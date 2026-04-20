@@ -6701,25 +6701,6 @@ function applyCheckoutStatus() {
       joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       introComplete: true
     });
-      async function shouldEnterPurchasedCourse() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('enter') !== '1' || !supabaseClient) return false;
-
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-    if (error || !data || !data.session || !data.session.user) return false;
-
-    const user = data.session.user;
-    const meta = user.user_metadata || {};
-    const currentStudent = APP_STATE.data.student || {};
-    const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
-
-    APP_STATE.setStudent({
-      ...currentStudent,
-      name: currentStudent.name || fullName || user.email || '',
-      joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      introComplete: true
-    });
 
     window.history.replaceState({}, document.title, window.location.pathname);
     return true;
@@ -6961,7 +6942,9 @@ async function showApp() {
   applyCheckoutStatus();
 
   if (await shouldEnterPurchasedCourse()) {
-    enterPurchasedCourseHome();
+    document.getElementById('landingPage').style.display = 'none';
+    hideIntro();
+    showCourse();
     return;
   }
 
@@ -6979,7 +6962,6 @@ async function showApp() {
     renderHomeProgress();
   }
 }
-
 
 // Intro input helpers
 function introGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
