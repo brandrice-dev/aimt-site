@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Enrollment Confirmed — AIMT</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #171410;
+  --panel: rgba(255,255,255,0.05);
+  --panel-border: rgba(255,255,255,0.1);
+  --text: rgba(255,255,255,0.94);
+  --muted: rgba(255,255,255,0.52);
+  --accent: #a3968d;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Outfit', -apple-system, system-ui, sans-serif;
+  --mont: 'Montserrat', Arial, sans-serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: var(--sans);
+  background:
+    radial-gradient(circle at top left, rgba(163,150,141,0.12), transparent 34%),
+    linear-gradient(180deg, #1d1914 0%, #14110d 100%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.card {
+  width: min(100%, 760px);
+  background: var(--panel);
+  border: 0.5px solid var(--panel-border);
+  border-radius: 26px;
+  padding: clamp(2rem, 4vw, 3.25rem);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.32);
+  backdrop-filter: blur(14px);
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.66);
+  margin-bottom: 1.15rem;
+}
+.headline {
+  font-family: var(--mont);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.97;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.headline em {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.46em;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 0.2rem;
+}
+.lead {
+  max-width: 42rem;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 2rem 0 1.6rem;
+}
+.detail {
+  background: rgba(255,255,255,0.035);
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 1rem 1.05rem;
+}
+.detail-label {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.52);
+  margin-bottom: 0.45rem;
+}
+.detail-value {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.82);
+}
+.note {
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 0.5px solid rgba(255,255,255,0.08);
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 42rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.92rem 1.35rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--mont);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+}
+.btn-primary {
+  background: #f2eee8;
+  color: #1a1714;
+  border: 0.5px solid rgba(242,238,232,0.55);
+}
+.btn-secondary {
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  border: 0.5px solid rgba(255,255,255,0.16);
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+@media (max-width: 720px) {
+  .wrap { padding: 1rem; }
+  .card { border-radius: 22px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .actions { flex-direction: column; }
+  .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="eyebrow">Enrollment confirmed</div>
+      <h1 class="headline">
+        <em>AIMT · Certification 01</em>
+        You're enrolled in HeadSpa Mastery.
+      </h1>
+      <p class="lead">Your payment has been received and your place in the certification is confirmed. The next step is access setup and sign-in provisioning for the course environment.</p>
+
+      <div class="detail-grid">
+        <div class="detail">
+          <div class="detail-label">Program</div>
+          <div class="detail-value">HeadSpa Mastery</div>
+        </div>
+        <div class="detail">
+          <div class="detail-label">Enrollment</div>
+          <div class="detail-value">One-time payment · lifetime access</div>
+        </div>
+        <div class="detail">
+          <div class="detail-label">Credential</div>
+          <div class="detail-value">AIMT certificate included upon completion</div>
+        </div>
+      </div>
+
+      <p class="note">Access and login setup are the next operational step in the AIMT launch flow. Return to the course page to review the program again, or continue to the current sign-in area if your access has already been provisioned.</p>
+
+      <div class="actions">
+        <a href="headspa-mastery.html" class="btn btn-primary">Return to HeadSpa Mastery</a>
+        <a href="courses.html" class="btn btn-secondary">Browse Certifications</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

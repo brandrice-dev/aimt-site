@@ -1,0 +1,81 @@
+:root {
+  --aimt-color-ink: #262626;
+  --aimt-color-ink-deep: #1a1814;
+  --aimt-color-accent: #a3968d;
+  --aimt-color-surface: rgba(255,255,255,0.02);
+  --aimt-color-surface-strong: rgba(255,255,255,0.04);
+  --aimt-color-border: rgba(255,255,255,0.08);
+  --aimt-color-border-soft: rgba(255,255,255,0.06);
+  --aimt-color-text-primary: rgba(255,255,255,0.95);
+  --aimt-color-text-secondary: rgba(255,255,255,0.45);
+  --aimt-color-text-tertiary: rgba(255,255,255,0.28);
+  --aimt-radius-card: 18px;
+  --aimt-radius-media: 14px;
+  --aimt-shadow-card: 0 24px 60px rgba(0,0,0,0.32);
+  --aimt-shadow-media: 0 18px 42px rgba(0,0,0,0.24);
+  --aimt-font-display: 'Montserrat', Arial, sans-serif;
+  --aimt-font-body: 'Outfit', -apple-system, system-ui, sans-serif;
+  --aimt-font-editorial: 'Playfair Display', Georgia, serif;
+  --aimt-font-label: 'SF Mono', 'Fira Code', monospace;
+}
+
+.aimt-eyebrow {
+  font-family: var(--aimt-font-label);
+  font-size: 0.52rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--aimt-color-accent);
+}
+
+.aimt-product-title {
+  font-family: var(--aimt-font-display);
+  font-size: clamp(1.5rem, 2.3vw, 1.72rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  color: var(--aimt-color-text-primary);
+  text-transform: none;
+}
+
+.aimt-product-summary {
+  font-family: var(--aimt-font-body);
+  font-size: 0.82rem;
+  font-weight: 300;
+  line-height: 1.78;
+  color: var(--aimt-color-text-secondary);
+}
+
+.aimt-pill {
+  font-family: var(--aimt-font-body);
+  font-size: 0.64rem;
+  font-weight: 400;
+  color: var(--aimt-color-text-tertiary);
+  background: var(--aimt-color-surface-strong);
+  border: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 999px;
+  padding: 0.27rem 0.68rem;
+}
+
+.aimt-price {
+  font-family: var(--aimt-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--aimt-color-text-primary);
+}
+
+.aimt-inline-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--aimt-font-display);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.48);
+  background: rgba(255,255,255,0.06);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+}
