@@ -1290,6 +1290,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .mod-hero { padding: 1.5rem 1.25rem; }
   .lp-inner { padding: 3rem 1.25rem 4rem; }
   .lp-headline { font-size: clamp(1.65rem, 8vw, 2.5rem); }
+  .lp-pricing-card { padding: 1.25rem; }
+  .lp-pricing-card.lp-purchase-top { margin: 1.5rem 0 2.25rem; }
+  .lp-pricing-row { flex-direction: column; align-items: flex-start; gap: 0.65rem; margin-bottom: 1.15rem; padding-bottom: 1.15rem; }
+  .lp-price { font-size: 2.15rem; }
   .cert-sheet { padding: 2.5rem 1.5rem 2rem; }
   .cert-name { font-size: clamp(1.5rem, 9vw, 2.25rem); }
   .cert-meta { flex-direction: column; align-items: center; gap: 1.25rem; }
@@ -1536,7 +1540,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <p class="lp-subhead">Most head spa education teaches you steps. This teaches you how to think — about the scalp, the client, the service, and the business behind it. Built from nearly two decades of real practice. Guided by an instructor who adapts to you.</p>
     <div class="lp-pricing-card lp-purchase-top">
       <div class="lp-pricing-eyebrow">Certification 01 · HeadSpa Mastery</div>
-      <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was not completed. You can review the certification again and resume enrollment whenever you're ready.</div>
+      <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
       <div class="lp-pricing-row">
         <div class="lp-price">$497</div>
         <div class="lp-price-detail">
@@ -6680,6 +6684,10 @@ function applyCheckoutStatus() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'canceled') {
     status.style.display = 'block';
+    params.delete('checkout');
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
+    window.history.replaceState({}, '', nextUrl);
   }
 }
 

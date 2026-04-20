@@ -261,12 +261,21 @@ body {
   color: rgba(255,255,255,0.6);
 }
 @media (max-width: 720px) {
-  .wrap { padding: 1rem; }
-  .card { border-radius: 22px; }
+  .wrap {
+    align-items: flex-start;
+    padding: 1rem 1rem max(1.25rem, env(safe-area-inset-bottom, 1.25rem));
+  }
+  .card {
+    border-radius: 22px;
+    padding: 1.5rem 1.2rem 1.7rem;
+  }
   .detail-grid,
   .form-grid { grid-template-columns: 1fr; }
   .actions { flex-direction: column; }
-  .btn { width: 100%; }
+  .btn {
+    width: 100%;
+    min-height: 48px;
+  }
 }
 </style>
 </head>
