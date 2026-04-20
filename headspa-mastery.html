@@ -710,15 +710,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-price-label { font-size: 0.82rem; font-weight: 400; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
 .lp-price-sub { font-size: 0.72rem; font-weight: 300; color: rgba(255,255,255,0.3); }
 .lp-purchase-note { font-size: 0.74rem; color: rgba(255,255,255,0.34); line-height: 1.62; font-weight: 300; margin: 0 0 1rem; }
+.lp-purchased-link { font-family: var(--sans); font-size: 0.74rem; font-weight: 300; color: rgba(255,255,255,0.3); text-decoration: none; margin: -0.15rem 0 1rem; display: inline-block; transition: color 0.2s; }
+.lp-purchased-link:hover { color: rgba(255,255,255,0.55); }
 .lp-pricing-includes { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem; }
 .lp-pi-item { font-size: 0.82rem; font-weight: 300; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 0.6rem; }
 .lp-pi-check { color: #a3968d; font-size: 0.75rem; flex-shrink: 0; }
-.lp-enroll-btn { width: 100%; padding: 1rem 1.5rem; background: white; border: none; border-radius: 10px; cursor: pointer; font-family: var(--mont); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #262626; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.lp-enroll-btn { width: 100%; padding: 0.92rem 1.35rem; background: white; border: none; border-radius: 10px; cursor: pointer; font-family: var(--mont); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #262626; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-enroll-btn:hover { opacity: 0.88; }
 .lp-or-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; }
 .lp-or-divider::before, .lp-or-divider::after { content: ''; flex: 1; height: 0.5px; background: rgba(255,255,255,0.08); }
 .lp-or-divider span { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
-.lp-signin-btn { width: 100%; padding: 0.85rem; background: none; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.82rem; font-weight: 400; color: rgba(255,255,255,0.45); transition: all 0.2s; }
+.lp-signin-btn { width: 100%; padding: 0.92rem 1.35rem; background: none; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.8rem; font-weight: 400; color: rgba(255,255,255,0.45); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
 .lp-signin-btn:hover { border-color: rgba(255,255,255,0.22); color: rgba(255,255,255,0.7); }
 .lp-passcode-toggle { background: none; border: none; font-family: var(--sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.25); cursor: pointer; padding: 0; transition: color 0.2s; display: block; margin: 0 auto; }
 .lp-passcode-toggle:hover { color: rgba(255,255,255,0.5); }
@@ -726,7 +728,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-passcode-wrap.open { display: block; }
 .lp-passcode-input { width: 100%; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.9rem 1.25rem; font-family: var(--sans); font-size: 0.95rem; font-weight: 300; color: rgba(255,255,255,0.88); outline: none; transition: border-color 0.3s; caret-color: #a3968d; margin-bottom: 0.75rem; letter-spacing: 0.1em; -webkit-appearance: none; }
 .lp-passcode-input:focus { border-color: rgba(163,150,141,0.45); }
-.lp-passcode-btn { width: 100%; padding: 0.9rem; background: rgba(163,150,141,0.1); border: 0.5px solid rgba(163,150,141,0.25); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.82rem; color: rgba(255,255,255,0.6); transition: all 0.2s; }
+.lp-passcode-btn { width: 100%; padding: 0.92rem 1.35rem; background: rgba(163,150,141,0.1); border: 0.5px solid rgba(163,150,141,0.25); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.8rem; color: rgba(255,255,255,0.6); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
 .lp-passcode-btn:hover { background: rgba(163,150,141,0.18); color: rgba(255,255,255,0.85); }
 .lp-passcode-error { font-size: 0.75rem; color: rgba(200,100,100,0.7); margin-top: 0.5rem; display: none; font-family: var(--sans); }
 
@@ -1537,7 +1539,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-eyebrow">Professional Education</div>
     <h1 class="lp-headline">The head spa course<br><em>built from the floor up.</em></h1>
-    <p class="lp-subhead">Most head spa education teaches you steps. This teaches you how to think — about the scalp, the client, the service, and the business behind it. Built from nearly two decades of real practice. Guided by an instructor who adapts to you.</p>
+    <p class="lp-subhead">Most head spa education teaches steps. This certification teaches clinical judgment, service execution, and pricing clarity so you can deliver a premium scalp service with confidence. Built from nearly two decades of real practice and guided by an instructor who adapts to you.</p>
     <div class="lp-pricing-card lp-purchase-top">
       <div class="lp-pricing-eyebrow">Certification 01 · HeadSpa Mastery</div>
       <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
@@ -1548,7 +1550,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-price-sub">Lifetime access · AIMT certificate included</div>
         </div>
       </div>
-      <p class="lp-purchase-note">Immediate enrollment for the full certification experience, including all 12 modules, Cadence-guided checkpoints, and institute-issued completion credentials.</p>
+      <p class="lp-purchase-note">Immediate access to the full certification: 12 modules, Cadence-guided checkpoints, and an AIMT credential built to signal real practitioner-level mastery.</p>
+      <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Enter here.</a>
       <div class="lp-pricing-includes">
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>12 modules · self-paced progression</div>
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Cadence-guided learning and checkpoints</div>
