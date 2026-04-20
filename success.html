@@ -388,8 +388,22 @@ body {
     const nextStepButton = document.getElementById('nextStepButton');
     const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
     const COURSE_SIGNIN_URL = 'headspa-mastery.html';
+    const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const checkoutParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
+
+    function persistPendingCheckoutSession() {
+      if (!checkoutSessionId) return;
+      try {
+        localStorage.setItem(PENDING_CLAIM_KEY, checkoutSessionId);
+      } catch (_) {}
+    }
+
+    function clearPendingCheckoutSession() {
+      try {
+        localStorage.removeItem(PENDING_CLAIM_KEY);
+      } catch (_) {}
+    }
 
     function showSuccessPanel(title, copy) {
       if (successPanelTitle) successPanelTitle.textContent = title;
@@ -436,11 +450,17 @@ body {
         });
 
         const data = await response.json().catch(() => ({}));
+        if (response.ok) {
+          clearPendingCheckoutSession();
+        } else {
+          persistPendingCheckoutSession();
+        }
         return {
           ok: response.ok,
           error: data.error || ''
         };
       } catch (_) {
+        persistPendingCheckoutSession();
         return {
           ok: false,
           error: 'Unable to save your course access right now.'
@@ -583,6 +603,7 @@ body {
       }
     });
 
+    persistPendingCheckoutSession();
     handleExistingSession();
   </script>
 </body>

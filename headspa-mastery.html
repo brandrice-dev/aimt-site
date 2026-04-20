@@ -6627,6 +6627,7 @@ const supabaseClient = window.supabase && typeof window.supabase.createClient ==
   : null;
 const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
 const HEADSPA_COURSE_SLUG = 'headspa-mastery';
+const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
 const STAFF_EMAIL_ALLOWLIST = [
   'brandmrice@gmail.com',
   'cadyb03@gmail.com',
@@ -6640,6 +6641,20 @@ function normalizeAccessEmail(email) {
 function isAllowlistedStaffEmail(email) {
   const normalized = normalizeAccessEmail(email);
   return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
+}
+
+function getPendingCheckoutSessionId() {
+  try {
+    return String(localStorage.getItem(PENDING_CLAIM_KEY) || '').trim();
+  } catch (_) {
+    return '';
+  }
+}
+
+function clearPendingCheckoutSessionId() {
+  try {
+    localStorage.removeItem(PENDING_CLAIM_KEY);
+  } catch (_) {}
 }
 
 async function hasHeadSpaEntitlement(user) {
@@ -6669,6 +6684,31 @@ async function bindHeadSpaEntitlementsToUser(user) {
       .eq('purchaser_email', normalizeAccessEmail(user.email))
       .is('user_id', null);
   } catch (_) {}
+}
+
+async function recoverHeadSpaEntitlement(user) {
+  const sessionId = getPendingCheckoutSessionId();
+  if (!sessionId || !user) return false;
+
+  try {
+    const response = await fetch('/api/claim-course-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId,
+        email: normalizeAccessEmail(user.email),
+        userId: user.id || ''
+      })
+    });
+
+    if (response.ok) {
+      clearPendingCheckoutSessionId();
+      await bindHeadSpaEntitlementsToUser(user);
+      return true;
+    }
+  } catch (_) {}
+
+  return false;
 }
 
 function setSignedInStudent(user) {
@@ -6749,7 +6789,11 @@ async function shouldEnterPurchasedCourse() {
     if (requestedPurchasedEntry) {
       await bindHeadSpaEntitlementsToUser(user);
     }
-    const entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(user);
+    let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(user);
+    if (!allowlistedStaff && !entitledPurchaser) {
+      await recoverHeadSpaEntitlement(user);
+      entitledPurchaser = await hasHeadSpaEntitlement(user);
+    }
     if (!allowlistedStaff && !requestedPurchasedEntry && !entitledPurchaser) return false;
     if (!allowlistedStaff && entitledPurchaser) {
       await bindHeadSpaEntitlementsToUser(user);
@@ -6822,11 +6866,17 @@ async function handleSignIn() {
     if (!allowlistedStaff) {
       await bindHeadSpaEntitlementsToUser(data.user);
     }
-    const entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(data.user);
+    let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(data.user);
+    if (!allowlistedStaff && !entitledPurchaser) {
+      await recoverHeadSpaEntitlement(data.user);
+      entitledPurchaser = await hasHeadSpaEntitlement(data.user);
+    }
 
     if (!allowlistedStaff && !entitledPurchaser) {
       await supabaseClient.auth.signOut();
-      notice.textContent = 'This account does not currently have access to HeadSpa Mastery.';
+      notice.textContent = getPendingCheckoutSessionId()
+        ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
+        : 'This account does not currently have access to HeadSpa Mastery.';
       return;
     }
 
