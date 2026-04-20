@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>HEADSPA MASTERY — AIMT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -6585,6 +6586,11 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ── PASSCODE ACCESS ──
 // To change the staff access code, update the value below
 const STAFF_ACCESS_CODE = 'AIMT2025';
+  const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 function togglePasscode() {
   const wrap = document.getElementById('lpPasscodeWrap');
@@ -6676,6 +6682,33 @@ function applyCheckoutStatus() {
     status.style.display = 'block';
   }
 }
+  async function shouldEnterPurchasedCourse() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('enter') !== '1' || !supabaseClient) return false;
+
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error || !data || !data.session || !data.session.user) return false;
+
+    const user = data.session.user;
+    const meta = user.user_metadata || {};
+    const currentStudent = APP_STATE.data.student || {};
+    const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
+
+    APP_STATE.setStudent({
+      ...currentStudent,
+      name: currentStudent.name || fullName || user.email || '',
+      joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      introComplete: true
+    });
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 
 // ── SIGN IN PANEL ──
 function showSignInPanel() {
@@ -6904,9 +6937,17 @@ function showCourse() {
   renderHomeProgress();
 }
 
-function showApp() {
+async function showApp() {
   APP_STATE.load();
   applyCheckoutStatus();
+
+  if (await shouldEnterPurchasedCourse()) {
+    document.getElementById('landingPage').style.display = 'none';
+    hideIntro();
+    showCourse();
+    return;
+  }
+
   if (shouldShowIntro()) {
     document.getElementById('landingPage').style.display = 'flex';
     document.getElementById('introScreen').style.display = 'none';
