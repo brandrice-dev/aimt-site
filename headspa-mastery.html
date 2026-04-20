@@ -718,6 +718,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-pi-check { color: #a3968d; font-size: 0.75rem; flex-shrink: 0; }
 .lp-enroll-btn { width: 100%; padding: 0.92rem 1.35rem; background: white; border: none; border-radius: 10px; cursor: pointer; font-family: var(--mont); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #262626; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .lp-enroll-btn:hover { opacity: 0.88; }
+.lp-cta-reassurance { font-size: 0.72rem; color: rgba(255,255,255,0.42); line-height: 1.55; font-weight: 300; text-align: center; margin: 0.7rem 0 0; }
 .lp-or-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; }
 .lp-or-divider::before, .lp-or-divider::after { content: ''; flex: 1; height: 0.5px; background: rgba(255,255,255,0.08); }
 .lp-or-divider span { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
@@ -743,6 +744,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-signin-link { color: #a3968d; cursor: pointer; }
 .lp-signin-link:hover { text-decoration: underline; }
 .lp-signin-notice { font-size: 0.75rem; color: rgba(163,150,141,0.7); margin-top: 0.6rem; text-align: center; font-family: var(--sans); }
+.lp-mobile-sticky-cta { display: none; }
 
 @keyframes lpFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 #introScreen {
@@ -1291,16 +1293,56 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .home-greeting { font-size: 1.65rem; }
   .lesson-wrap { padding: 1.5rem 1.1rem 7rem; }
   .mod-hero { padding: 1.5rem 1.25rem; }
-  .lp-inner { padding: 3rem 1.25rem 4rem; }
+  .lp-inner { padding: 2.4rem 1.25rem 5.75rem; }
   .lp-headline { font-size: clamp(1.65rem, 8vw, 2.35rem); line-height: 1; }
   .lp-subhead { font-size: 0.92rem; line-height: 1.68; }
   .lp-pricing-card { padding: 1.25rem; }
-  .lp-pricing-card.lp-purchase-top { margin: 1.5rem 0 2.25rem; }
-  .lp-pricing-row { flex-direction: column; align-items: flex-start; gap: 0.65rem; margin-bottom: 1.15rem; padding-bottom: 1.15rem; }
+  .lp-pricing-card.lp-purchase-top { margin: 1rem 0 1.75rem; }
+  .lp-pricing-row { flex-direction: column; align-items: flex-start; gap: 0.65rem; margin-bottom: 0.95rem; padding-bottom: 0.95rem; }
   .lp-price { font-size: 2.15rem; }
   .cert-sheet { padding: 2.5rem 1.5rem 2rem; }
   .cert-name { font-size: clamp(1.5rem, 9vw, 2.25rem); }
   .cert-meta { flex-direction: column; align-items: center; gap: 1.25rem; }
+}
+
+@media (max-width: 600px) {
+  #landingPage { padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 5.5rem)); }
+  .lp-brand { margin-bottom: 2rem; }
+  .lp-eyebrow { margin-bottom: 0.9rem; }
+  .lp-headline { margin-bottom: 0.95rem; }
+  .lp-subhead { margin-bottom: 1.75rem; }
+  .lp-pricing-card.lp-purchase-top { margin: 0.9rem 0 1.6rem; }
+  .lp-checkout-status { margin-bottom: 0.75rem; font-size: 0.76rem; line-height: 1.5; }
+  .lp-pricing-eyebrow { margin-bottom: 0.95rem; }
+  .lp-purchase-note,
+  .lp-purchase-trust { margin-bottom: 0.75rem; }
+  .lp-purchased-link { margin-bottom: 0.75rem; }
+  .lp-pricing-includes { gap: 0.45rem; margin-bottom: 1rem; }
+  .lp-pi-item { font-size: 0.78rem; }
+  .lp-or-divider { margin: 0.8rem 0; }
+  .lp-divider { margin-bottom: 1.75rem; }
+  .lp-outcomes { margin-bottom: 2rem; }
+  .lp-outcomes-label { margin-bottom: 0.9rem; }
+  .lp-outcome-item { gap: 0.8rem; padding: 0.75rem 0; }
+  .lp-outcome-text { font-size: 0.88rem; line-height: 1.54; }
+  .lp-modules { margin-bottom: 2rem; }
+  .lp-cert { margin-bottom: 2rem; padding: 1rem 1.1rem; }
+  .lp-mobile-sticky-cta {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 250;
+    display: block;
+    padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom, 0));
+    background: rgba(10,8,8,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .lp-mobile-sticky-cta .lp-enroll-btn {
+    max-width: 680px;
+    margin: 0 auto;
+  }
 }
 
 /* ── Tablet and up (> 768px) ── */
@@ -1566,6 +1608,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-enter-btn-dot"></div>
         Begin Enrollment
       </button>
+      <p class="lp-cta-reassurance">After signup, you’ll enter HeadSpa Mastery right away.</p>
       <div class="lp-or-divider"><span>or</span></div>
       <button class="lp-signin-btn" onclick="showSignInPanel()">
         Already enrolled? Sign in
@@ -1584,9 +1627,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <button class="lp-passcode-btn" onclick="submitName()">Enter HeadSpa Mastery →</button>
           <div class="lp-passcode-error" id="lpNameError">Please enter your first name to continue.</div>
         </div>
-      </div>
     </div>
-    <div class="lp-divider"></div>
+  </div>
+  <div class="lp-mobile-sticky-cta">
+    <button class="lp-enroll-btn" onclick="startCheckout()">
+      <div class="lp-enter-btn-dot"></div>
+      Begin Enrollment
+    </button>
+  </div>
+  <div class="lp-divider"></div>
     <div class="lp-outcomes">
       <div class="lp-outcomes-label">What you will walk away with</div>
       <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see — so every service decision is grounded in science, not guesswork.</div></div>
