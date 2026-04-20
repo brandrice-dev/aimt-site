@@ -724,15 +724,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-or-divider span { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
 .lp-signin-btn { width: 100%; padding: 0.88rem 1.35rem; background: none; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.78rem; font-weight: 400; color: rgba(255,255,255,0.42); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
 .lp-signin-btn:hover { border-color: rgba(255,255,255,0.22); color: rgba(255,255,255,0.7); }
-.lp-passcode-toggle { background: none; border: none; font-family: var(--sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.25); cursor: pointer; padding: 0; transition: color 0.2s; display: block; margin: 0 auto; }
-.lp-passcode-toggle:hover { color: rgba(255,255,255,0.5); }
-.lp-passcode-wrap { display: none; margin-top: 1rem; }
-.lp-passcode-wrap.open { display: block; }
-.lp-passcode-input { width: 100%; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.9rem 1.25rem; font-family: var(--sans); font-size: 0.95rem; font-weight: 300; color: rgba(255,255,255,0.88); outline: none; transition: border-color 0.3s; caret-color: #a3968d; margin-bottom: 0.75rem; letter-spacing: 0.1em; -webkit-appearance: none; }
-.lp-passcode-input:focus { border-color: rgba(163,150,141,0.45); }
-.lp-passcode-btn { width: 100%; padding: 0.92rem 1.35rem; background: rgba(163,150,141,0.1); border: 0.5px solid rgba(163,150,141,0.25); border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 0.8rem; color: rgba(255,255,255,0.6); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
-.lp-passcode-btn:hover { background: rgba(163,150,141,0.18); color: rgba(255,255,255,0.85); }
-.lp-passcode-error { font-size: 0.75rem; color: rgba(200,100,100,0.7); margin-top: 0.5rem; display: none; font-family: var(--sans); }
 
 /* ── SIGN IN PANEL ── */
 .lp-signin-panel { display: none; width: 100%; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.5rem; background: rgba(255,255,255,0.03); margin-top: 1rem; }
@@ -1613,20 +1604,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <button class="lp-signin-btn" onclick="showSignInPanel()">
         Already enrolled? Sign in
       </button>
-      <div class="lp-or-divider"><span>or</span></div>
-      <button class="lp-passcode-toggle" onclick="togglePasscode()">Have an access code?</button>
-      <div class="lp-passcode-wrap" id="lpPasscodeWrap">
-        <div id="lpPasscodeStep">
-          <input type="text" class="lp-passcode-input" id="lpPasscodeInput" placeholder="Enter access code" autocomplete="off" onkeydown="passcodeKey(event)" />
-          <button class="lp-passcode-btn" onclick="submitPasscode()">Continue →</button>
-          <div class="lp-passcode-error" id="lpPasscodeError">Incorrect code. Please try again.</div>
-        </div>
-        <div id="lpNameStep" style="display:none;">
-          <div style="font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.75rem;">Welcome. What's your first name?</div>
-          <input type="text" class="lp-passcode-input" id="lpNameInput" placeholder="First name" autocomplete="given-name" onkeydown="nameKey(event)" />
-          <button class="lp-passcode-btn" onclick="submitName()">Enter HeadSpa Mastery →</button>
-          <div class="lp-passcode-error" id="lpNameError">Please enter your first name to continue.</div>
-        </div>
     </div>
   </div>
   <div class="lp-mobile-sticky-cta">
@@ -1664,14 +1641,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lp-cert-text"><div class="lp-cert-title">Certificate of Completion — AIMT HeadSpa Mastery</div><div class="lp-cert-sub">Awarded upon finishing all 12 modules</div></div>
     </div>
 
-    <!-- ── SIGN IN PANEL (placeholder) ── -->
+    <!-- ── SIGN IN PANEL ── -->
     <div class="lp-signin-panel" id="lpSignInPanel">
       <div class="lp-signin-header">
         <span class="lp-signin-title">Sign in to AIMT</span>
         <button class="lp-signin-close" onclick="hideSignInPanel()">✕</button>
       </div>
-      <input type="email" class="lp-name-input" placeholder="Email address" autocomplete="email" style="margin-bottom:0.75rem;" />
-      <input type="password" class="lp-name-input" placeholder="Password" autocomplete="current-password" style="margin-bottom:1rem;" />
+      <input type="email" class="lp-name-input" id="lpSignInEmail" placeholder="Email address" autocomplete="email" style="margin-bottom:0.75rem;" />
+      <input type="password" class="lp-name-input" id="lpSignInPassword" placeholder="Password" autocomplete="current-password" style="margin-bottom:1rem;" />
       <button class="lp-enroll-btn" onclick="handleSignIn()">Enter HeadSpa Mastery</button>
       <div class="lp-signin-sub">Forgot your password? <span class="lp-signin-link" onclick="handleForgotPassword()">Reset it here</span></div>
       <div class="lp-signin-notice" id="lpSignInNotice"></div>
@@ -6643,57 +6620,33 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 
 // ══ LANDING PAGE ══
-// ── PASSCODE ACCESS ──
-// To change the staff access code, update the value below
-const STAFF_ACCESS_CODE = 'AIMT2025';
 const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+const STAFF_EMAIL_ALLOWLIST = [
+  'brandmrice@gmail.com',
+  'cadyb03@gmail.com',
+  'atriumlanc@gmail.com'
+];
 
-function togglePasscode() {
-  const wrap = document.getElementById('lpPasscodeWrap');
-  const err = document.getElementById('lpPasscodeError');
-  wrap.classList.toggle('open');
-  if (wrap.classList.contains('open')) {
-    setTimeout(() => document.getElementById('lpPasscodeInput').focus(), 50);
-  }
-  if (err) err.style.display = 'none';
+function isAllowlistedStaffEmail(email) {
+  const normalized = String(email || '').trim().toLowerCase();
+  return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
 }
 
-function passcodeKey(e) { if (e.key === 'Enter') { e.preventDefault(); submitPasscode(); } }
-function nameKey(e) { if (e.key === 'Enter') { e.preventDefault(); submitName(); } }
-async function submitName() {
-  const input = document.getElementById('lpNameInput');
-  const err = document.getElementById('lpNameError');
-  const name = input.value.trim();
-  if (!name) { if (err) err.style.display = 'block'; input.focus(); return; }
-  if (err) err.style.display = 'none';
-  APP_STATE.setStudent({ name: name, joined: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) });
-  const lp = document.getElementById('landingPage');
-  lp.classList.add('fade-out');
-  await sleep(900);
-  lp.style.display = 'none';
-  document.getElementById('introScreen').style.display = 'flex';
-  document.getElementById('introSkip').style.display = 'block';
-  startIntro();
-}
+function setSignedInStudent(user) {
+  const meta = user.user_metadata || {};
+  const currentStudent = APP_STATE.data.student || {};
+  const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
 
-async function submitPasscode() {
-  const input = document.getElementById('lpPasscodeInput');
-  const err = document.getElementById('lpPasscodeError');
-  const code = input.value.trim().toUpperCase();
-  if (code === STAFF_ACCESS_CODE) {
-    if (err) err.style.display = 'none';
-    document.getElementById('lpPasscodeStep').style.display = 'none';
-    document.getElementById('lpNameStep').style.display = 'block';
-    setTimeout(() => document.getElementById('lpNameInput').focus(), 50);
-  } else {
-    if (err) err.style.display = 'block';
-    input.value = '';
-    input.focus();
-  }
+  APP_STATE.setStudent({
+    ...currentStudent,
+    name: currentStudent.name || fullName || user.email || '',
+    joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    introComplete: true
+  });
 }
 
 // ── CHECKOUT START ──
@@ -6749,25 +6702,21 @@ function applyCheckoutStatus() {
 
 async function shouldEnterPurchasedCourse() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('enter') !== '1' || !supabaseClient) return false;
+  const requestedPurchasedEntry = params.get('enter') === '1';
+  if (!supabaseClient) return false;
 
   try {
     const { data, error } = await supabaseClient.auth.getSession();
     if (error || !data || !data.session || !data.session.user) return false;
 
     const user = data.session.user;
-    const meta = user.user_metadata || {};
-    const currentStudent = APP_STATE.data.student || {};
-    const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
+    if (!requestedPurchasedEntry && !isAllowlistedStaffEmail(user.email)) return false;
 
-    APP_STATE.setStudent({
-      ...currentStudent,
-      name: currentStudent.name || fullName || user.email || '',
-      joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      introComplete: true
-    });
+    setSignedInStudent(user);
 
-    window.history.replaceState({}, document.title, window.location.pathname);
+    if (requestedPurchasedEntry) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
     return true;
   } catch (_) {
     return false;
@@ -6793,46 +6742,68 @@ function enterPurchasedCourseHome() {
 function showSignInPanel() {
   const panel = document.getElementById('lpSignInPanel');
   panel.classList.add('open');
-  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  const notice = document.getElementById('lpSignInNotice');
+  if (notice) notice.textContent = '';
+  setTimeout(() => {
+    const emailInput = document.getElementById('lpSignInEmail');
+    if (emailInput) emailInput.focus();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
 }
 function hideSignInPanel() {
   document.getElementById('lpSignInPanel').classList.remove('open');
 }
-function handleSignIn() {
-  // Placeholder — wire to auth backend when ready
+async function handleSignIn() {
   const notice = document.getElementById('lpSignInNotice');
-  if (notice) { notice.textContent = 'Account login is coming soon. Use an access code to enter during beta.'; }
-}
-function handleForgotPassword() {
-  const notice = document.getElementById('lpSignInNotice');
-  if (notice) { notice.textContent = 'Password reset will be available when accounts launch.'; }
-}
+  const emailInput = document.getElementById('lpSignInEmail');
+  const passwordInput = document.getElementById('lpSignInPassword');
+  if (!notice || !emailInput || !passwordInput || !supabaseClient) return;
 
-function lpNameChange() {
-  const input = document.getElementById('lpNameInput');
-  const btn = document.getElementById('lpEnterBtn');
-  const err = document.getElementById('lpNameError');
-  if (!input || !btn) return;
-  const val = input.value.trim();
-  if (val.length > 0) btn.classList.add('ready');
-  else btn.classList.remove('ready');
-  if (err) err.style.display = 'none';
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  notice.textContent = '';
+
+  if (!email || !password) {
+    notice.textContent = 'Enter your email and password to continue.';
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error || !data || !data.user) {
+      notice.textContent = error?.message || 'Unable to sign in right now.';
+      return;
+    }
+
+    if (!isAllowlistedStaffEmail(data.user.email)) {
+      await supabaseClient.auth.signOut();
+      notice.textContent = 'This account is not enabled for internal staff access on this preview.';
+      return;
+    }
+
+    setSignedInStudent(data.user);
+    hideSignInPanel();
+    enterPurchasedCourseHome();
+  } catch (_) {
+    notice.textContent = 'Unable to sign in right now.';
+  }
 }
-function lpNameKey(e) { if (e.key === 'Enter') { e.preventDefault(); enterCourse(); } }
-async function enterCourse() {
-  const input = document.getElementById('lpNameInput');
-  const err = document.getElementById('lpNameError');
-  if (!input) return;
-  const name = input.value.trim();
-  if (!name) { if (err) err.style.display = 'block'; input.focus(); return; }
-  APP_STATE.setStudent({ name: name, joined: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) });
-  const lp = document.getElementById('landingPage');
-  lp.classList.add('fade-out');
-  await sleep(900);
-  lp.style.display = 'none';
-  document.getElementById('introScreen').style.display = 'flex';
-  document.getElementById('introSkip').style.display = 'block';
-  startIntro();
+async function handleForgotPassword() {
+  const notice = document.getElementById('lpSignInNotice');
+  const emailInput = document.getElementById('lpSignInEmail');
+  if (!notice || !emailInput || !supabaseClient) return;
+  const email = emailInput.value.trim();
+  if (!email) {
+    notice.textContent = 'Enter your email address first.';
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+    notice.textContent = error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.';
+  } catch (_) {
+    notice.textContent = 'Unable to send reset email.';
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -7027,8 +6998,6 @@ async function showApp() {
     document.getElementById('landingPage').style.display = 'flex';
     document.getElementById('introScreen').style.display = 'none';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const savedName = APP_STATE.data.student && APP_STATE.data.student.name;
-    if (savedName) { const ni = document.getElementById('lpNameInput'); if (ni) { ni.value = savedName; lpNameChange(); } }
   } else {
     document.getElementById('landingPage').style.display = 'none';
     hideIntro();
