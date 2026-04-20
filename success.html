@@ -388,6 +388,8 @@ body {
     const nextStepButton = document.getElementById('nextStepButton');
     const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
     const COURSE_SIGNIN_URL = 'headspa-mastery.html';
+    const checkoutParams = new URLSearchParams(window.location.search);
+    const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
 
     function showSuccessPanel(title, copy) {
       if (successPanelTitle) successPanelTitle.textContent = title;
@@ -417,6 +419,33 @@ body {
       window.setTimeout(() => {
         window.location.href = COURSE_ENTRY_URL;
       }, delayMs || 0);
+    }
+
+    async function claimCourseAccess(email, userId) {
+      if (!checkoutSessionId) return { ok: false, skipped: true };
+
+      try {
+        const response = await fetch('/api/claim-course-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: checkoutSessionId,
+            email: email || '',
+            userId: userId || ''
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        return {
+          ok: response.ok,
+          error: data.error || ''
+        };
+      } catch (_) {
+        return {
+          ok: false,
+          error: 'Unable to save your course access right now.'
+        };
+      }
     }
 
     function showError(message) {
@@ -450,6 +479,8 @@ body {
       try {
         const { data, error } = await supabaseClient.auth.getSession();
         if (error || !data || !data.session || !data.session.user) return;
+
+        await claimCourseAccess(data.session.user.email, data.session.user.id);
 
         clearNotices();
         hideNextStep();
@@ -507,6 +538,7 @@ body {
         if (error) {
           const lower = (error.message || '').toLowerCase();
           if (lower.includes('already') || lower.includes('registered') || lower.includes('exists')) {
+            await claimCourseAccess(email, null);
             showMessage('An AIMT account already appears to exist for this email. Return to HeadSpa Mastery and sign in with that account to continue.');
             showNextStep('Already have an account?', 'Use the email tied to your enrollment and the sign-in option on HeadSpa Mastery to enter the course.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
           } else {
@@ -517,15 +549,25 @@ body {
         }
 
         if (maybeExistingAccount) {
+          await claimCourseAccess(email, null);
           showMessage('An AIMT account already exists for this email. Sign in on HeadSpa Mastery to continue into your purchased course.');
           showNextStep('Already have an account?', 'Return to HeadSpa Mastery and use the sign-in option there with this same email.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
           return;
         }
 
         if (!data.session) {
+          const claim = await claimCourseAccess(email, null);
           showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to HeadSpa Mastery to sign in.');
           showNextStep('Need to sign in after confirmation?', 'Once you confirm your email, return to HeadSpa Mastery and use the sign-in option there.', COURSE_SIGNIN_URL, 'Back to HeadSpa Mastery');
+          if (!claim.ok && !claim.skipped) {
+            showError(claim.error || 'We could not save your course access right now. Return to HeadSpa Mastery and sign in after email confirmation.');
+          }
           return;
+        }
+
+        const claim = await claimCourseAccess(email, data.session.user && data.session.user.id);
+        if (!claim.ok && !claim.skipped) {
+          showMessage('Your account is ready. We’re sending you into HeadSpa Mastery now, but your access may take one more sign-in if the entitlement save is delayed.');
         }
 
         clearNotices();

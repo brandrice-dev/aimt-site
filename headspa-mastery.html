@@ -6625,7 +6625,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
-const PURCHASER_ACCESS_KEY = 'aimt_headspa_purchaser_email';
+const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
+const HEADSPA_COURSE_SLUG = 'headspa-mastery';
 const STAFF_EMAIL_ALLOWLIST = [
   'brandmrice@gmail.com',
   'cadyb03@gmail.com',
@@ -6641,22 +6642,33 @@ function isAllowlistedStaffEmail(email) {
   return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
 }
 
-function grantStoredPurchaserAccess(email) {
-  const normalized = normalizeAccessEmail(email);
-  if (!normalized) return;
-  try {
-    localStorage.setItem(PURCHASER_ACCESS_KEY, normalized);
-  } catch (_) {}
-}
+async function hasHeadSpaEntitlement(user) {
+  if (!supabaseClient || !user) return false;
 
-function hasStoredPurchaserAccess(email) {
-  const normalized = normalizeAccessEmail(email);
-  if (!normalized) return false;
   try {
-    return localStorage.getItem(PURCHASER_ACCESS_KEY) === normalized;
+    const { data, error } = await supabaseClient
+      .from(COURSE_ENTITLEMENTS_TABLE)
+      .select('checkout_session_id')
+      .eq('course_slug', HEADSPA_COURSE_SLUG)
+      .limit(1);
+
+    return !error && Array.isArray(data) && data.length > 0;
   } catch (_) {
     return false;
   }
+}
+
+async function bindHeadSpaEntitlementsToUser(user) {
+  if (!supabaseClient || !user || !user.id) return;
+
+  try {
+    await supabaseClient
+      .from(COURSE_ENTITLEMENTS_TABLE)
+      .update({ user_id: user.id })
+      .eq('course_slug', HEADSPA_COURSE_SLUG)
+      .eq('purchaser_email', normalizeAccessEmail(user.email))
+      .is('user_id', null);
+  } catch (_) {}
 }
 
 function setSignedInStudent(user) {
@@ -6734,11 +6746,13 @@ async function shouldEnterPurchasedCourse() {
 
     const user = data.session.user;
     const allowlistedStaff = isAllowlistedStaffEmail(user.email);
-    const knownPurchaser = requestedPurchasedEntry || hasStoredPurchaserAccess(user.email);
-    if (!allowlistedStaff && !knownPurchaser) return false;
-
     if (requestedPurchasedEntry) {
-      grantStoredPurchaserAccess(user.email);
+      await bindHeadSpaEntitlementsToUser(user);
+    }
+    const entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(user);
+    if (!allowlistedStaff && !requestedPurchasedEntry && !entitledPurchaser) return false;
+    if (!allowlistedStaff && entitledPurchaser) {
+      await bindHeadSpaEntitlementsToUser(user);
     }
 
     setSignedInStudent(user);
@@ -6804,7 +6818,13 @@ async function handleSignIn() {
       return;
     }
 
-    if (!isAllowlistedStaffEmail(data.user.email) && !hasStoredPurchaserAccess(data.user.email)) {
+    const allowlistedStaff = isAllowlistedStaffEmail(data.user.email);
+    if (!allowlistedStaff) {
+      await bindHeadSpaEntitlementsToUser(data.user);
+    }
+    const entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(data.user);
+
+    if (!allowlistedStaff && !entitledPurchaser) {
       await supabaseClient.auth.signOut();
       notice.textContent = 'This account does not currently have access to HeadSpa Mastery.';
       return;
