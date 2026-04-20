@@ -6586,7 +6586,7 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ── PASSCODE ACCESS ──
 // To change the staff access code, update the value below
 const STAFF_ACCESS_CODE = 'AIMT2025';
-  const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -6682,7 +6682,8 @@ function applyCheckoutStatus() {
     status.style.display = 'block';
   }
 }
-  async function shouldEnterPurchasedCourse() {
+
+async function shouldEnterPurchasedCourse() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('enter') !== '1' || !supabaseClient) return false;
 
@@ -6709,6 +6710,20 @@ function applyCheckoutStatus() {
   }
 }
 
+function enterPurchasedCourseHome() {
+  const landingPage = document.getElementById('landingPage');
+  const introScreen = document.getElementById('introScreen');
+
+  if (landingPage) landingPage.style.display = 'none';
+  if (introScreen) introScreen.style.display = 'none';
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('courseHome').classList.add('active');
+  APP_STATE.setCurrentView('home');
+  renderHomeProgress();
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
 
 // ── SIGN IN PANEL ──
 function showSignInPanel() {
@@ -6940,14 +6955,10 @@ function showCourse() {
 async function showApp() {
   APP_STATE.load();
   applyCheckoutStatus();
-
   if (await shouldEnterPurchasedCourse()) {
-    document.getElementById('landingPage').style.display = 'none';
-    hideIntro();
-    showCourse();
+    enterPurchasedCourseHome();
     return;
   }
-
   if (shouldShowIntro()) {
     document.getElementById('landingPage').style.display = 'flex';
     document.getElementById('introScreen').style.display = 'none';
