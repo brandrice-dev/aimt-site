@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Enrollment Confirmed — AIMT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -36,7 +37,7 @@ body {
   padding: 2rem;
 }
 .card {
-  width: min(100%, 760px);
+  width: min(100%, 860px);
   background: var(--panel);
   border: 0.5px solid var(--panel-border);
   border-radius: 26px;
@@ -113,11 +114,98 @@ body {
   color: var(--muted);
   max-width: 42rem;
 }
+.setup {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 0.5px solid rgba(255,255,255,0.08);
+}
+.setup-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.6);
+  margin-bottom: 0.75rem;
+}
+.setup-title {
+  font-family: var(--mont);
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: rgba(255,255,255,0.96);
+  margin-bottom: 0.7rem;
+}
+.setup-copy {
+  max-width: 40rem;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.58);
+  margin-bottom: 1.5rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.field.full {
+  grid-column: 1 / -1;
+}
+.field-label {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.5);
+}
+.field-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 0.92rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: rgba(255,255,255,0.92);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.field-input:focus {
+  border-color: rgba(163,150,141,0.42);
+  background: rgba(255,255,255,0.055);
+}
+.form-error,
+.form-message {
+  display: none;
+  margin-top: 1rem;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  font-weight: 300;
+}
+.form-error {
+  border: 0.5px solid rgba(194,115,115,0.22);
+  background: rgba(194,115,115,0.08);
+  color: rgba(255,220,220,0.88);
+}
+.form-message {
+  border: 0.5px solid rgba(163,150,141,0.22);
+  background: rgba(163,150,141,0.08);
+  color: rgba(255,255,255,0.78);
+}
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
-  margin-top: 2rem;
+  margin-top: 1.4rem;
 }
 .btn {
   display: inline-flex;
@@ -131,7 +219,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, opacity 0.2s;
 }
 .btn-primary {
   background: #f2eee8;
@@ -146,10 +234,37 @@ body {
 .btn:hover {
   transform: translateY(-1px);
 }
+.btn[disabled] {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+.success-panel {
+  display: none;
+  margin-top: 1.5rem;
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+.success-panel-title {
+  font-family: var(--mont);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 0.3rem;
+}
+.success-panel-copy {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.6);
+}
 @media (max-width: 720px) {
   .wrap { padding: 1rem; }
   .card { border-radius: 22px; }
-  .detail-grid { grid-template-columns: 1fr; }
+  .detail-grid,
+  .form-grid { grid-template-columns: 1fr; }
   .actions { flex-direction: column; }
   .btn { width: 100%; }
 }
@@ -163,7 +278,7 @@ body {
         <em>AIMT · Certification 01</em>
         You're enrolled in HeadSpa Mastery.
       </h1>
-      <p class="lead">Your payment has been received and your place in the certification is confirmed. The next step is access setup and sign-in provisioning for the course environment.</p>
+      <p class="lead">Your payment has been received and your place in the certification is confirmed. The next step is account creation and immediate access setup for the course environment.</p>
 
       <div class="detail-grid">
         <div class="detail">
@@ -180,13 +295,154 @@ body {
         </div>
       </div>
 
-      <p class="note">Access and login setup are the next operational step in the AIMT launch flow. Return to the course page to review the program again, or continue to the current sign-in area if your access has already been provisioned.</p>
+      <p class="note">Your payment was successful. Create your account to access HeadSpa Mastery.</p>
 
-      <div class="actions">
-        <a href="headspa-mastery.html" class="btn btn-primary">Return to HeadSpa Mastery</a>
-        <a href="courses.html" class="btn btn-secondary">Browse Certifications</a>
+      <div class="setup">
+        <div class="setup-label">Create your account</div>
+        <div class="setup-title">Set up your AIMT login.</div>
+        <p class="setup-copy">Use the same email you want associated with your enrollment. Once your account is created, we’ll hand you directly into the course area.</p>
+
+        <form id="accountForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="firstName">First name</label>
+              <input class="field-input" id="firstName" name="firstName" type="text" autocomplete="given-name" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="lastName">Last name</label>
+              <input class="field-input" id="lastName" name="lastName" type="text" autocomplete="family-name" required>
+            </div>
+            <div class="field full">
+              <label class="field-label" for="email">Email</label>
+              <input class="field-input" id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="password">Password</label>
+              <input class="field-input" id="password" name="password" type="password" autocomplete="new-password" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="confirmPassword">Confirm password</label>
+              <input class="field-input" id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required>
+            </div>
+          </div>
+
+          <div class="form-error" id="formError"></div>
+          <div class="form-message" id="formMessage"></div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Create account</button>
+            <a href="headspa-mastery.html" class="btn btn-secondary">Return to HeadSpa Mastery</a>
+          </div>
+
+          <div class="success-panel" id="successPanel">
+            <div class="success-panel-title">Account created.</div>
+            <div class="success-panel-copy">Your AIMT account is ready. We’re taking you into the HeadSpa Mastery access flow now.</div>
+          </div>
+        </form>
       </div>
     </section>
   </main>
+
+  <script>
+    const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById('accountForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorBox = document.getElementById('formError');
+    const messageBox = document.getElementById('formMessage');
+    const successPanel = document.getElementById('successPanel');
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+      messageBox.style.display = 'none';
+    }
+
+    function showMessage(message) {
+      messageBox.textContent = message;
+      messageBox.style.display = 'block';
+      errorBox.style.display = 'none';
+    }
+
+    function clearNotices() {
+      errorBox.style.display = 'none';
+      messageBox.style.display = 'none';
+    }
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading ? 'Creating account...' : 'Create account';
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotices();
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!firstName || !lastName || !email || !password || !confirmPassword) {
+        showError('Please complete all fields before continuing.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError('Your passwords do not match yet.');
+        return;
+      }
+
+      if (password.length < 8) {
+        showError('Please choose a password with at least 8 characters.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+            }
+          }
+        });
+
+        if (error) {
+          const lower = (error.message || '').toLowerCase();
+          if (lower.includes('already') || lower.includes('registered') || lower.includes('exists')) {
+            showMessage('An AIMT account already appears to exist for this email. Return to HeadSpa Mastery and use the sign-in option there.');
+          } else {
+            showError(error.message || 'We could not create your account right now.');
+          }
+          return;
+        }
+
+        if (!data.session) {
+          showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to HeadSpa Mastery to sign in.');
+          return;
+        }
+
+        successPanel.style.display = 'block';
+        clearNotices();
+
+        window.setTimeout(() => {
+          window.location.href = 'headspa-mastery.html';
+        }, 1200);
+      } catch (_) {
+        showError('We could not create your account right now. Please try again in a moment.');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
 </body>
 </html>
