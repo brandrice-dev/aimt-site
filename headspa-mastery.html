@@ -6625,15 +6625,38 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+const PURCHASER_ACCESS_KEY = 'aimt_headspa_purchaser_email';
 const STAFF_EMAIL_ALLOWLIST = [
   'brandmrice@gmail.com',
   'cadyb03@gmail.com',
   'atriumlanc@gmail.com'
 ];
 
+function normalizeAccessEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
 function isAllowlistedStaffEmail(email) {
-  const normalized = String(email || '').trim().toLowerCase();
+  const normalized = normalizeAccessEmail(email);
   return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
+}
+
+function grantStoredPurchaserAccess(email) {
+  const normalized = normalizeAccessEmail(email);
+  if (!normalized) return;
+  try {
+    localStorage.setItem(PURCHASER_ACCESS_KEY, normalized);
+  } catch (_) {}
+}
+
+function hasStoredPurchaserAccess(email) {
+  const normalized = normalizeAccessEmail(email);
+  if (!normalized) return false;
+  try {
+    return localStorage.getItem(PURCHASER_ACCESS_KEY) === normalized;
+  } catch (_) {
+    return false;
+  }
 }
 
 function setSignedInStudent(user) {
@@ -6710,7 +6733,13 @@ async function shouldEnterPurchasedCourse() {
     if (error || !data || !data.session || !data.session.user) return false;
 
     const user = data.session.user;
-    if (!requestedPurchasedEntry && !isAllowlistedStaffEmail(user.email)) return false;
+    const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+    const knownPurchaser = requestedPurchasedEntry || hasStoredPurchaserAccess(user.email);
+    if (!allowlistedStaff && !knownPurchaser) return false;
+
+    if (requestedPurchasedEntry) {
+      grantStoredPurchaserAccess(user.email);
+    }
 
     setSignedInStudent(user);
 
@@ -6775,9 +6804,9 @@ async function handleSignIn() {
       return;
     }
 
-    if (!isAllowlistedStaffEmail(data.user.email)) {
+    if (!isAllowlistedStaffEmail(data.user.email) && !hasStoredPurchaserAccess(data.user.email)) {
       await supabaseClient.auth.signOut();
-      notice.textContent = 'This account is not enabled for internal staff access on this preview.';
+      notice.textContent = 'This account does not currently have access to HeadSpa Mastery.';
       return;
     }
 

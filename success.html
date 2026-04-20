@@ -262,6 +262,10 @@ body {
   line-height: 1.7;
   color: rgba(255,255,255,0.6);
 }
+.next-step-panel {
+  display: none;
+  margin-top: 1rem;
+}
 @media (max-width: 720px) {
   .wrap {
     align-items: flex-start;
@@ -349,8 +353,16 @@ body {
           </div>
 
           <div class="success-panel" id="successPanel">
-            <div class="success-panel-title">Account created.</div>
-            <div class="success-panel-copy">Your AIMT account is ready. We’re taking you into the HeadSpa Mastery access flow now.</div>
+            <div class="success-panel-title" id="successPanelTitle">Account created.</div>
+            <div class="success-panel-copy" id="successPanelCopy">Your AIMT account is ready. We’re taking you into the HeadSpa Mastery access flow now.</div>
+          </div>
+
+          <div class="success-panel next-step-panel" id="nextStepPanel">
+            <div class="success-panel-title" id="nextStepTitle">Next step</div>
+            <div class="success-panel-copy" id="nextStepCopy">Return to HeadSpa Mastery and continue from there.</div>
+            <div class="actions">
+              <a href="headspa-mastery.html" class="btn btn-secondary" id="nextStepButton">Go to HeadSpa Mastery</a>
+            </div>
           </div>
         </form>
       </div>
@@ -368,6 +380,44 @@ body {
     const errorBox = document.getElementById('formError');
     const messageBox = document.getElementById('formMessage');
     const successPanel = document.getElementById('successPanel');
+    const successPanelTitle = document.getElementById('successPanelTitle');
+    const successPanelCopy = document.getElementById('successPanelCopy');
+    const nextStepPanel = document.getElementById('nextStepPanel');
+    const nextStepTitle = document.getElementById('nextStepTitle');
+    const nextStepCopy = document.getElementById('nextStepCopy');
+    const nextStepButton = document.getElementById('nextStepButton');
+    const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
+    const COURSE_SIGNIN_URL = 'headspa-mastery.html';
+
+    function showSuccessPanel(title, copy) {
+      if (successPanelTitle) successPanelTitle.textContent = title;
+      if (successPanelCopy) successPanelCopy.textContent = copy;
+      successPanel.style.display = 'block';
+    }
+
+    function hideSuccessPanel() {
+      successPanel.style.display = 'none';
+    }
+
+    function showNextStep(title, copy, href, label) {
+      if (nextStepTitle) nextStepTitle.textContent = title;
+      if (nextStepCopy) nextStepCopy.textContent = copy;
+      if (nextStepButton) {
+        nextStepButton.href = href || COURSE_SIGNIN_URL;
+        nextStepButton.textContent = label || 'Go to HeadSpa Mastery';
+      }
+      nextStepPanel.style.display = 'block';
+    }
+
+    function hideNextStep() {
+      nextStepPanel.style.display = 'none';
+    }
+
+    function redirectToCourse(delayMs) {
+      window.setTimeout(() => {
+        window.location.href = COURSE_ENTRY_URL;
+      }, delayMs || 0);
+    }
 
     function showError(message) {
       errorBox.textContent = message;
@@ -388,12 +438,34 @@ body {
 
     function setLoading(isLoading) {
       submitBtn.disabled = isLoading;
-      submitBtn.textContent = isLoading ? 'Creating account...' : 'Create account';
+      submitBtn.textContent = isLoading ? 'Creating account...' : 'Create AIMT account';
+    }
+
+    function setSubmitState(label, disabled) {
+      submitBtn.disabled = !!disabled;
+      submitBtn.textContent = label;
+    }
+
+    async function handleExistingSession() {
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error || !data || !data.session || !data.session.user) return;
+
+        clearNotices();
+        hideNextStep();
+        showSuccessPanel('Account ready.', 'You already have an active AIMT session. We’re taking you into HeadSpa Mastery now.');
+        showMessage('You are already signed in. Continuing into your course access flow now.');
+        showNextStep('Already signed in?', 'If the redirect does not happen automatically, continue into HeadSpa Mastery here.', COURSE_ENTRY_URL, 'Enter HeadSpa Mastery');
+        setSubmitState('Continuing to course...', true);
+        redirectToCourse(900);
+      } catch (_) {}
     }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearNotices();
+      hideSuccessPanel();
+      hideNextStep();
 
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
@@ -430,33 +502,46 @@ body {
           }
         });
 
+        const maybeExistingAccount = !!(data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+
         if (error) {
           const lower = (error.message || '').toLowerCase();
           if (lower.includes('already') || lower.includes('registered') || lower.includes('exists')) {
-            showMessage('An AIMT account already appears to exist for this email. Return to HeadSpa Mastery and use the sign-in option there.');
+            showMessage('An AIMT account already appears to exist for this email. Return to HeadSpa Mastery and sign in with that account to continue.');
+            showNextStep('Already have an account?', 'Use the email tied to your enrollment and the sign-in option on HeadSpa Mastery to enter the course.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
           } else {
             showError(error.message || 'We could not create your account right now.');
+            showNextStep('Need another way in?', 'Return to HeadSpa Mastery and use the sign-in option there, or try account creation again in a moment.', COURSE_SIGNIN_URL, 'Go to HeadSpa Mastery');
           }
+          return;
+        }
+
+        if (maybeExistingAccount) {
+          showMessage('An AIMT account already exists for this email. Sign in on HeadSpa Mastery to continue into your purchased course.');
+          showNextStep('Already have an account?', 'Return to HeadSpa Mastery and use the sign-in option there with this same email.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
           return;
         }
 
         if (!data.session) {
           showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to HeadSpa Mastery to sign in.');
+          showNextStep('Need to sign in after confirmation?', 'Once you confirm your email, return to HeadSpa Mastery and use the sign-in option there.', COURSE_SIGNIN_URL, 'Back to HeadSpa Mastery');
           return;
         }
 
-        successPanel.style.display = 'block';
         clearNotices();
+        hideNextStep();
+        showSuccessPanel('Account created.', 'Your AIMT account is ready. We’re taking you into the HeadSpa Mastery access flow now.');
 
-        window.setTimeout(() => {
-          window.location.href = 'headspa-mastery.html?enter=1';
-        }, 1200);
+        redirectToCourse(1200);
       } catch (_) {
-        showError('We could not create your account right now. Please try again in a moment.');
+        showError('We could not create your account right now. Return to HeadSpa Mastery and use the sign-in option there, or try again in a moment.');
+        showNextStep('Need another way in?', 'If your account already exists, sign in on HeadSpa Mastery. If not, you can return here and try account creation again shortly.', COURSE_SIGNIN_URL, 'Go to HeadSpa Mastery');
       } finally {
         setLoading(false);
       }
     });
+
+    handleExistingSession();
   </script>
 </body>
 </html>
