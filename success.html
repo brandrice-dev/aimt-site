@@ -79,6 +79,7 @@ body {
   font-weight: 300;
   line-height: 1.8;
   color: var(--muted);
+  margin-bottom: 0.2rem;
 }
 .detail-grid {
   display: grid;
@@ -134,7 +135,7 @@ body {
   letter-spacing: -0.03em;
   line-height: 1.02;
   color: rgba(255,255,255,0.96);
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
 }
 .setup-copy {
   max-width: 40rem;
@@ -270,6 +271,9 @@ body {
     border-radius: 22px;
     padding: 1.5rem 1.2rem 1.7rem;
   }
+  .headline { line-height: 1; }
+  .lead,
+  .setup-copy { font-size: 0.9rem; line-height: 1.7; }
   .detail-grid,
   .form-grid { grid-template-columns: 1fr; }
   .actions { flex-direction: column; }
@@ -340,8 +344,8 @@ body {
           <div class="form-message" id="formMessage"></div>
 
           <div class="actions">
-            <button type="submit" class="btn btn-primary" id="submitBtn">Create account</button>
-            <a href="headspa-mastery.html" class="btn btn-secondary">Return to HeadSpa Mastery</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Create AIMT account</button>
+            <a href="headspa-mastery.html" class="btn btn-secondary">Back to HeadSpa Mastery</a>
           </div>
 
           <div class="success-panel" id="successPanel">

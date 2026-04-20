@@ -667,9 +667,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-brand-dot { width: 7px; height: 7px; border-radius: 50%; background: #a3968d; animation: introBreathe 4s ease-in-out infinite; }
 .lp-brand-name { font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
 .lp-eyebrow { font-family: 'Outfit', sans-serif; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; margin-bottom: 1.25rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.4s forwards; }
-.lp-headline { font-family: var(--mont); font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700; line-height: 1.05; color: rgba(255,255,255,0.95); letter-spacing: -0.03em; margin-bottom: 1.5rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.55s forwards; text-transform: uppercase; }
+.lp-headline { font-family: var(--mont); font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700; line-height: 1.05; color: rgba(255,255,255,0.95); letter-spacing: -0.03em; margin-bottom: 1.2rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.55s forwards; text-transform: uppercase; }
 .lp-headline em { font-style: normal; font-weight: 300; color: rgba(255,255,255,0.6); letter-spacing: 0.08em; }
-.lp-subhead { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 300; line-height: 1.75; color: rgba(255,255,255,0.45); max-width: 560px; margin-bottom: 3.5rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.7s forwards; }
+.lp-subhead { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 300; line-height: 1.75; color: rgba(255,255,255,0.45); max-width: 560px; margin-bottom: 3rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.7s forwards; }
 .lp-divider { width: 100%; height: 0.5px; background: rgba(255,255,255,0.07); margin-bottom: 3rem; opacity: 0; animation: lpFadeUp 0.6s ease 0.85s forwards; }
 .lp-outcomes { width: 100%; margin-bottom: 3.5rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.95s forwards; }
 .lp-outcomes-label { font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 1.5rem; }
@@ -710,6 +710,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-price-label { font-size: 0.82rem; font-weight: 400; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
 .lp-price-sub { font-size: 0.72rem; font-weight: 300; color: rgba(255,255,255,0.3); }
 .lp-purchase-note { font-size: 0.74rem; color: rgba(255,255,255,0.34); line-height: 1.62; font-weight: 300; margin: 0 0 1rem; }
+.lp-purchase-trust { font-size: 0.72rem; color: rgba(255,255,255,0.42); line-height: 1.62; font-weight: 300; margin: 0 0 1rem; }
 .lp-purchased-link { font-family: var(--sans); font-size: 0.74rem; font-weight: 300; color: rgba(255,255,255,0.3); text-decoration: none; margin: -0.15rem 0 1rem; display: inline-block; transition: color 0.2s; }
 .lp-purchased-link:hover { color: rgba(255,255,255,0.55); }
 .lp-pricing-includes { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem; }
@@ -1291,7 +1292,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lesson-wrap { padding: 1.5rem 1.1rem 7rem; }
   .mod-hero { padding: 1.5rem 1.25rem; }
   .lp-inner { padding: 3rem 1.25rem 4rem; }
-  .lp-headline { font-size: clamp(1.65rem, 8vw, 2.5rem); }
+  .lp-headline { font-size: clamp(1.65rem, 8vw, 2.35rem); line-height: 1; }
+  .lp-subhead { font-size: 0.92rem; line-height: 1.68; }
   .lp-pricing-card { padding: 1.25rem; }
   .lp-pricing-card.lp-purchase-top { margin: 1.5rem 0 2.25rem; }
   .lp-pricing-row { flex-direction: column; align-items: flex-start; gap: 0.65rem; margin-bottom: 1.15rem; padding-bottom: 1.15rem; }
@@ -1539,7 +1541,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-eyebrow">Professional Education</div>
     <h1 class="lp-headline">The head spa course<br><em>built from the floor up.</em></h1>
-    <p class="lp-subhead">Most head spa education teaches steps. This certification teaches clinical judgment, service execution, and pricing clarity so you can deliver a premium scalp service with confidence. Built from nearly two decades of real practice and guided by an instructor who adapts to you.</p>
+    <p class="lp-subhead">Most head spa education teaches steps. This certification teaches clinical judgment, service execution, and pricing clarity so you can deliver a premium scalp service with confidence. Built from real practice and guided by an instructor who adapts to you.</p>
     <div class="lp-pricing-card lp-purchase-top">
       <div class="lp-pricing-eyebrow">Certification 01 · HeadSpa Mastery</div>
       <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
@@ -1551,16 +1553,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
       <p class="lp-purchase-note">Immediate access to the full certification: 12 modules, Cadence-guided checkpoints, and an AIMT credential built to signal real practitioner-level mastery.</p>
+      <p class="lp-purchase-trust">After purchase, you’ll create your AIMT account, enter the course directly, and keep lifetime access to the certification materials.</p>
       <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Enter here.</a>
       <div class="lp-pricing-includes">
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>12 modules · self-paced progression</div>
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Cadence-guided learning and checkpoints</div>
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Lifetime access after one-time enrollment</div>
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>AIMT certificate included</div>
+        <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Post-purchase account setup and direct course entry</div>
       </div>
       <button class="lp-enroll-btn" onclick="startCheckout()">
         <div class="lp-enter-btn-dot"></div>
-        Enroll Now
+        Begin Enrollment
       </button>
       <div class="lp-or-divider"><span>or</span></div>
       <button class="lp-signin-btn" onclick="showSignInPanel()">
@@ -1577,7 +1581,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div id="lpNameStep" style="display:none;">
           <div style="font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.75rem;">Welcome. What's your first name?</div>
           <input type="text" class="lp-passcode-input" id="lpNameInput" placeholder="First name" autocomplete="given-name" onkeydown="nameKey(event)" />
-          <button class="lp-passcode-btn" onclick="submitName()">Enter Course →</button>
+          <button class="lp-passcode-btn" onclick="submitName()">Enter HeadSpa Mastery →</button>
           <div class="lp-passcode-error" id="lpNameError">Please enter your first name to continue.</div>
         </div>
       </div>
@@ -1619,7 +1623,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <input type="email" class="lp-name-input" placeholder="Email address" autocomplete="email" style="margin-bottom:0.75rem;" />
       <input type="password" class="lp-name-input" placeholder="Password" autocomplete="current-password" style="margin-bottom:1rem;" />
-      <button class="lp-enroll-btn" onclick="handleSignIn()">Sign In</button>
+      <button class="lp-enroll-btn" onclick="handleSignIn()">Enter HeadSpa Mastery</button>
       <div class="lp-signin-sub">Forgot your password? <span class="lp-signin-link" onclick="handleForgotPassword()">Reset it here</span></div>
       <div class="lp-signin-notice" id="lpSignInNotice"></div>
     </div>
