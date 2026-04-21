@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Student Access — AIMT</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #171410;
+  --panel: rgba(255,255,255,0.05);
+  --panel-border: rgba(255,255,255,0.1);
+  --text: rgba(255,255,255,0.94);
+  --muted: rgba(255,255,255,0.52);
+  --accent: #a3968d;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Outfit', -apple-system, system-ui, sans-serif;
+  --mont: 'Montserrat', Arial, sans-serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+}
+html, body { min-height: 100%; }
+body {
+  font-family: var(--sans);
+  background:
+    radial-gradient(circle at top left, rgba(163,150,141,0.12), transparent 34%),
+    linear-gradient(180deg, #1d1914 0%, #14110d 100%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.card {
+  width: min(100%, 760px);
+  background: var(--panel);
+  border: 0.5px solid var(--panel-border);
+  border-radius: 26px;
+  padding: clamp(2rem, 4vw, 3.1rem);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.32);
+  backdrop-filter: blur(14px);
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.66);
+  margin-bottom: 1.15rem;
+}
+.headline {
+  font-family: var(--mont);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.97;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+.headline em {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.46em;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 0.2rem;
+}
+.lead {
+  max-width: 40rem;
+  font-size: 0.98rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.setup {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 0.5px solid rgba(255,255,255,0.08);
+}
+.setup-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.6);
+  margin-bottom: 0.75rem;
+}
+.setup-title {
+  font-family: var(--mont);
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: rgba(255,255,255,0.96);
+  margin-bottom: 0.6rem;
+}
+.setup-copy {
+  max-width: 38rem;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.58);
+  margin-bottom: 1.5rem;
+}
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem; }
+.field { display: flex; flex-direction: column; gap: 0.45rem; }
+.field-label {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.5);
+}
+.field-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 0.92rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: rgba(255,255,255,0.92);
+  outline: none;
+}
+.field-input:focus {
+  border-color: rgba(163,150,141,0.42);
+  background: rgba(255,255,255,0.055);
+}
+.notice {
+  display: none;
+  margin-top: 1rem;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  font-weight: 300;
+  border: 0.5px solid rgba(163,150,141,0.22);
+  background: rgba(163,150,141,0.08);
+  color: rgba(255,255,255,0.78);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.4rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.92rem 1.35rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--mont);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, opacity 0.2s;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #f2eee8;
+  color: #1a1714;
+  border: 0.5px solid rgba(242,238,232,0.55);
+}
+.btn-secondary {
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  border: 0.5px solid rgba(255,255,255,0.16);
+}
+.helper {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.5);
+}
+.forgot {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  cursor: pointer;
+}
+@media (max-width: 720px) {
+  .wrap {
+    align-items: flex-start;
+    padding: 1rem 1rem max(1.25rem, env(safe-area-inset-bottom, 1.25rem));
+  }
+  .card {
+    border-radius: 22px;
+    padding: 1.5rem 1.2rem 1.7rem;
+  }
+  .lead,
+  .setup-copy { font-size: 0.9rem; line-height: 1.7; }
+  .actions { flex-direction: column; }
+  .btn { width: 100%; min-height: 48px; }
+}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="eyebrow">Student Access</div>
+      <h1 class="headline">
+        <em>AIMT · HeadSpa Mastery</em>
+        Sign in to your course.
+      </h1>
+      <p class="lead">Use your AIMT account to enter HeadSpa Mastery. If your purchase access is still syncing, this page will retry that connection automatically when possible.</p>
+
+      <div class="setup">
+        <div class="setup-label">Account access</div>
+        <div class="setup-title">Enter HeadSpa Mastery.</div>
+        <p class="setup-copy">Sign in with the email tied to your enrollment. New purchases still complete account creation on the confirmation page first.</p>
+
+        <form id="signInForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="email">Email</label>
+              <input class="field-input" id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label class="field-label" for="password">Password</label>
+              <input class="field-input" id="password" name="password" type="password" autocomplete="current-password" required>
+            </div>
+          </div>
+
+          <div class="notice" id="notice"></div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Enter HeadSpa Mastery</button>
+            <a href="courses.html" class="btn btn-secondary">View Certifications</a>
+          </div>
+
+          <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
+    const HEADSPA_COURSE_SLUG = 'headspa-mastery';
+    const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
+    const STAFF_EMAIL_ALLOWLIST = [
+      'brandmrice@gmail.com',
+      'cadyb03@gmail.com',
+      'atriumlanc@gmail.com'
+    ];
+
+    const form = document.getElementById('signInForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const notice = document.getElementById('notice');
+    const forgotLink = document.getElementById('forgotLink');
+
+    function normalizeAccessEmail(email) {
+      return String(email || '').trim().toLowerCase();
+    }
+
+    function isAllowlistedStaffEmail(email) {
+      const normalized = normalizeAccessEmail(email);
+      return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
+    }
+
+    function getPendingCheckoutSessionId() {
+      try {
+        return String(localStorage.getItem(PENDING_CLAIM_KEY) || '').trim();
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function clearPendingCheckoutSessionId() {
+      try {
+        localStorage.removeItem(PENDING_CLAIM_KEY);
+      } catch (_) {}
+    }
+
+    function showNotice(message) {
+      notice.textContent = message;
+      notice.style.display = 'block';
+    }
+
+    function clearNotice() {
+      notice.style.display = 'none';
+      notice.textContent = '';
+    }
+
+    function setLoading(isLoading, label) {
+      submitBtn.disabled = isLoading;
+      submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Enter HeadSpa Mastery';
+    }
+
+    function redirectToCourse() {
+      window.location.href = 'headspa-mastery.html';
+    }
+
+    async function hasHeadSpaEntitlement() {
+      try {
+        const { data, error } = await supabaseClient
+          .from(COURSE_ENTITLEMENTS_TABLE)
+          .select('checkout_session_id')
+          .eq('course_slug', HEADSPA_COURSE_SLUG)
+          .limit(1);
+
+        return !error && Array.isArray(data) && data.length > 0;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function bindHeadSpaEntitlementsToUser(user) {
+      if (!user || !user.id) return;
+      try {
+        await supabaseClient
+          .from(COURSE_ENTITLEMENTS_TABLE)
+          .update({ user_id: user.id })
+          .eq('course_slug', HEADSPA_COURSE_SLUG)
+          .eq('purchaser_email', normalizeAccessEmail(user.email))
+          .is('user_id', null);
+      } catch (_) {}
+    }
+
+    async function recoverHeadSpaEntitlement(user) {
+      const sessionId = getPendingCheckoutSessionId();
+      if (!sessionId || !user) return false;
+
+      try {
+        const response = await fetch('/api/claim-course-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            email: normalizeAccessEmail(user.email),
+            userId: user.id || ''
+          })
+        });
+
+        if (response.ok) {
+          clearPendingCheckoutSessionId();
+          await bindHeadSpaEntitlementsToUser(user);
+          return true;
+        }
+      } catch (_) {}
+
+      return false;
+    }
+
+    async function canAccessCourse(user) {
+      const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+      if (!allowlistedStaff) {
+        await bindHeadSpaEntitlementsToUser(user);
+      }
+
+      let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement();
+      if (!allowlistedStaff && !entitledPurchaser) {
+        await recoverHeadSpaEntitlement(user);
+        entitledPurchaser = await hasHeadSpaEntitlement();
+      }
+
+      return allowlistedStaff || entitledPurchaser;
+    }
+
+    async function handleExistingSession() {
+      setLoading(true, 'Checking access...');
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error || !data || !data.session || !data.session.user) return;
+
+        if (await canAccessCourse(data.session.user)) {
+          redirectToCourse();
+          return;
+        }
+
+        await supabaseClient.auth.signOut();
+        showNotice(getPendingCheckoutSessionId()
+          ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
+          : 'This account does not currently have access to HeadSpa Mastery.');
+      } catch (_) {
+        showNotice('Unable to verify access right now. Please try again in a moment.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotice();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) {
+        showNotice('Enter your email and password to continue.');
+        return;
+      }
+
+      setLoading(true, 'Signing in...');
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error || !data || !data.user) {
+          showNotice(error?.message || 'Unable to sign in right now.');
+          return;
+        }
+
+        if (!(await canAccessCourse(data.user))) {
+          await supabaseClient.auth.signOut();
+          showNotice(getPendingCheckoutSessionId()
+            ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
+            : 'This account does not currently have access to HeadSpa Mastery.');
+          return;
+        }
+
+        redirectToCourse();
+      } catch (_) {
+        showNotice('Unable to sign in right now.');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    forgotLink.addEventListener('click', async () => {
+      clearNotice();
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        showNotice('Enter your email address first.');
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+        showNotice(error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.');
+      } catch (_) {
+        showNotice('Unable to send reset email.');
+      }
+    });
+
+    handleExistingSession();
+  </script>
+</body>
+</html>

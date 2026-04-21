@@ -349,7 +349,7 @@ body {
 
           <div class="actions">
             <button type="submit" class="btn btn-primary" id="submitBtn">Create AIMT account</button>
-            <a href="headspa-mastery.html" class="btn btn-secondary">Back to HeadSpa Mastery</a>
+            <a href="student-access.html" class="btn btn-secondary">Back to Student Access</a>
           </div>
 
           <div class="success-panel" id="successPanel">
@@ -359,9 +359,9 @@ body {
 
           <div class="success-panel next-step-panel" id="nextStepPanel">
             <div class="success-panel-title" id="nextStepTitle">Next step</div>
-            <div class="success-panel-copy" id="nextStepCopy">Return to HeadSpa Mastery and continue from there.</div>
+            <div class="success-panel-copy" id="nextStepCopy">Return to Student Access and continue from there.</div>
             <div class="actions">
-              <a href="headspa-mastery.html" class="btn btn-secondary" id="nextStepButton">Go to HeadSpa Mastery</a>
+              <a href="student-access.html" class="btn btn-secondary" id="nextStepButton">Go to Student Access</a>
             </div>
           </div>
         </form>
@@ -387,7 +387,7 @@ body {
     const nextStepCopy = document.getElementById('nextStepCopy');
     const nextStepButton = document.getElementById('nextStepButton');
     const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
-    const COURSE_SIGNIN_URL = 'headspa-mastery.html';
+    const COURSE_SIGNIN_URL = 'student-access.html';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const checkoutParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
@@ -420,7 +420,7 @@ body {
       if (nextStepCopy) nextStepCopy.textContent = copy;
       if (nextStepButton) {
         nextStepButton.href = href || COURSE_SIGNIN_URL;
-        nextStepButton.textContent = label || 'Go to HeadSpa Mastery';
+        nextStepButton.textContent = label || 'Go to Student Access';
       }
       nextStepPanel.style.display = 'block';
     }
@@ -559,28 +559,28 @@ body {
           const lower = (error.message || '').toLowerCase();
           if (lower.includes('already') || lower.includes('registered') || lower.includes('exists')) {
             await claimCourseAccess(email, null);
-            showMessage('An AIMT account already appears to exist for this email. Return to HeadSpa Mastery and sign in with that account to continue.');
-            showNextStep('Already have an account?', 'Use the email tied to your enrollment and the sign-in option on HeadSpa Mastery to enter the course.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
+            showMessage('An AIMT account already appears to exist for this email. Return to Student Access and sign in with that account to continue.');
+            showNextStep('Already have an account?', 'Use the email tied to your enrollment and sign in through Student Access to enter the course.', COURSE_SIGNIN_URL, 'Sign in to Student Access');
           } else {
             showError(error.message || 'We could not create your account right now.');
-            showNextStep('Need another way in?', 'Return to HeadSpa Mastery and use the sign-in option there, or try account creation again in a moment.', COURSE_SIGNIN_URL, 'Go to HeadSpa Mastery');
+            showNextStep('Need another way in?', 'Return to Student Access and sign in there, or try account creation again in a moment.', COURSE_SIGNIN_URL, 'Go to Student Access');
           }
           return;
         }
 
         if (maybeExistingAccount) {
           await claimCourseAccess(email, null);
-          showMessage('An AIMT account already exists for this email. Sign in on HeadSpa Mastery to continue into your purchased course.');
-          showNextStep('Already have an account?', 'Return to HeadSpa Mastery and use the sign-in option there with this same email.', COURSE_SIGNIN_URL, 'Sign in to HeadSpa Mastery');
+          showMessage('An AIMT account already exists for this email. Sign in through Student Access to continue into your purchased course.');
+          showNextStep('Already have an account?', 'Return to Student Access and use this same email to enter the course.', COURSE_SIGNIN_URL, 'Sign in to Student Access');
           return;
         }
 
         if (!data.session) {
           const claim = await claimCourseAccess(email, null);
-          showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to HeadSpa Mastery to sign in.');
-          showNextStep('Need to sign in after confirmation?', 'Once you confirm your email, return to HeadSpa Mastery and use the sign-in option there.', COURSE_SIGNIN_URL, 'Back to HeadSpa Mastery');
+          showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to Student Access to sign in.');
+          showNextStep('Need to sign in after confirmation?', 'Once you confirm your email, return to Student Access and sign in there.', COURSE_SIGNIN_URL, 'Back to Student Access');
           if (!claim.ok && !claim.skipped) {
-            showError(claim.error || 'We could not save your course access right now. Return to HeadSpa Mastery and sign in after email confirmation.');
+            showError(claim.error || 'We could not save your course access right now. Return to Student Access and sign in after email confirmation.');
           }
           return;
         }
@@ -596,8 +596,8 @@ body {
 
         redirectToCourse(1200);
       } catch (_) {
-        showError('We could not create your account right now. Return to HeadSpa Mastery and use the sign-in option there, or try again in a moment.');
-        showNextStep('Need another way in?', 'If your account already exists, sign in on HeadSpa Mastery. If not, you can return here and try account creation again shortly.', COURSE_SIGNIN_URL, 'Go to HeadSpa Mastery');
+        showError('We could not create your account right now. Return to Student Access and sign in there, or try again in a moment.');
+        showNextStep('Need another way in?', 'If your account already exists, sign in through Student Access. If not, you can return here and try account creation again shortly.', COURSE_SIGNIN_URL, 'Go to Student Access');
       } finally {
         setLoading(false);
       }

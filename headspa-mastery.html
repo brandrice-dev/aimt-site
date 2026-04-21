@@ -37,6 +37,8 @@
 }
 html { scroll-behavior: smooth; }
 body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100dvh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body.app-loading { visibility: hidden; }
+body.app-ready { visibility: visible; }
 
 /* ── VIEWS ── */
 .view { display: none; }
@@ -1563,7 +1565,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .cadence-sig.light svg path { stroke: var(--muted); }
 </style>
 </head>
-<body>
+<body class="app-loading">
 
 <!-- ══ LANDING PAGE ══ -->
 <div id="landingPage">
@@ -6657,6 +6659,22 @@ function clearPendingCheckoutSessionId() {
   } catch (_) {}
 }
 
+function getStudentFirstName() {
+  const student = APP_STATE.data && APP_STATE.data.student;
+  const name = String(student && student.name || '').trim();
+  if (!name || name.includes('@')) return '';
+  return name.split(/\s+/)[0] || '';
+}
+
+function setAppReady() {
+  document.body.classList.remove('app-loading');
+  document.body.classList.add('app-ready');
+}
+
+function redirectToStudentAccess() {
+  window.location.replace('student-access.html');
+}
+
 async function hasHeadSpaEntitlement(user) {
   if (!supabaseClient || !user) return false;
 
@@ -6720,7 +6738,7 @@ function setSignedInStudent(user) {
     ...currentStudent,
     name: currentStudent.name || fullName || user.email || '',
     joined: currentStudent.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-    introComplete: true
+    introComplete: currentStudent.introComplete || !!meta.headspa_intro_complete
   });
 }
 
@@ -6790,13 +6808,8 @@ function clearStudentSignInParam() {
 }
 
 function showStudentSignInEntry() {
-  const landingPage = document.getElementById('landingPage');
-  const introScreen = document.getElementById('introScreen');
-  if (landingPage) landingPage.style.display = 'flex';
-  if (introScreen) introScreen.style.display = 'none';
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  showSignInPanel();
   clearStudentSignInParam();
+  redirectToStudentAccess();
 }
 
 async function shouldEnterPurchasedCourse() {
@@ -6961,6 +6974,10 @@ function shouldShowIntro() {
 
 function startIntro() {
   if (!shouldShowIntro()) { hideIntro(); return; }
+  introSkipped = false;
+  introCurrentText = '';
+  const line = document.getElementById('introLine');
+  if (line) line.innerHTML = '';
   document.getElementById('introScreen').style.display = 'flex';
   document.getElementById('introSkip').style.display = 'block';
   buildIntroScript();
@@ -6971,8 +6988,8 @@ function startIntro() {
 }
 
 function buildIntroScript() {
-  const name = (APP_STATE.data.student && APP_STATE.data.student.name) || '';
-  const greeting = name ? 'Hi, ' + name + '.' : 'Hi.';
+  const firstName = getStudentFirstName();
+  const greeting = firstName ? 'Hi, ' + firstName + '.' : 'Hi.';
   window._activeIntroScript = [
     { text: greeting, pause: 1300 },
     { text: " I'm Cadence.", pause: 1600 },
@@ -6990,6 +7007,17 @@ function buildIntroScript() {
     { text: "Before we begin —", pause: 1400 },
     { text: 'INPUT', pause: 0 }
   ];
+}
+
+async function persistCadenceWelcomeComplete(extraData) {
+  if (!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient.auth.getUser();
+    const user = data && data.user;
+    if (!user) return;
+    const nextData = { ...(user.user_metadata || {}), ...(extraData || {}), headspa_intro_complete: true };
+    await supabaseClient.auth.updateUser({ data: nextData });
+  } catch (_) {}
 }
 
 async function runIntroScript() {
@@ -7050,6 +7078,7 @@ async function submitIntro() {
     responses: [text]
   });
   APP_STATE.updateCadenceMemoryFromIntro(text);
+  persistCadenceWelcomeComplete(detectedName ? { first_name: detectedName } : null);
 
   const name = detectedName || existingName;
 
@@ -7074,7 +7103,8 @@ async function submitIntro() {
     })
     .catch(() => {
       const textEl = document.getElementById('introCadenceText');
-      const fallback = name ? 'Welcome, ' + name + ". Let's get started." : "Welcome. Let's begin.";
+      const fallbackName = getStudentFirstName();
+      const fallback = fallbackName ? 'Welcome, ' + fallbackName + ". Let's get started." : "Welcome. Let's begin.";
       if (textEl) textEl.innerHTML = '<p>' + fallback + '</p>';
       const beginBtn = document.getElementById('introBeginBtn');
       if (beginBtn) beginBtn.style.display = 'flex';
@@ -7093,6 +7123,7 @@ async function introProceed() {
 function skipIntro() {
   introSkipped = true;
   APP_STATE.setStudent({ introComplete: true });
+  persistCadenceWelcomeComplete();
   document.getElementById('introScreen').classList.add('fade-out');
   const sk = document.getElementById('introSkip'); if (sk) sk.style.display = 'none';
   setTimeout(() => { hideIntro(); showCourse(); }, 900);
@@ -7114,24 +7145,21 @@ async function showApp() {
   APP_STATE.load();
   applyCheckoutStatus();
   if (await shouldEnterPurchasedCourse()) {
+    document.getElementById('landingPage').style.display = 'none';
+    if (shouldShowIntro()) {
+      startIntro();
+      setAppReady();
+      return;
+    }
     enterPurchasedCourseHome();
+    setAppReady();
     return;
   }
   if (shouldOpenStudentSignIn()) {
     showStudentSignInEntry();
     return;
   }
-  if (shouldShowIntro()) {
-    document.getElementById('landingPage').style.display = 'flex';
-    document.getElementById('introScreen').style.display = 'none';
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  } else {
-    document.getElementById('landingPage').style.display = 'none';
-    hideIntro();
-    document.getElementById('courseHome').classList.add('active');
-    APP_STATE.setCurrentView('home');
-    renderHomeProgress();
-  }
+  redirectToStudentAccess();
 }
 
 // Intro input helpers
