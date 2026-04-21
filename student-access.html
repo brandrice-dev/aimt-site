@@ -253,6 +253,7 @@ body {
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
     const HEADSPA_COURSE_SLUG = 'headspa-mastery';
+    const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const STAFF_EMAIL_ALLOWLIST = [
@@ -318,7 +319,21 @@ body {
 
     function redirectToCourse() {
       setAccessFlowHandoff(existingAuthorizedSession ? 'student-access-session-continue' : 'student-access-signin');
-      window.location.href = 'headspa-mastery.html';
+      window.location.href = COURSE_ENTRY_URL;
+    }
+
+    async function ensureSessionReady(userId) {
+      const expectedUserId = String(userId || '').trim();
+      if (!expectedUserId) return false;
+
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const { data, error } = await supabaseClient.auth.getSession();
+        const sessionUserId = data && data.session && data.session.user && data.session.user.id;
+        if (!error && sessionUserId === expectedUserId) return true;
+        await new Promise((resolve) => setTimeout(resolve, 90));
+      }
+
+      return false;
     }
 
     async function hasHeadSpaEntitlement(user) {
@@ -445,6 +460,12 @@ body {
           showNotice(getPendingCheckoutSessionId()
             ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
             : 'This account does not currently have access to HeadSpa Mastery.');
+          return;
+        }
+
+        if (!(await ensureSessionReady(data.user.id))) {
+          showNotice('You are signed in, but your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+          existingAuthorizedSession = data.user;
           return;
         }
 
