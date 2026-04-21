@@ -672,8 +672,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-headline em { font-style: normal; font-weight: 300; color: rgba(255,255,255,0.6); letter-spacing: 0.08em; }
 .lp-subhead { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 300; line-height: 1.7; color: rgba(255,255,255,0.45); max-width: 560px; margin-bottom: 0.9rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.7s forwards; }
 .lp-fit { font-family: var(--sans); font-size: 0.78rem; font-weight: 300; line-height: 1.55; color: rgba(255,255,255,0.52); margin-bottom: 1.25rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.78s forwards; }
-.lp-divider { width: 100%; height: 0.5px; background: rgba(255,255,255,0.07); margin-bottom: 3rem; opacity: 0; animation: lpFadeUp 0.6s ease 0.85s forwards; }
-.lp-outcomes { width: 100%; margin-bottom: 3.5rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.95s forwards; }
+.lp-divider { width: 100%; height: 0.5px; background: rgba(255,255,255,0.07); margin-bottom: 2rem; opacity: 0; animation: lpFadeUp 0.6s ease 0.85s forwards; }
+.lp-outcomes { width: 100%; margin-bottom: 3rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.95s forwards; }
 .lp-outcomes-label { font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 1.5rem; }
 .lp-outcome-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
 .lp-outcome-item:last-child { border-bottom: none; }
@@ -1313,7 +1313,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-pricing-includes { gap: 0.45rem; margin-bottom: 1rem; }
   .lp-pi-item { font-size: 0.78rem; }
   .lp-or-divider { margin: 0.65rem 0; }
-  .lp-divider { margin-bottom: 1.35rem; }
+  .lp-divider { margin-bottom: 1.1rem; }
   .lp-outcomes { margin-bottom: 2rem; }
   .lp-outcomes-label { margin-bottom: 0.9rem; }
   .lp-outcome-item { gap: 0.8rem; padding: 0.75rem 0; }
@@ -1607,14 +1607,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         Already enrolled? Sign in
       </button>
     </div>
-  </div>
-  <div class="lp-mobile-sticky-cta">
-    <button class="lp-enroll-btn" onclick="startCheckout()">
-      <div class="lp-enter-btn-dot"></div>
-      Begin Enrollment
-    </button>
-  </div>
-  <div class="lp-divider"></div>
+    <div class="lp-divider"></div>
     <div class="lp-outcomes">
       <div class="lp-outcomes-label">What you will walk away with</div>
       <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see — so every service decision is grounded in science, not guesswork.</div></div>
@@ -1655,7 +1648,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lp-signin-sub">Forgot your password? <span class="lp-signin-link" onclick="handleForgotPassword()">Reset it here</span></div>
       <div class="lp-signin-notice" id="lpSignInNotice"></div>
     </div>
-
+  </div>
+  <div class="lp-mobile-sticky-cta">
+    <button class="lp-enroll-btn" onclick="startCheckout()">
+      <div class="lp-enter-btn-dot"></div>
+      Begin Enrollment
+    </button>
   </div>
 </div>
 
