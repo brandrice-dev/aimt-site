@@ -7197,10 +7197,6 @@ async function showApp() {
     showStudentSignInEntry();
     return;
   }
-  if (await hasActiveAuthorizedSession()) {
-    redirectToStudentAccess();
-    return;
-  }
   document.getElementById('landingPage').style.display = 'flex';
   document.getElementById('introScreen').style.display = 'none';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
