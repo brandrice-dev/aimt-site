@@ -36,13 +36,15 @@
 
 ## Launch-Critical Remaining Tasks
 ### Must complete before launch
-- [ ] Validate HeadSpa Mastery public sales flow end-to-end:
-  - [ ] Course card click lands on the correct public enrollment page.
-  - [ ] Enrollment page clearly prioritizes purchase (CTA visible immediately, no confusion).
-  - [ ] Stripe checkout opens cleanly (no dead clicks or delays).
-  - [ ] Cancel returns to `courses.html?checkout=canceled`.
-  - [ ] No path accidentally routes new users into `student-access.html`.
-- [ ] Validate in staging + production that course never auto-opens on browser reopen/refresh without fresh access-flow handoff through `student-access.html`.
+- [x] Validate HeadSpa Mastery public sales flow end-to-end:
+  - [x] Course card click lands on the correct public enrollment page.
+  - [x] Enrollment page clearly prioritizes purchase (CTA visible immediately, no confusion).
+  - [x] Stripe checkout opens cleanly (no dead clicks or delays).
+  - [x] Cancel returns to `courses.html?checkout=canceled`.
+  - [x] No path accidentally routes new users into `student-access.html`.
+  - [x] Public enrollment page does not route returning purchasers into `student-access.html` prematurely.
+- [x] Validate in staging + production that course never auto-opens on browser reopen/refresh without fresh access-flow handoff through `student-access.html`.
+- [x] Validate returning purchaser sign-in reliably restores access via durable entitlements (no false "no access" state, no routing to public landing page).
 - [ ] Run full end-to-end QA matrix (new purchase, existing student sign-in, password reset, entitlement recovery, staff allowlist).
 - [ ] Add/confirm lightweight error observability for critical failures (`create-checkout-session`, `claim-course-access`, Supabase auth failures).
 
@@ -57,7 +59,7 @@
 - [ ] Refine non-critical content polish on lower-priority sales-page sections.
 
 ## Important Bugs / Risks
-- [ ] Course should never auto-open on browser reopen; students must re-enter through `student-access.html`.
+- [x] Resolved: course no longer auto-opens on browser reopen; students re-enter through `student-access.html`.
 - [ ] Entitlement sync race conditions can still create temporary “no access” confusion if claim timing is delayed.
 - [ ] Any regression in gating logic could either lock out valid students or accidentally expose course entry.
 
@@ -81,4 +83,6 @@
 - Execute and document a focused launch gating QA pass first (especially browser reopen/refresh behavior across devices), then freeze access-flow logic unless a launch-blocking bug is found.
 
 ## Change Log
+- 2026-04-21: Completed full public sales flow validation (card -> enrollment page -> Stripe -> cancel path). Confirmed no unintended routing into `student-access.html` and clean purchase-first UX.
+- 2026-04-21: Removed weak `?enter=1` bypass, enforced durable entitlement checks, added session-readiness guard in `student-access.html`, fixed returning purchaser routing regression, confirmed browser reopen no longer auto-opens course, and confirmed valid returning students re-enter via `student-access.html` and route correctly into the gated course.
 - 2026-04-21: Created this launch-readiness source-of-truth document and populated current known state, launch tasks, UX/technical guardrails, and priority risks.
