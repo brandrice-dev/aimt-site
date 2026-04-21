@@ -321,12 +321,17 @@ body {
       window.location.href = 'headspa-mastery.html';
     }
 
-    async function hasHeadSpaEntitlement() {
+    async function hasHeadSpaEntitlement(user) {
+      if (!user || !user.id) return false;
+      const normalizedEmail = normalizeAccessEmail(user.email);
+      if (!normalizedEmail) return false;
+
       try {
         const { data, error } = await supabaseClient
           .from(COURSE_ENTITLEMENTS_TABLE)
           .select('checkout_session_id')
           .eq('course_slug', HEADSPA_COURSE_SLUG)
+          .or(`user_id.eq.${user.id},purchaser_email.ilike.${normalizedEmail}`)
           .limit(1);
 
         return !error && Array.isArray(data) && data.length > 0;
@@ -342,7 +347,7 @@ body {
           .from(COURSE_ENTITLEMENTS_TABLE)
           .update({ user_id: user.id })
           .eq('course_slug', HEADSPA_COURSE_SLUG)
-          .eq('purchaser_email', normalizeAccessEmail(user.email))
+          .ilike('purchaser_email', normalizeAccessEmail(user.email))
           .is('user_id', null);
       } catch (_) {}
     }
@@ -378,10 +383,10 @@ body {
         await bindHeadSpaEntitlementsToUser(user);
       }
 
-      let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement();
+      let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(user);
       if (!allowlistedStaff && !entitledPurchaser) {
         await recoverHeadSpaEntitlement(user);
-        entitledPurchaser = await hasHeadSpaEntitlement();
+        entitledPurchaser = await hasHeadSpaEntitlement(user);
       }
 
       return allowlistedStaff || entitledPurchaser;

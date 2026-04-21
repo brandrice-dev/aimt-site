@@ -6693,12 +6693,15 @@ function redirectToStudentAccess() {
 
 async function hasHeadSpaEntitlement(user) {
   if (!supabaseClient || !user) return false;
+  const normalizedEmail = normalizeAccessEmail(user.email);
+  if (!user.id || !normalizedEmail) return false;
 
   try {
     const { data, error } = await supabaseClient
       .from(COURSE_ENTITLEMENTS_TABLE)
       .select('checkout_session_id')
       .eq('course_slug', HEADSPA_COURSE_SLUG)
+      .or(`user_id.eq.${user.id},purchaser_email.ilike.${normalizedEmail}`)
       .limit(1);
 
     return !error && Array.isArray(data) && data.length > 0;
@@ -6715,7 +6718,7 @@ async function bindHeadSpaEntitlementsToUser(user) {
       .from(COURSE_ENTITLEMENTS_TABLE)
       .update({ user_id: user.id })
       .eq('course_slug', HEADSPA_COURSE_SLUG)
-      .eq('purchaser_email', normalizeAccessEmail(user.email))
+      .ilike('purchaser_email', normalizeAccessEmail(user.email))
       .is('user_id', null);
   } catch (_) {}
 }
@@ -6849,7 +6852,7 @@ async function shouldEnterPurchasedCourse() {
       await recoverHeadSpaEntitlement(user);
       entitledPurchaser = await hasHeadSpaEntitlement(user);
     }
-    if (!allowlistedStaff && !requestedPurchasedEntry && !entitledPurchaser) return false;
+    if (!allowlistedStaff && !entitledPurchaser) return false;
     if (!allowlistedStaff && entitledPurchaser) {
       await bindHeadSpaEntitlementsToUser(user);
     }
