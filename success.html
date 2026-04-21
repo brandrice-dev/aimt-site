@@ -389,6 +389,7 @@ body {
     const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
     const COURSE_SIGNIN_URL = 'student-access.html';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
+    const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const checkoutParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
 
@@ -429,7 +430,19 @@ body {
       nextStepPanel.style.display = 'none';
     }
 
+    function setAccessFlowHandoff(source) {
+      const payload = {
+        source: String(source || 'success'),
+        issuedAt: Date.now(),
+        nonce: Math.random().toString(36).slice(2)
+      };
+      try {
+        sessionStorage.setItem(ACCESS_FLOW_HANDOFF_KEY, JSON.stringify(payload));
+      } catch (_) {}
+    }
+
     function redirectToCourse(delayMs) {
+      setAccessFlowHandoff('success-claim');
       window.setTimeout(() => {
         window.location.href = COURSE_ENTRY_URL;
       }, delayMs || 0);

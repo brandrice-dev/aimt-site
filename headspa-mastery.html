@@ -6628,6 +6628,8 @@ const supabaseClient = window.supabase && typeof window.supabase.createClient ==
 const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
 const HEADSPA_COURSE_SLUG = 'headspa-mastery';
 const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
+const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
+const ACCESS_FLOW_HANDOFF_TTL_MS = 5 * 60 * 1000;
 const STAFF_EMAIL_ALLOWLIST = [
   'brandmrice@gmail.com',
   'cadyb03@gmail.com',
@@ -6655,6 +6657,22 @@ function clearPendingCheckoutSessionId() {
   try {
     localStorage.removeItem(PENDING_CLAIM_KEY);
   } catch (_) {}
+}
+
+function consumeAccessFlowHandoff() {
+  try {
+    const raw = sessionStorage.getItem(ACCESS_FLOW_HANDOFF_KEY);
+    if (!raw) return false;
+    sessionStorage.removeItem(ACCESS_FLOW_HANDOFF_KEY);
+
+    const parsed = JSON.parse(raw);
+    const issuedAt = Number(parsed && parsed.issuedAt);
+    if (!issuedAt || (Date.now() - issuedAt) > ACCESS_FLOW_HANDOFF_TTL_MS) return false;
+    return true;
+  } catch (_) {
+    try { sessionStorage.removeItem(ACCESS_FLOW_HANDOFF_KEY); } catch (__) {}
+    return false;
+  }
 }
 
 function getStudentFirstName() {
@@ -6811,6 +6829,8 @@ function showStudentSignInEntry() {
 }
 
 async function shouldEnterPurchasedCourse() {
+  if (!consumeAccessFlowHandoff()) return false;
+
   const params = new URLSearchParams(window.location.search);
   const requestedPurchasedEntry = params.get('enter') === '1';
   if (!supabaseClient) return false;
@@ -6845,6 +6865,29 @@ async function shouldEnterPurchasedCourse() {
   }
 }
 
+async function hasActiveAuthorizedSession() {
+  if (!supabaseClient) return false;
+
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error || !data || !data.session || !data.session.user) return false;
+
+    const user = data.session.user;
+    const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+    if (allowlistedStaff) return true;
+
+    await bindHeadSpaEntitlementsToUser(user);
+    let entitledPurchaser = await hasHeadSpaEntitlement(user);
+    if (!entitledPurchaser) {
+      await recoverHeadSpaEntitlement(user);
+      entitledPurchaser = await hasHeadSpaEntitlement(user);
+    }
+    return !!entitledPurchaser;
+  } catch (_) {
+    return false;
+  }
+}
+
 function enterPurchasedCourseHome() {
   const landingPage = document.getElementById('landingPage');
   const introScreen = document.getElementById('introScreen');
@@ -6862,15 +6905,7 @@ function enterPurchasedCourseHome() {
 
 // ── SIGN IN PANEL ──
 function showSignInPanel() {
-  const panel = document.getElementById('lpSignInPanel');
-  panel.classList.add('open');
-  const notice = document.getElementById('lpSignInNotice');
-  if (notice) notice.textContent = '';
-  setTimeout(() => {
-    const emailInput = document.getElementById('lpSignInEmail');
-    if (emailInput) emailInput.focus();
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 50);
+  redirectToStudentAccess();
 }
 function hideSignInPanel() {
   document.getElementById('lpSignInPanel').classList.remove('open');
@@ -7155,6 +7190,10 @@ async function showApp() {
   }
   if (shouldOpenStudentSignIn()) {
     showStudentSignInEntry();
+    return;
+  }
+  if (await hasActiveAuthorizedSession()) {
+    redirectToStudentAccess();
     return;
   }
   document.getElementById('landingPage').style.display = 'flex';

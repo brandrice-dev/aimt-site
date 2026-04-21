@@ -254,11 +254,13 @@ body {
     const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
     const HEADSPA_COURSE_SLUG = 'headspa-mastery';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
+    const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const STAFF_EMAIL_ALLOWLIST = [
       'brandmrice@gmail.com',
       'cadyb03@gmail.com',
       'atriumlanc@gmail.com'
     ];
+    let existingAuthorizedSession = null;
 
     const form = document.getElementById('signInForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -303,7 +305,19 @@ body {
       submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Enter HeadSpa Mastery';
     }
 
+    function setAccessFlowHandoff(source) {
+      const payload = {
+        source: String(source || 'student-access'),
+        issuedAt: Date.now(),
+        nonce: Math.random().toString(36).slice(2)
+      };
+      try {
+        sessionStorage.setItem(ACCESS_FLOW_HANDOFF_KEY, JSON.stringify(payload));
+      } catch (_) {}
+    }
+
     function redirectToCourse() {
+      setAccessFlowHandoff(existingAuthorizedSession ? 'student-access-session-continue' : 'student-access-signin');
       window.location.href = 'headspa-mastery.html';
     }
 
@@ -380,7 +394,8 @@ body {
         if (error || !data || !data.session || !data.session.user) return;
 
         if (await canAccessCourse(data.session.user)) {
-          redirectToCourse();
+          existingAuthorizedSession = data.session.user;
+          showNotice('You already have an active AIMT session. Click "Enter HeadSpa Mastery" to continue through the access gate.');
           return;
         }
 
@@ -398,6 +413,11 @@ body {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearNotice();
+
+      if (existingAuthorizedSession) {
+        redirectToCourse();
+        return;
+      }
 
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
