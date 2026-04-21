@@ -419,6 +419,51 @@ body {
       return allowlistedStaff || entitledPurchaser;
     }
 
+    async function createFirstTimeStaffAccount(email, password) {
+      const normalizedEmail = normalizeAccessEmail(email);
+      if (!isAllowlistedStaffEmail(normalizedEmail)) return { ok: false };
+      if (!password || password.length < 8) {
+        return { ok: false, error: 'Use at least 8 characters for your password.' };
+      }
+
+      const signUpResult = await supabaseClient.auth.signUp({ email: normalizedEmail, password });
+      const signUpError = signUpResult && signUpResult.error;
+      const signUpData = signUpResult && signUpResult.data;
+      const signUpUser = signUpData && signUpData.user;
+      const signUpSession = signUpData && signUpData.session;
+
+      if (signUpError) {
+        const msg = String(signUpError.message || '').toLowerCase();
+        if (!(msg.includes('already') || msg.includes('registered') || msg.includes('exists'))) {
+          return { ok: false, error: signUpError.message || 'Unable to create staff account right now.' };
+        }
+      }
+
+      if (signUpSession && signUpUser) {
+        return { ok: true, user: signUpUser };
+      }
+
+      const signInRetry = await supabaseClient.auth.signInWithPassword({ email: normalizedEmail, password });
+      if (signInRetry && signInRetry.error) {
+        const retryMsg = String(signInRetry.error.message || '').toLowerCase();
+        if (retryMsg.includes('email not confirmed')) {
+          return { ok: false, error: 'Staff account created. Confirm your email, then sign in.' };
+        }
+        return { ok: false, error: signInRetry.error.message || 'Unable to sign in after creating your staff account.' };
+      }
+
+      const retryData = signInRetry && signInRetry.data;
+      const retryUser = retryData && retryData.user;
+      if (!retryUser) {
+        if (signUpUser) {
+          return { ok: false, error: 'Staff account created. If sign-in does not complete yet, try again in a moment.' };
+        }
+        return { ok: false, error: 'Unable to create staff account right now.' };
+      }
+
+      return { ok: true, user: retryUser };
+    }
+
     async function handleExistingSession() {
       setLoading(true, 'Checking access...');
       try {
@@ -463,6 +508,25 @@ body {
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error || !data || !data.user) {
+          if (isAllowlistedStaffEmail(email)) {
+            setLoading(true, 'Creating staff account...');
+            const created = await createFirstTimeStaffAccount(email, password);
+            if (!created.ok || !created.user) {
+              showNotice(created.error || error?.message || 'Unable to sign in right now.');
+              return;
+            }
+            if (!(await canAccessCourse(created.user))) {
+              showNotice('Unable to verify staff access right now. Please try again.');
+              return;
+            }
+            if (!(await ensureSessionReady(created.user.id))) {
+              showNotice('Staff account created. Your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+              existingAuthorizedSession = created.user;
+              return;
+            }
+            redirectToCourse();
+            return;
+          }
           showNotice(error?.message || 'Unable to sign in right now.');
           return;
         }
