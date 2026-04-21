@@ -6775,6 +6775,30 @@ function applyCheckoutStatus() {
   }
 }
 
+function shouldOpenStudentSignIn() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('signin') === '1';
+}
+
+function clearStudentSignInParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('signin') !== '1') return;
+  params.delete('signin');
+  const nextQuery = params.toString();
+  const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
+  window.history.replaceState({}, '', nextUrl);
+}
+
+function showStudentSignInEntry() {
+  const landingPage = document.getElementById('landingPage');
+  const introScreen = document.getElementById('introScreen');
+  if (landingPage) landingPage.style.display = 'flex';
+  if (introScreen) introScreen.style.display = 'none';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  showSignInPanel();
+  clearStudentSignInParam();
+}
+
 async function shouldEnterPurchasedCourse() {
   const params = new URLSearchParams(window.location.search);
   const requestedPurchasedEntry = params.get('enter') === '1';
@@ -7091,6 +7115,10 @@ async function showApp() {
   applyCheckoutStatus();
   if (await shouldEnterPurchasedCourse()) {
     enterPurchasedCourseHome();
+    return;
+  }
+  if (shouldOpenStudentSignIn()) {
+    showStudentSignInEntry();
     return;
   }
   if (shouldShowIntro()) {
