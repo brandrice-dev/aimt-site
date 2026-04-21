@@ -392,6 +392,7 @@ body {
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const checkoutParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
+    const hasCheckoutSession = !!checkoutSessionId;
 
     function persistPendingCheckoutSession() {
       if (!checkoutSessionId) return;
@@ -513,6 +514,15 @@ body {
         const { data, error } = await supabaseClient.auth.getSession();
         if (error || !data || !data.session || !data.session.user) return;
 
+        if (!hasCheckoutSession) {
+          clearNotices();
+          hideSuccessPanel();
+          showMessage('Your AIMT session is active, but this page is missing checkout confirmation details. Continue through Student Access.');
+          showNextStep('Missing checkout confirmation?', 'Use Student Access to continue into your course with your existing account.', COURSE_SIGNIN_URL, 'Go to Student Access');
+          setSubmitState('Create AIMT account', false);
+          return;
+        }
+
         await claimCourseAccess(data.session.user.email, data.session.user.id);
 
         clearNotices();
@@ -599,6 +609,11 @@ body {
         }
 
         const claim = await claimCourseAccess(email, data.session.user && data.session.user.id);
+        if (claim.skipped) {
+          showMessage('Your account is ready, but checkout confirmation details are missing on this page. Continue through Student Access to enter your course.');
+          showNextStep('Missing checkout confirmation?', 'Sign in through Student Access with this same email to continue.', COURSE_SIGNIN_URL, 'Go to Student Access');
+          return;
+        }
         if (!claim.ok && !claim.skipped) {
           showMessage('Your account is ready. We’re sending you into HeadSpa Mastery now, but your access may take one more sign-in if the entitlement save is delayed.');
         }

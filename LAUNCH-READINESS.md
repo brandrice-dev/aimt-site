@@ -50,18 +50,23 @@
   - [ ] New purchase flow manual verification
     - Test: Start at `courses.html`, open HeadSpa enrollment, run one live Stripe cancel and one live Stripe success path through `success.html` account handoff.
     - Pass if: Cancel lands at `courses.html?checkout=canceled` with correct UX, and success lands at `success.html?session_id=...` then hands off correctly toward gated entry.
+    - Note: Purchase flow audited; `success.html` now blocks auto-handoff when `session_id` is missing and sends users to Student Access instead.
   - [ ] Existing student sign-in manual verification
     - Test: From signed-out state, sign in at `student-access.html` with a known entitled purchaser account.
     - Pass if: User is routed into gated `headspa-mastery.html` (not public landing) and resume state loads.
+    - Note: Sign-in routing audited; durable entitlement + intentional handoff + session-readiness guard are in place, with no additional code change needed in this pass.
   - [ ] Password reset manual verification
     - Test: Trigger reset from `student-access.html`, complete email reset flow, then sign in with new password.
     - Pass if: Reset email arrives, reset completes successfully, and post-reset sign-in follows normal access rules.
+    - Note: Reset flow hardened to use explicit `redirectTo` back to `student-access.html` to avoid environment-default redirect ambiguity.
   - [ ] Entitlement recovery manual verification
     - Test: Simulate/execute a pending-claim scenario, then sign in via `student-access.html` with matching purchaser identity.
     - Pass if: `claim-course-access` recovery restores durable entitlement and user gains gated access without manual DB intervention.
+    - Note: Recovery path audited and hardened with a short post-claim entitlement re-check retry in `student-access.html`; live pass still required.
   - [ ] Staff allowlist manual verification
     - Test: Sign in via `student-access.html` using an allowlisted staff account from signed-out state.
     - Pass if: Staff account reaches gated course access as intended, while non-entitled non-staff accounts remain blocked.
+    - Note: Staff path audited; allowlist checks are normalized and enforced in both `student-access.html` and `headspa-mastery.html`.
 - [ ] Add/confirm lightweight error observability for critical failures (`create-checkout-session`, `claim-course-access`, Supabase auth failures).
 
 ### Should complete before launch
@@ -85,6 +90,7 @@
 - Student access remains separate.
 - Do not collapse gated course and sales page together.
 - Returning students should go directly to `student-access.html`, not through sales friction.
+- Course cards always route to public enrollment pages. Returning students must use `student-access.html` and are not auto-routed from course discovery pages.
 
 ## Technical Rules / Do Not Break
 - Staff allowlist.
@@ -99,6 +105,10 @@
 - Execute and document a focused launch gating QA pass first (especially browser reopen/refresh behavior across devices), then freeze access-flow logic unless a launch-blocking bug is found.
 
 ## Change Log
+- 2026-04-21: Enforced course-card navigation rule in launch docs after code audit confirmation: discovery card interaction remains a fixed route to public enrollment (no auth-based interception/reroute); returning access remains through `student-access.html`.
+- 2026-04-21: Hardened password reset initiation by setting explicit Supabase `redirectTo` back to `student-access.html` in both student access surfaces.
+- 2026-04-21: Audited new purchase flow and hardened `success.html` to prevent auto-course handoff when `session_id` is missing, routing those cases to Student Access guidance instead.
+- 2026-04-21: Audited entitlement recovery path end-to-end and hardened `student-access.html` with a brief post-claim entitlement retry check to reduce timing-related false "no access" outcomes after successful claim writes.
 - 2026-04-21: Corrected Stripe checkout `cancel_url` to `courses.html?checkout=canceled` (from `headspa-mastery.html?checkout=canceled`) to keep canceled users on the public sales/discovery path.
 - 2026-04-21: Completed full public sales flow validation (card -> enrollment page -> Stripe -> cancel path). Confirmed no unintended routing into `student-access.html` and clean purchase-first UX.
 - 2026-04-21: Removed weak `?enter=1` bypass, enforced durable entitlement checks, added session-readiness guard in `student-access.html`, fixed returning purchaser routing regression, confirmed browser reopen no longer auto-opens course, and confirmed valid returning students re-enter via `student-access.html` and route correctly into the gated course.

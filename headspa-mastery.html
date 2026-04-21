@@ -6971,7 +6971,9 @@ async function handleForgotPassword() {
   }
 
   try {
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/student-access.html`
+    });
     notice.textContent = error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.';
   } catch (_) {
     notice.textContent = 'Unable to send reset email.';

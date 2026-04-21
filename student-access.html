@@ -355,6 +355,16 @@ body {
       }
     }
 
+    async function waitForHeadSpaEntitlement(user, attempts = 4, delayMs = 140) {
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        if (await hasHeadSpaEntitlement(user)) return true;
+        if (attempt < attempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+      }
+      return false;
+    }
+
     async function bindHeadSpaEntitlementsToUser(user) {
       if (!user || !user.id) return;
       try {
@@ -400,8 +410,10 @@ body {
 
       let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(user);
       if (!allowlistedStaff && !entitledPurchaser) {
-        await recoverHeadSpaEntitlement(user);
-        entitledPurchaser = await hasHeadSpaEntitlement(user);
+        const recovered = await recoverHeadSpaEntitlement(user);
+        entitledPurchaser = recovered
+          ? await waitForHeadSpaEntitlement(user)
+          : await hasHeadSpaEntitlement(user);
       }
 
       return allowlistedStaff || entitledPurchaser;
@@ -486,7 +498,9 @@ body {
       }
 
       try {
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/student-access.html`
+        });
         showNotice(error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.');
       } catch (_) {
         showNotice('Unable to send reset email.');
