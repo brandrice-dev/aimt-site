@@ -11,7 +11,7 @@ export async function onRequestPost(context) {
     'line_items[0][price]': env.STRIPE_PRICE_ID,
     'line_items[0][quantity]': '1',
     success_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/courses.html?checkout=canceled`,
+    cancel_url: `${origin}/headspa-mastery.html?checkout=canceled`,
   });
 
   const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {

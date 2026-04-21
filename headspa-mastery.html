@@ -7159,7 +7159,10 @@ async function showApp() {
     showStudentSignInEntry();
     return;
   }
-  redirectToStudentAccess();
+  document.getElementById('landingPage').style.display = 'flex';
+  document.getElementById('introScreen').style.display = 'none';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  setAppReady();
 }
 
 // Intro input helpers
