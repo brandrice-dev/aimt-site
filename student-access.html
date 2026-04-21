@@ -242,6 +242,25 @@ body {
 
           <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span></div>
         </form>
+
+        <div class="setup" id="recoveryPanel" style="display:none; margin-top:1.25rem;">
+          <div class="setup-label">Password recovery</div>
+          <div class="setup-title">Set a new password.</div>
+          <p class="setup-copy">Choose a new password for your AIMT account, then sign in again from Student Access.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="recoveryPassword">New password</label>
+              <input class="field-input" id="recoveryPassword" type="password" autocomplete="new-password" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="recoveryConfirmPassword">Confirm new password</label>
+              <input class="field-input" id="recoveryConfirmPassword" type="password" autocomplete="new-password" />
+            </div>
+          </div>
+          <div class="actions" style="margin-top:1rem;">
+            <button type="button" class="btn btn-primary" id="recoverySubmitBtn">Update password</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -267,6 +286,9 @@ body {
     const submitBtn = document.getElementById('submitBtn');
     const notice = document.getElementById('notice');
     const forgotLink = document.getElementById('forgotLink');
+    const recoveryPanel = document.getElementById('recoveryPanel');
+    const recoverySubmitBtn = document.getElementById('recoverySubmitBtn');
+    let recoveryMode = false;
 
     function normalizeAccessEmail(email) {
       return String(email || '').trim().toLowerCase();
@@ -304,6 +326,89 @@ body {
     function setLoading(isLoading, label) {
       submitBtn.disabled = isLoading;
       submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Enter HeadSpa Mastery';
+    }
+
+    function setRecoveryLoading(isLoading, label) {
+      if (!recoverySubmitBtn) return;
+      recoverySubmitBtn.disabled = isLoading;
+      recoverySubmitBtn.textContent = isLoading ? (label || 'Updating password...') : 'Update password';
+    }
+
+    function parseRecoveryParams() {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hash = String(window.location.hash || '').replace(/^#/, '');
+      const hashParams = new URLSearchParams(hash);
+      const type = searchParams.get('type') || hashParams.get('type') || '';
+      const tokenHash = searchParams.get('token_hash') || hashParams.get('token_hash') || '';
+      const code = searchParams.get('code') || hashParams.get('code') || '';
+      const accessToken = hashParams.get('access_token') || '';
+      const refreshToken = hashParams.get('refresh_token') || '';
+      return { type, tokenHash, code, accessToken, refreshToken };
+    }
+
+    function hasRecoverySignal(params) {
+      return !!(
+        params.type === 'recovery' ||
+        params.tokenHash ||
+        params.code ||
+        params.accessToken ||
+        params.refreshToken
+      );
+    }
+
+    function clearRecoveryUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      ['type', 'token_hash', 'code', 'redirect_to'].forEach((k) => params.delete(k));
+      const nextQuery = params.toString();
+      const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
+      window.history.replaceState({}, '', nextUrl);
+    }
+
+    function enableRecoveryMode(message) {
+      recoveryMode = true;
+      if (recoveryPanel) recoveryPanel.style.display = 'block';
+      if (message) showNotice(message);
+      setLoading(false);
+    }
+
+    async function initializeRecoveryMode() {
+      const recovery = parseRecoveryParams();
+      if (!hasRecoverySignal(recovery)) return false;
+
+      if (recovery.code) {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(recovery.code);
+        if (error) {
+          showNotice(error.message || 'This recovery link is invalid or expired. Request a new reset email.');
+          return false;
+        }
+      }
+
+      if (recovery.tokenHash) {
+        const { error } = await supabaseClient.auth.verifyOtp({
+          type: 'recovery',
+          token_hash: recovery.tokenHash
+        });
+        if (error) {
+          showNotice(error.message || 'This recovery link is invalid or expired. Request a new reset email.');
+          return false;
+        }
+      }
+
+      let hasSession = false;
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const { data } = await supabaseClient.auth.getSession();
+        hasSession = !!(data && data.session && data.session.user);
+        if (hasSession) break;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      if (!hasSession && !recovery.accessToken && !recovery.refreshToken) {
+        showNotice('This recovery link is invalid or expired. Request a new reset email.');
+        return false;
+      }
+
+      enableRecoveryMode('Recovery link verified. Set your new password below.');
+      return true;
     }
 
     function setAccessFlowHandoff(source) {
@@ -465,6 +570,7 @@ body {
     }
 
     async function handleExistingSession() {
+      if (recoveryMode) return;
       setLoading(true, 'Checking access...');
       try {
         const { data, error } = await supabaseClient.auth.getSession();
@@ -490,6 +596,10 @@ body {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearNotice();
+      if (recoveryMode) {
+        showNotice('Use the password recovery form below to set a new password.');
+        return;
+      }
 
       if (existingAuthorizedSession) {
         redirectToCourse();
@@ -571,7 +681,54 @@ body {
       }
     });
 
-    handleExistingSession();
+    recoverySubmitBtn.addEventListener('click', async () => {
+      clearNotice();
+      if (!recoveryMode) return;
+
+      const nextPassword = document.getElementById('recoveryPassword').value;
+      const confirmPassword = document.getElementById('recoveryConfirmPassword').value;
+      if (!nextPassword || !confirmPassword) {
+        showNotice('Enter and confirm your new password.');
+        return;
+      }
+      if (nextPassword !== confirmPassword) {
+        showNotice('Your passwords do not match.');
+        return;
+      }
+      if (nextPassword.length < 8) {
+        showNotice('Use at least 8 characters for your new password.');
+        return;
+      }
+
+      setRecoveryLoading(true, 'Updating password...');
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password: nextPassword });
+        if (error) {
+          showNotice(error.message || 'Unable to update password right now.');
+          return;
+        }
+
+        await supabaseClient.auth.signOut();
+        clearRecoveryUrlParams();
+        showNotice('Password updated. Sign in with your new password.');
+        if (recoveryPanel) recoveryPanel.style.display = 'none';
+        recoveryMode = false;
+      } catch (_) {
+        showNotice('Unable to update password right now.');
+      } finally {
+        setRecoveryLoading(false);
+      }
+    });
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        enableRecoveryMode('Recovery link verified. Set your new password below.');
+      }
+    });
+
+    initializeRecoveryMode().finally(() => {
+      handleExistingSession();
+    });
   </script>
 </body>
 </html>
