@@ -310,7 +310,20 @@ nav {
 #cadence { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
 .cadence-intro { font-family: var(--serif); font-style: italic; font-size: clamp(1.15rem,4vw,1.5rem); color: rgba(255,255,255,0.58); line-height: 1.62; margin-bottom: 1.15rem; max-width: 38ch; }
 .cadence-intro em { font-style: normal; color: white; }
-.cadence-summary { max-width: 54ch; font-size: 0.86rem; color: rgba(255,255,255,0.42); font-weight: 300; line-height: 1.78; }
+.cadence-summary { max-width: 58ch; font-size: 0.86rem; color: rgba(255,255,255,0.42); font-weight: 300; line-height: 1.78; margin-bottom: 1.4rem; }
+.cadence-pill-preview { display: inline-flex; align-items: center; gap: 10px; background: var(--hero-bg); border-radius: 23px; padding: 0 16px 0 10px; height: 44px; border: 0.5px solid rgba(255,255,255,0.1); margin-top: 0.35rem; }
+.cpv-dot { width: 7px; height: 7px; border-radius: 50%; background: #a3968d; animation: breathe 2.4s ease-in-out infinite; }
+.cpv-mark { width: 18px; height: 18px; color: rgba(255,255,255,0.52); }
+.cpv-mark svg { width: 18px; height: 18px; }
+.cpv-label { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: white; }
+.cpv-sub { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+.cadence-link-note { margin-top: 0.7rem; max-width: 56ch; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(195,185,175,0.52); line-height: 1.68; }
+.cadence-features { margin-top: 1.6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 980px; }
+@media(max-width:700px){ .cadence-features { grid-template-columns: 1fr; } }
+.cadence-feature { background: rgba(255,255,255,0.025); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1rem 1.05rem; }
+.cf-title { font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(195,185,175,0.62); margin-bottom: 0.5rem; }
+.cf-body { font-size: 0.8rem; color: rgba(255,255,255,0.44); font-weight: 300; line-height: 1.72; }
+.cf-body strong { color: rgba(255,255,255,0.7); font-weight: 400; }
 
 /* ── COMING SOON ── */
 #coming-soon { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
@@ -675,7 +688,19 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(1.8rem,7vw,3.2rem);">Your AI<br>learning guide.</h2>
     <p class="cadence-intro reveal reveal-delay-2">Cadence is AIMT’s in-course intelligence layer: focused, curriculum-bound, and built to support clinical reasoning inside each lesson.</p>
-    <p class="cadence-summary reveal reveal-delay-3">She provides context-specific guidance, evaluates open-ended checkpoints, and reinforces institute standards without turning the learning experience into generic chat.</p>
+    <p class="cadence-summary reveal reveal-delay-3">Use Cadence to clarify protocol decisions, pressure-test your understanding, and strengthen the reasoning behind each step of practice. Her role is narrow by design: keep the learning precise, applicable, and aligned with institute standards.</p>
+    <div class="cadence-pill-preview reveal reveal-delay-3" style="width:fit-content;">
+      <div class="cpv-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
+      <div><div class="cpv-label">Cadence</div><div class="cpv-sub">Your guide · Active in every lesson</div></div>
+      <div class="cpv-dot"></div>
+    </div>
+    <p class="cadence-link-note reveal reveal-delay-3">This is the Cadence access pill students use inside modules. Opening it connects directly to their AI tutor in context.</p>
+    <div class="cadence-features reveal reveal-delay-3">
+      <div class="cadence-feature"><div class="cf-title">Context-Aware Guidance</div><div class="cf-body">Cadence responds from the active lesson context, so explanations stay specific to the exact concept, protocol, or decision point in front of the student.</div></div>
+      <div class="cadence-feature"><div class="cf-title">Checkpoint Support</div><div class="cf-body">After open-ended checkpoints, Cadence helps students refine reasoning quality, not just recall facts. <strong>The emphasis is judgment, clarity, and standard alignment.</strong></div></div>
+      <div class="cadence-feature"><div class="cf-title">Always Available</div><div class="cf-body">The pill remains present throughout course progression, so learners can ask for reinforcement without leaving the module flow.</div></div>
+      <div class="cadence-feature"><div class="cf-title">Curriculum-Bound</div><div class="cf-body">Cadence is intentionally constrained to AIMT training standards, reducing generic answers and keeping guidance aligned with institute expectations.</div></div>
+    </div>
   </div>
 </section>
 
