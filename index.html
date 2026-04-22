@@ -140,8 +140,7 @@ nav {
   .hero-ctas { flex-direction: column; align-items: stretch; justify-content: center; }
   .cta-primary, .cta-ghost { text-align: center; }
   nav { padding: 0 1rem; }
-  .nav-btn-ghost { display: none; }
-  .nav-btn-primary { font-size: 0.7rem; padding: 0.4rem 0.75rem; white-space: nowrap; }
+  .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 0.4rem 0.75rem; white-space: nowrap; }
 }
 .hero-image {
   width: 100%;
@@ -541,42 +540,79 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   </div>
 </section>
 
+<!-- COURSE 01 -->
+<section id="course01">
+  <div class="section-inner">
+    <span class="eyebrow-light reveal">Certification 01</span>
+    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">HeadSpa<br>Mastery</h2>
+    <p class="section-sub reveal reveal-delay-2">HeadSpa Mastery is now presented with the same course-card visual system used on the certifications page, keeping discovery and enrollment hierarchy consistent across the public experience.</p>
+    <div class="course01-feature-wrap reveal reveal-delay-2">
+      <a href="courses.html" class="course-card featured">
+        <div class="card-image">
+          <div class="card-image-inner">
+            <img src="assets/hero-desktop.jpg" alt="HeadSpa Mastery course preview" class="flagship-preview-shot">
+          </div>
+        </div>
+        <div class="course-card-body">
+          <span class="course-card-tag">&#x2736; Certification 01 &mdash; Enrollment Open</span>
+          <div class="course-card-title">HeadSpa<br>Mastery</div>
+          <p class="course-card-desc">A 12-module certification in scalp science, service execution, client communication, and pricing logic. Cadence guidance and checkpoint progression are built into the learning path.</p>
+          <div class="course-card-meta">
+            <span class="course-meta-pill">12 modules</span>
+            <span class="course-meta-pill">Checkpoint-based</span>
+            <span class="course-meta-pill">Cadence-guided</span>
+            <span class="course-meta-pill">Self-paced</span>
+            <span class="course-meta-pill">Institute credential</span>
+          </div>
+        </div>
+        <div class="course-card-bottom">
+          <div>
+            <div class="course-card-price">$497</div>
+            <div class="course-card-price-sub">One-time &middot; Lifetime access</div>
+          </div>
+          <span class="course-card-enter">View HeadSpa Mastery <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- AI SAFE -->
 <section id="ai-safe">
   <div class="section-inner">
     <span class="eyebrow reveal">The AI-proof career</span>
-    <h2 class="ai-safe-headline reveal reveal-delay-1">While AI displaces<br><em>knowledge work,</em><br>your hands stay employed.</h2>
-    <p class="ai-safe-sub reveal reveal-delay-2">In March 2026, Anthropic — the company behind Claude — published a landmark labor market study tracking AI displacement across 800 occupations using real-world usage data. The findings for <strong>hands-on service professionals are unambiguous</strong>: your career is among the most protected on the planet.</p>
+    <h2 class="ai-safe-headline reveal reveal-delay-1">One of the least AI-exposed paths<br><em>is still hands-on service.</em></h2>
+    <p class="ai-safe-sub reveal reveal-delay-2">Current labor data shows a clear split: routine digital work is being automated quickly, while in-person, touch-based services remain materially protected. For scalp and beauty professionals, the advantage is practical and immediate.</p>
 
     <div class="exposure-chart reveal reveal-delay-2">
       <div class="chart-title-block">
-        <div class="chart-main-label">Jobs AI is replacing right now</div>
-        <div class="chart-sub-label">Based on real usage data tracked by Anthropic, March 2026. These aren't predictions — this is what's actually happening.</div>
+        <div class="chart-main-label">Estimated AI task exposure by field</div>
+        <div class="chart-sub-label">Anthropic Economic Index, March 2026. Higher percentages indicate stronger near-term automation pressure.</div>
       </div>
       <div class="bar-row">
         <div class="bar-item">
           <div class="bar-label-row"><span class="bar-label">Software &amp; Tech Jobs</span><span class="bar-pct-big danger">35.8%</span></div>
-          <div class="bar-caption">More than 1 in 3 tasks already handled by AI</div>
+          <div class="bar-caption">Large portions of daily output are already automated</div>
           <div class="bar-track"><div class="bar-fill exposed" data-width="35.8"></div></div>
         </div>
         <div class="bar-item">
           <div class="bar-label-row"><span class="bar-label">Office &amp; Admin Work</span><span class="bar-pct-big danger">34.3%</span></div>
-          <div class="bar-caption">Scheduling, filing, data entry — being replaced fast</div>
+          <div class="bar-caption">Repetitive communication and process tasks are vulnerable</div>
           <div class="bar-track"><div class="bar-fill exposed" data-width="34.3"></div></div>
         </div>
         <div class="bar-item">
           <div class="bar-label-row"><span class="bar-label">Finance &amp; Business</span><span class="bar-pct-big danger">28.4%</span></div>
-          <div class="bar-caption">Analysis, reports, forecasting — increasingly automated</div>
+          <div class="bar-caption">Analysis and reporting are being compressed by AI tools</div>
           <div class="bar-track"><div class="bar-fill exposed" data-width="28.4"></div></div>
         </div>
         <div class="bar-item">
           <div class="bar-label-row"><span class="bar-label">Sales Roles</span><span class="bar-pct-big danger">26.9%</span></div>
-          <div class="bar-caption">Cold outreach, follow-ups, proposals — AI does it cheaper</div>
+          <div class="bar-caption">Prospecting and follow-up workflows are increasingly automated</div>
           <div class="bar-track"><div class="bar-fill exposed" data-width="26.9"></div></div>
         </div>
         <div class="bar-item highlight">
           <div class="bar-label-row"><span class="bar-label">✦ Scalp &amp; Beauty Services</span><span class="bar-pct-big safe-num">~4%</span></div>
-          <div class="bar-caption">AI cannot wash hair, massage a scalp, or read a client's skin with its hands</div>
+          <div class="bar-caption">Service delivery still depends on judgment, presence, and skilled touch</div>
           <div class="bar-track"><div class="bar-fill safe" data-width="4.5"></div></div>
         </div>
       </div>
@@ -584,60 +620,21 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
 
     <div class="stats-row reveal reveal-delay-1">
-      <div class="ai-callout"><div class="ai-callout-num">~4%</div><div class="ai-callout-label"><strong>How much of a scalp service AI can replace.</strong> It can't touch a client, read their scalp, or perform a head spa. The number is close to zero — by definition.</div></div>
-      <div class="ai-callout"><div class="ai-callout-num">35%</div><div class="ai-callout-label"><strong>How much of a tech job AI is already doing.</strong> Coding, analysis, writing — it's being automated right now, at scale. This isn't a prediction. It's happening.</div></div>
+      <div class="ai-callout"><div class="ai-callout-num">~4%</div><div class="ai-callout-label"><strong>Estimated task exposure in scalp/beauty services.</strong> Most core service value remains physical, observational, and client-facing.</div></div>
+      <div class="ai-callout"><div class="ai-callout-num">35%</div><div class="ai-callout-label"><strong>Estimated exposure in software/tech roles.</strong> Automation pressure is materially higher in work that is purely digital.</div></div>
     </div>
 
     <div class="ai-contrast reveal reveal-delay-2">
-      <div class="ai-contrast-title">What this means for your career</div>
-      <div class="contrast-header"><div class="contrast-head-cell">⚠ Desk jobs at risk</div><div class="contrast-head-cell">✦ Hands-on work is protected</div></div>
+      <div class="ai-contrast-title">Why this matters at the career level</div>
+      <div class="contrast-header"><div class="contrast-head-cell">Higher AI pressure</div><div class="contrast-head-cell">Lower AI pressure</div></div>
       <div class="contrast-rows">
-        <div class="contrast-row"><div class="contrast-cell">AI can perform most core tasks</div><div class="contrast-cell good">AI literally cannot perform the service</div></div>
-        <div class="contrast-row"><div class="contrast-cell">Hiring of young workers already slowing</div><div class="contrast-cell good">Demand grows with every client who discovers head spa</div></div>
-        <div class="contrast-row"><div class="contrast-cell">BLS projects lower growth through 2034</div><div class="contrast-cell good">Personal care projected to grow — and under-supplied</div></div>
-        <div class="contrast-row"><div class="contrast-cell">Replicated at scale, zero marginal cost</div><div class="contrast-cell good">Premium, embodied, irreplaceable — priced accordingly</div></div>
-        <div class="contrast-row"><div class="contrast-cell">Entry-level most vulnerable — no pathway in</div><div class="contrast-cell good">The right training is the entire competitive advantage</div></div>
+        <div class="contrast-row"><div class="contrast-cell">Output can be replicated by software at scale</div><div class="contrast-cell good">Service requires physical delivery and real-time assessment</div></div>
+        <div class="contrast-row"><div class="contrast-cell">Entry pathways can narrow quickly during automation</div><div class="contrast-cell good">Skill depth remains a durable advantage in-market</div></div>
+        <div class="contrast-row"><div class="contrast-cell">Price pressure rises as tasks become commoditized</div><div class="contrast-cell good">Premium positioning remains tied to practitioner quality</div></div>
+        <div class="contrast-row"><div class="contrast-cell">Knowledge alone is less defensible over time</div><div class="contrast-cell good">Embodied service + judgment is harder to displace</div></div>
       </div>
     </div>
-    <p class="reveal" style="font-size:0.82rem;color:rgba(255,255,255,0.32);font-weight:300;line-height:1.75;margin-top:1rem;">These numbers come from Anthropic's March 2026 labor market study — tracking what AI is <em>actually doing</em> in real professional workflows, not what it might do someday. For scalp and beauty professionals, the conclusion is straightforward: the safest career in an AI-disrupted world is one built in a treatment room.</p>
-  </div>
-</section>
-
-<!-- COURSE 01 -->
-<section id="course01">
-  <div class="section-inner">
-    <span class="eyebrow-light reveal">Certification 01</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">HeadSpa<br>Mastery</h2>
-    <p class="section-sub reveal reveal-delay-2">AIMT's first certification program. Twelve modules covering everything from scalp physiology to service execution, guided at each step by Cadence and completed through checkpoint-based progression.</p>
-    <div class="c01-hero reveal reveal-delay-2">
-      <div class="c01-top">
-        <div class="c01-tag">✦ Certification Program 01 — Enrollment Open</div>
-        <div class="c01-title"><em>AIMT — Certification 01</em>HeadSpa<br>Mastery</div>
-        <p class="c01-desc">The complete certification curriculum in head spa and scalp service. 12 modules. AI-guided checkpoints. Issued by the American Institute of Modern Trichology.</p>
-        <div class="c01-meta">
-          <div class="c01-meta-item"><span class="c01-meta-dot"></span>12 modules</div>
-          <div class="c01-meta-item"><span class="c01-meta-dot"></span>AI-guided checkpoints</div>
-          <div class="c01-meta-item"><span class="c01-meta-dot"></span>Self-paced</div>
-          <div class="c01-meta-item"><span class="c01-meta-dot"></span>AIMT Certificate issued</div>
-          <div class="c01-meta-item"><span class="c01-meta-dot"></span>Mobile-first</div>
-        </div>
-        <a href="courses.html" class="c01-enter">View Certifications <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-      </div>
-      <div class="c01-bottom">
-        <div class="c01-module"><div class="c01-mod-num">0</div><div><div class="c01-mod-title">Welcome &amp; Overview</div><div class="c01-mod-sub">Introduction to the course &amp; Cadence</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">1</div><div><div class="c01-mod-title">Role of the Head Spa Tech</div><div class="c01-mod-sub">Scope of practice, limitations, licensing</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">2</div><div><div class="c01-mod-title">Welcoming Your Client</div><div class="c01-mod-sub">Intake, rituals, first contact</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">3</div><div><div class="c01-mod-title">Hair &amp; Scalp Anatomy</div><div class="c01-mod-sub">The biology behind every service decision</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">4</div><div><div class="c01-mod-title">Microscopy &amp; Scalp Assessment</div><div class="c01-mod-sub">Assessment as a service tool</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">5</div><div><div class="c01-mod-title">Scalp Types &amp; Protocols</div><div class="c01-mod-sub">Treatment frameworks for each type</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">6</div><div><div class="c01-mod-title">Conditions &amp; Disorders</div><div class="c01-mod-sub">Recognition and scope boundaries</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">7</div><div><div class="c01-mod-title">Equipment &amp; Room Setup</div><div class="c01-mod-sub">Tools, layout, setup systems</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">8</div><div><div class="c01-mod-title">The Head Spa Service</div><div class="c01-mod-sub">Full service execution</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">9</div><div><div class="c01-mod-title">Sanitation &amp; Reset Systems</div><div class="c01-mod-sub">Between-client protocols</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">10</div><div><div class="c01-mod-title">Pricing Strategy</div><div class="c01-mod-sub">Business and pricing module</div></div></div>
-        <div class="c01-module"><div class="c01-mod-num">11</div><div><div class="c01-mod-title">Completion &amp; Certification</div><div class="c01-mod-sub">Certificate of completion</div></div></div>
-      </div>
-    </div>
+    <p class="reveal" style="font-size:0.82rem;color:rgba(255,255,255,0.32);font-weight:300;line-height:1.75;margin-top:1rem;">The point is practical, not hype: this is a field where skill quality still maps directly to client outcomes. Strong training compounds in value when service cannot be automated away.</p>
   </div>
 </section>
 
