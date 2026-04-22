@@ -962,11 +962,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(163,150,141,0.12) 100%);
   box-shadow: 0 16px 36px rgba(0,0,0,0.18);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: center;
+  justify-items: center;
+  text-align: center;
 }
-.lp-bottom-cta-copy { max-width: 62ch; }
+.lp-bottom-cta-copy { max-width: 70ch; }
 .lp-bottom-cta-kicker {
   font-family: var(--mono);
   font-size: 0.56rem;
@@ -995,6 +997,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   min-width: 230px;
   padding-left: 1.35rem;
   padding-right: 1.35rem;
+  margin: 0 auto;
 }
 
 /* ── SIGN IN PANEL ── */
