@@ -98,7 +98,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--na
 .promise-wrap { background: #faf8f5; margin-top: 0; }
 .promise-section { padding: 5rem 2rem 6rem; max-width: 1100px; margin: 0 auto; }
 .promise-header { display: flex; align-items: baseline; gap: 1.5rem; margin-bottom: 3rem; }
-.promise-title { font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 400; font-style: italic; color: #262626; white-space: nowrap; }
+.promise-title { font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 400; font-style: italic; color: #262626; white-space: normal; overflow-wrap: anywhere; }
 .promise-rule { flex: 1; height: 0.5px; background: rgba(0,0,0,0.1); min-width: 20px; }
 .promise-grid { display: grid; grid-template-columns: repeat(2, 1fr); }
 .promise-item { padding: 2rem 2.5rem 2rem 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); border-right: 0.5px solid rgba(0,0,0,0.07); }
@@ -136,8 +136,27 @@ footer { background: #faf8f5; border-top: 0.5px solid rgba(0,0,0,0.08); padding:
   .promise-item:nth-last-child(-n+2) { border-bottom: 0.5px solid rgba(0,0,0,0.07); }
   .promise-item:last-child { border-bottom: none; }
   .promise-header { flex-wrap: wrap; }
+  .promise-title { font-size: clamp(1.22rem, 7.2vw, 1.58rem); line-height: 1.2; max-width: 100%; }
   .promise-rule { display: none; }
   .nav-btn-ghost { display: none; }
+}
+
+@media (max-width: 560px) {
+  nav { padding: 0 1rem; }
+  .nav-sub { display: none; }
+  .nav-name { font-size: 0.62rem; letter-spacing: 0.26em; }
+  .page-header { padding-top: calc(var(--nav-h) + 3.2rem); }
+  .courses-section { padding-top: 4rem; padding-bottom: 4.75rem; }
+  .promise-section { padding-top: 4rem; padding-bottom: 4.75rem; }
+  .course-card-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.68rem;
+  }
+  .course-card-enter { white-space: normal; text-align: center; line-height: 1.35; }
+  .card-image { height: 200px; }
+  .course-meta-pill,
+  .coming-soon-badge { white-space: normal; line-height: 1.35; }
 }
 </style>
 </head>

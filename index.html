@@ -539,6 +539,48 @@ nav {
   .c01-desc { font-size: 0.82rem; }
   .c01-enter { font-size: 0.8rem; }
   .course-card-bottom { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+  .cadence-pill-preview { width: 100%; max-width: 100%; justify-content: flex-start; min-width: 0; }
+  .cert-card { padding: 1.35rem 1.2rem 1.2rem; }
+  .cert-recipient { font-size: clamp(1.12rem, 7.2vw, 1.35rem); line-height: 1.2; }
+  .cert-program-line { font-size: 0.66rem; line-height: 1.52; }
+  .cert-footer { flex-wrap: wrap; justify-content: center; gap: 0.9rem 1.1rem; }
+  .cert-sig-line { width: 62px; }
+  .section-title,
+  .mid-cta p,
+  .c01-enter,
+  .cta-primary,
+  .cta-ghost { overflow-wrap: anywhere; }
+  .card-image { height: 200px; }
+}
+
+@media(max-width:480px){
+  nav { padding: 0 0.85rem; }
+  .nav-sub { display: none; }
+  .nav-name { font-size: 0.62rem; letter-spacing: 0.25em; }
+  .hero-content { width: min(100%, 18.5rem); }
+  .hero-sub { font-size: 0.82rem; line-height: 1.58; }
+  .section-title { font-size: clamp(1.45rem, 8.6vw, 2.05rem); line-height: 1.08; }
+  .what-card,
+  .ai-callout,
+  .ai-contrast,
+  .diff-card,
+  .cadence-feature,
+  .coming-card,
+  .comm-card { padding: 1.15rem; }
+  .c01-meta-dot { display: none; }
+  .c01-meta { gap: 0.42rem; margin-bottom: 1.1rem; }
+  .c01-meta-item {
+    border: 0.5px solid rgba(255,255,255,0.09);
+    border-radius: 980px;
+    padding: 0.25rem 0.52rem;
+    background: rgba(255,255,255,0.045);
+    line-height: 1.32;
+  }
+  .cadence-pill-preview { height: auto; min-height: 44px; padding: 0.4rem 0.8rem 0.4rem 0.6rem; }
+  .cpv-sub { font-size: 0.62rem; line-height: 1.35; }
+  .cert-watermark { font-size: 3.2rem; }
+  .cert-org { font-size: 0.44rem; letter-spacing: 0.15em; }
+  .cert-title-main { font-size: 0.92rem; }
 }
 
 /* ── FOOTER ── */

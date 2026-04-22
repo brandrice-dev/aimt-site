@@ -759,6 +759,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   color: rgba(255,255,255,0.95);
   margin: 0 0 0.55rem;
   max-width: 23ch;
+  overflow-wrap: anywhere;
 }
 .lp-outcomes-intro {
   font-family: var(--sans);
@@ -825,6 +826,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   line-height: 1.04;
   margin-bottom: 0.7rem;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 .lp-cert-lead {
   font-family: var(--sans);
@@ -1595,8 +1597,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-fit { font-size: 0.76rem; margin-bottom: 0.75rem; line-height: 1.5; }
   .lp-fit-pills { gap: 0.35rem; margin-bottom: 0.2rem; }
   .lp-pricing-card.lp-purchase-top { margin: 0.55rem auto 1.35rem; }
+  .lp-pricing-card { padding: 1.2rem 1.05rem 1.1rem; }
   .lp-checkout-status { margin-bottom: 0.75rem; font-size: 0.76rem; line-height: 1.5; }
   .lp-pricing-eyebrow { margin-bottom: 0.95rem; }
+  .lp-pricing-row { flex-wrap: wrap; align-items: flex-start; gap: 0.55rem; }
+  .lp-price { font-size: clamp(1.85rem, 11vw, 2.15rem); }
   .lp-purchase-note,
   .lp-purchase-trust { margin-bottom: 0.75rem; }
   .lp-purchased-link { margin-bottom: 0.65rem; }
@@ -1634,6 +1639,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     width: 100%;
     min-width: 0;
   }
+  .lp-enroll-btn,
+  .lp-signin-btn { min-height: 48px; }
   .lp-mobile-sticky-cta {
     position: fixed;
     left: 0;
@@ -1650,6 +1657,20 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     max-width: 680px;
     margin: 0 auto;
   }
+}
+
+@media (max-width: 420px) {
+  .lp-inner { width: min(1200px, calc(100% - 40px)); }
+  .lp-band-inner { width: min(1100px, calc(100% - 40px)); }
+  .lp-headline { font-size: clamp(1.72rem, 10.3vw, 2.2rem); }
+  .lp-subhead { font-size: 0.88rem; line-height: 1.58; }
+  .lp-fit-pill { font-size: 0.62rem; }
+  .lp-outcomes-shell,
+  .lp-outcome-item { padding: 18px; }
+  .lp-cert-image-wrap { padding: 12px; border-radius: 16px; }
+  .lp-bottom-cta { padding: 0.9rem 0.78rem; }
+  .lp-bottom-cta-title { font-size: clamp(0.92rem, 6vw, 1.12rem); }
+  .lp-bottom-cta-text { font-size: 0.75rem; line-height: 1.55; }
 }
 
 /* ── Tablet and up (> 768px) ── */
