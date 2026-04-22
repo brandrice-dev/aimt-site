@@ -56,17 +56,18 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--na
 .why-stat-label { font-family: var(--sans); font-size: 0.74rem; font-weight: 300; color: rgba(255,255,255,0.38); line-height: 1.6; max-width: 16ch; }
 
 .courses-section { max-width: 1100px; margin: 0 auto; padding: 5rem 2rem 6rem; }
-.courses-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 2.5rem; display: block; }
-.courses-intro { font-family: var(--sans); font-size: 0.9rem; font-weight: 300; color: rgba(255,255,255,0.46); line-height: 1.8; max-width: 640px; margin: -1.2rem 0 2rem; }
+.courses-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(163,150,141,0.44); margin-bottom: 2.5rem; display: block; }
+.courses-intro { font-family: var(--sans); font-size: 0.92rem; font-weight: 300; color: rgba(255,255,255,0.52); line-height: 1.8; max-width: 720px; margin: -1.2rem 0 2.2rem; }
 .page-status { display: none; margin-top: 1.4rem; max-width: 640px; border: 0.5px solid rgba(163,150,141,0.24); background: rgba(163,150,141,0.08); border-radius: 16px; padding: 0.95rem 1rem; font-size: 0.84rem; line-height: 1.68; color: rgba(255,255,255,0.76); }
-.course-subsection { margin-bottom: 1.9rem; }
-.course-subsection-title { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(163,150,141,0.5); margin-bottom: 0.9rem; display: block; }
-.course-subsection-title.coming { color: rgba(255,255,255,0.24); margin-top: 2.5rem; }
+.course-subsection { margin-bottom: 2.2rem; }
+.course-subsection-title { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(163,150,141,0.62); margin-bottom: 0.65rem; display: block; }
+.course-subsection-note { font-size: 0.8rem; color: rgba(255,255,255,0.34); font-weight: 300; line-height: 1.72; max-width: 62ch; margin-bottom: 1.1rem; }
 
-.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.25rem; align-items: start; }
+.course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: stretch; }
+@media (max-width: 980px) { .course-grid { grid-template-columns: 1fr; } }
 
-.course-card { background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s; cursor: pointer; }
-.course-card:hover { border-color: rgba(163,150,141,0.22); background: rgba(255,255,255,0.04); transform: translateY(-2px); box-shadow: 0 24px 60px rgba(0,0,0,0.32); }
+.course-card { background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 18px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s; cursor: pointer; height: 100%; }
+.course-card:hover { border-color: rgba(163,150,141,0.26); background: rgba(255,255,255,0.045); transform: translateY(-3px); box-shadow: 0 24px 60px rgba(0,0,0,0.32); }
 .course-card.featured { background: rgba(255,255,255,0.035); border-color: rgba(163,150,141,0.18); box-shadow: 0 16px 42px rgba(0,0,0,0.18); }
 
 .card-image { width: 100%; height: 220px; overflow: hidden; position: relative; flex-shrink: 0; background: #1e1b17; }
@@ -75,7 +76,9 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--na
 .card-image-label { font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(163,150,141,0.22); text-align: center; position: relative; z-index: 1; }
 .card-image-icon { width: 38px; height: 38px; margin: 0 auto 0.55rem; opacity: 0.12; display: block; }
 .flagship-preview-shot { width: 100%; height: 100%; object-fit: cover; object-position: 50% 4%; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); box-shadow: 0 18px 42px rgba(0,0,0,0.24); position: relative; z-index: 1; display: block; }
-.course-card.coming-soon { opacity: 0.36; cursor: default; pointer-events: none; }
+.mini-course-shot { width: 100%; height: 100%; object-fit: cover; object-position: 32% 46%; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); box-shadow: 0 18px 42px rgba(0,0,0,0.24); position: relative; z-index: 1; display: block; }
+.course-card.coming-soon { opacity: 0.92; cursor: default; pointer-events: none; }
+.course-card.future { background: linear-gradient(180deg, rgba(255,255,255,0.038) 0%, rgba(255,255,255,0.018) 100%); border-color: rgba(163,150,141,0.22); box-shadow: 0 14px 36px rgba(0,0,0,0.2); }
 
 .course-card-tag { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: #a3968d; margin-bottom: 1rem; display: block; }
 .course-card-body { padding: 1.5rem 1.5rem 1.35rem; flex: 1; display: flex; flex-direction: column; }
@@ -180,7 +183,8 @@ footer { background: #faf8f5; border-top: 0.5px solid rgba(0,0,0,0.08); padding:
   <span class="courses-label">Available certifications</span>
   <p class="courses-intro">Enrollment is currently open for available certifications. Select a live program below to review the curriculum and complete enrollment.</p>
   <div class="course-subsection">
-    <span class="course-subsection-title">Enrollment open</span>
+    <span class="course-subsection-title">HeadSpa Mastery ecosystem</span>
+    <p class="course-subsection-note">The flagship certification is live now, with focused mini-courses in development to deepen clinical application inside the same service framework.</p>
     <div class="course-grid">
 
       <a href="headspa-mastery.html" id="headspa-mastery" class="course-card featured">
@@ -210,32 +214,25 @@ footer { background: #faf8f5; border-top: 0.5px solid rgba(0,0,0,0.08); padding:
           <span class="course-card-enter aimt-inline-cta">View HeadSpa Mastery <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
-    </div>
-  </div>
-
-  <div class="course-subsection">
-    <span class="course-subsection-title coming">In development</span>
-    <div class="course-grid">
-      <div class="course-card coming-soon">
+      <div class="course-card coming-soon future">
         <div class="card-image">
           <div class="card-image-inner">
-            <div style="text-align:center;position:relative;z-index:1;">
-              <div class="card-image-label">Certification 02</div>
-            </div>
+            <img src="assets/aimt-hero-image.png" alt="Practitioner performing scalp microscopy and analysis" class="mini-course-shot">
           </div>
         </div>
         <div class="course-card-body">
-          <span class="course-card-tag">Certification 02</span>
-          <div class="course-card-title">Coming<br>Soon</div>
-          <p class="course-card-desc">The next AIMT certification is being developed with the same clinical and practitioner-built standard. It remains intentionally unreleased until the curriculum, Cadence guidance, and assessment structure are ready to stand behind.</p>
+          <span class="course-card-tag">Mini Course &mdash; In development</span>
+          <div class="course-card-title">Microscopy &amp;<br>Scalp Analysis</div>
+          <p class="course-card-desc">A focused extension of HeadSpa Mastery built for practitioners who want stronger confidence in scalp imaging, visual pattern recognition, and client-facing analysis language in real consultations.</p>
           <div class="course-card-meta">
-            <span class="coming-soon-badge">In development</span>
+            <span class="coming-soon-badge">Future release</span>
+            <span class="coming-soon-badge">HeadSpa ecosystem</span>
           </div>
         </div>
         <div class="course-card-bottom">
           <div>
             <div class="course-card-price" style="color:rgba(255,255,255,0.16);">&mdash;</div>
-            <div class="course-card-price-sub">Not yet available</div>
+            <div class="course-card-price-sub">Planned mini-course release</div>
           </div>
         </div>
       </div>
