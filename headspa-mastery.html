@@ -673,25 +673,42 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-subhead { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 300; line-height: 1.7; color: rgba(255,255,255,0.45); max-width: 560px; margin-bottom: 0.9rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.7s forwards; }
 .lp-fit { font-family: var(--sans); font-size: 0.78rem; font-weight: 300; line-height: 1.55; color: rgba(255,255,255,0.52); margin-bottom: 1.25rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.78s forwards; }
 .lp-divider { width: 100%; height: 0.5px; background: rgba(255,255,255,0.08); margin-bottom: 1.4rem; opacity: 0; animation: lpFadeUp 0.6s ease 0.85s forwards; }
-.lp-content-break {
+.lp-section-band {
   width: 100%;
-  margin-bottom: 2.4rem;
-  padding: 1.6rem 1.5rem 1.25rem;
-  background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%);
-  border: 0.5px solid rgba(255,255,255,0.09);
   border-radius: 16px;
-  box-shadow: 0 10px 34px rgba(0,0,0,0.18);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  padding: 1.5rem 1.4rem;
+  margin-bottom: 1.1rem;
   opacity: 0;
-  animation: lpFadeUp 0.8s ease 0.95s forwards;
+  animation: lpFadeUp 0.8s ease forwards;
 }
-.lp-outcomes { width: 100%; margin-bottom: 2.2rem; }
+.lp-band-outcomes {
+  background: linear-gradient(180deg, rgba(163,150,141,0.13) 0%, rgba(163,150,141,0.06) 100%);
+  border-color: rgba(163,150,141,0.34);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.2);
+  animation-delay: 0.95s;
+}
+.lp-band-modules {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.025) 100%);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+  animation-delay: 1.08s;
+}
+.lp-band-cert {
+  background: linear-gradient(165deg, rgba(163,150,141,0.16) 0%, rgba(255,255,255,0.04) 100%);
+  border-color: rgba(163,150,141,0.4);
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.24);
+  animation-delay: 1.2s;
+}
+.lp-outcomes { width: 100%; margin-bottom: 0; }
 .lp-outcomes-label { font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 1.5rem; }
 .lp-outcome-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
 .lp-outcome-item:last-child { border-bottom: none; }
 .lp-outcome-num { font-family: 'Outfit', sans-serif; font-size: 0.58rem; font-weight: 400; letter-spacing: 0.1em; color: #a3968d; padding-top: 0.15rem; min-width: 20px; }
 .lp-outcome-text { font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 300; line-height: 1.62; color: rgba(255,255,255,0.64); }
 .lp-outcome-text strong { font-weight: 500; color: rgba(255,255,255,0.82); display: block; margin-bottom: 0.15rem; }
-.lp-modules { width: 100%; margin-bottom: 2rem; }
+.lp-modules { width: 100%; margin-bottom: 0; }
 .lp-modules-label { font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 1.25rem; }
 .lp-module-row { display: flex; align-items: center; gap: 0.875rem; padding: 0.65rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
 .lp-module-row:last-child { border-bottom: none; }
@@ -699,19 +716,33 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-module-name { font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.45); line-height: 1.4; }
 .lp-cert {
   width: 100%;
-  margin-bottom: 0.5rem;
-  padding: 1.2rem 1.25rem 1.25rem;
-  border-radius: 12px;
-  border: 0.5px solid rgba(255,255,255,0.09);
-  background: rgba(255,255,255,0.03);
+  margin-bottom: 0;
+  padding: 0;
 }
-.lp-cert-label {
+.lp-cert-kicker {
   font-family: var(--mono);
   font-size: 0.56rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-  margin-bottom: 0.85rem;
+  color: rgba(255,255,255,0.44);
+  margin-bottom: 0.7rem;
+}
+.lp-cert-headline {
+  font-family: var(--mont);
+  font-size: clamp(1.35rem, 3.4vw, 2rem);
+  letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.95);
+  line-height: 1.06;
+  margin-bottom: 0.65rem;
+  text-transform: uppercase;
+}
+.lp-cert-lead {
+  font-family: var(--sans);
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.64;
+  margin-bottom: 1rem;
+  max-width: 52ch;
 }
 .lp-cert-sheet {
   width: 100%;
@@ -719,7 +750,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   border: 1px solid rgba(160,141,118,0.38);
   background: linear-gradient(160deg, #f3ede4 0%, #e9dece 100%);
   color: #3a322c;
-  padding: 1.15rem 1.15rem 1rem;
+  padding: 1.3rem 1.3rem 1.1rem;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 8px 22px rgba(0,0,0,0.22);
 }
 .lp-cert-brand {
@@ -730,26 +761,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   color: rgba(58,50,44,0.72);
   margin-bottom: 0.45rem;
 }
-.lp-cert-title {
+.lp-cert-doc-title {
   font-family: var(--serif);
-  font-size: 1.02rem;
+  font-size: 1.18rem;
   letter-spacing: -0.01em;
   color: #2a231e;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.8rem;
 }
 .lp-cert-name {
   font-family: var(--mont);
-  font-size: 1.18rem;
+  font-size: 1.38rem;
   letter-spacing: -0.02em;
   font-weight: 600;
   color: #26201b;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.58rem;
 }
 .lp-cert-course {
   font-family: var(--sans);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   color: rgba(58,50,44,0.8);
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.95rem;
 }
 .lp-cert-meta {
   display: flex;
@@ -761,7 +792,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   text-transform: uppercase;
   color: rgba(58,50,44,0.64);
 }
-.lp-cert-sub { font-family: 'Outfit', sans-serif; font-size: 0.74rem; font-weight: 300; color: rgba(255,255,255,0.34); margin-top: 0.75rem; line-height: 1.55; }
+.lp-cert-sub { font-family: 'Outfit', sans-serif; font-size: 0.76rem; font-weight: 300; color: rgba(255,255,255,0.5); margin-top: 0.78rem; line-height: 1.58; }
 .lp-cta { width: 100%; opacity: 0; animation: lpFadeUp 0.8s ease 1.35s forwards; }
 .lp-cta-label { font-family: 'Outfit', sans-serif; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 0.85rem; display: block; }
 .lp-name-input { width: 100%; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 1rem 1.25rem; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.88); outline: none; transition: border-color 0.3s, background 0.3s; caret-color: #a3968d; margin-bottom: 1rem; -webkit-appearance: none; }
@@ -1404,15 +1435,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-pi-item { font-size: 0.78rem; }
   .lp-or-divider { margin: 0.65rem 0; }
   .lp-divider { margin-bottom: 0.95rem; }
-  .lp-content-break { padding: 1rem 0.9rem 0.75rem; margin-bottom: 1.4rem; }
-  .lp-outcomes { margin-bottom: 1.6rem; }
+  .lp-section-band { padding: 1rem 0.9rem 0.9rem; margin-bottom: 0.85rem; }
+  .lp-band-cert { padding: 1.1rem 1rem; }
+  .lp-outcomes { margin-bottom: 0; }
   .lp-outcomes-label { margin-bottom: 0.9rem; }
   .lp-outcome-item { gap: 0.8rem; padding: 0.75rem 0; }
   .lp-outcome-text { font-size: 0.88rem; line-height: 1.54; }
-  .lp-modules { margin-bottom: 1.45rem; }
-  .lp-cert { padding: 0.9rem 0.9rem 1rem; }
-  .lp-cert-title { font-size: 0.95rem; }
+  .lp-modules { margin-bottom: 0; }
+  .lp-cert-headline { font-size: clamp(1.2rem, 6vw, 1.6rem); }
+  .lp-cert-lead { font-size: 0.8rem; margin-bottom: 0.85rem; }
+  .lp-cert-doc-title { font-size: 1.02rem; }
   .lp-cert-name { font-size: 1.02rem; }
+  .lp-cert-course { font-size: 0.73rem; }
   .lp-mobile-sticky-cta {
     position: fixed;
     left: 0;
@@ -1703,7 +1737,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </button>
     </div>
     <div class="lp-divider"></div>
-    <div class="lp-content-break">
+    <div class="lp-section-band lp-band-outcomes">
       <div class="lp-outcomes">
         <div class="lp-outcomes-label">What you will walk away with</div>
         <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see so every service decision is grounded in science, not guesswork.</div></div>
@@ -1712,6 +1746,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Pricing and positioning aligned with your expertise</strong>Construct a defensible three-tier menu, understand cost-based pricing, and communicate value without discounting your standards.</div></div>
         <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Clear professional scope and client-safe language</strong>Know what to document, what to communicate, and where your scope ends so your service remains ethical, clinically aware, and compliant.</div></div>
       </div>
+    </div>
+    <div class="lp-section-band lp-band-modules">
       <div class="lp-modules">
         <div class="lp-modules-label">12 modules &middot; Self-paced &middot; AI-guided</div>
         <div class="lp-module-row"><div class="lp-module-num">00</div><div class="lp-module-name">Welcome &amp; Course Overview</div></div>
@@ -1727,11 +1763,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-module-row"><div class="lp-module-num">10</div><div class="lp-module-name">Pricing Strategy</div></div>
         <div class="lp-module-row"><div class="lp-module-num">11</div><div class="lp-module-name">Completion &amp; Certification</div></div>
       </div>
+    </div>
+    <div class="lp-section-band lp-band-cert">
       <div class="lp-cert">
-        <div class="lp-cert-label">Certificate preview</div>
+        <div class="lp-cert-kicker">Graduate Credential</div>
+        <div class="lp-cert-headline">Earn A Certificate Worth Displaying</div>
+        <p class="lp-cert-lead">HeadSpa Mastery graduates receive a polished AIMT completion certificate designed for practitioner credibility, client trust, and portfolio signaling.</p>
         <div class="lp-cert-sheet">
           <div class="lp-cert-brand">American Institute of Modern Trichology</div>
-          <div class="lp-cert-title">Certificate of Completion</div>
+          <div class="lp-cert-doc-title">Certificate of Completion</div>
           <div class="lp-cert-name">Jordan Avery</div>
           <div class="lp-cert-course">HeadSpa Mastery · Practitioner Certification</div>
           <div class="lp-cert-meta">
@@ -1739,7 +1779,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
             <span>Verified completion</span>
           </div>
         </div>
-        <div class="lp-cert-sub">Issued after completion of all 12 modules and required competency checkpoints.</div>
+        <div class="lp-cert-sub">Awarded after all 12 modules and required competency checkpoints are successfully completed.</div>
       </div>
     </div>
 
