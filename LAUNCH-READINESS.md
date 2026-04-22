@@ -54,7 +54,8 @@
   - [ ] Existing student sign-in manual verification
     - Test: From signed-out state, sign in at `student-access.html` with a known entitled purchaser account.
     - Pass if: User is routed into gated `headspa-mastery.html` (not public landing) and resume state loads.
-    - Note: Sign-in routing audited; durable entitlement + intentional handoff + session-readiness guard are in place, with no additional code change needed in this pass.
+    - Note: Sign-in routing audited; durable entitlement + intentional handoff + session-readiness guard are in place.
+    - Note: Supabase auth persistence is now session-scoped in `student-access.html`, `success.html`, and `headspa-mastery.html` so browser-close requires fresh sign-in while local course progress/memory persistence remains intact.
   - [ ] Password reset manual verification
     - Test: Trigger reset from `student-access.html`, complete email reset flow, then sign in with new password.
     - Pass if: Reset email arrives, reset completes successfully, and post-reset sign-in follows normal access rules.
@@ -105,6 +106,7 @@
 - Execute and document a focused launch gating QA pass first (especially browser reopen/refresh behavior across devices), then freeze access-flow logic unless a launch-blocking bug is found.
 
 ## Change Log
+- 2026-04-21: Switched Supabase auth persistence to session-scoped browser storage across student-access, success, and headspa course entry so closing the browser now requires re-authentication, while local course progress/resume and in-course memory data remain preserved.
 - 2026-04-21: Enforced course-card navigation rule in launch docs after code audit confirmation: discovery card interaction remains a fixed route to public enrollment (no auth-based interception/reroute); returning access remains through `student-access.html`.
 - 2026-04-21: Hardened password reset initiation by setting explicit Supabase `redirectTo` back to `student-access.html` in both student access surfaces.
 - 2026-04-21: Audited new purchase flow and hardened `success.html` to prevent auto-course handoff when `session_id` is missing, routing those cases to Student Access guidance instead.

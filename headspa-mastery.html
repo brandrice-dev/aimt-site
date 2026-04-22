@@ -6622,8 +6622,41 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ══ LANDING PAGE ══
 const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+function createSessionAuthStorage() {
+  const memoryStore = {};
+  return {
+    getItem(key) {
+      try {
+        return window.sessionStorage.getItem(key);
+      } catch (_) {
+        return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null;
+      }
+    },
+    setItem(key, value) {
+      try {
+        window.sessionStorage.setItem(key, value);
+      } catch (_) {
+        memoryStore[key] = value;
+      }
+    },
+    removeItem(key) {
+      try {
+        window.sessionStorage.removeItem(key);
+      } catch (_) {
+        delete memoryStore[key];
+      }
+    }
+  };
+}
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        storage: createSessionAuthStorage(),
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
   : null;
 const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
 const HEADSPA_COURSE_SLUG = 'headspa-mastery';
