@@ -112,6 +112,11 @@ body {
 }
 .form-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem; }
 .field { display: flex; flex-direction: column; gap: 0.45rem; }
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 .field-label {
   font-family: var(--mono);
   font-size: 0.52rem;
@@ -131,10 +136,35 @@ body {
   color: rgba(255,255,255,0.92);
   outline: none;
 }
+.field-input.has-toggle {
+  padding-right: 4.2rem;
+}
 .field-input:focus {
   border-color: rgba(163,150,141,0.42);
   background: rgba(255,255,255,0.055);
 }
+.password-toggle {
+  position: absolute;
+  right: 0.62rem;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.62);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.25rem 0.32rem;
+}
+.password-toggle:hover { color: rgba(255,255,255,0.82); }
+.password-hint {
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.42);
+  min-height: 1.2em;
+}
+.password-hint.is-valid { color: rgba(198,230,205,0.82); }
+.password-hint.is-error { color: rgba(236,198,198,0.82); }
 .notice {
   display: none;
   margin-top: 1rem;
@@ -229,7 +259,11 @@ body {
             </div>
             <div class="field">
               <label class="field-label" for="password">Password</label>
-              <input class="field-input" id="password" name="password" type="password" autocomplete="current-password" required>
+              <div class="field-input-wrap">
+                <input class="field-input has-toggle" id="password" name="password" type="password" autocomplete="current-password" required>
+                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" data-password-toggle data-target="password">Show</button>
+              </div>
+              <div class="password-hint" id="signInPasswordHint">For new account creation/reset: at least 8 characters, including a letter and a number.</div>
             </div>
           </div>
 
@@ -250,11 +284,19 @@ body {
           <div class="form-grid">
             <div class="field">
               <label class="field-label" for="recoveryPassword">New password</label>
-              <input class="field-input" id="recoveryPassword" type="password" autocomplete="new-password" />
+              <div class="field-input-wrap">
+                <input class="field-input has-toggle" id="recoveryPassword" type="password" autocomplete="new-password" />
+                <button type="button" class="password-toggle" id="recoveryPasswordToggle" aria-label="Show new password" data-password-toggle data-target="recoveryPassword">Show</button>
+              </div>
+              <div class="password-hint" id="recoveryPasswordHint">Use at least 8 characters with at least one letter and one number.</div>
             </div>
             <div class="field">
               <label class="field-label" for="recoveryConfirmPassword">Confirm new password</label>
-              <input class="field-input" id="recoveryConfirmPassword" type="password" autocomplete="new-password" />
+              <div class="field-input-wrap">
+                <input class="field-input has-toggle" id="recoveryConfirmPassword" type="password" autocomplete="new-password" />
+                <button type="button" class="password-toggle" id="recoveryConfirmPasswordToggle" aria-label="Show confirmed password" data-password-toggle data-target="recoveryConfirmPassword">Show</button>
+              </div>
+              <div class="password-hint" id="recoveryConfirmHint"></div>
             </div>
           </div>
           <div class="actions" style="margin-top:1rem;">
@@ -321,6 +363,12 @@ body {
     const forgotLink = document.getElementById('forgotLink');
     const recoveryPanel = document.getElementById('recoveryPanel');
     const recoverySubmitBtn = document.getElementById('recoverySubmitBtn');
+    const signInPasswordInput = document.getElementById('password');
+    const signInPasswordHint = document.getElementById('signInPasswordHint');
+    const recoveryPasswordInput = document.getElementById('recoveryPassword');
+    const recoveryPasswordHint = document.getElementById('recoveryPasswordHint');
+    const recoveryConfirmPasswordInput = document.getElementById('recoveryConfirmPassword');
+    const recoveryConfirmHint = document.getElementById('recoveryConfirmHint');
     let recoveryMode = false;
 
     function normalizeAccessEmail(email) {
@@ -344,6 +392,85 @@ body {
       try {
         localStorage.removeItem(PENDING_CLAIM_KEY);
       } catch (_) {}
+    }
+
+    function evaluatePassword(value) {
+      const input = String(value || '');
+      const hasLength = input.length >= 8;
+      const hasLetter = /[A-Za-z]/.test(input);
+      const hasNumber = /[0-9]/.test(input);
+      const missing = [];
+      if (!hasLength) missing.push('8+ characters');
+      if (!hasLetter) missing.push('a letter');
+      if (!hasNumber) missing.push('a number');
+      return {
+        isValid: hasLength && hasLetter && hasNumber,
+        missing
+      };
+    }
+
+    function getPasswordRequirementMessage(passwordValue) {
+      const check = evaluatePassword(passwordValue);
+      if (check.isValid) {
+        return { ok: true, message: 'Password meets requirements.' };
+      }
+      const missingLabel = check.missing.join(', ');
+      return { ok: false, message: `Password must include ${missingLabel}.` };
+    }
+
+    function setHintState(el, message, state) {
+      if (!el) return;
+      el.textContent = message || '';
+      el.classList.remove('is-valid', 'is-error');
+      if (state === 'valid') el.classList.add('is-valid');
+      if (state === 'error') el.classList.add('is-error');
+    }
+
+    function updateSignInPasswordHint() {
+      const value = signInPasswordInput ? signInPasswordInput.value : '';
+      if (!value) {
+        setHintState(signInPasswordHint, 'For new account creation/reset: at least 8 characters, including a letter and a number.');
+        return;
+      }
+      const result = getPasswordRequirementMessage(value);
+      setHintState(signInPasswordHint, result.ok ? '✓ Meets password requirements.' : result.message, result.ok ? 'valid' : 'error');
+    }
+
+    function updateRecoveryPasswordHints() {
+      const nextPassword = recoveryPasswordInput ? recoveryPasswordInput.value : '';
+      const confirmPassword = recoveryConfirmPasswordInput ? recoveryConfirmPasswordInput.value : '';
+
+      if (!nextPassword) {
+        setHintState(recoveryPasswordHint, 'Use at least 8 characters with at least one letter and one number.');
+      } else {
+        const result = getPasswordRequirementMessage(nextPassword);
+        setHintState(recoveryPasswordHint, result.ok ? '✓ Meets password requirements.' : result.message, result.ok ? 'valid' : 'error');
+      }
+
+      if (!confirmPassword) {
+        setHintState(recoveryConfirmHint, '');
+        return;
+      }
+      if (confirmPassword !== nextPassword) {
+        setHintState(recoveryConfirmHint, 'Passwords do not match yet.', 'error');
+        return;
+      }
+      setHintState(recoveryConfirmHint, '✓ Passwords match.', 'valid');
+    }
+
+    function setupPasswordToggles() {
+      const toggles = document.querySelectorAll('[data-password-toggle]');
+      toggles.forEach((toggle) => {
+        const inputId = toggle.getAttribute('data-target');
+        const input = inputId ? document.getElementById(inputId) : null;
+        if (!input) return;
+        toggle.addEventListener('click', () => {
+          const showing = input.type === 'text';
+          input.type = showing ? 'password' : 'text';
+          toggle.textContent = showing ? 'Show' : 'Hide';
+          toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        });
+      });
     }
 
     function showNotice(message) {
@@ -560,8 +687,9 @@ body {
     async function createFirstTimeStaffAccount(email, password) {
       const normalizedEmail = normalizeAccessEmail(email);
       if (!isAllowlistedStaffEmail(normalizedEmail)) return { ok: false };
-      if (!password || password.length < 8) {
-        return { ok: false, error: 'Use at least 8 characters for your password.' };
+      const passwordCheck = getPasswordRequirementMessage(password);
+      if (!passwordCheck.ok) {
+        return { ok: false, error: passwordCheck.message };
       }
 
       const signUpResult = await supabaseClient.auth.signUp({ email: normalizedEmail, password });
@@ -652,6 +780,11 @@ body {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error || !data || !data.user) {
           if (isAllowlistedStaffEmail(email)) {
+            const passwordCheck = getPasswordRequirementMessage(password);
+            if (!passwordCheck.ok) {
+              showNotice(passwordCheck.message);
+              return;
+            }
             setLoading(true, 'Creating staff account...');
             const created = await createFirstTimeStaffAccount(email, password);
             if (!created.ok || !created.user) {
@@ -728,8 +861,9 @@ body {
         showNotice('Your passwords do not match.');
         return;
       }
-      if (nextPassword.length < 8) {
-        showNotice('Use at least 8 characters for your new password.');
+      const passwordCheck = getPasswordRequirementMessage(nextPassword);
+      if (!passwordCheck.ok) {
+        showNotice(passwordCheck.message);
         return;
       }
 
@@ -758,6 +892,19 @@ body {
         enableRecoveryMode('Recovery link verified. Set your new password below.');
       }
     });
+
+    setupPasswordToggles();
+    if (signInPasswordInput) {
+      signInPasswordInput.addEventListener('input', updateSignInPasswordHint);
+      updateSignInPasswordHint();
+    }
+    if (recoveryPasswordInput) {
+      recoveryPasswordInput.addEventListener('input', updateRecoveryPasswordHints);
+    }
+    if (recoveryConfirmPasswordInput) {
+      recoveryConfirmPasswordInput.addEventListener('input', updateRecoveryPasswordHints);
+    }
+    updateRecoveryPasswordHints();
 
     initializeRecoveryMode().finally(() => {
       handleExistingSession();
