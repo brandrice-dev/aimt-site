@@ -1403,13 +1403,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-pricing-includes { gap: 0.45rem; margin-bottom: 1rem; }
   .lp-pi-item { font-size: 0.78rem; }
   .lp-or-divider { margin: 0.65rem 0; }
-  .lp-divider { margin-bottom: 1.1rem; }
-  .lp-outcomes { margin-bottom: 2rem; }
+  .lp-divider { margin-bottom: 0.95rem; }
+  .lp-content-break { padding: 1rem 0.9rem 0.75rem; margin-bottom: 1.4rem; }
+  .lp-outcomes { margin-bottom: 1.6rem; }
   .lp-outcomes-label { margin-bottom: 0.9rem; }
   .lp-outcome-item { gap: 0.8rem; padding: 0.75rem 0; }
   .lp-outcome-text { font-size: 0.88rem; line-height: 1.54; }
-  .lp-modules { margin-bottom: 2rem; }
-  .lp-cert { margin-bottom: 2rem; padding: 1rem 1.1rem; }
+  .lp-modules { margin-bottom: 1.45rem; }
+  .lp-cert { padding: 0.9rem 0.9rem 1rem; }
+  .lp-cert-title { font-size: 0.95rem; }
+  .lp-cert-name { font-size: 1.02rem; }
   .lp-mobile-sticky-cta {
     position: fixed;
     left: 0;
@@ -1669,6 +1672,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <p class="lp-fit">For practitioners building a disciplined head spa and scalp service.</p>
     <div class="lp-pricing-card lp-purchase-top">
       <div class="lp-pricing-eyebrow">Certification 01 · HeadSpa Mastery</div>
+      <p class="lp-pricing-intent">A complete practitioner certification designed to help you deliver a premium scalp service with clinical clarity and consistent client outcomes.</p>
       <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
       <div class="lp-pricing-row">
         <div class="lp-price">$497</div>
@@ -1677,9 +1681,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-price-sub">Lifetime access · AIMT certificate included</div>
         </div>
       </div>
-      <p class="lp-purchase-note">Access to the full certification: 12 modules, Cadence-guided checkpoints, and an AIMT credential built to signal real practitioner-level mastery.</p>
-      <p class="lp-purchase-trust">After purchase, you’ll create your AIMT account and enter the course as soon as your AIMT sign-in is active. Lifetime access to the certification materials is included.</p>
+      <p class="lp-purchase-note">Includes the full 12-module curriculum, Cadence-guided checkpoints, and an AIMT completion credential recognized inside your client education flow.</p>
+      <p class="lp-purchase-trust">Secure checkout. One-time payment. You will create your AIMT sign-in after purchase and enter the course immediately once your session is active.</p>
       <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Enter here.</a>
+      <div class="lp-pricing-includes-label">Enrollment includes</div>
       <div class="lp-pricing-includes">
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>12 modules · self-paced progression</div>
         <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Cadence-guided learning and checkpoints</div>
@@ -1691,39 +1696,51 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-enter-btn-dot"></div>
         Begin Enrollment
       </button>
-      <p class="lp-cta-reassurance">After signup, you’ll enter HeadSpa Mastery as soon as your AIMT session is active.</p>
+      <p class="lp-cta-reassurance">Enrollment takes under a minute. Course access is unlocked after your AIMT account handoff.</p>
       <div class="lp-or-divider"><span>or</span></div>
       <button class="lp-signin-btn" onclick="showSignInPanel()">
         Already enrolled? Sign in
       </button>
     </div>
     <div class="lp-divider"></div>
-    <div class="lp-outcomes">
-      <div class="lp-outcomes-label">What you will walk away with</div>
-      <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see — so every service decision is grounded in science, not guesswork.</div></div>
-      <div class="lp-outcome-item"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>The ability to assess and adapt in the room</strong>Microscopy, scalp typing, conditions and disorders — you will know the difference between a dry scalp and dandruff, between normal shedding and something that needs a referral.</div></div>
-      <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>A premium client experience from first touch to checkout</strong>The arrival sequence, the tea ritual, the 17-step service map, the closing script that drives rebooking — every detail is intentional and teachable.</div></div>
-      <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Pricing and positioning that reflects your value</strong>How to build a three-tier menu, price from your actual costs, and handle the client who says it felt expensive — without discounting what you do.</div></div>
-      <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Clarity on scope, safety, and professional standards</strong>What you can do, what you cannot, and exactly how to speak to clients about what you observe — without crossing into diagnosis or making claims you cannot back up.</div></div>
-    </div>
-    <div class="lp-modules">
-      <div class="lp-modules-label">12 modules &middot; Self-paced &middot; AI-guided</div>
-      <div class="lp-module-row"><div class="lp-module-num">00</div><div class="lp-module-name">Welcome &amp; Course Overview</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">01</div><div class="lp-module-name">Role of the Head Spa Technician</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">02</div><div class="lp-module-name">Welcoming Your Client</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">03</div><div class="lp-module-name">Hair &amp; Scalp Anatomy</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">04</div><div class="lp-module-name">Microscopy &amp; Scalp Assessment</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">05</div><div class="lp-module-name">Scalp Types &amp; Protocols</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">06</div><div class="lp-module-name">Conditions &amp; Disorders</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">07</div><div class="lp-module-name">Equipment &amp; Room Setup</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">08</div><div class="lp-module-name">The Head Spa Service</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">09</div><div class="lp-module-name">Sanitation &amp; Reset Systems</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">10</div><div class="lp-module-name">Pricing Strategy</div></div>
-      <div class="lp-module-row"><div class="lp-module-num">11</div><div class="lp-module-name">Completion &amp; Certification</div></div>
-    </div>
-    <div class="lp-cert">
-      <div class="lp-cert-icon">&#x2713;</div>
-      <div class="lp-cert-text"><div class="lp-cert-title">Certificate of Completion — AIMT HeadSpa Mastery</div><div class="lp-cert-sub">Awarded upon finishing all 12 modules</div></div>
+    <div class="lp-content-break">
+      <div class="lp-outcomes">
+        <div class="lp-outcomes-label">What you will walk away with</div>
+        <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see so every service decision is grounded in science, not guesswork.</div></div>
+        <div class="lp-outcome-item"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>The ability to assess and adapt in real time</strong>Microscopy, scalp typing, and condition awareness so you can distinguish dry scalp from dandruff and identify when referral is the correct professional step.</div></div>
+        <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>A premium service protocol clients can feel</strong>From intake and ritual sequencing to treatment execution and closing language, every phase is built to improve trust, retention, and rebooking confidence.</div></div>
+        <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Pricing and positioning aligned with your expertise</strong>Construct a defensible three-tier menu, understand cost-based pricing, and communicate value without discounting your standards.</div></div>
+        <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Clear professional scope and client-safe language</strong>Know what to document, what to communicate, and where your scope ends so your service remains ethical, clinically aware, and compliant.</div></div>
+      </div>
+      <div class="lp-modules">
+        <div class="lp-modules-label">12 modules &middot; Self-paced &middot; AI-guided</div>
+        <div class="lp-module-row"><div class="lp-module-num">00</div><div class="lp-module-name">Welcome &amp; Course Overview</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">01</div><div class="lp-module-name">Role of the Head Spa Technician</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">02</div><div class="lp-module-name">Welcoming Your Client</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">03</div><div class="lp-module-name">Hair &amp; Scalp Anatomy</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">04</div><div class="lp-module-name">Microscopy &amp; Scalp Assessment</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">05</div><div class="lp-module-name">Scalp Types &amp; Protocols</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">06</div><div class="lp-module-name">Conditions &amp; Disorders</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">07</div><div class="lp-module-name">Equipment &amp; Room Setup</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">08</div><div class="lp-module-name">The Head Spa Service</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">09</div><div class="lp-module-name">Sanitation &amp; Reset Systems</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">10</div><div class="lp-module-name">Pricing Strategy</div></div>
+        <div class="lp-module-row"><div class="lp-module-num">11</div><div class="lp-module-name">Completion &amp; Certification</div></div>
+      </div>
+      <div class="lp-cert">
+        <div class="lp-cert-label">Certificate preview</div>
+        <div class="lp-cert-sheet">
+          <div class="lp-cert-brand">American Institute of Modern Trichology</div>
+          <div class="lp-cert-title">Certificate of Completion</div>
+          <div class="lp-cert-name">Jordan Avery</div>
+          <div class="lp-cert-course">HeadSpa Mastery · Practitioner Certification</div>
+          <div class="lp-cert-meta">
+            <span>Issued by AIMT</span>
+            <span>Verified completion</span>
+          </div>
+        </div>
+        <div class="lp-cert-sub">Issued after completion of all 12 modules and required competency checkpoints.</div>
+      </div>
     </div>
 
     <!-- ── SIGN IN PANEL ── -->
