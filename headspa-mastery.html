@@ -771,13 +771,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .lp-cert-image-wrap {
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(160,141,118,0.42);
-  overflow: hidden;
-  box-shadow: 0 14px 30px rgba(0,0,0,0.22);
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 0.5px solid rgba(255,255,255,0.16);
+  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
 }
 .lp-cert-image {
   width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(160,141,118,0.38);
   display: block;
   object-fit: cover;
 }
@@ -1442,7 +1447,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-module-row { padding: 0.68rem 0.62rem; }
   .lp-cert-headline { font-size: clamp(1.2rem, 6vw, 1.6rem); }
   .lp-cert-lead { font-size: 0.8rem; margin-bottom: 0.85rem; }
-  .lp-cert-image-wrap { border-radius: 10px; }
+  .lp-cert-image-wrap { padding: 0.5rem; border-radius: 10px; }
+  .lp-cert-image { border-radius: 8px; }
   .lp-mobile-sticky-cta {
     position: fixed;
     left: 0;
