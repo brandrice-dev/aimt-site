@@ -258,6 +258,52 @@ nav {
 .card-image-inner { width: 100%; height: 100%; background: radial-gradient(ellipse at 30% 60%, rgba(163,150,141,0.1) 0%, transparent 60%), radial-gradient(ellipse at 75% 30%, rgba(120,100,85,0.07) 0%, transparent 55%), linear-gradient(135deg, #221f1b 0%, #1a1714 50%, #1e1a16 100%); display: flex; align-items: center; justify-content: center; position: relative; padding: 0.85rem; }
 .card-image-inner::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0px, transparent 1px, transparent 40px); }
 .flagship-preview-shot { width: 100%; height: 100%; object-fit: cover; object-position: 52% 30%; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); box-shadow: 0 18px 42px rgba(0,0,0,0.24); position: relative; z-index: 1; display: block; }
+.card-module-preview {
+  position: absolute;
+  left: 1.35rem;
+  right: 1.35rem;
+  bottom: 1.35rem;
+  z-index: 2;
+  border-radius: 12px;
+  border: 0.5px solid rgba(255,255,255,0.16);
+  background: linear-gradient(180deg, rgba(14,12,10,0.86) 0%, rgba(14,12,10,0.94) 100%);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.24);
+  padding: 0.72rem 0.8rem 0.75rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  pointer-events: none;
+}
+.course-card:hover .card-module-preview {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(255,255,255,0.22);
+}
+.card-module-preview-label {
+  font-family: var(--mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.44);
+  margin-bottom: 0.45rem;
+}
+.card-module-preview-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.4;
+}
+.card-module-preview-row + .card-module-preview-row { margin-top: 0.28rem; }
+.card-module-num {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.44);
+  min-width: 1.7rem;
+}
 .course-card-tag { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: #a3968d; margin-bottom: 1rem; display: block; }
 .course-card-body { padding: 1.5rem 1.5rem 1.35rem; flex: 1; display: flex; flex-direction: column; }
 .course-card-title { font-family: var(--mont); font-size: 1.7rem; font-weight: 600; line-height: 1.02; letter-spacing: -0.035em; color: white; margin-bottom: 0.85rem; text-transform: none; }
@@ -464,6 +510,13 @@ nav {
   .email-input-row { flex-direction: column; }
   .email-submit { width: 100%; }
   .card-image { height: 220px; }
+  .card-module-preview {
+    left: 1.15rem;
+    right: 1.15rem;
+    bottom: 1.15rem;
+    opacity: 1;
+    transform: none;
+  }
   .course-card-bottom { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
 }
 
@@ -516,7 +569,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
         <span class="hero-inst-bottom">of Modern Trichology</span>
       </span>
     </h1>
-    <p class="hero-sub"><strong>Institute-issued trichology certifications for real practice.</strong> Learn through structured checkpoints, guided by Cadence, and earn a credential designed to signal real mastery.</p>
+    <p class="hero-sub"><strong>Institute-issued trichology certifications for real practice.</strong> Learn through structured checkpoints with a personal in-course AI tutor, and earn a credential designed to signal real mastery.</p>
     <div class="hero-ctas">
       <a href="courses.html" class="cta-primary">View HeadSpa Mastery →</a>
       <a href="#community" class="cta-ghost">Meet the Community</a>
@@ -529,11 +582,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="section-inner">
     <span class="eyebrow reveal">About the Institute</span>
     <p class="what-statement reveal reveal-delay-1"><em>Professional trichology education</em> built like an institute instead of a content library.</p>
-    <p class="what-body reveal reveal-delay-2">The American Institute of Modern Trichology issues <strong>professional certifications in trichology and scalp science</strong>. The curriculum is built with active practitioners, guided by Cadence inside each lesson, and structured from the first module to the final checkpoint.</p>
+    <p class="what-body reveal reveal-delay-2">The American Institute of Modern Trichology issues <strong>professional certifications in trichology and scalp science</strong>. The curriculum is built with active practitioners, supported by an in-course AI tutor inside each lesson, and structured from the first module to the final checkpoint.</p>
     <p class="what-body reveal reveal-delay-3">No scattered PDFs. No generic eLearning. Just <strong>focused certification programs</strong> that build service judgment, scope awareness, and client-ready skill — whether you're entering the field or elevating an established practice.</p>
     <div class="what-grid">
       <div class="what-card reveal reveal-delay-1"><div class="what-card-icon">🎓</div><div class="what-card-title">Credentialed depth</div><div class="what-card-body">12-module certification programs that build real competency — not highlights, not tips. Curriculum designed with working practitioners.</div></div>
-      <div class="what-card reveal reveal-delay-2"><div class="what-card-icon">✦</div><div class="what-card-title">AI-guided learning</div><div class="what-card-body">Cadence, our AI guide, lives inside every lesson — answering questions, checking understanding, adapting to how you engage.</div></div>
+      <div class="what-card reveal reveal-delay-2"><div class="what-card-icon">✦</div><div class="what-card-title">AI-guided learning</div><div class="what-card-body">AIMT&rsquo;s in-course AI tutor, Cadence, lives inside every lesson &mdash; answering questions, checking understanding, and adapting to how you engage.</div></div>
       <div class="what-card reveal reveal-delay-3"><div class="what-card-icon">◎</div><div class="what-card-title">One certification at a time</div><div class="what-card-body">We release one certification program on one subject, done right. Quality over volume. Not a library — an institute.</div></div>
       <div class="what-card reveal reveal-delay-4"><div class="what-card-icon">⟐</div><div class="what-card-title">Open to everyone</div><div class="what-card-body">Whether you're brand new to the industry or an experienced practitioner leveling up, AIMT certifications are designed to meet you where you are and build from there.</div></div>
     </div>
@@ -551,16 +604,23 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
         <div class="card-image">
           <div class="card-image-inner">
             <img src="assets/headspa-halo-preview.png" alt="HeadSpa Mastery halo treatment preview" class="flagship-preview-shot">
+            <div class="card-module-preview" aria-hidden="true">
+              <div class="card-module-preview-label">Module Preview</div>
+              <div class="card-module-preview-row"><span class="card-module-num">01</span><span>Role of the Head Spa Technician</span></div>
+              <div class="card-module-preview-row"><span class="card-module-num">04</span><span>Microscopy &amp; Scalp Assessment</span></div>
+              <div class="card-module-preview-row"><span class="card-module-num">08</span><span>The Head Spa Service</span></div>
+              <div class="card-module-preview-row"><span class="card-module-num">+9</span><span>Additional modules</span></div>
+            </div>
           </div>
         </div>
         <div class="course-card-body">
           <span class="course-card-tag">&#x2736; Certification 01 &mdash; Enrollment Open</span>
           <div class="course-card-title">HeadSpa<br>Mastery</div>
-          <p class="course-card-desc">A 12-module certification in scalp science, service execution, client communication, and pricing logic. Cadence guidance and checkpoint progression are built into the learning path.</p>
+          <p class="course-card-desc">A 12-module certification in scalp science, service execution, client communication, and pricing logic. Personal AI tutor support and checkpoint progression are built into the learning path.</p>
           <div class="course-card-meta">
             <span class="course-meta-pill">12 modules</span>
             <span class="course-meta-pill">Checkpoint-based</span>
-            <span class="course-meta-pill">Cadence-guided</span>
+            <span class="course-meta-pill">AI tutor-guided</span>
             <span class="course-meta-pill">Self-paced</span>
             <span class="course-meta-pill">Institute credential</span>
           </div>
@@ -645,7 +705,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Built like an<br>institute.</h2>
     <p class="section-sub reveal reveal-delay-2">Most continuing education issues a certificate for attendance. AIMT is structured around a stricter standard: <strong>the credential should reflect verified learning</strong>, and the experience should still feel personal and usable.</p>
     <div class="diff-grid">
-      <div class="diff-card reveal"><div class="diff-num">01</div><div><div class="diff-title">Cadence lives inside the curriculum</div><div class="diff-body">Cadence is not a chatbot added after the fact. She is woven into each module, answering questions in context and evaluating checkpoints against the material you just studied. <strong>The guidance stays tied to the course.</strong></div></div></div>
+      <div class="diff-card reveal"><div class="diff-num">01</div><div><div class="diff-title">The AI tutor lives inside the curriculum</div><div class="diff-body">Cadence, AIMT&rsquo;s in-course AI tutor, is not a chatbot added after the fact. She is woven into each module, answering questions in context and evaluating checkpoints against the material you just studied. <strong>The guidance stays tied to the course.</strong></div></div></div>
       <div class="diff-card reveal reveal-delay-1"><div class="diff-num">02</div><div><div class="diff-title">One certification at a time</div><div class="diff-body">AIMT does not chase volume. Each certification is developed with working practitioners, reviewed for accuracy, and refined before the next one is released. <strong>The standard is protected by restraint.</strong></div></div></div>
       <div class="diff-card reveal reveal-delay-2"><div class="diff-num">03</div><div><div class="diff-title">Built for real study conditions</div><div class="diff-body">Open a module between clients, on a commute, or at home without losing your place. The experience is designed to stay stable, readable, and sequential across devices. <strong>The system supports continuity instead of fighting it.</strong></div></div></div>
       <div class="diff-card reveal reveal-delay-3"><div class="diff-num">04</div><div><div class="diff-title">Elevated presentation, serious content</div><div class="diff-body">The interface is intentionally calm, but the curriculum is strict. AIMT is designed to feel premium without softening the underlying standards. <strong>The experience matches the level of practice it represents.</strong></div></div></div>
@@ -667,7 +727,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
     <div class="human-strip reveal reveal-delay-2">
       <div class="human-strip-icon">💬</div>
-      <div class="human-strip-text"><strong>You can always reach a human.</strong> Cadence supports the learning experience, but practitioner judgment still matters. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
+      <div class="human-strip-text"><strong>You can always reach a human.</strong> The in-course AI tutor supports the learning experience, but practitioner judgment still matters. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
     </div>
   </div>
 </section>
