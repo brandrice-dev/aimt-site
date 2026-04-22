@@ -308,48 +308,9 @@ nav {
 
 /* ── CADENCE ── */
 #cadence { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
-.cadence-intro { font-family: var(--serif); font-style: italic; font-size: clamp(1.15rem,4vw,1.5rem); color: rgba(255,255,255,0.58); line-height: 1.62; margin-bottom: 2.5rem; }
+.cadence-intro { font-family: var(--serif); font-style: italic; font-size: clamp(1.15rem,4vw,1.5rem); color: rgba(255,255,255,0.58); line-height: 1.62; margin-bottom: 1.15rem; max-width: 38ch; }
 .cadence-intro em { font-style: normal; color: white; }
-.cadence-features { display: flex; flex-direction: column; }
-.cadence-feature { padding: 1.25rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.055); display: flex; gap: 14px; align-items: flex-start; }
-.cadence-feature:last-child { border-bottom: none; }
-.cf-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.045); border: 0.5px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem; }
-.cf-title { font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.82); margin-bottom: 4px; }
-.cf-body { font-size: 0.8rem; color: rgba(255,255,255,0.38); font-weight: 300; line-height: 1.68; }
-.cf-body strong { color: rgba(255,255,255,0.6); font-weight: 400; }
-.cadence-pill-preview { display: inline-flex; align-items: center; gap: 10px; background: var(--hero-bg); border-radius: 23px; padding: 0 16px 0 10px; height: 44px; border: 0.5px solid rgba(255,255,255,0.1); margin-top: 2rem; position: relative; cursor: pointer; user-select: none; transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease; outline: none; }
-.cadence-pill-preview:hover,
-.cadence-pill-preview:focus-visible,
-.cadence-pill-preview.is-open { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,0,0,0.24); }
-.cpv-dot { width: 7px; height: 7px; border-radius: 50%; background: #a3968d; animation: breathe 2.4s ease-in-out infinite; }
-.cpv-mark { width: 18px; height: 18px; color: rgba(255,255,255,0.52); }
-.cpv-mark svg { width: 18px; height: 18px; }
-.cpv-label { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: white; }
-.cpv-sub { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
-.cpv-message {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 10px);
-  width: min(360px, calc(100vw - 3rem));
-  background: rgba(17,14,12,0.98);
-  border: 0.5px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 0.8rem 0.9rem;
-  font-size: 0.74rem;
-  line-height: 1.62;
-  font-weight: 300;
-  color: rgba(255,255,255,0.82);
-  opacity: 0;
-  transform: translateY(-5px);
-  pointer-events: none;
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-.cadence-pill-preview:hover .cpv-message,
-.cadence-pill-preview:focus-visible .cpv-message,
-.cadence-pill-preview.is-open .cpv-message {
-  opacity: 1;
-  transform: translateY(0);
-}
+.cadence-summary { max-width: 54ch; font-size: 0.86rem; color: rgba(255,255,255,0.42); font-weight: 300; line-height: 1.78; }
 
 /* ── COMING SOON ── */
 #coming-soon { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
@@ -713,19 +674,8 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="section-inner">
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(1.8rem,7vw,3.2rem);">Your AI<br>learning guide.</h2>
-    <p class="cadence-intro reveal reveal-delay-2">Every AIMT certification includes <em>Cadence</em> — an AI learning guide trained on the course curriculum and available inside each module to answer questions, extend understanding, and keep the learning process specific to the lesson at hand.</p>
-    <div class="cadence-features reveal reveal-delay-2">
-      <div class="cadence-feature"><div class="cf-icon">💬</div><div><div class="cf-title">Ask anything, in context</div><div class="cf-body">Cadence knows the module you're in. Ask "why does the sebaceous gland matter here?" and get an answer specific to what you just read — not a generic search result. <strong>Context-aware, always.</strong></div></div></div>
-      <div class="cadence-feature"><div class="cf-icon">✦</div><div><div class="cf-title">Checkpoints, not quizzes</div><div class="cf-body">At the end of each lesson, Cadence gives you an open-ended checkpoint. She reads your answer and responds with feedback, clarification, or extension grounded in the module. <strong>No multiple choice. No generic scoring.</strong></div></div></div>
-      <div class="cadence-feature"><div class="cf-icon">◎</div><div><div class="cf-title">Available when you need depth</div><div class="cf-body">A persistent guide button lives on every lesson screen. Open it when you need a sharper explanation, a clearer distinction, or help connecting the material back to practice. <strong>The guide stays inside the course instead of pulling you away from it.</strong></div></div></div>
-      <div class="cadence-feature"><div class="cf-icon">⟐</div><div><div class="cf-title">Model-backed, curriculum-bound</div><div class="cf-body">Cadence runs on a frontier AI model, but her role inside AIMT is deliberately narrow: guide the learner, reinforce the curriculum, and support rigor. <strong>The intelligence serves the certification standard.</strong></div></div></div>
-    </div>
-    <div class="cadence-pill-preview reveal reveal-delay-3" style="width:fit-content;" role="button" tabindex="0" aria-label="Preview Cadence welcome message" aria-expanded="false">
-      <div class="cpv-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
-      <div><div class="cpv-label">Cadence</div><div class="cpv-sub">Your guide · Active in every lesson</div></div>
-      <div class="cpv-dot"></div>
-      <div class="cpv-message" aria-live="polite">Welcome to AIMT. I’ll guide you through your HeadSpa Mastery training step by step.</div>
-    </div>
+    <p class="cadence-intro reveal reveal-delay-2">Cadence is AIMT’s in-course intelligence layer: focused, curriculum-bound, and built to support clinical reasoning inside each lesson.</p>
+    <p class="cadence-summary reveal reveal-delay-3">She provides context-specific guidance, evaluates open-ended checkpoints, and reinforces institute standards without turning the learning experience into generic chat.</p>
   </div>
 </section>
 
@@ -876,30 +826,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// Cadence preview interaction
-const cadencePreview = document.querySelector('.cadence-pill-preview');
-if (cadencePreview) {
-  const setPreviewState = (isOpen) => {
-    cadencePreview.classList.toggle('is-open', isOpen);
-    cadencePreview.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  };
-
-  cadencePreview.addEventListener('click', (e) => {
-    e.stopPropagation();
-    setPreviewState(!cadencePreview.classList.contains('is-open'));
-  });
-
-  cadencePreview.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setPreviewState(!cadencePreview.classList.contains('is-open'));
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!cadencePreview.contains(e.target)) setPreviewState(false);
-  });
-}
 </script>
 </body>
 </html>
