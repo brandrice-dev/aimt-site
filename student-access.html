@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Student Access — AIMT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #171410;
-  --panel: rgba(255,255,255,0.05);
-  --panel-border: rgba(255,255,255,0.1);
+  --bg: #1a1814;
+  --panel: rgba(255,255,255,0.035);
+  --panel-border: rgba(255,255,255,0.08);
   --text: rgba(255,255,255,0.94);
-  --muted: rgba(255,255,255,0.52);
+  --muted: rgba(255,255,255,0.5);
   --accent: #a3968d;
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'Outfit', -apple-system, system-ui, sans-serif;
@@ -24,8 +25,8 @@ html, body { min-height: 100%; }
 body {
   font-family: var(--sans);
   background:
-    radial-gradient(circle at top left, rgba(163,150,141,0.12), transparent 34%),
-    linear-gradient(180deg, #1d1914 0%, #14110d 100%);
+    radial-gradient(circle at top left, rgba(163,150,141,0.08), transparent 34%),
+    linear-gradient(180deg, #1a1814 0%, #14110d 100%);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
@@ -40,9 +41,9 @@ body {
   width: min(100%, 760px);
   background: var(--panel);
   border: 0.5px solid var(--panel-border);
-  border-radius: 26px;
+  border-radius: 18px;
   padding: clamp(2rem, 4vw, 3.1rem);
-  box-shadow: 0 30px 90px rgba(0,0,0,0.32);
+  box-shadow: 0 16px 42px rgba(0,0,0,0.18);
   backdrop-filter: blur(14px);
 }
 .eyebrow {
@@ -187,27 +188,35 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.92rem 1.35rem;
-  border-radius: 999px;
+  padding: 0.86rem 1.05rem;
+  border-radius: 980px;
   text-decoration: none;
   font-family: var(--mont);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   text-align: center;
-  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, opacity 0.2s;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, opacity 0.2s, gap 0.2s;
   cursor: pointer;
 }
 .btn-primary {
-  background: #f2eee8;
-  color: #1a1714;
-  border: 0.5px solid rgba(242,238,232,0.55);
+  background: white;
+  color: #262626;
+  border: 0.5px solid rgba(255,255,255,0.16);
 }
 .btn-secondary {
-  background: transparent;
-  color: rgba(255,255,255,0.72);
-  border: 0.5px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.48);
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+.btn-primary:hover {
+  background: rgba(255,255,255,0.9);
+}
+.btn-secondary:hover {
+  color: white;
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.18);
 }
 .helper {
   margin-top: 1rem;
@@ -226,7 +235,7 @@ body {
     padding: 1rem 1rem max(1.25rem, env(safe-area-inset-bottom, 1.25rem));
   }
   .card {
-    border-radius: 22px;
+    border-radius: 16px;
     padding: 1.5rem 1.2rem 1.7rem;
   }
   .lead,

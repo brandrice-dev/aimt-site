@@ -1,0 +1,149 @@
+/*
+  AIMT Design System (Source: /courses)
+  This file is token-only and does not change page visuals until consumed.
+*/
+
+:root {
+  /* Typography families */
+  --aimt-font-serif: 'Playfair Display', Georgia, serif;
+  --aimt-font-sans: 'Outfit', -apple-system, system-ui, sans-serif;
+  --aimt-font-mono: 'SF Mono', 'Fira Code', monospace;
+  --aimt-font-mont: 'Montserrat', Arial, sans-serif;
+
+  /* Base layout */
+  --aimt-nav-height: 56px;
+  --aimt-container-max: 1100px;
+  --aimt-container-pad-desktop: 2rem;
+  --aimt-container-pad-mobile: 1.25rem;
+
+  /* Core color system (dark surfaces) */
+  --aimt-color-bg-primary: #1a1814;                /* /courses body */
+  --aimt-color-bg-secondary: #262626;              /* /courses --hero-bg */
+  --aimt-color-accent: #a3968d;
+
+  --aimt-color-text-primary: #ffffff;
+  --aimt-color-text-strong: rgba(255,255,255,0.95);
+  --aimt-color-text-body: rgba(255,255,255,0.52);
+  --aimt-color-text-muted: rgba(255,255,255,0.43);
+  --aimt-color-text-subtle: rgba(255,255,255,0.34);
+  --aimt-color-text-micro: rgba(255,255,255,0.28);
+  --aimt-color-text-faint: rgba(255,255,255,0.22);
+
+  /* Light-surface text colors (promise/footer areas) */
+  --aimt-color-light-bg: #faf8f5;
+  --aimt-color-light-text: #262626;
+  --aimt-color-light-muted: #7a6e66;
+
+  /* Surface and borders */
+  --aimt-surface-1: rgba(255,255,255,0.02);
+  --aimt-surface-2: rgba(255,255,255,0.03);
+  --aimt-surface-3: rgba(255,255,255,0.04);
+  --aimt-surface-4: rgba(255,255,255,0.045);
+
+  --aimt-border-hairline: 0.5px;
+  --aimt-border-soft: rgba(255,255,255,0.06);
+  --aimt-border-default: rgba(255,255,255,0.07);
+  --aimt-border-strong: rgba(255,255,255,0.08);
+  --aimt-border-accent: rgba(163,150,141,0.18);
+  --aimt-border-accent-strong: rgba(163,150,141,0.24);
+
+  /* Radius */
+  --aimt-radius-pill: 980px;
+  --aimt-radius-card: 18px;
+  --aimt-radius-media: 14px;
+  --aimt-radius-panel: 16px;
+
+  /* Shadows */
+  --aimt-shadow-card-hover: 0 24px 60px rgba(0,0,0,0.32);
+  --aimt-shadow-card-featured: 0 16px 42px rgba(0,0,0,0.18);
+  --aimt-shadow-card-future: 0 14px 36px rgba(0,0,0,0.2);
+  --aimt-shadow-media: 0 18px 42px rgba(0,0,0,0.24);
+
+  /* Spacing scale (from /courses rhythm) */
+  --aimt-space-xxs: 0.35rem;
+  --aimt-space-xs: 0.5rem;
+  --aimt-space-sm: 0.75rem;
+  --aimt-space-md: 1rem;
+  --aimt-space-lg: 1.25rem;
+  --aimt-space-xl: 1.5rem;
+  --aimt-space-2xl: 2rem;
+  --aimt-space-3xl: 2.5rem;
+  --aimt-space-4xl: 3rem;
+  --aimt-space-5xl: 4rem;
+  --aimt-space-6xl: 5rem;
+  --aimt-space-7xl: 6rem;
+
+  /* Section rhythm */
+  --aimt-section-pad-standard: 5rem 2rem 6rem;     /* courses-section, promise-section */
+  --aimt-section-pad-band: 3rem 2rem;              /* why-band */
+  --aimt-section-gap-major: 4rem;                  /* section-rule spacing */
+  --aimt-section-gap-header: 2.5rem;
+
+  /* Type scale */
+  --aimt-type-h1: clamp(2.5rem, 6vw, 4.5rem);
+  --aimt-type-h2: clamp(1.4rem, 3vw, 1.9rem);
+  --aimt-type-h3: 1.7rem;
+  --aimt-type-h4: 1.08rem;
+
+  --aimt-type-body-lg: 1rem;
+  --aimt-type-body-md: 0.92rem;
+  --aimt-type-body-sm: 0.82rem;
+  --aimt-type-body-xs: 0.78rem;
+  --aimt-type-caption: 0.74rem;
+  --aimt-type-micro: 0.64rem;
+  --aimt-type-mono-sm: 0.58rem;
+  --aimt-type-mono-xs: 0.56rem;
+  --aimt-type-mono-xxs: 0.52rem;
+  --aimt-type-mono-3xs: 0.5rem;
+
+  /* Type weights */
+  --aimt-weight-light: 300;
+  --aimt-weight-regular: 400;
+  --aimt-weight-medium: 500;
+  --aimt-weight-semibold: 600;
+  --aimt-weight-bold: 700;
+
+  /* Line heights */
+  --aimt-leading-tight: 0.95;
+  --aimt-leading-heading: 1.02;
+  --aimt-leading-copy-tight: 1.6;
+  --aimt-leading-copy: 1.72;
+  --aimt-leading-copy-loose: 1.82;
+  --aimt-leading-editorial: 1.42;
+  --aimt-leading-micro: 1;
+
+  /* Letter spacing presets */
+  --aimt-track-tight: -0.035em;
+  --aimt-track-title: -0.025em;
+  --aimt-track-subtitle: -0.02em;
+  --aimt-track-label: 0.22em;
+  --aimt-track-label-md: 0.2em;
+  --aimt-track-label-sm: 0.18em;
+  --aimt-track-cta: 0.1em;
+
+  /* Card component tokens (exact /courses) */
+  --aimt-card-bg: rgba(255,255,255,0.02);
+  --aimt-card-bg-hover: rgba(255,255,255,0.045);
+  --aimt-card-bg-featured: rgba(255,255,255,0.035);
+  --aimt-card-border: rgba(255,255,255,0.08);
+  --aimt-card-border-hover: rgba(163,150,141,0.26);
+  --aimt-card-border-featured: rgba(163,150,141,0.18);
+  --aimt-card-media-height: 220px;
+  --aimt-card-body-pad: 1.5rem 1.5rem 1.35rem;
+  --aimt-card-footer-pad: 1rem 1.5rem 1.2rem;
+
+  /* Button component tokens (from nav + course card CTA) */
+  --aimt-btn-pill-radius: 980px;
+  --aimt-btn-font-size: 0.62rem;
+  --aimt-btn-font-size-nav: 0.74rem;
+  --aimt-btn-pad-inline: 0.95rem;
+  --aimt-btn-pad-block: 0.52rem;
+  --aimt-btn-gap: 7px;
+  --aimt-btn-bg-secondary: rgba(255,255,255,0.06);
+  --aimt-btn-border-secondary: rgba(255,255,255,0.1);
+  --aimt-btn-text-secondary: rgba(255,255,255,0.48);
+  --aimt-btn-bg-secondary-hover: rgba(255,255,255,0.09);
+  --aimt-btn-border-secondary-hover: rgba(255,255,255,0.18);
+  --aimt-btn-text-secondary-hover: #ffffff;
+}
+
