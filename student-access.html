@@ -350,6 +350,7 @@ body {
     const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
+    const AIMT_LOGS_TABLE = 'aimt_logs';
     const STAFF_EMAIL_ALLOWLIST = [
       'brandmrice@gmail.com',
       'cadyb03@gmail.com',
@@ -392,6 +393,29 @@ body {
       try {
         localStorage.removeItem(PENDING_CLAIM_KEY);
       } catch (_) {}
+    }
+
+    async function logAimtEvent(type, payload) {
+      const normalizedEmail = normalizeAccessEmail(payload && payload.email);
+      const row = {
+        event_type: String(type || 'unknown_event'),
+        source: String((payload && payload.source) || 'student-access.html'),
+        email: normalizedEmail || null,
+        user_id: payload && payload.user_id ? String(payload.user_id) : null,
+        message: payload && payload.message ? String(payload.message) : null
+      };
+      try {
+        const { error } = await supabaseClient.from(AIMT_LOGS_TABLE).insert(row);
+        if (error) throw error;
+      } catch (error) {
+        try {
+          console.info('[aimt-log-fallback]', {
+            timestamp: new Date().toISOString(),
+            ...row,
+            fallback_error: error && error.message ? error.message : 'insert_failed'
+          });
+        } catch (_) {}
+      }
     }
 
     function evaluatePassword(value) {
@@ -645,6 +669,10 @@ body {
     async function recoverHeadSpaEntitlement(user) {
       const sessionId = getPendingCheckoutSessionId();
       if (!sessionId || !user) return false;
+      void logAimtEvent('student_access_entitlement_recovery_attempt', {
+        email: user.email,
+        user_id: user.id || null
+      });
 
       try {
         const response = await fetch('/api/claim-course-access', {
@@ -660,9 +688,25 @@ body {
         if (response.ok) {
           clearPendingCheckoutSessionId();
           await bindHeadSpaEntitlementsToUser(user);
+          void logAimtEvent('student_access_entitlement_recovery_result', {
+            email: user.email,
+            user_id: user.id || null,
+            message: 'success'
+          });
           return true;
         }
+        void logAimtEvent('student_access_entitlement_recovery_result', {
+          email: user.email,
+          user_id: user.id || null,
+          message: `failure_http_${response.status}`
+        });
+        return false;
       } catch (_) {}
+      void logAimtEvent('student_access_entitlement_recovery_result', {
+        email: user.email,
+        user_id: user.id || null,
+        message: 'failure_exception'
+      });
 
       return false;
     }
@@ -779,12 +823,20 @@ body {
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error || !data || !data.user) {
+          void logAimtEvent('student_access_signin_failure', {
+            email,
+            message: error?.message || 'sign_in_failed'
+          });
           if (isAllowlistedStaffEmail(email)) {
             const passwordCheck = getPasswordRequirementMessage(password);
             if (!passwordCheck.ok) {
               showNotice(passwordCheck.message);
               return;
             }
+            void logAimtEvent('student_access_staff_autosignup_triggered', {
+              email,
+              message: 'sign_in_failed_allowlisted_retry_with_signup'
+            });
             setLoading(true, 'Creating staff account...');
             const created = await createFirstTimeStaffAccount(email, password);
             if (!created.ok || !created.user) {
@@ -800,6 +852,11 @@ body {
               existingAuthorizedSession = created.user;
               return;
             }
+            void logAimtEvent('student_access_signin_success', {
+              email: created.user.email,
+              user_id: created.user.id || null,
+              message: 'staff_autosignup_path'
+            });
             redirectToCourse();
             return;
           }
@@ -821,8 +878,16 @@ body {
           return;
         }
 
+        void logAimtEvent('student_access_signin_success', {
+          email: data.user.email,
+          user_id: data.user.id || null
+        });
         redirectToCourse();
       } catch (_) {
+        void logAimtEvent('student_access_signin_failure', {
+          email,
+          message: 'sign_in_exception'
+        });
         showNotice('Unable to sign in right now.');
       } finally {
         setLoading(false);
@@ -841,8 +906,16 @@ body {
         const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/student-access.html`
         });
+        void logAimtEvent('student_access_password_reset_requested', {
+          email,
+          message: error ? (error.message || 'request_failed') : 'request_sent'
+        });
         showNotice(error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.');
       } catch (_) {
+        void logAimtEvent('student_access_password_reset_requested', {
+          email,
+          message: 'request_exception'
+        });
         showNotice('Unable to send reset email.');
       }
     });
@@ -871,16 +944,25 @@ body {
       try {
         const { error } = await supabaseClient.auth.updateUser({ password: nextPassword });
         if (error) {
+          void logAimtEvent('student_access_password_reset_completed', {
+            message: error.message || 'update_failed'
+          });
           showNotice(error.message || 'Unable to update password right now.');
           return;
         }
 
+        void logAimtEvent('student_access_password_reset_completed', {
+          message: 'success'
+        });
         await supabaseClient.auth.signOut();
         clearRecoveryUrlParams();
         showNotice('Password updated. Sign in with your new password.');
         if (recoveryPanel) recoveryPanel.style.display = 'none';
         recoveryMode = false;
       } catch (_) {
+        void logAimtEvent('student_access_password_reset_completed', {
+          message: 'update_exception'
+        });
         showNotice('Unable to update password right now.');
       } finally {
         setRecoveryLoading(false);

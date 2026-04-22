@@ -6663,6 +6663,7 @@ const HEADSPA_COURSE_SLUG = 'headspa-mastery';
 const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
 const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
 const ACCESS_FLOW_HANDOFF_TTL_MS = 5 * 60 * 1000;
+const AIMT_LOGS_TABLE = 'aimt_logs';
 const STAFF_EMAIL_ALLOWLIST = [
   'brandmrice@gmail.com',
   'cadyb03@gmail.com',
@@ -6690,6 +6691,29 @@ function clearPendingCheckoutSessionId() {
   try {
     localStorage.removeItem(PENDING_CLAIM_KEY);
   } catch (_) {}
+}
+
+async function logAimtEvent(type, payload) {
+  if (!supabaseClient) return;
+  const row = {
+    event_type: String(type || 'unknown_event'),
+    source: String((payload && payload.source) || 'headspa-mastery.html'),
+    email: normalizeAccessEmail(payload && payload.email) || null,
+    user_id: payload && payload.user_id ? String(payload.user_id) : null,
+    message: payload && payload.message ? String(payload.message) : null
+  };
+  try {
+    const { error } = await supabaseClient.from(AIMT_LOGS_TABLE).insert(row);
+    if (error) throw error;
+  } catch (error) {
+    try {
+      console.info('[aimt-log-fallback]', {
+        timestamp: new Date().toISOString(),
+        ...row,
+        fallback_error: error && error.message ? error.message : 'insert_failed'
+      });
+    } catch (_) {}
+  }
 }
 
 function consumeAccessFlowHandoff() {
@@ -6885,7 +6909,14 @@ async function shouldEnterPurchasedCourse() {
       await recoverHeadSpaEntitlement(user);
       entitledPurchaser = await hasHeadSpaEntitlement(user);
     }
-    if (!allowlistedStaff && !entitledPurchaser) return false;
+    if (!allowlistedStaff && !entitledPurchaser) {
+      void logAimtEvent('headspa_blocked_access_no_entitlement', {
+        email: user.email,
+        user_id: user.id || null,
+        message: requestedPurchasedEntry ? 'gated_entry_denied_after_handoff' : 'gated_entry_denied'
+      });
+      return false;
+    }
     if (!allowlistedStaff && entitledPurchaser) {
       await bindHeadSpaEntitlementsToUser(user);
     }
@@ -6980,6 +7011,11 @@ async function handleSignIn() {
 
     if (!allowlistedStaff && !entitledPurchaser) {
       await supabaseClient.auth.signOut();
+      void logAimtEvent('headspa_blocked_access_no_entitlement', {
+        email: data.user.email,
+        user_id: data.user.id || null,
+        message: 'signin_denied_no_entitlement'
+      });
       notice.textContent = getPendingCheckoutSessionId()
         ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
         : 'This account does not currently have access to HeadSpa Mastery.';

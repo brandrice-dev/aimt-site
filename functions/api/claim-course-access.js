@@ -1,6 +1,7 @@
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const ENTITLEMENTS_TABLE = 'course_entitlements';
 const COURSE_SLUG = 'headspa-mastery';
+const AIMT_LOGS_TABLE = 'aimt_logs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -11,6 +12,48 @@ function json(data, status = 200) {
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
+}
+
+async function logAimtEvent(type, payload) {
+  const source = String((payload && payload.source) || 'api/claim-course-access');
+  const row = {
+    event_type: String(type || 'unknown_event'),
+    source,
+    email: normalizeEmail(payload && payload.email) || null,
+    user_id: payload && payload.user_id ? String(payload.user_id) : null,
+    message: payload && payload.message ? String(payload.message) : null
+  };
+  const timestamp = new Date().toISOString();
+  const supabaseUrl = payload && payload.supabaseUrl;
+  const serviceRoleKey = payload && payload.serviceRoleKey;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.info('[aimt-log-fallback]', { timestamp, ...row, fallback_error: 'missing_supabase_config' });
+    return;
+  }
+
+  try {
+    const response = await fetch(`${supabaseUrl}/rest/v1/${AIMT_LOGS_TABLE}`, {
+      method: 'POST',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify(row)
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data?.message || data?.error || `http_${response.status}`);
+    }
+  } catch (error) {
+    console.info('[aimt-log-fallback]', {
+      timestamp,
+      ...row,
+      fallback_error: error && error.message ? error.message : 'insert_failed'
+    });
+  }
 }
 
 async function fetchCheckoutSession(sessionId, stripeSecretKey) {
@@ -65,13 +108,47 @@ export async function onRequestPost(context) {
     const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
     const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!sessionId) return json({ error: 'Missing checkout session.' }, 400);
-    if (!stripeSecretKey) return json({ error: 'Stripe is not configured.' }, 500);
-    if (!serviceRoleKey) return json({ error: 'Supabase service role is not configured.' }, 500);
+    if (!sessionId) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'missing_checkout_session'
+      });
+      return json({ error: 'Missing checkout session.' }, 400);
+    }
+    if (!stripeSecretKey) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'stripe_not_configured'
+      });
+      return json({ error: 'Stripe is not configured.' }, 500);
+    }
+    if (!serviceRoleKey) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'supabase_service_role_not_configured'
+      });
+      return json({ error: 'Supabase service role is not configured.' }, 500);
+    }
 
     const session = await fetchCheckoutSession(sessionId, stripeSecretKey);
     const paid = session.payment_status === 'paid' || session.status === 'complete';
     if (!paid) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'checkout_not_completed'
+      });
       return json({ error: 'Checkout session is not completed.' }, 400);
     }
 
@@ -83,10 +160,23 @@ export async function onRequestPost(context) {
     const purchaserEmail = providedEmail || sessionEmail;
 
     if (!purchaserEmail) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        user_id: userId,
+        message: 'missing_purchaser_email'
+      });
       return json({ error: 'No purchaser email found for this checkout session.' }, 400);
     }
 
     if (providedEmail && sessionEmail && providedEmail !== sessionEmail) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'email_mismatch_with_checkout'
+      });
       return json({ error: 'Use the same email address tied to your enrollment.' }, 400);
     }
 
@@ -98,8 +188,22 @@ export async function onRequestPost(context) {
       userId
     });
 
+    await logAimtEvent('api_claim_course_access_success', {
+      supabaseUrl,
+      serviceRoleKey,
+      email: purchaserEmail,
+      user_id: userId,
+      message: 'entitlement_upserted'
+    });
     return json({ ok: true });
   } catch (error) {
+    const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
+    await logAimtEvent('api_claim_course_access_failure', {
+      supabaseUrl,
+      serviceRoleKey,
+      message: error && error.message ? error.message : 'claim_exception'
+    });
     return json({ error: error.message || 'Unable to claim course access.' }, 500);
   }
 }

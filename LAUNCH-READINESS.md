@@ -61,7 +61,8 @@
   - [x] Staff allowlist manual verification
     - Test: Sign in via `student-access.html` using an allowlisted staff account from signed-out state.
     - Pass if: Staff account reaches gated course access as intended, while non-entitled non-staff accounts remain blocked.
-- [ ] Add/confirm lightweight error observability for critical failures (`create-checkout-session`, `claim-course-access`, Supabase auth failures).
+- [x] Add/confirm lightweight error observability for critical failures (`create-checkout-session`, `claim-course-access`, Supabase auth failures).
+  - Note: `aimt_logs` table and migration are now in place, with a silent-fail `logAimtEvent` helper capturing launch-critical auth, checkout, and entitlement claim events without affecting UX.
 
 ### Should complete before launch
 - [ ] Add a short QA runbook with exact test cases and expected outcomes for support/team handoff.
@@ -99,6 +100,7 @@
 - Execute and document a focused launch gating QA pass first (especially browser reopen/refresh behavior across devices), then freeze access-flow logic unless a launch-blocking bug is found.
 
 ## Change Log
+- 2026-04-21: Added lightweight launch observability with `aimt_logs` migration and client/server `logAimtEvent` coverage for auth, entitlement recovery/claim, and checkout failure paths.
 - 2026-04-21: Completed full live end-to-end QA matrix. Verified purchase flow (cancel + success), entitlement recovery, password reset, and staff allowlist, and confirmed auth now requires re-login after browser close.
 - 2026-04-21: Switched Supabase auth persistence to session-scoped browser storage across student-access, success, and headspa course entry so closing the browser now requires re-authentication, while local course progress/resume and in-course memory data remain preserved.
 - 2026-04-21: Enforced course-card navigation rule in launch docs after code audit confirmation: discovery card interaction remains a fixed route to public enrollment (no auth-based interception/reroute); returning access remains through `student-access.html`.

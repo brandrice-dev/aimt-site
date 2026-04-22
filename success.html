@@ -465,9 +465,36 @@ body {
     const COURSE_SIGNIN_URL = 'student-access.html';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
+    const AIMT_LOGS_TABLE = 'aimt_logs';
     const checkoutParams = new URLSearchParams(window.location.search);
     const checkoutSessionId = String(checkoutParams.get('session_id') || '').trim();
     const hasCheckoutSession = !!checkoutSessionId;
+
+    function normalizeAccessEmail(email) {
+      return String(email || '').trim().toLowerCase();
+    }
+
+    async function logAimtEvent(type, payload) {
+      const row = {
+        event_type: String(type || 'unknown_event'),
+        source: String((payload && payload.source) || 'success.html'),
+        email: normalizeAccessEmail(payload && payload.email) || null,
+        user_id: payload && payload.user_id ? String(payload.user_id) : null,
+        message: payload && payload.message ? String(payload.message) : null
+      };
+      try {
+        const { error } = await supabaseClient.from(AIMT_LOGS_TABLE).insert(row);
+        if (error) throw error;
+      } catch (error) {
+        try {
+          console.info('[aimt-log-fallback]', {
+            timestamp: new Date().toISOString(),
+            ...row,
+            fallback_error: error && error.message ? error.message : 'insert_failed'
+          });
+        } catch (_) {}
+      }
+    }
 
     function persistPendingCheckoutSession() {
       if (!checkoutSessionId) return;
@@ -609,8 +636,18 @@ body {
         const data = await response.json().catch(() => ({}));
         if (response.ok) {
           clearPendingCheckoutSession();
+          void logAimtEvent('success_claim_course_access_success', {
+            email,
+            user_id: userId || null,
+            message: 'claim_ok'
+          });
         } else {
           persistPendingCheckoutSession();
+          void logAimtEvent('success_claim_course_access_failure', {
+            email,
+            user_id: userId || null,
+            message: data.error || `http_${response.status}`
+          });
         }
         return {
           ok: response.ok,
@@ -618,6 +655,11 @@ body {
         };
       } catch (_) {
         persistPendingCheckoutSession();
+        void logAimtEvent('success_claim_course_access_failure', {
+          email,
+          user_id: userId || null,
+          message: 'claim_exception'
+        });
         return {
           ok: false,
           error: 'Unable to save your course access right now.'
@@ -658,6 +700,11 @@ body {
         if (error || !data || !data.session || !data.session.user) return;
 
         if (!hasCheckoutSession) {
+          void logAimtEvent('success_missing_session_id', {
+            email: data.session.user && data.session.user.email,
+            user_id: data.session.user && data.session.user.id,
+            message: 'active_session_missing_checkout_session_id'
+          });
           clearNotices();
           hideSuccessPanel();
           showMessage('Your AIMT session is active, but this page is missing checkout confirmation details. Continue through Student Access.');
@@ -776,6 +823,11 @@ body {
     });
 
     persistPendingCheckoutSession();
+    if (!hasCheckoutSession) {
+      void logAimtEvent('success_missing_session_id', {
+        message: 'page_loaded_without_checkout_session_id'
+      });
+    }
     setupPasswordToggles();
     if (passwordInput) {
       passwordInput.addEventListener('input', updatePasswordHints);
