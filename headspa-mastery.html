@@ -930,12 +930,69 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-pi-check { color: #a3968d; font-size: 0.75rem; flex-shrink: 0; }
 .lp-enroll-btn { width: 100%; padding: 0.86rem 1.05rem; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 980px; cursor: pointer; font-family: var(--mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.48); transition: color 0.2s, gap 0.2s, background 0.2s, border-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 7px; box-shadow: none; }
 .lp-enroll-btn:hover { color: white; gap: 10px; background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
+.lp-enroll-btn.lp-enroll-primary {
+  background: rgba(255,255,255,0.98);
+  border-color: rgba(255,255,255,0.98);
+  color: rgba(15,13,11,0.9);
+  box-shadow: 0 8px 26px rgba(0,0,0,0.22);
+}
+.lp-enroll-btn.lp-enroll-primary:hover {
+  background: white;
+  border-color: white;
+  color: rgba(8,7,6,0.95);
+  gap: 10px;
+}
+.lp-enroll-btn.lp-enroll-primary .lp-enter-btn-dot {
+  background: rgba(18,15,13,0.5);
+}
 .lp-cta-reassurance { font-size: 0.72rem; color: rgba(255,255,255,0.5); line-height: 1.52; font-weight: 300; text-align: center; margin: 0.65rem 0 0; }
 .lp-or-divider { display: flex; align-items: center; gap: 0.75rem; margin: 0.7rem 0; }
 .lp-or-divider::before, .lp-or-divider::after { content: ''; flex: 1; height: 0.5px; background: rgba(255,255,255,0.08); }
 .lp-or-divider span { font-size: 0.65rem; color: rgba(255,255,255,0.2); font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
 .lp-signin-btn { width: 100%; padding: 0.88rem 1rem; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 980px; cursor: pointer; font-family: var(--mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.48); transition: color 0.2s, gap 0.2s, background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .lp-signin-btn:hover { color: white; gap: 10px; background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
+.lp-bottom-cta {
+  margin: 1.15rem 0 0.4rem;
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 1.35rem 1.4rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(163,150,141,0.12) 100%);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.18);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+.lp-bottom-cta-copy { max-width: 62ch; }
+.lp-bottom-cta-kicker {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.78);
+  margin-bottom: 0.5rem;
+}
+.lp-bottom-cta-title {
+  font-family: var(--mont);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  letter-spacing: -0.018em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.93);
+  margin-bottom: 0.42rem;
+}
+.lp-bottom-cta-text {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  line-height: 1.62;
+  color: rgba(255,255,255,0.58);
+}
+.lp-bottom-cta .lp-enroll-btn {
+  width: auto;
+  min-width: 230px;
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+}
 
 /* ── SIGN IN PANEL ── */
 .lp-signin-panel { display: none; width: 100%; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.5rem; background: rgba(255,255,255,0.03); margin-top: 1rem; }
@@ -1565,6 +1622,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-cert-image-wrap { padding: 0.62rem; border-radius: 12px; }
   .lp-cert-image { border-radius: 8px; }
   .lp-cert-notes { grid-template-columns: 1fr; gap: 0.5rem; }
+  .lp-bottom-cta {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1rem 0.95rem;
+    border-radius: 16px;
+    margin-top: 1rem;
+  }
+  .lp-bottom-cta .lp-enroll-btn {
+    width: 100%;
+    min-width: 0;
+  }
   .lp-mobile-sticky-cta {
     position: fixed;
     left: 0;
@@ -1853,7 +1921,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-pi-item"><span class="lp-pi-check">✓</span>AIMT certificate included</div>
           <div class="lp-pi-item"><span class="lp-pi-check">✓</span>Post-purchase account setup and guided course entry</div>
         </div>
-        <button class="lp-enroll-btn" onclick="startCheckout()">
+        <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
           <div class="lp-enter-btn-dot"></div>
           Begin Enrollment
         </button>
@@ -1927,6 +1995,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
     </div>
+    <div class="lp-bottom-cta">
+      <div class="lp-bottom-cta-copy">
+        <div class="lp-bottom-cta-kicker">Enrollment Open</div>
+        <div class="lp-bottom-cta-title">Ready To Begin Clinical HeadSpa Mastery?</div>
+        <div class="lp-bottom-cta-text">Join the AIMT certification path and move through a structured practitioner standard with guided checkpoints from start to completion.</div>
+      </div>
+      <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
+        <div class="lp-enter-btn-dot"></div>
+        Begin Enrollment
+      </button>
+    </div>
 
     <!-- ── SIGN IN PANEL ── -->
     <div class="lp-signin-panel" id="lpSignInPanel">
@@ -1942,7 +2021,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
   </div>
   <div class="lp-mobile-sticky-cta">
-    <button class="lp-enroll-btn" onclick="startCheckout()">
+    <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
       <div class="lp-enter-btn-dot"></div>
       Begin Enrollment
     </button>
