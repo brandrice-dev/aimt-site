@@ -692,6 +692,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-headline { font-family: var(--mont); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 0.95; color: white; letter-spacing: -0.025em; margin-bottom: 0.52rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.55s forwards; text-transform: uppercase; max-width: 9ch; }
 .lp-headline em { font-style: italic; font-weight: 300; font-family: var(--serif); font-size: 0.55em; letter-spacing: 0.04em; text-transform: none; color: rgba(255,255,255,0.48); display: block; margin-bottom: 0.15em; }
 .lp-subhead { font-family: var(--sans); font-size: 0.95rem; font-weight: 300; color: rgba(255,255,255,0.56); line-height: 1.72; max-width: 520px; margin: 0 0 0.9rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.7s forwards; }
+.lp-hero-note {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 300;
+  line-height: 1.64;
+  color: rgba(255,255,255,0.48);
+  max-width: 520px;
+  margin: 0 0 1rem;
+  opacity: 0;
+  animation: lpFadeUp 0.8s ease 0.76s forwards;
+}
 .lp-fit { font-family: var(--mono); font-size: 0.62rem; font-weight: 400; line-height: 1.55; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(163,150,141,0.72); margin-bottom: 0.82rem; max-width: 520px; opacity: 0; animation: lpFadeUp 0.8s ease 0.78s forwards; }
 .lp-fit-pills { display: flex; flex-wrap: wrap; gap: 0.45rem; opacity: 0; animation: lpFadeUp 0.8s ease 0.86s forwards; }
 .lp-fit-pill {
@@ -1702,6 +1713,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-brand { margin-bottom: 1.35rem; }
   .lp-headline { margin-bottom: 0.85rem; }
   .lp-subhead { margin-bottom: 0.72rem; font-size: 0.94rem; line-height: 1.62; }
+  .lp-hero-note { font-size: 0.8rem; line-height: 1.58; margin-bottom: 0.85rem; }
   .lp-fit { font-size: 0.58rem; margin-bottom: 0.66rem; line-height: 1.52; letter-spacing: 0.14em; }
   .lp-fit-pills { gap: 0.35rem; margin-bottom: 0.2rem; }
   .lp-pricing-card.lp-purchase-top { margin: 0.55rem auto 1.35rem; }
@@ -1785,6 +1797,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-band-inner { width: min(1100px, calc(100% - 40px)); }
   .lp-headline { font-size: clamp(1.72rem, 10.3vw, 2.2rem); }
   .lp-subhead { font-size: 0.88rem; line-height: 1.58; }
+  .lp-hero-note { font-size: 0.76rem; line-height: 1.55; }
   .lp-fit-pill { font-size: 0.62rem; }
   .lp-outcomes-shell,
   .lp-outcome-item,
@@ -2040,9 +2053,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-hero-grid">
       <div class="lp-hero-copy">
-        <h1 class="lp-headline">Train at the standard clients feel immediately.<br><em>AIMT &middot; Certification 01</em></h1>
+        <h1 class="lp-headline">Refine your practice to the standard clients feel immediately.<br><em>AIMT &middot; Certification 01</em></h1>
         <p class="lp-fit">Certification 01 &middot; Enrollment open &middot; Practitioner-grade training</p>
-        <p class="lp-subhead">For practitioners who want to move beyond basic service delivery and operate with stronger clinical judgment, cleaner protocol execution, and higher-trust client outcomes.</p>
+        <p class="lp-subhead">Built for working practitioners who already serve clients and want stronger structure, cleaner protocol decisions, and more clinically grounded execution inside every service.</p>
+        <p class="lp-hero-note">If your work is already active but you want more consistency, clarity, and professional lift, this certification is designed for that next level.</p>
         <div class="lp-fit-pills">
           <span class="lp-fit-pill">Client trust</span>
           <span class="lp-fit-pill">Protocol precision</span>
@@ -2052,7 +2066,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="lp-pricing-card lp-purchase-top">
         <div class="lp-pricing-eyebrow">Certification 01 · HeadSpa Mastery</div>
-        <p class="lp-pricing-intent">A complete practitioner certification designed to help you deliver premium scalp services with confidence and consistency.</p>
+        <p class="lp-pricing-intent">A structured practitioner certification for delivering higher-standard scalp services with confidence, consistency, and clearer decision-making.</p>
         <div class="lp-checkout-status" id="lpCheckoutStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
         <div class="lp-pricing-row">
           <div class="lp-price">$497</div>
@@ -2061,8 +2075,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
             <div class="lp-price-sub">Lifetime access · AIMT certificate included</div>
           </div>
         </div>
-        <p class="lp-purchase-note">Includes the full 12-module curriculum, Cadence-guided checkpoints, and an AIMT completion credential recognized inside your client education flow.</p>
-        <p class="lp-purchase-trust">Secure checkout. One-time payment. You will create your AIMT sign-in after purchase and enter the course immediately once your session is active.</p>
+        <p class="lp-purchase-note">Includes the full 12-module curriculum, Cadence-guided checkpoints, and a completion credential designed to support trust in real client-facing practice.</p>
+        <p class="lp-purchase-trust">Secure one-time checkout. After purchase, you complete a simple AIMT account setup and enter the course immediately once your session is active.</p>
         <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Enter here.</a>
         <div class="lp-pricing-includes-label">Enrollment includes</div>
         <div class="lp-pricing-includes">
@@ -2076,7 +2090,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-enter-btn-dot"></div>
           Begin Enrollment
         </button>
-        <p class="lp-cta-reassurance">Enrollment takes under a minute. Course access is unlocked after your AIMT account handoff.</p>
+        <p class="lp-cta-reassurance">Enrollment takes under a minute, and the post-purchase handoff is straightforward from checkout to course entry.</p>
         <div class="lp-or-divider"><span>or</span></div>
         <button class="lp-signin-btn" onclick="showSignInPanel()">
           Already enrolled? Sign in
@@ -2092,14 +2106,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               <div class="lp-outcomes-label">What you will walk away with</div>
               <div class="lp-outcomes-title">What You Will Be Able To Deliver After Certification</div>
               <p class="lp-outcomes-introline">After certification, you will be able to:</p>
-              <p class="lp-outcomes-intro">A structured capability framework covering clinical judgment, service execution, professional language, and business clarity inside one coherent practitioner standard.</p>
+              <p class="lp-outcomes-intro">This is the practice standard you step into: clearer judgment, stronger execution, and more defensible service quality across the full client experience.</p>
             </div>
             <div class="lp-outcomes-grid">
-              <div class="lp-outcome-item featured"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>Make service decisions with clinical confidence</strong>Use anatomy, growth-cycle logic, and barrier awareness to choose protocols from evidence, not guesswork.</div></div>
-              <div class="lp-outcome-item featured"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>Assess scalp conditions with professional certainty</strong>Apply microscopy and condition frameworks to adapt treatments accurately and communicate boundaries clearly.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>Deliver a premium protocol clients recognize</strong>Run intake, ritual flow, execution, and closeout with consistency that improves trust, retention, and rebooking behavior.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Price and position your service with authority</strong>Build a defensible menu and explain value in language that protects margins without discount dependence.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Operate with stronger scope and client safety standards</strong>Document, communicate, and refer with precision so your practice remains ethical, compliant, and trusted.</div></div>
+              <div class="lp-outcome-item featured"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>Decide with stronger clinical reasoning</strong>Use anatomy, growth-cycle logic, and barrier awareness to choose protocols with confidence instead of improvising under pressure.</div></div>
+              <div class="lp-outcome-item featured"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>Assess and adapt with greater professional clarity</strong>Apply microscopy and condition frameworks to adjust treatment paths accurately and communicate boundaries cleanly.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>Execute a service standard clients can feel</strong>Run intake, ritual flow, execution, and closeout with repeatable quality that strengthens trust, retention, and referral behavior.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Position and price from professional confidence</strong>Build a defensible menu and communicate value in language that supports healthy margins without discount dependency.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Operate at a clearer safety and scope standard</strong>Document, educate, and refer with precision so your practice stays compliant, ethical, and trusted over time.</div></div>
             </div>
           </div>
         </div>
@@ -2109,26 +2123,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lp-band-inner">
         <div class="lp-mastery-shell">
           <div class="lp-mastery-head">
-            <div class="lp-mastery-label">Mastery framework</div>
-            <div class="lp-mastery-title">A Complete Practitioner System, Not A Topic List</div>
-            <p class="lp-mastery-sub">HeadSpa Mastery is sequenced to build decision quality, protocol precision, and business confidence in one integrated progression from first assessment to final client recommendation.</p>
+            <div class="lp-mastery-label">Applied Mastery Framework</div>
+            <div class="lp-mastery-title">A Structured System You Can Apply Inside Real Services</div>
+            <p class="lp-mastery-sub">HeadSpa Mastery is sequenced as a practical progression that sharpens how you assess, treat, communicate, and position services inside your current client workflow.</p>
           </div>
           <div class="lp-mastery-grid">
             <div class="lp-mastery-item">
               <div class="lp-mastery-item-title">Clinical Foundations</div>
-              <div class="lp-mastery-item-body">Build the biological and trichology base that drives accurate treatment reasoning in live client situations.</div>
+              <div class="lp-mastery-item-body">Build the biological and trichology base that improves treatment reasoning in real client decisions.</div>
             </div>
             <div class="lp-mastery-item">
               <div class="lp-mastery-item-title">Scalp &amp; Hair Analysis</div>
-              <div class="lp-mastery-item-body">Apply structured assessment and microscopy interpretation to select protocols with greater confidence and fewer errors.</div>
+              <div class="lp-mastery-item-body">Use structured assessment and microscopy interpretation to select protocols with clearer rationale and fewer missteps.</div>
             </div>
             <div class="lp-mastery-item">
               <div class="lp-mastery-item-title">HeadSpa Protocol Execution</div>
-              <div class="lp-mastery-item-body">Execute a full premium service workflow with repeatable quality from intake to reset, not one-off technique fragments.</div>
+              <div class="lp-mastery-item-body">Run a full premium workflow from intake to reset with repeatable quality, not disconnected technique fragments.</div>
             </div>
             <div class="lp-mastery-item">
               <div class="lp-mastery-item-title">Client Communication &amp; Pricing</div>
-              <div class="lp-mastery-item-body">Strengthen consult language, recommendation clarity, and menu positioning so your expertise translates into pricing power.</div>
+              <div class="lp-mastery-item-body">Strengthen consult language, recommendation clarity, and menu positioning so stronger execution translates into professional value.</div>
             </div>
           </div>
         </div>
@@ -2142,11 +2156,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               <div class="lp-cert-kicker">Graduate Credential</div>
               <div class="lp-cert-headline">Earn A Certificate Worth Displaying</div>
               <p class="lp-cert-lead">AIMT issues a completion credential tied to demonstrated progression across the full certification framework, not attendance alone.</p>
-              <p class="lp-cert-support">Use it as a visible professional signal that differentiates your service standard from non-certified practitioners.</p>
+              <p class="lp-cert-support">It serves as a quiet professional signal of training depth, helping clients and peers recognize a higher operating standard.</p>
               <div class="lp-cert-notes">
                 <div class="lp-cert-note"><strong>Award Standard</strong>Granted only after full module completion and required competency checkpoints.</div>
                 <div class="lp-cert-note"><strong>Verification</strong>Issued under AIMT standards to document real progression through practitioner-level training.</div>
-                <div class="lp-cert-note"><strong>Status Signal</strong>Supports stronger client perception, portfolio credibility, and premium service positioning.</div>
+                <div class="lp-cert-note"><strong>Professional Signal</strong>Supports stronger trust, clearer differentiation, and elevated practitioner positioning.</div>
               </div>
             </div>
             <div class="lp-cert-stage">
@@ -2171,8 +2185,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-final-close">
       <div class="lp-final-close-label">Final Step</div>
-      <div class="lp-final-close-title">Become The Practitioner Clients Choose For Precision, Not Price.</div>
-      <div class="lp-final-close-text">HeadSpa Mastery gives you the structure to assess better, execute cleaner, and position your service at a higher professional standard.</div>
+      <div class="lp-final-close-title">If You&rsquo;re Ready To Refine How You Work, This Is The Next Step.</div>
+      <div class="lp-final-close-text">HeadSpa Mastery gives you a clear framework to assess with confidence, execute with consistency, and lead services at a higher professional standard.</div>
       <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
         <div class="lp-enter-btn-dot"></div>
         Begin Enrollment
