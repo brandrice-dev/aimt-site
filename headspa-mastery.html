@@ -957,7 +957,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-signin-btn { width: 100%; padding: 0.88rem 1rem; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 980px; cursor: pointer; font-family: var(--mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.48); transition: color 0.2s, gap 0.2s, background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .lp-signin-btn:hover { color: white; gap: 10px; background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
 .lp-bottom-cta {
-  margin: 1.15rem 0 0.4rem;
+  width: 100%;
+  max-width: 1100px;
+  align-self: center;
+  margin: 1.15rem auto 0.4rem;
   border: 0.5px solid rgba(255,255,255,0.12);
   border-radius: 20px;
   padding: 1.35rem 1.4rem;
@@ -1679,6 +1682,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lesson-wrap { padding: 2.5rem 2rem 8rem; }
   .intro-inner { padding: 2rem 0; }
   .cert-sheet { padding: 4rem 4rem 3.5rem; }
+  .lp-bottom-cta {
+    width: min(1100px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 /* ── Protocol card grid — force single col on narrow ── */
