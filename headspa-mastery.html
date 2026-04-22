@@ -708,10 +708,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   opacity: 0;
   animation: lpFadeUp 0.8s ease forwards;
 }
+.lp-band-inner { width: 100%; max-width: 1100px; margin: 0 auto; }
 .lp-band-outcomes {
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: 0 14px 36px rgba(0,0,0,0.2);
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: 0.5px solid rgba(163,150,141,0.16);
+  border-bottom: 0.5px solid rgba(163,150,141,0.16);
+  padding: 3.2rem max(1.25rem, calc((100vw - 1100px) / 2 + 2rem));
+  background: rgba(163,150,141,0.065);
+  box-shadow: none;
   animation-delay: 0.95s;
 }
 .lp-band-modules {
@@ -721,10 +729,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   animation-delay: 1.08s;
 }
 .lp-band-cert {
-  background: rgba(163,150,141,0.04);
-  border-color: rgba(163,150,141,0.18);
-  padding: 1.5rem;
-  box-shadow: 0 16px 42px rgba(0,0,0,0.18);
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: 0.5px solid rgba(255,255,255,0.07);
+  border-bottom: 0.5px solid rgba(255,255,255,0.07);
+  padding: 3.35rem max(1.25rem, calc((100vw - 1100px) / 2 + 2rem)) 3.5rem;
+  background: rgba(255,255,255,0.03);
+  box-shadow: none;
   animation-delay: 1.2s;
 }
 .lp-outcomes { width: 100%; margin-bottom: 0; }
@@ -756,6 +770,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   margin-bottom: 0;
   padding: 0;
 }
+.lp-cert-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.lp-cert-copy { max-width: 48ch; }
 .lp-cert-kicker {
   font-family: var(--mono);
   font-size: 0.56rem;
@@ -783,7 +804,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .lp-cert-image-wrap {
   width: 100%;
-  max-width: 640px;
+  max-width: 740px;
   margin: 0;
   padding: 0.85rem;
   border-radius: 14px;
@@ -870,6 +891,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-hero-grid { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2.25rem; }
   .lp-hero-copy { margin-top: 0; }
   .lp-headline { max-width: none; }
+  .lp-band-outcomes,
+  .lp-band-cert {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .lp-cert-layout { grid-template-columns: 1fr; gap: 1rem; }
 }
 
 @keyframes lpFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -1449,7 +1476,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .lp-or-divider { margin: 0.65rem 0; }
   .lp-divider { margin-bottom: 1.5rem; }
   .lp-section-band { padding: 1.15rem 1rem 1rem; margin-bottom: 0.92rem; border-radius: 16px; }
-  .lp-band-cert { padding: 1.2rem 1rem; }
+  .lp-band-outcomes,
+  .lp-band-cert {
+    margin-left: calc(50% - 50vw);
+    width: 100vw;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 2rem 1.25rem;
+  }
+  .lp-band-cert { padding-bottom: 2.15rem; }
   .lp-outcomes { margin-bottom: 0; }
   .lp-outcomes-grid { grid-template-columns: 1fr; gap: 0.45rem; }
   .lp-outcomes-label { margin-bottom: 0.52rem; }
@@ -1764,15 +1800,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-divider"></div>
     <div class="lp-section-band lp-band-outcomes">
-      <div class="lp-outcomes">
-        <div class="lp-outcomes-label">What you will walk away with</div>
-        <div class="lp-outcomes-title">What You Will Be Able To Deliver After Certification</div>
-        <div class="lp-outcomes-grid">
-          <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see so every service decision is grounded in science, not guesswork.</div></div>
-          <div class="lp-outcome-item"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>The ability to assess and adapt in real time</strong>Microscopy, scalp typing, and condition awareness so you can distinguish dry scalp from dandruff and identify when referral is the correct professional step.</div></div>
-          <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>A premium service protocol clients can feel</strong>From intake and ritual sequencing to treatment execution and closing language, every phase is built to improve trust, retention, and rebooking confidence.</div></div>
-          <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Pricing and positioning aligned with your expertise</strong>Construct a defensible three-tier menu, understand cost-based pricing, and communicate value without discounting your standards.</div></div>
-          <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Clear professional scope and client-safe language</strong>Know what to document, what to communicate, and where your scope ends so your service remains ethical, clinically aware, and compliant.</div></div>
+      <div class="lp-band-inner">
+        <div class="lp-outcomes">
+          <div class="lp-outcomes-label">What you will walk away with</div>
+          <div class="lp-outcomes-title">What You Will Be Able To Deliver After Certification</div>
+          <div class="lp-outcomes-grid">
+            <div class="lp-outcome-item"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>A clinical foundation most practitioners never get</strong>Scalp anatomy, hair growth cycles, the hydrolipid barrier, and how to read what you see so every service decision is grounded in science, not guesswork.</div></div>
+            <div class="lp-outcome-item"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>The ability to assess and adapt in real time</strong>Microscopy, scalp typing, and condition awareness so you can distinguish dry scalp from dandruff and identify when referral is the correct professional step.</div></div>
+            <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>A premium service protocol clients can feel</strong>From intake and ritual sequencing to treatment execution and closing language, every phase is built to improve trust, retention, and rebooking confidence.</div></div>
+            <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Pricing and positioning aligned with your expertise</strong>Construct a defensible three-tier menu, understand cost-based pricing, and communicate value without discounting your standards.</div></div>
+            <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Clear professional scope and client-safe language</strong>Know what to document, what to communicate, and where your scope ends so your service remains ethical, clinically aware, and compliant.</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1796,14 +1834,20 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
     <div class="lp-section-band lp-band-cert">
-      <div class="lp-cert">
-        <div class="lp-cert-kicker">Graduate Credential</div>
-        <div class="lp-cert-headline">Earn A Certificate Worth Displaying</div>
-        <p class="lp-cert-lead">AIMT issues a polished completion certificate tied to demonstrated progress through the full curriculum, designed to support practitioner trust and professional signaling.</p>
-        <div class="lp-cert-image-wrap">
-          <img src="assets/aimt-certificate-preview.png" alt="AIMT HeadSpa Mastery certificate preview" class="lp-cert-image" loading="lazy" />
+      <div class="lp-band-inner">
+        <div class="lp-cert">
+          <div class="lp-cert-layout">
+            <div class="lp-cert-copy">
+              <div class="lp-cert-kicker">Graduate Credential</div>
+              <div class="lp-cert-headline">Earn A Certificate Worth Displaying</div>
+              <p class="lp-cert-lead">AIMT issues a polished completion certificate tied to demonstrated progress through the full curriculum, designed to support practitioner trust and professional signaling.</p>
+              <div class="lp-cert-sub">Awarded after all 12 modules and required competency checkpoints are successfully completed.</div>
+            </div>
+            <div class="lp-cert-image-wrap">
+              <img src="assets/aimt-certificate-preview.png" alt="AIMT HeadSpa Mastery certificate preview" class="lp-cert-image" loading="lazy" />
+            </div>
+          </div>
         </div>
-        <div class="lp-cert-sub">Awarded after all 12 modules and required competency checkpoints are successfully completed.</div>
       </div>
     </div>
 
