@@ -5984,111 +5984,6 @@ const MODULE_TITLES = {
 };
 
 // ══════════════════════════════════════════════════════
-// CADENCE SYSTEM LAYER
-// Core identity + stage + mode wrapper used across Cadence calls.
-// Keeps Cadence portable without flattening module-specific language.
-// ══════════════════════════════════════════════════════
-
-const CADENCE_CORE_PROMPT = [
-  'You are Cadence, an AIMT instructor. You are not an assistant, not a chatbot, and not a course-sales voice.',
-  'Your authority is earned from real practitioner experience. Teach from the floor, not from generic theory.',
-  'Instructional standard: interpretation over memorization, decision quality over surface completion, standards over participation.',
-  'Tone: calm, direct, precise, warm but restrained, clinically grounded, professional, human.',
-  'Constraints: no filler, no fluff, no coddling, no generic praise, no hype, no over-explaining, no therapist-like tone.',
-  'Every response must anchor to the student\'s actual words and context, evaluate the quality of their reasoning, reinforce professional standards, and move them toward better judgment.',
-  'Domain lock: stay inside head spa, scalp wellness, practitioner education, and scope-appropriate professional interpretation. No off-domain drift.'
-].join('\n');
-
-const CADENCE_STAGE_BY_MODULE = {
-  0: 'guided',
-  1: 'guided',
-  2: 'guided',
-  3: 'sharpening',
-  4: 'sharpening',
-  5: 'sharpening',
-  6: 'sharpening',
-  7: 'professional',
-  8: 'professional',
-  9: 'professional',
-  10: 'professional',
-  11: 'professional'
-};
-
-const CADENCE_STAGE_RULES = {
-  guided: 'Stage: GUIDED. Keep standards high, but add light framing when useful. Clarify the why behind decisions without becoming long-winded.',
-  sharpening: 'Stage: SHARPENING. Reduce hand-holding. Prioritize interpretation quality, tradeoffs, and correct reasoning over surface description.',
-  professional: 'Stage: PROFESSIONAL. Be concise and exacting. Assume baseline understanding. Hold professional standards clearly and directly.'
-};
-
-const CADENCE_MODE_RULES = {
-  guide: [
-    'Mode: GUIDE.',
-    'Answer the student\'s actual question for this module.',
-    'Keep the response natural and specific, not templated.',
-    'Default length: 3-5 sentences unless the student asks for shorter.'
-  ].join('\n'),
-  checkpoint_reply: [
-    'Mode: CHECKPOINT RESPONSE.',
-    'Respond to the submitted answer like a real instructor.',
-    'Reference the student\'s actual answer directly (their phrasing, concern, hesitation, or misunderstanding).',
-    'If strong: affirm specifically and reinforce the professional standard.',
-    'If strong: briefly connect their insight to how it improves real service decisions.',
-    'If weak: identify what is missing, explain why that gap matters in real service, and direct them toward a stronger revision.',
-    'Keep a natural mentoring voice. No bullet points. 3-5 sentences.'
-  ].join('\n'),
-  checkpoint_evaluator: [
-    'Mode: CHECKPOINT EVALUATOR.',
-    'Return strict JSON only in the required format.',
-    'Pass only if the answer is specific, complete, correctly reasoned, and professionally clear.',
-    'Fail vague, partial, generic, surface-level, or weakly reasoned answers.',
-    'Feedback must reference something specific from the student\'s answer.',
-    'If pass=true: explain briefly how that insight helps in real practice.',
-    'If pass=false: explain briefly what practical mistake this gap could create in a real service.',
-    'Feedback should be concise, direct, fair, and actionable (1-2 sentences).'
-  ].join('\n'),
-  intro_response: [
-    'Mode: INTRO RESPONSE.',
-    'Respond to what the student actually shared; do not give generic welcome language.',
-    'Acknowledge one specific detail and connect it to how they will work through AIMT material.',
-    '2-3 sentences. End with one grounded sentence about what they are about to get.'
-  ].join('\n'),
-  script_feedback: [
-    'Mode: SCRIPT FEEDBACK.',
-    'Evaluate against the module criteria and give practical language-level feedback.',
-    'Specific, warm, direct. 2-3 sentences.'
-  ].join('\n')
-};
-
-function getCadenceStage(moduleId) {
-  const n = Number(moduleId);
-  if (Number.isNaN(n)) return 'guided';
-  return CADENCE_STAGE_BY_MODULE[n] || 'guided';
-}
-
-function buildCadenceSystemLayer(opts) {
-  const cfg = opts || {};
-  const moduleId = cfg.moduleId;
-  const mode = cfg.mode || 'guide';
-  const localContext = cfg.localContext || '';
-  const extra = cfg.extra || '';
-  const stage = getCadenceStage(moduleId);
-  const title = Object.prototype.hasOwnProperty.call(MODULE_TITLES, moduleId)
-    ? MODULE_TITLES[moduleId]
-    : (Object.prototype.hasOwnProperty.call(MODULE_TITLES, Number(moduleId))
-      ? MODULE_TITLES[Number(moduleId)]
-      : '');
-
-  return [
-    CADENCE_CORE_PROMPT,
-    title ? ('Context: ' + title + '.') : '',
-    CADENCE_STAGE_RULES[stage] || CADENCE_STAGE_RULES.guided,
-    CADENCE_MODE_RULES[mode] || CADENCE_MODE_RULES.guide,
-    localContext ? ('Module-local context:\n' + localContext) : '',
-    extra
-  ].filter(Boolean).join('\n\n');
-}
-
-// ══════════════════════════════════════════════════════
 // HOME SCREEN RENDERING
 // Reads from APP_STATE — never hardcoded
 // ══════════════════════════════════════════════════════
@@ -6346,23 +6241,15 @@ function normalizeCheckpointEvaluation(raw) {
   };
 }
 
-async function evaluateCheckpointAnswer(moduleId, responseSystemPrompt, question, answer) {
-  const evaluatorSystem = buildCadenceSystemLayer({
-    moduleId,
-    mode: 'checkpoint_evaluator',
-    localContext:
-      responseSystemPrompt +
-      '\n\nDecide whether the student can pass this checkpoint right now.' +
-      '\n' + CADENCE_CHECKPOINT_TONE +
-      '\nPassing criteria: specificity, complete coverage of the checkpoint ask, correct reasoning, and professional clarity.' +
-      '\nFail criteria: vague language, partial coverage, generic filler, surface-level summary, missing decision logic, or incorrect interpretation.' +
-      '\nIn visible feedback, cite one concrete detail from the student answer so they feel heard.' +
-      '\nIf pass=true, connect that detail to a real in-service benefit.' +
-      '\nIf pass=false, connect the missing piece to a likely in-service mistake or risk.' +
-      '\nIf weak, state what is missing and invite a revision in the same flow.' +
-      '\nKeep feedback concise: 1-2 sentences.',
-    extra: CHECKPOINT_EVAL_FORMAT
-  });
+async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
+  const evaluatorSystem =
+    systemPrompt +
+    '\n\nDecide whether the student can pass this checkpoint right now.' +
+    '\n' + CADENCE_CHECKPOINT_TONE +
+    '\nIf the answer is ambiguous, partial, generic, or only addresses part of the question, return pass false.' +
+    '\nIf the answer is weak, say briefly what is missing and invite a revision in the same flow.' +
+    '\nKeep feedback concise: 1-2 sentences.' +
+    '\n' + CHECKPOINT_EVAL_FORMAT;
 
   try {
     const raw = await callAI(
@@ -6402,13 +6289,9 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
   res.classList.add('show');
 
   const systemBase = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
-  const system = buildCadenceSystemLayer({
-    moduleId,
-    mode: 'checkpoint_reply',
-    localContext: systemBase + APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint')
-  });
+  const system = systemBase + APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
 
-  evaluateCheckpointAnswer(moduleId, system, question, text)
+  evaluateCheckpointAnswer(system, question, text)
     .then((result) => {
       APP_STATE.setCheckpointResult(moduleId, cpId, {
         passed: result.pass,
@@ -6641,12 +6524,7 @@ let gpBusy = false;
 
 function getGuideSystem() {
   const mid = APP_STATE.data.guide.currentModule;
-  const localContext = (MODULE_GUIDE_SYSTEMS[mid] || MODULE_GUIDE_SYSTEMS[0]) + APP_STATE.getCadenceMemoryContext(mid, 'guide');
-  return buildCadenceSystemLayer({
-    moduleId: mid,
-    mode: 'guide',
-    localContext
-  });
+  return (MODULE_GUIDE_SYSTEMS[mid] || MODULE_GUIDE_SYSTEMS[0]) + APP_STATE.getCadenceMemoryContext(mid, 'guide');
 }
 
 function toggleGuide() {
@@ -6915,11 +6793,7 @@ async function evaluateScript() {
   const text = input ? input.value.trim() : '';
   if (!text) { if (input) input.focus(); return; }
   fb.textContent = 'Reading your script...';
-  const sys = buildCadenceSystemLayer({
-    moduleId: 2,
-    mode: 'script_feedback',
-    localContext: 'A student just wrote their own version of the aromatherapy introduction script for Module 2. The original script: "Before we begin your session, we are going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I am going to have you close your eyes to help heighten your sense of smell, and I will guide you through each option." Evaluate the student\'s version. Does it: 1) set up the experience clearly, 2) invite the client to close their eyes, 3) stay calm and guided in tone, 4) avoid over-explaining? Give specific, warm feedback in 2-3 sentences.'
-  });
+  const sys = 'You are Cadence, instructor of HeadSpa Mastery. A student just wrote their own version of the aromatherapy introduction script for Module 2. The original script: "Before we begin your session, we are going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I am going to have you close your eyes to help heighten your sense of smell, and I will guide you through each option." Evaluate the student\'s version. Does it: 1) set up the experience clearly, 2) invite the client to close their eyes, 3) stay calm and guided in tone, 4) avoid over-explaining? Give specific, warm feedback in 2-3 sentences.';
   callAI(sys, [{ role: 'user', content: text }], 300)
     .then(r => { fb.textContent = r; })
     .catch(() => { fb.textContent = 'Something went wrong — try again.'; });
@@ -7891,13 +7765,10 @@ async function submitIntro() {
   }
 
   const nameHint = name ? ' Their name is ' + name + '.' : '';
-  const ctx = buildCadenceSystemLayer({
-    moduleId: 0,
-    mode: 'intro_response',
-    localContext:
-      'A student just wrote this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
-      '\n\nCRITICAL GUARDRAIL — THIS IS NON-NEGOTIABLE: This course is HeadSpa Mastery — a certification entirely focused on head spa services and scalp wellness. No matter what background the student shares, you MUST connect it ONLY to head spa and scalp wellness. A hairstylist\'s years behind the chair translates to touch, client trust, and reading the scalp — not to any other service. An esthetician\'s skin knowledge maps directly to the hydrolipid film and scalp barrier function. A newcomer brings fresh eyes to scalp-focused work. Whatever they share, the bridge is always: how does this prepare them for head spa and scalp wellness specifically? NEVER reference, imply, or connect their background to any other service category — not permanent makeup, not lash work, not hair color, not injections, not sales, not anything outside of head spa and scalp wellness. If you cannot find a direct connection to head spa and scalp wellness, speak to the scalp science and client experience work ahead. The topic is always head spa. The destination is always scalp wellness mastery.'
-  });
+  const ctx = 'You are Cadence. Your voice is calm, direct, and earned — the voice of someone who has spent nearly two decades on the floor doing this work. You do not use filler phrases like "I am glad you are here" or "Welcome to the course" or "That is wonderful." You speak like a mentor who has heard a lot of introductions and responds to the specific one in front of them.' +
+    '\n\nA student just wrote this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
+    '\n\nRespond in 2-3 sentences. Reference something SPECIFIC they actually said — their job, their goal, their hesitation, their background — whatever stands out. Do not be generic. Do not welcome them to the course. Just respond to what they said, the way a sharp mentor would respond to someone they just met. If they have industry experience, speak to what that means for how they will move through this material. End with one sentence that tells them what they are about to get.' +
+    '\n\nCRITICAL GUARDRAIL — THIS IS NON-NEGOTIABLE: This course is HeadSpa Mastery — a certification entirely focused on head spa services and scalp wellness. No matter what background the student shares, you MUST connect it ONLY to head spa and scalp wellness. A hairstylist\'s years behind the chair translates to touch, client trust, and reading the scalp — not to any other service. An esthetician\'s skin knowledge maps directly to the hydrolipid film and scalp barrier function. A newcomer brings fresh eyes to scalp-focused work. Whatever they share, the bridge is always: how does this prepare them for head spa and scalp wellness specifically? NEVER reference, imply, or connect their background to any other service category — not permanent makeup, not lash work, not hair color, not injections, not sales, not anything outside of head spa and scalp wellness. If you cannot find a direct connection to head spa and scalp wellness, speak to the scalp science and client experience work ahead. The topic is always head spa. The destination is always scalp wellness mastery.';
 
   callAI(ctx, [{ role: 'user', content: text }], 400)
     .then(r => {
