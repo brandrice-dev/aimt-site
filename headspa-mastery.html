@@ -6030,8 +6030,10 @@ const CADENCE_MODE_RULES = {
   checkpoint_reply: [
     'Mode: CHECKPOINT RESPONSE.',
     'Respond to the submitted answer like a real instructor.',
+    'Reference the student\'s actual answer directly (their phrasing, concern, hesitation, or misunderstanding).',
     'If strong: affirm specifically and reinforce the professional standard.',
-    'If weak: identify what is missing and direct the student toward a stronger revision.',
+    'If strong: briefly connect their insight to how it improves real service decisions.',
+    'If weak: identify what is missing, explain why that gap matters in real service, and direct them toward a stronger revision.',
     'Keep a natural mentoring voice. No bullet points. 3-5 sentences.'
   ].join('\n'),
   checkpoint_evaluator: [
@@ -6039,6 +6041,9 @@ const CADENCE_MODE_RULES = {
     'Return strict JSON only in the required format.',
     'Pass only if the answer is specific, complete, correctly reasoned, and professionally clear.',
     'Fail vague, partial, generic, surface-level, or weakly reasoned answers.',
+    'Feedback must reference something specific from the student\'s answer.',
+    'If pass=true: explain briefly how that insight helps in real practice.',
+    'If pass=false: explain briefly what practical mistake this gap could create in a real service.',
     'Feedback should be concise, direct, fair, and actionable (1-2 sentences).'
   ].join('\n'),
   intro_response: [
@@ -6351,6 +6356,9 @@ async function evaluateCheckpointAnswer(moduleId, responseSystemPrompt, question
       '\n' + CADENCE_CHECKPOINT_TONE +
       '\nPassing criteria: specificity, complete coverage of the checkpoint ask, correct reasoning, and professional clarity.' +
       '\nFail criteria: vague language, partial coverage, generic filler, surface-level summary, missing decision logic, or incorrect interpretation.' +
+      '\nIn visible feedback, cite one concrete detail from the student answer so they feel heard.' +
+      '\nIf pass=true, connect that detail to a real in-service benefit.' +
+      '\nIf pass=false, connect the missing piece to a likely in-service mistake or risk.' +
       '\nIf weak, state what is missing and invite a revision in the same flow.' +
       '\nKeep feedback concise: 1-2 sentences.',
     extra: CHECKPOINT_EVAL_FORMAT
