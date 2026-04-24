@@ -6247,12 +6247,21 @@ function normalizeCheckpointEvaluation(raw) {
 }
 
 async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
+  let checkpointSpecificCriteria = '';
+  if (/first five minutes of her experience/i.test(question || '')) {
+    checkpointSpecificCriteria =
+      '\nCheckpoint-specific criteria (first five minutes): pass answers that clearly sequence the opening experience and show applied judgment, including most of the following: intentional pacing, physical transition into the space, client regulation/nervous-system downshift, minimal grounded communication, intentional first touch or clear transition into service, and why each step matters.' +
+      '\nDo not require exact wording or a rigid ritual checklist if the reasoning is strong and practice-ready.' +
+      '\nStill fail answers that are generic, unordered, shallow, or limited to broad comfort language without operational detail.';
+  }
+
   const evaluatorSystem =
     systemPrompt +
     '\n\nDecide whether the student can pass this checkpoint right now.' +
     '\n' + CADENCE_CHECKPOINT_TONE +
     '\nIf the answer is ambiguous, partial, generic, or only addresses part of the question, return pass false.' +
     '\nIf the answer is weak, say briefly what is missing and invite a revision in the same flow.' +
+    checkpointSpecificCriteria +
     '\n' + CADENCE_FEEDBACK_MICRO_RULES +
     '\n' + CHECKPOINT_EVAL_FORMAT;
 
