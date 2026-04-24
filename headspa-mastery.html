@@ -5973,6 +5973,7 @@ const CHECKPOINT_EVAL_FORMAT = 'Return valid JSON only in this shape: {"pass":tr
 // without changing existing pass/fail thresholds or broader prompt structure.
 const CADENCE_FEEDBACK_MICRO_RULES = 'Feedback micro-rules: reference at least one specific detail from the student answer. If pass=true, add a brief real-world anchor (how this helps service execution or client experience). If pass=false due to weakness/incompleteness, briefly state one practical in-service issue that gap can create. Keep feedback concise (typically 2-4 sentences). No filler. No generic praise.';
 const CADENCE_RESPONSE_CONSISTENCY_ANCHOR = 'Response consistency anchor: reference one specific detail from the student\'s message and briefly connect it to real service execution or client experience. Keep tone natural, direct, and non-generic.';
+const CADENCE_SELECTIVE_MEMORY_INSTRUCTION = 'Reference prior student patterns only when they materially improve the response. Do not force historical callbacks.';
 
 const MODULE_TITLES = {
   0: 'Module 0 — Welcome & Overview',
@@ -6306,6 +6307,7 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
   const systemBase = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
   const system = systemBase +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
     APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
 
   evaluateCheckpointAnswer(system, question, text)
@@ -6543,7 +6545,22 @@ function getGuideSystem() {
   const mid = APP_STATE.data.guide.currentModule;
   return (MODULE_GUIDE_SYSTEMS[mid] || MODULE_GUIDE_SYSTEMS[0]) +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
     APP_STATE.getCadenceMemoryContext(mid, 'guide');
+}
+
+function getAdaptiveGreetingCallback(moduleId) {
+  const context = APP_STATE.getCadenceMemoryContext(moduleId, 'guide');
+  if (!context || context.indexOf('Relevant earlier learner context:') === -1) return '';
+
+  const match = context.match(/Module\s+(\d+)\s+—\s+([^.\n]+(?:\.)?)/i);
+  if (!match) return '';
+
+  const priorModule = match[1];
+  const summary = (match[2] || '').trim();
+  if (!summary || summary.length < 24) return '';
+
+  return 'You already showed this in Module ' + priorModule + ': ' + summary;
 }
 
 function toggleGuide() {
@@ -6758,7 +6775,9 @@ function openModuleById(id, options = {}) {
       10: 'Pricing is where a lot of talented practitioners undersell themselves. Let us fix that.',
       11: 'You made it to the end. But this is not the end — it is the beginning of repetition. Read this module slowly. Then go practice.'
     };
-    gpAgentMsg(greetings[id] || 'I am here if anything is unclear as you move through this module.');
+    const baseGreeting = greetings[id] || 'I am here if anything is unclear as you move through this module.';
+    const callback = getAdaptiveGreetingCallback(id);
+    gpAgentMsg(callback ? (baseGreeting + ' ' + callback) : baseGreeting);
   }, 500);
 }
 
