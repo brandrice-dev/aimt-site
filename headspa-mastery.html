@@ -5968,6 +5968,11 @@ const CADENCE_CHECKPOINT_TONE = 'Tone: warm, direct, clinically aware, and groun
 
 const CHECKPOINT_EVAL_FORMAT = 'Return valid JSON only in this shape: {"pass":true|false,"feedback":"short response shown to the student"}. Set pass to true only if the student directly answers the full question with enough specificity to move on. If any core part is missing, shallow, vague, or off-target, set pass to false.';
 
+// Cadence micro-refinement (minimal + reversible):
+// Adds a small behavioral nudge for specificity + real-world relevance
+// without changing existing pass/fail thresholds or broader prompt structure.
+const CADENCE_FEEDBACK_MICRO_RULES = 'Feedback micro-rules: reference at least one specific detail from the student answer. If pass=true, add a brief real-world anchor (how this helps service execution or client experience). If pass=false due to weakness/incompleteness, briefly state one practical in-service issue that gap can create. Keep feedback concise (typically 2-4 sentences). No filler. No generic praise.';
+
 const MODULE_TITLES = {
   0: 'Module 0 — Welcome & Overview',
   1: 'Module 1 — Role of the Head Spa Tech',
@@ -6248,7 +6253,7 @@ async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
     '\n' + CADENCE_CHECKPOINT_TONE +
     '\nIf the answer is ambiguous, partial, generic, or only addresses part of the question, return pass false.' +
     '\nIf the answer is weak, say briefly what is missing and invite a revision in the same flow.' +
-    '\nKeep feedback concise: 1-2 sentences.' +
+    '\n' + CADENCE_FEEDBACK_MICRO_RULES +
     '\n' + CHECKPOINT_EVAL_FORMAT;
 
   try {
