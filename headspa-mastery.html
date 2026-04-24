@@ -5972,6 +5972,7 @@ const CHECKPOINT_EVAL_FORMAT = 'Return valid JSON only in this shape: {"pass":tr
 // Adds a small behavioral nudge for specificity + real-world relevance
 // without changing existing pass/fail thresholds or broader prompt structure.
 const CADENCE_FEEDBACK_MICRO_RULES = 'Feedback micro-rules: reference at least one specific detail from the student answer. If pass=true, add a brief real-world anchor (how this helps service execution or client experience). If pass=false due to weakness/incompleteness, briefly state one practical in-service issue that gap can create. Keep feedback concise (typically 2-4 sentences). No filler. No generic praise.';
+const CADENCE_RESPONSE_CONSISTENCY_ANCHOR = 'Response consistency anchor: reference one specific detail from the student\'s message and briefly connect it to real service execution or client experience. Keep tone natural, direct, and non-generic.';
 
 const MODULE_TITLES = {
   0: 'Module 0 — Welcome & Overview',
@@ -6303,7 +6304,9 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
   res.classList.add('show');
 
   const systemBase = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
-  const system = systemBase + APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
+  const system = systemBase +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
 
   evaluateCheckpointAnswer(system, question, text)
     .then((result) => {
@@ -6538,7 +6541,9 @@ let gpBusy = false;
 
 function getGuideSystem() {
   const mid = APP_STATE.data.guide.currentModule;
-  return (MODULE_GUIDE_SYSTEMS[mid] || MODULE_GUIDE_SYSTEMS[0]) + APP_STATE.getCadenceMemoryContext(mid, 'guide');
+  return (MODULE_GUIDE_SYSTEMS[mid] || MODULE_GUIDE_SYSTEMS[0]) +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    APP_STATE.getCadenceMemoryContext(mid, 'guide');
 }
 
 function toggleGuide() {
@@ -6807,7 +6812,8 @@ async function evaluateScript() {
   const text = input ? input.value.trim() : '';
   if (!text) { if (input) input.focus(); return; }
   fb.textContent = 'Reading your script...';
-  const sys = 'You are Cadence, instructor of HeadSpa Mastery. A student just wrote their own version of the aromatherapy introduction script for Module 2. The original script: "Before we begin your session, we are going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I am going to have you close your eyes to help heighten your sense of smell, and I will guide you through each option." Evaluate the student\'s version. Does it: 1) set up the experience clearly, 2) invite the client to close their eyes, 3) stay calm and guided in tone, 4) avoid over-explaining? Give specific, warm feedback in 2-3 sentences.';
+  const sys = 'You are Cadence, instructor of HeadSpa Mastery. A student just wrote their own version of the aromatherapy introduction script for Module 2. The original script: "Before we begin your session, we are going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I am going to have you close your eyes to help heighten your sense of smell, and I will guide you through each option." Evaluate the student\'s version. Does it: 1) set up the experience clearly, 2) invite the client to close their eyes, 3) stay calm and guided in tone, 4) avoid over-explaining? Give specific, warm feedback in 2-3 sentences.' +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
   callAI(sys, [{ role: 'user', content: text }], 300)
     .then(r => { fb.textContent = r; })
     .catch(() => { fb.textContent = 'Something went wrong — try again.'; });
@@ -7782,6 +7788,7 @@ async function submitIntro() {
   const ctx = 'You are Cadence. Your voice is calm, direct, and earned — the voice of someone who has spent nearly two decades on the floor doing this work. You do not use filler phrases like "I am glad you are here" or "Welcome to the course" or "That is wonderful." You speak like a mentor who has heard a lot of introductions and responds to the specific one in front of them.' +
     '\n\nA student just wrote this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
     '\n\nRespond in 2-3 sentences. Reference something SPECIFIC they actually said — their job, their goal, their hesitation, their background — whatever stands out. Do not be generic. Do not welcome them to the course. Just respond to what they said, the way a sharp mentor would respond to someone they just met. If they have industry experience, speak to what that means for how they will move through this material. End with one sentence that tells them what they are about to get.' +
+    '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
     '\n\nCRITICAL GUARDRAIL — THIS IS NON-NEGOTIABLE: This course is HeadSpa Mastery — a certification entirely focused on head spa services and scalp wellness. No matter what background the student shares, you MUST connect it ONLY to head spa and scalp wellness. A hairstylist\'s years behind the chair translates to touch, client trust, and reading the scalp — not to any other service. An esthetician\'s skin knowledge maps directly to the hydrolipid film and scalp barrier function. A newcomer brings fresh eyes to scalp-focused work. Whatever they share, the bridge is always: how does this prepare them for head spa and scalp wellness specifically? NEVER reference, imply, or connect their background to any other service category — not permanent makeup, not lash work, not hair color, not injections, not sales, not anything outside of head spa and scalp wellness. If you cannot find a direct connection to head spa and scalp wellness, speak to the scalp science and client experience work ahead. The topic is always head spa. The destination is always scalp wellness mastery.';
 
   callAI(ctx, [{ role: 'user', content: text }], 400)
