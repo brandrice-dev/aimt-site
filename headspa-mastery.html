@@ -1142,16 +1142,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   margin: 0 auto;
 }
 
-/* ── SIGN IN PANEL ── */
-.lp-signin-panel { display: none; width: 100%; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.5rem; background: rgba(255,255,255,0.03); margin-top: 1rem; }
-.lp-signin-panel.open { display: block; }
-.lp-signin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.lp-signin-title { font-family: var(--mont); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
-.lp-signin-close { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 0.9rem; cursor: pointer; padding: 0; }
-.lp-signin-sub { font-size: 0.75rem; color: rgba(255,255,255,0.25); text-align: center; margin-top: 0.85rem; font-family: var(--sans); }
-.lp-signin-link { color: #a3968d; cursor: pointer; }
-.lp-signin-link:hover { text-decoration: underline; }
-.lp-signin-notice { font-size: 0.75rem; color: rgba(163,150,141,0.7); margin-top: 0.6rem; text-align: center; font-family: var(--sans); }
 .lp-mobile-sticky-cta { display: none; }
 
 @media (max-width: 1020px) {
@@ -2099,7 +2089,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
         <p class="lp-purchase-note">Includes the full 12-module curriculum, Cadence-guided checkpoints, and a completion credential designed to support trust in real client-facing practice.</p>
         <p class="lp-purchase-trust">Secure one-time checkout. After purchase, you complete a simple AIMT account setup and enter the course immediately once your session is active.</p>
-        <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Enter here.</a>
+        <a href="#" class="lp-purchased-link" onclick="showSignInPanel(); return false;">Already purchased? Go to Student Access.</a>
         <div class="lp-pricing-includes-label">Enrollment includes</div>
         <div class="lp-pricing-includes">
           <div class="lp-pi-item"><span class="lp-pi-check">✓</span>12 modules · self-paced progression</div>
@@ -2114,9 +2104,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </button>
         <p class="lp-cta-reassurance">Enrollment takes under a minute, and the post-purchase handoff is straightforward from checkout to course entry.</p>
         <div class="lp-or-divider"><span>or</span></div>
-        <button class="lp-signin-btn" onclick="showSignInPanel()">
-          Already enrolled? Sign in
-        </button>
+        <button class="lp-signin-btn" onclick="showSignInPanel()">Student Access</button>
       </div>
     </div>
     <div class="lp-divider"></div>
@@ -2203,19 +2191,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-enter-btn-dot"></div>
         Begin Enrollment
       </button>
-    </div>
-
-    <!-- ── SIGN IN PANEL ── -->
-    <div class="lp-signin-panel" id="lpSignInPanel">
-      <div class="lp-signin-header">
-        <span class="lp-signin-title">Sign in to AIMT</span>
-        <button class="lp-signin-close" onclick="hideSignInPanel()">✕</button>
-      </div>
-      <input type="email" class="lp-name-input" id="lpSignInEmail" placeholder="Email address" autocomplete="email" style="margin-bottom:0.75rem;" />
-      <input type="password" class="lp-name-input" id="lpSignInPassword" placeholder="Password" autocomplete="current-password" style="margin-bottom:1rem;" />
-      <button class="lp-enroll-btn" onclick="handleSignIn()">Enter HeadSpa Mastery</button>
-      <div class="lp-signin-sub">Forgot your password? <span class="lp-signin-link" onclick="handleForgotPassword()">Reset it here</span></div>
-      <div class="lp-signin-notice" id="lpSignInNotice"></div>
     </div>
   </div>
   <div class="lp-mobile-sticky-cta">
@@ -7581,80 +7556,6 @@ function enterPurchasedCourseHome() {
 // ── SIGN IN PANEL ──
 function showSignInPanel() {
   redirectToStudentAccess();
-}
-function hideSignInPanel() {
-  document.getElementById('lpSignInPanel').classList.remove('open');
-}
-async function handleSignIn() {
-  const notice = document.getElementById('lpSignInNotice');
-  const emailInput = document.getElementById('lpSignInEmail');
-  const passwordInput = document.getElementById('lpSignInPassword');
-  if (!notice || !emailInput || !passwordInput || !supabaseClient) return;
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-  notice.textContent = '';
-
-  if (!email || !password) {
-    notice.textContent = 'Enter your email and password to continue.';
-    return;
-  }
-
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error || !data || !data.user) {
-      notice.textContent = error?.message || 'Unable to sign in right now.';
-      return;
-    }
-
-    const allowlistedStaff = isAllowlistedStaffEmail(data.user.email);
-    if (!allowlistedStaff) {
-      await bindHeadSpaEntitlementsToUser(data.user);
-    }
-    let entitledPurchaser = allowlistedStaff ? false : await hasHeadSpaEntitlement(data.user);
-    if (!allowlistedStaff && !entitledPurchaser) {
-      await recoverHeadSpaEntitlement(data.user);
-      entitledPurchaser = await hasHeadSpaEntitlement(data.user);
-    }
-
-    if (!allowlistedStaff && !entitledPurchaser) {
-      await supabaseClient.auth.signOut();
-      void logAimtEvent('headspa_blocked_access_no_entitlement', {
-        email: data.user.email,
-        user_id: data.user.id || null,
-        message: 'signin_denied_no_entitlement'
-      });
-      notice.textContent = getPendingCheckoutSessionId()
-        ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
-        : 'This account does not currently have access to HeadSpa Mastery.';
-      return;
-    }
-
-    setSignedInStudent(data.user);
-    hideSignInPanel();
-    enterPurchasedCourseHome();
-  } catch (_) {
-    notice.textContent = 'Unable to sign in right now.';
-  }
-}
-async function handleForgotPassword() {
-  const notice = document.getElementById('lpSignInNotice');
-  const emailInput = document.getElementById('lpSignInEmail');
-  if (!notice || !emailInput || !supabaseClient) return;
-  const email = emailInput.value.trim();
-  if (!email) {
-    notice.textContent = 'Enter your email address first.';
-    return;
-  }
-
-  try {
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/student-access.html`
-    });
-    notice.textContent = error ? (error.message || 'Unable to send reset email.') : 'Password reset email sent.';
-  } catch (_) {
-    notice.textContent = 'Unable to send reset email.';
-  }
 }
 
 // ══════════════════════════════════════════════════════

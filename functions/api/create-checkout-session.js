@@ -57,9 +57,29 @@ export async function onRequestPost(context) {
   const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
+  const stripeSecretKey = env.STRIPE_SECRET_KEY;
+  const stripePriceId = env.STRIPE_PRICE_ID;
+
+  if (!stripeSecretKey || !stripePriceId) {
+    await logAimtEvent('api_create_checkout_session_failure', {
+      supabaseUrl,
+      serviceRoleKey,
+      message: !stripeSecretKey && !stripePriceId
+        ? 'stripe_secret_and_price_not_configured'
+        : (!stripeSecretKey ? 'stripe_secret_not_configured' : 'stripe_price_not_configured')
+    });
+    return new Response(
+      JSON.stringify({ error: 'Checkout is temporarily unavailable.' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
   const body = new URLSearchParams({
     mode: 'payment',
-    'line_items[0][price]': env.STRIPE_PRICE_ID,
+    'line_items[0][price]': stripePriceId,
     'line_items[0][quantity]': '1',
     success_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/courses.html?checkout=canceled`,
@@ -69,7 +89,7 @@ export async function onRequestPost(context) {
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+        Authorization: `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,

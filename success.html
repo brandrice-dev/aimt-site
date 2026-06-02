@@ -713,7 +713,16 @@ body {
           return;
         }
 
-        await claimCourseAccess(data.session.user.email, data.session.user.id);
+        const claim = await claimCourseAccess(data.session.user.email, data.session.user.id);
+
+        if (!claim.ok) {
+          clearNotices();
+          hideSuccessPanel();
+          showMessage('Your AIMT session is active, but course access is still syncing. Continue through Student Access and this browser will retry the entitlement handoff there.');
+          showNextStep('Access still syncing?', 'Use Student Access with this same email to complete course entry once the entitlement handoff finishes.', COURSE_SIGNIN_URL, 'Go to Student Access');
+          setSubmitState('Create AIMT account', false);
+          return;
+        }
 
         clearNotices();
         hideNextStep();
@@ -806,7 +815,11 @@ body {
           return;
         }
         if (!claim.ok && !claim.skipped) {
-          showMessage('Your account is ready. We’re sending you into HeadSpa Mastery now, but your access may take one more sign-in if the entitlement save is delayed.');
+          clearNotices();
+          showSuccessPanel('Account created.', 'Your AIMT account is ready, but course access is still syncing.');
+          showMessage('Use Student Access with this same email to complete entry once the entitlement handoff finishes.');
+          showNextStep('Access still syncing?', 'Student Access will retry the entitlement recovery in this browser using your purchase session.', COURSE_SIGNIN_URL, 'Go to Student Access');
+          return;
         }
 
         clearNotices();

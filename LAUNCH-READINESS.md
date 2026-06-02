@@ -10,7 +10,7 @@
 ## Current Architecture
 - `courses.html` = public discovery + sales path.
 - `student-access.html` = returning student entry point (sign-in, reset, re-entry).
-- `headspa-mastery.html` = gated course experience.
+- `headspa-mastery.html` = public enrollment page + gated course experience, with explicit access-flow handoff required for course entry.
 - `success.html` = Stripe success, account creation, entitlement handoff.
 - Backend/services in place: Stripe + Supabase + Cloudflare Pages.
 - Entitlement infrastructure in place: `claim-course-access` endpoint + `course_entitlements` table + durable entitlement handling.
@@ -66,7 +66,7 @@
 
 ### Should complete before launch
 - [ ] Add a short QA runbook with exact test cases and expected outcomes for support/team handoff.
-- [ ] Add clearer user-facing fallback copy for delayed entitlement sync on `student-access.html` and `success.html`.
+- [x] Add clearer user-facing fallback copy for delayed entitlement sync on `student-access.html` and `success.html`.
 - [ ] Confirm post-launch rollback/hotfix process on Cloudflare Pages (who deploys, where env vars live, fast revert steps).
 
 ### Can wait until after launch
@@ -97,9 +97,10 @@
 - `headspa-mastery.html` must remain gated behind explicit access-flow entry.
 
 ## Recommended Next Step
-- Execute and document a focused launch gating QA pass first (especially browser reopen/refresh behavior across devices), then freeze access-flow logic unless a launch-blocking bug is found.
+- Freeze access-flow logic, then run one final live launch smoke test covering checkout success, delayed entitlement recovery messaging, returning sign-in, password reset, and staff allowlist before launch.
 
 ## Change Log
+- 2026-06-02: Hardened launch access flows by stopping `success.html` from auto-handing users into the course when entitlement claim has not succeeded, removing the leftover public-page sign-in panel from `headspa-mastery.html`, and clarifying delayed-access messaging in `student-access.html` and `success.html` for first-time purchasers and entitlement sync recovery.
 - 2026-04-21: Added lightweight launch observability with `aimt_logs` migration and client/server `logAimtEvent` coverage for auth, entitlement recovery/claim, and checkout failure paths.
 - 2026-04-21: Completed full live end-to-end QA matrix. Verified purchase flow (cancel + success), entitlement recovery, password reset, and staff allowlist, and confirmed auth now requires re-login after browser close.
 - 2026-04-21: Switched Supabase auth persistence to session-scoped browser storage across student-access, success, and headspa course entry so closing the browser now requires re-authentication, while local course progress/resume and in-course memory data remain preserved.
