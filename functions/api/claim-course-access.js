@@ -56,6 +56,23 @@ async function logAimtEvent(type, payload) {
   }
 }
 
+/* Validate the session actually purchased THIS course's price.
+   Prevents a checkout session for a cheaper future product from
+   granting HeadSpa Mastery access. */
+async function sessionMatchesCoursePrice(sessionId, stripeSecretKey, expectedPriceId) {
+  if (!expectedPriceId) return true; // no price configured — skip check
+  const response = await fetch(
+    `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}/line_items?limit=10`,
+    { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error?.message || 'Unable to verify purchased items.');
+  }
+  const items = Array.isArray(data.data) ? data.data : [];
+  return items.some((item) => item?.price?.id === expectedPriceId);
+}
+
 async function fetchCheckoutSession(sessionId, stripeSecretKey) {
   const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
     headers: {
@@ -150,6 +167,22 @@ export async function onRequestPost(context) {
         message: 'checkout_not_completed'
       });
       return json({ error: 'Checkout session is not completed.' }, 400);
+    }
+
+    const priceMatches = await sessionMatchesCoursePrice(
+      session.id,
+      stripeSecretKey,
+      env.STRIPE_PRICE_ID
+    );
+    if (!priceMatches) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: providedEmail,
+        user_id: userId,
+        message: 'price_mismatch_for_course'
+      });
+      return json({ error: 'This purchase does not include this course.' }, 400);
     }
 
     const sessionEmail = normalizeEmail(

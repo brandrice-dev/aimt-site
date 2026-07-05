@@ -5906,6 +5906,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 </div>
 
 <script src="assets/js/headspa-state.js"></script>
+<script src="assets/js/aimt-progress-sync.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // HEADSPA MASTERY — Powered by Lēvo
@@ -7179,11 +7180,19 @@ function addModule() {}
 
 async function callAI(system, messages, maxTokens = 600) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+  const timeout = setTimeout(() => controller.abort(), 25000);
   try {
+    let accessToken = '';
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      accessToken = data?.session?.access_token || '';
+    } catch (_) {}
     const r = await fetch(PROXY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {})
+      },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, system, messages }),
       signal: controller.signal
     });
@@ -7548,6 +7557,7 @@ function enterPurchasedCourseHome() {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('courseHome').classList.add('active');
   APP_STATE.setCurrentView('home');
+  if (window.AIMT_SYNC && window.supabaseClient) { AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); }
   renderHomeProgress();
 
   window.history.replaceState({}, document.title, window.location.pathname);
