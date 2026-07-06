@@ -16,7 +16,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 const COURSE_SLUG = 'headspa-mastery';
-const CREDENTIAL_PREFIX = 'AIMT-HSM';
+const CREDENTIAL_PREFIX = 'AIMT-HS';
 /* Modules 0–10 complete = 11 x 100 in the progress score */
 const REQUIRED_SCORE = 1100;
 /* Unambiguous alphabet: no 0/O, 1/I/L */
