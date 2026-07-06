@@ -365,7 +365,6 @@ body {
     }
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        storage: createSessionAuthStorage(),
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true

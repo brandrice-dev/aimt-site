@@ -186,7 +186,6 @@ function createSessionAuthStorage() {
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: createSessionAuthStorage(),
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true

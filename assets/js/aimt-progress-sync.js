@@ -44,10 +44,10 @@
       Object.keys(progress).forEach(function (moduleId) {
         var mod = progress[moduleId] || {};
         if (mod.complete) score += 100;
-        var cps = mod.checkpoints || {};
+        var cps = mod.checkpointMeta || {};
         Object.keys(cps).forEach(function (cpId) {
           var cp = cps[cpId] || {};
-          if (cp.status === 'pass') score += 5;
+          if (cp.status === 'passed') score += 5;
           else if (cp.status) score += 1; /* attempted */
         });
       });

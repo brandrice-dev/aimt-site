@@ -7244,13 +7244,17 @@ function createSessionAuthStorage() {
 const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        storage: createSessionAuthStorage(),
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
       }
     })
   : null;
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session && window.AIMT_SYNC) AIMT_SYNC.init(supabaseClient, 'headspa-mastery');
+  });
+}
 const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
 const HEADSPA_COURSE_SLUG = 'headspa-mastery';
 const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
