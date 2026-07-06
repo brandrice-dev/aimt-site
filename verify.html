@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify a Credential — AIMT</title>
+<meta name="description" content="Verify the authenticity of an AIMT certification credential. Every AIMT certificate carries a unique, independently verifiable credential ID.">
+<link rel="canonical" href="https://aimt-site.pages.dev/verify.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--aimt-color-bg-primary, #1a1814);
+    color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
+    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 3rem;
+    flex: 1;
+  }
+  .brand {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  h1 {
+    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
+    font-weight: 500;
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    line-height: 1.2;
+    margin-bottom: 0.9rem;
+  }
+  .sub {
+    color: var(--aimt-color-text-body, rgba(255,255,255,0.52));
+    font-size: 0.98rem;
+    line-height: 1.65;
+    margin-bottom: 2.4rem;
+  }
+  .lookup {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+  }
+  .lookup input {
+    flex: 1;
+    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
+    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    border-radius: 8px;
+    color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    padding: 0.85rem 1rem;
+    outline: none;
+    text-transform: uppercase;
+  }
+  .lookup input:focus { border-color: var(--aimt-border-accent-strong, rgba(163,150,141,0.24)); }
+  .lookup button {
+    background: var(--aimt-color-accent, #a3968d);
+    border: none;
+    border-radius: 8px;
+    color: #1a1814;
+    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 0 1.5rem;
+    cursor: pointer;
+  }
+  .lookup button:disabled { opacity: 0.5; cursor: default; }
+  .hint {
+    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    font-size: 0.8rem;
+    margin-bottom: 2.6rem;
+  }
+  .result {
+    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    border-radius: 12px;
+    padding: 1.8rem;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result.valid { border-color: rgba(140, 180, 140, 0.35); }
+  .result.invalid { border-color: rgba(200, 130, 120, 0.35); }
+  .result .status {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 1.1rem;
+  }
+  .result.valid .status { color: #9fc39f; }
+  .result.invalid .status { color: #cf9187; }
+  .result .name {
+    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  .result .detail {
+    color: var(--aimt-color-text-body, rgba(255,255,255,0.52));
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .result .cred {
+    font-family: var(--aimt-font-mono, monospace);
+    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+    font-size: 0.82rem;
+    margin-top: 1rem;
+    letter-spacing: 0.06em;
+  }
+  footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    color: var(--aimt-color-text-micro, rgba(255,255,255,0.28));
+    font-size: 0.78rem;
+  }
+  footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.6rem; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand"><a href="index.html">American Institute of Modern Trichology</a></div>
+    <h1>Verify a credential</h1>
+    <p class="sub">Every certificate issued by AIMT carries a unique credential ID, recorded at the moment of completion. Enter an ID below to confirm its authenticity.</p>
+
+    <div class="lookup">
+      <input id="credInput" placeholder="AIMT-HSM-2026-XXXXXX" autocomplete="off" spellcheck="false">
+      <button id="credBtn" onclick="verify()">Verify</button>
+    </div>
+    <div class="hint">The credential ID appears at the bottom of every AIMT certificate.</div>
+
+    <div class="result" id="result">
+      <div class="status" id="resStatus"></div>
+      <div class="name" id="resName"></div>
+      <div class="detail" id="resDetail"></div>
+      <div class="cred" id="resCred"></div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="index.html">AIMT</a> ·
+    <a href="courses.html">Certifications</a> ·
+    <a href="terms.html">Terms</a> ·
+    <a href="privacy.html">Privacy</a>
+  </footer>
+
+<script>
+async function verify() {
+  const input = document.getElementById('credInput');
+  const btn = document.getElementById('credBtn');
+  const box = document.getElementById('result');
+  const id = (input.value || '').trim().toUpperCase();
+  if (!id) return;
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const r = await fetch('/api/verify-credential?id=' + encodeURIComponent(id));
+    const data = await r.json();
+    box.classList.add('show');
+    box.classList.remove('valid', 'invalid');
+
+    if (data.valid) {
+      box.classList.add('valid');
+      document.getElementById('resStatus').textContent = 'Verified · Authentic';
+      document.getElementById('resName').textContent = data.student_name;
+      const date = new Date(data.completed_at).toLocaleDateString('en-US',
+        { month: 'long', day: 'numeric', year: 'numeric' });
+      document.getElementById('resDetail').textContent =
+        'Completed ' + data.course + ' on ' + date + '.';
+      document.getElementById('resCred').textContent = data.credential_id;
+    } else {
+      box.classList.add('invalid');
+      document.getElementById('resStatus').textContent =
+        data.reason === 'revoked' ? 'Revoked' : 'Not Found';
+      document.getElementById('resName').textContent = '';
+      document.getElementById('resDetail').textContent =
+        data.reason === 'revoked'
+          ? 'This credential was issued but has since been revoked. Contact AIMT for details.'
+          : 'No credential matches this ID. Check the ID for typos — every character matters.';
+      document.getElementById('resCred').textContent = id;
+    }
+  } catch (e) {
+    box.classList.add('show', 'invalid');
+    document.getElementById('resStatus').textContent = 'Error';
+    document.getElementById('resDetail').textContent = 'Could not reach the verification service. Please try again.';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Verify';
+}
+document.getElementById('credInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') verify();
+});
+</script>
+</body>
+</html>

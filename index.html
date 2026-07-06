@@ -604,6 +604,9 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 .footer-mark svg { width: 22px; height: 22px; }
 .footer-name { font-family: var(--mont); font-size: 0.62rem; letter-spacing: 0.38em; text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,0.28); padding-right: 0.38em; }
 .footer-copy { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.14); }
+.footer-legal { display: flex; gap: 1.1rem; font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; }
+.footer-legal a { color: rgba(255,255,255,0.28); text-decoration: none; transition: color 0.2s; }
+.footer-legal a:hover { color: rgba(255,255,255,0.6); }
 
 /* ── REVEAL ── */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
@@ -947,6 +950,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand"><div class="footer-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div><span class="footer-name">AIMT</span></div>
+  <div class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></div>
   <div class="footer-copy">© 2026 American Institute of Modern Trichology · Private Certification Institute</div>
 </footer>
 

@@ -7256,19 +7256,9 @@ const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
 const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
 const ACCESS_FLOW_HANDOFF_TTL_MS = 5 * 60 * 1000;
 const AIMT_LOGS_TABLE = 'aimt_logs';
-const STAFF_EMAIL_ALLOWLIST = [
-  'brandmrice@gmail.com',
-  'cadyb03@gmail.com',
-  'atriumlanc@gmail.com'
-];
 
 function normalizeAccessEmail(email) {
   return String(email || '').trim().toLowerCase();
-}
-
-function isAllowlistedStaffEmail(email) {
-  const normalized = normalizeAccessEmail(email);
-  return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
 }
 
 function getPendingCheckoutSessionId() {
@@ -7492,7 +7482,7 @@ async function shouldEnterPurchasedCourse() {
     if (error || !data || !data.session || !data.session.user) return false;
 
     const user = data.session.user;
-    const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+    const allowlistedStaff = false; // staff access now via entitlement rows (see 20260706 migration)
     if (requestedPurchasedEntry) {
       await bindHeadSpaEntitlementsToUser(user);
     }
@@ -7532,7 +7522,7 @@ async function hasActiveAuthorizedSession() {
     if (error || !data || !data.session || !data.session.user) return false;
 
     const user = data.session.user;
-    const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+    const allowlistedStaff = false; // staff access now via entitlement rows (see 20260706 migration)
     if (allowlistedStaff) return true;
 
     await bindHeadSpaEntitlementsToUser(user);
@@ -7837,6 +7827,33 @@ function showCertificate() {
   if (nameEl) nameEl.textContent = name || 'Graduate';
   if (dateEl) dateEl.textContent = dateStr;
 
+  // Server-issued verifiable credential
+  (async () => {
+    const credEl = document.getElementById('certCredentialId');
+    if (!credEl) return;
+    credEl.textContent = 'Issuing credential…';
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      const token = data?.session?.access_token || '';
+      const r = await fetch('/api/issue-certificate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: 'Bearer ' + token } : {})
+        },
+        body: JSON.stringify({ student_name: name || 'Graduate' })
+      });
+      const result = await r.json();
+      if (r.ok && result.credential_id) {
+        credEl.textContent = 'Credential ID: ' + result.credential_id + ' · verify at aimt-site.pages.dev/verify.html';
+      } else {
+        credEl.textContent = result.error || 'Credential could not be issued — contact support.';
+      }
+    } catch (_) {
+      credEl.textContent = 'Credential could not be issued — check your connection and reopen this certificate.';
+    }
+  })();
+
   if (!overlay) return;
   overlay.style.display = 'flex';
   // Force reflow before adding show class
@@ -8067,6 +8084,7 @@ function loadStepVideo(stepIdx) {
       <div class="cert-meta-item">
         <span class="cert-meta-label">Date</span>
         <span class="cert-meta-value" id="certDate">—</span>
+        <div id="certCredentialId" style="font-family: var(--aimt-font-mono, monospace); font-size: 0.62rem; letter-spacing: 0.08em; opacity: 0.65; margin-top: 0.9rem;"></div>
       </div>
       <div class="cert-meta-item">
         <span class="cert-meta-label">Program</span>
@@ -8088,6 +8106,12 @@ function loadStepVideo(stepIdx) {
     </div>
   </div>
 </div>
+
+<footer style="text-align: center; padding: 2rem 1rem; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.05em; color: var(--muted2);">
+  <a href="terms.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Terms</a>
+  <a href="privacy.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Privacy</a>
+  <a href="refunds.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Refunds</a>
+</footer>
 
 </body>
 </html>

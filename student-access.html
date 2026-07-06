@@ -374,11 +374,6 @@ body {
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const AIMT_LOGS_TABLE = 'aimt_logs';
-    const STAFF_EMAIL_ALLOWLIST = [
-      'brandmrice@gmail.com',
-      'cadyb03@gmail.com',
-      'atriumlanc@gmail.com'
-    ];
     let existingAuthorizedSession = null;
 
     const form = document.getElementById('signInForm');
@@ -397,11 +392,6 @@ body {
 
     function normalizeAccessEmail(email) {
       return String(email || '').trim().toLowerCase();
-    }
-
-    function isAllowlistedStaffEmail(email) {
-      const normalized = normalizeAccessEmail(email);
-      return normalized && STAFF_EMAIL_ALLOWLIST.includes(normalized);
     }
 
     function getPendingCheckoutSessionId() {
@@ -735,7 +725,7 @@ body {
     }
 
     async function canAccessCourse(user) {
-      const allowlistedStaff = isAllowlistedStaffEmail(user.email);
+      const allowlistedStaff = false; // staff access now via entitlement rows (see 20260706 migration)
       if (!allowlistedStaff) {
         await bindHeadSpaEntitlementsToUser(user);
       }
@@ -753,7 +743,7 @@ body {
 
     async function createFirstTimeStaffAccount(email, password) {
       const normalizedEmail = normalizeAccessEmail(email);
-      if (!isAllowlistedStaffEmail(normalizedEmail)) return { ok: false };
+      return { ok: false }; // staff access now via entitlement rows (see 20260706 migration)
       const passwordCheck = getPasswordRequirementMessage(password);
       if (!passwordCheck.ok) {
         return { ok: false, error: passwordCheck.message };
@@ -850,7 +840,7 @@ body {
             email,
             message: error?.message || 'sign_in_failed'
           });
-          if (isAllowlistedStaffEmail(email)) {
+          if (false) { // staff access now via entitlement rows (see 20260706 migration)
             const passwordCheck = getPasswordRequirementMessage(password);
             if (!passwordCheck.ok) {
               showNotice(passwordCheck.message);
@@ -1015,5 +1005,11 @@ body {
       handleExistingSession();
     });
   </script>
+
+  <footer style="text-align: center; padding: 2rem 1rem; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.05em; color: var(--muted);">
+    <a href="terms.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Terms</a>
+    <a href="privacy.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Privacy</a>
+    <a href="refunds.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Refunds</a>
+  </footer>
 </body>
 </html>
