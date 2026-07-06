@@ -2292,9 +2292,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="brand-name">Headspa Mastery</div>
         <div class="brand-sub">American Institute of Modern Trichology</div>
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
-        <button style="background:none;border:0.5px solid rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.45);font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.35rem 0.7rem;cursor:pointer;" onclick="showAdmin()">Admin</button>
-      </div>
     </div>
     <div class="home-greeting" id="homeGreeting">Welcome back,<br><em id="studentFirstName"></em></div>
     <div class="home-sub" id="homeSubText">Keep building. Your next module is ready.</div>
@@ -5839,73 +5836,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   </div>
 </div>
 
-<!-- ══ ADMIN VIEW ══ -->
-<div id="adminView" class="view">
-  <div class="admin-nav">
-    <span class="admin-logo">HeadSpa Mastery</span>
-    <span class="admin-badge">Admin</span>
-    <button class="admin-exit" onclick="exitAdmin()">← Back to course</button>
-  </div>
-  <div class="admin-body">
-
-    <div class="admin-section">
-      <div class="admin-section-title">Overview</div>
-      <div class="admin-stats">
-        <div class="ast"><div class="ast-n" id="statStudents">6</div><div class="ast-l">Active students</div></div>
-        <div class="ast"><div class="ast-n">3</div><div class="ast-l">Modules complete (avg)</div></div>
-        <div class="ast"><div class="ast-n">47%</div><div class="ast-l">Avg completion</div></div>
-      </div>
-    </div>
-
-    <div class="admin-section">
-      <div class="admin-section-title">Student progress</div>
-      <p style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted2);margin:-0.5rem 0 0.75rem;">Illustrative data</p>
-      <div class="student-table">
-        <div class="st-header"><span>Student</span><span>Progress</span><span>Status</span></div>
-        <div class="st-row"><span class="st-name">Student A</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:72%"></div></div><span class="st-pct">72%</span></div><span class="st-status ss-active">Active</span></div>
-        <div class="st-row"><span class="st-name">Student B</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:58%"></div></div><span class="st-pct">58%</span></div><span class="st-status ss-active">Active</span></div>
-        <div class="st-row"><span class="st-name">Student C</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:45%"></div></div><span class="st-pct">45%</span></div><span class="st-status ss-active">Active</span></div>
-        <div class="st-row"><span class="st-name">Student D</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:30%"></div></div><span class="st-pct">30%</span></div><span class="st-status ss-new">New</span></div>
-        <div class="st-row"><span class="st-name">Student E</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:18%"></div></div><span class="st-pct">18%</span></div><span class="st-status ss-new">New</span></div>
-        <div class="st-row"><span class="st-name">Student F</span><div class="st-prog-wrap"><div class="st-prog-bar"><div class="st-prog-fill" style="width:85%"></div></div><span class="st-pct">85%</span></div><span class="st-status ss-active">Active</span></div>
-      </div>
-    </div>
-
-    <div class="admin-section">
-      <div class="admin-section-title">Edit course modules</div>
-      <div id="moduleEditors"></div>
-      <button class="add-module-btn" onclick="addModule()">+ Add new module</button>
-      <button class="save-all-btn" onclick="saveAll()">Save all changes</button>
-    </div>
-
-    <div class="admin-section">
-      <div class="admin-section-title">Course settings</div>
-      <div style="background:var(--white);border:0.5px solid var(--border2);border-radius:14px;padding:0 1rem;">
-        <div class="settings-row">
-          <div><div class="sr-label">Sequential unlock</div><div class="sr-desc">Students must complete each module before the next unlocks</div></div>
-          <button class="toggle on" id="toggleSeq" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row">
-          <div><div class="sr-label">AI guide (Cadence)</div><div class="sr-desc">Floating guide available on all lesson pages</div></div>
-          <button class="toggle on" id="toggleGuideS" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row">
-          <div><div class="sr-label">Checkpoints required</div><div class="sr-desc">Students must complete checkpoints to advance</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row">
-          <div><div class="sr-label">Allow retakes</div><div class="sr-desc">Students can redo checkpoints and quizzes</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row" style="border-bottom:none">
-          <div><div class="sr-label">Certificate on completion</div><div class="sr-desc">Issue a completion certificate when all modules are done</div></div>
-          <button class="toggle" onclick="this.classList.toggle('on')"></button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 <script src="assets/js/headspa-state.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
@@ -7087,94 +7017,6 @@ function calcPrice() {
     result.style.display = 'block';
   }
 }
-
-// ══════════════════════════════════════════════════════
-// ADMIN
-// ══════════════════════════════════════════════════════
-
-const ADMIN_PASSWORD_HASH = '690babd3b5edf52fc8ac5dceaf323d09f83d38722102c87a0198625baff12bb0'; // sha-256 of 'levo2025'
-
-async function hashPassword(pw) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function showAdmin() {
-  const pw = prompt('Admin access:');
-  if (!pw) return;
-  const hash = await hashPassword(pw);
-  if (hash !== ADMIN_PASSWORD_HASH) return;
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('adminView').classList.add('active');
-  document.getElementById('guideBtn').classList.remove('visible');
-  renderModuleEditors();
-  renderAdminStats();
-}
-
-function exitAdmin() { showHome(); }
-
-function renderAdminStats() {
-  const done = APP_STATE.getCompletedCount();
-  const pct = APP_STATE.getOverallPct();
-  const el = document.getElementById('statStudents');
-  // Update admin stat if element exists — otherwise leave placeholder
-}
-
-const MODULES_ADMIN = [
-  { id: 0, title: 'Module 0 — Welcome & Overview', status: 'published', video: '', notes: 'Introduction from Cadence. Course overview.' },
-  { id: 1, title: 'Module 1 — Role of the Head Spa Tech', status: 'published', video: '', notes: 'Scope of practice, licensing, limitations.' },
-  { id: 2, title: 'Module 2 — Welcoming Your Client', status: 'published', video: '', notes: 'Client intake, tea ritual, aromatherapy, first contact.' },
-  { id: 3, title: 'Module 3 — Hair & Scalp Anatomy', status: 'published', video: '', notes: 'Scalp layers, follicle, growth cycle, TE, hydrolipid film.' },
-  { id: 4, title: 'Module 4 — Microscopy & Scalp Assessment', status: 'published', video: '', notes: 'Microscopy, assessment, when not to treat.' },
-  { id: 5, title: 'Module 5 — Scalp Types & Protocols', status: 'published', video: '', notes: 'Five scalp types, identification, treatment protocols.' },
-  { id: 6, title: 'Module 6 — Conditions & Disorders', status: 'published', video: '', notes: 'Dandruff, Malassezia, seborrheic dermatitis, triggers.' },
-  { id: 7, title: 'Module 7 — Equipment & Room Setup', status: 'published', video: '', notes: 'Bed, tools, station prep, client positioning.' },
-  { id: 8, title: 'Module 8 — The Head Spa Service', status: 'published', video: '', notes: '17-step service map. 1hr and 2hr versions.' },
-  { id: 9, title: 'Module 9 — Sanitation & Reset Systems', status: 'published', video: '', notes: 'Sanitation protocols, bed maintenance, reset system.' },
-  { id: 10, title: 'Module 10 — Pricing Strategy', status: 'published', video: '', notes: 'Menu design, pricing framework, add-ons.' },
-  { id: 11, title: 'Course Completion & Certification', status: 'published', video: '', notes: 'Final module — execution standard, certification, what comes next.' }
-];
-
-function renderModuleEditors() {
-  const container = document.getElementById('moduleEditors');
-  if (!container) return;
-  container.innerHTML = '';
-  MODULES_ADMIN.forEach((mod, i) => {
-    const el = document.createElement('div');
-    el.className = 'mod-editor';
-    el.innerHTML =
-      '<div class="me-head" onclick="toggleME(' + i + ')">'
-      + '<span class="me-drag">⠿</span>'
-      + '<input class="me-title-input" value="' + mod.title + '" onclick="event.stopPropagation()" onchange="MODULES_ADMIN[' + i + '].title=this.value"/>'
-      + '<span style="font-size:.68rem;padding:2px 8px;border-radius:980px;background:' + (mod.status === 'published' ? 'var(--success-light)' : 'var(--surface)') + ';color:' + (mod.status === 'published' ? 'var(--success)' : 'var(--muted)') + ';margin-right:6px;">' + mod.status + '</span>'
-      + '<button class="me-toggle" id="meToggle_' + i + '">›</button>'
-      + '</div>'
-      + '<div class="me-body" id="meBody_' + i + '">'
-      + '<div class="me-field"><label>Video URL</label><div class="me-video-row"><input class="me-input" placeholder="https://youtube.com/embed/..." value="' + mod.video + '" onchange="MODULES_ADMIN[' + i + '].video=this.value"/><button class="me-save-btn" onclick="saveVideo(' + i + ')">Save</button></div></div>'
-      + '<div class="me-field"><label>Notes (internal)</label><textarea class="me-textarea" onchange="MODULES_ADMIN[' + i + '].notes=this.value">' + mod.notes + '</textarea></div>'
-      + '</div>';
-    container.appendChild(el);
-  });
-}
-
-function toggleME(i) {
-  const body = document.getElementById('meBody_' + i);
-  const btn = document.getElementById('meToggle_' + i);
-  if (!body) return;
-  body.classList.toggle('open');
-  if (btn) btn.textContent = body.classList.contains('open') ? '⌄' : '›';
-}
-
-function saveVideo(i) {
-  alert('Video saved for "' + MODULES_ADMIN[i].title + '"');
-}
-
-function saveAll() {
-  const btn = document.querySelector('.save-all-btn');
-  if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(() => { btn.textContent = 'Save all changes'; btn.style.background = ''; }, 2000); }
-}
-
-function addModule() {}
 
 // ══════════════════════════════════════════════════════
 // AI
