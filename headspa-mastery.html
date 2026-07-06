@@ -7476,10 +7476,15 @@ function showStudentSignInEntry() {
 }
 
 async function shouldEnterPurchasedCourse() {
-  if (!consumeAccessFlowHandoff()) return false;
+  // Two admission paths, both required to pass the entitlement check below: the
+  // sessionStorage handoff flag set by student-access.html, OR an explicit
+  // ?enter=1 (e.g. the My AIMT dashboard's Continue link). Do not make either
+  // path the sole gate — that regresses to blocking valid, entitled sessions.
+  const hadAccessFlowHandoff = consumeAccessFlowHandoff();
 
   const params = new URLSearchParams(window.location.search);
   const requestedPurchasedEntry = params.get('enter') === '1';
+  if (!hadAccessFlowHandoff && !requestedPurchasedEntry) return false;
   if (!supabaseClient) return false;
 
   try {
