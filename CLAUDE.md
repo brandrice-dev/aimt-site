@@ -84,3 +84,6 @@ Full audit lives in the owner's records (AIMT-Launch-Audit.md, 22 items).
   sitemap.xml, favicon); Coming Soon cards on courses.html.
 - ⏳ Rolling: Vimeo IDs into STEP_VIDEO_IDS (12 slots, Module 8); optimized
   images (WebP) replacing the 6.9MB hero PNG.
+- ⏳ Post-launch roadmap: Owner's Console — proper admin.html behind Supabase
+  auth (owner account only), real enrollment/completion/revenue metrics.
+  Replaces removed legacy panel.
