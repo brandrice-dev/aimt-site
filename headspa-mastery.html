@@ -7251,8 +7251,12 @@ const supabaseClient = window.supabase && typeof window.supabase.createClient ==
     })
   : null;
 if (supabaseClient) {
+  let syncInitCalled = false;
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session && window.AIMT_SYNC) AIMT_SYNC.init(supabaseClient, 'headspa-mastery');
+    if (session && window.AIMT_SYNC && !syncInitCalled) {
+      syncInitCalled = true;
+      AIMT_SYNC.init(supabaseClient, 'headspa-mastery');
+    }
   });
 }
 const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
@@ -7348,8 +7352,30 @@ async function hasHeadSpaEntitlement(user) {
       .or(`user_id.eq.${user.id},purchaser_email.ilike.${normalizedEmail}`)
       .limit(1);
 
-    return !error && Array.isArray(data) && data.length > 0;
-  } catch (_) {
+    if (error) {
+      void logAimtEvent('entitlement_check_query_error', {
+        email: user.email,
+        user_id: user.id,
+        message: error.message || 'unknown_query_error'
+      });
+      return false;
+    }
+
+    const found = Array.isArray(data) && data.length > 0;
+    if (!found) {
+      void logAimtEvent('entitlement_check_no_rows', {
+        email: user.email,
+        user_id: user.id,
+        message: 'query_ok_zero_rows'
+      });
+    }
+    return found;
+  } catch (error) {
+    void logAimtEvent('entitlement_check_exception', {
+      email: user.email,
+      user_id: user.id,
+      message: error && error.message ? error.message : 'unknown_exception'
+    });
     return false;
   }
 }

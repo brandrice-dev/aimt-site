@@ -29,6 +29,7 @@
   var _pushing = false;
   var _pushQueued = false;
   var _initialized = false;
+  var _initStarted = false;
   var _originalSave = null;
 
   function log(msg, extra) {
@@ -216,7 +217,8 @@
   window.AIMT_SYNC = {
     /* Call once, after auth + entitlement are confirmed. */
     init: function (supabaseClient, courseSlug) {
-      if (_initialized) return Promise.resolve();
+      if (_initStarted) return Promise.resolve();
+      _initStarted = true;
       if (!supabaseClient || !window.APP_STATE) {
         log('init skipped — missing client or APP_STATE');
         return Promise.resolve();
@@ -229,15 +231,21 @@
         if (!user) { log('init skipped — no user'); return; }
         _userId = user.id;
 
-        /* Hook save(): stamp + debounce push on every local mutation */
-        _originalSave = window.APP_STATE.save.bind(window.APP_STATE);
-        window.APP_STATE.save = function () {
-          _originalSave();
-          if (!_suppressPush) {
-            setLocalSavedAt(nowIso());
-            schedulePush();
-          }
-        };
+        /* Hook save(): stamp + debounce push on every local mutation.
+           Guard against re-wrapping an already-wrapped save (which would
+           make it call itself and blow the call stack). */
+        if (!window.APP_STATE.save.__aimtWrapped) {
+          _originalSave = window.APP_STATE.save.bind(window.APP_STATE);
+          var wrappedSave = function () {
+            _originalSave();
+            if (!_suppressPush) {
+              setLocalSavedAt(nowIso());
+              schedulePush();
+            }
+          };
+          wrappedSave.__aimtWrapped = true;
+          window.APP_STATE.save = wrappedSave;
+        }
 
         window.addEventListener('pagehide', flushOnHide);
         document.addEventListener('visibilitychange', function () {
