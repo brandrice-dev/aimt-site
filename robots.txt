@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /my-aimt.html
+Disallow: /success.html
+
+Sitemap: https://aimt-site.pages.dev/sitemap.xml

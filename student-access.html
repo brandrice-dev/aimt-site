@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Student Access — AIMT</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="Sign in to your AIMT student account to access your courses, progress, and certificates.">
+<meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -621,7 +624,7 @@ body {
 
     function redirectToCourse() {
       setAccessFlowHandoff(existingAuthorizedSession ? 'student-access-session-continue' : 'student-access-signin');
-      window.location.href = COURSE_ENTRY_URL;
+      window.location.href = 'my-aimt.html';
     }
 
     async function ensureSessionReady(userId) {

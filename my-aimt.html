@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My AIMT — Student Dashboard</title>
+<meta name="description" content="Your AIMT student home: course progress, certificates, and resources.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--aimt-color-bg-primary, #1a1814);
+    color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
+    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
+    font-weight: 300;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.5rem 4rem; }
+  .topbar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3rem; gap: 1rem; flex-wrap: wrap; }
+  .brand {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  .signout {
+    background: none; border: none; cursor: pointer;
+    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em;
+  }
+  .signout:hover { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); }
+  h1 {
+    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
+    font-weight: 500; font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 0.4rem;
+  }
+  .welcome-email { color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); font-size: 0.9rem; margin-bottom: 2.8rem; }
+  .section-label {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    margin: 2.6rem 0 1rem;
+  }
+  .card {
+    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
+    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    border-radius: 12px; padding: 1.6rem 1.7rem; margin-bottom: 1rem;
+  }
+  .card h3 {
+    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
+    font-weight: 500; font-size: 1.25rem; margin-bottom: 0.35rem;
+  }
+  .card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); font-size: 0.88rem; line-height: 1.6; }
+  .progress-row { display: flex; align-items: center; gap: 1rem; margin: 1.1rem 0 1.2rem; }
+  .progress-track {
+    flex: 1; height: 4px; border-radius: 2px;
+    background: var(--aimt-surface-4, rgba(255,255,255,0.045));
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: var(--aimt-color-accent, #a3968d);
+    border-radius: 2px; transition: width 0.6s ease;
+  }
+  .progress-pct {
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.78rem; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+    min-width: 3.2em; text-align: right;
+  }
+  .btn {
+    display: inline-block; background: var(--aimt-color-accent, #a3968d);
+    color: #1a1814; text-decoration: none; border: none; cursor: pointer;
+    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
+    font-size: 0.88rem; font-weight: 500; letter-spacing: 0.04em;
+    padding: 0.7rem 1.5rem; border-radius: 8px;
+  }
+  .btn.ghost {
+    background: transparent;
+    border: 1px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
+    color: var(--aimt-color-accent, #a3968d);
+  }
+  .cred-line {
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.82rem; letter-spacing: 0.06em;
+    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+    margin: 0.7rem 0 1rem; word-break: break-all;
+  }
+  .empty {
+    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    font-size: 0.9rem; line-height: 1.6;
+  }
+  .resource-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.85rem 0; gap: 1rem;
+    border-bottom: 1px solid var(--aimt-border-soft, rgba(255,255,255,0.06));
+  }
+  .resource-item:last-child { border-bottom: none; }
+  .resource-item .r-name { font-size: 0.92rem; }
+  .resource-item .r-desc { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.78rem; margin-top: 0.15rem; }
+  .resource-item a {
+    color: var(--aimt-color-accent, #a3968d); text-decoration: none;
+    font-size: 0.84rem; white-space: nowrap;
+  }
+  .account-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .loading { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; padding: 2rem 0; }
+  footer {
+    text-align: center; padding: 2.5rem 1.5rem;
+    color: var(--aimt-color-text-micro, rgba(255,255,255,0.28)); font-size: 0.78rem;
+  }
+  footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.55rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><a href="index.html">American Institute of Modern Trichology</a></div>
+    <button class="signout" onclick="signOut()">Sign out</button>
+  </div>
+
+  <h1>My AIMT</h1>
+  <div class="welcome-email" id="userEmail"></div>
+
+  <div id="loading" class="loading">Loading your studies…</div>
+
+  <div id="dashboard" style="display:none">
+    <div class="section-label">Your Courses</div>
+    <div id="coursesArea"></div>
+
+    <div class="section-label">Certification</div>
+    <div id="certArea"></div>
+
+    <div class="section-label">Resources</div>
+    <div class="card" id="resourcesCard"></div>
+
+    <div class="section-label">Account</div>
+    <div class="card">
+      <div class="account-row">
+        <div class="meta">Signed in as <span id="accountEmail"></span></div>
+        <a class="btn ghost" href="student-access.html#reset">Change password</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="index.html">AIMT</a> · <a href="courses.html">Certifications</a> ·
+  <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> ·
+  <a href="refunds.html">Refunds</a> · <a href="verify.html">Verify a Credential</a>
+</footer>
+
+<script>
+/* ── Config (anon key is public by design; RLS enforces access) ── */
+const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+
+const COURSES = {
+  'headspa-mastery': {
+    title: 'HeadSpa Mastery',
+    subtitle: 'Head Spa Practitioner Certification · 12 modules',
+    entry: 'headspa-mastery.html?enter=1',
+    totalModules: 12
+  }
+};
+
+/* Downloadable resources. To activate: create a PRIVATE Supabase Storage
+   bucket named 'course-resources', upload files, and list them here.
+   Empty array = friendly empty state, nothing breaks. */
+const RESOURCES = [
+  /* { course: 'headspa-mastery', name: 'Service Protocol Quick Card', desc: 'Printable 17-step reference', path: 'headspa-mastery/protocol-quick-card.pdf' }, */
+];
+
+/* ── Same per-tab session storage as the rest of the site ── */
+function createSessionAuthStorage() {
+  const memoryStore = {};
+  return {
+    getItem(key) { try { return window.sessionStorage.getItem(key); } catch (_) { return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null; } },
+    setItem(key, value) { try { window.sessionStorage.setItem(key, value); } catch (_) { memoryStore[key] = value; } },
+    removeItem(key) { try { window.sessionStorage.removeItem(key); } catch (_) { delete memoryStore[key]; } }
+  };
+}
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: createSessionAuthStorage(),
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
+let currentUser = null;
+
+async function init() {
+  const { data } = await supabaseClient.auth.getUser();
+  currentUser = data && data.user;
+  if (!currentUser) {
+    window.location.href = 'student-access.html';
+    return;
+  }
+  const email = (currentUser.email || '').toLowerCase();
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('accountEmail').textContent = email;
+
+  await Promise.all([loadCourses(email), loadCertificates(), loadResources()]);
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+}
+
+async function loadCourses(email) {
+  const area = document.getElementById('coursesArea');
+  const { data: ents, error } = await supabaseClient
+    .from('course_entitlements')
+    .select('course_slug')
+    .or('user_id.eq.' + currentUser.id + ',purchaser_email.eq.' + email);
+
+  if (error || !ents || !ents.length) {
+    area.innerHTML = '<div class="card"><div class="empty">No enrollments yet. Browse our <a href="courses.html" style="color:var(--aimt-color-accent,#a3968d)">certifications</a> to begin.</div></div>';
+    return;
+  }
+
+  /* progress for all courses in one query */
+  const { data: progRows } = await supabaseClient
+    .from('course_progress')
+    .select('course_slug, state')
+    .eq('user_id', currentUser.id);
+  const progBySlug = {};
+  (progRows || []).forEach(r => { progBySlug[r.course_slug] = r.state; });
+
+  const slugs = [...new Set(ents.map(e => e.course_slug))];
+  area.innerHTML = slugs.map(slug => {
+    const course = COURSES[slug] || { title: slug, subtitle: '', entry: '#', totalModules: 12 };
+    let done = 0;
+    const state = progBySlug[slug];
+    try {
+      const progress = (state && state.progress) || {};
+      Object.keys(progress).forEach(k => { if (progress[k] && progress[k].complete) done++; });
+    } catch (_) {}
+    const pct = Math.min(100, Math.round((done / course.totalModules) * 100));
+    const label = done === 0 ? 'Begin course' : (pct >= 100 ? 'Revisit course' : 'Continue');
+    return '<div class="card">' +
+      '<h3>' + course.title + '</h3>' +
+      '<div class="meta">' + course.subtitle + '</div>' +
+      '<div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="progress-pct">' + pct + '%</div></div>' +
+      '<a class="btn" href="' + course.entry + '">' + label + '</a>' +
+      '</div>';
+  }).join('');
+}
+
+async function loadCertificates() {
+  const area = document.getElementById('certArea');
+  const { data: comps, error } = await supabaseClient
+    .from('completions')
+    .select('credential_id, course_slug, student_name, completed_at, revoked')
+    .eq('user_id', currentUser.id);
+
+  if (error || !comps || !comps.filter(c => !c.revoked).length) {
+    area.innerHTML = '<div class="card"><div class="empty">Your certificate will appear here when you complete a course. Every AIMT credential carries a unique ID your employer can verify.</div></div>';
+    return;
+  }
+
+  area.innerHTML = comps.filter(c => !c.revoked).map(c => {
+    const course = COURSES[c.course_slug] || { title: c.course_slug, entry: '#' };
+    const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return '<div class="card">' +
+      '<h3>' + course.title + ' — Certified</h3>' +
+      '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
+      '<div class="cred-line">Credential ID: ' + c.credential_id + '</div>' +
+      '<a class="btn" href="' + course.entry + '" style="margin-right:0.6rem">View certificate</a>' +
+      '<a class="btn ghost" href="verify.html">Verification page</a>' +
+      '</div>';
+  }).join('');
+}
+
+async function loadResources() {
+  const card = document.getElementById('resourcesCard');
+  if (!RESOURCES.length) {
+    card.innerHTML = '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
+    return;
+  }
+  const items = await Promise.all(RESOURCES.map(async r => {
+    try {
+      const { data, error } = await supabaseClient
+        .storage.from('course-resources')
+        .createSignedUrl(r.path, 60 * 60);
+      const href = (!error && data && data.signedUrl) ? data.signedUrl : null;
+      return '<div class="resource-item"><div><div class="r-name">' + r.name + '</div>' +
+        (r.desc ? '<div class="r-desc">' + r.desc + '</div>' : '') + '</div>' +
+        (href ? '<a href="' + href + '" target="_blank" rel="noopener">Download</a>'
+              : '<span class="r-desc">Unavailable</span>') +
+        '</div>';
+    } catch (_) { return ''; }
+  }));
+  card.innerHTML = items.join('') || '<div class="empty">Resources are temporarily unavailable.</div>';
+}
+
+async function signOut() {
+  try { await supabaseClient.auth.signOut(); } catch (_) {}
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>
