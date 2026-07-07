@@ -73,8 +73,9 @@ Supabase changes: run SQL manually in dashboard SQL editor.
 `docs/` holds the source-of-truth documents for design, copy, and launch
 process — treat these as governing, not just reference: `AIMT-Design-Audit-Charter.md`,
 `AIMT-Art-Direction-Brief.md`, `AIMT-Copy-Claims-Audit.md`,
-`AIMT-Domain-Day-Checklist.md`, `AIMT-Design-Session-Kickoff.md`, and the full
-22-item `AIMT-Launch-Audit.md`.
+`AIMT-Domain-Day-Checklist.md`, `AIMT-Design-Session-Kickoff.md`,
+`AIMT-AUDIT-RULES.md` (standing rename rule + copy directive for the ongoing
+design/copy audit), and the full 22-item `AIMT-Launch-Audit.md`.
 
 ## Current launch plan status
 - ✅ Domain live at aimtrichology.com.
