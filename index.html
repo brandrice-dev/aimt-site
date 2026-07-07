@@ -75,6 +75,8 @@ nav {
 .nav-links { display: flex; align-items: center; gap: var(--aimt-space-lg); }
 .nav-link { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; white-space: nowrap; }
 .nav-link:hover { color: white; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--aimt-space-lg); }
+.nav-sep { width: 0.5px; height: 14px; background: var(--aimt-border-default); flex-shrink: 0; }
 .nav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .nav-btn { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 980px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .nav-btn-ghost { background: none; border: 0.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
@@ -157,6 +159,7 @@ nav {
   nav { padding: 0 1rem; }
   .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 0.4rem 0.75rem; white-space: nowrap; }
   .nav-links { display: none; }
+  .nav-sep { display: none; }
   nav .cta-primary { font-size: 0.62rem; padding: 0.4rem 0.85rem; white-space: nowrap; }
 }
 .hero-image {
@@ -628,16 +631,16 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="nav-wordmark">
     <div class="nav-name-stack">
       <div class="nav-name-top">AIMT</div>
-      <div class="nav-name-bottom">American Institute of Modern Trichology</div>
     </div>
   </div>
-  <div class="nav-links">
-    <a href="headspa-mastery.html" class="nav-link">Head Spa Certification</a>
-    <a href="courses.html" class="nav-link">All Certifications</a>
-    <a href="#institute" class="nav-link">The Institute</a>
-  </div>
-  <div class="nav-actions">
-    <a href="student-access.html" class="nav-btn nav-btn-ghost">Student Access</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="headspa-mastery.html" class="nav-link">Head Spa Certification</a>
+      <a href="courses.html" class="nav-link">All Certifications</a>
+      <a href="#institute" class="nav-link">The Institute</a>
+    </div>
+    <span class="nav-sep"></span>
+    <a href="student-access.html" class="nav-link">Student Access</a>
     <a href="headspa-mastery.html" class="cta-primary">Enroll →</a>
   </div>
 </nav>
