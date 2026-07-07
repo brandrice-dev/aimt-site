@@ -69,19 +69,25 @@ push to main → Cloudflare Pages builds/deploys automatically.
 Worker changes: manual paste in Cloudflare dashboard (separate from Pages).
 Supabase changes: run SQL manually in dashboard SQL editor.
 
+## Governing documents
+`docs/` holds the source-of-truth documents for design, copy, and launch
+process — treat these as governing, not just reference: `AIMT-Design-Audit-Charter.md`,
+`AIMT-Art-Direction-Brief.md`, `AIMT-Copy-Claims-Audit.md`,
+`AIMT-Domain-Day-Checklist.md`, `AIMT-Design-Session-Kickoff.md`, and the full
+22-item `AIMT-Launch-Audit.md`.
+
 ## Current launch plan status
-Full audit lives in the owner's records (AIMT-Launch-Audit.md, 22 items).
-- ✅ Session 1 (built, deploying): stripe-webhook.js, claim price validation,
-  course_progress migration + aimt-progress-sync.js, hardened Cadence Worker.
-  Instructions: `DEPLOY-NOTES.md` (Session 1 zip).
-- ⏳ Session 2 (next): `completions` table + verifiable certificate credential
-  IDs + public /verify page; legal pages (terms/privacy/refunds) in the site
-  design system; remove STAFF_EMAIL_ALLOWLIST from client HTML (staff access
-  moves to entitlement rows / Worker env).
-- ⏳ Session 3: "My AIMT" student dashboard (extends student-access.html:
-  enrolled courses + progress, downloads via Supabase Storage signed URLs,
-  certificate re-download); SEO (meta descriptions, canonicals, robots.txt,
-  sitemap.xml, favicon); Coming Soon cards on courses.html.
+- ✅ Domain live at aimtrichology.com.
+- ✅ Sessions 1–4 deployed: stripe-webhook.js + claim price validation +
+  course_progress sync (Session 1); verifiable certificates + legal pages +
+  allowlist removal (Session 2); My AIMT dashboard + SEO pack + Coming Soon
+  cards (Session 3); claims hygiene + badge propagation + rename-proofing
+  (Session 4).
+- ✅ Legacy admin panel removed (leaked credential, nonfunctional demo data).
+- ✅ Certificate accuracy sweep done (signatory, dates, claims — see b70c82e).
+- ⏳ Safe Browsing review pending on the pages.dev domain.
+- ⏳ Next: Pass 1 consistency audit → design elevation pass (remaining
+  certificate work is visual/design-only from here).
 - ⏳ Rolling: Vimeo IDs into STEP_VIDEO_IDS (12 slots, Module 8); optimized
   images (WebP) replacing the 6.9MB hero PNG.
 - ⏳ Post-launch roadmap: Owner's Console — proper admin.html behind Supabase
