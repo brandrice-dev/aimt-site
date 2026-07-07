@@ -72,6 +72,9 @@ nav {
 .nav-wordmark { display: flex; flex-direction: column; gap: 1px; }
 .nav-name { font-family: var(--aimt-font-mont); font-size: 0.68rem; letter-spacing: 0.38em; text-transform: uppercase; font-weight: 700; color: white; line-height: 1; }
 .nav-sub { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.3); line-height: 1; }
+.nav-links { display: flex; align-items: center; gap: var(--aimt-space-lg); }
+.nav-link { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; white-space: nowrap; }
+.nav-link:hover { color: white; }
 .nav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .nav-btn { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 980px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .nav-btn-ghost { background: none; border: 0.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
@@ -153,6 +156,8 @@ nav {
   .cta-primary, .cta-ghost { text-align: center; }
   nav { padding: 0 1rem; }
   .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 0.4rem 0.75rem; white-space: nowrap; }
+  .nav-links { display: none; }
+  nav .cta-primary { font-size: 0.62rem; padding: 0.4rem 0.85rem; white-space: nowrap; }
 }
 .hero-image {
   width: 100%;
@@ -372,7 +377,7 @@ nav {
 .c01-mod-sub { font-size: 0.64rem; color: rgba(255,255,255,0.22); font-weight: 300; margin-top: 1px; }
 
 /* ── DIFFERENT ── */
-#different { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
+#institute { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
 .diff-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 2rem; }
 .diff-card { background: white; border: 0.5px solid var(--border2); border-radius: 16px; padding: 1.4rem; display: flex; gap: 14px; align-items: flex-start; }
 .diff-num { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted2); flex-shrink: 0; padding-top: 3px; min-width: 20px; }
@@ -526,7 +531,7 @@ nav {
   #what,
   #ai-safe,
   #course01,
-  #different,
+  #institute,
   #community,
   #cadence,
   #coming-soon,
@@ -626,8 +631,14 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <div class="nav-name-bottom">American Institute of Modern Trichology</div>
     </div>
   </div>
+  <div class="nav-links">
+    <a href="headspa-mastery.html" class="nav-link">Head Spa Certification</a>
+    <a href="courses.html" class="nav-link">All Certifications</a>
+    <a href="#institute" class="nav-link">The Institute</a>
+  </div>
   <div class="nav-actions">
     <a href="student-access.html" class="nav-btn nav-btn-ghost">Student Access</a>
+    <a href="headspa-mastery.html" class="cta-primary">Enroll →</a>
   </div>
 </nav>
 
@@ -750,7 +761,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 </section>
 
 <!-- DIFFERENT -->
-<section id="different">
+<section id="institute">
   <div class="section-inner">
     <span class="eyebrow-light reveal">What sets AIMT apart</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Built like an<br>institute.</h2>
@@ -921,6 +932,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand"><div class="footer-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div><span class="footer-name">AIMT</span></div>
+  <div class="footer-legal"><a href="headspa-mastery.html">Head Spa Certification</a><a href="courses.html">All Certifications</a><a href="student-access.html">Student Access</a></div>
   <div class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></div>
   <div class="footer-copy">© 2026 American Institute of Modern Trichology · Private Certification Institute</div>
 </footer>
