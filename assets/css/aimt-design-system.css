@@ -1,6 +1,19 @@
 /*
   AIMT Design System (Source: /courses)
   This file is token-only and does not change page visuals until consumed.
+
+  Two intentional heading systems (Pass 1 design audit, confirmed as
+  deliberate, not drift):
+  - Tier 1 — marketing pages (index, courses, headspa-mastery,
+    student-access, success): bold uppercase Montserrat (--aimt-font-mont)
+    hero/headline treatment. Each page's headline size is scaled to its own
+    role (homepage hero vs. marketing headline vs. utility form headline)
+    and intentionally NOT unified to one clamp() value.
+  - Tier 2 — institutional pages (verify, terms, privacy, refunds,
+    my-aimt): quiet serif Playfair Display (--aimt-font-serif) h1/h2,
+    normalized to one shared size: h1 clamp(1.7rem, 4vw, 2.3rem), h2 1.25rem.
+  All pages load the same Google Fonts request (Montserrat + Playfair
+  Display + Outfit) and this stylesheet, regardless of tier.
 */
 
 :root {
@@ -52,6 +65,9 @@
   --aimt-radius-card: 18px;
   --aimt-radius-media: 14px;
   --aimt-radius-panel: 16px;
+  --aimt-radius-sm: 10px;
+  --aimt-radius-md: 12px;
+  --aimt-radius-lg: 20px;
 
   /* Shadows */
   --aimt-shadow-card-hover: 0 24px 60px rgba(0,0,0,0.32);
@@ -74,7 +90,7 @@
   --aimt-space-7xl: 6rem;
 
   /* Section rhythm */
-  --aimt-section-pad-standard: 5rem 2rem 6rem;     /* courses-section, promise-section */
+  --aimt-section-pad-standard: 5.5rem 1.5rem;      /* Pass 1: updated to match sitewide majority usage */
   --aimt-section-pad-band: 3rem 2rem;              /* why-band */
   --aimt-section-gap-major: 4rem;                  /* section-rule spacing */
   --aimt-section-gap-header: 2.5rem;
