@@ -106,6 +106,7 @@ nav {
   width: min(100%, 36rem);
   margin-left: auto;
   margin-right: clamp(2.5rem, 9vw, 9.5rem);
+  margin-top: 3rem;
   padding: 0;
   text-shadow: 0 2px 20px rgba(0,0,0,0.28);
 }
@@ -114,13 +115,16 @@ nav {
   letter-spacing: -0.02em; line-height: 0.92; text-transform: uppercase; color: white;
   margin-bottom: 0.6rem; width: 100%;
 }
-.hero-headline em { font-style: normal; font-weight: 300; font-family: var(--aimt-font-mono); color: rgba(255,255,255,0.6); display: block; font-size: 0.18em; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.7em; }
+.hero-headline em { font-style: normal; font-weight: 300; font-family: var(--aimt-font-mono); color: rgba(255,255,255,0.6); display: block; font-size: 0.18em; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 1.6em; }
 .hero-institute-name { display: flex; flex-direction: column; gap: 0; }
 .hero-inst-top { display: block; }
 .hero-inst-bottom { display: block; font-size: 0.36em; font-family: var(--aimt-font-mono); font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68); margin-top: 0.35em; }
-.hero-sub { font-family: var(--aimt-font-serif); font-size: clamp(0.9rem,1.4vw,1.2rem); font-style: italic; color: rgba(255,255,255,0.7); line-height: 1.6; max-width: 600px; margin-bottom: 1.5rem; margin-top: 0.65rem; }
+.hero-lead { font-family: var(--aimt-font-serif); font-style: italic; font-weight: 400; text-transform: none; color: rgba(255,255,255,0.66); font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1; display: block; margin-bottom: 0.15em; }
+.hero-payoff { font-family: var(--aimt-font-mont); font-weight: 800; text-transform: uppercase; color: white; font-size: clamp(2.5rem, 5.5vw, 4.6rem); line-height: 0.94; letter-spacing: -0.02em; display: block; }
+.hero-sub { font-family: var(--aimt-font-serif); font-size: clamp(1.05rem, 1.7vw, 1.3rem); font-style: italic; color: rgba(255,255,255,0.84); line-height: 1.4; max-width: 460px; margin-top: 1.5rem; }
 .hero-sub strong { font-style: normal; font-weight: 500; color: rgba(255,255,255,0.9); }
-.hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hero-signal { font-family: var(--aimt-font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.6); display: inline-block; margin-top: 1.3rem; padding-top: 1.4rem; border-top: 0.5px solid rgba(255,255,255,0.09); }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 2rem; }
 
 @media(max-width:700px){
   #hero {
@@ -152,8 +156,11 @@ nav {
   }
   .hero-headline { font-size: clamp(1.7rem, 5vw, 1.9rem); line-height: 0.96; margin-bottom: 0.45rem; }
   .hero-inst-bottom { font-size: 0.42em; letter-spacing: 0.14em; }
-  .hero-sub { font-size: 0.84rem; max-width: 100%; margin: 0.75rem 0 1.15rem; line-height: 1.62; color: rgba(255,255,255,0.84); }
+  .hero-lead { font-size: clamp(1.2rem, 6vw, 1.6rem); }
+  .hero-payoff { font-size: clamp(2rem, 11vw, 2.9rem); }
+  .hero-sub { font-size: 0.84rem; max-width: 100%; margin-top: 0.75rem; line-height: 1.62; color: rgba(255,255,255,0.84); }
   .hero-sub strong { color: rgba(255,255,255,0.98); }
+  .hero-signal { font-size: 0.62rem; margin-top: 1.15rem; padding-top: 1rem; white-space: normal; }
   .hero-ctas { flex-direction: column; align-items: stretch; justify-content: center; }
   .cta-primary, .cta-ghost { text-align: center; }
   nav { padding: 0 1rem; }
@@ -655,9 +662,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="hero-content">
     <h1 class="hero-headline">
       <em>American Institute of Modern Trichology</em>
-      <span class="hero-inst-top">The practitioner's standard for head&nbsp;spa certification.</span>
+      <span class="hero-lead">The Standard</span>
+      <span class="hero-payoff">Head&nbsp;Spa<br>Certification</span>
     </h1>
-    <p class="hero-sub"><strong>Train to become the head spa professional clients return for.</strong> Learn through structured checkpoints with an in-course AI guide, and earn a credential built on demonstrated, hands-on clinical training — the standard serious practitioners hold themselves to.</p>
+    <p class="hero-sub">Train to become the head spa professional clients return for.</p>
+    <div class="hero-signal">Self-paced &nbsp;&middot;&nbsp; Any device &nbsp;&middot;&nbsp; For serious professionals</div>
     <div class="hero-ctas">
       <a href="headspa-mastery.html" class="cta-primary">View Head Spa Certification Course →</a>
       <a href="#institute" class="cta-ghost">Why AIMT →</a>
