@@ -37,6 +37,16 @@ no income promises, no "mastery".
    occurrences when each of those pages is audited. Certificate specimen on
    index is covered by the credential-section commit.
 
+## STANDING COLOR RULE — oxblood is seal/diploma-only
+
+Oxblood is a SEAL/DIPLOMA color only, not a site-wide accent. The web page
+stays clean cream/white/near-black (monochrome, no color accent). Do NOT add
+oxblood accent tokens or recolor hairlines, eyebrows, credential IDs, or CTA
+borders. Primary CTAs stay cream. The crest/certificate keeps the deep seal
+oxblood (~#38141C) at full richness — that's the one place the color lives.
+Canonical seal oxblood for the badge/cert: `#38141C`. Do not define it as a
+general-purpose CSS variable or apply it outside the crest/certificate.
+
 ## STANDING PROCESS RULES (already in effect)
 
 Visual/copy only — never touch payment/auth/entitlement/sync/Worker or
