@@ -54,3 +54,35 @@ anything in `cadence-worker/`, `supabase/`, `functions/`; smallest diffs, one
 concern per commit; design-system tokens win (fix the token, never fork the
 value); report-then-apply and STOP before committing; verify in a real
 full-width browser, not the sandbox preview.
+
+## TYPE SYSTEM & SECTION PATTERN (canonical — do not deviate)
+
+Fonts: `--aimt-font-mont` = Montserrat (headlines) · `--aimt-font-serif` =
+Playfair Display (editorial intros) · `--aimt-font-sans` = Outfit (body) ·
+`--aimt-font-mono` = SF Mono (eyebrows)
+
+Every section below the hero follows this rhythm:
+
+1. **Eyebrow** — `.eyebrow` (dark bg) / `.eyebrow-light` (light bg): mono,
+   0.6rem, weight 400, uppercase, 0.16em tracking
+2. **Headline** — `.section-title`: Montserrat, `clamp(1.6rem,6vw,2.6rem)`,
+   weight 700, UPPERCASE, letter-spacing -0.03em, line-height 1.05. Color set
+   inline per background. NEVER create a bespoke headline class for a
+   section.
+3. **Editorial serif intro** — Playfair italic, `clamp(1.1rem,3.8vw,1.45rem)`,
+   line-height 1.6, with `<em>` two-color emphasis (first sentence
+   emphasized in full color, remainder muted). This is the polish moment —
+   every section should have one. (Reference: `.community-intro` on dark,
+   `.institute-intro` on light.)
+4. **Body** — `.section-sub`: Outfit, 0.9rem, weight 300, line-height 1.82,
+   muted
+5. **Cards** — section-appropriate card component
+
+All elements in a section share ONE left edge (align eyebrow, headline,
+intro, body, and card content to the same padding).
+
+The hero (`#hero`) is the ONE exception — it has its own distinct treatment
+by design.
+
+**RULE:** Before styling any section, read this. Reuse the canonical
+classes. Do not invent new heading or intro classes.
