@@ -86,3 +86,11 @@ by design.
 
 **RULE:** Before styling any section, read this. Reuse the canonical
 classes. Do not invent new heading or intro classes.
+
+**ALIGNMENT (canonical):** All sections use `--aimt-align` (1.4rem) as the
+content inset. Every element in a section — eyebrow, headline, editorial
+intro, body, grid containers, and card content — must resolve to this same
+left edge. NEVER hardcode a padding value for alignment; always reference
+`var(--aimt-align)`. When adding a card component, ensure its internal
+padding + its container's offset resolves to the token value, not a
+coincidentally-matching number.
