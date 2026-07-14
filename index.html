@@ -411,12 +411,29 @@ nav {
 .cpv-mark svg { width: 18px; height: 18px; }
 .cpv-label { font-family: var(--aimt-font-mono); font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: white; }
 .cpv-sub { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
-.cadence-features { margin-top: 1.3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 980px; }
+.cadence-features { margin-top: 1.3rem; display: flex; flex-direction: column; gap: 10px; max-width: 980px; }
 @media(max-width:700px){ .cadence-features { grid-template-columns: 1fr; } }
-.cadence-feature { background: rgba(255,255,255,0.035); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1.2rem 1.2rem; }
+.cadence-feature { background: rgba(255,255,255,0.035); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1.4rem; display: flex; gap: 14px; align-items: flex-start; }
+.cf-num { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.32); flex-shrink: 0; padding-top: 3px; min-width: 20px; }
 .cf-title { font-family: var(--aimt-font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(220,210,200,0.82); margin-bottom: 0.62rem; }
 .cf-body { font-size: 0.9rem; color: rgba(255,255,255,0.68); font-weight: 300; line-height: 1.74; }
 .cf-body strong { color: rgba(255,255,255,0.7); font-weight: 400; }
+#cadence .eyebrow { padding-left: 1.4rem; }
+#cadence .section-title { padding-left: 1.4rem; padding-right: 1.4rem; }
+#cadence .community-intro { padding-left: 1.4rem; padding-right: 1.4rem; }
+#cadence .section-sub { max-width: none; padding-left: 1.4rem; padding-right: 1.4rem; }
+#cadence .section-sub strong { color: rgba(255,255,255,0.95); }
+
+/* ── PROOF ── */
+#proof { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
+.proof-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; margin-top: 2rem; padding-left: 1.4rem; padding-right: 1.4rem; }
+@media(max-width:700px){ .proof-grid { grid-template-columns: 1fr; } }
+.proof-item { display: flex; flex-direction: column; gap: 0.9rem; }
+.proof-item .section-sub { padding-left: 0; padding-right: 0; }
+.proof-image { width: 100%; height: auto; display: block; border-radius: 14px; border: 0.5px solid var(--border2); }
+#proof .eyebrow-light { padding-left: 1.4rem; }
+#proof .section-title { padding-left: 1.4rem; padding-right: 1.4rem; }
+#proof .section-sub { padding-left: 1.4rem; padding-right: 1.4rem; }
 
 /* ── COMING SOON ── */
 #coming-soon { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
@@ -679,8 +696,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   </div>
 </section>
 
-<!-- WHAT IS LEVO -->
-
 <!-- COURSE 01 -->
 <section id="course01">
   <div class="section-inner">
@@ -725,8 +740,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   </div>
 </section>
 
-<!-- AI SAFE -->
-<!-- DIFFERENT -->
 <section id="institute">
   <div class="section-inner">
     <span class="eyebrow-light reveal">The modern practitioner</span>
@@ -754,10 +767,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <div class="comm-card reveal reveal-delay-1"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="7.5" cy="8" r="3" stroke="currentColor" stroke-width="1.25"/><circle cx="13" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.25" opacity="0.6"/></svg></div><div class="comm-title">Join the community</div><div class="comm-body">Students and graduates share a growing community — a place to ask real questions and compare what's working, whether you're new to the industry or ten years in.</div></div>
       <div class="comm-card reveal reveal-delay-2" style="grid-column: 1 / -1;"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="15" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="10" cy="9" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="16" cy="5" r="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M5.3 13.7L8.7 10.3M11.3 7.7L14.7 6.3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">As the community grows</div><div class="comm-body">We're building toward graduate-to-graduate mentorship and referrals, and connections to employers looking for certified practitioners — the network grows as the institute does.</div></div>
     </div>
-    <div class="human-strip reveal reveal-delay-2">
-      <div class="human-strip-icon">💬</div>
-      <div class="human-strip-text"><strong>You can always reach a human.</strong> The in-course AI tutor supports the learning experience, but practitioner judgment still matters. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
-    </div>
   </div>
 </section>
 
@@ -774,37 +783,40 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 <section id="cadence">
   <div class="section-inner">
     <span class="eyebrow reveal">Meet Cadence</span>
-    <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(1.8rem,7vw,3.2rem);">Your AI<br>learning guide.</h2>
-    <p class="cadence-intro reveal reveal-delay-2">Cadence is AIMT’s in-course intelligence layer: focused, curriculum-bound, and built to support clinical reasoning inside each lesson.</p>
-    <p class="cadence-summary reveal reveal-delay-3">Use Cadence to clarify protocol decisions, pressure-test your understanding, and strengthen the reasoning behind each step of practice. Her role is narrow by design: keep the learning precise, applicable, and aligned with institute standards.</p>
-    <div class="cadence-pill-preview reveal reveal-delay-3" style="width:fit-content;">
-      <div class="cpv-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
-      <div><div class="cpv-label">Cadence</div><div class="cpv-sub">Your guide · Active in every lesson</div></div>
-      <div class="cpv-dot"></div>
-    </div>
+    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your interactive tutor,<br>built into every module.</h2>
+    <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Ask questions, work through difficult concepts, and receive focused feedback on written checkpoints as you progress.</p>
+    <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1.75rem;">Unlike a standard course chatbot, Cadence is built around AIMT's curriculum and evaluates responses against what each module actually teaches. The role is practical: clarify the material, identify what is still missing, and guide you back to the lesson without giving away the answer.</p>
     <div class="cadence-features reveal reveal-delay-3">
-      <div class="cadence-feature"><div class="cf-title">Context-Aware Guidance</div><div class="cf-body">Cadence responds from the active lesson context, so explanations stay specific to the exact concept, protocol, or decision point in front of the student.</div></div>
-      <div class="cadence-feature"><div class="cf-title">Checkpoint Support</div><div class="cf-body">After open-ended checkpoints, Cadence helps students refine reasoning quality, not just recall facts. <strong>The emphasis is judgment, clarity, and standard alignment.</strong></div></div>
-      <div class="cadence-feature"><div class="cf-title">Always Available</div><div class="cf-body">The pill remains present throughout course progression, so learners can ask for reinforcement without leaving the module flow.</div></div>
-      <div class="cadence-feature"><div class="cf-title">Curriculum-Bound</div><div class="cf-body">Cadence is intentionally constrained to AIMT training standards, reducing generic answers and keeping guidance aligned with institute expectations.</div></div>
+      <div class="cadence-feature"><div class="cf-num">01</div><div><div class="cf-title">Built around the curriculum.</div><div class="cf-body">Cadence works from the concepts taught inside AIMT, so the guidance stays relevant to the course and the standard established in each module.</div></div></div>
+      <div class="cadence-feature"><div class="cf-num">02</div><div><div class="cf-title">Feedback that requires real understanding.</div><div class="cf-body">Written checkpoints are evaluated for completeness and accuracy. Vague or partial responses are returned for revision, with focused direction on what needs another look.</div></div></div>
+      <div class="cadence-feature"><div class="cf-num">03</div><div><div class="cf-title">Support that continues as you progress.</div><div class="cf-body">Relevant context from your background and completed work can carry forward, allowing the guidance to build on what you have already demonstrated rather than starting from zero each time.</div></div></div>
+    </div>
+    <div class="human-strip reveal reveal-delay-3">
+      <div class="human-strip-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.67 3.67 4 4.5 4h11c.83 0 1.5.67 1.5 1.5v6c0 .83-.67 1.5-1.5 1.5H9.5L6 15v-2H4.5C3.67 13 3 12.33 3 11.5v-6z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg></div>
+      <div class="human-strip-text"><strong>The curriculum remains human. The responsibility remains yours.</strong> Cadence makes the learning process more responsive, but it does not replace instruction, professional judgment, or practical experience. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
     </div>
   </div>
 </section>
 
-<!-- COMING SOON -->
-<section id="coming-soon">
+<!-- PROOF -->
+<section id="proof">
   <div class="section-inner">
-    <span class="eyebrow-light reveal">What's next</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Certifications in<br>development.</h2>
-    <p class="section-sub reveal reveal-delay-2">AIMT releases one certification at a time. These programs are in development now; register below if you want notice when each one is ready to open.</p>
-    <div class="coming-grid">
-      <div class="coming-card reveal reveal-delay-1"><span class="coming-badge">Coming — Certification 02</span><div class="coming-num">Certification 02</div><div class="coming-title">Advanced Scalp Treatments</div><div class="coming-desc">PRP prep, dermarolling, scalp facials, and medical-adjacent protocols for estheticians working in elevated environments.</div></div>
-      <div class="coming-card reveal reveal-delay-2"><span class="coming-badge">Coming — Certification 03</span><div class="coming-num">Certification 03</div><div class="coming-title">Retail Sales Mastery</div><div class="coming-desc">How to build a retail revenue stream that supports the service experience and increases revenue without weakening practitioner trust.</div></div>
-      <div class="coming-card reveal reveal-delay-3"><span class="coming-badge">Coming — Certification 04</span><div class="coming-num">Certification 04</div><div class="coming-title">Sensitive Skin &amp; Scalp Conditions</div><div class="coming-desc">Clinical-level training on alopecia, psoriasis, contact dermatitis, and how to safely serve clients with complex scalp conditions.</div></div>
-      <div class="coming-card reveal reveal-delay-4"><span class="coming-badge">Coming — Certification 05</span><div class="coming-num">Certification 05</div><div class="coming-title">Building Your Beauty Business</div><div class="coming-desc">Pricing, positioning, booking systems, and social strategy for independent professionals who want to run a real business — not just book clients.</div></div>
+    <span class="eyebrow-light reveal">Cadence in practice</span>
+    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">The test adapts.<br>The standard doesn't.</h2>
+    <p class="institute-intro reveal reveal-delay-2"><em>A real checkpoint from Module 6.</em> Students can revise as many times as needed, and the guidance adapts to each response—but the standard doesn't move. Instead of choosing from a list of answers, the student has to interpret the evidence, explain the reasoning, and respond within professional scope.</p>
+    <div class="proof-grid reveal reveal-delay-2">
+      <div class="proof-item">
+        <img src="assets/Cadencerevision.png" alt="Cadence returning a vague checkpoint answer for revision" class="proof-image">
+        <p class="section-sub"><strong>A vague answer is returned.</strong> Cadence identifies what is missing and directs the student back to the evidence—without supplying the answer.</p>
+      </div>
+      <div class="proof-item">
+        <img src="assets/Cadenceaccept.png" alt="Cadence accepting a correct, in-scope checkpoint answer" class="proof-image">
+        <p class="section-sub"><strong>A complete answer is accepted.</strong> The response demonstrates the correct interpretation, explains the reasoning, and gives an appropriate next step within scope.</p>
+      </div>
     </div>
   </div>
 </section>
+
 
 <!-- CERTIFICATE SHOWCASE -->
 <section id="certificate">
