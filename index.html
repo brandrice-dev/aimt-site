@@ -428,6 +428,28 @@ nav {
 .c01-mod-title { font-size: 0.76rem; font-weight: 400; color: rgba(255,255,255,0.55); line-height: 1.3; }
 .c01-mod-sub { font-size: 0.64rem; color: rgba(255,255,255,0.22); font-weight: 300; margin-top: 1px; }
 
+/* ── SERVICE PROTOCOL ── */
+#protocol { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
+#protocol .eyebrow { padding-left: var(--aimt-align); }
+#protocol .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+#protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+#protocol .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); margin-top: 1.75rem; }
+/* Screenshots render on #11100e — matches the app's own background exactly, so any
+   letterboxing from object-fit:contain blends into the frame instead of showing as bars. */
+.protocol-lead { margin-top: 2rem; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); overflow: hidden; background: #11100e; }
+.protocol-lead img { width: 100%; height: 320px; display: block; object-fit: contain; }
+.protocol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; margin-top: 1.75rem; }
+@media(max-width:700px){ .protocol-grid { grid-template-columns: 1fr; } }
+.protocol-item { display: flex; flex-direction: column; gap: 0.75rem; }
+.protocol-frame { border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); overflow: hidden; background: #11100e; }
+.protocol-frame img { width: 100%; height: 220px; display: block; object-fit: contain; }
+.protocol-caption-lead { font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 600; color: white; }
+.protocol-caption-body { font-size: 0.8rem; color: rgba(255,255,255,0.42); font-weight: 300; line-height: 1.6; margin-top: 2px; }
+@media(max-width:700px){
+  .protocol-lead img { height: 220px; }
+  .protocol-frame img { height: 200px; }
+}
+
 /* ── DIFFERENT ── */
 #institute { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
 .diff-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 2rem; }
@@ -788,6 +810,35 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
           <div class="c01-module"><div class="c01-mod-num">11</div><div><div class="c01-mod-title">AI in Professional Practice</div><div class="c01-mod-sub">Using modern tools with skill, judgment, and clear professional boundaries</div></div></div>
           <div class="c01-module"><div class="c01-mod-num">12</div><div><div class="c01-mod-title">Completion &amp; Certification</div><div class="c01-mod-sub">Final review and credential issue</div></div></div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE PROTOCOL -->
+<section id="protocol">
+  <div class="section-inner">
+    <span class="eyebrow reveal">Included with enrollment</span>
+    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your complete head spa service protocol<br>in your pocket.</h2>
+    <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Protocol with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
+    <p class="section-sub reveal reveal-delay-2">For a new practitioner, it removes the pressure of trying to remember every step with a client in front of you. The protocol stays beside you from your first appointment onward, helping you deliver the service with structure until the flow becomes second nature.</p>
+    <div class="protocol-lead reveal reveal-delay-2">
+      <img src="assets/serviceprotocol1.png" alt="AIMT Service Protocol mode-select screen showing 60- and 120-minute timed head spa service formats">
+    </div>
+    <div class="protocol-grid reveal reveal-delay-3">
+      <div class="protocol-item">
+        <div class="protocol-frame">
+          <img src="assets/serviceprotocol2.png" alt="Service Protocol Aromatherapy Selection step with a live countdown timer and practitioner notes">
+        </div>
+        <div class="protocol-caption-lead">Every step, timed.</div>
+        <div class="protocol-caption-body">The protocol auto-advances and keeps you on schedule.</div>
+      </div>
+      <div class="protocol-item">
+        <div class="protocol-frame">
+          <img src="assets/serviceprotocol3.png" alt="Service Protocol Halo Activation and Wet Massage step with a live countdown timer and practitioner notes">
+        </div>
+        <div class="protocol-caption-lead">The judgment, not just the steps.</div>
+        <div class="protocol-caption-body">Each step carries the practitioner notes that separate a good service from a forgettable one.</div>
       </div>
     </div>
   </div>
