@@ -418,9 +418,10 @@ nav {
 .c01-ctas { display: flex; flex-direction: column; gap: 0.6rem; }
 .c01-enter { display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; background: white; color: #262626; border: none; border-radius: 980px; padding: 0.72rem 1.2rem; font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; }
 .c01-enter:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
-.c01-enter-ghost { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: rgba(255,255,255,0.5); font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 400; text-decoration: none; padding: 0.5rem 0; transition: color 0.2s; }
+.c01-enter-ghost { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: rgba(255,255,255,0.5); font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 400; text-decoration: none; padding: 0.5rem 0; transition: color 0.2s; cursor: pointer; width: 100%; }
 .c01-enter-ghost:hover { color: rgba(255,255,255,0.85); }
-.c01-bottom { padding: 1.5rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.05); }
+.c01-bottom { padding: 1.5rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.05); max-height: 1000px; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
+.c01-bottom.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
 @media(max-width:520px){ .c01-bottom { grid-template-columns: 1fr; } }
 .c01-module { background: var(--hero-bg2); padding: 0.95rem var(--aimt-align); display: flex; align-items: center; gap: 10px; }
 .c01-mod-num { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; font-family: var(--aimt-font-mono); font-size: 0.58rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
@@ -770,10 +771,10 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
           </div>
           <div class="c01-ctas">
             <a href="headspa-mastery.html" class="c01-enter">Enroll — $497</a>
-            <a href="headspa-mastery.html" class="c01-enter-ghost">See the full curriculum →</a>
+            <button type="button" class="c01-enter-ghost" id="c01CurriculumToggle" aria-expanded="false" aria-controls="c01ModuleGrid">See the full curriculum →</button>
           </div>
         </div>
-        <div class="c01-bottom">
+        <div class="c01-bottom collapsed" id="c01ModuleGrid" aria-hidden="true">
           <div class="c01-module"><div class="c01-mod-num">1</div><div><div class="c01-mod-title">Role of the Head Spa Tech</div><div class="c01-mod-sub">Scope of practice, limitations, licensing</div></div></div>
           <div class="c01-module"><div class="c01-mod-num">2</div><div><div class="c01-mod-title">Welcoming Your Client</div><div class="c01-mod-sub">Intake, rituals, first contact</div></div></div>
           <div class="c01-module"><div class="c01-mod-num">3</div><div><div class="c01-mod-title">Hair &amp; Scalp Anatomy</div><div class="c01-mod-sub">The biology behind every service decision</div></div></div>
@@ -982,6 +983,18 @@ function handleFormSubmit(e) {
   fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } }).catch(() => {});
   form.style.display = 'none';
   document.getElementById('emailSuccess').classList.add('show');
+}
+
+// Curriculum toggle
+const c01Toggle = document.getElementById('c01CurriculumToggle');
+const c01Grid = document.getElementById('c01ModuleGrid');
+if (c01Toggle && c01Grid) {
+  c01Toggle.addEventListener('click', () => {
+    const collapsed = c01Grid.classList.toggle('collapsed');
+    c01Toggle.setAttribute('aria-expanded', String(!collapsed));
+    c01Grid.setAttribute('aria-hidden', String(collapsed));
+    c01Toggle.textContent = collapsed ? 'See the full curriculum →' : 'Hide curriculum ↑';
+  });
 }
 
 // Smooth scroll
