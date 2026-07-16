@@ -710,6 +710,14 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 .reveal-delay-3 { transition-delay: 0.24s; }
 .reveal-delay-4 { transition-delay: 0.32s; }
 
+/* ── LIGHTBOX ── */
+img.zoomable { cursor: zoom-in; }
+.lightbox { position: fixed; inset: 0; z-index: 500; background: rgba(10,9,7,0.92); display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.25s ease; }
+.lightbox.show { opacity: 1; visibility: visible; }
+.lightbox-img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.7); font-size: 1.5rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
+.lightbox-close:hover { background: rgba(255,255,255,0.16); color: white; }
+
 </style>
 </head>
 <body>
@@ -823,19 +831,19 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Protocol with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
     <p class="section-sub reveal reveal-delay-2">For a new practitioner, it removes the pressure of trying to remember every step with a client in front of you. The protocol stays beside you from your first appointment onward, helping you deliver the service with structure until the flow becomes second nature.</p>
     <div class="protocol-lead reveal reveal-delay-2">
-      <img src="assets/serviceprotocol1.png" alt="AIMT Service Protocol mode-select screen showing 60- and 120-minute timed head spa service formats">
+      <img src="assets/serviceprotocol1.png" alt="AIMT Service Protocol mode-select screen showing 60- and 120-minute timed head spa service formats" class="zoomable" style="cursor: zoom-in">
     </div>
     <div class="protocol-grid reveal reveal-delay-3">
       <div class="protocol-item">
         <div class="protocol-frame">
-          <img src="assets/serviceprotocol2.png" alt="Service Protocol Aromatherapy Selection step with a live countdown timer and practitioner notes">
+          <img src="assets/serviceprotocol2.png" alt="Service Protocol Aromatherapy Selection step with a live countdown timer and practitioner notes" class="zoomable" style="cursor: zoom-in">
         </div>
         <div class="protocol-caption-lead">Every step, timed.</div>
         <div class="protocol-caption-body">The protocol auto-advances and keeps you on schedule.</div>
       </div>
       <div class="protocol-item">
         <div class="protocol-frame">
-          <img src="assets/serviceprotocol3.png" alt="Service Protocol Halo Activation and Wet Massage step with a live countdown timer and practitioner notes">
+          <img src="assets/serviceprotocol3.png" alt="Service Protocol Halo Activation and Wet Massage step with a live countdown timer and practitioner notes" class="zoomable" style="cursor: zoom-in">
         </div>
         <div class="protocol-caption-lead">The judgment, not just the steps.</div>
         <div class="protocol-caption-body">Each step carries the practitioner notes that separate a good service from a forgettable one.</div>
@@ -901,11 +909,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <p class="institute-intro reveal reveal-delay-2"><em>A real checkpoint from Module 6.</em> Students can revise as many times as needed, and the guidance adapts to each response—but the standard doesn't move. Instead of choosing from a list of answers, the student has to interpret the evidence, explain the reasoning, and respond within professional scope.</p>
     <div class="proof-grid reveal reveal-delay-2">
       <div class="proof-item">
-        <img src="assets/Cadencerevision.png" alt="Head spa certification checkpoint evaluated by Cadence" class="proof-image">
+        <img src="assets/Cadencerevision.png" alt="Head spa certification checkpoint evaluated by Cadence" class="proof-image zoomable" style="cursor: zoom-in">
         <p class="section-sub"><strong>A vague answer is returned.</strong> Cadence identifies what is missing and directs the student back to the evidence—without supplying the answer.</p>
       </div>
       <div class="proof-item">
-        <img src="assets/Cadenceaccept.png" alt="Accepted head spa certification checkpoint answer" class="proof-image">
+        <img src="assets/Cadenceaccept.png" alt="Accepted head spa certification checkpoint answer" class="proof-image zoomable" style="cursor: zoom-in">
         <p class="section-sub"><strong>A complete answer is accepted.</strong> The response demonstrates the correct interpretation, explains the reasoning, and gives an appropriate next step within scope.</p>
       </div>
     </div>
@@ -1008,6 +1016,12 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="footer-copy">© 2026 American Institute of Modern Trichology · Private Certification Institute</div>
 </footer>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <button type="button" class="lightbox-close" aria-label="Close image">&times;</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+</div>
+
 <script>
 // Scroll reveal
 const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('visible'); }), { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
@@ -1047,6 +1061,29 @@ if (c01Toggle && c01Grid) {
     c01Toggle.textContent = collapsed ? 'See the full curriculum →' : 'Hide curriculum ↑';
   });
 }
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxClose = document.querySelector('.lightbox-close');
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('show');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  lightbox.classList.remove('show');
+  lightbox.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('img.zoomable').forEach(img => {
+  img.addEventListener('click', () => openLightbox(img.src, img.alt));
+});
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+lightboxClose.addEventListener('click', closeLightbox);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('show')) closeLightbox(); });
 
 // Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(a => {
