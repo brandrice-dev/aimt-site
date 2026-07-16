@@ -611,8 +611,6 @@ nav {
 
 /* ── MID CTA STRIP ── */
 .mid-cta { background: rgba(255,255,255,0.04); border-top: 0.5px solid rgba(255,255,255,0.07); border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 2.25rem 1.5rem; text-align: center; }
-.mid-cta p { font-size: 0.92rem; color: rgba(255,255,255,0.52); margin-bottom: 1rem; font-weight: 300; line-height: 1.6; }
-.mid-cta p strong { color: white; font-weight: 500; }
 .mid-cta-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 @media(max-width:700px){
   .section-sub,
@@ -654,7 +652,6 @@ nav {
   .cert-footer { flex-wrap: wrap; justify-content: center; gap: 0.9rem 1.1rem; }
   .cert-sig-line { width: 62px; }
   .section-title,
-  .mid-cta p,
   .c01-enter,
   .cta-primary,
   .cta-ghost { overflow-wrap: anywhere; }
@@ -922,10 +919,11 @@ img.zoomable { cursor: zoom-in; }
 
 <!-- MID CTA -->
 <div class="mid-cta">
-  <h2 class="section-title" style="color:white;">The difference is not what you watched.<br>It is what you can do afterward.</h2>
-  <p>AIMT requires you to interpret, explain, apply, and revise until the understanding is there. You do not leave with information alone—you leave better equipped to make decisions in real practice.</p>
+  <span class="eyebrow">The head spa standard</span>
+  <h2 class="section-title" style="color:white;">For practitioners who want<br>their work to feel different.</h2>
+  <p class="section-sub" style="margin:0 auto 1.25rem;">Not louder. Not trendier. More informed, more intentional, and more prepared. AIMT was built for practitioners who want the structure, judgment, and professional depth behind a head spa service—not just the sequence of steps.</p>
   <div class="mid-cta-actions">
-    <a href="headspa-mastery.html" class="cta-primary">See how the training works →</a>
+    <a href="headspa-mastery.html" class="cta-primary">Explore the curriculum →</a>
   </div>
 </div>
 
@@ -935,24 +933,24 @@ img.zoomable { cursor: zoom-in; }
     <!-- Text column -->
     <div class="cert-text-col">
       <p style="font-family:var(--aimt-font-mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;">A verifiable head spa credential</p>
-      <h2 class="section-title">A credential<br>built to last.</h2>
-      <p class="section-sub">Every AIMT graduate receives a digital certificate carrying a unique, independently verifiable credential ID.</p>
+      <h2 class="section-title">A certificate that can<br>be confirmed.</h2>
+      <p class="section-sub">Every AIMT graduate receives a digital certificate with a unique verification ID, allowing clients, employers, or collaborators to confirm the credential directly through AIMT.</p>
       <div class="cert-details">
         <div class="cert-detail-row">
           <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M6 7h8M6 10h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Module-verified</strong>Tied to module-by-module verified completion, not just course enrollment — so it reflects what you actually know.</div>
+          <div class="cert-detail-text"><strong>Module-verified</strong>Issued only after the required modules and checkpoints are completed—not simply after enrollment or passive course access.</div>
         </div>
         <div class="cert-detail-row">
           <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.25"/><path d="M10 6.5v3.5l2.5 2.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Permanently on record</strong>A documented, independently verifiable credential — not a PDF that disappears into a downloads folder.</div>
+          <div class="cert-detail-text"><strong>Independently verifiable</strong>Each certificate carries a unique credential ID that can be checked through AIMT's verification system.</div>
         </div>
         <div class="cert-detail-row">
           <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M4 14L10 5l6 9H4z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><circle cx="10" cy="10" r="2" fill="currentColor" opacity="0.4"/></svg>
-          <div class="cert-detail-text"><strong>Practitioner-grade signaling</strong>Issued under the AIMT mark — a name being built with intention in the trichology space.</div>
+          <div class="cert-detail-text"><strong>Issued under the AIMT standard</strong>A credential connected to a structured head spa certification curriculum, applied checkpoints, and professional scope—not a generic downloadable PDF.</div>
         </div>
         <div class="cert-detail-row">
           <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.25"/><path d="M10 6.5v3.5l2.5 2.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Built for work that lasts</strong>Roles built on touch, trust, and contextual judgment are more likely to be augmented by AI than replaced by it (BCG, 2026) — so skill depth keeps compounding in value.</div>
+          <div class="cert-detail-text"><strong>Built for professional use</strong>Designed to support your credibility as you present your education to clients, employers, collaborators, or future opportunities.</div>
         </div>
       </div>
     </div>
@@ -968,12 +966,12 @@ img.zoomable { cursor: zoom-in; }
           <div class="cert-divider"></div>
           <p class="cert-presents">This certificate is awarded to</p>
           <h3 class="cert-title-main">Certificate of Completion</h3>
-          <p class="cert-subtitle">Certification 01 · HeadSpa Mastery</p>
+          <p class="cert-subtitle">Certification 01 · Head Spa Certification Course</p>
         </div>
         <div class="cert-body">
           <p class="cert-awarded-to">Presented to</p>
           <p class="cert-recipient">Alexandra M. Renfield</p>
-          <p class="cert-program-line">For successful completion of <em>HeadSpa Mastery</em>,<br>a 12-module clinical certification in modern trichology<br>practice, scalp assessment, and treatment protocol.</p>
+          <p class="cert-program-line">For successful completion of the <em>AIMT Head Spa Certification Course</em>, a 12-module certification in head spa service, scalp assessment, professional scope, and modern practice.</p>
         </div>
         <div class="cert-footer">
           <div class="cert-sig-col">
