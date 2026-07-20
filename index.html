@@ -429,26 +429,60 @@ nav {
 .c01-mod-sub { font-size: 0.64rem; color: rgba(255,255,255,0.22); font-weight: 300; margin-top: 1px; }
 
 /* ── SERVICE PROTOCOL ── */
-#protocol { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
+#protocol { background: #0f0d0b; padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
+#protocol .section-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 3rem; max-width: 960px; }
+@media(max-width:700px){ #protocol .section-inner { grid-template-columns: 1fr; } }
 #protocol .eyebrow { padding-left: var(--aimt-align); }
 #protocol .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); margin-top: 1.75rem; }
-/* Screenshots render on #11100e — matches the app's own background exactly, so any
-   letterboxing from object-fit:contain blends into the frame instead of showing as bars. */
-.protocol-lead { margin-top: 2rem; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); overflow: hidden; background: #11100e; }
-.protocol-lead img { width: 100%; height: 320px; display: block; object-fit: contain; }
-.protocol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; margin-top: 1.75rem; }
-@media(max-width:700px){ .protocol-grid { grid-template-columns: 1fr; } }
-.protocol-item { display: flex; flex-direction: column; gap: 0.75rem; }
-.protocol-frame { border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.12); overflow: hidden; background: #11100e; }
-.protocol-frame img { width: 100%; height: 220px; display: block; object-fit: contain; }
-.protocol-caption-lead { font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 600; color: white; }
-.protocol-caption-body { font-size: 0.8rem; color: rgba(255,255,255,0.42); font-weight: 300; line-height: 1.6; margin-top: 2px; }
-@media(max-width:700px){
-  .protocol-lead img { height: 220px; }
-  .protocol-frame img { height: 200px; }
+
+/* Service Protocol timer recreation — tokens are scoped to this component only
+   (--ptd-*) so they never leak into the page's cream palette. */
+.protocol-timer-demo {
+  --ptd-bg: #0f0d0b;
+  --ptd-surface: #1a1814;
+  --ptd-accent: #a3968d;
+  --ptd-white: #faf8f5;
+  max-width: 420px;
+  min-height: 520px;
+  margin: 0;
+  background: var(--ptd-surface);
+  border: 0.5px solid rgba(250,248,245,0.18);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border-radius: 18px;
+  padding: 20px;
 }
+.ptd-content { opacity: 1; transform: translateY(0); transition: opacity 175ms ease, transform 175ms ease; }
+.ptd-content.ptd-fade-out { opacity: 0; transform: translateY(-6px); }
+.ptd-content.ptd-fade-in { opacity: 0; transform: translateY(8px); }
+.ptd-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ptd-service-label, .ptd-phase-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; text-transform: uppercase; color: var(--ptd-accent); }
+.ptd-service-label { letter-spacing: 0.28em; }
+.ptd-phase-label { letter-spacing: 0.2em; }
+.ptd-progress-track { height: 2px; background: rgba(250,248,245,0.08); margin-bottom: 10px; overflow: hidden; }
+.ptd-progress-fill { height: 100%; background: var(--ptd-accent); }
+.ptd-time-row { font-family: var(--aimt-font-sans); font-size: 10px; font-weight: 400; color: rgba(250,248,245,0.4); margin-bottom: 18px; }
+.ptd-time-row .ptd-remaining { color: var(--ptd-accent); }
+.ptd-timer-block { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.ptd-ring { flex-shrink: 0; transform: rotate(-90deg); }
+.ptd-ring-track { stroke: rgba(250,248,245,0.08); stroke-width: 4; }
+.ptd-ring-fill { stroke: var(--ptd-accent); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 163.36; stroke-dashoffset: 60; }
+.ptd-countdown { font-family: var(--aimt-font-mont); font-weight: 900; font-size: 40px; line-height: 1; color: var(--ptd-white); }
+.ptd-step-count { font-family: var(--aimt-font-sans); font-size: 11px; font-weight: 400; color: rgba(250,248,245,0.4); margin-top: 4px; }
+.ptd-step-label { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ptd-accent); margin-bottom: 12px; }
+.ptd-step-dash { display: inline-block; width: 16px; height: 1px; background: var(--ptd-accent); }
+.ptd-step-title { font-family: var(--aimt-font-mont); font-weight: 900; font-size: 34px; text-transform: uppercase; line-height: 0.95; color: var(--ptd-white); margin-bottom: 16px; }
+.ptd-desc { font-family: var(--aimt-font-sans); font-weight: 300; font-size: 14px; line-height: 1.65; color: rgba(250,248,245,0.65); margin-bottom: 16px; }
+.ptd-note { background: rgba(163,150,141,0.10); border: 0.5px solid var(--ptd-accent); border-left: 3px solid var(--ptd-accent); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 16px; }
+.ptd-note-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ptd-accent); margin-bottom: 6px; }
+.ptd-note-text { font-family: var(--aimt-font-sans); font-weight: 400; font-style: italic; font-size: 12px; line-height: 1.6; color: rgba(250,248,245,0.88); }
+.ptd-next { display: flex; align-items: center; gap: 8px; opacity: 0.45; }
+.ptd-next-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ptd-accent); }
+.ptd-next-title { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ptd-white); }
+.ptd-next-btn { display: block; width: 100%; margin-top: 16px; padding: 12px 16px; background: transparent; border: 0.5px solid rgba(250,248,245,0.18); border-radius: 980px; font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ptd-white); text-align: center; cursor: pointer; }
+.ptd-next-btn[hidden] { display: none; }
+@media(max-width:700px){ .protocol-timer-demo { max-width: none; width: 100%; } }
 
 /* ── DIFFERENT ── */
 #institute { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
@@ -510,17 +544,17 @@ nav {
 /* ── CTA ── */
 /* ── CERTIFICATE SHOWCASE ── */
 #certificate { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
-.cert-showcase { max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
-@media(max-width:700px){ .cert-showcase { grid-template-columns: 1fr; gap: 2rem; } }
+.cert-showcase { max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: start; }
+@media(max-width:700px){ .cert-showcase { grid-template-columns: 1fr; gap: 2rem; } .cert-details { grid-template-columns: 1fr; } }
 .cert-text-col .section-title { color: var(--text); }
 .cert-text-col .section-sub { margin-bottom: 1.5rem; }
-.cert-details { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
-.cert-detail-row { display: flex; align-items: flex-start; gap: 0.75rem; }
+#certificate .institute-intro { padding-left: 0; padding-right: 0; }
+.cert-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 760px; margin: 2rem auto 0; }
+.cert-detail-row { display: flex; align-items: flex-start; gap: 0.75rem; background: var(--surface); border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.4rem; }
 .cert-detail-icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.4; margin-top: 1px; }
 .cert-detail-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
 .cert-detail-text strong { color: var(--text); font-weight: 500; display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.1em; }
 /* The certificate card itself */
-.cert-card-wrap { position: relative; }
 .cert-card {
   background: #fdfaf5;
   border: 1px solid #d8cfc0;
@@ -556,6 +590,7 @@ nav {
 .cert-sig { font-family: 'Palatino Linotype', 'Book Antiqua', 'Palatino', serif; font-size: 1rem; font-style: italic; color: #4a3c28; line-height: 1; margin-bottom: 3px; }
 .cert-sig-line { width: 80px; height: 0.5px; background: #c8b89a; margin: 0 auto 3px; }
 .cert-sig-label { font-family: var(--aimt-font-mono); font-size: 0.4rem; letter-spacing: 0.12em; text-transform: uppercase; color: #b0a090; }
+.cert-credential-line { font-family: var(--aimt-font-mono); font-size: 0.4rem; letter-spacing: 0.12em; text-transform: uppercase; color: #b0a090; text-align: center; white-space: nowrap; margin-top: 1rem; }
 .cert-seal { width: 44px; height: 44px; opacity: 0.55; }
 .cert-date-col { text-align: center; }
 .cert-date-val { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; color: #8a7660; margin-bottom: 3px; }
@@ -601,6 +636,7 @@ nav {
 @media(max-width:560px){ .community-grid { grid-template-columns: 1fr; } }
 .comm-card { background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.4rem; }
 .comm-icon { font-size: 1.1rem; margin-bottom: 10px; }
+#community .cert-detail-icon { width: 28px; height: 28px; flex: none; }
 .comm-title { font-family: var(--aimt-font-mont); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: white; margin-bottom: 6px; }
 .comm-body { font-size: 0.8rem; line-height: 1.72; color: rgba(255,255,255,0.42); font-weight: 300; }
 .comm-body strong { color: rgba(255,255,255,0.72); font-weight: 500; }
@@ -707,47 +743,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 .reveal-delay-3 { transition-delay: 0.24s; }
 .reveal-delay-4 { transition-delay: 0.32s; }
 
-/* ── LIGHTBOX ── */
-img.zoomable { cursor: zoom-in; }
-.lightbox { position: fixed; inset: 0; z-index: 500; background: rgba(10,9,7,0.92); display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; visibility: hidden; transition: opacity 0.25s ease; }
-.lightbox.show { opacity: 1; visibility: visible; }
-.lightbox-img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-.lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.7); font-size: 1.5rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
-.lightbox-close:hover { background: rgba(255,255,255,0.16); color: white; }
-
-/* ── UI FRAGMENTS (quiet product-evidence recreations, non-interactive) ── */
-.ui-frag { max-width: 260px; border-radius: 12px; border: 0.5px solid var(--border2); background: white; padding: 1.1rem 1.2rem; float: right; margin: 0.25rem var(--aimt-align) 1.25rem 1.75rem; }
-.ui-frag-dark { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
-@media(max-width:700px){
-  .ui-frag { float: none; width: 100%; max-width: none; margin: 0 0 1.75rem; }
-}
-
-/* Checkpoint fragment (#institute) */
-.ui-frag-checkpoint { display: flex; flex-direction: column; gap: 0.55rem; }
+/* Status pills — still used by #proof's live checkpoint thread */
 .ui-frag-pill { display: flex; align-items: center; gap: 6px; width: fit-content; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.65rem; border-radius: 980px; }
 .ui-frag-pill-muted { background: var(--surface); color: var(--muted); border: 0.5px solid var(--border2); }
 .ui-frag-pill-bright { background: rgba(163,150,141,0.16); color: var(--text); border: 0.5px solid rgba(163,150,141,0.32); }
 .ui-frag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.65; flex-shrink: 0; }
-.ui-frag-feedback { font-family: var(--aimt-font-sans); font-style: italic; font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
-
-/* Timer fragment (#cadence) */
-.ui-frag-timer-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.9rem; }
-.ui-frag-ring { width: 48px; height: 48px; border-radius: 50%; background: conic-gradient(#a3968d 0deg 306deg, rgba(255,255,255,0.1) 306deg 360deg); flex-shrink: 0; position: relative; }
-.ui-frag-ring::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--hero-bg2); }
-.ui-frag-time { font-family: var(--aimt-font-mont); font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.01em; line-height: 1; }
-.ui-frag-time-label { font-family: var(--aimt-font-sans); font-size: 0.68rem; color: rgba(255,255,255,0.4); font-weight: 300; margin-top: 4px; }
-.ui-frag-step-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 3px; }
-.ui-frag-step-name { font-family: var(--aimt-font-mont); font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: white; }
-
-/* Credential fragment (#certificate) — not floated: .cert-details is a flex column,
-   not flowing text, and floating a sibling in front of it collapses the whole
-   flex box's width (a flex container avoids a float for its entire height, not
-   just the overlapping lines the way text does). Sits as a block before the rows instead. */
-.ui-frag-credential { float: none; margin: 0 0 1.5rem; }
-.ui-frag-cred-label { font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
-.ui-frag-cred-value { font-family: var(--aimt-font-mont); font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text); margin-bottom: 0.9rem; word-break: break-all; }
-.ui-frag-cred-verified { display: flex; align-items: center; gap: 6px; font-family: var(--aimt-font-sans); font-size: 0.76rem; color: var(--muted); font-weight: 400; }
-.ui-frag-check { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; }
 
 /* ── PROOF: LIVE CHECKPOINT THREAD ── */
 .proof-live { max-width: 620px; margin: 2rem var(--aimt-align) 0; background: white; border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.75rem 1.75rem 2rem; }
@@ -785,6 +785,7 @@ img.zoomable { cursor: zoom-in; }
 @media (prefers-reduced-motion: reduce) {
   .proof-msg, .proof-msg-text, .proof-typing, .proof-pill-row { transition: none; }
   .proof-typing span { animation: none; }
+  .ptd-content { transition: none; }
 }
 
 </style>
@@ -895,28 +896,43 @@ img.zoomable { cursor: zoom-in; }
 <!-- SERVICE PROTOCOL -->
 <section id="protocol">
   <div class="section-inner">
-    <span class="eyebrow reveal">Included with enrollment</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your complete head spa service protocol<br>in your pocket.</h2>
-    <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Protocol with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
-    <p class="section-sub reveal reveal-delay-2">For a new practitioner, it removes the pressure of trying to remember every step with a client in front of you. The protocol stays beside you from your first appointment onward, helping you deliver the service with structure until the flow becomes second nature.</p>
-    <div class="protocol-lead reveal reveal-delay-2">
-      <img src="assets/serviceprotocol1.png" alt="AIMT Service Protocol mode-select screen showing 60- and 120-minute timed head spa service formats" class="zoomable" style="cursor: zoom-in">
+    <div class="protocol-text-col">
+      <span class="eyebrow reveal">Included with enrollment</span>
+      <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your complete head spa service protocol<br>in your pocket.</h2>
+      <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Protocol with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
+      <p class="section-sub reveal reveal-delay-2">For a new practitioner, it removes the pressure of trying to remember every step with a client in front of you. The protocol stays beside you from your first appointment onward, helping you deliver the service with structure until the flow becomes second nature.</p>
     </div>
-    <div class="protocol-grid reveal reveal-delay-3">
-      <div class="protocol-item">
-        <div class="protocol-frame">
-          <img src="assets/serviceprotocol2.png" alt="Service Protocol Aromatherapy Selection step with a live countdown timer and practitioner notes" class="zoomable" style="cursor: zoom-in">
+    <div class="protocol-timer-demo reveal reveal-delay-2" aria-hidden="true">
+      <div class="ptd-content" id="ptdContent">
+        <div class="ptd-top-row">
+          <span class="ptd-service-label">60-Min Service</span>
+          <span class="ptd-phase-label">Treatment</span>
         </div>
-        <div class="protocol-caption-lead">Every step, timed.</div>
-        <div class="protocol-caption-body">The protocol auto-advances and keeps you on schedule.</div>
-      </div>
-      <div class="protocol-item">
-        <div class="protocol-frame">
-          <img src="assets/serviceprotocol3.png" alt="Service Protocol Halo Activation and Wet Massage step with a live countdown timer and practitioner notes" class="zoomable" style="cursor: zoom-in">
+        <div class="ptd-progress-track"><div class="ptd-progress-fill" style="width:22%;"></div></div>
+        <div class="ptd-time-row"><span class="ptd-elapsed">13:00 Elapsed</span> · <span class="ptd-remaining">47:00 Remaining</span></div>
+        <div class="ptd-timer-block">
+          <svg class="ptd-ring" viewBox="0 0 56 56" width="56" height="56">
+            <circle class="ptd-ring-track" cx="28" cy="28" r="26" fill="none"/>
+            <circle class="ptd-ring-fill" cx="28" cy="28" r="26" fill="none"/>
+          </svg>
+          <div class="ptd-timer-meta">
+            <div class="ptd-countdown">0:12</div>
+            <div class="ptd-step-count">Step 04 of 12</div>
+          </div>
         </div>
-        <div class="protocol-caption-lead">The judgment, not just the steps.</div>
-        <div class="protocol-caption-body">Each step carries the practitioner notes that separate a good service from a forgettable one.</div>
+        <div class="ptd-step-label"><span class="ptd-step-dash"></span>Step 04</div>
+        <div class="ptd-step-title">Exfoliant<br>Application</div>
+        <p class="ptd-desc">Load brush from bowl — no dripping. Part cleanly. Apply along parting in a controlled line. Quadrant by quadrant: frontal → temporal L → temporal R → crown → occipital.</p>
+        <div class="ptd-note">
+          <div class="ptd-note-label">Note</div>
+          <p class="ptd-note-text">Clean partings. Product stays on scalp — not spread through hair.</p>
+        </div>
+        <div class="ptd-next">
+          <span class="ptd-next-label">Next</span>
+          <span class="ptd-next-title">Scalp Massage</span>
+        </div>
       </div>
+      <button type="button" class="ptd-next-btn" id="ptdNextBtn" tabindex="-1" hidden>Next Step →</button>
     </div>
   </div>
 </section>
@@ -925,11 +941,6 @@ img.zoomable { cursor: zoom-in; }
   <div class="section-inner">
     <span class="eyebrow-light reveal">Online head spa training</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Built like an institute.<br>Designed for how the industry is changing.</h2>
-    <div class="ui-frag ui-frag-checkpoint reveal reveal-delay-2" aria-hidden="true">
-      <div class="ui-frag-pill ui-frag-pill-muted"><span class="ui-frag-dot"></span>Needs revision</div>
-      <div class="ui-frag-pill ui-frag-pill-bright"><span class="ui-frag-dot"></span>Accepted</div>
-      <p class="ui-frag-feedback">"Good start—name the assessment tool before moving on."</p>
-    </div>
     <p class="institute-intro reveal reveal-delay-2"><em>The industry is changing—new tools, higher client expectations, and a rising bar for what a serious practitioner is expected to know.</em> AIMT is built to prepare you for that, not just to hand you a certificate.</p>
     <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1rem;">AIMT is built on a different standard. We believe knowledge is only useful when you can articulate it, apply it, and make sound decisions with a real client in front of you.</p>
     <p class="section-sub reveal reveal-delay-2">Our curriculum is developed by practicing cosmetologists, estheticians, and trichologists with decades of combined experience and thousands of client services behind them. It is shaped by what happens in the treatment room—not by theory alone.</p>
@@ -961,17 +972,6 @@ img.zoomable { cursor: zoom-in; }
   <div class="section-inner">
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your interactive tutor,<br>built into every module.</h2>
-    <div class="ui-frag ui-frag-dark ui-frag-timer reveal reveal-delay-2" aria-hidden="true">
-      <div class="ui-frag-timer-row">
-        <div class="ui-frag-ring"></div>
-        <div>
-          <div class="ui-frag-time">4:48</div>
-          <div class="ui-frag-time-label">this step · 5:00 total</div>
-        </div>
-      </div>
-      <div class="ui-frag-step-eyebrow">Step 03</div>
-      <div class="ui-frag-step-name">Halo Activation</div>
-    </div>
     <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Ask questions, work through difficult concepts, and receive focused feedback on written checkpoints as you progress.</p>
     <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1.75rem;">Unlike a standard course chatbot, Cadence is built around AIMT's curriculum and evaluates responses against what each module actually teaches. The role is practical: clarify the material, identify what is still missing, and guide you back to the lesson without giving away the answer.</p>
     <div class="cadence-features reveal reveal-delay-3">
@@ -1052,30 +1052,8 @@ img.zoomable { cursor: zoom-in; }
     <div class="cert-text-col">
       <p style="font-family:var(--aimt-font-mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;">A verifiable head spa credential</p>
       <h2 class="section-title">A certificate that can<br>be confirmed.</h2>
+      <p class="institute-intro reveal reveal-delay-2">Anyone can <em>print</em> a certificate.<br>Far fewer can <em>stand behind</em>&nbsp;one.</p>
       <p class="section-sub">Every AIMT graduate receives a digital certificate with a unique verification ID, allowing clients, employers, or collaborators to confirm the credential directly through AIMT.</p>
-      <div class="ui-frag ui-frag-credential reveal" aria-hidden="true">
-        <div class="ui-frag-cred-label">Credential ID</div>
-        <div class="ui-frag-cred-value">AIMT-HS-2026-XXXXXX</div>
-        <div class="ui-frag-cred-verified"><svg class="ui-frag-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified · AIMT</div>
-      </div>
-      <div class="cert-details">
-        <div class="cert-detail-row">
-          <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M6 7h8M6 10h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Module-verified</strong>Issued only after the required modules and checkpoints are completed—not simply after enrollment or passive course access.</div>
-        </div>
-        <div class="cert-detail-row">
-          <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.25"/><path d="M10 6.5v3.5l2.5 2.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Independently verifiable</strong>Each certificate carries a unique credential ID that can be checked through AIMT's verification system.</div>
-        </div>
-        <div class="cert-detail-row">
-          <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M4 14L10 5l6 9H4z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><circle cx="10" cy="10" r="2" fill="currentColor" opacity="0.4"/></svg>
-          <div class="cert-detail-text"><strong>Issued under the AIMT standard</strong>A credential connected to a structured head spa certification curriculum, applied checkpoints, and professional scope—not a generic downloadable PDF.</div>
-        </div>
-        <div class="cert-detail-row">
-          <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.25"/><path d="M10 6.5v3.5l2.5 2.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-          <div class="cert-detail-text"><strong>Built for professional use</strong>Designed to support your credibility as you present your education to clients, employers, collaborators, or future opportunities.</div>
-        </div>
-      </div>
     </div>
     <!-- Certificate card -->
     <div class="cert-card-wrap reveal">
@@ -1087,7 +1065,6 @@ img.zoomable { cursor: zoom-in; }
             <div class="cert-org">AIMT<br>American Institute of<br>Modern Trichology</div>
           </div>
           <div class="cert-divider"></div>
-          <p class="cert-presents">This certificate is awarded to</p>
           <h3 class="cert-title-main">Certificate of Completion</h3>
           <p class="cert-subtitle">Certification 01 · Head Spa Certification Course</p>
         </div>
@@ -1113,7 +1090,22 @@ img.zoomable { cursor: zoom-in; }
             <p class="cert-sig-label">AIMT</p>
           </div>
         </div>
+        <p class="cert-credential-line">Credential ID · AIMT-HS-2026-XXXXXX</p>
       </div>
+    </div>
+  </div>
+  <div class="cert-details">
+    <div class="cert-detail-row">
+      <div class="cert-detail-text"><strong>Module-verified</strong>Issued only after the required modules and checkpoints are completed—not simply after enrollment or passive course access.</div>
+    </div>
+    <div class="cert-detail-row">
+      <div class="cert-detail-text"><strong>Independently verifiable</strong>Each certificate carries a unique credential ID that can be checked through AIMT's verification system.</div>
+    </div>
+    <div class="cert-detail-row">
+      <div class="cert-detail-text"><strong>Issued under the AIMT standard</strong>A credential connected to a structured head spa certification curriculum, applied checkpoints, and professional scope—not a generic downloadable PDF.</div>
+    </div>
+    <div class="cert-detail-row">
+      <div class="cert-detail-text"><strong>Built for professional use</strong>Designed to support your credibility as you present your education to clients, employers, collaborators, or future opportunities.</div>
     </div>
   </div>
 </section>
@@ -1136,12 +1128,6 @@ img.zoomable { cursor: zoom-in; }
   <div class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></div>
   <div class="footer-copy">© 2026 American Institute of Modern Trichology · Private Certification Institute</div>
 </footer>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
-  <button type="button" class="lightbox-close" aria-label="Close image">&times;</button>
-  <img class="lightbox-img" id="lightboxImg" src="" alt="">
-</div>
 
 <script>
 // Scroll reveal
@@ -1183,28 +1169,167 @@ if (c01Toggle && c01Grid) {
   });
 }
 
-// Lightbox
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
-const lightboxClose = document.querySelector('.lightbox-close');
-function openLightbox(src, alt) {
-  lightboxImg.src = src;
-  lightboxImg.alt = alt || '';
-  lightbox.classList.add('show');
-  lightbox.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
-function closeLightbox() {
-  lightbox.classList.remove('show');
-  lightbox.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-}
-document.querySelectorAll('img.zoomable').forEach(img => {
-  img.addEventListener('click', () => openLightbox(img.src, img.alt));
-});
-lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-lightboxClose.addEventListener('click', closeLightbox);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('show')) closeLightbox(); });
+// Protocol timer demo: real-time countdown, chains 04 -> 05 -> 06, pauses off-screen
+(function() {
+  const root = document.querySelector('.protocol-timer-demo');
+  if (!root) return;
+  const content = document.getElementById('ptdContent');
+  const nextBtn = document.getElementById('ptdNextBtn');
+  const els = {
+    phase: root.querySelector('.ptd-phase-label'),
+    progressFill: root.querySelector('.ptd-progress-fill'),
+    elapsed: root.querySelector('.ptd-elapsed'),
+    remaining: root.querySelector('.ptd-remaining'),
+    countdown: root.querySelector('.ptd-countdown'),
+    ringFill: root.querySelector('.ptd-ring-fill'),
+    stepCount: root.querySelector('.ptd-step-count'),
+    stepLabel: root.querySelector('.ptd-step-label'),
+    stepTitle: root.querySelector('.ptd-step-title'),
+    desc: root.querySelector('.ptd-desc'),
+    noteText: root.querySelector('.ptd-note-text'),
+    nextTitle: root.querySelector('.ptd-next-title')
+  };
+
+  const RING_CIRC = 163.36;
+  const RING_IDLE_OFFSET = 60; // resting fill so the track stays visible before a step's clock starts
+  const RED = '#e05c5c';
+  const GREEN = '#4caf7d';
+  const STEPS = [
+    {
+      num: '04', phase: 'Treatment', titleHtml: 'Exfoliant<br>Application',
+      duration: '0:05', elapsed: '13:00', remaining: '47:00', overall: 22,
+      desc: 'Load brush from bowl — no dripping. Part cleanly. Apply along parting in a controlled line. Quadrant by quadrant: frontal → temporal L → temporal R → crown → occipital.',
+      note: 'Clean partings. Product stays on scalp — not spread through hair.',
+      next: 'Scalp Massage'
+    },
+    {
+      num: '05', phase: 'Treatment', titleHtml: 'Scalp<br>Massage',
+      duration: '10:00', elapsed: '18:00', remaining: '42:00', overall: 30,
+      desc: 'Thumbs at occipital ridge — press and hold 2 seconds before circular movement. Full coverage: occipital → nape → temporal → crown → frontal and back. Hands stay in contact the entire time. No air gaps.',
+      note: 'Deepest pressure at occipital. Lighter at temples. Broad palm at crown. This is why they rebook.',
+      next: 'First Rinse'
+    },
+    {
+      num: '06', phase: 'Wet Phase', titleHtml: 'First<br>Rinse',
+      duration: '3:00', elapsed: '28:00', remaining: '32:00', overall: 47,
+      desc: 'Temperature check again — identical to Step 03. Angled flow, not direct overhead. Work methodically. Exfoliant should be fully clearing.',
+      note: 'Recheck temperature every rinse. Every time.',
+      next: 'Neck & Shoulder Massage'
+    }
+  ];
+
+  function parseDuration(str) {
+    const parts = str.split(':');
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  }
+  function formatTime(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  const totalSecondsByStep = STEPS.map(step => parseDuration(step.duration));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let currentIndex = 0;
+  let secondsRemaining = totalSecondsByStep[0];
+  let intervalId = null;
+  let pendingAdvance = null;
+  let isVisible = false;
+  let started = false;
+
+  function render(index, remaining, ringOffsetOverride) {
+    const step = STEPS[index];
+    const total = totalSecondsByStep[index];
+    els.phase.textContent = step.phase;
+    els.progressFill.style.width = step.overall + '%';
+    els.elapsed.textContent = step.elapsed + ' Elapsed';
+    els.remaining.textContent = step.remaining + ' Remaining';
+    els.countdown.textContent = formatTime(remaining);
+    els.countdown.style.color = remaining === 0 ? GREEN : (remaining <= 30 ? RED : '');
+    els.ringFill.style.strokeDashoffset = ringOffsetOverride != null ? ringOffsetOverride : RING_CIRC * (1 - remaining / total);
+    els.stepCount.textContent = 'Step ' + step.num + ' of 12';
+    els.stepLabel.innerHTML = '<span class="ptd-step-dash"></span>Step ' + step.num;
+    els.stepTitle.innerHTML = step.titleHtml;
+    els.desc.textContent = step.desc;
+    els.noteText.textContent = step.note;
+    els.nextTitle.textContent = step.next;
+    if (nextBtn) nextBtn.hidden = (index === 0 || index >= STEPS.length - 1);
+  }
+
+  // Initial paint: step 04, untouched, idle ring so both ring colors read while it waits to start
+  render(0, secondsRemaining, RING_IDLE_OFFSET);
+
+  if (reduceMotion) {
+    currentIndex = 1;
+    secondsRemaining = totalSecondsByStep[1];
+    render(1, secondsRemaining, RING_IDLE_OFFSET);
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex >= STEPS.length - 1) return;
+        currentIndex += 1;
+        secondsRemaining = totalSecondsByStep[currentIndex];
+        render(currentIndex, secondsRemaining, RING_IDLE_OFFSET);
+      });
+    }
+    return;
+  }
+
+  function stopInterval() {
+    if (intervalId) { clearInterval(intervalId); intervalId = null; }
+  }
+  function startInterval() {
+    if (intervalId || !isVisible) return;
+    intervalId = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    secondsRemaining = Math.max(0, secondsRemaining - 1);
+    render(currentIndex, secondsRemaining);
+    if (secondsRemaining === 0) {
+      stopInterval();
+      if (currentIndex < STEPS.length - 1) {
+        pendingAdvance = setTimeout(() => { pendingAdvance = null; goToStep(currentIndex + 1); }, 800);
+      }
+    }
+  }
+
+  function goToStep(index) {
+    if (pendingAdvance) { clearTimeout(pendingAdvance); pendingAdvance = null; }
+    stopInterval();
+    content.classList.add('ptd-fade-out');
+    setTimeout(() => {
+      currentIndex = index;
+      secondsRemaining = totalSecondsByStep[index];
+      render(currentIndex, secondsRemaining);
+      content.classList.remove('ptd-fade-out');
+      content.classList.add('ptd-fade-in');
+      void content.offsetWidth;
+      content.classList.remove('ptd-fade-in');
+      startInterval();
+    }, 175);
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex >= STEPS.length - 1) return;
+      goToStep(currentIndex + 1);
+    });
+  }
+
+  const ptdObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        if (!started) { started = true; render(currentIndex, secondsRemaining); }
+        startInterval();
+      } else {
+        stopInterval();
+      }
+    });
+  }, { threshold: 0.4 });
+  ptdObs.observe(root);
+})();
 
 // Proof: live checkpoint thread
 (function() {
