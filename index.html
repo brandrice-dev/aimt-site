@@ -715,6 +715,78 @@ img.zoomable { cursor: zoom-in; }
 .lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.7); font-size: 1.5rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
 .lightbox-close:hover { background: rgba(255,255,255,0.16); color: white; }
 
+/* ── UI FRAGMENTS (quiet product-evidence recreations, non-interactive) ── */
+.ui-frag { max-width: 260px; border-radius: 12px; border: 0.5px solid var(--border2); background: white; padding: 1.1rem 1.2rem; float: right; margin: 0.25rem var(--aimt-align) 1.25rem 1.75rem; }
+.ui-frag-dark { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+@media(max-width:700px){
+  .ui-frag { float: none; width: 100%; max-width: none; margin: 0 0 1.75rem; }
+}
+
+/* Checkpoint fragment (#institute) */
+.ui-frag-checkpoint { display: flex; flex-direction: column; gap: 0.55rem; }
+.ui-frag-pill { display: flex; align-items: center; gap: 6px; width: fit-content; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.65rem; border-radius: 980px; }
+.ui-frag-pill-muted { background: var(--surface); color: var(--muted); border: 0.5px solid var(--border2); }
+.ui-frag-pill-bright { background: rgba(163,150,141,0.16); color: var(--text); border: 0.5px solid rgba(163,150,141,0.32); }
+.ui-frag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.65; flex-shrink: 0; }
+.ui-frag-feedback { font-family: var(--aimt-font-sans); font-style: italic; font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+
+/* Timer fragment (#cadence) */
+.ui-frag-timer-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.9rem; }
+.ui-frag-ring { width: 48px; height: 48px; border-radius: 50%; background: conic-gradient(#a3968d 0deg 306deg, rgba(255,255,255,0.1) 306deg 360deg); flex-shrink: 0; position: relative; }
+.ui-frag-ring::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--hero-bg2); }
+.ui-frag-time { font-family: var(--aimt-font-mont); font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.01em; line-height: 1; }
+.ui-frag-time-label { font-family: var(--aimt-font-sans); font-size: 0.68rem; color: rgba(255,255,255,0.4); font-weight: 300; margin-top: 4px; }
+.ui-frag-step-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 3px; }
+.ui-frag-step-name { font-family: var(--aimt-font-mont); font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: white; }
+
+/* Credential fragment (#certificate) — not floated: .cert-details is a flex column,
+   not flowing text, and floating a sibling in front of it collapses the whole
+   flex box's width (a flex container avoids a float for its entire height, not
+   just the overlapping lines the way text does). Sits as a block before the rows instead. */
+.ui-frag-credential { float: none; margin: 0 0 1.5rem; }
+.ui-frag-cred-label { font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.ui-frag-cred-value { font-family: var(--aimt-font-mont); font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text); margin-bottom: 0.9rem; word-break: break-all; }
+.ui-frag-cred-verified { display: flex; align-items: center; gap: 6px; font-family: var(--aimt-font-sans); font-size: 0.76rem; color: var(--muted); font-weight: 400; }
+.ui-frag-check { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; }
+
+/* ── PROOF: LIVE CHECKPOINT THREAD ── */
+.proof-live { max-width: 620px; margin: 2rem var(--aimt-align) 0; background: white; border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.75rem 1.75rem 2rem; }
+.proof-live-label { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.4rem; }
+.proof-live-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--muted); color: white; font-family: var(--aimt-font-serif); font-size: 0.7rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.proof-live-scenario { font-family: var(--aimt-font-serif); font-style: normal; font-size: clamp(1rem, 2.4vw, 1.15rem); line-height: 1.55; color: var(--text); margin-bottom: 1.75rem; }
+/* Thread: every message's final text is always in the DOM (opacity 0 until its turn),
+   so the card is already at its final height on first paint — nothing reflows as
+   messages and pills reveal. Typing dots are absolutely positioned inside the bubble
+   so they don't add to its box size either. */
+.proof-thread { display: flex; flex-direction: column; gap: 1.75rem; }
+.proof-turn { display: flex; flex-direction: column; gap: 0.6rem; }
+.proof-msg { display: flex; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.proof-msg.show { opacity: 1; transform: translateY(0); }
+.proof-msg-student { justify-content: flex-end; }
+.proof-msg-cadence { justify-content: flex-start; }
+.proof-bubble { position: relative; max-width: 85%; padding: 0.85rem 1.1rem; border-radius: 14px; }
+.proof-bubble-student { background: white; border: 0.5px solid var(--border2); border-bottom-right-radius: 4px; }
+.proof-bubble-cadence { background: var(--stone); border-bottom-left-radius: 4px; }
+.proof-msg-text { font-family: var(--aimt-font-sans); font-size: 0.85rem; color: var(--text); line-height: 1.65; opacity: 0; transition: opacity 0.4s ease; }
+.proof-bubble.text-shown .proof-msg-text { opacity: 1; }
+.proof-typing { position: absolute; left: 1.1rem; top: 1rem; display: flex; gap: 4px; opacity: 1; transition: opacity 0.25s ease; }
+.proof-bubble.text-shown .proof-typing { opacity: 0; }
+.proof-typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); opacity: 0.35; animation: proofTypingDot 1.1s ease-in-out infinite; }
+.proof-typing span:nth-child(2) { animation-delay: 0.15s; }
+.proof-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes proofTypingDot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 0.9; transform: translateY(-3px); } }
+.proof-pill-row { display: flex; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
+.proof-pill-row.show { opacity: 1; transform: translateY(0); }
+.proof-pill-row-student { justify-content: flex-end; }
+@media(max-width:700px){
+  .proof-live { padding: 1.4rem 1.25rem 1.6rem; margin-left: var(--aimt-align); margin-right: var(--aimt-align); }
+  .proof-bubble { max-width: 88%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proof-msg, .proof-msg-text, .proof-typing, .proof-pill-row { transition: none; }
+  .proof-typing span { animation: none; }
+}
+
 </style>
 </head>
 <body>
@@ -853,6 +925,11 @@ img.zoomable { cursor: zoom-in; }
   <div class="section-inner">
     <span class="eyebrow-light reveal">Online head spa training</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Built like an institute.<br>Designed for how the industry is changing.</h2>
+    <div class="ui-frag ui-frag-checkpoint reveal reveal-delay-2" aria-hidden="true">
+      <div class="ui-frag-pill ui-frag-pill-muted"><span class="ui-frag-dot"></span>Needs revision</div>
+      <div class="ui-frag-pill ui-frag-pill-bright"><span class="ui-frag-dot"></span>Accepted</div>
+      <p class="ui-frag-feedback">"Good start—name the assessment tool before moving on."</p>
+    </div>
     <p class="institute-intro reveal reveal-delay-2"><em>The industry is changing—new tools, higher client expectations, and a rising bar for what a serious practitioner is expected to know.</em> AIMT is built to prepare you for that, not just to hand you a certificate.</p>
     <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1rem;">AIMT is built on a different standard. We believe knowledge is only useful when you can articulate it, apply it, and make sound decisions with a real client in front of you.</p>
     <p class="section-sub reveal reveal-delay-2">Our curriculum is developed by practicing cosmetologists, estheticians, and trichologists with decades of combined experience and thousands of client services behind them. It is shaped by what happens in the treatment room—not by theory alone.</p>
@@ -884,6 +961,17 @@ img.zoomable { cursor: zoom-in; }
   <div class="section-inner">
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your interactive tutor,<br>built into every module.</h2>
+    <div class="ui-frag ui-frag-dark ui-frag-timer reveal reveal-delay-2" aria-hidden="true">
+      <div class="ui-frag-timer-row">
+        <div class="ui-frag-ring"></div>
+        <div>
+          <div class="ui-frag-time">4:48</div>
+          <div class="ui-frag-time-label">this step · 5:00 total</div>
+        </div>
+      </div>
+      <div class="ui-frag-step-eyebrow">Step 03</div>
+      <div class="ui-frag-step-name">Halo Activation</div>
+    </div>
     <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Ask questions, work through difficult concepts, and receive focused feedback on written checkpoints as you progress.</p>
     <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1.75rem;">Unlike a standard course chatbot, Cadence is built around AIMT's curriculum and evaluates responses against what each module actually teaches. The role is practical: clarify the material, identify what is still missing, and guide you back to the lesson without giving away the answer.</p>
     <div class="cadence-features reveal reveal-delay-3">
@@ -904,14 +992,44 @@ img.zoomable { cursor: zoom-in; }
     <span class="eyebrow-light reveal">How the certification works</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">The test adapts.<br>The standard doesn't.</h2>
     <p class="institute-intro reveal reveal-delay-2"><em>A real checkpoint from Module 6.</em> Students can revise as many times as needed, and the guidance adapts to each response—but the standard doesn't move. Instead of choosing from a list of answers, the student has to interpret the evidence, explain the reasoning, and respond within professional scope.</p>
-    <div class="proof-grid reveal reveal-delay-2">
-      <div class="proof-item">
-        <img src="assets/Cadencerevision.png" alt="Head spa certification checkpoint evaluated by Cadence" class="proof-image zoomable" style="cursor: zoom-in">
-        <p class="section-sub"><strong>A vague answer is returned.</strong> Cadence identifies what is missing and directs the student back to the evidence—without supplying the answer.</p>
-      </div>
-      <div class="proof-item">
-        <img src="assets/Cadenceaccept.png" alt="Accepted head spa certification checkpoint answer" class="proof-image zoomable" style="cursor: zoom-in">
-        <p class="section-sub"><strong>A complete answer is accepted.</strong> The response demonstrates the correct interpretation, explains the reasoning, and gives an appropriate next step within scope.</p>
+    <div class="proof-live reveal reveal-delay-2" id="proofLive">
+      <div class="proof-live-label" aria-hidden="true"><span class="proof-live-icon">i</span>Real scenario</div>
+      <p class="proof-live-scenario">A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</p>
+      <div class="proof-thread" id="proofThread" aria-hidden="true">
+        <div class="proof-turn">
+          <div class="proof-msg proof-msg-student" id="proofMsg1">
+            <div class="proof-bubble proof-bubble-student">
+              <span class="proof-typing"><span></span><span></span><span></span></span>
+              <p class="proof-msg-text">Im not really sure . . .</p>
+            </div>
+          </div>
+          <div class="proof-pill-row proof-pill-row-student" id="proofPillRow1">
+            <div class="ui-frag-pill ui-frag-pill-muted"><span class="ui-frag-dot"></span>Needs revision</div>
+          </div>
+        </div>
+        <div class="proof-msg proof-msg-cadence" id="proofMsg2">
+          <div class="proof-bubble proof-bubble-cadence">
+            <span class="proof-typing"><span></span><span></span><span></span></span>
+            <p class="proof-msg-text">No worries — let's work through it. Start with what the microscopy is telling you: fine white powdery flakes, minimal oil, matte surface. Does that picture match dandruff, or something else? Once you identify what's actually going on, the conversation with the client and your next steps will follow naturally. Take a shot at it.</p>
+          </div>
+        </div>
+        <div class="proof-turn">
+          <div class="proof-msg proof-msg-student" id="proofMsg3">
+            <div class="proof-bubble proof-bubble-student">
+              <span class="proof-typing"><span></span><span></span><span></span></span>
+              <p class="proof-msg-text">Fine white flakes with minimal oil and a matte surface reads more like a dry, over-cleansed scalp than a fungal dandruff pattern. I'd describe what I'm seeing rather than label it, suggest that the client ease off of the zinc, and focus on restoring moisture.</p>
+            </div>
+          </div>
+          <div class="proof-pill-row proof-pill-row-student" id="proofPillRow2">
+            <div class="ui-frag-pill ui-frag-pill-bright"><span class="ui-frag-dot"></span>Accepted</div>
+          </div>
+        </div>
+        <div class="proof-msg proof-msg-cadence" id="proofMsg4">
+          <div class="proof-bubble proof-bubble-cadence">
+            <span class="proof-typing"><span></span><span></span><span></span></span>
+            <p class="proof-msg-text">Solid read. You tied the matte surface and minimal oil to barrier disruption rather than Malassezia activity — and your scope framing around describing what you see is exactly right. That distinction matters when a client has been self-treating for months and is expecting a diagnosis. Clean checkpoint.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -935,6 +1053,11 @@ img.zoomable { cursor: zoom-in; }
       <p style="font-family:var(--aimt-font-mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;">A verifiable head spa credential</p>
       <h2 class="section-title">A certificate that can<br>be confirmed.</h2>
       <p class="section-sub">Every AIMT graduate receives a digital certificate with a unique verification ID, allowing clients, employers, or collaborators to confirm the credential directly through AIMT.</p>
+      <div class="ui-frag ui-frag-credential reveal" aria-hidden="true">
+        <div class="ui-frag-cred-label">Credential ID</div>
+        <div class="ui-frag-cred-value">AIMT-HS-2026-XXXXXX</div>
+        <div class="ui-frag-cred-verified"><svg class="ui-frag-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified · AIMT</div>
+      </div>
       <div class="cert-details">
         <div class="cert-detail-row">
           <svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M6 7h8M6 10h5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
@@ -1082,6 +1205,63 @@ document.querySelectorAll('img.zoomable').forEach(img => {
 lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
 lightboxClose.addEventListener('click', closeLightbox);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('show')) closeLightbox(); });
+
+// Proof: live checkpoint thread
+(function() {
+  const card = document.getElementById('proofLive');
+  const thread = document.getElementById('proofThread');
+  if (!card || !thread) return;
+  const messages = ['proofMsg1', 'proofMsg2', 'proofMsg3', 'proofMsg4'].map(id => document.getElementById(id));
+  const pillRows = ['proofPillRow1', 'proofPillRow2'].map(id => document.getElementById(id));
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  function showTyping(msg) { msg.classList.add('show'); }
+  function showText(msg) { msg.querySelector('.proof-bubble').classList.add('text-shown'); }
+  function showPill(row) { row.classList.add('show'); }
+
+  function renderFinalState() {
+    messages.forEach(showTyping);
+    messages.forEach(showText);
+    pillRows.forEach(showPill);
+  }
+
+  async function runSequence() {
+    await sleep(1700);                 // beat before the student "responds"
+    showTyping(messages[0]);
+    await sleep(1150);                 // student typing indicator
+    showText(messages[0]);
+    await sleep(1000);                 // pause before delivery pill
+    showPill(pillRows[0]);
+    await sleep(1300);                 // pause before Cadence starts typing
+    showTyping(messages[1]);
+    await sleep(2000);                 // Cadence typing indicator — longer reply
+    showText(messages[1]);
+    await sleep(2800);                 // real hold, as though the student is thinking
+    showTyping(messages[2]);
+    await sleep(1400);                 // student typing indicator
+    showText(messages[2]);
+    await sleep(1000);                 // pause before delivery pill
+    showPill(pillRows[1]);
+    await sleep(1300);                 // pause before Cadence starts typing
+    showTyping(messages[3]);
+    await sleep(2000);                 // Cadence typing indicator
+    showText(messages[3]);
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    renderFinalState();
+  } else {
+    const proofObs = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          runSequence();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    proofObs.observe(card);
+  }
+})();
 
 // Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(a => {
