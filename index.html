@@ -46,6 +46,7 @@
 </script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:focus-visible { outline: 2px solid #a3968d; outline-offset: 2px; }
 :root {
   --bg: #faf8f5;
   --white: #ffffff;
@@ -188,10 +189,10 @@ nav {
   .hero-ctas { flex-direction: column; align-items: stretch; justify-content: center; }
   .cta-primary, .cta-ghost { text-align: center; }
   nav { padding: 0 1rem; }
-  .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 0.4rem 0.75rem; white-space: nowrap; }
+  .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 1rem 0.75rem; white-space: nowrap; }
   .nav-links { display: none; }
   .nav-sep { display: none; }
-  nav .cta-primary { font-size: 0.62rem; padding: 0.4rem 0.85rem; white-space: nowrap; }
+  nav .cta-primary { font-size: 0.62rem; padding: 1.05rem 0.85rem; white-space: nowrap; }
 }
 .hero-image {
   width: 100%;
@@ -233,6 +234,10 @@ nav {
 .cta-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
 .cta-ghost { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.48); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 980px; padding: 0.86rem 1.05rem; font-family: var(--aimt-font-mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .cta-ghost:hover { border-color: rgba(255,255,255,0.38); color: rgba(255,255,255,0.82); }
+@media(max-width:700px){
+  .cta-primary { padding: 1.05rem 1.15rem; }
+  .cta-ghost { padding: 1.05rem 1.05rem; }
+}
 
 /* ── SECTION ── */
 .section-inner { max-width: 700px; margin: 0 auto; }
@@ -420,13 +425,60 @@ nav {
 .c01-enter:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
 .c01-enter-ghost { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: rgba(255,255,255,0.5); font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 400; text-decoration: none; padding: 0.5rem 0; transition: color 0.2s; cursor: pointer; width: 100%; }
 .c01-enter-ghost:hover { color: rgba(255,255,255,0.85); }
-.c01-bottom { padding: 1.5rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.05); max-height: 1000px; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
+@media(max-width:700px){ .c01-enter-ghost { padding: 0.95rem 0; } }
+/* Desktop: vertical tabs / master-detail. Mobile reverts to an accordion (see breakpoint below). */
+.c01-bottom { padding: 1.5rem 0; display: grid; grid-template-columns: minmax(0,280px) 1fr; grid-auto-rows: 44px; column-gap: 2rem; max-height: 3000px; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
 .c01-bottom.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
-@media(max-width:520px){ .c01-bottom { grid-template-columns: 1fr; } }
-.c01-module { background: var(--hero-bg2); padding: 0.95rem var(--aimt-align); display: flex; align-items: center; gap: 10px; }
-.c01-mod-num { width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; font-family: var(--aimt-font-mono); font-size: 0.58rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
+.c01-module { grid-column: 1; min-width: 0; background: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); box-shadow: inset 2px 0 0 0 transparent; padding: 0.65rem var(--aimt-align); display: flex; align-items: center; gap: 10px; }
+.c01-module-expandable { cursor: pointer; }
+.c01-module-expandable[aria-selected="true"] { background: rgba(255,255,255,0.05); box-shadow: inset 2px 0 0 0 #a3968d; }
+.c01-mod-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; font-family: var(--aimt-font-mono); font-size: 0.5rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
 .c01-mod-title { font-size: 0.76rem; font-weight: 400; color: rgba(255,255,255,0.55); line-height: 1.3; }
 .c01-mod-sub { font-size: 0.64rem; color: rgba(255,255,255,0.22); font-weight: 300; margin-top: 1px; }
+.c01-mod-chevron { display: none; width: 14px; height: 14px; color: rgba(255,255,255,0.28); flex-shrink: 0; margin-left: auto; transition: transform 0.25s ease; }
+.c01-module-expandable[aria-expanded="true"] .c01-mod-chevron { transform: rotate(180deg); }
+
+.c01-mod-panel {
+  grid-column: 2; grid-row: 1 / -1; align-self: start;
+  min-width: 0;
+  position: sticky; top: 76px;
+  max-width: min(46em, 100%);
+  min-height: 240px;
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.24);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+.c01-mod-panel[aria-hidden="false"] { opacity: 1; visibility: visible; transition: opacity 0.2s ease, visibility 0s linear 0s; }
+.c01-mod-question-label { display: block; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 0.4rem; }
+.c01-mod-question { font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 300; font-style: italic; line-height: 1.6; }
+.c01-mod-panel-footer { margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid rgba(255,255,255,0.08); font-family: var(--aimt-font-mono); font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.18); }
+@media(max-width:700px){
+  .c01-bottom { grid-auto-rows: auto; }
+  .c01-bottom { grid-template-columns: 1fr; }
+  .c01-module { box-shadow: none; padding: 0.85rem var(--aimt-align); }
+  .c01-module-expandable[aria-selected="true"] { background: none; box-shadow: none; }
+  .c01-mod-chevron { display: block; }
+  .c01-mod-panel {
+    grid-column: 1; grid-row: auto; align-self: auto;
+    position: static; top: auto; max-width: none; min-height: 0;
+    background: rgba(255,255,255,0.03);
+    border: none; border-top: 0.5px solid rgba(255,255,255,0.06);
+    border-radius: 0;
+    padding: 0 var(--aimt-align);
+    max-height: 0; overflow: hidden;
+    opacity: 1; visibility: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0.25s;
+  }
+  .c01-mod-panel[aria-hidden="false"] {
+    padding: 0.9rem var(--aimt-align);
+    visibility: visible;
+    transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0s;
+  }
+}
 
 /* ── SERVICE PROTOCOL ── */
 #protocol { background: #0f0d0b; padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
@@ -482,6 +534,7 @@ nav {
 .ptd-next-title { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ptd-white); }
 .ptd-next-btn { display: block; width: 100%; margin-top: 16px; padding: 12px 16px; background: transparent; border: 0.5px solid rgba(250,248,245,0.18); border-radius: 980px; font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ptd-white); text-align: center; cursor: pointer; }
 .ptd-next-btn[hidden] { display: none; }
+@media(max-width:700px){ .ptd-next-btn { padding: 16px; } }
 @media(max-width:700px){ .protocol-timer-demo { max-width: none; width: 100%; } }
 
 /* ── DIFFERENT ── */
@@ -786,6 +839,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   .proof-msg, .proof-msg-text, .proof-typing, .proof-pill-row { transition: none; }
   .proof-typing span { animation: none; }
   .ptd-content { transition: none; }
+  .c01-mod-panel, .c01-mod-chevron { transition: none; }
 }
 
 </style>
@@ -875,17 +929,28 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
           </div>
         </div>
         <div class="c01-bottom collapsed" id="c01ModuleGrid" aria-hidden="true">
-          <div class="c01-module"><div class="c01-mod-num">1</div><div><div class="c01-mod-title">Role of the Head Spa Tech</div><div class="c01-mod-sub">Scope of practice, limitations, licensing</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">2</div><div><div class="c01-mod-title">Welcoming Your Client</div><div class="c01-mod-sub">Intake, rituals, first contact</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">3</div><div><div class="c01-mod-title">Hair &amp; Scalp Anatomy</div><div class="c01-mod-sub">The biology behind every service decision</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">4</div><div><div class="c01-mod-title">Microscopy &amp; Scalp Assessment</div><div class="c01-mod-sub">Assessment as a service tool</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">5</div><div><div class="c01-mod-title">Scalp Types &amp; Protocols</div><div class="c01-mod-sub">Treatment frameworks for each type</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">6</div><div><div class="c01-mod-title">Conditions &amp; Disorders</div><div class="c01-mod-sub">Recognition and scope boundaries</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">7</div><div><div class="c01-mod-title">Equipment &amp; Room Setup</div><div class="c01-mod-sub">Tools, layout, setup systems</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">8</div><div><div class="c01-mod-title">The Head Spa Service</div><div class="c01-mod-sub">Full service execution</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">9</div><div><div class="c01-mod-title">Sanitation &amp; Reset Systems</div><div class="c01-mod-sub">Between-client protocols</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">10</div><div><div class="c01-mod-title">Pricing Strategy</div><div class="c01-mod-sub">Positioning and menu architecture</div></div></div>
-          <div class="c01-module"><div class="c01-mod-num">11</div><div><div class="c01-mod-title">AI in Professional Practice</div><div class="c01-mod-sub">Using modern tools with skill, judgment, and clear professional boundaries</div></div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel1"><div class="c01-mod-num">1</div><div><div class="c01-mod-title">Role of the Head Spa Tech</div><div class="c01-mod-sub">Scope of practice, limitations, licensing</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel1" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client sits down and says her hair has been shedding heavily for two months. She's convinced she has alopecia and wants you to tell her if that's what you see. How do you handle this moment: what do you say, and what don't you say?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel2"><div class="c01-mod-num">2</div><div><div class="c01-mod-title">Welcoming Your Client</div><div class="c01-mod-sub">Intake, rituals, first contact</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel2" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A new client arrives visibly stressed, rushing, apologizing for being two minutes late. Walk me through the first five minutes of her experience. What do you do, in what order, and what are you trying to accomplish with each step?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel3"><div class="c01-mod-num">3</div><div><div class="c01-mod-title">Hair &amp; Scalp Anatomy</div><div class="c01-mod-sub">The biology behind every service decision</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel3" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client says her hair has been shedding heavily for about two months. She also mentions she had a bad flu six weeks ago and has been under a lot of stress at work. What is the most likely explanation, and what would you say to her?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel4"><div class="c01-mod-num">4</div><div><div class="c01-mod-title">Microscopy &amp; Scalp Assessment</div><div class="c01-mod-sub">Assessment as a service tool</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel4" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client shows you a visibly flaky scalp. Before you reach for any products, what are the two completely different scalp situations that could be causing the flaking, and why does it matter which one it is?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel5"><div class="c01-mod-num">5</div><div><div class="c01-mod-title">Scalp Types &amp; Protocols</div><div class="c01-mod-sub">Treatment frameworks for each type</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel5" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">You see oiliness at the crown with waxy buildup around the follicles, but the sides and hairline show flaking and a more matte appearance. How do you approach this service, and what mistake are you specifically trying to avoid?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel6"><div class="c01-mod-num">6</div><div><div class="c01-mod-title">Conditions &amp; Disorders</div><div class="c01-mod-sub">Recognition and scope boundaries</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel6" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">The microscope shows yellowish clumped flakes near the follicle, visible oiliness, mild redness, and the client reports it spreads to her eyebrows and hairline. How does your response change, and is this still within the scope of a head spa service?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel7"><div class="c01-mod-num">7</div><div><div class="c01-mod-title">Equipment &amp; Room Setup</div><div class="c01-mod-sub">Tools, layout, setup systems</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel7" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">You've just begun the halo rinse phase. Your client mentions her neck feels strained and she's a little cold. Walk through how you respond: what you adjust, and in what order.</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel8"><div class="c01-mod-num">8</div><div><div class="c01-mod-title">The Head Spa Service</div><div class="c01-mod-sub">Full service execution</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel8" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">You're twelve minutes into the scalp massage. Your client opens her eyes and asks what exactly the difference is between this and a regular shampoo at the salon. She's genuinely curious. What do you say, without breaking the experience?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel9"><div class="c01-mod-num">9</div><div><div class="c01-mod-title">Sanitation &amp; Reset Systems</div><div class="c01-mod-sub">Between-client protocols</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel9" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client calls to say she developed a rash on her neck the day after her service. Walk through how you investigate and respond, to her and internally.</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel10"><div class="c01-mod-num">10</div><div><div class="c01-mod-title">Pricing Strategy</div><div class="c01-mod-sub">Positioning and menu architecture</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel10" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client at checkout says the service was amazing but the price felt a little high. How do you respond in the moment, and what does this tell you about your positioning?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
+          <div class="c01-module c01-module-expandable" role="button" tabindex="0" aria-expanded="false" aria-controls="c01Panel11"><div class="c01-mod-num">11</div><div><div class="c01-mod-title">AI in Professional Practice</div><div class="c01-mod-sub">Using modern tools with skill, judgment, and clear professional boundaries</div></div><svg class="c01-mod-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="c01-mod-panel" id="c01Panel11" aria-hidden="true"><span class="c01-mod-question-label">Checkpoint</span><p class="c01-mod-question">A client arrives having asked an AI chatbot about her symptoms. She shows you the response on her phone: it names a specific condition and recommends a treatment. Your own assessment doesn't support it. How do you handle that conversation without dismissing her and without overstepping your scope?</p><div class="c01-mod-panel-footer">Answer by Typing or Voice · Cadence Evaluates and Responds</div></div>
           <div class="c01-module"><div class="c01-mod-num">12</div><div><div class="c01-mod-title">Completion &amp; Certification</div><div class="c01-mod-sub">Final review and credential issue</div></div></div>
         </div>
       </div>
@@ -1168,6 +1233,67 @@ if (c01Toggle && c01Grid) {
     c01Toggle.textContent = collapsed ? 'See the full curriculum →' : 'Hide curriculum ↑';
   });
 }
+
+// Module checkpoint panels — desktop: vertical tabs (one always selected).
+// Mobile (<=700px): accordion (zero or one open). Same DOM, same data, ARIA pattern switches with viewport.
+(function() {
+  const list = document.getElementById('c01ModuleGrid');
+  if (!list) return;
+  const pairs = Array.from(document.querySelectorAll('.c01-module-expandable')).map(row => ({
+    row: row,
+    panel: document.getElementById(row.getAttribute('aria-controls'))
+  })).filter(pair => pair.panel);
+  if (!pairs.length) return;
+
+  const mq = window.matchMedia('(max-width:700px)');
+  let desktopSelected = 0;
+  let mobileOpen = null;
+
+  function render() {
+    if (mq.matches) {
+      list.removeAttribute('role');
+      pairs.forEach((pair, i) => {
+        const open = i === mobileOpen;
+        pair.row.setAttribute('role', 'button');
+        pair.row.setAttribute('aria-expanded', String(open));
+        pair.row.removeAttribute('aria-selected');
+        pair.panel.removeAttribute('role');
+        pair.panel.setAttribute('aria-hidden', String(!open));
+        pair.panel.style.maxHeight = open ? pair.panel.scrollHeight + 'px' : '0px';
+      });
+    } else {
+      list.setAttribute('role', 'tablist');
+      pairs.forEach((pair, i) => {
+        const active = i === desktopSelected;
+        pair.row.setAttribute('role', 'tab');
+        pair.row.setAttribute('aria-selected', String(active));
+        pair.row.removeAttribute('aria-expanded');
+        pair.panel.setAttribute('role', 'tabpanel');
+        pair.panel.setAttribute('aria-hidden', String(!active));
+        pair.panel.style.maxHeight = '';
+      });
+    }
+  }
+
+  function select(i) {
+    if (mq.matches) {
+      mobileOpen = (mobileOpen === i) ? null : i;
+    } else {
+      desktopSelected = i;
+    }
+    render();
+  }
+
+  pairs.forEach((pair, i) => {
+    pair.row.addEventListener('click', () => select(i));
+    pair.row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(i); }
+    });
+  });
+
+  mq.addEventListener('change', render);
+  render();
+})();
 
 // Protocol timer demo: real-time countdown, chains 04 -> 05 -> 06, pauses off-screen
 (function() {
