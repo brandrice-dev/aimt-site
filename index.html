@@ -217,7 +217,8 @@ nav {
   .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 1rem 0.75rem; white-space: nowrap; }
   .nav-links { display: none; }
   .nav-sep { display: none; }
-  nav .cta-primary { font-size: 0.62rem; padding: 1.05rem 0.85rem; white-space: nowrap; }
+  nav .cta-primary { font-size: 0.62rem; padding: 0.7rem 1.15rem; white-space: nowrap; position: relative; }
+  nav .cta-primary::after { content: ''; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px; }
 }
 .hero-image {
   width: 100%;
