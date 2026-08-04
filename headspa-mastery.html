@@ -52,6 +52,23 @@ html { scroll-behavior: smooth; }
 body { font-family: var(--aimt-font-sans); background: var(--bg); color: var(--text); min-height: 100dvh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body.app-loading { visibility: hidden; }
 body.app-ready { visibility: visible; }
+body.review-mode-active { padding-top: 34px; }
+
+/* ── COURSE REVIEW MODE (audit-only; owner inspection, no student impact) ── */
+#reviewModeBanner {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 3000;
+  background: var(--accent2); color: rgba(255,255,255,0.92);
+  font-family: var(--aimt-font-sans); font-size: 0.72rem; letter-spacing: 0.02em;
+  padding: 0.5rem 1rem; align-items: center; justify-content: center; gap: 0.75rem;
+  flex-wrap: wrap; text-align: center;
+}
+#reviewModeBanner.show { display: flex; }
+#reviewModeBanner .rmb-exit {
+  background: rgba(255,255,255,0.14); color: #fff; border: none; border-radius: 4px;
+  padding: 0.2rem 0.65rem; font-size: 0.68rem; letter-spacing: 0.02em; cursor: pointer;
+  font-family: var(--aimt-font-sans);
+}
+#reviewModeBanner .rmb-exit:hover { background: rgba(255,255,255,0.24); }
 
 /* ── VIEWS ── */
 .view { display: none; }
@@ -1960,6 +1977,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 </style>
 </head>
 <body class="app-loading">
+
+<div id="reviewModeBanner" role="status" aria-live="polite">
+  <span>Course Review Mode — progress is not being recorded</span>
+  <button type="button" class="rmb-exit" onclick="ReviewMode.exit()">Exit Review Mode</button>
+</div>
 
 <!-- ══ LANDING PAGE ══ -->
 <div id="landingPage">
@@ -5841,6 +5863,8 @@ function renderHomeProgress() {
     const complete = APP_STATE.isModuleComplete(i);
     const canAccess = APP_STATE.canAccessModule(i);
     const isNext = (i === next && !complete);
+    const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
+    const reviewOnlyAccess = reviewModeActive && APP_STATE.wouldBeLockedWithoutReview(i);
 
     if (rowEl) rowEl.classList.toggle('locked', !canAccess);
 
@@ -5849,6 +5873,11 @@ function renderHomeProgress() {
       numEl.textContent = '✓';
       badgeEl.className = 'mr-badge mb-done';
       badgeEl.textContent = 'Complete';
+    } else if (reviewOnlyAccess) {
+      numEl.className = 'mr-num mr-active';
+      numEl.textContent = String(i);
+      badgeEl.className = 'mr-badge mb-active';
+      badgeEl.textContent = 'Review';
     } else if (!canAccess) {
       numEl.className = 'mr-num mr-locked';
       numEl.textContent = String(i);
@@ -6103,6 +6132,9 @@ async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
 // ══════════════════════════════════════════════════════
 
 function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
+  if (window.ReviewMode && window.ReviewMode.isActive()) {
+    return submitCheckpointReviewMode(moduleId, cpId, systemPrompt, question);
+  }
   const inp = getActiveElementById(cpId + 'In');
   const btn = getActiveElementById(cpId + 'Btn');
   const res = getActiveElementById(cpId + 'Res');
@@ -6157,6 +6189,49 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
       res.innerHTML = '<p style="font-size:.875rem;color:var(--muted)">Cadence didn\'t respond — check your connection and try again.</p>';
       res.classList.remove('show');
       setTimeout(() => res.classList.add('show'), 50);
+    });
+}
+
+// Course Review Mode: reuses the real checkpoint question + Cadence grading
+// prompt so the owner can functionally test it, but never persists a result,
+// never marks a checkpoint passed, and never completes or unlocks a module.
+function submitCheckpointReviewMode(moduleId, cpId, systemPrompt, question) {
+  const inp = getActiveElementById(cpId + 'In');
+  const btn = getActiveElementById(cpId + 'Btn');
+  const res = getActiveElementById(cpId + 'Res');
+  if (!inp || !btn || !res) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  if (!btn.dataset.defaultHtml) btn.dataset.defaultHtml = btn.innerHTML;
+
+  const reviewLabel = '<p style="font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Review Mode test — not saved</p>';
+
+  inp.disabled = true;
+  btn.disabled = true;
+  res.innerHTML = '<div class="cp-thinking"><span></span><span></span><span></span></div>';
+  res.classList.add('show');
+
+  const systemBase = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
+  const system = systemBase +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
+
+  evaluateCheckpointAnswer(system, question, text)
+    .then((result) => {
+      res.innerHTML = reviewLabel + result.feedback.split('\n').filter(l => l.trim())
+        .map(l => '<p style="font-size:.875rem;line-height:1.7;font-weight:300;color:var(--text);margin-bottom:.3rem">' + l + '</p>')
+        .join('');
+      inp.disabled = false;
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.defaultHtml;
+      btn.classList.remove('retry-mode');
+    })
+    .catch(() => {
+      res.innerHTML = reviewLabel + '<p style="font-size:.875rem;color:var(--muted)">Cadence didn\'t respond — check your connection and try again.</p>';
+      inp.disabled = false;
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.defaultHtml;
+      btn.classList.remove('retry-mode');
     });
 }
 
@@ -7574,6 +7649,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Capture module 3 HTML (it is the default content of .lesson-wrap)
   const wrap = document.querySelector('.lesson-wrap');
   if (wrap) module3HTML = wrap.innerHTML;
+  if (window.ReviewMode) window.ReviewMode.applyUI();
   showApp();
 });
 
@@ -7587,6 +7663,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ══ COMPLETION CERTIFICATE ══
 function showCertificate() {
+  // Course Review Mode: never issue a certificate or create eligibility.
+  if (window.ReviewMode && window.ReviewMode.isActive()) {
+    alert('Certificate issuance is disabled in Course Review Mode.');
+    return;
+  }
   // Verify all modules 0–10 are complete before issuing certificate
   for (let i = 0; i <= 10; i++) {
     if (!APP_STATE.isModuleComplete(i)) {

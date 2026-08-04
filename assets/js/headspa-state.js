@@ -8,6 +8,92 @@
     return Date.now();
   }
 
+  /* ══════════════════════════════════════════════════════
+     COURSE REVIEW MODE — audit-only, owner inspection.
+     Never activates on a production hostname. Session-only;
+     never touches localStorage['levo_app'] or progress sync.
+     See docs/course-audit/implementation-log.md for the audit trail.
+     ══════════════════════════════════════════════════════ */
+  const REVIEW_MODE_SESSION_KEY = 'aimt_review_mode';
+  const REVIEW_MODE_PRODUCTION_HOSTS = [
+    'aimtrichology.com',
+    'www.aimtrichology.com',
+    'aimt-site.pages.dev' /* bare Cloudflare Pages production alias */
+  ];
+
+  function isReviewModeProductionHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    return REVIEW_MODE_PRODUCTION_HOSTS.indexOf(h) !== -1;
+  }
+
+  function isReviewModeEligibleHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    if (isReviewModeProductionHost(h)) return false;
+    if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')) return true;
+    /* Cloudflare Pages branch-preview subdomains: <branch>.aimt-site.pages.dev */
+    if (/^[a-z0-9-]+\.aimt-site\.pages\.dev$/.test(h)) return true;
+    return false;
+  }
+
+  const ReviewMode = {
+    _active: false,
+
+    init() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+
+      if (isReviewModeProductionHost(hostname)) {
+        /* Hard block: never active on production, regardless of any
+           stale session flag or query param. */
+        try { sessionStorage.removeItem(REVIEW_MODE_SESSION_KEY); } catch (e) {}
+        this._active = false;
+        return;
+      }
+
+      let requested = false;
+      try {
+        requested = new URLSearchParams(window.location.search).get('review') === '1';
+      } catch (e) {}
+
+      let sessionFlag = false;
+      try { sessionFlag = sessionStorage.getItem(REVIEW_MODE_SESSION_KEY) === '1'; } catch (e) {}
+
+      const eligible = isReviewModeEligibleHost(hostname);
+      this._active = eligible && (requested || sessionFlag);
+
+      if (this._active) {
+        try { sessionStorage.setItem(REVIEW_MODE_SESSION_KEY, '1'); } catch (e) {}
+      }
+    },
+
+    isActive() {
+      return this._active === true;
+    },
+
+    applyUI() {
+      const banner = document.getElementById('reviewModeBanner');
+      if (this._active) {
+        document.body.classList.add('review-mode-active');
+        if (banner) banner.classList.add('show');
+      } else {
+        document.body.classList.remove('review-mode-active');
+        if (banner) banner.classList.remove('show');
+      }
+    },
+
+    exit() {
+      try { sessionStorage.removeItem(REVIEW_MODE_SESSION_KEY); } catch (e) {}
+      const path = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
+      params.delete('review');
+      const nextQuery = params.toString();
+      window.location.href = nextQuery ? (path + '?' + nextQuery) : path;
+    }
+  };
+
+  ReviewMode.init();
+  window.ReviewMode = ReviewMode;
+
   function createCheckpointMeta() {
     return {
       status: '',
@@ -405,6 +491,8 @@
 
     save() {
       this._syncDerivedState();
+      /* Course Review Mode: never write real student records. */
+      if (window.ReviewMode && window.ReviewMode.isActive()) return;
       try {
         localStorage.setItem(this._key, JSON.stringify(this.data));
       } catch (e) {}
@@ -540,8 +628,21 @@
     canAccessModule(moduleId) {
       const id = Number(moduleId);
       if (!Number.isInteger(id) || id < 0 || id >= MODULE_COUNT) return false;
+      /* Course Review Mode: owner may open any module for inspection
+         without affecting real unlock state (see wouldBeLockedWithoutReview). */
+      if (window.ReviewMode && window.ReviewMode.isActive()) return true;
       if (id === 0) return true;
       return this.isModuleComplete(id - 1);
+    },
+
+    /* Course Review Mode UI only — reports whether a module would be
+       locked for a real student, independent of the Review Mode override
+       above. Does not affect access or persistence. */
+    wouldBeLockedWithoutReview(moduleId) {
+      const id = Number(moduleId);
+      if (!Number.isInteger(id) || id < 0 || id >= MODULE_COUNT) return true;
+      if (id === 0) return false;
+      return !this.isModuleComplete(id - 1);
     },
 
     getHighestUnlockedModule() {
