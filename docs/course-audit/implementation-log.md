@@ -595,3 +595,31 @@ Listen Mode fields — meaningfully prevents audio-only completion of this
 module in a way not seen in Modules 0 or 1.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 12: Approved Module 2 specification added
+
+The externally-reviewed approved specification was placed into
+`docs/course-audit/modules/module-02.md`, populating all required sections
+(Approved outcomes, Keep unchanged, Required corrections, Final replacement
+copy, Checkpoint specification, Approved interactions, Cadence behavior,
+Acceptance criteria, Guided completion structure, Listen Mode notes,
+Implementation notes). Notable approved corrections: aligning the displayed
+and evaluated `m2cp1` checkpoint questions (currently mismatched — see the
+Module 2 extraction), replacing the phrase/regex-triggered checkpoint
+grading exception with a Module-2/checkpoint-specific evaluator
+configuration, removing unsupported nervous-system/subconscious-trust/
+transformation/rebooking claims, requiring explicit consent before first
+touch, reframing tea and aromatherapy as optional hospitality/sensory
+choices with a fragrance-free path, adding numbered sections 2.1–2.5 to the
+arrival sequence, making the arrival accordion and judgment-check
+interaction accessible and retryable, replacing the feeling slider with a
+static "Same service. Different beginning." comparison, and the same
+course-name/Cadence-identity corrections already applied to the Welcome
+Module and Module 1. `modules/README.md` was updated to reflect Module 2
+status as **Approved — awaiting implementation**.
+
+This was a documentation update only — the specification authorizes future
+implementation but nothing was implemented. No production files were
+modified. Work remains on branch `course-audit-build`.

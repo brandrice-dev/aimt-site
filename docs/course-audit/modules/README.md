@@ -80,16 +80,17 @@ first-pass content assessment.
 | Wrapper ID | `module2Wrap` |
 | Checkpoint IDs | `m2cp1` |
 | Current completion requirement | Single checkpoint `m2cp1` must be graded `passed` (no read-percentage minimum) |
-| Guided completion structure | Recorded in `module-02-source.md` §9 (extraction only — not yet an approved spec) |
-| Listen Mode notes | Recorded in `module-02-source.md` §10 (extraction only — not yet an approved spec) |
-| **Status** | **Awaiting external audit** |
+| Guided completion structure | Recorded in `module-02.md` — position: client-experience foundation, immediately after Module 1 |
+| Listen Mode notes | Recorded in `module-02.md` — narration approved as a partial candidate (after timeline content is made available independent of accordion state), ~9–11 minutes |
+| **Status** | **Approved — awaiting implementation** |
 
-Extracted without production changes. Module 2 has four ungraded/
-semi-graded interactive components beyond its required checkpoint
-(interactive timeline, a quiz with no retry, an AI-evaluated script
-builder, and a feeling slider) — see `module-02-source.md` §5 and §11 for
-full behavior and confirmed accessibility/interaction concerns, none of
-which have been fixed.
+Approved specification added. Module 2 has four ungraded/semi-graded
+interactive components beyond its required checkpoint (accessible arrival
+accordion, a retryable "what breaks the moment" judgment check, an
+AI-evaluated script builder, and a static comparison replacing the removed
+feeling slider) — see `module-02.md` for the approved behavior and
+`module-02-source.md` §5 and §11 for the prior-state accessibility/
+interaction concerns being corrected.
 
 Modules 3–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
