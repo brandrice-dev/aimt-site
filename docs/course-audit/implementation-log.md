@@ -441,3 +441,119 @@ accessibility corrections already applied to the Welcome Module.
 This was a documentation update only — the specification authorizes
 future implementation but nothing was implemented. No production files
 were modified. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 10: Module 1 implementation
+
+Implemented the approved Module 1 audit specification
+(`docs/course-audit/modules/module-01.md`). No other module was audited
+or edited.
+
+**Files changed:** `headspa-mastery.html` only (204 insertions, 63
+deletions). No changes to `headspa-state.js` or `aimt-progress-sync.js`.
+
+**Copy and behavior implemented:**
+- Course name / Cadence identity corrections applied to `M1.systems` and
+  `MODULE_GUIDE_SYSTEMS[1]` (no more "HeadSpa Mastery"; Cadence no longer
+  claims personal work experience).
+- Module identity: home-screen title/subtitle, hero eyebrow/description
+  (hero title and `module1Wrap`/`M1`/`m1cp1`/`m1cp2`/module ID `1`
+  unchanged, as required).
+- License-dependent scope framing in 1.4 (heading, intro, both protocol
+  cards reframed from universal "within/outside scope" to "may fall
+  within scope—verify first" / "never authorized by this course").
+- "Head spa technician is a role, not a license" clarification added to
+  1.2, with a replaced clinical note ("The work behind the calm").
+- Hair-growth and circulation claims removed: 1.1's card ("Massage &
+  relaxation"), 1.5's can-support/cannot-do lists, and the 1.5 key point
+  all rewritten to cosmetic/comfort language only.
+- Strengthened referral guidance in 1.3 and a fourth "Shedding or
+  thinning" row added to the safe-language script card; the out-of-scope
+  card gained a fourth "Prescription" row.
+- 1.6 (licensing), 1.7 (practitioner insight + Cadence note), and 1.8's
+  first mistake card rewritten per spec; 1.8's other four cards, and all
+  of 1.1/1.3's non-replaced content, left untouched.
+- New ungraded "Where is the line?" interaction added between 1.4 and
+  1.5 — four scenarios, native `<button>` choices, immediate textual
+  feedback ("Correct."/"Not quite." prefix, not color-only), a
+  completion message after all four are answered, and no `APP_STATE`
+  access anywhere in `selectM1Line()`.
+- Checkpoint questions realigned: `M1.questions.m1cp1`/`m1cp2` now use
+  the exact same string shown in `.cp-q` (verified programmatically in
+  testing, not just by inspection).
+- `M1` restructured from one shared `system` function to `M1.systems`
+  keyed by checkpoint ID, each carrying its own itemized pass rubric,
+  immediate-correction rules, and revision-focus examples per
+  `module-01.md`'s "Checkpoint specification". `submitM1CP` passes
+  `M1.systems[id]` and a Module-1-specific `errorMessage` (via the
+  optional 5th parameter added to `submitCheckpoint()` during the
+  Welcome Module work) — no shared function signature changed, so no
+  other module's checkpoint behavior is affected.
+- Accessibility: `aria-label` added to both voice buttons and both
+  submit buttons; `aria-live="polite"` added to both `.cp-res` regions;
+  the practice interaction's choice buttons are native, keyboard-focusable
+  `<button>` elements with `aria-pressed` and no color-only state.
+- Completion card: new eyebrow ("Module 1 complete"), new title
+  ("Professional boundaries demonstrated."), and a competency-naming
+  body line, following the same `.lc-next-label`-reuse pattern used for
+  the Welcome Module's completion card.
+
+**Tests completed** (local static server, mocking `callAI` since no live
+API credentials are reachable in this environment):
+normal Module 1 entry; Review Mode entry with the rewritten checkpoints
+(test submission correctly labeled "Review Mode test — not saved" and
+did not touch the stored answer); an existing pre-rewrite "passed" state
+for both `m1cp1` and `m1cp2` was seeded and confirmed to survive a reload
+as "Accepted" with Module 2 still unlocked; both checkpoints' displayed
+`.cp-q` text was verified programmatically equal to `M1.questions`; a
+mocked strong `m1cp1` answer passed; a mocked partial `m1cp1` answer
+(avoids diagnosis, no referral) returned "Needs revision" with the
+approved focused-follow-up pattern; a mocked unsafe `m1cp1` answer
+(names alopecia, promises regrowth) was correctly rejected with an
+immediate-correction-style message; a mocked strong `m1cp2` answer
+passed and completed the module, unlocking Module 2, with the exact
+approved completion-card text; a mocked generic `m1cp2` answer returned
+the approved vague-answer follow-up; the network-failure fallback
+preserved the typed answer and showed the exact approved text; all four
+"Where is the line?" scenarios were exercised with real `.click()`
+calls — correct/incorrect selection, textual "Correct."/"Not quite."
+feedback, changing an answer after selecting, and the completion message
+appearing only after all four are answered; `localStorage['levo_app']`
+key structure was diffed before/after the interaction and confirmed
+unchanged; mobile viewport (375×812) showed no horizontal overflow; a
+full-page text extraction confirmed every section renders in the correct
+order with no stray or duplicate content; the Welcome Module and Module 2
+were both re-opened and confirmed byte-for-byte unchanged; a duplicate-ID
+scan showed the new interaction/checkpoint elements follow the exact same
+pre-existing hidden-template-plus-live-copy pattern already present for
+every module (no new duplication introduced); console stayed error-free
+throughout; `git diff` was scanned for references to any other module's
+wrapper ID, `MN` object, or title string and found none outside the
+intentional "Module 2" forward-reference in Module 1's own completion
+copy.
+
+**Requires manual review (could not be fully verified in this
+environment):**
+- Enter/Space keyboard activation of the "Where is the line?" choice
+  buttons — same tooling limitation already noted for the Welcome
+  Module's practice interaction (native `<button>` semantics guarantee
+  activation in a real browser; this sandbox's synthetic key-event
+  delivery did not trigger it during testing).
+- The live Claude model's actual behavior against the new per-checkpoint
+  rubrics — grading flows were verified with mocked AI responses, not
+  the real model. In particular, whether the model reliably applies the
+  "do not fail for grammar/spelling/informal wording/non-native English"
+  instruction, and whether it correctly identifies the single most
+  important missing element rather than restating the whole prompt, can
+  only be confirmed with live-model testing.
+- Screen-reader verification (VoiceOver/NVDA) of the new `aria-live` and
+  `aria-pressed` behavior on the checkpoints and the practice interaction.
+- Touch-target sizing was not measured against a specific minimum (e.g.
+  44×44px) — the practice-choice buttons reuse standard padding already
+  used elsewhere in the app, not a value chosen or verified against a
+  touch-target guideline.
+
+Guided Completion Path UI, Listen Mode, persistent checkpoint threads,
+and Module 12 were not built, per instruction. Module 2 was not extracted
+or edited.

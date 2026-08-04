@@ -308,6 +308,22 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .practice-feedback.show { display: block; }
 .practice-feedback .practice-anchor { margin-top: 0.6rem; color: var(--muted); font-style: italic; }
 
+/* Ungraded classify-scenario practice interaction */
+.practice-scenario { background: rgba(255,255,255,0.65); backdrop-filter: blur(10px); border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 0.9rem; }
+.practice-scenario-text { font-size: 0.875rem; line-height: 1.6; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 0.85rem; }
+.practice-choice-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.practice-choice {
+  font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 500;
+  padding: 0.55rem 1rem; border-radius: 980px; border: 0.5px solid var(--border2);
+  background: rgba(255,255,255,0.5); color: var(--text); cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.practice-choice:hover { border-color: var(--muted); }
+.practice-choice:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.practice-choice.selected { background: #262626; color: #fff; border-color: #262626; }
+.practice-choice.selected.is-correct { background: var(--success); border-color: var(--success); }
+.practice-choice.selected.is-incorrect { background: var(--accent2); border-color: var(--accent2); }
+
 /* Concept grid */
 .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
 @media(max-width:600px){ .concept-grid { grid-template-columns: 1fr !important; } }
@@ -2272,7 +2288,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="1" onclick="openModuleById(1)">
         <div class="mr-num mr-active" id="mnum-1">1</div>
-        <div class="mr-info"><div class="mr-title">Module 1 — Role of the Head Spa Tech</div><div class="mr-sub">Scope of practice, limitations, licensing</div></div>
+        <div class="mr-info"><div class="mr-title">Module 1 — Role of the Head Spa Technician</div><div class="mr-sub">Professional role, scope, limitations, and licensing</div></div>
         <span class="mr-badge mb-active" id="mbadge-1">Start</span>
       </div>
       <div class="module-row" data-module-id="2" onclick="openModuleById(2)">
@@ -4056,9 +4072,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 1 · What Is a Head Spa & The Role of the Technician</div>
+      <div class="mh-eyebrow">Module 1 · Role, Scope & Professional Boundaries</div>
       <div class="mh-title">Know what you are.<br>Know what you are not.</div>
-      <div class="mh-desc">The quality of the service doesn't start when your hands touch the scalp. It starts the moment the client walks in.</div>
+      <div class="mh-desc">Professionalism begins before the service does—with how you observe, explain, adapt, and stay within scope.</div>
     </div>
 
     <div class="sec-eyebrow">1.1 — What is a head spa?</div>
@@ -4068,7 +4084,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="scalp-type-grid grid-2col" style="margin:1.25rem 0;">
       <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Cleansing</div><div class="sc-look">The foundation of every service.</div></div>
       <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Exfoliation</div><div class="sc-look">When appropriate — not automatically.</div></div>
-      <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Massage & circulation</div><div class="sc-look">The therapeutic core of the service.</div></div>
+      <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Massage & relaxation</div><div class="sc-look">The sensory core of the service.</div></div>
       <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Water therapy</div><div class="sc-look">Temperature, immersion, sensory shift.</div></div>
       <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Conditioning & treatment</div><div class="sc-look">Product choice driven by what you observe.</div></div>
       <div class="scalp-card"><div class="sc-indicator" style="background:#4d403a;"></div><div class="sc-name">Sensory elements</div><div class="sc-look">Temperature, touch, sound, aromatherapy.</div></div>
@@ -4085,9 +4101,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">You are responsible for the full experience. Not just the steps.</div>
     <div class="body-text">This is where most people underestimate the role. They think: "I just need the steps." That works until something doesn't look the way you expected.</div>
 
+    <div class="body-text">In this course, "head spa technician" describes the role you perform during a head spa service. It is not a separate state license. Your legal scope comes from the license or authorization you already hold, the laws where you practice, and the specific services you perform. AIMT certification documents course completion; it does not expand that legal scope.</div>
+
     <div class="clinical-note">
-      <div class="cn2-label">The mindset that creates weak practitioners</div>
-      <div class="cn2-text">The service should feel effortless to the client. It should not feel effortless to you. Behind the calm, there should be constant observation and decision-making. A strong technician reads the room, adjusts pressure and pacing, recognizes when to simplify, explains without overcomplicating, and maintains control from start to finish.</div>
+      <div class="cn2-label">The work behind the calm</div>
+      <div class="cn2-text">The service should feel effortless to the client. Behind that calm, the practitioner is observing, communicating, adjusting pressure and pacing, protecting scope, recognizing when to simplify or stop, and maintaining control from beginning to end.</div>
     </div>
 
     <hr class="divider">
@@ -4103,9 +4121,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="pc-badge neutral-badge">Say this</div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Buildup</span><span class="pc-val">"I'm seeing some buildup around the follicles — today I'd want to focus on clarifying."</span></div>
-        <div class="pc-row"><span class="pc-label">Flaking</span><span class="pc-val">"There's some flaking and oil at the root. That can sometimes be consistent with dandruff, but I can't diagnose. What I can do is adjust your service today to be more supportive."</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Irritation</span><span class="pc-val">"I'm seeing some irritation here, so I'd keep things gentler today."</span></div>
+        <div class="pc-row"><span class="pc-label">Buildup</span><span class="pc-val">"I'm seeing visible buildup around parts of the scalp. Today I would focus on gentle, thorough cleansing and adjust the service based on how the scalp responds."</span></div>
+        <div class="pc-row"><span class="pc-label">Flaking</span><span class="pc-val">"I'm seeing flaking and oil around the root area. I can describe what is visible and adjust today's cosmetic service, but I can't determine the cause from appearance alone."</span></div>
+        <div class="pc-row"><span class="pc-label">Irritation</span><span class="pc-val">"I'm seeing redness and irritation in this area. I would avoid aggressive exfoliation or stimulation here and explain when medical evaluation would be appropriate."</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Shedding or thinning</span><span class="pc-val">"I can document the shedding or thinning pattern I can see, but I can't determine the cause or diagnose hair loss. Because this is new or concerning to you, a dermatologist or other qualified medical professional is the appropriate next step."</span></div>
       </div>
     </div>
 
@@ -4116,51 +4135,103 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="pc-badge sensitive-badge">Never say</div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Diagnosis</span><span class="pc-val">"This is seborrheic dermatitis." — You are not a dermatologist.</span></div>
-        <div class="pc-row"><span class="pc-label">Diagnosis</span><span class="pc-val">"This is fungal." — You cannot determine this from visual observation.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Diagnosis</span><span class="pc-val">"This is alopecia." — Medical diagnosis. Not your lane.</span></div>
+        <div class="pc-row"><span class="pc-label">Diagnosis</span><span class="pc-val">"This is seborrheic dermatitis." — A visible pattern is not a medical diagnosis.</span></div>
+        <div class="pc-row"><span class="pc-label">Cause</span><span class="pc-val">"This is fungal." — Appearance alone cannot establish the cause.</span></div>
+        <div class="pc-row"><span class="pc-label">Hair loss</span><span class="pc-val">"This is alopecia." — Hair-loss diagnosis requires medical evaluation.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Prescription</span><span class="pc-val">"You should use this medicated or prescription product." — Do not prescribe or direct medical treatment.</span></div>
       </div>
     </div>
 
-    <div class="body-text">That difference protects your credibility. Confidence tends to grow faster than scope if you're not careful. The more experienced you become, the more tempted you'll be to speak with certainty about things you're still only observing. Stay grounded in what you can actually see.</div>
+    <div class="body-text">This distinction protects the client and your credibility. Experience should make your language more precise—not more certain than the evidence allows. Stay grounded in what you can observe, what your license permits, and when referral is the correct next step.</div>
 
     <div class="sec-eyebrow" style="margin-top:1.5rem">When to refer out</div>
-    <div class="body-text">Refer when what you're seeing is severe, persistent, spreading, painful, or not responding to standard care. You are not expected to have all the answers. You are expected to recognize when something is outside your lane — and act on that recognition rather than push through it. Referral is not failure. It is part of doing the job correctly.</div>
+    <div class="body-text">Refer when the concern is new, unexplained, severe, persistent, spreading, painful, bleeding, rapidly changing, or outside cosmetic scope. New or heavy shedding, sudden changes in density, broken or visibly compromised skin, and signs that may indicate infection or significant inflammation require caution and appropriate medical evaluation. You are not expected to determine the diagnosis. You are expected to recognize when a cosmetic service is not the answer and respond professionally.</div>
 
     <hr class="divider">
 
     <div class="sec-eyebrow">1.4 — Scope of practice</div>
-    <div class="sec-title">What you can do. What you cannot. No grey area.</div>
-    <div class="body-text">The mistake is not starting out of scope. The mistake is drifting there over time.</div>
+    <div class="sec-title">What may be permitted. What this course never authorizes.</div>
+    <div class="body-text">Scope is determined by the license or authorization you hold, the laws where you practice, the establishment in which you work, and the specific services and equipment you use. A service that is permitted for one license type or state may be prohibited for another. The mistake is assuming that course certification creates permission it cannot create.</div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon neutral-icon">✓</div>
-        <div><div class="pc-title">Within scope</div></div>
-        <div class="pc-badge neutral-badge">Yours to do</div>
+        <div><div class="pc-title">May fall within scope—verify first</div></div>
+        <div class="pc-badge neutral-badge">License dependent</div>
       </div>
       <div class="pc-body">
         <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cleansing the scalp and hair</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Non-medical product application</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cosmetic product application</span></div>
         <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Massage and manual techniques</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Tool use within licensed scope</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Observation and description</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Non-prescription recommendations</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cosmetic exfoliation</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Use of devices or equipment</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Observation and description of visible findings</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Non-prescription cosmetic product guidance</span></div>
       </div>
     </div>
+
+    <div class="body-text" style="margin-top:-0.75rem">Each item is permitted only when it is allowed by your existing license, state and local rules, establishment requirements, and the manufacturer's directions.</div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon sensitive-icon">✗</div>
-        <div><div class="pc-title">Outside scope</div></div>
-        <div class="pc-badge sensitive-badge">Not yours</div>
+        <div><div class="pc-title">Never authorized by this course</div></div>
+        <div class="pc-badge sensitive-badge">Outside course scope</div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Diagnosing conditions</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Prescribing or recommending prescription products</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Claiming to cure or treat disease</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Performing medical procedures</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Diagnosing a medical condition</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Prescribing or directing prescription treatment</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Claiming to cure, reverse, or treat disease</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Performing a medical procedure</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Presenting scanner, microscopy, or AI output as a medical diagnosis</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Practicing beyond the license or authorization you hold</span></div>
       </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">Practice — ungraded</div>
+    <div class="sec-title">Where is the line?</div>
+    <div class="body-text">Read each statement and decide whether it is professional observation or outside scope.</div>
+
+    <div class="practice-interaction" id="m1LineInteraction">
+      <div class="practice-scenario" id="m1Line1">
+        <div class="practice-scenario-text">"I'm seeing redness in this area. I would avoid aggressive exfoliation here and explain when medical evaluation would be appropriate."</div>
+        <div class="practice-choice-row">
+          <button type="button" class="practice-choice" data-choice="observation" onclick="selectM1Line('m1Line1','observation')" aria-pressed="false">Professional observation</button>
+          <button type="button" class="practice-choice" data-choice="outside" onclick="selectM1Line('m1Line1','outside')" aria-pressed="false">Outside scope</button>
+        </div>
+        <div class="practice-feedback" id="m1Line1Feedback" aria-live="polite"></div>
+      </div>
+
+      <div class="practice-scenario" id="m1Line2">
+        <div class="practice-scenario-text">"This is seborrheic dermatitis. You should use a medicated shampoo twice a week."</div>
+        <div class="practice-choice-row">
+          <button type="button" class="practice-choice" data-choice="observation" onclick="selectM1Line('m1Line2','observation')" aria-pressed="false">Professional observation</button>
+          <button type="button" class="practice-choice" data-choice="outside" onclick="selectM1Line('m1Line2','outside')" aria-pressed="false">Outside scope</button>
+        </div>
+        <div class="practice-feedback" id="m1Line2Feedback" aria-live="polite"></div>
+      </div>
+
+      <div class="practice-scenario" id="m1Line3">
+        <div class="practice-scenario-text">"I can document the flaking I see, adjust today's service, and explain that appearance alone cannot determine the cause."</div>
+        <div class="practice-choice-row">
+          <button type="button" class="practice-choice" data-choice="observation" onclick="selectM1Line('m1Line3','observation')" aria-pressed="false">Professional observation</button>
+          <button type="button" class="practice-choice" data-choice="outside" onclick="selectM1Line('m1Line3','outside')" aria-pressed="false">Outside scope</button>
+        </div>
+        <div class="practice-feedback" id="m1Line3Feedback" aria-live="polite"></div>
+      </div>
+
+      <div class="practice-scenario" id="m1Line4">
+        <div class="practice-scenario-text">"Your follicles are clogged, and that is why your hair is thinning."</div>
+        <div class="practice-choice-row">
+          <button type="button" class="practice-choice" data-choice="observation" onclick="selectM1Line('m1Line4','observation')" aria-pressed="false">Professional observation</button>
+          <button type="button" class="practice-choice" data-choice="outside" onclick="selectM1Line('m1Line4','outside')" aria-pressed="false">Outside scope</button>
+        </div>
+        <div class="practice-feedback" id="m1Line4Feedback" aria-live="polite"></div>
+      </div>
+
+      <div class="practice-feedback" id="m1LineComplete" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
@@ -4174,10 +4245,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div><div class="pc-title">What a head spa can support</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Improved scalp cleanliness and reduced buildup</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Moisture balance support</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Improved comfort and relaxation</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">A healthier environment that supports hair growth</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Improved cosmetic cleansing and removal of buildup when appropriate</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cosmetic hydration and conditioning</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Scalp comfort and relaxation</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">A cleaner, more comfortable scalp environment</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">A consistent routine of professional cosmetic scalp care</span></div>
       </div>
     </div>
 
@@ -4187,33 +4259,36 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div><div class="pc-title">What a head spa cannot do</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Treat disease</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Diagnose or treat disease</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Determine the cause of shedding or thinning</span></div>
         <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Reverse genetic hair loss</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cure dandruff or dermatitis</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Regrow hair on its own</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Cure dandruff, dermatitis, infection, or inflammation</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Regrow hair on its own</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Replace evaluation or treatment by a qualified medical professional</span></div>
       </div>
     </div>
 
     <div class="key-point">
       <div class="kp-icon">→</div>
-      <div class="kp-text">If you position it incorrectly, you will attract the wrong expectations. Use language like this instead: "This can help support a healthier scalp environment." "This works best as part of a larger approach." You are not selling a miracle. You are providing a professional service with real, but specific, benefits.</div>
+      <div class="kp-text">Position the service accurately. Language such as "This service can support cosmetic scalp cleansing, comfort, and conditioning" is responsible. Language that promises treatment, diagnosis, or hair regrowth is not. The service can provide meaningful cosmetic and relaxation benefits without being presented as a medical solution.</div>
     </div>
 
     <hr class="divider">
 
     <div class="sec-eyebrow">1.6 — Licensing</div>
     <div class="sec-title">Before offering this service, know your local requirements.</div>
-    <div class="body-text">That includes licensing requirements, sanitation standards, disinfection protocols, and equipment and water system rules. This course gives best practices. It does not override your legal responsibilities. Scope varies by license type and state — verify what applies to you before you begin offering services.</div>
+    <div class="body-text">Before offering a head spa service, verify what your existing license or authorization permits in the state and location where you practice. Review rules for cleansing and shampooing, scalp and body massage, exfoliation, cosmetic product application, devices, water systems, sanitation, establishment licensing, and the body areas you may legally treat.</div>
+    <div class="body-text">Do not assume every head spa service is permitted under every beauty license. The exact combination of services matters. This course provides professional education and best practices; it does not override law, create a license, or expand your legal scope.</div>
 
     <hr class="divider">
 
     <div class="sec-eyebrow">1.7 — Practitioner insight</div>
     <div class="sec-title">Most clients don't actually know what a head spa is.</div>
-    <div class="body-text">They're coming in because it looks relaxing, it was recommended, or they're simply curious. You are shaping their understanding in real time. If you position yourself as someone who fixes conditions, they will expect results you cannot control. If you position yourself as someone who understands the scalp, works within scope, and customizes the service — they will trust you.</div>
+    <div class="body-text">Most clients arrive because the service looks relaxing, someone recommended it, or they are curious about their scalp. You are shaping their expectations in real time. If you position yourself as someone who diagnoses or fixes medical conditions, clients will expect results you cannot responsibly promise. If you position yourself as someone who observes carefully, works within scope, customizes the cosmetic service, and refers appropriately, you build trust without overclaiming.</div>
 
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"Your language trains your client. The fastest way to lose credibility is to sound like you're guessing while trying to sound confident. Clients don't need you to know everything. They need you to sound grounded in what you do know. That is a very different standard — and a much more achievable one."</div>
+      <div class="cn-text">"Your language teaches the client what this service is. They do not need certainty you cannot support. They need clear observation, responsible expectations, and confidence that you will know when to proceed, when to adjust, and when to refer."</div>
     </div>
 
     <hr class="divider">
@@ -4221,7 +4296,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">1.8 — Mistakes new practitioners make</div>
     <div class="sec-title">Five patterns. All avoidable.</div>
 
-    <div class="info-card"><div class="ic-title">Blurring observation with diagnosis</div><div class="body-text" style="margin:0">The most common and most dangerous mistake. Recognizing patterns is part of your role. Diagnosing is not. The line is clear — stay on your side of it.</div></div>
+    <div class="info-card"><div class="ic-title">Blurring observation with diagnosis</div><div class="body-text" style="margin:0">One of the most consequential mistakes is turning a visible finding into a medical conclusion. Recognizing patterns can inform your cosmetic service. Diagnosis does not belong to this role. Know the rules that apply to your license and keep your language on the correct side of that boundary.</div></div>
     <div class="info-card"><div class="ic-title">Overpromising results</div><div class="body-text" style="margin:0">Making the service sound more powerful than it is may help you sell it once. It will hurt you long term when expectations aren't met.</div></div>
     <div class="info-card"><div class="ic-title">Thinking the role is just hands-on</div><div class="body-text" style="margin:0">If you think your job is to perform the service, you will miss the consultation, education, and decision-making that actually define it.</div></div>
     <div class="info-card"><div class="ic-title">Copying what you see online without thinking long-term</div><div class="body-text" style="margin:0">Most people speaking outside their scope online are not thinking about consequences. Don't build your professional standards on what looks good in a reel.</div></div>
@@ -4232,46 +4307,47 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="checkpoint" id="m1cp1">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Check your understanding</div>
+        <div class="cp-label">Apply the boundary</div>
       </div>
-      <div class="cp-q">A client sits down and says her hair has been shedding heavily for two months. She's convinced she has alopecia and wants you to tell her if that's what you see. How do you handle this moment — what do you say, and what don't you say?</div>
+      <div class="cp-q">A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m1cp1In" placeholder="Walk me through exactly how you'd handle this..." rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m1cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m1cp1In" placeholder="Write the response you would give the client, then explain the next step…" rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m1cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m1cp1Btn" onclick="submitM1CP('m1cp1')">
+        <button class="cp-btn" id="m1cp1Btn" onclick="submitM1CP('m1cp1')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m1cp1Res"></div>
+      <div class="cp-res" id="m1cp1Res" aria-live="polite"></div>
     </div>
 
     <div class="checkpoint" id="m1cp2">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Final check</div>
+        <div class="cp-label">Demonstrate the role</div>
       </div>
-      <div class="cp-q">In your own words — what is the difference between a head spa technician and someone who just knows how to do the steps? And why does that difference matter to a client?</div>
+      <div class="cp-q">Explain the difference between a head spa technician and someone who only knows the service steps. Give one specific example of how that difference changes the client's experience, safety, or trust.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m1cp2In" placeholder="Think about what the client actually experiences..." rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m1cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m1cp2In" placeholder="Explain the difference and give one real service example…" rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp2')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m1cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m1cp2Btn" onclick="submitM1CP('m1cp2')">
+        <button class="cp-btn" id="m1cp2Btn" onclick="submitM1CP('m1cp2')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m1cp2Res"></div>
+      <div class="cp-res" id="m1cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m1Complete" style="display:none;">
       <div class="lc-gold">✦</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-sub">You understand the role, the scope, and the language that keeps you professional and protected.</div>
+      <div class="lc-next-label">Module 1 complete</div>
+      <div class="lc-title">Professional boundaries demonstrated.</div>
+      <div class="lc-sub">You demonstrated observation-first language, scope and referral judgment, and an understanding of the technician's responsibility for the complete client experience.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 2</div>
-        <div class="lc-next-text">Scope is the foundation. Now we build the experience on top of it. Module 2 is where the service actually begins — before you touch the scalp, before the water runs. The intake, the first contact, the tea ritual. The things clients remember most.</div>
+        <div class="lc-next-text">With the professional boundary established, Module 2 moves into the client experience before the scalp service begins: intake, first contact, communication, and the opening moments that establish trust.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(2)">Start Module 2 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -5867,7 +5943,7 @@ const CADENCE_SELECTIVE_MEMORY_INSTRUCTION = 'Reference prior student patterns o
 
 const MODULE_TITLES = {
   0: 'Welcome Module',
-  1: 'Module 1 — Role of the Head Spa Tech',
+  1: 'Module 1 — Role of the Head Spa Technician',
   2: 'Module 2 — Welcoming Your Client',
   3: 'Module 3 — Hair & Scalp Anatomy',
   4: 'Module 4 — Microscopy & Scalp Assessment',
@@ -6368,11 +6444,37 @@ const M0 = {
 
 // ── MODULE 1 ──
 const M1 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m1cp1 / m1cp2 in module1Wrap.
   questions: {
-    m1cp1: 'A client says her hair has been shedding heavily for two months and wants you to tell her if she has alopecia. How do you handle this moment?',
-    m1cp2: 'What is the difference between a head spa technician and someone who just knows how to do the steps?'
+    m1cp1: 'A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.',
+    m1cp2: 'Explain the difference between a head spa technician and someone who only knows the service steps. Give one specific example of how that difference changes the client\'s experience, safety, or trust.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 1 checkpoint. Question: "' + q + '". Key concepts: Observation vs diagnosis — describe what you see, never name a medical condition. Safe language: "I\'m seeing..." not "This is...". Scope includes cleansing, non-medical products, massage, observation. Scope excludes diagnosing, prescribing, claiming to cure. A great technician guides the full experience. Referral is professionalism. Respond to what they wrote specifically. 3-5 sentences, direct and warm, no bullet points.'
+  // Module-1-specific evaluator configuration (one rubric per checkpoint),
+  // combined with the shared tone/format rules inside evaluateCheckpointAnswer().
+  systems: {
+    m1cp1: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 1 competency: responding to a hair-loss concern without diagnosing, and directing the client to an appropriate professional next step.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. The response does not confirm, deny, or name alopecia (or any other condition) as the client\'s diagnosis.\n' +
+      '2. The response uses observation-based language, or clearly explains that the practitioner can only describe what is visible.\n' +
+      '3. The response does not claim that a head spa service can diagnose, treat, reverse, or regrow hair.\n' +
+      '4. The response recommends evaluation by a dermatologist or another appropriately qualified medical professional, because the shedding described is heavy, persistent, and concerning.\n' +
+      '5. The response is written in a way that could reasonably be said to a real client.\n\n' +
+      'The student does not need to use the exact words "dermatologist" or "diagnosis" if the same professional meaning is clearly demonstrated. Do not fail for grammar, spelling, informal wording, concise wording, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that diagnoses alopecia or another condition, attributes the shedding to a specific medical cause, prescribes medicated or prescription treatment, promises that a head spa service will stop shedding or regrow hair, or advises the client to ignore or delay appropriate medical evaluation.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if diagnosis is avoided but no next step is given, ask who should evaluate persistent heavy shedding. If referral is recommended but diagnostic language is used, ask for the client-facing sentence to be rewritten using observation language. If the language is safe but implies the service can treat the cause, correct the claim and ask for the service limitation to be restated.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard.\n\n' +
+      'Do not grade the student\'s personal confidence, career stage, or background.',
+    m1cp2: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 1 competency: understanding that a head spa technician leads the complete service through judgment, communication, observation, adaptation, scope protection, and client care — not merely physical sequence execution.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. A meaningful distinction between leading the complete client experience and simply following steps.\n' +
+      '2. At least one practitioner responsibility beyond physical technique — for example observation, communication, pacing, adaptation, comfort, scope, safety, or referral.\n' +
+      '3. One specific example of how that difference affects the client\'s experience, safety, or trust.\n\n' +
+      'The student does not need to list every responsibility a technician holds — one clear, specific example is enough. Do not fail for grammar, spelling, informal wording, concise wording, or non-native English when the concept is correct.\n\n' +
+      'If one part is missing, ask only for that part — do not repeat the entire prompt. For example: if the distinction is clear but no example is given, ask for one moment in a real service where leadership changes the outcome. If an example is given but the underlying distinction is missing, ask what the practitioner is deciding or observing beyond the sequence. If the answer is generic (for example, "one is more professional"), ask what the professional is actually doing differently.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard.\n\n' +
+      'Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 2 ──
@@ -6461,7 +6563,7 @@ const M10 = {
 
 const MODULE_GUIDE_SYSTEMS = {
   0: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance was built from the instructor\'s nearly two decades of hands-on experience across cosmetology, esthetics, client experience, service design, and scalp-focused care.\n\nThe student is in Module 0: Course Orientation. This module establishes the course philosophy, the difference between performing and leading a service, how to use the program, and the professional scope framing that governs the curriculum.\n\nRespond directly to the student\'s actual question. Reference their background only when it materially improves the answer, and connect it only to head spa services, scalp wellness, client experience, professional practice, or the business of building a head spa service. Do not diagnose, prescribe, or imply that the course expands legal scope.\n\nKeep responses concise, warm, direct, and professional. Avoid generic praise, excessive enthusiasm, therapist-like language, or invented personal details. Usually respond in 3–5 sentences without bullet points unless the student explicitly asks for a list.',
-  1: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 1 (Role of the Head Spa Tech): scope of practice, observing vs diagnosing, safe client language, licensing variation, and when to refer. If the student has industry experience, connect scope boundaries to head spa specifically — a hairstylist understands client trust and scalp proximity, an esthetician understands skin barrier and sensitivity. All connections must lead back to head spa and scalp wellness — never to other service categories. 3-5 sentences. No bullet points.',
+  1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 1: the role of the head spa technician, observation versus diagnosis, safe client language, realistic service limitations, licensing variation, and referral judgment. Respond directly to the student\'s actual question using only the course\'s professional and cosmetic scope. Do not diagnose, prescribe, interpret visible findings as medical fact, or imply that AIMT certification expands legal scope. When laws or license permissions are involved, tell the student to verify the rules that apply to their license and jurisdiction. Use 3–5 concise sentences and no bullet points.',
   2: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 2 (Welcoming Your Client): intake, spa attire prep, tea ritual, aromatherapy with first intentional touch, tone-setting. The beginning shapes everything. If the student has a service background, connect this to how the head spa arrival sequence differs from and elevates what they already know — always in the context of scalp wellness and head spa. 3-5 sentences. No bullet points.',
   3: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 3 (Hair & Scalp Anatomy): scalp layers, follicle structure, hair growth phases, telogen effluvium, postpartum hair loss, hydrolipid film, circulation. The visible shaft is not alive — the follicle is where health matters. If the student has cosmetology or esthetics training, build on what they know and connect it directly to scalp health and head spa practice. 3-5 sentences. No bullet points.',
   4: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 4 (Microscopy & Scalp Assessment): microscopy as observation, five assessment regions, dry scalp vs dandruff, when not to treat. If they come from a licensed background, connect their existing pattern-recognition skills to scalp assessment for head spa. All roads lead back to serving the scalp. 3-5 sentences. No bullet points.',
@@ -6476,7 +6578,7 @@ const MODULE_GUIDE_SYSTEMS = {
 
 const MODULE_QUICK_PROMPTS = {
   0: ['How should I use Cadence during the course?', 'What makes a service feel led rather than performed?', 'What does this certification represent?'],
-  1: ['How do I talk about scope with a client?', 'When exactly should I refer out?', 'What language should I use vs avoid?'],
+  1: ['How do I describe what I see without diagnosing?', 'When should I pause or refer a client?', 'How do I verify whether a service is within my license?'],
   2: ['Why does the tea ritual matter?', 'How does the first touch work?', 'What if a client skips the intake?'],
   3: ['What is the hydrolipid film?', 'How do I explain shedding to a worried client?', 'What does massage actually do physiologically?'],
   4: ['What does healthy look like under microscopy?', 'How do I talk about what I see without diagnosing?', 'When should I stop and refer?'],
@@ -6715,7 +6817,7 @@ function openModuleById(id, options = {}) {
   setTimeout(() => {
     const greetings = {
       0: 'The Welcome Module establishes how this course works and the standard behind it. Start with the difference between performing a sequence and leading the complete experience; that distinction will return throughout the program.',
-      1: 'Module 1 is the professional foundation. The scope section especially — read it slowly. The practitioners who skip past it are the ones who end up speaking with more certainty than they have earned.',
+      1: 'Module 1 establishes the professional boundary for everything that follows. Read the scope and client-language sections carefully. Strong practitioners do not sound more certain than the evidence or their license allows.',
       2: 'Module 2 is some of my favorite material to teach because the details here are what clients actually remember. The beginning of a service shapes everything that follows.',
       3: 'Good to see you in Module 3 — this is where things start clicking. The biology is not just background knowledge, it is the reason every decision at the treatment bed makes sense.',
       4: 'Module 4 is where your eye starts to develop. Microscopy sounds technical but the skill is really about slowing down and actually looking. Ask me anything as you move through it.',
@@ -6914,9 +7016,48 @@ function selectM0Practice(choice) {
   feedback.classList.add('show');
 }
 
+// "Where is the line?" — ungraded practice interaction (Module 1).
+// Does not touch APP_STATE, progress, checkpoints, or completion.
+const M1_LINE_ANSWERS = {
+  m1Line1: { correct: 'observation', feedback: 'This describes what is visible, adjusts the cosmetic service, and recognizes when referral may be appropriate without naming a condition.' },
+  m1Line2: { correct: 'outside', feedback: 'This names a diagnosis and directs treatment. A head spa technician may describe visible findings and recommend medical evaluation, but should not diagnose or prescribe.' },
+  m1Line3: { correct: 'observation', feedback: 'This keeps the practitioner grounded in observation and service adjustment without presenting a medical conclusion.' },
+  m1Line4: { correct: 'outside', feedback: 'This presents an unverified cause as fact. The practitioner may document visible buildup or thinning, but cannot determine the medical cause from appearance alone.' }
+};
+let _m1LineAnswered = {};
+function selectM1Line(scenarioId, choice) {
+  const scenario = getActiveElementById(scenarioId);
+  const feedback = getActiveElementById(scenarioId + 'Feedback');
+  const answer = M1_LINE_ANSWERS[scenarioId];
+  if (!scenario || !feedback || !answer) return;
+
+  const isCorrect = choice === answer.correct;
+  scenario.querySelectorAll('.practice-choice').forEach((btn) => {
+    const btnChoice = btn.dataset.choice;
+    const isSelected = btnChoice === choice;
+    btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    btn.classList.toggle('selected', isSelected);
+    btn.classList.toggle('is-correct', isSelected && isCorrect);
+    btn.classList.toggle('is-incorrect', isSelected && !isCorrect);
+  });
+
+  feedback.innerHTML = '<p><strong>' + (isCorrect ? 'Correct.' : 'Not quite.') + '</strong> ' + answer.feedback + '</p>';
+  feedback.classList.add('show');
+
+  _m1LineAnswered[scenarioId] = true;
+  if (Object.keys(_m1LineAnswered).length === 4) {
+    const complete = getActiveElementById('m1LineComplete');
+    if (complete) {
+      complete.innerHTML = '<p>Good professional language is specific about what is visible and restrained about what it cannot establish.</p>';
+      complete.classList.add('show');
+    }
+  }
+}
+
 // ── MODULE 1 ──
 function submitM1CP(id) {
-  submitCheckpoint(1, id, M1.system, M1.questions[id]);
+  submitCheckpoint(1, id, M1.systems[id], M1.questions[id],
+    'Cadence couldn’t evaluate your response. Check your connection and try again.');
 }
 function m1cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM1CP(id); }

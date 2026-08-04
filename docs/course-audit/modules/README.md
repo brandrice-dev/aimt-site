@@ -56,7 +56,7 @@ first-pass content assessment.
 | Guided completion structure | Recorded in `module-00.md` — position: first, precedes Module 1 and the Module 12 Final Exam |
 | **Status** | **Implemented — awaiting manual QA** |
 
-## Module 1 — Role of the Head Spa Tech
+## Module 1 — Role of the Head Spa Technician
 
 | Field | Value |
 |---|---|
@@ -68,7 +68,7 @@ first-pass content assessment.
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-01.md` — position: foundation block, immediately after the Welcome Module |
 | Listen Mode notes | Recorded in `module-01.md` — narration approved as a strong candidate, ~8–10 minutes |
-| **Status** | **Approved — awaiting implementation** |
+| **Status** | **Implemented — awaiting manual QA** |
 
 Modules 2–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
