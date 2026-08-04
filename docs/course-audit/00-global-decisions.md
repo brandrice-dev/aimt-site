@@ -122,6 +122,98 @@ phase and is **not** part of this task.
 
 ---
 
+## Welcome Module naming
+
+The technical module with ID `0` must be presented to students as:
+
+**Welcome Module**
+
+Student-facing copy must not display "Module 0." This applies to titles,
+eyebrows, dashboard subtitles, home-screen labels, completion copy, Cadence
+references, and any other student-visible surface tied to module `0`.
+
+**Preserve all existing technical identifiers**, including:
+
+- Module ID `0`
+- `module0Wrap`
+- `M0`
+- `m0cp1`
+- Progress keys
+- Function names
+- State identifiers
+
+The next instructional module remains student-facing **Module 1**. Do not
+renumber technical modules — this is a display-label change only, applied
+the same way as the course-name rename above (see "Course name").
+
+---
+
+## Course sequence & Final exam (Module 12)
+
+The approved student-facing course sequence is:
+
+- **Welcome Module** (technical module `0`)
+- **Modules 1–11** — instructional curriculum
+- **Module 12 — Final Exam**
+
+Module 12 will require the student to demonstrate course-wide competency
+before certification is issued.
+
+This is a structural decision only. It does **not** authorize designing the
+exam, changing certificate logic, adding a new production module, or
+renumbering technical module IDs. The exact technical implementation
+(whether Module 12 is a new technical module, how it maps to existing
+Module 11 and the certificate flow, etc.) will be determined after the
+existing Module 11 and certificate flow are audited.
+
+Guided Completion Path pacing (below) must lead toward completion of the
+Module 12 Final Exam, not merely completion of the instructional modules.
+
+---
+
+## Guided Completion Path
+
+The course remains flexible and self-paced. In addition, it will include an
+**optional Guided Completion Path** to improve follow-through and practical
+application, leading toward completion of the Module 12 Final Exam (see
+"Course sequence & Final exam" above) — not merely completion of the
+instructional modules.
+
+The final recommended course duration is **not yet decided**. That decision
+is deferred until all modules are audited and their actual workload
+(learning time + hands-on/application time) is known.
+
+### Required fields for every future module audit
+
+From this point forward, every module audit (`module-XX.md`) must document:
+
+- Estimated learning time
+- Estimated hands-on or application time
+- Competency demonstrated
+- Suggested practice or application task
+- Earlier concepts that should be revisited
+- Suggested position in the Guided Completion Path
+
+### The eventual Guided Completion Path may include
+
+- Suggested weekly pacing
+- A student-selected target completion date
+- A clear "this week" view
+- Spaced review prompts
+- Gentle stalled-progress reminders
+- Visible progress toward certification
+
+### It must not include
+
+- Punitive deadlines
+- Lost progress
+- Anxiety-based streaks
+- XP or arbitrary points
+- Manufactured urgency
+- Certification credit for merely opening content
+
+---
+
 ## Scope reminders (from `CLAUDE.md`, restated for this audit)
 
 - No entitlement/auth/payment/Supabase/progress-locking/certificate-logic

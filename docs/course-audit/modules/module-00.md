@@ -11,6 +11,28 @@ This document is the approved implementation specification for Module 0. It does
 
 ---
 
+## Amendment — Welcome Module naming
+
+**Approved decision (supersedes conflicting display text below):** the
+technical module with ID `0` must be presented to students as **Welcome
+Module**. Student-facing copy must not display "Module 0" — this
+supersedes any "Module 0 — Course Orientation" / "Module 0 · Course
+Orientation" display text elsewhere in this document (see "Module identity"
+under Final replacement copy, and the "Approved module title" field above).
+Where this document says the student-facing title or eyebrow should read
+"Module 0 — Course Orientation" or "Module 0 · Course Orientation," the
+approved student-facing text is now **Welcome Module** instead.
+
+All technical identifiers named throughout this document are preserved
+exactly as specified: module ID `0`, `module0Wrap`, `M0`, `m0cp1`, progress
+keys, function names, and state identifiers. This is a display-label change
+only. The next instructional module remains student-facing **Module 1**;
+technical modules are not renumbered.
+
+Full rationale: [`../00-global-decisions.md`](../00-global-decisions.md#welcome-module-naming).
+
+---
+
 ## Approved outcomes
 
 By the end of Module 0, the student should be able to:
@@ -743,6 +765,39 @@ Module 0 is approved only when all of the following are true.
 - No duplicate element IDs are introduced.
 - No new console errors appear.
 - No unrelated module copy, checkpoint prompt, or styling is changed.
+
+---
+
+## Guided completion structure
+
+The Welcome Module will eventually introduce the optional Guided
+Completion Path (see
+[`../00-global-decisions.md`](../00-global-decisions.md#guided-completion-path)).
+The exact pace options and wording are **deferred** until all module
+workloads have been audited — this document does not authorize building any
+Guided Completion Path UI or logic yet.
+
+Guided Completion Path fields for the Welcome Module itself (recorded here
+per the same requirement now placed on every module audit; see
+`modules/README.md`):
+
+- **Estimated learning time:** not yet determined — deferred pending full
+  workload audit.
+- **Estimated hands-on or application time:** not yet determined — the
+  Welcome Module is orientation-only and is not expected to carry hands-on
+  time, but this is confirmed only after the full audit.
+- **Competency demonstrated:** the student can explain the difference
+  between following a service sequence and leading the complete client
+  experience (see "Approved outcomes" and "Checkpoint specification"
+  above).
+- **Suggested practice or application task:** none beyond the approved
+  "Same steps. Different service." interaction and the required checkpoint
+  — the Welcome Module is orientation, not a hands-on module.
+- **Earlier concepts that should be revisited:** none — this is the first
+  module in the sequence.
+- **Suggested position in the Guided Completion Path:** first — precedes
+  Module 1 and every instructional module, and precedes the Module 12 Final
+  Exam that all pacing leads toward.
 
 ---
 
