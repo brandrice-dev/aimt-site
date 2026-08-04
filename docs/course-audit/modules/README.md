@@ -14,7 +14,7 @@ for the decisions every module spec must be checked against.
 | Wrapper ID | `module0Wrap` |
 | Checkpoint IDs | `m0cp1` |
 | Current completion requirement | Single checkpoint `m0cp1` must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Awaiting external audit** |
+| **Status** | **Approved — awaiting implementation** |
 
 Modules 1–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes.

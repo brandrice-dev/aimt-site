@@ -24,3 +24,19 @@ other production code are untouched. Work was done on branch
 
 Modules 1–11 were not touched. `module-00.md` (the approved-spec file) was
 created with empty headings only, pending external audit.
+
+---
+
+## 2026-08-03 — Step 3: Approved Module 0 specification added
+
+The externally-reviewed approved specification was placed into
+`docs/course-audit/modules/module-00.md`, populating all nine required
+sections (Approved outcomes, Keep unchanged, Required corrections, Final
+replacement copy, Checkpoint specification, Approved interactions, Cadence
+behavior, Acceptance criteria, Implementation notes). `modules/README.md`
+was updated to reflect Module 0 status as **Approved — awaiting
+implementation**.
+
+This was a documentation update only — the specification authorizes future
+implementation but nothing was implemented. No production files were
+modified. Work remains on branch `course-audit-build`.
