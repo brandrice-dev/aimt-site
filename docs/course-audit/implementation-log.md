@@ -170,3 +170,89 @@ were not modified.
 Module 12 Final Exam was not added. The Welcome Module rename was not
 implemented. Module 1 was not extracted. Certificate backend logic was not
 modified.
+
+---
+
+## 2026-08-04 — Step 6: Fix — review mode broke authenticated preview access
+
+**Bug report:** an authenticated, entitled user on the branch-preview host
+signed in, entered the course, then added `?review=1` to the exact
+course-page URL and reloaded — and was routed to the purchase/landing page
+instead of staying in the course.
+
+**Root cause (confirmed, not caused by Review Mode's own access/persistence
+logic):** `shouldEnterPurchasedCourse()` (`headspa-mastery.html`, course
+entry gate) requires one of two "admission triggers" on *every* page load,
+checked before it ever looks at the Supabase session: a one-time
+`sessionStorage` handoff flag set by `student-access.html` — deleted the
+instant `consumeAccessFlowHandoff()` reads it — or an explicit `?enter=1`
+query param. On successful entry, `history.replaceState(...,
+window.location.pathname)` strips all query params (including `enter=1`)
+from the visible URL. So by the time the user manually added `?review=1`
+and reloaded, both admission triggers were already gone (handoff consumed,
+`enter=1` stripped) — `shouldEnterPurchasedCourse()` returned `false` before
+ever checking auth or entitlement, and `showApp()` fell through to the
+landing page. This isn't a hard redirect (the URL keeps `?review=1`); it's
+the landing/purchase view being shown in place. This would happen with any
+manually-added query param on a reload, not something specific to
+`review=1` — Review Mode's own code (`canAccessModule`, `save()` guard,
+etc.) never even got a chance to run, because the user never got past this
+pre-existing one-time entry gate.
+
+Also investigated and ruled out per the debugging checklist: the
+`workers.dev` hostname question (the only `workers.dev` host in this repo
+is the unrelated Cadence AI proxy, `headspa-proxy.brandrice.workers.dev`;
+there is no `workers.dev` page hosting, and the real Cloudflare Pages
+branch-preview hostname format, `<branch>.aimt-site.pages.dev`, was already
+matched correctly by `ReviewMode`'s existing hostname regex); and whether
+auth/session state is domain/path/reload-dependent (it isn't — the Supabase
+session itself persists fine across reloads; only the separate one-time
+entry-trigger gate was the problem).
+
+**Fix (smallest possible — one function, one file):**
+`headspa-mastery.html`, `shouldEnterPurchasedCourse()` — added
+`window.ReviewMode.isActive()` as a third admission trigger alongside the
+existing `enter=1` and handoff-flag checks:
+
+```js
+const requestedPurchasedEntry = params.get('enter') === '1' ||
+  !!(window.ReviewMode && window.ReviewMode.isActive());
+```
+
+This is safe because: `ReviewMode.init()` (in `headspa-state.js`) always
+runs synchronously at script-parse time, before `shouldEnterPurchasedCourse()`
+is ever called (from `showApp()`, on `DOMContentLoaded`), so `isActive()` is
+reliably resolved first. `ReviewMode.isActive()` is hard-blocked on every
+production hostname (verified in Step 5's hostname matrix), so on
+production this change is a no-op — `requestedPurchasedEntry` computes
+identically to before. It adds an admission *trigger*, not an entitlement
+*bypass* — the real `supabaseClient.auth.getSession()` and
+`hasHeadSpaEntitlement()` checks immediately below still run unchanged and
+still gate final entry. No hostname allowlist was touched.
+
+**Testing performed** (local static server, mocking Supabase since no real
+test credentials are available in this environment — `supabaseClient` is a
+top-level `const` so its `auth.getSession` method was patched in place
+rather than the binding replaced, to test the real, unmodified
+`shouldEnterPurchasedCourse()` function directly):
+- Isolated gate-logic comparison under the exact reported repro URL (bare
+  `?review=1`, no `enter=1`, handoff already consumed): old logic — gate
+  fails (reproduces the bug); fixed logic — gate passes.
+- Full function call, same repro URL, mocked authenticated + entitled
+  session: `shouldEnterPurchasedCourse()` now returns `true`,
+  `setSignedInStudent()` is called, no blocked-access event is logged — the
+  user is correctly let into the course.
+- Same repro URL, mocked authenticated but **not entitled** session:
+  `shouldEnterPurchasedCourse()` still returns `false`,
+  `setSignedInStudent()` is **not** called, and
+  `headspa_blocked_access_no_entitlement` is still logged — confirms
+  entitlement is still fully enforced, not bypassed.
+- Normal load with zero triggers (no `review`, `enter`, handoff, or active
+  Review Mode) and an entitled user: still correctly returns `false` —
+  confirms no regression to the pre-existing, intentional default-denied
+  behavior for ordinary page loads.
+- No console errors introduced.
+
+Progress-isolation and certificate protections (Step 5) were not touched
+and remain unchanged. No curriculum, no new features, no hostname allowlist
+changes.

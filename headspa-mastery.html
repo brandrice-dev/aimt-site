@@ -7324,14 +7324,18 @@ function showStudentSignInEntry() {
 }
 
 async function shouldEnterPurchasedCourse() {
-  // Two admission paths, both required to pass the entitlement check below: the
-  // sessionStorage handoff flag set by student-access.html, OR an explicit
-  // ?enter=1 (e.g. the My AIMT dashboard's Continue link). Do not make either
-  // path the sole gate — that regresses to blocking valid, entitled sessions.
+  // Three admission paths, all required to pass the entitlement check below: the
+  // sessionStorage handoff flag set by student-access.html, an explicit
+  // ?enter=1 (e.g. the My AIMT dashboard's Continue link), or an active Course
+  // Review Mode session (?review=1 on an eligible non-production host — see
+  // ReviewMode in headspa-state.js, which is hard-blocked on production, so
+  // this is a no-op there). Do not make any path the sole gate — that
+  // regresses to blocking valid, entitled sessions.
   const hadAccessFlowHandoff = consumeAccessFlowHandoff();
 
   const params = new URLSearchParams(window.location.search);
-  const requestedPurchasedEntry = params.get('enter') === '1';
+  const requestedPurchasedEntry = params.get('enter') === '1' ||
+    !!(window.ReviewMode && window.ReviewMode.isActive());
   if (!hadAccessFlowHandoff && !requestedPurchasedEntry) return false;
   if (!supabaseClient) return false;
 
