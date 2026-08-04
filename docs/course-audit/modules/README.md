@@ -66,9 +66,9 @@ first-pass content assessment.
 | Wrapper ID | `module1Wrap` |
 | Checkpoint IDs | `m1cp1`, `m1cp2` |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| Guided completion structure | Recorded in `module-01-source.md` §7 (extraction only — not yet an approved spec) |
-| Listen Mode notes | Recorded in `module-01-source.md` §8 (extraction only — not yet an approved spec) |
-| **Status** | **Awaiting external audit** |
+| Guided completion structure | Recorded in `module-01.md` — position: foundation block, immediately after the Welcome Module |
+| Listen Mode notes | Recorded in `module-01.md` — narration approved as a strong candidate, ~8–10 minutes |
+| **Status** | **Approved — awaiting implementation** |
 
 Modules 2–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

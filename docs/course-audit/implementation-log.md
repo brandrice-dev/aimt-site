@@ -417,3 +417,27 @@ being well-suited to one.
 
 Work remains on branch `course-audit-build`. Module 1 was not implemented
 or edited — only extracted.
+
+---
+
+## 2026-08-04 — Step 9: Approved Module 1 specification added
+
+The externally-reviewed approved specification was placed into
+`docs/course-audit/modules/module-01.md`, populating all eleven required
+sections (Approved outcomes, Keep unchanged, Required corrections, Final
+replacement copy, Checkpoint specification, Approved interactions,
+Cadence behavior, Acceptance criteria, Guided completion structure,
+Listen Mode notes, Implementation notes). Notable approved corrections:
+aligning the displayed and evaluated checkpoint questions (currently
+mismatched — see the Module 1 extraction), reframing "within scope" from
+universal claims to license-dependent language, removing hair-growth and
+circulation outcome claims, tightening the flaking script and referral
+guidance, adding an ungraded "Where is the line?" practice interaction
+between sections 1.4 and 1.5, and the same course-name/Cadence-identity/
+accessibility corrections already applied to the Welcome Module.
+`modules/README.md` was updated to reflect Module 1 status as **Approved
+— awaiting implementation**.
+
+This was a documentation update only — the specification authorizes
+future implementation but nothing was implemented. No production files
+were modified. Work remains on branch `course-audit-build`.
