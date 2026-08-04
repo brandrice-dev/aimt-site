@@ -46,7 +46,7 @@ Final Exam, not merely completion of the instructional modules.
 | Checkpoint IDs | `m0cp1` |
 | Current completion requirement | Single checkpoint `m0cp1` must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-00.md` — position: first, precedes Module 1 and the Module 12 Final Exam |
-| **Status** | **Approved — awaiting implementation** |
+| **Status** | **Implemented — awaiting manual QA** |
 
 Modules 1–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

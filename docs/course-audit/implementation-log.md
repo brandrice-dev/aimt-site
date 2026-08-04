@@ -256,3 +256,130 @@ rather than the binding replaced, to test the real, unmodified
 Progress-isolation and certificate protections (Step 5) were not touched
 and remain unchanged. No curriculum, no new features, no hostname allowlist
 changes.
+
+---
+
+## 2026-08-04 — Step 7: Welcome Module implementation
+
+Implemented the approved Welcome Module and student-facing course rename
+per `docs/course-audit/00-global-decisions.md` and
+`docs/course-audit/modules/module-00.md`. No other module was audited or
+edited.
+
+**Files changed:** `headspa-mastery.html` only (180 insertions, 58
+deletions). `headspa-state.js` and `aimt-progress-sync.js` were not
+touched — no changes were needed to Review Mode, persistence, or sync
+logic for this implementation.
+
+**Course-name rename** (student-facing only; `headspa-mastery.html`
+filename, `headspa-mastery` slug, all technical identifiers unchanged):
+intro screen brand mark, intro begin button, course-home brand wordmark,
+`.hpc-title`/`.hpc-label`, resume button, Module 0 guide-identity prompt,
+intro personalization prompt — all now read "Head Spa Certification
+Course" instead of "HeadSpa Mastery" / "Headspa Mastery".
+
+**Welcome Module naming** (technical module ID `0`, `module0Wrap`, `M0`,
+`m0cp1`, progress keys unchanged): `MODULE_TITLES[0]`, the course-home
+module-list row title/subtitle, the module hero eyebrow, the resume
+button, the module-open Cadence greeting, and the completion-card eyebrow
+all now read "Welcome Module" and never "Module 0". The two AI system
+prompts that reference "Module 0" (`M0.system`, the Module 0
+`MODULE_GUIDE_SYSTEMS[0]` guide identity) were left exactly as approved in
+`module-00.md`'s verbatim blocks — those strings are sent to the model as
+internal instructions, never rendered as UI copy, so the naming rule
+(which governs student-facing copy) doesn't apply to them.
+
+**Source sections changed** (all per the "Final replacement copy" items
+A–T in `module-00.md`; everything else in Module 0's curriculum — 0.3,
+0.4, 0.6 principles 1/2/5, 0.7's other three cards, 0.8's surrounding
+paragraphs, 0.9's other two cards, 0.10, 0.11 — was left verbatim):
+intro cinematic script, student-intro label/placeholder, intro
+personalization prompt, intro fallback, intro begin button, course-home
+labels, module hero eyebrow/description, 0.1's opening paragraph (other
+two paragraphs unchanged), a new certification explainer added to 0.2
+after the existing "What this course is not" note, 0.5's heading/body/
+Cadence note, 0.6 principles 3 and 4, 0.7's intro paragraph ("observe
+without being told" → "observe, ask, confirm, and adjust") and its
+"Observe"/"Hold the room" cards, 0.8's professional-frame note, 0.9's
+"Guide confidently"/"Assess without overstepping" cards, the module-open
+Cadence greeting, the guide-chat error message, and the completion card
+(eyebrow, title, body naming the demonstrated competency, next-step copy).
+
+**Checkpoint (`m0cp1`) changes:** new two-part question (leadership
+distinction + one applied example), new placeholder, new accessible
+button label ("Send response to Cadence"), `aria-label="Speak your
+answer"` added to the voice button, `aria-live="polite"` added to the
+feedback region (the status pill already had it from Review Mode work).
+`M0.system` replaced with the approved evaluator prompt that grades only
+the two required elements, explicitly instructs the model not to fail for
+grammar/spelling/informal wording, and asks one focused follow-up when
+only one element is present. `submitCheckpoint()` gained an optional 5th
+`errorMessage` parameter (default unchanged, so every other module's
+checkpoint error text is byte-identical to before) so only `m0cp1` shows
+the approved "Cadence couldn't review your response..." fallback.
+
+**Interaction added:** "Same steps. Different service." — an ungraded,
+two-option predict-then-reveal interaction placed after section 0.5 and
+before 0.6, using native `<button type="button">` elements with
+`aria-pressed`, no persistence, no scoring, no completion/unlock effect
+(`selectM0Practice()` never touches `APP_STATE`). Both options remain
+reviewable and the selection can be changed after picking either one.
+
+**Accessibility changes:** aria-labels on the checkpoint voice and submit
+buttons; `aria-live="polite"` on the checkpoint feedback region; a new
+"Show full intro" control (`showFullIntro()`) that immediately reveals
+the complete cinematic text; a `prefers-reduced-motion` check in
+`startIntro()` that skips the character-by-character animation entirely
+for users who request it (same code path as "Show full intro"); a
+reduced-motion CSS override for the intro cursor blink; keyboard
+submission (Enter submits, Shift+Enter inserts a newline) was already
+correct pre-existing behavior in `m0cpKey`, unchanged.
+
+**Tests completed:** normal course entry (verified via
+`enterPurchasedCourseHome()`); Review Mode still activates correctly, its
+"Review" badges and locked-module access still work, and its checkpoint
+test path still shows "Review Mode test — not saved" without touching
+stored progress; an existing pre-implementation "passed" `m0cp1` record
+was seeded into `localStorage['levo_app']` and confirmed to survive a
+reload as "Accepted" with Module 1 still unlocked; new students see
+"Welcome Module" everywhere (nav title, hero eyebrow, home row, resume
+button, completion card) and never "Module 0"; Module 1's own title is
+untouched; a mocked strong answer passes and unlocks Module 1; a mocked
+partial answer returns "Needs revision" with one focused follow-up and
+does not complete the module; a mocked network failure preserves the
+student's typed answer and shows the approved fallback text; the practice
+interaction was exercised with real native clicks (not just direct
+function calls) — selecting either option updates `aria-pressed`,
+applies/removes the `selected`/`is-correct` classes, shows the correct
+feedback, and the selection can be changed afterward; full-page text
+extraction confirmed every curriculum section renders in the correct
+order with no duplicated or missing content; mobile viewport (375×812)
+showed no horizontal overflow; console stayed error-free throughout.
+`git diff` was scanned for any reference to another module's wrapper ID,
+`MN` object, or title string and found none outside intentional "Module
+1" forward-references in Module 0's own completion copy.
+
+**Requires manual review (could not be fully verified in this
+environment):**
+- Enter/Space keyboard activation of the new practice-interaction buttons.
+  They are genuine `<button type="button">` elements with no interfering
+  keydown handlers, which guarantees native activation in a real browser,
+  but this sandbox's synthetic key-event delivery did not trigger a click
+  during testing (a real mouse click did work correctly, and a manually
+  dispatched `KeyboardEvent` correctly did *not* trigger activation either
+  — expected behavior, since synthetic events never fire native UA
+  actions). Recommend a real-browser keyboard pass.
+- The live Claude model's actual leniency on grammar/spelling/informal
+  wording against the new evaluator prompt — checkpoint pass/fail/
+  revision flows were verified with mocked AI responses (since this
+  environment has no reachable API credentials), not the real model.
+- Screen-reader verification (VoiceOver/NVDA) of the new `aria-live` and
+  `aria-pressed` behavior — implemented per spec, not audited with an
+  actual screen reader.
+- `prefers-reduced-motion` behavior was verified by code review (the
+  `startIntro()` branch is straightforward) but not exercised with an
+  actual OS-level reduced-motion setting.
+
+Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
+Module 12 were not added, per instruction. No other module was audited or
+edited.

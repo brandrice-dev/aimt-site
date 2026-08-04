@@ -289,6 +289,25 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .info-card { background: rgba(255,255,255,0.65); backdrop-filter: blur(10px); border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.25rem 1.4rem; margin: 1.5rem 0; }
 .ic-title { font-size: 0.78rem; font-weight: 500; margin-bottom: 10px; letter-spacing: 0.02em; }
 
+/* Ungraded practice interaction (predict-then-reveal) */
+.practice-interaction { margin: 1.25rem 0; }
+.practice-option {
+  display: block; width: 100%; text-align: left; font-family: var(--aimt-font-sans);
+  background: rgba(255,255,255,0.65); backdrop-filter: blur(10px);
+  border: 0.5px solid var(--border2); border-radius: 14px;
+  padding: 1.1rem 1.25rem; margin-bottom: 0.75rem; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.practice-option:hover { border-color: var(--muted); }
+.practice-option:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.practice-option.selected { border-color: var(--muted2); background: rgba(255,255,255,0.85); }
+.practice-option.selected.is-correct { border-color: var(--success); }
+.practice-option-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.practice-option-text { font-size: 0.875rem; line-height: 1.6; font-weight: 300; color: var(--text); }
+.practice-feedback { display: none; font-size: 0.875rem; line-height: 1.7; font-weight: 300; color: var(--text); background: var(--surface); border-radius: 12px; padding: 1rem 1.1rem; margin-top: 0.5rem; }
+.practice-feedback.show { display: block; }
+.practice-feedback .practice-anchor { margin-top: 0.6rem; color: var(--muted); font-style: italic; }
+
 /* Concept grid */
 .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
 @media(max-width:600px){ .concept-grid { grid-template-columns: 1fr !important; } }
@@ -1218,6 +1237,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   cursor: pointer; transition: color 0.2s; padding: 0; display: none;
 }
 .intro-skip:hover { color: rgba(255,255,255,0.3); }
+.intro-showfull {
+  position: fixed; bottom: 1.5rem; right: 5.5rem; z-index: 1001;
+  font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.1); background: none; border: none;
+  cursor: pointer; transition: color 0.2s; padding: 0; display: none;
+}
+.intro-showfull:hover { color: rgba(255,255,255,0.3); }
+@media (prefers-reduced-motion: reduce) {
+  .intro-cursor { animation: none !important; }
+}
 
 
 /* ── MODULE 2 INTERACTIVE STYLES ── */
@@ -2145,20 +2175,20 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <circle cx="2"    cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
         <circle cx="7.9"  cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
       </svg>
-      <span class="intro-mark-name">AIMT &middot; HeadSpa Mastery</span>
+      <span class="intro-mark-name">AIMT &middot; Head Spa Certification Course</span>
     </div>
     <div class="intro-text-wrap" id="introTextWrap">
       <div class="intro-line" id="introLine"></div>
     </div>
     <div class="intro-divider" id="introDivider"></div>
     <div class="intro-input-wrap" id="introInputWrap">
-      <span class="intro-input-label">Tell me about yourself</span>
+      <span class="intro-input-label">Tell Cadence where you're starting</span>
       <div class="intro-input-row">
         <textarea class="intro-input" id="introInput"
-          placeholder="Your background, where you are in your career, what brought you here&#8230;" rows="3"
+          placeholder="Your license or professional role, your experience, what you want to build, and anything you feel unsure about&#8230;" rows="3"
           oninput="introGrow(this)"
           onkeydown="introKey(event)"></textarea>
-        <button class="voice-btn-dark" onclick="startVoice('introInput',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <button class="voice-btn-dark" onclick="startVoice('introInput',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
       </div>
       <button class="intro-send" id="introSendBtn" onclick="submitIntro()">
         <div class="intro-send-dot"></div>
@@ -2170,12 +2200,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <button class="intro-begin-btn" id="introBeginBtn" style="display:none;" onclick="introProceed()">
         <div class="intro-send-dot"></div>
-        Begin HeadSpa Mastery
+        Begin the course
       </button>
     </div>
   </div>
 </div>
 <button class="intro-skip" id="introSkip" onclick="skipIntro()">Skip</button>
+<button class="intro-showfull" id="introShowFull" onclick="showFullIntro()">Show full intro</button>
 
 
 
@@ -2215,18 +2246,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </svg>
       </div>
       <div class="brand-wordmark">
-        <div class="brand-name">Headspa Mastery</div>
+        <div class="brand-name">Head Spa Certification Course</div>
         <div class="brand-sub">American Institute of Modern Trichology</div>
       </div>
     </div>
     <div class="home-greeting" id="homeGreeting">Welcome back,<br><em id="studentFirstName"></em></div>
     <div class="home-sub" id="homeSubText">Keep building. Your next module is ready.</div>
     <div class="home-progress-card">
-      <div class="hpc-label">Your progress</div>
-      <div class="hpc-title">HeadSpa Mastery — Full Certification</div>
+      <div class="hpc-label">Certification progress</div>
+      <div class="hpc-title">Head Spa Certification Course</div>
       <div class="hpc-bar"><div class="hpc-fill" id="overallFill" style="width:0%"></div></div>
       <div class="hpc-stats"><span id="overallDone">0 of 12 modules complete</span><span id="overallPct">0%</span></div>
-      <button class="hpc-resume" id="resumeBtn" onclick="resumeCourse()">Begin — Module 0</button>
+      <button class="hpc-resume" id="resumeBtn" onclick="resumeCourse()">Begin — Welcome Module</button>
     </div>
   </div>
 
@@ -2236,7 +2267,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <!-- Rendered by renderHomeModules() -->
       <div class="module-row" data-module-id="0" onclick="openModuleById(0)">
         <div class="mr-num mr-active" id="mnum-0">0</div>
-        <div class="mr-info"><div class="mr-title">Module 0 — Welcome & Overview</div><div class="mr-sub">Introduction to the course and Cadence</div></div>
+        <div class="mr-info"><div class="mr-title">Welcome Module</div><div class="mr-sub">How the course works, what certification means, and the standard ahead</div></div>
         <span class="mr-badge mb-active" id="mbadge-0">Start</span>
       </div>
       <div class="module-row" data-module-id="1" onclick="openModuleById(1)">
@@ -3754,14 +3785,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 0 · Introduction to Head Spa Mastery</div>
+      <div class="mh-eyebrow">Welcome Module</div>
       <div class="mh-title">Clients can feel the difference between a service that is being performed<br>and one that is being led.</div>
-      <div class="mh-desc">Your job is to lead it. This module sets the standard before anything else begins.</div>
+      <div class="mh-desc">Your job is to lead it. Before technique begins, this module establishes how the course works and the professional standard behind every service decision that follows.</div>
     </div>
 
     <div class="sec-eyebrow">0.1 — Welcome</div>
     <div class="sec-title">Why this course exists.</div>
-    <div class="body-text">I'm Cadence, and I've spent nearly two decades in cosmetology and esthetics, with a strong focus on elevated client experience, hands-on service design, and scalp-focused treatments. This course was built to solve a problem I kept seeing: most head spa education gives pieces, but not a full system.</div>
+    <div class="body-text">I'm Cadence, the course guide built to help you work through AIMT's curriculum, test your reasoning, and connect each concept to real service delivery. The course itself was built from nearly two decades of hands-on work across cosmetology, esthetics, elevated client experience, service design, and scalp-focused care. It was created to solve a problem that appears throughout head spa education: students are often given pieces, but not a complete working system.</div>
     <div class="body-text">You might learn what a head spa is. You might see tools. You might get a general idea of the experience. But that is not the same as knowing how to perform the service well — how to guide the client through it confidently, adjust when something feels off, and create something that feels intentional from beginning to end.</div>
     <div class="body-text">That is what this course is for. A working framework built through real services on real clients — not just the order of the service, but the logic behind it. Why transitions matter. How to pace the room. How to build trust. How to make decisions in real time. This is not theory dressed up as expertise. It is a working framework built through repetition, observation, and refinement.</div>
 
@@ -3775,6 +3806,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="clinical-note">
       <div class="cn2-label">What this course is not</div>
       <div class="cn2-text">This is not the only way to perform a head spa. Rigid systems create fragile practitioners. The goal here is understanding — not imitation — so you can adapt based on your space, your tools, your client, and your scope.</div>
+    </div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">What your certificate represents</div>
+      <div class="cn2-text">Completing AIMT's Head Spa Certification Course means you have worked through the required curriculum and demonstrated the course competencies. Your certificate documents that achievement. It is not a state license, a medical credential, or permission to work beyond the services your existing license and local laws allow. Your licensing authority, local regulations, and professional scope remain the standard you must follow.</div>
     </div>
 
     <hr class="divider">
@@ -3798,12 +3834,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="sec-eyebrow">0.5 — How to use this course</div>
-    <div class="sec-title">Go through it in order. All of it.</div>
-    <div class="body-text">Not because every section is exciting — but because each one supports the next. If you skip scope, you overstep in consultations. If you rush anatomy, your assessment gets weaker. If you ignore setup, your flow breaks down.</div>
+    <div class="sec-title">Move through it in order. Use it actively.</div>
+    <div class="body-text">Each module supports the next. If you skip scope, you are more likely to overstep in consultation. If you rush anatomy, your assessment reasoning becomes weaker. If you ignore setup, the service flow breaks down.</div>
+    <div class="body-text">The course is self-paced, but it is not designed to be rushed. Pause for the practice moments. Answer checkpoints from your own reasoning. Use Cadence to question, clarify, and strengthen your thinking—not to write the answer for you. Physical technique still requires repetition outside the screen.</div>
 
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"As you move through the program, don't just ask 'what do I do here?' Ask: why does this matter? What problem does this solve? What would I do if this looked different? That is where skill starts."</div>
+      <div class="cn-text">"As you move through the course, don't stop at 'what do I do here?' Ask why it matters, what problem it solves, and what should change when the client or scalp in front of you does not match the ideal example. That is where professional judgment begins."</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">Practice — ungraded</div>
+    <div class="sec-title">Same steps. Different service.</div>
+    <div class="body-text">Both practitioners know the service sequence. Which one is leading the experience?</div>
+
+    <div class="practice-interaction" id="m0PracticeInteraction">
+      <button type="button" class="practice-option" id="m0PracticeA" onclick="selectM0Practice('A')" aria-pressed="false">
+        <div class="practice-option-label">Practitioner A</div>
+        <div class="practice-option-text">The practitioner follows the sequence exactly. When the next product is out of reach, they step away without explanation, return, and continue where they left off. They do not check comfort because the client has not complained.</div>
+      </button>
+      <button type="button" class="practice-option" id="m0PracticeB" onclick="selectM0Practice('B')" aria-pressed="false">
+        <div class="practice-option-label">Practitioner B</div>
+        <div class="practice-option-text">The practitioner prepares the transition, tells the client what is changing, watches for tension, checks temperature and comfort, and adjusts the sequence when the client or scalp response calls for it.</div>
+      </button>
+      <div class="practice-feedback" id="m0PracticeFeedback" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
@@ -3837,7 +3892,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div><div class="pc-title">Relaxation and professionalism can coexist</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">Why it matters</span><span class="pc-val">Calm does not mean careless. The service can be deeply sensory while still being thoughtful, well-paced, and clinically respectful. These are not in conflict.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Why it matters</span><span class="pc-val">Calm does not mean careless. The service can be deeply sensory while still being prepared, well-paced, hygienic, and professionally responsible. Those qualities support one another.</span></div>
       </div>
     </div>
 
@@ -3847,7 +3902,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div><div class="pc-title">Human touch matters more than tools</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">Why it matters</span><span class="pc-val">Tools support the service. They do not replace presence. A practitioner hiding behind gadgets usually does not yet trust their own hands. Intentional touch, pacing, and comfort are not optional. Tools are.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Why it matters</span><span class="pc-val">Tools can support precision, consistency, comfort, and sensory interest. They cannot replace prepared hands, attentive pacing, clear communication, or professional judgment. Tools are optional. Intentional delivery is not.</span></div>
       </div>
     </div>
 
@@ -3865,18 +3920,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">0.7 — What makes a great technician</div>
     <div class="sec-title">A great technician is not just someone with good hands.</div>
-    <div class="body-text">They know how to hold the room, observe without being told, make decisions when things don't match expectations, explain simply, and repeat quality consistently. That last one is what builds a business.</div>
+    <div class="body-text">They know how to hold the room, observe, ask, confirm, and adjust, make decisions when things don't match expectations, explain simply, and repeat quality consistently. That last one is what builds a business.</div>
 
     <div class="scalp-type-grid grid-2col" style="margin:1.25rem 0;">
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#4d403a;"></div>
         <div class="sc-name">Hold the room</div>
-        <div class="sc-look">Energy, pace, comfort, flow, and emotional state — from the moment the service begins.</div>
+        <div class="sc-look">Guide the pace, comfort, transitions, and emotional tone of the service from the moment it begins.</div>
       </div>
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#4d403a;"></div>
         <div class="sc-name">Observe</div>
-        <div class="sc-look">Scalp condition, body language, sensitivity — without needing the client to spell it out.</div>
+        <div class="sc-look">Notice scalp appearance, client feedback, body language, temperature response, and sensitivity—then ask, confirm, and adjust instead of assuming.</div>
       </div>
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#4d403a;"></div>
@@ -3903,7 +3958,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="clinical-note">
       <div class="cn2-label">The professional frame</div>
-      <div class="cn2-text">You are observing, working within scope, supporting the scalp appropriately, and recognizing when to refer out. A strong practitioner says: "This is what I'm seeing. This is how I'd approach it here. This is where I'd be cautious." Not certainty where it doesn't belong.</div>
+      <div class="cn2-text">You are observing and documenting visible findings, working within scope, supporting comfort and scalp wellness appropriately, and recognizing when to modify, pause, or refer. A strong practitioner can say: "This is what I can see. This is how I can safely adapt within my role. This is where I would pause and recommend further evaluation." Never communicate certainty you are not qualified to provide.</div>
     </div>
 
     <div class="body-text">People get into trouble in this industry because they want to sound advanced. They start speaking with too much certainty about conditions they are not qualified to diagnose. That does not make them look experienced. It makes them look reckless. Local laws, licensing standards, and sanitation requirements vary — knowing yours is your responsibility, not an afterthought.</div>
@@ -3918,12 +3973,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#3a5a3a;"></div>
         <div class="sc-name">Guide confidently</div>
-        <div class="sc-look">Move a client through the full experience — intake to close — without hesitation.</div>
+        <div class="sc-look">Move a client through the complete experience—from intake to close—with a prepared flow, clear communication, and the ability to recover when something changes.</div>
       </div>
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#3a5a3a;"></div>
         <div class="sc-name">Assess without overstepping</div>
-        <div class="sc-look">Observe what is visible, name it accurately, and stay on your side of the line.</div>
+        <div class="sc-look">Observe and describe visible findings accurately, document what matters, and stay on your side of the professional boundary.</div>
       </div>
       <div class="scalp-card">
         <div class="sc-indicator" style="background:#3a5a3a;"></div>
@@ -3967,26 +4022,27 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         <div class="cp-label">Before you move on</div>
       </div>
-      <div class="cp-q">In your own words — what is the difference between a service that is being performed and a service that is being led? And where do you currently feel least confident as you start this course?</div>
+      <div class="cp-q">Two practitioners can follow the same service sequence and create completely different experiences. In your own words, what changes when a practitioner leads the service instead of simply performing the steps? Give one specific example of what leading would look like during a head spa service.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m0cp1In" placeholder="Answer in your own words..." rows="1" oninput="grow(this)" onkeydown="m0cpKey(event,'m0cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m0cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m0cp1In" placeholder="Explain the difference and give one service example…" rows="1" oninput="grow(this)" onkeydown="m0cpKey(event,'m0cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m0cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m0cp1Btn" onclick="submitM0CP('m0cp1')">
+        <button class="cp-btn" id="m0cp1Btn" onclick="submitM0CP('m0cp1')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m0cp1Res"></div>
+      <div class="cp-res" id="m0cp1Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m0Complete" style="display:none;">
       <div class="lc-gold">✦</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-sub">You understand what you're building and the standard it's held to.</div>
+      <div class="lc-next-label">Welcome Module complete</div>
+      <div class="lc-title">The standard is established.</div>
+      <div class="lc-sub">You demonstrated the difference between following a sequence and leading the full client experience. Competencies shown: course expectations, service leadership, professional boundaries.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 1</div>
-        <div class="lc-next-text">Now that you understand what this course is, the next step is understanding the role itself. What a head spa technician actually is, where the role ends, and why that line matters more than most people realize until they've crossed it.</div>
+        <div class="lc-next-text">Next, you'll define the professional role itself: what a head spa practitioner is responsible for, where that responsibility ends, and why that boundary protects both the client and the practitioner.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(1)">Start Module 1 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -5810,7 +5866,7 @@ const CADENCE_RESPONSE_CONSISTENCY_ANCHOR = 'Response consistency anchor: refere
 const CADENCE_SELECTIVE_MEMORY_INSTRUCTION = 'Reference prior student patterns only when they materially improve the response. Do not force historical callbacks.';
 
 const MODULE_TITLES = {
-  0: 'Module 0 — Welcome & Overview',
+  0: 'Welcome Module',
   1: 'Module 1 — Role of the Head Spa Tech',
   2: 'Module 2 — Welcoming Your Client',
   3: 'Module 3 — Hair & Scalp Anatomy',
@@ -5845,12 +5901,13 @@ function renderHomeProgress() {
   if (pctEl) pctEl.textContent = pct + '%';
 
   const next = APP_STATE.getNextIncompleteModule();
+  const resumeModuleLabel = resumeModule === 0 ? 'Welcome Module' : 'Module ' + resumeModule;
   if (resumeBtn) {
-    resumeBtn.textContent = done === 0 ? 'Begin — Module 0' : 'Continue — Module ' + resumeModule;
+    resumeBtn.textContent = done === 0 ? 'Begin — Welcome Module' : 'Continue — ' + resumeModuleLabel;
     resumeBtn.onclick = () => resumeCourse();
   }
   if (subText && done > 0) {
-    subText.textContent = 'Resume Module ' + resumeModule + ' where you left off.';
+    subText.textContent = 'Resume ' + (resumeModule === 0 ? 'the Welcome Module' : resumeModuleLabel) + ' where you left off.';
   }
 
   // Update each module row
@@ -6131,7 +6188,7 @@ async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
 // Replaces 9 near-identical functions
 // ══════════════════════════════════════════════════════
 
-function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
+function submitCheckpoint(moduleId, cpId, systemPrompt, question, errorMessage) {
   if (window.ReviewMode && window.ReviewMode.isActive()) {
     return submitCheckpointReviewMode(moduleId, cpId, systemPrompt, question);
   }
@@ -6186,7 +6243,8 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question) {
     })
     .catch((err) => {
       applyCheckpointInputState(moduleId, cpId);
-      res.innerHTML = '<p style="font-size:.875rem;color:var(--muted)">Cadence didn\'t respond — check your connection and try again.</p>';
+      const fallbackMsg = errorMessage || 'Cadence didn\'t respond — check your connection and try again.';
+      res.innerHTML = '<p style="font-size:.875rem;color:var(--muted)">' + fallbackMsg + '</p>';
       res.classList.remove('show');
       setTimeout(() => res.classList.add('show'), 50);
     });
@@ -6296,9 +6354,16 @@ window.addEventListener('scroll', () => {
 // ── MODULE 0 ──
 const M0 = {
   questions: {
-    m0cp1: 'What is the difference between a service that is being performed and a service that is being led? Where do you currently feel least confident?'
+    m0cp1: 'Two practitioners can follow the same service sequence and create completely different experiences. In your own words, what changes when a practitioner leads the service instead of simply performing the steps? Give one specific example of what leading would look like during a head spa service.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. A student just answered the opening checkpoint in Module 0. The question: "' + q + '". Key concepts: A performed service follows steps. A led service holds the full experience with calm certainty. Common weak spots: scope, consultation confidence, scalp knowledge, touch, flow, pricing. This is the first checkpoint in the course — respond like a mentor who just heard something real. Acknowledge specifically what they said. 3-5 sentences, no bullet points.'
+  system: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 0 competency, not their writing style.\n\n' +
+    'The student passes only when they demonstrate both elements:\n\n' +
+    '1. They explain that leading a service means taking responsibility for the complete client experience rather than merely completing memorized steps. Their explanation may reference preparation, observation, pacing, transitions, communication, comfort, adaptation, decision-making, consistency, or professional boundaries.\n' +
+    '2. They give one specific, relevant example of what that leadership looks like during a head spa service.\n\n' +
+    'Do not require exact terminology. Do not fail for grammar, spelling, informal wording, concision, or English-language fluency when the concept is clear.\n\n' +
+    'If one element is demonstrated and the other is missing, return pass false and ask one focused follow-up question about only the missing element. If the response is vague, identify what makes it vague and ask for one observable practitioner behavior. If the response contains medical diagnosis or unsafe scope language, correct that immediately and ask the student to reframe the example within professional scope.\n\n' +
+    'If both elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard and connect it to client trust, comfort, consistency, or service flow.\n\n' +
+    'Do not grade the student\'s personal confidence, career stage, or background.'
 };
 
 // ── MODULE 1 ──
@@ -6395,7 +6460,7 @@ const M10 = {
 // ══════════════════════════════════════════════════════
 
 const MODULE_GUIDE_SYSTEMS = {
-  0: 'You are Cadence — a mentor built from nearly two decades of hands-on experience in the head spa industry. Your voice is direct, warm, and earned. You are not a chatbot — you are a guide who knows this student from their introduction. The student is in Module 0 (Welcome & Overview): course philosophy, why head spa education is broken, scope of practice framing. Respond to their actual question. If their background is relevant — hairstylist, esthetician, newcomer, or anything else — acknowledge it naturally and connect it ONLY to head spa and scalp wellness. IMPORTANT: Every connection you make to a student\'s background must tie directly back to head spa services and scalp wellness — never to any other service category. Never be generic. 3-5 sentences. No bullet points.',
+  0: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance was built from the instructor\'s nearly two decades of hands-on experience across cosmetology, esthetics, client experience, service design, and scalp-focused care.\n\nThe student is in Module 0: Course Orientation. This module establishes the course philosophy, the difference between performing and leading a service, how to use the program, and the professional scope framing that governs the curriculum.\n\nRespond directly to the student\'s actual question. Reference their background only when it materially improves the answer, and connect it only to head spa services, scalp wellness, client experience, professional practice, or the business of building a head spa service. Do not diagnose, prescribe, or imply that the course expands legal scope.\n\nKeep responses concise, warm, direct, and professional. Avoid generic praise, excessive enthusiasm, therapist-like language, or invented personal details. Usually respond in 3–5 sentences without bullet points unless the student explicitly asks for a list.',
   1: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 1 (Role of the Head Spa Tech): scope of practice, observing vs diagnosing, safe client language, licensing variation, and when to refer. If the student has industry experience, connect scope boundaries to head spa specifically — a hairstylist understands client trust and scalp proximity, an esthetician understands skin barrier and sensitivity. All connections must lead back to head spa and scalp wellness — never to other service categories. 3-5 sentences. No bullet points.',
   2: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 2 (Welcoming Your Client): intake, spa attire prep, tea ritual, aromatherapy with first intentional touch, tone-setting. The beginning shapes everything. If the student has a service background, connect this to how the head spa arrival sequence differs from and elevates what they already know — always in the context of scalp wellness and head spa. 3-5 sentences. No bullet points.',
   3: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 3 (Hair & Scalp Anatomy): scalp layers, follicle structure, hair growth phases, telogen effluvium, postpartum hair loss, hydrolipid film, circulation. The visible shaft is not alive — the follicle is where health matters. If the student has cosmetology or esthetics training, build on what they know and connect it directly to scalp health and head spa practice. 3-5 sentences. No bullet points.',
@@ -6410,7 +6475,7 @@ const MODULE_GUIDE_SYSTEMS = {
 };
 
 const MODULE_QUICK_PROMPTS = {
-  0: ['How do I get the most from this course?', 'What makes a service feel led vs performed?', 'What should I focus on first?'],
+  0: ['How should I use Cadence during the course?', 'What makes a service feel led rather than performed?', 'What does this certification represent?'],
   1: ['How do I talk about scope with a client?', 'When exactly should I refer out?', 'What language should I use vs avoid?'],
   2: ['Why does the tea ritual matter?', 'How does the first touch work?', 'What if a client skips the intake?'],
   3: ['What is the hydrolipid film?', 'How do I explain shedding to a worried client?', 'What does massage actually do physiologically?'],
@@ -6484,7 +6549,7 @@ async function gpSend() {
     if (gpHistory.length > 16) gpHistory = gpHistory.slice(-16);
   } catch(e) {
     gpHideTyping();
-    gpAgentMsg('Something went sideways — try that again?');
+    gpAgentMsg('Cadence couldn’t respond. Check your connection and try again.');
   }
   gpBusy = false;
   document.getElementById('gpSend').disabled = false;
@@ -6649,7 +6714,7 @@ function openModuleById(id, options = {}) {
   // Cadence greeting
   setTimeout(() => {
     const greetings = {
-      0: 'Welcome. Before you learn what to do, you need to understand why. Module 0 is short but it sets the right mindset for everything that follows.',
+      0: 'The Welcome Module establishes how this course works and the standard behind it. Start with the difference between performing a sequence and leading the complete experience; that distinction will return throughout the program.',
       1: 'Module 1 is the professional foundation. The scope section especially — read it slowly. The practitioners who skip past it are the ones who end up speaking with more certainty than they have earned.',
       2: 'Module 2 is some of my favorite material to teach because the details here are what clients actually remember. The beginning of a service shapes everything that follows.',
       3: 'Good to see you in Module 3 — this is where things start clicking. The biology is not just background knowledge, it is the reason every decision at the treatment bed makes sense.',
@@ -6815,10 +6880,38 @@ function m6cpKey(e, id) {
 
 // ── MODULE 0 ──
 function submitM0CP(id) {
-  submitCheckpoint(0, id, M0.system, M0.questions[id]);
+  submitCheckpoint(0, id, M0.system, M0.questions[id],
+    'Cadence couldn’t review your response. Your answer is still here—check your connection and try again.');
 }
 function m0cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM0CP(id); }
+}
+
+// "Same steps. Different service." — ungraded practice interaction.
+// Does not touch APP_STATE, progress, checkpoints, or completion.
+function selectM0Practice(choice) {
+  const optA = document.getElementById('m0PracticeA');
+  const optB = document.getElementById('m0PracticeB');
+  const feedback = document.getElementById('m0PracticeFeedback');
+  if (!optA || !optB || !feedback) return;
+
+  optA.setAttribute('aria-pressed', choice === 'A' ? 'true' : 'false');
+  optB.setAttribute('aria-pressed', choice === 'B' ? 'true' : 'false');
+  optA.classList.toggle('selected', choice === 'A');
+  optB.classList.toggle('selected', choice === 'B');
+  optA.classList.remove('is-correct');
+  optB.classList.remove('is-correct');
+
+  if (choice === 'B') {
+    optB.classList.add('is-correct');
+    feedback.innerHTML =
+      '<p>This service is being led. Preparation, communication, observation, and responsible adjustment keep the client inside one continuous experience.</p>' +
+      '<p class="practice-anchor">Leadership is visible in what the practitioner notices, prepares, communicates, and adjusts—not in how luxurious the tools appear.</p>';
+  } else {
+    feedback.innerHTML =
+      '<p>The steps may be correct, but the practitioner is reacting to the service instead of guiding it. Silence, an unprepared transition, and waiting for the client to complain all shift responsibility back to the client.</p>';
+  }
+  feedback.classList.add('show');
 }
 
 // ── MODULE 1 ──
@@ -7458,11 +7551,34 @@ function startIntro() {
   if (line) line.innerHTML = '';
   document.getElementById('introScreen').style.display = 'flex';
   document.getElementById('introSkip').style.display = 'block';
+  const showFullBtn = document.getElementById('introShowFull');
+  if (showFullBtn) showFullBtn.style.display = 'block';
   buildIntroScript();
+  const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (prefersReducedMotion) {
+    document.getElementById('introMark').classList.add('show');
+    showFullIntro();
+    return;
+  }
   setTimeout(() => {
     document.getElementById('introMark').classList.add('show');
     setTimeout(() => runIntroScript(), 1200);
   }, 500);
+}
+
+// Reduced-motion users and anyone who taps "Show full intro" get the
+// complete text immediately, with no character-by-character animation.
+function showFullIntro() {
+  introSkipped = true;
+  const script = window._activeIntroScript || INTRO_SCRIPT;
+  let full = '';
+  for (let i = 0; i < script.length; i++) {
+    const seg = script[i];
+    if (seg.text === 'INPUT') break;
+    full += seg.text === 'NEWLINE' ? '<br><br>' : seg.text;
+  }
+  introCurrentText = full;
+  showIntroInput();
 }
 
 function buildIntroScript() {
@@ -7472,17 +7588,16 @@ function buildIntroScript() {
     { text: greeting, pause: 1300 },
     { text: " I'm Cadence.", pause: 1600 },
     { text: 'NEWLINE', pause: 900 },
-    { text: "I'm the voice of nearly two decades of hands-on experience in the head spa space —", pause: 1800 },
-    { text: ' distilled into a course that meets you exactly where you are.', pause: 2000 },
+    { text: "I'm your guide through AIMT's Head Spa Certification Course.", pause: 1800 },
     { text: 'NEWLINE', pause: 1000 },
-    { text: "Think of me as a mentor, not a manual.", pause: 1800 },
-    { text: ' I guide you through the science, the technique, the client experience,', pause: 1600 },
-    { text: ' and the business of building something real.', pause: 2200 },
+    { text: "My guidance was built from nearly two decades of hands-on work across cosmetology, esthetics, client experience, service design, and scalp-focused care.", pause: 2000 },
     { text: 'NEWLINE', pause: 1000 },
-    { text: "The more you share with me as we go,", pause: 1600 },
-    { text: ' the more I can tailor what I teach to where you are headed.', pause: 2200 },
+    { text: "I'll help you understand the science, technique, client experience,", pause: 1600 },
+    { text: " and business decisions behind a professional head spa service—not simply memorize a sequence.", pause: 2200 },
+    { text: 'NEWLINE', pause: 1000 },
+    { text: "Your answers help me tailor examples and feedback to where you are starting and what you are working toward.", pause: 2000 },
     { text: 'NEWLINE', pause: 1200 },
-    { text: "Before we begin —", pause: 1400 },
+    { text: "Before we begin—tell me where you are starting.", pause: 1400 },
     { text: 'INPUT', pause: 0 }
   ];
 }
@@ -7524,6 +7639,8 @@ async function runIntroScript() {
 
 function showIntroInput() {
   document.getElementById('introLine').innerHTML = introCurrentText;
+  const showFullBtn = document.getElementById('introShowFull');
+  if (showFullBtn) showFullBtn.style.display = 'none';
   setTimeout(() => {
     const d = document.getElementById('introDivider');
     if (d) d.classList.add('show');
@@ -7567,11 +7684,11 @@ async function submitIntro() {
   }
 
   const nameHint = name ? ' Their name is ' + name + '.' : '';
-  const ctx = 'You are Cadence. Your voice is calm, direct, and earned — the voice of someone who has spent nearly two decades on the floor doing this work. You do not use filler phrases like "I am glad you are here" or "Welcome to the course" or "That is wonderful." You speak like a mentor who has heard a lot of introductions and responds to the specific one in front of them.' +
-    '\n\nA student just wrote this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
-    '\n\nRespond in 2-3 sentences. Reference something SPECIFIC they actually said — their job, their goal, their hesitation, their background — whatever stands out. Do not be generic. Do not welcome them to the course. Just respond to what they said, the way a sharp mentor would respond to someone they just met. If they have industry experience, speak to what that means for how they will move through this material. End with one sentence that tells them what they are about to get.' +
-    '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
-    '\n\nCRITICAL GUARDRAIL — THIS IS NON-NEGOTIABLE: This course is HeadSpa Mastery — a certification entirely focused on head spa services and scalp wellness. No matter what background the student shares, you MUST connect it ONLY to head spa and scalp wellness. A hairstylist\'s years behind the chair translates to touch, client trust, and reading the scalp — not to any other service. An esthetician\'s skin knowledge maps directly to the hydrolipid film and scalp barrier function. A newcomer brings fresh eyes to scalp-focused work. Whatever they share, the bridge is always: how does this prepare them for head spa and scalp wellness specifically? NEVER reference, imply, or connect their background to any other service category — not permanent makeup, not lash work, not hair color, not injections, not sales, not anything outside of head spa and scalp wellness. If you cannot find a direct connection to head spa and scalp wellness, speak to the scalp science and client experience work ahead. The topic is always head spa. The destination is always scalp wellness mastery.';
+  const ctx = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance was built from the instructor\'s nearly two decades of hands-on experience across cosmetology, esthetics, client experience, service design, and scalp-focused care.' +
+    '\n\nA student submitted this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
+    '\n\nRespond in 2–3 concise sentences. Reference one specific detail the student actually shared. Connect that detail only to the head spa curriculum, professional service delivery, scalp wellness, client experience, or the business of building a head spa service. Do not invent facts about the student. Do not use generic praise, excessive enthusiasm, or therapy-like language.' +
+    '\n\nEnd by naming one useful area of the course that appears especially relevant to what the student shared. Do not evaluate or grade the introduction.' +
+    '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
 
   callAI(ctx, [{ role: 'user', content: text }], 400)
     .then(r => {
@@ -7583,7 +7700,9 @@ async function submitIntro() {
     .catch(() => {
       const textEl = document.getElementById('introCadenceText');
       const fallbackName = getStudentFirstName();
-      const fallback = fallbackName ? 'Welcome, ' + fallbackName + ". Let's get started." : "Welcome. Let's begin.";
+      const fallback = fallbackName
+        ? fallbackName + ", your introduction has been saved. You can begin the course now, and Cadence will be available inside each module."
+        : "Your introduction has been saved. You can begin the course now, and Cadence will be available inside each module.";
       if (textEl) textEl.innerHTML = '<p>' + fallback + '</p>';
       const beginBtn = document.getElementById('introBeginBtn');
       if (beginBtn) beginBtn.style.display = 'flex';
@@ -7594,6 +7713,8 @@ async function introProceed() {
   document.getElementById('introScreen').classList.add('fade-out');
   const sk = document.getElementById('introSkip');
   if (sk) sk.style.display = 'none';
+  const sf = document.getElementById('introShowFull');
+  if (sf) sf.style.display = 'none';
   await sleep(1000);
   hideIntro();
   showCourse();
@@ -7605,6 +7726,7 @@ function skipIntro() {
   persistCadenceWelcomeComplete();
   document.getElementById('introScreen').classList.add('fade-out');
   const sk = document.getElementById('introSkip'); if (sk) sk.style.display = 'none';
+  const sf = document.getElementById('introShowFull'); if (sf) sf.style.display = 'none';
   setTimeout(() => { hideIntro(); showCourse(); }, 900);
 }
 
