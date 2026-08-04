@@ -557,3 +557,41 @@ environment):**
 Guided Completion Path UI, Listen Mode, persistent checkpoint threads,
 and Module 12 were not built, per instruction. Module 2 was not extracted
 or edited.
+
+---
+
+## 2026-08-04 — Step 11: Module 2 source extraction
+
+Created `docs/course-audit/modules/module-02-source.md` (full verbatim
+extraction of Module 2's curriculum, its one checkpoint and complete
+grading prompt including a Module-2-specific checkpoint-criteria block
+unique to this module, Cadence guide context/quick prompts/greeting/memory
+tags, all five interactions — interactive timeline, "what breaks the
+moment" quiz, AI-evaluated script builder, feeling slider, and the
+checkpoint — with graded/ungraded/persistent status for each, completion
+behavior, accessibility behavior, mobile/interaction concerns, Guided
+Completion Path fields, Listen Mode planning fields, source map, and
+confirmed implementation concerns separated from assumptions) and
+`docs/course-audit/modules/module-02.md` (empty headings only). Module 1
+was not edited; Module 3 was not extracted or edited.
+
+This was documentation and extraction only — no production files were
+modified. `docs/course-audit/modules/README.md` was updated with a
+Module 2 entry (status **Awaiting external audit**).
+
+Notable findings recorded in the extraction (not fixed): Module 2's
+displayed and evaluated checkpoint questions do not match (same pattern
+already corrected for Module 1); the interactive timeline's five
+accordion steps are plain `<div onclick>` elements with no keyboard or
+screen-reader access at all; the "what breaks the moment" quiz cannot be
+retried once answered (all four options are permanently disabled on
+first click) and its correct/incorrect state relies primarily on color;
+the script builder and feeling slider have no accessible names or live
+regions; the old course name ("HeadSpa Mastery") appears in both the
+checkpoint grading prompt and the separate script-evaluation prompt; the
+completion card has no distinct competency-naming line; and the module's
+interactive timeline content is hidden by default, which — per the new
+Listen Mode fields — meaningfully prevents audio-only completion of this
+module in a way not seen in Modules 0 or 1.
+
+Work remains on branch `course-audit-build`.

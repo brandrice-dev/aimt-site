@@ -70,7 +70,28 @@ first-pass content assessment.
 | Listen Mode notes | Recorded in `module-01.md` — narration approved as a strong candidate, ~8–10 minutes |
 | **Status** | **Implemented — awaiting manual QA** |
 
-Modules 2–11 have not been extracted yet. Source files for those modules
+## Module 2 — Welcoming Your Client
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 2** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-02-source.md`](module-02-source.md) |
+| Approved specification file | [`module-02.md`](module-02.md) |
+| Wrapper ID | `module2Wrap` |
+| Checkpoint IDs | `m2cp1` |
+| Current completion requirement | Single checkpoint `m2cp1` must be graded `passed` (no read-percentage minimum) |
+| Guided completion structure | Recorded in `module-02-source.md` §9 (extraction only — not yet an approved spec) |
+| Listen Mode notes | Recorded in `module-02-source.md` §10 (extraction only — not yet an approved spec) |
+| **Status** | **Awaiting external audit** |
+
+Extracted without production changes. Module 2 has four ungraded/
+semi-graded interactive components beyond its required checkpoint
+(interactive timeline, a quiz with no retry, an AI-evaluated script
+builder, and a feeling slider) — see `module-02-source.md` §5 and §11 for
+full behavior and confirmed accessibility/interaction concerns, none of
+which have been fixed.
+
+Modules 3–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.
