@@ -35,6 +35,14 @@ completion structure" section containing:
 Pacing recorded in these fields must lead toward completion of the Module 12
 Final Exam, not merely completion of the instructional modules.
 
+Every `module-XX.md` from this point forward must also document a "Listen
+Mode notes" section (introduced starting with the Module 1 audit)
+containing: whether narration is appropriate, which sections need
+visual-review cues, which content should remain video-only, and an
+approximate narration length. No Listen Mode UI or logic is authorized by
+documenting these fields — see each module's source file for the
+first-pass content assessment.
+
 ## Module 0 — Welcome Module (technical module ID `0`)
 
 | Field | Value |
@@ -48,7 +56,21 @@ Final Exam, not merely completion of the instructional modules.
 | Guided completion structure | Recorded in `module-00.md` — position: first, precedes Module 1 and the Module 12 Final Exam |
 | **Status** | **Implemented — awaiting manual QA** |
 
-Modules 1–11 have not been extracted yet. Source files for those modules
+## Module 1 — Role of the Head Spa Tech
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 1** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-01-source.md`](module-01-source.md) |
+| Approved specification file | [`module-01.md`](module-01.md) |
+| Wrapper ID | `module1Wrap` |
+| Checkpoint IDs | `m1cp1`, `m1cp2` |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| Guided completion structure | Recorded in `module-01-source.md` §7 (extraction only — not yet an approved spec) |
+| Listen Mode notes | Recorded in `module-01-source.md` §8 (extraction only — not yet an approved spec) |
+| **Status** | **Awaiting external audit** |
+
+Modules 2–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.

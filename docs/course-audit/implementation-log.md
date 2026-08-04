@@ -383,3 +383,37 @@ environment):**
 Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
 Module 12 were not added, per instruction. No other module was audited or
 edited.
+
+---
+
+## 2026-08-04 — Step 8: Module 1 source extraction
+
+Created `docs/course-audit/modules/module-01-source.md` (full verbatim
+extraction of Module 1's curriculum, both checkpoints and their complete
+grading prompts, Cadence guide context and quick prompts, the module-open
+greeting, interactions, completion behavior, source map, Guided Completion
+Path fields, Listen Mode planning fields, and confirmed implementation
+concerns separated from assumptions) and
+`docs/course-audit/modules/module-01.md` (empty headings only, including
+the two new "Guided completion structure" and "Listen Mode notes" headings
+alongside the existing Module 0 spec headings).
+
+This was documentation and extraction only — no production files were
+modified, and Module 1's actual curriculum, checkpoints, or Cadence prompts
+were not touched. `docs/course-audit/modules/README.md` was updated with a
+Module 1 entry (status **Awaiting external audit**) and a note that every
+future module audit must now also document Listen Mode fields alongside
+the existing Guided Completion Path fields.
+
+Notable findings recorded in the extraction (not fixed): Module 1's
+checkpoint grading prompts interpolate a shorter paraphrase of each
+question than what the student actually sees in `.cp-q`; Module 1 has no
+structured/itemized pass criteria the way Module 0's rewritten `m0cp1`
+now does; neither checkpoint has accessibility labels; the completion card
+has no distinct competency-naming line; `M1.system` still says "HeadSpa
+Mastery"; and no ungraded practice interaction exists in Module 1 despite
+its "Say this / Never say" and "Within scope / Outside scope" content
+being well-suited to one.
+
+Work remains on branch `course-audit-build`. Module 1 was not implemented
+or edited — only extracted.
