@@ -103,25 +103,28 @@ corrected.
 | Wrapper ID | **None** — Module 3 is the default `.lesson-wrap` content captured into `module3HTML` at page load, not a hidden `moduleNWrap` template like every other module (see the source extraction, §1) |
 | Checkpoint IDs | `cp1`, `cp2` — bare IDs, not the `mNcpX` pattern every other module uses |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| Guided completion structure | Recorded in `module-03-source.md` §11 (extraction only — not yet an approved spec) |
-| Listen Mode notes | Recorded in `module-03-source.md` §12 (extraction only — not yet an approved spec) |
-| **Status** | **Awaiting external audit** |
+| Guided completion structure | Recorded in `module-03.md` — position: fourth, technical foundation immediately before Module 4 assessment and microscopy |
+| Listen Mode notes | Recorded in `module-03.md` — narration approved for most prose, ~14–17 minutes; the five-layer map and supplied cross-section require structured visual-review cues |
+| **Status** | **Approved — awaiting implementation** |
 
-Extracted without production changes. Module 3 is structurally the
-outlier among the modules extracted so far — no wrapper ID, bare
-checkpoint IDs, a video-intro placeholder no other module has, and a
-hand-authored inline SVG scalp/hair cross-section diagram (not an image
-file) with 14 labeled callouts. It is also the first extracted module with
-**zero** ungraded practice interactions. A proposed raster replacement for
-the cross-section diagram was added to the repo at
-`assets/images/course/module-03/aimt-scalp-cross-section.png` but is not
-yet referenced by any production file and has not been verified for
-anatomical or label accuracy — see `module-03-source.md` §2 and the
-2026-08-04 Step 15 implementation-log entry. See `module-03-source.md` §13
-for the full list of confirmed findings (displayed/evaluated checkpoint
-question mismatches on both checkpoints, dead code, a hardcoded-vs-dynamic
-quick-prompts discrepancy, vestigial markup, and more), none of which have
-been fixed.
+Approved per `module-03.md`. Notable approved corrections: the approved
+headline "The scalp is not a backdrop. It is the environment everything
+depends on."; a corrected five-layer scalp map (skin, dense connective
+tissue, galea aponeurotica, loose areolar tissue, pericranium) replacing
+the current inline SVG; the supplied
+`assets/images/course/module-03/aimt-scalp-cross-section.png` used in the
+pilosebaceous-unit section (with a web-optimized derivative, approved alt
+text/caption, and a full-size viewing control) rather than as a complete
+five-layer diagram; a new ungraded "Anatomy to Action" visual explorer and
+a predict-then-reveal hair-cycle timing interaction; `cp1` moved to the
+module's midpoint with `cp2` remaining at the end, both with aligned
+displayed/evaluated questions and separate checkpoint-specific evaluator
+rubrics; removal of the nonfunctional video placeholder, the dead
+`cpKey_m3` function, the duplicate/conflicting quick-prompt sets, and the
+malformed hidden completion markup; and the same course-name/Cadence-
+identity/accessibility corrections already applied to the Welcome Module
+and Modules 1–2. See `module-03-source.md` §13 for the full list of
+pre-existing findings this specification resolves.
 
 Modules 4–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

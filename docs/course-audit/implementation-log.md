@@ -898,3 +898,39 @@ section being well suited to one.
 
 Work remains on branch `course-audit-build`. Module 3 was not implemented
 or edited — only extracted.
+
+---
+
+## 2026-08-04 — Step 17: Approved Module 3 specification added
+
+The externally-reviewed approved specification was placed into
+`docs/course-audit/modules/module-03.md`, populating all thirteen required
+sections (Approved outcomes, Keep unchanged, Required corrections, Final
+replacement copy, Checkpoint specification, Approved interactions, Cadence
+behavior, Acceptance criteria, Distinct learning rhythm, Insider value and
+acceleration payoff, Guided completion structure, Listen Mode notes,
+Implementation notes). Notable approved corrections: the approved headline
+"The scalp is not a backdrop. It is the environment everything depends
+on."; a corrected five-layer scalp map (skin, dense connective tissue,
+galea aponeurotica, loose areolar tissue, pericranium) replacing the
+current inline SVG; use of the supplied
+`assets/images/course/module-03/aimt-scalp-cross-section.png` (plus a
+web-optimized derivative) in the pilosebaceous-unit section only, with
+approved alt text/caption clarifying it is not a complete five-layer
+diagram; a new ungraded "Anatomy to Action" visual explorer and a
+predict-then-reveal hair-cycle timing interaction; `cp1` moved to the
+module's midpoint (immediately after the timing interaction) while `cp2`
+remains at the end, both with displayed and evaluated question strings
+aligned and separate checkpoint-specific evaluator rubrics; removal of the
+nonfunctional video placeholder, the dead `cpKey_m3` function, the
+duplicate/conflicting quick-prompt sets, and the malformed hidden
+completion markup; corrected hair-growth-cycle, shedding-pattern, barrier,
+and massage claims (removing diagnostic certainty, unsupported circulation/
+regrowth claims, and the impossible flu/shedding timeline); and the same
+course-name/Cadence-identity/accessibility corrections already applied to
+the Welcome Module and Modules 1–2. `modules/README.md` was updated to
+reflect Module 3 status as **Approved — awaiting implementation**.
+
+This was a documentation update only — the specification authorizes
+future implementation but nothing was implemented. No production files
+were modified. Work remains on branch `course-audit-build`.
