@@ -161,31 +161,35 @@ corrected shedding/barrier/massage claims.
 | Field | Value |
 |---|---|
 | Student-facing name | **Module 4** (unchanged — Welcome Module naming applies only to technical module `0`) |
-| Asset inventory | [`module-04-assets.md`](module-04-assets.md) — 5 examination-area images, 5 microscopy images, all unverified and unapproved |
+| Asset inventory | [`module-04-assets.md`](module-04-assets.md) — 5 examination-area images, 5 microscopy images |
 | Source file | [`module-04-source.md`](module-04-source.md) |
-| Approved specification file | [`module-04.md`](module-04.md) — empty headings only, awaiting external audit |
+| Approved specification file | [`module-04.md`](module-04.md) — full approved specification |
 | Wrapper ID | `module4Wrap` — standard hidden-template pattern (not the Module-3-style capture outlier) |
 | Checkpoint IDs | `m4cp1`, `m4cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Awaiting external audit** |
+| **Status** | **Implemented — awaiting manual QA** |
 
-Extracted per the task's full 17-section extraction template. Notable
-findings recorded (not fixed): the five current "What you're seeing"
-microscopy protocol-card placeholders match the five Phase-1 proposed
-`microscopy/` image captions word for word, and the five current
-"Regions to assess" grid cards match the five proposed
-`examination-areas/` filenames exactly — see `module-04-source.md` §3 for
-the full cross-reference; two of the five microscopy categories
-("Congested" and "Oily / congested") overlap substantially in stated
-observable features; the displayed and evaluated checkpoint questions do
-not match for either checkpoint (same pattern already corrected in
-Modules 1–3); no Module-4-specific checkpoint rubric exists; the Cadence
-guide system references a dry-vs-dandruff distinction that Module 4's own
-curriculum does not actually teach (that's Module 6 content); the old
-course name and a personal-experience claim remain in the checkpoint and
-guide system prompts; and Module 4 has zero ungraded practice interactions
-despite both five-item card sets being well suited to one. Module 4 was
-not implemented or edited — only extracted.
+Implemented per `module-04.md`. Replaced the five-region colored-dot grid
+with an accessible five-point scalp-scan stepper (real photos, previous/
+next controls, direct station selection, announced current station);
+replaced the five scalp-type protocol cards with an illustrative
+appearance-examples gallery (baseline, oil-dominant, fine-scale,
+visible-color-change, surface-residue) plus a dedicated oil-versus-residue
+comparison section; added a new ungraded "Say only what the image earned"
+five-statement classification interaction; added the five-observation-lens
+framework and the four-decision (preserve/modify/avoid/refer) framework;
+rewrote the do-not-proceed section as four grouped warning categories with
+the approved referral script and a device-contamination note; realigned
+both checkpoints' displayed and evaluated question strings (same pattern
+already corrected in Modules 1–3) with new checkpoint-specific
+`M4.systems.m4cp1`/`M4.systems.m4cp2` evaluator rubrics (replacing the one
+shared generic `M4.system`); corrected the Cadence guide system and
+module-open greeting (old course name and personal-experience claim
+removed, "dry scalp vs dandruff" removed, replaced with the approved
+visible-feature → missing-context → cosmetic-implication → limit
+framing); and applied the same course-name/accessibility corrections
+already used in Modules 0–3. See `implementation-log.md` for the full
+step entry, including deferred manual QA items.
 
 Modules 5–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

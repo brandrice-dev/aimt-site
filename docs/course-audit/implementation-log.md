@@ -1379,3 +1379,238 @@ No file under `docs/course-audit/` was edited except this log entry.
 `headspa-mastery.html`, production JavaScript, course state, authentication,
 entitlements, payments, progress, certificates, and every module
 implementation were untouched. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 23: Module 4 implementation
+
+Implemented the approved Module 4 audit specification
+(`docs/course-audit/modules/module-04.md`). No other module was audited or
+edited.
+
+**Files changed:** `headspa-mastery.html` (full section rewrite of
+`#module4Wrap`, new CSS for the five-point stepper and observation-
+classification interaction, restructured `M4` checkpoint object, corrected
+Cadence guide system/quick-prompts/greeting, two new ungraded interaction
+functions). New assets: ten WebP derivatives under
+`assets/images/course/module-04/examination-areas/` and
+`assets/images/course/module-04/microscopy/` (see Assets below). No changes
+to `headspa-state.js` or `aimt-progress-sync.js`.
+
+**Section order implemented** (per module-04.md's "Final replacement
+copy," using the exact approved copy throughout): hero (updated
+description only — eyebrow/title unchanged); 4.1 role of magnification;
+4.2 presenting the assessment (live-view script, image-capture consent
+script, privacy note); 4.3 image integrity (six technique cards, sanitation
+note); 4.4 five-point scalp scan (new stepper interaction); 4.5 five
+observation lenses; "Say only what the image earned" classification
+interaction; `m4cp1`; 4.6 appearance examples (five-card illustrative
+gallery); oil-versus-residue comparison; 4.7 from image to decision (four
+cards); 4.8 when not to proceed (four warning groups, referral script,
+device-contamination note); 4.9 practitioner insight (five cards); 4.10
+common mistakes (six cards); `m4cp2`; completion card. The old five-region
+colored-dot grid and the old five scalp-type protocol cards (Neutral/
+balanced, Oily/congested, Dry/depleted, Sensitive/reactive, Congested) were
+removed entirely — no duplicate or dead markup from the prior taxonomy
+remains. The home-screen row subtitle for Module 4 was also updated to the
+approved "A repeatable system for collecting and interpreting visible
+evidence" (hero eyebrow/title, module ID `4`, and `module4Wrap` unchanged).
+
+**Interactions added** (both ungraded, non-persistent, no `APP_STATE`
+access anywhere in either function — verified by diffing
+`APP_STATE.data.progress['4']` before and after exercising both):
+- **Five-point scalp scan stepper** (`m4GoToStation`/`m4PrevStation`/
+  `m4NextStation`): five station panels (frontal hairline, top parting,
+  crown/vertex, temporal area, occipital/back), each showing its real
+  examination-area photo, purpose, and technique cue. Supports direct
+  station selection (five nav buttons), previous/next with disabled state
+  at both boundaries, an `aria-live="polite"` status region announcing
+  "Station N of 5: <name>", and a completion line shown once all five
+  stations have been viewed at least once. All DOM queries are scoped to
+  `#lessonView` (not bare `document.querySelectorAll`) so they only ever
+  match the live copy, never the hidden `module4Wrap` template that shares
+  the same classes — this sidesteps the positional-indexing fragility
+  already present in the shared `openStep()` accordion function (used by
+  Modules 2 and 3), which was deliberately not reused here. The temporal-
+  area station includes an inline note that it is a separate location
+  guide, not the same client as the other four stations.
+- **"Say only what the image earned"** (`m4Classify`): the five approved
+  statements, each with three classification buttons (Supported
+  observation / Working question / Unsupported conclusion). Selecting an
+  option shows the approved explanatory feedback text, tags the objectively
+  correct button "Correct answer" regardless of which option was picked
+  (persistent, not removed on a wrong pick), and tags an incorrect
+  selection "Not quite" — correctness is communicated with text, not color
+  alone (reusing the existing `.bq-opt`/`.bq-tag` pattern already used by
+  Module 2's judgment check and Module 3's predict-then-reveal
+  interaction). Answers can be changed freely; changing an answer clears
+  stale tags before re-adding them (verified — no duplicate tags after
+  repeated changes). A completion line appears once all five statements
+  have been classified at least once.
+
+**Checkpoint changes:** `m4cp1` and `m4cp2` IDs, `m4Complete`, module ID
+`4`, and `module4Wrap` are unchanged. Both checkpoints' displayed `.cp-q`
+text and `M4.questions[id]` now share one exact string each (verified
+programmatically — see Validation). `M4` was restructured from a single
+shared `system(q)` function (no itemized rubric, used identically for both
+checkpoints) to `M4.systems.m4cp1` / `M4.systems.m4cp2`, each an itemized
+rubric matching module-04.md's required pass elements, immediate-correction
+triggers, and revision-focus examples. `submitM4CP` now passes
+`M4.systems[id]` and the approved Module-4-specific network-error text
+("Cadence couldn't evaluate your assessment response. Check your
+connection and try again.") via `submitCheckpoint()`'s existing optional
+5th parameter — no shared function signature changed, so no other module's
+checkpoint behavior is affected. `m4cp1`'s label changed to "Read the full
+scan" and `m4cp2`'s to "Know when the image ends the service," both with
+new placeholders matching module-04.md. `aria-label="Speak your answer"`
+and `aria-label="Send response to Cadence"` were added to both
+checkpoints' voice/submit buttons, `aria-live="polite"` to both `.cp-res`
+regions; existing Enter-to-submit/Shift+Enter-for-new-line behavior
+(`m4cpKey`) and Review Mode's unsaved-submission path
+(`submitCheckpointReviewMode`) were not touched. `m4cp1` remains
+non-completion-gating for the rest of the lesson (placed after the
+classification interaction, well before 4.6 onward); both checkpoints
+remain required for normal-mode completion.
+
+**Cadence changes:** `MODULE_GUIDE_SYSTEMS[4]` replaced with the approved
+system prompt (course name is "Head Spa Certification Course," not
+"HeadSpa Mastery"; Cadence states guidance was built from the instructor's
+experience without claiming personal human practice; "dry scalp vs
+dandruff" removed; uses the visible-feature → missing-context →
+cosmetic-implication → limit structure). The module-open greeting
+(inside `openModuleById`'s greetings map) and `MODULE_QUICK_PROMPTS[4]`
+(now the four approved prompts) were replaced with the approved copy. No
+conflicting hardcoded quick-prompt set existed in Module 4's markup before
+or after this change (confirmed by search) — one authoritative source
+remains.
+
+**Assets:** all ten original PNG source files remain unmodified (byte
+sizes confirmed identical to the pre-implementation inventory in
+`module-04-assets.md`; `git status` shows no changes to any `.png` under
+`assets/images/course/module-04/`). Ten new WebP derivatives were created
+with Pillow (no `cwebp`/`magick`/`sips`-webp available in this
+environment):
+- Examination-area derivatives (no crop — the baked-in heading and
+  location-marker overlay are retained as approved content, only resized/
+  compressed): `exam-area-01-front-hairline.webp` (900×746, ~25.5KB),
+  `exam-area-02-top-parting.webp` (900×750, ~34.3KB),
+  `exam-area-03-crown-vertex.webp` (900×900, ~38.4KB),
+  `exam-area-04-temporal-area.webp` (900×900, ~34.2KB),
+  `exam-area-05-occipital-back.webp` (900×900, ~34.6KB). Used via
+  `<picture><source webp><img src="…png">` (original PNG as true
+  fallback, since content is identical, just uncompressed).
+- Microscopy derivatives (cropped to remove the decorative poster title,
+  subtitle, and border — verified visually on all five before use; no
+  change to the depicted scalp content beyond crop/resize/compression):
+  `microscopy-baseline-appearing.webp` (900×557, ~77.2KB),
+  `microscopy-oil-dominant.webp` (900×557, ~73.8KB),
+  `microscopy-fine-scale.webp` (900×556, ~111.3KB),
+  `microscopy-visible-color-change.webp` (900×558, ~109.9KB),
+  `microscopy-surface-residue.webp` (900×558, ~110.4KB). Used directly as
+  `<img src="….webp">` (no PNG fallback derivative was produced for these
+  — module-04.md's suggested-filenames list only names `.webp`; global
+  WebP support is high enough that this was judged an acceptable, minimal-
+  diff tradeoff rather than generating additional cropped-PNG derivatives
+  not requested by the spec). Every microscopy card and the oil/residue
+  comparison both carry the visible "Illustrative magnified example — not
+  a clinical diagnosis" label and the approved alt text; none are called
+  clinical photographs or graded for identification.
+
+**Accessibility:** semantic `<button type="button">` controls throughout
+(stepper nav/prev/next, classification options); `aria-current="step"` on
+the active stepper nav button; an `aria-live="polite"` status region for
+the current station; `aria-pressed` on classification buttons; text-based
+correct/incorrect tags (not color-only) on both new interactions,
+consistent with Modules 2/3's established pattern; meaningful alt text on
+all twelve production `<img>` elements (five stepper + five gallery +
+two reused in the oil/residue comparison); accessible "View full-size
+image" links (`target="_blank" rel="noopener"`) on all five appearance-
+gallery cards; no native `alert()` used anywhere in the new code; no
+content hidden from assistive technology to create the stepper's tab-like
+appearance (all five station panels are real DOM content, toggled via a
+CSS `display` class, not `aria-hidden` trickery that would also need
+management). No new `prefers-reduced-motion` media query was needed — the
+stepper and classification interaction introduce no CSS animation.
+
+**Validation performed** (local static-file testing via the in-app
+browser, `file://` load with `callAI` unreachable — no live API
+credentials in this environment):
+- Programmatically confirmed `m4cp1` and `m4cp2`'s displayed `.cp-q` text
+  is byte-identical to `M4.questions.m4cp1`/`m4cp2`.
+- Scanned the full `#module4Wrap` block: `<div>`/`<button>`/`<picture>`/
+  `<svg>`/`<textarea>`/`<a>` tag counts balanced; zero duplicate `id`
+  attributes introduced anywhere in the document (one pre-existing,
+  unrelated duplicate — `studentFirstName`, used in dynamically-replaced
+  greeting `innerHTML` elsewhere in the app — was found and confirmed
+  unrelated to this change).
+- Searched the new content and the updated `M4`/`MODULE_GUIDE_SYSTEMS[4]`
+  for every banned term: "HeadSpa Mastery," "seborrheic flaking,"
+  "rebound," "soft pink tone," "dry scalp vs dandruff," the old
+  personal-experience phrase, and the old "Congested"/"Oily / Congested"/
+  "Sensitive / Reactive Scalp" card names — zero matches (one intentional
+  exception: "clogged follicle" appears once, inside the approved "Do not
+  write" example in the observation-lenses section, teaching the student
+  not to write it).
+- Rendered the module live in-browser (`enterPurchasedCourseHome()` +
+  direct `module4Wrap` → `.lesson-wrap` injection, since Course Review
+  Mode's hostname allowlist does not include a bare `file://` origin and
+  was not modified to add one): confirmed zero console errors; confirmed
+  all twelve production images load successfully (`naturalWidth > 0`, zero
+  broken `<img>`); exercised the stepper via real `.click()` calls
+  (previous/next, direct selection to station 5, boundary-disable
+  correctness, `aria-current` correctness, live-region text, completion
+  line appearing only after all five stations were visited); exercised all
+  five classification statements via real `.click()` calls including
+  changing an answer from wrong to right (stale tag removed, no
+  duplicates) and confirmed the completion line appears only after all
+  five are answered; confirmed `APP_STATE.data.progress['4']` remained
+  `{checkpoints: [], checkpointMeta: {}, complete: false, …}` — byte-for-
+  byte the same shape before and after exercising both interactions,
+  confirming neither writes progress; submitted `m4cp1` with the network
+  unreachable and confirmed the exact approved error text renders in
+  `#m4cp1Res` and no `checkpointMeta` entry is written on failure; confirmed
+  `aria-label="Speak your answer"`/`"Send response to Cadence"` and
+  `aria-live="polite"` are present on both checkpoints; confirmed zero
+  horizontal overflow at a 375px viewport (`document.documentElement
+  .scrollWidth === clientWidth`) with Module 4's content loaded.
+
+**Requires manual QA (could not be verified in this environment):**
+- Live-model grading behavior against the new `M4.systems.m4cp1`/`m4cp2`
+  rubrics — checkpoint pass/fail/revision flows were only exercised via
+  the network-failure path (no reachable Anthropic API credentials in this
+  environment), not a real model response.
+- Screen-reader verification (VoiceOver/NVDA) of the stepper's
+  `aria-current`/live-region behavior and the classification interaction's
+  `aria-pressed`/tag behavior.
+- Physical-keyboard activation of the stepper and classification buttons —
+  native `<button type="button">` semantics guarantee activation in a real
+  browser, but this was only exercised via `.click()` in this environment,
+  consistent with the same limitation already noted for every prior
+  module's practice interactions.
+- Real touch-device verification of the stepper controls and classification
+  buttons.
+- Medical/dermatological subject-matter review of the corrected
+  device-framing, observation-lens, appearance-example, and referral
+  language.
+- Privacy/legal review of the image-consent and saved-image workflow
+  described in 4.2 (this module implements the approved instructional
+  copy only — no new storage, signature, or legal-record system was
+  built, per the specification).
+- Future replacement of the five illustrative microscopy derivatives with
+  authenticated, consented, de-identified clinical captures, per
+  module-04.md's own note that the current assets are generated
+  illustrations.
+- Visual/screenshot QA in a real browser — the in-app preview tool
+  rendered this `file://` page as a static snapshot that did not reflect
+  live DOM updates in its screenshots (confirmed via the tool's own
+  notice), so all interaction and responsive verification above was
+  performed via DOM assertions (`getComputedStyle`, attribute reads,
+  `scrollWidth`/`clientWidth`) rather than visual screenshots. A real
+  local-server or deployed-preview visual pass is still recommended.
+
+`docs/course-audit/modules/README.md` was updated to reflect Module 4
+status as **Implemented — awaiting manual QA** (not manually approved).
+Guided Completion Path UI, Listen Mode, persistent Cadence threads, Module
+12, and the proposed downloadable resource were not built, per instruction.
+Modules 0–3 and Module 5 were not extracted, audited, or edited. Work
+remains on branch `course-audit-build`.

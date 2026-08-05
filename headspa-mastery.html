@@ -1952,6 +1952,42 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .photo-pair { grid-template-columns: 1fr !important; }
 }
 
+/* ══ MODULE 4 — FIVE-POINT STEPPER + OBSERVATION CLASSIFICATION ══ */
+.aimt-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+.m4-stepper { margin: 1.5rem 0; }
+.m4-stepper-nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.1rem; }
+.m4-stepper-nav button {
+  flex: 1 1 18%; min-width:64px;
+  background: rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: 980px;
+  padding: 0.5rem 0.4rem; font-family: var(--aimt-font-mono); font-size:0.64rem; letter-spacing:0.03em;
+  color: var(--muted); cursor:pointer; transition: all 0.2s; text-align:center;
+}
+.m4-stepper-nav button:hover { background: rgba(255,255,255,0.9); border-color: var(--ash); }
+.m4-stepper-nav button:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m4-stepper-nav button[aria-current="step"] { background: var(--hero-bg); color:#fff; border-color: var(--hero-bg); }
+@media (max-width:600px) { .m4-stepper-nav button { flex-basis: 30%; font-size:0.6rem; } }
+
+.m4-station-panel { display:none; }
+.m4-station-panel.active { display:block; }
+.m4-station-head { display:flex; align-items:baseline; gap:10px; margin-bottom:0.75rem; }
+.m4-station-num { font-family: var(--aimt-font-mono); font-size:0.68rem; color: var(--muted2); }
+.m4-station-name { font-size:1rem; font-weight:500; }
+.m4-station-controls { display:flex; justify-content:space-between; gap:10px; margin-top:1.1rem; }
+.m4-station-controls button {
+  background: rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius:980px;
+  padding:0.55rem 1.1rem; font-family:var(--aimt-font-sans); font-size:0.8rem; font-weight:500;
+  color:var(--text); cursor:pointer; transition: all 0.2s;
+}
+.m4-station-controls button:hover:not(:disabled) { background: rgba(255,255,255,0.9); }
+.m4-station-controls button:disabled { opacity:0.4; cursor:default; }
+.m4-station-controls button:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+
+.m4-classify-block { margin: 1.5rem 0; }
+.m4-classify-quote { font-family: var(--aimt-font-serif); font-style:italic; font-size:0.95rem; color:var(--text); line-height:1.6; margin-bottom:0.75rem; }
+.m4-classify-opts { display:flex; flex-wrap:wrap; gap:8px; }
+.m4-classify-opts .bq-opt { flex: 1 1 auto; min-width: 150px; }
+
 /* ══ MODULE 8 — STEP VIDEOS ══ */
 .sms-video {
   margin-top: 1rem;
@@ -2305,7 +2341,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="4" onclick="openModuleById(4)">
         <div class="mr-num mr-active" id="mnum-4">4</div>
-        <div class="mr-info"><div class="mr-title">Module 4 — Microscopy & Scalp Assessment</div><div class="mr-sub">How to use assessment as a service tool</div></div>
+        <div class="mr-info"><div class="mr-title">Module 4 — Microscopy & Scalp Assessment</div><div class="mr-sub">A repeatable system for collecting and interpreting visible evidence</div></div>
         <span class="mr-badge mb-active" id="mbadge-4">Start</span>
       </div>
       <div class="module-row" data-module-id="5" onclick="openModuleById(5)">
@@ -3254,321 +3290,616 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 4 · Microscopy &amp; Scalp Assessment</div>
       <div class="mh-title">Stop assuming.<br>Start seeing.</div>
-      <div class="mh-desc">Scalp microscopy changes the service from a relaxing treatment into a customized one. This module teaches you how to use it — not as a performance, but as a genuine decision-making tool that guides everything you do next.</div>
+      <div class="mh-desc">Magnification does not hand you a diagnosis. It gives you a better view. This module teaches a repeatable five-point scan, disciplined observation, and the moment a cosmetic service should be customized, simplified, paused, or referred.</div>
     </div>
 
-    <div class="sec-eyebrow">Why it matters</div>
-    <div class="sec-title">A microscope makes you a better observer. That's it.</div>
-    <div class="body-text">Scalp microscopy lets both you and the client actually see what's happening on the scalp rather than guessing. For you it trains the eye — over time you begin recognizing patterns in oil production, buildup, follicle appearance, and density that would be invisible otherwise. For the client it often creates a moment of genuine clarity. Many clients have never seen their scalp up close. Once they do, they take your recommendations far more seriously.</div>
-    <div class="body-text">That said — a microscope does not make you a medical professional. It makes you a better observer. You are using it to notice what is present, identify visible patterns, and determine whether the scalp is appropriate for treatment. You are not using it to diagnose disease or claim certainty about a medical condition. That distinction matters every single time.</div>
+    <div class="sec-eyebrow">4.1 — The role of magnification</div>
+    <div class="sec-title">A closer view is not a final answer.</div>
+    <div class="body-text">A scalp camera can reveal details that are easy to miss with the unaided eye: surface shine, scale, residue, material around follicular openings, hair-shaft variation, and differences from one region to another.</div>
+    <div class="body-text">That does not mean the device knows what caused what you see. Medical trichoscopy is a clinical diagnostic technique interpreted alongside history, examination, and other medical information. In a head spa, scalp microscopy is a cosmetic observation and education tool.</div>
+    <div class="body-text">Its value is precision—not certainty. It helps you collect better evidence before you choose a cosmetic service direction.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">The image can sharpen the question. It cannot answer every question.</div>
+    </div>
 
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"The best thing microscopy does is stop you from making assumptions. A client tells you their scalp is dry — and what you see is oily congestion and seborrheic flaking. Without the microscope you might have reached for the wrong thing entirely. That's the point. It helps you stop guessing and start responding to what's actually there."</div>
+      <div class="cn-text">"A weak assessment names the scalp too quickly. A strong assessment collects the view, compares regions, asks for context, and lets the service decision remain no more certain than the evidence."</div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">Presenting it to the client</div>
-    <div class="sec-title">Keep it calm, educational, and simple.</div>
-    <div class="body-text">The way you introduce scalp assessment matters. You don't want the client to feel examined, judged, or alarmed. Keep the framing straightforward and positive — you're customizing their service, not searching for problems.</div>
+    <div class="sec-eyebrow">4.2 — Presenting the assessment</div>
+    <div class="sec-title">Make the lens feel informative—not invasive.</div>
+    <div class="body-text">Tell the client what the camera is for before it touches the scalp. The assessment should feel like part of customization, not a search for something wrong.</div>
 
     <div class="clinical-note">
-      <div class="cn2-label">Script to use</div>
-      <div class="cn2-text">"As part of your service today, I'm going to take a look at your scalp up close so I can better understand what your scalp environment looks like and tailor the treatment accordingly."</div>
-    </div>
-
-    <div class="body-text">That language keeps it professional without sounding clinical or intimidating. You can explain you'll be looking at buildup around the follicles, visible oil production, dryness or flaking, any signs of irritation, and overall scalp balance. This helps clients understand that assessment is part of customizing — not part of diagnosing — the service.</div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">4.2 — Technique</div>
-    <div class="sec-title">The process matters more than the device.</div>
-
-    <div class="body-text">Using a scalp microscope well is less about the tool and more about your approach. Poor technique produces misleading images, rushed conclusions, and weak client education. Good technique makes the entire service feel elevated and trustworthy.</div>
-
-    <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>When to assess:</strong> At minimum, before the treatment begins — before water, exfoliants, or products touch the scalp. Many practitioners also briefly check at the end. Clients can often see the difference in clarity and cleanliness after treatment, which reinforces the value of what you did.</div>
-    </div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Regions to assess</div>
-    <div class="body-text">Don't look at one section and assume it tells the whole story. The scalp is rarely uniform. Some clients show more buildup at the crown, sensitivity around the hairline, or oiliness through the top while the sides remain balanced. A thorough assessment covers multiple regions.</div>
-
-    <div class="scalp-type-grid" style="grid-template-columns: repeat(5,1fr); gap:8px; margin: 1.25rem 0;">
-      <div class="scalp-card" style="text-align:center; padding: 0.85rem 0.5rem;">
-        <div class="sc-indicator" style="background:#a3968d; margin: 0 auto 8px;"></div>
-        <div class="sc-name" style="font-size:0.72rem;">Frontal<br>hairline</div>
-      </div>
-      <div class="scalp-card" style="text-align:center; padding: 0.85rem 0.5rem;">
-        <div class="sc-indicator" style="background:#a3968d; margin: 0 auto 8px;"></div>
-        <div class="sc-name" style="font-size:0.72rem;">Top<br>parting</div>
-      </div>
-      <div class="scalp-card" style="text-align:center; padding: 0.85rem 0.5rem;">
-        <div class="sc-indicator" style="background:#a3968d; margin: 0 auto 8px;"></div>
-        <div class="sc-name" style="font-size:0.72rem;">Crown<br>vertex</div>
-      </div>
-      <div class="scalp-card" style="text-align:center; padding: 0.85rem 0.5rem;">
-        <div class="sc-indicator" style="background:#a3968d; margin: 0 auto 8px;"></div>
-        <div class="sc-name" style="font-size:0.72rem;">Temporal<br>area</div>
-      </div>
-      <div class="scalp-card" style="text-align:center; padding: 0.85rem 0.5rem;">
-        <div class="sc-indicator" style="background:#a3968d; margin: 0 auto 8px;"></div>
-        <div class="sc-name" style="font-size:0.72rem;">Occipital<br>back</div>
-      </div>
-    </div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Technique essentials</div>
-    <div class="body-text">Part the hair cleanly so the scalp is visible. Don't press the microscope too hard into the scalp — excess pressure creates temporary redness that makes a healthy scalp look reactive. Rest the tool lightly and steadily. Hold it in one place long enough to actually interpret what you're seeing before moving on. The most common beginner mistake is moving too quickly, constantly shifting without allowing time to understand what's on the screen. The purpose is not to rush through an inspection — it's to gather useful information.</div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">4.3 — What you're seeing</div>
-    <div class="sec-title">Five patterns you'll encounter most often.</div>
-    <div class="body-text">You're looking for broad visible patterns — not trying to force a diagnosis. Your interpretation guides treatment. Here's what each pattern typically looks like and what it tells you.</div>
-
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon neutral-icon">N</div>
-        <div><div class="pc-title">Neutral / balanced</div><div class="pc-sub">The baseline to recognize</div></div>
-        <div class="pc-badge neutral-badge">Preserve</div>
-      </div>
-      <div class="pc-body">
-        <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Neutral / Balanced Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Slight sheen, clear follicle openings, calm pink tone</div>
-      </div>
-        <div class="pc-row"><span class="pc-label">What you see</span><span class="pc-val">Slight natural sheen without greasiness. Follicle openings relatively clear. Calm, even color — soft pink tone rather than redness or dullness.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">What it means</span><span class="pc-val">No aggressive correction needed. Focus on maintenance, preservation, and what the client's goals are rather than fixing an imbalance.</span></div>
-      </div>
-    </div>
-
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon oily-icon">O</div>
-        <div><div class="pc-title">Oily / congested</div><div class="pc-sub">Excess sebum and buildup</div></div>
-        <div class="pc-badge oily-badge">Clarify</div>
-      </div>
-      <div class="pc-body">
-        <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Oily / Congested Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Visible sebum at follicle openings, yellowish congestion</div>
-      </div>
-        <div class="pc-row"><span class="pc-label">What you see</span><span class="pc-val">Shiny appearance, visible sebum surrounding follicle openings, possible oil pooling at base of hairs, yellowish congestion around follicles.</span></div>
-        <div class="pc-row"><span class="pc-label">Client reports</span><span class="pc-val">Gets greasy quickly, feels like product sits on scalp, needs to wash often.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">What it means</span><span class="pc-val">Protocol leans clarifying. But don't over-strip — that triggers more oil production as compensation.</span></div>
-      </div>
-    </div>
-
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon dry-icon">D</div>
-        <div><div class="pc-title">Dry / depleted</div><div class="pc-sub">Barrier compromise</div></div>
-        <div class="pc-badge dry-badge">Restore</div>
-      </div>
-      <div class="pc-body">
-        <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Dry / Depleted Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Matte surface, fine white powdery flakes, minimal oil</div>
-      </div>
-        <div class="pc-row"><span class="pc-label">What you see</span><span class="pc-val">Matte, less reflective surface. Little visible oil at follicle openings. Finer, drier, lighter flakes than seborrheic flaking.</span></div>
-        <div class="pc-row"><span class="pc-label">Client reports</span><span class="pc-val">Tightness, itchiness, flaking without feeling oily.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">What it means</span><span class="pc-val">Protocol focuses on gentle hydration and barrier support. Avoid anything stripping.</span></div>
-      </div>
-    </div>
-
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon sensitive-icon">S</div>
-        <div><div class="pc-title">Sensitive / reactive</div><div class="pc-sub">Fragile barrier, visible redness</div></div>
-        <div class="pc-badge sensitive-badge">Soothe</div>
-      </div>
-      <div class="pc-body">
-        <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Sensitive / Reactive Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Visible redness, fragile barrier, inflamed areas</div>
-      </div>
-        <div class="pc-row"><span class="pc-label">What you see</span><span class="pc-val">Visible redness, reactivity, delicate overall appearance. May show flushing or inflamed areas.</span></div>
-        <div class="pc-row"><span class="pc-label">Client reports</span><span class="pc-val">Stinging, burning, itching, or easy irritation from products, temperature, or friction.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">What it means</span><span class="pc-val">Slow down. Reduce stimulation. Not every red scalp is a crisis — but redness should make you more selective about everything you do.</span></div>
-      </div>
-    </div>
-
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon combo-icon">C</div>
-        <div><div class="pc-title">Congested</div><div class="pc-sub">Buildup, coating, residue</div></div>
-        <div class="pc-badge combo-badge">Clarify gently</div>
-      </div>
-      <div class="pc-body">
-        <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Congested Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Buildup at follicle openings, coated surface residue</div>
-      </div>
-        <div class="pc-row"><span class="pc-label">What you see</span><span class="pc-val">Buildup at follicle openings, residue on scalp surface, coated appearance from sebum, dead skin, product residue, or infrequent cleansing.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">What it means</span><span class="pc-val">May benefit from exfoliation and clarifying support — as long as the scalp is not also inflamed or sensitive. Congested and sensitive can coexist.</span></div>
-      </div>
-    </div>
-
-    <div class="cadence-note" style="margin-top:1.5rem;">
-      <div class="cn-label">What this looks like in real time</div>
-      <div class="cn-text">"You see flaking, slight shine, and buildup at the follicle. The weak interpretation: dry scalp, needs hydration. The stronger interpretation: possible oil plus buildup with flaking — likely needs cleansing support, not just moisture. You see redness and the client says 'it's sensitive.' The weak interpretation: inflamed scalp, treat it aggressively to fix it. The stronger: reactive scalp — reduce stimulation, simplify the service, avoid overworking the area. You see clean follicles and balanced sheen. The weak interpretation: nothing to do. The stronger: maintain balance — don't overcorrect what isn't a problem. This is where most people get it wrong. They react to what's visible instead of interpreting what it means."</div>
-    </div>
-
-    <div class="info-card" style="margin-top:1.25rem;">
-      <div class="ic-title">Most scalps are not one category</div>
-      <div class="body-text" style="margin:0">One of the most common mistakes is trying to label a scalp too quickly. In reality you'll often see oily at the crown, dry at the hairline, buildup in one section, and sensitivity in another. If you treat the entire scalp the same way, you will overcorrect one area and under-treat another. Strong practitioners adjust within the service. Not everything needs to be uniform.</div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">4.4 — When not to treat</div>
-    <div class="sec-title">This is where professionalism matters most.</div>
-
-    <div class="body-text">An inexperienced practitioner thinks they need to do something every time. An experienced practitioner knows when not to proceed. This section is one of the most important in the course — because restraint here protects both the client and your career.</div>
-
-    <div class="key-point">
-      <div class="kp-icon">⚠️</div>
-      <div class="kp-text"><strong>Default rule:</strong> If you are unsure whether something is appropriate to treat, default to caution. A referral is not a failure. It is a sign that you understand your role.</div>
+      <div class="cn2-label">Live-view script</div>
+      <div class="cn2-text">"Before we begin, I'm going to look at several areas of your scalp under magnification. I'll use what is visible—along with what you tell me—to customize the cosmetic service. The camera helps us see detail, but it does not diagnose a scalp condition."</div>
     </div>
 
     <div class="clinical-note">
-      <div class="cn2-label">Do not treat — signs of possible infection</div>
-      <div class="cn2-text">Pustules or pus-filled lesions, areas that appear actively infected, crusting with tenderness, suspicious fungal-looking patches, weeping or oozing areas. Refer to a medical professional before treatment.</div>
-    </div>
-
-    <div class="clinical-note">
-      <div class="cn2-label">Do not treat — open, broken, or actively injured scalp</div>
-      <div class="cn2-text">Cuts, abrasions, scratched-open areas, raw or bleeding spots, recent surgical sites, unhealed wounds. Water, friction, exfoliation, and product application can all worsen these areas and increase contamination risk.</div>
-    </div>
-
-    <div class="clinical-note">
-      <div class="cn2-label">Do not treat — severe inflammation</div>
-      <div class="cn2-text">A mildly reactive scalp may still be manageable with care. But if the scalp is intensely red, painful, hot, swollen, or clearly inflamed — that moves outside the range of a relaxing scalp service. Refer out.</div>
-    </div>
-
-    <div class="clinical-note">
-      <div class="cn2-label">Do not treat — suspected medical hair loss</div>
-      <div class="cn2-text">Sudden patchy loss, smooth bald spots, unusual shedding patterns, shiny scar-like areas, follicle absence, or eyebrow/lash loss alongside scalp loss. These are not buildup, dryness, or poor circulation. These require medical evaluation.</div>
-    </div>
-
-    <div class="clinical-note">
-      <div class="cn2-label">Do not continue — if the client reports unexpected pain</div>
-      <div class="cn2-text">Tenderness, burning, sharp pain, or discomfort that seems disproportionate should be taken seriously. Pain is not something to massage through just because the scalp looks okay.</div>
-    </div>
-
-    <div class="cadence-note" style="margin-top:1.5rem">
-      <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"Don't treat the client anyway because you don't want to lose the appointment. That decision comes from insecurity, not professionalism. If the scalp looks inappropriate for treatment — you pause, you explain, you refer. The script is simple: 'Based on what I'm seeing today, I think it would be best to pause and have you seen by a dermatologist first. Once that's been evaluated, I'd love to support your scalp in a way that's appropriate.' That language protects them and protects you."</div>
-    </div>
-
-    <div class="key-point">
-      <div class="kp-icon">⚠️</div>
-      <div class="kp-text"><strong>Where practitioners go wrong here:</strong> They continue the service anyway. They downplay what they're seeing. They avoid referral because it feels uncomfortable. That is not confidence. That is avoidance. If something looks inappropriate to treat — you stop.</div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">4.5 — Practitioner insight</div>
-    <div class="sec-title">What experience actually teaches you.</div>
-
-    <div class="body-text">These are the patterns that come with time — the things that are hard to teach in a classroom but easy to internalize once you know to look for them.</div>
-
-    <div class="info-card">
-      <div class="ic-title">Flakes do not automatically mean dryness</div>
-      <div class="body-text" style="margin:0">Many flaky scalps are oily, congested, or yeast-driven. If the scalp is shiny and the flakes are clumped, yellowish, or sticking near the follicle — don't automatically reach for a hydrating story. Look at the whole environment.</div>
+      <div class="cn2-label">Image-capture consent script</div>
+      <div class="cn2-text">"I can use the camera for a live view without saving anything. I can also capture comparison images for your service record. Would you like me to save them, and may I explain how they will be stored and used?"</div>
     </div>
 
     <div class="info-card">
-      <div class="ic-title">Product buildup can mimic scalp conditions</div>
-      <div class="body-text" style="margin:0">Dry shampoo, styling products, root sprays, and heavy leave-ins can make a scalp look far worse than it actually is. Always consider whether what you're seeing could be residue before assuming it's a condition.</div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">Pressure creates fake redness</div>
-      <div class="body-text" style="margin:0">Press too hard with the microscope and you'll create temporary redness — then potentially treat a reaction you caused. Light touch matters. Rest the tool, don't press it.</div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">Clients believe what they can see</div>
-      <div class="body-text" style="margin:0">When clients visually understand their scalp they are far more likely to follow your recommendations and take home care seriously. The microscope isn't just for you — it's one of the strongest trust-building tools in the service when used correctly.</div>
+      <div class="ic-title">Privacy note</div>
+      <div class="body-text" style="margin:0">Permission to view is not permission to save. Permission to save for the client record is not permission to post, teach from, transmit to another service, or use in marketing.</div>
     </div>
 
     <div class="key-point">
       <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>Quick reality check:</strong> Microscopy does not make you more advanced. Your interpretation does. Two practitioners can look at the same scalp and make completely different decisions. That is the skill you are building.</div>
+      <div class="kp-text"><strong>Client-language rule:</strong> Show the image without making the client feel dirty, damaged, or alarmed. Describe the finding. Explain the cosmetic decision. State the limit when the cause cannot be determined.</div>
     </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.3 — Image integrity</div>
+    <div class="sec-title">A useful image begins before the lens touches the scalp.</div>
+    <div class="body-text">Magnification can exaggerate a poor setup. Standardize the conditions before you interpret the screen.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">1. Start before treatment</div></div>
+        <div class="cc-body">Assess before water, exfoliants, oils, masks, steam, or treatment products alter the surface.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">2. Ask what is already on the scalp</div></div>
+        <div class="cc-body">Record wash timing, dry shampoo, root sprays, oils, fibers, medicated products, chemical services, and recent scratching or irritation.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">3. Part cleanly</div></div>
+        <div class="cc-body">Create a clear view without scraping or repeatedly disturbing the same area.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">4. Touch lightly</div></div>
+        <div class="cc-body">Rest the device steadily. Excess pressure can blanch or redden the skin and create the finding you think you discovered.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">5. Hold the view</div></div>
+        <div class="cc-body">Stay long enough to inspect the image. A constant visual sweep produces motion, blur, and shallow interpretation.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a3968d"></div><div class="cc-h-title">6. Make comparisons honest</div></div>
+        <div class="cc-body">Match region, magnification, light, pressure, orientation, and device settings when comparing two images.</div>
+      </div>
+    </div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">Sanitation note</div>
+      <div class="cn2-text">Clean and disinfect reusable contact surfaces before and after each client according to the manufacturer's instructions and applicable rules. Do not place the device on broken, bleeding, weeping, oozing, or draining skin.</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">⚠️</div>
+      <div class="kp-text">If the setup changes, the image changes. Document the difference before you call it improvement.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.4 — The five-point scalp scan</div>
+    <div class="sec-title">Five stations prevent one-angle thinking.</div>
+    <div class="body-text">The scalp is not uniform. AIMT's baseline scan uses the same five stations in the same order so the practitioner does not let one dramatic image represent the entire head.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Memory line:</strong> Front. Top. Crown. Side. Back.</div>
+    </div>
+
+    <div class="interaction-hint">Use the arrows or select a station directly</div>
+
+    <div class="m4-stepper" id="m4Stepper">
+      <div class="m4-stepper-nav" role="group" aria-label="Five-point scalp scan stations">
+        <button type="button" id="m4station-btn-0" aria-current="step" onclick="m4GoToStation(0)">1 · Frontal</button>
+        <button type="button" id="m4station-btn-1" aria-current="false" onclick="m4GoToStation(1)">2 · Top</button>
+        <button type="button" id="m4station-btn-2" aria-current="false" onclick="m4GoToStation(2)">3 · Crown</button>
+        <button type="button" id="m4station-btn-3" aria-current="false" onclick="m4GoToStation(3)">4 · Temporal</button>
+        <button type="button" id="m4station-btn-4" aria-current="false" onclick="m4GoToStation(4)">5 · Occipital</button>
+      </div>
+
+      <div class="aimt-sr-only" id="m4StationAnnounce" aria-live="polite" role="status"></div>
+
+      <div class="m4-station-panel active" id="m4station-0">
+        <div class="clinical-photo">
+          <picture>
+            <source srcset="assets/images/course/module-04/examination-areas/exam-area-01-front-hairline.webp" type="image/webp">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-01-front-hairline.png" alt="Front view of a head with the frontal hairline marked as the first scalp-magnification assessment station.">
+          </picture>
+        </div>
+        <div class="m4-station-head"><div class="m4-station-num">Station 1 of 5</div><div class="m4-station-name">Frontal hairline</div></div>
+        <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Establish the visible condition along the hairline, where styling products, cosmetics, tension, scale, and client concerns may be easiest to notice.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Separate hair gently and avoid rubbing the hairline before the image is captured.</span></div>
+      </div>
+
+      <div class="m4-station-panel" id="m4station-1">
+        <div class="clinical-photo">
+          <picture>
+            <source srcset="assets/images/course/module-04/examination-areas/exam-area-02-top-parting.webp" type="image/webp">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-02-top-parting.png" alt="Top view of a head with the central top parting marked as the second scalp-magnification assessment station.">
+          </picture>
+        </div>
+        <div class="m4-station-head"><div class="m4-station-num">Station 2 of 5</div><div class="m4-station-name">Top parting</div></div>
+        <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Collect a consistent central view of the scalp surface, follicular openings, and hair distribution along the part.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Use the same part location when creating a future comparison.</span></div>
+      </div>
+
+      <div class="m4-station-panel" id="m4station-2">
+        <div class="clinical-photo">
+          <picture>
+            <source srcset="assets/images/course/module-04/examination-areas/exam-area-03-crown-vertex.webp" type="image/webp">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-03-crown-vertex.png" alt="Upper rear view of a head with the crown or vertex marked as the third scalp-magnification assessment station.">
+          </picture>
+        </div>
+        <div class="m4-station-head"><div class="m4-station-num">Station 3 of 5</div><div class="m4-station-name">Crown / vertex</div></div>
+        <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Compare the crown with the parting and hairline rather than assuming the central scalp presents uniformly.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Work with the natural swirl instead of forcing the shafts flat across the view.</span></div>
+      </div>
+
+      <div class="m4-station-panel" id="m4station-3">
+        <div class="clinical-photo">
+          <picture>
+            <source srcset="assets/images/course/module-04/examination-areas/exam-area-04-temporal-area.webp" type="image/webp">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-04-temporal-area.png" alt="Side view of a head with the temporal scalp marked as the fourth scalp-magnification assessment station.">
+          </picture>
+        </div>
+        <div class="m4-station-head"><div class="m4-station-num">Station 4 of 5</div><div class="m4-station-name">Temporal area</div></div>
+        <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Observe a lateral region and compare it with the central scalp.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Check the opposite side when asymmetry, tension, tenderness, or localized concern is reported.</span></div>
+        <div class="body-text" style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted)">This station uses a separate location-guide photo, not the same client shown in the other four stations — each image is an independent procedural reference.</div>
+      </div>
+
+      <div class="m4-station-panel" id="m4station-4">
+        <div class="clinical-photo">
+          <picture>
+            <source srcset="assets/images/course/module-04/examination-areas/exam-area-05-occipital-back.webp" type="image/webp">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-05-occipital-back.png" alt="Back view of a head with the occipital scalp marked as the fifth scalp-magnification assessment station.">
+          </picture>
+        </div>
+        <div class="m4-station-head"><div class="m4-station-num">Station 5 of 5</div><div class="m4-station-name">Occipital / back</div></div>
+        <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Include the hidden posterior scalp, which may look different from the areas the client sees and styles most often.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Position the hair securely so the lens remains steady and the client does not have to hold an uncomfortable posture.</span></div>
+      </div>
+
+      <div class="m4-station-controls">
+        <button type="button" id="m4StationPrev" onclick="m4PrevStation()" disabled>← Previous station</button>
+        <button type="button" id="m4StationNext" onclick="m4NextStation()">Next station →</button>
+      </div>
+
+      <div class="practice-feedback" id="m4StepperComplete" aria-live="polite" style="display:none;">A five-point scan creates the baseline. The client's concern tells you where to add targeted views.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.5 — The five observation lenses</div>
+    <div class="sec-title">Do not label the scalp. Read the evidence.</div>
+    <div class="body-text">Use the same five lenses at every station. They keep the assessment specific enough to be useful and restrained enough to remain honest.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">1. Scalp surface</div></div>
+        <div class="cc-body">
+          <strong>Look for:</strong> Color relative to the client's surrounding baseline, sheen, loose or adherent scale, visible coating, residue, and whether the skin is intact.<br><br>
+          <strong>Document like this:</strong> "Diffuse surface shine at the crown with small areas of adherent yellow-white material."
+        </div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">2. Follicular openings</div></div>
+        <div class="cc-body">
+          <strong>Look for:</strong> Whether openings are visible and whether material is present at or near them.<br><br>
+          <strong>Document like this:</strong> "Several openings show visible material around the emerging shafts."<br><br>
+          <strong>Do not write:</strong> "The follicles are clogged."
+        </div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">3. Perifollicular area</div></div>
+        <div class="cc-body">
+          <strong>Look for:</strong> Color change, scale, or visible material immediately surrounding a follicle.<br><br>
+          <strong>Document like this:</strong> "Color change and fine scale are visible around several follicles in this station."
+        </div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">4. Hair shafts</div></div>
+        <div class="cc-body">
+          <strong>Look for:</strong> Visible breakage, coating, residue, variation in shaft appearance, and the number of shafts visible in the field.<br><br>
+          <strong>Document like this:</strong> "Short and longer shafts are visible in the same field; several shafts have surface residue."<br><br>
+          <strong>Limit:</strong> One image cannot establish the cause of breakage, thinning, or shaft variation.
+        </div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">5. Distribution</div></div>
+        <div class="cc-body">
+          <strong>Look for:</strong> Whether the finding is localized, diffuse, symmetric, or different from another station.<br><br>
+          <strong>Document like this:</strong> "The crown shows more surface shine and residue than the frontal hairline."
+        </div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Distribution is often more useful than the most dramatic close-up.</strong> One image is a detail. The scan is the pattern.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">Observation discipline</div>
+    <div class="sec-title">Say only what the image earned.</div>
+    <div class="body-text">Classify each statement as a supported observation, a working question, or an unsupported conclusion.</div>
+
+    <div class="m4-classify-block" id="m4Statement1">
+      <div class="m4-classify-quote">"The crown shows diffuse shine and visible yellow-white material around several follicular openings."</div>
+      <div class="m4-classify-opts">
+        <button type="button" class="bq-opt" data-choice="supported" onclick="m4Classify(1,'supported',this)" aria-pressed="false">Supported observation</button>
+        <button type="button" class="bq-opt" data-choice="question" onclick="m4Classify(1,'question',this)" aria-pressed="false">Working question</button>
+        <button type="button" class="bq-opt" data-choice="unsupported" onclick="m4Classify(1,'unsupported',this)" aria-pressed="false">Unsupported conclusion</button>
+      </div>
+      <div class="bq-feedback" id="m4Statement1Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m4-classify-block" id="m4Statement2">
+      <div class="m4-classify-quote">"Could the visible material be influenced by dry shampoo, root spray, oil, or wash timing?"</div>
+      <div class="m4-classify-opts">
+        <button type="button" class="bq-opt" data-choice="supported" onclick="m4Classify(2,'supported',this)" aria-pressed="false">Supported observation</button>
+        <button type="button" class="bq-opt" data-choice="question" onclick="m4Classify(2,'question',this)" aria-pressed="false">Working question</button>
+        <button type="button" class="bq-opt" data-choice="unsupported" onclick="m4Classify(2,'unsupported',this)" aria-pressed="false">Unsupported conclusion</button>
+      </div>
+      <div class="bq-feedback" id="m4Statement2Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m4-classify-block" id="m4Statement3">
+      <div class="m4-classify-quote">"The client's follicles are clogged because they do not shampoo enough."</div>
+      <div class="m4-classify-opts">
+        <button type="button" class="bq-opt" data-choice="supported" onclick="m4Classify(3,'supported',this)" aria-pressed="false">Supported observation</button>
+        <button type="button" class="bq-opt" data-choice="question" onclick="m4Classify(3,'question',this)" aria-pressed="false">Working question</button>
+        <button type="button" class="bq-opt" data-choice="unsupported" onclick="m4Classify(3,'unsupported',this)" aria-pressed="false">Unsupported conclusion</button>
+      </div>
+      <div class="bq-feedback" id="m4Statement3Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m4-classify-block" id="m4Statement4">
+      <div class="m4-classify-quote">"The temporal area looks darker and the client reports burning, so I would avoid stimulation there and ask whether this is new."</div>
+      <div class="m4-classify-opts">
+        <button type="button" class="bq-opt" data-choice="supported" onclick="m4Classify(4,'supported',this)" aria-pressed="false">Supported observation</button>
+        <button type="button" class="bq-opt" data-choice="question" onclick="m4Classify(4,'question',this)" aria-pressed="false">Working question</button>
+        <button type="button" class="bq-opt" data-choice="unsupported" onclick="m4Classify(4,'unsupported',this)" aria-pressed="false">Unsupported conclusion</button>
+      </div>
+      <div class="bq-feedback" id="m4Statement4Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m4-classify-block" id="m4Statement5">
+      <div class="m4-classify-quote">"This is seborrheic dermatitis."</div>
+      <div class="m4-classify-opts">
+        <button type="button" class="bq-opt" data-choice="supported" onclick="m4Classify(5,'supported',this)" aria-pressed="false">Supported observation</button>
+        <button type="button" class="bq-opt" data-choice="question" onclick="m4Classify(5,'question',this)" aria-pressed="false">Working question</button>
+        <button type="button" class="bq-opt" data-choice="unsupported" onclick="m4Classify(5,'unsupported',this)" aria-pressed="false">Unsupported conclusion</button>
+      </div>
+      <div class="bq-feedback" id="m4Statement5Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="bq-feedback" id="m4ClassifyComplete" aria-live="polite" style="display:none;">Strong assessment language is precise about what is visible and disciplined about what remains unknown.</div>
 
     <hr class="divider">
 
     <div class="checkpoint" id="m4cp1">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Check your understanding</div>
+        <div class="cp-label">Read the full scan</div>
       </div>
-      <div class="cp-q">A client sits down and shows you a scalp that's visibly flaky. Before you reach for any products, what are the two completely different scalp situations that could be causing the flaking — and why does it matter which one it is?</div>
+      <div class="cp-q">During a five-point scan, the crown appears shiny with visible material around several follicular openings, while the frontal hairline looks matte with fine loose scale. The client reports no pain or burning. Describe what you would document, explain why one label for the entire scalp would be weak, and name one question you would ask before deciding how to adjust the service.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m4cp1In" placeholder="Think through what flaking can actually signal..." rows="1" oninput="grow(this)" onkeydown="m4cpKey(event,'m4cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m4cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m4cp1In" placeholder="Describe the two regions, explain the limit of one label, and ask for the missing context…" rows="1" oninput="grow(this)" onkeydown="m4cpKey(event,'m4cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m4cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m4cp1Btn" onclick="submitM4CP('m4cp1')">
+        <button class="cp-btn" id="m4cp1Btn" onclick="submitM4CP('m4cp1')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m4cp1Res"></div>
+      <div class="cp-res" id="m4cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.6 — Common mistakes</div>
-    <div class="sec-title">What to unlearn before it becomes a habit.</div>
+    <div class="sec-eyebrow">4.6 — Appearance examples</div>
+    <div class="sec-title">Patterns overlap. That is why labels fail.</div>
+    <div class="body-text">These images build visual vocabulary. They are illustrative magnified examples, not authenticated clinical captures and not proof of a diagnosis. Use each one to practice description, questioning, and restraint.</div>
 
-    <div class="body-text">These are the patterns that show up most in new practitioners — not because of bad intentions, but because they haven't yet developed the habits that come from repetition and honest feedback.</div>
+    <div class="info-card">
+      <div class="ic-title">Illustrative examples</div>
+      <div class="body-text" style="margin:0">Actual scalp appearance varies by client, skin tone, lighting, magnification, device, product history, and image conditions.</div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon neutral-icon">1</div>
+        <div><div class="pc-title">Baseline-appearing view</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-baseline-appearing.webp" alt="Illustrative magnified scalp view with visible hair shafts, relatively clear follicular openings, and minimal obvious surface scale or residue.">
+        </div>
+        <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
+        <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">Relatively even surface appearance, visible follicular openings, minimal obvious scale or coating, and no pronounced localized color change in the field.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">The client's own baseline, product use, sensation, and comparison with the other four stations.</span></div>
+        <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">Avoid unnecessary correction. Preserve what is working and follow the client's cosmetic goals.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">That the scalp is universally "healthy," medically normal, or free of a condition outside the camera's view.</span></div>
+        <a href="assets/images/course/module-04/microscopy/microscopy-baseline-appearing.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon oily-icon">2</div>
+        <div><div class="pc-title">Oil-dominant appearance</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-oil-dominant.webp" alt="Illustrative magnified scalp view showing diffuse shine and yellow-white material around several hair shafts and follicular openings.">
+        </div>
+        <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
+        <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">Diffuse shine and sebum-like material at or around several follicular openings.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">Time since washing, product use, sweating, recent heat, client sensation, and whether the same appearance exists in other regions.</span></div>
+        <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">It may support a more thorough but conservative cleansing direction after the full assessment.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">Sebum overproduction, poor hygiene, dandruff, infection, or a clogged follicle.</span></div>
+        <a href="assets/images/course/module-04/microscopy/microscopy-oil-dominant.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon dry-icon">3</div>
+        <div><div class="pc-title">Fine-scale / dry-appearing surface</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-fine-scale.webp" alt="Illustrative magnified scalp view showing a matte-appearing surface with fine loose light-colored scale around hair shafts.">
+        </div>
+        <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
+        <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">A more matte surface with fine loose scale and less obvious surface shine in the field.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">Tightness, itching, burning, cleansing frequency, recent clarifying, chemical services, weather exposure, and comparison with other regions.</span></div>
+        <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">It may support a gentler, simplified service while avoiding aggressive cleansing or exfoliation.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">Dehydration, barrier damage, dandruff, dermatitis, or the medical cause of scale.</span></div>
+        <a href="assets/images/course/module-04/microscopy/microscopy-fine-scale.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon sensitive-icon">4</div>
+        <div><div class="pc-title">Visible color change / reactive-appearing area</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-visible-color-change.webp" alt="Illustrative magnified scalp view showing localized color variation around several hair shafts and follicular openings.">
+        </div>
+        <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
+        <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">Color variation relative to the surrounding field, with possible scale or visible material around some follicles.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">Pain, burning, itching, heat, recent product or chemical exposure, scratching, friction, and whether the color changed after device contact.</span></div>
+        <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">Reduce pressure, heat, friction, exfoliation, and product load. Avoid the area when the client reports discomfort or the skin appears compromised.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">Sensitivity, inflammation, allergy, infection, or a specific condition.</span></div>
+        <a href="assets/images/course/module-04/microscopy/microscopy-visible-color-change.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon combo-icon">5</div>
+        <div><div class="pc-title">Surface residue / buildup</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-surface-residue.webp" alt="Illustrative magnified scalp view showing visible surface coating and light-colored material around multiple hair shafts and follicular openings.">
+        </div>
+        <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
+        <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">A coated appearance with visible material on the scalp surface and around some hair shafts or openings.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">Dry shampoo, root sprays, fibers, oils, styling products, medicated products, wash timing, sweating, and whether gentle cleansing changes the appearance.</span></div>
+        <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">It may support careful cleansing after sensitivity, pain, skin integrity, and product history are reviewed.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">Follicular blockage, infrequent hygiene, sebum composition, infection, or the cause of the material.</span></div>
+        <a href="assets/images/course/module-04/microscopy/microscopy-surface-residue.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">Similar image. Different possible story.</div>
+    <div class="sec-title">The camera shows the material. The consultation helps explain it.</div>
+
+    <div class="photo-pair">
+      <div>
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-oil-dominant.webp" alt="Illustrative magnified scalp view showing diffuse shine and yellow-white material around several hair shafts and follicular openings.">
+        </div>
+        <div class="photo-pair-label">Oil-dominant appearance</div>
+      </div>
+      <div>
+        <div class="clinical-photo">
+          <img src="assets/images/course/module-04/microscopy/microscopy-surface-residue.webp" alt="Illustrative magnified scalp view showing visible surface coating and light-colored material around multiple hair shafts and follicular openings.">
+        </div>
+        <div class="photo-pair-label">Surface residue / buildup</div>
+      </div>
+    </div>
+
+    <div class="body-text">Both images show shine or material near follicular openings. The microscope cannot determine the material's composition from appearance alone.</div>
+    <div class="body-text">Before calling it oil, scale, or product buildup, ask:</div>
+
+    <div class="clinical-note">
+      <div class="cn2-text">
+        • When was the hair last washed?<br>
+        • What products are used at the root?<br>
+        • Is the client experiencing tightness, itching, burning, tenderness, or rapid oil return?<br>
+        • Is the appearance present across the scalp or concentrated in one region?<br>
+        • Does a gentle cleanse change what is visible?
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">When two possible stories look similar, ask a better question instead of choosing a stronger label.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.7 — From image to decision</div>
+    <div class="sec-title">The image earns its place by changing what happens next.</div>
+    <div class="body-text">Assessment is not a performance. It should support one of four professional decisions.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#7d9471"></div><div class="cc-h-title">Preserve</div></div>
+        <div class="cc-body">The visible surface is intact, the client is comfortable, and no finding calls for correction.<br><br><strong>Action:</strong> Avoid over-treating. Follow the client's cosmetic goals.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#c9a35a"></div><div class="cc-h-title">Modify conservatively</div></div>
+        <div class="cc-body">Oil, scale, residue, or regional variation is visible without broken skin, marked pain, drainage, or a concerning loss pattern.<br><br><strong>Action:</strong> Adjust cleansing, exfoliation, temperature, pressure, and product load conservatively. Module 5 develops these treatment directions.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#c07a4a"></div><div class="cc-h-title">Avoid or pause an area</div></div>
+        <div class="cc-body">A localized region shows discomfort, pronounced color change, recent irritation, tenderness, or uncertainty.<br><br><strong>Action:</strong> Do not overwork it. Simplify, omit the area, or postpone that part of the service.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#a34b3f"></div><div class="cc-h-title">Stop and refer</div></div>
+        <div class="cc-body">The scalp shows nonintact, draining, pustular, severely painful, hot, swollen, rapidly changing, patchy, smooth, shiny, or scar-like findings.<br><br><strong>Action:</strong> Do not continue a cosmetic service over the area. Explain the limit of the assessment and recommend medical evaluation.</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">The advanced decision is not always a more complex treatment. Sometimes it is less treatment. Sometimes it is no treatment today.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.8 — When not to proceed</div>
+    <div class="sec-title">The most important image may be the one that ends the service.</div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">Nonintact or draining skin</div>
+      <div class="cn2-text">Broken, bleeding, weeping, oozing, pustular, crusted, or visibly draining areas.<br><strong>Response:</strong> Stop camera contact and do not continue the cosmetic service over the area.</div>
+    </div>
+    <div class="clinical-note">
+      <div class="cn2-label">Marked pain or inflammatory appearance</div>
+      <div class="cn2-text">Heat, swelling, severe tenderness, intense burning, or pain that seems disproportionate.<br><strong>Response:</strong> Do not massage through pain or use the service to test whether the area improves.</div>
+    </div>
+    <div class="clinical-note">
+      <div class="cn2-label">Concerning hair-loss pattern</div>
+      <div class="cn2-text">Rapidly changing density, patchy loss, smooth or shiny areas, scar-like appearance, or loss involving brows or lashes.<br><strong>Response:</strong> Describe and document what is visible without naming the condition. Recommend medical evaluation.</div>
+    </div>
+    <div class="clinical-note">
+      <div class="cn2-label">Uncertainty outside cosmetic scope</div>
+      <div class="cn2-text">A finding may not fit a course example, or several warning signs may overlap.<br><strong>Response:</strong> You do not need the diagnosis to know that the service should pause.</div>
+    </div>
+
+    <div class="cadence-note" style="margin-top:1.5rem">
+      <div class="cn-label">Referral script</div>
+      <div class="cn-text">"I'm seeing an area that should be medically evaluated before we continue a scalp service over it. I can document what is visible, but I can't determine the cause from a cosmetic assessment. Once it has been evaluated, we can decide what kind of service is appropriate."</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">⚠️</div>
+      <div class="kp-text"><strong>Device-contamination note:</strong> If the device contacted a draining, bleeding, or otherwise compromised area, remove it from service and follow the manufacturer's required cleaning and disinfection procedure before reuse.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.9 — Practitioner insight</div>
+    <div class="sec-title">The device can create the evidence you think you found.</div>
+
+    <div class="info-card">
+      <div class="ic-title">Pressure changes color</div>
+      <div class="body-text" style="margin:0">Excess contact can blanch or redden the scalp. Capture the baseline before repeated contact alters it.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-title">A dirty lens creates a false story</div>
+      <div class="body-text" style="margin:0">Haze, residue, oil, or scale on the device can appear to belong to the client. Inspect and prepare the lens before the scan.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-title">Products can imitate pathology</div>
+      <div class="body-text" style="margin:0">Dry shampoo, fibers, root spray, oils, masks, and medicated products can change surface appearance. Ask before you interpret.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-title">One image is not the scalp</div>
+      <div class="body-text" style="margin:0">A dramatic crown image does not erase a calm hairline, and a clean hairline does not represent the hidden posterior scalp.</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-title">Before-and-after requires matching conditions</div>
+      <div class="body-text" style="margin:0">Different light, angle, pressure, magnification, or location can create a more dramatic "result" than the service did.</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Quick reality check:</strong> Microscopy does not become advanced when the image is dramatic. It becomes advanced when the collection method is consistent and the interpretation is restrained.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">4.10 — Common mistakes</div>
+    <div class="sec-title">What to unlearn before the camera makes it look convincing.</div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
-        <div><div class="pc-title">Assuming every flaky scalp is dry</div></div>
+        <div><div class="pc-title">Naming the scalp after one image</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Look at the whole environment. Is there oil present? Are flakes clumped and yellowish or fine and powdery? Two completely different treatment paths.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Complete the five-point scan and compare distribution before forming a working service direction.</span></div>
       </div>
     </div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
-        <div><div class="pc-title">Moving too fast during assessment</div></div>
+        <div><div class="pc-title">Pressing for a clearer view</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Slow down enough to actually interpret what's on the screen. Assessment is not a visual sweep — it's a deliberate observation.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Improve parting, stability, focus, lighting, and lens cleanliness—not pressure.</span></div>
       </div>
     </div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
-        <div><div class="pc-title">Using assessment as performance</div></div>
+        <div><div class="pc-title">Turning visible material into a cause</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">If the assessment doesn't change what you do — the protocol, the products, the referral decision — it's theater. Let it actually guide your work.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Describe location, color, texture, and distribution. Ask about product and wash history.</span></div>
       </div>
     </div>
 
     <div class="protocol-card">
       <div class="pc-header">
         <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
-        <div><div class="pc-title">Speaking too confidently about medical issues</div></div>
+        <div><div class="pc-title">Saving images without clear permission</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Observing is fine. Educating is fine. Diagnosing is not. The moment you speak with certainty about a medical condition, you're outside your lane.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Separate consent for live view, record capture, teaching, marketing, and external sharing.</span></div>
       </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Creating a misleading before-and-after</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">Match region, magnification, light, pressure, and orientation.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Performing assessment that changes nothing</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The fix</span><span class="pc-val">The image should support preserve, modify, avoid, pause, or refer. Otherwise it is theater.</span></div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">The microscope is not the skill. The collection method, language, and decision are the skill.</div>
     </div>
 
     <hr class="divider">
@@ -3576,28 +3907,29 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="checkpoint" id="m4cp2">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Final check</div>
+        <div class="cp-label">Know when the image ends the service</div>
       </div>
-      <div class="cp-q">You complete your assessment and notice what looks like a cluster of pus-filled lesions near the crown. The client seems unbothered and just wants their relaxing service. Walk me through exactly what you do and say.</div>
+      <div class="cp-q">During the crown station, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m4cp2In" placeholder="What's your response in this moment..." rows="1" oninput="grow(this)" onkeydown="m4cpKey(event,'m4cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m4cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m4cp2In" placeholder="Explain the device response, service decision, client language, and reason…" rows="1" oninput="grow(this)" onkeydown="m4cpKey(event,'m4cp2')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m4cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m4cp2Btn" onclick="submitM4CP('m4cp2')">
+        <button class="cp-btn" id="m4cp2Btn" onclick="submitM4CP('m4cp2')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m4cp2Res"></div>
+      <div class="cp-res" id="m4cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m4Complete" style="display:none;">
       <div class="lc-gold">✦</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-sub">You can see the scalp now. You know what to look for and when to stop.</div>
+      <div class="lc-next-label">Module 4 complete</div>
+      <div class="lc-title">You can collect evidence before making a decision.</div>
+      <div class="lc-sub">You demonstrated a standardized five-point scan, disciplined observation language, regional comparison, image-consent awareness, and pause/referral judgment.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 5</div>
-        <div class="lc-next-text">Module 5 tells you what to do with what you see. Five scalp types, five treatment directions, and the framework that makes every service feel intentional rather than improvised.</div>
+        <div class="lc-next-text">Module 4 taught you how to gather and describe the evidence. Module 5 teaches you how to translate appropriate findings into a cosmetic treatment direction without collapsing the entire scalp into one label.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(5)">Start Module 5 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -6361,11 +6693,44 @@ const M3 = {
 
 // ── MODULE 4 ──
 const M4 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m4cp1 / m4cp2 inside #module4Wrap.
   questions: {
-    m4cp1: 'A client has a visibly flaky scalp. What are the two completely different causes that could explain the flaking, and why does it matter which one it is?',
-    m4cp2: 'You notice pus-filled lesions near the crown. The client wants their service. What do you do and say?'
+    m4cp1: 'During a five-point scan, the crown appears shiny with visible material around several follicular openings, while the frontal hairline looks matte with fine loose scale. The client reports no pain or burning. Describe what you would document, explain why one label for the entire scalp would be weak, and name one question you would ask before deciding how to adjust the service.',
+    m4cp2: 'During the crown station, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 4 (Microscopy & Scalp Assessment) checkpoint. Question: "' + q + '". Key concepts: Microscopy is observation not diagnosis. Flaky scalp — dry/depleted (fine white powdery, no oil) vs oily/yeast-driven (clumped yellowish, near follicle). Five assessment regions: frontal, top parting, crown, temporal, occipital. Light pressure only. Do not treat: pustules/lesions, broken scalp, severe inflammation, suspected medical hair loss. Referral is professionalism. 3-5 sentences, direct and warm, no bullet points.'
+  // Module-4/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer().
+  systems: {
+    m4cp1: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 4 competency: documenting regional differences from a five-point scan, resisting a single whole-scalp label, and seeking relevant context before choosing a cosmetic service direction.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Objective documentation of both regions: crown shine/material around openings, and matte hairline/fine loose scale.\n' +
+      '2. Recognition that the crown and hairline do not present identically.\n' +
+      '3. Recognition that one label for the entire scalp would erase regional variation.\n' +
+      '4. At least one relevant question, such as time since washing, dry shampoo/root spray/oils/fibers/styling products, cleansing frequency, tightness/itching/tenderness/sensitivity, recent chemical service, whether the pattern is new, or whether other stations match either region.\n' +
+      '5. No diagnosis or claim that the image proves the material\'s cause.\n' +
+      '6. A conservative statement that the service direction should follow the completed assessment and client context.\n\n' +
+      'The student does not need to use "follicular," "perifollicular," or the exact five-lens terminology when the reasoning is accurate. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that diagnoses dandruff, dermatitis, infection, dehydration, or another condition; says the follicles are definitely clogged; blames poor hygiene; treats the crown image as the whole scalp; recommends aggressive exfoliation without reviewing sensitivity and skin integrity; or claims the camera identifies the material\'s composition.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if only the crown is described, ask what the hairline changes about the conclusion. If both regions are labeled but no question is asked, ask what history is needed before choosing a service. If the observations are good but stated with diagnostic certainty, ask the student to restate the conclusion using visible features only. If the regional reasoning is good but there is no service implication, ask what should remain undecided until context is gathered.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Do not grade the student\'s personal confidence, career stage, or background.',
+    m4cp2: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 4 competency: stopping device contact and the cosmetic service appropriately, communicating without diagnosing or alarming the client, and managing a potentially contaminated reusable device responsibly.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Stop using the microscope on the area.\n' +
+      '2. Do not continue a head spa service over the affected area.\n' +
+      '3. Avoid naming or confirming an infection or diagnosis.\n' +
+      '4. Explain that the visible finding requires medical evaluation before a cosmetic scalp service continues.\n' +
+      '5. Use calm, professional client-facing language.\n' +
+      '6. Remove the device from use and follow manufacturer-required cleaning and disinfection before reuse when contact or contamination may have occurred.\n' +
+      '7. Do not allow the client\'s lack of discomfort to override the visible concern.\n\n' +
+      'The student does not need to name a specific disinfectant or medical condition. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that continues the service because the client is unbothered; massages around or through the lesions; diagnoses folliculitis, fungal infection, or another disease; recommends prescription or medicated treatment; wipes the device casually and uses it on another client; shames or alarms the client; or states that lack of pain makes treatment safe.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the service is stopped but device handling is omitted, ask what happens to the contact device before reuse. If the device is cleaned but the service continues, ask why the visible finding changes the treatment decision. If the referral is appropriate but a diagnosis is given, ask for an observation-based version of the same client script. If the answer only says "refer out," ask for the exact calm sentence they would say.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 5 ──
@@ -6431,7 +6796,7 @@ const MODULE_GUIDE_SYSTEMS = {
   1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 1: the role of the head spa technician, observation versus diagnosis, safe client language, realistic service limitations, licensing variation, and referral judgment. Respond directly to the student\'s actual question using only the course\'s professional and cosmetic scope. Do not diagnose, prescribe, interpret visible findings as medical fact, or imply that AIMT certification expands legal scope. When laws or license permissions are involved, tell the student to verify the rules that apply to their license and jurisdiction. Use 3–5 concise sentences and no bullet points.',
   2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 2: intake review, private preparation, optional hospitality, scent preference, consent before touch, concise orientation, and a repeatable but adaptable arrival framework. Keep guidance grounded in professional client experience rather than unsupported physiological or psychological claims. Do not say that tea, scent, or touch regulates the nervous system, creates subconscious trust, treats stress, guarantees relaxation, or causes rebooking. Reinforce client choice, privacy, fragrance-free options, legal scope, and explicit permission before touch. Use 3–5 concise sentences and no bullet points.',
   3: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 3: five scalp layers, the pilosebaceous unit, hair-shaft versus follicle biology, the hair-growth cycle, delayed diffuse shedding, postpartum shedding, referral patterns, the stratum-corneum barrier, surface lipids, and accurate massage claims. Translate technical material through this sequence whenever useful: structure, visible clue, service implication, limit of the conclusion. Lead with practitioner insight and applied understanding rather than repeated warnings. Do not diagnose, promise hair growth, claim that massage feeds or activates follicles, or state that visible findings prove an internal cause. Use 3–5 concise sentences and no bullet points.',
-  4: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 4 (Microscopy & Scalp Assessment): microscopy as observation, five assessment regions, dry scalp vs dandruff, when not to treat. If they come from a licensed background, connect their existing pattern-recognition skills to scalp assessment for head spa. All roads lead back to serving the scalp. 3-5 sentences. No bullet points.',
+  4: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 4: cosmetic scalp magnification, client introduction and image consent, device hygiene, standardized image collection, AIMT\'s five-point scan, the five observation lenses, regional comparison, appearance-versus-cause reasoning, conservative service adjustment, and pause/referral judgment. Treat the scalp camera as an observation and education tool, not medical trichoscopy or a diagnostic device. When useful, structure the response as: what is visible, what context is missing, what may change in the cosmetic service, and what cannot be concluded. Do not diagnose, prescribe, claim that an image proves follicular blockage or a medical cause, or repeat a scanner-generated condition label as fact. Lead with applied observation skill rather than repeated scope warnings. Use 3-5 concise sentences and no bullet points unless the student explicitly asks for a list.',
   5: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 5 (Scalp Types & Protocols): neutral, oily, dry, combination, sensitive. Match treatment to condition. If the student has product knowledge from salon or esthetics work, acknowledge how it applies specifically to scalp protocol selection in a head spa context. Combination scalp is the most commonly misread — emphasize that. 3-5 sentences. No bullet points.',
   6: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 6 (Conditions & Disorders): dry scalp vs dandruff vs seborrheic dermatitis. Anti-dandruff shampoo worsens dry scalp. If the student has seen client scalp issues before, connect this to what they may have misread — and how head spa assessment changes their approach going forward. 3-5 sentences. No bullet points.',
   7: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 7 (Equipment & Room Setup): halo bed selection, essential tools, prep sequence, client positioning. The room is part of the head spa service. If the student is building a new space or adding head spa to an existing menu, speak to how the setup specifically supports scalp wellness delivery. 3-5 sentences. No bullet points.',
@@ -6446,7 +6811,7 @@ const MODULE_QUICK_PROMPTS = {
   1: ['How do I describe what I see without diagnosing?', 'When should I pause or refer a client?', 'How do I verify whether a service is within my license?'],
   2: ['How do I ask permission before first touch?', 'What should changing instructions include?', 'How do I keep the arrival consistent without making it rigid?'],
   3: ['Why can shedding appear months after an illness?', 'What can the scalp surface tell me—and what can’t it?', 'How do I explain massage without promising hair growth?', 'What does the scalp barrier change in product choice?'],
-  4: ['What does healthy look like under microscopy?', 'How do I talk about what I see without diagnosing?', 'When should I stop and refer?'],
+  4: ['How do I document what I see without labeling the scalp?', 'What questions help distinguish oil from product residue?', 'How do I make before-and-after scalp images honest?', 'Which findings mean I should stop the service?'],
   5: ['How do I identify combination scalp?', 'What causes compensatory oil production?', 'How do I redirect a client who wants the wrong treatment?'],
   6: ['How do I tell dry scalp from dandruff?', 'When does dandruff become seborrheic dermatitis?', 'What botanicals work for inflammation?'],
   7: ['What bed should I get first?', 'How do I set up for back-to-back clients?', 'What is the non-negotiable prep step?'],
@@ -6685,7 +7050,7 @@ function openModuleById(id, options = {}) {
       1: 'Module 1 establishes the professional boundary for everything that follows. Read the scope and client-language sections carefully. Strong practitioners do not sound more certain than the evidence or their license allows.',
       2: 'Module 2 is where professional standards become visible to the client. Pay close attention to privacy, choice, and consent—the arrival should feel organized without becoming rigid or performative.',
       3: 'Module 3 is where the surface stops looking random. Follow every technical term to its practical payoff: what it helps you notice, what it changes in service, and what it still cannot prove.',
-      4: 'Module 4 is where your eye starts to develop. Microscopy sounds technical but the skill is really about slowing down and actually looking. Ask me anything as you move through it.',
+      4: 'Module 4 is where observation becomes a method. Use the camera to collect a better view, then separate what is visible from what still needs context and what the image cannot prove.',
       5: 'Scalp types is where assessment becomes action. If Module 4 taught you how to look, Module 5 teaches you what to do with what you see.',
       6: 'Module 6 changes how you listen to clients. Once you understand the dry vs dandruff distinction, you will hear misidentification everywhere — in what clients say, in what products they are using.',
       7: 'Equipment feels like logistics but it directly affects the service. The setup details here come from real mistakes made early on. Ask me anything.',
@@ -6850,10 +7215,98 @@ function cpKey_m3(e, id) {
 
 // ── MODULE 4 ──
 function submitM4CP(id) {
-  submitCheckpoint(4, id, M4.system, M4.questions[id]);
+  submitCheckpoint(4, id, M4.systems[id], M4.questions[id],
+    'Cadence couldn’t evaluate your assessment response. Check your connection and try again.');
 }
 function m4cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM4CP(id); }
+}
+
+// Five-point scalp scan stepper — ungraded, non-persistent, content-navigation
+// only. Does not touch APP_STATE, progress, checkpoints, or completion.
+// Queries are scoped to #lessonView so they only ever match the live copy,
+// never the hidden module4Wrap template that also carries these classes.
+const M4_STATION_NAMES = ['Frontal hairline', 'Top parting', 'Crown / vertex', 'Temporal area', 'Occipital / back'];
+let _m4StationViewed = new Set([0]);
+function m4GoToStation(idx) {
+  const panels = document.querySelectorAll('#lessonView .m4-station-panel');
+  const buttons = document.querySelectorAll('#lessonView .m4-stepper-nav button');
+  if (!panels.length || idx < 0 || idx >= panels.length) return;
+  const announce = getActiveElementById('m4StationAnnounce');
+  const prevBtn = getActiveElementById('m4StationPrev');
+  const nextBtn = getActiveElementById('m4StationNext');
+  const complete = getActiveElementById('m4StepperComplete');
+
+  panels.forEach((p, i) => p.classList.toggle('active', i === idx));
+  buttons.forEach((b, i) => b.setAttribute('aria-current', i === idx ? 'step' : 'false'));
+  if (prevBtn) prevBtn.disabled = idx === 0;
+  if (nextBtn) nextBtn.disabled = idx === panels.length - 1;
+  if (announce) announce.textContent = 'Station ' + (idx + 1) + ' of 5: ' + M4_STATION_NAMES[idx];
+
+  _m4StationViewed.add(idx);
+  if (_m4StationViewed.size === 5 && complete) complete.style.display = 'block';
+}
+function m4PrevStation() {
+  const panels = document.querySelectorAll('#lessonView .m4-station-panel');
+  const idx = Array.from(panels).findIndex(p => p.classList.contains('active'));
+  if (idx > 0) m4GoToStation(idx - 1);
+}
+function m4NextStation() {
+  const panels = document.querySelectorAll('#lessonView .m4-station-panel');
+  const idx = Array.from(panels).findIndex(p => p.classList.contains('active'));
+  if (idx >= 0 && idx < panels.length - 1) m4GoToStation(idx + 1);
+}
+
+// "Say only what the image earned" — ungraded, retryable classification.
+// Does not touch APP_STATE, progress, checkpoints, or completion.
+const M4_CLASSIFY_ANSWERS = {
+  1: { correct: 'supported', feedback: 'It describes location and appearance without claiming what the material is or why it is present.' },
+  2: { correct: 'question', feedback: 'It identifies missing context and directs the consultation without converting the image into a conclusion.' },
+  3: { correct: 'unsupported', feedback: 'The image cannot prove obstruction, hygiene, cause, or the client’s cleansing behavior.' },
+  4: { correct: 'question', feedback: 'The statement combines a visible difference with the client’s report and changes the cosmetic service without naming a condition.' },
+  5: { correct: 'unsupported', feedback: 'A cosmetic magnification image does not establish a medical diagnosis.' }
+};
+let _m4ClassifyAnswered = new Set();
+function m4Classify(n, choice, btn) {
+  const block = getActiveElementById('m4Statement' + n);
+  const feedback = getActiveElementById('m4Statement' + n + 'Feedback');
+  const complete = getActiveElementById('m4ClassifyComplete');
+  if (!block || !feedback) return;
+  const answer = M4_CLASSIFY_ANSWERS[n];
+  const opts = block.querySelectorAll('.bq-opt');
+
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  opts.forEach(o => {
+    if (o.dataset.choice === answer.correct) {
+      o.classList.add('correct');
+      const tag = document.createElement('span');
+      tag.className = 'bq-tag';
+      tag.textContent = 'Correct answer';
+      o.appendChild(tag);
+    }
+  });
+
+  if (choice !== answer.correct) {
+    btn.classList.add('wrong');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Not quite';
+    btn.appendChild(tag);
+  }
+
+  feedback.style.display = 'block';
+  feedback.textContent = answer.feedback;
+
+  _m4ClassifyAnswered.add(n);
+  if (_m4ClassifyAnswered.size === 5 && complete) complete.style.display = 'block';
 }
 
 // ── MODULE 5 ──
