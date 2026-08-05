@@ -1331,3 +1331,51 @@ Module 3 are present in Module 4.
 Work remains on branch `course-audit-build`. Module 4 was not implemented
 or edited — only extracted. Module 5 and later modules were not extracted
 or edited.
+
+---
+
+## 2026-08-05 — Step 22: Initial module video source pack
+
+Created `docs/course-video-sources/` for parallel video production, drawing
+only from already-approved audit specifications. This was a
+documentation-only step — no production HTML/JS, audit specification, or
+module implementation status was changed.
+
+**Files created:** `00-aimt-course-map.md` (course-wide sequence and
+continuity reference), `00-aimt-video-direction.md` (visual/production
+direction, cross-referencing the pre-existing
+`00-aimt-module-video-master-instructions.md`), and
+`module-00-video-source.md` through `module-03-video-source.md` (one
+concise, self-contained video source per approved module).
+
+**Statuses assigned**, based strictly on current `implementation-log.md`
+and `modules/README.md` entries, not assumption: Welcome Module and Module
+1 — `Approved for video scripting` (each implemented, but neither has a
+recorded manual-QA-approval step, unlike Modules 2 and 3); Module 2 and
+Module 3 — `Approved for video production` (both implemented and
+manual-QA-approved, per Steps 14 and 20 respectively), with each file
+still flagging its own module's outstanding deferred-QA items (live-model
+grading, screen-reader, keyboard, touch-device, and — for Module 3
+specifically — medical subject-matter review of shedding/barrier/massage
+claims).
+
+**Module 4 video source intentionally not created.** The task's premise
+assumed `docs/course-audit/modules/module-04.md` was an approved
+specification usable for scripting. On inspection, that file currently
+contains only empty section headings and states its own status as
+"Awaiting external audit" — Module 4 has been extracted
+(`module-04-source.md`, `module-04-assets.md`) but never externally
+approved, unlike Modules 0–3 (each of which has a corresponding "Approve
+Module N audit" step in this log). Creating a video-source file with real
+content would have required inventing outcomes, insider knowledge, and
+visual direction that no approved source actually supports. This
+discrepancy was raised with the user, who chose to defer
+`module-04-video-source.md` until Module 4's audit is actually approved.
+The course map's Module 4 entry documents this explicitly rather than
+implying the module is ready. Modules 5–12 remain unaddressed, per the
+original task scope.
+
+No file under `docs/course-audit/` was edited except this log entry.
+`headspa-mastery.html`, production JavaScript, course state, authentication,
+entitlements, payments, progress, certificates, and every module
+implementation were untouched. Work remains on branch `course-audit-build`.
