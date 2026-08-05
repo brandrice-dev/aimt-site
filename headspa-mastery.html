@@ -2583,11 +2583,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="phase-detail">Practitioner connection: a trigger that shifts more follicles into telogen may not produce visible shedding immediately.</div>
         </div>
       </div>
-      <div class="phase-item" style="padding-bottom:0">
-        <div class="phase-dot pd-4">+</div>
-        <div class="phase-content" style="padding-bottom:0">
+      <div class="phase-item">
+        <div class="phase-dot pd-4">4</div>
+        <div class="phase-content">
           <div class="phase-name">Exogen — Release</div>
-          <div class="phase-desc">The club hair separates and sheds from the follicle.</div>
+          <div class="phase-desc">Often described as the shedding portion of the cycle. The club hair separates and sheds from the follicle.</div>
           <div class="phase-detail">Practitioner connection: shedding is a normal part of cycling. The pattern, amount, timing, duration, and accompanying signs determine whether it deserves closer evaluation.</div>
         </div>
       </div>
@@ -6796,21 +6796,44 @@ function selectM3Timing(choice) {
   const feedback = getActiveElementById('m3TimingFeedback');
   if (!optA || !optB || !optC || !feedback) return;
 
-  [['A', optA], ['B', optB], ['C', optC]].forEach(([key, opt]) => {
+  const opts = [['A', optA], ['B', optB], ['C', optC]];
+
+  // Clear prior selection state and any previously appended answer tag before
+  // re-labeling, so changing an answer never leaves a duplicate tag behind.
+  opts.forEach(([key, opt]) => {
     const isSelected = key === choice;
     opt.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     opt.classList.toggle('selected', isSelected);
     opt.classList.toggle('is-correct', isSelected && key === 'C');
+    const existingTag = opt.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
   });
+
+  // The correct option is unmistakably labeled as soon as a prediction has
+  // been made, whether or not it is the option the student chose — this is
+  // a text label, not a color-only signal, and it stays visible (persists)
+  // regardless of which option is selected afterward.
+  const correctTag = document.createElement('span');
+  correctTag.className = 'bq-tag';
+  correctTag.textContent = 'Correct answer';
+  optC.appendChild(correctTag);
+
+  if (choice !== 'C') {
+    const selectedOpt = choice === 'A' ? optA : optB;
+    const wrongTag = document.createElement('span');
+    wrongTag.className = 'bq-tag';
+    wrongTag.textContent = 'Not quite';
+    selectedOpt.appendChild(wrongTag);
+  }
 
   if (choice === 'C') {
     feedback.innerHTML =
-      '<p><strong>Roughly two to three months later.</strong> A major physiological stressor can shift more follicles from growth toward rest. Those hairs are not released immediately. The visible shedding often appears after the cycle has moved forward—commonly several weeks to a few months later.</p>' +
+      '<p><strong>Correct — roughly two to three months later.</strong> A major physiological stressor can shift more follicles from growth toward rest. Those hairs are not released immediately. The visible shedding often appears after the cycle has moved forward—commonly several weeks to a few months later.</p>' +
       '<p class="practice-anchor">This timing can make a past event relevant, but it does not establish a diagnosis. It tells you which history is worth documenting and discussing.</p>' +
       '<p class="practice-anchor">The beginner looks at what happened this week. The informed practitioner also asks what happened months ago.</p>';
   } else {
     feedback.innerHTML =
-      '<p>A major physiological stressor can shift more follicles from growth toward rest. Those hairs are not released immediately—the visible shedding often appears commonly several weeks to a few months later, not right away.</p>' +
+      '<p>Not quite — the correct answer is roughly two to three months later. A major physiological stressor can shift more follicles from growth toward rest. Those hairs are not released immediately—the visible shedding often appears commonly several weeks to a few months later, not right away.</p>' +
       '<p class="practice-anchor">The beginner looks at what happened this week. The informed practitioner also asks what happened months ago.</p>';
   }
   feedback.classList.add('show');

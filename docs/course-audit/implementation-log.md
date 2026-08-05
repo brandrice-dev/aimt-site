@@ -1132,3 +1132,72 @@ after the fix.
 Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
 Module 12 were not built, per instruction. Modules 1, 2, and 4–11 were not
 extracted or edited.
+
+---
+
+## 2026-08-05 — Step 19: Module 3 manual-QA corrections
+
+Two narrowly scoped corrections identified during manual QA of the Step 18
+implementation. No other module was audited or edited; no checkpoint
+rubric, progress behavior, authentication, entitlement, or certificate
+logic was touched.
+
+**1. Hair-growth-cycle numbering.** The exogen phase-dot showed a `+`
+symbol instead of a number, visually setting it apart from the numbered
+1–2–3 sequence for anagen/catagen/telogen. Changed the dot to `4` and
+removed the `style="padding-bottom:0"` overrides on that phase-item/
+phase-content (a leftover from when exogen had no practitioner-connection
+line beneath it; it now has one, like every other phase, so the override
+was no longer appropriate and was flattening its spacing inconsistently
+with phases 1–3). The phase-desc line for exogen now also states "Often
+described as the shedding portion of the cycle" — preserving that
+nuance as descriptive text rather than as a separate visual treatment.
+Visible sequence confirmed as 1 — Anagen, 2 — Catagen, 3 — Telogen,
+4 — Exogen.
+
+**2. Predict-before-reveal correct-answer clarity.** `selectM3Timing()`
+(the "The delay tells the story" interaction) previously distinguished
+correct/incorrect only through an `is-correct` CSS class (a color/border
+signal) applied solely to the option the student actually clicked — if a
+student picked wrong, nothing on screen showed which option had been
+correct. Rewrote the function to:
+- always attach a persistent, literal `"Correct answer"` text tag to the
+  roughly-two-to-three-months option as soon as any prediction is made,
+  regardless of which option was clicked (reusing the existing `.bq-tag`
+  text-tag pattern already shipped for Module 2's judgment-check
+  interaction — no new CSS);
+- attach a `"Not quite"` text tag to the selected option when it is not
+  the correct one;
+- clear any previously appended tag from all three options at the start
+  of every call before re-adding, so changing an answer (correct→wrong,
+  wrong→correct, wrong→different wrong) never leaves a duplicate tag;
+- lead the reveal text with "Correct — roughly two to three months
+  later." when the student picks correctly, and "Not quite — the correct
+  answer is roughly two to three months later." when they do not.
+No `APP_STATE`, progress, checkpoint, or completion access exists anywhere
+in this function (unchanged from Step 18) — verified by diffing
+`APP_STATE.data.progress` before and after exercising all three options
+and multiple answer changes.
+
+**Tests completed** (local static server, Course Review Mode via
+`?review=1`): exogen dot renders `4` and reads correctly in the 1–2–3–4
+sequence; item 4's inline style overrides confirmed removed; all three
+timing options exercised individually; changing from an incorrect
+selection to the correct one removed the stale "Not quite" tag and left
+exactly one "Correct answer" tag; changing from correct back to a
+different incorrect option re-added "Not quite" to the newly selected
+option while "Correct answer" remained on the correct option throughout
+(never duplicated — confirmed by counting `.bq-tag` elements after each
+change); `aria-pressed` and native `<button>` semantics confirmed
+unchanged; `APP_STATE.data.progress` confirmed byte-identical before and
+after all interaction testing; mobile viewport (375×812) showed zero
+horizontal overflow and the tags/buttons stayed within the viewport
+(measured via `getBoundingClientRect()`, not just visual inspection); a
+document-wide duplicate-`id` scan after testing found none; console
+stayed error-free throughout. `git diff --stat` confirmed only
+`headspa-mastery.html` changed, with no references to Module 2, Module 4,
+any `M3.systems`/checkpoint rubric, or `APP_STATE` in the diff.
+
+Requires the same live-model, screen-reader, physical-keyboard, and
+touch-device manual QA already flagged in Step 18 — nothing in this step
+changes what remains outstanding there.
