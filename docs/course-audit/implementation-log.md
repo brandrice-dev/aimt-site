@@ -1270,3 +1270,64 @@ asset inventory file.
 Module 3's production content (`headspa-mastery.html`) was not touched in
 this step beyond the verification read. No other module was audited,
 extracted, or edited. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 21: Module 4 source extraction
+
+Created `docs/course-audit/modules/module-04-source.md` (full verbatim
+extraction of Module 4's curriculum, both checkpoints and their complete
+grading prompts, Cadence guide context/quick prompts/greeting/memory tags,
+current interactions, completion behavior, accessibility behavior, mobile
+concerns, a distinct learning-rhythm assessment, an insider-value
+assessment, the five-region examination sequence, the five-category
+microscopy taxonomy, an explicit cross-reference between the current
+curriculum and the ten Phase-1 proposed image assets, Guided Completion
+Path fields, Listen Mode planning fields, source map, and confirmed
+implementation concerns separated from assumptions) and
+`docs/course-audit/modules/module-04.md` (empty headings only, matching
+the fourteen-heading skeleton used going forward — including the new
+"Downloadable resource opportunity" heading required by this task). Module
+3 was not edited; Module 5 was not extracted or edited.
+
+This was documentation and extraction only — no production files were
+modified, and Module 4's actual curriculum, checkpoints, or Cadence
+prompts were not touched. `docs/course-audit/modules/README.md` was
+updated with a Module 4 entry (status **Awaiting external audit**).
+
+Notable findings recorded in the extraction (not fixed): Module 4's
+displayed and evaluated checkpoint questions do not match for either
+checkpoint (same pattern already corrected in Modules 1–3); no
+Module-4-specific checkpoint rubric exists (one shared `M4.system` function
+grades both checkpoints, same pre-audit starting state as Modules 0–3);
+neither checkpoint has accessibility labels; the completion card has no
+distinct competency-naming line; the old course name and a
+personal-experience claim ("mentor built from nearly two decades in the
+head spa industry") remain in the checkpoint and guide system prompts; the
+Cadence guide system references a "dry scalp vs dandruff" distinction that
+Module 4's own curriculum never actually teaches (that content belongs to
+Module 6); Module 4 has zero ungraded practice interactions despite two
+parallel five-item card sets (the examination-region grid and the
+microscopy pattern set) being structurally well suited to one; and two of
+the five microscopy categories ("Congested" and "Oily / congested")
+overlap substantially in stated observable features.
+
+The extraction's asset cross-reference (§3) found an exact, word-for-word
+match between all five current "What you're seeing" protocol-card
+placeholder labels/sub-labels and the five Phase-1 `microscopy/` image
+captions, and an exact filename match between the current "Regions to
+assess" five-card grid and the five `examination-areas/` images — strongly
+suggesting the assets were produced to fill these specific placeholders,
+though (per the task's standing instruction) this naming match does not by
+itself establish that the images are accurate, approved, or that the
+underlying five-category taxonomy is correct. Module 4's structure was
+also confirmed to be conventional throughout — standard `module4Wrap`
+hidden-template wrapper, standard `m4cp1`/`m4cp2` checkpoint IDs, standard
+`m4Complete` completion-card ID with no special-case routing, and a single
+authoritative `MODULE_QUICK_PROMPTS[4]` source with no conflicting
+hardcoded prompt set — none of the structural irregularities found in
+Module 3 are present in Module 4.
+
+Work remains on branch `course-audit-build`. Module 4 was not implemented
+or edited — only extracted. Module 5 and later modules were not extracted
+or edited.
