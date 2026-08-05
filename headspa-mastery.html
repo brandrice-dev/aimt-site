@@ -44,6 +44,15 @@
   --success: #3a5a3a;
   --success-light: #e8ede8;
   --warn-light: #f5f3ee;
+  /* Shared semantic states (course-audit color normalization, Modules 0–4) —
+     values reused from the strongest existing Modules 0–3 usage, not new. */
+  --aimt-success: var(--success);
+  --aimt-success-light: var(--success-light);
+  --aimt-error: #c0392b;
+  --aimt-error-light: #fde8e8;
+  --aimt-warning: #8b5e00;
+  --aimt-warning-light: #fff4e8;
+  --aimt-neutral: var(--accent2);
   --hero-bg: #262626;
   --hero-bg2: #1a1814;
   --nav-h: 56px;
@@ -1317,7 +1326,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .bq-opt:hover { background:rgba(255,255,255,0.9); border-color:var(--ash); }
 .bq-opt:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
-.bq-opt.correct { background:#e8ede8; border-color:#3a5a3a; color:#3a5a3a; }
+.bq-opt.correct { background:var(--aimt-success-light); border-color:var(--aimt-success); color:var(--aimt-success); }
 .bq-opt.wrong { background:#f5f3ee; border-color:var(--ash); color:var(--muted); }
 .bq-tag { display:block; margin-top:4px; font-size:0.68rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; }
 .bq-feedback { margin-top:1rem; padding:1rem 1.1rem; background:var(--hero-bg); border-radius: var(--aimt-radius-sm); font-size:0.85rem; line-height:1.7; color:rgba(255,255,255,0.78); font-weight:300; }
@@ -2710,7 +2719,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
       <div class="condition-card">
         <div class="cc-header">
-          <div class="cc-badge" style="background:#c0392b"></div>
+          <div class="cc-badge" style="background:var(--aimt-error)"></div>
           <div class="cc-h-title">Pattern requiring medical evaluation</div>
         </div>
         <div class="cc-body">
@@ -3381,18 +3390,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="sec-eyebrow">4.4 — The five-point scalp scan</div>
-    <div class="sec-title">Five stations prevent one-angle thinking.</div>
-    <div class="body-text">The scalp is not uniform. AIMT's baseline scan uses the same five stations in the same order so the practitioner does not let one dramatic image represent the entire head.</div>
+    <div class="sec-title">Five assessment points prevent one-angle thinking.</div>
+    <div class="body-text">The scalp is not uniform. AIMT's baseline scan uses the same five assessment points in the same order so the practitioner does not let one dramatic image represent the entire head.</div>
 
     <div class="key-point">
       <div class="kp-icon">→</div>
       <div class="kp-text"><strong>Memory line:</strong> Front. Top. Crown. Side. Back.</div>
     </div>
 
-    <div class="interaction-hint">Use the arrows or select a station directly</div>
+    <div class="interaction-hint">Use the arrows or select an assessment point directly</div>
 
     <div class="m4-stepper" id="m4Stepper">
-      <div class="m4-stepper-nav" role="group" aria-label="Five-point scalp scan stations">
+      <div class="m4-stepper-nav" role="group" aria-label="Five-point scalp scan assessment points">
         <button type="button" id="m4station-btn-0" aria-current="step" onclick="m4GoToStation(0)">1 · Frontal</button>
         <button type="button" id="m4station-btn-1" aria-current="false" onclick="m4GoToStation(1)">2 · Top</button>
         <button type="button" id="m4station-btn-2" aria-current="false" onclick="m4GoToStation(2)">3 · Crown</button>
@@ -3406,10 +3415,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="clinical-photo">
           <picture>
             <source srcset="assets/images/course/module-04/examination-areas/exam-area-01-front-hairline.webp" type="image/webp">
-            <img src="assets/images/course/module-04/examination-areas/exam-area-01-front-hairline.png" alt="Front view of a head with the frontal hairline marked as the first scalp-magnification assessment station.">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-01-front-hairline.png" alt="Front view of a head with the frontal hairline marked as the first scalp-magnification assessment point.">
           </picture>
         </div>
-        <div class="m4-station-head"><div class="m4-station-num">Station 1 of 5</div><div class="m4-station-name">Frontal hairline</div></div>
+        <div class="m4-station-head"><div class="m4-station-num">Assessment Point 1 of 5</div><div class="m4-station-name">Frontal hairline</div></div>
         <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Establish the visible condition along the hairline, where styling products, cosmetics, tension, scale, and client concerns may be easiest to notice.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Separate hair gently and avoid rubbing the hairline before the image is captured.</span></div>
       </div>
@@ -3418,10 +3427,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="clinical-photo">
           <picture>
             <source srcset="assets/images/course/module-04/examination-areas/exam-area-02-top-parting.webp" type="image/webp">
-            <img src="assets/images/course/module-04/examination-areas/exam-area-02-top-parting.png" alt="Top view of a head with the central top parting marked as the second scalp-magnification assessment station.">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-02-top-parting.png" alt="Top view of a head with the central top parting marked as the second scalp-magnification assessment point.">
           </picture>
         </div>
-        <div class="m4-station-head"><div class="m4-station-num">Station 2 of 5</div><div class="m4-station-name">Top parting</div></div>
+        <div class="m4-station-head"><div class="m4-station-num">Assessment Point 2 of 5</div><div class="m4-station-name">Top parting</div></div>
         <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Collect a consistent central view of the scalp surface, follicular openings, and hair distribution along the part.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Use the same part location when creating a future comparison.</span></div>
       </div>
@@ -3430,10 +3439,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="clinical-photo">
           <picture>
             <source srcset="assets/images/course/module-04/examination-areas/exam-area-03-crown-vertex.webp" type="image/webp">
-            <img src="assets/images/course/module-04/examination-areas/exam-area-03-crown-vertex.png" alt="Upper rear view of a head with the crown or vertex marked as the third scalp-magnification assessment station.">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-03-crown-vertex.png" alt="Upper rear view of a head with the crown or vertex marked as the third scalp-magnification assessment point.">
           </picture>
         </div>
-        <div class="m4-station-head"><div class="m4-station-num">Station 3 of 5</div><div class="m4-station-name">Crown / vertex</div></div>
+        <div class="m4-station-head"><div class="m4-station-num">Assessment Point 3 of 5</div><div class="m4-station-name">Crown / vertex</div></div>
         <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Compare the crown with the parting and hairline rather than assuming the central scalp presents uniformly.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Work with the natural swirl instead of forcing the shafts flat across the view.</span></div>
       </div>
@@ -3442,30 +3451,30 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="clinical-photo">
           <picture>
             <source srcset="assets/images/course/module-04/examination-areas/exam-area-04-temporal-area.webp" type="image/webp">
-            <img src="assets/images/course/module-04/examination-areas/exam-area-04-temporal-area.png" alt="Side view of a head with the temporal scalp marked as the fourth scalp-magnification assessment station.">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-04-temporal-area.png" alt="Side view of a head with the temporal scalp marked as the fourth scalp-magnification assessment point.">
           </picture>
         </div>
-        <div class="m4-station-head"><div class="m4-station-num">Station 4 of 5</div><div class="m4-station-name">Temporal area</div></div>
+        <div class="m4-station-head"><div class="m4-station-num">Assessment Point 4 of 5</div><div class="m4-station-name">Temporal area</div></div>
         <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Observe a lateral region and compare it with the central scalp.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Check the opposite side when asymmetry, tension, tenderness, or localized concern is reported.</span></div>
-        <div class="body-text" style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted)">This station uses a separate location-guide photo, not the same client shown in the other four stations — each image is an independent procedural reference.</div>
+        <div class="body-text" style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted)">This assessment point uses a separate location-guide photo, not the same client shown in the other four assessment points — each image is an independent procedural reference.</div>
       </div>
 
       <div class="m4-station-panel" id="m4station-4">
         <div class="clinical-photo">
           <picture>
             <source srcset="assets/images/course/module-04/examination-areas/exam-area-05-occipital-back.webp" type="image/webp">
-            <img src="assets/images/course/module-04/examination-areas/exam-area-05-occipital-back.png" alt="Back view of a head with the occipital scalp marked as the fifth scalp-magnification assessment station.">
+            <img src="assets/images/course/module-04/examination-areas/exam-area-05-occipital-back.png" alt="Back view of a head with the occipital scalp marked as the fifth scalp-magnification assessment point.">
           </picture>
         </div>
-        <div class="m4-station-head"><div class="m4-station-num">Station 5 of 5</div><div class="m4-station-name">Occipital / back</div></div>
+        <div class="m4-station-head"><div class="m4-station-num">Assessment Point 5 of 5</div><div class="m4-station-name">Occipital / back</div></div>
         <div class="pc-row"><span class="pc-label">Purpose</span><span class="pc-val">Include the hidden posterior scalp, which may look different from the areas the client sees and styles most often.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Technique cue</span><span class="pc-val">Position the hair securely so the lens remains steady and the client does not have to hold an uncomfortable posture.</span></div>
       </div>
 
       <div class="m4-station-controls">
-        <button type="button" id="m4StationPrev" onclick="m4PrevStation()" disabled>← Previous station</button>
-        <button type="button" id="m4StationNext" onclick="m4NextStation()">Next station →</button>
+        <button type="button" id="m4StationPrev" onclick="m4PrevStation()" disabled>← Previous assessment point</button>
+        <button type="button" id="m4StationNext" onclick="m4NextStation()">Next assessment point →</button>
       </div>
 
       <div class="practice-feedback" id="m4StepperComplete" aria-live="polite" style="display:none;">A five-point scan creates the baseline. The client's concern tells you where to add targeted views.</div>
@@ -3475,7 +3484,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">4.5 — The five observation lenses</div>
     <div class="sec-title">Do not label the scalp. Read the evidence.</div>
-    <div class="body-text">Use the same five lenses at every station. They keep the assessment specific enough to be useful and restrained enough to remain honest.</div>
+    <div class="body-text">Use the same five lenses at every assessment area. They keep the assessment specific enough to be useful and restrained enough to remain honest.</div>
 
     <div class="condition-cards">
       <div class="condition-card">
@@ -3497,7 +3506,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">3. Perifollicular area</div></div>
         <div class="cc-body">
           <strong>Look for:</strong> Color change, scale, or visible material immediately surrounding a follicle.<br><br>
-          <strong>Document like this:</strong> "Color change and fine scale are visible around several follicles in this station."
+          <strong>Document like this:</strong> "Color change and fine scale are visible around several follicles in this assessment area."
         </div>
       </div>
       <div class="condition-card">
@@ -3511,7 +3520,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="condition-card">
         <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">5. Distribution</div></div>
         <div class="cc-body">
-          <strong>Look for:</strong> Whether the finding is localized, diffuse, symmetric, or different from another station.<br><br>
+          <strong>Look for:</strong> Whether the finding is localized, diffuse, symmetric, or different from another assessment area.<br><br>
           <strong>Document like this:</strong> "The crown shows more surface shine and residue than the frontal hairline."
         </div>
       </div>
@@ -3622,7 +3631,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
         <div class="cp-placeholder-label" style="text-align:left;padding:0 0 0.85rem;">Illustrative magnified example — not a clinical diagnosis</div>
         <div class="pc-row"><span class="pc-label">What is visible</span><span class="pc-val">Relatively even surface appearance, visible follicular openings, minimal obvious scale or coating, and no pronounced localized color change in the field.</span></div>
-        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">The client's own baseline, product use, sensation, and comparison with the other four stations.</span></div>
+        <div class="pc-row"><span class="pc-label">Context needed</span><span class="pc-val">The client's own baseline, product use, sensation, and comparison with the other four assessment areas.</span></div>
         <div class="pc-row"><span class="pc-label">May change</span><span class="pc-val">Avoid unnecessary correction. Preserve what is working and follow the client's cosmetic goals.</span></div>
         <div class="pc-row" style="border:none"><span class="pc-label">Does not prove</span><span class="pc-val">That the scalp is universally "healthy," medically normal, or free of a condition outside the camera's view.</span></div>
         <a href="assets/images/course/module-04/microscopy/microscopy-baseline-appearing.webp" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;">View full-size image</a>
@@ -3839,7 +3848,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Naming the scalp after one image</div></div>
       </div>
       <div class="pc-body">
@@ -3849,7 +3858,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Pressing for a clearer view</div></div>
       </div>
       <div class="pc-body">
@@ -3859,7 +3868,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Turning visible material into a cause</div></div>
       </div>
       <div class="pc-body">
@@ -3869,7 +3878,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Saving images without clear permission</div></div>
       </div>
       <div class="pc-body">
@@ -3879,7 +3888,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Creating a misleading before-and-after</div></div>
       </div>
       <div class="pc-body">
@@ -3889,7 +3898,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon" style="background:#4d403a;color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
         <div><div class="pc-title">Performing assessment that changes nothing</div></div>
       </div>
       <div class="pc-body">
@@ -3909,7 +3918,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         <div class="cp-label">Know when the image ends the service</div>
       </div>
-      <div class="cp-q">During the crown station, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.</div>
+      <div class="cp-q">During the crown assessment, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.</div>
       <div class="cp-row">
         <div class="cp-input-row">
         <textarea class="cp-input" id="m4cp2In" placeholder="Explain the device response, service decision, client language, and reason…" rows="1" oninput="grow(this)" onkeydown="m4cpKey(event,'m4cp2')"></textarea>
@@ -4129,22 +4138,22 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="scalp-type-grid grid-2col" style="margin:1.25rem 0;">
       <div class="scalp-card">
-        <div class="sc-indicator" style="background:#3a5a3a;"></div>
+        <div class="sc-indicator" style="background:var(--aimt-success);"></div>
         <div class="sc-name">Guide confidently</div>
         <div class="sc-look">Move a client through the complete experience—from intake to close—with a prepared flow, clear communication, and the ability to recover when something changes.</div>
       </div>
       <div class="scalp-card">
-        <div class="sc-indicator" style="background:#3a5a3a;"></div>
+        <div class="sc-indicator" style="background:var(--aimt-success);"></div>
         <div class="sc-name">Assess without overstepping</div>
         <div class="sc-look">Observe and describe visible findings accurately, document what matters, and stay on your side of the professional boundary.</div>
       </div>
       <div class="scalp-card">
-        <div class="sc-indicator" style="background:#3a5a3a;"></div>
+        <div class="sc-indicator" style="background:var(--aimt-success);"></div>
         <div class="sc-name">Adapt in real time</div>
         <div class="sc-look">Adjust based on what you see — not what you planned before the client sat down.</div>
       </div>
       <div class="scalp-card">
-        <div class="sc-indicator" style="background:#3a5a3a;"></div>
+        <div class="sc-indicator" style="background:var(--aimt-success);"></div>
         <div class="sc-name">Perform repeatably</div>
         <div class="sc-look">Deliver the same quality experience for every client — not just the ones where everything went smoothly.</div>
       </div>
@@ -4631,11 +4640,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="condition-cards">
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Rushed and unclear</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Rushed and unclear</div></div>
         <div class="cc-body">The client receives incomplete changing instructions, senses that the practitioner is behind schedule, and is touched before expectations or consent are clear. They begin the service managing uncertainty that the practitioner created.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#3a5a3a;"></div><div class="cc-h-title">Guided and consent-based</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-success);"></div><div class="cc-h-title">Guided and consent-based</div></div>
         <div class="cc-body">The practitioner reviews what matters, explains the transition, protects privacy, offers real choices, asks before touch, and gives one clear orientation. The client knows what is happening and how to speak up.</div>
       </div>
     </div>
@@ -4650,23 +4659,23 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="condition-cards">
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Rushing the beginning</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Rushing the beginning</div></div>
         <div class="cc-body">Schedule pressure belongs to the business, not the client. Rushing changing, intake confirmation, or consent can make the service feel transactional and may compromise professional boundaries.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Giving unclear instructions</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Giving unclear instructions</div></div>
         <div class="cc-body">When a client does not know where to go, what to remove, what remains covered, or what happens next, they must manage uncertainty that clear guidance could have prevented.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Assuming consent</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Assuming consent</div></div>
         <div class="cc-body">Prior visits, a signed intake form, closed eyes, or silence do not replace permission for a new touch or service choice. Explain and ask.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Treating optional rituals as mandatory</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Treating optional rituals as mandatory</div></div>
         <div class="cc-body">Tea, fragrance, changing, and shoulder contact must adapt to allergies, comfort, accessibility, scope, and preference. Consistency does not mean forcing the same ritual on every client.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Over-explaining</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error);"></div><div class="cc-h-title">Over-explaining</div></div>
         <div class="cc-body">Clients should feel informed, not briefed on every technical step. Give the information they need to participate, consent, and relax into the experience.</div>
       </div>
     </div>
@@ -6697,7 +6706,7 @@ const M4 = {
   // markup for m4cp1 / m4cp2 inside #module4Wrap.
   questions: {
     m4cp1: 'During a five-point scan, the crown appears shiny with visible material around several follicular openings, while the frontal hairline looks matte with fine loose scale. The client reports no pain or burning. Describe what you would document, explain why one label for the entire scalp would be weak, and name one question you would ask before deciding how to adjust the service.',
-    m4cp2: 'During the crown station, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.'
+    m4cp2: 'During the crown assessment, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.'
   },
   // Module-4/checkpoint-specific evaluator configuration (one rubric per
   // checkpoint), combined with the shared tone/format rules inside
@@ -6708,7 +6717,7 @@ const M4 = {
       '1. Objective documentation of both regions: crown shine/material around openings, and matte hairline/fine loose scale.\n' +
       '2. Recognition that the crown and hairline do not present identically.\n' +
       '3. Recognition that one label for the entire scalp would erase regional variation.\n' +
-      '4. At least one relevant question, such as time since washing, dry shampoo/root spray/oils/fibers/styling products, cleansing frequency, tightness/itching/tenderness/sensitivity, recent chemical service, whether the pattern is new, or whether other stations match either region.\n' +
+      '4. At least one relevant question, such as time since washing, dry shampoo/root spray/oils/fibers/styling products, cleansing frequency, tightness/itching/tenderness/sensitivity, recent chemical service, whether the pattern is new, or whether other assessment areas match either region.\n' +
       '5. No diagnosis or claim that the image proves the material\'s cause.\n' +
       '6. A conservative statement that the service direction should follow the completed assessment and client context.\n\n' +
       'The student does not need to use "follicular," "perifollicular," or the exact five-lens terminology when the reasoning is accurate. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +

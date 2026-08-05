@@ -1614,3 +1614,180 @@ Guided Completion Path UI, Listen Mode, persistent Cadence threads, Module
 12, and the proposed downloadable resource were not built, per instruction.
 Modules 0–3 and Module 5 were not extracted, audited, or edited. Work
 remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 24: Polish — Module 4 terminology and semantic colors
+
+Two combined corrections requested ahead of Module 4 manual QA, applied as
+a single surgical pass to `headspa-mastery.html` (95 lines changed: 52
+insertions, 43 deletions — no other file touched). Module 4 remains
+**Implemented — awaiting manual QA**, not approved, by this step.
+
+**1. Terminology — `station` replaced with approved assessment language.**
+`Station` is not approved professional terminology for scalp magnification.
+Every student-facing Module 4 occurrence was replaced with AIMT's approved
+language (`assessment point`, `assessment area`, `five-point scan`); the
+five-area method, order, images, interaction behavior, technical IDs, and
+the `Front. Top. Crown. Side. Back.` memory line were preserved exactly.
+Changed surfaces:
+- 4.4 headline (`Five stations…` → `Five assessment points prevent
+  one-angle thinking.`) and body text.
+- The five-point stepper: `aria-label`, the "select a station directly"
+  hint, all five `Station N of 5` panel labels (→ `Assessment Point N of
+  5`), the temporal-area cross-reference note, and the Previous/Next
+  button labels.
+- Alt text on all five examination-area images (`…assessment station.` →
+  `…assessment point.`).
+- 4.5 observation-lenses intro, the perifollicular "Document like this"
+  example, and the distribution lens's "Look for" text (all → `assessment
+  area`).
+- The baseline appearance-gallery card's "Context needed" text (→
+  `assessment areas`).
+- `m4cp2`'s displayed question (`During the crown station…` → `During the
+  crown assessment…`), `M4.questions.m4cp2` (the exact same string,
+  verified byte-identical — see Validation), and the parallel phrase
+  inside `M4.systems.m4cp1`'s rubric (`whether other stations match either
+  region` → `whether other assessment areas match either region`).
+- `m4cp1`'s displayed/evaluated question already read "During a five-point
+  scan…" with no `station` wording — confirmed unchanged, no edit needed.
+
+**Explicitly preserved, not renamed** (internal identifiers, never shown
+to a student): the `.m4-station-panel`/`.m4-station-head`/`.m4-station-num`/
+`.m4-station-name`/`.m4-station-controls` CSS classes, the
+`m4station-btn-0..4`/`m4station-0..4`/`m4StationPrev`/`m4StationNext`
+element IDs, the `m4GoToStation`/`m4PrevStation`/`m4NextStation` function
+names, and the `M4_STATION_NAMES` JS constant. Also preserved: Module 7's
+and Module 9's own, unrelated uses of "station" (physical spa
+station/equipment-setup meaning — "Fresh bed sheets — minimum 2 sets per
+station," "Rolling cart — stations should be mobile," "station entry,"
+"Your station is built," "your station looks empty") — out of scope for
+this task and not the terminology being corrected.
+
+**2. Shared semantic CSS variables — success/error/warning/neutral.**
+Inspected existing Modules 0–3 color usage before defining anything new.
+Found `--success: #3a5a3a` / `--success-light: #e8ede8` already an
+established shared variable (used by `.mr-done`/`.mb-done`,
+`.practice-option`/`.practice-choice.is-correct`, and matching Module 1's
+`neutral-icon`/`neutral-badge` "Say this" styling and the Welcome Module's
+"What success looks like" indicators). `#c0392b` (paired light background
+`#fde8e8`) was the most consistently used error red — ten occurrences
+across the file versus three for the older `#7a3030` value tied to Module
+1's legacy `sensitive-icon`/`sensitive-badge` classes — and was already
+used for genuinely semantic mistake/referral states (Module 2's "What
+goes wrong" and "Rushed and unclear" cards, Module 3's "Pattern requiring
+medical evaluation" card). `#8b5e00` (paired light background `#fff4e8`,
+from Module 3's catagen phase dot) was the only established warm
+amber/ochre pairing found. Added to `:root` (`headspa-mastery.html`
+line ~44):
+
+```css
+--aimt-success: var(--success);
+--aimt-success-light: var(--success-light);
+--aimt-error: #c0392b;
+--aimt-error-light: #fde8e8;
+--aimt-warning: #8b5e00;
+--aimt-warning-light: #fff4e8;
+--aimt-neutral: var(--accent2);
+```
+
+`--aimt-warning`/`--aimt-warning-light` are defined for the shared palette
+but had no unambiguous existing violation to apply to this pass (see
+below) — they exist so future modules have one authoritative amber value
+to reuse rather than inventing another.
+
+**Module 4 fix (the actual reported defect):** the six `.pc-icon` mistake
+badges in 4.10 "Common mistakes" used a hardcoded near-black
+`background:#4d403a` (`--accent2`) with a `✗` glyph — a black X icon
+communicating "mistake," which the task specifically called out to
+correct. Changed all six to `background:var(--aimt-error)`. The
+accompanying title text (e.g. "Naming the scalp after one image") and
+"The fix" text were left untouched — correctness is still communicated
+with text, not color alone.
+
+**Cross-module DRY refactor (zero visual change, same literal values,
+"where technically safe" per validation criterion 11):** replaced exact
+duplicate `#3a5a3a`/`#c0392b` literals with `var(--aimt-success)`/
+`var(--aimt-error)` in six places already carrying the identical
+semantic meaning: `.bq-opt.correct` (the shared correct-answer style
+reused by Module 2's judgment check, Module 3's predict-then-reveal, and
+Module 4's "Say only what the image earned"); the Welcome Module's four
+"What success looks like" indicators (0.9); Module 2's "Rushed and
+unclear" / "Guided and consent-based" comparison pair and all five "What
+goes wrong" mistake-card badges (2.6); and Module 3's "Pattern requiring
+medical evaluation" card (3.5). Every value is byte-identical before and
+after — this is a pure `var()` substitution, not a recolor.
+
+**Explicitly left unchanged** (decorative or already-considered
+choices, not the reported defect, and outside this task's scope):
+- Module 3's `.pd-1`–`.pd-4` hair-cycle phase dots and Module 9's
+  `.freq-every`/`.freq-weekly`/`.freq-daily` sanitation tags — decorative
+  sequence/frequency coloring, not pass/fail semantics.
+- Module 4's own appearance-gallery numbered badges (`neutral-icon`/
+  `oily-icon`/`dry-icon`/`sensitive-icon`/`combo-icon`, reused only for
+  their circle-color styling to number cards 1–5) and its four
+  preserve/modify/avoid/refer decision-card dots (4.7) — a deliberate
+  escalating spectrum, not a binary correct/incorrect signal, and
+  changing "Stop and refer" to bright red risked the task's own "do not
+  turn every warning into red" guidance for a card that was not flagged
+  as a defect.
+- `.bq-opt.wrong` (the "Not quite" state already used by Modules 2–4's
+  interactions) intentionally uses a neutral gray, not red — an existing,
+  working accessibility choice (avoids a jarring red flash on the
+  student's own selection; the "Not quite" text tag carries the meaning)
+  that predates this task and was not altered.
+- Module 1's `sensitive-icon`/`sensitive-badge` (`#7a3030`, "Never say" /
+  "Never authorized") — a real error-semantic use, but a different,
+  already-shipped, manually-QA'd literal value from a different module.
+  Repainting it to match the new `--aimt-error` would be an actual color
+  *change* to already-approved Module 1 content, not a same-value
+  variable substitution, and was judged out of scope for a Module-4-
+  focused polish pass.
+- `.voice-btn.listening` (`#c0392b`/`#e74c3c` recording-pulse indicator)
+  — communicates "actively recording," not a correctness state.
+
+**Validation performed:**
+- Full re-search for `station`/`stations`: only internal CSS
+  classes/IDs/JS identifiers and Module 7/9's unrelated physical-station
+  usage remain (see above); zero remaining student-facing Module 4
+  occurrences.
+- Full re-search for the black-X-icon literal (`#4d403a` paired with
+  `✗`): zero remaining matches.
+- `m4cp1` and `m4cp2` displayed (`.cp-q`) vs. evaluated
+  (`M4.questions`) strings reprogrammatically diffed and confirmed
+  byte-identical (Python string comparison, not eyeballing).
+- Document-wide duplicate-`id` scan: only the one pre-existing,
+  unrelated `studentFirstName` triplicate (documented in Step 23) remains
+  — no new duplicates introduced.
+- Tag-balance check (`div`/`button`/`picture`/`a`/`textarea`) across the
+  full `module4Wrap` block: all balanced.
+- Rendered the page on a local static server, entered Course Review Mode,
+  opened Module 4 live: the five-point stepper's `aria-label`, hint text,
+  panel labels ("Assessment Point 1 of 5" → "Assessment Point 3 of 5"
+  after calling `m4GoToStation(2)`, confirmed against the actual active
+  panel rather than the first DOM match), and Previous/Next button text
+  all read correctly; `getComputedStyle` on all six 4.10 mistake icons
+  returned `rgb(192, 57, 43)` (`#c0392b`) for every one; both `.cp-q`
+  strings rendered exactly as expected; zero console errors at any point.
+
+**Deferred to manual visual QA** (unchanged from Step 23, not
+re-verified by this polish pass): live-model grading behavior against
+`M4.systems.m4cp1`/`m4cp2` (only the byte-identical question strings and
+the one rubric-text edit were verified here, not a live model call);
+screen-reader verification of the stepper and classification
+interaction; physical-keyboard activation of the stepper/classification
+buttons; real touch-device verification; visual/screenshot confirmation
+in a real browser at both the five-point stepper and the 4.10 mistake
+cards that the red icon reads correctly against the card background at
+normal and mobile widths; medical/dermatological subject-matter review
+of Module 4's device-framing and referral language (untouched by this
+step); privacy/legal review of the image-consent workflow (untouched by
+this step).
+
+Module 4 status remains **Implemented — awaiting manual QA** —
+`docs/course-audit/modules/README.md` was not changed by this step, and
+Module 4 manual QA is explicitly not being marked approved here. No
+module structure, learning sequence, interaction behavior, checkpoint
+IDs, progress behavior, completion rules, authentication, entitlements,
+certificate logic, Review Mode, or Module 5+ content was touched. Work
+remains on branch `course-audit-build`.
