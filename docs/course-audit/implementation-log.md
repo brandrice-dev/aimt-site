@@ -623,3 +623,146 @@ status as **Approved — awaiting implementation**.
 This was a documentation update only — the specification authorizes future
 implementation but nothing was implemented. No production files were
 modified. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 13: Module 2 implementation
+
+Implemented the approved Module 2 audit specification
+(`docs/course-audit/modules/module-02.md`). No other module was audited or
+edited.
+
+**Files changed:** `headspa-mastery.html` only (202 insertions, 155
+deletions). No changes to `headspa-state.js` or `aimt-progress-sync.js`.
+
+**Copy and behavior implemented:**
+- Course name / Cadence identity corrections applied to `M2.systems.m2cp1`,
+  `MODULE_GUIDE_SYSTEMS[2]`, and `evaluateScript()`'s system prompt (no
+  more "HeadSpa Mastery"; Cadence no longer claims personal industry
+  experience).
+- Module identity: hero description and home-screen row subtitle updated
+  (hero eyebrow/title, `module2Wrap`/`M2`/`m2cp1`/`m2Complete`/module ID
+  `2` unchanged, as required).
+- Five arrival-sequence steps rebuilt as an accessible accordion, visibly
+  numbered 2.1–2.5, using the approved copy for each step (intake review,
+  private preparation, hospitality transition, scent preference and first
+  touch, set expectations) — replacing the old "in this order, every time"
+  framing and the shoulder-touch-before-consent instruction.
+- Tea reframed as optional hospitality (no nervous-system claims); scent
+  reframed as optional with an explicit fragrance-free path; consent
+  required before first touch, with the approved example script.
+- Unsupported nervous-system, subconscious-trust, transformation, and
+  rebooking claims removed throughout (timeline, 2.6, 2.7).
+- 2.6 "What goes wrong" rewritten to five cards (added "Assuming consent"
+  and "Treating optional rituals as mandatory," removed "Skipping first
+  contact"); 2.7 "Consistency" rewritten to distinguish consistent
+  standards from adaptable rituals, replacing the old "nothing in this
+  module is optional" framing.
+- "What breaks the moment?" quiz rebuilt to use the approved four options
+  and feedback, made retryable (selection can change, no permanent
+  disabling), with a visible "Best response"/"Try again" text tag on the
+  selected option (not color-only) and a completion message once all four
+  explanations have been viewed.
+- Script builder rewritten to the approved reference script, prompt, and
+  network-error text; accessible label added to the textarea and button;
+  `aria-live` added to the feedback region. Remains ungraded, no
+  progress/checkpoint state, revisable and resubmittable (never disabled).
+- Feeling slider removed entirely — markup (`#feelingSlider`,
+  `#feelingOutput`), `FEELING_STATES`, `updateFeeling()`, the
+  `STATIC_MODULES[2]` post-render `setTimeout` that initialized it, and
+  the module-agnostic `DOMContentLoaded` init check for `#feelingSlider`
+  were all removed. Replaced with the approved static "Same service.
+  Different beginning." comparison (reuses the existing `.condition-cards`
+  pattern already used by 2.6 — no new CSS component). Module 6's
+  unrelated `spectrumSlider` init was left untouched.
+- Checkpoint `m2cp1`: displayed `.cp-q` and `M2.questions.m2cp1` now share
+  one exact string (verified programmatically). `M2` restructured from a
+  single `system` function to `M2.systems.m2cp1`, an itemized rubric
+  covering the seven required elements, the seven immediate-correction
+  triggers, and the four revision-focus examples from `module-02.md`'s
+  "Checkpoint specification." The former phrase-regex-triggered special
+  case in `evaluateCheckpointAnswer()`
+  (`/first five minutes of her experience/i`) was deleted — no other
+  checkpoint depended on it. `submitM2CP` now passes `M2.systems[id]` and
+  a Module-2-specific `errorMessage` via `submitCheckpoint()`'s existing
+  optional 5th parameter — no shared function signature changed, so no
+  other module's checkpoint behavior is affected.
+- Accessibility: `aria-label` added to the checkpoint voice and submit
+  buttons; `aria-live="polite"` added to `.cp-res`; the accordion triggers
+  are native `<button>` elements with `aria-expanded`/`aria-controls` and
+  a `:focus-visible` outline; a `prefers-reduced-motion` override was
+  added for `.tl-detail`'s open animation.
+- Completion card: new eyebrow ("Module 2 complete"), new title ("The
+  arrival framework is yours."), and a competency-naming body line,
+  following the same `.lc-next-label`-reuse pattern used for the Welcome
+  Module and Module 1 completion cards.
+
+**Tests completed** (local static server, mocking `callAI` since no live
+API credentials are reachable in this environment): normal Module 2 entry;
+Review Mode entry with the rewritten checkpoint (test submission correctly
+labeled "Review Mode test — not saved" and left `checkpointMeta` empty);
+an existing pre-rewrite "passed" `m2cp1` state was seeded directly through
+`APP_STATE.setCheckpointResult` (persisted to `localStorage['levo_app']`
+with Review Mode's save-guard temporarily bypassed, matching how a real
+prior student record would already exist on disk) and, after a full page
+reload, confirmed to survive as `status: 'passed'`, with
+`isModuleComplete(2)` and `canAccessModule(3)` both `true` and the
+completion card visible; Module 1 and Module 3 were both opened and
+confirmed byte-for-byte unchanged (`git diff` was also scanned for any
+reference to `module1Wrap`/`module3Wrap`, `M1`/`M3`, or their checkpoint
+IDs and found none); all five accordion steps render in order labeled
+2.1–2.5; real `.click()` activation on an accordion trigger correctly
+toggled `aria-expanded` and only one step open at a time; all four
+judgment-check options were exercised with real clicks — each showed its
+own feedback text and a "Best response"/"Try again" tag on the button
+itself, selections could be changed freely, and the completion message
+appeared only after all four had been viewed; confirmed via static
+analysis that `openStep`, `breakAnswer`, and `evaluateScript` contain zero
+references to `APP_STATE` (no progress write from any of the three
+ungraded interactions); script builder was submitted with a mocked network
+failure and showed the exact approved error text, then confirmed still
+enabled for revision and resubmission; checkpoint network-failure fallback
+was tested in both normal mode (Module-2-specific text) and Review Mode
+(shared default text, matching every other module's existing Review Mode
+behavior); a mocked strong `m2cp1` answer passed, completed the module,
+and unlocked Module 3; a mocked partial answer (no touch consent) returned
+one focused revision request and re-enabled the input for retry; mobile
+viewport (375×812) showed no horizontal overflow and confirmed
+`#feelingSlider` does not exist anywhere in the DOM; a full-page text
+extraction confirmed every curriculum section renders in the correct
+order; opening/re-entering Module 2 after removing the feeling-slider code
+threw no errors; console stayed error-free throughout; a duplicate-ID scan
+within the `module2Wrap` block found no duplicates, and a tag-balance
+check confirmed matched `<div>`/`<button>` counts.
+
+**Requires manual QA (could not be fully verified in this environment):**
+- Enter/Space keyboard activation of the accordion triggers and the
+  judgment-check buttons — same sandbox limitation already noted for the
+  Welcome Module's and Module 1's practice interactions (native `<button>`
+  semantics guarantee activation in a real browser; this sandbox's
+  synthetic key-event delivery did not trigger a click during testing;
+  mouse/`.click()` activation worked correctly).
+- The live Claude model's actual behavior against the new `m2cp1` rubric —
+  grading flows were verified with mocked AI responses, not the real
+  model. In particular: whether a safe alternate ritual (e.g., a
+  fragrance-free, no-tea response with a clearly explained alternative)
+  passes; whether forced undressing, forced fragrance, or unsupported
+  physiological claims are reliably caught as immediate corrections;
+  whether grammar/spelling/informal wording is reliably not penalized; and
+  whether the model identifies the single most important missing element
+  rather than restating the whole prompt — can only be confirmed with
+  live-model testing.
+- Screen-reader verification (VoiceOver/NVDA) of the new `aria-live`,
+  `aria-expanded`/`aria-controls`, and `role="region"` behavior on the
+  accordion, judgment check, script builder, and checkpoint.
+- `prefers-reduced-motion` behavior was verified by code review (the new
+  `@media (prefers-reduced-motion: reduce) { .tl-detail { animation: none
+  !important; } }` rule mirrors the existing intro-cursor pattern) but not
+  exercised with an actual OS-level reduced-motion setting.
+- Touch-target sizing was not measured against a specific minimum (e.g.
+  44×44px) — the accordion and quiz buttons reuse existing padding, not a
+  value chosen or verified against a touch-target guideline.
+
+Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
+Module 12 were not built, per instruction. Module 3 was not extracted or
+edited.

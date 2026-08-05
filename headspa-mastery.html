@@ -1273,11 +1273,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   background:rgba(255,255,255,0.65); border:0.5px solid var(--border2);
   border-radius:0; cursor:pointer; transition:background 0.2s;
   border-bottom:none;
+  width:100%; text-align:left; font-family:inherit; color:inherit;
+  appearance:none; -webkit-appearance:none; margin:0;
 }
 .timeline-item:first-of-type { border-radius:12px 12px 0 0; }
 .timeline-item:last-of-type { border-bottom:0.5px solid var(--border2); }
 .timeline-item.open { background:rgba(255,255,255,0.9); }
 .timeline-item:hover { background:rgba(255,255,255,0.85); }
+.timeline-item:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
 .tl-num { font-family:var(--aimt-font-mono); font-size:0.6rem; color:var(--muted); letter-spacing:0.1em; min-width:24px; }
 .tl-info { flex:1; }
 .tl-title { font-size:0.875rem; font-weight:500; }
@@ -1293,6 +1296,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .tl-detail:last-child { border-radius:0 0 12px 12px; border-bottom:0.5px solid var(--border2); }
 .tl-detail.open { display:block; }
 @keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+@media (prefers-reduced-motion: reduce) {
+  .tl-detail { animation: none !important; }
+}
 .tld-body { font-size:0.875rem; line-height:1.75; color:var(--text); font-weight:300; margin-bottom:0.75rem; }
 .tld-highlight {
   background:var(--hero-bg); color:rgba(255,255,255,0.78); border-radius: var(--aimt-radius-sm);
@@ -1310,8 +1316,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   text-align:left; cursor:pointer; transition:all 0.2s; line-height:1.5;
 }
 .bq-opt:hover { background:rgba(255,255,255,0.9); border-color:var(--ash); }
+.bq-opt:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .bq-opt.correct { background:#e8ede8; border-color:#3a5a3a; color:#3a5a3a; }
-.bq-opt.wrong { background:#f5f3ee; border-color:var(--ash); color:var(--muted); opacity:0.6; }
+.bq-opt.wrong { background:#f5f3ee; border-color:var(--ash); color:var(--muted); }
+.bq-tag { display:block; margin-top:4px; font-size:0.68rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; }
 .bq-feedback { margin-top:1rem; padding:1rem 1.1rem; background:var(--hero-bg); border-radius: var(--aimt-radius-sm); font-size:0.85rem; line-height:1.7; color:rgba(255,255,255,0.78); font-weight:300; }
 
 /* Script builder */
@@ -1325,12 +1333,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .sb-btn { margin-top:8px; background:var(--hero-bg); color:white; border:none; border-radius:980px; padding:0.55rem 1.1rem; font-family:var(--aimt-font-sans); font-size:0.8rem; font-weight:500; cursor:pointer; transition:opacity 0.2s; }
 .sb-btn:hover { opacity:0.8; }
 .sb-feedback { margin-top:0.85rem; font-size:0.85rem; line-height:1.7; color:var(--text); font-weight:300; min-height:0; }
-
-/* Feeling slider */
-.feeling-slider-wrap { margin:1.5rem 0; }
-.fs-labels { display:flex; justify-content:space-between; font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted2); margin-bottom:8px; }
-.fs-slider { width:100%; accent-color:var(--hero-bg); }
-.fs-output { margin-top:1rem; min-height:60px; padding:1rem 1.1rem; background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); font-size:0.875rem; line-height:1.7; color:var(--text); font-weight:300; transition:all 0.3s; }
 
 
 /* ── MODULE 6 STYLES ── */
@@ -2293,7 +2295,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="2" onclick="openModuleById(2)">
         <div class="mr-num mr-active" id="mnum-2">2</div>
-        <div class="mr-info"><div class="mr-title">Module 2 — Welcoming Your Client</div><div class="mr-sub">Intake, rituals, first contact</div></div>
+        <div class="mr-info"><div class="mr-title">Module 2 — Welcoming Your Client</div><div class="mr-sub">Arrival, consent, comfort, and first contact</div></div>
         <span class="mr-badge mb-active" id="mbadge-2">Start</span>
       </div>
       <div class="module-row" data-module-id="3" onclick="openModuleById(3)">
@@ -4363,177 +4365,191 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 2 · Welcoming Your Client</div>
       <div class="mh-title">The experience begins<br>before your hands do.</div>
-      <div class="mh-desc">Everything in this module happens before the scalp is touched. That's the point. The first five minutes shape how the client receives every minute that follows.</div>
+      <div class="mh-desc">The arrival shapes whether a client feels rushed, uncertain, or guided. The goal is a calm, clear transition into the service—before hands-on work begins.</div>
     </div>
 
-    <!-- ── INTERACTIVE TIMELINE ── -->
+    <!-- ── ACCESSIBLE ARRIVAL-SEQUENCE ACCORDION ── -->
     <div class="sec-eyebrow">The arrival sequence</div>
-    <div class="sec-title">Five moments. In this order. Every time.</div>
-    <div class="body-text">Tap each step to understand why it exists — not just what it is.</div>
-    <div class="interaction-hint">↓ Tap each step to expand</div>
+    <div class="sec-title">Five moments. One adaptable framework.</div>
+    <div class="body-text">Open each step to understand what it protects: preparation, privacy, choice, consent, and a clear transition into the service.</div>
+    <div class="interaction-hint">Select each step to expand</div>
 
     <div class="timeline-wrap" id="timeline">
-      <div class="timeline-item" onclick="openStep(0)">
-        <div class="tl-num">01</div>
+      <button type="button" class="timeline-item" id="tl-trigger-0" aria-expanded="false" aria-controls="step-0" onclick="openStep(0)">
+        <div class="tl-num">2.1</div>
         <div class="tl-info">
-          <div class="tl-title">Intake form</div>
-          <div class="tl-sub">Before they arrive</div>
+          <div class="tl-title">Review before they arrive. Confirm before you begin.</div>
+          <div class="tl-sub">Preparation without assumption</div>
         </div>
-        <div class="tl-arrow">+</div>
-      </div>
-      <div class="tl-detail" id="step-0">
-        <div class="tld-body">The intake form is not paperwork. It is preparation — for both of you. When a client fills it out, they begin thinking about their scalp, their habits, and what they want from the service. They arrive more engaged. You arrive knowing what to adjust before they walk in. Review it before they enter the treatment space. Look for sensitivities, scalp discomfort notes, stress levels, anything that changes your approach. That level of preparation is what separates a reactive service from a controlled one.</div>
+        <div class="tl-arrow" aria-hidden="true">+</div>
+      </button>
+      <div class="tl-detail" id="step-0" role="region" aria-labelledby="tl-trigger-0">
+        <div class="tld-body">The intake form is preparation, not a substitute for conversation. Review it before the client enters the treatment space so you can identify sensitivities, discomfort, relevant health or service-history notes, and anything that may change your approach.</div>
+        <div class="tld-body">At the appointment, briefly confirm whether anything has changed and clarify any answer that affects safety, products, positioning, scent, touch, or service selection. A prepared practitioner is not guessing in front of the client—but is still willing to ask.</div>
+        <div class="tld-highlight">Intake information should guide a professional conversation. It should never be used to diagnose a condition or override what the client tells you in person.</div>
       </div>
 
-      <div class="timeline-item" onclick="openStep(1)">
-        <div class="tl-num">02</div>
+      <button type="button" class="timeline-item" id="tl-trigger-1" aria-expanded="false" aria-controls="step-1" onclick="openStep(1)">
+        <div class="tl-num">2.2</div>
         <div class="tl-info">
-          <div class="tl-title">Physical preparation</div>
-          <div class="tl-sub">Spa attire, access, comfort</div>
+          <div class="tl-title">Explain what is necessary. Preserve choice and coverage.</div>
+          <div class="tl-sub">Changing, privacy, and comfort</div>
         </div>
-        <div class="tl-arrow">+</div>
-      </div>
-      <div class="tl-detail" id="step-1">
-        <div class="tld-body">Guests change into a spa wrap and warm robe. Top layers, bra, and intrusive jewelry are removed — giving you full access to the shoulders, neck, and upper back. Without this, massage work becomes restricted and the service loses fluidity. But this step is also psychological. When you guide it clearly and calmly, the client feels taken care of rather than unsure of what to do next. Uncertainty at this stage creates tension that follows them into the service.</div>
-        <div class="tld-highlight">The sock detail — each guest receives a complimentary pair of fuzzy slipper socks. Low cost. Consistent emotional response. It signals thoughtfulness and sets this apart from a standard appointment before the service has started.</div>
+        <div class="tl-arrow" aria-hidden="true">+</div>
+      </button>
+      <div class="tl-detail" id="step-1" role="region" aria-labelledby="tl-trigger-1">
+        <div class="tld-body">Preparation depends on the service being performed, the practitioner's legal scope, and the client's comfort. Explain what clothing or jewelry may interfere with the service, what the client may leave on, how they will remain covered, and where their belongings will be placed.</div>
+        <div class="tld-body">Ask the client to remove only what is necessary. Provide privacy while they change and offer an alternative when they prefer to keep a garment on. A client should never feel pressured to expose more of the body than the service requires.</div>
+        <div class="tld-highlight"><strong>A thoughtful detail.</strong> A robe, wrap, slippers, or another comfort item can make the transition feel considered. The item itself is not the standard. The standard is that it is clean, appropriate, clearly explained, and optional.</div>
       </div>
 
-      <div class="timeline-item" onclick="openStep(2)">
-        <div class="tl-num">03</div>
+      <button type="button" class="timeline-item" id="tl-trigger-2" aria-expanded="false" aria-controls="step-2" onclick="openStep(2)">
+        <div class="tl-num">2.3</div>
         <div class="tl-info">
-          <div class="tl-title">The tea ritual</div>
-          <div class="tl-sub">Calming the nervous system</div>
+          <div class="tl-title">Create a pause without making a health claim.</div>
+          <div class="tl-sub">Tea, water, or another optional ritual</div>
         </div>
-        <div class="tl-arrow">+</div>
-      </div>
-      <div class="tl-detail" id="step-2">
-        <div class="tld-body">A curated tea menu featuring calming herbal blends. Not aesthetic — physiological. Holding a warm beverage slows the body, lowers nervous system arousal, and creates a moment of pause. For first-time guests especially, there is underlying uncertainty. They don't fully know what to expect. This moment allows them to transition out of that uncertainty and into the experience. You are not just preparing the body. You are preparing the state of mind. A mentally settled client responds better to touch, relaxes more deeply, and perceives the service as more immersive.</div>
+        <div class="tl-arrow" aria-hidden="true">+</div>
+      </button>
+      <div class="tl-detail" id="step-2" role="region" aria-labelledby="tl-trigger-2">
+        <div class="tld-body">An optional beverage can create a natural pause between arrival and service. At Atrium, tea is part of that hospitality ritual. In another setting, water or a different simple transition may be more appropriate.</div>
+        <div class="tld-body">Offer the choice without presenting it as treatment. Provide ingredient information for herbal blends, account for known allergies or sensitivities, offer a no-beverage option, and serve hot drinks at a safe temperature. The purpose is hospitality and pacing—not a promise to regulate the body or treat stress.</div>
       </div>
 
-      <div class="timeline-item" onclick="openStep(3)">
-        <div class="tl-num">04</div>
+      <button type="button" class="timeline-item" id="tl-trigger-3" aria-expanded="false" aria-controls="step-3" onclick="openStep(3)">
+        <div class="tl-num">2.4</div>
         <div class="tl-info">
-          <div class="tl-title">First contact</div>
-          <div class="tl-sub">Aromatherapy & touch introduction</div>
+          <div class="tl-title">Choice first. Consent before touch.</div>
+          <div class="tl-sub">Optional scent and the first physical introduction</div>
         </div>
-        <div class="tl-arrow">+</div>
-      </div>
-      <div class="tl-detail" id="step-3">
-        <div class="tld-body">This is the most important and most overlooked moment in the entire pre-service sequence. A head spa is intimate. Some clients feel uneasy being touched by someone they don't yet know. If you don't manage this intentionally, the first part of your service can feel abrupt.</div>
-        <div class="tld-highlight">The aromatherapy process: present three clearly different essential oil blends — earthy, fresh, mint-forward. Use the intake form to remove anything the client is sensitive to. Ask them to close their eyes. Then — before they close them — gently place your hand on their shoulder. That hand stays there through the entire selection. It is not removed until they choose. This introduces touch gradually, creates grounding, and builds subconscious trust. By the time hands-on work begins, your touch already feels familiar.</div>
+        <div class="tl-arrow" aria-hidden="true">+</div>
+      </button>
+      <div class="tl-detail" id="step-3" role="region" aria-labelledby="tl-trigger-3">
+        <div class="tld-body">Scent can be offered as an optional sensory element. Review sensitivities first and make the fragrance-free option as easy to choose as any scented option.</div>
+        <div class="tld-body">Before touching the client, explain what you would like to do and ask permission. The client may decline the touch, keep their eyes open, skip the scent selection, or change their mind. Consent is part of the experience—not an interruption to it.</div>
+        <div class="tld-highlight">"I can offer a few scent options, or we can keep your service fragrance-free. Would you like to sample them? You're welcome to close your eyes while I guide you through each one, but you do not have to. Would it be okay if I rest a hand lightly on your shoulder while you choose?"</div>
+        <div class="tld-highlight">A calm first touch begins with permission. Do not use touch as a technique for creating subconscious trust.</div>
       </div>
 
-      <div class="timeline-item" onclick="openStep(4)">
-        <div class="tl-num">05</div>
+      <button type="button" class="timeline-item" id="tl-trigger-4" aria-expanded="false" aria-controls="step-4" onclick="openStep(4)">
+        <div class="tl-num">2.5</div>
         <div class="tl-info">
-          <div class="tl-title">Setting the tone</div>
-          <div class="tl-sub">Guide, don't overwhelm</div>
+          <div class="tl-title">Guide the client without briefing them on every step.</div>
+          <div class="tl-sub">Clear, concise orientation</div>
         </div>
-        <div class="tl-arrow">+</div>
-      </div>
-      <div class="tl-detail" id="step-4">
-        <div class="tld-body">During this phase your job is to guide — not explain. You do not need to walk the client through every step before it happens. Clients should feel informed, comfortable, and guided — but not overloaded. One simple statement is usually enough: "I'll walk you through everything as we go, but this is a fully guided service — you can just relax and let me take care of everything." That language builds trust and reduces tension. Then you begin.</div>
+        <div class="tl-arrow" aria-hidden="true">+</div>
+      </button>
+      <div class="tl-detail" id="step-4" role="region" aria-labelledby="tl-trigger-4">
+        <div class="tld-body">The client should know what they need to do, what will happen next, and how to communicate discomfort or a change of mind. They do not need a long explanation of the entire protocol.</div>
+        <div class="tld-body">One clear orientation is often enough: "I'll guide you as we go. You can let me know at any point if you want the pressure, temperature, position, scent, or any part of the service adjusted."</div>
       </div>
     </div>
 
     <hr class="divider">
 
     <!-- ── INTERACTIVE: WHAT BREAKS THE MOMENT ── -->
-    <div class="sec-eyebrow">Test yourself</div>
+    <div class="sec-eyebrow">Test your judgment</div>
     <div class="sec-title">What breaks the moment?</div>
-    <div class="body-text">Each of these scenarios happens at the start of the service. Tap the one that does the most damage to the experience.</div>
+    <div class="body-text">Choose the response that does the most damage to trust at the beginning of the service. You may change your answer and review the reasoning.</div>
 
     <div id="breakQuiz" class="break-quiz">
-      <div class="bq-options">
-        <button class="bq-opt" onclick="breakAnswer(this, false)">You take 90 seconds longer than usual getting the tea ready</button>
-        <button class="bq-opt" onclick="breakAnswer(this, false)">You forget to offer the slipper socks</button>
-        <button class="bq-opt" onclick="breakAnswer(this, true)">You rush the client through changing because the previous appointment ran long</button>
-        <button class="bq-opt" onclick="breakAnswer(this, false)">You only have two essential oil options instead of three</button>
+      <div class="bq-options" role="group" aria-label="What breaks the moment? Choose one response.">
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="breakAnswer(this,'1',false)">The tea takes an extra minute to prepare.</button>
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="breakAnswer(this,'2',false)">The slippers you normally offer are unavailable.</button>
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="breakAnswer(this,'3',true)">You rush the client through changing because the previous appointment ran long.</button>
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="breakAnswer(this,'4',false)">The client declines every scent option.</button>
       </div>
-      <div class="bq-feedback" id="bqFeedback" style="display:none;"></div>
+      <div class="bq-feedback" id="bqFeedback" aria-live="polite" style="display:none;"></div>
+      <div class="bq-feedback" id="bqComplete" aria-live="polite" style="display:none;"></div>
     </div>
 
     <hr class="divider">
 
     <!-- ── SCRIPT BUILDER ── -->
     <div class="sec-eyebrow">Your voice</div>
-    <div class="sec-title">The aromatherapy script — in your own words.</div>
-    <div class="body-text">This is the script used at Atrium. Read it. Then scroll down and write your own version — your voice, your phrasing, the same intent.</div>
+    <div class="sec-title">Introduce scent without assuming consent.</div>
+    <div class="body-text">Read the reference version. Then write your own concise introduction. Preserve the choice, the fragrance-free option, and permission before touch.</div>
 
     <div class="script-card">
-      <div class="sc-label">Atrium script</div>
-      <div class="sc-text">"Before we begin your session, we're going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I'm going to have you close your eyes to help heighten your sense of smell, and I'll guide you through each option."</div>
+      <div class="sc-label">Reference script</div>
+      <div class="sc-text">"Before we begin, I can offer a few scent options, or we can keep the service fragrance-free. Would you like to sample them? You may close your eyes while I guide you through each one, but you do not have to. Before I touch your shoulder, I'll ask your permission."</div>
     </div>
 
     <div class="script-build">
-      <div class="sb-label">Write yours</div>
-      <textarea class="sb-input" id="scriptInput" placeholder="Same intention, your voice. How would you say this?" rows="3"></textarea>
-      <button class="sb-btn" onclick="evaluateScript()">Get Cadence's feedback →</button>
-      <div class="sb-feedback" id="scriptFeedback"></div>
+      <div class="sb-label">Write your version</div>
+      <textarea class="sb-input" id="scriptInput" aria-label="Write your version of the scent introduction script" placeholder="Use your own voice while preserving choice, consent, and a fragrance-free option…" rows="3"></textarea>
+      <button class="sb-btn" onclick="evaluateScript()" aria-label="Get Cadence's feedback on your script">Get Cadence's feedback →</button>
+      <div class="sb-feedback" id="scriptFeedback" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
-    <!-- ── FIVE FEELING SLIDER ── -->
+    <!-- ── STATIC COMPARISON: SAME SERVICE, DIFFERENT BEGINNING ── -->
     <div class="sec-eyebrow">Practitioner insight</div>
-    <div class="sec-title">The client decides before you start.</div>
-    <div class="body-text">They don't remember exactly what you did first. They remember how they felt in the first five minutes. Slide to see how the beginning shapes the whole service.</div>
+    <div class="sec-title">Same service. Different beginning.</div>
+    <div class="body-text">The technique may be identical. The arrival can still change how organized, safe, and personal the service feels.</div>
 
-    <div class="feeling-slider-wrap">
-      <div class="fs-labels">
-        <span>Rushed</span>
-        <span>Uncertain</span>
-        <span>Neutral</span>
-        <span>Guided</span>
-        <span>Immersed</span>
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Rushed and unclear</div></div>
+        <div class="cc-body">The client receives incomplete changing instructions, senses that the practitioner is behind schedule, and is touched before expectations or consent are clear. They begin the service managing uncertainty that the practitioner created.</div>
       </div>
-      <input type="range" min="1" max="5" value="3" class="fs-slider" id="feelingSlider" oninput="updateFeeling(this.value)">
-      <div class="fs-output" id="feelingOutput"></div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#3a5a3a;"></div><div class="cc-h-title">Guided and consent-based</div></div>
+        <div class="cc-body">The practitioner reviews what matters, explains the transition, protects privacy, offers real choices, asks before touch, and gives one clear orientation. The client knows what is happening and how to speak up.</div>
+      </div>
     </div>
+    <div class="body-text" style="margin-top:0.75rem;">The goal is not to manufacture a reaction. It is to remove preventable uncertainty.</div>
 
     <hr class="divider">
 
     <!-- ── MISTAKES SECTION ── -->
     <div class="sec-eyebrow">2.6 — What goes wrong</div>
-    <div class="sec-title">Mistakes that break the beginning.</div>
-    <div class="body-text">These are not rare. They happen in real services when practitioners treat the pre-service sequence as casual instead of structured.</div>
+    <div class="sec-title">Mistakes that weaken the beginning.</div>
+    <div class="body-text">These problems appear when a practitioner treats the arrival as informal instead of intentional.</div>
 
     <div class="condition-cards">
       <div class="condition-card">
         <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Rushing the beginning</div></div>
-        <div class="cc-body">The most damaging mistake. When the beginning feels rushed, the client's nervous system stays elevated. Touch doesn't land the same way. They leave satisfied but not transformed.</div>
+        <div class="cc-body">Schedule pressure belongs to the business, not the client. Rushing changing, intake confirmation, or consent can make the service feel transactional and may compromise professional boundaries.</div>
       </div>
       <div class="condition-card">
         <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Giving unclear instructions</div></div>
-        <div class="cc-body">If a client hesitates — wondering where to go, what to remove, what happens next — the experience already feels less controlled. Uncertainty at this stage follows them into the service.</div>
+        <div class="cc-body">When a client does not know where to go, what to remove, what remains covered, or what happens next, they must manage uncertainty that clear guidance could have prevented.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Skipping first contact</div></div>
-        <div class="cc-body">Moving straight into the service without establishing touch makes the first contact feel abrupt. The client may stay slightly guarded for the first several minutes — and you can't recover that lost ground.</div>
+        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Assuming consent</div></div>
+        <div class="cc-body">Prior visits, a signed intake form, closed eyes, or silence do not replace permission for a new touch or service choice. Explain and ask.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Treating optional rituals as mandatory</div></div>
+        <div class="cc-body">Tea, fragrance, changing, and shoulder contact must adapt to allergies, comfort, accessibility, scope, and preference. Consistency does not mean forcing the same ritual on every client.</div>
       </div>
       <div class="condition-card">
         <div class="cc-header"><div class="cc-badge" style="background:#c0392b;"></div><div class="cc-h-title">Over-explaining</div></div>
-        <div class="cc-body">Clients should feel guided, not briefed. Long explanations create cognitive load. They come to relax — not to process information. One clear sentence beats five hesitant ones.</div>
+        <div class="cc-body">Clients should feel informed, not briefed on every technical step. Give the information they need to participate, consent, and relax into the experience.</div>
       </div>
     </div>
 
     <div class="info-card" style="margin-top:1.5rem;">
-      <div class="ic-title">What this looks like in real life</div>
+      <div class="ic-title">What this looks like in practice</div>
       <div class="body-text" style="margin:0 0 0.75rem;">A client walks in and isn't sure where to go.</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Weak response:</strong> "Yeah just go ahead and change, you can put your stuff anywhere."</div>
-      <div class="body-text" style="margin:0;"><strong>Strong response:</strong> "Go ahead and change into the wrap, remove your top layers and any jewelry, and take your time. I'll be right outside when you're ready." Clarity removes tension immediately — before the service has started.</div>
+      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Weak response:</strong> "Go ahead and change. You can put your things anywhere."</div>
+      <div class="body-text" style="margin:0;"><strong>Strong response:</strong> "I'll give you privacy to change. Remove only the items we discussed, and you may keep anything on that makes you more comfortable. Place your belongings here, and I'll be right outside when you're ready."</div>
+      <div class="body-text" style="margin:0.75rem 0 0;">Clarity protects comfort and professional boundaries before the service begins.</div>
     </div>
 
     <hr class="divider">
 
     <!-- ── CONSISTENCY SECTION ── -->
     <div class="sec-eyebrow">2.7 — Consistency</div>
-    <div class="sec-title">You are not improvising. You are delivering.</div>
-    <div class="body-text">Everything in this module should be repeatable. That is the point. Intake, changing, tea, aromatherapy, first contact, tone of voice — when these steps are consistent, clients feel safe, taken care of, and confident in your process. Consistency is what allows a service to scale, whether that means building a team or simply delivering a high-level experience every time.</div>
+    <div class="sec-title">Repeat the standard. Adapt the ritual.</div>
+    <div class="body-text">A high-level arrival should be repeatable without becoming rigid. Every client should receive preparation, privacy, clear communication, meaningful choice, consent before touch, and a calm transition into the service.</div>
+    <div class="body-text">Tea, fragrance, changing instructions, and the exact first-contact method may vary. The framework remains consistent while the experience adapts to the client, the service, and the practitioner's legal scope.</div>
 
     <div class="info-card">
-      <div class="ic-title">The question to ask yourself after every service</div>
-      <div class="body-text" style="margin:0">Could my next client walk in right now and have the exact same pre-service experience as the one who just left? If the answer is no — something in this sequence is being treated as optional. Nothing in this module is optional.</div>
+      <div class="ic-title">The question to ask after every service</div>
+      <div class="body-text" style="margin:0">Did this client receive the same standard of clarity, privacy, choice, consent, and professional guidance as the client before them? If not, identify which standard became inconsistent. Do not judge consistency by whether every client accepted the same ritual.</div>
     </div>
 
     <hr class="divider">
@@ -4542,28 +4558,29 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="checkpoint" id="m2cp1">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Check your understanding</div>
+        <div class="cp-label">Apply the arrival framework</div>
       </div>
-      <div class="cp-q">A new client arrives visibly stressed — she's been rushing and apologizes for being two minutes late. Walk me through the first five minutes of her experience. What do you do, in what order, and what specifically are you trying to accomplish with each step?</div>
+      <div class="cp-q">A new client arrives visibly stressed after rushing and apologizes for being two minutes late. Walk through the first five minutes in the order you would handle them. Explain how you would avoid transferring time pressure to the client, what you would confirm from the intake, how you would protect privacy and choice during preparation, how you would introduce any optional beverage or scent, when you would ask permission for first touch, and what you are trying to accomplish before the hands-on service begins.</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m2cp1In" placeholder="Walk me through it step by step..." rows="1" oninput="grow(this)" onkeydown="m2cpKey(event,'m2cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m2cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m2cp1In" placeholder="Walk through the sequence and explain the purpose of each decision…" rows="1" oninput="grow(this)" onkeydown="m2cpKey(event,'m2cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m2cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m2cp1Btn" onclick="submitM2CP('m2cp1')">
+        <button class="cp-btn" id="m2cp1Btn" onclick="submitM2CP('m2cp1')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m2cp1Res"></div>
+      <div class="cp-res" id="m2cp1Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m2Complete" style="display:none;">
       <div class="lc-gold">✦</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-sub">You know how to receive a client. Now you need to understand what's underneath your hands.</div>
+      <div class="lc-next-label">Module 2 complete</div>
+      <div class="lc-title">The arrival framework is yours.</div>
+      <div class="lc-sub">You demonstrated an organized pre-service sequence grounded in preparation, privacy, client choice, consent, and calm guidance under time pressure.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 3</div>
-        <div class="lc-next-text">Module 3 is the science — hair structure, scalp anatomy, the growth cycle. Once it clicks, every decision you make at the treatment bed will have a reason behind it that you can explain to a client in plain language.</div>
+        <div class="lc-next-text">Module 3 moves beneath the experience into the science of the hair and scalp. The goal is to understand what you are observing so later service decisions have a clear professional reason behind them.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(3)">Start Module 3 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -6223,21 +6240,12 @@ function normalizeCheckpointEvaluation(raw) {
 }
 
 async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
-  let checkpointSpecificCriteria = '';
-  if (/first five minutes of her experience/i.test(question || '')) {
-    checkpointSpecificCriteria =
-      '\nCheckpoint-specific criteria (first five minutes): pass answers that clearly sequence the opening experience and show applied judgment, including most of the following: intentional pacing, physical transition into the space, client regulation/nervous-system downshift, minimal grounded communication, intentional first touch or clear transition into service, and why each step matters.' +
-      '\nDo not require exact wording or a rigid ritual checklist if the reasoning is strong and practice-ready.' +
-      '\nStill fail answers that are generic, unordered, shallow, or limited to broad comfort language without operational detail.';
-  }
-
   const evaluatorSystem =
     systemPrompt +
     '\n\nDecide whether the student can pass this checkpoint right now.' +
     '\n' + CADENCE_CHECKPOINT_TONE +
     '\nIf the answer is ambiguous, partial, generic, or only addresses part of the question, return pass false.' +
     '\nIf the answer is weak, say briefly what is missing and invite a revision in the same flow.' +
-    checkpointSpecificCriteria +
     '\n' + CADENCE_FEEDBACK_MICRO_RULES +
     '\n' + CHECKPOINT_EVAL_FORMAT;
 
@@ -6479,10 +6487,29 @@ const M1 = {
 
 // ── MODULE 2 ──
 const M2 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m2cp1 in module2Wrap.
   questions: {
-    m2cp1: 'A new client arrives visibly stressed after rushing. Walk through the first five minutes of her experience.'
+    m2cp1: 'A new client arrives visibly stressed after rushing and apologizes for being two minutes late. Walk through the first five minutes in the order you would handle them. Explain how you would avoid transferring time pressure to the client, what you would confirm from the intake, how you would protect privacy and choice during preparation, how you would introduce any optional beverage or scent, when you would ask permission for first touch, and what you are trying to accomplish before the hands-on service begins.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 2 checkpoint. Question: "' + q + '". Key concepts: arrival sequence is intake review, physical prep with spa attire, tea ritual to lower the nervous system, aromatherapy with intentional first touch, guided tone-setting. Each step has a physiological or psychological purpose. The beginning shapes everything. Respond specifically to what they wrote. 3-5 sentences, warm and direct.'
+  // Module-2/checkpoint-specific evaluator configuration for m2cp1, replacing
+  // the former question-regex-triggered special case in evaluateCheckpointAnswer().
+  systems: {
+    m2cp1: 'You are Cadence, the curriculum-grounded learning guide for AIMT\'s Head Spa Certification Course. Evaluate the student\'s Module 2 competency: adapting the arrival framework for a visibly stressed, slightly late client while protecting preparation, privacy, choice, consent, and a calm transition into the service.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. The practitioner does not shame the client or intensify the rush because of the two-minute delay.\n' +
+      '2. The practitioner briefly confirms relevant intake information or changes before proceeding.\n' +
+      '3. The practitioner gives clear preparation instructions that preserve privacy and do not require unnecessary undressing.\n' +
+      '4. The practitioner presents beverage and scent as optional, or provides a reasonable alternative without treating the ritual as mandatory.\n' +
+      '5. The practitioner obtains explicit permission before first touch.\n' +
+      '6. The practitioner gives a concise orientation that helps the client understand what happens next and how to request an adjustment.\n' +
+      '7. The response is sequenced and explains the purpose behind the major decisions.\n\n' +
+      'The response does not need to reproduce a specific studio\'s preferred sequence word for word. Tea, scent, robe use, eye closure, and shoulder contact are not individually required when the student provides a safe, intentional alternative. Evaluate applied judgment rather than keyword matching, and accept safe variations in sequence. Accept concise answers that demonstrate the full competency. Do not fail for grammar, spelling, informal wording, concise wording, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that touches the client without permission, pressures the client to remove clothing, presents silence, an intake form, closed eyes, or prior visits as consent, makes physiological, medical, or mental-health claims for tea or aromatherapy, treats a fragrance-free request as a problem, recommends ignoring an allergy or sensitivity, or prioritizes the schedule over privacy or safe preparation.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the sequence is strong but touch consent is never mentioned, ask when and how permission would be obtained. If consent is clear but preparation is vague, ask what changing and privacy instructions the client would receive. If the steps are good but no rationale is given, ask what the practitioner is trying to protect before hands-on service begins. If tea or scent is treated as a rigid requirement, ask how the sequence would adapt if the client declined.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 3 ──
@@ -6564,7 +6591,7 @@ const M10 = {
 const MODULE_GUIDE_SYSTEMS = {
   0: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance was built from the instructor\'s nearly two decades of hands-on experience across cosmetology, esthetics, client experience, service design, and scalp-focused care.\n\nThe student is in Module 0: Course Orientation. This module establishes the course philosophy, the difference between performing and leading a service, how to use the program, and the professional scope framing that governs the curriculum.\n\nRespond directly to the student\'s actual question. Reference their background only when it materially improves the answer, and connect it only to head spa services, scalp wellness, client experience, professional practice, or the business of building a head spa service. Do not diagnose, prescribe, or imply that the course expands legal scope.\n\nKeep responses concise, warm, direct, and professional. Avoid generic praise, excessive enthusiasm, therapist-like language, or invented personal details. Usually respond in 3–5 sentences without bullet points unless the student explicitly asks for a list.',
   1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 1: the role of the head spa technician, observation versus diagnosis, safe client language, realistic service limitations, licensing variation, and referral judgment. Respond directly to the student\'s actual question using only the course\'s professional and cosmetic scope. Do not diagnose, prescribe, interpret visible findings as medical fact, or imply that AIMT certification expands legal scope. When laws or license permissions are involved, tell the student to verify the rules that apply to their license and jurisdiction. Use 3–5 concise sentences and no bullet points.',
-  2: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 2 (Welcoming Your Client): intake, spa attire prep, tea ritual, aromatherapy with first intentional touch, tone-setting. The beginning shapes everything. If the student has a service background, connect this to how the head spa arrival sequence differs from and elevates what they already know — always in the context of scalp wellness and head spa. 3-5 sentences. No bullet points.',
+  2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 2: intake review, private preparation, optional hospitality, scent preference, consent before touch, concise orientation, and a repeatable but adaptable arrival framework. Keep guidance grounded in professional client experience rather than unsupported physiological or psychological claims. Do not say that tea, scent, or touch regulates the nervous system, creates subconscious trust, treats stress, guarantees relaxation, or causes rebooking. Reinforce client choice, privacy, fragrance-free options, legal scope, and explicit permission before touch. Use 3–5 concise sentences and no bullet points.',
   3: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 3 (Hair & Scalp Anatomy): scalp layers, follicle structure, hair growth phases, telogen effluvium, postpartum hair loss, hydrolipid film, circulation. The visible shaft is not alive — the follicle is where health matters. If the student has cosmetology or esthetics training, build on what they know and connect it directly to scalp health and head spa practice. 3-5 sentences. No bullet points.',
   4: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 4 (Microscopy & Scalp Assessment): microscopy as observation, five assessment regions, dry scalp vs dandruff, when not to treat. If they come from a licensed background, connect their existing pattern-recognition skills to scalp assessment for head spa. All roads lead back to serving the scalp. 3-5 sentences. No bullet points.',
   5: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 5 (Scalp Types & Protocols): neutral, oily, dry, combination, sensitive. Match treatment to condition. If the student has product knowledge from salon or esthetics work, acknowledge how it applies specifically to scalp protocol selection in a head spa context. Combination scalp is the most commonly misread — emphasize that. 3-5 sentences. No bullet points.',
@@ -6579,7 +6606,7 @@ const MODULE_GUIDE_SYSTEMS = {
 const MODULE_QUICK_PROMPTS = {
   0: ['How should I use Cadence during the course?', 'What makes a service feel led rather than performed?', 'What does this certification represent?'],
   1: ['How do I describe what I see without diagnosing?', 'When should I pause or refer a client?', 'How do I verify whether a service is within my license?'],
-  2: ['Why does the tea ritual matter?', 'How does the first touch work?', 'What if a client skips the intake?'],
+  2: ['How do I ask permission before first touch?', 'What should changing instructions include?', 'How do I keep the arrival consistent without making it rigid?'],
   3: ['What is the hydrolipid film?', 'How do I explain shedding to a worried client?', 'What does massage actually do physiologically?'],
   4: ['What does healthy look like under microscopy?', 'How do I talk about what I see without diagnosing?', 'When should I stop and refer?'],
   5: ['How do I identify combination scalp?', 'What causes compensatory oil production?', 'How do I redirect a client who wants the wrong treatment?'],
@@ -6777,7 +6804,7 @@ function openModuleById(id, options = {}) {
 
   const STATIC_MODULES = {
     3: () => { if (wrap && module3HTML) wrap.innerHTML = module3HTML; },
-    2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const fs = document.getElementById('feelingSlider'); if (fs) updateFeeling(fs.value); }, 100); },
+    2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; },
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m5cpsDone = 0; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); window._m6cpsDone = 0; },
@@ -6818,7 +6845,7 @@ function openModuleById(id, options = {}) {
     const greetings = {
       0: 'The Welcome Module establishes how this course works and the standard behind it. Start with the difference between performing a sequence and leading the complete experience; that distinction will return throughout the program.',
       1: 'Module 1 establishes the professional boundary for everything that follows. Read the scope and client-language sections carefully. Strong practitioners do not sound more certain than the evidence or their license allows.',
-      2: 'Module 2 is some of my favorite material to teach because the details here are what clients actually remember. The beginning of a service shapes everything that follows.',
+      2: 'Module 2 is where professional standards become visible to the client. Pay close attention to privacy, choice, and consent—the arrival should feel organized without becoming rigid or performative.',
       3: 'Good to see you in Module 3 — this is where things start clicking. The biology is not just background knowledge, it is the reason every decision at the treatment bed makes sense.',
       4: 'Module 4 is where your eye starts to develop. Microscopy sounds technical but the skill is really about slowing down and actually looking. Ask me anything as you move through it.',
       5: 'Scalp types is where assessment becomes action. If Module 4 taught you how to look, Module 5 teaches you what to do with what you see.',
@@ -6841,60 +6868,82 @@ function openModuleById(id, options = {}) {
 // ══════════════════════════════════════════════════════
 
 // ── MODULE 2 ──
+// Accessible arrival-sequence accordion. Content-navigation only — no
+// APP_STATE access, no progress write, no completion effect.
 function openStep(idx) {
-  const items = document.querySelectorAll('.timeline-item');
+  const triggers = document.querySelectorAll('.timeline-item');
   const details = document.querySelectorAll('.tl-detail');
-  const item = items[idx]; const detail = details[idx];
+  const item = triggers[idx]; const detail = details[idx];
   if (!item || !detail) return;
   const isOpen = detail.classList.contains('open');
   details.forEach(d => d.classList.remove('open'));
-  items.forEach(i => i.classList.remove('open'));
-  if (!isOpen) { detail.classList.add('open'); item.classList.add('open'); }
-}
-
-function breakAnswer(btn, isCorrect) {
-  const opts = document.querySelectorAll('.bq-opt');
-  const fb = document.getElementById('bqFeedback');
-  opts.forEach(o => { o.disabled = true; o.classList.add('wrong'); });
-  btn.classList.remove('wrong');
-  btn.classList.add(isCorrect ? 'correct' : 'wrong');
-  fb.style.display = 'block';
-  if (isCorrect) {
-    fb.textContent = 'Exactly right. Rushing the beginning is the most damaging mistake because it creates a feeling of being processed rather than welcomed. Everything that follows is colored by it.';
-  } else {
-    fb.textContent = 'The right answer is rushing the client through changing. The other options are minor imperfections — they do not fundamentally change how the client feels. But rushing signals to the nervous system that this is transactional.';
+  triggers.forEach(t => { t.classList.remove('open'); t.setAttribute('aria-expanded', 'false'); });
+  if (!isOpen) {
+    detail.classList.add('open');
+    item.classList.add('open');
+    item.setAttribute('aria-expanded', 'true');
   }
 }
 
-const FEELING_STATES = {
-  1: 'When the beginning feels rushed — the client carries that into the entire service. Their nervous system stays elevated. Touch does not land the same way. They leave satisfied but not transformed.',
-  2: 'When the beginning feels uncertain — the client spends the first part of the service figuring out what is happening rather than experiencing it.',
-  3: 'A neutral beginning is fine. The client is not uncomfortable. But they are also not yet in the experience.',
-  4: 'When the beginning feels guided — the client hands over control early. Their body follows. By the time your hands are on the scalp, they are already partially in the experience.',
-  5: 'When the beginning feels immersive — the client forgets the outside world exists before the service has technically started. These are the clients who rebook before they leave.'
+// "What breaks the moment?" — ungraded, retryable judgment check.
+// Does not touch APP_STATE, progress, checkpoints, or completion.
+const BQ_FEEDBACK = {
+  '1': 'An extra minute is usually manageable when you communicate calmly. The delay matters less than how the client is treated during it.',
+  '2': 'A missing comfort item is a minor variation. The professional standard is cleanliness, clarity, and care—not a specific accessory.',
+  '3': 'Best response. Rushing transfers your scheduling pressure onto the client and can compromise privacy, consent, and trust before the service begins.',
+  '4': 'Declining scent is not a problem to solve. A fragrance-free service is a valid client choice and should be supported without pressure.'
 };
+let _bqViewed = new Set();
+function breakAnswer(btn, optId, isCorrect) {
+  const wrap = getActiveElementById('breakQuiz');
+  const fb = getActiveElementById('bqFeedback');
+  const complete = getActiveElementById('bqComplete');
+  if (!wrap || !fb) return;
 
-function updateFeeling(val) {
-  const out = document.getElementById('feelingOutput');
-  if (out) out.textContent = FEELING_STATES[val];
+  wrap.querySelectorAll('.bq-opt').forEach((o) => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const tag = document.createElement('span');
+  tag.className = 'bq-tag';
+  tag.textContent = isCorrect ? 'Best response' : 'Try again';
+  btn.appendChild(tag);
+
+  fb.style.display = 'block';
+  fb.textContent = BQ_FEEDBACK[optId];
+
+  _bqViewed.add(optId);
+  if (_bqViewed.size === 4 && complete) {
+    complete.style.display = 'block';
+    complete.textContent = 'The strongest arrival sequence protects the client’s experience even when the preferred ritual changes.';
+  }
 }
 
+// Aromatherapy script builder — ungraded, formative feedback only.
+// Does not touch APP_STATE, progress, or checkpoint state. Revisable.
 async function evaluateScript() {
-  const input = document.getElementById('scriptInput');
-  const fb = document.getElementById('scriptFeedback');
+  const input = getActiveElementById('scriptInput');
+  const fb = getActiveElementById('scriptFeedback');
   const text = input ? input.value.trim() : '';
   if (!text) { if (input) input.focus(); return; }
-  fb.textContent = 'Reading your script...';
-  const sys = 'You are Cadence, instructor of HeadSpa Mastery. A student just wrote their own version of the aromatherapy introduction script for Module 2. The original script: "Before we begin your session, we are going to sample a few essential oil blends. Whichever one you enjoy most will be used throughout your service for your aromatherapy. I am going to have you close your eyes to help heighten your sense of smell, and I will guide you through each option." Evaluate the student\'s version. Does it: 1) set up the experience clearly, 2) invite the client to close their eyes, 3) stay calm and guided in tone, 4) avoid over-explaining? Give specific, warm feedback in 2-3 sentences.' +
+  fb.textContent = 'Cadence is reviewing your script…';
+  const sys = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. A student just wrote their own version of the optional scent-introduction script for Module 2. Reference script: "Before we begin, I can offer a few scent options, or we can keep the service fragrance-free. Would you like to sample them? You may close your eyes while I guide you through each one, but you do not have to. Before I touch your shoulder, I\'ll ask your permission." Evaluate whether the student\'s version: 1) clearly introduces the optional scent experience, 2) offers a fragrance-free choice, 3) avoids medical or nervous-system claims, 4) does not require eye closure, 5) asks permission before touch, 6) stays concise and natural. Reference one specific strength and identify one focused correction when needed. Avoid pass/fail language. Give feedback in 2-3 concise sentences.' +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
   callAI(sys, [{ role: 'user', content: text }], 300)
     .then(r => { fb.textContent = r; })
-    .catch(() => { fb.textContent = 'Something went wrong — try again.'; });
+    .catch(() => { fb.textContent = 'Cadence couldn’t review your script. Check your connection and try again.'; });
 }
 
 // Module 2 checkpoint (single checkpoint — different pattern)
 function submitM2CP(id) {
-  submitCheckpoint(2, id, M2.system, M2.questions[id]);
+  submitCheckpoint(2, id, M2.systems[id], M2.questions[id],
+    'Cadence couldn’t evaluate your response. Check your connection and try again.');
 }
 function m2cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM2CP(id); }
@@ -7922,8 +7971,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Init sliders on load (for when module HTML is already in DOM)
 document.addEventListener('DOMContentLoaded', function() {
-  const fs = document.getElementById('feelingSlider');
-  if (fs) updateFeeling(fs.value);
   const ss = document.getElementById('spectrumSlider');
   if (ss) updateSpectrum(ss.value);
 });

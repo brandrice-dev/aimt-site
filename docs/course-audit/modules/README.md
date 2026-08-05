@@ -82,15 +82,16 @@ first-pass content assessment.
 | Current completion requirement | Single checkpoint `m2cp1` must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-02.md` — position: client-experience foundation, immediately after Module 1 |
 | Listen Mode notes | Recorded in `module-02.md` — narration approved as a partial candidate (after timeline content is made available independent of accordion state), ~9–11 minutes |
-| **Status** | **Approved — awaiting implementation** |
+| **Status** | **Implemented — awaiting manual QA** |
 
-Approved specification added. Module 2 has four ungraded/semi-graded
-interactive components beyond its required checkpoint (accessible arrival
-accordion, a retryable "what breaks the moment" judgment check, an
-AI-evaluated script builder, and a static comparison replacing the removed
-feeling slider) — see `module-02.md` for the approved behavior and
-`module-02-source.md` §5 and §11 for the prior-state accessibility/
-interaction concerns being corrected.
+Implemented per `module-02.md`. Module 2 has three ungraded interactive
+components beyond its required checkpoint (accessible arrival accordion
+labeled 2.1–2.5, a retryable "what breaks the moment" judgment check, and
+an AI-evaluated script builder) plus a static "Same service. Different
+beginning." comparison that replaced the removed feeling slider — see
+`module-02.md` for the approved behavior and `module-02-source.md` §5 and
+§11 for the prior-state accessibility/interaction concerns that were
+corrected.
 
 Modules 3–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
