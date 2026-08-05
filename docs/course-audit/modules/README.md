@@ -105,26 +105,37 @@ corrected.
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-03.md` — position: fourth, technical foundation immediately before Module 4 assessment and microscopy |
 | Listen Mode notes | Recorded in `module-03.md` — narration approved for most prose, ~14–17 minutes; the five-layer map and supplied cross-section require structured visual-review cues |
-| **Status** | **Approved — awaiting implementation** |
+| **Status** | **Implemented — awaiting manual QA** |
 
-Approved per `module-03.md`. Notable approved corrections: the approved
-headline "The scalp is not a backdrop. It is the environment everything
-depends on."; a corrected five-layer scalp map (skin, dense connective
-tissue, galea aponeurotica, loose areolar tissue, pericranium) replacing
-the current inline SVG; the supplied
-`assets/images/course/module-03/aimt-scalp-cross-section.png` used in the
-pilosebaceous-unit section (with a web-optimized derivative, approved alt
-text/caption, and a full-size viewing control) rather than as a complete
-five-layer diagram; a new ungraded "Anatomy to Action" visual explorer and
-a predict-then-reveal hair-cycle timing interaction; `cp1` moved to the
-module's midpoint with `cp2` remaining at the end, both with aligned
-displayed/evaluated questions and separate checkpoint-specific evaluator
-rubrics; removal of the nonfunctional video placeholder, the dead
-`cpKey_m3` function, the duplicate/conflicting quick-prompt sets, and the
-malformed hidden completion markup; and the same course-name/Cadence-
-identity/accessibility corrections already applied to the Welcome Module
-and Modules 1–2. See `module-03-source.md` §13 for the full list of
-pre-existing findings this specification resolves.
+Implemented per `module-03.md`. Notable implemented corrections: the
+approved headline "The scalp is not a backdrop. It is the environment
+everything depends on."; a corrected five-layer scalp map (skin, dense
+connective tissue, galea aponeurotica, loose areolar tissue, pericranium)
+replacing the removed inline SVG; the supplied
+`assets/images/course/module-03/aimt-scalp-cross-section.png` (plus a new
+web-optimized `aimt-scalp-cross-section.webp` derivative, served via
+`<picture>`) used in the pilosebaceous-unit section with the approved alt
+text, caption, and a keyboard-accessible full-size link — not presented as
+a complete five-layer diagram; a new ungraded "Anatomy to Action" visual
+explorer (four accessible accordion controls) and a predict-then-reveal
+hair-cycle timing interaction, both non-persistent; `cp1` moved to the
+module's midpoint immediately after the timing interaction, with `cp2`
+remaining at the end — both with displayed and evaluated question strings
+aligned and separate `M3.systems.cp1`/`M3.systems.cp2` evaluator rubrics;
+removal of the nonfunctional video placeholder, the duplicate/conflicting
+quick-prompt sets (one dynamic `MODULE_QUICK_PROMPTS[3]` source now
+authoritative), and the malformed hidden completion markup and duplicate
+dead button; and the same course-name/Cadence-identity/accessibility
+corrections already applied to the Welcome Module and Modules 1–2. See
+`module-03-source.md` §13 for the full list of pre-existing findings this
+implementation resolves.
+
+**Manual QA still required:** live-model grading behavior against the new
+`cp1`/`cp2` rubrics, screen-reader testing (VoiceOver/NVDA) of the new
+accordion/practice-interaction/checkpoint `aria-live` and `aria-expanded`
+behavior, physical-keyboard activation of the accordion and timing-option
+buttons, real touch-device verification, and medical subject-matter review
+of the corrected shedding/barrier/massage claims.
 
 Modules 4–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

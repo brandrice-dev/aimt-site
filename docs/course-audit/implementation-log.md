@@ -934,3 +934,201 @@ reflect Module 3 status as **Approved — awaiting implementation**.
 This was a documentation update only — the specification authorizes
 future implementation but nothing was implemented. No production files
 were modified. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 18: Module 3 implementation
+
+Implemented the approved Module 3 audit specification
+(`docs/course-audit/modules/module-03.md`). No other module was audited or
+edited.
+
+**Files changed:** `headspa-mastery.html` (352 insertions, 484 deletions —
+the large deletion count is the removed inline SVG diagram, now replaced
+by an image reference). New asset:
+`assets/images/course/module-03/aimt-scalp-cross-section.webp`. No
+changes to `headspa-state.js` or `aimt-progress-sync.js`.
+
+**Copy and behavior implemented:**
+- Video placeholder removed; hero rewritten (eyebrow/title/description)
+  per approved copy; home-screen row subtitle updated. Hero title, module
+  ID `3`, and `MODULE_TITLES[3]` unchanged.
+- Section 3.1 rewritten with the approved headline "The scalp is not a
+  backdrop. It is the environment everything depends on."
+- Section 3.2: the old inline SVG cross-section (14 labeled callouts, six
+  drawn layers) removed from the student experience and replaced with an
+  accessible five-layer scalp map (Skin, Dense connective tissue, Galea
+  aponeurotica, Loose areolar tissue, Pericranium), each with a
+  treatment-bed-relevance line, reusing the existing `.condition-cards`
+  component (no new CSS).
+- Section 3.3: new pilosebaceous-unit copy: the supplied
+  `aimt-scalp-cross-section.png` is now referenced via `<picture>` with a
+  new `aimt-scalp-cross-section.webp` derivative (1600px wide, ~208KB,
+  down from the source PNG's ~7.2MB — a 97% reduction; the original PNG
+  is preserved unmodified and untouched at its original resolution) and
+  PNG fallback, the approved alt text and caption, and a keyboard-focusable
+  "View full-size diagram" link opening the full-resolution PNG in a new
+  tab. The image's baked-in labels were not altered or redrawn, and the
+  caption explicitly states it is not a complete five-layer diagram.
+- New "Anatomy to Action" explorer: four accessible accordion controls
+  (Surface barrier; Follicle opening and sebaceous gland; Follicle, bulb,
+  and dermal papilla; Vessels and nerves), each revealing what it is, what
+  may be observed, what it changes in service, and what not to assume.
+  Reuses the existing accordion pattern/CSS/JS (`openStep()`,
+  `.timeline-item`/`.tl-detail`) already established for Module 2's
+  arrival sequence — ungraded, revisitable, no `APP_STATE` access. Its
+  trigger/detail element IDs were deliberately made unique
+  (`a2a-trigger-0..3` / `a2a-step-0..3`) rather than reusing Module 2's
+  `tl-trigger-N` / `step-N` IDs, which would have collided (see Testing).
+- Section 3.4 hair-growth-cycle cards rewritten with approved
+  anagen/catagen/telogen/exogen copy, including a new "Practitioner
+  connection" line for exogen (previously the only phase without one).
+- New predict-then-reveal "The delay tells the story" interaction
+  (`selectM3Timing()`): three timing options, commit-before-reveal,
+  changeable afterward, text-based feedback via an `aria-live="polite"`
+  region, ungraded, no progress write. Modeled on the existing
+  `selectM0Practice()` two-option pattern, extended to three options.
+- `cp1` moved to the midpoint, immediately after the timing interaction:
+  new label ("Apply the timing"), new question (display and
+  `M3.questions.cp1` now share one exact string, verified
+  programmatically), new placeholder, `aria-label`s on the voice/submit
+  buttons, `aria-live="polite"` on `.cp-res`, and `onkeydown` switched from
+  the generic 2-arg `cpKey(event,'cp1')` to the already-defined (but
+  previously uncalled) `cpKey_m3(event,'cp1')` — resolving the dead-code
+  finding from the source extraction without changing the shared `cpKey`
+  function used by no other module.
+- Section 3.5 (was "Common hair loss conditions") rewritten as "Read the
+  pattern": the two placeholder photo-pair blocks removed; three
+  comparison cards (delayed diffuse shedding, postpartum shedding, pattern
+  requiring medical evaluation) replacing the old Telogen
+  Effluvium/Postpartum/Referral cards, with a referral script and a
+  corrected key point (daily shedding count reframed as context, not a
+  diagnostic test).
+- Section 3.6 (was "Sebum & the hydrolipid film") rewritten as "Barrier
+  and surface lipids": stratum corneum established as the principal
+  barrier (hydrolipid film reframed as cosmetic shorthand, not a
+  single-cause explanation); the "defensive response"/rebound-oil claim
+  and "most imbalances trace back to one film" claim removed; a new
+  three-question decision rule added; corrected Cadence note.
+- Section 3.7 (was "Circulation & scalp massage") rewritten as "Massage
+  and anatomy": claims that massage delivers nutrients to follicles,
+  creates a "healthier growth environment," reduces traction-related
+  thinning, or produces different outcomes in returning clients were all
+  removed; reframed around controlled technique, pressure, pace, and
+  tissue tolerance.
+- Section 3.8 (was "Putting it all together") rewritten as "Anatomy in
+  practice" with the approved four-question clinical note and closing key
+  point.
+- `cp2` kept at the end (after 3.8): new label ("Turn anatomy into a
+  decision"), new question (display and `M3.questions.cp2` aligned), new
+  placeholder, same accessibility additions as `cp1`.
+- `M3` restructured from one shared `system` function (identical prompt
+  for both checkpoints, no itemized rubric) to `M3.systems.cp1` /
+  `M3.systems.cp2`, each an itemized rubric matching module-03.md's
+  required elements, immediate-correction triggers, and revision-focus
+  examples. `submitCP(id)` now passes `M3.systems[id]` and the approved
+  Module-3-specific network-error text via `submitCheckpoint()`'s existing
+  optional 5th parameter.
+- `MODULE_GUIDE_SYSTEMS[3]` and the module-open Cadence greeting replaced
+  with the approved copy (no more "instructor of HeadSpa Mastery" or "a
+  mentor built from nearly two decades in the head spa industry" personal-
+  experience framing). `MODULE_QUICK_PROMPTS[3]` replaced with the four
+  approved prompts; the conflicting hardcoded five-prompt set in the
+  shared guide panel's default markup (visible only before any module has
+  been opened) was updated to match the same four approved prompts, so
+  Module 3 shows one consistent prompt set regardless of entry path.
+- Completion card: new eyebrow ("Module 3 complete"), new title ("You can
+  now see beneath the surface."), new competency line, following the same
+  `.lc-next-label`-reuse pattern used by every other module's completion
+  card. The malformed `<div style="display:none">v>` fragment and its
+  nested duplicate dead "Back to course →" button were removed; the
+  vestigial `data-also-id="m3Complete"` attribute (never read by any code
+  — the real mechanism is `getVisibleCompletionCard()`'s existing
+  `moduleId === 3` special case) was left untouched as out of scope.
+
+**Preserved unchanged:** module ID `3`, checkpoint IDs `cp1`/`cp2`,
+completion-card ID `lessonComplete`, the `module3HTML` capture/routing
+mechanism, Module 4's unlock dependency on Module 3 completion,
+authentication, entitlements, progress sync, certificate logic, and Review
+Mode. Modules 1, 2, and 4–11 were not edited.
+
+**Tests completed** (local static server on `localhost`, Course Review
+Mode activated via `?review=1`, `callAI` mocked since no live API
+credentials are reachable in this environment): normal Module 3 entry and
+Review Mode entry (including the shared "Review Mode test — not saved"
+label and confirmation that `checkpointMeta` stayed empty after a Review
+Mode checkpoint test); video placeholder confirmed absent; new hero and
+approved headlines rendered; five-layer map order and copy verified
+programmatically; old inline SVG confirmed absent (`document.querySelector('svg')`
+scan of the lesson content); the optimized WEBP was confirmed to load via
+`<picture>` (`img.naturalWidth` reflected the 1600px WEBP source, not the
+2304px PNG fallback) while the source PNG remains on disk unmodified;
+alt text, caption, and full-size link (opens the PNG in a new tab)
+verified; all four Anatomy to Action controls exercised via real
+`.click()` — single-open accordion behavior, revisitable, zero
+`APP_STATE` writes confirmed by diffing `APP_STATE.data.progress` before
+and after; all three timing options exercised, prediction-before-reveal
+and post-selection changeability confirmed, zero progress writes
+confirmed; `cp1` confirmed at the midpoint with displayed/evaluated
+question strings verified programmatically equal; a mocked strong `cp1`
+answer passed and persisted (`checkpointMeta.cp1.status === 'passed'`)
+without completing the module or unlocking Module 4 (both checkpoints
+still required); a mocked diagnostic-certainty `cp1` answer was correctly
+rejected with the approved-style correction and left the input open for
+retry; a mocked strong `cp2` answer passed, completed the module
+(`progress['3'].complete === true`), and unlocked Module 4
+(`canAccessModule(4) === true`); a mocked diagnosis-naming `cp2` answer was
+correctly rejected; the exact approved Module-3-specific network-error
+text was verified for both checkpoints; a pre-existing "passed" `cp1`/`cp2`
+record was written directly to `localStorage['levo_app']` and, after a full
+page reload (not just a DOM re-render), confirmed to survive as `status:
+'passed'` with the completion card visible and Module 4 accessible;
+Module 2 and Module 4 were both opened and confirmed to render correctly
+and unaffected; the Cadence guide panel's dynamic quick prompts and
+module-open greeting matched the approved copy exactly; mobile viewport
+(375×812) showed zero horizontal overflow (confirmed both via
+`scrollWidth`/`clientWidth` comparison and direct element-width
+measurement of the image, explorer, and condition cards); console stayed
+error-free throughout; a full-page text extraction confirmed every section
+renders in the correct order with no stray or duplicate content; and a
+document-wide `id` attribute scan confirmed zero duplicate IDs after a fix
+described below.
+
+**Bug found and fixed during testing:** the Anatomy to Action explorer's
+first draft reused Module 2's exact trigger/detail element IDs
+(`tl-trigger-0..3` / `step-0..3`). Because Module 2's arrival-sequence
+accordion sits in a hidden (but always-present) `module2Wrap` template
+alongside Module 3's live content, this produced real duplicate `id`
+attributes in the DOM — invalid HTML, and a direct violation of the
+specification's "no duplicate IDs" acceptance criterion — even though the
+shared `openStep()` function (which indexes into `querySelectorAll`
+results positionally rather than by ID) happened to still behave correctly
+by luck of DOM order. Fixed by renaming Module 3's explorer IDs to
+`a2a-trigger-0..3` / `a2a-step-0..3`; `openStep()` itself required no
+change. Verified via a full document `id`-attribute census before and
+after the fix.
+
+**Requires manual QA (could not be fully verified in this environment):**
+- Enter/Space keyboard activation of the Anatomy to Action and timing-
+  interaction buttons — same sandbox limitation already noted for every
+  prior module's practice interactions (native `<button>` semantics
+  guarantee activation in a real browser; this sandbox's synthetic
+  key-event delivery does not reliably trigger a click during automated
+  testing; `.click()` activation was verified instead and confirmed
+  correct).
+- The live Claude model's actual behavior against the new `M3.systems.cp1`
+  and `M3.systems.cp2` rubrics — grading flows were verified with mocked
+  AI responses, not the real model.
+- Screen-reader verification (VoiceOver/NVDA) of the new accordion
+  `aria-expanded`/`aria-controls`/`role="region"` behavior, the timing
+  interaction's `aria-live` region, and the checkpoints' `aria-live`
+  regions.
+- Real touch-device verification and `prefers-reduced-motion` verification
+  under an actual OS-level reduced-motion setting (the reused `.tl-detail`
+  animation-suppression rule was verified by code review only).
+- Medical subject-matter review of the corrected shedding-timing,
+  barrier/hydrolipid, and massage-claim language.
+
+Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
+Module 12 were not built, per instruction. Modules 1, 2, and 4–11 were not
+extracted or edited.
