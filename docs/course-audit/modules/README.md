@@ -93,7 +93,37 @@ beginning." comparison that replaced the removed feeling slider — see
 §11 for the prior-state accessibility/interaction concerns that were
 corrected.
 
-Modules 3–11 have not been extracted yet. Source files for those modules
+## Module 3 — Hair & Scalp Anatomy
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 3** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-03-source.md`](module-03-source.md) |
+| Approved specification file | [`module-03.md`](module-03.md) |
+| Wrapper ID | **None** — Module 3 is the default `.lesson-wrap` content captured into `module3HTML` at page load, not a hidden `moduleNWrap` template like every other module (see the source extraction, §1) |
+| Checkpoint IDs | `cp1`, `cp2` — bare IDs, not the `mNcpX` pattern every other module uses |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| Guided completion structure | Recorded in `module-03-source.md` §11 (extraction only — not yet an approved spec) |
+| Listen Mode notes | Recorded in `module-03-source.md` §12 (extraction only — not yet an approved spec) |
+| **Status** | **Awaiting external audit** |
+
+Extracted without production changes. Module 3 is structurally the
+outlier among the modules extracted so far — no wrapper ID, bare
+checkpoint IDs, a video-intro placeholder no other module has, and a
+hand-authored inline SVG scalp/hair cross-section diagram (not an image
+file) with 14 labeled callouts. It is also the first extracted module with
+**zero** ungraded practice interactions. A proposed raster replacement for
+the cross-section diagram was added to the repo at
+`assets/images/course/module-03/aimt-scalp-cross-section.png` but is not
+yet referenced by any production file and has not been verified for
+anatomical or label accuracy — see `module-03-source.md` §2 and the
+2026-08-04 Step 15 implementation-log entry. See `module-03-source.md` §13
+for the full list of confirmed findings (displayed/evaluated checkpoint
+question mismatches on both checkpoints, dead code, a hardcoded-vs-dynamic
+quick-prompts discrepancy, vestigial markup, and more), none of which have
+been fixed.
+
+Modules 4–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.

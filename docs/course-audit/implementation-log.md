@@ -846,3 +846,55 @@ current production Module 3 image was not deleted or replaced.
 
 This was a documentation and asset-tracking update only. No production
 course file was modified. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 16: Module 3 source extraction
+
+Created `docs/course-audit/modules/module-03-source.md` (full verbatim
+extraction of Module 3's curriculum, the inline-SVG scalp/hair
+cross-section diagram and its 14 labeled callouts, both checkpoints and
+their complete grading prompts, Cadence guide context/quick prompts/
+greeting/memory tags, all current interactions, completion behavior,
+accessibility behavior, mobile/interaction concerns, a distinct
+learning-rhythm assessment, an insider-value assessment, Guided Completion
+Path fields, Listen Mode planning fields, source map, and confirmed
+implementation concerns separated from assumptions) and
+`docs/course-audit/modules/module-03.md` (empty headings only, including
+the two new "Distinct learning rhythm" and "Insider value and
+acceleration payoff" headings introduced by this task alongside the
+existing headings). Module 2 was not edited; Module 4 was not extracted
+or edited.
+
+This was documentation and extraction only — no production files were
+modified. `docs/course-audit/modules/README.md` was updated with a
+Module 3 entry (status **Awaiting external audit**).
+
+Notable findings recorded in the extraction (not fixed): Module 3 is
+structurally the outlier among modules extracted so far — it has no
+`moduleNWrap` hidden-template div (it is the default `.lesson-wrap`
+content captured into `module3HTML` at page load) and its checkpoint IDs
+are bare `cp1`/`cp2` rather than the `mNcpX` pattern every other module
+uses; both checkpoints' displayed and evaluated questions do not match
+(same pattern already corrected for Modules 1 and 2); the current
+scalp/hair cross-section diagram is a fully hand-authored inline SVG, not
+an image file, so the proposed replacement PNG added in Step 15 is not a
+drop-in swap and its anatomical/label accuracy is unverified; a dead
+`cpKey_m3` function exists alongside the older `cpKey` pattern actually
+used by the markup; Module 3 has two different, inconsistent sets of
+Cadence quick prompts (five hardcoded in the static HTML vs. three in
+`MODULE_QUICK_PROMPTS[3]`, with the dynamic set winning on every
+`openModuleById(3)` call); the completion card carries an unused
+`data-also-id="m3Complete"` attribute while the real mechanism is a
+hardcoded `moduleId === 3` special case in `getVisibleCompletionCard()`;
+a broken, unreachable `<div style="display:none">v>` fragment with a dead
+duplicate "Back to course" button sits inside the completion card; the
+old course name ("HeadSpa Mastery") and a personal-experience claim
+("built from nearly two decades in the head spa industry") remain in the
+checkpoint and guide system prompts; the completion card has no distinct
+competency-naming line; and Module 3 is the first extracted module with
+zero ungraded practice interactions, despite its hair-loss-conditions
+section being well suited to one.
+
+Work remains on branch `course-audit-build`. Module 3 was not implemented
+or edited — only extracted.
