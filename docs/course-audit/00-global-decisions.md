@@ -214,6 +214,99 @@ From this point forward, every module audit (`module-XX.md`) must document:
 
 ---
 
+## Varied learning rhythm
+
+Do not force every module into the same structural template. The Welcome
+Module, Module 1, and Module 2 share a similar shape because their subject
+matter happened to call for it — that is not a template to replicate by
+default.
+
+**Shared standards remain consistent across every module:**
+
+- Accessibility
+- Grading integrity
+- Progress behavior
+- Cadence identity
+- Visual system
+- Completion integrity
+
+**The student experience should vary according to the content.** Some
+modules may need several interactions. Others may need one strong
+interaction, or an uninterrupted instructional sequence with none at all.
+Do not add an interaction merely to make a module appear interactive — this
+sharpens the existing "Interaction standard" above; density is a per-module
+judgment call, not a fixed quota.
+
+### Required for every future module audit
+
+In addition to the existing required fields, every module audit must
+explicitly determine:
+
+- The module's signature learning moment
+- Appropriate interaction density: light, moderate, or high
+- Whether checkpoints belong midway, at the end, or in multiple stages
+- Whether the material is best learned through visual exploration,
+  prediction, sequencing, comparison, scenario judgment, recall,
+  explanation, or applied practice
+- Where Cadence adds value
+- Where the student should reason independently
+- How the module creates curiosity, discovery, and payoff
+
+---
+
+## Insider knowledge and accelerated mastery
+
+Professional scope and safety are essential guardrails, but they must not
+become the dominant tone of the entire course. Module 1 appropriately
+foregrounds scope because scope is its subject — that emphasis does not
+generalize to every later module.
+
+In later modules, the primary student value should be:
+
+- Accumulated practitioner knowledge
+- Insider observations
+- Practical decision rules
+- Techniques and refinements
+- Details inexperienced practitioners commonly miss
+- Mistakes the student can avoid
+- Faster confidence and competence
+- Reduced trial and error
+- Knowledge that would otherwise take years to collect
+
+Scope reminders should appear where a specific technique, product,
+condition, claim, or decision requires them. They should not repeatedly
+dominate unrelated instructional material.
+
+### Required for every future module audit
+
+Every module audit must identify:
+
+- The insider knowledge being transferred
+- The practical shortcut or decision rule
+- The subtle detail a newer practitioner would likely miss
+- The mistake this knowledge prevents
+- How it improves the service, confidence, efficiency, client experience,
+  or business result
+
+---
+
+## Module-specific Cadence threads
+
+Persistent Cadence conversations remain deferred (see "Cadence direction"
+above). When that architecture is eventually implemented:
+
+- Each module must have its own saved text-message-style thread
+- Returning to a module must reopen that module's conversation
+- A new module begins a separate thread
+- Students should not scroll through one continuous course-wide
+  conversation
+- Storage should be structured by student, course, and module
+
+Do not implement this now. This is a structural decision for the future
+engineering phase only.
+
+---
+
 ## Scope reminders (from `CLAUDE.md`, restated for this audit)
 
 - No entitlement/auth/payment/Supabase/progress-locking/certificate-logic

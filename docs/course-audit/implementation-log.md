@@ -766,3 +766,83 @@ check confirmed matched `<div>`/`<button>` counts.
 Guided Completion Path UI, Listen Mode, persistent checkpoint threads, and
 Module 12 were not built, per instruction. Module 3 was not extracted or
 edited.
+
+---
+
+## 2026-08-04 — Step 14: Module 2 manual QA approved
+
+Module 2 passed manual review. The reviewer confirmed correct behavior and
+appearance for: curriculum copy, module identity and hero, the arrival
+accordion (2.1–2.5), the "What breaks the moment?" practice interaction,
+the static "Same service. Different beginning." comparison, the checkpoint
+(`m2cp1`), and the completion card — across layout and responsive
+appearance.
+
+`docs/course-audit/modules/README.md` was updated to reflect Module 2
+status as **Implemented — manual QA approved**.
+
+The following remain outstanding and are deferred to later production QA,
+not resolved by this manual pass: live-model grading behavior against the
+new `m2cp1` rubric and the script-builder evaluator, screen-reader testing
+(VoiceOver/NVDA) of the new `aria-live`/`aria-expanded`/`role="region"`
+behavior, physical-keyboard activation of the accordion and judgment-check
+buttons, real OS-level `prefers-reduced-motion` testing, and verification
+on a real touch device.
+
+This was a documentation update only. No production files were modified.
+Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-04 — Step 15: Global audit principles + Module 3 image asset recorded
+
+Recorded three new approved global decisions in
+`docs/course-audit/00-global-decisions.md`, documentation-only:
+
+1. **Varied learning rhythm** — modules are not required to follow the same
+   structural template as the Welcome Module, Module 1, and Module 2.
+   Accessibility, grading integrity, progress behavior, Cadence identity,
+   the visual system, and completion integrity remain consistent; everything
+   else (interaction density, checkpoint placement, and interaction type)
+   is a per-module judgment call based on the content. Every future
+   module audit must now also document the module's signature learning
+   moment, interaction density, checkpoint placement, best-fit learning
+   mode(s), where Cadence adds value, where the student should reason
+   independently, and how the module creates curiosity and payoff.
+2. **Insider knowledge and accelerated mastery** — scope and safety framing
+   should not dominate every module's tone the way it appropriately does
+   in Module 1. Later modules should primarily transfer accumulated
+   practitioner knowledge, decision rules, commonly missed details, and
+   mistake-avoidance — not repeat scope reminders outside where a specific
+   technique, product, condition, claim, or decision actually requires one.
+   Every future module audit must now also identify the insider knowledge
+   being transferred, the practical shortcut/decision rule, the subtle
+   detail a beginner would likely miss, the mistake it prevents, and how
+   it improves the service, confidence, efficiency, client experience, or
+   business result.
+3. **Module-specific Cadence threads** — recorded as a future-architecture
+   decision only (persistent Cadence conversations remain deferred, per
+   the existing "Cadence direction" section). When built, each module will
+   reopen its own saved module-specific thread rather than a single
+   course-wide conversation, structured by student, course, and module.
+   Nothing was implemented.
+
+**Module 3 image asset:** confirmed
+`assets/images/course/module-03/aimt-scalp-cross-section.png` exists
+(PNG, 2304×1852, ~7.2MB). The file was found on disk named
+`aimt_scalp_cross_section.png` (underscores) and was renamed to match the
+hyphenated path named throughout this task and consistent with this
+repo's existing kebab-case asset-naming convention — no other change was
+made to the file. It is recorded here as the **proposed** replacement for
+Module 3's current scalp/hair cross-section image and is **not** placed
+into Module 3 or referenced by any production file in this step. It must
+be reviewed during the Module 3 audit for anatomical accuracy, label
+accuracy, relevance to the lesson, appropriate alt text, mobile display,
+and whether any labels need correction or clarification. Its current file
+size (~7.2MB, uncompressed PNG) is flagged as a likely mobile-performance
+concern to revisit in that same review — consistent with the existing,
+separately tracked 6.9MB hero PNG optimization item in `CLAUDE.md`. The
+current production Module 3 image was not deleted or replaced.
+
+This was a documentation and asset-tracking update only. No production
+course file was modified. Work remains on branch `course-audit-build`.

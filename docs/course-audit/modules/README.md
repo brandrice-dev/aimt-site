@@ -82,7 +82,7 @@ first-pass content assessment.
 | Current completion requirement | Single checkpoint `m2cp1` must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-02.md` — position: client-experience foundation, immediately after Module 1 |
 | Listen Mode notes | Recorded in `module-02.md` — narration approved as a partial candidate (after timeline content is made available independent of accordion state), ~9–11 minutes |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
 
 Implemented per `module-02.md`. Module 2 has three ungraded interactive
 components beyond its required checkpoint (accessible arrival accordion
