@@ -307,6 +307,39 @@ engineering phase only.
 
 ---
 
+## Downloadable resource principle
+
+Downloadable resources are **selective, not mandatory**. A module audit
+should only recommend a downloadable when it would provide clear, lasting
+practical value, such as:
+
+- helping a student perform a real service;
+- preserving a complex framework for repeated reference;
+- supporting a protocol or consultation;
+- preventing the student from reopening a full lesson to retrieve one
+  practical detail.
+
+Do not force a PDF or download into every module.
+
+Every future module audit must include a section titled **"Downloadable
+resource opportunity."** That section may conclude simply:
+
+> None recommended
+
+When a resource is genuinely useful, record:
+
+- proposed resource;
+- practical value;
+- recommended file format;
+- recommended placement in the lesson;
+- recommended placement in the future dashboard resource folder.
+
+Do not build the dashboard resource folder or any download system based on
+this principle alone — that remains a separate, later implementation
+decision.
+
+---
+
 ## Scope reminders (from `CLAUDE.md`, restated for this audit)
 
 - No entitlement/auth/payment/Supabase/progress-locking/certificate-logic

@@ -43,6 +43,18 @@ approximate narration length. No Listen Mode UI or logic is authorized by
 documenting these fields — see each module's source file for the
 first-pass content assessment.
 
+Every `module-XX.md` from this point forward must also document a
+"Downloadable resource opportunity" section (introduced starting with the
+Module 4 audit — see
+[`../00-global-decisions.md`](../00-global-decisions.md#downloadable-resource-principle)
+for the full rule). Downloadables are **selective, not mandatory** — this
+section may simply conclude `None recommended`. When a resource is
+genuinely useful, record the proposed resource, its practical value,
+recommended file format, recommended placement in the lesson, and
+recommended placement in the future dashboard resource folder. Building the
+dashboard resource folder or any download system is not authorized by
+documenting this section.
+
 ## Module 0 — Welcome Module (technical module ID `0`)
 
 | Field | Value |
@@ -105,7 +117,7 @@ corrected.
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-03.md` — position: fourth, technical foundation immediately before Module 4 assessment and microscopy |
 | Listen Mode notes | Recorded in `module-03.md` — narration approved for most prose, ~14–17 minutes; the five-layer map and supplied cross-section require structured visual-review cues |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
 
 Implemented per `module-03.md`. Notable implemented corrections: the
 approved headline "The scalp is not a backdrop. It is the environment
@@ -130,14 +142,31 @@ corrections already applied to the Welcome Module and Modules 1–2. See
 `module-03-source.md` §13 for the full list of pre-existing findings this
 implementation resolves.
 
-**Manual QA still required:** live-model grading behavior against the new
-`cp1`/`cp2` rubrics, screen-reader testing (VoiceOver/NVDA) of the new
-accordion/practice-interaction/checkpoint `aria-live` and `aria-expanded`
-behavior, physical-keyboard activation of the accordion and timing-option
-buttons, real touch-device verification, and medical subject-matter review
-of the corrected shedding/barrier/massage claims.
+Manual QA also confirmed two narrowly scoped corrections from Step 19: the
+exogen phase-dot now reads `4` (matching the numbered 1–2–3 sequence for
+anagen/catagen/telogen, replacing the earlier `+` symbol), and the
+predict-before-reveal "The delay tells the story" interaction now labels
+the correct answer with a literal `"Correct answer"` text tag and the
+student's incorrect selection with `"Not quite"` — correctness is no longer
+communicated by color alone. See Step 19 in `implementation-log.md`.
 
-Modules 4–11 have not been extracted yet. Source files for those modules
+**Still deferred to later production QA (not resolved by manual pass):**
+live-model grading behavior against the `cp1`/`cp2` rubrics, screen-reader
+testing (VoiceOver/NVDA), physical-keyboard activation testing, real
+touch-device verification, and medical subject-matter review of the
+corrected shedding/barrier/massage claims.
+
+## Module 4 — Assessment & Microscopy
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 4** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Asset inventory | [`module-04-assets.md`](module-04-assets.md) — 5 examination-area images, 5 microscopy images, all unverified and unapproved |
+| Source file | Not yet created |
+| Approved specification file | Not yet created |
+| **Status** | **Assets inventoried — source extraction pending** |
+
+Modules 5–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.

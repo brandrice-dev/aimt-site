@@ -1201,3 +1201,72 @@ any `M3.systems`/checkpoint rubric, or `APP_STATE` in the diff.
 Requires the same live-model, screen-reader, physical-keyboard, and
 touch-device manual QA already flagged in Step 18 — nothing in this step
 changes what remains outstanding there.
+
+---
+
+## 2026-08-04 — Step 20: Module 3 finalized, downloadable-resource principle, Module 4 asset intake
+
+Documentation-only step, plus the addition of ten new Module 4 image assets
+(not yet referenced by any production file). No production course file was
+modified.
+
+**Module 3 status finalized.** Re-inspected the current
+`headspa-mastery.html` and confirmed both Step 19 manual-QA corrections are
+present in production: the exogen phase-dot renders `4`
+(`class="phase-dot pd-4">4"`) in the numbered 1–2–3–4 sequence, and
+`selectM3Timing()` (lines ~6792–6836) applies a persistent `"Correct
+answer"` text tag to the correct option and a `"Not quite"` text tag to an
+incorrect selection, in addition to the existing `is-correct` CSS class —
+correctness is communicated with text, not color alone. Because both
+corrections were already present and verified, no production content
+change was made in this step. `docs/course-audit/modules/README.md` was
+updated to set Module 3 status to **Implemented — manual QA approved**,
+with a note on the two Step 19 corrections and the still-deferred QA items
+(live-model grading, screen-reader testing, physical-keyboard testing,
+real touch-device testing, medical subject-matter review).
+
+**Downloadable-resource principle recorded.** Added a new "Downloadable
+resource principle" section to `00-global-decisions.md`: downloadables are
+selective, not mandatory, and should only be recommended when they provide
+clear, lasting practical value (performing a real service, preserving a
+complex framework, supporting a protocol/consultation, or preventing a
+student from reopening a full lesson for one practical detail). Every
+future `module-XX.md` must include a "Downloadable resource opportunity"
+section that may conclude "None recommended," or record the proposed
+resource, its practical value, file format, lesson placement, and future
+dashboard-folder placement. `modules/README.md`'s "Required fields for
+every future module audit" section was updated to reference this rule.
+Building the dashboard resource folder or download system is explicitly
+not authorized by this decision.
+
+**Module 4 asset intake.** Ten PNG image files were added to the repository
+under `assets/images/course/module-04/examination-areas/` (5 files:
+`exam-area-01-front-hairline.png` through `exam-area-05-occipital-back.png`)
+and `assets/images/course/module-04/microscopy/` (5 files:
+`microscopy-dry-depleted-scalp.png`, `microscopy-congested-scalp.png`,
+`microscopy-sensitive-reactive-scalp.png`,
+`microscopy-neutral-balanced-scalp.png`,
+`microscopy-oily-congested-scalp.png`). All ten filenames were already
+lowercase kebab-case with correct extensions — **no renaming was
+necessary**. Every file was visually inspected and recorded in the new
+`docs/course-audit/modules/module-04-assets.md`, including exact filename,
+folder, file type, pixel dimensions, file size, apparent subject, embedded
+labels/text, likely intended lesson use, filename/content mismatch check,
+duplicate/near-duplicate concern, orientation, mobile label-readability
+concern, and an "Unverified — awaiting Module 4 audit" status for every
+asset. Two findings were flagged (not resolved): `exam-area-04-temporal-
+area.png` uses a visibly different model/framing than the other four
+examination-area images, and `microscopy-congested-scalp.png` /
+`microscopy-oily-congested-scalp.png` may represent overlapping scalp-type
+categories. No image's anatomical or dermatological accuracy was evaluated,
+no image was cropped or compressed, and no image was placed into any
+production lesson. A stray `assets/images/course/module-04/.DS_Store` file
+was found and excluded from the asset inventory and from staging.
+
+`modules/README.md` was updated with a new Module 4 entry — status
+**Assets inventoried — source extraction pending** — linking to the new
+asset inventory file.
+
+Module 3's production content (`headspa-mastery.html`) was not touched in
+this step beyond the verification read. No other module was audited,
+extracted, or edited. Work remains on branch `course-audit-build`.
