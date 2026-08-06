@@ -227,47 +227,63 @@ referral language, privacy/legal review of the image-consent workflow, and
 future replacement of the illustrative microscopy assets with
 authenticated, consented, de-identified clinical captures.
 
-## Module 5 — Scalp Types & Protocols
+## Module 5 — Scalp Patterns & Service Adaptation
 
 | Field | Value |
 |---|---|
 | Student-facing name | **Module 5** (unchanged — Welcome Module naming applies only to technical module `0`) |
 | Source file | [`module-05-source.md`](module-05-source.md) — full verbatim extraction |
-| Approved specification file | [`module-05.md`](module-05.md) — empty scaffold only, not yet audited |
+| Approved specification file | [`module-05.md`](module-05.md) — full approved specification |
 | Wrapper ID | `module5Wrap` — standard hidden-template pattern |
 | Checkpoint IDs | `m5cp1`, `m5cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Extracted — awaiting external audit** |
+| **Status** | **Externally audited — approved specification added; awaiting implementation** |
 
 Extracted per Step 27. No asset inventory file was created — Module 5
 currently contains zero real image/diagram/video/downloadable assets; every
 "photo" slot renders a decorative placeholder graphic with no underlying
 file (`module-05-source.md` §7).
 
-Notable findings recorded in the extraction (not fixed): Module 5's
-displayed and evaluated checkpoint questions do not match for both
-`m5cp1` and `m5cp2` (same pattern already corrected for Modules 1–4);
-`M5.system` is a single shared rubric for both checkpoints rather than the
-per-checkpoint `M5.systems.mNcpX` structure Modules 1–4 now use;
-`submitM5CP` supplies no module-specific network-error text; both
-checkpoints' voice and submit buttons lack `aria-label` and both `.cp-res`
-regions lack `aria-live`, all already present in Modules 0, 1, and 4;
-`M5.system` still says "instructor of HeadSpa Mastery" and
-`MODULE_GUIDE_SYSTEMS[5]` still frames Cadence as personally "a mentor
-built from nearly two decades in the head spa industry" — the old-name and
-personal-experience-claim patterns already corrected out of Modules 0, 1,
-2, and 4; the curriculum, rubric, and a quick prompt all teach
-"compensatory oil production" and follicular-congestion-impairs-hair-growth
-as settled fact, both claims Module 4's own approved spec explicitly
-required removing for lacking support; the "↓ Tap each type to see the
-protocol" hint has no corresponding interactive behavior — the five-card
-scalp-type grid is fully static; and Module 5 has no explicit
+Notable findings recorded in the extraction (not fixed at extraction time):
+Module 5's displayed and evaluated checkpoint questions did not match for
+both `m5cp1` and `m5cp2` (same pattern already corrected for Modules 1–4);
+`M5.system` was a single shared rubric for both checkpoints rather than the
+per-checkpoint `M5.systems.mNcpX` structure Modules 1–4 use; `submitM5CP`
+supplied no module-specific network-error text; both checkpoints' voice and
+submit buttons lacked `aria-label` and both `.cp-res` regions lacked
+`aria-live`, all already present in Modules 0, 1, and 4; `M5.system` still
+said "instructor of HeadSpa Mastery" and `MODULE_GUIDE_SYSTEMS[5]` still
+framed Cadence as personally "a mentor built from nearly two decades in the
+head spa industry" — the old-name and personal-experience-claim patterns
+already corrected out of Modules 0, 1, 2, and 4; the curriculum, rubric, and
+a quick prompt all taught "compensatory oil production" and
+follicular-congestion-impairs-hair-growth as settled fact, both claims
+Module 4's own approved spec explicitly required removing for lacking
+support; the "↓ Tap each type to see the protocol" hint had no
+corresponding interactive behavior; and Module 5 had no explicit
 stop-service/refer-out section, unlike Module 1 and Module 4. See
-`module-05-source.md` for the complete findings list, including the
-Module 4/Module 5 curriculum-framework tension (five discrete "scalp
-types" vs. Module 4's corrected "appearance examples, not diagnoses"
-approach) and the deferred medical/legal/live-model/accessibility review
-items.
+`module-05-source.md` for the complete pre-audit findings list.
+
+**Approved specification added.** `module-05.md` now carries the externally
+reviewed, approved specification, approved title **Scalp Patterns & Service
+Adaptation**, status **Approved for controlled implementation**, source
+reviewed `module-05-source.md`. Major approved corrections: replace the
+fixed five-scalp-type labels with current scalp patterns and service
+directions; align with Module 4's regional observation framework; remove
+the unsupported compensatory-oil, follicular-obstruction, hair-growth,
+universal baseline-color, percentage, diet, and diagnostic claims; remove
+the dead "Tap each type" hint and the eight fake microscopy placeholders;
+add the ungraded "What changes first?" protocol-decision interaction;
+replace the shared rubric with checkpoint-specific rubrics for `m5cp1` and
+`m5cp2`; correct the displayed/evaluated question mismatch for both
+checkpoints; correct Cadence's identity (remove the old course name and the
+personal-practitioner-experience claim) and quick prompts; add accessibility
+labels/live-region requirements and the shared semantic-color tokens; and
+add the required Guided Completion Path and Listen Mode fields. No
+production code was changed to add this specification. Module 5
+implementation remains a separate, not-yet-started task. Module 6 remains
+blocked. Medical, dermatological, legal, live-model, assistive-technology,
+and real-device review remain deferred.
 
 Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

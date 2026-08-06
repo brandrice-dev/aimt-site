@@ -2089,3 +2089,64 @@ minimum, per Step 10's own notes).
 
 This was a documentation update only. No production files were modified.
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 29: Approved Module 5 audit specification added
+
+The Module 5 external audit is complete. The empty audit scaffold at
+`docs/course-audit/modules/module-05.md` was replaced with the externally
+reviewed, approved Module 5 audit specification, approved title
+**Scalp Patterns & Service Adaptation**, status **Approved for controlled
+implementation**, source authority `module-05-source.md`.
+
+**Major approved corrections carried by the new specification:**
+
+- Replace the fixed "five scalp types" labels with current scalp patterns
+  and service directions (baseline/maintenance, oil-dominant or
+  residue-present, fine-scale/dry-appearing, mixed regional, reactive or
+  sensitivity-reported) — not diagnoses, not permanent client identities.
+- Align Module 5 with Module 4's approved regional-observation framework
+  (five-point assessment, observation lenses, appearance examples,
+  preserve/modify/avoid/pause/refer) rather than reintroducing a parallel
+  five-type system.
+- Remove the unsupported compensatory-oil-production claim, the
+  follicular-obstruction/hair-growth claim, the universal baseline
+  pink-tone/translucency claim, the "60 to 90 percent of follicles" dry-
+  scalp percentage claim, and the diet/vitamin/postpartum-hormone
+  diagnostic claims.
+- Remove the dead "↓ Tap each type to see the protocol" hint and the eight
+  fake microscopy placeholder boxes; do not replace them with fabricated
+  clinical photography.
+- Add the ungraded "What changes first?" protocol-decision interaction
+  (four scenarios, real buttons, keyboard/touch support, polite live
+  feedback, retry, no persistence, no progress write, no completion gate)
+  as Module 5's signature learning moment.
+- Add checkpoint-specific rubrics (`M5.systems.m5cp1`, `M5.systems.m5cp2`)
+  replacing the single shared `M5.system` rubric.
+- Correct the displayed/evaluated question mismatch for both `m5cp1` and
+  `m5cp2` so the visible and evaluated strings are byte-identical.
+- Correct Cadence's identity — remove "instructor of HeadSpa Mastery" and
+  the "mentor built from nearly two decades in the head spa industry"
+  personal-experience claim — and replace the quick prompts.
+- Add accessibility requirements (`aria-label` on voice and submit
+  controls, `aria-live="polite"` on feedback regions) and the shared
+  Module-1-baseline semantic color tokens.
+- Add the required Guided Completion Path and Listen Mode fields and a
+  competency-based completion requirement (both checkpoints passed, no
+  read-percentage minimum).
+
+**Files changed in this step:** `docs/course-audit/modules/module-05.md`
+(scaffold replaced with the approved specification),
+`docs/course-audit/modules/README.md` (Module 5 status updated).
+
+No production code was changed. `headspa-mastery.html`,
+`assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`, and
+`docs/course-audit/modules/module-05-source.md` were not touched. Module 5
+implementation remains a separate, not-yet-started task. Module 6 remains
+blocked — no Module 6 extraction, audit, or documentation was created.
+Medical, dermatological, legal, live-model, assistive-technology, and
+real-device review remain deferred, per the specification's own "Deferred
+QA and review" section.
+
+Work remains on branch `course-audit-build`.
