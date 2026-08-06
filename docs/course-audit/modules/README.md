@@ -167,7 +167,7 @@ corrected shedding/barrier/massage claims.
 | Wrapper ID | `module4Wrap` — standard hidden-template pattern (not the Module-3-style capture outlier) |
 | Checkpoint IDs | `m4cp1`, `m4cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented and manually approved** |
 
 Implemented per `module-04.md`. Replaced the five-region colored-dot grid
 with an accessible five-point scalp-scan stepper (real photos, previous/
@@ -191,7 +191,68 @@ framing); and applied the same course-name/accessibility corrections
 already used in Modules 0–3. See `implementation-log.md` for the full
 step entry, including deferred manual QA items.
 
-Modules 5–11 have not been extracted yet. Source files for those modules
+Manual QA (Step 26) confirmed desktop and phone layouts; the five-point
+scalp-assessment controls (direct assessment-point selection, previous/
+next navigation, image enlargement); mobile readability and horizontal
+overflow; the observation-classification interaction and its correct/
+not-quite states; the appearance gallery; the oil-versus-residue
+comparison; `m4cp1`; `m4cp2`; Cadence prompts and responses; the
+completion card; Module 5 unlock behavior; Module 4 terminology; and
+Module 1 semantic red/green baseline consistency. See Step 26 in
+`implementation-log.md`.
+
+**Still deferred to later production QA (not resolved by manual pass):**
+live-model grading behavior against the `M4.systems.m4cp1`/`m4cp2`
+rubrics, screen-reader testing (VoiceOver/NVDA), physical-keyboard
+activation testing, real touch-device verification, medical/
+dermatological subject-matter review of Module 4's device-framing and
+referral language, privacy/legal review of the image-consent workflow, and
+future replacement of the illustrative microscopy assets with
+authenticated, consented, de-identified clinical captures.
+
+## Module 5 — Scalp Types & Protocols
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 5** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-05-source.md`](module-05-source.md) — full verbatim extraction |
+| Approved specification file | [`module-05.md`](module-05.md) — empty scaffold only, not yet audited |
+| Wrapper ID | `module5Wrap` — standard hidden-template pattern |
+| Checkpoint IDs | `m5cp1`, `m5cp2` — standard `mNcpX` pattern |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| **Status** | **Extracted — awaiting external audit** |
+
+Extracted per Step 27. No asset inventory file was created — Module 5
+currently contains zero real image/diagram/video/downloadable assets; every
+"photo" slot renders a decorative placeholder graphic with no underlying
+file (`module-05-source.md` §7).
+
+Notable findings recorded in the extraction (not fixed): Module 5's
+displayed and evaluated checkpoint questions do not match for both
+`m5cp1` and `m5cp2` (same pattern already corrected for Modules 1–4);
+`M5.system` is a single shared rubric for both checkpoints rather than the
+per-checkpoint `M5.systems.mNcpX` structure Modules 1–4 now use;
+`submitM5CP` supplies no module-specific network-error text; both
+checkpoints' voice and submit buttons lack `aria-label` and both `.cp-res`
+regions lack `aria-live`, all already present in Modules 0, 1, and 4;
+`M5.system` still says "instructor of HeadSpa Mastery" and
+`MODULE_GUIDE_SYSTEMS[5]` still frames Cadence as personally "a mentor
+built from nearly two decades in the head spa industry" — the old-name and
+personal-experience-claim patterns already corrected out of Modules 0, 1,
+2, and 4; the curriculum, rubric, and a quick prompt all teach
+"compensatory oil production" and follicular-congestion-impairs-hair-growth
+as settled fact, both claims Module 4's own approved spec explicitly
+required removing for lacking support; the "↓ Tap each type to see the
+protocol" hint has no corresponding interactive behavior — the five-card
+scalp-type grid is fully static; and Module 5 has no explicit
+stop-service/refer-out section, unlike Module 1 and Module 4. See
+`module-05-source.md` for the complete findings list, including the
+Module 4/Module 5 curriculum-framework tension (five discrete "scalp
+types" vs. Module 4's corrected "appearance examples, not diagnoses"
+approach) and the deferred medical/legal/live-model/accessibility review
+items.
+
+Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.

@@ -1925,3 +1925,132 @@ IDs, progress behavior, completion rules, authentication, entitlements,
 certificate logic, or Review Mode was touched. Module 4 status remains
 **Implemented — awaiting manual QA** — not marked approved by this step.
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 26: Module 4 manual QA approved
+
+Module 4 passed manual desktop and phone QA. The reviewer confirmed correct
+behavior and appearance for: desktop and phone layouts; the AIMT
+five-point scalp-assessment controls (the accessible stepper built in Step
+23); direct assessment-point selection; previous/next navigation; image
+enlargement; mobile readability and horizontal overflow; the
+observation-classification interaction ("Say only what the image earned");
+its correct and not-quite states; the appearance gallery; the
+oil-versus-residue comparison; `m4cp1`; `m4cp2`; Cadence prompts and
+responses; the completion card; Module 5 unlock behavior; Module 4
+terminology (the `station` → `assessment point`/`assessment area`
+correction from Step 24); and Module 1 semantic red/green baseline
+consistency (the `#7a3030`/`#e8ede8`/`#3a5a3a`/`#e8ede8` correction from
+Step 25).
+
+`docs/course-audit/modules/README.md` was updated to reflect Module 4
+status as **Implemented and manually approved**.
+
+The following remain outstanding and are deferred to later production QA,
+not resolved by this manual pass: live-model grading behavior against the
+`M4.systems.m4cp1`/`m4cp2` rubrics, screen-reader testing (VoiceOver/NVDA),
+physical-keyboard activation testing, real touch-device verification,
+medical/dermatological subject-matter review of Module 4's device-framing
+and referral language, privacy/legal review of the image-consent workflow,
+and future replacement of the illustrative microscopy assets with
+authenticated, consented, de-identified clinical captures.
+
+This was a documentation update only. No production files were modified.
+Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 27: Module 5 source extraction
+
+Created `docs/course-audit/modules/module-05-source.md` (full verbatim
+extraction of Module 5's curriculum — hero, intro, the five-card scalp-type
+grid, all five scalp-type sections with their treatment-protocol cards, the
+priority-order timeline, both checkpoints, the Cadence recap note, and the
+completion card — module identity/technical identifiers, the one
+non-interaction found ("Tap each type to see the protocol," which has no
+corresponding click behavior in the code), both checkpoints' full grading
+detail including a direct displayed-vs-evaluated string comparison, Cadence
+guide system/quick prompts/greeting/memory tags, completion and
+progression behavior, a full assets inventory (zero real assets — every
+photo slot is a decorative placeholder), a claims/technical-content
+inventory separating what the module states from what the code implies
+from what needs external review, Module 4/Module 6 relationship notes,
+accessibility/responsive findings, Listen Mode notes, a full source map,
+and confirmed findings separated from assumptions requiring external
+review) and `docs/course-audit/modules/module-05.md` (empty scaffold only,
+`Status: Awaiting external audit`, matching Module 4's full heading set —
+Approved outcomes through Implementation notes, including the Distinct
+learning rhythm, Insider value and acceleration payoff, Guided completion
+structure, Listen Mode notes, and Downloadable resource opportunity
+sections). Source commit at extraction time: `b4ee09906d238c57119b9331b678e448e21408a6`.
+
+This was documentation and extraction only — no production files were
+modified, and Module 5's actual curriculum, checkpoints, or Cadence
+prompts were not touched, corrected, rewritten, or approved.
+`docs/course-audit/modules/README.md` was updated with a Module 5 entry
+(status **Extracted — awaiting external audit**). No `module-05-assets.md`
+file was created, per instruction not to create an empty asset file —
+Module 5 currently has no real image, diagram, video, or downloadable
+assets to inventory (every "photo" is a decorative placeholder graphic
+with no underlying file). Module 6 was not touched, extracted, or edited.
+
+**Notable confirmed findings recorded in the extraction (not fixed):**
+`m5cp1` and `m5cp2` displayed (`.cp-q`) and evaluated (`M5.questions`)
+question strings are not byte-identical for either checkpoint (same defect
+class already corrected in Modules 1–4); `M5.system` is one shared
+function for both checkpoints rather than the per-checkpoint
+`M5.systems.mNcpX` structure Modules 1–4 now use; `submitM5CP` passes no
+5th `errorMessage` argument to `submitCheckpoint()`, so Module 5 has no
+module-specific network-error text yet; both checkpoints' voice buttons
+lack `aria-label`, both submit buttons lack `aria-label`, and both
+`.cp-res` feedback regions lack `aria-live`, all already present in
+Modules 0, 1, and 4; `M5.system` still opens "instructor of HeadSpa
+Mastery" (old course name) and `MODULE_GUIDE_SYSTEMS[5]` still frames
+Cadence as personally "a mentor built from nearly two decades in the head
+spa industry" (the personal-experience-claim pattern already corrected out
+of Modules 0, 1, 2, and 4); the "over-stripping triggers compensatory oil
+production" claim and the "follicular congestion... compromises the
+environment needed for healthy hair growth" claim both appear in Module
+5's curriculum, rubric, and (the former) a quick prompt, and both are
+claims Module 4's own approved audit spec (`module-04.md`) explicitly
+required removing from Module 4 for lacking support; the "↓ Tap each type
+to see the protocol" hint text has no corresponding interactive behavior
+anywhere in the code (the five-card grid is fully static, confirmed by
+grepping for any handler on `.scalp-card`); `window._m5cpsDone` is set on
+every module-5 open but never read anywhere else in the file (dead state);
+the hero eyebrow ("...Treatment Protocols") does not word-for-word match
+the home-row title and `MODULE_TITLES[5]` ("...Protocols"); the
+priority-timeline's `pd-3` (red) dot still resolves to the pre-Step-25 red
+literal (`#c0392b`/`#fde8e8`) rather than the Module-1-baseline red
+established in Step 25 (expected, since Step 25 explicitly did not touch
+Module 5, but still a real inconsistency for a future audit); and Module 5
+has no explicit stop-service/refer-out section, unlike Module 1 and
+Module 4.
+
+**Relationship to adjacent modules (flagged, not resolved):** Module 5's
+hero and Cadence greeting explicitly position it as continuing directly
+from Module 4, but its organizing structure ("Five scalp types," a
+tap-to-select grid) has not been realigned with Module 4's corrected
+"appearance examples, not diagnoses" approach (`module-04.md`, "Required
+corrections" §2) — Module 4's own approved completion-card handoff line
+("...without collapsing the entire scalp into one label") sets an
+expectation Module 5's current five-type framing does not yet clearly
+satisfy. The recap's dry-vs-dandruff Cadence note previews subject matter
+that belongs to, and is directly tested by, the still-unaudited Module 6.
+
+**Deferred to external audit and further review (not resolved by this
+extraction):** medical/dermatological verification of every physiological
+claim identified in the claims inventory (compensatory oil production,
+follicular congestion and hair growth, the "60 to 90 percent of follicles"
+dry-scalp criterion, the heat-exposure/sebum-percentage claim, the
+bacterial-overgrowth mention, the Malassezia/dandruff mechanism); legal/
+scope review of the specific active-ingredient protocol language; live-model
+testing of the current shared `M5.system` rubric; screen-reader testing of
+the confirmed missing `aria-label`/`aria-live` attributes; physical-keyboard
+and real touch-device testing; and visual manual QA of the scalp-type grid,
+protocol cards, priority timeline, and placeholder photo boxes at desktop
+and mobile widths.
+
+Module 5 was not audited, approved, or implemented by this step — only
+extracted. Work remains on branch `course-audit-build`.
