@@ -15,6 +15,88 @@ Module 5 should feel like a protocol decision laboratory. Module 4 taught the st
 
 ---
 
+## Amendment — Module 5 visual asset addendum (approved)
+
+**Status: Approved.** This addendum amends the implemented Module 5 spec to add real teaching photography. It does not reopen or change any approved curriculum, checkpoint, interaction, Cadence, or completion content already implemented per this document — see `implementation-log.md` for the implementation record this addendum sits on top of. File-level inventory (paths, dimensions, derivative status) lives in [`module-05-assets.md`](module-05-assets.md); this section is the content authority for placement, captions, and alt text.
+
+### Approved source photography
+
+Five source photographs are approved, functioning as **four visual teaching moments**:
+
+1. **Same-client crown/hairline regional comparison pair** (two photographs — crown and hairline/temporal — of the same model, used together as one paired lesson).
+2. **Targeted crown cleansing** (one photograph).
+3. **Gentle hairline adaptation** (one photograph).
+4. **Regional-plan client conversation** (one photograph).
+
+### Purpose
+
+These visuals exist to:
+
+- preserve engagement through a module that is otherwise decision- and text-led;
+- connect observation to service decisions rather than to a static appearance gallery;
+- demonstrate regional adaptation as a real, visible practice;
+- support client communication;
+- give Module 5 its own visual rhythm, distinct from Module 4's five-point stepper and appearance-gallery format — Module 5 must **not** repeat that card-grid presentation.
+
+### Controlling caution
+
+Module 5 must **not** present these photographs as diagnostic or authenticated medical evidence. They are illustrative service-planning photography. Every placement below carries this caution in on-page copy, and no caption, alt text, or nearby text may imply a diagnosis or a proven medical cause.
+
+### Approved placements, copy, and alt text
+
+#### Visual 1 — Regional comparison case study
+
+- **Source images:** `mixed-regional-crown-original`, `mixed-regional-hairline-original`.
+- **Placement:** after Section 5.4 and before the "What changes first?" interaction.
+- **Presentation:** a large editorial case-study spread — side by side on desktop, stacked in the same order on phone, treated visually as one paired lesson. No carousel, no small card thumbnails.
+- **Heading:** `One scalp. Different regional needs.`
+- **Crown caption:** `Crown: greater visible shine and surface coating may support more targeted cleansing.`
+- **Hairline caption:** `Hairline or temporal area: a matte, fine-scale appearance may call for a gentler service direction.`
+- **Shared caution:** `Illustrative service-planning example. Appearance alone does not establish cause or diagnosis.`
+- **Crown alt text:** `Close view of a client's crown showing greater visible shine and surface coating than the comparison region.`
+- **Hairline alt text:** `Close view of the same client's hairline or temporal region showing a more matte appearance with fine visible scale.`
+- **Teaching purpose:** show why one client may require different service decisions by region.
+
+#### Visual 2 — Targeted crown cleansing
+
+- **Source image:** `targeted-crown-cleansing-original`.
+- **Placement:** after Section 5.5, following the regional protocol builder.
+- **Presentation:** a full-width (content-column-width) editorial image break — not a small card thumbnail.
+- **Caption:** `Regional customization may change product placement and cleansing intensity without changing the entire service.`
+- **Alt text:** `Practitioner sections the crown and applies cleansing product specifically at the roots while customizing treatment by region.`
+- **Teaching purpose:** show product placement and targeted cleansing as deliberate customization.
+
+#### Visual 3 — Gentle hairline adaptation
+
+- **Source image:** `gentle-hairline-adaptation-original`.
+- **Placement:** within or immediately after Section 5.7, "Steam, water, pressure, and time."
+- **Caption:** `Lower pressure, less product, and reduced stimulation can be deliberate protocol decisions.`
+- **Alt text:** `Practitioner uses light fingertip contact and minimal product at the client's hairline during a low-stimulation service adjustment.`
+- **Teaching purpose:** show restraint as a skilled service modification—not a lesser service. Do not describe the client as inflamed, diseased, or medically sensitive in this caption or any nearby copy.
+
+#### Visual 4 — Client communication
+
+- **Source image:** `regional-plan-client-conversation-original`.
+- **Placement:** within Section 5.8, "Explain the change without losing the client."
+- **Caption:** `Explain what you observed, what the client reported, and why the service plan changed.`
+- **Alt text:** `Practitioner explains a personalized regional scalp-service plan to a seated client in a treatment room.`
+- **Teaching purpose:** connect service judgment with client trust and communication.
+- **Note (recorded, not a placement change):** the source photograph's background props (a wall display and a handheld chart) carry their own stock-photography set-dressing text and a three-region layout that does not match this course's approved five-pattern framework. That prop text is incidental staging, not approved course terminology — it must not be referenced, repeated, or treated as endorsed language in the caption, alt text, or any nearby copy, and no private or real client information is depicted (the props are generic stock mockups).
+
+### Accessibility requirements
+
+Use semantic `<figure>`/`<figcaption>` structures where practical. Every image requires the approved alt text above (meaningful, non-diagnostic — not a repeat of the caption verbatim). Do not place essential teaching text inside the image itself; all teaching text stays in real DOM copy.
+
+### Downloadable resource decision (retained)
+
+The existing approved downloadable-resource decision is unchanged by this addendum:
+
+> **AIMT Regional Service Adaptation Guide — recommended; production deferred.**
+
+See "Downloadable resource opportunity" below for the full recorded detail. This addendum does not create, link, or produce that downloadable.
+
+---
+
 ## Approved outcomes
 
 By the end of Module 5, the student should be able to:
