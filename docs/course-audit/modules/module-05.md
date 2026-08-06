@@ -1091,31 +1091,15 @@ The full checkpoint specification appears below.
 
 ---
 
-## 5.10 — Recap
-
-**Section eyebrow**
-
-> 5.10 · From pattern to plan
-
-**Headline**
-
-> Assessment becomes skill when it changes the service responsibly.
-
-**Body**
-
-> Module 5 is not about memorizing five scalp types. It is about making better decisions with the evidence you have.
->
-> Establish the limit first. Identify the current priority. Adjust cleansing, exfoliation, water and steam, pressure and tempo, and product placement by region. Preserve stable areas. Reduce stimulation when the client reports reactivity. Pause or refer when cosmetic service is not the responsible next step.
->
-> The strongest practitioner is not the one who uses the most products or performs every step. It is the one who can explain why each step belongs.
-
----
-
 ## Completion card — `m5Complete`
 
 **Title**
 
 > Module complete.
+
+**Supporting line**
+
+> Assessment becomes skill when it changes the service responsibly.
 
 **Primary competency statement**
 
