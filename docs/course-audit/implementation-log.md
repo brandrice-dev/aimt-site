@@ -2304,3 +2304,148 @@ status can become "Implemented — manual QA approved." Module 6 was not
 extracted, audited, or edited. No merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-06 — Step 31: Module 5 visual asset plan and teaching-image integration
+
+Added five real source photographs to Module 5 as a focused pre-QA visual
+polish, per an externally supplied asset plan. Module 5 remains
+**Implemented — awaiting manual QA** after this step. Module 6 was not
+touched.
+
+**Preflight:** confirmed branch `course-audit-build`; found an untracked
+`assets/images/course/module-05/` folder already containing the five
+approved source photographs (supplied outside this session, matching the
+pattern used for Module 3's cross-section image and Module 4's asset
+intake). All five files were inspected and confirmed present, uncorrupted,
+correctly named, and assigned to the correct visual purpose — none were
+missing, corrupt, misnamed, or obviously wrong:
+
+| File | Format | Dimensions | Orientation | Size |
+|---|---|---|---|---|
+| `regional-comparison/mixed-regional-crown-original.png` | PNG | 1448×1086 | Landscape 4:3 | ~2.47 MB |
+| `regional-comparison/mixed-regional-hairline-original.png` | PNG | 1448×1086 | Landscape 4:3 | ~2.54 MB |
+| `service-adaptation/targeted-crown-cleansing-original.png` | PNG | 1448×1086 | Landscape 4:3 | ~1.80 MB |
+| `service-adaptation/gentle-hairline-adaptation-original.png` | PNG | 1448×1086 | Landscape 4:3 | ~1.79 MB |
+| `service-adaptation/regional-plan-client-conversation-original.png` | PNG | 1448×1086 | Landscape 4:3 | ~1.88 MB |
+
+All five share the same 4:3 ratio already used by the existing
+`.clinical-photo { aspect-ratio: 4/3 }` component — no cropping was needed.
+One finding recorded, not blocking: `regional-plan-client-conversation-original.png`
+contains baked-in stock-photography set dressing (a wall display and a
+handheld chart) with generic mockup region labels that do not match this
+course's approved terminology; flagged in `module-05-assets.md` and
+`module-05.md`'s addendum so it is not mistaken for approved course
+language, and confirmed to contain no real or private client information.
+
+**Part 1 — Documentation (Commit `b96fd3eff70d86d89d0ec1c8386a6049b124bead`,
+"Add Module 5 visual asset plan"):** added an "Amendment — Module 5 visual
+asset addendum (approved)" section to `module-05.md` recording the four
+approved teaching moments, their purpose (preserve engagement, connect
+observation to service decisions, demonstrate regional adaptation, support
+client communication, avoid repeating Module 4's stepper/gallery format),
+the controlling non-diagnostic caution, and the exact approved heading/
+caption/alt-text copy for each placement; retained the existing
+`AIMT Regional Service Adaptation Guide — recommended; production deferred`
+downloadable decision unchanged. Created `module-05-assets.md` with the
+full file-level inventory (paths, formats, dimensions, sizes, teaching
+purpose, placement, caption, alt text, caution, derivative status). No
+image files and no `headspa-mastery.html` changes were part of this commit.
+
+**Part 2 — Production derivatives:** generated optimized WebP derivatives
+with Pillow (this sandbox has no `node`/`cwebp`/ImageMagick; macOS `sips`
+does not support WebP output here). All five originals were downscaled from
+1448×1086 to 1360×1020 (never upscaled), quality 82, method 6 — a 92–97%
+size reduction (e.g. 2.47 MB → 158 KB for the crown comparison image; the
+smallest derivative, `gentle-hairline-adaptation.webp`, is 54 KB). Originals
+were preserved unmodified alongside the new `.webp` files, matching the
+existing Module 3/Module 4 naming convention (same base name, `-original`
+suffix dropped, `.webp` extension). Derivatives were not placed inside
+`assets/images/course/module-04/`.
+
+**Part 3 — Integration (this commit, "Integrate Module 5 teaching images" —
+see `00-aimt-current-course-status.md` for the resulting commit hash):** all
+four visuals were added to `#module5Wrap` in
+`headspa-mastery.html` using two new, Module-5-scoped CSS components
+(`.m5-case-study`/`.m5-case-grid` for the paired comparison; `.m5-photo-block`
+for the three single-image breaks) — deliberately not Module 4's five-point
+stepper, appearance gallery, oil-vs-residue comparison, or a repeated card
+grid. Every image uses `<picture>` with a `.webp` `<source>` and the
+original `.png` as the `<img>` fallback, explicit `width="1360" height="1020"`,
+`loading="lazy"`, a real `<figcaption>` (not baked into the image), and the
+approved non-diagnostic alt text:
+
+- **Visual 1** (regional comparison case study, source images
+  `mixed-regional-crown-original`/`mixed-regional-hairline-original`) —
+  inserted after Section 5.4's last pattern card and before the "What
+  changes first?" interaction, as a two-up `<figure>` grid under the
+  heading "One scalp. Different regional needs.", with per-image captions
+  and one shared caution line below the pair.
+- **Visual 2** (targeted crown cleansing, `targeted-crown-cleansing-original`)
+  — inserted after Section 5.5's practitioner note, before checkpoint
+  `m5cp1`, as a full-content-column-width `.m5-photo-block`.
+- **Visual 3** (gentle hairline adaptation, `gentle-hairline-adaptation-original`)
+  — inserted immediately after Section 5.7's closing key-point, before the
+  divider into Section 5.8.
+- **Visual 4** (client communication, `regional-plan-client-conversation-original`)
+  — inserted inside Section 5.8, after the section's intro paragraph and
+  before the "Mixed-regional script" note.
+
+**Validation performed:**
+
+- File-existence and broken-path scan: all 10 referenced paths (5 `.webp` +
+  5 `.png`) resolve on disk; confirmed again over HTTP in a mocked browser
+  session (`fetch` HEAD requests) — all 200, correct `image/webp`/`image/png`
+  content types, byte counts matching disk.
+- WebP derivative validation: decoded each `.webp` in-browser and confirmed
+  1360×1020 actual pixels, matching the declared `width`/`height`
+  attributes exactly (no layout-shift risk from mismatched intrinsics);
+  confirmed each `<picture>` actually resolves to its `.webp` `<source>`
+  (`img.currentSrc` ends in `.webp`, `naturalWidth` 1360) when loaded, not
+  the PNG fallback.
+- HTML tag-balance check on `#module5Wrap` (`div`/`button`/`textarea`/`svg`/
+  `figure`/`picture`/`figcaption` open=close; `img` count 5, correctly
+  void) and a repository-wide duplicate-`id` scan (no new duplicates;
+  `studentFirstName`'s pre-existing 3 occurrences unaffected) both passed.
+- A custom regex-aware JS tokenizer (no `node` available) found zero
+  syntax errors in the full inline `<script>` after these HTML/CSS-only
+  changes.
+- Desktop render (1280px, mocked Course Review Mode): case-study images
+  confirmed side by side via `getBoundingClientRect` (identical `top`,
+  ordered `left`→`left`), each rendered at the correct 4:3 ratio
+  (269×201.75, `object-fit: cover`, no stretching), captions and the shared
+  caution line matched the approved copy exactly.
+- Phone render (375×812): case-study images confirmed stacked in the
+  approved order (crown above hairline, matching `left` position, `top`
+  offsets non-overlapping), same 4:3 ratio maintained on every image
+  (checked within 0.02 tolerance across all 5), and
+  `document.documentElement.scrollWidth` never exceeded `window.innerWidth`
+  at either width (no horizontal overflow).
+- Regression checks: `module4Wrap`'s markup is byte-identical (confirmed via
+  `git diff` grep and by reopening Module 4 live — title, content length,
+  and its 12 existing `module-04` images all unaffected); the "What changes
+  first?" interaction still leaves `APP_STATE.data.progress['5']`
+  byte-identical after a click (no progress write); `submitM5CP`/`m5cpKey`
+  are still defined and wired; a checkpoint state persisted from the prior
+  implementation session's testing correctly restored on reload
+  (`isModuleComplete(5)` → `true`, `canAccessModule(6)` → `true`,
+  `#m5Complete` visible with the approved copy) alongside the new images
+  with no conflict; and a targeted grep confirmed no auth, entitlement,
+  Supabase, Stripe, or certificate-issuance code was touched.
+
+**Not resolved by this step (deferred, unchanged from Step 30):** live-model
+grading, screen-reader QA, physical-keyboard QA, real touch-device QA, a
+real human visual/scroll pass (this sandbox's `computer` scroll action
+still does not move the Browser pane's viewport for reasons unrelated to
+this change — the same limitation noted in Step 30 — so visual confirmation
+below the fold relied on `getBoundingClientRect`/`getComputedStyle`
+measurement rather than a screenshot), medical/dermatological review,
+legal/scope review, and production of the (still-deferred)
+`AIMT Regional Service Adaptation Guide` downloadable.
+
+Module 5 remains **Implemented — awaiting manual QA**. The current gate
+remains Module 5 manual QA. Module 6 was not extracted, audited, or edited.
+No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.

@@ -233,7 +233,8 @@ authenticated, consented, de-identified clinical captures.
 |---|---|
 | Student-facing name | **Module 5** (unchanged — Welcome Module naming applies only to technical module `0`) |
 | Source file | [`module-05-source.md`](module-05-source.md) — full verbatim extraction |
-| Approved specification file | [`module-05.md`](module-05.md) — full approved specification |
+| Approved specification file | [`module-05.md`](module-05.md) — full approved specification, including the visual asset addendum |
+| Asset inventory | [`module-05-assets.md`](module-05-assets.md) — 5 source photographs, 4 teaching-moment placements |
 | Wrapper ID | `module5Wrap` — standard hidden-template pattern |
 | Checkpoint IDs | `m5cp1`, `m5cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
@@ -309,6 +310,23 @@ IDs, the wrapper ID, the completion-card ID, the Module 4 prerequisite, and
 the Module 6 unlock relationship are all unchanged. This is a
 static-and-mocked-validation pass only — see `implementation-log.md` for
 the full test list. Module 5 is not yet marked manually approved.
+
+**Visual re-audit completed.** `module-05.md` gained an approved "Amendment
+— Module 5 visual asset addendum" adding five real source photographs as
+four teaching moments (regional crown/hairline comparison, targeted crown
+cleansing, gentle hairline adaptation, and a client-communication scene);
+[`module-05-assets.md`](module-05-assets.md) was created recording the full
+file inventory. Optimized WebP production derivatives (1360×1020,
+downscaled from the 1448×1086 sources, no upscaling) were generated under
+`assets/images/course/module-05/` and integrated into `headspa-mastery.html`
+at the four approved placements, in a large editorial case-study spread and
+full-width photo breaks — deliberately not Module 4's five-point stepper,
+appearance gallery, or card-grid treatment. Every image uses `<picture>`
+with a WebP source and PNG fallback, explicit `width`/`height`, `loading="lazy"`,
+a real `<figcaption>`, and non-diagnostic alt text. The approved
+downloadable resource (`AIMT Regional Service Adaptation Guide`) remains
+recommended with production deferred — nothing was created or linked. Module
+5 remains **Implemented — awaiting manual QA**.
 
 Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

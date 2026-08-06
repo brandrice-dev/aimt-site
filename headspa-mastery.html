@@ -2005,6 +2005,21 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m5-reset-btn:hover { color:var(--text); }
 .m5-reset-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 
+/* ── MODULE 5 — teaching photography (editorial, not a Module-4-style card grid) ── */
+.m5-case-study { margin: 2rem 0 2.25rem; }
+.m5-case-heading { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1.1rem; color: var(--text); text-align: center; margin-bottom: 1.1rem; }
+.m5-case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.m5-case-grid figure { margin: 0; }
+.m5-case-grid img { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--aimt-radius-md); display: block; }
+.m5-case-grid figcaption { font-size: 0.78rem; font-weight: 300; color: var(--muted); line-height: 1.55; margin-top: 0.6rem; }
+.m5-case-caution { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); text-align: center; margin-top: 1.15rem; }
+@media (max-width:600px) { .m5-case-grid { grid-template-columns: 1fr; } }
+
+.m5-photo-block { margin: 2rem 0; }
+.m5-photo-block figure { margin: 0; }
+.m5-photo-block img { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--aimt-radius-md); display: block; }
+.m5-photo-block figcaption { font-size: 0.84rem; font-weight: 300; color: var(--muted); line-height: 1.65; margin-top: 0.85rem; text-align: center; max-width: 32rem; margin-left: auto; margin-right: auto; }
+
 /* ══ MODULE 8 — STEP VIDEOS ══ */
 .sms-video {
   margin-top: 1rem;
@@ -3077,6 +3092,28 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
+    <!-- VISUAL 1 — Regional comparison case study -->
+    <div class="m5-case-study">
+      <div class="m5-case-heading">One scalp. Different regional needs.</div>
+      <div class="m5-case-grid">
+        <figure>
+          <picture>
+            <source srcset="assets/images/course/module-05/regional-comparison/mixed-regional-crown.webp" type="image/webp">
+            <img src="assets/images/course/module-05/regional-comparison/mixed-regional-crown-original.png" alt="Close view of a client's crown showing greater visible shine and surface coating than the comparison region." width="1360" height="1020" loading="lazy">
+          </picture>
+          <figcaption>Crown: greater visible shine and surface coating may support more targeted cleansing.</figcaption>
+        </figure>
+        <figure>
+          <picture>
+            <source srcset="assets/images/course/module-05/regional-comparison/mixed-regional-hairline.webp" type="image/webp">
+            <img src="assets/images/course/module-05/regional-comparison/mixed-regional-hairline-original.png" alt="Close view of the same client's hairline or temporal region showing a more matte appearance with fine visible scale." width="1360" height="1020" loading="lazy">
+          </picture>
+          <figcaption>Hairline or temporal area: a matte, fine-scale appearance may call for a gentler service direction.</figcaption>
+        </figure>
+      </div>
+      <div class="m5-case-caution">Illustrative service-planning example. Appearance alone does not establish cause or diagnosis.</div>
+    </div>
+
     <hr class="divider">
 
     <!-- SIGNATURE INTERACTION: WHAT CHANGES FIRST? -->
@@ -3162,6 +3199,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="clinical-note">
       <div class="cn2-label">Practitioner note</div>
       <div class="cn2-text">Document the regional decision in plain language: what you observed, what the client reported, and what you changed. Do not document a diagnosis you are not qualified to make.</div>
+    </div>
+
+    <!-- VISUAL 2 — Targeted crown cleansing -->
+    <div class="m5-photo-block">
+      <figure>
+        <picture>
+          <source srcset="assets/images/course/module-05/service-adaptation/targeted-crown-cleansing.webp" type="image/webp">
+          <img src="assets/images/course/module-05/service-adaptation/targeted-crown-cleansing-original.png" alt="Practitioner sections the crown and applies cleansing product specifically at the roots while customizing treatment by region." width="1360" height="1020" loading="lazy">
+        </picture>
+        <figcaption>Regional customization may change product placement and cleansing intensity without changing the entire service.</figcaption>
+      </figure>
     </div>
 
     <hr class="divider">
@@ -3251,12 +3299,34 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="kp-text"><strong>The protocol is not the number of steps. It is the quality of the decisions between them.</strong></div>
     </div>
 
+    <!-- VISUAL 3 — Gentle hairline adaptation -->
+    <div class="m5-photo-block">
+      <figure>
+        <picture>
+          <source srcset="assets/images/course/module-05/service-adaptation/gentle-hairline-adaptation.webp" type="image/webp">
+          <img src="assets/images/course/module-05/service-adaptation/gentle-hairline-adaptation-original.png" alt="Practitioner uses light fingertip contact and minimal product at the client's hairline during a low-stimulation service adjustment." width="1360" height="1020" loading="lazy">
+        </picture>
+        <figcaption>Lower pressure, less product, and reduced stimulation can be deliberate protocol decisions.</figcaption>
+      </figure>
+    </div>
+
     <hr class="divider">
 
     <!-- 5.8 -->
     <div class="sec-eyebrow">5.8 · Client communication</div>
     <div class="sec-title">Redirect the method without dismissing the goal.</div>
     <div class="body-text">Clients often ask for intensity because they associate intensity with results. Your job is not to argue with the goal. Your job is to explain why a different method is the better fit today.</div>
+
+    <!-- VISUAL 4 — Client communication -->
+    <div class="m5-photo-block">
+      <figure>
+        <picture>
+          <source srcset="assets/images/course/module-05/service-adaptation/regional-plan-client-conversation.webp" type="image/webp">
+          <img src="assets/images/course/module-05/service-adaptation/regional-plan-client-conversation-original.png" alt="Practitioner explains a personalized regional scalp-service plan to a seated client in a treatment room." width="1360" height="1020" loading="lazy">
+        </picture>
+        <figcaption>Explain what you observed, what the client reported, and why the service plan changed.</figcaption>
+      </figure>
+    </div>
 
     <div class="clinical-note">
       <div class="cn2-label">Mixed-regional script</div>
