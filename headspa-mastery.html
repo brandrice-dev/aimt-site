@@ -1999,6 +1999,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m4-classify-opts { display:flex; flex-wrap:wrap; gap:8px; }
 .m4-classify-opts .bq-opt { flex: 1 1 auto; min-width: 150px; }
 
+/* ── MODULE 5 — "What changes first?" decision interaction ── */
+.m5-decision-block { margin: 1.5rem 0; }
+.m5-reset-btn { margin-top:0.6rem; background:none; border:none; padding:0.3rem 0; font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:color 0.2s; }
+.m5-reset-btn:hover { color:var(--text); }
+.m5-reset-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+
 /* ══ MODULE 8 — STEP VIDEOS ══ */
 .sms-video {
   margin-top: 1rem;
@@ -2357,7 +2363,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="5" onclick="openModuleById(5)">
         <div class="mr-num mr-active" id="mnum-5">5</div>
-        <div class="mr-info"><div class="mr-title">Module 5 — Scalp Types & Protocols</div><div class="mr-sub">Neutral, oily, dry, combination, sensitive</div></div>
+        <div class="mr-info"><div class="mr-title">Module 5 — Scalp Patterns & Service Adaptation</div><div class="mr-sub">Translate regional findings into cosmetic service decisions</div></div>
         <span class="mr-badge mb-active" id="mbadge-5">Start</span>
       </div>
       <div class="module-row" data-module-id="6" onclick="openModuleById(6)">
@@ -2905,387 +2911,503 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- Hero -->
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 5 · Scalp Types &amp; Treatment Protocols</div>
-      <div class="mh-title">What the scalp is telling you — and how to respond.</div>
-      <div class="mh-desc">Module 5 builds directly on your assessment skills from Module 4. Now that you know how to look, this module teaches you what to do with what you see. Five scalp types. Five treatment approaches. No rigid formulas — just a clear framework you can adapt to every client.</div>
+      <div class="mh-eyebrow">Module 5 · Scalp Patterns &amp; Service Adaptation</div>
+      <div class="mh-title">Read the pattern.<br>Adjust the service.</div>
+      <div class="mh-desc">Module 4 taught you how to gather and describe evidence. Now you will turn supported observations, client-reported experience, and regional differences into a cosmetic service plan. The goal is not to assign one permanent scalp type. The goal is to make each step earn its place.</div>
     </div>
 
-    <!-- Intro -->
-    <div class="sec-eyebrow">Before you treat, you have to decide</div>
-    <div class="sec-title">Observation without action is incomplete.</div>
-    <div class="body-text">By this point you've learned how to observe the scalp and recognize what a healthy environment looks like. Now comes the part that actually changes your service: deciding what to do with what you're seeing.</div>
-    <div class="body-text">Not every scalp behaves the same way. Your job is not to label. Your job is to recognize patterns, understand what matters most, and adjust your service accordingly. Because the difference between a relaxing service and a skilled one is this: your treatment changes based on what you see.</div>
+    <!-- 5.1 -->
+    <div class="sec-eyebrow">5.1 · From evidence to action</div>
+    <div class="sec-title">The scalp does not need a label. The service needs a reason.</div>
+    <div class="body-text">A useful assessment changes what you do next. It may change how thoroughly you cleanse, whether you exfoliate, how much heat you use, where you place product, how much pressure you apply, or whether you pause the service entirely.</div>
+    <div class="body-text">The weak approach is to notice one feature, assign one type, and run the same protocol across the entire scalp. The stronger approach is to combine what is visible with what the client reports, what happened recently, and how each region responds.</div>
+    <div class="body-text">One client may show diffuse shine at the crown, fine loose scale near the hairline, and no discomfort anywhere. Another may show very little visible buildup but report burning after a recent product change. Those clients do not need the same service—and neither one can be reduced to one word.</div>
 
     <div class="info-card">
-      <div class="ic-title">The reality most people miss</div>
-      <div class="body-text" style="margin:0">Scalp analysis is rarely clean. Most clients will not fall into one category. You will see oil in one area, dryness in another, buildup sitting on top of a compromised barrier, and sensitivity layered over everything. If you treat the scalp as one uniform condition, you will overcorrect some areas, ignore others, and create new problems. Strong practitioners adjust within the service.</div>
+      <div class="ic-title">Ask four questions before you choose a step</div>
+      <div class="body-text" style="margin:0 0 0.5rem;">1. What is visibly present?</div>
+      <div class="body-text" style="margin:0 0 0.5rem;">2. What does the client report?</div>
+      <div class="body-text" style="margin:0 0 0.5rem;">3. What is the safest service limit?</div>
+      <div class="body-text" style="margin:0;">4. What should change in this region?</div>
     </div>
-
-    <hr class="divider">
-
-    <!-- SCALP TYPE COMPARISON VISUAL -->
-    <div class="sec-eyebrow">Visual reference</div>
-    <div class="sec-title">The five scalp types at a glance.</div>
-    <div class="body-text">Before reading through each type in depth, this reference gives you the pattern at a glance. You'll return to this visual instinctively once you've seen each type under the microscope enough times.</div>
-
-<div class="photo-pair">
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Oily Scalp — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Visible sebum, shiny, congestion at follicles</div>
-      </div>
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Dry Scalp — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Matte surface, fine flakes, minimal oil</div>
-      </div>
-    </div>
-    <div class="interaction-hint">↓ Tap each type to see the protocol</div>
-    <div class="scalp-type-grid">
-      <div class="scalp-card neutral">
-        <div class="sc-indicator"></div>
-        <div class="sc-name">Neutral</div>
-        <div class="sc-look">Slight natural sheen. Soft pink underglow. Faint translucency at roots.</div>
-        <div class="sc-goal">Goal: Preserve</div>
-      </div>
-      <div class="scalp-card oily">
-        <div class="sc-indicator"></div>
-        <div class="sc-name">Oily</div>
-        <div class="sc-look">Shiny or greasy at follicles. Wet or slick roots. Possible yellowish tinge or waxy buildup.</div>
-        <div class="sc-goal">Goal: Clarify &amp; balance</div>
-      </div>
-      <div class="scalp-card dry">
-        <div class="sc-indicator"></div>
-        <div class="sc-name">Dry</div>
-        <div class="sc-look">Matte surface. Little visible sebum. Fine white powdery flaking. Lacks reflective sheen.</div>
-        <div class="sc-goal">Goal: Restore barrier</div>
-      </div>
-      <div class="scalp-card combo">
-        <div class="sc-indicator"></div>
-        <div class="sc-name">Combination</div>
-        <div class="sc-look">Oily or congested in some zones. Dry or flaky in others. Read the whole scalp.</div>
-        <div class="sc-goal">Goal: Balance both</div>
-      </div>
-      <div class="scalp-card sensitive">
-        <div class="sc-indicator"></div>
-        <div class="sc-name">Sensitive</div>
-        <div class="sc-look">Larger areas of redness. Fragile barrier. Stinging, burning, itching, or tightness reported.</div>
-        <div class="sc-goal">Goal: Soothe only</div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- NEUTRAL -->
-    <div class="sec-eyebrow">Scalp type 1</div>
-    <div class="sec-title">The neutral scalp.</div>
-    <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Neutral Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Balanced sheen, clear follicles, soft pink tone</div>
-      </div>
-    <div class="body-text">A neutral scalp is the ideal — not because it requires no attention, but because it has achieved equilibrium. The hydrolipid film is intact, sebum production is balanced, and the follicle environment is healthy. You'll see a slight natural reflection or sheen across the scalp surface. Not greasy, not dull — just quietly balanced.</div>
-    <div class="body-text">Three things to look for under the microscope: a slight natural sheen from the intact hydrolipid film, a soft pink underglow that indicates healthy circulation and adequate blood flow to the follicles, and a faint translucency through the upper skin layers meaning you can see the roots beneath — no heavy buildup blocking that clarity. If the scalp appears opaque or matte rather than clear, something is disrupting that translucency.</div>
-
-    <div class="clinical-note">
-      <div class="cn2-label">In practice</div>
-      <div class="cn2-text">Clients with a neutral scalp typically don't feel oily between washes and don't experience tightness or flaking. They may not even have a scalp concern — they're there for the experience. That's actually useful information. It tells you the service focus is relaxation and maintenance, not correction.</div>
-    </div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Treatment protocol — neutral</div>
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon neutral-icon">N</div>
-        <div>
-          <div class="pc-title">Neutral scalp protocol</div>
-          <div class="pc-sub">Preservation over correction</div>
-        </div>
-        <div class="pc-badge neutral-badge">Preserve</div>
-      </div>
-      <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Approach</span><span class="pc-val">Gentle, non-disruptive formulations. Support what's already working.</span></div>
-        <div class="pc-row"><span class="pc-label">Exfoliation</span><span class="pc-val">Mild exfoliant occasionally if minor buildup is visible. Not routine.</span></div>
-        <div class="pc-row"><span class="pc-label">If goal is relaxation</span><span class="pc-val">Soothing, hydrating treatments. No exfoliation needed.</span></div>
-        <div class="pc-row"><span class="pc-label">If goal is vitality</span><span class="pc-val">Incorporate circulation-supporting products and massage techniques.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Key principle</span><span class="pc-val">You are maintaining, not fixing. Adjust to the client's goals, not a formula.</span></div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- OILY -->
-    <div class="sec-eyebrow">Scalp type 2</div>
-    <div class="sec-title">The oily scalp.</div>
-    <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Oily Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Visible sebum, shiny, yellowish buildup at follicles</div>
-      </div>
-    <div class="body-text">An oily scalp appears shiny or greasy around and within the hair follicles. In some cases sebum accumulates visibly at the follicle opening — small pools of oil sitting at the base of the hair shafts. The roots often look wet or slick, and the scalp may take on a slight yellowish tinge from excess sebum concentration.</div>
-    <div class="body-text">Left unaddressed, that excess oil mixes with dead skin cells and product residue to form what's called <strong>follicular congestion</strong> — a thicker, waxy yellowish buildup around and within the follicle. This is one of the most common things you'll see under the microscope on a client who washes infrequently or uses heavy products. If the congestion is significant enough to obstruct the follicle opening, it begins to compromise the environment needed for healthy hair growth.</div>
 
     <div class="key-point">
-      <div class="kp-icon">💡</div>
-      <div class="kp-text"><strong>Ask about heat exposure.</strong> Sebum production rises approximately 10% for every 1.8°F increase in temperature. A client who works in a kitchen, exercises daily, or spends hours outdoors in warm weather will have structurally higher oil production. This isn't a hygiene issue — it's physiology. Understanding their environment changes how you recommend home care.</div>
-    </div>
-
-    <div class="body-text">Other common causes: diet high in fried, spicy, or sugary foods can stimulate the sebaceous glands through hormonal fluctuations and systemic inflammation. Hormonal changes — particularly postpartum shifts or other imbalances — can also suddenly increase oil production in someone who previously had a normal scalp.</div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Treatment protocol — oily</div>
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon oily-icon">O</div>
-        <div>
-          <div class="pc-title">Oily scalp protocol</div>
-          <div class="pc-sub">Clarify without over-stripping</div>
-        </div>
-        <div class="pc-badge oily-badge">Clarify</div>
-      </div>
-      <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Key ingredients</span><span class="pc-val">Salicylic acid, zinc, or clay-based formulations to manage sebum production.</span></div>
-        <div class="pc-row"><span class="pc-label">Cleansing</span><span class="pc-val">Regular shampooing with oil-controlling but not harsh surfactants.</span></div>
-        <div class="pc-row"><span class="pc-label">Exfoliation</span><span class="pc-val">Occasional scalp exfoliation to break down waxy follicular congestion.</span></div>
-        <div class="pc-row"><span class="pc-label">Steam</span><span class="pc-val">Steam treatments can help soften and loosen buildup before cleansing.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Caution</span><span class="pc-val">Over-stripping triggers the sebaceous gland to produce more oil as compensation. Gentle is still the word — even here.</span></div>
-      </div>
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Limit first. Priority second. Region by region.</strong></div>
     </div>
 
     <hr class="divider">
 
-    <!-- DRY -->
-    <div class="sec-eyebrow">Scalp type 3</div>
-    <div class="sec-title">The dry scalp.</div>
-    <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Dry Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Matte surface, fine white flakes, depleted barrier</div>
+    <!-- 5.2 -->
+    <div class="sec-eyebrow">5.2 · What you can actually change</div>
+    <div class="sec-title">Most protocol changes come from five levers.</div>
+    <div class="body-text">Skilled customization is usually not a completely different service. It is a deliberate change in intensity, placement, duration, or omission.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">1. Cleansing</div></div>
+        <div class="cc-body">Decide how thorough the cleanse should be, whether one region needs more attention than another, and whether repeating a cleanse is appropriate. More lather is not the goal. A clean, comfortable finish is.</div>
       </div>
-    <div class="body-text">A dry scalp appears more matte and lacks the reflective quality of a neutral scalp — because the hydrolipid film that produces that sheen is depleted or compromised. About 60 to 90 percent of follicles will show no visible sebum under the microscope. There may also be flaking — fine, white, powdery flakes that shed as dry dead skin cells accumulate on the surface. Clients with dry scalps often won't feel greasy even after two to three days without washing.</div>
-    <div class="body-text">Common causes include aging (sebaceous gland activity naturally decreases over time), seasonal changes particularly in colder or drier weather, and chemical processes like perming or color treatments that strip the moisture barrier. Over-cleansing and harsh products are among the most common and most correctable causes — a client washing daily with a sulfate-heavy shampoo may simply be undoing their own barrier every time they shower.</div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">2. Exfoliation</div></div>
+        <div class="cc-body">Decide whether exfoliation belongs at all. If it does, choose the region, method, intensity, and contact time carefully. Visible scale is not automatic permission to exfoliate.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">3. Water and steam</div></div>
+        <div class="cc-body">Adjust temperature, duration, and distance. Heat can increase comfort for some clients and increase discomfort for others. Steam is optional—not proof that the service is more advanced.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">4. Pressure and tempo</div></div>
+        <div class="cc-body">Adjust mechanical stimulation to the client's comfort and the current region. Pressure is not a corrective tool. Firm massage should never be used to overpower tenderness, burning, or a reactive presentation.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">5. Product placement and finish</div></div>
+        <div class="cc-body">Choose where product belongs, how much is needed, and whether the finish should be lightweight, conditioning, or minimal. Whole-scalp application is not automatically more thorough.</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Product comes after the decision.</div>
+      <div class="body-text" style="margin:0">Do not choose the protocol because you want to use a particular product. Choose the service direction first, then select a compatible product category within your license, training, and manufacturer instructions.</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 5.3 -->
+    <div class="sec-eyebrow">5.3 · Priority order</div>
+    <div class="sec-title">The safest limit outranks the client's request.</div>
+    <div class="body-text">Clients may ask for the deepest cleanse, the strongest exfoliation, maximum steam, or firm pressure. Their preference matters—but it does not override what the assessment and consultation tell you is appropriate today.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error)"></div><div class="cc-h-title">1. Safety limit</div></div>
+        <div class="cc-body">Is there any reason to avoid the area, pause, or refer? Broken, bleeding, weeping, oozing, draining, pustular, severely painful, rapidly worsening, or otherwise concerning findings do not need a stronger cosmetic protocol.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-warning)"></div><div class="cc-h-title">2. Client comfort and reactivity</div></div>
+        <div class="cc-body">Ask about stinging, burning, tenderness, itching, heat, tightness, recent chemical services, scratching, friction, or a recent product reaction.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#5a4a70"></div><div class="cc-h-title">3. Surface tolerance</div></div>
+        <div class="cc-body">Consider whether cleansing, exfoliation, heat, or friction is likely to make the current presentation less comfortable.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#3a5060"></div><div class="cc-h-title">4. Visible cosmetic need</div></div>
+        <div class="cc-body">Decide what oil, residue, loose scale, or regional difference can be addressed conservatively within the service.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-success)"></div><div class="cc-h-title">5. Client preference and maintenance goal</div></div>
+        <div class="cc-body">Once the limits are clear, shape the experience around the client's comfort, maintenance needs, and desired level of relaxation.</div>
+      </div>
+    </div>
 
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"Gentle exfoliation for a dry scalp sounds counterintuitive — but it's often necessary. You have to lift away the buildup of dead cells before hydrating products can actually penetrate. The mistake is using anything too aggressive. The goal is creating a clean surface for moisture to absorb into, not stripping what little barrier is left."</div>
+      <div class="cn-text">"The strongest service is not the one with the most steps. It is the one in which every step has a reason and nothing is added simply to prove value."</div>
     </div>
 
-    <div class="body-text">For home care recommendations: a gentle, moisturizing cleanser every two to three days. Avoid over-washing and high heat directed at the scalp. Foods rich in omega-3 fatty acids — fish, flaxseeds, walnuts — support internal hydration. Vitamins E and A are relevant for barrier health.</div>
+    <hr class="divider">
 
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Treatment protocol — dry</div>
+    <!-- 5.4 -->
+    <div class="sec-eyebrow">5.4 · Patterns, not permanent types</div>
+    <div class="sec-title">Read the dominant need without forcing the whole scalp into it.</div>
+
     <div class="protocol-card">
       <div class="pc-header">
-        <div class="pc-icon dry-icon">D</div>
-        <div>
-          <div class="pc-title">Dry scalp protocol</div>
-          <div class="pc-sub">Restore the hydrolipid barrier</div>
-        </div>
-        <div class="pc-badge dry-badge">Restore</div>
+        <div class="pc-icon neutral-icon">A</div>
+        <div><div class="pc-title">Baseline / maintenance presentation</div></div>
       </div>
       <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">First step</span><span class="pc-val">Gentle exfoliation to lift dead cell buildup — only if scalp is not also sensitive.</span></div>
-        <div class="pc-row"><span class="pc-label">Treatment</span><span class="pc-val">Hydrating, barrier-repairing treatments after exfoliation. Seal moisture in.</span></div>
-        <div class="pc-row"><span class="pc-label">Ingredients</span><span class="pc-val">Hyaluronic acid, ceramides, plant oils, panthenol — anything that repairs and retains moisture.</span></div>
-        <div class="pc-row"><span class="pc-label">Home care</span><span class="pc-val">Gentle moisturizing cleanser every 2–3 days. Minimize heat styling at the scalp.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Ultimate goal</span><span class="pc-val">Repair and restore the hydrolipid film so the scalp can hold onto its own moisture long-term.</span></div>
+        <div class="pc-row"><span class="pc-label">What may be present</span><span class="pc-val">No dominant cosmetic concern, no meaningful regional difference, and no reported discomfort. The client may simply want relaxation, maintenance, and a consistent routine.</span></div>
+        <div class="pc-row"><span class="pc-label">Context still needed</span><span class="pc-val">Wash timing, recent product use, service goal, allergies, sensitivities, and any recent chemical service.</span></div>
+        <div class="pc-row"><span class="pc-label">Responsible direction</span><span class="pc-val">Preserve. Use a gentle, non-disruptive cleanse, avoid unnecessary exfoliation, and let the service focus on comfort and maintenance.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Do not conclude</span><span class="pc-val">That the scalp has one universal "healthy" color or that every corrective step should be added because the client paid for a premium service.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon oily-icon">B</div>
+        <div><div class="pc-title">Oil-dominant or residue-present presentation</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row"><span class="pc-label">What may be present</span><span class="pc-val">Diffuse shine, slick roots, visible coating, adherent surface material, or heavier material in selected regions.</span></div>
+        <div class="pc-row"><span class="pc-label">Context still needed</span><span class="pc-val">Wash timing, dry shampoo, root products, exercise, sweat, work environment, headwear, recent styling products, and whether the material changes after cleansing.</span></div>
+        <div class="pc-row"><span class="pc-label">Responsible direction</span><span class="pc-val">Cleanse thoroughly but proportionately. Use targeted product placement, repeat cleansing only when appropriate, consider compatible localized exfoliation when the surface is intact and comfortable, rinse fully, and avoid leaving an unnecessarily heavy finish.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Do not conclude</span><span class="pc-val">That the follicles are clogged, that visible material is definitely sebum, that hair growth is being blocked, or that cleansing will trigger guaranteed compensatory oil production.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon dry-icon">C</div>
+        <div><div class="pc-title">Fine-scale / dry-appearing presentation</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row"><span class="pc-label">What may be present</span><span class="pc-val">A matte surface, fine loose scale, little visible surface shine, or a client report of tightness.</span></div>
+        <div class="pc-row"><span class="pc-label">Context still needed</span><span class="pc-val">Itching, burning, tenderness, cleansing frequency, shampoo type, chemical services, weather, heat styling, recent product changes, and whether scale is loose or adherent.</span></div>
+        <div class="pc-row"><span class="pc-label">Responsible direction</span><span class="pc-val">Lower unnecessary cleansing intensity, use comfortable water temperature, reduce friction, choose a compatible conditioning or hydration-supportive cosmetic product, and exfoliate only when the area is intact, comfortable, and appropriate for the product and service.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Do not conclude</span><span class="pc-val">That the image proves dehydration, a damaged barrier, dandruff, dermatitis, or a need for exfoliation.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon combo-icon">D</div>
+        <div><div class="pc-title">Mixed regional presentation</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row"><span class="pc-label">What may be present</span><span class="pc-val">Shine or residue in one region and fine scale, matte appearance, or greater sensitivity in another.</span></div>
+        <div class="pc-row"><span class="pc-label">Context still needed</span><span class="pc-val">Regional product placement, wash habits, dry shampoo use, chemical-service history, styling patterns, friction, and symptoms by area.</span></div>
+        <div class="pc-row"><span class="pc-label">Responsible direction</span><span class="pc-val">Map the regions. Cleanse, exfoliate, condition, or reduce stimulation only where each decision is earned. One client may receive more thorough cleansing at the crown, a gentler approach at the hairline, and a maintenance approach elsewhere.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Do not conclude</span><span class="pc-val">That one dominant feature should control the protocol across the entire scalp.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon sensitive-icon">E</div>
+        <div><div class="pc-title">Reactive presentation or sensitivity reported</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row"><span class="pc-label">What may be present</span><span class="pc-val">A visible difference from surrounding baseline combined with client-reported stinging, burning, tenderness, itching, heat, tightness, or a recent reaction.</span></div>
+        <div class="pc-row"><span class="pc-label">Context still needed</span><span class="pc-val">Recent chemical service, product change, heat exposure, scratching, friction, known allergies, symptom severity, broken skin, drainage, pustules, crusting, or rapid worsening.</span></div>
+        <div class="pc-row"><span class="pc-label">Responsible direction</span><span class="pc-val">Reduce stimulation. Lower heat, use cooler or comfortably lukewarm water, avoid aggressive exfoliation, avoid firm massage over the area, and use fewer familiar compatible products. Pause or refer when the presentation falls outside cosmetic service limits.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label">Do not conclude</span><span class="pc-val">That visible color alone proves sensitivity, inflammation, infection, or the medical cause.</span></div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- COMBINATION -->
-    <div class="sec-eyebrow">Scalp type 4</div>
-    <div class="sec-title">The combination scalp.</div>
-    <div class="photo-pair">
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Combination — Crown Zone</div>
-        </div>
-        <div class="photo-pair-label">Oily or congested at crown</div>
+    <!-- SIGNATURE INTERACTION: WHAT CHANGES FIRST? -->
+    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-title">What changes first?</div>
+    <div class="body-text">Choose the first responsible service direction. You are not diagnosing the scalp. You are deciding what the current evidence allows you to do next.</div>
+
+    <div class="m5-decision-block" id="m5Decision1">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 1.</strong> The five-point assessment shows no dominant concern or meaningful regional difference. The client reports no discomfort and wants a relaxation-focused service.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 1. Choose the first responsible service direction.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m5Decide(1,0,this)">Add a strong exfoliation so the service feels complete</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m5Decide(1,1,this)">Preserve the current presentation and customize for relaxation</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m5Decide(1,2,this)">Use a clarifying protocol to prevent future buildup</button>
       </div>
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Combination — Hairline Zone</div>
-        </div>
-        <div class="photo-pair-label">Dry or flaky at sides and hairline</div>
+      <div class="bq-feedback" id="m5Decision1Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m5ResetDecision(1)">Reset this scenario</button>
+    </div>
+
+    <div class="m5-decision-block" id="m5Decision2">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 2.</strong> The crown shows diffuse shine and visible surface residue. The sides and hairline look close to the client's baseline. The client reports no burning, tenderness, or recent reaction and says they used dry shampoo this morning.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 2. Choose the first responsible service direction.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m5Decide(2,0,this)">Use targeted cleansing at the crown and keep the remaining regions gentle</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m5Decide(2,1,this)">Exfoliate the entire scalp aggressively</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m5Decide(2,2,this)">Tell the client the crown follicles are clogged</button>
+      </div>
+      <div class="bq-feedback" id="m5Decision2Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m5ResetDecision(2)">Reset this scenario</button>
+    </div>
+
+    <div class="m5-decision-block" id="m5Decision3">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 3.</strong> The hairline shows fine loose scale. The client reports burning after starting a new product three days ago.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 3. Choose the first responsible service direction.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m5Decide(3,0,this)">Exfoliate the scale first so hydration can penetrate</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m5Decide(3,1,this)">Reduce stimulation, avoid aggressive exfoliation, and reassess whether the service should continue</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m5Decide(3,2,this)">Increase steam to soften the area</button>
+      </div>
+      <div class="bq-feedback" id="m5Decision3Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m5ResetDecision(3)">Reset this scenario</button>
+    </div>
+
+    <div class="m5-decision-block" id="m5Decision4">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 4.</strong> One assessment area is broken, moist, and visibly draining.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 4. Choose the first responsible service direction.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m5Decide(4,0,this)">Avoid only that small spot and complete the rest of the service</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m5Decide(4,1,this)">Clean the area thoroughly before proceeding</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m5Decide(4,2,this)">Stop contact with the area, pause the service, and refer appropriately</button>
+      </div>
+      <div class="bq-feedback" id="m5Decision4Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m5ResetDecision(4)">Reset this scenario</button>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 5.5 -->
+    <div class="sec-eyebrow">5.5 · One appointment, more than one approach</div>
+    <div class="sec-title">The protocol can change without the service feeling fragmented.</div>
+    <div class="body-text">Regional customization should feel intentional, not improvised. Use the same service structure, then adjust the levers by area.</div>
+    <div class="body-text">You might cleanse the crown more thoroughly, skip exfoliation near a reactive hairline, lower pressure at the temples, and use a lighter finish at the roots. The client still experiences one cohesive service. The practitioner simply stops pretending that every square inch has the same need.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-success)"></div><div class="cc-h-title">Preserve</div></div>
+        <div class="cc-body">Keep the steps and regions that are already appropriate. Do not remove a comfortable, effective part of the service just because another area needs modification.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#3a5060"></div><div class="cc-h-title">Modify</div></div>
+        <div class="cc-body">Change intensity, placement, duration, temperature, pressure, or product amount.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-warning)"></div><div class="cc-h-title">Avoid</div></div>
+        <div class="cc-body">Omit a step that is unnecessary, incompatible, or likely to increase discomfort.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#5a4a70"></div><div class="cc-h-title">Pause</div></div>
+        <div class="cc-body">Stop when new symptoms, visible changes, contamination, or client discomfort make continuing inappropriate.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error)"></div><div class="cc-h-title">Refer</div></div>
+        <div class="cc-body">Recommend medical evaluation when the presentation is outside cosmetic assessment or service limits.</div>
       </div>
     </div>
-    <div class="body-text">A combination scalp is one of the most commonly misread presentations — precisely because you have to resist the instinct to categorize it based on the first thing you notice. A client may appear oily at the crown or roots while the hairline or sides appear dry and flaky. In some cases, excess sebum is present overall but the surface skin is still dehydrated because the hydrolipid barrier has been compromised — meaning oiliness and dryness can genuinely coexist.</div>
-    <div class="body-text">The mistake is treating the entire scalp as one type. If you see oiliness and treat accordingly — clarifying shampoo, oil-controlling products across the board — you may dehydrate the areas that were already dry and make the problem worse. Assess the scalp as a whole. Document what you're seeing in each region. Build a treatment that addresses both concerns intentionally.</div>
 
     <div class="clinical-note">
-      <div class="cn2-label">Common pattern to watch for</div>
-      <div class="cn2-text">Combination scalps are often created by product behavior — a client who uses a heavy leave-in conditioner at the ends but a dry shampoo at the roots, or who over-cleanses the top but neglects the sides. Asking about their routine usually reveals the cause faster than the microscope alone.</div>
-    </div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Treatment protocol — combination</div>
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon combo-icon">C</div>
-        <div>
-          <div class="pc-title">Combination scalp protocol</div>
-          <div class="pc-sub">Adaptive — address both without overcorrecting</div>
-        </div>
-        <div class="pc-badge combo-badge">Balance</div>
-      </div>
-      <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Exfoliation</span><span class="pc-val">Gentle exfoliation where buildup is visible. Avoid aggressive application over dry or sensitive areas.</span></div>
-        <div class="pc-row"><span class="pc-label">Cleanser</span><span class="pc-val">Mild, balancing cleanser — removes excess oil without stripping moisture. Avoid harsh degreasers.</span></div>
-        <div class="pc-row"><span class="pc-label">During treatment</span><span class="pc-val">Soothing massage for circulation. Lightweight scalp treatments that support the hydrolipid barrier.</span></div>
-        <div class="pc-row"><span class="pc-label">Home care</span><span class="pc-val">Consistent cleansing routine — regular but not excessive. Balancing shampoos only.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">Mindset</span><span class="pc-val">The goal is to normalize scalp function over time — not force immediate oil removal or aggressive hydration.</span></div>
-      </div>
+      <div class="cn2-label">Practitioner note</div>
+      <div class="cn2-text">Document the regional decision in plain language: what you observed, what the client reported, and what you changed. Do not document a diagnosis you are not qualified to make.</div>
     </div>
 
     <hr class="divider">
 
-    <!-- SENSITIVE -->
-    <div class="sec-eyebrow">Scalp type 5</div>
-    <div class="sec-title">The sensitive scalp.</div>
-    <div class="clinical-photo placeholder">
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Sensitive Scalp — Microscopy</div>
-        <div class="cp-placeholder-sub">Redness, fragile barrier, reactive areas</div>
-      </div>
-    <div class="body-text">A sensitive scalp often presents as larger areas of visible redness and a thinner, more fragile skin barrier. Clients may report stinging, burning, itching, or tightness — sensations that arise during or after product use, heat exposure, or even gentle manipulation. Importantly, sensitivity can occur on any scalp type — an oily scalp can also be sensitive, and a dry scalp almost always is to some degree.</div>
-    <div class="body-text">Redness on a sensitive scalp is not always the same thing. Some redness reflects chronic sensitivity or barrier damage. Some is triggered by a recent stressor, lack of sleep, or a product reaction. Bacterial overgrowth on a compromised scalp can present as inflamed areas with small visible red dots. Your job is not to diagnose the cause — but to recognize that a reactive scalp needs a very different approach than a stable one.</div>
-
-    <div class="key-point">
-      <div class="kp-icon">⚠️</div>
-      <div class="kp-text"><strong>When in doubt, do less.</strong> A sensitive scalp that is over-stimulated, over-treated, or exposed to harsh products or excessive heat can spiral quickly. The conservative approach is always the right one here. If you're uncertain about the degree of sensitivity, adjust the service to be gentler before proceeding — not after you've already caused a reaction.</div>
-    </div>
-
-    <div class="sec-eyebrow" style="margin-top:1.5rem">Treatment protocol — sensitive</div>
-    <div class="protocol-card">
-      <div class="pc-header">
-        <div class="pc-icon sensitive-icon">S</div>
-        <div>
-          <div class="pc-title">Sensitive scalp protocol</div>
-          <div class="pc-sub">Soothe. Do not stimulate.</div>
-        </div>
-        <div class="pc-badge sensitive-badge">Soothe</div>
-      </div>
-      <div class="pc-body">
-        <div class="pc-row"><span class="pc-label">Primary rule</span><span class="pc-val">Minimize stimulation. No aggressive massage, exfoliation, heat, or strong actives.</span></div>
-        <div class="pc-row"><span class="pc-label">Products</span><span class="pc-val">Fragrance-free, minimal-ingredient formulations. Botanical calming agents like chamomile and licorice root.</span></div>
-        <div class="pc-row"><span class="pc-label">Massage</span><span class="pc-val">Gentle, slow, and limited. Watch for any change in redness during the service.</span></div>
-        <div class="pc-row"><span class="pc-label">Temperature</span><span class="pc-val">Cooler water. Avoid hot rinsing. Avoid steam on highly reactive scalps.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label">If unsure</span><span class="pc-val">Default to the most conservative approach. You can always add — you can't undo a reaction.</span></div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- PRIORITY ORDER -->
-    <div class="sec-eyebrow">Priority matters more than category</div>
-    <div class="sec-title">What matters most right now?</div>
-    <div class="body-text">Identifying the scalp type is not enough. When multiple concerns are present — and they usually are — you have to decide what to address first. Use this priority order in real time.</div>
-
-    <div class="phase-timeline">
-      <div class="phase-item">
-        <div class="phase-dot pd-3">1</div>
-        <div class="phase-content">
-          <div class="phase-name">Sensitivity / inflammation — first</div>
-          <div class="phase-desc">If the scalp is reactive, reduce stimulation before anything else. Sensitivity overrides every other concern.</div>
-        </div>
-      </div>
-      <div class="phase-item">
-        <div class="phase-dot pd-2">2</div>
-        <div class="phase-content">
-          <div class="phase-name">Barrier condition — second</div>
-          <div class="phase-desc">If the scalp is dry or compromised, avoid stripping it further. Don't address buildup at the cost of what little barrier remains.</div>
-        </div>
-      </div>
-      <div class="phase-item">
-        <div class="phase-dot pd-4">3</div>
-        <div class="phase-content">
-          <div class="phase-name">Buildup and congestion — third</div>
-          <div class="phase-desc">Address once the scalp can tolerate it. Exfoliation and clarifying work belong here — after inflammation and barrier are accounted for.</div>
-        </div>
-      </div>
-      <div class="phase-item">
-        <div class="phase-dot pd-1">4</div>
-        <div class="phase-content">
-          <div class="phase-name">Oil control — last</div>
-          <div class="phase-desc">Oil is often a response, not the root problem. If you ignore the order above, you can choose the "right" product and still get the wrong result.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">Real-world decision training</div>
-      <div class="body-text" style="margin:0 0 0.75rem;"><strong>Scenario 1 — flakes, shine, slight redness:</strong> Weak approach: treat dryness. Stronger approach: mixed presentation — reduce irritation first, gently clear buildup, avoid overcorrection.</div>
-      <div class="body-text" style="margin:0 0 0.75rem;"><strong>Scenario 2 — heavy oil, visible buildup, no redness:</strong> Approach: clarify and reset. Support consistent cleansing.</div>
-      <div class="body-text" style="margin:0;"><strong>Scenario 3 — redness, sensitivity, minimal buildup:</strong> Approach: reduce stimulation, avoid aggressive treatment, focus on calming. Two people can look at the same scalp and make completely different decisions. The difference is not knowledge — it's interpretation.</div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- CHECKPOINT 1 -->
+    <!-- CHECKPOINT 1 (midpoint) -->
     <div class="checkpoint" id="m5cp1">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Check your understanding</div>
+        <div class="cp-label">Midpoint check</div>
       </div>
-      <div class="cp-q">A client sits down and you see oiliness at the crown with what looks like waxy buildup around the follicles — but as you assess the sides and hairline you notice flaking and a more matte appearance. How do you approach this service, and what's the mistake you're specifically trying to avoid?</div>
+      <div class="cp-q">During the five-point assessment, the crown shows diffuse shine and visible surface residue, while the sides and hairline show fine loose scale and little visible shine. The client reports no burning, tenderness, or recent reaction. How would you adapt the service by region, and what whole-scalp mistake are you avoiding?</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m5cp1In" placeholder="Think through both what you see and what you'd do..." rows="1" oninput="grow(this)" onkeydown="m5cpKey(event,'m5cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m5cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m5cp1In" placeholder="Explain how you would adapt the service by region, and the whole-scalp mistake you're avoiding…" rows="1" oninput="grow(this)" onkeydown="m5cpKey(event,'m5cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m5cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m5cp1Btn" onclick="submitM5CP('m5cp1')">
+        <button class="cp-btn" id="m5cp1Btn" onclick="submitM5CP('m5cp1')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m5cp1Res"></div>
+      <div class="cp-res" id="m5cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
-    <!-- RECAP -->
-    <div class="sec-eyebrow">Module recap</div>
-    <div class="sec-title">Scalp analysis should always guide treatment.</div>
-    <div class="body-text">The five scalp types covered in this module each have their own visual cues, underlying causes, and treatment priorities. Neutral scalps need preservation. Oily scalps need clarification without over-stripping. Dry scalps need gentle exfoliation followed by barrier repair. Combination scalps need adaptive approaches that address both concerns without overcorrecting. Sensitive scalps need restraint above everything else.</div>
-    <div class="body-text">The pattern that runs through all of them is this: accurate identification changes the service. Not the technique — the intention behind it. The more precisely you read what the scalp is communicating, the more intentional, effective, and professional every service becomes.</div>
+    <!-- 5.6 -->
+    <div class="sec-eyebrow">5.6 · Choose a function, not a fantasy</div>
+    <div class="sec-title">The right product is the one that supports the decision you already made.</div>
+    <div class="body-text">Product knowledge matters, but product enthusiasm can distort judgment. A practitioner who starts with the bottle often finds a reason to use it. Start with the service need instead.</div>
+    <div class="body-text">Choose a product category based on what the current region can tolerate and what you are trying to accomplish cosmetically.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Gentle routine cleansing</div></div>
+        <div class="cc-body">Appropriate when the goal is maintenance, comfort, or a non-disruptive reset.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Targeted or more thorough cosmetic cleansing</div></div>
+        <div class="cc-body">Appropriate when visible oil or residue and client history support a stronger cleanse in selected regions.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Optional compatible exfoliation</div></div>
+        <div class="cc-body">Appropriate only when the skin is intact, the client is comfortable, the method is within scope, and the product directions support its use.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Conditioning or hydration support</div></div>
+        <div class="cc-body">Appropriate when the goal is comfort, slip, softness, or a less stripping finish. Do not describe the product as treating a medical barrier disorder.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Minimal-product service</div></div>
+        <div class="cc-body">Appropriate when the client reports recent reactivity, when product history is unclear, or when adding more variables would make the response harder to interpret.</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">⚠️</div>
+      <div class="kp-text"><strong>Boundary note.</strong> Specific ingredients, medicated claims, and condition-directed products may carry license, labeling, contraindication, or manufacturer requirements. Follow the product—not a social-media protocol.</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 5.7 -->
+    <div class="sec-eyebrow">5.7 · Intensity is part of the protocol</div>
+    <div class="sec-title">More heat, more pressure, and more time do not equal more expertise.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Steam</div></div>
+        <div class="cc-body">Steam may support comfort or help soften some surface product and residue, but it is optional. Reduce or omit it when the client reports heat sensitivity, burning, tenderness, or a recent reaction. Do not say steam opens pores or detoxifies the scalp.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Water temperature</div></div>
+        <div class="cc-body">Comfortably lukewarm is a useful default. Use cooler water when heat increases discomfort. Avoid very hot water on a reactive or uncomfortable area.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Pressure</div></div>
+        <div class="cc-body">Pressure should remain controlled and responsive to client feedback. Do not use firm massage as a corrective response to oil, scale, or residue.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#b89060"></div><div class="cc-h-title">Time</div></div>
+        <div class="cc-body">Longer contact is not automatically better. Follow manufacturer directions and use the shortest effective step that supports the service goal.</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>The protocol is not the number of steps. It is the quality of the decisions between them.</strong></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 5.8 -->
+    <div class="sec-eyebrow">5.8 · Client communication</div>
+    <div class="sec-title">Redirect the method without dismissing the goal.</div>
+    <div class="body-text">Clients often ask for intensity because they associate intensity with results. Your job is not to argue with the goal. Your job is to explain why a different method is the better fit today.</div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">Mixed-regional script</div>
+      <div class="cn2-text">"Your scalp is not presenting the same way in every area today. I'm going to cleanse the crown more thoroughly, keep the hairline gentler, and adjust the product placement so we do not overcorrect the areas that do not need it."</div>
+    </div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">Lower-intensity script</div>
+      <div class="cn2-text">"You asked for the deepest version of the service. Based on what you're feeling and what I'm observing, the stronger exfoliation, maximum steam, and firm pressure are not the best fit today. I can still give you a complete service, but I'm going to lower the heat, reduce stimulation, and focus on a gentle cleanse and comfort."</div>
+    </div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">Pause-and-refer script</div>
+      <div class="cn2-text">"I'm seeing an area that is not appropriate for cosmetic treatment today. I do not want to aggravate it or guess at the cause, so I recommend having it evaluated before we continue with scalp services."</div>
+    </div>
 
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"The most common mistake I see is treating the scalp you expected to see rather than the one in front of you. Dandruff is driven by excess oil — Malassezia yeast feeds on sebum, so an oily scalp environment is usually underneath it. But a client who says they have 'dandruff' may have misidentified their own condition entirely and actually have a dry scalp. Those two things require opposite approaches. A client who looks oily at the crown may be dry everywhere else. Every appointment is a fresh assessment. This module is about building the observational instinct that makes that possible."</div>
+      <div class="cn-text">"Client satisfaction is not created by saying yes to every requested step. It is created by giving the client a clear reason, a thoughtful alternative when one is appropriate, and a service plan you can defend."</div>
     </div>
 
     <hr class="divider">
 
-    <!-- CHECKPOINT 2 -->
+    <!-- 5.9 -->
+    <div class="sec-eyebrow">5.9 · Errors that make protocols less intelligent</div>
+    <div class="sec-title">The most common mistake is treating the label instead of the client.</div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Label first</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Choosing "oily," "dry," or "sensitive" before gathering regional evidence and client history.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Product first</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Building the explanation around the product you want to use instead of the need you are trying to address.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Whole scalp, one intensity</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Applying the strongest regional need across every assessment area.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Exfoliating every flake</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Treating visible scale as proof that exfoliation is required.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Strongest means best</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Assuming maximum steam, repeated cleansing, firm pressure, or more product creates a more valuable service.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Image becomes diagnosis</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Turning shine, scale, residue, or color change into a medical conclusion.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Client request becomes permission</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Continuing an inappropriate step because the client asked for it.</span></div>
+      </div>
+    </div>
+
+    <div class="protocol-card">
+      <div class="pc-header">
+        <div class="pc-icon" style="background:var(--aimt-error);color:white;font-family:var(--aimt-font-mono);font-size:0.6rem;">✗</div>
+        <div><div class="pc-title">Improvement becomes cure</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row" style="border:none"><span class="pc-label">The mistake</span><span class="pc-val">Describing a cleaner appearance or more comfortable service as proof that a condition was treated.</span></div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">A strong protocol is explainable.</div>
+      <div class="body-text" style="margin:0">You should be able to name what you observed, what context changed your interpretation, what you modified, and what you intentionally left out.</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- CHECKPOINT 2 (final) -->
     <div class="checkpoint" id="m5cp2">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         <div class="cp-label">Final check</div>
       </div>
-      <div class="cp-q">A client comes in, you complete your assessment, and you determine it's a sensitive scalp. But she's asking for a full deep-cleanse and exfoliation treatment — "the works." How do you handle that conversation while keeping the client happy and doing right by her scalp?</div>
+      <div class="cp-q">A client reports stinging and tenderness, and you observe a reactive-appearing area. They still ask for the strongest exfoliation, maximum steam, and firm massage. What would you say, how would you modify or pause the service, and what would make you refer instead of proceeding?</div>
       <div class="cp-row">
         <div class="cp-input-row">
-        <textarea class="cp-input" id="m5cp2In" placeholder="How would you navigate this..." rows="1" oninput="grow(this)" onkeydown="m5cpKey(event,'m5cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m5cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m5cp2In" placeholder="Explain what you'd say, how you'd modify or pause the service, and what would make you refer…" rows="1" oninput="grow(this)" onkeydown="m5cpKey(event,'m5cp2')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m5cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m5cp2Btn" onclick="submitM5CP('m5cp2')">
+        <button class="cp-btn" id="m5cp2Btn" onclick="submitM5CP('m5cp2')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m5cp2Res"></div>
+      <div class="cp-res" id="m5cp2Res" aria-live="polite"></div>
     </div>
+
+    <hr class="divider">
+
+    <!-- 5.10 RECAP -->
+    <div class="sec-eyebrow">5.10 · From pattern to plan</div>
+    <div class="sec-title">Assessment becomes skill when it changes the service responsibly.</div>
+    <div class="body-text">Module 5 is not about memorizing five scalp types. It is about making better decisions with the evidence you have.</div>
+    <div class="body-text">Establish the limit first. Identify the current priority. Adjust cleansing, exfoliation, water and steam, pressure and tempo, and product placement by region. Preserve stable areas. Reduce stimulation when the client reports reactivity. Pause or refer when cosmetic service is not the responsible next step.</div>
+    <div class="body-text">The strongest practitioner is not the one who uses the most products or performs every step. It is the one who can explain why each step belongs.</div>
 
     <!-- Completion -->
     <div class="lesson-complete" id="m5Complete" style="display:none;">
       <div class="lc-gold">✦</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-sub">You can identify patterns and match them to protocols. That's the foundation of every good service decision.</div>
+      <div class="lc-sub">You can translate regional observations and client feedback into a cosmetic service plan without forcing the scalp into one label.</div>
+      <div class="lc-sub">You can identify the safest limit, choose the current priority, adapt the five service levers by region, explain a modified plan, and recognize when to avoid, pause, or refer.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 6</div>
-        <div class="lc-next-text">Now you need to understand the specific conditions your clients will actually come in with and ask you about. Dandruff, seborrheic dermatitis, Malassezia — the ones that get misread most often and mishandled most consistently.</div>
+        <div class="lc-next-text">Next, you will examine named scalp conditions and the presentations that are commonly confused with cosmetic patterns. The goal will remain the same: observe carefully, stay within scope, and know when medical evaluation belongs in the plan.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(6)">Start Module 6 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -6115,7 +6237,7 @@ const MODULE_TITLES = {
   2: 'Module 2 — Welcoming Your Client',
   3: 'Module 3 — Hair & Scalp Anatomy',
   4: 'Module 4 — Microscopy & Scalp Assessment',
-  5: 'Module 5 — Scalp Types & Protocols',
+  5: 'Module 5 — Scalp Patterns & Service Adaptation',
   6: 'Module 6 — Conditions & Disorders',
   7: 'Module 7 — Equipment & Room Setup',
   8: 'Module 8 — The Head Spa Service',
@@ -6746,11 +6868,43 @@ const M4 = {
 
 // ── MODULE 5 ──
 const M5 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m5cp1 / m5cp2 inside #module5Wrap.
   questions: {
-    m5cp1: 'A client has oiliness and waxy buildup at the crown but flaking and matte appearance at the sides and hairline. How do you approach this service, and what mistake are you specifically trying to avoid?',
-    m5cp2: 'You assess a sensitive scalp but the client is asking for a full deep-cleanse and exfoliation treatment. How do you handle that conversation?'
+    m5cp1: 'During the five-point assessment, the crown shows diffuse shine and visible surface residue, while the sides and hairline show fine loose scale and little visible shine. The client reports no burning, tenderness, or recent reaction. How would you adapt the service by region, and what whole-scalp mistake are you avoiding?',
+    m5cp2: 'A client reports stinging and tenderness, and you observe a reactive-appearing area. They still ask for the strongest exfoliation, maximum steam, and firm massage. What would you say, how would you modify or pause the service, and what would make you refer instead of proceeding?'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 5 (Scalp Types & Protocols) checkpoint. Question: "' + q + '". Key concepts: Five types: neutral (preserve), oily (clarify without over-stripping), dry (restore barrier), combination (adaptive — address both zones), sensitive (soothe only). Combination scalp is misread by treating dominant feature only. Over-stripping oily scalp triggers compensatory oil production. Sensitive scalp: when unsure, do less. Client education is part of the job. 3-5 sentences, direct and warm, no bullet points.'
+  // Module-5/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer().
+  systems: {
+    m5cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 5 competency: building a regional cosmetic service plan for a mixed presentation without diagnosing or overcorrecting the entire scalp.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Recognizes a mixed regional presentation rather than one whole-scalp type.\n' +
+      '2. Uses more thorough or targeted cleansing at the crown when appropriate.\n' +
+      '3. Uses a gentler approach at the sides and hairline, with no automatic aggressive exfoliation.\n' +
+      '4. Adjusts at least one additional service lever appropriately, such as product placement, heat, pressure, or finish.\n' +
+      '5. Explicitly avoids treating the entire scalp according to the crown\'s dominant feature.\n' +
+      '6. Does not diagnose dandruff, dehydration, clogged follicles, or hair-growth obstruction.\n\n' +
+      'The student does not need to name a specific product, brand, or ingredient. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that diagnoses dandruff, dermatitis, dehydration, infection, or a medical condition; says the follicles are clogged or hair growth is blocked; recommends aggressive whole-scalp exfoliation or strong cleansing; treats rebound oil as guaranteed; or ignores the fine-scale regions entirely.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the mixed presentation is recognized but the regional plan is missing, ask how the crown and hairline would receive different cleansing or exfoliation decisions. If the crown is addressed but the whole scalp is still treated with one intensity, ask the student to revise the regional plan. If the plan is sound but stated with diagnostic certainty, ask the student to keep the observation cosmetic since the image does not prove clogged follicles or dandruff.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.',
+    m5cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 5 competency: protecting the service limit, communicating clearly with a client requesting an inappropriate intensity, and distinguishing a gentler modification from a pause or referral.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Acknowledges the client\'s requested goal without agreeing to unsafe intensity.\n' +
+      '2. Explains that reported stinging and tenderness lower the appropriate level of stimulation.\n' +
+      '3. Removes or reduces aggressive exfoliation, maximum steam, and firm massage.\n' +
+      '4. Offers a gentler compatible plan or pauses when proceeding is not appropriate.\n' +
+      '5. Names at least one reason to refer instead of proceeding, such as broken, bleeding, weeping, oozing, draining, pustular, severely painful, rapidly worsening, or otherwise concerning findings.\n' +
+      '6. Avoids diagnosing the cause.\n\n' +
+      'The student does not need to name a specific product, brand, or ingredient. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that performs the requested aggressive service because the client signed consent; uses exfoliation to "remove inflammation" or "treat infection"; diagnoses the cause of the reaction; uses steam or firm pressure to force improvement; ignores broken or draining skin; or promises a cure.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the student explains why the strong service is not appropriate but gives no gentler alternative, ask what they would offer instead. If the modification is clear but no referral condition is named, ask what finding would make them stop and refer. If the language strays into a diagnosis, ask the student to describe the presentation and service limit without naming a diagnosis.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 6 ──
@@ -6808,7 +6962,7 @@ const MODULE_GUIDE_SYSTEMS = {
   2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 2: intake review, private preparation, optional hospitality, scent preference, consent before touch, concise orientation, and a repeatable but adaptable arrival framework. Keep guidance grounded in professional client experience rather than unsupported physiological or psychological claims. Do not say that tea, scent, or touch regulates the nervous system, creates subconscious trust, treats stress, guarantees relaxation, or causes rebooking. Reinforce client choice, privacy, fragrance-free options, legal scope, and explicit permission before touch. Use 3–5 concise sentences and no bullet points.',
   3: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 3: five scalp layers, the pilosebaceous unit, hair-shaft versus follicle biology, the hair-growth cycle, delayed diffuse shedding, postpartum shedding, referral patterns, the stratum-corneum barrier, surface lipids, and accurate massage claims. Translate technical material through this sequence whenever useful: structure, visible clue, service implication, limit of the conclusion. Lead with practitioner insight and applied understanding rather than repeated warnings. Do not diagnose, promise hair growth, claim that massage feeds or activates follicles, or state that visible findings prove an internal cause. Use 3–5 concise sentences and no bullet points.',
   4: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 4: cosmetic scalp magnification, client introduction and image consent, device hygiene, standardized image collection, AIMT\'s five-point scan, the five observation lenses, regional comparison, appearance-versus-cause reasoning, conservative service adjustment, and pause/referral judgment. Treat the scalp camera as an observation and education tool, not medical trichoscopy or a diagnostic device. When useful, structure the response as: what is visible, what context is missing, what may change in the cosmetic service, and what cannot be concluded. Do not diagnose, prescribe, claim that an image proves follicular blockage or a medical cause, or repeat a scanner-generated condition label as fact. Lead with applied observation skill rather than repeated scope warnings. Use 3-5 concise sentences and no bullet points unless the student explicitly asks for a list.',
-  5: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 5 (Scalp Types & Protocols): neutral, oily, dry, combination, sensitive. Match treatment to condition. If the student has product knowledge from salon or esthetics work, acknowledge how it applies specifically to scalp protocol selection in a head spa context. Combination scalp is the most commonly misread — emphasize that. 3-5 sentences. No bullet points.',
+  5: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 5, Scalp Patterns & Service Adaptation. Help the student translate supported observations, client-reported experience, and regional differences into conservative cosmetic service decisions. Use the five service levers: cleansing, exfoliation, water and steam, pressure and tempo, and product placement and finish. Reinforce the order: safety limit, client comfort/reactivity, surface tolerance, visible cosmetic need, then client preference. Do not diagnose, prescribe, claim medical treatment, claim personal practitioner experience, restore the compensatory-oil claim, call follicles clogged, imply hair-growth obstruction, or teach named dandruff/dermatitis content that belongs in Module 6. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; do not claim that experience as your own. Be direct, warm, practical, and concise.',
   6: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 6 (Conditions & Disorders): dry scalp vs dandruff vs seborrheic dermatitis. Anti-dandruff shampoo worsens dry scalp. If the student has seen client scalp issues before, connect this to what they may have misread — and how head spa assessment changes their approach going forward. 3-5 sentences. No bullet points.',
   7: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 7 (Equipment & Room Setup): halo bed selection, essential tools, prep sequence, client positioning. The room is part of the head spa service. If the student is building a new space or adding head spa to an existing menu, speak to how the setup specifically supports scalp wellness delivery. 3-5 sentences. No bullet points.',
   8: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 8 (The Head Spa Service): 17 steps, two formats, micro-teach while doing. If the student has an existing service background, acknowledge that some steps will feel familiar but the intentionality behind each one is specific to the head spa experience. The closing script with one personal scalp observation drives rebooking. 3-5 sentences. No bullet points.',
@@ -6823,7 +6977,7 @@ const MODULE_QUICK_PROMPTS = {
   2: ['How do I ask permission before first touch?', 'What should changing instructions include?', 'How do I keep the arrival consistent without making it rigid?'],
   3: ['Why can shedding appear months after an illness?', 'What can the scalp surface tell me—and what can’t it?', 'How do I explain massage without promising hair growth?', 'What does the scalp barrier change in product choice?'],
   4: ['How do I document what I see without labeling the scalp?', 'What questions help distinguish oil from product residue?', 'How do I make before-and-after scalp images honest?', 'Which findings mean I should stop the service?'],
-  5: ['How do I identify combination scalp?', 'What causes compensatory oil production?', 'How do I redirect a client who wants the wrong treatment?'],
+  5: ['How do I build one service for a mixed regional presentation?', 'When should I skip exfoliation or steam?', 'How do I explain a gentler plan without disappointing the client?'],
   6: ['How do I tell dry scalp from dandruff?', 'When does dandruff become seborrheic dermatitis?', 'What botanicals work for inflammation?'],
   7: ['What bed should I get first?', 'How do I set up for back-to-back clients?', 'What is the non-negotiable prep step?'],
   8: ['What makes the micro-teach effective?', 'How do I handle a question mid-service?', 'What is the most important step?'],
@@ -7020,7 +7174,7 @@ function openModuleById(id, options = {}) {
     3: () => { if (wrap && module3HTML) wrap.innerHTML = module3HTML; },
     2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; },
-    5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m5cpsDone = 0; },
+    5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); window._m6cpsDone = 0; },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
@@ -7062,7 +7216,7 @@ function openModuleById(id, options = {}) {
       2: 'Module 2 is where professional standards become visible to the client. Pay close attention to privacy, choice, and consent—the arrival should feel organized without becoming rigid or performative.',
       3: 'Module 3 is where the surface stops looking random. Follow every technical term to its practical payoff: what it helps you notice, what it changes in service, and what it still cannot prove.',
       4: 'Module 4 is where observation becomes a method. Use the camera to collect a better view, then separate what is visible from what still needs context and what the image cannot prove.',
-      5: 'Scalp types is where assessment becomes action. If Module 4 taught you how to look, Module 5 teaches you what to do with what you see.',
+      5: 'Module 4 taught you how to gather evidence. Module 5 is where that evidence begins changing the service. The key is not choosing one scalp label—it is deciding what to preserve, modify, avoid, pause, or refer in each region.',
       6: 'Module 6 changes how you listen to clients. Once you understand the dry vs dandruff distinction, you will hear misidentification everywhere — in what clients say, in what products they are using.',
       7: 'Equipment feels like logistics but it directly affects the service. The setup details here come from real mistakes made early on. Ask me anything.',
       8: 'This is the full picture — every step in sequence. If you have questions about timing or technique for any specific step, I am right here.',
@@ -7322,10 +7476,70 @@ function m4Classify(n, choice, btn) {
 
 // ── MODULE 5 ──
 function submitM5CP(id) {
-  submitCheckpoint(5, id, M5.system, M5.questions[id]);
+  submitCheckpoint(5, id, M5.systems[id], M5.questions[id],
+    'Cadence could not review your protocol decision. Check your connection and try again.');
 }
 function m5cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM5CP(id); }
+}
+
+// "What changes first?" — ungraded, retryable protocol-decision interaction.
+// Does not touch APP_STATE, progress, checkpoints, or completion.
+const M5_DECISION_ANSWERS = {
+  1: { correct: 1, feedback: 'Correct. A stable presentation does not need to be turned into a corrective project. Gentle cleansing, comfort, and maintenance are enough.' },
+  2: { correct: 0, feedback: 'Correct. The recent dry-shampoo history and regional difference support targeted cleansing. The image does not prove clogged follicles or justify whole-scalp overcorrection.' },
+  3: { correct: 1, feedback: 'Correct. The client\'s burning changes the priority. Comfort and safety come before scale removal.' },
+  4: { correct: 2, feedback: 'Correct. A cosmetic protocol is not the next step when the skin is broken and draining.' }
+};
+function m5Decide(n, choice, btn) {
+  const block = getActiveElementById('m5Decision' + n);
+  const feedback = getActiveElementById('m5Decision' + n + 'Feedback');
+  if (!block || !feedback) return;
+  const answer = M5_DECISION_ANSWERS[n];
+  const opts = block.querySelectorAll('.bq-opt');
+
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  opts.forEach(o => {
+    if (Number(o.dataset.choice) === answer.correct) {
+      o.classList.add('correct');
+      const tag = document.createElement('span');
+      tag.className = 'bq-tag';
+      tag.textContent = 'Correct answer';
+      o.appendChild(tag);
+    }
+  });
+
+  if (choice !== answer.correct) {
+    btn.classList.add('wrong');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Not quite';
+    btn.appendChild(tag);
+  }
+
+  feedback.style.display = 'block';
+  feedback.textContent = answer.feedback;
+}
+function m5ResetDecision(n) {
+  const block = getActiveElementById('m5Decision' + n);
+  const feedback = getActiveElementById('m5Decision' + n + 'Feedback');
+  if (!block || !feedback) return;
+  block.querySelectorAll('.bq-opt').forEach(o => {
+    o.setAttribute('aria-pressed', 'false');
+    o.classList.remove('selected', 'correct', 'wrong');
+    const tag = o.querySelector('.bq-tag');
+    if (tag) tag.remove();
+  });
+  feedback.style.display = 'none';
+  feedback.textContent = '';
 }
 
 // ── MODULE 6 ──

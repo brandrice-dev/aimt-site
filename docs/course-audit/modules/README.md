@@ -237,7 +237,7 @@ authenticated, consented, de-identified clinical captures.
 | Wrapper ID | `module5Wrap` — standard hidden-template pattern |
 | Checkpoint IDs | `m5cp1`, `m5cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Externally audited — approved specification added; awaiting implementation** |
+| **Status** | **Implemented — awaiting manual QA** |
 
 Extracted per Step 27. No asset inventory file was created — Module 5
 currently contains zero real image/diagram/video/downloadable assets; every
@@ -279,11 +279,36 @@ replace the shared rubric with checkpoint-specific rubrics for `m5cp1` and
 checkpoints; correct Cadence's identity (remove the old course name and the
 personal-practitioner-experience claim) and quick prompts; add accessibility
 labels/live-region requirements and the shared semantic-color tokens; and
-add the required Guided Completion Path and Listen Mode fields. No
-production code was changed to add this specification. Module 5
-implementation remains a separate, not-yet-started task. Module 6 remains
-blocked. Medical, dermatological, legal, live-model, assistive-technology,
-and real-device review remain deferred.
+add the required Guided Completion Path and Listen Mode fields.
+
+**Implemented per `module-05.md`.** `headspa-mastery.html` was updated:
+Module 5's title/subtitle/hero now read "Scalp Patterns & Service
+Adaptation" everywhere (dashboard, lesson nav, hero eyebrow, Cadence
+prompts); the five permanent "scalp type" cards, the eight fake microscopy
+placeholders, and the dead "Tap each type" hint were removed; the module now
+follows the approved section order (5.1–5.10) — protocol-is-a-decision
+framing, the five service levers, the priority order (safety limit → client
+comfort/reactivity → surface tolerance → visible cosmetic need → client
+preference), the five service-direction pattern cards (A–E), the new
+ungraded "What changes first?" four-scenario decision interaction, the
+regional preserve/modify/avoid/pause/refer builder, product-category
+decisions, steam/water/pressure/time, client-communication scripts, and the
+eight-item common-mistakes list; `M5.questions`/`M5.systems.m5cp1`/
+`M5.systems.m5cp2` replaced the single shared `M5.system` rubric, with the
+displayed and evaluated question strings verified byte-identical for both
+checkpoints; `submitM5CP` now passes the approved Module 5 network-error
+text; `MODULE_GUIDE_SYSTEMS[5]` and `MODULE_QUICK_PROMPTS[5]` were replaced
+with the approved Cadence identity (no more "HeadSpa Mastery" or "nearly two
+decades" personal-experience claim) and the three approved quick prompts;
+`aria-label`/`aria-live` were added to both checkpoints' voice/submit
+buttons and feedback regions; the shared Module-1-baseline semantic color
+tokens (`var(--aimt-success)`/`var(--aimt-error)`/`var(--aimt-warning)`)
+replaced the pre-baseline red; and the confirmed-dead `window._m5cpsDone`
+assignment was removed (repository-wide search found no reads). Checkpoint
+IDs, the wrapper ID, the completion-card ID, the Module 4 prerequisite, and
+the Module 6 unlock relationship are all unchanged. This is a
+static-and-mocked-validation pass only — see `implementation-log.md` for
+the full test list. Module 5 is not yet marked manually approved.
 
 Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

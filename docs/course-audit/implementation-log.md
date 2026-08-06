@@ -2150,3 +2150,157 @@ real-device review remain deferred, per the specification's own "Deferred
 QA and review" section.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-06 — Step 30: Module 5 implementation
+
+Implemented the approved Module 5 audit specification
+(`docs/course-audit/modules/module-05.md`). No other module was audited or
+edited. Module 6 was not touched.
+
+**Files changed:** `headspa-mastery.html` only (487 insertions, 273
+deletions). No changes to `headspa-state.js` or `aimt-progress-sync.js`.
+
+**Module identity:** home-screen row title/subtitle, `MODULE_TITLES[5]`,
+and the hero eyebrow/title/description now read "Module 5 — Scalp Patterns
+& Service Adaptation" / "Translate regional findings into cosmetic service
+decisions" everywhere. Neither "Scalp Types & Protocols" nor "Treatment
+Protocols" remain anywhere in Module 5's student-facing copy or
+documentation strings. Module ID `5`, wrapper ID `module5Wrap`, checkpoint
+IDs `m5cp1`/`m5cp2`, and completion-card ID `m5Complete` are unchanged.
+
+**Curriculum replaced in full**, in the approved order: hero; 5.1 "A
+protocol is a decision, not a label" (with the "ask four questions" decision
+card and the "Limit first. Priority second. Region by region." key line);
+5.2 the five service levers (cleansing, exfoliation, water and steam,
+pressure and tempo, product placement and finish); 5.3 the priority order
+(safety limit → client comfort/reactivity → surface tolerance → visible
+cosmetic need → client preference, replacing the old
+sensitivity/barrier/congestion/oil sequence); 5.4 the five service-direction
+pattern cards A–E (baseline/maintenance, oil-dominant/residue-present,
+fine-scale/dry-appearing, mixed regional, reactive/sensitivity-reported),
+each with "what may be present," "context still needed," "responsible
+direction," and "do not conclude" rows; the new ungraded "What changes
+first?" interaction; 5.5 the regional preserve/modify/avoid/pause/refer
+builder; the midpoint checkpoint `m5cp1`; 5.6 product-category decisions;
+5.7 steam/water/pressure/time; 5.8 client-communication scripts; 5.9 the
+eight-item common-mistakes list; the final checkpoint `m5cp2`; 5.10 recap;
+and the completion card. All eight fake microscopy placeholders, the
+five-card fixed scalp-type grid, and the dead "↓ Tap each type to see the
+protocol" hint were removed and not replaced with any new image asset (per
+spec, no new Module 5 media is required). Removed claims: universal
+baseline pink-tone/translucency, the "60 to 90 percent of follicles" dry
+criterion, guaranteed compensatory oil production, follicular
+obstruction/hair-growth-impairment, the fixed 10%-per-1.8°F sebum rule,
+diet/vitamin/postpartum-hormone cause assignment, "exfoliation is required
+before hydration can penetrate," the absolute "dandruff is driven by excess
+oil" Cadence line, and all `#c0392b` pre-baseline red usage. Confirmed by
+targeted grep across the full file: every remaining "clogged"/"compensatory
+oil" string in Module 5's block is a negation ("do not conclude…", a wrong
+interaction choice, a rubric immediate-correction trigger) — none assert it
+as fact.
+
+**Ungraded interaction — "What changes first?":** implemented as four
+independent scenario blocks (`m5Decision1`–`m5Decision4`), each using real
+`<button type="button">` choices (`.bq-opt`, reused file-wide primitive) in
+a `role="group"` container, a `aria-live="polite"` feedback region, and a
+new per-scenario `Reset this scenario` control (`m5-reset-btn`, new
+Module-5-scoped CSS). New JS: `M5_DECISION_ANSWERS`, `m5Decide(n, choice,
+btn)`, `m5ResetDecision(n)` — namespaced to avoid any collision with
+Modules 0–4's interaction functions. Verified live in a mocked
+Course-Review-Mode browser session: all four scenarios' correct answers
+match the approved spec (scenario 1→"Preserve…", 2→"Use targeted
+cleansing…", 3→"Reduce stimulation…", 4→"Stop contact…"); wrong and correct
+choices are tagged "Not quite"/"Correct answer" (text, not color-only);
+retry (picking a different option) and the reset control both work and
+leave no stale tags; and `APP_STATE.data.progress['5']` was byte-identical
+before and after interacting with the scenarios — confirming no progress
+write, no persistence, and no completion-gate dependency.
+
+**Checkpoints:** `M5.questions.m5cp1`/`m5cp2` and new
+`M5.systems.m5cp1`/`m5cp2` (checkpoint-specific rubrics, each with its own
+pass criteria, immediate-correction triggers, and revision-focus examples
+per `module-05.md`'s "Checkpoint specification") replace the old shared
+`M5.system` function. Programmatically verified the displayed `.cp-q` text
+and `M5.questions` strings are byte-identical for both checkpoints.
+`submitM5CP(id)` now calls `submitCheckpoint(5, id, M5.systems[id],
+M5.questions[id], 'Cadence could not review your protocol decision. Check
+your connection and try again.')` — the approved Module 5-specific
+network-error text. Added `aria-label="Speak your answer"` to both voice
+buttons, `aria-label="Send response to Cadence"` to both submit buttons,
+and `aria-live="polite"` to both `.cp-res` regions (all previously absent).
+
+**Cadence:** `MODULE_GUIDE_SYSTEMS[5]` and the module-open greeting were
+replaced with the approved text (Cadence identifies as AIMT's
+curriculum-grounded guide, no longer "instructor of HeadSpa Mastery" or "a
+mentor built from nearly two decades in the head spa industry").
+`MODULE_QUICK_PROMPTS[5]` replaced with the three approved prompts ("How do
+I build one service for a mixed regional presentation?", "When should I
+skip exfoliation or steam?", "How do I explain a gentler plan without
+disappointing the client?") — the old prompts ("How do I identify
+combination scalp?", "What causes compensatory oil production?", "How do I
+redirect a client who wants the wrong treatment?") were removed.
+
+**Dead-state cleanup:** `window._m5cpsDone = 0` was removed from
+`STATIC_MODULES[5]`. Repository-wide grep (`.html`/`.js`) confirmed this
+was its only occurrence — no reads, no external references, no
+progress-state function depended on it.
+
+**Static validation performed:** old title/course-name grep across Module
+5's block returned zero matches; a custom quote/comment-aware JS tokenizer
+(the sandbox has no `node`/`npm`) found zero bracket/quote mismatches in the
+full inline `<script>`, and a targeted brace-balance check on the new `const
+M5` block and the new `submitM5CP`…`m5ResetDecision` block both closed at
+depth 0; HTML tag-balance check (`div`/`button`/`textarea`/`svg`) on the
+Module 5 block was even; repository-wide duplicate-`id` scan found no new
+duplicates (`studentFirstName`'s 3 occurrences are pre-existing,
+JS-inserted, unrelated to this change); `MODULE_CHECKPOINTS['5']` confirmed
+unchanged.
+
+**Mocked browser validation performed** (local static server, Course Review
+Mode, `callAI` mocked since no live API credentials are reachable in this
+environment): Module 5 opened via `openModuleById(5)` with zero console
+errors; full-page text extraction confirmed every section renders in the
+approved order with no duplicated or missing pre-audit content; Review Mode
+checkpoint submission was correctly labeled "Review Mode test — not saved"
+and left `checkpointMeta` empty; with Review Mode's active-check stubbed for
+this test session only (no source change), a mocked strong `m5cp1` answer
+passed and persisted to `APP_STATE`; a mocked weak `m5cp2` answer returned
+"Needs revision" with the button relabeled "Retry" and the input still
+editable; a mocked network failure on `m5cp2` showed the exact approved
+error text; a mocked strong `m5cp2` answer then passed, completing Module 5
+(`isModuleComplete(5)` → `true`), unlocking Module 6
+(`canAccessModule(6)` → `true`), and revealing `#m5Complete` with the exact
+approved title and both competency lines; at a 375×812 mobile viewport, and
+again at 1280×2400, `document.documentElement.scrollWidth` never exceeded
+`window.innerWidth` anywhere in the full Module 5 document (no horizontal
+overflow); and the decision-interaction and checkpoint controls were
+confirmed to be real, natively-focusable `<button>` elements
+(`tabIndex === 0`).
+
+**Could not be fully verified in this environment (deferred, consistent
+with prior module steps):** real mouse/touch scroll and visual screenshot
+review of content below the hero at mobile width — this sandbox's
+programmatic `scrollTo`/`scrollIntoView` did not move the viewport past
+`scrollY≈68` in the Browser pane for reasons unrelated to this change (no
+console errors, no scroll-lock class present); the whole-document
+`scrollWidth` check above is a reliable substitute for overflow detection
+but is not the same as a human visual pass. Also deferred, matching every
+prior module: live-model grading behavior against the new `M5.systems`
+rubrics (verified only with mocked `callAI` responses); screen-reader
+testing (VoiceOver/NVDA) of the new `aria-live`/`aria-pressed` behavior;
+physical-keyboard activation testing; real touch-device verification;
+`prefers-reduced-motion` testing (no animation was added, so there is
+nothing to disable, but this was not exercised with an actual OS-level
+setting); medical/dermatological review; legal/scope review; and
+authenticated clinical-image intake (no new Module 5 image asset was
+introduced, per spec).
+
+Module 5 is implemented but **not yet manually approved** — desktop and
+phone manual QA against `docs/course-audit/00-aimt-manual-qa-master-checklist.md`
+and `module-05.md`'s acceptance criteria is still required before the
+status can become "Implemented — manual QA approved." Module 6 was not
+extracted, audited, or edited. No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.
