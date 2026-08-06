@@ -2449,3 +2449,110 @@ remains Module 5 manual QA. Module 6 was not extracted, audited, or edited.
 No merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-06 — Step 32: Correction — remove Module 5 post-checkpoint recap
+
+Manual QA on Module 5 identified a standalone lesson section
+(`5.10 — Recap`) placed after the final required checkpoint (`m5cp2`),
+creating the impression that new instructional material continues after
+the student has reached the final assessment. A standalone post-checkpoint
+recap is not an established ending pattern in any other approved module.
+This step is a narrow structural-clarity correction only — no curriculum,
+grading, image, or architecture content changed. Module 5 remains
+**Implemented — awaiting manual QA** after this step; Module 6 was not
+touched.
+
+**Files changed (Commit `4428e511264966c2e8848603af69a7b953db9b50`, "Remove
+Module 5 post-checkpoint recap"):** `docs/course-audit/modules/module-05.md`
+and `headspa-mastery.html` only (2 files, 5 insertions, 29 deletions
+combined).
+
+**`module-05.md`:** removed the complete `## 5.10 — Recap` section (eyebrow
+`5.10 · From pattern to plan`, headline, and three-paragraph body) that
+sat between the "Final checkpoint — `m5cp2`" spec block and the
+"Completion card — `m5Complete`" spec block. Sections 5.1–5.9 were not
+renumbered or otherwise touched. The completion-card specification gained
+a new **Supporting line** field, placed between **Title** and **Primary
+competency statement**, carrying the strongest sentence from the deleted
+recap headline verbatim: "Assessment becomes skill when it changes the
+service responsibly." No other completion-card field (demonstrated
+competencies, Module 6 transition copy, button labels) changed. The
+existing "Distinct learning rhythm" approved-rhythm list (item 11 "Final
+checkpoint `m5cp2`" → item 12 "Competency-based completion card") already
+had no recap step listed and needed no edit. A full-file grep confirmed no
+other reference to "5.10," "recap," or "pattern to plan" remained anywhere
+in the specification.
+
+**`headspa-mastery.html`:** removed the matching visible block from
+`#module5Wrap` — the `<hr class="divider">`, the `<!-- 5.10 RECAP -->`
+comment, the `.sec-eyebrow`/`.sec-title`/three `.body-text` divs — so that
+checkpoint `m5cp2`'s closing `</div>` is immediately followed by the
+`<!-- Completion -->` comment and the `#m5Complete` card, with no divider
+between them (matching the existing Module 4 checkpoint→completion
+pattern, which also has no divider). Added one new `.lc-sub` line inside
+`#m5Complete`, directly after the existing `.lc-title` ("Module complete.")
+and before the existing primary-competency `.lc-sub`, containing the same
+supporting sentence — rendered with the identical `.lc-sub` class already
+used by the two lines beneath it, not as a new section, heading,
+checkpoint, or separate card. A full-file case-insensitive grep for
+"recap," "pattern to plan," and "5.10" before this change found exactly
+two lines (the removed comment and eyebrow); after the change, zero
+remain anywhere in `headspa-mastery.html`. No JavaScript referenced the
+removed section (no anchors, selectors, or function bodies mentioned it),
+so no script changes were needed.
+
+**Validation performed** (local static server, mocked Course Review Mode,
+`callAI` mocked):
+
+- Structure: confirmed via live DOM inspection that Sections 5.1–5.9 are
+  unchanged and in order; the last five direct children of the rendered
+  lesson are a 5.9 mistake card, the unchanged 5.9 summary card ("A strong
+  protocol is explainable."), a divider, checkpoint `m5cp2`, then
+  `#m5Complete` directly — no divider and no instructional element between
+  `m5cp2` and `#m5Complete`; a full-text scan of the rendered module
+  confirmed no "5.10" or "From pattern to plan" text appears anywhere in
+  the student experience; all 5 approved Module 5 images and their
+  captions/alt text are still present and unchanged (image count unchanged
+  at 5).
+- Completion behavior: with a cleared `localStorage`, passing only a mocked
+  `m5cp1` left `isModuleComplete(5)` `false` and `#m5Complete` hidden;
+  passing the mocked `m5cp2` afterward flipped `isModuleComplete(5)` to
+  `true`, revealed `#m5Complete` (`display: block`), and
+  `APP_STATE.canAccessModule(6)` became `true`; the new supporting line
+  (`.lc-sub`, first of three) was confirmed to render only inside the now-
+  visible completion card, in the order Title → supporting line → primary
+  competency statement → demonstrated competencies, matching
+  `module-05.md`'s updated spec exactly. A page reload after both
+  checkpoints passed correctly restored `status: 'passed'` for both
+  `m5cp1`/`m5cp2`, `isModuleComplete(5)`, and `canAccessModule(6)`.
+- Regression: both checkpoints' displayed `.cp-q` text remained
+  programmatically byte-identical to `M5.questions.m5cp1`/`m5cp2`;
+  `M5.systems`, `MODULE_GUIDE_SYSTEMS[5]`, and `MODULE_QUICK_PROMPTS[5]`
+  are untouched (confirmed via `git diff`, and spot-checked live — no old
+  course name or personal-experience claim present); the "What changes
+  first?" interaction was exercised once more and left
+  `APP_STATE.data.progress['5']` byte-identical before/after (no progress
+  write); a repository-wide duplicate-`id` scan found no new duplicates;
+  an HTML tag-balance check on `#module5Wrap`
+  (`div`/`button`/`textarea`/`svg`/`figure`/`picture`/`img`/`figcaption`)
+  passed; a custom regex-aware JS tokenizer (no `node` in this sandbox)
+  found zero syntax errors in the full inline `<script>`; Module 4 was
+  reopened live and confirmed unchanged (same title, same 12 `module-04`
+  images); and a targeted `git diff` grep confirmed zero references to
+  authentication, entitlement, Supabase, certificate-issuance, or
+  progress-persistence functions anywhere in the change.
+- No horizontal overflow at any of four representative widths: 1440px,
+  1024px, 768px, and 390px (`document.documentElement.scrollWidth` never
+  exceeded `window.innerWidth`).
+
+This was static and mocked browser validation only — it does not replace
+or claim real-device or live-preview manual QA. Module 5 remains
+**Implemented — awaiting manual QA**; the current gate remains Module 5
+manual QA. Module 6 was not extracted, audited, or edited. The approved
+downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended
+with production deferred — nothing was created or linked. No merge or
+deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.

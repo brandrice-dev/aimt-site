@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: "Integrate Module 5 teaching images" (this file is updated inside that same commit, so it cannot self-cite its own hash — see `git log` on `course-audit-build`); the last hash citable here is `b96fd3eff70d86d89d0ec1c8386a6049b124bead` — "Add Module 5 visual asset plan"
+- Latest controlling commit: `4428e511264966c2e8848603af69a7b953db9b50` — "Remove Module 5 post-checkpoint recap"
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -70,16 +70,16 @@ Manually approved, but the following still require later or manual review — no
 
 ## Task just completed
 
-Module 5 visual asset plan and teaching-image integration (a focused pre-QA visual polish; Module 5 remains awaiting manual QA).
+Focused Module 5 correction: removed the standalone post-checkpoint recap identified in manual QA. Module 5 remains `Implemented — awaiting manual QA`.
 
-`docs/course-audit/modules/module-05.md` gained an approved "Amendment — Module 5 visual asset addendum" recording five source photographs as four teaching moments (regional crown/hairline comparison, targeted crown cleansing, gentle hairline adaptation, client communication), their purpose, the controlling non-diagnostic caution, and the approved heading/caption/alt-text copy. `docs/course-audit/modules/module-05-assets.md` was created with the full file inventory. Optimized WebP production derivatives (1360×1020, downscaled from 1448×1086 sources, never upscaled) were generated and integrated into `headspa-mastery.html` at the four approved placements using a large editorial case-study spread and full-width photo breaks — deliberately distinct from Module 4's five-point stepper, appearance gallery, and card-grid presentation. The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended with production deferred; nothing was created or linked. No auth, entitlement, progress, certificate, payment, or Review Mode code changed, and Module 4's markup is unchanged. Module 5 has not yet been manually approved.
+Manual QA on Module 5 found a standalone lesson section (`5.10 — Recap`) placed after the final required checkpoint (`m5cp2`), which created the impression that new instructional material continued after the student reached the final assessment — a pattern no other approved module uses. The complete `## 5.10 — Recap` section was removed from `docs/course-audit/modules/module-05.md` (Sections 5.1–5.9 were not renumbered or otherwise touched), and the matching visible block was removed from `headspa-mastery.html` so checkpoint `m5cp2` is now followed directly by the completion card, with no divider or instructional content between them — matching the existing Module 4 checkpoint-to-completion pattern. The strongest sentence from the deleted recap ("Assessment becomes skill when it changes the service responsibly.") was preserved as a new **Supporting line** in the completion-card specification and rendered as an additional `.lc-sub` line inside `#m5Complete`, directly after the "Module complete." title and before the existing primary competency statement — not as a new section, heading, checkpoint, or separate card. Section 5.9's summary card, both checkpoint questions/rubrics, the "What changes first?" interaction, all five approved images and their captions/alt text, Cadence configuration, and Module 6 gating are all unchanged. This is a narrow structural-clarity correction only.
 
-### Visual integration summary
+### Recap-removal validation summary
 
-- Four placements implemented exactly as specified: after Section 5.4 (comparison pair), after Section 5.5 (targeted cleansing), within/after Section 5.7 (gentle adaptation), and within Section 5.8 (client communication).
-- Every image uses `<picture>` (WebP source + PNG fallback), explicit `width="1360" height="1020"`, `loading="lazy"`, a real `<figcaption>`, and non-diagnostic alt text — no teaching text is baked into any image.
-- Validation: file-existence/broken-path scan, WebP-derivative dimension/format validation (confirmed via in-browser decode and `<picture>` source resolution), HTML tag-balance and duplicate-ID scans, JS-syntax check, desktop side-by-side and phone stacked-order layout checks (via `getBoundingClientRect`), zero horizontal overflow at both widths, and full regression checks (interaction, checkpoints, Cadence, completion, Module 6 gating, and Module 4's untouched markup) — all passed.
-- Deferred, consistent with every prior module: live-model grading, screen-reader QA, physical-keyboard QA, real touch-device QA, a real human visual/scroll pass (sandbox tooling limitation, unchanged from Step 30 — see `implementation-log.md` Step 31), medical/dermatological review, legal/scope review, and production of the still-deferred downloadable.
+- Structure: confirmed live that Sections 5.1–5.9 remain in order, `m5cp2` is the final visible instructional block, no "5.10" or "From pattern to plan" text remains anywhere in the student experience, and Section 5.9's summary card is unchanged.
+- Completion behavior: with a cleared test state, passing only `m5cp1` (mocked) left completion hidden; passing both `m5cp1` and `m5cp2` revealed `#m5Complete` with the new supporting line in the correct position, unlocked Module 6, and correctly restored on reload.
+- Regression: both checkpoint questions remain byte-identical between display and evaluation; rubrics, Cadence config, and the ungraded interaction (still writes no progress) are unchanged; no duplicate IDs or malformed HTML introduced; no JavaScript referenced the removed section; no horizontal overflow at 1440px, 1024px, 768px, or 390px; Module 4 reopened unchanged; no auth, entitlement, certificate, progress, or Review Mode architecture changed.
+- This was static and mocked browser validation only — it does not replace or claim real-device or live-preview manual QA.
 
 ---
 
@@ -91,7 +91,7 @@ Module 5 manual QA.
 
 ## Exact next task
 
-Push the outstanding Module 5 commits (implementation plus this visual-asset pass), locate the `course-audit-build` preview, and complete Module 5 desktop and phone manual QA against `docs/course-audit/00-aimt-manual-qa-master-checklist.md` and `module-05.md`'s acceptance criteria (including the visual placements, captions, and alt text added in this pass). Do not mark Module 5 "Implemented — manual QA approved" until that manual pass is complete.
+Push the outstanding Module 5 commits (implementation, visual-asset integration, and this recap correction) if necessary, open the updated `course-audit-build` branch preview, and resume Module 5 desktop and phone manual QA against `docs/course-audit/00-aimt-manual-qa-master-checklist.md` and `module-05.md`'s acceptance criteria — including confirming the completion card's new supporting line and the absence of any post-checkpoint recap. Do not begin preview QA against an older deployment. Do not mark Module 5 "Implemented — manual QA approved" until that manual pass is complete.
 
 ---
 
@@ -140,11 +140,14 @@ Retained accurately, not resolved by this task:
 - authenticated clinical-image intake;
 - Guided Completion and Listen Mode QA.
 
+The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended; production is still deferred and it was not created or linked by this task.
+
 ---
 
 ## Latest relevant commits
 
-- (pending) — Integrate Module 5 teaching images (**latest controlling commit** — created together with this file; see `git log` for the hash)
+- `4428e511264966c2e8848603af69a7b953db9b50` — Remove Module 5 post-checkpoint recap (**latest controlling commit**)
+- `8a2ef4bdadd780ae7fba7849be0376a358a3c686` — Integrate Module 5 teaching images
 - `b96fd3eff70d86d89d0ec1c8386a6049b124bead` — Add Module 5 visual asset plan
 - `7f2b3fbb9d63d1a197b03dc7b58eeb9ec0ae322f` — Advance course status to Module 5 manual QA
 - `a5879dc1dcb527a2b4ef1315d5dd73120410e41e` — Implement Module 5 approved audit
