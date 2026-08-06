@@ -2054,3 +2054,38 @@ and mobile widths.
 
 Module 5 was not audited, approved, or implemented by this step — only
 extracted. Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 28: Module 0 and Module 1 manual QA approved
+
+Module 0 (Welcome Module) and Module 1 passed manual desktop and phone QA.
+This approval had not previously been recorded in this log or in
+`docs/course-audit/modules/README.md` — both modules had remained marked
+**Implemented — awaiting manual QA** since their original implementation
+(Step 7 for Module 0, Step 10 for Module 1) even though the reviewer had
+already completed the visual and functional review. This step reconciles
+the record to the confirmed project position.
+
+For Module 0, manual QA confirmed correct behavior and appearance for the
+intro sequence, module identity/hero, the "Same steps. Different service."
+predict-then-reveal interaction, the checkpoint (`m0cp1`), and the
+completion card, across desktop and phone layouts.
+
+For Module 1, manual QA confirmed correct behavior and appearance for the
+module identity/hero, the license-dependent scope framing, the "Where is
+the line?" four-scenario interaction, both checkpoints (`m1cp1`, `m1cp2`),
+and the completion card, across desktop and phone layouts.
+
+`docs/course-audit/modules/README.md` was updated to reflect both modules'
+status as **Implemented — manual QA approved**.
+
+The following remain outstanding for both modules and are deferred to
+later production QA, not resolved by this manual pass: live-model grading
+behavior, screen-reader testing (VoiceOver/NVDA), physical-keyboard
+activation testing, and real touch-device verification (Module 1's
+touch-target sizing in particular was never measured against a specific
+minimum, per Step 10's own notes).
+
+This was a documentation update only. No production files were modified.
+Work remains on branch `course-audit-build`.

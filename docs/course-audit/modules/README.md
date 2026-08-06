@@ -66,7 +66,15 @@ documenting this section.
 | Checkpoint IDs | `m0cp1` |
 | Current completion requirement | Single checkpoint `m0cp1` must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-00.md` — position: first, precedes Module 1 and the Module 12 Final Exam |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
+
+Manual QA confirmed correct behavior and appearance for the intro sequence,
+the module identity/hero, the "Same steps. Different service." predict-
+then-reveal interaction, the checkpoint (`m0cp1`), and the completion
+card — across desktop and phone layouts. See Step 28 in
+`implementation-log.md`. Deferred, not resolved by this pass: live-model
+grading behavior, screen-reader testing, physical-keyboard activation
+testing, and real touch-device verification.
 
 ## Module 1 — Role of the Head Spa Technician
 
@@ -80,7 +88,16 @@ documenting this section.
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-01.md` — position: foundation block, immediately after the Welcome Module |
 | Listen Mode notes | Recorded in `module-01.md` — narration approved as a strong candidate, ~8–10 minutes |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
+
+Manual QA confirmed correct behavior and appearance for the module
+identity/hero, the license-dependent scope framing, the "Where is the
+line?" four-scenario interaction, both checkpoints (`m1cp1`, `m1cp2`), and
+the completion card — across desktop and phone layouts. See Step 28 in
+`implementation-log.md`. Deferred, not resolved by this pass: live-model
+grading behavior, screen-reader testing, physical-keyboard activation
+testing, and real touch-device verification (touch-target sizing in
+particular was never measured against a specific minimum).
 
 ## Module 2 — Welcoming Your Client
 
