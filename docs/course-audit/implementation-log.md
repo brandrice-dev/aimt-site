@@ -1791,3 +1791,137 @@ module structure, learning sequence, interaction behavior, checkpoint
 IDs, progress behavior, completion rules, authentication, entitlements,
 certificate logic, Review Mode, or Module 5+ content was touched. Work
 remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-05 — Step 25: Correction — align semantic red/green to Module 1 baseline
+
+Step 24 picked `#c0392b` as the shared error red because it was the most
+*frequently occurring* red literal in the file. The user correctly flagged
+this as the wrong basis: frequency isn't approval, and Module 1's own
+already-shipped correct/accepted and incorrect/prohibited colors are the
+actual visual source of truth. This step re-derives the tokens from Module
+1 directly and re-sweeps Modules 0–4. `headspa-mastery.html` only (11
+insertions, 9 deletions — no other file touched).
+
+**1. Module 1 baseline values found.** Inspected every color-bearing class
+Module 1 actually uses (`neutral-icon`/`neutral-badge` for "Say this" /
+"License dependent" / "What a head spa can support"; `sensitive-icon`/
+`sensitive-badge` for "Never say" / "Outside course scope" / "What a head
+spa cannot do" — three consistent correct/accepted-vs-incorrect/prohibited
+pairs within Module 1 itself, `headspa-mastery.html` lines ~4270–4409):
+- **Green (correct/accepted):** `#3a5a3a` icon/text, `#e8ede8` badge
+  background (`.neutral-icon`, `.neutral-badge`).
+- **Red (incorrect/prohibited):** `#7a3030` icon/text, `#f0e8e8` badge
+  background (`.sensitive-icon`, `.sensitive-badge`) — **not** `#c0392b`,
+  which Step 24 had used.
+Module 1's decorative `sc-indicator` divs (`#4d403a`, "Cleansing,"
+"Exfoliation," etc. — a service-components list, not a correctness state)
+and the compound `.neutral .sc-indicator`/`.sensitive .sc-indicator`
+selectors (a different, lighter indicator-dot palette used only by
+Module 5's scalp-type cards) were inspected and correctly excluded — they
+are not Module 1's correct/incorrect pair.
+
+**2. Tokens corrected** (`:root`, line ~44):
+```css
+--aimt-success: #3a5a3a;
+--aimt-success-light: #e8ede8;
+--aimt-error: #7a3030;       /* was #c0392b */
+--aimt-error-light: #f0e8e8;  /* was #fde8e8 */
+```
+Green was already correct (Module 1's `#3a5a3a` happened to match the
+pre-existing `--success` variable exactly); only red and its light
+companion changed. `--aimt-warning`/`--aimt-neutral` were not part of this
+correction and are unchanged.
+
+**3. Selectors changed** (all inherit the corrected values automatically
+via the token, or were edited directly):
+- `.neutral-icon`/`.sensitive-icon` and `.neutral-badge`/`.sensitive-badge`
+  (shared rule, line ~629/633) — literal `#3a5a3a`/`#7a3030`/`#e8ede8`/
+  `#f0e8e8` replaced with `var(--aimt-success)`/`var(--aimt-error)`/
+  `var(--aimt-success-light)`/`var(--aimt-error-light)`. Zero visual
+  change for Module 1 (same values, now traced to the token instead of
+  hardcoded) and for Module 0's and Module 4's *decorative* reuse of
+  `neutral-icon` (numbered badges, unrelated to correctness). This rule is
+  also used by Module 5's still-unaudited "Preserve"/"Soothe" scalp-type
+  badges (`#a3968d`-adjacent block, lines ~2934–3168) — confirmed the
+  computed color is unchanged there too (same literal value, just sourced
+  from the token), so Module 5's rendered appearance and code are both
+  unaffected; only the CSS variable definition and this one shared rule
+  were touched, not any Module 5 markup or behavior.
+- Module 4's six 4.10 "Common mistakes" `.pc-icon` X badges — already
+  referenced `var(--aimt-error)` from Step 24, so they inherited the
+  corrected `#7a3030` automatically with no selector edit needed. Verified
+  live (see Validation).
+- Module 2's cc-badge cards ("Rushed and unclear"/"Guided and
+  consent-based" comparison, all five "What goes wrong" cards) and Module
+  3's "Pattern requiring medical evaluation" card — same: already used
+  `var(--aimt-error)`/`var(--aimt-success)` from Step 24, inherited the
+  correction automatically.
+- Module 4's decision-card badges (4.7) — re-evaluated under the user's
+  explicit instruction not to preserve "previously shipped" inconsistent
+  colors. `Preserve` (`#7d9471`, a muted sage) and `Stop and refer`
+  (`#a34b3f`, a muted brick) are the two decision states that actually
+  communicate accepted/prohibited meaning in this four-step ladder, so
+  both were converted: `Preserve` → `var(--aimt-success)`, `Stop and
+  refer` → `var(--aimt-error)`. `Modify conservatively` (`#c9a35a`, amber)
+  and `Avoid or pause an area` (`#c07a4a`, orange) were left untouched —
+  neither is a red or green value, and both remain outside this
+  red/green-specific correction.
+
+**4. Re-audited for remaining bypass literals** across Module 3 (default
+`.lesson-wrap`), Module 4, Module 0, Module 1, and Module 2 (Module 5's
+line range was scanned only to confirm it was untouched, per instruction).
+Every remaining raw hex literal in the audited ranges is amber/orange/
+taupe/charcoal (`#a3968d`, `#b89060`, `#c9a35a`, `#c07a4a`, `#e8a882`,
+`#d4956e`, `#c8a080`, `#8b6f47`, `#e8a830`, `#4d403a`) — none is a red or
+green value bypassing the tokens. Two literal reds were found and
+deliberately left alone as non-semantic (decorative/functional, not a
+correct-incorrect signal), consistent with "do not change decorative
+imagery or colors that do not communicate a red/green semantic state":
+- Module 3's `.pd-3` hair-cycle phase dot (`#fde8e8`/`#c0392b`, telogen) —
+  one step in a four-color anagen→catagen→telogen→exogen sequence, not a
+  pass/fail indicator. `.pd-1` (green, already `var(--success)`) is the
+  same kind of sequence coloring, also left alone for consistency.
+- `.voice-btn.listening`/`.voice-btn-dark.listening` (`#c0392b`/`#e74c3c`)
+  — the microphone recording-pulse indicator used by every module's
+  checkpoint voice button; communicates "actively recording," not
+  correct/incorrect/error.
+
+**5. Contrast verified** (WCAG relative-luminance calculation): white text
+on `var(--aimt-error)` ≈ 9.6:1; `var(--aimt-error)` text on
+`var(--aimt-error-light)` ≈ 8.0:1; white text on `var(--aimt-success)` ≈
+7.6:1; `var(--aimt-success)` text on `var(--aimt-success-light)` ≈ 6.4:1.
+All exceed WCAG AA (4.5:1) for normal text; three of the four exceed AAA
+(7:1). Meaning is still never carried by color alone anywhere in this
+diff — every changed element keeps its existing text label ("Never say,"
+"Stop and refer," "Rushed and unclear," the ✗ glyph, etc.).
+
+**6. Live-render validation** (local static server, Course Review Mode):
+`getComputedStyle(document.documentElement).getPropertyValue('--aimt-error')`
+confirmed `#7a3030` (and `--aimt-success` `#3a5a3a`) at the `:root`.
+Rendered and read back computed `background-color` for: Module 1's
+`neutral-icon`/`sensitive-icon`/`neutral-badge`/`sensitive-badge` (all
+`rgb(58,90,58)`/`rgb(122,48,48)`/`rgb(232,237,232)`/`rgb(240,232,232)` as
+expected); Module 4's six 4.10 mistake icons (all `rgb(122,48,48)` — the
+deeper Module 1 red, confirmed); Module 4's four decision-card badges
+(`Preserve` `rgb(58,90,58)`, `Modify conservatively` `rgb(201,163,90)`
+unchanged, `Avoid or pause` `rgb(192,122,74)` unchanged, `Stop and refer`
+`rgb(122,48,48)`); Module 2's seven cc-badges (red/green as expected);
+Module 3's "Pattern requiring medical evaluation" card (`rgb(122,48,48)`).
+Zero console errors across all five module renders.
+
+**7. No content/checkpoint/rubric/Module 5 changes.** `git diff` was
+limited to `:root` token values, two shared CSS class rules, and four
+`cc-badge`/`.pc-icon` inline `style="background:…"` attributes — no
+`<div>` text, `.cp-q` string, `M4.questions`/`M4.systems` rubric text, ARIA
+label, checkpoint ID, or any Module 5 markup/JS appears in the diff.
+`m4cp1`/`m4cp2` display/evaluated strings were not re-touched (untouched
+by a color-only change) and remain byte-identical per Step 24's
+verification.
+
+No module structure, learning sequence, interaction behavior, checkpoint
+IDs, progress behavior, completion rules, authentication, entitlements,
+certificate logic, or Review Mode was touched. Module 4 status remains
+**Implemented — awaiting manual QA** — not marked approved by this step.
+Work remains on branch `course-audit-build`.

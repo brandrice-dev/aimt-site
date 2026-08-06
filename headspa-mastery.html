@@ -45,11 +45,13 @@
   --success-light: #e8ede8;
   --warn-light: #f5f3ee;
   /* Shared semantic states (course-audit color normalization, Modules 0–4) —
-     values reused from the strongest existing Modules 0–3 usage, not new. */
-  --aimt-success: var(--success);
-  --aimt-success-light: var(--success-light);
-  --aimt-error: #c0392b;
-  --aimt-error-light: #fde8e8;
+     success/error values are Module 1's own approved correct/accepted
+     (.neutral-icon/.neutral-badge) and incorrect/prohibited
+     (.sensitive-icon/.sensitive-badge) colors — Module 1 is the baseline. */
+  --aimt-success: #3a5a3a;
+  --aimt-success-light: #e8ede8;
+  --aimt-error: #7a3030;
+  --aimt-error-light: #f0e8e8;
   --aimt-warning: #8b5e00;
   --aimt-warning-light: #fff4e8;
   --aimt-neutral: var(--accent2);
@@ -626,11 +628,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .protocol-card { background: rgba(255,255,255,0.7); border: 0.5px solid var(--border2); border-radius: 16px; overflow: hidden; margin: 1.25rem 0; backdrop-filter: blur(10px); }
 .pc-header { padding: 1rem 1.1rem; display: flex; align-items: center; gap: 12px; border-bottom: 0.5px solid var(--border); }
 .pc-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--aimt-font-mono); font-size: 0.7rem; font-weight: 500; flex-shrink: 0; color: white; }
-.neutral-icon { background: #3a5a3a; } .oily-icon { background: #7a5a20; } .dry-icon { background: #5a4a70; } .combo-icon { background: #3a5060; } .sensitive-icon { background: #7a3030; }
+.neutral-icon { background: var(--aimt-success); } .oily-icon { background: #7a5a20; } .dry-icon { background: #5a4a70; } .combo-icon { background: #3a5060; } .sensitive-icon { background: var(--aimt-error); }
 .pc-title { font-size: 0.875rem; font-weight: 500; }
 .pc-sub { font-size: 0.72rem; color: var(--muted); font-weight: 300; margin-top: 1px; }
 .pc-badge { margin-left: auto; font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 980px; flex-shrink: 0; }
-.neutral-badge { background: #e8ede8; color: #3a5a3a; } .oily-badge { background: #f5ede0; color: #7a5a20; } .dry-badge { background: #ede8f0; color: #5a4a70; } .combo-badge { background: #e0edf0; color: #3a5060; } .sensitive-badge { background: #f0e8e8; color: #7a3030; }
+.neutral-badge { background: var(--aimt-success-light); color: var(--aimt-success); } .oily-badge { background: #f5ede0; color: #7a5a20; } .dry-badge { background: #ede8f0; color: #5a4a70; } .combo-badge { background: #e0edf0; color: #3a5060; } .sensitive-badge { background: var(--aimt-error-light); color: var(--aimt-error); }
 .pc-body { padding: 0 1.1rem 0.25rem; }
 .pc-row { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 0.65rem 0; border-bottom: 0.5px solid var(--border); align-items: start; }
 .pc-label { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
@@ -3756,7 +3758,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="condition-cards">
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#7d9471"></div><div class="cc-h-title">Preserve</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-success)"></div><div class="cc-h-title">Preserve</div></div>
         <div class="cc-body">The visible surface is intact, the client is comfortable, and no finding calls for correction.<br><br><strong>Action:</strong> Avoid over-treating. Follow the client's cosmetic goals.</div>
       </div>
       <div class="condition-card">
@@ -3768,7 +3770,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cc-body">A localized region shows discomfort, pronounced color change, recent irritation, tenderness, or uncertainty.<br><br><strong>Action:</strong> Do not overwork it. Simplify, omit the area, or postpone that part of the service.</div>
       </div>
       <div class="condition-card">
-        <div class="cc-header"><div class="cc-badge" style="background:#a34b3f"></div><div class="cc-h-title">Stop and refer</div></div>
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-error)"></div><div class="cc-h-title">Stop and refer</div></div>
         <div class="cc-body">The scalp shows nonintact, draining, pustular, severely painful, hot, swollen, rapidly changing, patchy, smooth, shiny, or scar-like findings.<br><br><strong>Action:</strong> Do not continue a cosmetic service over the area. Explain the limit of the assessment and recommend medical evaluation.</div>
       </div>
     </div>
