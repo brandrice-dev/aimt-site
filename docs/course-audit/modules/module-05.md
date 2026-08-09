@@ -1045,33 +1045,65 @@ The full checkpoint specification appears below.
 
 > Choosing “oily,” “dry,” or “sensitive” before gathering regional evidence and client history.
 
+**Better move**
+
+> Gather the regional evidence and client context first, then choose the service direction each area actually supports.
+
 ### 2. Product first
 
 > Building the explanation around the product you want to use instead of the need you are trying to address.
+
+**Better move**
+
+> Define the service need first, then choose a compatible product category that supports that decision.
 
 ### 3. Whole scalp, one intensity
 
 > Applying the strongest regional need across every assessment area.
 
+**Better move**
+
+> Map the regions and adjust cleansing, exfoliation, heat, pressure, and product placement only where the evidence supports it.
+
 ### 4. Exfoliating every flake
 
 > Treating visible scale as proof that exfoliation is required.
+
+**Better move**
+
+> Check comfort, skin integrity, client history, and product suitability before deciding whether exfoliation belongs at all.
 
 ### 5. Strongest means best
 
 > Assuming maximum steam, repeated cleansing, firm pressure, or more product creates a more valuable service.
 
+**Better move**
+
+> Use the level of cleansing, heat, pressure, time, and product placement the current service goal actually requires—not the maximum available.
+
 ### 6. Image becomes diagnosis
 
 > Turning shine, scale, residue, or color change into a medical conclusion.
+
+**Better move**
+
+> Describe what is visible, ask for the missing context, and keep the conclusion inside cosmetic observation.
 
 ### 7. Client request becomes permission
 
 > Continuing an inappropriate step because the client asked for it.
 
+**Better move**
+
+> Explain the safer modification, or pause the service when the requested step exceeds the current service limit.
+
 ### 8. Improvement becomes cure
 
 > Describing a cleaner appearance or more comfortable service as proof that a condition was treated.
+
+**Better move**
+
+> Describe the cosmetic change you can observe or the comfort the client reports without claiming that a condition was treated or cured.
 
 **Summary card**
 
