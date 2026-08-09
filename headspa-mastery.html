@@ -7556,10 +7556,38 @@ function m5cpKey(e, id) {
 // "What changes first?" — ungraded, retryable protocol-decision interaction.
 // Does not touch APP_STATE, progress, checkpoints, or completion.
 const M5_DECISION_ANSWERS = {
-  1: { correct: 1, feedback: 'Correct. A stable presentation does not need to be turned into a corrective project. Gentle cleansing, comfort, and maintenance are enough.' },
-  2: { correct: 0, feedback: 'Correct. The recent dry-shampoo history and regional difference support targeted cleansing. The image does not prove clogged follicles or justify whole-scalp overcorrection.' },
-  3: { correct: 1, feedback: 'Correct. The client\'s burning changes the priority. Comfort and safety come before scale removal.' },
-  4: { correct: 2, feedback: 'Correct. A cosmetic protocol is not the next step when the skin is broken and draining.' }
+  1: {
+    correct: 1,
+    feedback: {
+      0: 'Not quite. No finding currently earns a stronger corrective step. Adding exfoliation simply to make the service feel complete would override the evidence rather than respond to it. Try again.',
+      1: 'Correct. A stable presentation does not need to be turned into a corrective project. Gentle cleansing, comfort, and maintenance are enough.',
+      2: 'Not quite. The current assessment does not show a need for corrective cleansing. Preserve the stable presentation instead of treating a future problem that has not been observed. Try again.'
+    }
+  },
+  2: {
+    correct: 0,
+    feedback: {
+      0: 'Correct. The recent dry-shampoo history and regional difference support targeted cleansing. The image does not prove clogged follicles or justify whole-scalp overcorrection.',
+      1: 'Not quite. The finding is regional, and the recent dry-shampoo history gives useful context. Whole-scalp aggressive exfoliation would overcorrect areas that do not show the same need. Try again.',
+      2: 'Not quite. Visible shine and residue do not prove that follicles are clogged. Stay with what you can observe and choose a cosmetic service adjustment from that evidence. Try again.'
+    }
+  },
+  3: {
+    correct: 1,
+    feedback: {
+      0: 'Not quite. The client\'s burning changes the priority. Visible scale is not automatic permission to exfoliate, especially when the area is currently reactive or uncomfortable. Try again.',
+      1: 'Correct. The client\'s burning changes the priority. Comfort and safety come before scale removal.',
+      2: 'Not quite. More heat is not the responsible first move when the client is reporting burning. Reduce stimulation and reassess before adding intensity. Try again.'
+    }
+  },
+  4: {
+    correct: 2,
+    feedback: {
+      0: 'Not quite. Broken, draining skin changes the service limit. This is not a situation where the practitioner simply works around the area and continues as usual. Try again.',
+      1: 'Not quite. A cosmetic head spa service should not be used to clean or treat broken, draining skin. Stop contact, pause the service, and use the appropriate referral pathway. Try again.',
+      2: 'Correct. A cosmetic protocol is not the next step when the skin is broken and draining.'
+    }
+  }
 };
 function m5Decide(n, choice, btn) {
   const block = getActiveElementById('m5Decision' + n);
@@ -7568,6 +7596,9 @@ function m5Decide(n, choice, btn) {
   const answer = M5_DECISION_ANSWERS[n];
   const opts = block.querySelectorAll('.bq-opt');
 
+  // Reset every option to neutral first — only the option the student just
+  // selected receives a state. The approved answer is never revealed on an
+  // unselected option; it only turns green when the student picks it.
   opts.forEach(o => {
     const isSelected = o === btn;
     o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
@@ -7577,17 +7608,15 @@ function m5Decide(n, choice, btn) {
     if (existingTag) existingTag.remove();
   });
 
-  opts.forEach(o => {
-    if (Number(o.dataset.choice) === answer.correct) {
-      o.classList.add('correct');
-      const tag = document.createElement('span');
-      tag.className = 'bq-tag';
-      tag.textContent = 'Correct answer';
-      o.appendChild(tag);
-    }
-  });
+  const isCorrect = choice === answer.correct;
 
-  if (choice !== answer.correct) {
+  if (isCorrect) {
+    btn.classList.add('correct');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Correct answer';
+    btn.appendChild(tag);
+  } else {
     btn.classList.add('wrong');
     const tag = document.createElement('span');
     tag.className = 'bq-tag';
@@ -7595,8 +7624,10 @@ function m5Decide(n, choice, btn) {
     btn.appendChild(tag);
   }
 
+  // Each choice — correct or not — has its own explanation. The wrong-choice
+  // text never names or describes the approved answer.
   feedback.style.display = 'block';
-  feedback.textContent = answer.feedback;
+  feedback.textContent = answer.feedback[choice];
 }
 function m5ResetDecision(n) {
   const block = getActiveElementById('m5Decision' + n);

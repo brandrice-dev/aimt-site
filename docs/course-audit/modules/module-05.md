@@ -803,6 +803,11 @@ Immediately after Section 5.4 and before Section 5.5.
 
 > Correct. A stable presentation does not need to be turned into a corrective project. Gentle cleansing, comfort, and maintenance are enough.
 
+**Incorrect-choice feedback**
+
+- "Add a strong exfoliation so the service feels complete" → Not quite. No finding currently earns a stronger corrective step. Adding exfoliation simply to make the service feel complete would override the evidence rather than respond to it. Try again.
+- "Use a clarifying protocol to prevent future buildup" → Not quite. The current assessment does not show a need for corrective cleansing. Preserve the stable presentation instead of treating a future problem that has not been observed. Try again.
+
 ### Scenario 2
 
 > The crown shows diffuse shine and visible surface residue. The sides and hairline look close to the client’s baseline. The client reports no burning, tenderness, or recent reaction and says they used dry shampoo this morning.
@@ -820,6 +825,11 @@ Immediately after Section 5.4 and before Section 5.5.
 **Feedback**
 
 > Correct. The recent dry-shampoo history and regional difference support targeted cleansing. The image does not prove clogged follicles or justify whole-scalp overcorrection.
+
+**Incorrect-choice feedback**
+
+- "Exfoliate the entire scalp aggressively" → Not quite. The finding is regional, and the recent dry-shampoo history gives useful context. Whole-scalp aggressive exfoliation would overcorrect areas that do not show the same need. Try again.
+- "Tell the client the crown follicles are clogged" → Not quite. Visible shine and residue do not prove that follicles are clogged. Stay with what you can observe and choose a cosmetic service adjustment from that evidence. Try again.
 
 ### Scenario 3
 
@@ -839,6 +849,11 @@ Immediately after Section 5.4 and before Section 5.5.
 
 > Correct. The client’s burning changes the priority. Comfort and safety come before scale removal.
 
+**Incorrect-choice feedback**
+
+- "Exfoliate the scale first so hydration can penetrate" → Not quite. The client's burning changes the priority. Visible scale is not automatic permission to exfoliate, especially when the area is currently reactive or uncomfortable. Try again.
+- "Increase steam to soften the area" → Not quite. More heat is not the responsible first move when the client is reporting burning. Reduce stimulation and reassess before adding intensity. Try again.
+
 ### Scenario 4
 
 > One assessment area is broken, moist, and visibly draining.
@@ -857,6 +872,11 @@ Immediately after Section 5.4 and before Section 5.5.
 
 > Correct. A cosmetic protocol is not the next step when the skin is broken and draining.
 
+**Incorrect-choice feedback**
+
+- "Avoid only that small spot and complete the rest of the service" → Not quite. Broken, draining skin changes the service limit. This is not a situation where the practitioner simply works around the area and continues as usual. Try again.
+- "Clean the area thoroughly before proceeding" → Not quite. A cosmetic head spa service should not be used to clean or treat broken, draining skin. Stop contact, pause the service, and use the appropriate referral pathway. Try again.
+
 **Interaction behavior**
 
 - Use semantic buttons.
@@ -868,6 +888,9 @@ Immediately after Section 5.4 and before Section 5.5.
 - Do not write progress.
 - Do not gate completion.
 - Do not show a score.
+- On selection, apply state only to the selected option — the approved answer is never highlighted, tagged, or revealed until the student selects it themselves; every other option (including previously selected ones) returns to neutral on each new selection.
+- An incorrect selection shows the "Not quite" state on that option and its own choice-specific feedback beginning "Not quite." — this feedback explains why that option is not the responsible first move without naming or describing the approved answer.
+- A correct selection shows the "Correct answer" state on that option and its feedback beginning "Correct." followed by the approved explanation.
 
 ---
 
@@ -1614,7 +1637,8 @@ The **What changes first?** interaction must:
 - remain nonpersistent;
 - never write progress;
 - never gate completion;
-- avoid animation that conflicts with reduced-motion preferences.
+- avoid animation that conflicts with reduced-motion preferences;
+- never highlight, tag, or reveal the approved answer until the student selects it — an incorrect selection shows only that option's own "Not quite" state and choice-specific explanation, and a correct selection shows the "Correct answer" state with its approved explanation, retried and reset back to neutral on each new selection.
 
 ## Checkpoint implementation
 
