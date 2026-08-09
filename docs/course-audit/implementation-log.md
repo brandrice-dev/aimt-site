@@ -2824,3 +2824,116 @@ Module 5 is now **Implemented — manual QA approved**. Modules 0–5 are
 approved; Modules 6–11 remain pending. No merge or deployment to `main`
 occurred, and none is authorized. Work remains on branch
 `course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 36: Module 5 video-source creation (lifecycle step 9)
+
+Created `docs/course-video-sources/module-05-video-source.md` as the
+concise, self-contained primary authority for a future, separately scoped
+ChatGPT Project conversation that will produce Module 5's actual
+opening-video package (spoken script, 12-section production package,
+storyboard, shot list, final assets). This step does not create any of
+that production material — only the approved source brief it will be
+generated from. This is documentation-only; no course production code
+changed.
+
+**Status recorded: `Approved for video production`** — Module 5 is
+implemented, manual visual QA is complete, and course-interface footage
+may now be captured where useful. The file explicitly distinguishes this
+from still-deferred live-model checkpoint grading, live Cadence response,
+screen-reader, physical-keyboard, real touch-device, medical/
+dermatological, and legal/scope QA, none of which block video production.
+
+**Content sourced entirely from `docs/course-audit/modules/module-05.md`**
+(approved specification — outcomes, hero/section copy, the "What changes
+first?" interaction, Section 5.9's mistake/"Better move" pairs, the
+completion card, and "Insider value and acceleration payoff") and
+`docs/course-audit/modules/module-05-assets.md` (asset identity, captions,
+alt text, and the consultation-image prop-text caution). The pre-audit
+`module-05-source.md` was read only to confirm what changed, never cited
+as content authority. All eight text callouts recorded in the "Approved
+text-callout opportunities" section were verified as exact-string matches
+against `module-05.md` before inclusion. The file uses all 17 required
+headings from `00-aimt-module-video-master-instructions.md`'s
+video-source architecture, following `module-03-video-source.md`'s
+established level of detail without copying its content or creative
+framing.
+
+**Narrow video-documentation refresh performed** (factual staleness only,
+per this task's explicit scope — no redesign, no new brand rules):
+
+- `docs/course-video-sources/00-aimt-course-map.md`: the "Approved titles
+  and practitioner payoffs" section was stale at "Modules 0–3" even
+  though Modules 4 and 5 have since completed audit, implementation, and
+  manual approval. Added Module 4 (hero "Stop assuming. / Start seeing.",
+  payoff drawn from `module-04.md`) and Module 5 (hero "Read the pattern.
+  / Adjust the service.", payoff drawn from `module-05.md`) as approved
+  entries. The "Modules 4–12 — Awaiting audit" table incorrectly still
+  listed Module 4 as awaiting audit and Module 5 as not yet extracted —
+  renamed to "Modules 6–12 — Awaiting audit" with Module 4 and 5's rows
+  removed; Modules 6–11 and Module 12 remain listed as pending, unaudited,
+  with no content invented. The table's "what comes next" example was
+  updated from Module 3's handoff sentence to Module 5's own approved
+  Module 6 handoff sentence (the same one used in this step's video-source
+  file). Modules 0–3 were not otherwise revised.
+- `docs/course-video-sources/00-aimt-video-direction.md`: the
+  "Image-authenticity labels" and "Illustrative versus authenticated
+  clinical imagery" sections still described all ten Module 4 images as
+  "Unverified — awaiting Module 4 audit," which is now factually wrong —
+  Module 4 is implemented and manually approved. Investigated production
+  truth directly (`headspa-mastery.html`'s actual `<img>`/`<source>`
+  references, since the pre-audit `module-04-assets.md` intake file was
+  itself never updated after Module 4's implementation and still shows
+  stale filenames/status — flagged below, not fixed, as out of this
+  task's scope) and cross-referenced `module-04.md`'s "Required
+  corrections" §14: Module 4's five `examination-areas/` photos are real,
+  approved photography (now labeled **Existing asset — approved**);
+  its five `microscopy/` images are approved for use but are explicitly
+  generated/illustration-style, always captioned "Illustrative magnified
+  example — not a clinical diagnosis" (given a new **Existing asset —
+  approved, illustrative/generated** label, since the existing category
+  list didn't have a slot for "approved but not clinical-authentic").
+  Module 5's five teaching photographs — real stock photography, not
+  generated — were added to the **Existing asset — approved** category
+  with their own illustrative-only caveat. The file's "Authority" line,
+  which cited the stale `module-04-assets.md` as the image-authenticity
+  precedent, was corrected to point to each module's own approved
+  `module-XX.md` instead. No brand/visual-identity rule (palette,
+  typography, lighting, continuity elements) was touched.
+- **`module-04-video-source.md` does not exist in this repository** —
+  only Modules 0–3 have video-source files. The task's "Module 4 video
+  source" status-correction instruction was conditional on that file
+  already existing with a stale `Approved for video scripting` status; no
+  such file exists, so there was nothing to update. Creating it from
+  scratch would be a materially larger, separately scoped task (a full
+  Module 4 video-source brief, mirroring this step's Module 5 work) and
+  was not performed here, consistent with "do not update unrelated video
+  sources" / "report drift rather than broadening this task."
+- `module-04-assets.md` itself (the pre-audit Module 4 asset intake file)
+  remains stale — still dated 2026-08-04, still using pre-implementation
+  microscopy filenames (e.g. `microscopy-dry-depleted-scalp.png`) that no
+  longer match production (`microscopy-baseline-appearing.webp`, etc.),
+  and still marking every image "Unverified — awaiting Module 4 audit."
+  This is flagged here as a documentation gap for a future task; it was
+  not edited, since it is not one of this task's named files and
+  correcting it would mean re-auditing/re-documenting Module 4's asset
+  inventory rather than performing the narrow refresh this task
+  authorized.
+- Modules 0–3's video-source files were not revised — no factual
+  contradiction was found in them.
+
+**Files changed:**
+`docs/course-video-sources/module-05-video-source.md` (new),
+`docs/course-video-sources/00-aimt-course-map.md`,
+`docs/course-video-sources/00-aimt-video-direction.md`. No production code
+(`headspa-mastery.html`) and no course-audit module specification file was
+changed.
+
+**Lifecycle status.** This completes lifecycle step 9 (video-source
+creation) for Module 5. Per the governing module lifecycle, Module 6
+source extraction (step 10) may now begin as a separate task once this
+step's commit is pushed. Module 6 was not extracted, audited, or
+documented in this step. No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.

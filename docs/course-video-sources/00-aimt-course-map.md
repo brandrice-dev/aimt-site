@@ -61,12 +61,13 @@ assumed.
 
 ---
 
-## Approved titles and practitioner payoffs — Modules 0–3
+## Approved titles and practitioner payoffs — Modules 0–5
 
-Only these four modules have a completed, approved audit
-(`docs/course-audit/modules/module-0{0,1,2,3}.md`, each with an "Approve
-Module N audit" step in `implementation-log.md`). Titles and payoffs below
-are drawn from those approved specifications.
+Only these six modules have a completed, approved audit and manual
+approval (`docs/course-audit/modules/module-0{0,1,2,3,4,5}.md`, each with
+an "Approve Module N audit"/manual-approval step in
+`implementation-log.md`). Titles and payoffs below are drawn from those
+approved specifications.
 
 ### Welcome Module (technical Module 0)
 
@@ -103,23 +104,48 @@ usable decision sequence (structure → visible clue → service implication →
 limit), so the student can explain shedding, flaking, and massage honestly
 instead of guessing or overclaiming.
 
+### Module 4 — Microscopy & Scalp Assessment
+
+**Hero line:** "Stop assuming. / Start seeing."
+**Practitioner payoff:** Teaches a repeatable five-point scalp scan and
+five observation lenses so the student can separate a supported visual
+observation from a working question and an unsupported conclusion —
+giving magnification real diagnostic-adjacent value in a cosmetic setting
+without crossing into medical diagnosis. See
+[`module-04-video-source.md`](module-04-video-source.md) once that file
+exists; it does not yet exist in this repository as of this writing (see
+`docs/course-audit/modules/module-04.md` for the full approved
+specification in the meantime).
+
+### Module 5 — Scalp Patterns & Service Adaptation
+
+**Hero line:** "Read the pattern. / Adjust the service."
+**Practitioner payoff:** Turns Module 4's disciplined observation into a
+repeatable service-decision model — identify the safest limit, weigh
+client-reported context, then adjust cleansing, exfoliation, water and
+steam, pressure and tempo, and product placement by region — replacing the
+instinct to force one scalp into one fixed "type" or one uniform
+intensity. See
+[`module-05-video-source.md`](module-05-video-source.md) for the complete
+video-source brief.
+
 ---
 
-## Modules 4–12 — Awaiting audit
+## Modules 6–12 — Awaiting audit
 
 | Module | Status |
 |---|---|
-| Module 4 — Microscopy & Scalp Assessment | **Awaiting audit.** Extracted (`module-04-source.md`, image inventory in `module-04-assets.md`) but the approved-specification file (`module-04.md`) currently contains only empty section headings — no outcomes, corrections, or final copy have been externally approved. Do not treat anything about Module 4's final content as settled beyond its position in the sequence (comes after Module 3). |
-| Modules 5–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
+| Modules 6–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
 | Module 12 — Final Exam | **Awaiting audit.** Approved only as a structural placeholder (see "Student-facing module sequence" above) — no content, design, or technical implementation is approved. |
 
 Do not invent titles, hero lines, outcomes, or continuity detail for any
-module in this table. Where a module's relationship to Module 3 needs to be
-described (e.g., "what comes next"), state only what Module 3's own approved
-spec says about its handoff — for example, Module 3's completion copy says
-"Anatomy gives you the map. Module 4 teaches you how to read the visible
-scalp in real time through assessment, microscopy, and disciplined
-observation" — and go no further than that sentence.
+module in this table. Where a module's relationship to Module 5 needs to be
+described (e.g., "what comes next"), state only what Module 5's own approved
+spec says about its handoff — its completion card says "Next, you will
+examine named scalp conditions and the presentations that are commonly
+confused with cosmetic patterns. The goal will remain the same: observe
+carefully, stay within scope, and know when medical evaluation belongs in
+the plan" — and go no further than that sentence.
 
 ---
 

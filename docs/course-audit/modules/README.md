@@ -346,8 +346,14 @@ green with its "Correct." explanation once actually selected (Step 34).
 items (live-model grading/Cadence QA, screen-reader QA, physical-keyboard
 QA, real touch-device QA, medical/dermatological review, legal/scope
 review). Module 5 status is now **Implemented — manual QA approved**.
-Modules 0–5 are approved; Modules 6–11 remain pending. The current gate is
-Module 5 video-source creation — Module 6 extraction has not begun.
+Modules 0–5 are approved; Modules 6–11 remain pending.
+
+**Video-source created (Step 36).**
+[`docs/course-video-sources/module-05-video-source.md`](../../course-video-sources/module-05-video-source.md)
+is now the approved primary authority for a future, separately scoped
+video-production task — status **Approved for video production**. This
+completes lifecycle step 9 for Module 5. The current gate is Module 6
+source extraction; Module 6 extraction has not begun.
 
 Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

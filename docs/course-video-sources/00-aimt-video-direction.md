@@ -9,11 +9,15 @@ format, and script-craft rules, see the already-approved
 in this folder — do not duplicate that document's process guidance here.
 
 **Authority:** `CLAUDE.md` (design-system rule), `docs/AIMT-Art-Direction-Brief.md`,
-`docs/AIMT-AUDIT-RULES.md`, and `docs/course-audit/modules/module-04-assets.md`
-(for the image-authenticity precedent). Where a specific brand token (an
-exact hex value, a font family beyond what's named below, a camera package,
-a fixed production standard) is not documented in one of those files, this
-document describes the direction qualitatively rather than inventing one.
+`docs/AIMT-AUDIT-RULES.md`, and each module's own approved `module-XX.md`
+specification for image-authenticity status (currently
+`docs/course-audit/modules/module-04.md` and
+`docs/course-audit/modules/module-05.md` — their pre-audit `module-XX-assets.md`
+intake files are not current authority once a module audit is approved).
+Where a specific brand token (an exact hex value, a font family beyond
+what's named below, a camera package, a fixed production standard) is not
+documented in one of those files, this document describes the direction
+qualitatively rather than inventing one.
 
 ---
 
@@ -137,28 +141,56 @@ professional distinction) sit in near-silence rather than being scored.
 ## Image-authenticity labels
 
 Every image or diagram referenced in a video plan must carry one of these
-labels, matching the precedent already set in
-`docs/course-audit/modules/module-04-assets.md`:
+labels. The precedent was originally set in
+`docs/course-audit/modules/module-04-assets.md` (a pre-audit intake
+document that itself was never updated after Module 4's implementation —
+treat `docs/course-audit/modules/module-04.md`'s "Required corrections"
+§14 and its "Final replacement copy" microscopy captions as the current
+authority for Module 4 image status, not the stale pre-audit inventory
+file):
 
-- **Existing asset — approved** — in production use with a completed audit
-  behind it (currently only Module 3's cross-section image/derivative).
+- **Existing asset — approved** — in production use with a completed
+  module audit and manual approval behind it. This currently includes
+  Module 3's cross-section image/derivative; Module 4's five
+  `examination-areas/` photos (real photography of assessment-point
+  positioning, used as procedural guides in the five-point-scan stepper);
+  and all five of Module 5's approved teaching photographs (real
+  stock photography — not generated — under
+  `assets/images/course/module-05/regional-comparison/` and
+  `assets/images/course/module-05/service-adaptation/`; see
+  `module-05-video-source.md` for placement and captions).
+- **Existing asset — approved, illustrative/generated** — approved for
+  production use but explicitly generated/illustration-style rather than
+  authenticated clinical photography, and always captioned as such.
+  Currently Module 4's five `microscopy/` images (renamed in production
+  to `microscopy-baseline-appearing`, `microscopy-oil-dominant`,
+  `microscopy-fine-scale`, `microscopy-visible-color-change`,
+  `microscopy-surface-residue`), each carrying the approved "Illustrative
+  magnified example — not a clinical diagnosis" framing.
 - **Existing asset — unverified/unapproved** — present in the repository
-  but not yet cleared by an approved module audit (currently all ten
-  Module 4 images: five `examination-areas/` and five `microscopy/`
-  photos, each recorded as "Unverified — awaiting Module 4 audit").
-- **Illustrative/generated** — not authenticated clinical photography, and
-  must never be presented as such.
+  but not yet cleared by an approved module audit. None currently exist
+  in this category; update this list as new modules extract assets ahead
+  of their own audit.
 - **New footage/diagram needed** — does not exist yet.
 
 ## Illustrative versus authenticated clinical imagery
 
-Do not present an illustrative or generated image as authenticated clinical
-photography in any video, per the master instructions. Concretely: Module
-3's cross-section is an approved simplified illustration, always captioned
-as such, never a claim of real clinical photography. The ten Module 4
-images are real photographs but are explicitly unverified and unapproved —
-until Module 4's audit is approved, they must not appear in any video as
-settled, accurate clinical reference material.
+Do not present an illustrative, generated, or stock-photography image as
+authenticated clinical photography in any video, per the master
+instructions. Concretely: Module 3's cross-section is an approved
+simplified illustration, always captioned as such, never a claim of real
+clinical photography. Module 4's five microscopy images are approved for
+production use but are generated microscopy-style illustrations, always
+captioned "Illustrative magnified example — not a clinical diagnosis" —
+never settled, accurate clinical reference material. Module 4's five
+examination-area photos are real photography of assessment-point
+positioning (not scalp-condition evidence) and do not carry a clinical
+claim either way. Module 5's five teaching photographs are real stock
+photography approved for illustrative service-planning use only — always
+carry the module's approved caution ("Illustrative service-planning
+example. Appearance alone does not establish cause or diagnosis.") and
+never treat the consultation image's background prop graphic as AIMT
+documentation or an approved framework.
 
 ## Continuity elements (repeat across every video)
 
