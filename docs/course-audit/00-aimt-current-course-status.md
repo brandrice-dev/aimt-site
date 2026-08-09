@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: (pending) — "Extract Module 6 for external audit" (see `git log` for the hash once committed)
+- Latest controlling commit: (pending) — "Add approved Module 6 audit specification" (see `git log` for the hash once committed)
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -38,7 +38,8 @@ Do not merge or deploy yet.
 | Module 3 | Implemented — manual QA approved |
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
-| Modules 6–11 | Pending |
+| Module 6 | Externally audited — approved specification added; awaiting implementation |
+| Modules 7–11 | Pending |
 | Module 12 | Planned — do not begin |
 
 **Latest approved module: Module 5** — approved August 8, 2026.
@@ -72,9 +73,19 @@ Manually approved, but the following still require later or manual review — no
 
 ## Task just completed
 
-**Module 6 source extraction for external audit (lifecycle step 10) — August 8, 2026.** Created `docs/course-audit/modules/module-06-source.md` — a complete, neutral, verbatim extraction of the current Module 6 ("Conditions & Disorders") student experience: module identity, full curriculum in student encounter order, all four ungraded interactions (dry-vs-dandruff comparison toggle, wrong-product cycle selector, Malassezia spectrum slider, trigger accordion), both checkpoints (`m6cp1`, `m6cp2`) with displayed and evaluated question strings captured independently, Cadence configuration (checkpoint rubric, guide system, quick prompts, greeting, memory tags), completion/Module 7 gating behavior, asset inventory (zero real assets — all placeholder graphics, matching Module 5's current state), a claims/technical-content inventory, an accessibility/responsive inventory, Listen Mode and Guided Completion Path notes, a full source map, and a confirmed-findings/assumptions list — and `docs/course-audit/modules/module-06.md`, the empty external-audit scaffold (`Status: Awaiting external audit`, matching Module 5's full pre-audit heading set, every section reading `_Pending external audit._`), per the established per-module extraction-task convention. This is documentation and extraction only — no production file (`headspa-mastery.html`, `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was modified, no correction was made, and no audit judgment was rendered.
+**Module 6 external audit (lifecycle step 3 of the per-module cycle) — August 8, 2026.** Replaced the empty scaffold in `docs/course-audit/modules/module-06.md` with the completed, approved audit specification, using `module-06-source.md` as the authoritative record of the current student experience and `module-05.md` as a structural/quality precedent only (not a source of curriculum content). Status set to **Approved for controlled implementation**. Approved title: **Conditions & Disorders** (resolved the "Common Conditions & Disorders" hero-eyebrow drift by dropping "Common" everywhere).
 
-**Module 6 is NOT audited, NOT approved, and NOT implemented.** The extraction preserves current findings without correcting them, including: mismatched displayed/evaluated checkpoint questions (both `m6cp1` and `m6cp2`); a single shared `M6.system` rubric rather than per-checkpoint rubrics; no module-specific checkpoint network-error text; missing `aria-label`/`aria-live` on both checkpoints; three of Module 6's four interactions (`.vs-card`, `.cycle-step`, `.trigger-item`) using plain `<div onclick>` elements with zero keyboard/ARIA semantics; the old course name ("HeadSpa Mastery") and a personal-practitioner-experience claim still present in Cadence prompts; a missing "6.2" section number; a duplicated/inconsistent tap-interaction hint; an unverified sebum/temperature percentage claim duplicated verbatim from Module 5; and no standalone, always-visible referral/stop-service section (the module's only referral sentence is gated behind a specific spectrum-slider position). None of these were corrected — they are recorded for the external audit to evaluate.
+**External evidence used:** AAD's seborrheic dermatitis overview; Borda & Wikramanayake's "Seborrheic Dermatitis and Dandruff: A Comprehensive Review" (PMC4852869); DermNet NZ; Cunliffe et al. 1970 (*Br J Dermatol*) on local skin temperature and sebum excretion rate; and current OTC/prescription concentration data for ketoconazole shampoo (1% OTC, 2% prescription). Full citations and how each shaped a decision are recorded in `module-06.md`'s "Research and evidence sources" section.
+
+**Major decisions:** the core dry-scalp-vs-dandruff distinction and the dandruff-to-seborrheic-dermatitis "spectrum" framing are both scientifically supported and were **kept**, with their stated mechanisms softened from single-cause certainty to the multifactorial framing the evidence actually supports. Diet and stress trigger claims were softened to match their actual (weaker, more individual) evidence strength. A new Section 6.2 ("What you can and cannot conclude from appearance alone") and a new standalone, always-visible Section 6.6 ("When to pause or refer," with an approved referral script) were added — Module 6 previously had no referral section not gated behind a specific interaction state. A new signature ungraded interaction, "Sort three presentations" (proceed/modify/refer triage), was added. Both checkpoints were kept (they test genuinely different competencies) with question-parity fixed, per-checkpoint rubrics added, and checkpoint placement changed to a two-stage mid/end structure. The `scope-awareness` memory tag (declared but unreachable) was resolved by removal rather than by adding a redundant regex branch.
+
+**Same-day re-audit, before the commit was pushed, corrected four items.** The "10% per 1.8°F" sebum/temperature claim was re-examined against its primary source's actual limitations — 9 subjects, forehead skin rather than scalp, surface sebum excretion rather than gland production, and the source authors' own alternative explanation for their result — and was **removed** from student-facing curriculum, not further hedged; no numeric replacement was substituted, only qualitative, actionable language. The ketoconazole evidence base was upgraded from commercial retail sources (GoodRx/Drugs.com) to primary DailyMed/FDA labeling, which also corrected an imprecise 2%-strength indication description, and Section 6.7 now carries an explicit "a product-category recommendation is not a diagnosis and not a prescription" scope statement. The visual asset plan was re-opened and now resolves each of the four existing placeholder slots explicitly: two are replaced with a **required** non-diagnostic comparative illustration in Section 6.3; two are **removed** from Section 6.5 with no replacement required (an optional future gradient diagram is noted but not required). Interaction density was re-checked against the governing learning-rhythm standard: the cycle-step selector and trigger accordion were found to be revealing information rather than requiring judgment and were simplified to static content (all curriculum content preserved, only the click-to-reveal mechanic removed); the comparison toggle and spectrum slider were confirmed to have distinct instructional jobs and were kept as interactions. Module 6's final ungraded-interaction count is three, down from the initial pass's five.
+
+**Module 6 is now externally audited and has an approved specification. It is NOT implemented, NOT manually QA'd, and NOT approved for release.** No production file (`headspa-mastery.html`, `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was modified by this task.
+
+### Prior task (unchanged, recorded for continuity)
+
+**Module 6 source extraction for external audit (lifecycle step 10) — August 8, 2026.** Created `docs/course-audit/modules/module-06-source.md` — a complete, neutral, verbatim extraction of the current Module 6 ("Conditions & Disorders") student experience: module identity, full curriculum in student encounter order, all four ungraded interactions (dry-vs-dandruff comparison toggle, wrong-product cycle selector, Malassezia spectrum slider, trigger accordion), both checkpoints (`m6cp1`, `m6cp2`) with displayed and evaluated question strings captured independently, Cadence configuration (checkpoint rubric, guide system, quick prompts, greeting, memory tags), completion/Module 7 gating behavior, asset inventory (zero real assets — all placeholder graphics, matching Module 5's current state), a claims/technical-content inventory, an accessibility/responsive inventory, Listen Mode and Guided Completion Path notes, a full source map, and a confirmed-findings/assumptions list — and the (now superseded) empty `module-06.md` scaffold. This was documentation and extraction only — no production file was modified, no correction was made, and no audit judgment was rendered.
 
 **Content grounding:** every fact recorded was sourced directly from `headspa-mastery.html` and `assets/js/headspa-state.js` at commit `b10a939921d17d1117ec835af1c45bc76f4a09cb`, cross-checked against the `module-05-source.md` and `module-04-source.md` extraction precedents for structure and depth. No content was inferred from another module.
 
@@ -90,21 +101,21 @@ Manually approved, but the following still require later or manual review — no
 
 ## Current gate
 
-Module 6 external audit.
+Module 6 implementation.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10). Module 6 external audit (step 11 of the overall workflow / step 3 of the lifecycle) may begin as its own separate task.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10) and external audit / approved specification (steps 3–4 of the per-module lifecycle). `module-06.md` is the implementation authority. Module 6 implementation may begin as its own separate task.
 
 ---
 
 ## Exact next task
 
-Perform the external audit of Module 6 using `docs/course-audit/modules/module-06-source.md` and the governing audit standards (`00-aimt-course-audit-master-instructions.md`, `00-global-decisions.md`), then populate the existing empty `docs/course-audit/modules/module-06.md` scaffold with the approved specification only after that audit is complete. Module 6 implementation must not begin until the approved specification is populated.
+Implement the approved Module 6 specification (`docs/course-audit/modules/module-06.md`) in `headspa-mastery.html` (and `assets/js/headspa-state.js` only for the `MODULE_MEMORY_TAGS[6]` correction), then perform static and mocked validation — matching the implementation pattern already used for Modules 0–5. Module 6 is not manually approved and must not be treated as such until it clears manual QA per `00-aimt-manual-qa-master-checklist.md`.
 
 ---
 
 ## Do not begin
 
-- Module 6 external audit, approved specification, or implementation (this task's output — the source extraction — is now complete; the audit itself is the next separate task, not yet started)
+- Module 6 manual QA or manual approval (implementation and static/mocked validation must happen first)
 - Module 7 extraction or any Module 7 work
 - Module 12
 - completion and certificate audit
@@ -165,7 +176,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- (pending) — Extract Module 6 for external audit (**latest controlling commit** — created together with this file; see `git log` for the hash)
+- (pending) — Add approved Module 6 audit specification (**latest controlling commit** — created together with this file; see `git log` for the hash)
+- `8f67c6af1d256a9085455f72d55eca722998c9f8` — Extract Module 6 for external audit
 - `b10a939921d17d1117ec835af1c45bc76f4a09cb` — Add Module 5 video source
 - `190677ebad61b957e494b208932f812ec89185a2` — Approve Module 5 manual QA
 - `27397ca7bbc7823c205cd1764ac7ba6205dafb5f` — Finalize Module 5 "What changes first?" answer-reveal behavior

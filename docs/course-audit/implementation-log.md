@@ -3032,3 +3032,228 @@ specified, or implemented in this step. Module 7 was not touched. No
 merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 38: Module 6 external audit (lifecycle step 3) — approved specification added
+
+Replaced the empty scaffold in `docs/course-audit/modules/module-06.md`
+with the completed, externally audited, approved implementation
+specification, following the structure and rigor established by
+`module-05.md`. Source of truth for the current experience:
+`module-06-source.md`. `module-05.md` was consulted only as a structural
+and quality precedent — none of its curriculum, interaction rhythm, or
+audit decisions were copied into Module 6. Modules 1–5 were inspected
+(not edited) to confirm established scope boundaries, terminology,
+interaction patterns, checkpoint conventions, Cadence conventions, and
+completion behavior that Module 6 should build on rather than repeat.
+This was documentation only — no production file
+(`headspa-mastery.html`, `assets/js/headspa-state.js`,
+`assets/js/aimt-progress-sync.js`) was modified, no Module 6
+implementation occurred, and no Module 7 work began.
+
+**External evidence used** (full citations recorded in `module-06.md`'s
+"Research and evidence sources" section): American Academy of
+Dermatology, "Seborrheic dermatitis: Overview"; Borda & Wikramanayake,
+"Seborrheic Dermatitis and Dandruff: A Comprehensive Review" (*J Clin
+Investig Dermatol* 2015, PMC4852869); DermNet NZ, "Seborrhoeic
+dermatitis"; Cunliffe, Burton & Shuster, "The effect of local temperature
+variations on the sebum excretion rate" (*Br J Dermatol* 1970;83:650–654);
+and current DailyMed (U.S. National Library of Medicine) FDA drug
+labeling for ketoconazole shampoo 1% (Human OTC Drug) and 2% (Rx only).
+The Cunliffe source and the ketoconazole evidence base were both
+re-examined in a same-day, pre-push re-audit — see "Re-audit corrections"
+below. Research was scoped to claims that materially affect curriculum
+accuracy or safety — not a general literature review.
+
+**Approved module identity.** Title: **Conditions & Disorders** (kept —
+this is what the home-row title and `MODULE_TITLES[6]` already say; the
+hero eyebrow's "Common Conditions & Disorders" is corrected to match
+rather than either side winning by default). Hero title ("Before you
+treat, you have to interpret correctly.") and hero description are kept
+substantially unchanged — already strong and consistent with the
+module's approved outcomes.
+
+**Major curriculum decisions.** The core dry-scalp-vs-dandruff
+distinction and the dandruff-to-seborrheic-dermatitis "spectrum" concept
+are both scientifically supported per the evidence above and were
+**kept** — this is not a rewrite-everything audit. What changed: their
+stated mechanisms were softened from single-cause certainty ("the scalp
+is functioning abnormally," "oil production increases" as the sole
+driver) to the multifactorial framing the evidence actually supports
+(yeast activity, sebum, and individual immune/inflammatory-response
+variation together). The "10% per 1.8°F" sebum/temperature claim is
+**removed** from student-facing curriculum, not merely hedged — on
+re-audit, its primary source (Cunliffe et al. 1970) turned out to be a
+9-subject study measuring surface sebum excretion on forehead skin, not
+scalp production, and the study's own authors propose temperature-
+dependent sebum viscosity as an alternative explanation for their
+result; the specific number also doesn't change any service decision.
+Only qualitative, evidence-consistent language (warmer/humid conditions
+commonly associated with client-reported oiliness, worth an intake
+question) replaces it — no numeric rule was substituted. The
+ketoconazole recommendation is corrected to specify **1%-strength only**
+(never 2%, which DailyMed/FDA labeling confirms is Rx-only) and loses
+the overreaching "without requiring medical oversight" phrasing;
+Section 6.7 gains an explicit scope statement that a product-category
+recommendation is not a diagnosis and not a prescription. Diet and
+stress trigger claims are softened to match their comparatively weaker,
+more individual evidence base, while the "wrong product use" trigger and
+the six-step "wrong product cycle" causal chain's content is kept
+largely as-is (genuinely useful, well-sequenced practitioner insight),
+with only the unsupported "most clients" generalization corrected and
+its interactivity simplified (see "Interaction decisions" below).
+
+**Structural additions.** A new **Section 6.2** ("What you can and
+cannot conclude from appearance alone") resolves the missing-6.2 gap
+found in the source extraction and gives the module an observation-limits
+frame before it starts making distinctions, directly building on Module
+4's observation-versus-conclusion discipline. A new, standalone,
+always-visible **Section 6.6** ("When to pause or refer," with an
+approved referral script adapted from Module 4's pattern) resolves the
+extraction's most significant finding — Module 6 previously had exactly
+one referral sentence, gated behind manually dragging the Malassezia
+spectrum slider to its final position. Final approved section order:
+6.1 → 6.2 (new) → 6.3 → 6.4 → `m6cp1` → 6.5 → 6.6 (new) → new signature
+interaction → 6.7 → 6.8 → `m6cp2` → completion. The duplicated/
+inconsistent tap-interaction hint in Section 6.3 is resolved to a single
+consistent hint.
+
+**Interaction decisions.** Re-checked once, in full, against the
+governing learning-rhythm standard (every interaction must require
+observe/recall/distinguish/sequence/decide/explain/apply/communicate,
+not the appearance of activity). Two of the module's four original
+ungraded interactions survive with a distinct instructional job: the
+dry-vs-dandruff comparison toggle (**distinguish** — retained, revised
+for native keyboard/ARIA semantics) and the four-position Malassezia
+spectrum slider (**observe** a continuum experientially — retained,
+gains an explicit `aria-label`). The other two — the six-step
+wrong-product-cycle selector and the four-item trigger accordion — were
+found to be revealing information on click with no attached
+observation/distinction/decision/sequencing task, and because the cycle
+content is inherently ordered, letting the student jump to any step in
+any order actively worked against its own causal-chain logic. Both are
+**simplified to static, always-visible content** — all curriculum
+content is preserved; only the click-to-reveal mechanic and its
+`<div onclick>` markup are removed, which also reduces the module's
+custom-control accessibility surface and its Listen Mode reveal-gating
+problem. A new **signature ungraded interaction, "Sort three
+presentations,"** requires the student to triage three text-based client
+presentations into proceed / proceed-with-modification / pause-and-refer
+— the module's one genuine decide-and-apply task, and the point where
+identification, spectrum placement, and referral judgment are exercised
+together, deliberately distinct from Module 5's protocol-lever-adaptation
+signature interaction. Module 6's final ungraded-interaction count is
+**three** (comparison toggle, spectrum slider, signature triage), down
+from the initial audit pass's five.
+
+**Checkpoint decisions.** Both `m6cp1` and `m6cp2` are kept — the audit
+determined they test genuinely different competencies (identification-
+and-correction vs. spectrum placement and referral/scope judgment), not
+duplication for its own sake. Displayed/evaluated question parity is
+fixed for both (using the existing, already-strong displayed text as the
+authoritative string). The single shared `M6.system` rubric is replaced
+with checkpoint-specific `M6.systems.m6cp1`/`m6cp2` rubrics, each with
+itemized pass criteria, immediate-correction triggers, and focused
+revision examples. `submitM6CP` gains the approved module-specific
+network-error text. Checkpoint placement moves from both-at-the-end to a
+two-stage structure: `m6cp1` after Section 6.4 (identification/
+correction content), `m6cp2` at the end (full spectrum/referral
+synthesis).
+
+**Cadence decisions.** `M6.system`'s "instructor of HeadSpa Mastery" and
+`MODULE_GUIDE_SYSTEMS[6]`'s "nearly two decades" personal-experience
+claim are corrected, matching the pattern already applied to Modules 0,
+1, 2, and 4. Quick prompt 2 is revised from "When does dandruff become
+seborrheic dermatitis?" (implies a diagnostic progression the student
+isn't qualified to declare) to "When should a flaking presentation raise
+more concern?" (the actionable, in-scope question). The unreachable
+`scope-awareness` memory tag (declared in `MODULE_MEMORY_TAGS[6]` with no
+corresponding regex branch) is resolved by **removal** rather than by
+adding a new regex branch that would functionally duplicate the
+already-working `referral-judgment` tag.
+
+**Visual asset plan.** Re-opened on re-audit to give each of the four
+existing placeholder slots an explicit, final disposition rather than
+the initial pass's open-ended "no imagery required now, recommended
+later" framing. The two Section 6.3 placeholders ("Dry Scalp —
+Microscopy," "Dandruff — Microscopy") are **replaced with a required
+non-diagnostic comparative illustration** — a two-panel diagram
+(not photography, not styled as clinical microscopy) placed alongside
+the existing comparison cards, with mandatory comparison-consistency,
+non-diagnostic captioning, and alt-text requirements. This is required
+for initial implementation and does not block on sourcing consented
+clinical photography. The two Section 6.5 placeholders ("Mild
+Dandruff — Microscopy," "Seborrheic Dermatitis — Microscopy") are
+**removed with no replacement required** — a two-photo pair would
+misleadingly imply a hard category boundary the module explicitly
+teaches against; an optional, non-required future gradient diagram is
+noted but not authorized or blocking. If real presentation photography
+is ever pursued for Section 6.3 as a future upgrade over the illustration
+(mirroring Module 5's real-photography addendum), it must be explicitly
+captioned as an illustrative example of visible features, not diagnostic
+evidence. No placeholder is left as an unresolved production marker.
+
+**Downloadable resource decision.** Recommended: `AIMT Scalp Presentation
+& Referral Quick Reference` — a one-page comparison/referral reference
+with genuine consultation-room reuse value, mirroring Module 5's
+approved (also production-deferred) `AIMT Regional Service Adaptation
+Guide`. Not created or linked by this task.
+
+**Guided Completion / Listen Mode.** Guided Completion fields (≈14–18 min
+learning, ≈8–12 min checkpoints, ≈15–20 min hands-on practice) and Listen
+Mode fields (≈11–14 min narration) are recorded per the governing
+requirement, not implemented. The Listen Mode notes flag a
+module-specific requirement not present in Module 5: two of Module 6's
+three remaining interactions (the comparison toggle and the spectrum
+slider) still gate their explanatory text behind a tap/click/drag, so a
+future narration script must explicitly narrate those two reveals or an
+audio-only pass would omit that content — smaller in scope than the
+initial audit pass's four-interaction version of this problem, since the
+cycle-step and trigger content is now static and narrates directly.
+
+**Accessibility and semantic requirements** are specified per the
+governing standard (aria-label/aria-live on both checkpoints, an explicit
+label for the spectrum slider, native-button conversion for `.vs-card`
+only — `.cycle-step` and `.trigger-item` no longer need ARIA/keyboard
+handling since they are static, not interactive — a `prefers-reduced-
+motion` guard for the one remaining reveal animation (`.vs-detail`), and
+success/warning/error semantic states for the new signature interaction's
+proceed/modify/refer outcomes, using the existing Module 4 shared color
+baseline) but not implemented.
+
+**Re-audit corrections (same day, before the commit was pushed).** Before
+`22642cc1879011f119c3df27fb6479fdf427ff09` was pushed to
+`origin/course-audit-build`, four items were re-examined and corrected in
+place, amending the same unpushed commit rather than creating a second
+one: (1) the sebum/temperature statistic, re-examined against its
+primary source's actual limitations and removed rather than further
+hedged; (2) the ketoconazole evidence base, upgraded from commercial
+retail sources to primary DailyMed/FDA labeling, with an explicit
+diagnosis-is-not-prescribing scope statement added; (3) the visual asset
+plan, re-opened to give all four existing placeholders an explicit,
+final disposition instead of an open-ended future recommendation; (4)
+interaction density, re-checked against the governing learning-rhythm
+standard, resulting in two of the four original interactions being
+simplified to static content. All four corrections are reflected
+directly in the paragraphs above and in `module-06.md` itself (see its
+"Re-audit corrections" header note) — this is not a second, separate
+audit pass recorded as a new step, since the underlying commit was never
+pushed and is being amended, not superseded.
+
+**Files changed:** `docs/course-audit/modules/module-06.md` (populated,
+then corrected pre-push), `docs/course-audit/modules/README.md`,
+`docs/course-audit/00-aimt-current-course-status.md`, and this file
+(`implementation-log.md`). No production code
+(`headspa-mastery.html`, `assets/js/headspa-state.js`,
+`assets/js/aimt-progress-sync.js`) was changed.
+
+**Lifecycle status.** This completes lifecycle step 3 (external audit) and
+step 4 (approved specification added) for Module 6. `module-06.md` is
+now the Module 6 implementation authority. Per the governing module
+lifecycle, Module 6 implementation (lifecycle step 5) may now begin as a
+separate task once this step's commit is pushed. Module 6 was not
+implemented, manually QA'd, or manually approved in this step. Module 7
+was not touched. No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.
