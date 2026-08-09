@@ -2556,3 +2556,100 @@ with production deferred — nothing was created or linked. No merge or
 deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 33: Correction — add "Better move" to Module 5 Section 5.9
+
+Manual QA on Module 5 identified that Section 5.9 ("Errors that make
+protocols less intelligent") named eight common practitioner mistakes but
+each card stopped after naming the error, with no explicit statement of
+the corrective behavior. Because Section 5.9 is the final instructional
+section before the final checkpoint (`m5cp2`), the finding was that the
+student should leave it with both the mistake to avoid and the correct
+replacement behavior. This step adds one concise **Better move** line to
+each of the eight existing mistake cards. No new curriculum was
+introduced — every corrective line is distilled from concepts already
+taught and approved elsewhere in Module 5 (the regional protocol builder,
+the five service levers, the safety-limit and priority-order sections, and
+the client-communication section). Checkpoint content/rubrics, completion
+behavior, Cadence configuration, Module 5 imagery, progress architecture,
+and Module 6 gating were not changed.
+
+**Files changed (Commit `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc`,
+"Strengthen Module 5 common-mistake guidance"):**
+`docs/course-audit/modules/module-05.md` and `headspa-mastery.html` only
+(2 files, 48 insertions, 8 deletions combined).
+
+**`module-05.md`:** added a **Better move** line, in the approved exact
+wording, immediately after each of the eight existing mistake
+title/description pairs in the "5.9 — Common mistakes" section. The
+section eyebrow, headline, all eight mistake titles, all eight existing
+mistake descriptions, and the closing summary card ("A strong protocol is
+explainable.") were left byte-for-byte unchanged. No other Module 5
+curriculum was touched, and Section 5.10 was not reintroduced.
+
+**`headspa-mastery.html`:** each of the eight mistake `.protocol-card`
+elements in `#module5Wrap` gained a second `.pc-row` inside its existing
+`.pc-body`, labeled "Better move" via the same `.pc-label`/`.pc-val`
+structure already used for the existing "The mistake" row — the identical
+pattern used throughout the course (including Module 4's own mistake
+cards) for labeled key/value rows inside a `.protocol-card`. The first row
+("The mistake") lost its `style="border:none"` (so the existing
+`.pc-row`'s default `border-bottom` now visually separates it from the row
+beneath), and the new second row carries `style="border:none"` as the new
+last row — no new CSS classes, colors, icons, or components were added.
+Card titles, mistake descriptions, the red "✗" header icon, and the
+closing summary `.info-card` are unchanged. No animation, interactivity,
+or progress-writing behavior was added to any card.
+
+**Validation performed** (local static server, mocked Course Review Mode,
+`callAI` mocked):
+
+- Content: live DOM inspection of all eight mistake cards confirmed
+  exactly two `.pc-row` elements each, with "The mistake" and "Better
+  move" labels and values matching the approved copy exactly (verified
+  programmatically per card, not by visual sampling); the closing summary
+  card text is unchanged; the last six rendered elements of the lesson are
+  the 7th and 8th mistake cards, the unchanged summary card, the existing
+  divider, checkpoint `m5cp2`, then `#m5Complete` directly — confirming
+  Section 5.10 did not reappear and `m5cp2` still follows Section 5.9
+  directly; a full-text scan found no "5.10" or "From pattern to plan"
+  anywhere in the rendered module; no medical/diagnostic claim, named
+  condition, or product/ingredient prescription was introduced (the eight
+  approved lines were used verbatim).
+- Static checks: an HTML tag-balance check on `#module5Wrap`
+  (`div`/`button`/`textarea`/`svg`/`figure`/`picture`/`figcaption`)
+  passed; a repository-wide duplicate-`id` scan found no new duplicates; a
+  custom regex-aware JS tokenizer (no `node` in this sandbox) found zero
+  syntax errors in the full inline `<script>`.
+- Regression: both checkpoint questions remain programmatically
+  byte-identical between `.cp-q` and `M5.questions`; `M5.systems` rubrics,
+  `MODULE_GUIDE_SYSTEMS[5]`, and `MODULE_QUICK_PROMPTS[5]` are untouched
+  (confirmed via `git diff`); the "What changes first?" interaction was
+  exercised once more and left `APP_STATE.data.progress['5']`
+  byte-identical before/after (no progress write); all 5 approved Module 5
+  images remained present and unchanged; completion gating was exercised
+  end-to-end with mocked pass results — passing only one checkpoint left
+  `#m5Complete` hidden, passing both revealed it with the same supporting
+  line and competency copy from the prior recap-polish step, and
+  `APP_STATE.canAccessModule(6)` correctly followed `isModuleComplete(5)`;
+  Module 4 was reopened live and confirmed unchanged (same title, same 12
+  `module-04` images); a targeted `git diff` grep confirmed zero
+  references to authentication, entitlement, Supabase, certificate-
+  issuance, or progress-persistence functions anywhere in the change.
+- No horizontal overflow at any of four representative widths: 1440px,
+  1024px, 768px, and 390px. At 1440px a sampled mistake card measured
+  ~552px wide × ~195px tall; at 390px the same card measured ~320px wide ×
+  ~251px tall — compact and readable at both ends, not dramatically
+  taller than the pre-existing single-row cards.
+
+This was static and mocked browser validation only — it does not replace
+or claim real-device or live-preview manual QA. Module 5 remains
+**Implemented — awaiting manual QA**; the current gate remains Module 5
+manual QA. Module 6 was not extracted, audited, or edited. The approved
+downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended
+with production deferred — nothing was created or linked. No merge or
+deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.

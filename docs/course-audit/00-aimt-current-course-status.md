@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 6, 2026
+**Last updated:** August 8, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: `4428e511264966c2e8848603af69a7b953db9b50` — "Remove Module 5 post-checkpoint recap"
+- Latest controlling commit: `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc` — "Strengthen Module 5 common-mistake guidance"
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -70,15 +70,15 @@ Manually approved, but the following still require later or manual review — no
 
 ## Task just completed
 
-Focused Module 5 correction: removed the standalone post-checkpoint recap identified in manual QA. Module 5 remains `Implemented — awaiting manual QA`.
+Focused Module 5 correction: added "Better move" corrective lines to Section 5.9's eight common-mistake cards, identified during manual QA. Module 5 remains `Implemented — awaiting manual QA`.
 
-Manual QA on Module 5 found a standalone lesson section (`5.10 — Recap`) placed after the final required checkpoint (`m5cp2`), which created the impression that new instructional material continued after the student reached the final assessment — a pattern no other approved module uses. The complete `## 5.10 — Recap` section was removed from `docs/course-audit/modules/module-05.md` (Sections 5.1–5.9 were not renumbered or otherwise touched), and the matching visible block was removed from `headspa-mastery.html` so checkpoint `m5cp2` is now followed directly by the completion card, with no divider or instructional content between them — matching the existing Module 4 checkpoint-to-completion pattern. The strongest sentence from the deleted recap ("Assessment becomes skill when it changes the service responsibly.") was preserved as a new **Supporting line** in the completion-card specification and rendered as an additional `.lc-sub` line inside `#m5Complete`, directly after the "Module complete." title and before the existing primary competency statement — not as a new section, heading, checkpoint, or separate card. Section 5.9's summary card, both checkpoint questions/rubrics, the "What changes first?" interaction, all five approved images and their captions/alt text, Cadence configuration, and Module 6 gating are all unchanged. This is a narrow structural-clarity correction only.
+Manual QA found that Section 5.9 ("Errors that make protocols less intelligent") — the final instructional section before checkpoint `m5cp2` — named eight common practitioner mistakes but stopped after naming each error, with no explicit corrective behavior. `docs/course-audit/modules/module-05.md` and `headspa-mastery.html` each gained one **Better move** line per existing mistake card, in the exact approved wording, distilled entirely from concepts already taught and approved elsewhere in Module 5 — no new curriculum was introduced. The section eyebrow, headline, all eight mistake titles, all eight existing mistake descriptions, and the closing summary card ("A strong protocol is explainable.") are unchanged. Checkpoint questions/rubrics, completion-card copy, Cadence configuration, all five approved Module 5 images and their captions/alt text, progress architecture, and Module 6 gating were not touched, and Section 5.10 (removed in the prior polish pass) did not return.
 
-### Recap-removal validation summary
+### Mistake-guidance validation summary
 
-- Structure: confirmed live that Sections 5.1–5.9 remain in order, `m5cp2` is the final visible instructional block, no "5.10" or "From pattern to plan" text remains anywhere in the student experience, and Section 5.9's summary card is unchanged.
-- Completion behavior: with a cleared test state, passing only `m5cp1` (mocked) left completion hidden; passing both `m5cp1` and `m5cp2` revealed `#m5Complete` with the new supporting line in the correct position, unlocked Module 6, and correctly restored on reload.
-- Regression: both checkpoint questions remain byte-identical between display and evaluation; rubrics, Cadence config, and the ungraded interaction (still writes no progress) are unchanged; no duplicate IDs or malformed HTML introduced; no JavaScript referenced the removed section; no horizontal overflow at 1440px, 1024px, 768px, or 390px; Module 4 reopened unchanged; no auth, entitlement, certificate, progress, or Review Mode architecture changed.
+- Content: all eight mistake cards confirmed programmatically to carry exactly one "The mistake" row and one "Better move" row each, matching the approved copy exactly; the summary card is unchanged; `m5cp2` still follows Section 5.9 directly with no reintroduced recap section.
+- Completion behavior: with a cleared test state, passing only one mocked checkpoint left `#m5Complete` hidden; passing both revealed it with the same supporting line and competency copy from the prior recap-polish step, and Module 6 correctly unlocked.
+- Regression: both checkpoint questions remain byte-identical between display and evaluation; rubrics, Cadence config, and the ungraded interaction (still writes no progress) are unchanged; all 5 Module 5 images unchanged; no duplicate IDs or malformed HTML introduced; no horizontal overflow at 1440px, 1024px, 768px, or 390px; Module 4 reopened unchanged; no auth, entitlement, certificate, progress, or Review Mode architecture changed.
 - This was static and mocked browser validation only — it does not replace or claim real-device or live-preview manual QA.
 
 ---
@@ -91,7 +91,7 @@ Module 5 manual QA.
 
 ## Exact next task
 
-Push the outstanding Module 5 commits (implementation, visual-asset integration, and this recap correction) if necessary, open the updated `course-audit-build` branch preview, and resume Module 5 desktop and phone manual QA against `docs/course-audit/00-aimt-manual-qa-master-checklist.md` and `module-05.md`'s acceptance criteria — including confirming the completion card's new supporting line and the absence of any post-checkpoint recap. Do not begin preview QA against an older deployment. Do not mark Module 5 "Implemented — manual QA approved" until that manual pass is complete.
+Push the outstanding Module 5 commits (implementation, visual-asset integration, the recap correction, and this mistake-guidance polish) if necessary, reopen/refresh the updated `course-audit-build` branch preview, and continue Module 5 desktop and phone manual QA from Section 5.9 against `docs/course-audit/00-aimt-manual-qa-master-checklist.md` and `module-05.md`'s acceptance criteria — including confirming each mistake card's new "Better move" line, the completion card's supporting line, and the absence of any post-checkpoint recap. Do not perform QA against an older preview. Do not mark Module 5 "Implemented — manual QA approved" until that manual pass is complete.
 
 ---
 
@@ -146,7 +146,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- `4428e511264966c2e8848603af69a7b953db9b50` — Remove Module 5 post-checkpoint recap (**latest controlling commit**)
+- `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc` — Strengthen Module 5 common-mistake guidance (**latest controlling commit**)
+- `4428e511264966c2e8848603af69a7b953db9b50` — Remove Module 5 post-checkpoint recap
 - `8a2ef4bdadd780ae7fba7849be0376a358a3c686` — Integrate Module 5 teaching images
 - `b96fd3eff70d86d89d0ec1c8386a6049b124bead` — Add Module 5 visual asset plan
 - `7f2b3fbb9d63d1a197b03dc7b58eeb9ec0ae322f` — Advance course status to Module 5 manual QA
