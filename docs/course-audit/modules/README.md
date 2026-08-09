@@ -355,7 +355,51 @@ video-production task — status **Approved for video production**. This
 completes lifecycle step 9 for Module 5. The current gate is Module 6
 source extraction; Module 6 extraction has not begun.
 
-Modules 6–11 have not been extracted yet. Source files for those modules
+## Module 6 — Conditions & Disorders
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 6** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-06-source.md`](module-06-source.md) — full verbatim extraction |
+| Approved specification file | [`module-06.md`](module-06.md) — empty scaffold only, not yet audited |
+| Wrapper ID | `module6Wrap` — standard hidden-template pattern |
+| Checkpoint IDs | `m6cp1`, `m6cp2` — standard `mNcpX` pattern |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| **Status** | **Extracted — awaiting external audit** |
+
+Extracted per the Module 6 source-extraction task. No asset inventory file
+was created — Module 6 currently contains zero real image/diagram/video/
+downloadable assets; every "photo" slot renders a decorative placeholder
+graphic with no underlying file, the same state already documented for
+Module 5 (`module-06-source.md` §7).
+
+Notable findings recorded in the extraction (not fixed at extraction time):
+Module 6's displayed and evaluated checkpoint questions do not match for
+both `m6cp1` and `m6cp2` (same pattern already corrected for Modules 1–4,
+not yet corrected for Module 5); `M6.system` is a single shared rubric for
+both checkpoints rather than the per-checkpoint `M6.systems.mNcpX`
+structure Modules 1–4 use; `submitM6CP` supplies no module-specific
+network-error text; both checkpoints' voice and submit buttons lack
+`aria-label` and both `.cp-res` regions lack `aria-live`; three of Module
+6's four ungraded interactions (a dry-vs-dandruff comparison toggle, a
+six-step "wrong product cycle" selector, and a four-item trigger
+accordion) are plain `<div onclick>` elements with no keyboard or
+screen-reader semantics at all (the fourth, a Malassezia-spectrum range
+slider, is a native, keyboard-accessible control but lacks an explicit
+`aria-label`); section numbering skips "6.2" entirely; a tap-interaction
+hint is duplicated with inconsistent wording; `M6.system` still says
+"instructor of HeadSpa Mastery" and `MODULE_GUIDE_SYSTEMS[6]` still frames
+Cadence as personally "a mentor built from nearly two decades in the head
+spa industry" — the old-name and personal-experience-claim patterns
+already corrected out of Modules 0, 1, 2, and 4, still uncorrected in
+Module 5; an unverified sebum-production/temperature percentage claim is
+duplicated verbatim from Module 5's oily-scalp section; and Module 6 has
+no standalone, always-visible stop-service/refer-out section — its only
+referral sentence is gated behind manually dragging the spectrum slider to
+its final position. See `module-06-source.md` for the complete pre-audit
+findings list.
+
+Modules 7–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.

@@ -2937,3 +2937,98 @@ step's commit is pushed. Module 6 was not extracted, audited, or
 documented in this step. No merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 37: Module 6 source extraction (lifecycle step 10)
+
+Created `docs/course-audit/modules/module-06-source.md` — a complete,
+neutral, verbatim extraction of the current Module 6 ("Conditions &
+Disorders") student experience, following the structure and depth
+established by `module-05-source.md` and `module-04-source.md` — and
+`docs/course-audit/modules/module-06.md` (empty scaffold only, `Status:
+Awaiting external audit`, matching Module 5's full heading set — Approved
+outcomes through Implementation notes, including the Distinct learning
+rhythm, Insider value and acceleration payoff, Guided completion
+structure, Listen Mode notes, and Downloadable resource opportunity
+sections), matching the established per-module extraction-task convention
+(see Step 27 for the Module 5 precedent). This was documentation and
+extraction only — no production file (`headspa-mastery.html`,
+`assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was
+modified, no correction was made, and no audit judgment was rendered.
+Module 6 was not audited, specified, or implemented in this step.
+
+**Categories extracted:** module identity (titles, eyebrow, hero, wrapper
+ID, routing, prerequisites, unlock behavior); the complete curriculum in
+student encounter order (hero, sections 6.1 and 6.3–6.8, both checkpoints,
+completion card); all four ungraded interactions (a dry-vs-dandruff
+comparison-card toggle, a six-step "wrong product cycle" selector, a
+four-position Malassezia-to-seborrheic-dermatitis spectrum slider, and a
+four-item trigger accordion), each with instructions, revealed feedback
+text, retry/reset behavior, progress-write status, persistence status, and
+keyboard/accessibility wiring; both checkpoints (`m6cp1`, `m6cp2`) with
+displayed and evaluated question strings captured and compared
+independently, the shared `M6.system` evaluator rubric, voice/Enter-key
+behavior, and the checkpoint error-message gap; Cadence configuration
+(`M6.system`'s checkpoint identity, `MODULE_GUIDE_SYSTEMS[6]`, the three
+`MODULE_QUICK_PROMPTS[6]` entries, the module-open greeting, and
+`MODULE_MEMORY_TAGS[6]`/`getCheckpointMemoryTags`'s module-6 branch);
+completion requirements, completion-card copy, and Module 7 gating
+behavior; a full asset inventory (zero real assets — every "photo" slot is
+a decorative placeholder, matching Module 5's current state); a claims and
+technical-content inventory (preserved, not evaluated for accuracy); an
+accessibility and responsive inventory; Listen Mode and Guided Completion
+Path planning notes; a relationship-to-adjacent-modules section; a full
+source map with line numbers re-verified against the current file (not
+copied from the Module 5 template's line numbers where shared code has
+since moved); and a confirmed-findings/assumptions list.
+
+**Notable findings recorded (not fixed at extraction time):** both
+checkpoints' displayed and evaluated question strings do not match (same
+defect class already corrected in Modules 1–4, not yet corrected in
+Module 5); `M6.system` is one shared rubric for both checkpoints rather
+than a per-checkpoint structure; `submitM6CP` has no module-specific
+network-error text; both checkpoints lack `aria-label`/`aria-live`; three
+of the four interactions (`.vs-card`, `.cycle-step`, `.trigger-item`) are
+plain `<div onclick>` elements with zero keyboard/ARIA semantics, and the
+fourth (the spectrum slider) is a native, keyboard-accessible control that
+still lacks an explicit `aria-label`; section numbering skips "6.2"
+entirely; a tap-interaction hint appears twice with inconsistent wording
+in the same section; `M6.system` still says "instructor of HeadSpa
+Mastery" and `MODULE_GUIDE_SYSTEMS[6]` still frames Cadence as personally
+"a mentor built from nearly two decades in the head spa industry" (the
+old-name and personal-experience-claim patterns already corrected out of
+Modules 0, 1, 2, and 4, still uncorrected in Module 5); a specific
+sebum-production/temperature percentage claim is duplicated verbatim from
+Module 5's oily-scalp section; a memory tag (`scope-awareness`) is
+declared in `MODULE_MEMORY_TAGS[6]` but has no corresponding regex branch
+in `getCheckpointMemoryTags`, making it unreachable from checkpoint
+grading; and Module 6 has no standalone, always-visible stop-service/
+refer-out section — its only referral sentence is gated behind manually
+dragging the spectrum slider to its final position. None of these were
+corrected — they are recorded for the external audit to evaluate.
+
+**No audit judgments were made.** The extraction does not propose
+replacement curriculum, approved outcomes, final copy, corrected
+rubrics, accessibility fixes, or implementation instructions anywhere in
+the file — findings are recorded as observations only, following the same
+"preserve, do not correct" standard already applied to the Module 0–5
+extractions.
+
+**Files changed:** `docs/course-audit/modules/module-06-source.md` (new),
+`docs/course-audit/modules/module-06.md` (new, empty scaffold only),
+`docs/course-audit/00-aimt-current-course-status.md`,
+`docs/course-audit/modules/README.md`, and this file
+(`implementation-log.md`). No production code (`headspa-mastery.html`,
+`assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was
+changed, and `module-06.md` contains no audit content — every section
+below its heading reads `_Pending external audit._`.
+
+**Lifecycle status.** This completes lifecycle step 10 (source extraction)
+for Module 6. Per the governing module lifecycle, the Module 6 external
+audit (step 3 of the per-module lifecycle) may now begin as a separate
+task once this step's commit is pushed. Module 6 was not audited,
+specified, or implemented in this step. Module 7 was not touched. No
+merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.
