@@ -238,7 +238,7 @@ authenticated, consented, de-identified clinical captures.
 | Wrapper ID | `module5Wrap` — standard hidden-template pattern |
 | Checkpoint IDs | `m5cp1`, `m5cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
 
 Extracted per Step 27. No asset inventory file was created — Module 5
 currently contains zero real image/diagram/video/downloadable assets; every
@@ -327,6 +327,27 @@ a real `<figcaption>`, and non-diagnostic alt text. The approved
 downloadable resource (`AIMT Regional Service Adaptation Guide`) remains
 recommended with production deferred — nothing was created or linked. Module
 5 remains **Implemented — awaiting manual QA**.
+
+**Manual QA polish (Steps 32–34).** Three focused corrections came out of
+manual QA before approval: the standalone post-checkpoint `5.10 — Recap`
+section was removed, with its strongest line preserved as new supporting
+copy inside the `m5Complete` completion card (Step 32); each of Section
+5.9's eight common-mistake cards gained an approved "Better move"
+corrective line (Step 33); and the "What changes first?" interaction's
+answer-reveal behavior was finalized so an incorrect selection never
+reveals, highlights, or tags the approved answer — only the selected
+option receives a state, each of the 8 wrong choices shows its own
+approved "Not quite." explanation, and the approved answer only turns
+green with its "Correct." explanation once actually selected (Step 34).
+
+**Manually approved August 8, 2026.** The owner reviewed the updated
+`course-audit-build` branch preview and approved Module 5. See Step 35 in
+`implementation-log.md` for the full manual-QA record and the deferred
+items (live-model grading/Cadence QA, screen-reader QA, physical-keyboard
+QA, real touch-device QA, medical/dermatological review, legal/scope
+review). Module 5 status is now **Implemented — manual QA approved**.
+Modules 0–5 are approved; Modules 6–11 remain pending. The current gate is
+Module 5 video-source creation — Module 6 extraction has not begun.
 
 Modules 6–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been

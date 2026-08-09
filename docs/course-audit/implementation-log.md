@@ -2653,3 +2653,174 @@ with production deferred — nothing was created or linked. No merge or
 deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 34: Finalize "What changes first?" answer-reveal behavior
+
+During the manual-QA preview review, the owner identified that the
+Module 5 "What changes first?" interaction revealed and tagged the
+approved answer for every scenario as soon as any option was clicked —
+including a wrong one — and that the feedback panel always opened with
+the word "Correct." even when the student had picked incorrectly. This
+step corrects that behavior directly in the live interaction, through
+three rounds of the same fix converging on final approved behavior, and
+updates `module-05.md` so the specification records what is now
+implemented.
+
+**Commit `27397ca7bbc7823c205cd1764ac7ba6205dafb5f`, "Finalize Module 5
+'What changes first?' answer-reveal behavior":** `headspa-mastery.html`
+and `docs/course-audit/modules/module-05.md` only (2 files, 71 insertions,
+16 deletions combined).
+
+**`headspa-mastery.html` (`M5_DECISION_ANSWERS` / `m5Decide()`):**
+- Every option now resets to fully neutral on each new selection; only
+  the option the student just clicked receives a state. The approved
+  answer is never pre-highlighted, tagged, or revealed on an unselected
+  option.
+- Each of the 8 wrong choices now carries its own approved
+  choice-specific explanation (verbatim, supplied by the owner), shown in
+  the feedback panel and beginning "Not quite." — replacing the earlier
+  intermediate state where a wrong pick showed only a bare "Not quite" tag
+  with no panel text.
+- The 4 approved-answer explanations keep their "Correct." opening word;
+  the panel only shows this text once the student actually selects that
+  option, alongside the green "Correct answer" tag.
+- Retry, reset, no-progress-write, and the ungraded/non-gating nature of
+  the interaction are all unchanged.
+
+**`module-05.md` ("Approved interaction — 'What changes first?'"):** each
+of the four scenarios gained an **Incorrect-choice feedback** subsection
+recording its two approved wrong-choice explanations verbatim (this
+content did not previously exist anywhere in the repository). Both
+"Interaction behavior" and "Interaction implementation" requirement lists
+gained a bullet documenting the finalized non-reveal/isolation rule and
+the "Correct."/"Not quite." prefix convention, so the specification now
+matches the implemented behavior exactly.
+
+**Validation performed:** all 12 possible selections (4 scenarios × 3
+options) were exercised with real `.click()` calls against a cleared test
+state. All 8 wrong selections showed their exact approved explanation
+text with only that option marked and every other option — including the
+approved answer — confirmed neutral; all 4 correct selections showed the
+green state and the "Correct."-prefixed explanation only once selected. A
+retry sequence (wrong → correct → wrong again) confirmed previously-marked
+options fully revert to neutral. `APP_STATE.data.progress['5']` was
+confirmed byte-identical before and after every click, and
+`isModuleComplete(5)` stayed `false` throughout. A custom regex-aware JS
+tokenizer confirmed zero syntax errors after each edit.
+
+No other Module 5 content, checkpoint, Cadence, image, or completion
+behavior was touched. Module 6 was not extracted, audited, or edited. No
+merge or deployment to `main` occurred. Work remains on branch
+`course-audit-build`.
+
+---
+
+## 2026-08-08 — Step 35: Module 5 manually approved
+
+The owner reviewed the updated `course-audit-build` branch preview and
+explicitly approved Module 5 after manual QA. Module 5 status changes from
+`Implemented — awaiting manual QA` to **`Implemented — manual QA
+approved`**. This is the manual-approval stage of the module lifecycle
+(`00-aimt-course-audit-master-instructions.md`, "Module lifecycle,"
+step 8) before video-source creation (step 9) and, eventually, Module 6
+(step 10).
+
+**Manual QA pass reviewed and recorded:**
+
+- **Environment/preview:** the updated `course-audit-build` preview was
+  reviewed; the production site was not used as the branch QA environment;
+  the current Module 5 polish (recap removal, "Better move" cards, and the
+  finalized interaction behavior from Step 34) was visible in the
+  preview; an earlier stale-preview concern was identified and resolved
+  before QA continued.
+- **Desktop visual review — passed:** hero and section hierarchy; approved
+  section order; no old fixed scalp-type material; readable spacing and
+  text width; no visible overlap or horizontal overflow; image sharpness
+  and proportions; captions and labels; semantic presentation; completion-
+  card layout.
+- **Module ending correction (Step 32, confirmed in preview):** the
+  standalone `5.10 — Recap` section was removed; Section 5.9 remains the
+  final instructional summary; "Assessment becomes skill when it changes
+  the service responsibly." was preserved as supporting copy inside the
+  `m5Complete` completion card.
+- **Section 5.9 polish (Step 33, confirmed in preview):** all eight
+  common-mistake cards now carry an approved "Better move" statement
+  built from already-approved Module 5 concepts; the existing summary
+  card ("A strong protocol is explainable.") remained intact.
+- **Image review — passed:** the paired crown/hairline regional comparison
+  after Section 5.4, arranged correctly on desktop; the targeted
+  crown-cleansing image after Section 5.5; the gentle hairline-adaptation
+  image after Section 5.7; the regional client-conversation image inside
+  Section 5.8; all images sharp and not stretched; image use remained
+  illustrative and non-diagnostic; the client-conversation image's
+  background consultation-photo prop material was confirmed not to be
+  represented as AIMT terminology, real documentation, or authenticated
+  clinical evidence.
+- **"What changes first?" interaction — passed after Step 34's polish.**
+  Final approved behavior: an incorrect selection marks only the selected
+  option "Not quite" and shows that option's own choice-specific
+  explanatory feedback; the approved answer is never automatically
+  revealed; the student may retry; a correct selection receives the green
+  "Correct answer" state and its explanation beginning "Correct."; all
+  feedback is text-based as well as semantically styled; the interaction
+  remains ungraded, writes no progress, and does not gate completion. A
+  similar pre-existing answer-reveal pattern was separately observed in
+  earlier, already-approved modules (Module 3's predict-then-reveal
+  interaction and Module 4's "Say only what the image earned"
+  classification interaction both unconditionally reveal/tag the correct
+  answer regardless of which option is clicked). That pattern was
+  intentionally left unchanged in this Module 5 task — it is recorded here
+  as a deferred regression item for a future, separately scoped task
+  rather than folded silently into Module 5's scope.
+- **Completion/regression review — passed:** corrected completion-card
+  presentation; no leftover Section 5.10; previously approved modules
+  (0–4) open normally; global course navigation remains functional;
+  visible progress behavior remains normal; Review Mode remains intact; no
+  unrelated visual regression observed.
+- **Mobile responsive review:** a manual responsive review was completed
+  at approximately 390px using browser device emulation — layout,
+  stacking, text fit, imagery, and completion-card presentation all
+  passed with no visible horizontal overflow or clipping. This is browser
+  device-emulation review, not physical-device QA.
+
+**Deferred QA — recorded honestly, not completed by this approval:**
+live-model checkpoint grading QA; live Cadence response QA; screen-reader
+QA; physical-keyboard QA; real touch-device QA; medical/dermatological
+review; legal/state-specific scope review. Review Mode in the current
+audit environment does not wire through to live Cadence grading, so live
+checkpoint response-quality testing was not performed during this
+module's manual pass — static/mocked validation already covered
+checkpoint wiring, question identity, rubric implementation, state logic,
+completion logic, and Module 6 gating (see Steps 30–34). No new
+authentication or grading test architecture was created for this task.
+
+**Downloadable resource:** `AIMT Regional Service Adaptation Guide`
+remains recommended with production deferred. The emerging architectural
+direction — that approved student downloads may ultimately live in a
+centralized dashboard Resources Library rather than being duplicated
+across module pages — is preserved as a future direction only. Neither
+the guide nor the Resources Library was created in this task.
+
+**Files changed in this step:**
+`docs/course-audit/00-aimt-current-course-status.md`,
+`docs/course-audit/modules/README.md`, and this file
+(`implementation-log.md`). No production code was touched by the approval
+documentation itself — the code and spec changes it approves were already
+committed in Step 34 (`27397ca7bbc7823c205cd1764ac7ba6205dafb5f`).
+
+**Lifecycle determination.** Per the governing module lifecycle
+(source extraction → external audit → approved specification →
+implementation → static/mocked validation → manual QA → manual approval →
+video-source creation → next module begins), Module 5 has now cleared
+manual approval (step 8). `module-05-video-source.md` must be created
+(step 9) before Module 6 source extraction (step 10) may begin. The
+current gate is Module 5 video-source creation. Module 6 extraction,
+audit, or documentation remains prohibited until that file exists and is
+recorded complete.
+
+Module 5 is now **Implemented — manual QA approved**. Modules 0–5 are
+approved; Modules 6–11 remain pending. No merge or deployment to `main`
+occurred, and none is authorized. Work remains on branch
+`course-audit-build`.

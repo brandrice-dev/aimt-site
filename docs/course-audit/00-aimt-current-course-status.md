@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc` — "Strengthen Module 5 common-mistake guidance"
+- Latest controlling Module 5 implementation/polish commit: `27397ca7bbc7823c205cd1764ac7ba6205dafb5f` — "Finalize Module 5 \"What changes first?\" answer-reveal behavior"
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -37,9 +37,11 @@ Do not merge or deploy yet.
 | Module 2 | Implemented — manual QA approved |
 | Module 3 | Implemented — manual QA approved |
 | Module 4 | Implemented — manual QA approved |
-| Module 5 | Implemented — awaiting manual QA |
+| Module 5 | Implemented — manual QA approved |
 | Modules 6–11 | Pending |
 | Module 12 | Planned — do not begin |
+
+**Latest approved module: Module 5** — approved August 8, 2026.
 
 ---
 
@@ -70,34 +72,57 @@ Manually approved, but the following still require later or manual review — no
 
 ## Task just completed
 
-Focused Module 5 correction: added "Better move" corrective lines to Section 5.9's eight common-mistake cards, identified during manual QA. Module 5 remains `Implemented — awaiting manual QA`.
+**Module 5 manually approved — August 8, 2026.** The owner reviewed the updated `course-audit-build` branch preview and explicitly approved Module 5 (**Scalp Patterns & Service Adaptation**) after manual QA. Module 5 status changes from `Implemented — awaiting manual QA` to `Implemented — manual QA approved`. This is documentation-only; no course production code was modified by this task. The code and specification changes this approval covers were already committed separately (`27397ca7bbc7823c205cd1764ac7ba6205dafb5f`, "Finalize Module 5 \"What changes first?\" answer-reveal behavior") before this approval was recorded.
 
-Manual QA found that Section 5.9 ("Errors that make protocols less intelligent") — the final instructional section before checkpoint `m5cp2` — named eight common practitioner mistakes but stopped after naming each error, with no explicit corrective behavior. `docs/course-audit/modules/module-05.md` and `headspa-mastery.html` each gained one **Better move** line per existing mistake card, in the exact approved wording, distilled entirely from concepts already taught and approved elsewhere in Module 5 — no new curriculum was introduced. The section eyebrow, headline, all eight mistake titles, all eight existing mistake descriptions, and the closing summary card ("A strong protocol is explainable.") are unchanged. Checkpoint questions/rubrics, completion-card copy, Cadence configuration, all five approved Module 5 images and their captions/alt text, progress architecture, and Module 6 gating were not touched, and Section 5.10 (removed in the prior polish pass) did not return.
+### Manual QA summary
 
-### Mistake-guidance validation summary
+**Environment/preview:** the updated `course-audit-build` preview was reviewed; the production site was not used as the branch QA environment; current Module 5 polish (recap removal, "Better move" cards, and the finalized interaction behavior) was visible in the preview; an earlier stale-preview concern was identified and resolved before QA continued.
 
-- Content: all eight mistake cards confirmed programmatically to carry exactly one "The mistake" row and one "Better move" row each, matching the approved copy exactly; the summary card is unchanged; `m5cp2` still follows Section 5.9 directly with no reintroduced recap section.
-- Completion behavior: with a cleared test state, passing only one mocked checkpoint left `#m5Complete` hidden; passing both revealed it with the same supporting line and competency copy from the prior recap-polish step, and Module 6 correctly unlocked.
-- Regression: both checkpoint questions remain byte-identical between display and evaluation; rubrics, Cadence config, and the ungraded interaction (still writes no progress) are unchanged; all 5 Module 5 images unchanged; no duplicate IDs or malformed HTML introduced; no horizontal overflow at 1440px, 1024px, 768px, or 390px; Module 4 reopened unchanged; no auth, entitlement, certificate, progress, or Review Mode architecture changed.
-- This was static and mocked browser validation only — it does not replace or claim real-device or live-preview manual QA.
+**Passed:**
+- Desktop visual review — hero and section hierarchy, approved section order, no old fixed scalp-type material, readable spacing and text width, no overlap or horizontal overflow, image sharpness and proportions, captions and labels, semantic presentation, completion-card layout.
+- Module ending correction — standalone `5.10 — Recap` removed; Section 5.9 remains the final instructional summary; "Assessment becomes skill when it changes the service responsibly." preserved as completion-card supporting copy.
+- Section 5.9 polish — all eight common-mistake cards carry an approved "Better move" statement built from already-approved Module 5 concepts; the existing summary card ("A strong protocol is explainable.") remained intact.
+- Image review — paired crown/hairline regional comparison after Section 5.4 (correctly arranged on desktop), targeted crown-cleansing image after Section 5.5, gentle hairline-adaptation image after Section 5.7, regional client-conversation image inside Section 5.8; all images sharp, not stretched, illustrative and non-diagnostic; consultation-photo background material in the client-conversation image confirmed not represented as AIMT terminology, real documentation, or authenticated clinical evidence.
+- "What changes first?" interaction — final approved behavior: an incorrect selection marks only the selected option "Not quite" and shows its own choice-specific explanatory feedback; the approved answer is never automatically revealed; retry is allowed; a correct selection receives the green "Correct answer" state with its explanation beginning "Correct."; feedback is text-based as well as semantically styled; the interaction remains ungraded, writes no progress, and does not gate completion. A similar pre-existing answer-reveal pattern was observed in earlier approved modules (Module 3's predict-then-reveal and Module 4's classification interaction) and was intentionally **not** changed in this Module 5 task — recorded below as a deferred regression item, not silently folded into scope.
+- Completion/regression review — corrected completion-card presentation, no leftover Section 5.10, previously approved modules (0–4) open normally, global navigation functional, visible progress behavior normal, Review Mode intact, no unrelated visual regression.
+- Mobile responsive review — completed at approximately 390px using browser device emulation: layout, stacking, text fit, imagery, and completion-card presentation all passed with no horizontal overflow or clipping. **This is browser device-emulation review, not physical-device QA.**
+
+**Deferred — not completed by this approval:**
+- live-model checkpoint grading QA;
+- live Cadence response QA;
+- screen-reader QA;
+- physical-keyboard QA;
+- real touch-device QA;
+- medical/dermatological review;
+- legal/state-specific scope review.
+
+Review Mode in the current audit environment does not wire through to live Cadence grading, so live checkpoint response-quality testing was not performed during this module's manual pass. Static/mocked validation already covered checkpoint wiring, question identity, rubric implementation, state logic, completion logic, and Module 6 gating.
+
+**Deferred regression item (not part of Module 5's scope):** Module 3's predict-then-reveal interaction and Module 4's "Say only what the image earned" classification interaction share the same pre-existing answer-reveal pattern that was corrected in Module 5 — both already-approved modules still unconditionally reveal/tag the correct answer regardless of which option is clicked. This was intentionally left unchanged during Module 5's task and remains open for a future, separately scoped task.
+
+### Downloadable decision
+
+`AIMT Regional Service Adaptation Guide` — recommended; production deferred. Not created, not linked. The emerging architectural direction — that approved student downloads may ultimately live in a centralized dashboard Resources Library rather than being duplicated across module pages — is preserved as a future direction only; the Resources Library was not built.
 
 ---
 
 ## Current gate
 
-Module 5 manual QA.
+Module 5 video-source creation.
+
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 5 has now cleared manual approval (step 8). `module-05-video-source.md` must be created (step 9) before Module 6 source extraction (step 10) may begin.
 
 ---
 
 ## Exact next task
 
-Push the outstanding Module 5 commits (implementation, visual-asset integration, the recap correction, and this mistake-guidance polish) if necessary, reopen/refresh the updated `course-audit-build` branch preview, and continue Module 5 desktop and phone manual QA from Section 5.9 against `docs/course-audit/00-aimt-manual-qa-master-checklist.md` and `module-05.md`'s acceptance criteria — including confirming each mistake card's new "Better move" line, the completion card's supporting line, and the absence of any post-checkpoint recap. Do not perform QA against an older preview. Do not mark Module 5 "Implemented — manual QA approved" until that manual pass is complete.
+Create `module-05-video-source.md` using the governing module-opening video workflow and the now-approved Module 5 specification. After that file is complete and documented, Module 6 source extraction may begin.
 
 ---
 
 ## Do not begin
 
-- Module 6 extraction or audit
+- Module 6 extraction or audit (until Module 5 video-source creation is complete)
 - Module 12
 - completion and certificate audit
 - certificate or grading trust hardening
@@ -111,6 +136,8 @@ Push the outstanding Module 5 commits (implementation, visual-asset integration,
 - monolith refactor
 - merge to `main`
 - production deployment
+- downloadable production
+- Resources Library implementation
 
 ---
 
@@ -120,9 +147,9 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0–3.
 
-It must not interrupt or reorder Module 5 manual QA.
+Module 5's own video-source file is now the current gate (see "Exact next task" above), not a side track.
 
-Module 4 video-source creation is not the current audit gate.
+Module 4 video-source creation remains available in parallel but is not the current audit gate.
 
 ---
 
@@ -131,6 +158,7 @@ Module 4 video-source creation is not the current audit gate.
 Retained accurately, not resolved by this task:
 
 - live-model grading QA;
+- live Cadence response QA;
 - screen-reader QA;
 - physical-keyboard QA;
 - real touch-device QA;
@@ -138,25 +166,34 @@ Retained accurately, not resolved by this task:
 - legal and state-specific scope review;
 - downloadable-resource production;
 - authenticated clinical-image intake;
-- Guided Completion and Listen Mode QA.
+- Guided Completion and Listen Mode QA;
+- Module 3/Module 4 answer-reveal pattern (deferred regression item, see above).
 
 The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended; production is still deferred and it was not created or linked by this task.
 
 ---
 
+## Preview, push, merge, and deployment status
+
+- Branch preview: `course-audit-build` remains the audit environment; the preview reflects all commits through this approval.
+- Push status: local branch is ahead of `origin/course-audit-build` pending this task's commit — push after committing, or via GitHub Desktop if CLI credentials are unavailable.
+- Merge status: no merge to `main` has occurred or is authorized.
+- Deployment status: no production deployment has occurred or is authorized.
+
+---
+
 ## Latest relevant commits
 
-- `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc` — Strengthen Module 5 common-mistake guidance (**latest controlling commit**)
+- (pending) — Approve Module 5 manual QA (**latest controlling commit** — created together with this file; see `git log` for the hash)
+- `27397ca7bbc7823c205cd1764ac7ba6205dafb5f` — Finalize Module 5 "What changes first?" answer-reveal behavior
+- `1c6c7289b7d9eeb13297fe8012dc11312ad58a65` — Record Module 5 mistake-guidance polish
+- `ebe30a2e44a40b583da8a5b7d3a8ffc99c6706bc` — Strengthen Module 5 common-mistake guidance
+- `92028e777e4e80050b8a6c0d26ec8f9d111db25c` — Record Module 5 recap polish
 - `4428e511264966c2e8848603af69a7b953db9b50` — Remove Module 5 post-checkpoint recap
 - `8a2ef4bdadd780ae7fba7849be0376a358a3c686` — Integrate Module 5 teaching images
 - `b96fd3eff70d86d89d0ec1c8386a6049b124bead` — Add Module 5 visual asset plan
 - `7f2b3fbb9d63d1a197b03dc7b58eeb9ec0ae322f` — Advance course status to Module 5 manual QA
 - `a5879dc1dcb527a2b4ef1315d5dd73120410e41e` — Implement Module 5 approved audit
 - `7ec2bf40ce7f8b508ab71f9762c1cdb2c1b933f5` — Add approved Module 5 audit specification
-- `586e891` — Extract Module 5 for external audit
-- `b4ee099` — Align semantic colors to Module 1 baseline
-- `32665ea` — Polish Module 4 terminology and semantic colors
-- `42d9aaa` — Implement Module 4 approved audit
-- `4256b1e` — Add initial module video source pack
 
 Update this section whenever a new controlling commit is approved.
