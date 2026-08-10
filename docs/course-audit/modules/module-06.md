@@ -4,13 +4,15 @@
 **Module:** 6
 **Approved module title:** Conditions & Disorders
 **Source reviewed:** `module-06-source.md`
-**Audit date:** August 8, 2026 (initial audit); **re-audited August 8, 2026** — see "Re-audit corrections" note below
+**Audit date:** August 8, 2026 (initial audit); **re-audited August 8, 2026** — see "Re-audit corrections" note below; **narrowly amended August 10, 2026** — see "Post-implementation amendment" note below
 **Status:** Approved for controlled implementation
 **Production source of truth:** `headspa-mastery.html`
 
 This document is the approved implementation specification for Module 6. It replaces the empty external-audit scaffold and becomes the controlling Module 6 content authority.
 
 **Re-audit corrections (same-day, pre-push):** four issues were corrected before this specification's commit was pushed: (1) the "10% per 1.8°F" sebum/temperature statistic was re-examined against its primary source's actual limitations and **removed** (not merely hedged further) — see "Required corrections" #9; (2) the ketoconazole OTC/prescription evidence was upgraded from commercial retail sources to primary DailyMed/FDA labeling, and the module's product-recommendation copy now carries an explicit "this is not a diagnosis or a prescription" scope statement — see "Required corrections" #7 and "Research and evidence sources" #5; (3) the visual asset plan was re-opened and now gives each of the four existing placeholder slots an explicit, final disposition (two replaced with a required non-diagnostic illustration, two removed) rather than an open-ended future recommendation — see "Visual asset plan"; (4) interaction density was re-checked against the governing learning-rhythm standard, and two of the four original interactions (the cycle-step selector and the trigger accordion) were simplified to static content because they revealed information without requiring judgment — see "Approved interactions — full audit." No curriculum content was lost in any of these corrections; all four are reasoned audit decisions, not wording changes.
+
+**Post-implementation amendment (August 10, 2026) — narrow, not a re-audit:** after initial implementation, two items were completed: (1) the required Visual 1 illustration, previously blocked because the asset did not yet exist, was supplied and installed in Section 6.3 — see "Visual asset plan"; (2) Section 6.4's interaction was refined from static, always-visible content to **"Follow the cycle,"** a progressive causal-sequence interaction that requires the student to work through the six approved steps in order and ends in an applied "Where do you break the cycle?" decision — see "Wrong product cycle" — audit decision," the revised Section 6.4 entry, "Approved interactions — full audit," "Distinct learning rhythm," "Listen Mode notes," and the added acceptance-criteria items. The six-step curriculum content, its order, and every other approved decision in this document (Section 6.3 copy beyond Visual 1's installation, Section 6.5, the trigger-list decision, the signature "Sort three presentations" interaction, both checkpoints, Cadence, completion/gating, the downloadable decision, the optional future Visual 2, and Guided Completion planning) are unchanged. This amendment does not reopen the external audit and was not accompanied by new research or new curriculum claims.
 
 It does not authorize changes to authentication, entitlements, payments, database policies, certificate issuance, unrelated modules, persistent Cadence threads, the Guided Completion Path interface, Listen Mode, Module 7, the future Module 12 Final Exam, or the monolithic course-file architecture. Nothing in this document authorizes implementation — implementation is a separate, later task.
 
@@ -157,8 +159,8 @@ Both checkpoints' displayed (`.cp-q`) and evaluated (`M6.questions`) strings mus
 - Add `aria-label="Speak your answer"` to both voice buttons and `aria-label="Send response to Cadence"` to both submit buttons.
 - Add `aria-live="polite"` to both `.cp-res` feedback regions.
 - Add an explicit `aria-label` (or `aria-labelledby` pointing to the section heading and positional labels) to `#spectrumSlider`.
-- Convert `.vs-card`, `.cycle-step`, and `.trigger-item` from plain `<div onclick>` elements to native, keyboard-operable controls (`<button type="button">` with `aria-expanded`/`aria-pressed` as appropriate), matching the pattern already used to correct Module 2's arrival accordion and judgment-check quiz.
-- Add a `prefers-reduced-motion` override for the `.vs-detail` and `.cycle-insight` `slideDown` animations, matching the pattern already established elsewhere in the file.
+- Convert `.vs-card` and `.trigger-item` from plain `<div onclick>` elements to native, keyboard-operable controls (`<button type="button">` with `aria-expanded`/`aria-pressed` as appropriate), matching the pattern already used to correct Module 2's arrival accordion and judgment-check quiz. (`.cycle-step` — superseded by the "Follow the cycle" progressive interaction's native `.fc-trigger` buttons; see the post-implementation amendment.)
+- Add a `prefers-reduced-motion` override for the `.vs-detail` `slideDown` animation, matching the pattern already established elsewhere in the file. (`.cycle-insight`'s reduced-motion handling — superseded by `.fc-detail`/`.fc-final`; see the post-implementation amendment.)
 
 ### 15. Correct Cadence identity
 
@@ -228,9 +230,9 @@ The approved sequence resolves the 6.2 gap, adds the standalone referral section
 
 **Required copy/content changes:** "Most clients... end up..." → softened per correction #5.
 
-**Interaction/visual requirements:** The six-step cycle is presented as a **static, always-visible sequential display** (numbered steps 1–6 with their insight text already visible, connected by the existing arrow glyphs) — the `.cycle-step` click-to-reveal interactivity is **removed** per the interaction-density re-check (see "Approved interactions — full audit" below). No interaction remains at this location; the content itself is fully preserved.
+**Interaction/visual requirements — revised (post-implementation refinement, see "Wrong product cycle" — audit decision below):** The six-step cycle is presented as **"Follow the cycle,"** a progressive causal-sequence interaction (`.follow-cycle`). The curriculum content and the six-step order are unchanged from the original approved specification — no step was reworded beyond what "Required copy/content changes" above already specifies. What changed is the delivery mechanism: only Step 1 is initially available; activating a step reveals its approved explanation, marks that stage explored, and unlocks the next step; a student cannot jump ahead to a later step on the first pass; previously explored steps remain freely reviewable (their explanation can be reopened/closed without affecting unlocked progress). After all six stages have been explored, a final reasoning card, "Where do you break the cycle?", appears and requires the student to apply the causal chain to a new scenario (see full specification in "Wrong product cycle" — audit decision). The interaction remains **ungraded**: it writes nothing to `APP_STATE`, does not persist between module visits, and does not gate module completion.
 
-**Before moving on, the student should:** Be able to explain to a client, in plain language, why an anti-dandruff product made their dry scalp worse instead of better.
+**Before moving on, the student should:** Be able to explain to a client, in plain language, why an anti-dandruff product made their dry scalp worse instead of better, and identify where in the cycle a practitioner can responsibly intervene.
 
 ### Checkpoint 1 — `m6cp1`
 
@@ -368,9 +370,15 @@ What the student should learn from it, once corrected: that severity is a contin
 
 ## "Wrong product cycle" — audit decision
 
-**Retain the content. Remove the interactivity — re-evaluated on the interaction-density re-check.** The six-step causal chain itself is a genuinely useful, memorable practitioner insight and is well-sequenced pedagogically; none of that content is cut. What changes is the delivery mechanism: the current `.cycle-step` interaction lets the student click any of the six steps in any order to reveal its insight text. On re-examination against the governing interaction standard (observe / recall / distinguish / sequence / decide / explain / apply / communicate), this interaction does not actually require any of those — the student is not asked to sequence, predict, or judge anything; they simply choose which pre-written paragraph to read next. Worse, because the content is an inherently causal, ordered chain (step 1 causes step 2 causes step 3...), letting the student jump to any step in any order works *against* the causal-chain teaching point rather than reinforcing it.
+**Refined post-implementation (see amendment note below).** The original external audit correctly identified that the initial `.cycle-step` interaction — click any of six steps in any order to reveal its insight text — did not survive the governing interaction standard (observe / recall / distinguish / sequence / decide / explain / apply / communicate): the student was not asked to sequence, predict, or judge anything, only to choose which pre-written paragraph to read next, and because the content is an inherently causal, ordered chain, letting the student jump to any step in any order actively worked *against* the causal-chain teaching point. That diagnosis was correct and is preserved here. What is revised is the remedy: rather than removing interactivity entirely, the interaction is **redesigned so the UI itself requires sequencing and application** — the arbitrary jump-anywhere mechanic is rejected, not interactivity in general.
 
-The corrected approach presents all six steps and their insight text as a **static, always-visible sequential display** — the same numbered-steps-with-arrows visual, but with nothing gated behind a click. This preserves 100% of the teaching content, removes a decorative-click mechanic that wasn't earning its interactivity, and — as a secondary benefit — removes one of the module's reveal-gated Listen Mode obstacles (see "Listen Mode notes").
+**Approved interaction: "Follow the cycle."** Retain all six steps' content and ordering unchanged. Present them as a connected, numbered sequence (visually a chain, not six independent boxes) in which only the current frontier step is available; activating it reveals its approved insight text, marks it explored, and unlocks the next step; a student cannot skip ahead to a later step before reaching it in order; previously explored steps remain freely reviewable at any time. This directly reflects the content's own causal structure — the interaction now teaches sequencing because it *requires* sequencing, rather than merely displaying an ordered list.
+
+**"Where do you break the cycle?" — applied final reasoning.** After all six stages have been explored, reveal a final decision card requiring the student to apply the causal-chain reasoning to a new scenario: a client who has been escalating anti-dandruff products for a dry, increasingly reactive scalp. Three choices — move to a stronger dandruff product; reassess the presentation before choosing the product direction; add more exfoliation. Approved answer: **reassess the presentation before choosing the product direction**. Feedback is text-based (never color-only), the correct answer is never pre-highlighted, and incorrect choices receive focused feedback explaining what they overlook without describing the approved answer. Unlimited reselection; reselecting resets other options to neutral, matching the established `m5Decide`/`m6Sort` pattern used elsewhere in this module and in Module 5.
+
+**Classification, unchanged from the original audit's intent:** ungraded. Writes no progress to `APP_STATE`, creates no score, persists no state across module visits, and gates no completion — the interaction proves sequencing/application skill in the moment, not through a saved record.
+
+**Why this is a refinement, not a reopening of the audit:** the curriculum content, the six-step order, the checkpoint placement, and every other approved decision in this document are unchanged. Only the delivery mechanism for this one section was revised, after implementation, to better fulfill the same instructional goal the original correction was already aiming at — a stronger causal-sequence teaching device that also ends in an applied practitioner decision, which the static version could not provide.
 
 ---
 
@@ -429,15 +437,15 @@ None of the four items' content is removed — each maps to a concrete intake qu
 
 ### Interaction-density re-check (governs the decisions below)
 
-Re-evaluated once, in full, against the governing learning-rhythm standard (every interaction must require observe / recall / distinguish / sequence / decide / explain / apply / communicate — not movement, novelty, or the appearance of activity). The initial audit pass retained and revised all four existing interactions plus the new signature interaction (five total). On re-examination, two of the four existing interactions do not survive this test, and two do:
+Re-evaluated once, in full, against the governing learning-rhythm standard (every interaction must require observe / recall / distinguish / sequence / decide / explain / apply / communicate — not movement, novelty, or the appearance of activity). The initial audit pass retained and revised all four existing interactions plus the new signature interaction (five total). On re-examination, two of the four existing interactions did not survive this test in their original form, and two did:
 
 - **`.vs-card` comparison toggle — survives.** The mechanic (choose one of two sides to expand) requires the student to actively select which presentation to examine and reinforces a genuine two-way distinction. Distinct instructional job: **distinguish**.
 - **`#spectrumSlider` — survives.** The mechanic (continuous drag across four graduated positions) is isomorphic to the concept it teaches — a severity continuum, not discrete categories — in a way a static list or card grid could not communicate as directly. Distinct instructional job: **observe** a continuous variable experientially.
-- **`.cycle-step` selector — does not survive.** Clicking any of six steps in any order to reveal pre-written text requires no observation, distinction, sequencing, decision, explanation, or application — and because the underlying content is an inherently ordered causal chain, letting the student jump to any step in any order actively works against the content's own logic. **Simplified: converted to a static, always-visible sequential display** (see Section 6.4 above). Content fully retained; interactivity removed.
-- **`.trigger-item` accordion — does not survive.** Opening one of four independent, parallel items to read a paragraph is a plain reveal with no directed task attached. **Simplified: converted to a static list** (see Section 6.8 above). Content fully retained; interactivity removed.
-- **New signature interaction ("Sort three presentations") — added, clearly justified.** Requires the student to weigh multiple observable cues together and choose between proceed / modify / refer — the module's one genuine **decide**-and-**apply** task, and the only point where identification, spectrum placement, and referral judgment are exercised together.
+- **Original `.cycle-step` selector — does not survive in its original form.** Clicking any of six steps in any order to reveal pre-written text required no observation, distinction, sequencing, decision, explanation, or application — and because the underlying content is an inherently ordered causal chain, letting the student jump to any step in any order actively worked against the content's own logic. **Post-implementation refinement (see "Wrong product cycle" — audit decision):** rather than removing interactivity, the interaction was redesigned as **"Follow the cycle"** — a progressive, sequential-unlock interaction that requires the student to actually work through the causal chain in order, ending in an applied "Where do you break the cycle?" decision. This is not a reopening of the static-content decision; it is a recognition that the *jump-anywhere* mechanic, not interactivity itself, was the defect. Distinct instructional job: **sequence** and **apply**.
+- **`.trigger-item` accordion — does not survive.** Opening one of four independent, parallel items to read a paragraph is a plain reveal with no directed task attached. **Simplified: converted to a static list** (see Section 6.8 above). Content fully retained; interactivity removed. This decision is unchanged by the Section 6.4 refinement — the trigger list's four items are independent and parallel, not causally ordered, so the same reasoning that justifies "Follow the cycle" for Section 6.4 does not apply here.
+- **New signature interaction ("Sort three presentations") — added, clearly justified.** Requires the student to weigh multiple observable cues together and choose between proceed / modify / refer — one of the module's genuine **decide**-and-**apply** tasks, and the only point where identification, spectrum placement, and referral judgment are exercised together.
 
-**Resulting interaction count: three ungraded interactions** (`.vs-card`, `#spectrumSlider`, the new signature interaction) plus the two required checkpoints — down from the initial pass's five. This is not an arbitrary cut: two interactions were removed specifically because they were revealing information rather than requiring judgment, per the explicit governing test, while their content was fully preserved as static copy. The remaining three each have a distinct, non-overlapping instructional job (distinguish / observe a continuum / decide-and-apply), so the final density is intentional, not incidental — and the reduction has the secondary benefit of shrinking Module 6's Listen Mode reveal-gating problem (see "Listen Mode notes") and its custom-control accessibility surface area (see "Acceptance criteria").
+**Resulting interaction count: four ungraded interactions** (`.vs-card`, "Follow the cycle," `#spectrumSlider`, "Sort three presentations") plus the two required checkpoints. Each has a distinct, non-overlapping instructional job — distinguish / sequence-and-apply / observe a continuum / decide-and-apply — so the density is intentional, not incidental. This is one interaction more than the pass immediately following the initial audit (which had reduced the count to three by converting both the cycle-step and trigger-item mechanics to static content), but the increase is justified the same way the original reduction was: by the explicit governing test, not by a target count. The trigger list remains static because its four items do not share the cycle's causal structure; only the section whose content is genuinely sequential regained an interaction, and that interaction now requires more of the student (sequencing plus an applied decision) than the original arbitrary-order version ever did.
 
 ### 1. Dry-scalp-vs-dandruff comparison toggle (`.vs-card`)
 
@@ -456,9 +464,21 @@ Genuine distinction-building value; the defect is purely accessibility and the d
 - **Persistence:** none — matches current behavior.
 - **Progress written:** none.
 
-### 2. "Wrong product cycle" step display (`.cycle-step`)
+### 2. "Follow the cycle" progressive sequence (`.follow-cycle`) — revised post-implementation
 
-**Decision: Simplify — remove the interaction, keep all content as static copy.** See "Interaction-density re-check" above for the full reasoning. No control, keyboard, touch, or accessible-state-communication spec applies here anymore, since there is no longer an interactive element — the six steps and their insight text render together, in order, with no `onclick` handler, no `tabindex`, and no ARIA state needed. This removes an entire item from the accessibility acceptance checklist rather than adding one, and removes one of the module's Listen Mode reveal-gating obstacles.
+**Decision: Retain the six-step content and order; redesign the interaction so the UI requires sequencing and application.** See "Interaction-density re-check" above and "Wrong product cycle" — audit decision" for the full reasoning.
+
+- **Instructions:** "Open each stage in order to follow the cycle," placed immediately before the sequence.
+- **Controls:** six native `<button type="button">` triggers, one per step, each with `aria-expanded` reflecting its own open/closed detail state and `aria-controls` pointing at its detail region. Steps not yet reached carry the native `disabled` attribute (matching the codebase's existing stepper-navigation precedent), which both prevents activation and communicates unavailability to assistive technology natively — no custom ARIA state is invented where a native control already does the job.
+- **Choices/states:** locked (not yet reached, disabled, "Not yet available"), current (the next available step, "Up next"), explored (reached at least once, "Explored," freely reviewable). State is communicated through visible text badges on each step, not color alone.
+- **Progression:** only the current frontier step is enabled. Activating it reveals its approved explanation, marks it explored, and unlocks the next step. A student cannot jump directly to a later step before reaching it in order. Once explored, a step's explanation may be freely reopened or closed without affecting unlocked progress.
+- **Final reasoning moment:** once all six steps have been explored, a "Where do you break the cycle?" decision card appears (see "Wrong product cycle" — audit decision for the full scenario, choices, and feedback). Ungraded; unlimited reselection; reselecting resets other options to neutral; feedback is text-based, never color-only.
+- **Keyboard requirements:** native button semantics for every enabled control — Enter/Space activates; visible focus required; disabled steps are correctly excluded from the tab order until unlocked.
+- **Touch requirements:** full-width tap targets matching the padding already used by this module's other interactive cards.
+- **Accessible state communication:** `aria-expanded` per step trigger; `aria-controls` associating each trigger with its detail region; native `disabled` for locked steps; `aria-pressed` on the final decision's answer buttons; `aria-live="polite"` on the final feedback region.
+- **Persistence:** none. Session-only interaction state (which steps are explored, which is current, whether the final question has been answered) is held in module-scoped JavaScript variables, not `APP_STATE`, and is explicitly reset every time Module 6 is opened.
+- **Progress written:** none.
+- **Reduced motion:** the detail-reveal and final-card animations respect `prefers-reduced-motion`.
 
 ### 3. Malassezia-to-seborrheic-dermatitis spectrum slider (`#spectrumSlider`)
 
@@ -483,7 +503,7 @@ Genuine distinction-building value; the defect is purely accessibility and the d
 
 **Decision: Add.** Full specification in "Signature learning moment" above; ARIA/keyboard/touch/persistence requirements are specified there, not repeated here.
 
-**Summary:** Of the module's original four interactions, two survive re-examination with genuine, distinct instructional jobs (`.vs-card` — distinguish; `#spectrumSlider` — observe a continuum), and two are simplified to static content because they were revealing information rather than requiring judgment (`.cycle-step`, `.trigger-item`) — no content is lost, only the decorative click mechanic. Combined with the new signature interaction, Module 6's final ungraded-interaction count is **three** (down from the initial audit pass's five), each with a distinct, non-overlapping instructional job. This is intentionally lighter than the initial pass, not because fewer interactions are inherently better, but because a click that isn't doing instructional work should not be counted as density — see "Distinct learning rhythm" below for how this compares to Modules 4 and 5.
+**Summary:** Of the module's original four interactions, two survive largely unchanged with genuine, distinct instructional jobs (`.vs-card` — distinguish; `#spectrumSlider` — observe a continuum); one was redesigned rather than removed once its arbitrary-order defect was corrected with a sequencing mechanic instead of a static one (`.follow-cycle`, formerly `.cycle-step` — sequence and apply); and one remains simplified to static content because its four items are independent and parallel, not causally ordered (`.trigger-item`). Combined with the new signature interaction ("Sort three presentations" — decide and apply), Module 6's final ungraded-interaction count is **four**, each with a distinct, non-overlapping instructional job. Interaction count itself is not the justification — the justification is that four sections of this module genuinely benefit from a mechanic requiring distinct, verifiable student action, while the fifth (the trigger list) does not — see "Distinct learning rhythm" below for how this compares to Modules 4 and 5.
 
 ---
 
@@ -617,23 +637,44 @@ Implementation is not complete until all of the following are verifiable:
 6. `submitM6CP` passes the approved 5th `errorMessage` argument.
 7. Both checkpoint voice buttons carry `aria-label="Speak your answer"`; both submit buttons carry `aria-label="Send response to Cadence"`; both `.cp-res` regions carry `aria-live="polite"`.
 8. `#spectrumSlider` carries an explicit `aria-label` or `aria-labelledby` association.
-9. `.vs-card` is a native, keyboard-focusable, `Enter`/`Space`-activatable control with `aria-expanded` state — verified by real keyboard activation, not just markup inspection. `.cycle-step` and `.trigger-item` no longer exist as interactive controls — the cycle content and trigger content render as static markup with no `onclick`, `tabindex`, or ARIA state (verified by confirming no click handlers remain on either).
-10. `.vs-detail`'s reveal animation respects `prefers-reduced-motion`. (`.cycle-insight`'s animation no longer applies — the cycle content is static and always visible, so there is no reveal to animate.)
+9. `.vs-card` is a native, keyboard-focusable, `Enter`/`Space`-activatable control with `aria-expanded` state — verified by real keyboard activation, not just markup inspection. `.trigger-item` no longer exists as an interactive control — the trigger content renders as static markup with no `onclick`, `tabindex`, or ARIA state. `.cycle-step` (the original arbitrary-order mechanic) no longer exists in any form — it has been replaced by `.follow-cycle` (see items 26–34 below).
+10. `.vs-detail`'s reveal animation respects `prefers-reduced-motion`. `.fc-detail`'s and `.fc-final`'s reveal animations also respect `prefers-reduced-motion`.
 11. `MODULE_MEMORY_TAGS[6]` no longer includes `scope-awareness`.
 12. `M6.system`/`MODULE_GUIDE_SYSTEMS[6]` no longer contain "HeadSpa Mastery" or the "nearly two decades" personal-experience claim.
 13. A standalone, always-visible Section 6.6 referral list and script exists and does not require any interaction to view.
 14. The spectrum slider's position-4 text no longer functions as the module's only referral information.
 15. The new signature "Sort three presentations" interaction is implemented per its full specification (feedback, retry, accessibility, no persistence, no progress write, no completion gate).
-16. Section 6.4's six-step cycle renders as static, always-visible content — no click required to read any of the six insight paragraphs, and no residual `.cycle-step`/`cycleStep()` interactive code remains.
+16. Section 6.4's six-step cycle is implemented as the approved "Follow the cycle" progressive-sequence interaction (see items 26–34) — no residual `.cycle-step`/`cycleStep()`/`CYCLE_INSIGHTS` code remains anywhere in the file.
 17. Ketoconazole card specifies 1%-strength only (never 2%) and no longer states "without requiring medical oversight"; Section 6.7 includes the new explicit scope note that a product-category recommendation is not a diagnosis or a prescription.
 18. Diet and stress trigger items reflect the corrected certainty language. The "excess oil production" trigger item **contains no numeric percentage or per-degree claim** — verified by confirming the string "10%" (and any other specific percentage tied to temperature) does not appear anywhere in Module 6's rendered copy.
 19. Section 6.3 includes the overlap/ambiguity closing note.
 20. Both checkpoints' immediate-correction triggers are verified to fire on at least one mocked unsafe/diagnostic answer each, including at least one mocked answer that recommends or names a prescription-strength (2%) product.
 21. No regression to Modules 0–5: reopening each confirms byte-identical content and unaffected checkpoint/progress state.
-22. Mobile viewport (375×812) shows no horizontal overflow across the three ungraded interactions, the new referral section, and the required Visual 1 illustration.
+22. Mobile viewport (375×812) shows no horizontal overflow across the four ungraded interactions, the new referral section, and the required Visual 1 illustration.
 23. Review Mode continues to route Module 6 checkpoint test submissions through the existing unsaved test path.
 24. Module 7 unlock behavior is unaffected by these changes (still requires both `m6cp1` and `m6cp2` passed).
-25. None of the four original placeholder boxes ("Dry Scalp — Microscopy," "Dandruff — Microscopy," "Mild Dandruff — Microscopy," "Seborrheic Dermatitis — Microscopy") remains in the implemented module in its original decorative-placeholder form — Section 6.3 shows the required Visual 1 illustration per its full specification; Section 6.5's two placeholders are removed with no replacement required.
+25. None of the four original placeholder boxes ("Dry Scalp — Microscopy," "Dandruff — Microscopy," "Mild Dandruff — Microscopy," "Seborrheic Dermatitis — Microscopy") remains in the implemented module in its original decorative-placeholder form — Section 6.3 shows the required Visual 1 illustration per its full specification (see item 26); Section 6.5's two placeholders are removed with no replacement required.
+
+### Visual 1 (added — installation of the previously-blocked required asset)
+
+26. Visual 1 (`module-06-dry-scalp-vs-dandruff-illustration.png`/`.webp`) exists at `assets/images/course/module-06/` and renders inside Section 6.3, positioned alongside — not replacing — the `.vs-card` comparison cards.
+27. The image's alt text reads exactly: "Illustrative comparison of a dry-scalp pattern and a dandruff-spectrum pattern, showing fine powdery matte flaking versus larger yellowish flakes with visible oil near the root." — no diagnostic conclusion is stated for either side.
+28. The image is responsive (`max-width:100%`/`height:auto` behavior) with no stretching and no horizontal overflow at 375×812.
+
+### "Follow the cycle" (added — Section 6.4 progressive-sequence interaction)
+
+29. All six approved stage titles and explanations appear in the correct, unchanged order and wording.
+30. Only Step 1 is enabled on initial render; Steps 2–6 carry the native `disabled` attribute and cannot be activated.
+31. Activating an available step reveals its explanation, marks it explored, and enables exactly the next step — never more than one step ahead.
+32. A student cannot activate a locked step to skip ahead on the first pass (verified by attempting to activate a disabled step and confirming no state change).
+33. Previously explored steps remain reviewable — their explanation can be reopened and closed freely without affecting unlock progress.
+34. The "Where do you break the cycle?" final decision card is hidden until all six steps have been explored, and becomes visible immediately once the sixth step is explored.
+35. The approved correct answer ("Reassess the presentation before choosing the product direction") receives the approved "Correct" feedback beginning with "Correct."; each incorrect answer receives its own approved focused feedback beginning with "Not quite." that does not name or describe the correct answer.
+36. Selecting a different answer resets the previously selected option back to neutral (no stale `correct`/`wrong` state or tag left behind); reselection is unlimited.
+37. Neither step activation nor the final answer writes anything to `APP_STATE` or `localStorage['levo_app']` (verified by comparing stored state before and after exercising the full interaction).
+38. Reopening Module 6 resets all "Follow the cycle" state — every step locked except Step 1, no steps marked explored, the final decision card hidden — confirming no persistence between visits.
+39. Every enabled step trigger and every final-answer button is a native `<button>`, keyboard-operable (Enter/Space), with visible focus.
+40. `.fc-detail` and `.fc-final` reveal animations respect `prefers-reduced-motion`.
 
 ---
 
@@ -643,12 +684,12 @@ Compared to Module 4 (observation-led, visual, five-point stepper, appearance ga
 
 **Module 6 is interpretation-led.** Its dominant learning mode is distinguishing between overlapping presentations and recognizing the limits of a confident-looking visual read.
 
-- **Interaction density:** light-to-moderate, and deliberately so after re-audit — three ungraded interactions, each with a distinct instructional job: the comparison-card toggle (distinguish), the spectrum slider (observe a continuum experientially), and the new signature "Sort three presentations" interaction (decide/apply). Two originally-planned interactions (the cycle-step selector and the trigger accordion) were simplified to static content because they were revealing information rather than requiring judgment — see "Approved interactions — full audit." This is lighter than Module 5's single large signature interaction in click count, but the signature interaction carries comparable decision-making weight; the difference from Module 5 is that Module 6 also keeps two lightweight comparison/observation interactions because its content specifically benefits from active comparison, not because more clicks were needed to fill space.
-- **Checkpoint placement:** two-stage, at natural competency boundaries (mid-module after the identification/correction content, end-of-module after the full spectrum-and-referral content) — different from Module 4's placement rationale and Module 5's end-loaded final checkpoint placement, but consistent with the general "checkpoint after the content it tests" principle both those modules also follow.
-- **Where independent reasoning happens:** the signature "Sort three presentations" interaction and both checkpoints.
+- **Interaction density:** moderate, and deliberately so — four ungraded interactions, each with a distinct instructional job: the comparison-card toggle (distinguish), "Follow the cycle" (sequence, then apply), the spectrum slider (observe a continuum experientially), and the signature "Sort three presentations" interaction (decide/apply). The trigger list remains static content because its four items are independent and parallel, not causally ordered — see "Approved interactions — full audit." The count itself is not the point: each of the four interactions exists because its section's content specifically benefits from requiring that particular kind of student action (comparing, sequencing, observing a continuum, or deciding), not because a target density was being filled.
+- **Checkpoint placement:** two-stage, at natural competency boundaries (mid-module after the identification/correction content and "Follow the cycle," end-of-module after the full spectrum-and-referral content) — different from Module 4's placement rationale and Module 5's end-loaded final checkpoint placement, but consistent with the general "checkpoint after the content it tests" principle both those modules also follow.
+- **Where independent reasoning happens:** "Follow the cycle"'s final "Where do you break the cycle?" decision, the signature "Sort three presentations" interaction, and both checkpoints.
 - **Where Cadence adds value:** ambiguous/overlapping presentations, referral-timing judgment, and client-communication scripts — a distinctly diagnostic-adjacent-reasoning role, different from Module 5's protocol-construction role.
-- **Curiosity/payoff structure:** the "spectrum, not two conditions" reveal and the "wrong product cycle" causal chain give Module 6 a detective/investigative feel — figuring out what's really going on — that is distinct from Module 4's careful-observation feel and Module 5's protocol-building feel.
-- **What prevents this from feeling like the same template again:** Module 6 is the first module built around telling apart two things that look similar, rather than building a single skill in one direction (observe carefully; adapt a protocol). Its signature interaction is a triage decision (proceed/modify/refer), not a scenario-selection decision like Module 5's.
+- **Curiosity/payoff structure:** the "spectrum, not two conditions" reveal and the "wrong product cycle" causal chain — now experienced as a progressive sequence the student works through rather than read as static prose — give Module 6 a detective/investigative feel — figuring out what's really going on — that is distinct from Module 4's careful-observation feel and Module 5's protocol-building feel.
+- **What prevents this from feeling like the same template again:** Module 6 is the first module built around telling apart two things that look similar, rather than building a single skill in one direction (observe carefully; adapt a protocol). Its two applied-decision moments — "Follow the cycle"'s ending and the signature interaction — are both triage/intervention decisions, not scenario-selection decisions like Module 5's.
 
 ---
 
@@ -693,7 +734,7 @@ Immediately after Module 5 and before Module 7. Module 6 is the bridge between s
 
 ## Narration suitability
 
-Most of Module 6's prose narrates well — 6.1, the new 6.2, the dry-vs-dandruff explanatory paragraphs, the cycle insights, the spectrum-state descriptions, the new Section 6.6 referral script, the treatment-grid cards, and the trigger details are all readable sequential text.
+Most of Module 6's prose narrates well — 6.1, the new 6.2, the dry-vs-dandruff explanatory paragraphs, the six "Follow the cycle" stage explanations, the spectrum-state descriptions, the new Section 6.6 referral script, the treatment-grid cards, and the trigger details are all readable sequential text.
 
 **Approximate narration length:** **11–14 minutes**, excluding checkpoint and interaction time. Content-based estimate, not a measured recording duration.
 
@@ -701,17 +742,19 @@ Most of Module 6's prose narrates well — 6.1, the new 6.2, the dry-vs-dandruff
 
 Narration should direct the listener to review the screen at:
 
-- Section 6.3's comparison cards;
+- Section 6.3's comparison cards and the Visual 1 illustration;
+- Section 6.4's "Follow the cycle" sequence and its "Where do you break the cycle?" final decision;
 - Section 6.5's spectrum slider;
 - Section 6.6's referral list (even though it is text, its always-visible standalone presentation is part of its teaching value);
 - the signature "Sort three presentations" interaction.
 
-Sections 6.4 and 6.8 no longer need a visual-review cue for their own sake — both are now static, always-visible content and narrate directly like any other prose section.
+Section 6.8 no longer needs a visual-review cue for its own sake — it is static, always-visible content and narrates directly like any other prose section. Section 6.4, by contrast, is once again screen-dependent post-refinement (see below) — its visual-review cue is required, not optional.
 
 ## Screen-required content
 
 The following require the screen and cannot be proven through audio alone:
 
+- "Follow the cycle"'s progressive unlock sequence and its "Where do you break the cycle?" final decision;
 - the signature "Sort three presentations" interaction;
 - checkpoint `m6cp1`;
 - checkpoint `m6cp2`;
@@ -719,7 +762,7 @@ The following require the screen and cannot be proven through audio alone:
 
 ## Content that must not be treated as audio-only competency
 
-Unlike Module 5 (no reveal-gated content), **two of Module 6's three ungraded interactions still gate explanatory text behind a tap/click/drag** — the comparison-card toggle and the spectrum slider. (The cycle-step and trigger-item content, per the interaction-density re-check above, is now static and visible by default, so it no longer poses this problem — narrating it requires no special handling.) A narration script must still explicitly narrate the comparison-card details and the four spectrum states rather than only reading what is visible by default, or an audio-only pass would omit that content. This is a smaller version of the same consideration flagged in the initial audit pass — the re-check's interaction simplification directly reduced Module 6's Listen Mode obstacle from four gated elements to two.
+**Three of Module 6's four ungraded interactions gate explanatory text behind an activation** — the comparison-card toggle, "Follow the cycle," and the spectrum slider. (The trigger-item content remains static and visible by default, so it poses no obstacle — narrating it requires no special handling.) A narration script must explicitly narrate the comparison-card details, all six "Follow the cycle" stage explanations plus the final reasoning question and its approved answer, and the four spectrum states, rather than only reading what is visible by default — an audio-only pass that read only the default-visible text would omit most of Section 6.4 entirely, since only Step 1 is visible without activation. This is a reversal of the reduction recorded in the prior specification pass (which had brought Module 6's gated-element count down to two by making the cycle static) — the Section 6.4 refinement reintroduces a screen-dependency here deliberately, because the progressive-unlock mechanic is what makes the causal-chain teaching point land, and Listen Mode implementation remains deferred regardless.
 
 Listening alone must never be treated as proof of competency — checkpoints still require typed or spoken free-text response either way.
 
@@ -762,20 +805,22 @@ No placeholder is left unresolved. Implementation must not carry any of the four
 
 ## Required for initial implementation
 
-### Visual 1 — Dry scalp vs. dandruff comparative illustration (REQUIRED)
+### Visual 1 — Dry scalp vs. dandruff comparative illustration (REQUIRED) — **installed**
 
-This directly replaces placeholders #1 and #2. Unlike the initial audit pass's deferred "real photography, someday" recommendation, this is a required, achievable-now asset — a non-diagnostic illustration does not require sourcing consented clinical photography and does not block implementation.
+This directly replaces placeholders #1 and #2. Unlike the initial audit pass's deferred "real photography, someday" recommendation, this was a required, achievable-now asset — a non-diagnostic illustration does not require sourcing consented clinical photography and does not block implementation.
 
-- **Required or optional:** **Required** for initial implementation.
-- **Quantity:** 1 two-panel diagram (or two matched single-panel illustrations presented as a pair) — one panel per pattern.
-- **Type:** **non-diagnostic illustration/diagram** — explicitly not styled as clinical microscopy and not photography. A simple, clearly-illustrated schematic representation of flake size, color, matte-vs-oily sheen, and distribution for each pattern.
-- **Exact placement:** Section 6.3, positioned alongside (not replacing) the existing `.vs-card` comparison cards — the cards carry the text distinction; the illustration supports it visually.
-- **Teaching purpose:** give the student a visual anchor for the size/color/oiliness distinction already described in the text, without claiming photographic or clinical authority the module cannot back up.
-- **Orientation/crop:** two panels side by side (stacked on mobile), identical scale and framing between them.
-- **Caption/visible label:** panel labels "Dry-scalp pattern (illustrative)" / "Dandruff-spectrum pattern (illustrative)"; a shared caption beneath both reading "Illustrative comparison — not a clinical or diagnostic image."
-- **Alt-text intent:** describe only the illustrated features (e.g., "illustration comparing fine, matte, powdery flakes with minimal oil to larger, yellowish, oily flakes near the root"); never a diagnostic conclusion.
-- **Comparison consistency required:** **yes** — identical illustration style, scale, and framing for both panels.
-- **Non-diagnostic caution required:** **yes**, explicit and required — state plainly that this is an illustrative schematic, not a clinical or diagnostic photograph, and that appearance alone does not establish cause (directly reinforcing Section 6.2).
+**Status: fulfilled.** The approved asset was supplied and installed at `assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.png` (with a `.webp` derivative of the same image for delivery performance, served via `<picture>` with the PNG as fallback — the same pattern already used for Modules 3 and 5's real assets). It satisfies the specification below: a two-panel, non-diagnostic illustration (not photography, not styled as clinical microscopy) comparing fine, matte, powdery flaking to larger, yellowish, oily flaking near the root, with the panel labels ("Dry-scalp pattern" / "Dandruff-spectrum pattern") and the non-diagnostic caption ("Illustrative comparison — not a clinical or diagnostic image.") already visibly embedded in the image itself — implementation did not duplicate that text as a separate caption element, since doing so would be redundant with what a sighted student already sees; the mandated alt text (below) carries the equivalent information for assistive technology.
+
+- **Required or optional:** **Required** for initial implementation. **Met.**
+- **Quantity:** 1 two-panel diagram (or two matched single-panel illustrations presented as a pair) — one panel per pattern. **Met** — supplied as a single two-panel image.
+- **Type:** **non-diagnostic illustration/diagram** — explicitly not styled as clinical microscopy and not photography. A simple, clearly-illustrated schematic representation of flake size, color, matte-vs-oily sheen, and distribution for each pattern. **Met.**
+- **Exact placement:** Section 6.3, positioned alongside (not replacing) the existing `.vs-card` comparison cards — the cards carry the text distinction; the illustration supports it visually. **Met** — placed immediately after the section's opening paragraph and before the comparison-card interaction hint.
+- **Teaching purpose:** give the student a visual anchor for the size/color/oiliness distinction already described in the text, without claiming photographic or clinical authority the module cannot back up. **Met.**
+- **Orientation/crop:** two panels side by side (stacked on mobile via responsive image sizing), identical scale and framing between them. **Met.**
+- **Caption/visible label:** panel labels and the non-diagnostic caption are embedded directly in the supplied image (see "Status" above) rather than duplicated as separate HTML text — an implementation choice within the spirit of this requirement, not a deviation from it.
+- **Alt text (exact, as installed):** "Illustrative comparison of a dry-scalp pattern and a dandruff-spectrum pattern, showing fine powdery matte flaking versus larger yellowish flakes with visible oil near the root." Describes only the illustrated features; states no diagnostic conclusion for either side.
+- **Comparison consistency required:** **yes** — identical illustration style, scale, and framing for both panels. **Met.**
+- **Non-diagnostic caution required:** **yes**, explicit and required — state plainly that this is an illustrative schematic, not a clinical or diagnostic photograph, and that appearance alone does not establish cause (directly reinforcing Section 6.2). **Met**, via the caption embedded in the image itself.
 
 ## Optional — future addendum only (not authorized, not required, not blocking)
 

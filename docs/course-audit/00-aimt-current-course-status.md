@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 8, 2026
+**Last updated:** August 10, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: (pending) — "Add approved Module 6 audit specification" (see `git log` for the hash once committed)
+- Latest controlling commit: `0c016b3871f201ffd42e286532f9b0961a4d970a` — "Implement approved Module 6 audit" (consolidated history — supersedes the earlier, never-pushed `291e6d5`/`2b37d87` commits, which were reset and folded into this single commit before the first push attempt)
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -38,11 +38,11 @@ Do not merge or deploy yet.
 | Module 3 | Implemented — manual QA approved |
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
-| Module 6 | Externally audited — approved specification added; awaiting implementation |
+| Module 6 | Implemented — awaiting manual QA |
 | Modules 7–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 5** — approved August 8, 2026.
+**Latest approved module: Module 5** — approved August 8, 2026. **Module 6 is implemented but not yet manually approved.**
 
 ---
 
@@ -73,6 +73,35 @@ Manually approved, but the following still require later or manual review — no
 
 ## Task just completed
 
+**Module 6 student-facing language + scenario-block polish (narrow quality pass) — August 10, 2026.** Owner review of the rendered Module 6 experience flagged implementation-created microcopy that read as generic/AI-written rather than AIMT's practitioner-education standard. Corrected, implementation-only (no `module-06.md` change needed — none of this was approved curriculum, all of it was implementation microcopy):
+
+1. **Removed generic rating language.** "Weak call," "Strong call," "Correct call," and "Stronger approach" — all used as bare ratings in the Section 6.4 "What this looks like in real time" block — are gone from the file entirely (verified by full-text search).
+2. **Redesigned "What this looks like in real time."** Replaced the three-sentence paragraph dump with three separate, consistently structured scenario cards, each with four labeled fields (Presentation / Likely direction / What this changes / Service direction), using the exact approved replacement copy. Remains static content — no new interaction, no progress write.
+3. **"Follow the cycle" final reasoning re-themed.** The "Where do you break the cycle?" decision's state tag and feedback lead-in now read "Breaks the cycle" (correct) / "Keeps the cycle going" (incorrect) instead of the prior generic "Correct answer"/"Not quite" tag — reinforcing the module's own cycle metaphor. The specific explanatory feedback beneath each state is unchanged in substance.
+4. **Reviewed the remaining three interactions** (comparison toggle, spectrum slider, "Sort three presentations") and Cadence — no further generic wording found; the "Sort three presentations" and `m5Decide`-style "Correct."/"Not quite." feedback patterns were confirmed as already meeting the approved specific-explanation standard and were left unchanged, per instruction.
+5. **Bounded comparison against "Approved outcomes," "Practitioner insider value," and "Distinct learning rhythm"** in `module-06.md` found no area where implementation undersells, oversimplifies, or introduces unauthorized terminology — the scenario-card redesign in fact makes the "insider value" reasoning (e.g., avoiding overcorrection on a mixed presentation) more explicit than the paragraph it replaced.
+
+All validation items passed: no flagged phrases remain; the new interaction tags/feedback are in place; the scenario block is three cards with the approved copy and labels; checkpoint parity, completion/gating, Module 7 lock/unlock, Review Mode's unsaved path, and mobile overflow (375×812) were all re-confirmed intact; Visual 1 remains installed and responsive. See Step 41 in `implementation-log.md`. **Module 6 status is unchanged by this pass** — still `Implemented — awaiting manual QA`; this was a quality correction, not new implementation scope.
+
+### Prior task (unchanged, recorded for continuity)
+
+**Module 6 Visual 1 installation + Section 6.4 interaction upgrade (narrow implementation polish) — August 10, 2026.** The prior implementation task (below) had advanced Module 6's status to "Implemented — awaiting manual QA" while the required Section 6.3 Visual 1 illustration was still absent — that was premature, and is corrected by this task rather than repeated. Two items were completed:
+
+1. **Visual 1 installed.** The user supplied the approved asset (`module-06-dry-scalp-vs-dandruff-illustration.png`, found at `assets/images/course/module-06/`); a `.webp` performance derivative of the same image was generated (matching the Module 3/5 `<picture>` pattern) and both are now wired into Section 6.3, alongside — not replacing — the `.vs-card` comparison cards, with the exact mandated alt text. The old placeholder boxes remain fully removed. This resolves acceptance criterion #25's previously-blocked half.
+2. **Section 6.4 upgraded.** The static six-step cycle was replaced with **"Follow the cycle,"** a progressive causal-sequence interaction: only Step 1 is initially available; activating a step reveals its unchanged approved explanation, marks it explored, and unlocks exactly the next step; a student cannot skip ahead on the first pass; explored steps stay freely reviewable. After all six steps are explored, a "Where do you break the cycle?" applied-decision card appears (approved answer: reassess the presentation before choosing the product direction), built on the same `bq-opt`/text-based-feedback/unlimited-reselection pattern already used by `m5Decide` and `m6Sort`. Remains ungraded — no `APP_STATE` writes, no persistence between visits, no completion gate; verified by direct mocked-browser testing (session state resets on module reopen; `localStorage['levo_app']` confirmed byte-identical before/after exercising the full interaction).
+
+`docs/course-audit/modules/module-06.md` was narrowly amended (not re-audited) to document this refinement — see its "Post-implementation amendment" note. Module 6's final ungraded-interaction count is now **four**: comparison toggle (distinguish), "Follow the cycle" (sequence + apply), spectrum slider (observe a continuum), "Sort three presentations" (decide/apply). All prior regression items (checkpoint question parity, mocked strong/weak/network-failure/diagnostic-unsafe checkpoint paths, completion gating, Module 7 unlock, Review Mode's unsaved test path, Cadence quick prompts) were re-verified and remain intact. Static validation (JavaScriptCore syntax parse — no `node` runtime available — plus stack-based div/button tag-balance and duplicate-ID checks) passed. Mobile viewport (375×812) confirmed overflow-free for both the installed image and the new interaction. See Step 40 in `implementation-log.md` for the full record.
+
+**All Module 6 implementation acceptance criteria in `module-06.md` now pass.** Module 6 status is confirmed (not merely re-asserted) as **Implemented — awaiting manual QA**.
+
+### Prior task (unchanged, recorded for continuity)
+
+**Module 6 implementation (lifecycle step 5) — August 9, 2026.** Implemented the approved `module-06.md` specification in `headspa-mastery.html` (CSS interaction styles, the `#module6Wrap` content block, and the Module 6 JS configuration/functions) and `assets/js/headspa-state.js` (`MODULE_MEMORY_TAGS[6]`). Static syntax validation (JavaScriptCore parse of every inline `<script>` block — no `node` runtime was available in this environment), structural checks (div/button tag balance, duplicate-ID scan, checkpoint displayed/evaluated question-parity check run programmatically), and mocked/browser validation (via Course Review Mode on a local static server, with `callAI` mocked) all passed — see Step 39 in `implementation-log.md` for the full record, including the one blocked acceptance criterion (the required Visual 1 comparative illustration for Section 6.3 does not exist as a production asset and was not fabricated — Section 6.3 ships text-only pending that asset).
+
+**Module 6 was implemented but NOT manually QA'd and NOT manually approved as of this prior task.** (Visual 1 is now installed — see the task above.)
+
+### Prior task (unchanged, recorded for continuity)
+
 **Module 6 external audit (lifecycle step 3 of the per-module cycle) — August 8, 2026.** Replaced the empty scaffold in `docs/course-audit/modules/module-06.md` with the completed, approved audit specification, using `module-06-source.md` as the authoritative record of the current student experience and `module-05.md` as a structural/quality precedent only (not a source of curriculum content). Status set to **Approved for controlled implementation**. Approved title: **Conditions & Disorders** (resolved the "Common Conditions & Disorders" hero-eyebrow drift by dropping "Common" everywhere).
 
 **External evidence used:** AAD's seborrheic dermatitis overview; Borda & Wikramanayake's "Seborrheic Dermatitis and Dandruff: A Comprehensive Review" (PMC4852869); DermNet NZ; Cunliffe et al. 1970 (*Br J Dermatol*) on local skin temperature and sebum excretion rate; and current OTC/prescription concentration data for ketoconazole shampoo (1% OTC, 2% prescription). Full citations and how each shaped a decision are recorded in `module-06.md`'s "Research and evidence sources" section.
@@ -101,21 +130,21 @@ Manually approved, but the following still require later or manual review — no
 
 ## Current gate
 
-Module 6 implementation.
+Module 6 manual QA.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10) and external audit / approved specification (steps 3–4 of the per-module lifecycle). `module-06.md` is the implementation authority. Module 6 implementation may begin as its own separate task.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10), external audit / approved specification (steps 3–4), and implementation + static/mocked validation (steps 5–6). `module-06.md` remains the implementation authority for any future correction. Manual QA (step 7) is the next gate.
 
 ---
 
 ## Exact next task
 
-Implement the approved Module 6 specification (`docs/course-audit/modules/module-06.md`) in `headspa-mastery.html` (and `assets/js/headspa-state.js` only for the `MODULE_MEMORY_TAGS[6]` correction), then perform static and mocked validation — matching the implementation pattern already used for Modules 0–5. Module 6 is not manually approved and must not be treated as such until it clears manual QA per `00-aimt-manual-qa-master-checklist.md`.
+Perform manual QA on the `course-audit-build` branch preview for Module 6, using `00-aimt-manual-qa-master-checklist.md` plus the module-specific acceptance criteria in `docs/course-audit/modules/module-06.md`. This includes real desktop and phone visual review, all four ungraded interactions (comparison toggle, "Follow the cycle" with its "Where do you break the cycle?" final question, spectrum slider, "Sort three presentations"), the installed Visual 1 illustration, both checkpoints against live-model grading, Cadence's quick prompts and guide responses, and completion/Module 7 unlock behavior. Do not approve Module 6 until that review passes — see "Deferred review" below for what this implementation task could not verify itself.
 
 ---
 
 ## Do not begin
 
-- Module 6 manual QA or manual approval (implementation and static/mocked validation must happen first)
+- Module 6 manual approval (manual QA must happen first and pass)
 - Module 7 extraction or any Module 7 work
 - Module 12
 - completion and certificate audit
@@ -149,17 +178,18 @@ Module 5's actual video-production package (spoken script, 12-section package, s
 
 Retained accurately, not resolved by this task:
 
-- live-model grading QA;
-- live Cadence response QA;
+- live-model grading QA (Module 6 checkpoints were validated with mocked `callAI` responses only);
+- live Cadence response QA (Module 6 guide system/quick prompts were not exercised against the real model);
 - screen-reader QA;
 - physical-keyboard QA;
 - real touch-device QA;
 - medical/dermatological review;
 - legal and state-specific scope review;
-- downloadable-resource production;
+- downloadable-resource production (`AIMT Scalp Presentation & Referral Quick Reference` remains recommended, not created);
 - authenticated clinical-image intake;
 - Guided Completion and Listen Mode QA;
-- Module 3/Module 4 answer-reveal pattern (deferred regression item, see above).
+- Module 3/Module 4 answer-reveal pattern (deferred regression item, see above);
+- Module 5's own unaudited copy of the numeric sebum/temperature claim (flagged in `module-06.md`'s "Implementation notes" for a future Module 5 consistency pass — out of scope for this task).
 
 The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains recommended; production is still deferred and it was not created or linked by this task.
 
@@ -168,7 +198,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the preview reflects all commits through this approval.
-- Push status: local branch is ahead of `origin/course-audit-build` pending this task's commit — push after committing, or via GitHub Desktop if CLI credentials are unavailable.
+- Push status: local branch is ahead of `origin/course-audit-build` by one consolidated commit (`0c016b3`). `git push` failed again — no CLI credentials configured in this environment ("could not read Username for 'https://github.com'"). No git configuration was altered and no alternate remote was used. Push via **GitHub Desktop → Push origin**.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -176,7 +206,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- (pending) — Add approved Module 6 audit specification (**latest controlling commit** — created together with this file; see `git log` for the hash)
+- `0c016b3871f201ffd42e286532f9b0961a4d970a` — Implement approved Module 6 audit (**latest controlling commit** — consolidated single commit covering implementation, Visual 1 installation, and the Section 6.4 interaction upgrade)
+- `0b135c48324d2c120682ae34a4aab516fa9244d1` — Add approved Module 6 audit specification
 - `8f67c6af1d256a9085455f72d55eca722998c9f8` — Extract Module 6 for external audit
 - `b10a939921d17d1117ec835af1c45bc76f4a09cb` — Add Module 5 video source
 - `190677ebad61b957e494b208932f812ec89185a2` — Approve Module 5 manual QA

@@ -3257,3 +3257,584 @@ implemented, manually QA'd, or manually approved in this step. Module 7
 was not touched. No merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-09 — Step 39: Module 6 implementation (lifecycle step 5)
+
+Implemented the approved Module 6 audit specification
+(`docs/course-audit/modules/module-06.md`). No other module was audited
+or edited.
+
+**Preflight.** Confirmed repository `aimt-site`, branch
+`course-audit-build`, clean working tree, and that `origin/course-audit-build`
+contained commit `0b135c48324d2c120682ae34a4aab516fa9244d1` ("Add
+approved Module 6 audit specification") before any edit was made. Read
+the master instructions, the manual QA checklist, the global decisions
+file, the current-status file, `modules/README.md`, this log,
+`module-06-source.md`, and `module-06.md` in full before starting.
+
+**Files changed:** `headspa-mastery.html` (CSS interaction styles ~lines
+1350–1420; the `#module6Wrap` content block; the `M6` object;
+`MODULE_GUIDE_SYSTEMS[6]`; `MODULE_QUICK_PROMPTS[6]`; the Module 6
+module-open greeting; `STATIC_MODULES[6]`; `toggleVsCard`,
+`updateSpectrum`, `submitM6CP`; removed `cycleStep`, `CYCLE_INSIGHTS`,
+`toggleTrigger`; added `m6Sort`/`M6_SORT_ANSWERS`) and
+`assets/js/headspa-state.js` (`MODULE_MEMORY_TAGS[6]` only — the
+`getCheckpointMemoryTags` regex branches for module 6 already covered
+exactly the three retained tags and needed no change). No other file was
+touched.
+
+**Module identity.** Hero eyebrow corrected from "Module 6 · Common
+Conditions & Disorders" to "Module 6 · Conditions & Disorders" — the
+home-row title and `MODULE_TITLES[6]` already read "Module 6 —
+Conditions & Disorders," so this was the only identity string requiring
+a fix. Verified programmatically that no "Common Conditions" string
+remains anywhere in the file.
+
+**Section structure.** Rebuilt to the exact approved order: 6.1 → 6.2
+(new) → 6.3 → 6.4 (static) → `m6cp1` → 6.5 → 6.6 (new, standalone,
+always-visible referral section) → signature interaction ("Sort three
+presentations," new) → 6.7 → 6.8 (static) → `m6cp2` → completion —
+verified by locating each section eyebrow's string offset in the
+rendered block and confirming ascending order. The old combined "6.5 &
+6.6" heading no longer exists. Section 6.2 ("What you can and cannot
+conclude from appearance alone") and Section 6.6 ("When to pause or
+refer," with the approved referral-trigger list and script adapted from
+Module 4's pattern) were added verbatim per the approved copy. The
+duplicated tap-interaction hint in Section 6.3 (three phrasings within a
+few paragraphs) was reduced to the single approved hint, "Tap each card
+to compare," placed immediately before the comparison cards.
+
+**Curriculum corrections.** All applied per `module-06.md`'s "Required
+corrections": softened "the scalp is functioning abnormally" dandruff
+language; softened the "most clients... end up..." wrong-product-cycle
+claim; reframed the Malassezia mechanism as multifactorial rather than
+single-cause oil-driven; corrected the ketoconazole/product card to
+1%-strength-only (zinc pyrithione, 1% ketoconazole, 1% selenium
+sulfide), removed "without requiring medical oversight," and added the
+new closing scope note to Section 6.7 ("a product category is not a
+diagnosis and not a prescription... refer instead of recommending a
+product"); softened the diet and stress/hormonal trigger items; and —
+the most consequential correction — fully **removed** the "sebum
+production rises approximately 10% per 1.8°F" claim from Section 6.8,
+replacing it with the approved qualitative-only sentence and adding no
+numeric replacement. Verified programmatically that the string "10%"
+does not appear anywhere in the file's current content (Module 5's own,
+separately-flagged, out-of-scope copy of a similar-sounding claim was
+independently checked and was not found either — Module 5 was not
+touched by this task, consistent with `module-06.md`'s implementation
+notes). Section 6.3 gained the approved closing "When it's not
+clean-cut" overlap/ambiguity note. Spectrum position-4 text now reads
+"...See Section 6.6 for when to pause or refer" instead of carrying the
+module's only referral sentence.
+
+**Interactions.** The `.vs-card` comparison-card toggle was retained and
+converted from a plain `<div onclick>` to a native
+`<button type="button">` with `aria-expanded` reflecting open/closed
+state and `aria-controls` pointing at its detail region — verified via
+real `.click()` calls that `aria-expanded` toggles correctly and that
+opening one card closes the other. The spectrum slider was retained,
+unchanged as a control, with a new descriptive `aria-label` added. The
+`.cycle-step` step-selector and `.trigger-item` accordion were both
+simplified to static, always-visible content per the approved
+interaction-density re-check: `cycleStep()`, `CYCLE_INSIGHTS`, and
+`toggleTrigger()` were deleted from the JS, all `onclick` attributes
+were removed from the markup, and every one of the six cycle insights
+and four trigger details now renders unconditionally — verified
+programmatically (zero `.cycle-step[onclick]` / `.trigger-item[onclick]`
+matches; all twelve cycle-insight and eight trigger-detail nodes across
+both the hidden template and the live copy report `display !== 'none'`).
+New CSS modifier classes (`.cycle-step.static`, `.cycle-insight.static`,
+`.trigger-item.static`, `.trig-detail.static`) neutralize the former
+hover/cursor affordances and remove the now-inapplicable reveal
+animation. The new signature interaction, "Sort three presentations"
+(`m6Sort`/`M6_SORT_ANSWERS`), was built on the same pattern as Module
+5's approved `m5Decide` — three scenarios, three responses each
+(Proceed as usual / Proceed with modification / Pause and refer), state
+applied only to the clicked option, the approved answer never
+pre-highlighted, wrong-answer feedback that never names the correct
+answer, and unlimited reselection that resets prior state to neutral.
+Confirmed by direct testing: correct and incorrect selections render
+the exact approved feedback text with "Correct answer"/"Not quite" text
+tags (not color-only), reselecting an option resets the previously
+selected option to neutral, and `m6Sort` contains no `APP_STATE`
+reference (localStorage was confirmed byte-identical before and after
+exercising all three scenarios).
+
+**Accessibility.** Added `aria-label="Speak your answer"` to both voice
+buttons, `aria-label="Send response to Cadence"` to both submit buttons,
+and `aria-live="polite"` to both `.cp-res` regions and all three
+signature-interaction feedback regions. Added a
+`prefers-reduced-motion` override for `.vs-detail`'s reveal animation
+(matching the existing `.tl-detail` precedent). `.trig-icon` (the "+"
+expand glyph) no longer exists anywhere in Module 6's markup, consistent
+with the accordion's removal.
+
+**Checkpoints.** `M6.system` (one shared rubric) was replaced with
+`M6.systems.m6cp1` / `M6.systems.m6cp2`, each an itemized, checkpoint-
+specific rubric built from `module-06.md`'s "Checkpoint specification"
+(pass criteria, incomplete-answer handling, one-focused-follow-up
+revision guidance, and immediate-correction triggers including
+prescription-strength-product recommendations and confirmed-diagnosis
+language). Both checkpoints' displayed (`.cp-q`) and evaluated
+(`M6.questions`) strings were verified byte-identical programmatically
+(previously mismatched, per the source extraction). `submitM6CP` now
+passes the approved network-error text, "Cadence could not review your
+interpretation. Check your connection and try again." — confirmed by
+forcing a mocked network failure. Checkpoint placement matches the
+approved two-stage structure: `m6cp1` sits after Section 6.4, `m6cp2`
+after Section 6.8.
+
+**Cadence.** `M6.system`'s "instructor of HeadSpa Mastery" and
+`MODULE_GUIDE_SYSTEMS[6]`'s "a mentor built from nearly two decades in
+the head spa industry" were both removed — `MODULE_GUIDE_SYSTEMS[6]` now
+uses the approved course-name-correct, non-personal-experience-claim
+text. `MODULE_QUICK_PROMPTS[6]`'s second prompt was replaced ("When
+should a flaking presentation raise more concern?" — the diagnostic-
+sounding original was removed). The module-open greeting was replaced
+with the approved copy. `MODULE_MEMORY_TAGS[6]` no longer includes
+`scope-awareness`; the remaining three tags (`pattern-recognition`,
+`referral-judgment`, `barrier-thinking`) already had working regex
+branches in `getCheckpointMemoryTags`, so no JS logic change was needed
+beyond the array itself.
+
+**Visual asset — blocked.** Per `module-06.md`'s visual asset plan,
+Section 6.3's two placeholders ("Dry Scalp — Microscopy," "Dandruff —
+Microscopy") were to be replaced with a required non-diagnostic,
+two-panel comparative illustration ("Visual 1"), and Section 6.5's two
+placeholders ("Mild Dandruff — Microscopy," "Seborrheic Dermatitis —
+Microscopy") were to be removed with no replacement required. Both
+pairs of old decorative placeholder boxes were removed from the
+implemented markup — none of the four remains in its original form,
+satisfying that half of the approved disposition. Visual 1 itself does
+not exist anywhere in the repository (`assets/images/course/module-06/`
+does not exist; no illustration asset was found anywhere in the repo).
+Per the explicit task instruction for this exact scenario, it was not
+fabricated, not generated in code, and not substituted with an
+unrelated or generic image — Section 6.3 currently ships text-only,
+without an illustration, until that asset is produced separately. This
+is recorded as a blocker against full compliance with `module-06.md`'s
+acceptance criterion 25 and is carried into "Deferred review" in
+`00-aimt-current-course-status.md`.
+
+**Static validation.** No `node` (or any other JS runtime) was available
+in this environment, so syntax validation was performed by concatenating
+every inline `<script>` block and parsing it with `new Function(code)`
+under macOS's built-in JavaScriptCore (via `osascript -l JavaScript`),
+which reported no `SyntaxError`. Additional checks, all run
+programmatically against the live file: div/button tag-balance count
+within the `#module6Wrap` block (194/194 divs, 17/17 buttons); a
+duplicate-ID scan restricted to Module 6's own IDs (none found); a
+byte-identical comparison of `.cp-q` markup against `M6.questions` for
+both checkpoints (both matched); confirmation that `M6.system(`, old
+title wording, "without requiring medical oversight," the "10%" figure,
+`cycleStep`, `CYCLE_INSIGHTS`, `toggleTrigger`, and `window._m6cpsDone`
+no longer appear anywhere in the file; and a `git diff` hunk-location
+scan confirming every change fell inside Module 6's CSS block, the
+`#module6Wrap` markup, or the Module 6 JS configuration/function region
+— no other module's wrapper ID, checkpoint ID, or title string appears
+in the diff.
+
+**Mocked/browser validation.** Performed against a local static server
+(`python3 -m http.server`) with the branch's own Course Review Mode
+(`?review=1`) used to reach Module 6 without a real Supabase session,
+consistent with Review Mode's intended audit-only purpose. Verified: the
+module opens with the corrected title and full approved section order;
+the `.vs-card` toggle's `aria-expanded` state and single-card-open
+behavior; the static cycle and trigger content render with no residual
+click handlers; the spectrum slider's position-4 text references
+Section 6.6; the "Sort three presentations" interaction's correct/
+incorrect feedback, tagging, and reselect-to-neutral behavior, with
+confirmed zero `APP_STATE`/`localStorage` writes; a mocked weak `m6cp1`
+answer returned "retry" status with revision-style feedback referencing
+the student's answer and left the input open for resubmission; a mocked
+strong `m6cp1` answer passed without completing the module (Module 7
+still locked); a mocked strong `m6cp2` answer then completed the
+module, made the completion card visible, and unlocked Module 7
+(`APP_STATE.canAccessModule(7)` became `true`); a mocked network failure
+displayed the exact approved error text; and, with Review Mode's real
+`isActive()` check restored, a checkpoint submission correctly routed
+through the unsaved test path, was labeled "Review Mode test — not
+saved," and left the previously-saved real answer/status untouched. In a
+separate session, both checkpoints were also submitted with a mocked
+diagnostic/unsafe answer (naming a confirmed diagnosis, recommending a
+prescription-strength 2% ketoconazole product, and promising a cure) —
+each mocked correction response rendered correctly as a non-passing
+"retry" state with the corrective feedback text displayed and the input
+re-enabled for revision, and the module did not complete. Mobile
+viewport (375×812) showed no horizontal overflow
+(`document.body.scrollWidth === window.innerWidth`), and the comparison
+cards, signature interaction, and completion card were visually
+confirmed to stack and render cleanly at that width via screenshot.
+
+**Deferred / not validated in this environment (recorded honestly, not
+claimed as passed):** live-model grading behavior against the new
+`M6.systems.m6cp1`/`m6cp2` rubrics (all checkpoint tests used a mocked
+`callAI`); live Cadence guide/quick-prompt responses; screen-reader
+testing; physical-keyboard activation testing (the `.vs-card` buttons
+are native `<button>` elements, which guarantees Enter/Space activation
+in a real browser, but this was not exercised with a physical keyboard
+in this environment); real touch-device verification; medical/
+dermatological review beyond the citations already recorded in
+`module-06.md`; legal/state-specific scope review; and the Visual 1
+illustration itself (blocked, see above).
+
+**Regression check.** `git diff --stat` and a hunk-location scan
+confirmed changes were confined to Module 6's CSS, markup, and JS
+regions; Modules 0–5, global navigation, authentication/entitlement
+wiring, Review Mode, and the global checkpoint/completion architecture
+were not touched. Module 5's own separate copy of the sebum/temperature
+claim was checked and confirmed absent from the current file (already
+resolved independently of this task; not something this task altered).
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md`
+(module status table, "Task just completed," current gate, exact next
+task, "Do not begin," "Deferred review"), `docs/course-audit/modules/README.md`
+(Module 6 entry), and this file. Module 6 status is now
+**Implemented — awaiting manual QA**. Current gate: **Module 6 manual
+QA**. Exact next task: perform manual QA on the `course-audit-build`
+branch preview using `00-aimt-manual-qa-master-checklist.md` plus
+`module-06.md`'s acceptance criteria.
+
+**Not performed, per instruction:** manual QA, manual approval, Module 7
+extraction or any Module 7 work, and merge or deployment to `main`.
+
+Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-10 — Step 40: Module 6 Visual 1 installation + Section 6.4 interaction upgrade (narrow polish)
+
+Completed two remaining Module 6 implementation items flagged by Step 39:
+installed the required Section 6.3 Visual 1 asset, and replaced Section
+6.4's static six-step display with a stronger progressive
+causal-sequence interaction. `docs/course-audit/modules/module-06.md`
+was narrowly amended to keep the approved specification aligned with
+this refinement. This was not a re-audit — no other module was touched,
+and no unrelated Module 6 decision was reopened.
+
+**Preflight.** Confirmed repository `aimt-site`, branch
+`course-audit-build`, and that both prior implementation commits
+(`291e6d5e9f42db29d71e993549a7409397a4b1af`,
+`2b37d87...` — "Record Module 6 implementation commit hash and push
+status") existed only locally, not on `origin/course-audit-build`, with
+no unrelated local commits ahead of them. Located the newly added asset
+at `assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.png`
+(1536×1024 PNG, supplied by the user) before making any edit.
+
+**Files changed:** `headspa-mastery.html` (CSS: replaced the now-dead
+`.cycle-wrap`/`.cycle-step`/`.cycle-arrow`/`.cycle-insight` rules with
+`.m6-visual-figure` and the new `.follow-cycle` component styles;
+markup: Section 6.3 gained a `<figure><picture>` Visual 1 block, Section
+6.4's static cycle markup was replaced with the "Follow the cycle"
+progressive-sequence markup and the "Where do you break the cycle?"
+final-decision card; JS: added `fcActivate`, `fcAnswer`, `fcReset`,
+`FC_STEP_COUNT`, `FC_FINAL_ANSWER`, module-scoped `_fcExplored`/
+`_fcFrontier` state, and wired `fcReset()` into `STATIC_MODULES[6]`) and
+`docs/course-audit/modules/module-06.md` (narrow amendment — see below).
+New asset files: `assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.webp`
+(a Pillow-generated, 1200×800, ~175KB WebP derivative of the same
+supplied image, for delivery performance — matching the `<picture>`
+pattern already used for Modules 3 and 5's real assets). The user's
+original PNG was not modified, resized, or replaced.
+
+**Part 1 — Visual 1.** Wired the supplied illustration into Section
+6.3 via `<picture>` (WebP source, PNG fallback), positioned after the
+section's opening paragraph and before the `.vs-card` comparison
+interaction — alongside it, not replacing it, per the approved
+placement. The image already carries its panel labels ("Dry-scalp
+pattern" / "Dandruff-spectrum pattern") and its non-diagnostic caption
+("Illustrative comparison — not a clinical or diagnostic image.")
+visibly embedded; per instruction, no redundant duplicate caption/label
+text was added around it — the mandated alt text ("Illustrative
+comparison of a dry-scalp pattern and a dandruff-spectrum pattern,
+showing fine powdery matte flaking versus larger yellowish flakes with
+visible oil near the root.") carries the equivalent information for
+assistive technology. Confirmed via mocked/browser testing: both image
+paths resolve (HTTP 200), the browser selects the WebP source
+(`img.currentSrc` ends in `.webp`), the image loads and renders at
+1200×800 with `max-width:100%` responsive sizing, and no horizontal
+overflow appears at 375×812. Confirmed via static text search that no
+`clinical-photo`/placeholder markup remains anywhere in the Module 6
+block.
+
+**Part 2 — "Follow the cycle."** Replaced the static six-step display
+with a progressive-unlock interaction. All six approved step titles and
+explanations are unchanged in content and order. Only Step 1 is enabled
+on initial render (native `disabled` attribute on Steps 2–6, matching
+the existing precedent already used by Module 4's stepper
+`prevBtn`/`nextBtn.disabled` pattern); activating an available step
+toggles its own explanation open/closed, marks it explored (text badge
+changes to "Explored," not a color-only signal), and — the first time
+that step is explored — unlocks exactly the next step (removes
+`disabled`, applies a "current"/"Up next" state). A locked step's
+trigger cannot be activated at all (verified: clicking a disabled
+trigger produces no state change). Previously explored steps remain
+freely reviewable — their explanation can be reopened and closed
+without affecting unlocked progress (verified directly). Once all six
+steps have been explored, the "Where do you break the cycle?" card
+becomes visible (verified: hidden at five explored, visible immediately
+at six). The final question uses the same `bq-opt`/`bq-feedback`
+pattern already established by `m5Decide` and `m6Sort`: state applied
+only to the clicked option, the approved answer ("Reassess the
+presentation before choosing the product direction") never
+pre-highlighted, wrong-answer feedback that explains what the choice
+overlooks without naming the correct answer, and unlimited reselection
+that resets other options to neutral — all confirmed by direct testing,
+including one full wrong-then-correct reselection cycle.
+
+**Non-persistence verified.** `fcActivate`/`fcAnswer` contain no
+`APP_STATE` reference (confirmed by design and by testing:
+`localStorage['levo_app']` was read before and after exercising all six
+steps and the final question and found byte-identical). `fcReset()` is
+called from `STATIC_MODULES[6]` on every module-6 open, and was
+confirmed to fully reset visible state (all steps locked except Step 1,
+zero explored, final card hidden) after reopening the module
+mid-interaction.
+
+**Accessibility.** Every enabled step trigger and the three final-answer
+buttons are native `<button>` elements — keyboard-operable via native
+semantics, with `:focus-visible` styling reused from the existing
+`.fc-trigger`/`.bq-opt` rules. `aria-expanded` per step trigger,
+`aria-controls` associating each trigger with its detail region, native
+`disabled` (not merely `aria-disabled`) for locked steps so
+unavailability is communicated the same way the codebase's existing
+stepper precedent already communicates it, `aria-pressed` on the final
+answer buttons, and `aria-live="polite"` on the final feedback region.
+`.fc-detail` and `.fc-final` reveal animations are guarded by
+`prefers-reduced-motion`, matching the pattern already used for
+`.vs-detail`/`.tl-detail` elsewhere in the file. Physical-keyboard and
+screen-reader testing were not performed in this environment — recorded
+as deferred, not claimed as passed.
+
+**Visual design.** Implemented as a left-rail vertical stepper — numbered
+circular badges connected by a thin rail line (tinted toward
+`--aimt-success` once a step is explored), elevated white step cards,
+and a distinct "Final reasoning" card for the closing question — chosen
+deliberately over a horizontal/stepped desktop layout because the six
+step titles are full sentences long enough that a horizontal treatment
+would harm readability; the specification permits vertical treatment at
+any width ("horizontal or stepped pathway on wider desktop *if it
+remains readable*"), so a uniform vertical stepper was kept at all
+widths as the more robust, spec-compliant choice. Confirmed via
+screenshot (both desktop and 375×812 mobile) that the result reads as a
+connected sequence rather than a list of independent boxes, with no
+horizontal overflow at mobile width.
+
+**Static validation.** No `node` runtime was available in this
+environment; JavaScriptCore (`osascript -l JavaScript`, via
+`new Function(code)` over every concatenated inline `<script>` block)
+reported no `SyntaxError` after both edits. A stack-based (not naive
+substring-count) div-tag balance check against the true `#module6Wrap`
+boundary confirmed 196 open/196 close; button and figure/picture tags
+were confirmed balanced; a duplicate-ID scan within the block found
+none; confirmed no `cycle-wrap`/`cycle-step`/`cycleStep(`/
+`CYCLE_INSIGHTS` string remains anywhere in the file; confirmed the
+approved section order (6.1–6.8, signature interaction, both
+checkpoints) is unchanged.
+
+**Mocked/browser validation and regression.** Performed against a local
+static server with Course Review Mode, mocking `callAI` as in Step 39.
+Re-verified and confirmed unaffected by this change: `.cp-q`/
+`M6.questions` byte-identity for both checkpoints; `m6Sort`'s three
+scenarios; a mocked strong `m6cp1` + `m6cp2` pass sequence completing
+Module 6 and unlocking Module 7 (`APP_STATE.canAccessModule(7)` →
+`true`); Review Mode's unsaved test path (submission labeled "Review
+Mode test — not saved," stored real answer left untouched); and
+`MODULE_QUICK_PROMPTS[6]`. No Modules 0–5 files were touched (only
+`headspa-mastery.html` and `docs/course-audit/modules/module-06.md`
+were modified in this step, plus the new image assets).
+
+**`module-06.md` amendment (narrow, not a re-audit).** Added a
+"Post-implementation amendment" note at the top of the document; revised
+the Section 6.4 entry's interaction/visual requirement; replaced the
+"Wrong product cycle" — audit decision" section with the refined
+decision (retain content, redesign the interaction, add the applied
+final-reasoning moment) while preserving the original diagnosis of why
+the arbitrary-order mechanic failed; updated "Approved interactions —
+full audit" (interaction-density re-check, the numbered `.cycle-step`
+entry now describing `.follow-cycle`, the resulting-count paragraph, and
+the closing summary) to reflect four ungraded interactions instead of
+three; updated "Distinct learning rhythm" to describe four interactions
+without claiming count itself is the value; updated "Listen Mode notes"
+to record that Section 6.4 is once again screen-dependent and must be
+explicitly narrated stage-by-stage plus the final question, reversing
+the prior pass's "no longer gated" note; marked the Visual 1 entry in
+"Visual asset plan" as **installed**, recording the exact installed path
+and alt text; replaced acceptance criteria #9's and #16's `.cycle-step`
+references and added new acceptance criteria 26–40 covering Visual 1's
+installation and "Follow the cycle"'s full behavior, without weakening
+or removing any unrelated existing criterion. Section 6.3 curriculum
+copy (beyond Visual 1's installation), Section 6.5, the trigger-list
+decision, the signature "Sort three presentations" interaction, both
+checkpoints, Cadence, completion/gating, the downloadable decision, the
+optional future Visual 2, and Guided Completion planning were not
+touched.
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md`
+(new "Task just completed" entry, "Deferred review" — removed the
+now-resolved Visual 1 item, "Exact next task" — updated interaction
+count to four), `docs/course-audit/modules/README.md` (new Module 6
+entry recording both completed items), and this file. Module 6 status
+is now confirmed — not merely re-asserted — as **Implemented — awaiting
+manual QA**. Current gate: **Module 6 manual QA**, unchanged from Step
+39's determination; only the confidence behind that status changed,
+since all implementation acceptance criteria now genuinely pass.
+
+**Commit history.** Both implementation commits
+(`291e6d5e9f42db29d71e993549a7409397a4b1af`,
+"Record Module 6 implementation commit hash and push status") were still
+unpushed at the start of this task. Rather than pushing a known-incomplete
+intermediate state, this task's changes were folded into the commit
+history per the task's own instruction to consolidate before the first
+push.
+
+**Not performed, per instruction:** manual QA, manual approval, Module 7
+extraction or any Module 7 work, and merge or deployment to `main`.
+
+Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-10 — Step 41: Module 6 student-facing language + scenario-block polish
+
+Owner review of the rendered Module 6 experience identified
+implementation-created microcopy that read as generic, AI-written, or
+below AIMT's practitioner-education standard — specifically the "Weak
+call"/"Strong call"/"Correct call"/"Stronger approach" ratings and the
+dense-paragraph "What this looks like in real time" block. This was a
+narrow language and presentation quality pass, not a re-audit; no
+approved curriculum meaning, scientific claim, competency, interaction
+behavior, or scope decision was changed.
+
+**Preflight.** Confirmed repository `aimt-site`, branch
+`course-audit-build`, clean working tree, and that both existing
+implementation commits (`0c016b3`, `0c8efcc`) remained unpushed with no
+unrelated local commits ahead of them. Read the current
+`docs/course-audit/modules/module-06.md` and the full rendered Module 6
+markup before editing.
+
+**Part 1 — language audit.** Reviewed every piece of student-facing
+copy introduced or materially changed during implementation: interaction
+labels, button labels, state badges, instructions, feedback text,
+micro-headings, and card labels across all four ungraded interactions,
+both checkpoints' surrounding UI, and Cadence. Found exactly one problem
+area: the Section 6.4 "What this looks like in real time" info-card,
+which used "Weak call: dandruff... Stronger call: dry scalp...",
+"Correct call: dandruff pattern...", and "Stronger approach: mixed
+presentation..." as bare ratings with the judgment, explanation, and
+service recommendation all merged into single dense sentences. No other
+generic-rating language ("Good choice," "Nice work," "Think again," etc.)
+was found anywhere else in the module.
+
+**Part 2 — "Follow the cycle" final reasoning.** `FC_FINAL_ANSWER`'s
+feedback strings and `fcAnswer`'s state-tag text were revised: the tag
+now reads "Breaks the cycle" for the correct answer (reassess the
+presentation) and "Keeps the cycle going" for both incorrect answers
+(escalate to a stronger product; add more exfoliation), replacing the
+prior generic "Correct answer"/"Not quite" tag used by the shared
+`bq-tag` pattern elsewhere. Each feedback string's substantive
+explanation is unchanged — only the lead-in phrase was reframed to match
+the module's own cycle metaphor, directly reinforcing the intended
+lesson: the professional move is not automatically choosing a stronger
+product, but questioning the original assumption before escalating.
+
+**Part 3 — scenario-block redesign.** Replaced the single `.info-card`
+paragraph-dump with a new `.m6-scenario-list` of three
+`.m6-scenario-card` elements, each with four consistently labeled rows
+(Presentation / Likely direction / What this changes / Service
+direction), using the exact approved replacement copy supplied for this
+task. New CSS (`.m6-scenario-heading`, `.m6-scenario-list`,
+`.m6-scenario-card`, `.m6-scenario-title`, `.m6-scenario-row`,
+`.m6-scenario-label`, `.m6-scenario-value`) follows the file's existing
+restrained editorial language — neutral card background, a single
+subtle border, mono-uppercase micro-labels (matching the `.vs-tag`/
+`.treat-icon` convention already used elsewhere), and generous internal
+spacing — deliberately avoiding icon overload, gradients, heavy color
+coding, and any new animation. The block remains static content: no
+`onclick`, no interactive state, no `APP_STATE` reference anywhere in
+the new markup.
+
+**Part 4 — remaining interactions.** Reviewed Section 6.3's comparison
+toggle (labels and reveal text already precise and appropriately
+hedged — no change), Section 6.5's spectrum slider (the four state
+labels and `SPECTRUM_STATES` output text are approved curriculum from
+`module-06.md`, not implementation microcopy — left unchanged), and
+"Sort three presentations" (`M6_SORT_ANSWERS`'s "Correct."/"Not quite."
+feedback already leads directly into specific instructional explanation
+per answer, matching the pattern this task explicitly said may remain —
+left unchanged). Cadence (`MODULE_GUIDE_SYSTEMS[6]`,
+`MODULE_QUICK_PROMPTS[6]`, the module-open greeting) was reviewed and
+found to contain no off-spec phrase — left unchanged.
+
+**Broader confidence check.** Compared the rendered module against
+"Approved outcomes," "Practitioner insider value," and "Distinct
+learning rhythm" in `module-06.md`. Found no area where implementation
+undersells the approved teaching, introduces generic filler, removes an
+approved practitioner insight, oversimplifies a concept, or introduces
+terminology the specification doesn't authorize — if anything, the
+scenario-card redesign makes "Practitioner insider value"'s "common
+beginner mistake this prevents" (reaching for the strongest product,
+overcorrecting a mixed presentation) more explicit than the paragraph it
+replaced, by giving it its own labeled "What this changes" row in
+Scenario 3. No issue required stopping instead of fixing;
+`docs/course-audit/modules/module-06.md` was not edited in this step —
+none of the corrected language was approved curriculum, so documenting
+it there would clutter the specification with implementation microcopy,
+per instruction.
+
+**Files changed:** `headspa-mastery.html` only (CSS additions, the
+`fcAnswer`/`FC_FINAL_ANSWER` edits, and the Section 6.4 scenario-block
+markup replacement). No other production file was touched.
+
+**Static validation.** JavaScriptCore syntax parse (`osascript -l
+JavaScript`, `new Function(code)` over the concatenated inline
+`<script>` content — no `node` runtime available) reported no
+`SyntaxError`. A stack-based div-tag balance check against the true
+`#module6Wrap` boundary confirmed 235 open/235 close (up from 196,
+reflecting the new scenario-card markup); button tags balanced
+(26/26); no duplicate IDs; confirmed zero remaining instances of "Weak
+call," "Strong call," "Good call," "Bad call," "Correct call," "Stronger
+call," "Stronger approach," "Good choice," "Poor choice," "Nice work,"
+"Great job," "Think again," or "wrong call" anywhere in the file.
+
+**Mocked/browser validation.** Performed against a local static server
+with Course Review Mode, mocking `callAI`. Confirmed: the three scenario
+cards render with the exact approved labels and copy
+(programmatically verified card count, titles, labels, and values);
+Visual 1 remains installed and responsive; the "Follow the cycle"
+sequence (all six steps, sequential unlock, final-card reveal gating)
+functions exactly as in Step 40; the final answer's wrong/correct tags
+and feedback read "Keeps the cycle going"/"Breaks the cycle" as
+specified; checkpoint `.cp-q`/`M6.questions` parity holds for both
+checkpoints; a mocked strong pass sequence for `m6cp1` then `m6cp2`
+completes Module 6 and unlocks Module 7
+(`APP_STATE.canAccessModule(7)` → `true`); mobile viewport (375×812)
+shows no horizontal overflow for the new scenario cards. A full-window
+screenshot (1280×4000 viewport, to work around this environment's
+scroll-timing limitations at deep page offsets) visually confirmed the
+scenario cards render as three clean, separated, consistently labeled
+panels rather than a paragraph slab.
+
+**Regression.** No Modules 0–5 files were touched. Only
+`headspa-mastery.html` was modified — `module-06.md` and the JS
+memory-tag file from Step 39/40 were not touched by this step.
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md`
+(new "Task just completed" entry), `docs/course-audit/modules/README.md`
+(new Module 6 entry recording the polish pass), and this file. Module 6
+status is unchanged: **Implemented — awaiting manual QA**. Current gate:
+**Module 6 manual QA**.
+
+**Commit handling.** Both prior commits (`0c016b3`, `0c8efcc`) remained
+unpushed at the start of this task, with no unrelated local commits.
+Consistent with the established consolidation strategy, this task's
+changes are intended to be folded into that same unpushed history rather
+than pushed as a separate, previously-known-incomplete intermediate
+state.
+
+**Not performed, per instruction:** manual QA, manual approval, Module 7
+extraction or any Module 7 work, and merge or deployment to `main`.
+
+Work remains on branch `course-audit-build`.

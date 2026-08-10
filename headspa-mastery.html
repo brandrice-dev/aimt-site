@@ -1352,11 +1352,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 /* VS cards */
 .vs-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:1.25rem 0 0; }
 @media(max-width:600px){ .vs-wrap { grid-template-columns:1fr !important; } }
-.vs-card { border-radius:14px; padding:1.1rem; cursor:pointer; transition:all 0.2s; border:0.5px solid var(--border2); }
+.vs-card {
+  border-radius:14px; padding:1.1rem; cursor:pointer; transition:all 0.2s; border:0.5px solid var(--border2);
+  width:100%; text-align:left; font-family:inherit; color:inherit; appearance:none; -webkit-appearance:none; margin:0; display:block;
+}
 .dry-card { background:#f0ece4; }
 .dandruff-card { background:#f0e8e4; }
 .vs-card:hover { transform:translateY(-2px); }
 .vs-card.open { box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+.vs-card:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .vs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .vs-label { font-size:0.9rem; font-weight:500; }
 .dry-label { color:#5a4a30; }
@@ -1367,20 +1371,56 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .vs-expand-hint { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
 .vs-detail { display:none; padding:1rem 1.1rem; border-radius:0 0 12px 12px; margin-top:-6px; border:0.5px solid var(--border2); border-top:none; margin-bottom:6px; animation:slideDown 0.25s ease; }
 .vs-detail.open { display:block; }
+@media (prefers-reduced-motion: reduce) {
+  .vs-detail { animation: none !important; }
+}
 .vsd-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
 .vsd-text { font-size:0.875rem; line-height:1.75; color:var(--text); font-weight:300; }
 
-/* Cycle */
-.cycle-wrap { display:flex; flex-direction:column; align-items:center; gap:0; margin:1.25rem 0; }
-.cycle-step { width:100%; background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; display:flex; align-items:center; gap:12px; cursor:pointer; transition:all 0.2s; }
-.cycle-step:hover { background:rgba(255,255,255,0.9); }
-.cycle-step.active { background:var(--hero-bg); border-color:transparent; }
-.cycle-step.active .cs-num { color:#cdc8bc; }
-.cycle-step.active .cs-text { color:rgba(255,255,255,0.85); }
-.cs-num { font-family:var(--aimt-font-mono); font-size:0.65rem; color:var(--muted2); min-width:18px; }
-.cs-text { font-size:0.85rem; font-weight:300; color:var(--text); line-height:1.5; }
-.cycle-arrow { color:var(--muted2); font-size:0.9rem; margin:2px 0; }
-.cycle-insight { width:100%; margin-top:0.75rem; padding:1rem 1.1rem; background:#f0ece4; border-radius: var(--aimt-radius-sm); border:0.5px solid var(--ash); font-size:0.875rem; line-height:1.7; color:var(--text); font-weight:300; animation:slideDown 0.3s ease; }
+/* Section 6.3 Visual 1 — dry scalp vs. dandruff comparative illustration */
+.m6-visual-figure { margin: 1.25rem 0; }
+.m6-visual-figure picture, .m6-visual-figure img { display:block; width:100%; height:auto; max-width:100%; border-radius: var(--aimt-radius-md); border: 0.5px solid var(--border2); }
+
+/* "Follow the cycle" — progressive causal-sequence interaction (Section 6.4) */
+.follow-cycle { position:relative; margin:1.5rem 0 0; padding-left:2.75rem; }
+.fc-step { position:relative; padding-bottom:0.65rem; }
+.fc-rail { position:absolute; left:-1.75rem; top:2.1rem; bottom:0.65rem; width:1px; background:var(--border2); }
+.fc-step:last-of-type .fc-rail { display:none; }
+.fc-step.explored .fc-rail { background:var(--aimt-success); opacity:0.35; }
+.fc-num-badge {
+  position:absolute; left:-2.75rem; top:0; width:2.15rem; height:2.15rem; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-family:var(--aimt-font-mono);
+  font-size:0.82rem; font-weight:600; background:#f0ece4; border:0.5px solid var(--border2);
+  color:var(--muted); transition:all 0.2s; z-index:1;
+}
+.fc-step.current .fc-num-badge { background:var(--hero-bg); color:#fff; border-color:transparent; }
+.fc-step.explored .fc-num-badge { background:var(--aimt-success-light); color:var(--aimt-success); border-color:var(--aimt-success); }
+.fc-trigger {
+  width:100%; text-align:left; font-family:inherit; color:inherit; appearance:none; -webkit-appearance:none;
+  display:flex; align-items:center; gap:12px; padding:0.9rem 1.1rem; margin:0;
+  background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm);
+  cursor:pointer; transition:all 0.2s;
+}
+.fc-trigger:hover:not(:disabled) { background:rgba(255,255,255,0.9); }
+.fc-trigger:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.fc-trigger:disabled { cursor:not-allowed; opacity:0.5; }
+.fc-step.current .fc-trigger { border-color:var(--hero-bg); box-shadow:0 2px 16px rgba(0,0,0,0.07); }
+.fc-title { flex:1; font-size:0.85rem; font-weight:500; line-height:1.45; }
+.fc-badge { font-family:var(--aimt-font-mono); font-size:0.54rem; letter-spacing:0.07em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+.fc-step.current .fc-badge { color:var(--hero-bg); font-weight:600; }
+.fc-step.explored .fc-badge { color:var(--aimt-success); }
+.fc-detail { display:none; margin:0.4rem 0 0; padding:1rem 1.1rem; background:#f0ece4; border-radius: var(--aimt-radius-sm); border:0.5px solid var(--ash); font-size:0.85rem; line-height:1.7; color:var(--text); font-weight:300; animation:slideDown 0.25s ease; }
+.fc-detail.open { display:block; }
+@media (prefers-reduced-motion: reduce) { .fc-detail, .fc-final { animation: none !important; } }
+.fc-final { margin-top:1.5rem; padding:1.4rem 1.3rem; background:rgba(255,255,255,0.7); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-md); animation:slideDown 0.3s ease; }
+.fc-final-eyebrow { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.45rem; }
+.fc-final-heading { font-size:1.02rem; font-weight:600; color:var(--text); margin-bottom:0.6rem; }
+.fc-final-prompt { font-size:0.85rem; line-height:1.7; color:var(--text); font-weight:300; margin-bottom:1.1rem; }
+@media(max-width:600px){
+  .follow-cycle { padding-left:2.25rem; }
+  .fc-num-badge { left:-2.25rem; width:1.85rem; height:1.85rem; font-size:0.72rem; }
+  .fc-rail { left:-1.35rem; top:1.85rem; }
+}
 
 /* Spectrum */
 .spectrum-wrap { margin:1.25rem 0; }
@@ -1399,12 +1439,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .trigger-list { display:flex; flex-direction:column; gap:6px; margin:1.25rem 0; }
 .trigger-item { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); overflow:hidden; cursor:pointer; transition:background 0.2s; }
 .trigger-item:hover { background:rgba(255,255,255,0.88); }
+.trigger-item.static { cursor:default; }
+.trigger-item.static:hover { background:rgba(255,255,255,0.65); }
 .trig-header { display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; gap:10px; }
 .trig-name { font-size:0.875rem; font-weight:500; flex:1; }
 .trig-icon { color:var(--muted2); font-size:1.1rem; font-weight:300; transition:transform 0.2s; }
 .trigger-item.open .trig-icon { transform:rotate(45deg); }
 .trig-detail { display:none; padding:0 1rem 0.9rem; font-size:0.82rem; line-height:1.7; color:var(--muted); font-weight:300; }
 .trigger-item.open .trig-detail { display:block; }
+.trig-detail.static { display:block; }
+.m6-sort-block { margin: 1.5rem 0; }
+
+/* "What this looks like in real time" — applied interpretation cards (Section 6.4) */
+.m6-scenario-heading { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.02em; color: var(--text); margin: 1.5rem 0 0.9rem; }
+.m6-scenario-list { display: flex; flex-direction: column; gap: 12px; margin: 0 0 1.25rem; }
+.m6-scenario-card { background: rgba(255,255,255,0.65); border: 0.5px solid var(--border2); border-radius: var(--aimt-radius-md); padding: 1.1rem 1.2rem; }
+.m6-scenario-title { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); padding-bottom: 0.7rem; margin-bottom: 0.7rem; border-bottom: 0.5px solid var(--border2); }
+.m6-scenario-row { margin-bottom: 0.7rem; }
+.m6-scenario-row:last-child { margin-bottom: 0; }
+.m6-scenario-label { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted2); margin-bottom: 2px; }
+.m6-scenario-value { font-size: 0.82rem; line-height: 1.65; color: var(--text); font-weight: 300; }
 
 /* ── MODULE 7 — Tool categories ── */
 .tool-category { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius:14px; overflow:hidden; cursor:pointer; transition:background 0.2s; }
@@ -4937,7 +4991,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 6 · Common Conditions & Disorders</div>
+      <div class="mh-eyebrow">Module 6 · Conditions & Disorders</div>
       <div class="mh-title">Before you treat,<br>you have to interpret correctly.</div>
       <div class="mh-desc">By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer — conditions that change how those patterns behave. Because if you misread what you're seeing, you will choose the wrong approach with confidence.</div>
     </div>
@@ -4949,30 +5003,28 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
+    <div class="sec-eyebrow">6.2 — What you can and cannot conclude from appearance alone</div>
+    <div class="sec-title">Appearance is suggestive. It is not conclusive.</div>
+    <div class="body-text">Flake color, size, oiliness, and redness tell you something — but not everything. Several presentations can look similar at a glance: dry scalp, early dandruff, ordinary product buildup, and — at the more involved end — presentations that resemble other conditions entirely, such as psoriasis, tinea capitis, or contact or atopic dermatitis. A cosmetic assessment cannot rule these look-alikes out.</div>
+    <div class="body-text">This module does not teach you to name or rule out those other conditions. It teaches you that they exist, so a confident-sounding visual read never becomes more certain than it actually is.</div>
+    <div class="body-text">When a presentation is ambiguous or mixed, the responsible move is to ask about history — product use, wash timing, recent changes, symptoms — and favor the gentler service direction. Don't force a label to make the picture feel resolved.</div>
+
+    <hr class="divider">
+
     <div class="sec-eyebrow">6.3 — The most important distinction in scalp care</div>
     <div class="sec-title">Dry scalp and dandruff are not the same thing.</div>
-    <div class="body-text">They may both present with flaking. But the cause — and therefore the treatment approach — is completely different. Getting this wrong is one of the most common and most consequential mistakes in scalp care. Tap each side to understand them fully.</div>
-    <div class="interaction-hint">↓ Tap each card to expand</div>
+    <div class="body-text">They may both present with flaking. But the cause — and therefore the treatment approach — is completely different. Getting this wrong is one of the most common and most consequential mistakes in scalp care.</div>
 
-    <div class="photo-pair">
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Dry Scalp — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Fine white powdery flakes, matte surface, minimal oil</div>
-      </div>
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Dandruff — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Yellowish clumped flakes, oily surface, near follicle</div>
-      </div>
-    </div>
-    <div class="interaction-hint">↓ Tap each pattern to see what it means</div>
+    <figure class="m6-visual-figure">
+      <picture>
+        <source srcset="assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.webp" type="image/webp">
+        <img src="assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.png" alt="Illustrative comparison of a dry-scalp pattern and a dandruff-spectrum pattern, showing fine powdery matte flaking versus larger yellowish flakes with visible oil near the root." width="1200" height="800" loading="lazy">
+      </picture>
+    </figure>
+
+    <div class="interaction-hint">Tap each card to compare</div>
     <div class="vs-wrap">
-      <div class="vs-card dry-card" id="vsCardDry" onclick="toggleVsCard('vsCardDry', 'vsDetailDry')">
+      <button type="button" class="vs-card dry-card" id="vsCardDry" aria-expanded="false" aria-controls="vsDetailDry" onclick="toggleVsCard('vsCardDry', 'vsDetailDry')">
         <div class="vs-header">
           <div class="vs-label dry-label">Dry scalp</div>
           <div class="vs-tag">Hydration issue</div>
@@ -4984,8 +5036,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="vs-bullet">Minimal visible oil</div>
         </div>
         <div class="vs-expand-hint" id="vsHintDry">+ See why this matters</div>
-      </div>
-      <div class="vs-card dandruff-card" id="vsCardDandruff" onclick="toggleVsCard('vsCardDandruff', 'vsDetailDandruff')">
+      </button>
+      <button type="button" class="vs-card dandruff-card" id="vsCardDandruff" aria-expanded="false" aria-controls="vsDetailDandruff" onclick="toggleVsCard('vsCardDandruff', 'vsDetailDandruff')">
         <div class="vs-header">
           <div class="vs-label dandruff-label">Dandruff</div>
           <div class="vs-tag">Biological imbalance</div>
@@ -4997,7 +5049,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="vs-bullet">Irritation or redness</div>
         </div>
         <div class="vs-expand-hint" id="vsHintDandruff">+ See why this matters</div>
-      </div>
+      </button>
     </div>
 
     <div class="vs-detail" id="vsDetailDry">
@@ -5006,48 +5058,89 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="vs-detail" id="vsDetailDandruff">
       <div class="vsd-label">Dandruff — the deeper picture</div>
-      <div class="vsd-text">Dandruff flakes because the scalp is functioning abnormally. Excess oil, microbial activity (primarily Malassezia yeast), inflammation, and accelerated skin cell turnover all combine to produce the flaking and irritation. This is not a hydration problem — adding moisture to an oily, inflamed scalp can make it worse. Treatment direction: cleansing support, oil control, anti-fungal supporting ingredients, anti-inflammatory botanicals. The goal is to rebalance the environment, not repair a barrier.</div>
+      <div class="vsd-text">Dandruff is generally associated with the scalp environment shifting out of balance — excess oil, Malassezia yeast activity, inflammation, and faster skin-cell turnover typically combine to produce the flaking and irritation, though the exact balance varies from client to client. This is not a hydration problem — adding moisture to an oily, inflamed scalp can make it worse. Treatment direction: cleansing support, oil control, anti-fungal supporting ingredients, anti-inflammatory botanicals. The goal is to rebalance the environment, not repair a barrier.</div>
+    </div>
+
+    <div class="info-card" style="margin-top:1rem;">
+      <div class="ic-title">When it's not clean-cut</div>
+      <div class="body-text" style="margin:0">Some clients show features of both — moderate oil with some tightness, or flakes that don't clearly match either column. When that happens, don't force a label. Ask about recent products, wash frequency, and how long the pattern has been present, and favor the gentler service direction until the picture is clearer.</div>
     </div>
 
     <hr class="divider">
 
-    <!-- ── INTERACTIVE: THE WRONG PRODUCT CYCLE ── -->
+    <!-- ── FOLLOW THE CYCLE — progressive causal-sequence interaction ── -->
     <div class="sec-eyebrow">6.4 — The cycle worth understanding</div>
     <div class="sec-title">Why the wrong product makes things worse.</div>
-    <div class="body-text">Most clients with dry scalp end up using anti-dandruff shampoo. They see flakes, assume dandruff, reach for the strongest thing they can find. Here's what actually happens.</div>
-    <div class="interaction-hint">↓ Tap each step to follow the cycle</div>
+    <div class="body-text">This is a common, avoidable pattern: a client sees flakes, assumes dandruff, and reaches for the strongest anti-dandruff product they can find. Here's what actually happens — work through it in order.</div>
+    <div class="interaction-hint">Open each stage in order to follow the cycle</div>
 
-    <div class="cycle-wrap" id="cycleWrap">
-      <div class="cycle-step active" id="cstep-0" onclick="cycleStep(0)">
-        <div class="cs-num">1</div>
-        <div class="cs-text">Client notices flaking on their clothing and scalp</div>
+    <div class="follow-cycle" id="followCycle">
+      <div class="fc-step current" id="fcStep-0">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">1</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-0" aria-expanded="false" aria-controls="fcDetail-0" onclick="fcActivate(0)">
+          <span class="fc-title">Client notices flaking on their clothing and scalp</span>
+          <span class="fc-badge" id="fcBadge-0">Start here</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-0">This is where it starts. A client sees flakes and immediately interprets them as dandruff. The assumption is almost universal — and almost always made without any real assessment.</div>
       </div>
-      <div class="cycle-arrow">↓</div>
-      <div class="cycle-step" id="cstep-1" onclick="cycleStep(1)">
-        <div class="cs-num">2</div>
-        <div class="cs-text">Assumes it must be dandruff. Buys anti-dandruff shampoo.</div>
+      <div class="fc-step locked" id="fcStep-1">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">2</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-1" aria-expanded="false" aria-controls="fcDetail-1" onclick="fcActivate(1)" disabled>
+          <span class="fc-title">Assumes it must be dandruff. Buys anti-dandruff shampoo.</span>
+          <span class="fc-badge" id="fcBadge-1">Not yet available</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-1">The product choice follows the assumption. Anti-dandruff shampoos are heavily marketed, widely available, and seem like the logical solution. The mistake is reaching for the wrong one.</div>
       </div>
-      <div class="cycle-arrow">↓</div>
-      <div class="cycle-step" id="cstep-2" onclick="cycleStep(2)">
-        <div class="cs-num">3</div>
-        <div class="cs-text">Anti-dandruff shampoo strips the scalp of its remaining moisture and oils</div>
+      <div class="fc-step locked" id="fcStep-2">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">3</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-2" aria-expanded="false" aria-controls="fcDetail-2" onclick="fcActivate(2)" disabled>
+          <span class="fc-title">Anti-dandruff shampoo strips the scalp of its remaining moisture and oils</span>
+          <span class="fc-badge" id="fcBadge-2">Not yet available</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-2">Anti-dandruff shampoos strip oil, suppress yeast, and slow cell turnover. On a scalp that already lacks moisture, they remove what little barrier is left.</div>
       </div>
-      <div class="cycle-arrow">↓</div>
-      <div class="cycle-step" id="cstep-3" onclick="cycleStep(3)">
-        <div class="cs-num">4</div>
-        <div class="cs-text">Scalp becomes drier. Flaking worsens. More irritation.</div>
+      <div class="fc-step locked" id="fcStep-3">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">4</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-3" aria-expanded="false" aria-controls="fcDetail-3" onclick="fcActivate(3)" disabled>
+          <span class="fc-title">Scalp becomes drier. Flaking worsens. More irritation.</span>
+          <span class="fc-badge" id="fcBadge-3">Not yet available</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-3">The scalp responds to barrier loss by becoming drier, tighter, and more reactive. Flaking increases. The client interprets this as the condition getting worse.</div>
       </div>
-      <div class="cycle-arrow">↓</div>
-      <div class="cycle-step" id="cstep-4" onclick="cycleStep(4)">
-        <div class="cs-num">5</div>
-        <div class="cs-text">Client increases usage — thinks they need more of the same product</div>
+      <div class="fc-step locked" id="fcStep-4">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">5</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-4" aria-expanded="false" aria-controls="fcDetail-4" onclick="fcActivate(4)" disabled>
+          <span class="fc-title">Client increases usage — thinks they need more of the same product</span>
+          <span class="fc-badge" id="fcBadge-4">Not yet available</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-4">The logical response to a product not working is to use more of it. This accelerates the damage cycle.</div>
       </div>
-      <div class="cycle-arrow">↓</div>
-      <div class="cycle-step" id="cstep-5" onclick="cycleStep(5)">
-        <div class="cs-num">6</div>
-        <div class="cs-text">Back to step 1. The cycle continues. They arrive at your table having over-treated for months.</div>
+      <div class="fc-step locked" id="fcStep-5">
+        <div class="fc-rail" aria-hidden="true"></div>
+        <div class="fc-num-badge" aria-hidden="true">6</div>
+        <button type="button" class="fc-trigger" id="fcTrigger-5" aria-expanded="false" aria-controls="fcDetail-5" onclick="fcActivate(5)" disabled>
+          <span class="fc-title">Back to step 1. The cycle continues. They arrive at your table having over-treated for months.</span>
+          <span class="fc-badge" id="fcBadge-5">Not yet available</span>
+        </button>
+        <div class="fc-detail" id="fcDetail-5">By the time they reach you, the scalp has been compromised repeatedly. Your first job is often to stop the damage — not start a new treatment.</div>
       </div>
-      <div class="cycle-insight" id="cycleInsight" style="display:none"></div>
+
+      <div class="fc-final" id="fcFinal" style="display:none">
+        <div class="fc-final-eyebrow">Final reasoning</div>
+        <div class="fc-final-heading">Where do you break the cycle?</div>
+        <div class="fc-final-prompt">A client arrives after repeatedly escalating anti-dandruff products for a dry, increasingly reactive scalp. What should change first?</div>
+        <div class="bq-options" role="group" aria-label="Where do you break the cycle?">
+          <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="fcAnswer(0,this)">Move to a stronger dandruff product</button>
+          <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="fcAnswer(1,this)">Reassess the presentation before choosing the product direction</button>
+          <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="fcAnswer(2,this)">Add more exfoliation</button>
+        </div>
+        <div class="bq-feedback" id="fcFeedback" aria-live="polite" style="display:none;"></div>
+      </div>
     </div>
 
     <div class="cadence-note" style="margin-top:1.5rem">
@@ -5055,36 +5148,95 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cn-text">"This is not treatment failure. It is misidentification. Flaking alone does not justify anti-dandruff treatment. Your job is to identify what type of flaking you are seeing before recommending anything. Sometimes the best thing you can do is simplify — not add more."</div>
     </div>
 
-    <div class="info-card" style="margin-top:1.25rem;">
-      <div class="ic-title">What this looks like in real time</div>
-      <div class="body-text" style="margin:0 0 0.75rem;"><strong>Scenario 1 — fine white flakes, no oil, tight matte scalp:</strong> Weak call: dandruff — treat aggressively. Stronger call: dry scalp — support barrier, reduce stripping.</div>
-      <div class="body-text" style="margin:0 0 0.75rem;"><strong>Scenario 2 — yellowish flakes, oil at root, slight redness:</strong> Correct call: dandruff pattern — support cleansing and regulation.</div>
-      <div class="body-text" style="margin:0;"><strong>Scenario 3 — flakes, some oil, mild irritation (not clean):</strong> Stronger approach: mixed presentation — avoid aggressive stripping, support balance first. This is where most people hesitate and make the wrong call.</div>
+    <div class="m6-scenario-heading">What this looks like in real time</div>
+    <div class="m6-scenario-list">
+      <div class="m6-scenario-card">
+        <div class="m6-scenario-title">Scenario 1</div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Presentation</div>
+          <div class="m6-scenario-value">Fine white flakes, no visible oil, tight matte scalp.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Likely direction</div>
+          <div class="m6-scenario-value">Dry-scalp pattern.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">What this changes</div>
+          <div class="m6-scenario-value">This does not point you toward a stronger dandruff response. Treating an already dry presentation as an oil-driven flaking pattern can intensify dryness and reactivity.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Service direction</div>
+          <div class="m6-scenario-value">Support the barrier, reduce stripping, and simplify the routine.</div>
+        </div>
+      </div>
+      <div class="m6-scenario-card">
+        <div class="m6-scenario-title">Scenario 2</div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Presentation</div>
+          <div class="m6-scenario-value">Yellowish flakes, oil at the root, slight redness.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Likely direction</div>
+          <div class="m6-scenario-value">Dandruff-spectrum pattern.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">What this changes</div>
+          <div class="m6-scenario-value">This pattern supports a cleansing-and-regulation direction rather than a hydration-first direction.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Service direction</div>
+          <div class="m6-scenario-value">Support cleansing, regulation, and an appropriate within-scope home-care direction.</div>
+        </div>
+      </div>
+      <div class="m6-scenario-card">
+        <div class="m6-scenario-title">Scenario 3</div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Presentation</div>
+          <div class="m6-scenario-value">Flakes, some oil, mild irritation, not clean-cut.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Likely direction</div>
+          <div class="m6-scenario-value">Mixed or unclear presentation.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">What this changes</div>
+          <div class="m6-scenario-value">This is where practitioners can overcorrect. When the pattern is mixed, the priority is not choosing the strongest response — it is avoiding an aggressive one before the picture is clearer.</div>
+        </div>
+        <div class="m6-scenario-row">
+          <div class="m6-scenario-label">Service direction</div>
+          <div class="m6-scenario-value">Favor balance first. Avoid aggressive stripping. Ask more questions and choose the gentler direction until the pattern is clearer.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── MIDPOINT CHECKPOINT ── -->
+    <div class="checkpoint" id="m6cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Real scenario</div>
+      </div>
+      <div class="cp-q">A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+        <textarea class="cp-input" id="m6cp1In" placeholder="Diagnose the situation and walk me through your response..." rows="1" oninput="grow(this)" onkeydown="m6cpKey(event,'m6cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m6cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m6cp1Btn" onclick="submitM6CP('m6cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m6cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
     <!-- ── MALASSEZIA SPECTRUM SLIDER ── -->
-    <div class="sec-eyebrow">6.5 & 6.6 — Malassezia to seborrheic dermatitis</div>
+    <div class="sec-eyebrow">6.5 — Malassezia to seborrheic dermatitis: one spectrum</div>
     <div class="sec-title">Not two conditions. One spectrum.</div>
-    <div class="photo-pair">
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Mild Dandruff — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Early Malassezia activity, oily flaking</div>
-      </div>
-      <div>
-        <div class="clinical-photo placeholder">
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Seborrheic Dermatitis — Microscopy</div>
-        </div>
-        <div class="photo-pair-label">Advanced — redness, scaling beyond scalp, inflammation</div>
-      </div>
-    </div>
-    <div class="body-text">Malassezia is a naturally occurring yeast found on most scalps. It becomes a problem when oil production increases, the scalp environment shifts, and the yeast becomes overactive. As it progresses, it moves along a spectrum from mild dandruff to seborrheic dermatitis — the same biological process at different levels of severity.</div>
-    <div class="interaction-hint">↔ Drag to move along the spectrum</div>
+    <div class="body-text">Malassezia is a naturally occurring yeast found on most scalps. It becomes a problem when several factors line up together — increased oil, a shift in the scalp's surface environment, and individual variation in how the scalp's immune and inflammatory response reacts to the yeast's activity. As it progresses, it moves along a spectrum from mild dandruff to seborrheic dermatitis — the same underlying process at different levels of severity.</div>
+    <div class="interaction-hint">Drag to move along the spectrum</div>
 
     <div class="spectrum-wrap">
       <div class="spectrum-labels">
@@ -5093,8 +5245,65 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <span>Moderate</span>
         <span>Seborrheic dermatitis</span>
       </div>
-      <input type="range" min="1" max="4" value="1" id="spectrumSlider" oninput="updateSpectrum(this.value)" step="1" style="width:100%;accent-color:var(--hero-bg);">
+      <input type="range" min="1" max="4" value="1" id="spectrumSlider" oninput="updateSpectrum(this.value)" step="1" style="width:100%;accent-color:var(--hero-bg);" aria-label="Malassezia to seborrheic dermatitis spectrum, from balanced to seborrheic dermatitis">
       <div class="spectrum-output" id="spectrumOutput"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── STANDALONE REFERRAL SECTION ── -->
+    <div class="sec-eyebrow">6.6 — When to pause or refer</div>
+    <div class="sec-title">Know these without needing to touch anything.</div>
+    <div class="info-card">
+      <div class="ic-title">Refer when you see</div>
+      <div class="vs-bullets">
+        <div class="vs-bullet">Redness or scaling that spreads beyond the scalp — to the eyebrows, hairline, or ears — combined with active irritation</div>
+        <div class="vs-bullet">Broken, weeping, crusted, or bleeding skin</div>
+        <div class="vs-bullet">Symptoms the client describes as severe, painful, or rapidly worsening</div>
+        <div class="vs-bullet">No improvement despite reasonable home care and product changes</div>
+        <div class="vs-bullet">Any presentation you are not confident matches a typical dry-scalp or dandruff-spectrum pattern — including anything that could resemble a different condition (see Section 6.2)</div>
+      </div>
+    </div>
+    <div class="cadence-note" style="margin-top:1.25rem">
+      <div class="cn-label">Referral script</div>
+      <div class="cn-text">"I'm seeing something today that goes beyond what a head spa service is designed to address. I don't want to guess at the cause or risk making it worse, so I'd recommend having it evaluated before we continue with scalp services."</div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- SIGNATURE INTERACTION: SORT THREE PRESENTATIONS -->
+    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-title">Sort three presentations.</div>
+    <div class="body-text">For each presentation, decide whether to proceed as usual, proceed with a modification, or pause and refer. Weigh the combination of cues together — not any single feature in isolation.</div>
+
+    <div class="m6-sort-block" id="m6Sort1">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Presentation 1.</strong> Fine white powdery flakes, matte surface, minimal oil, mild tightness, no redness.</div>
+      <div class="bq-options" role="group" aria-label="Presentation 1. Choose whether to proceed, modify, or refer.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m6Sort(1,0,this)">Proceed as usual</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m6Sort(1,1,this)">Proceed with modification</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m6Sort(1,2,this)">Pause and refer</button>
+      </div>
+      <div class="bq-feedback" id="m6Sort1Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m6Sort2">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Presentation 2.</strong> Yellowish, clumped flakes, visible oil at the root, mild redness, contained to the scalp, no spread.</div>
+      <div class="bq-options" role="group" aria-label="Presentation 2. Choose whether to proceed, modify, or refer.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m6Sort(2,0,this)">Proceed as usual</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m6Sort(2,1,this)">Proceed with modification</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m6Sort(2,2,this)">Pause and refer</button>
+      </div>
+      <div class="bq-feedback" id="m6Sort2Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m6Sort3">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Presentation 3.</strong> Scale and redness spreading to the eyebrows and hairline, the client reports significant discomfort, and the pattern has persisted for months despite drugstore treatments.</div>
+      <div class="bq-options" role="group" aria-label="Presentation 3. Choose whether to proceed, modify, or refer.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m6Sort(3,0,this)">Proceed as usual</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m6Sort(3,1,this)">Proceed with modification</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m6Sort(3,2,this)">Pause and refer</button>
+      </div>
+      <div class="bq-feedback" id="m6Sort3Feedback" aria-live="polite" style="display:none;"></div>
     </div>
 
     <hr class="divider">
@@ -5112,7 +5321,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="treat-card">
         <div class="treat-icon">②</div>
         <div class="treat-title">Anti-fungal supporting ingredients</div>
-        <div class="treat-body">Zinc, ketoconazole (OTC recommendation only — not prescription), selenium sulfide. These help manage yeast activity without requiring medical oversight.</div>
+        <div class="treat-body">Zinc pyrithione, 1%-strength ketoconazole, and 1% selenium sulfide are OTC categories that help manage yeast activity. Never recommend or name a prescription-strength (2%) product.</div>
       </div>
       <div class="treat-card">
         <div class="treat-icon">③</div>
@@ -5126,42 +5335,42 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
+    <div class="info-card" style="margin-top:1.25rem;">
+      <div class="ic-title">A product category is not a diagnosis</div>
+      <div class="body-text" style="margin:0">Recommending a product category is a retail suggestion within a cosmetic service — not a diagnosis and not a prescription. If a presentation meets any of Section 6.6's referral criteria, refer instead of recommending a product.</div>
+    </div>
+
     <hr class="divider">
 
-    <!-- ── TRIGGER QUIZ ── -->
+    <!-- ── TRIGGERS (static — reveal mechanic removed on audit) ── -->
     <div class="sec-eyebrow">6.8 — What makes it worse</div>
     <div class="sec-title">Match the trigger to what it does.</div>
     <div class="body-text">Understanding what aggravates these conditions helps you educate clients in a way that actually changes their behavior.</div>
-    <div class="interaction-hint">↓ Tap each trigger to reveal its mechanism</div>
 
     <div class="trigger-list">
-      <div class="trigger-item" onclick="toggleTrigger(this)">
+      <div class="trigger-item static">
         <div class="trig-header">
           <div class="trig-name">Stress &amp; hormonal changes</div>
-          <div class="trig-icon">+</div>
         </div>
-        <div class="trig-detail">Increases oil production and can trigger flare-ups of existing conditions. Clients who notice seasonal or cyclical worsening are often seeing a hormonal pattern. Asking about stress levels and lifestyle during intake is diagnostically useful.</div>
+        <div class="trig-detail static">Stress and hormonal shifts are associated with flare-ups of existing conditions, most likely through a combination of immune and inflammatory response and changes in oil production — not oil production alone. Clients who notice seasonal or cyclical worsening are often seeing a hormonal pattern. Asking about stress levels and lifestyle during intake is useful context, not a diagnosis.</div>
       </div>
-      <div class="trigger-item" onclick="toggleTrigger(this)">
+      <div class="trigger-item static">
         <div class="trig-header">
           <div class="trig-name">Diet high in sugar, fried, or inflammatory foods</div>
-          <div class="trig-icon">+</div>
         </div>
-        <div class="trig-detail">Contributes to increased oil production and systemic inflammation — both of which feed Malassezia activity. Clients who clean up their diet often see scalp improvement without changing any products. Worth mentioning, not lecturing about.</div>
+        <div class="trig-detail static">May contribute for some clients, though the evidence here is largely individual rather than firmly established. Worth asking about as part of intake — not something to lecture the client about or present as a guaranteed fix.</div>
       </div>
-      <div class="trigger-item" onclick="toggleTrigger(this)">
+      <div class="trigger-item static">
         <div class="trig-header">
           <div class="trig-name">Excess oil production</div>
-          <div class="trig-icon">+</div>
         </div>
-        <div class="trig-detail">Creates the ideal environment for Malassezia overgrowth. Temperature, hormones, and diet all influence how much oil the scalp produces. This is why warm weather flare-ups are common — sebum production rises approximately 10% per 1.8°F increase in temperature.</div>
+        <div class="trig-detail static">Creates a favorable environment for Malassezia overgrowth. Warmer weather, humidity, and hormonal shifts are commonly associated with a client noticing more oil between washes, though the relationship isn't precise or predictable enough to apply as a fixed rule for any individual client. Ask about recent heat exposure, exercise, and seasonal changes as part of intake rather than assuming a specific cause.</div>
       </div>
-      <div class="trigger-item" onclick="toggleTrigger(this)">
+      <div class="trigger-item static">
         <div class="trig-header">
           <div class="trig-name">Wrong product use</div>
-          <div class="trig-icon">+</div>
         </div>
-        <div class="trig-detail">The most correctable trigger. Overly harsh or stripping products worsen both dryness and dandruff conditions. Clients often arrive already over-treating — multiple shampoos, aggressive products, inconsistent routines. Simplification is often more effective than adding more.</div>
+        <div class="trig-detail static">The most correctable trigger. Overly harsh or stripping products worsen both dryness and dandruff conditions. Clients often arrive already over-treating — multiple shampoos, aggressive products, inconsistent routines. Simplification is often more effective than adding more.</div>
       </div>
     </div>
 
@@ -5177,25 +5386,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <!-- ── SCENARIO CHECKPOINT ── -->
-    <div class="checkpoint" id="m6cp1">
-      <div class="cp-head">
-        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Real scenario</div>
-      </div>
-      <div class="cp-q">A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</div>
-      <div class="cp-row">
-        <div class="cp-input-row">
-        <textarea class="cp-input" id="m6cp1In" placeholder="Diagnose the situation and walk me through your response..." rows="1" oninput="grow(this)" onkeydown="m6cpKey(event,'m6cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m6cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
-        </div>
-        <button class="cp-btn" id="m6cp1Btn" onclick="submitM6CP('m6cp1')">
-          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-      <div class="cp-res" id="m6cp1Res"></div>
-    </div>
-
+    <!-- ── FINAL CHECKPOINT ── -->
     <div class="checkpoint" id="m6cp2">
       <div class="cp-head">
         <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
@@ -5205,13 +5396,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cp-row">
         <div class="cp-input-row">
         <textarea class="cp-input" id="m6cp2In" placeholder="How does the picture change your approach..." rows="1" oninput="grow(this)" onkeydown="m6cpKey(event,'m6cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m6cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <button class="voice-btn" onclick="startVoice('m6cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-        <button class="cp-btn" id="m6cp2Btn" onclick="submitM6CP('m6cp2')">
+        <button class="cp-btn" id="m6cp2Btn" onclick="submitM6CP('m6cp2')" aria-label="Send response to Cadence">
           <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="cp-res" id="m6cp2Res"></div>
+      <div class="cp-res" id="m6cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m6Complete" style="display:none;">
@@ -6979,11 +7170,40 @@ const M5 = {
 
 // ── MODULE 6 ──
 const M6 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m6cp1 / m6cp2 inside #module6Wrap.
   questions: {
-    m6cp1: 'Client has been using zinc anti-dandruff shampoo for 3 months with worsening results. Microscopy shows fine white powdery flakes, minimal oil, matte surface. What is happening and what do you tell her?',
-    m6cp2: 'Same client but microscopy shows yellowish clumped flakes, visible oil, mild redness, flaking spreads to eyebrows and hairline. How does your response change and is this within scope?'
+    m6cp1: 'A client comes in with visible flaking and says she\'s been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What\'s happening — and what do you tell her?',
+    m6cp2: 'Same client, but this time the microscope shows yellowish clumped flakes near the follicle, visible oiliness, mild redness, and the client reports it spreads to her eyebrows and hairline. How does your response change — and is this still within the scope of a head spa service?'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 6 (Common Conditions & Disorders) checkpoint. Question: "' + q + '". Key concepts: dry scalp (fine white powdery flakes, matte, minimal oil) vs dandruff (yellow oily clumped flakes, redness, Malassezia-driven). Anti-dandruff products worsen dry scalp by stripping the barrier. Seborrheic dermatitis = advanced Malassezia — flaking beyond scalp (eyebrows, hairline) plus significant inflammation warrants referral. Within-scope support: gentle cleansing, anti-inflammatory botanicals, OTC zinc recommendation, simplification. 3-5 sentences, direct and warm.'
+  // Module-6/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer().
+  systems: {
+    m6cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 6 competency: recognizing a dry-scalp presentation being misidentified and mistreated as dandruff, and correcting it responsibly.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Identifies the presentation as consistent with a dry-scalp pattern (matte, minimal oil, powdery flakes) rather than dandruff.\n' +
+      '2. Explains, without absolute "always" framing, that anti-dandruff/anti-fungal shampoo can strip a barrier-compromised scalp further and worsen dryness.\n' +
+      '3. Offers a within-scope alternative direction — simplifying the routine, gentler or less-frequent cleansing, a hydration-supportive product category — rather than a specific medical treatment claim.\n' +
+      '4. Communicates this to the client without diagnosing a medical condition, without contradicting her harshly, and without implying she was foolish for self-treating.\n\n' +
+      'The student does not need to name a specific product, brand, or ingredient. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that diagnoses a specific medical skin condition as fact (for example, states this is "eczema" or "psoriasis"); promises the recommended product will "cure" or permanently fix the presentation; recommends a prescription-strength product by name; or dismisses or belittles the client\'s self-care attempt.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the dry-scalp pattern is identified correctly but there is no client-facing language, ask what the student would actually say to redirect her away from the anti-dandruff shampoo. If the client language is good but never explains why the current product is the problem, ask for that.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.',
+    m6cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 6 competency: placing a more involved presentation on the dandruff spectrum, recognizing referral-relevant features, and responding appropriately without diagnosing.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Recognizes the presentation as more consistent with the more-involved end of the dandruff spectrum than simple dry scalp, without naming it as a confirmed diagnosis (for example, does not assert "this is seborrheic dermatitis").\n' +
+      '2. Identifies that spread beyond the scalp combined with redness is a referral-relevant finding.\n' +
+      '3. Gives a reasonable scope decision tied to the described severity — proceeding conservatively, modifying, pausing, or referring — rather than defaulting to "proceed as normal."\n' +
+      '4. If recommending any service action at all, stays within already-approved within-scope categories (cleansing support, an OTC-only 1%-strength anti-fungal/zinc/selenium-sulfide category, botanicals) rather than inventing a new treatment.\n' +
+      '5. Gives client-facing language that explains the change or the referral without alarming the client or stating a diagnosis.\n\n' +
+      'The student does not need to name a specific product, brand, or ingredient. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that diagnoses seborrheic dermatitis or another named medical condition as confirmed fact; recommends a prescription-strength product by name; promises the head-spa service will resolve or cure the spreading presentation; or fails to mention referral or scope limits at all despite the scenario\'s spread-with-redness description.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the student recognizes this is more involved but never states whether or how the scope decision changes, ask them to state clearly whether they would proceed, modify, pause, or refer, and why. If the scope decision is right but there is no client-facing language, ask what they would actually say to the client.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 7 ──
@@ -7033,7 +7253,7 @@ const MODULE_GUIDE_SYSTEMS = {
   3: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 3: five scalp layers, the pilosebaceous unit, hair-shaft versus follicle biology, the hair-growth cycle, delayed diffuse shedding, postpartum shedding, referral patterns, the stratum-corneum barrier, surface lipids, and accurate massage claims. Translate technical material through this sequence whenever useful: structure, visible clue, service implication, limit of the conclusion. Lead with practitioner insight and applied understanding rather than repeated warnings. Do not diagnose, promise hair growth, claim that massage feeds or activates follicles, or state that visible findings prove an internal cause. Use 3–5 concise sentences and no bullet points.',
   4: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 4: cosmetic scalp magnification, client introduction and image consent, device hygiene, standardized image collection, AIMT\'s five-point scan, the five observation lenses, regional comparison, appearance-versus-cause reasoning, conservative service adjustment, and pause/referral judgment. Treat the scalp camera as an observation and education tool, not medical trichoscopy or a diagnostic device. When useful, structure the response as: what is visible, what context is missing, what may change in the cosmetic service, and what cannot be concluded. Do not diagnose, prescribe, claim that an image proves follicular blockage or a medical cause, or repeat a scanner-generated condition label as fact. Lead with applied observation skill rather than repeated scope warnings. Use 3-5 concise sentences and no bullet points unless the student explicitly asks for a list.',
   5: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 5, Scalp Patterns & Service Adaptation. Help the student translate supported observations, client-reported experience, and regional differences into conservative cosmetic service decisions. Use the five service levers: cleansing, exfoliation, water and steam, pressure and tempo, and product placement and finish. Reinforce the order: safety limit, client comfort/reactivity, surface tolerance, visible cosmetic need, then client preference. Do not diagnose, prescribe, claim medical treatment, claim personal practitioner experience, restore the compensatory-oil claim, call follicles clogged, imply hair-growth obstruction, or teach named dandruff/dermatitis content that belongs in Module 6. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; do not claim that experience as your own. Be direct, warm, practical, and concise.',
-  6: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 6 (Conditions & Disorders): dry scalp vs dandruff vs seborrheic dermatitis. Anti-dandruff shampoo worsens dry scalp. If the student has seen client scalp issues before, connect this to what they may have misread — and how head spa assessment changes their approach going forward. 3-5 sentences. No bullet points.',
+  6: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 6, Conditions & Disorders. Help the student distinguish a dry-scalp presentation from the dandruff-to-seborrheic-dermatitis spectrum, recognize that appearance alone does not establish cause, and decide whether to proceed, modify, or refer. Reinforce that spread beyond the scalp combined with redness, broken or weeping skin, severe symptoms, or no improvement with reasonable care are referral-relevant findings. Do not diagnose, prescribe, name a specific medical condition as confirmed fact, claim personal practitioner experience, or treat any illustrative image as clinical proof. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise.',
   7: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 7 (Equipment & Room Setup): halo bed selection, essential tools, prep sequence, client positioning. The room is part of the head spa service. If the student is building a new space or adding head spa to an existing menu, speak to how the setup specifically supports scalp wellness delivery. 3-5 sentences. No bullet points.',
   8: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 8 (The Head Spa Service): 17 steps, two formats, micro-teach while doing. If the student has an existing service background, acknowledge that some steps will feel familiar but the intentionality behind each one is specific to the head spa experience. The closing script with one personal scalp observation drives rebooking. 3-5 sentences. No bullet points.',
   9: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 9 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
@@ -7048,7 +7268,7 @@ const MODULE_QUICK_PROMPTS = {
   3: ['Why can shedding appear months after an illness?', 'What can the scalp surface tell me—and what can’t it?', 'How do I explain massage without promising hair growth?', 'What does the scalp barrier change in product choice?'],
   4: ['How do I document what I see without labeling the scalp?', 'What questions help distinguish oil from product residue?', 'How do I make before-and-after scalp images honest?', 'Which findings mean I should stop the service?'],
   5: ['How do I build one service for a mixed regional presentation?', 'When should I skip exfoliation or steam?', 'How do I explain a gentler plan without disappointing the client?'],
-  6: ['How do I tell dry scalp from dandruff?', 'When does dandruff become seborrheic dermatitis?', 'What botanicals work for inflammation?'],
+  6: ['How do I tell dry scalp from dandruff?', 'When should a flaking presentation raise more concern?', 'What botanicals work for inflammation?'],
   7: ['What bed should I get first?', 'How do I set up for back-to-back clients?', 'What is the non-negotiable prep step?'],
   8: ['What makes the micro-teach effective?', 'How do I handle a question mid-service?', 'What is the most important step?'],
   9: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
@@ -7245,7 +7465,7 @@ function openModuleById(id, options = {}) {
     2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; },
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); window._m6cpsDone = 0; },
+    6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
@@ -7287,7 +7507,7 @@ function openModuleById(id, options = {}) {
       3: 'Module 3 is where the surface stops looking random. Follow every technical term to its practical payoff: what it helps you notice, what it changes in service, and what it still cannot prove.',
       4: 'Module 4 is where observation becomes a method. Use the camera to collect a better view, then separate what is visible from what still needs context and what the image cannot prove.',
       5: 'Module 4 taught you how to gather evidence. Module 5 is where that evidence begins changing the service. The key is not choosing one scalp label—it is deciding what to preserve, modify, avoid, pause, or refer in each region.',
-      6: 'Module 6 changes how you listen to clients. Once you understand the dry vs dandruff distinction, you will hear misidentification everywhere — in what clients say, in what products they are using.',
+      6: 'Module 5 taught you how to adapt a service. Module 6 teaches you how to interpret what you\'re looking at before you decide anything — because the same flakes can mean two very different things, and treating the wrong one usually makes it worse.',
       7: 'Equipment feels like logistics but it directly affects the service. The setup details here come from real mistakes made early on. Ask me anything.',
       8: 'This is the full picture — every step in sequence. If you have questions about timing or technique for any specific step, I am right here.',
       9: 'Sanitation does not get talked about enough. It is what separates consistent professionals from inconsistent ones.',
@@ -7644,41 +7864,33 @@ function m5ResetDecision(n) {
 }
 
 // ── MODULE 6 ──
+// "Dry scalp vs. dandruff" comparison toggle — retained, revised for keyboard
+// access (native <button> with aria-expanded). Does not touch APP_STATE,
+// progress, checkpoints, or completion.
 function toggleVsCard(cardId, detailId) {
   const card = document.getElementById(cardId);
   const detail = document.getElementById(detailId);
   if (!card || !detail) return;
   const isOpen = detail.classList.contains('open');
   document.querySelectorAll('.vs-detail').forEach(d => d.classList.remove('open'));
-  document.querySelectorAll('.vs-card').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll('.vs-card').forEach(c => { c.classList.remove('open'); c.setAttribute('aria-expanded', 'false'); });
   document.querySelectorAll('.vs-expand-hint').forEach(h => { if (h) h.textContent = '+ See why this matters'; });
   if (!isOpen) {
     detail.classList.add('open'); card.classList.add('open');
+    card.setAttribute('aria-expanded', 'true');
     const hint = card.querySelector('.vs-expand-hint');
     if (hint) hint.textContent = '− Close';
   }
 }
 
-const CYCLE_INSIGHTS = {
-  0: 'This is where it starts. A client sees flakes and immediately interprets them as dandruff. The assumption is almost universal — and almost always made without any real assessment.',
-  1: 'The product choice follows the assumption. Anti-dandruff shampoos are heavily marketed, widely available, and seem like the logical solution. The mistake is reaching for the wrong one.',
-  2: 'Anti-dandruff shampoos strip oil, suppress yeast, and slow cell turnover. On a scalp that already lacks moisture, they remove what little barrier is left.',
-  3: 'The scalp responds to barrier loss by becoming drier, tighter, and more reactive. Flaking increases. The client interprets this as the condition getting worse.',
-  4: 'The logical response to a product not working is to use more of it. This accelerates the damage cycle.',
-  5: 'By the time they reach you, the scalp has been compromised repeatedly. Your first job is often to stop the damage — not start a new treatment.'
-};
-
-function cycleStep(idx) {
-  document.querySelectorAll('.cycle-step').forEach((s, i) => s.classList.toggle('active', i === idx));
-  const insight = document.getElementById('cycleInsight');
-  if (insight) { insight.textContent = CYCLE_INSIGHTS[idx]; insight.style.display = 'block'; }
-}
-
+// Malassezia-to-seborrheic-dermatitis spectrum slider — retained, revised.
+// Position 4's text now points to the standalone Section 6.6 referral
+// section rather than being the module's only referral sentence.
 const SPECTRUM_STATES = {
   1: 'A balanced scalp has Malassezia present at normal levels — no visible flaking, no redness, no irritation. Sebum production is balanced.',
   2: 'Early Malassezia-driven dandruff: small white to yellow flakes, slight clustering, mild oil, minimal redness. Still within scope with appropriate product choices.',
   3: 'Moderate stage — flakes more visible, oil presence notable, mild redness. Client likely notices this daily. Head spa can support — consistent home care also needed.',
-  4: 'Seborrheic dermatitis — larger thicker flakes, pronounced redness, flaking beyond the scalp to eyebrows, hairline, ears. If inflammation is severe, active, or painful, refer out.'
+  4: 'Seborrheic dermatitis — larger, thicker flakes, pronounced redness, and flaking that can spread beyond the scalp to the eyebrows, hairline, or ears. See Section 6.6 for when to pause or refer.'
 };
 
 function updateSpectrum(val) {
@@ -7686,14 +7898,165 @@ function updateSpectrum(val) {
   if (out) out.textContent = SPECTRUM_STATES[val];
 }
 
-function toggleTrigger(el) {
-  const isOpen = el.classList.contains('open');
-  document.querySelectorAll('.trigger-item').forEach(t => t.classList.remove('open'));
-  if (!isOpen) el.classList.add('open');
+// "Follow the cycle" — progressive causal-sequence interaction (ungraded).
+// Only the current frontier step is enabled; activating it reveals its
+// explanation, marks it explored, and unlocks the next step. Previously
+// explored steps remain freely reviewable (their own detail can be
+// reopened/closed independently). Does not touch APP_STATE, progress,
+// checkpoints, or completion. State is session-only, reset every time
+// Module 6 is (re)opened via fcReset() in STATIC_MODULES[6].
+const FC_STEP_COUNT = 6;
+let _fcExplored = new Set();
+let _fcFrontier = 0;
+
+function fcReset() {
+  _fcExplored = new Set();
+  _fcFrontier = 0;
+}
+
+function fcActivate(idx) {
+  const step = getActiveElementById('fcStep-' + idx);
+  const trigger = getActiveElementById('fcTrigger-' + idx);
+  const detail = getActiveElementById('fcDetail-' + idx);
+  const badge = getActiveElementById('fcBadge-' + idx);
+  if (!step || !trigger || !detail || trigger.disabled) return;
+
+  // Toggle this step's own detail — already-explored steps stay reviewable
+  // and can be freely reopened/closed without affecting unlocked progress.
+  const isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  trigger.setAttribute('aria-expanded', String(!isOpen));
+
+  if (!_fcExplored.has(idx)) {
+    _fcExplored.add(idx);
+    step.classList.remove('current');
+    step.classList.add('explored');
+    if (badge) badge.textContent = 'Explored';
+
+    if (idx === _fcFrontier && _fcFrontier < FC_STEP_COUNT - 1) {
+      _fcFrontier = idx + 1;
+      const nextStep = getActiveElementById('fcStep-' + _fcFrontier);
+      const nextTrigger = getActiveElementById('fcTrigger-' + _fcFrontier);
+      const nextBadge = getActiveElementById('fcBadge-' + _fcFrontier);
+      if (nextStep) { nextStep.classList.remove('locked'); nextStep.classList.add('current'); }
+      if (nextTrigger) nextTrigger.disabled = false;
+      if (nextBadge) nextBadge.textContent = 'Up next';
+    }
+
+    if (_fcExplored.size === FC_STEP_COUNT) {
+      const final = getActiveElementById('fcFinal');
+      if (final) final.style.display = 'block';
+    }
+  }
+}
+
+const FC_FINAL_ANSWER = {
+  correct: 1,
+  feedback: {
+    0: 'Keeps the cycle going. Escalating to a stronger product without reassessing the presentation is the same assumption that produced this client\'s reactive scalp in the first place.',
+    1: 'Breaks the cycle. The practitioner stops treating the client\'s original assumption as the answer, reassesses the presentation, and chooses the gentlest appropriate service and product direction from there.',
+    2: 'Keeps the cycle going. Adding exfoliation increases intensity before you\'ve established whether the scalp needs it — reassess the presentation first.'
+  }
+};
+function fcAnswer(choice, btn) {
+  const final = getActiveElementById('fcFinal');
+  const feedback = getActiveElementById('fcFeedback');
+  if (!final || !feedback) return;
+  const opts = final.querySelectorAll('.bq-opt');
+
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  const isCorrect = choice === FC_FINAL_ANSWER.correct;
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const tag = document.createElement('span');
+  tag.className = 'bq-tag';
+  tag.textContent = isCorrect ? 'Breaks the cycle' : 'Keeps the cycle going';
+  btn.appendChild(tag);
+
+  feedback.style.display = 'block';
+  feedback.textContent = FC_FINAL_ANSWER.feedback[choice];
+}
+
+// "Sort three presentations" — new signature interaction (ungraded,
+// retryable triage decision). Does not touch APP_STATE, progress,
+// checkpoints, or completion.
+const M6_SORT_ANSWERS = {
+  1: {
+    correct: 1,
+    feedback: {
+      0: 'Not quite. Treating this as your standard service overlooks the barrier-supportive adjustments a dry-scalp presentation like this one calls for.',
+      1: 'Correct. The matte, powdery, minimal-oil presentation supports a dry-scalp-pattern direction — a modified, hydration-supportive routine, with simplification if the client reports over-treating.',
+      2: 'Not quite. Nothing described here — no redness, no spread, no severe discomfort — meets a referral trigger. This presentation can be served with adjustment, not paused.'
+    }
+  },
+  2: {
+    correct: 1,
+    feedback: {
+      0: 'Not quite. Visible oil and mild redness call for cleansing support and an OTC-category recommendation — not the unmodified standard service.',
+      1: 'Correct. Oil, clumped yellowish flakes, and redness contained to the scalp support a modified, cleansing-forward direction with an OTC-category anti-fungal or zinc recommendation, plus monitoring.',
+      2: 'Not quite. The redness here is mild and contained to the scalp, with no spread — that doesn\'t meet the threshold for pausing the service and referring out.'
+    }
+  },
+  3: {
+    correct: 2,
+    feedback: {
+      0: 'Not quite. Spread beyond the scalp with active redness and significant discomfort are referral-relevant findings — this isn\'t a standard-service presentation.',
+      1: 'Not quite. A modified service still assumes proceeding is appropriate. Spread to the eyebrows and hairline, combined with significant discomfort and months of unresolved symptoms, calls for stepping back from the service, not adjusting it.',
+      2: 'Correct. Spread beyond the scalp with active redness, real discomfort, and months without improvement despite home treatment are referral-relevant findings — this is a pause-and-refer decision, not a service one.'
+    }
+  }
+};
+function m6Sort(n, choice, btn) {
+  const block = getActiveElementById('m6Sort' + n);
+  const feedback = getActiveElementById('m6Sort' + n + 'Feedback');
+  if (!block || !feedback) return;
+  const answer = M6_SORT_ANSWERS[n];
+  const opts = block.querySelectorAll('.bq-opt');
+
+  // Reset every option to neutral first — only the option the student just
+  // selected receives a state. The approved answer is never revealed on an
+  // unselected option; it only turns green when the student picks it.
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  const isCorrect = choice === answer.correct;
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Correct answer';
+    btn.appendChild(tag);
+  } else {
+    btn.classList.add('wrong');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Not quite';
+    btn.appendChild(tag);
+  }
+
+  // Each choice — correct or not — has its own explanation. The wrong-choice
+  // text never names or describes the approved answer.
+  feedback.style.display = 'block';
+  feedback.textContent = answer.feedback[choice];
 }
 
 function submitM6CP(id) {
-  submitCheckpoint(6, id, M6.system, M6.questions[id]);
+  submitCheckpoint(6, id, M6.systems[id], M6.questions[id],
+    'Cadence could not review your interpretation. Check your connection and try again.');
 }
 function m6cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM6CP(id); }

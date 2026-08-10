@@ -135,7 +135,7 @@
     3: ['anatomy-grounding', 'barrier-thinking', 'client-explanation'],
     4: ['pattern-recognition', 'scope-awareness', 'referral-judgment'],
     5: ['protocol-matching', 'barrier-thinking', 'client-guidance'],
-    6: ['pattern-recognition', 'scope-awareness', 'referral-judgment', 'barrier-thinking'],
+    6: ['pattern-recognition', 'referral-judgment', 'barrier-thinking'],
     7: ['service-flow', 'room-prep', 'client-guidance'],
     8: ['client-explanation', 'service-flow', 'client-guidance'],
     9: ['sanitation-discipline', 'complaint-response', 'service-flow'],
