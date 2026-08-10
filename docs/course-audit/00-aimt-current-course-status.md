@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: `0c016b3871f201ffd42e286532f9b0961a4d970a` — "Implement approved Module 6 audit" (consolidated history — supersedes the earlier, never-pushed `291e6d5`/`2b37d87` commits, which were reset and folded into this single commit before the first push attempt)
+- Latest controlling commit: `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit" (consolidated history — supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into this single commit before the first push attempt)
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -198,7 +198,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the preview reflects all commits through this approval.
-- Push status: local branch is ahead of `origin/course-audit-build` by one consolidated commit (`0c016b3`). `git push` failed again — no CLI credentials configured in this environment ("could not read Username for 'https://github.com'"). No git configuration was altered and no alternate remote was used. Push via **GitHub Desktop → Push origin**.
+- Push status: local branch is ahead of `origin/course-audit-build` by one consolidated commit (`fb6619a`). `git push` failed again — no CLI credentials configured in this environment ("could not read Username for 'https://github.com'"). No git configuration was altered and no alternate remote was used. Push via **GitHub Desktop → Push origin**.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -206,7 +206,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- `0c016b3871f201ffd42e286532f9b0961a4d970a` — Implement approved Module 6 audit (**latest controlling commit** — consolidated single commit covering implementation, Visual 1 installation, and the Section 6.4 interaction upgrade)
+- `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — Implement approved Module 6 audit (**latest controlling commit** — consolidated single commit covering implementation, Visual 1 installation, the Section 6.4 interaction upgrade, and the student-facing language/scenario-block polish pass)
 - `0b135c48324d2c120682ae34a4aab516fa9244d1` — Add approved Module 6 audit specification
 - `8f67c6af1d256a9085455f72d55eca722998c9f8` — Extract Module 6 for external audit
 - `b10a939921d17d1117ec835af1c45bc76f4a09cb` — Add Module 5 video source
