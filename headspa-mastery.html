@@ -1461,10 +1461,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m6-scenario-value { font-size: 0.82rem; line-height: 1.65; color: var(--text); font-weight: 300; }
 
 /* ── MODULE 7 — Tool categories ── */
-.tool-category { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius:14px; overflow:hidden; cursor:pointer; transition:background 0.2s; }
+.tool-category { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius:14px; overflow:hidden; transition:background 0.2s; }
 .tool-category:hover { background:rgba(255,255,255,0.85); }
 .tool-category.open { background:rgba(255,255,255,0.9); }
-.tc-head { display:flex; align-items:center; gap:12px; padding:1rem 1.1rem; }
+.tc-head {
+  display:flex; align-items:center; gap:12px; padding:1rem 1.1rem; width:100%;
+  background:none; border:none; margin:0; text-align:left; cursor:pointer;
+  font-family:inherit; color:inherit; appearance:none; -webkit-appearance:none;
+}
+.tc-head:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
 .tc-icon { font-size:1.1rem; flex-shrink:0; }
 .tc-label { font-size:0.875rem; font-weight:500; flex:1; }
 .tc-arrow { font-family:var(--aimt-font-mono); font-size:0.9rem; color:var(--muted); font-weight:400; flex-shrink:0; transition:transform 0.2s; }
@@ -1477,8 +1482,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 /* ── MODULE 7 — Prep checklist ── */
 .prep-checklist { display:flex; flex-direction:column; gap:6px; margin:1.25rem 0; }
-.prep-item { display:flex; align-items:flex-start; gap:12px; padding:0.85rem 1rem; background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); cursor:pointer; transition:all 0.2s; }
+.prep-item {
+  display:flex; align-items:flex-start; gap:12px; padding:0.85rem 1rem; width:100%;
+  background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm);
+  cursor:pointer; transition:all 0.2s; text-align:left; font-family:inherit; color:inherit;
+  appearance:none; -webkit-appearance:none; margin:0;
+}
 .prep-item:hover { background:rgba(255,255,255,0.88); }
+.prep-item:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .prep-item.done { background:#e8ede8; border-color:rgba(58,90,58,0.2); }
 .pi-check { font-family:var(--aimt-font-mono); font-size:0.85rem; color:var(--muted2); min-width:18px; flex-shrink:0; transition:color 0.2s; }
 .prep-item.done .pi-check { color:#3a5a3a; }
@@ -1490,6 +1501,48 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .pos-num { font-family:var(--aimt-font-mono); font-size:0.65rem; color:var(--muted); letter-spacing:0.08em; min-width:24px; flex-shrink:0; padding-top:2px; }
 .pos-content { flex:1; }
 .pos-title { font-size:0.875rem; font-weight:500; margin-bottom:4px; }
+
+/* ── MODULE 7 — Required-visual-asset placeholders (development only) ──
+   These stand in for the four production photographs specified in
+   module-07.md's "Visual asset plan" (Visuals 1–3). Replace each box's
+   contents with the commented final <picture> markup once the
+   corresponding file exists under assets/images/course/module-07/. */
+.asset-pending { border-color:#cdc8bc; background:#efece6; }
+.ap-pending-tag {
+  font-family:var(--aimt-font-mono); font-size:0.56rem; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--aimt-warning); background:var(--aimt-warning-light);
+  border-radius:980px; padding:3px 10px; margin-bottom:2px;
+}
+.ap-final-caption {
+  font-family:var(--aimt-font-sans); font-size:0.74rem; font-weight:300; font-style:italic;
+  color:var(--muted2); margin-top:6px; line-height:1.55;
+}
+.ap-final-caption strong { font-style:normal; font-weight:500; color:var(--muted); }
+
+/* ── MODULE 7 — Signature interaction: "Find the setup mistakes" ── */
+.sm-mistake-list { display:flex; flex-direction:column; gap:8px; margin:1.25rem 0; }
+.sm-mistake-item { display:flex; flex-direction:column; }
+.sm-mistake-btn {
+  display:flex; align-items:flex-start; gap:12px; width:100%; text-align:left;
+  font-family:inherit; color:inherit; appearance:none; -webkit-appearance:none; margin:0;
+  background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm);
+  padding:0.85rem 1rem; cursor:pointer; transition:all 0.2s;
+}
+.sm-mistake-btn:hover { background:rgba(255,255,255,0.88); }
+.sm-mistake-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.sm-mistake-btn.correct { background:var(--aimt-success-light); border-color:var(--aimt-success); }
+.sm-mistake-btn.wrong { background:var(--aimt-error-light); border-color:var(--aimt-error); }
+.sm-mistake-check { font-family:var(--aimt-font-mono); font-size:0.9rem; color:var(--muted2); min-width:18px; flex-shrink:0; }
+.sm-mistake-btn.correct .sm-mistake-check { color:var(--aimt-success); }
+.sm-mistake-btn.wrong .sm-mistake-check { color:var(--aimt-error); }
+.sm-mistake-text { font-size:0.82rem; line-height:1.55; color:var(--text); font-weight:300; flex:1; }
+.sm-mistake-tag { display:block; margin-top:4px; font-size:0.66rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; }
+.sm-mistake-btn.correct .sm-mistake-tag { color:var(--aimt-success); }
+.sm-mistake-btn.wrong .sm-mistake-tag { color:var(--aimt-error); }
+.sm-mistake-feedback { margin-top:4px; padding:0.7rem 0.9rem; background:rgba(255,255,255,0.6); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); font-size:0.8rem; line-height:1.6; color:var(--text); font-weight:300; }
+@media (prefers-reduced-motion: reduce) {
+  .tc-body, .prep-item, .sm-mistake-btn { transition: none !important; }
+}
 .pos-body { font-size:0.82rem; color:var(--muted); font-weight:300; line-height:1.6; }
 
 /* ── MODULE 8 — Format cards ── */
@@ -5427,28 +5480,77 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 7 · Equipment & Room Setup</div>
-      <div class="mh-title">Before the service starts,<br>your setup is already speaking.</div>
+      <div class="mh-title">Before the service starts, your setup is already speaking.</div>
       <div class="mh-desc">By the time your hands touch the client, they've already formed an impression. Not consciously — but they feel whether you're prepared, whether the space is controlled, whether the service will be smooth or interrupted. Your setup is not separate from the service. It is part of it.</div>
     </div>
 
     <div class="sec-eyebrow">7.1 — The treatment bed</div>
     <div class="sec-title">Your most important equipment decision.</div>
-    <div class="clinical-photo placeholder">
+
+    <!-- REQUIRED VISUAL ASSET — Visual 1 (Section 7.1)
+    Final file: assets/images/course/module-07/module-07-treatment-bed-setup.png
+    Once produced, replace the placeholder box below with:
+    <figure class="clinical-photo">
+      <picture>
+        <source srcset="assets/images/course/module-07/module-07-treatment-bed-setup.webp" type="image/webp">
+        <img src="assets/images/course/module-07/module-07-treatment-bed-setup.png" alt="A configured head spa bed with the halo/basin assembly in place, clean linens on the bed, and the headrest visible and unobstructed." width="1360" height="1020" loading="lazy">
+      </picture>
+      <figcaption>A configured head spa bed, ready for service.</figcaption>
+    </figure>
+    -->
+    <div class="clinical-photo placeholder asset-pending">
+        <div class="ap-pending-tag">Production asset pending</div>
         <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Halo Wet Bed — Setup Photo</div>
-        <div class="cp-placeholder-sub">Properly configured head spa bed with halo attachment</div>
+        <div class="cp-placeholder-label">Required production asset pending — treatment bed setup</div>
       </div>
+    <div class="ap-final-caption"><strong>Final caption:</strong> "A configured head spa bed, ready for service."</div>
+
     <div class="body-text">The head spa bed is the foundation of everything. Comfort, positioning, water flow, massage access, client perception — it all builds from this. You can perform a service without the right bed. But you cannot create a premium experience without one.</div>
-    <div class="body-text">A halo-equipped wet bed is the foundation of a true head spa service. The halo allows water immersion during massage, which changes the client's physical and psychological state in a way that dry work cannot replicate. When evaluating beds, prioritize models without confining armrests — side rails that tuck in the client are consistently uncomfortable for taller or larger guests, and the discomfort breaks the relaxation response you've spent the whole service building.</div>
+    <div class="body-text">A halo-equipped wet bed is the foundation of a true head spa service. The halo allows water immersion during massage, which changes the client's physical and psychological state in a way that dry work cannot replicate. Evaluate any bed you're considering against what it actually needs to accomplish — not against how it looks in a photo.</div>
 
     <div class="info-card">
       <div class="ic-title">What most people get wrong</div>
       <div class="body-text" style="margin:0">They choose based on how it looks, not how it performs. A bed with restrictive armrests may photograph beautifully — but larger clients feel confined, taller clients feel compressed, and movement becomes limited. Once comfort breaks, the entire service is affected. Nothing will compensate for it.</div>
     </div>
 
+    <div class="body-text"><strong>Evaluate the bed against what it needs to do — not how it looks.</strong> Run any bed you're offered or can afford against these categories:</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--teal)"></div><div class="cc-h-title">1. Basin & head support</div></div>
+        <div class="cc-body">The headrest curve should actually support the occipital bone in a relaxed, non-extended position — this connects directly to correct client positioning in Section 7.4.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--teal)"></div><div class="cc-h-title">2. Client entry, exit & stability</div></div>
+        <div class="cc-body">A client should be able to get on and off the bed safely, and the bed shouldn't shift or wobble under normal movement.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--teal)"></div><div class="cc-h-title">3. Practitioner reach & working height</div></div>
+        <div class="cc-body">The bed's height and access affect your own posture and reach across an entire shift — not just a single service.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--teal)"></div><div class="cc-h-title">4. Water management</div></div>
+        <div class="cc-body">How water is contained and drained affects both service flow and how easily the station can be sanitized between clients.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--teal)"></div><div class="cc-h-title">5. Cleaning & sanitation compatibility</div></div>
+        <div class="cc-body">Surfaces and seams need to be things you can actually disinfect between clients — not just wipe at a glance.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-warning)"></div><div class="cc-h-title">6. Space requirements — preference, not a universal standard</div></div>
+        <div class="cc-body">How much room a bed needs depends on your specific space and business. This is a practitioner-preference and business-context decision, not a documented requirement.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:var(--aimt-warning)"></div><div class="cc-h-title">7. Armrest configuration — preference, not a requirement</div></div>
+        <div class="cc-body">Armrests that tuck in larger or taller clients are a commonly reported comfort complaint among experienced practitioners — a preference many share, not a documented safety or ergonomic requirement. The deciding factor is always how a given bed performs for your actual clientele.</div>
+      </div>
+    </div>
+
+    <div class="body-text">There is no single required bed model — evaluating any bed against these categories, instead of how it photographs, is what makes the decision transferable to whatever you're actually offered or can afford.</div>
+
     <div class="cadence-note">
       <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"One of the earliest mistakes I made was prioritizing what looked impressive in photos over what felt comfortable to lie in for an hour. Buy the bed your clients will want to come back to — not the one that photographs well."</div>
+      <div class="cn-text">"A common early mistake is prioritizing what looks impressive in photos over what actually feels comfortable to lie in for an hour. Choose the bed your clients will want to come back to — not the one that photographs well."</div>
     </div>
 
     <hr class="divider">
@@ -5457,11 +5559,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">Essentials first. Upgrades later.</div>
     <div class="body-text">Most people overvalue tools. They assume more tools means a better service. That's incorrect. Your hands create the experience. Tools support, enhance, and assist — but they should never replace presence. Overuse of tools leads to a mechanical-feeling service, loss of connection, and inconsistent pressure. Clients may not say it. But they feel it.</div>
     <div class="body-text">Start with everything on the essentials list. Nothing on the upgrades list is necessary to deliver a premium service — add from the upgrade tier when your volume justifies it.</div>
-    <div class="interaction-hint">↓ Tap each category to expand</div>
+    <div class="interaction-hint">↓ Activate each category to expand</div>
 
     <div style="display:flex;flex-direction:column;gap:8px;margin:1.5rem 0;">
-      <div class="tool-category" id="tc-linen" onclick="toggleToolCat('tc-linen')">
-        <div class="tc-head"><div class="tc-icon">🛏</div><div class="tc-label">Linens & comfort</div><div class="tc-arrow">+</div></div>
+      <div class="tool-category" id="tc-linen">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="tc-linen-body" onclick="toggleToolCat('tc-linen')"><div class="tc-icon">🛏</div><div class="tc-label">Linens & comfort</div><div class="tc-arrow">+</div></button>
         <div class="tc-body" id="tc-linen-body">
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Fresh bed sheets — minimum 2 sets per station</div>
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Towels — hand and large, minimum 6 each</div>
@@ -5473,8 +5575,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="tc-item"><span class="tc-badge upg-badge">Upgrade</span>Heated jade eye mask</div>
         </div>
       </div>
-      <div class="tool-category" id="tc-tools" onclick="toggleToolCat('tc-tools')">
-        <div class="tc-head"><div class="tc-icon">🪮</div><div class="tc-label">Service tools</div><div class="tc-arrow">+</div></div>
+      <div class="tool-category" id="tc-tools">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="tc-tools-body" onclick="toggleToolCat('tc-tools')"><div class="tc-icon">🪮</div><div class="tc-label">Service tools</div><div class="tc-arrow">+</div></button>
         <div class="tc-body" id="tc-tools-body">
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Rolling cart — stations should be mobile</div>
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Mixing bowls — 3–4 small dishes for product portions</div>
@@ -5487,8 +5589,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="tc-item"><span class="tc-badge upg-badge">Upgrade</span>Steamer hood attachment</div>
         </div>
       </div>
-      <div class="tool-category" id="tc-sanit" onclick="toggleToolCat('tc-sanit')">
-        <div class="tc-head"><div class="tc-icon">🧴</div><div class="tc-label">Sanitation supplies</div><div class="tc-arrow">+</div></div>
+      <div class="tool-category" id="tc-sanit">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="tc-sanit-body" onclick="toggleToolCat('tc-sanit')"><div class="tc-icon">🧴</div><div class="tc-label">Sanitation supplies</div><div class="tc-arrow">+</div></button>
         <div class="tc-body" id="tc-sanit-body">
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Barbicide concentrate and properly sized container</div>
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Disinfecting wipes — EPA-registered</div>
@@ -5497,8 +5599,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Halo line cleaner — manufacturer-specific</div>
         </div>
       </div>
-      <div class="tool-category" id="tc-ambient" onclick="toggleToolCat('tc-ambient')">
-        <div class="tc-head"><div class="tc-icon">🕯</div><div class="tc-label">Ambient experience</div><div class="tc-arrow">+</div></div>
+      <div class="tool-category" id="tc-ambient">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="tc-ambient-body" onclick="toggleToolCat('tc-ambient')"><div class="tc-icon">🕯</div><div class="tc-label">Ambient experience</div><div class="tc-arrow">+</div></button>
         <div class="tc-body" id="tc-ambient-body">
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Bluetooth speaker — water-resistant</div>
           <div class="tc-item"><span class="tc-badge ess-badge">Essential</span>Curated playlist — non-lyric, consistent tone</div>
@@ -5510,31 +5612,66 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
+    <div class="ic-title">Arranging your cart</div>
+    <div class="body-text">Where something lives on your cart matters as much as whether you own it. Arrange by how often you reach for it during a service — not by the four categories above. Those categories are for deciding what to buy; this is for how fast you can work once the client is in the room.</div>
+
+    <div class="condition-cards">
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#3a5060"></div><div class="cc-h-title">Within-reach zone</div></div>
+        <div class="cc-body">Shoulder-to-waist height, no step required: the three product dishes, the applicator brush, and anything you touch during nearly every step of the service. This is what makes the pressure test below — "can I reach everything without stepping away?" — actually achievable.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#7a5a20"></div><div class="cc-h-title">One-step zone</div></div>
+        <div class="cc-body">Items used once or twice per service: comb or detangling brush, sectioning clips, blow dryer, spa wrap or robe.</div>
+      </div>
+      <div class="condition-card">
+        <div class="cc-header"><div class="cc-badge" style="background:#5a4a70"></div><div class="cc-h-title">Reserve zone — off the working surface</div></div>
+        <div class="cc-body">Backup linens, upgrade-tier tools not in use for this service, sanitation concentrate stock. Keeping these off the working surface reduces clutter and keeps your clean/dirty separation clean and visible.</div>
+      </div>
+    </div>
+
+    <div class="body-text">This is also where the clean/dirty bin separation from the sanitation supplies above earns its place — it only does its job if it's maintained during the live service, not just set up before the client arrives.</div>
+
     <hr class="divider">
 
     <div class="sec-eyebrow">7.3 — Station prep sequence</div>
     <div class="sec-title">Run this before every single client.</div>
-    <div class="clinical-photo placeholder">
+
+    <!-- REQUIRED VISUAL ASSET — Visual 2 (Section 7.3)
+    Final file: assets/images/course/module-07/module-07-station-cart-reach-order.png
+    Once produced, replace the placeholder box below with:
+    <figure class="clinical-photo">
+      <picture>
+        <source srcset="assets/images/course/module-07/module-07-station-cart-reach-order.webp" type="image/webp">
+        <img src="assets/images/course/module-07/module-07-station-cart-reach-order.png" alt="A prepped station cart with product dishes and the applicator brush within immediate reach, one-step-zone items organized slightly further, and no reserve-zone items on the working surface." width="1360" height="1020" loading="lazy">
+      </picture>
+      <figcaption>A station set up in reach order — the items used most, closest.</figcaption>
+    </figure>
+    -->
+    <div class="clinical-photo placeholder asset-pending">
+        <div class="ap-pending-tag">Production asset pending</div>
         <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Fully Prepped Station — Photo</div>
-        <div class="cp-placeholder-sub">Cart loaded, product dishes set, bed made, towel warmer on</div>
+        <div class="cp-placeholder-label">Required production asset pending — station/cart reach order</div>
       </div>
+    <div class="ap-final-caption"><strong>Final caption:</strong> "A station set up in reach order — the items used most, closest."</div>
+
     <div class="body-text">Inconsistency in setup is invisible to you and obvious to your client. A client who experienced a perfectly set room last visit notices when the towel warmer is cold or the cart is in the wrong place — even if they can't articulate why the experience felt off. Build a prep sequence and run it the same way every time.</div>
-    <div class="interaction-hint">↓ Tap each step to mark complete</div>
+    <div class="body-text">The order below isn't arbitrary — it follows a build sequence: sanitation and structural setup first, then product and tool staging, then comfort, then ambiance, so nothing has to be assembled while the room is being sanitized or the client is already in it.</div>
+    <div class="interaction-hint">↓ Activate each step to mark complete</div>
 
     <div class="prep-checklist">
-      <div class="prep-item" id="pi-0" onclick="togglePrep(0)"><div class="pi-check" id="pic-0">○</div><div class="pi-text"><strong>Halo flush</strong> — Barbicide rinse, then plain water until clear</div></div>
-      <div class="prep-item" id="pi-1" onclick="togglePrep(1)"><div class="pi-check" id="pic-1">○</div><div class="pi-text"><strong>Product dishes</strong> — Three bowls: shampoo, mask, exfoliant. Applicator brush alongside.</div></div>
-      <div class="prep-item" id="pi-2" onclick="togglePrep(2)"><div class="pi-check" id="pic-2">○</div><div class="pi-text"><strong>Towel warmer loaded</strong> — Confirm warm to the touch before client arrives</div></div>
-      <div class="prep-item" id="pi-3" onclick="togglePrep(3)"><div class="pi-check" id="pic-3">○</div><div class="pi-text"><strong>Fresh bed linens</strong> — Sheet, headrest cover, clean pillow if used</div></div>
-      <div class="prep-item" id="pi-4" onclick="togglePrep(4)"><div class="pi-check" id="pic-4">○</div><div class="pi-text"><strong>Bed warmer on</strong> — Set to appropriate temperature</div></div>
-      <div class="prep-item" id="pi-5" onclick="togglePrep(5)"><div class="pi-check" id="pic-5">○</div><div class="pi-text"><strong>Room temperature</strong> — Set lower than normal — the client will be wet</div></div>
-      <div class="prep-item" id="pi-6" onclick="togglePrep(6)"><div class="pi-check" id="pic-6">○</div><div class="pi-text"><strong>Spa wrap, robe, slipper socks</strong> — Folded and ready at station entry</div></div>
-      <div class="prep-item" id="pi-7" onclick="togglePrep(7)"><div class="pi-check" id="pic-7">○</div><div class="pi-text"><strong>Wrap towel around halo nozzle hose</strong> — Quiets it, prevents spray, maintains atmosphere</div></div>
-      <div class="prep-item" id="pi-8" onclick="togglePrep(8)"><div class="pi-check" id="pic-8">○</div><div class="pi-text"><strong>Massage oil and lotion</strong> — Ready on cart, easily accessible</div></div>
-      <div class="prep-item" id="pi-9" onclick="togglePrep(9)"><div class="pi-check" id="pic-9">○</div><div class="pi-text"><strong>Ambient: music, lighting, diffuser</strong> — Running before client enters the room</div></div>
+      <button type="button" class="prep-item" id="pi-0" role="checkbox" aria-checked="false" onclick="togglePrep(0)"><div class="pi-check" id="pic-0">○</div><div class="pi-text"><strong>Halo flush</strong> — Barbicide rinse, then plain water until clear</div></button>
+      <button type="button" class="prep-item" id="pi-1" role="checkbox" aria-checked="false" onclick="togglePrep(1)"><div class="pi-check" id="pic-1">○</div><div class="pi-text"><strong>Product dishes</strong> — Three bowls: shampoo, mask, exfoliant. Applicator brush alongside.</div></button>
+      <button type="button" class="prep-item" id="pi-2" role="checkbox" aria-checked="false" onclick="togglePrep(2)"><div class="pi-check" id="pic-2">○</div><div class="pi-text"><strong>Towel warmer loaded</strong> — Confirm warm to the touch before client arrives</div></button>
+      <button type="button" class="prep-item" id="pi-3" role="checkbox" aria-checked="false" onclick="togglePrep(3)"><div class="pi-check" id="pic-3">○</div><div class="pi-text"><strong>Fresh bed linens</strong> — Sheet, headrest cover, clean pillow if used</div></button>
+      <button type="button" class="prep-item" id="pi-4" role="checkbox" aria-checked="false" onclick="togglePrep(4)"><div class="pi-check" id="pic-4">○</div><div class="pi-text"><strong>Bed warmer on</strong> — Set to appropriate temperature</div></button>
+      <button type="button" class="prep-item" id="pi-5" role="checkbox" aria-checked="false" onclick="togglePrep(5)"><div class="pi-check" id="pic-5">○</div><div class="pi-text"><strong>Room temperature</strong> — Set lower than normal — the client will be wet</div></button>
+      <button type="button" class="prep-item" id="pi-6" role="checkbox" aria-checked="false" onclick="togglePrep(6)"><div class="pi-check" id="pic-6">○</div><div class="pi-text"><strong>Spa wrap, robe, slipper socks</strong> — Folded and ready at station entry</div></button>
+      <button type="button" class="prep-item" id="pi-7" role="checkbox" aria-checked="false" onclick="togglePrep(7)"><div class="pi-check" id="pic-7">○</div><div class="pi-text"><strong>Wrap towel around halo nozzle hose</strong> — Quiets it, prevents spray, maintains atmosphere</div></button>
+      <button type="button" class="prep-item" id="pi-8" role="checkbox" aria-checked="false" onclick="togglePrep(8)"><div class="pi-check" id="pic-8">○</div><div class="pi-text"><strong>Massage oil and lotion</strong> — Ready on cart, easily accessible</div></button>
+      <button type="button" class="prep-item" id="pi-9" role="checkbox" aria-checked="false" onclick="togglePrep(9)"><div class="pi-check" id="pic-9">○</div><div class="pi-text"><strong>Ambient: music, lighting, diffuser</strong> — Running before client enters the room</div></button>
     </div>
-    <div class="prep-complete" id="prepComplete" style="display:none;">
+    <div class="prep-complete" id="prepComplete" style="display:none;" aria-live="polite">
       <div style="font-size:1.1rem;margin-bottom:4px;">✓</div>
       <div style="font-size:.85rem;font-weight:500;">Station ready.</div>
       <div style="font-size:.75rem;margin-top:2px;opacity:.7;">Run this before every single client.</div>
@@ -5544,20 +5681,46 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">7.4 — Client positioning</div>
     <div class="sec-title">Three things to confirm before the water runs.</div>
+
+    <!-- REQUIRED VISUAL ASSET — Visual 3, the module's single highest-priority
+    asset (Section 7.4). Both images must use the same client/bed/room.
+    Final files:
+      assets/images/course/module-07/module-07-client-positioning-correct-side-view.png
+      assets/images/course/module-07/module-07-client-positioning-incorrect-side-view.png
+    Once produced, replace the two placeholder boxes below with:
+    <div class="photo-pair">
+      <figure class="clinical-photo">
+        <picture>
+          <source srcset="assets/images/course/module-07/module-07-client-positioning-correct-side-view.webp" type="image/webp">
+          <img src="assets/images/course/module-07/module-07-client-positioning-correct-side-view.png" alt="Side view of a client positioned correctly: occipital resting in the headrest's curve, neck relaxed and neutral, shoulders about 1-2 inches off the bed edge, chin level." width="1360" height="1020" loading="lazy">
+        </picture>
+        <figcaption>Correct: occipital supported, neck relaxed, shoulders clear of the edge.</figcaption>
+      </figure>
+      <figure class="clinical-photo">
+        <picture>
+          <source srcset="assets/images/course/module-07/module-07-client-positioning-incorrect-side-view.webp" type="image/webp">
+          <img src="assets/images/course/module-07/module-07-client-positioning-incorrect-side-view.png" alt="Side view of the same client positioned incorrectly, illustrating a setup mistake: chin lifted, neck extended back toward the basin edge instead of supported by the headrest curve." width="1360" height="1020" loading="lazy">
+        </picture>
+        <figcaption>Incorrect: chin lifted, neck extended over the basin edge — the exact position to avoid.</figcaption>
+      </figure>
+    </div>
+    -->
     <div class="photo-pair">
       <div>
-        <div class="clinical-photo placeholder">
+        <div class="clinical-photo placeholder asset-pending">
+          <div class="ap-pending-tag">Production asset pending</div>
           <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Correct Positioning — Side View</div>
+          <div class="cp-placeholder-label">Required production asset pending — correct positioning (side view)</div>
         </div>
-        <div class="photo-pair-label">Occipital in headrest, neck relaxed, shoulders at edge</div>
+        <div class="ap-final-caption"><strong>Final caption:</strong> "Correct: occipital supported, neck relaxed, shoulders clear of the edge."</div>
       </div>
       <div>
-        <div class="clinical-photo placeholder">
+        <div class="clinical-photo placeholder asset-pending">
+          <div class="ap-pending-tag">Production asset pending</div>
           <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Correct Positioning — Top View</div>
+          <div class="cp-placeholder-label">Required production asset pending — incorrect positioning (side view)</div>
         </div>
-        <div class="photo-pair-label">Centered under halo, water hits scalp evenly</div>
+        <div class="ap-final-caption"><strong>Final caption:</strong> "Incorrect: chin lifted, neck extended over the basin edge — the exact position to avoid."</div>
       </div>
     </div>
     <div class="body-text">Positioning errors are hard to correct mid-service without breaking the experience. Get these right before you start — it takes thirty seconds and prevents a disruption you cannot undo.</div>
@@ -5566,6 +5729,19 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="pos-card"><div class="pos-num">01</div><div class="pos-content"><div class="pos-title">Halo alignment</div><div class="pos-body">Client centered under the halo so water hits evenly across the scalp. Adjust the client's position — not the halo.</div></div></div>
       <div class="pos-card"><div class="pos-num">02</div><div class="pos-content"><div class="pos-title">Shoulder position</div><div class="pos-body">Top of shoulders sit 1–2 inches off the edge of the bed. This gives you clean access to the neck without the client sliding.</div></div></div>
       <div class="pos-card"><div class="pos-num">03</div><div class="pos-content"><div class="pos-title">Occipital support</div><div class="pos-body">The occipital bone rests in the deepest curve of the headrest with the neck naturally relaxed — not extended, not flexed. If the chin is lifting, reposition.</div></div></div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Why this matters</div>
+      <div class="body-text" style="margin:0">A relaxed, neutral neck position isn't just about comfort — sustained hyperextension against a hard basin edge is a documented, if rare, safety concern. Keeping the neck supported and unextended, as the three checks above describe, is the setup detail most directly within a practitioner's control to reduce that risk — not a guarantee against it.</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">!</div>
+      <div class="kp-text">
+        <div style="margin-bottom:0.6rem;"><strong>Watch for:</strong> the client reports neck strain, dizziness, or discomfort at any point, or the chin is visibly lifting. Some discomfort signals are only about comfort; if a client ever reports dizziness, visual changes, or slurred speech, stop immediately and treat it as a medical concern, not a positioning fix.</div>
+        <div><strong>What to do:</strong> stop the service, adjust the positioning or temperature issue, communicate what you're doing and check in with the client, then resume only once she confirms she's comfortable. Never adjust silently or push through to a "natural" stopping point.</div>
+      </div>
     </div>
 
     <div class="cadence-note">
@@ -5580,38 +5756,114 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">7.5 — Checkpoint</div>
-    <div class="sec-title">Before the client arrives.</div>
-    <div class="body-text">A new student is setting up their first head spa room from scratch. What would you tell them to do first — and why does the order of prep matter?</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m7cp1In" placeholder="Walk through the prep logic — not just the steps, but the reasoning behind them..." onkeydown="m7cpKey(event,'m7cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m7cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-title">Find the setup mistakes.</div>
+    <div class="body-text">Read the station as another practitioner left it before their shift. Select every condition below you believe is a genuine setup mistake — some of what's listed is actually fine.</div>
+
+    <div class="sm-mistake-list" role="group" aria-label="Select every condition that is a genuine setup mistake.">
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-0" aria-pressed="false" onclick="toggleSetupMistake(0,this)">
+          <span class="sm-mistake-check" id="smmc-0" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The rolling cart sits against the far wall, across the room from the bed.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-0" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-1" aria-pressed="false" onclick="toggleSetupMistake(1,this)">
+          <span class="sm-mistake-check" id="smmc-1" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The three product dishes are stacked inside each other instead of pre-portioned and set out separately.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-1" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-2" aria-pressed="false" onclick="toggleSetupMistake(2,this)">
+          <span class="sm-mistake-check" id="smmc-2" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The halo nozzle hose is loose and unwrapped.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-2" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-3" aria-pressed="false" onclick="toggleSetupMistake(3,this)">
+          <span class="sm-mistake-check" id="smmc-3" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The client's shoulders sit roughly four inches off the bed edge instead of 1–2 inches.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-3" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-4" aria-pressed="false" onclick="toggleSetupMistake(4,this)">
+          <span class="sm-mistake-check" id="smmc-4" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The client's occipital is resting flat on the headrest pad instead of settled into its curve.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-4" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-5" aria-pressed="false" onclick="toggleSetupMistake(5,this)">
+          <span class="sm-mistake-check" id="smmc-5" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">Fresh linens are already staged on the bed.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-5" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-6" aria-pressed="false" onclick="toggleSetupMistake(6,this)">
+          <span class="sm-mistake-check" id="smmc-6" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">Ambient music is already playing before the client walks in.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-6" aria-live="polite" style="display:none;"></div>
+      </div>
+      <div class="sm-mistake-item">
+        <button type="button" class="sm-mistake-btn" id="smm-7" aria-pressed="false" onclick="toggleSetupMistake(7,this)">
+          <span class="sm-mistake-check" id="smmc-7" aria-hidden="true">☐</span>
+          <span class="sm-mistake-text">The clean and dirty tool bins are pushed together on the same tray.</span>
+        </button>
+        <div class="sm-mistake-feedback" id="smmf-7" aria-live="polite" style="display:none;"></div>
+      </div>
+    </div>
+    <button type="button" class="m5-reset-btn" onclick="resetSetupMistakes()">Reset</button>
+
+    <hr class="divider">
+
+    <div class="checkpoint" id="m7cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Planning check</div>
+      </div>
+      <div class="cp-q">A new student is setting up their first head spa room from scratch. What would you tell them to do first — and why does the order of prep matter?</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+        <textarea class="cp-input" id="m7cp1In" placeholder="Walk through the prep logic — not just the steps, but the reasoning behind them..." rows="1" oninput="grow(this)" onkeydown="m7cpKey(event,'m7cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m7cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m7cp1Btn" onclick="submitM7CP('m7cp1')">Submit to Cadence →</button>
-      <div class="cp-response" id="m7cp1Res"></div>
+        <button class="cp-btn" id="m7cp1Btn" onclick="submitM7CP('m7cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m7cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">7.6 — Checkpoint</div>
-    <div class="sec-title">A client says she's uncomfortable.</div>
-    <div class="body-text">You've just begun the halo rinse phase. Your client mentions her neck feels strained and she's a little cold. The service has just started. Walk through how you respond — what you adjust and in what order.</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m7cp2In" placeholder="Walk through your response — adjustments, order, what you say..." onkeydown="m7cpKey(event,'m7cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m7cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    <div class="checkpoint" id="m7cp2">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Final check</div>
+      </div>
+      <div class="cp-q">You've just begun the halo rinse phase. Your client mentions her neck feels strained and she's a little cold. The service has just started. Walk through how you respond — what you adjust and in what order.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+        <textarea class="cp-input" id="m7cp2In" placeholder="Walk through your response — adjustments, order, what you say..." rows="1" oninput="grow(this)" onkeydown="m7cpKey(event,'m7cp2')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m7cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m7cp2Btn" onclick="submitM7CP('m7cp2')">Submit to Cadence →</button>
-      <div class="cp-response" id="m7cp2Res"></div>
+        <button class="cp-btn" id="m7cp2Btn" onclick="submitM7CP('m7cp2')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m7cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m7Complete" style="display:none;">
       <div class="lc-check">✓</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-body">Your station is built. Your prep sequence is locked. Now it's time to step into the service itself.</div>
+      <div class="lc-body">You can evaluate a setup, prepare a station, and position a client correctly — and now know what to do if something's off. Next: the service itself.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 8</div>
         <div class="lc-next-text">The full 17-step service map. Both formats. Every transition and every micro-teach moment that makes this service worth the price clients pay for it.</div>
@@ -7208,11 +7460,40 @@ const M6 = {
 
 // ── MODULE 7 ──
 const M7 = {
+  // Displayed and evaluated question strings must match exactly — see .cp-q
+  // markup for m7cp1 / m7cp2 inside #module7Wrap.
   questions: {
-    m7cp1: 'A new student is setting up their first head spa room from scratch. What would you tell them to do first, and why does the order of prep matter?',
-    m7cp2: 'You have just begun the halo rinse phase. Your client mentions her neck feels strained and she is a little cold. The service has just started. Walk through how you respond — what you adjust and in what order.'
+    m7cp1: 'A new student is setting up their first head spa room from scratch. What would you tell them to do first — and why does the order of prep matter?',
+    m7cp2: 'You\'ve just begun the halo rinse phase. Your client mentions her neck feels strained and she\'s a little cold. The service has just started. Walk through how you respond — what you adjust and in what order.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 7 (Equipment & Room Setup) checkpoint. Question: "' + q + '". Key concepts: prep sequence matters because rushing creates an atmosphere problem before the client arrives. Halo flush (Barbicide then clear water) always first. Room temp should account for the client being wet. Towel warmer loaded. Product dishes set before client arrives. Client positioning: center under halo, shoulders 1-2 inches off bed edge, occipital in headrest curve. If client is uncomfortable mid-service: stop, adjust, communicate, resume — in that order. 3-5 sentences, direct and warm, no bullet points.'
+  // Module-7/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer().
+  systems: {
+    m7cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 7 competency: explaining a logical, repeatable prep order and why sequence matters — not just reciting the checklist.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Identifies that sanitation and structural setup (such as the halo flush) comes before comfort or ambient elements, because building around a not-yet-sanitized or not-yet-set-up system creates avoidable rework.\n' +
+      '2. States that client-facing comfort and ambient elements should be ready and running before the client enters, not assembled during the appointment.\n' +
+      '3. Explains why this order matters — consistency, avoiding a scrambled first impression, or avoiding rework — not just what the order is.\n' +
+      '4. Gives a reasoned explanation of dependency between steps, not only a restatement of checklist items.\n\n' +
+      'The student does not need to name every prep item or match the checklist\'s exact wording. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response stating that order doesn\'t matter or that any step can be skipped without consequence, or treating sanitation as optional or lower priority than ambiance.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if strong first steps are listed with no reasoning about why order matters, ask what would go wrong if the order were reversed. If the reasoning about why order matters is good but there is no concrete example of what happens first or last, ask for one.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.',
+    m7cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 7 competency: applying the stop, adjust, communicate, resume sequence to a live scenario involving two distinct problems — a positioning issue and a comfort/temperature issue — without conflating or ignoring either.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Addresses both problems — the neck strain (positioning) and the cold (comfort/temperature) — rather than only one.\n' +
+      '2. States that the practitioner pauses the service before adjusting, rather than pushing through or waiting for a natural break.\n' +
+      '3. Adjusts positioning specifically, referencing the relevant physical check — shoulder position, occipital support, or reducing extension — rather than only addressing temperature.\n' +
+      '4. Communicates with the client during the adjustment — says what\'s changing and checks in — rather than silently fixing it.\n' +
+      '5. Resumes only after confirming comfort, not immediately.\n\n' +
+      'The student does not need to use the exact words "stop, adjust, communicate, resume." Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — a response that continues the service without pausing or adjusting, dismisses the discomfort as unimportant or minor, or ignores the neck-strain complaint entirely and addresses only temperature.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if temperature is addressed well but the neck/shoulder position check is missing, ask for it specifically. If the positioning fix is good but nothing is said to the client, ask what the student would actually say while making the adjustment.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 8 ──
@@ -7254,7 +7535,7 @@ const MODULE_GUIDE_SYSTEMS = {
   4: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s nearly two decades of applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 4: cosmetic scalp magnification, client introduction and image consent, device hygiene, standardized image collection, AIMT\'s five-point scan, the five observation lenses, regional comparison, appearance-versus-cause reasoning, conservative service adjustment, and pause/referral judgment. Treat the scalp camera as an observation and education tool, not medical trichoscopy or a diagnostic device. When useful, structure the response as: what is visible, what context is missing, what may change in the cosmetic service, and what cannot be concluded. Do not diagnose, prescribe, claim that an image proves follicular blockage or a medical cause, or repeat a scanner-generated condition label as fact. Lead with applied observation skill rather than repeated scope warnings. Use 3-5 concise sentences and no bullet points unless the student explicitly asks for a list.',
   5: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 5, Scalp Patterns & Service Adaptation. Help the student translate supported observations, client-reported experience, and regional differences into conservative cosmetic service decisions. Use the five service levers: cleansing, exfoliation, water and steam, pressure and tempo, and product placement and finish. Reinforce the order: safety limit, client comfort/reactivity, surface tolerance, visible cosmetic need, then client preference. Do not diagnose, prescribe, claim medical treatment, claim personal practitioner experience, restore the compensatory-oil claim, call follicles clogged, imply hair-growth obstruction, or teach named dandruff/dermatitis content that belongs in Module 6. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; do not claim that experience as your own. Be direct, warm, practical, and concise.',
   6: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 6, Conditions & Disorders. Help the student distinguish a dry-scalp presentation from the dandruff-to-seborrheic-dermatitis spectrum, recognize that appearance alone does not establish cause, and decide whether to proceed, modify, or refer. Reinforce that spread beyond the scalp combined with redness, broken or weeping skin, severe symptoms, or no improvement with reasonable care are referral-relevant findings. Do not diagnose, prescribe, name a specific medical condition as confirmed fact, claim personal practitioner experience, or treat any illustrative image as clinical proof. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise.',
-  7: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 7 (Equipment & Room Setup): halo bed selection, essential tools, prep sequence, client positioning. The room is part of the head spa service. If the student is building a new space or adding head spa to an existing menu, speak to how the setup specifically supports scalp wellness delivery. 3-5 sentences. No bullet points.',
+  7: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 7, Equipment & Room Setup — bed selection, tool organization, station prep, and client positioning. Help the student reason through equipment trade-offs, station organization, and positioning decisions using the module\'s function-based framework, not brand or product recommendations. If a student reports a client discomfort scenario, reinforce the stop, adjust, communicate, resume sequence. Do not state that any single bed model or brand is required. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
   8: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 8 (The Head Spa Service): 17 steps, two formats, micro-teach while doing. If the student has an existing service background, acknowledge that some steps will feel familiar but the intentionality behind each one is specific to the head spa experience. The closing script with one personal scalp observation drives rebooking. 3-5 sentences. No bullet points.',
   9: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 9 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
   10: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 10 (Pricing Strategy): three-tier menu, cost-first pricing, add-ons as enhancements, client perception. Price for the value of the head spa experience you are delivering. If the student is building a new menu or repricing, keep the conversation anchored to head spa service value — not other services. 3-5 sentences. No bullet points.',
@@ -7269,7 +7550,7 @@ const MODULE_QUICK_PROMPTS = {
   4: ['How do I document what I see without labeling the scalp?', 'What questions help distinguish oil from product residue?', 'How do I make before-and-after scalp images honest?', 'Which findings mean I should stop the service?'],
   5: ['How do I build one service for a mixed regional presentation?', 'When should I skip exfoliation or steam?', 'How do I explain a gentler plan without disappointing the client?'],
   6: ['How do I tell dry scalp from dandruff?', 'When should a flaking presentation raise more concern?', 'What botanicals work for inflammation?'],
-  7: ['What bed should I get first?', 'How do I set up for back-to-back clients?', 'What is the non-negotiable prep step?'],
+  7: ['What should I actually prioritize when choosing a bed?', 'How do I know if a client\'s positioning needs adjusting mid-service?', 'What\'s the one prep step I should never skip?'],
   8: ['What makes the micro-teach effective?', 'How do I handle a question mid-service?', 'What is the most important step?'],
   9: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
   10: ['How do I price my anchor service?', 'What add-ons convert best?', 'How do I respond when someone says it is expensive?'],
@@ -7468,7 +7749,7 @@ function openModuleById(id, options = {}) {
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
+    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); resetSetupMistakes(); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     10: () => { const w = document.getElementById('module10Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
@@ -7508,7 +7789,7 @@ function openModuleById(id, options = {}) {
       4: 'Module 4 is where observation becomes a method. Use the camera to collect a better view, then separate what is visible from what still needs context and what the image cannot prove.',
       5: 'Module 4 taught you how to gather evidence. Module 5 is where that evidence begins changing the service. The key is not choosing one scalp label—it is deciding what to preserve, modify, avoid, pause, or refer in each region.',
       6: 'Module 5 taught you how to adapt a service. Module 6 teaches you how to interpret what you\'re looking at before you decide anything — because the same flakes can mean two very different things, and treating the wrong one usually makes it worse.',
-      7: 'Equipment feels like logistics but it directly affects the service. The setup details here come from real mistakes made early on. Ask me anything.',
+      7: 'Equipment and room setup feel like logistics, but they directly shape the service. A well-designed station removes friction before the first step even begins. Ask me anything.',
       8: 'This is the full picture — every step in sequence. If you have questions about timing or technique for any specific step, I am right here.',
       9: 'Sanitation does not get talked about enough. It is what separates consistent professionals from inconsistent ones.',
       10: 'Pricing is where a lot of talented practitioners undersell themselves. Let us fix that.',
@@ -8147,7 +8428,8 @@ function m1cpKey(e, id) {
 
 // ── MODULE 7 ──
 function submitM7CP(id) {
-  submitCheckpoint(7, id, M7.system, M7.questions[id]);
+  submitCheckpoint(7, id, M7.systems[id], M7.questions[id],
+    'Cadence couldn\'t review your response. Check your connection and try again.');
 }
 function m7cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM7CP(id); }
@@ -8185,6 +8467,7 @@ function toggleToolCat(id) {
   const body = document.getElementById(id + '-body');
   const cat = document.getElementById(id);
   if (!body || !cat) return;
+  const btn = cat.querySelector('.tc-head');
   const isOpen = body.classList.contains('open');
   // Close all
   document.querySelectorAll('.tc-body').forEach(b => b.classList.remove('open'));
@@ -8192,12 +8475,15 @@ function toggleToolCat(id) {
     c.classList.remove('open');
     const arrow = c.querySelector('.tc-arrow');
     if (arrow) arrow.textContent = '+';
+    const b = c.querySelector('.tc-head');
+    if (b) b.setAttribute('aria-expanded', 'false');
   });
   if (!isOpen) {
     body.classList.add('open');
     cat.classList.add('open');
     const arrow = cat.querySelector('.tc-arrow');
     if (arrow) arrow.textContent = '−';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
   }
 }
 
@@ -8210,10 +8496,12 @@ function togglePrep(idx) {
     _prepDone.delete(idx);
     check.textContent = '○';
     item.classList.remove('done');
+    item.setAttribute('aria-checked', 'false');
   } else {
     _prepDone.add(idx);
     check.textContent = '✓';
     item.classList.add('done');
+    item.setAttribute('aria-checked', 'true');
   }
   if (_prepDone.size === 10) {
     const comp = document.getElementById('prepComplete');
@@ -8227,10 +8515,68 @@ function resetPrepChecklist() {
     const check = document.getElementById('pic-' + i);
     const item = document.getElementById('pi-' + i);
     if (check) check.textContent = '○';
-    if (item) item.classList.remove('done');
+    if (item) { item.classList.remove('done'); item.setAttribute('aria-checked', 'false'); }
   }
   const comp = document.getElementById('prepComplete');
   if (comp) comp.style.display = 'none';
+}
+
+// "Find the setup mistakes" — new signature interaction (ungraded,
+// multi-select, retryable). Does not touch APP_STATE, progress,
+// checkpoints, or completion. Each condition is independently toggled;
+// selecting it means "I believe this is a genuine setup mistake." State
+// resets every time Module 7 is (re)opened via resetSetupMistakes() in
+// STATIC_MODULES[7].
+const SETUP_MISTAKES = [
+  { isMistake: true, feedback: 'A cart across the room defeats the within-reach zone from Section 7.2 — every product and tool now requires a step away from the client, which is exactly the reaching the pressure-test callout asks you to eliminate.' },
+  { isMistake: true, feedback: 'Stacked dishes have to be separated and portioned mid-service instead of being ready to use — that\'s staging work happening in front of the client instead of before them.' },
+  { isMistake: true, feedback: 'An unwrapped halo hose is noisy and can spray — Section 7.3\'s prep checklist includes wrapping it specifically to quiet it and protect the atmosphere you\'ve built.' },
+  { isMistake: true, feedback: 'Four-plus inches off the edge is outside the 1–2 inch range Section 7.4 calls for — it limits your access to the neck and increases the chance the client slides during the service.' },
+  { isMistake: true, feedback: 'Resting on the flat pad instead of the headrest\'s curve is exactly the unsupported position Section 7.4\'s safety note is about — the neck isn\'t getting the support it needs.' },
+  { isMistake: false, feedback: 'This is exactly right — Section 7.3 calls for fresh linens ready before the client enters, not assembled during the appointment.' },
+  { isMistake: false, feedback: 'This is correct — ambient elements like music should already be running before the client walks in, per the build-sequence order in Section 7.3.' },
+  { isMistake: true, feedback: 'Mixing clean and dirty bins breaks the sanitation separation Section 7.2 teaches — once they\'re combined, you can no longer trust which tools are actually clean.' }
+];
+function toggleSetupMistake(idx, btn) {
+  const check = document.getElementById('smmc-' + idx);
+  const fb = document.getElementById('smmf-' + idx);
+  if (!btn || !check || !fb) return;
+  const item = SETUP_MISTAKES[idx];
+  const next = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', String(next));
+  btn.classList.remove('correct', 'wrong');
+  const existingTag = btn.querySelector('.sm-mistake-tag');
+  if (existingTag) existingTag.remove();
+
+  if (next) {
+    check.textContent = '☑';
+    btn.classList.add(item.isMistake ? 'correct' : 'wrong');
+    const tag = document.createElement('span');
+    tag.className = 'sm-mistake-tag';
+    tag.textContent = item.isMistake ? 'Genuine mistake' : 'Actually fine';
+    btn.querySelector('.sm-mistake-text').appendChild(tag);
+    fb.textContent = item.feedback;
+    fb.style.display = 'block';
+  } else {
+    check.textContent = '☐';
+    fb.style.display = 'none';
+    fb.textContent = '';
+  }
+}
+function resetSetupMistakes() {
+  SETUP_MISTAKES.forEach((_, idx) => {
+    const btn = document.getElementById('smm-' + idx);
+    const check = document.getElementById('smmc-' + idx);
+    const fb = document.getElementById('smmf-' + idx);
+    if (btn) {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('correct', 'wrong');
+      const tag = btn.querySelector('.sm-mistake-tag');
+      if (tag) tag.remove();
+    }
+    if (check) check.textContent = '☐';
+    if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  });
 }
 
 // ══════════════════════════════════════════════════════

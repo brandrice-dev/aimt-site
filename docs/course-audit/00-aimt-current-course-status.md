@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 10, 2026
+**Last updated:** August 11, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Add approved Module 7 audit specification" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `ceb4e45beb9560c5da658e8639610f058704e401` — "Extract Module 7 for external audit," confirmed present on `origin/course-audit-build` and resolved to its full form during this task's preflight (consolidated implementation history traces back through `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit," which supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into that single commit before the first push attempt)
+- Latest controlling commit: pending — this task's "Implement Module 7 core experience pending visuals" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `a72c738b6a087ba65c826ed16e2d6fd26ad055ee` — "Add approved Module 7 audit specification," confirmed present on `origin/course-audit-build` and resolved to its full form during this task's preflight.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -39,11 +39,11 @@ Do not merge or deploy yet.
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
-| Module 7 | Externally audited — approved specification added; awaiting implementation |
+| Module 7 | Implementation in progress — required visual assets pending |
 | Modules 8–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 6** — approved August 10, 2026.
+**Latest approved module: Module 6** — approved August 10, 2026. Module 7 core experience is implemented but not yet manual-QA-ready (visual assets pending).
 
 ---
 
@@ -73,6 +73,12 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 7 core-experience implementation, pending required visual assets (lifecycle step 5, partial) — August 11, 2026.** Implemented the approved `module-07.md` specification in `headspa-mastery.html`: the full 7.1–7.4 curriculum corrections, the new ungraded "Find the setup mistakes" signature interaction, checkpoint question-parity and per-checkpoint `M7.systems.m7cp1`/`m7cp2` rubrics, the approved Cadence guide/quick-prompts/greeting and corrected Section 7.1 Cadence note, the corrected completion-card copy, and full accessibility and responsive requirements. The owner is currently retaking reference photography for the module's four required images, so implementation deliberately stopped short of that one requirement: all four asset slots were rebuilt as labeled, development-only "production asset pending" placeholders (not the old generic decorative boxes, and not fake/substitute imagery of any kind) with the approved final captions shown separately and the exact final `<picture>` markup ready in HTML comments for a narrow future asset-installation task. Static/mocked validation passed (in-browser, zero console errors, byte-identical checkpoint parity verified programmatically, all ungraded interactions confirmed state-isolated and reset-on-reopen, no horizontal overflow at 390×844/1440×900, Modules 0–6 regression smoke test all clean). Per `module-07.md`'s own acceptance criteria (items 23–24), **implementation may not advance to manual QA until the required visual assets exist — this task does not claim manual-QA readiness.** See Step 46 in `implementation-log.md` for the full record.
+
+**Module 7 status is now `Implementation in progress — required visual assets pending`.** Current gate remains **Module 7 implementation**; the exact next task is installing the four required images, completing asset-specific validation, and then proceeding to manual QA. Manual QA was not begun. Module 8 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 7 external audit (lifecycle step 3 of the per-module cycle) — August 10, 2026.** Replaced the empty scaffold in `docs/course-audit/modules/module-07.md` with the completed, approved audit specification, using `module-07-source.md` as the authoritative record of the current student experience and `module-06.md` as a structural/quality precedent only (not a source of curriculum content — Module 6's curriculum and interaction rhythm were explicitly not imported). Status set to **Approved for controlled implementation**. Approved title: **Equipment & Room Setup** (kept unchanged — already accurate, not renamed merely to sound newer).
 
@@ -203,24 +209,29 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 Module 7 implementation.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's external audit (lifecycle step 3) is now complete —
-`docs/course-audit/modules/module-07.md` exists as the full approved
-implementation specification, status **Approved for controlled
-implementation**. Module 7 status is **Externally audited — approved
-specification added; awaiting implementation**. Module 7 is not manually
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's implementation (lifecycle step 5) is now core-complete —
+`headspa-mastery.html` carries the full approved `module-07.md` curriculum,
+interaction, checkpoint, Cadence, accessibility, and responsive
+implementation, with static/mocked validation passed. Module 7 status is
+**Implementation in progress — required visual assets pending**: the
+module's four required photographs (Section 7.1 bed, Section 7.3
+station/cart, and the Section 7.4 correct/incorrect positioning pair) are
+intentionally deferred while the owner retakes reference photography, and
+are represented by labeled, development-only "production asset pending"
+placeholders rather than any substitute imagery. Module 7 is not manually
 approved. Module 8 has not begun.
 
 ---
 
 ## Exact next task
 
-Implement the approved Module 7 specification (`docs/course-audit/modules/module-07.md`) in `headspa-mastery.html` and perform static/mocked validation, following the same implementation workflow already used for Modules 0–6. Per the specification's own acceptance criteria, implementation may not advance to manual QA until the required visual assets (Section 7.1 bed photo, Section 7.3 station/cart photo, and — highest priority — the Section 7.4 correct/incorrect positioning photo pair) exist; if those assets are not yet available when implementation begins, that constraint must be honestly recorded, not worked around. Do not perform Module 7 image generation, downloadable production, or any Module 8 work as part of any task until explicitly instructed to begin it.
+Install the four required Module 7 visual assets (`assets/images/course/module-07/module-07-treatment-bed-setup.png`, `module-07-station-cart-reach-order.png`, `module-07-client-positioning-correct-side-view.png`, `module-07-client-positioning-incorrect-side-view.png`) once the owner's reference photography is ready, uncomment the prepared final `<picture>` markup already left in `headspa-mastery.html` at each of the four asset slots, complete asset-specific/static validation (image renders, correct aspect ratio, alt text, mobile stacking), and only then proceed to manual QA. Do not perform Module 7 image generation of any kind (including AI generation) or any Module 8 work as part of any task until explicitly instructed to begin it.
 
 ---
 
 ## Do not begin
 
-- Module 7 manual QA or manual approval (until implementation is complete and the required visual assets exist)
+- Module 7 manual QA or manual approval (until the four required visual assets are installed)
 - Module 7 image generation of any kind, including the user's own head-spa-bed and treatment-tray reference photographs
 - Module 8 or any Module 8 work
 - Module 12
@@ -247,7 +258,7 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's external audit is complete and its approved specification exists; Module 7 implementation (the current gate) has not begun.
+Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's core implementation is complete pending its four required visual assets; the owner's reference-photography retake for those assets may proceed in parallel with other work, but Module 7 itself does not advance past the current gate until they exist.
 
 ---
 
@@ -274,8 +285,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Preview, push, merge, and deployment status
 
-- Branch preview: `course-audit-build` remains the audit environment; the owner's manual QA review was performed directly against this preview.
-- Push status: this task's "Add approved Module 7 audit specification" documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Branch preview: `course-audit-build` remains the audit environment; the Module 7 implementation has not yet been reviewed against this preview by the owner (manual QA is not authorized until the visual assets are installed).
+- Push status: this task's "Implement Module 7 core experience pending visuals" commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -283,7 +294,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's "Add approved Module 7 audit specification" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's "Implement Module 7 core experience pending visuals" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `a72c738b6a087ba65c826ed16e2d6fd26ad055ee` — Add approved Module 7 audit specification
 - `ceb4e45beb9560c5da658e8639610f058704e401` — Extract Module 7 for external audit
 - `6482c8ac4d36418d90d6623a826f0ba977fcb877` — Add Module 6 video source
 - `0fc8c5526780c625de1aa0df77dc4d78679d5b54` — Approve Module 6 manual QA
