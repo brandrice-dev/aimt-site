@@ -61,10 +61,10 @@ assumed.
 
 ---
 
-## Approved titles and practitioner payoffs — Modules 0–5
+## Approved titles and practitioner payoffs — Modules 0–6
 
-Only these six modules have a completed, approved audit and manual
-approval (`docs/course-audit/modules/module-0{0,1,2,3,4,5}.md`, each with
+Only these seven modules have a completed, approved audit and manual
+approval (`docs/course-audit/modules/module-0{0,1,2,3,4,5,6}.md`, each with
 an "Approve Module N audit"/manual-approval step in
 `implementation-log.md`). Titles and payoffs below are drawn from those
 approved specifications.
@@ -129,23 +129,34 @@ intensity. See
 [`module-05-video-source.md`](module-05-video-source.md) for the complete
 video-source brief.
 
+### Module 6 — Conditions & Disorders
+
+**Hero framing:** "Module 6 · Conditions & Disorders" — dandruff,
+Malassezia, and seborrheic dermatitis, taught as an interpretive judgment
+call rather than a condition catalog.
+**Practitioner payoff:** Teaches the student to distinguish a dry-scalp
+presentation from a dandruff-spectrum presentation using multiple
+observable cues together, recognize that appearance is suggestive and not
+conclusive, and decide whether the responsible next step is to proceed,
+modify, pause, or refer — without diagnosing. See
+[`module-06-video-source.md`](module-06-video-source.md) for the complete
+video-source brief.
+
 ---
 
-## Modules 6–12 — Awaiting audit
+## Modules 7–12 — Awaiting audit
 
 | Module | Status |
 |---|---|
-| Modules 6–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
+| Modules 7–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
 | Module 12 — Final Exam | **Awaiting audit.** Approved only as a structural placeholder (see "Student-facing module sequence" above) — no content, design, or technical implementation is approved. |
 
 Do not invent titles, hero lines, outcomes, or continuity detail for any
-module in this table. Where a module's relationship to Module 5 needs to be
-described (e.g., "what comes next"), state only what Module 5's own approved
-spec says about its handoff — its completion card says "Next, you will
-examine named scalp conditions and the presentations that are commonly
-confused with cosmetic patterns. The goal will remain the same: observe
-carefully, stay within scope, and know when medical evaluation belongs in
-the plan" — and go no further than that sentence.
+module in this table. Where a module's relationship to Module 6 needs to be
+described (e.g., "what comes next"), state only what Module 6's own approved
+spec says about its handoff position — Module 6 precedes Module 7, and
+detailed continuity toward Module 7 is awaiting Module 7's own audit — and
+go no further than that.
 
 ---
 

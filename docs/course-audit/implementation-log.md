@@ -3979,3 +3979,113 @@ production, Resources Library implementation, and merge or deployment to
 `main`.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-10 — Step 43: Module 6 video-source creation (lifecycle step 9)
+
+Created `docs/course-video-sources/module-06-video-source.md` from the
+final approved and implemented Module 6 experience, following the same
+video-source workflow already used for Modules 0, 1, 2, 3, and 5
+(`module-05-video-source.md` used as the structural precedent). This was
+documentation-only — no `headspa-mastery.html`, `headspa-state.js`, or
+`aimt-progress-sync.js` changes were made or needed. No Module 6 opening
+video script, storyboard, or downloadable was produced.
+
+**Preflight.** Confirmed repository `aimt-site`, branch
+`course-audit-build` exactly, clean working tree, `origin` fetched, and
+commit `0fc8c5526780c625de1aa0df77dc4d78679d5b54` ("Approve Module 6
+manual QA") confirmed present on `origin/course-audit-build` with local
+`HEAD` matching origin. Read in full: `00-aimt-course-audit-master-instructions.md`,
+`00-global-decisions.md`, `00-aimt-current-course-status.md`,
+`modules/README.md`, `implementation-log.md`, `modules/module-06.md`
+(complete — all sections through "Implementation notes"),
+`00-aimt-course-map.md`, `00-aimt-video-direction.md`, and
+`module-05-video-source.md`. `00-aimt-module-video-master-instructions.md`
+exists in the repository and was noted but not duplicated from, per its
+own stated relationship to `00-aimt-video-direction.md`. Confirmed
+`module-06.md` (not `module-06-source.md`) as the current curriculum
+authority, and spot-checked `headspa-mastery.html` for final visible
+interaction names, section markers, and asset paths (`module6Wrap`,
+`m6cp1`/`m6cp2`, `.vs-card`, `.fc-trigger`, `#spectrumSlider`, "Sort three
+presentations," `MODULE_TITLES[6]` = "Module 6 — Conditions & Disorders")
+— all matched `module-06.md` exactly. Confirmed the Section 6.3 Visual 1
+asset exists on disk at
+`assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.png`
+and `.webp`, per `module-06.md`'s "Visual asset plan" (status: fulfilled).
+
+**File created.** `docs/course-video-sources/module-06-video-source.md`,
+status **Approved for video production**, covering: module identity (title
+"Conditions & Disorders," hero framing, position after Module 5/before
+Module 7); "what the module is really about" (interpretation under
+uncertainty); approved outcomes (condensed to the most video-relevant
+subset, not all eight verbatim); central practitioner payoff (reduced
+misidentification and overcorrection, not condition-name memorization);
+the beginner misconception (flakes ≠ automatic dandruff; the wrong-product
+cycle stated as "a common, avoidable pattern," not "most clients");
+insider knowledge; the four-interaction learning rhythm ("Follow the
+cycle" and "Sort three presentations" included, with `m6cp1`/`m6cp2`
+placement noted only to distinguish filming boundaries); relationship to
+Module 5 (adapt the service → interpret whether that direction still
+holds) and to Module 7 (position-only continuity, explicitly marked
+"Awaiting Module 7 audit" — no unaudited Module 7 content treated as
+final); the Section 6.3 illustration labeled "Existing asset —
+illustrative/non-diagnostic comparison" with its exact approved alt text;
+permitted post-approval interface footage (with interaction/checkpoint
+solutions explicitly protected from being spoiled); new-footage
+recommendations (consultation, product-direction, referral-conversation
+framing — no dramatic pathology footage); the optional Section 6.5
+gradient and the deferred downloadable both marked not-yet-available;
+approved text callouts; the full "claims and language that must not be
+reintroduced" list (diagnostic certainty, single-cause Malassezia framing,
+the removed 10%/1.8°F claim, "most clients," "without requiring medical
+oversight," 2%-strength ketoconazole, old course-name language, and
+unsupported Cadence claims); presenter emphasis (controlled confidence,
+referral as one legitimate decision among several, not the climax); video
+boundaries (curiosity and framework preview only — no interaction
+solutions, no full referral list, no staged diagnosis); production flags
+(all deferred QA items restated, none implied as complete; medical/legal
+review explicitly not claimed complete); a suggested duration of
+approximately 1:45–2:15, checked against Module 5's 120–150s precedent
+rather than copied from it; and source references, explicitly excluding
+`module-06-source.md` as authority.
+
+**Course map / video direction check.** `00-aimt-course-map.md` was found
+stale — its "Approved titles and practitioner payoffs" section header and
+table still read "Modules 0–5" / "Modules 6–12 — Awaiting audit," with no
+Module 6 entry, despite Module 6 now being approved and manually QA'd.
+Made the smallest factual correction: retitled the section "Modules 0–6,"
+updated the six-module count/glob to seven
+(`module-0{0,1,2,3,4,5,6}.md`), added a Module 6 entry (hero framing,
+condensed practitioner payoff, link to the new video-source file) after
+the existing Module 5 entry, retitled the remaining table "Modules 7–12 —
+Awaiting audit" with its Modules 6–11 row narrowed to Modules 7–11, and
+updated the closing continuity-guardrail paragraph to reference Module 6's
+own (not Module 5's) handoff position toward Module 7 — stating only that
+Module 6 precedes Module 7 and that detailed continuity is awaiting
+Module 7's audit, inventing nothing about Module 7's content.
+`00-aimt-video-direction.md` was reviewed and required no change — Module
+6's Section 6.3 asset follows the document's existing "illustrative/
+generated" image-authenticity convention (the same pattern already
+recorded for Module 4's microscopy images) rather than establishing any
+new reusable production rule, so the file was left untouched per
+instruction not to rewrite global video direction merely because this
+task touches the video-source folder.
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md`
+(new "Task just completed" entry, "Current gate" → "Module 7 source
+extraction for external audit," "Exact next task" → Module 7 source
+extraction, "Parallel side projects" updated, "Latest relevant commits"
+appended), `docs/course-audit/modules/README.md` (new Module 6 "Video-source
+created" entry, mirroring the Module 5 precedent), and this file. No other
+module's status changed.
+
+**Resulting gate.** Current gate is now **Module 7 source extraction for
+external audit** (the next module's lifecycle step 1/10). Module 7 has not
+begun.
+
+**Not performed, per instruction:** the Module 6 opening-video script or
+storyboard, the Module 6 downloadable, any Module 7 extraction or other
+Module 7 work, and merge or deployment to `main`.
+
+Work remains on branch `course-audit-build`.

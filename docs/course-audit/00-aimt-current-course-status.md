@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit" (consolidated history — supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into this single commit before the first push attempt)
+- Latest controlling commit: pending — this task's "Add Module 6 video source" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `0fc8c5526780c625de1aa0df77dc4d78679d5b54` — "Approve Module 6 manual QA," confirmed present on `origin/course-audit-build` (consolidated implementation history traces back through `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit," which supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into that single commit before the first push attempt)
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -72,6 +72,46 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 6 video-source creation (lifecycle step 9) — August 10, 2026.**
+Created `docs/course-video-sources/module-06-video-source.md` from the
+final approved and implemented Module 6 experience (`module-06.md`, not
+`module-06-source.md`), following the same workflow already used for
+Modules 0, 1, 2, 3, and 5. Status recorded: **Approved for video
+production**. Covers module identity, the "interpretation under
+uncertainty" payoff, approved outcomes (condensed, not copied verbatim),
+the beginner misconception and wrong-product-cycle problem (stated as "a
+common, avoidable pattern," not "most clients"), insider knowledge, the
+four-interaction learning rhythm, relationship to Module 5 (adapt → 
+interpret) and Module 7 (position-only, marked "Awaiting Module 7 audit"),
+the Section 6.3 illustration labeled existing/illustrative/non-diagnostic,
+permitted post-approval interface footage with interaction/checkpoint
+solutions explicitly protected from being spoiled, new-footage
+recommendations, the deferred downloadable and optional Section 6.5
+gradient both marked not-yet-available, approved text callouts, the full
+list of claims/language that must not be reintroduced, presenter emphasis,
+video boundaries, all production flags/deferred-QA items restated (with no
+implied claim that medical/legal review is complete), and a suggested
+duration of approximately 1:45–2:15, checked against — not copied from —
+Module 5's 120–150s precedent. See Step 43 in `implementation-log.md` for
+the full record.
+
+**Course map / video direction check.** `docs/course-video-sources/00-aimt-course-map.md`
+was found stale (still showed Module 6 as "Awaiting audit") and was
+narrowly corrected: added a Module 6 entry (hero framing, condensed
+payoff, link to the new video-source file), retitled the approved-modules
+section and table to reflect Modules 0–6 approved / Modules 7–11 awaiting
+audit, and updated the closing continuity guardrail to reference Module
+6's own handoff position toward Module 7 (position-only — no Module 7
+content invented). `docs/course-video-sources/00-aimt-video-direction.md`
+required no change — Module 6's asset follows the document's existing
+illustrative/generated image-authenticity convention rather than
+establishing a new reusable production rule.
+
+**No production code was changed.** No downloadable was produced. Module 7
+source extraction did not begin.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 6 manual QA approved — August 10, 2026.** Combined a Claude-run independent source/configuration verification pass against every acceptance criterion in `module-06.md` (section numbering, title consistency, checkpoint question parity, checkpoint-specific rubrics and their immediate-correction triggers, accessibility labels/live regions, memory-tag correction, Cadence identity/quick-prompt text, the Section 6.6 referral section and script, the "Sort three presentations" interaction, the ketoconazole 1%-only correction and scope note, removal of the numeric heat/sebum claim, the Section 6.3 overlap/ambiguity note, the full "Follow the cycle" progressive-sequence implementation, `window._m6cpsDone` removal, Module 7 gating, and a source-level regression smoke test of Modules 0–5's wrapper markup) with the owner's own authenticated rendered-preview review on the `course-audit-build` branch preview. The owner's review covered: desktop visual quality, AIMT quality/tone (does it read as AIMT-caliber practitioner education, not generic LMS copy), the Section 6.3 Visual 1 illustration (explicitly reviewed and approved — see below), the dry-scalp/dandruff comparison toggle, "Follow the cycle," the three real-time scenario cards, the spectrum slider, the Section 6.6 referral presentation, "Sort three presentations," and Sections 6.7/6.8's presentation and content quality. The owner reported all of these as passing with no remaining blocker.
 
@@ -140,15 +180,20 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 6 video-source creation.
+Module 7 source extraction for external audit.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10), external audit / approved specification (steps 3–4), implementation + static/mocked validation (steps 5–6), and manual QA + manual approval (steps 7–8). `module-06.md` remains the implementation authority for any future correction. Video-source creation (step 9) is the next gate — Module 7 source extraction (which begins the next module's lifecycle) remains prohibited until it is complete.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared every step of its own lifecycle, including video-source creation (step 9) —
+`docs/course-video-sources/module-06-video-source.md` now exists, status
+**Approved for video production**. `module-06.md` remains the
+implementation authority for any future correction. Module 7 source
+extraction (lifecycle step 10 of the next module's cycle) is now the
+current gate and has not begun.
 
 ---
 
 ## Exact next task
 
-Create `docs/course-video-sources/module-06-video-source.md` from the final approved and implemented Module 6 experience, following the same video-source workflow already used for Modules 0, 1, 2, 3, and 5 (see `docs/course-video-sources/module-05-video-source.md` for the precedent). This is not authorized as part of the manual-QA approval task itself — it is a separate, later task per the "Work prohibited" scoping already given for this QA pass. Module 7 source extraction or any other Module 7 work must not begin until Module 6's video-source file exists.
+Module 7 source extraction only — create `docs/course-audit/modules/module-07-source.md`, a complete, neutral, verbatim extraction of the current Module 7 student experience, following the same extraction workflow already used for Modules 0–6. This is not authorized as part of this video-source-creation task — it is a separate, later task. Do not perform Module 7 extraction, audit, implementation, or any other Module 7 work as part of any task until explicitly instructed to begin it.
 
 ---
 
@@ -179,7 +224,7 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's actual video-production package (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared manual QA approval (lifecycle step 8); its video-source file (lifecycle step 9) is now the current gate but has not been created yet — see "Exact next task" above. Module 7 source extraction remains prohibited until it is.
+Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7 source extraction (the current gate) has not begun.
 
 ---
 
@@ -207,7 +252,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner's manual QA review was performed directly against this preview.
-- Push status: this approval's documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's "Add Module 6 video source" documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -215,7 +260,10 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — Implement approved Module 6 audit (**latest controlling commit** — consolidated single commit covering implementation, Visual 1 installation, the Section 6.4 interaction upgrade, and the student-facing language/scenario-block polish pass)
+- This task's "Add Module 6 video source" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `0fc8c5526780c625de1aa0df77dc4d78679d5b54` — Approve Module 6 manual QA
+- `a0bd3de56949a2378ad2932cb7eb7dae2c82e843` — Record Module 6 language-pass commit hash and push status
+- `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — Implement approved Module 6 audit (consolidated single commit covering implementation, Visual 1 installation, the Section 6.4 interaction upgrade, and the student-facing language/scenario-block polish pass)
 - `0b135c48324d2c120682ae34a4aab516fa9244d1` — Add approved Module 6 audit specification
 - `8f67c6af1d256a9085455f72d55eca722998c9f8` — Extract Module 6 for external audit
 - `b10a939921d17d1117ec835af1c45bc76f4a09cb` — Add Module 5 video source

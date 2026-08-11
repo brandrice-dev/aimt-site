@@ -373,7 +373,15 @@ source extraction; Module 6 extraction has not begun.
 
 **Honestly still deferred, not resolved by this approval:** live-model checkpoint grading QA (`m6cp1`/`m6cp2` were verified by rubric/config inspection and the existing mocked-`callAI` validation from Steps 39–41, not by exercising the real model), live Cadence response QA (verified by source inspection only), screen-reader QA, physical-keyboard QA, and real touch-device QA. See `00-aimt-current-course-status.md`'s "Deferred review" for the complete list.
 
-**Current gate is now Module 6 video-source creation** (lifecycle step 9) — Module 7 source extraction remains prohibited until that file exists.
+**Video-source created.**
+[`docs/course-video-sources/module-06-video-source.md`](../../course-video-sources/module-06-video-source.md)
+is now the approved primary authority for a future, separately scoped
+video-production task — status **Approved for video production**. This
+completes lifecycle step 9 for Module 6. `docs/course-video-sources/00-aimt-course-map.md`
+was narrowly updated to add Module 6's entry (it previously still showed
+Module 6 as "Awaiting audit"); `docs/course-video-sources/00-aimt-video-direction.md`
+required no change. **Current gate is now Module 7 source extraction for
+external audit** — Module 7 has not begun.
 
 ### Prior task (unchanged, recorded for continuity)
 
