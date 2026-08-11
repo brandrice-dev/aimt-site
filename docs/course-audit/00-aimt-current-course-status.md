@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Extract Module 7 for external audit" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `6482c8ac4d36418d90d6623a826f0ba977fcb877` — "Add Module 6 video source," confirmed present on `origin/course-audit-build` and resolved from its short form (`6482c8a`) during this task's preflight (consolidated implementation history traces back through `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit," which supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into that single commit before the first push attempt)
+- Latest controlling commit: pending — this task's "Add approved Module 7 audit specification" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `ceb4e45beb9560c5da658e8639610f058704e401` — "Extract Module 7 for external audit," confirmed present on `origin/course-audit-build` and resolved to its full form during this task's preflight (consolidated implementation history traces back through `fb6619a57d76528adbbd7d149f09e95366a8f2e1` — "Implement approved Module 6 audit," which supersedes the earlier, never-pushed `291e6d5`/`2b37d87` and `0c016b3`/`0c8efcc` commits, each reset and folded forward into that single commit before the first push attempt)
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -39,7 +39,7 @@ Do not merge or deploy yet.
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
-| Module 7 | Awaiting external audit |
+| Module 7 | Externally audited — approved specification added; awaiting implementation |
 | Modules 8–11 | Pending |
 | Module 12 | Planned — do not begin |
 
@@ -73,6 +73,20 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 7 external audit (lifecycle step 3 of the per-module cycle) — August 10, 2026.** Replaced the empty scaffold in `docs/course-audit/modules/module-07.md` with the completed, approved audit specification, using `module-07-source.md` as the authoritative record of the current student experience and `module-06.md` as a structural/quality precedent only (not a source of curriculum content — Module 6's curriculum and interaction rhythm were explicitly not imported). Status set to **Approved for controlled implementation**. Approved title: **Equipment & Room Setup** (kept unchanged — already accurate, not renamed merely to sound newer).
+
+**External evidence used:** beauty parlor stroke syndrome / cervical-hyperextension research — Michael Weintraub's original 1993 description, Yılmaz et al.'s 2022 case report and literature review (*Vertigo and Ischemic Stroke after Hyperextension (Beauty Parlour Stroke syndrome)*, PMC9799011), a 2024 case-series review in *The American Journal of Emergency Medicine* (54 documented cases across five decades), and the Professional Beauty Association's trade guidance on at-risk clients and stroke warning signs; and general workstation reach-zone ergonomics (Cisco-Eagle/BOSTONtec-class references). Both materially changed curriculum — full citations recorded in `module-07.md`'s "Research and evidence sources" section.
+
+**Major decisions:** Section 7.1 (treatment bed) was reorganized around function-based evaluation categories instead of a single armrest-comfort claim, which was relabeled from an unqualified rule to a clearly labeled practitioner preference — no source was found (or needed) to support one universal required bed model. Section 7.2 gained a new "Arranging your cart" reach-zone framework, resolving the source extraction's flagged gap that the module referenced a cart and product dishes with no actual arrangement logic; the tool-category accordion was retained but reclassified as an accessible content-organization disclosure, not a graded interaction. Section 7.3 gained a one-sentence clarification that its ten-step order is a build sequence, not an arbitrary list; the prep checklist's reset-on-every-reopen behavior was confirmed *correct* for an ungraded practice tool (per the governing standard) and kept as-is — the actual defect, the completion card's unconditional "Your prep sequence is locked" claim, was corrected instead. **Section 7.4 (client positioning) received the module's highest-priority correction**: a new, brief, non-alarmist safety note explaining why sustained neck extension against a hard basin edge is avoided, grounded in the beauty-parlor-stroke-syndrome research, plus a "watch for / what to do" callout that makes the stop/adjust/communicate/resume sequence visible curriculum for the first time — resolving the source extraction's finding that `m7cp2` graded a sequence that was never actually taught. A new signature interaction, "Find the setup mistakes" (deliberately text/scenario-based, not photo-dependent, so implementation isn't blocked on unproduced imagery), was added between Section 7.4 and the checkpoints. Both checkpoints were kept — `m7cp1` (pre-service planning reasoning) and `m7cp2` (live in-service adjustment) test genuinely different competencies — with checkpoint placement changed so `m7cp1` now follows the signature interaction and `m7cp2` remains the final section; question-parity was fixed for both, and the shared `M7.system` rubric was replaced with per-checkpoint rubrics. Cadence's old course name and hidden personal-experience claim were corrected, along with a newly identified, more severe instance: a **visible, student-facing** first-person Cadence note in Section 7.1 ("One of the earliest mistakes I made...") that the source extraction flagged as more exposed than the hidden system-prompt pattern.
+
+**Visual asset plan (required and high priority, per instruction).** All four existing placeholders received an explicit final disposition. The Section 7.1 bed photo and Section 7.3 station/cart photo are required — the station/cart photo is explicitly tied to demonstrating the new reach-zone organization and identified as the strongest use for the user's real assembled-tray reference photograph, once produced. A **required correct/incorrect side-view positioning photo pair** was added to Section 7.4 as the single highest-priority visual asset in the module, with a full comparison specification (same client/bed/room, side-view angle, exact body landmarks, non-medical/non-alarmist framing, captions, and alt text) detailed in enough depth that a future task can request unambiguous generation or photography prompts without further curriculum ambiguity. The existing top-view "correct" placeholder was downgraded to optional; a reach-zone diagram was recorded as an optional future addendum. The acceptance criteria explicitly state implementation may not advance to manual QA without the required bed, station, and positioning-pair assets — this is recorded so a future implementation task cannot mark Module 7 complete while those images are missing.
+
+**Also recorded, planning only (not implemented):** a recommended-but-not-produced downloadable ("AIMT Station & Positioning Quick Reference"); Guided Completion Path fields (10–13 min learning time, more hands-on practice time than Modules 5–6 given the module's physical competency); Listen Mode fields (positioning content flagged as screen-required); full accessibility and responsive acceptance criteria for the tool-category disclosure, prep checklist, and new signature interaction.
+
+**Module 7 is now externally audited and has an approved specification. It is NOT implemented, NOT manually QA'd, and NOT approved for release.** No production file (`headspa-mastery.html`, `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was modified by this task. No image was generated or added. Module 8 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 7 source extraction for external audit (lifecycle step 10) — August 10, 2026.** Created `docs/course-audit/modules/module-07-source.md` — a complete, neutral, verbatim extraction of the current Module 7 ("Equipment & Room Setup") student experience: module identity, full curriculum in student encounter order (Sections 7.1–7.6: treatment bed, tools & supplies, station prep sequence, client positioning, and two end-placed checkpoints), the two ungraded interactions (tool-category accordion, station prep checklist) with their distinct "self-tracking checklist that discards its own completion state on every reopen" behavior noted as a new pattern not seen in Modules 5–6, both checkpoints (`m7cp1`, `m7cp2`) with displayed and evaluated question strings compared independently (both mismatched), Cadence configuration (shared checkpoint rubric, guide system, quick prompts, module-open greeting, memory tags — all three reachable, unlike Module 6's unreachable `scope-awareness` tag), a new finding that Section 7.1's visible curriculum body itself (not just the hidden system prompt) carries a first-person Cadence personal-experience claim, completion/Module 8 gating behavior, a full placeholder-asset inventory (zero real assets, four decorative photo slots), dedicated client-positioning content (§14) and treatment-cart/tool-supply content (§15) extracted in the detail the task required, Guided Completion/Listen Mode/downloadable extraction fields, a full source map, and a confirmed-findings/assumptions list (§19). Also created the empty `docs/course-audit/modules/module-07.md` external-audit scaffold (status **Awaiting external audit**), following the exact heading structure used for Module 6's original empty skeleton. No `module-07-assets.md` was created — Module 7 has zero real image/diagram/video/downloadable assets, matching the precedent already set for Modules 5 and 6.
 
@@ -187,25 +201,26 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 7 external audit.
+Module 7 implementation.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7 source extraction (lifecycle step 10) is now complete —
-`docs/course-audit/modules/module-07-source.md` exists as the full
-verbatim pre-audit record, and `docs/course-audit/modules/module-07.md`
-exists as the empty external-audit scaffold, status **Awaiting external
-audit**. The Module 7 external audit itself has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's external audit (lifecycle step 3) is now complete —
+`docs/course-audit/modules/module-07.md` exists as the full approved
+implementation specification, status **Approved for controlled
+implementation**. Module 7 status is **Externally audited — approved
+specification added; awaiting implementation**. Module 7 is not manually
+approved. Module 8 has not begun.
 
 ---
 
 ## Exact next task
 
-Externally audit `module-07-source.md` and populate the existing empty `module-07.md` scaffold with the approved implementation specification, following the same external-audit workflow already used for Modules 0–6. Module 7 implementation has not begun and is not authorized until the approved specification exists and this task is separately instructed to proceed. Do not perform Module 7 implementation, image generation, or any other Module 7 work beyond the external audit and specification as part of any task until explicitly instructed to begin it.
+Implement the approved Module 7 specification (`docs/course-audit/modules/module-07.md`) in `headspa-mastery.html` and perform static/mocked validation, following the same implementation workflow already used for Modules 0–6. Per the specification's own acceptance criteria, implementation may not advance to manual QA until the required visual assets (Section 7.1 bed photo, Section 7.3 station/cart photo, and — highest priority — the Section 7.4 correct/incorrect positioning photo pair) exist; if those assets are not yet available when implementation begins, that constraint must be honestly recorded, not worked around. Do not perform Module 7 image generation, downloadable production, or any Module 8 work as part of any task until explicitly instructed to begin it.
 
 ---
 
 ## Do not begin
 
-- Module 7 external audit, specification, or implementation (until explicitly instructed)
+- Module 7 manual QA or manual approval (until implementation is complete and the required visual assets exist)
 - Module 7 image generation of any kind, including the user's own head-spa-bed and treatment-tray reference photographs
 - Module 8 or any Module 8 work
 - Module 12
@@ -232,7 +247,7 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7 source extraction is complete; the Module 7 external audit (the current gate) has not begun.
+Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's external audit is complete and its approved specification exists; Module 7 implementation (the current gate) has not begun.
 
 ---
 
@@ -260,7 +275,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner's manual QA review was performed directly against this preview.
-- Push status: this task's "Extract Module 7 for external audit" documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's "Add approved Module 7 audit specification" documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -268,7 +283,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's "Extract Module 7 for external audit" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's "Add approved Module 7 audit specification" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `ceb4e45beb9560c5da658e8639610f058704e401` — Extract Module 7 for external audit
 - `6482c8ac4d36418d90d6623a826f0ba977fcb877` — Add Module 6 video source
 - `0fc8c5526780c625de1aa0df77dc4d78679d5b54` — Approve Module 6 manual QA
 - `a0bd3de56949a2378ad2932cb7eb7dae2c82e843` — Record Module 6 language-pass commit hash and push status
