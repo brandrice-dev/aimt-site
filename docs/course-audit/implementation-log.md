@@ -3838,3 +3838,144 @@ state.
 extraction or any Module 7 work, and merge or deployment to `main`.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-10 — Step 42: Module 6 manual QA approved
+
+Performed the manual-QA gate for Module 6 (lifecycle step 7) and, finding
+no blocking issue, advanced it to manual approval (lifecycle step 8).
+This was a documentation-only task — no `headspa-mastery.html`,
+`headspa-state.js`, or `aimt-progress-sync.js` changes were made or were
+needed.
+
+**Preflight.** Confirmed repository `aimt-site`, branch
+`course-audit-build` exactly, clean working tree, `origin` fetched, and
+both controlling commits (`fb6619a57d76528adbbd7d149f09e95366a8f2e1` and
+the resolved full hash for `a0bd3de`,
+`a0bd3de56949a2378ad2932cb7eb7dae2c82e843`) confirmed present on
+`origin/course-audit-build` with local `HEAD` matching origin exactly.
+All governing documents (`00-aimt-course-audit-master-instructions.md`,
+`00-aimt-manual-qa-master-checklist.md`, `00-global-decisions.md`,
+`00-aimt-current-course-status.md`, `modules/README.md`,
+`implementation-log.md`, `module-06.md`) were read in full before QA
+began.
+
+**Independent source/configuration verification (Claude-performed,
+supports but does not substitute for the owner's rendered review).**
+Located the `course-audit-build` branch preview at
+`https://course-audit-build.aimt-site.pages.dev` and confirmed it serves
+the pushed branch tip (Course Review Mode activated, which is
+hard-blocked on production hosts). Discovered and reported a hard
+blocker: Course Review Mode unlocks module navigation only —
+`shouldEnterPurchasedCourse()` still requires a real signed-in Supabase
+session with a real `headspa-mastery` entitlement even in Review Mode —
+so Claude could not itself enter the authenticated course experience
+without credentials, which were correctly not requested or used. Per the
+owner's direction, QA was split: the owner performed the authenticated
+rendered-preview review personally, while Claude independently verified
+every objectively source-checkable item in `module-06.md`'s acceptance
+criteria (items 1–40) directly against `headspa-mastery.html` and
+`assets/js/headspa-state.js` — all passed: section numbering 6.1–6.8 with
+no gap/combined heading and no old placeholder text; title consistency
+("Conditions & Disorders," zero "Common" occurrences); the single
+approved Section 6.3 tap hint; `.cp-q`/`M6.questions` byte-parity for
+both `m6cp1`/`m6cp2`; `M6.systems.m6cp1`/`m6cp2` as separate rubrics (no
+shared `M6.system`) with immediate-correction triggers for diagnostic
+claims and for naming/recommending prescription-strength (2%) product;
+`submitM6CP`'s approved network-error text; `aria-label`s on both
+voice/submit buttons and `aria-live="polite"` on both `.cp-res` regions;
+`#spectrumSlider`'s `aria-label`; `.vs-card` as a native button with
+`aria-expanded`/`aria-controls`; `.trigger-item` converted to static
+markup with no interactivity; zero remaining `.cycle-step`/`cycleStep()`/
+`CYCLE_INSIGHTS` references; `prefers-reduced-motion` overrides for
+`.vs-detail`/`.fc-detail`/`.fc-final`; `MODULE_MEMORY_TAGS[6]` with
+`scope-awareness` removed; `MODULE_GUIDE_SYSTEMS[6]`/`M6.systems` free of
+"HeadSpa Mastery"/"nearly two decades"; `MODULE_QUICK_PROMPTS[6]` matching
+the three approved prompts exactly; the standalone, always-visible
+Section 6.6 referral list/script; the spectrum slider's position-4 text
+pointing to Section 6.6; the full "Sort three presentations" interaction
+(exact copy, native buttons, `aria-pressed`, `aria-live` feedback, no
+`APP_STATE` writes); the corrected ketoconazole 1%-only card with the
+required scope note and zero "without requiring medical oversight"
+occurrences; corrected diet/stress trigger language; zero "10%" (or any
+numeric heat/sebum claim) occurrences anywhere in the file; the Section
+6.3 overlap/ambiguity closing note; the complete "Follow the cycle"
+implementation (native `disabled` gating exactly one step ahead, explored
+steps freely reviewable, the final "Where do you break the cycle?" card
+gated on all six steps explored, "Breaks the cycle"/"Keeps the cycle
+going" text tags, unlimited reselection resetting other options to
+neutral, zero `APP_STATE`/`localStorage` writes anywhere in
+`fcReset`/`fcActivate`/`fcAnswer`, and `fcReset()` firing on every
+module-6 open); zero remaining "Weak call"/"Strong call"/"Correct
+call"/"Stronger approach" strings; `window._m6cpsDone` fully removed;
+Module 7's gate (`REQUIRED_CHECKPOINTS['6']` = `['m6cp1','m6cp2']`,
+`canAccessModule(7)` requiring `isModuleComplete(6)`) unaffected; and a
+source-level regression smoke test confirming all of Modules 0–5's
+wrapper divs remain present and structurally intact with zero duplicate
+IDs among the new Module 6 elements.
+
+Claude also viewed the installed Section 6.3 Visual 1 asset directly and
+flagged it as a likely blocker — the image is a photorealistic macro
+rendering of scalp/flakes rather than the "non-diagnostic
+illustration/diagram... not styled as clinical microscopy and not
+photography" `module-06.md`'s visual asset plan calls for — and
+explicitly deferred that judgment call to the owner rather than treating
+it as resolved either way.
+
+**Owner's authenticated rendered-preview review (the actual manual QA).**
+The owner signed in and reviewed Module 6 directly on the
+`course-audit-build` branch preview and reported, in order: Section 6.3
+Visual 1 — **explicitly reviewed and approved as installed**, no
+replacement needed, non-diagnostic captioning to remain exactly as
+implemented (this resolves Claude's flagged concern in the owner's
+favor); desktop visual quality — pass; AIMT quality/tone — pass; the
+dry-scalp/dandruff comparison experience — pass; "Follow the cycle" —
+pass; the three real-time scenario cards — pass; the spectrum
+presentation — pass; the Section 6.6 referral presentation — pass; "Sort
+three presentations" — pass; Sections 6.7/6.8 presentation and content
+quality — pass; overall rendered Module 6 experience — pass, with no
+remaining owner-identified blocker.
+
+**Honestly deferred, not resolved by this approval** (per the governing
+manual-QA standard, these require genuine live/manual testing this task
+did not perform and does not claim): live-model checkpoint grading QA for
+`m6cp1`/`m6cp2` (verified only by rubric/config inspection plus the
+existing mocked-`callAI` browser validation from Steps 39–41 — not by
+exercising the real model against live answers, including a diagnostic
+answer and a 2%-ketoconazole answer); live Cadence response QA (quick
+prompts and guide system verified by source inspection only, not
+exercised against the real model); screen-reader QA; physical-keyboard
+QA; real touch-device QA; medical/dermatological review; legal and
+state-specific scope review. See
+`00-aimt-current-course-status.md`'s "Deferred review" for the complete,
+unchanged list (including the pre-existing Module 3/4 answer-reveal and
+Module 5 numeric-claim deferred items, which this task did not touch).
+
+**Decision.** No blocking issue was found or reported by either the
+independent verification or the owner's review. Module 6 status advances
+to **Implemented — manual QA approved**.
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md`
+(new "Task just completed" entry, module-status table, "Current gate" →
+"Module 6 video-source creation," "Exact next task" → create
+`docs/course-video-sources/module-06-video-source.md`, "Do not begin" no longer
+lists Module 6 manual approval as outstanding, "Deferred review" restated
+to distinguish the owner's genuine manual review from what remains
+deferred, preview/push status reworded), `docs/course-audit/modules/README.md`
+(Module 6 status line and a new approval entry), and this file. Module 6
+is the only module whose status changed.
+
+**Resulting gate.** Current gate is now **Module 6 video-source
+creation** (lifecycle step 9): create
+`docs/course-video-sources/module-06-video-source.md` following the
+Modules 0/1/2/3/5 precedent. Module 7 source extraction remains
+prohibited until that file exists — it was not created by this task, per
+instruction.
+
+**Not performed, per instruction:** Module 6 video-source file creation,
+Module 7 extraction or any Module 7 work, Module 6/Module 5 downloadable
+production, Resources Library implementation, and merge or deployment to
+`main`.
+
+Work remains on branch `course-audit-build`.

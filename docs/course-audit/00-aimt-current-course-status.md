@@ -38,11 +38,11 @@ Do not merge or deploy yet.
 | Module 3 | Implemented — manual QA approved |
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
-| Module 6 | Implemented — awaiting manual QA |
+| Module 6 | Implemented — manual QA approved |
 | Modules 7–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 5** — approved August 8, 2026. **Module 6 is implemented but not yet manually approved.**
+**Latest approved module: Module 6** — approved August 10, 2026.
 
 ---
 
@@ -72,6 +72,16 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 6 manual QA approved — August 10, 2026.** Combined a Claude-run independent source/configuration verification pass against every acceptance criterion in `module-06.md` (section numbering, title consistency, checkpoint question parity, checkpoint-specific rubrics and their immediate-correction triggers, accessibility labels/live regions, memory-tag correction, Cadence identity/quick-prompt text, the Section 6.6 referral section and script, the "Sort three presentations" interaction, the ketoconazole 1%-only correction and scope note, removal of the numeric heat/sebum claim, the Section 6.3 overlap/ambiguity note, the full "Follow the cycle" progressive-sequence implementation, `window._m6cpsDone` removal, Module 7 gating, and a source-level regression smoke test of Modules 0–5's wrapper markup) with the owner's own authenticated rendered-preview review on the `course-audit-build` branch preview. The owner's review covered: desktop visual quality, AIMT quality/tone (does it read as AIMT-caliber practitioner education, not generic LMS copy), the Section 6.3 Visual 1 illustration (explicitly reviewed and approved — see below), the dry-scalp/dandruff comparison toggle, "Follow the cycle," the three real-time scenario cards, the spectrum slider, the Section 6.6 referral presentation, "Sort three presentations," and Sections 6.7/6.8's presentation and content quality. The owner reported all of these as passing with no remaining blocker.
+
+**Section 6.3 Visual 1 — explicitly owner-approved.** Claude's independent review flagged the installed illustration (`module-06-dry-scalp-vs-dandruff-illustration.png`) as a photorealistic macro rendering that reads closer to clinical photography than the "non-diagnostic illustration/diagram... not styled as clinical microscopy and not photography" `module-06.md` calls for, and raised it as a likely blocker pending the owner's own visual judgment. The owner then reviewed the same image directly on the authenticated branch preview and explicitly approved it as-is — no replacement required. The image's non-diagnostic caption/panel labeling (embedded in the asset itself, per `module-06.md`'s "Visual asset plan") stays exactly as implemented.
+
+**What this approval is based on, honestly:** the owner's rendered-preview pass was a genuine authenticated visual/interaction review — it is the manual QA the governing process requires and is treated as such. It did not include, and this approval does not claim: live-model checkpoint grading QA (`m6cp1`/`m6cp2` were validated only via rubric/config inspection and the existing mocked-`callAI` validation recorded in Step 39–41 of `implementation-log.md`), live Cadence response QA (quick-prompt text and the guide-system prompt were verified by source inspection, not exercised against the real model), screen-reader QA, physical-keyboard QA, or real touch-device QA. These remain honestly deferred — see "Deferred review" below — not resolved by this approval.
+
+**No blocking issue remains.** Module 6 status is now **Implemented — manual QA approved**.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 6 student-facing language + scenario-block polish (narrow quality pass) — August 10, 2026.** Owner review of the rendered Module 6 experience flagged implementation-created microcopy that read as generic/AI-written rather than AIMT's practitioner-education standard. Corrected, implementation-only (no `module-06.md` change needed — none of this was approved curriculum, all of it was implementation microcopy):
 
@@ -130,21 +140,20 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 6 manual QA.
+Module 6 video-source creation.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10), external audit / approved specification (steps 3–4), and implementation + static/mocked validation (steps 5–6). `module-06.md` remains the implementation authority for any future correction. Manual QA (step 7) is the next gate.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 6 has now cleared source extraction (step 10), external audit / approved specification (steps 3–4), implementation + static/mocked validation (steps 5–6), and manual QA + manual approval (steps 7–8). `module-06.md` remains the implementation authority for any future correction. Video-source creation (step 9) is the next gate — Module 7 source extraction (which begins the next module's lifecycle) remains prohibited until it is complete.
 
 ---
 
 ## Exact next task
 
-Perform manual QA on the `course-audit-build` branch preview for Module 6, using `00-aimt-manual-qa-master-checklist.md` plus the module-specific acceptance criteria in `docs/course-audit/modules/module-06.md`. This includes real desktop and phone visual review, all four ungraded interactions (comparison toggle, "Follow the cycle" with its "Where do you break the cycle?" final question, spectrum slider, "Sort three presentations"), the installed Visual 1 illustration, both checkpoints against live-model grading, Cadence's quick prompts and guide responses, and completion/Module 7 unlock behavior. Do not approve Module 6 until that review passes — see "Deferred review" below for what this implementation task could not verify itself.
+Create `docs/course-video-sources/module-06-video-source.md` from the final approved and implemented Module 6 experience, following the same video-source workflow already used for Modules 0, 1, 2, 3, and 5 (see `docs/course-video-sources/module-05-video-source.md` for the precedent). This is not authorized as part of the manual-QA approval task itself — it is a separate, later task per the "Work prohibited" scoping already given for this QA pass. Module 7 source extraction or any other Module 7 work must not begin until Module 6's video-source file exists.
 
 ---
 
 ## Do not begin
 
-- Module 6 manual approval (manual QA must happen first and pass)
 - Module 7 extraction or any Module 7 work
 - Module 12
 - completion and certificate audit
@@ -170,16 +179,16 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's actual video-production package (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with the Module 6 audit — neither blocks the other. Module 6 has no video-source file yet; that step (lifecycle step 9) only becomes available after Module 6 clears manual QA approval (lifecycle step 8), which has not happened.
+Module 5's actual video-production package (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared manual QA approval (lifecycle step 8); its video-source file (lifecycle step 9) is now the current gate but has not been created yet — see "Exact next task" above. Module 7 source extraction remains prohibited until it is.
 
 ---
 
 ## Deferred review
 
-Retained accurately, not resolved by this task:
+Module 6's manual QA approval was based on a genuine authenticated owner review of the rendered branch preview (desktop visual quality, AIMT tone/quality, Visual 1, all four ungraded interactions, the referral section, and Sections 6.7/6.8) combined with Claude's independent source/configuration verification. It did **not** include, and approval does not claim, the following — retained accurately as still deferred, not resolved by this approval:
 
-- live-model grading QA (Module 6 checkpoints were validated with mocked `callAI` responses only);
-- live Cadence response QA (Module 6 guide system/quick prompts were not exercised against the real model);
+- live-model grading QA for `m6cp1`/`m6cp2` (validated by rubric/config inspection and the existing mocked-`callAI` browser validation recorded in `implementation-log.md` Steps 39–41, not by exercising the real model against live answers);
+- live Cadence response QA (quick-prompt text and the guide-system prompt were verified by source inspection, not exercised against the real model);
 - screen-reader QA;
 - physical-keyboard QA;
 - real touch-device QA;
@@ -197,8 +206,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Preview, push, merge, and deployment status
 
-- Branch preview: `course-audit-build` remains the audit environment; the preview reflects all commits through this approval.
-- Push status: local branch is ahead of `origin/course-audit-build` by one consolidated commit (`fb6619a`). `git push` failed again — no CLI credentials configured in this environment ("could not read Username for 'https://github.com'"). No git configuration was altered and no alternate remote was used. Push via **GitHub Desktop → Push origin**.
+- Branch preview: `course-audit-build` remains the audit environment; the owner's manual QA review was performed directly against this preview.
+- Push status: this approval's documentation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
