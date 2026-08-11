@@ -439,7 +439,55 @@ referral sentence is gated behind manually dragging the spectrum slider to
 its final position. See `module-06-source.md` for the complete pre-audit
 findings list.
 
-Modules 7–11 have not been extracted yet. Source files for those modules
+## Module 7 — Equipment & Room Setup
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 7** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-07-source.md`](module-07-source.md) — full verbatim extraction |
+| Approved specification file | [`module-07.md`](module-07.md) — empty scaffold, awaiting external audit |
+| Wrapper ID | `module7Wrap` — standard hidden-template pattern |
+| Checkpoint IDs | `m7cp1`, `m7cp2` — standard `mNcpX` pattern |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| **Status** | **Awaiting external audit** |
+
+Extracted per the Module 7 source-extraction task, August 10, 2026. No asset
+inventory file was created — Module 7 currently contains zero real
+image/diagram/video/downloadable assets; all four "photo" slots (Section
+7.1 single placeholder, Section 7.3 single placeholder, Section 7.4 photo
+pair) render decorative placeholder graphics with no underlying file, the
+same state already documented for Modules 5 and 6
+(`module-07-source.md` §5).
+
+Notable findings recorded in the extraction (not fixed at extraction
+time): Module 7's displayed and evaluated checkpoint questions do not
+match for both `m7cp1` (em dash vs. comma before the second clause) and
+`m7cp2` (contractions expanded in the evaluated string) — the same defect
+class already found in Modules 5 and 6; `M7.system` is a single shared
+rubric for both checkpoints rather than the per-checkpoint
+`M7.systems.mNcpX` structure Modules 1–4 use; `submitM7CP` supplies no
+module-specific network-error text; both checkpoints' voice and submit
+buttons lack `aria-label` and both `.cp-response` regions lack
+`aria-live`; the tool-category accordion (`.tool-category`) and prep
+checklist (`.prep-item`) are both plain `<div onclick>` elements with no
+keyboard/ARIA semantics; `M7.system` still says "instructor of HeadSpa
+Mastery" and `MODULE_GUIDE_SYSTEMS[7]` still frames Cadence as personally
+"a mentor built from nearly two decades in the head spa industry" — the
+same old-name/personal-experience-claim pattern already found uncorrected
+in Modules 5, 6, 8, 9, and 10; Section 7.1's visible, student-facing
+Cadence note additionally contains its own first-person personal-history
+claim ("One of the earliest mistakes I made...") directly in the lesson
+body, a more visible instance of the same pattern than the hidden system
+prompt; the prep checklist's completion state is silently discarded every
+time the module is reopened, even mid-session; the mid-service discomfort
+sequence ("stop, adjust, communicate, resume") that `m7cp2` is graded
+against exists only in the hidden evaluator rubric, never stated in the
+visible curriculum; and Section 7.4 currently contains no
+incorrect-positioning comparison of any kind — both existing placeholder
+photo slots are labeled "Correct Positioning." See `module-07-source.md`
+§19 for the complete pre-audit findings list.
+
+Modules 8–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.
