@@ -4288,4 +4288,26 @@ Narrow reduction/polish pass on the four-card visual interaction from Step 49, n
 
 **Resulting gate.** Unchanged: **Module 7 manual QA**. Module 7 status is unchanged: **Implemented — awaiting manual QA**. Module 8 has not begun. No merge or deployment to `main` occurred.
 
+---
+
+## 2026-08-12 — Step 51: Module 7 manual QA approved
+
+The owner completed manual review of Module 7 on the `course-audit-build` branch preview and explicitly confirmed: "everything looks and functions properly." Per the governing manual-approval rule (`00-aimt-course-audit-master-instructions.md`), this is the owner's manual approval — Module 7 moves from **Implemented — awaiting manual QA** to **Implemented — manual QA approved**.
+
+**Preflight.** Confirmed branch `course-audit-build`, HEAD at `da20861` ("module 7 upgrades"), in sync with `origin/course-audit-build`. Working tree was clean except for one untracked file, `.claude/launch.json` — a temporary local static-server QA config (`python3 -m http.server`), not part of the course implementation. It was deleted, not committed, and no `.claude` infrastructure was added on its account. No unrelated working-tree changes were present.
+
+**QA record.** The owner's review confirmed: overall desktop/rendered visual quality; full functionality of the module; all four required Module 7 visuals installed and displaying correctly (bed-setup photo, station/cart photo, and the correct/incorrect positioning comparison pair); the positioning comparison reading correctly; the four-card visual setup-judgment interaction ("Find the setup mistakes") functioning correctly end to end; checkpoint (`m7cp1`, `m7cp2`), completion, and Module 8 gating all passing; no blocking visual or functional issue remaining. This combines with the technical/manual-QA support already recorded across Steps 46–50 (390px mobile-width review, functional checkpoint paths under mocked AI responses, Modules 0–6 regression, zero console errors).
+
+**Honestly still deferred — not resolved by this approval:** live-model checkpoint grading QA (`m7cp1`/`m7cp2` validated only via rubric/config inspection and mocked-`callAI` browser validation, not exercised against the real model); live Cadence response QA (quick-prompt text and the guide-system prompt verified by source inspection only); screen-reader QA; physical-keyboard QA on real hardware; real touch-device QA; medical/dermatological review; state-specific legal/scope review. These are not claimed complete by this approval.
+
+**Documentation cross-reference correction.** `module-07.md` correction #6 referenced a "Final replacement copy" section that does not exist anywhere in the file — confirmed by a full heading search. The actual corrected Section 7.1 Cadence note is already implemented in production (`headspa-mastery.html:5578`: "A common early mistake is prioritizing what looks impressive in photos over what actually feels comfortable to lie in for an hour. Choose the bed your clients will want to come back to — not the one that photographs well."). Since this is a pure broken pointer with the real, already-approved-and-shipped copy findable in production, the narrowest correction was to quote that copy inline in place of the dead cross-reference — no curriculum interpretation or rewriting was involved, and no other content in `module-07.md` was touched.
+
+**Not performed, per instruction.** No Module 7 UI, checkpoint, image, or curriculum content was changed. Module 7 video-source creation (`docs/course-video-sources/module-07-video-source.md`) was not begun. Module 8 was not touched. No merge to `main` and no deployment occurred.
+
+**Documentation updated:** `docs/course-audit/00-aimt-current-course-status.md` (module-status table → Module 7 "Implemented — manual QA approved"; latest approved module → Module 7; new "Task just completed" entry; current gate → Module 7 video-source creation; exact next task updated; deferred-review list carried forward accurately), `docs/course-audit/modules/README.md` (Module 7 entry status and table updated), `docs/course-audit/modules/module-07.md` (correction #6 cross-reference fixed, as above), and this file.
+
+**Resulting gate.** **Module 7 video-source creation** — creating `docs/course-video-sources/module-07-video-source.md` is the next task, not begun by this session. Module 8 remains blocked until that file exists. No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.
+
 Work remains on branch `course-audit-build`.

@@ -449,7 +449,17 @@ findings list.
 | Wrapper ID | `module7Wrap` — standard hidden-template pattern |
 | Checkpoint IDs | `m7cp1`, `m7cp2` — standard `mNcpX` pattern |
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
-| **Status** | **Implemented — awaiting manual QA** |
+| **Status** | **Implemented — manual QA approved** |
+
+**Manual QA approved (August 12, 2026).** The owner reviewed the rendered `course-audit-build` branch preview and explicitly confirmed "everything looks and functions properly" — desktop/overall visual quality, full functionality, all four required visuals (including the correct/incorrect positioning comparison), the four-card visual setup-judgment interaction, checkpoint (`m7cp1`, `m7cp2`)/completion/Module 8 gating, all passing with no blocking issue. This combines with the technical/manual-QA support already recorded in Steps 46–50 (390px mobile-width review, functional checkpoint paths under mocked AI responses, Modules 0–6 regression, zero console errors).
+
+**Honestly still deferred, not resolved by this approval:** live-model checkpoint grading QA, live Cadence response QA, screen-reader QA, physical-keyboard QA on real hardware, real touch-device QA, medical/dermatological review, and state-specific legal/scope review. See `00-aimt-current-course-status.md`'s "Deferred review" for the complete list.
+
+A minor documentation-only correction was also made: correction #6's "See 'Final replacement copy' for the corrected note" pointed to a section that does not exist in `module-07.md`; the already-implemented corrected copy was quoted inline in its place. No curriculum was changed.
+
+**Video-source creation is now the current gate** — `docs/course-video-sources/module-07-video-source.md` does not yet exist. See Step 51 in `implementation-log.md` for the full record. Module 8 remains blocked until that file exists.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Setup-judgment interaction — final UX polish (August 11, 2026).** Narrow reduction pass, no curriculum change. Removed the redundant "Continue" button from card 4's reveal (`m7cp1` already follows naturally); its closing takeaway now appears inline, no click required. Added focus management (`preventScroll` on every reveal; Tab from card 4 lands directly on `m7cp1`, confirmed in-browser — never trapped). Tightened the flip transition. No redundant correctness copy or reset/retry control existed to remove. `module-07.md` amendment updated in place. See Step 50 in `implementation-log.md`. Module 7 status is unchanged.
 

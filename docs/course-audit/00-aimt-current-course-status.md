@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 11, 2026
+**Last updated:** August 12, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's Module 7 visual-install commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `48f160a2916d3f4c657491bb38f6367f318151bb` — "Implement Module 7 core experience pending visuals" (amended once for a narrow typography fix), pushed to `origin/course-audit-build`.
+- Latest controlling commit: pending — this task's Module 7 manual-QA-approval commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `da20861` — "module 7 upgrades", pushed to `origin/course-audit-build`.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -39,11 +39,11 @@ Do not merge or deploy yet.
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
-| Module 7 | Implemented — awaiting manual QA |
+| Module 7 | Implemented — manual QA approved |
 | Modules 8–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 6** — approved August 10, 2026. Module 7 is fully implemented, including its four required visual assets, and is ready for manual QA — it has not yet been manually approved.
+**Latest approved module: Module 7** — manually approved August 12, 2026. The owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Modules 0–7 are now approved; Modules 8–11 remain pending.
 
 ---
 
@@ -73,6 +73,18 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 7 manual QA approved — August 12, 2026.** The owner completed manual review of Module 7 on the `course-audit-build` branch preview and explicitly confirmed: "everything looks and functions properly." This is treated as the owner's manual approval per the governing manual-approval rule. Owner review confirmed: overall desktop/rendered visual quality; full functionality; all four required Module 7 visuals installed and displaying correctly, including the correct/incorrect positioning comparison; the positioning comparison reading correctly; the four-card visual setup-judgment interaction functioning correctly; checkpoint (`m7cp1`, `m7cp2`), completion, and Module 8 gating all passing; no blocking issue remaining. This combines with the technical/manual-QA support already recorded in Steps 46–50 (390px mobile-width review, functional checkpoint paths under mocked AI responses, Modules 0–6 regression, zero console errors).
+
+**Honestly still deferred, not resolved by this approval:** live-model checkpoint grading QA, live Cadence response QA, screen-reader QA, physical-keyboard QA on real hardware, real touch-device QA, medical/dermatological review, and state-specific legal/scope review. See "Deferred review" below.
+
+A minor documentation-only correction was also made: `module-07.md` correction #6 pointed to a nonexistent "Final replacement copy" section. The actual corrected Section 7.1 Cadence note was already live in production (`headspa-mastery.html`); the dead cross-reference was replaced with that copy quoted inline. No curriculum was changed.
+
+An untracked `.claude/launch.json` (a temporary local static-server QA config from a prior session) was found in the working tree and deleted — it was not part of the course implementation and was not committed.
+
+**Module 7 status is now `Implemented — manual QA approved`.** See Step 51 in `implementation-log.md` for the full record. Module 7 video-source creation was not begun. Module 8 was not touched. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 7 setup-judgment interaction — final UX polish (pre-manual-QA) — August 11, 2026.** Narrow reduction pass, no curriculum change. Removed the redundant "Continue" button from card 4's reveal (`m7cp1` already follows naturally in page flow); its closing takeaway now appears inline in the same reveal, no click required. Added focus management (each reveal receives focus with `preventScroll`, so the page never jumps; Tab from card 4's reveal lands directly on `m7cp1`'s textarea, confirmed in-browser — the student is never trapped). Tightened the flip transition slightly for a snappier feel. Confirmed no redundant correctness copy or reset/retry control existed to remove. `module-07.md`'s existing amendment updated in place with a short addendum. See Step 50 in `implementation-log.md`.
 
@@ -231,30 +243,25 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 7 manual QA.
+Module 7 video-source creation.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's implementation (lifecycle step 5) is now fully complete, including its four required visual assets —
-`headspa-mastery.html` carries the full approved `module-07.md` curriculum,
-interaction, checkpoint, Cadence, accessibility, responsive, and visual-asset
-implementation, with static/mocked validation passed. Module 7 status is
-**Implemented — awaiting manual QA**. Module 7 is not yet manually
-approved — manual QA (real rendered review, desktop and phone, per
-`00-aimt-manual-qa-master-checklist.md`) has not been performed. Module 8
-has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7 has now cleared implementation (lifecycle step 5), static/mocked validation (step 6), manual QA (step 7), and manual approval (step 8) — the owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Module 7 status is
+**Implemented — manual QA approved**. The remaining lifecycle step for
+Module 7 is video-source creation (step 9); Module 8 (the next module,
+step 10) must not begin until that file exists.
 
 ---
 
 ## Exact next task
 
-Perform Module 7 manual QA against `00-aimt-manual-qa-master-checklist.md` and `module-07.md`'s acceptance criteria — real rendered review on the `course-audit-build` branch preview, desktop and phone, including the installed treatment-bed and station/cart photos, the Section 7.4 correct/incorrect positioning comparison and its checkmark/X badges, the tool-category disclosure, the prep checklist, the "Find the setup mistakes" signature interaction, both checkpoints, and Cadence. Only after the owner's manual approval should Module 7 be marked `Implemented — manual QA approved` and a Module 7 video-source file created. Do not perform any Module 8 work as part of any task until explicitly instructed to begin it.
+Create `docs/course-video-sources/module-07-video-source.md`, following the same workflow already used for Modules 0, 1, 2, 3, 5, and 6 — the approved primary authority for a future, separately scoped video-production task, drawn from the final approved and implemented Module 7 experience (`module-07.md`, not `module-07-source.md`). This file was explicitly **not** created by this task. Do not begin any Module 8 work until Module 7 video-source creation is complete.
 
 ---
 
 ## Do not begin
 
-- Module 7 manual approval (a status only the owner's actual rendered review can confer — this documentation update alone does not constitute manual QA)
-- Module 7 image generation of any kind, including the user's own head-spa-bed and treatment-tray reference photographs
-- Module 8 or any Module 8 work
+- Module 7 video-source creation (the exact next task, but explicitly not begun by this task — see "Exact next task")
+- Module 8 or any Module 8 work (blocked until Module 7 video-source creation is complete)
 - Module 12
 - completion and certificate audit
 - certificate or grading trust hardening
@@ -279,11 +286,23 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's implementation, including all four required visual assets, is now complete; the current gate is the owner's manual QA review, which is not a task Claude performs.
+Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7 has now cleared manual QA and manual approval; the current gate is Module 7 video-source creation (`docs/course-video-sources/module-07-video-source.md`, not yet created).
 
 ---
 
 ## Deferred review
+
+Module 7's manual QA approval was based on the owner's authenticated review of the rendered `course-audit-build` branch preview ("everything looks and functions properly" — desktop/overall visual quality, functionality, the four required installed visuals including the correct/incorrect positioning comparison, the four-card visual setup-judgment interaction, checkpoint/completion/Module 8 gating), combined with the technical/manual-QA support already recorded in Steps 46–50 (390px mobile-width review, functional `m7cp1`/`m7cp2` paths under mocked AI responses, Modules 0–6 regression, zero console errors). It did **not** include, and approval does not claim, the following — retained accurately as still deferred, not resolved by this approval:
+
+- live-model checkpoint grading QA for `m7cp1`/`m7cp2` (validated only by rubric/config inspection and mocked-`callAI` browser validation, not by exercising the real model against live answers);
+- live Cadence response QA (quick-prompt text and the guide-system prompt verified by source inspection only, not exercised against the real model);
+- screen-reader QA;
+- physical-keyboard QA on real hardware;
+- real touch-device QA;
+- medical/dermatological review;
+- state-specific legal/scope review;
+- downloadable-resource production (`AIMT Station & Positioning Quick Reference` remains recommended, not created);
+- Guided Completion and Listen Mode QA.
 
 Module 6's manual QA approval was based on a genuine authenticated owner review of the rendered branch preview (desktop visual quality, AIMT tone/quality, Visual 1, all four ungraded interactions, the referral section, and Sections 6.7/6.8) combined with Claude's independent source/configuration verification. It did **not** include, and approval does not claim, the following — retained accurately as still deferred, not resolved by this approval:
 
@@ -306,8 +325,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Preview, push, merge, and deployment status
 
-- Branch preview: `course-audit-build` remains the audit environment; Module 7's completed implementation (including the four installed visual assets) has not yet been reviewed against this preview by the owner — manual QA is the current gate and has not occurred.
-- Push status: this task's Module 7 visual-install commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Branch preview: `course-audit-build` remains the audit environment; the owner has now reviewed Module 7 against this preview and manually approved it.
+- Push status: this task's Module 7 manual-QA-approval commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -315,7 +334,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's Module 7 visual-install commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's Module 7 manual-QA-approval commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `da20861` — module 7 upgrades
 - `48f160a2916d3f4c657491bb38f6367f318151bb` — Implement Module 7 core experience pending visuals (amended once for a narrow typography fix)
 - `a72c738b6a087ba65c826ed16e2d6fd26ad055ee` — Add approved Module 7 audit specification
 - `ceb4e45beb9560c5da658e8639610f058704e401` — Extract Module 7 for external audit
