@@ -1534,9 +1534,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m7-card.active { display:block; }
 .m7-card-flip {
   background:rgba(255,255,255,0.7); border:0.5px solid var(--border2); border-radius:18px;
-  overflow:hidden; transition:transform 0.15s ease-in; transform:rotateY(0deg);
+  overflow:hidden; transition:transform 0.12s ease-in; transform:rotateY(0deg);
 }
 .m7-card-flip.mid-flip { transform:rotateY(90deg); }
+.m7-card-face:focus { outline:none; }
 .m7-card-image { aspect-ratio:4/3; width:100%; margin:0; background:#e8e4de; overflow:hidden; }
 .m7-card-image img { width:100%; height:100%; object-fit:cover; display:block; }
 .m7-card-body { padding:1.25rem 1.4rem 1.4rem; }
@@ -1561,6 +1562,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m7-card-badge.variation { background:var(--aimt-success-light); color:var(--aimt-success); }
 .m7-card-reveal { font-size:0.9rem; line-height:1.7; color:var(--text); font-weight:300; max-width:44ch; margin:0 auto 0.9rem; }
 .m7-card-lesson { font-size:0.78rem; line-height:1.6; color:var(--muted); font-weight:300; font-style:italic; max-width:38ch; margin:0 auto 1.35rem; }
+.m7-card-takeaway { margin-top:1.15rem; padding-top:1.15rem; border-top:0.5px solid var(--border2); }
+.m7-card-takeaway-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); margin-bottom:0.55rem; }
+.m7-card-takeaway-text { font-size:0.85rem; line-height:1.65; color:var(--muted); font-weight:300; max-width:40ch; margin:0 auto; }
 .m7-card-next {
   min-height:46px; background:#262626; color:#fff; border:none; border-radius:980px;
   padding:0.75rem 1.5rem; font-family:var(--aimt-font-sans); font-size:0.82rem; font-weight:500;
@@ -5751,7 +5755,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
       <div class="m7-card active" id="m7Card-0">
         <div class="m7-card-flip">
-          <div class="m7-card-face m7-card-front" id="m7Front-0">
+          <div class="m7-card-face m7-card-front" id="m7Front-0" tabindex="-1">
             <figure class="m7-card-image">
               <picture>
                 <source srcset="assets/images/course/module-07/module-07-setup-judgment-01-cart-left.webp" type="image/webp">
@@ -5766,7 +5770,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               </div>
             </div>
           </div>
-          <div class="m7-card-face m7-card-back" id="m7Back-0" hidden>
+          <div class="m7-card-face m7-card-back" id="m7Back-0" tabindex="-1" hidden>
             <div class="m7-card-badge variation"><span aria-hidden="true">✓</span> Acceptable variation</div>
             <div class="m7-card-reveal" aria-live="polite">Different does not automatically mean wrong. The cart can sit on either side as long as active-use items remain comfortably reachable and the setup supports efficient service flow.</div>
             <div class="m7-card-lesson">Reachability matters. Left versus right does not.</div>
@@ -5777,7 +5781,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
       <div class="m7-card" id="m7Card-1">
         <div class="m7-card-flip">
-          <div class="m7-card-face m7-card-front" id="m7Front-1">
+          <div class="m7-card-face m7-card-front" id="m7Front-1" tabindex="-1">
             <figure class="m7-card-image">
               <picture>
                 <source srcset="assets/images/course/module-07/module-07-setup-judgment-02-items-too-far.webp" type="image/webp">
@@ -5792,7 +5796,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               </div>
             </div>
           </div>
-          <div class="m7-card-face m7-card-back" id="m7Back-1" hidden>
+          <div class="m7-card-face m7-card-back" id="m7Back-1" tabindex="-1" hidden>
             <div class="m7-card-badge correction"><span aria-hidden="true">!</span> Needs correction</div>
             <div class="m7-card-reveal" aria-live="polite">Yes. Frequently used items belong within comfortable working reach. Repeatedly stepping away for active-use products interrupts service flow and signals that the station needs reorganizing.</div>
             <div class="m7-card-lesson">Frequency of use should influence placement.</div>
@@ -5803,7 +5807,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
       <div class="m7-card" id="m7Card-2">
         <div class="m7-card-flip">
-          <div class="m7-card-face m7-card-front" id="m7Front-2">
+          <div class="m7-card-face m7-card-front" id="m7Front-2" tabindex="-1">
             <figure class="m7-card-image">
               <picture>
                 <source srcset="assets/images/course/module-07/module-07-setup-judgment-03-bed-no-armrests.webp" type="image/webp">
@@ -5818,7 +5822,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               </div>
             </div>
           </div>
-          <div class="m7-card-face m7-card-back" id="m7Back-2" hidden>
+          <div class="m7-card-face m7-card-back" id="m7Back-2" tabindex="-1" hidden>
             <div class="m7-card-badge variation"><span aria-hidden="true">✓</span> Acceptable variation</div>
             <div class="m7-card-reveal" aria-live="polite">Not necessarily. Equipment should be judged by function, support, and service usability — not by whether it includes every optional feature. Armrests may be a practitioner preference rather than a universal requirement.</div>
             <div class="m7-card-lesson">Equipment preference is not the same as a functional requirement.</div>
@@ -5829,7 +5833,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
       <div class="m7-card" id="m7Card-3">
         <div class="m7-card-flip">
-          <div class="m7-card-face m7-card-front" id="m7Front-3">
+          <div class="m7-card-face m7-card-front" id="m7Front-3" tabindex="-1">
             <figure class="m7-card-image">
               <picture>
                 <source srcset="assets/images/course/module-07/module-07-setup-judgment-04-positioning.webp" type="image/webp">
@@ -5844,17 +5848,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               </div>
             </div>
           </div>
-          <div class="m7-card-face m7-card-back" id="m7Back-3" hidden>
+          <div class="m7-card-face m7-card-back" id="m7Back-3" tabindex="-1" hidden>
             <div class="m7-card-badge correction"><span aria-hidden="true">!</span> Needs correction</div>
             <div class="m7-card-reveal" aria-live="polite">Yes. The client is positioned too far from the head end, leaving the occipital area poorly supported and the neck extended. Reposition the client before continuing.</div>
-            <div class="m7-card-lesson">Support and positioning are functional setup requirements.</div>
-            <button type="button" class="m7-card-next" onclick="m7CardNext(3)">Continue</button>
+            <div class="m7-card-takeaway">
+              <div class="m7-card-takeaway-label">What to remember</div>
+              <div class="m7-card-takeaway-text">Professional setup is judged by function — support, reach, comfort, and service flow — not by whether every treatment room looks identical.</div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="info-card" id="m7CardConclusion" style="display:none;">
-        <div class="body-text" style="margin:0"><strong>The rule to keep:</strong> professional setup is judged by function, not by whether every treatment room looks identical.</div>
       </div>
     </div>
 
@@ -8573,12 +8575,25 @@ function resetPrepChecklist() {
 // prefers-reduced-motion. State resets every time Module 7 is (re)opened,
 // since STATIC_MODULES[7] re-clones this content from the pristine
 // #module7Wrap template.
+//
+// Focus handling: each face carries tabindex="-1" so it can anchor
+// keyboard focus without joining the normal tab order. After a reveal,
+// focus moves to the back face (announcing it via its existing
+// aria-live region) with preventScroll so the page never jumps. The
+// fourth card's back face has no further control — Tab from there
+// lands naturally on the next real focusable element in the document,
+// which is inside the m7cp1 checkpoint immediately below, so the
+// learner is never trapped in the interaction.
 function m7CardAnswer(idx) {
   const front = getActiveElementById('m7Front-' + idx);
   const back = getActiveElementById('m7Back-' + idx);
   if (!front || !back) return;
   const flip = front.closest('.m7-card-flip');
-  const swap = () => { front.hidden = true; back.hidden = false; };
+  const swap = () => {
+    front.hidden = true;
+    back.hidden = false;
+    if (back.focus) back.focus({ preventScroll: true });
+  };
 
   const reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   if (reducedMotion || !flip) {
@@ -8589,7 +8604,7 @@ function m7CardAnswer(idx) {
   setTimeout(() => {
     swap();
     flip.classList.remove('mid-flip');
-  }, 150);
+  }, 120);
 }
 
 function m7CardNext(idx) {
@@ -8597,15 +8612,12 @@ function m7CardNext(idx) {
   if (current) current.classList.remove('active');
   const nextIdx = idx + 1;
   const next = getActiveElementById('m7Card-' + nextIdx);
+  if (!next) return;
+  next.classList.add('active');
   const progress = getActiveElementById('m7CardProgress');
-  if (next) {
-    next.classList.add('active');
-    if (progress) progress.textContent = 'Setup ' + (nextIdx + 1) + ' of 4';
-  } else {
-    const conclusion = getActiveElementById('m7CardConclusion');
-    if (conclusion) conclusion.style.display = 'block';
-    if (progress) progress.textContent = 'Setup 4 of 4 — complete';
-  }
+  if (progress) progress.textContent = 'Setup ' + (nextIdx + 1) + ' of 4';
+  const nextFront = getActiveElementById('m7Front-' + nextIdx);
+  if (nextFront && nextFront.focus) nextFront.focus({ preventScroll: true });
 }
 // No explicit reset function: STATIC_MODULES[7] re-clones this content from
 // the pristine #module7Wrap template on every open, which already restores

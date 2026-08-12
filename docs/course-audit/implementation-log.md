@@ -4273,3 +4273,19 @@ A same-day second owner review of the six-scenario text version from Step 48 fou
 **Resulting gate.** Current gate remains **Module 7 manual QA**, now including this final visual card interaction in what the owner's rendered review will cover. Module 7 status is unchanged: **Implemented — awaiting manual QA**. Module 8 has not begun. No merge or deployment to `main` occurred.
 
 Work remains on branch `course-audit-build`.
+
+---
+
+## 2026-08-11 — Step 50: Module 7 setup-judgment interaction — final UX polish (pre-manual-QA)
+
+Narrow reduction/polish pass on the four-card visual interaction from Step 49, no curriculum or scenario change. Removed the generic "Continue" button from card 4's reveal — `m7cp1` already follows immediately in normal page flow, so a dedicated exit control was redundant; the closing takeaway ("What to remember: professional setup is judged by function...") now appears inline in the same reveal as card 4's explanation, with no click required. Removed the now-dead separate `#m7CardConclusion` element and its associated `m7CardNext` branch. Cards 1–3 are unchanged (single "Next setup" action each). Confirmed no redundant correctness copy ("Correct!"/"Great job!") and no reset/retry control were present to begin with — nothing to remove there. Added focus management: each card face now carries `tabindex="-1"`; after a reveal, focus moves to the revealed back face with `{preventScroll: true}` (announced via its existing `aria-live` region, no page jump); after "Next setup," focus moves to the new card's front face the same way. Because card 4's back face has no interactive control, Tab from there lands on the next real focusable element in the document — `m7cp1In` — confirmed directly in-browser, so the student is never trapped in the interaction. Tightened the flip transition from 150ms+150ms to 120ms+120ms per phase for a snappier, less theatrical feel; `prefers-reduced-motion` behavior (instant swap, no transform) reconfirmed unaffected. `module-07.md`'s existing amendment was updated in place with a short addendum describing card 4's final reveal behavior — not a new amendment.
+
+**Validation.** Verified in-browser: cards 1–3 retain exactly one "Next setup" button each; card 4 has zero buttons and shows its takeaway inline; takeaway label/text match exactly; focus lands on the correct back face after every answer and the correct front face after every "Next setup"; `localStorage['levo_app']` unchanged across the full 4-card sequence; no scroll jump on answering; reduced-motion path confirmed instant with no `mid-flip` class; no horizontal overflow at 390×844; zero console errors; a Modules 0–6 regression smoke test passed cleanly; `m7cp1` still immediately follows the card component with its question unchanged.
+
+**Not performed, per instruction.** Manual QA was not begun. Module 8 was not touched. No merge or deployment occurred.
+
+**Documentation updated:** `docs/course-audit/modules/module-07.md` (existing amendment revised in place with the card-4 behavior addendum, not stacked), this file. `00-aimt-current-course-status.md` and `modules/README.md` given a short amendment note only, per instruction not to over-document a polish pass.
+
+**Resulting gate.** Unchanged: **Module 7 manual QA**. Module 7 status is unchanged: **Implemented — awaiting manual QA**. Module 8 has not begun. No merge or deployment to `main` occurred.
+
+Work remains on branch `course-audit-build`.
