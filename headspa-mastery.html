@@ -1519,29 +1519,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .ap-final-caption strong { font-style:normal; font-weight:500; color:var(--muted); }
 
-/* ── MODULE 7 — Signature interaction: "Find the setup mistakes" ── */
-.sm-mistake-list { display:flex; flex-direction:column; gap:8px; margin:1.25rem 0; }
-.sm-mistake-item { display:flex; flex-direction:column; }
-.sm-mistake-btn {
-  display:flex; align-items:flex-start; gap:12px; width:100%; text-align:left;
-  font-family:inherit; color:inherit; appearance:none; -webkit-appearance:none; margin:0;
-  background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm);
-  padding:0.85rem 1rem; cursor:pointer; transition:all 0.2s;
-}
-.sm-mistake-btn:hover { background:rgba(255,255,255,0.88); }
-.sm-mistake-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
-.sm-mistake-btn.correct { background:var(--aimt-success-light); border-color:var(--aimt-success); }
-.sm-mistake-btn.wrong { background:var(--aimt-error-light); border-color:var(--aimt-error); }
-.sm-mistake-check { font-family:var(--aimt-font-mono); font-size:0.9rem; color:var(--muted2); min-width:18px; flex-shrink:0; }
-.sm-mistake-btn.correct .sm-mistake-check { color:var(--aimt-success); }
-.sm-mistake-btn.wrong .sm-mistake-check { color:var(--aimt-error); }
-.sm-mistake-text { font-size:0.82rem; line-height:1.55; color:var(--text); font-weight:300; flex:1; }
-.sm-mistake-tag { display:block; margin-top:4px; font-size:0.66rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; }
-.sm-mistake-btn.correct .sm-mistake-tag { color:var(--aimt-success); }
-.sm-mistake-btn.wrong .sm-mistake-tag { color:var(--aimt-error); }
-.sm-mistake-feedback { margin-top:4px; padding:0.7rem 0.9rem; background:rgba(255,255,255,0.6); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); font-size:0.8rem; line-height:1.6; color:var(--text); font-weight:300; }
 @media (prefers-reduced-motion: reduce) {
-  .tc-body, .prep-item, .sm-mistake-btn { transition: none !important; }
+  .tc-body, .prep-item { transition: none !important; }
 }
 .pos-body { font-size:0.82rem; color:var(--muted); font-weight:300; line-height:1.6; }
 
@@ -5487,9 +5466,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">7.1 — The treatment bed</div>
     <div class="sec-title">Your most important equipment decision.</div>
 
-    <!-- REQUIRED VISUAL ASSET — Visual 1 (Section 7.1)
-    Final file: assets/images/course/module-07/module-07-treatment-bed-setup.png
-    Once produced, replace the placeholder box below with:
     <figure class="clinical-photo">
       <picture>
         <source srcset="assets/images/course/module-07/module-07-treatment-bed-setup.webp" type="image/webp">
@@ -5497,13 +5473,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </picture>
       <figcaption>A configured head spa bed, ready for service.</figcaption>
     </figure>
-    -->
-    <div class="clinical-photo placeholder asset-pending">
-        <div class="ap-pending-tag">Production asset pending</div>
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Required production asset pending — treatment bed setup</div>
-      </div>
-    <div class="ap-final-caption"><strong>Final caption:</strong> "A configured head spa bed, ready for service."</div>
 
     <div class="body-text">The head spa bed is the foundation of everything. Comfort, positioning, water flow, massage access, client perception — it all builds from this. You can perform a service without the right bed. But you cannot create a premium experience without one.</div>
     <div class="body-text">A halo-equipped wet bed is the foundation of a true head spa service. The halo allows water immersion during massage, which changes the client's physical and psychological state in a way that dry work cannot replicate. Evaluate any bed you're considering against what it actually needs to accomplish — not against how it looks in a photo.</div>
@@ -5637,9 +5606,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">7.3 — Station prep sequence</div>
     <div class="sec-title">Run this before every single client.</div>
 
-    <!-- REQUIRED VISUAL ASSET — Visual 2 (Section 7.3)
-    Final file: assets/images/course/module-07/module-07-station-cart-reach-order.png
-    Once produced, replace the placeholder box below with:
     <figure class="clinical-photo">
       <picture>
         <source srcset="assets/images/course/module-07/module-07-station-cart-reach-order.webp" type="image/webp">
@@ -5647,13 +5613,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </picture>
       <figcaption>A station set up in reach order — the items used most, closest.</figcaption>
     </figure>
-    -->
-    <div class="clinical-photo placeholder asset-pending">
-        <div class="ap-pending-tag">Production asset pending</div>
-        <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="cp-placeholder-label">Required production asset pending — station/cart reach order</div>
-      </div>
-    <div class="ap-final-caption"><strong>Final caption:</strong> "A station set up in reach order — the items used most, closest."</div>
 
     <div class="body-text">Inconsistency in setup is invisible to you and obvious to your client. A client who experienced a perfectly set room last visit notices when the towel warmer is cold or the cart is in the wrong place — even if they can't articulate why the experience felt off. Build a prep sequence and run it the same way every time.</div>
     <div class="body-text">The order below isn't arbitrary — it follows a build sequence: sanitation and structural setup first, then product and tool staging, then comfort, then ambiance, so nothing has to be assembled while the room is being sanitized or the client is already in it.</div>
@@ -5682,12 +5641,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">7.4 — Client positioning</div>
     <div class="sec-title">Three things to confirm before the water runs.</div>
 
-    <!-- REQUIRED VISUAL ASSET — Visual 3, the module's single highest-priority
-    asset (Section 7.4). Both images must use the same client/bed/room.
-    Final files:
-      assets/images/course/module-07/module-07-client-positioning-correct-side-view.png
-      assets/images/course/module-07/module-07-client-positioning-incorrect-side-view.png
-    Once produced, replace the two placeholder boxes below with:
     <div class="photo-pair">
       <figure class="clinical-photo">
         <picture>
@@ -5703,25 +5656,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </picture>
         <figcaption>Incorrect: chin lifted, neck extended over the basin edge — the exact position to avoid.</figcaption>
       </figure>
-    </div>
-    -->
-    <div class="photo-pair">
-      <div>
-        <div class="clinical-photo placeholder asset-pending">
-          <div class="ap-pending-tag">Production asset pending</div>
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Required production asset pending — correct positioning (side view)</div>
-        </div>
-        <div class="ap-final-caption"><strong>Final caption:</strong> "Correct: occipital supported, neck relaxed, shoulders clear of the edge."</div>
-      </div>
-      <div>
-        <div class="clinical-photo placeholder asset-pending">
-          <div class="ap-pending-tag">Production asset pending</div>
-          <svg class="cp-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="#a3968d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <div class="cp-placeholder-label">Required production asset pending — incorrect positioning (side view)</div>
-        </div>
-        <div class="ap-final-caption"><strong>Final caption:</strong> "Incorrect: chin lifted, neck extended over the basin edge — the exact position to avoid."</div>
-      </div>
     </div>
     <div class="body-text">Positioning errors are hard to correct mid-service without breaking the experience. Get these right before you start — it takes thirty seconds and prevents a disruption you cannot undo.</div>
 
@@ -5758,67 +5692,61 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">Signature interaction</div>
     <div class="sec-title">Find the setup mistakes.</div>
-    <div class="body-text">Read the station as another practitioner left it before their shift. Select every condition below you believe is a genuine setup mistake — some of what's listed is actually fine.</div>
+    <div class="body-text">Does this setup need to change, or is it simply a different way of working? For each scenario, decide whether the setup interferes with positioning, reach, service flow, or another approved setup requirement — or whether it still performs its function correctly.</div>
 
-    <div class="sm-mistake-list" role="group" aria-label="Select every condition that is a genuine setup mistake.">
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-0" aria-pressed="false" onclick="toggleSetupMistake(0,this)">
-          <span class="sm-mistake-check" id="smmc-0" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The rolling cart sits against the far wall, across the room from the bed.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-0" aria-live="polite" style="display:none;"></div>
+    <div class="m6-sort-block" id="m7Judge0">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 1.</strong> The product dishes and applicator brush are stored in a drawer across the room, so the practitioner has to step away from the client to reach them during the service.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 1. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 1" onclick="m7Judge(0,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 1" onclick="m7Judge(0,1,this)">Acceptable variation</button>
       </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-1" aria-pressed="false" onclick="toggleSetupMistake(1,this)">
-          <span class="sm-mistake-check" id="smmc-1" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The three product dishes are stacked inside each other instead of pre-portioned and set out separately.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-1" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-2" aria-pressed="false" onclick="toggleSetupMistake(2,this)">
-          <span class="sm-mistake-check" id="smmc-2" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The halo nozzle hose is loose and unwrapped.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-2" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-3" aria-pressed="false" onclick="toggleSetupMistake(3,this)">
-          <span class="sm-mistake-check" id="smmc-3" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The client's shoulders sit roughly four inches off the bed edge instead of 1–2 inches.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-3" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-4" aria-pressed="false" onclick="toggleSetupMistake(4,this)">
-          <span class="sm-mistake-check" id="smmc-4" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The client's occipital is resting flat on the headrest pad instead of settled into its curve.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-4" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-5" aria-pressed="false" onclick="toggleSetupMistake(5,this)">
-          <span class="sm-mistake-check" id="smmc-5" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">Fresh linens are already staged on the bed.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-5" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-6" aria-pressed="false" onclick="toggleSetupMistake(6,this)">
-          <span class="sm-mistake-check" id="smmc-6" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">Ambient music is already playing before the client walks in.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-6" aria-live="polite" style="display:none;"></div>
-      </div>
-      <div class="sm-mistake-item">
-        <button type="button" class="sm-mistake-btn" id="smm-7" aria-pressed="false" onclick="toggleSetupMistake(7,this)">
-          <span class="sm-mistake-check" id="smmc-7" aria-hidden="true">☐</span>
-          <span class="sm-mistake-text">The clean and dirty tool bins are pushed together on the same tray.</span>
-        </button>
-        <div class="sm-mistake-feedback" id="smmf-7" aria-live="polite" style="display:none;"></div>
-      </div>
+      <div class="bq-feedback" id="m7Judge0Feedback" aria-live="polite" style="display:none;"></div>
     </div>
-    <button type="button" class="m5-reset-btn" onclick="resetSetupMistakes()">Reset</button>
+
+    <div class="m6-sort-block" id="m7Judge1">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 2.</strong> The treatment bed doesn't have armrests, but the client can still get on and off safely and the headrest properly supports the occipital.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 2. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 2" onclick="m7Judge(1,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 2" onclick="m7Judge(1,1,this)">Acceptable variation</button>
+      </div>
+      <div class="bq-feedback" id="m7Judge1Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m7Judge2">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 3.</strong> The client's occipital is resting flat on the headrest pad instead of settled into its curve, and the neck is visibly extended.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 3. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 3" onclick="m7Judge(2,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 3" onclick="m7Judge(2,1,this)">Acceptable variation</button>
+      </div>
+      <div class="bq-feedback" id="m7Judge2Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m7Judge3">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 4.</strong> Backup linens and reserve sanitation concentrate are stored in a cabinet, off the immediate working surface.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 4. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 4" onclick="m7Judge(3,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 4" onclick="m7Judge(3,1,this)">Acceptable variation</button>
+      </div>
+      <div class="bq-feedback" id="m7Judge3Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m7Judge4">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 5.</strong> The rolling cart is positioned on the practitioner's left side rather than the right, but every within-reach item is still comfortably reachable without stepping away.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 5. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 5" onclick="m7Judge(4,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 5" onclick="m7Judge(4,1,this)">Acceptable variation</button>
+      </div>
+      <div class="bq-feedback" id="m7Judge4Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
+    <div class="m6-sort-block" id="m7Judge5">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 6.</strong> A one-step-zone tool, like the sectioning clips, is positioned so the practitioner has to reach directly across the client's face to grab it during the service.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 6. Does this setup need to change, or is it an acceptable variation?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 6" onclick="m7Judge(5,0,this)">Needs correction</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 6" onclick="m7Judge(5,1,this)">Acceptable variation</button>
+      </div>
+      <div class="bq-feedback" id="m7Judge5Feedback" aria-live="polite" style="display:none;"></div>
+    </div>
 
     <hr class="divider">
 
@@ -7749,7 +7677,7 @@ function openModuleById(id, options = {}) {
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); resetSetupMistakes(); },
+    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     10: () => { const w = document.getElementById('module10Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
@@ -8521,62 +8449,92 @@ function resetPrepChecklist() {
   if (comp) comp.style.display = 'none';
 }
 
-// "Find the setup mistakes" — new signature interaction (ungraded,
-// multi-select, retryable). Does not touch APP_STATE, progress,
-// checkpoints, or completion. Each condition is independently toggled;
-// selecting it means "I believe this is a genuine setup mistake." State
-// resets every time Module 7 is (re)opened via resetSetupMistakes() in
-// STATIC_MODULES[7].
-const SETUP_MISTAKES = [
-  { isMistake: true, feedback: 'A cart across the room defeats the within-reach zone from Section 7.2 — every product and tool now requires a step away from the client, which is exactly the reaching the pressure-test callout asks you to eliminate.' },
-  { isMistake: true, feedback: 'Stacked dishes have to be separated and portioned mid-service instead of being ready to use — that\'s staging work happening in front of the client instead of before them.' },
-  { isMistake: true, feedback: 'An unwrapped halo hose is noisy and can spray — Section 7.3\'s prep checklist includes wrapping it specifically to quiet it and protect the atmosphere you\'ve built.' },
-  { isMistake: true, feedback: 'Four-plus inches off the edge is outside the 1–2 inch range Section 7.4 calls for — it limits your access to the neck and increases the chance the client slides during the service.' },
-  { isMistake: true, feedback: 'Resting on the flat pad instead of the headrest\'s curve is exactly the unsupported position Section 7.4\'s safety note is about — the neck isn\'t getting the support it needs.' },
-  { isMistake: false, feedback: 'This is exactly right — Section 7.3 calls for fresh linens ready before the client enters, not assembled during the appointment.' },
-  { isMistake: false, feedback: 'This is correct — ambient elements like music should already be running before the client walks in, per the build-sequence order in Section 7.3.' },
-  { isMistake: true, feedback: 'Mixing clean and dirty bins breaks the sanitation separation Section 7.2 teaches — once they\'re combined, you can no longer trust which tools are actually clean.' }
-];
-function toggleSetupMistake(idx, btn) {
-  const check = document.getElementById('smmc-' + idx);
-  const fb = document.getElementById('smmf-' + idx);
-  if (!btn || !check || !fb) return;
-  const item = SETUP_MISTAKES[idx];
-  const next = btn.getAttribute('aria-pressed') !== 'true';
-  btn.setAttribute('aria-pressed', String(next));
-  btn.classList.remove('correct', 'wrong');
-  const existingTag = btn.querySelector('.sm-mistake-tag');
-  if (existingTag) existingTag.remove();
-
-  if (next) {
-    check.textContent = '☑';
-    btn.classList.add(item.isMistake ? 'correct' : 'wrong');
-    const tag = document.createElement('span');
-    tag.className = 'sm-mistake-tag';
-    tag.textContent = item.isMistake ? 'Genuine mistake' : 'Actually fine';
-    btn.querySelector('.sm-mistake-text').appendChild(tag);
-    fb.textContent = item.feedback;
-    fb.style.display = 'block';
-  } else {
-    check.textContent = '☐';
-    fb.style.display = 'none';
-    fb.textContent = '';
-  }
-}
-function resetSetupMistakes() {
-  SETUP_MISTAKES.forEach((_, idx) => {
-    const btn = document.getElementById('smm-' + idx);
-    const check = document.getElementById('smmc-' + idx);
-    const fb = document.getElementById('smmf-' + idx);
-    if (btn) {
-      btn.setAttribute('aria-pressed', 'false');
-      btn.classList.remove('correct', 'wrong');
-      const tag = btn.querySelector('.sm-mistake-tag');
-      if (tag) tag.remove();
+// "Find the setup mistakes" — signature interaction (ungraded, single-select
+// per scenario, retryable — clicking either option at any time replaces the
+// prior answer). Does not touch APP_STATE, progress, checkpoints, or
+// completion. Each scenario asks the student to judge whether a described
+// setup needs correction (a genuine function/access/safety problem) or is
+// an acceptable variation (differs from one way of working but still
+// performs its job). Full markup replacement on module reopen already
+// resets this to its initial unanswered state — see STATIC_MODULES[7].
+const M7_JUDGE_ANSWERS = {
+  0: {
+    correct: 0,
+    feedback: {
+      0: 'Needs correction. Items used during nearly every step belong in the within-reach zone — stepping away for them breaks the flow the pressure-test check is built to catch.',
+      1: 'This interferes with reach, not habit. Items used constantly belong within reach — a practitioner shouldn\'t have to step away from the client for them.'
     }
-    if (check) check.textContent = '☐';
-    if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+  },
+  1: {
+    correct: 1,
+    feedback: {
+      0: 'Armrests are a preference, not a requirement — what matters is whether entry, exit, and support still function, and here they do. Different does not automatically mean wrong.',
+      1: 'Acceptable variation. Armrests are a preference, not a requirement — entry, exit, and support all still function here. Different does not automatically mean wrong.'
+    }
+  },
+  2: {
+    correct: 0,
+    feedback: {
+      0: 'Needs correction. An unsupported, extended neck is exactly the position Section 7.4\'s safety note addresses — this is a support failure, not a style choice.',
+      1: 'This isn\'t a style choice — an unsupported, extended neck is the specific position Section 7.4\'s safety guidance is about.'
+    }
+  },
+  3: {
+    correct: 1,
+    feedback: {
+      0: 'Backup stock isn\'t supposed to be within reach — this is the reserve zone doing exactly its job. Different does not automatically mean wrong.',
+      1: 'Acceptable variation. This is exactly what the reserve zone is for — backup stock belongs off the working surface. Different does not automatically mean wrong.'
+    }
+  },
+  4: {
+    correct: 1,
+    feedback: {
+      0: 'There\'s no required side for the cart — what matters is whether items stay comfortably reachable, and here they do. Different does not automatically mean wrong.',
+      1: 'Acceptable variation. Reach-zone organization is about reachability, not a fixed side — everything here is still comfortably within reach. Different does not automatically mean wrong.'
+    }
+  },
+  5: {
+    correct: 0,
+    feedback: {
+      0: 'Needs correction. Reaching across the client disrupts flow and access — a one-step item should never require crossing the client\'s space to grab it.',
+      1: 'Reaching across the client is a functional access problem, not a preference — it should be repositioned.'
+    }
+  }
+};
+function m7Judge(n, choice, btn) {
+  const block = getActiveElementById('m7Judge' + n);
+  const feedback = getActiveElementById('m7Judge' + n + 'Feedback');
+  if (!block || !feedback) return;
+  const answer = M7_JUDGE_ANSWERS[n];
+  const opts = block.querySelectorAll('.bq-opt');
+
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
   });
+
+  const isCorrect = choice === answer.correct;
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Correct answer';
+    btn.appendChild(tag);
+  } else {
+    btn.classList.add('wrong');
+    const tag = document.createElement('span');
+    tag.className = 'bq-tag';
+    tag.textContent = 'Not quite';
+    btn.appendChild(tag);
+  }
+
+  feedback.style.display = 'block';
+  feedback.textContent = answer.feedback[choice];
 }
 
 // ══════════════════════════════════════════════════════

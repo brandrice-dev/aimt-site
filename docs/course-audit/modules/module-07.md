@@ -265,25 +265,39 @@ No new biomechanical or medical claim beyond what Source 1 documents is made. Th
 
 ## Signature learning moment — "Find the setup mistakes" (new)
 
-**Instructional purpose:** require the student to apply the full module's setup competency — bed, tools, prep, and positioning — in one diagnostic exercise, rather than only recalling isolated facts. This is the module's real practitioner competency: reducing trial-and-error by learning to *spot* a setup problem, in someone else's station as well as their own.
+**Instructional purpose:** require the student to apply the full module's setup competency — bed, tools, prep, and positioning — in one diagnostic exercise, rather than only recalling isolated facts. This is the module's real practitioner competency: reducing trial-and-error by learning to *judge* a setup by function, in someone else's station as well as their own — and, just as importantly, to recognize when a setup that differs from their own habits is still doing its job correctly.
 
-**Placement:** after Section 7.4, before `m7cp1`.
+**Placement:** after Section 7.4, before `m7cp1`. Unchanged by the correction below.
 
-**Exact task:** the student reads a short, written walkthrough of a station "as another practitioner left it before their shift" — deliberately not an image, so the interaction does not depend on future photography and can ship without blocking on new assets. The walkthrough describes 8–10 discrete, observable conditions (a mix of genuine mistakes and things that are actually fine), spanning all four sections: e.g., the cart positioned across the room rather than within reach; product dishes stacked rather than pre-portioned; the halo hose left unwrapped; the client's shoulders four-plus inches from the bed edge rather than 1–2; the occipital resting on the flat headrest pad rather than its curve; fresh linens staged (fine); ambient music already playing (fine); the clean/dirty tool bins mixed together.
+**Post-implementation amendment (August 11, 2026).** Owner review of the rendered interaction found the original multi-select "flag every genuine mistake" design taught the wrong lesson: 5 of its 8 conditions were genuine mistakes, so the interaction was weighted toward "most things are wrong" rather than requiring the student to actually evaluate function. The student-facing labels ("Genuine mistake" / "Actually fine") were also imprecise — "actually fine" does not name *why* a variation is acceptable, and "genuine mistake" doesn't distinguish a functional failure from a stylistic one. The interaction is corrected to a single explicit instructional question, asked once and applied per scenario: **"Does this setup need to change, or is it simply a different way of working?"**
 
-**Choices/actions:** the student selects (multi-select, toggle-style) every condition they believe is a genuine setup mistake from the full list.
+**Exact task (corrected):** six short, single-scenario descriptions, each depicting one setup condition — no longer a single combined walkthrough — still deliberately text-based, not photo-dependent. For each scenario the student picks exactly one of two labeled choices:
 
-**Feedback:** per-item, text-based, specific — not just "correct/incorrect." Each selected-correctly item explains *why* it's a problem in one sentence; each correctly-left-alone item (if selected) explains why it's actually fine. Never color-only.
+- **Needs correction** — the setup interferes with positioning, comfortable reach, service flow, functional readiness, or another approved Module 7 setup requirement.
+- **Acceptable variation** — the setup may differ from the practitioner's personal preference or another room layout, but it still performs its function appropriately.
 
-**Retry behavior:** unlimited; selections can be freely changed.
+The six scenarios are intentionally balanced — three "Needs correction," three "Acceptable variation" — so the student cannot pattern-match toward one answer; each has exactly one defensible answer grounded in this specification (function-based bed evaluation, the reach-zone cart framework, and Section 7.4 positioning):
 
-**Graded/ungraded status:** ungraded. No `APP_STATE` write, no persistence across reopen, no completion gate — consistent with the governing standard that ungraded interactions must not pretend to prove competence.
+1. Product dishes and applicator brush stored across the room, requiring the practitioner to step away mid-service — **needs correction** (violates the within-reach zone).
+2. A bed without armrests, where entry/exit and occipital support still function — **acceptable variation** (armrests are a labeled preference, not a requirement).
+3. Occipital resting flat on the headrest pad with the neck visibly extended — **needs correction** (the unsupported position Section 7.4's safety note addresses).
+4. Backup linens and reserve sanitation concentrate stored off the working surface — **acceptable variation** (this is the reserve zone functioning as intended).
+5. The cart positioned on the practitioner's left rather than right, with every within-reach item still comfortably reachable — **acceptable variation** (reach-zone organization is about reachability, not a fixed side).
+6. A one-step-zone tool positioned so the practitioner must reach across the client's face to use it — **needs correction** (a functional access problem, not a preference).
 
-**Progress behavior:** resets on every module open, same as the module's other two interactions.
+**Choices/actions:** single-select per scenario (not multi-select); the student's answer can be freely changed at any time by selecting the other option — no separate reset control is required for this pattern, consistent with the single-select scenario interactions already used in Modules 5 and 6.
 
-**Accessibility:** native toggle/checkbox-style controls, each with an accessible name describing the specific condition, `aria-pressed` or equivalent checked-state semantics, live-region announcement of per-item feedback, no color-only correctness indication.
+**Feedback:** per-scenario, text-based, specific — not just "correct/incorrect." Feedback names the functional consequence for "Needs correction" answers; for every "Acceptable variation" answer and its corresponding wrong-answer feedback, the response explicitly states that *different does not automatically mean wrong*, reinforcing the module's underlying rule that professional setup is judged by function, not by whether every practitioner's room looks identical. Never color-only — pairs a text tag ("Correct answer" / "Not quite") with color.
 
-**Why distinct from Modules 5 and 6:** Module 5's signature interaction was protocol *adaptation* (choosing a service direction for a given presentation); Module 6's was triage (proceed/modify/refer). Module 7's is setup *diagnosis* — evaluating a completed physical/procedural setup for errors before a service even begins, a distinct observe-and-distinguish skill neither prior module required.
+**Retry behavior:** unlimited; an answer can be freely changed by selecting the other option.
+
+**Graded/ungraded status:** unchanged — ungraded. No `APP_STATE` write, no persistence across reopen, no completion gate.
+
+**Progress behavior:** unchanged — resets on every module open (full markup replacement on reopen already restores the initial unanswered state).
+
+**Accessibility:** native `<button>` controls per option with `aria-pressed`, a scenario-qualified `aria-label` on each option (since "Needs correction"/"Acceptable variation" repeat identically across all six scenarios and need to remain distinguishable to screen-reader users navigating by control rather than by reading order), a `role="group"` per scenario naming the scenario, and a `aria-live="polite"` feedback region — matching the accessible pattern already established for Modules 5–6's scenario interactions.
+
+**Why distinct from Modules 5 and 6:** Module 5's signature interaction was protocol *adaptation* (choosing a service direction for a given presentation); Module 6's was triage (proceed/modify/refer). Module 7's is setup *judgment* — distinguishing a genuine functional problem from an acceptable variation in how a setup is built, a distinct evaluative skill neither prior module required.
 
 If future real tray/cart photography becomes available, a photo-based version of this same exercise (spot the mistake in an actual image) is a reasonable future upgrade — see "Visual asset plan" — but the text-based version specified here is the required, ship-now version and is not blocked on that asset.
 

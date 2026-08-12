@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Implement Module 7 core experience pending visuals" commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `a72c738b6a087ba65c826ed16e2d6fd26ad055ee` — "Add approved Module 7 audit specification," confirmed present on `origin/course-audit-build` and resolved to its full form during this task's preflight.
+- Latest controlling commit: pending — this task's Module 7 visual-install commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `48f160a2916d3f4c657491bb38f6367f318151bb` — "Implement Module 7 core experience pending visuals" (amended once for a narrow typography fix), pushed to `origin/course-audit-build`.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -39,11 +39,11 @@ Do not merge or deploy yet.
 | Module 4 | Implemented — manual QA approved |
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
-| Module 7 | Implementation in progress — required visual assets pending |
+| Module 7 | Implemented — awaiting manual QA |
 | Modules 8–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 6** — approved August 10, 2026. Module 7 core experience is implemented but not yet manual-QA-ready (visual assets pending).
+**Latest approved module: Module 6** — approved August 10, 2026. Module 7 is fully implemented, including its four required visual assets, and is ready for manual QA — it has not yet been manually approved.
 
 ---
 
@@ -73,6 +73,18 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 7 signature-interaction correction, pre-manual-QA (owner review) — August 11, 2026.** Owner review of the rendered "Find the setup mistakes" interaction, ahead of formal manual QA, found the original 8-item multi-select design ("Genuine mistake" / "Actually fine") lopsided — 5 of 8 conditions were genuine mistakes — and imprecise. Redesigned as six single-scenario, single-select judgments ("Needs correction" / "Acceptable variation"), balanced 3:3, each answering one explicit instructional question: "Does this setup need to change, or is it simply a different way of working?" Every acceptable-variation scenario's feedback explicitly states "Different does not automatically mean wrong." Reused the course's established `m5Decide`/`m6Sort` single-select scenario pattern rather than inventing new markup; the prior interaction's bespoke CSS/JS was removed entirely. `module-07.md`'s "Signature learning moment" section was narrowly amended to record the correction and the corrected specification — placement, instructional purpose, and everything else about the module was left untouched. Verified in-browser: old wording fully gone, all six scenarios have exactly one correct answer, no progress write, `m7cp1`/`m7cp2` ordering and content unchanged, Modules 0–6 regression clean. See Step 48 in `implementation-log.md` for the full record.
+
+**Module 7 status is unchanged: `Implemented — awaiting manual QA`** (the visual-asset install had already completed). Manual QA was not begun and Module 7 was not marked manually approved. Module 8 was not touched.
+
+### Prior task (unchanged, recorded for continuity)
+
+**Module 7 visual-asset install (lifecycle step 5, completed) — August 11, 2026.** The owner supplied the four required Module 7 photographs at the approved destination paths under `assets/images/course/module-07/`. Each was downscaled to the established 1360×1020 course derivative size (matching Module 5's precedent, no upscaling) and an optimized `.webp` companion was generated alongside the `.png`. The Section 7.4 correct/incorrect positioning pair additionally received a restrained circular badge overlay baked directly into the image pixels — a white checkmark on the approved green (`#3a5a3a`) for the correct image and a white × on the approved red (`#7a3030`) for the incorrect image — placed in the bottom-right corner, clear of the face/neck/headrest teaching content, with no added callout text and no medical/dramatic styling. All four `<picture>` blocks (previously left as ready-to-uncomment HTML comments alongside labeled "production asset pending" placeholders) were wired live into `headspa-mastery.html`, and the four placeholder blocks were removed. Captions and alt text were verified against `module-07.md` and match exactly. Validation confirmed: all 8 files (4 PNG + 4 WebP) serve HTTP 200 and load at the correct 1360×1020 dimensions; zero console errors; the Section 7.4 pair renders side-by-side at desktop width and collapses to a single column with no horizontal overflow at 390×844; no placeholder markup remains anywhere in the module; a Modules 0–6 regression smoke test passed cleanly. See the task report for the full record.
+
+**Module 7 status is now `Implemented — awaiting manual QA`.** All four required visual assets are installed and wired. Manual QA was not begun and Module 7 was not marked manually approved. Module 8 was not begun. No downloadable was produced. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 7 core-experience implementation, pending required visual assets (lifecycle step 5, partial) — August 11, 2026.** Implemented the approved `module-07.md` specification in `headspa-mastery.html`: the full 7.1–7.4 curriculum corrections, the new ungraded "Find the setup mistakes" signature interaction, checkpoint question-parity and per-checkpoint `M7.systems.m7cp1`/`m7cp2` rubrics, the approved Cadence guide/quick-prompts/greeting and corrected Section 7.1 Cadence note, the corrected completion-card copy, and full accessibility and responsive requirements. The owner is currently retaking reference photography for the module's four required images, so implementation deliberately stopped short of that one requirement: all four asset slots were rebuilt as labeled, development-only "production asset pending" placeholders (not the old generic decorative boxes, and not fake/substitute imagery of any kind) with the approved final captions shown separately and the exact final `<picture>` markup ready in HTML comments for a narrow future asset-installation task. Static/mocked validation passed (in-browser, zero console errors, byte-identical checkpoint parity verified programmatically, all ungraded interactions confirmed state-isolated and reset-on-reopen, no horizontal overflow at 390×844/1440×900, Modules 0–6 regression smoke test all clean). Per `module-07.md`'s own acceptance criteria (items 23–24), **implementation may not advance to manual QA until the required visual assets exist — this task does not claim manual-QA readiness.** See Step 46 in `implementation-log.md` for the full record.
 
@@ -207,31 +219,28 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 7 implementation.
+Module 7 manual QA.
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's implementation (lifecycle step 5) is now core-complete —
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 7's implementation (lifecycle step 5) is now fully complete, including its four required visual assets —
 `headspa-mastery.html` carries the full approved `module-07.md` curriculum,
-interaction, checkpoint, Cadence, accessibility, and responsive
+interaction, checkpoint, Cadence, accessibility, responsive, and visual-asset
 implementation, with static/mocked validation passed. Module 7 status is
-**Implementation in progress — required visual assets pending**: the
-module's four required photographs (Section 7.1 bed, Section 7.3
-station/cart, and the Section 7.4 correct/incorrect positioning pair) are
-intentionally deferred while the owner retakes reference photography, and
-are represented by labeled, development-only "production asset pending"
-placeholders rather than any substitute imagery. Module 7 is not manually
-approved. Module 8 has not begun.
+**Implemented — awaiting manual QA**. Module 7 is not yet manually
+approved — manual QA (real rendered review, desktop and phone, per
+`00-aimt-manual-qa-master-checklist.md`) has not been performed. Module 8
+has not begun.
 
 ---
 
 ## Exact next task
 
-Install the four required Module 7 visual assets (`assets/images/course/module-07/module-07-treatment-bed-setup.png`, `module-07-station-cart-reach-order.png`, `module-07-client-positioning-correct-side-view.png`, `module-07-client-positioning-incorrect-side-view.png`) once the owner's reference photography is ready, uncomment the prepared final `<picture>` markup already left in `headspa-mastery.html` at each of the four asset slots, complete asset-specific/static validation (image renders, correct aspect ratio, alt text, mobile stacking), and only then proceed to manual QA. Do not perform Module 7 image generation of any kind (including AI generation) or any Module 8 work as part of any task until explicitly instructed to begin it.
+Perform Module 7 manual QA against `00-aimt-manual-qa-master-checklist.md` and `module-07.md`'s acceptance criteria — real rendered review on the `course-audit-build` branch preview, desktop and phone, including the installed treatment-bed and station/cart photos, the Section 7.4 correct/incorrect positioning comparison and its checkmark/X badges, the tool-category disclosure, the prep checklist, the "Find the setup mistakes" signature interaction, both checkpoints, and Cadence. Only after the owner's manual approval should Module 7 be marked `Implemented — manual QA approved` and a Module 7 video-source file created. Do not perform any Module 8 work as part of any task until explicitly instructed to begin it.
 
 ---
 
 ## Do not begin
 
-- Module 7 manual QA or manual approval (until the four required visual assets are installed)
+- Module 7 manual approval (a status only the owner's actual rendered review can confer — this documentation update alone does not constitute manual QA)
 - Module 7 image generation of any kind, including the user's own head-spa-bed and treatment-tray reference photographs
 - Module 8 or any Module 8 work
 - Module 12
@@ -258,7 +267,7 @@ The module-opening video workflow may continue for approved modules.
 
 Current video-source files exist for Modules 0, 1, 2, 3, and 5. `module-04-video-source.md` does not exist yet — creating it is available as a parallel side task but is not the current gate.
 
-Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's core implementation is complete pending its four required visual assets; the owner's reference-photography retake for those assets may proceed in parallel with other work, but Module 7 itself does not advance past the current gate until they exist.
+Module 5's and Module 6's actual video-production packages (spoken script, 12-section package, storyboard, shot list, final assets) may proceed in a separate ChatGPT Project conversation, in parallel with other work — neither blocks the other. Module 6 has now cleared its entire lifecycle including video-source creation (step 9) — `module-06-video-source.md` now exists, status Approved for video production. `module-04-video-source.md` still does not exist; creating it remains available as a parallel side task but is not the current gate. Module 7's implementation, including all four required visual assets, is now complete; the current gate is the owner's manual QA review, which is not a task Claude performs.
 
 ---
 
@@ -285,8 +294,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Preview, push, merge, and deployment status
 
-- Branch preview: `course-audit-build` remains the audit environment; the Module 7 implementation has not yet been reviewed against this preview by the owner (manual QA is not authorized until the visual assets are installed).
-- Push status: this task's "Implement Module 7 core experience pending visuals" commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Branch preview: `course-audit-build` remains the audit environment; Module 7's completed implementation (including the four installed visual assets) has not yet been reviewed against this preview by the owner — manual QA is the current gate and has not occurred.
+- Push status: this task's Module 7 visual-install commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -294,7 +303,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's "Implement Module 7 core experience pending visuals" commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's Module 7 visual-install commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `48f160a2916d3f4c657491bb38f6367f318151bb` — Implement Module 7 core experience pending visuals (amended once for a narrow typography fix)
 - `a72c738b6a087ba65c826ed16e2d6fd26ad055ee` — Add approved Module 7 audit specification
 - `ceb4e45beb9560c5da658e8639610f058704e401` — Extract Module 7 for external audit
 - `6482c8ac4d36418d90d6623a826f0ba977fcb877` — Add Module 6 video source
