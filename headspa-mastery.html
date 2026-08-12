@@ -1519,8 +1519,60 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .ap-final-caption strong { font-style:normal; font-weight:500; color:var(--muted); }
 
+/* ── MODULE 7 — Signature interaction: visual judgment cards ──
+   One card shown at a time; the image dominates the front face. Front
+   and back are two static sibling elements toggled via the `hidden`
+   attribute (not a true two-sided 3D card), so whichever face is
+   current is always the only one present to assistive tech — nothing
+   is left in an inaccessible "flipped away" state. The rotateY motion
+   on .m7-card-flip is a purely decorative transform applied while the
+   `hidden` swap happens at its 90° (edge-on) midpoint; it is skipped
+   entirely under prefers-reduced-motion. */
+.m7-cards { margin: 1.5rem 0; }
+.m7-card-progress { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); margin-bottom:0.75rem; }
+.m7-card { display:none; perspective:1400px; }
+.m7-card.active { display:block; }
+.m7-card-flip {
+  background:rgba(255,255,255,0.7); border:0.5px solid var(--border2); border-radius:18px;
+  overflow:hidden; transition:transform 0.15s ease-in; transform:rotateY(0deg);
+}
+.m7-card-flip.mid-flip { transform:rotateY(90deg); }
+.m7-card-image { aspect-ratio:4/3; width:100%; margin:0; background:#e8e4de; overflow:hidden; }
+.m7-card-image img { width:100%; height:100%; object-fit:cover; display:block; }
+.m7-card-body { padding:1.25rem 1.4rem 1.4rem; }
+.m7-card-prompt { font-family:var(--aimt-font-serif); font-size:0.98rem; line-height:1.55; color:var(--text); margin-bottom:1.1rem; }
+.m7-card-choices { display:flex; gap:10px; }
+.m7-card-btn {
+  flex:1; min-height:46px; padding:0.85rem 1rem; border-radius: var(--aimt-radius-sm);
+  border:0.5px solid var(--border2); background:rgba(255,255,255,0.75); cursor:pointer;
+  font-family:var(--aimt-font-sans); font-size:0.85rem; font-weight:500; color:var(--text);
+  transition:all 0.2s;
+}
+.m7-card-btn:hover { background:#fff; border-color:var(--ash); }
+.m7-card-btn:focus-visible { outline:2px solid var(--accent2); outline-offset:2px; }
+@media (max-width:600px) { .m7-card-choices { flex-direction:column; } }
+.m7-card-back { padding:1.9rem 1.6rem; text-align:center; }
+.m7-card-badge {
+  display:inline-flex; align-items:center; gap:6px; padding:0.4rem 0.9rem; border-radius:980px;
+  font-family:var(--aimt-font-mono); font-size:0.64rem; font-weight:600; letter-spacing:0.05em;
+  text-transform:uppercase; margin-bottom:1.1rem;
+}
+.m7-card-badge.correction { background:var(--aimt-warning-light); color:var(--aimt-warning); }
+.m7-card-badge.variation { background:var(--aimt-success-light); color:var(--aimt-success); }
+.m7-card-reveal { font-size:0.9rem; line-height:1.7; color:var(--text); font-weight:300; max-width:44ch; margin:0 auto 0.9rem; }
+.m7-card-lesson { font-size:0.78rem; line-height:1.6; color:var(--muted); font-weight:300; font-style:italic; max-width:38ch; margin:0 auto 1.35rem; }
+.m7-card-next {
+  min-height:46px; background:#262626; color:#fff; border:none; border-radius:980px;
+  padding:0.75rem 1.5rem; font-family:var(--aimt-font-sans); font-size:0.82rem; font-weight:500;
+  cursor:pointer; transition:opacity 0.2s;
+}
+.m7-card-next:hover { opacity:0.85; }
+.m7-card-next:focus-visible { outline:2px solid var(--accent2); outline-offset:2px; }
+
 @media (prefers-reduced-motion: reduce) {
   .tc-body, .prep-item { transition: none !important; }
+  .m7-card-flip { transition:none !important; transform:none !important; }
+  .m7-card-flip.mid-flip { transform:none !important; }
 }
 .pos-body { font-size:0.82rem; color:var(--muted); font-weight:300; line-height:1.6; }
 
@@ -5692,60 +5744,118 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">Signature interaction</div>
     <div class="sec-title">Find the setup mistakes.</div>
-    <div class="body-text">Does this setup need to change, or is it simply a different way of working? For each scenario, decide whether the setup interferes with positioning, reach, service flow, or another approved setup requirement — or whether it still performs its function correctly.</div>
+    <div class="body-text">Not every difference is a mistake. Look at each setup and decide whether something actually needs to change — or whether it is simply a different, functional way of working.</div>
 
-    <div class="m6-sort-block" id="m7Judge0">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 1.</strong> The product dishes and applicator brush are stored in a drawer across the room, so the practitioner has to step away from the client to reach them during the service.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 1. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 1" onclick="m7Judge(0,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 1" onclick="m7Judge(0,1,this)">Acceptable variation</button>
-      </div>
-      <div class="bq-feedback" id="m7Judge0Feedback" aria-live="polite" style="display:none;"></div>
-    </div>
+    <div class="m7-cards" id="m7Cards">
+      <div class="m7-card-progress" id="m7CardProgress" aria-live="polite">Setup 1 of 4</div>
 
-    <div class="m6-sort-block" id="m7Judge1">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 2.</strong> The treatment bed doesn't have armrests, but the client can still get on and off safely and the headrest properly supports the occipital.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 2. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 2" onclick="m7Judge(1,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 2" onclick="m7Judge(1,1,this)">Acceptable variation</button>
+      <div class="m7-card active" id="m7Card-0">
+        <div class="m7-card-flip">
+          <div class="m7-card-face m7-card-front" id="m7Front-0">
+            <figure class="m7-card-image">
+              <picture>
+                <source srcset="assets/images/course/module-07/module-07-setup-judgment-01-cart-left.webp" type="image/webp">
+                <img src="assets/images/course/module-07/module-07-setup-judgment-01-cart-left.png" alt="A head spa station viewed at an angle, with the rolling product cart positioned to the practitioner's left of the treatment bed and basin." width="1360" height="1020" loading="lazy">
+              </picture>
+            </figure>
+            <div class="m7-card-body">
+              <div class="m7-card-prompt">The cart is positioned on the practitioner's left. Does anything here actually need to change?</div>
+              <div class="m7-card-choices" role="group" aria-label="Setup 1 of 4. Needs correction, or acceptable variation?">
+                <button type="button" class="m7-card-btn" aria-label="Needs correction — Setup 1 of 4" onclick="m7CardAnswer(0)">Needs correction</button>
+                <button type="button" class="m7-card-btn" aria-label="Acceptable variation — Setup 1 of 4" onclick="m7CardAnswer(0)">Acceptable variation</button>
+              </div>
+            </div>
+          </div>
+          <div class="m7-card-face m7-card-back" id="m7Back-0" hidden>
+            <div class="m7-card-badge variation"><span aria-hidden="true">✓</span> Acceptable variation</div>
+            <div class="m7-card-reveal" aria-live="polite">Different does not automatically mean wrong. The cart can sit on either side as long as active-use items remain comfortably reachable and the setup supports efficient service flow.</div>
+            <div class="m7-card-lesson">Reachability matters. Left versus right does not.</div>
+            <button type="button" class="m7-card-next" onclick="m7CardNext(0)">Next setup →</button>
+          </div>
+        </div>
       </div>
-      <div class="bq-feedback" id="m7Judge1Feedback" aria-live="polite" style="display:none;"></div>
-    </div>
 
-    <div class="m6-sort-block" id="m7Judge2">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 3.</strong> The client's occipital is resting flat on the headrest pad instead of settled into its curve, and the neck is visibly extended.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 3. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 3" onclick="m7Judge(2,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 3" onclick="m7Judge(2,1,this)">Acceptable variation</button>
+      <div class="m7-card" id="m7Card-1">
+        <div class="m7-card-flip">
+          <div class="m7-card-face m7-card-front" id="m7Front-1">
+            <figure class="m7-card-image">
+              <picture>
+                <source srcset="assets/images/course/module-07/module-07-setup-judgment-02-items-too-far.webp" type="image/webp">
+                <img src="assets/images/course/module-07/module-07-setup-judgment-02-items-too-far.png" alt="A practitioner seated at the treatment bed's basin, with the rolling cart holding the active-use product dishes positioned several steps away across the room." width="1360" height="1020" loading="lazy">
+              </picture>
+            </figure>
+            <div class="m7-card-body">
+              <div class="m7-card-prompt">The items used throughout the service are positioned well outside the immediate working area. Does this setup need correction?</div>
+              <div class="m7-card-choices" role="group" aria-label="Setup 2 of 4. Needs correction, or acceptable variation?">
+                <button type="button" class="m7-card-btn" aria-label="Needs correction — Setup 2 of 4" onclick="m7CardAnswer(1)">Needs correction</button>
+                <button type="button" class="m7-card-btn" aria-label="Acceptable variation — Setup 2 of 4" onclick="m7CardAnswer(1)">Acceptable variation</button>
+              </div>
+            </div>
+          </div>
+          <div class="m7-card-face m7-card-back" id="m7Back-1" hidden>
+            <div class="m7-card-badge correction"><span aria-hidden="true">!</span> Needs correction</div>
+            <div class="m7-card-reveal" aria-live="polite">Yes. Frequently used items belong within comfortable working reach. Repeatedly stepping away for active-use products interrupts service flow and signals that the station needs reorganizing.</div>
+            <div class="m7-card-lesson">Frequency of use should influence placement.</div>
+            <button type="button" class="m7-card-next" onclick="m7CardNext(1)">Next setup →</button>
+          </div>
+        </div>
       </div>
-      <div class="bq-feedback" id="m7Judge2Feedback" aria-live="polite" style="display:none;"></div>
-    </div>
 
-    <div class="m6-sort-block" id="m7Judge3">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 4.</strong> Backup linens and reserve sanitation concentrate are stored in a cabinet, off the immediate working surface.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 4. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 4" onclick="m7Judge(3,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 4" onclick="m7Judge(3,1,this)">Acceptable variation</button>
+      <div class="m7-card" id="m7Card-2">
+        <div class="m7-card-flip">
+          <div class="m7-card-face m7-card-front" id="m7Front-2">
+            <figure class="m7-card-image">
+              <picture>
+                <source srcset="assets/images/course/module-07/module-07-setup-judgment-03-bed-no-armrests.webp" type="image/webp">
+                <img src="assets/images/course/module-07/module-07-setup-judgment-03-bed-no-armrests.png" alt="A head spa treatment bed with a halo basin at the head end and a plain, flat-sided cushion with no armrests." width="1360" height="907" loading="lazy">
+              </picture>
+            </figure>
+            <div class="m7-card-body">
+              <div class="m7-card-prompt">This treatment bed does not have optional armrests. Is that itself a setup problem?</div>
+              <div class="m7-card-choices" role="group" aria-label="Setup 3 of 4. Needs correction, or acceptable variation?">
+                <button type="button" class="m7-card-btn" aria-label="Needs correction — Setup 3 of 4" onclick="m7CardAnswer(2)">Needs correction</button>
+                <button type="button" class="m7-card-btn" aria-label="Acceptable variation — Setup 3 of 4" onclick="m7CardAnswer(2)">Acceptable variation</button>
+              </div>
+            </div>
+          </div>
+          <div class="m7-card-face m7-card-back" id="m7Back-2" hidden>
+            <div class="m7-card-badge variation"><span aria-hidden="true">✓</span> Acceptable variation</div>
+            <div class="m7-card-reveal" aria-live="polite">Not necessarily. Equipment should be judged by function, support, and service usability — not by whether it includes every optional feature. Armrests may be a practitioner preference rather than a universal requirement.</div>
+            <div class="m7-card-lesson">Equipment preference is not the same as a functional requirement.</div>
+            <button type="button" class="m7-card-next" onclick="m7CardNext(2)">Next setup →</button>
+          </div>
+        </div>
       </div>
-      <div class="bq-feedback" id="m7Judge3Feedback" aria-live="polite" style="display:none;"></div>
-    </div>
 
-    <div class="m6-sort-block" id="m7Judge4">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 5.</strong> The rolling cart is positioned on the practitioner's left side rather than the right, but every within-reach item is still comfortably reachable without stepping away.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 5. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 5" onclick="m7Judge(4,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 5" onclick="m7Judge(4,1,this)">Acceptable variation</button>
+      <div class="m7-card" id="m7Card-3">
+        <div class="m7-card-flip">
+          <div class="m7-card-face m7-card-front" id="m7Front-3">
+            <figure class="m7-card-image">
+              <picture>
+                <source srcset="assets/images/course/module-07/module-07-setup-judgment-04-positioning.webp" type="image/webp">
+                <img src="assets/images/course/module-07/module-07-setup-judgment-04-positioning.png" alt="Side view of a client lying on the treatment bed with her head extended past the headrest support, chin lifted, neck unsupported." width="1360" height="1020" loading="lazy">
+              </picture>
+            </figure>
+            <div class="m7-card-body">
+              <div class="m7-card-prompt">Look at the client's head, neck, and shoulder position. Does this setup need correction?</div>
+              <div class="m7-card-choices" role="group" aria-label="Setup 4 of 4. Needs correction, or acceptable variation?">
+                <button type="button" class="m7-card-btn" aria-label="Needs correction — Setup 4 of 4" onclick="m7CardAnswer(3)">Needs correction</button>
+                <button type="button" class="m7-card-btn" aria-label="Acceptable variation — Setup 4 of 4" onclick="m7CardAnswer(3)">Acceptable variation</button>
+              </div>
+            </div>
+          </div>
+          <div class="m7-card-face m7-card-back" id="m7Back-3" hidden>
+            <div class="m7-card-badge correction"><span aria-hidden="true">!</span> Needs correction</div>
+            <div class="m7-card-reveal" aria-live="polite">Yes. The client is positioned too far from the head end, leaving the occipital area poorly supported and the neck extended. Reposition the client before continuing.</div>
+            <div class="m7-card-lesson">Support and positioning are functional setup requirements.</div>
+            <button type="button" class="m7-card-next" onclick="m7CardNext(3)">Continue</button>
+          </div>
+        </div>
       </div>
-      <div class="bq-feedback" id="m7Judge4Feedback" aria-live="polite" style="display:none;"></div>
-    </div>
 
-    <div class="m6-sort-block" id="m7Judge5">
-      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 6.</strong> A one-step-zone tool, like the sectioning clips, is positioned so the practitioner has to reach directly across the client's face to grab it during the service.</div>
-      <div class="bq-options" role="group" aria-label="Scenario 6. Does this setup need to change, or is it an acceptable variation?">
-        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" aria-label="Needs correction — Scenario 6" onclick="m7Judge(5,0,this)">Needs correction</button>
-        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" aria-label="Acceptable variation — Scenario 6" onclick="m7Judge(5,1,this)">Acceptable variation</button>
+      <div class="info-card" id="m7CardConclusion" style="display:none;">
+        <div class="body-text" style="margin:0"><strong>The rule to keep:</strong> professional setup is judged by function, not by whether every treatment room looks identical.</div>
       </div>
-      <div class="bq-feedback" id="m7Judge5Feedback" aria-live="polite" style="display:none;"></div>
     </div>
 
     <hr class="divider">
@@ -8449,93 +8559,57 @@ function resetPrepChecklist() {
   if (comp) comp.style.display = 'none';
 }
 
-// "Find the setup mistakes" — signature interaction (ungraded, single-select
-// per scenario, retryable — clicking either option at any time replaces the
-// prior answer). Does not touch APP_STATE, progress, checkpoints, or
-// completion. Each scenario asks the student to judge whether a described
-// setup needs correction (a genuine function/access/safety problem) or is
-// an acceptable variation (differs from one way of working but still
-// performs its job). Full markup replacement on module reopen already
-// resets this to its initial unanswered state — see STATIC_MODULES[7].
-const M7_JUDGE_ANSWERS = {
-  0: {
-    correct: 0,
-    feedback: {
-      0: 'Needs correction. Items used during nearly every step belong in the within-reach zone — stepping away for them breaks the flow the pressure-test check is built to catch.',
-      1: 'This interferes with reach, not habit. Items used constantly belong within reach — a practitioner shouldn\'t have to step away from the client for them.'
-    }
-  },
-  1: {
-    correct: 1,
-    feedback: {
-      0: 'Armrests are a preference, not a requirement — what matters is whether entry, exit, and support still function, and here they do. Different does not automatically mean wrong.',
-      1: 'Acceptable variation. Armrests are a preference, not a requirement — entry, exit, and support all still function here. Different does not automatically mean wrong.'
-    }
-  },
-  2: {
-    correct: 0,
-    feedback: {
-      0: 'Needs correction. An unsupported, extended neck is exactly the position Section 7.4\'s safety note addresses — this is a support failure, not a style choice.',
-      1: 'This isn\'t a style choice — an unsupported, extended neck is the specific position Section 7.4\'s safety guidance is about.'
-    }
-  },
-  3: {
-    correct: 1,
-    feedback: {
-      0: 'Backup stock isn\'t supposed to be within reach — this is the reserve zone doing exactly its job. Different does not automatically mean wrong.',
-      1: 'Acceptable variation. This is exactly what the reserve zone is for — backup stock belongs off the working surface. Different does not automatically mean wrong.'
-    }
-  },
-  4: {
-    correct: 1,
-    feedback: {
-      0: 'There\'s no required side for the cart — what matters is whether items stay comfortably reachable, and here they do. Different does not automatically mean wrong.',
-      1: 'Acceptable variation. Reach-zone organization is about reachability, not a fixed side — everything here is still comfortably within reach. Different does not automatically mean wrong.'
-    }
-  },
-  5: {
-    correct: 0,
-    feedback: {
-      0: 'Needs correction. Reaching across the client disrupts flow and access — a one-step item should never require crossing the client\'s space to grab it.',
-      1: 'Reaching across the client is a functional access problem, not a preference — it should be repositioned.'
-    }
+// "Find the setup mistakes" — four-card visual judgment interaction
+// (ungraded, one card shown at a time). Does not touch APP_STATE,
+// progress, checkpoints, or completion. Each card's correct
+// classification and explanation are static content already in its
+// back face — this function does not grade the student's pick; it
+// reveals the same explanation regardless, per the approved design
+// (do not punish an incorrect guess, do not require repeated
+// guessing). Front and back are static sibling elements toggled via
+// the `hidden` attribute; the rotateY transform on .m7-card-flip is a
+// decorative flip motion applied while that swap happens at its
+// edge-on (90°) midpoint, skipped entirely under
+// prefers-reduced-motion. State resets every time Module 7 is (re)opened,
+// since STATIC_MODULES[7] re-clones this content from the pristine
+// #module7Wrap template.
+function m7CardAnswer(idx) {
+  const front = getActiveElementById('m7Front-' + idx);
+  const back = getActiveElementById('m7Back-' + idx);
+  if (!front || !back) return;
+  const flip = front.closest('.m7-card-flip');
+  const swap = () => { front.hidden = true; back.hidden = false; };
+
+  const reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (reducedMotion || !flip) {
+    swap();
+    return;
   }
-};
-function m7Judge(n, choice, btn) {
-  const block = getActiveElementById('m7Judge' + n);
-  const feedback = getActiveElementById('m7Judge' + n + 'Feedback');
-  if (!block || !feedback) return;
-  const answer = M7_JUDGE_ANSWERS[n];
-  const opts = block.querySelectorAll('.bq-opt');
-
-  opts.forEach(o => {
-    const isSelected = o === btn;
-    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    o.classList.toggle('selected', isSelected);
-    o.classList.remove('correct', 'wrong');
-    const existingTag = o.querySelector('.bq-tag');
-    if (existingTag) existingTag.remove();
-  });
-
-  const isCorrect = choice === answer.correct;
-
-  if (isCorrect) {
-    btn.classList.add('correct');
-    const tag = document.createElement('span');
-    tag.className = 'bq-tag';
-    tag.textContent = 'Correct answer';
-    btn.appendChild(tag);
-  } else {
-    btn.classList.add('wrong');
-    const tag = document.createElement('span');
-    tag.className = 'bq-tag';
-    tag.textContent = 'Not quite';
-    btn.appendChild(tag);
-  }
-
-  feedback.style.display = 'block';
-  feedback.textContent = answer.feedback[choice];
+  flip.classList.add('mid-flip');
+  setTimeout(() => {
+    swap();
+    flip.classList.remove('mid-flip');
+  }, 150);
 }
+
+function m7CardNext(idx) {
+  const current = getActiveElementById('m7Card-' + idx);
+  if (current) current.classList.remove('active');
+  const nextIdx = idx + 1;
+  const next = getActiveElementById('m7Card-' + nextIdx);
+  const progress = getActiveElementById('m7CardProgress');
+  if (next) {
+    next.classList.add('active');
+    if (progress) progress.textContent = 'Setup ' + (nextIdx + 1) + ' of 4';
+  } else {
+    const conclusion = getActiveElementById('m7CardConclusion');
+    if (conclusion) conclusion.style.display = 'block';
+    if (progress) progress.textContent = 'Setup 4 of 4 — complete';
+  }
+}
+// No explicit reset function: STATIC_MODULES[7] re-clones this content from
+// the pristine #module7Wrap template on every open, which already restores
+// card 1's initial unanswered state (same pattern as m6Sort).
 
 // ══════════════════════════════════════════════════════
 // MODULE 8 INTERACTIVE — Service step accordion + Format toggle
