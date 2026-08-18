@@ -1580,38 +1580,58 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .pos-body { font-size:0.82rem; color:var(--muted); font-weight:300; line-height:1.6; }
 
-/* ── MODULE 8 — Format cards ── */
-.format-card { border-radius:14px; padding:0.9rem 0.75rem; border:0.5px solid var(--border2); background:rgba(255,255,255,0.65); cursor:pointer; transition:all 0.2s; }
+/* ── MODULE 8 — Format toggle (real function, non-color-only state) ── */
+.format-card { border-radius:14px; padding:0.9rem 0.75rem; border:0.5px solid var(--border2); background:rgba(255,255,255,0.65); cursor:pointer; transition:all 0.2s; text-align:left; width:100%; font-family:inherit; }
+.format-card:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .format-card.selected { background:var(--hero-bg); border-color:transparent; }
 .format-card.selected .fmt-label { color:white; }
 .format-card.selected .fmt-price-hint { color:rgba(255,255,255,0.5); }
 .format-card.selected .fmt-bullet { color:rgba(255,255,255,0.75); }
 .format-card.selected .fmt-bullet::before { color:rgba(255,255,255,0.35); }
-.fmt-label { font-size:1rem; font-weight:500; margin-bottom:2px; }
+.fmt-label-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
+.fmt-label { font-size:1rem; font-weight:500; }
+.fmt-selected-tag { font-family:var(--aimt-font-mono); font-size:0.56rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.85); border:0.5px solid rgba(255,255,255,0.4); border-radius:980px; padding:2px 8px; display:none; }
+.format-card.selected .fmt-selected-tag { display:inline-block; }
 .fmt-price-hint { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
 .fmt-bullet { font-size:0.78rem; font-weight:300; color:var(--text); line-height:1.7; }
 .fmt-bullet::before { content:'— '; color:var(--muted2); }
-
-/* ── MODULE 8 — Service map accordion ── */
-.service-map { display:flex; flex-direction:column; gap:6px; margin:1.25rem 0; }
-.sm-step { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-md); overflow:hidden; cursor:pointer; transition:background 0.2s; }
-.sm-step:hover { background:rgba(255,255,255,0.85); }
-.sm-step.open { background:rgba(255,255,255,0.9); }
-.sms-head { display:flex; align-items:center; gap:12px; padding:0.9rem 1.1rem; }
-.sms-num { font-family:var(--aimt-font-mono); font-size:0.65rem; color:var(--muted2); letter-spacing:0.06em; min-width:24px; flex-shrink:0; }
-.sms-info { flex:1; }
-.sms-title { font-size:0.875rem; font-weight:500; margin-bottom:3px; }
-.sms-timing { display:flex; gap:6px; flex-wrap:wrap; }
-.t-badge { font-family:var(--aimt-font-mono); font-size:0.55rem; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:980px; background:#f0ece4; color:#7a5a20; }
+.t-badge { font-family:var(--aimt-font-mono); font-size:0.55rem; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:980px; background:#f0ece4; color:#7a5a20; transition:opacity 0.2s; }
 .t-2hr { background:#e8ede8; color:#3a5a3a; }
-.sms-arrow { font-family:var(--aimt-font-mono); font-size:0.85rem; color:var(--muted2); flex-shrink:0; transition:transform 0.2s; }
-.sms-body { display:none; padding:0 1.1rem 1rem; border-top:0.5px solid var(--border); animation:slideDown 0.2s ease; }
-.sms-body.open { display:block; }
-.sms-what { font-size:0.82rem; line-height:1.65; color:var(--text); font-weight:300; margin:0.75rem 0 0.6rem; }
-.sms-note { font-size:0.78rem; line-height:1.6; color:var(--muted); font-weight:300; font-style:italic; margin-top:0.5rem; }
-.sms-teach { background:var(--hero-bg); border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; margin:0.5rem 0; }
+.t-badge.t-dim { opacity:0.32; }
+
+/* ── MODULE 8 — Video-led chapters (accordion removed; content always visible) ── */
+.service-map { display:flex; flex-direction:column; gap:2.5rem; margin:1.25rem 0; }
+.sm-step { background:transparent; border:none; padding:0; }
+.sms-head { display:flex; align-items:baseline; gap:10px; margin-bottom:0.6rem; }
+.sms-num { font-family:var(--aimt-font-mono); font-size:0.65rem; color:var(--muted2); letter-spacing:0.06em; flex-shrink:0; }
+.sms-info { flex:1; }
+.sms-title { font-family:var(--aimt-font-mont); font-size:1.02rem; font-weight:600; letter-spacing:-0.01em; margin-bottom:5px; }
+.sms-timing { display:flex; gap:6px; flex-wrap:wrap; }
+.sms-body { padding:0; border-top:none; }
+.sms-watchfor { font-size:0.82rem; line-height:1.65; color:var(--muted); font-weight:300; font-style:italic; margin:0 0 0.15rem; max-width:60ch; }
+.sms-watchfor strong { font-style:normal; font-weight:500; color:var(--text); }
+.sms-what { font-size:0.88rem; line-height:1.75; color:var(--text); font-weight:300; margin:1rem 0 0; max-width:64ch; }
+.sms-note { font-size:0.78rem; line-height:1.6; color:var(--muted); font-weight:300; font-style:italic; margin-top:1rem; }
+.sms-teach { background:var(--hero-bg); border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; margin:0.85rem 0 0; max-width:64ch; }
 .teach-label { font-family:var(--aimt-font-mono); font-size:0.52rem; letter-spacing:0.1em; text-transform:uppercase; color:#cdc8bc; display:block; margin-bottom:5px; }
-.sms-teach { font-size:0.82rem; line-height:1.65; color:rgba(255,255,255,0.82); font-weight:300; font-family:var(--aimt-font-serif); font-style:italic; }
+.sms-teach-text { font-size:0.82rem; line-height:1.65; color:rgba(255,255,255,0.82); font-weight:300; font-family:var(--aimt-font-serif); font-style:italic; }
+
+/* Video stage — intentionally exceeds the standard reading measure on desktop */
+.m8-video-stage { margin:1.1rem 0 0; }
+@media(min-width:900px){ .m8-video-stage { margin-left:-100px; margin-right:-100px; } }
+@media(min-width:1200px){ .m8-video-stage { margin-left:-160px; margin-right:-160px; } }
+
+/* Chapter-jump navigation — plain accessible link list, not a graded interaction */
+.m8-jump-nav { display:flex; flex-direction:column; gap:2px; background:rgba(255,255,255,0.55); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-md); padding:0.9rem 1.1rem; margin:1.25rem 0 2rem; }
+.m8-jump-nav-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted2); margin-bottom:6px; }
+.m8-jump-nav a { font-size:0.8rem; font-weight:300; color:var(--text); text-decoration:none; padding:3px 0; border-bottom:0.5px dotted transparent; }
+.m8-jump-nav a:hover, .m8-jump-nav a:focus-visible { border-bottom-color: var(--muted2); }
+.m8-jump-nav a:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+
+/* Communication principle, stated once before the chapter sequence */
+.m8-principle { background:var(--hero-bg); border-radius: var(--aimt-radius-md); padding:1.2rem 1.35rem; margin:1.25rem 0 1.75rem; }
+.m8-principle-line { font-family:var(--aimt-font-serif); font-style:italic; font-size:1.05rem; color:white; margin-bottom:0.5rem; }
+.m8-principle-body { font-size:0.85rem; line-height:1.75; color:rgba(255,255,255,0.78); font-weight:300; }
 
 /* ── MODULE 9 — Reset sequence ── */
 .reset-sequence { display:flex; flex-direction:column; gap:4px; margin:1.25rem 0; }
@@ -2177,8 +2197,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   align-items: center; justify-content: center;
   cursor: pointer; position: relative;
   transition: background 0.2s;
+  border: none; padding: 0; margin: 0; font: inherit; color: inherit;
 }
 .sms-video-thumb:hover { background: #262626; }
+.sms-video-thumb:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .sms-video-thumb.loaded { display: none; }
 .sms-video-play {
   width: 52px; height: 52px; border-radius: 50%;
@@ -5921,7 +5943,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 8 · The Head Spa Service</div>
-      <div class="mh-title">This is not about<br>memorizing steps.</div>
+      <div class="mh-title">This is not about memorizing steps.</div>
       <div class="mh-desc">By this point you understand the scalp, the conditions, and the setup. Now everything comes together. Two people can follow the same steps and deliver completely different services. This module trains the part you can't get from a checklist — flow, timing, decision-making, and control.</div>
     </div>
 
@@ -5929,7 +5951,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">Steps make you robotic. Phases keep you in control.</div>
     <div class="body-text">If you think in steps, you become rigid — focused on what's next rather than what's happening now. If you think in phases, you stay aware of the full arc of the service. You know where you are, what the client is feeling, and what's coming — without losing presence.</div>
 
-    <div class="interaction-hint">↓ Tap each phase to understand its purpose</div>
+    <div class="interaction-hint">Seven phases, at a glance</div>
     <div class="concept-grid">
       <div class="concept-card">
         <div class="cc-icon">①</div>
@@ -5947,7 +5969,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cc-icon">③</div>
         <div class="cc-term">Treatment Work</div>
         <div class="cc-sub">Exfoliation + scalp massage</div>
-        <div class="cc-def">Your highest skill. Continuous movement, even pressure, no stopping and starting. Pausing turns treatment into a sequence instead of an experience.</div>
+        <div class="cc-def">One of the more demanding phases to execute well. Continuous movement, even pressure, no stopping and starting. Pausing turns treatment into a sequence instead of an experience.</div>
       </div>
       <div class="concept-card">
         <div class="cc-icon">④</div>
@@ -5980,242 +6002,304 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">8.1 — The two formats</div>
     <div class="sec-title">Same 17 steps. Different depth.</div>
     <div class="body-text">The difference between the 1-hour and 2-hour service is not what you do — it's how long you spend doing it, and two additions in the extended format. The foundation is the same. The depth is different. Understanding this makes it easy to upsell and easy to explain.</div>
-    <div class="interaction-hint">↓ Tap to compare</div>
+    <div class="interaction-hint">↓ Select the format you're building today's service around — it emphasizes that format's timings below</div>
 
     <div class="grid-2col">
-      <div class="format-card" id="fmt1hr" onclick="selectFormat(1)">
-        <div class="fmt-label">1-Hour</div>
+      <button type="button" class="format-card" id="fmt1hr" onclick="selectFormat(1)" aria-pressed="false">
+        <div class="fmt-label-row"><div class="fmt-label">1-Hour</div><span class="fmt-selected-tag">Selected</span></div>
         <div class="fmt-price-hint">Entry / Standard</div>
         <div class="fmt-bullet">Streamlined massage</div>
         <div class="fmt-bullet">Quick conditioning</div>
         <div class="fmt-bullet">No hand massage</div>
         <div class="fmt-bullet">No steam treatment</div>
-      </div>
-      <div class="format-card selected" id="fmt2hr" onclick="selectFormat(2)">
-        <div class="fmt-label">2-Hour</div>
+      </button>
+      <button type="button" class="format-card selected" id="fmt2hr" onclick="selectFormat(2)" aria-pressed="true">
+        <div class="fmt-label-row"><div class="fmt-label">2-Hour</div><span class="fmt-selected-tag">Selected</span></div>
         <div class="fmt-price-hint">Signature / Premium</div>
         <div class="fmt-bullet">Extended massage</div>
         <div class="fmt-bullet">Intensive mask + steam</div>
         <div class="fmt-bullet">Hand massage included</div>
         <div class="fmt-bullet">Extended neck work</div>
-      </div>
+      </button>
     </div>
 
     <hr class="divider">
 
     <div class="sec-eyebrow">8.2 — The service map</div>
-    <div class="sec-title">Every step. In order.</div>
-    <div class="body-text">Each card shows what happens, how long it takes in each format, and the micro-teach moment — what you say to the client while you do it. This narration is what separates an elevated service from a silent treatment.</div>
-    <div class="interaction-hint">↓ Tap each step to expand</div>
+    <div class="sec-title">The masterclass, chapter by chapter.</div>
+    <div class="body-text">The 17 steps below are the map. Each of the 12 chapters is built around the instructional demonstration for that part of the service — what the video shows you does not need to be repeated in prose here. The text is for what the camera can't teach: why the step belongs here, the judgment calls, and what to adapt.</div>
+
+    <div class="m8-principle">
+      <div class="m8-principle-line">Explain intentionally, not continuously.</div>
+      <div class="m8-principle-body">Communication should have a purpose — consent, comfort, introducing an unfamiliar step, a meaningful change, a client question, an observation, or after-service guidance. Quiet is allowed to remain quiet. A premium relaxation service does not require constant narration, so the language below each chapter is labeled "What you might say" — an example for steps where speaking has a purpose, not a script to recite at every step.</div>
+    </div>
+
+    <nav class="m8-jump-nav" aria-label="Jump to a service chapter">
+      <div class="m8-jump-nav-label">Jump to a chapter</div>
+      <a href="#m8ch-0">01 — Aromatherapy Selection</a>
+      <a href="#m8ch-1">02 — Dry Brushing & Hair Play</a>
+      <a href="#m8ch-2">03 — Halo Activation & Wet Massage</a>
+      <a href="#m8ch-3">04 — Exfoliant Application</a>
+      <a href="#m8ch-4">05 — Scalp Massage</a>
+      <a href="#m8ch-5">06 — First Rinse</a>
+      <a href="#m8ch-6">07 — Neck & Shoulder Massage</a>
+      <a href="#m8ch-7">08–10 — Second Rinse, Shampoo, Rinse</a>
+      <a href="#m8ch-8">11 — Conditioning & Treatment</a>
+      <a href="#m8ch-9">12 — Hand Massage</a>
+      <a href="#m8ch-10">13–15 — Waterfall, Cooling Spray, Hot Towel</a>
+      <a href="#m8ch-11">16–17 — Towel Wrap & Close</a>
+    </nav>
 
     <div class="service-map">
-      <div class="sm-step" id="sms-0" onclick="toggleServiceStep(0)">
-        <div class="sms-head"><div class="sms-num">01</div><div class="sms-info"><div class="sms-title">Aromatherapy selection</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-0">
+        <div class="sms-head" id="m8ch-0"><div class="sms-num">01</div><div class="sms-info"><div class="sms-title">Aromatherapy selection</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div></div>
         <div class="sms-body" id="smsb-0">
-          <div class="sms-what"><strong>What you do:</strong> Present three essential oil blends. Client closes eyes. Your hand rests on their shoulder throughout.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"I'm going to have you close your eyes — it heightens your sense of smell. I'll hold my hand here while you sample each one."</div>
-          <div class="sms-note">The first touch happens here. This step is covered in depth in Module 2.</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> how the choice is offered — fragrance and fragrance-free carry equal weight, and consent comes before the first touch.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-0-wrap">
-            <div class="sms-video-thumb" id="smsvid-0-thumb" onclick="loadStepVideo(0)">
+            <button type="button" class="sms-video-thumb" id="smsvid-0-thumb" onclick="loadStepVideo(0)" aria-label="Play video: Step 01 — Aromatherapy Selection">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 01 — Aromatherapy Selection</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Offer the three essential oil blends and a fragrance-free option with equal weight — fragrance-free is a genuinely valid choice, not a fallback. Ask before the first touch. If a client wants to close their eyes while they sample, that's their choice to offer, never an instruction.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"I have three blends today, or we can skip fragrance entirely if you'd prefer — whichever sounds better to you. I'm going to rest my hand here on your shoulder while you sample, if that's alright."</span></div>
+          <div class="sms-note">The first touch happens here, and it's the client's choice how immersive this moment is. Consent and first-touch framing are covered in depth in Module 2.</div>
+          <div class="sms-note">Next: dry brushing begins once the client has settled into their choice — no reset needed between them.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-1" onclick="toggleServiceStep(1)">
-        <div class="sms-head"><div class="sms-num">02</div><div class="sms-info"><div class="sms-title">Dry brushing & hair play</div><div class="sms-timing"><span class="t-badge">1hr: ~3 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-1">
+        <div class="sms-head" id="m8ch-1"><div class="sms-num">02</div><div class="sms-info"><div class="sms-title">Dry brushing & hair play</div><div class="sms-timing"><span class="t-badge">1hr: ~3 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div></div>
         <div class="sms-body" id="smsb-1">
-          <div class="sms-what"><strong>What you do:</strong> Introduce the scalp to stimulation. Distribute natural oils through the lengths. Begin activating circulation before water contact.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"This is just me waking up your scalp a little — distributing your own natural oils before we add anything."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> brush-to-scalp contact and hand transitions — a short step that sets the tempo for what follows.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-1-wrap">
-            <div class="sms-video-thumb" id="smsvid-1-thumb" onclick="loadStepVideo(1)">
+            <button type="button" class="sms-video-thumb" id="smsvid-1-thumb" onclick="loadStepVideo(1)" aria-label="Play video: Step 02 — Dry Brushing & Hair Play">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 02 — Dry Brushing & Hair Play</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Introduce the scalp to stimulation. Distribute natural oils through the lengths. Begin activating circulation before water contact.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"This is just me waking up your scalp a little — distributing your own natural oils before we add anything."</span></div>
+          <div class="sms-note">Next: the halo activates — the client moves from dry contact into their first water and massage combined.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-2" onclick="toggleServiceStep(2)">
-        <div class="sms-head"><div class="sms-num">03</div><div class="sms-info"><div class="sms-title">Halo activation — wet massage</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~8 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-2">
+        <div class="sms-head" id="m8ch-2"><div class="sms-num">03</div><div class="sms-info"><div class="sms-title">Halo activation — wet massage</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~8 min</span></div></div></div>
         <div class="sms-body" id="smsb-2">
-          <div class="sms-what"><strong>What you do:</strong> Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"The water is a closed loop — it recirculates, stays warm, and keeps you completely supported."</div>
-          <div class="sms-note">Temperature check is non-negotiable. Equipment fails. Your hand is the safeguard.</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> the temperature check before first water contact — every time, regardless of what the thermostat says.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-2-wrap">
-            <div class="sms-video-thumb" id="smsvid-2-thumb" onclick="loadStepVideo(2)">
+            <button type="button" class="sms-video-thumb" id="smsvid-2-thumb" onclick="loadStepVideo(2)" aria-label="Play video: Step 03 — Halo Activation & Wet Massage">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 03 — Halo Activation & Wet Massage</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"The water is a closed loop — it recirculates, stays warm, and keeps you completely supported."</span></div>
+          <div class="sms-note">Temperature check is non-negotiable. Equipment fails. Your hand is the safeguard.</div>
+          <div class="sms-note">Next: exfoliation follows once the scalp is fully wet and warmed.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-3" onclick="toggleServiceStep(3)">
-        <div class="sms-head"><div class="sms-num">04</div><div class="sms-info"><div class="sms-title">Exfoliant application</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-3">
+        <div class="sms-head" id="m8ch-3"><div class="sms-num">04</div><div class="sms-info"><div class="sms-title">Exfoliant application</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~5 min</span></div></div></div>
         <div class="sms-body" id="smsb-3">
-          <div class="sms-what"><strong>What you do:</strong> Apply exfoliant from mixing bowl using applicator brush. Work in four quadrants — frontal, temporal, crown, occipital.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"This is a scalp exfoliant — same idea as exfoliating your face, formulated for the scalp. It lifts buildup from the follicle openings before we cleanse."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> how technique varies by quadrant — intensity, product, and pressure are selected for this client, not applied on autopilot.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-3-wrap">
-            <div class="sms-video-thumb" id="smsvid-3-thumb" onclick="loadStepVideo(3)">
+            <button type="button" class="sms-video-thumb" id="smsvid-3-thumb" onclick="loadStepVideo(3)" aria-label="Play video: Step 04 — Exfoliant Application">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 04 — Exfoliant Application</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Apply exfoliant from mixing bowl using applicator brush. Work in four quadrants — frontal, temporal, crown, occipital.</div>
+          <div class="sms-what">Exfoliation intensity, product, and technique should match what this client's scalp is telling you today. A stronger application is not the default you dial back only when there's a problem — it's one point on a range you select from every time.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"This is a scalp exfoliant — same idea as exfoliating your face, formulated for the scalp. It lifts buildup from the follicle openings before we cleanse."</span></div>
+          <div class="key-point"><div class="kp-icon">→</div><div class="kp-text"><strong>Adapt by degree, not by switch:</strong> a strong approach that suits one scalp can be too much for another. Reduce pressure, choose a gentler product, or work more selectively by region — rather than skipping the step outright unless there's a genuine safety reason to omit it.</div></div>
+          <div class="sms-note">Next: the scalp massage — the heart of the service — follows directly, working with the same warmth and contact you've already established.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-4" onclick="toggleServiceStep(4)">
-        <div class="sms-head"><div class="sms-num">05</div><div class="sms-info"><div class="sms-title">Scalp massage</div><div class="sms-timing"><span class="t-badge">1hr: ~15 min</span><span class="t-badge t-2hr">2hr: ~30 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-4">
+        <div class="sms-head" id="m8ch-4"><div class="sms-num">05</div><div class="sms-info"><div class="sms-title">Scalp massage</div><div class="sms-timing"><span class="t-badge">1hr: ~15 min</span><span class="t-badge t-2hr">2hr: ~30 min</span></div></div></div>
         <div class="sms-body" id="smsb-4">
-          <div class="sms-what"><strong>What you do:</strong> The heart of the service. Systematic scalp and head massage — cover all regions, vary pressure, work the occipital ridge, temples, and neck junction.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"The massage is doing several things at once — stimulating circulation to the follicles, moving lymph, and activating your parasympathetic nervous system. That's the shift you feel when you start to really relax."</div>
-          <div class="sms-note">This is where the 1-hour and 2-hour diverge most. Know your pace for each format.</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> how pressure and rhythm shift across regions — this is the section of the service most defined by consistency, not force.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-4-wrap">
-            <div class="sms-video-thumb" id="smsvid-4-thumb" onclick="loadStepVideo(4)">
+            <button type="button" class="sms-video-thumb" id="smsvid-4-thumb" onclick="loadStepVideo(4)" aria-label="Play video: Step 05 — Scalp Massage">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 05 — Scalp Massage</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">The heart of the service. Systematic scalp and head massage — cover all regions, vary pressure, work the occipital ridge, temples, and neck junction.</div>
+          <div class="sms-what">What makes this step read as skilled is controlled technique — rhythm, continuity, pressure, broad versus targeted contact, and reading client response — not a specific physiological outcome. Pacing and smooth transitions between regions matter more than any single technique choice.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"This is the part where you can really let go. I'll keep a steady rhythm and check that the pressure feels right as we go."</span></div>
+          <div class="sms-note">This is where the 1-hour and 2-hour diverge most. Know your pace for each format.</div>
+          <div class="key-point"><div class="kp-icon">→</div><div class="kp-text"><strong>Adapt to response, not habit:</strong> pressure and intensity should be checked against client response, not applied uniformly regardless of what this client's scalp presentation and comfort are telling you in the moment.</div></div>
+          <div class="sms-note">Next: first rinse follows directly — client stays in this position; only the water changes.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-5" onclick="toggleServiceStep(5)">
-        <div class="sms-head"><div class="sms-num">06</div><div class="sms-info"><div class="sms-title">First rinse</div><div class="sms-timing"><span class="t-badge">1hr: ~3 min</span><span class="t-badge t-2hr">2hr: ~3 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-5">
+        <div class="sms-head" id="m8ch-5"><div class="sms-num">06</div><div class="sms-info"><div class="sms-title">First rinse</div><div class="sms-timing"><span class="t-badge">1hr: ~3 min</span><span class="t-badge t-2hr">2hr: ~3 min</span></div></div></div>
         <div class="sms-body" id="smsb-5">
-          <div class="sms-what"><strong>What you do:</strong> Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"I'm rinsing the exfoliant now — you'll feel the water shift and get clearer."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> water-temperature consistency and shower-head angle — small technical details that keep this transition from breaking the client's relaxation.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-5-wrap">
-            <div class="sms-video-thumb" id="smsvid-5-thumb" onclick="loadStepVideo(5)">
+            <button type="button" class="sms-video-thumb" id="smsvid-5-thumb" onclick="loadStepVideo(5)" aria-label="Play video: Step 06 — First Rinse">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 06 — First Rinse</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"I'm rinsing the exfoliant now — you'll feel the water shift and get clearer."</span></div>
+          <div class="sms-note">Next: neck and shoulder work begins, extending the service outward from the scalp.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-6" onclick="toggleServiceStep(6)">
-        <div class="sms-head"><div class="sms-num">07</div><div class="sms-info"><div class="sms-title">Neck & shoulder massage</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~12 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-6">
+        <div class="sms-head" id="m8ch-6"><div class="sms-num">07</div><div class="sms-info"><div class="sms-title">Neck & shoulder massage</div><div class="sms-timing"><span class="t-badge">1hr: ~5 min</span><span class="t-badge t-2hr">2hr: ~12 min</span></div></div></div>
         <div class="sms-body" id="smsb-6">
-          <div class="sms-what"><strong>What you do:</strong> Transition to neck, upper traps, and shoulder work. Extended significantly in the 2-hour format.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"The neck holds a lot — most people carry tension here without realizing how much. I'm going to work through this slowly."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> how the transition into the neck and shoulders is paced — this section extends significantly in the 2-hour format.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-6-wrap">
-            <div class="sms-video-thumb" id="smsvid-6-thumb" onclick="loadStepVideo(6)">
+            <button type="button" class="sms-video-thumb" id="smsvid-6-thumb" onclick="loadStepVideo(6)" aria-label="Play video: Step 07 — Neck & Shoulder Massage">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 07 — Neck & Shoulder Massage</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Transition to neck, upper traps, and shoulder work. Extended significantly in the 2-hour format.</div>
+          <div class="sms-what">Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client's consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"The neck holds a lot — most people carry tension here without realizing how much. I'm going to work through this slowly."</span></div>
+          <div class="sms-note">Next: the second rinse, shampoo, and rinse sequence follows — the client stays deeply relaxed through this stretch.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-7" onclick="toggleServiceStep(7)">
-        <div class="sms-head"><div class="sms-num">08–10</div><div class="sms-info"><div class="sms-title">Second rinse → Shampoo → Rinse</div><div class="sms-timing"><span class="t-badge">1hr: ~10 min</span><span class="t-badge t-2hr">2hr: ~10 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-7">
+        <div class="sms-head" id="m8ch-7"><div class="sms-num">08–10</div><div class="sms-info"><div class="sms-title">Second rinse → Shampoo → Rinse</div><div class="sms-timing"><span class="t-badge">1hr: ~10 min</span><span class="t-badge t-2hr">2hr: ~10 min</span></div></div></div>
         <div class="sms-body" id="smsb-7">
-          <div class="sms-what"><strong>What you do:</strong> Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach for shampoo</span>"I'm using [product] — chosen for your scalp specifically. The way I'm working it in continues the circulation work from the massage."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> the shift in energy here — the client is deeply relaxed, so this sequence runs with minimal narration.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-7-wrap">
-            <div class="sms-video-thumb" id="smsvid-7-thumb" onclick="loadStepVideo(7)">
+            <button type="button" class="sms-video-thumb" id="smsvid-7-thumb" onclick="loadStepVideo(7)" aria-label="Play video: Steps 08–10 — Second Rinse, Shampoo, Rinse">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Steps 08–10 — Second Rinse, Shampoo, Rinse</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say (shampoo)</span><span class="sms-teach-text">"I'm using [product] — chosen for your scalp specifically. The way I'm working it in continues the same rhythm from the massage."</span></div>
+          <div class="sms-note">Next: conditioning or treatment follows, on the format-specific path.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-8" onclick="toggleServiceStep(8)">
-        <div class="sms-head"><div class="sms-num">11</div><div class="sms-info"><div class="sms-title">Conditioning / treatment</div><div class="sms-timing"><span class="t-badge">1hr: quick conditioning</span><span class="t-badge t-2hr">2hr: mask + steam</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-8">
+        <div class="sms-head" id="m8ch-8"><div class="sms-num">11</div><div class="sms-info"><div class="sms-title">Conditioning / treatment</div><div class="sms-timing"><span class="t-badge">1hr: quick conditioning</span><span class="t-badge t-2hr">2hr: mask + steam</span></div></div></div>
         <div class="sms-body" id="smsb-8">
-          <div class="sms-what"><strong>What you do:</strong> 1-hour: conditioning treatment, brief processing, rinse. 2-hour: intensive hair mask, steam hood 15–20 minutes, rinse.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach (2hr)</span>"The steam opens the cuticle and drives the treatment deeper than it would penetrate at room temperature."</div>
-          <div class="sms-note">Explain the format difference clearly during booking — clients who've had the 2-hour will notice the absence of steam.</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> the difference in depth between formats — this is where the 2-hour service adds the intensive mask and steam.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-8-wrap">
-            <div class="sms-video-thumb" id="smsvid-8-thumb" onclick="loadStepVideo(8)">
+            <button type="button" class="sms-video-thumb" id="smsvid-8-thumb" onclick="loadStepVideo(8)" aria-label="Play video: Step 11 — Conditioning & Treatment">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 11 — Conditioning & Treatment</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">1-hour: conditioning treatment, brief processing, rinse. 2-hour: intensive hair mask, steam hood 15–20 minutes, rinse.</div>
+          <div class="sms-what">Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client's scalp is responding today, not a fixed penetration claim.</div>
+          <div class="sms-note">Explain the format difference clearly during booking — clients who've had the 2-hour will notice the absence of steam.</div>
+          <div class="sms-note">Next: hand massage follows in the 2-hour format while the treatment processes; 1-hour moves straight to the waterfall sequence.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-9" onclick="toggleServiceStep(9)">
-        <div class="sms-head"><div class="sms-num">12</div><div class="sms-info"><div class="sms-title">Hand massage <span style="font-size:.65rem;font-weight:400;color:var(--muted);margin-left:4px;">2-hour only</span></div><div class="sms-timing"><span class="t-badge t-2hr">2hr: ~8 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-9">
+        <div class="sms-head" id="m8ch-9"><div class="sms-num">12</div><div class="sms-info"><div class="sms-title">Hand massage <span style="font-size:.65rem;font-weight:400;color:var(--muted);margin-left:4px;">2-hour only</span></div><div class="sms-timing"><span class="t-badge t-2hr">2hr: ~8 min</span></div></div></div>
         <div class="sms-body" id="smsb-9">
-          <div class="sms-what"><strong>What you do:</strong> Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach</span>"While that processes, I'm going to work on your hands and forearms — there are more nerve endings in your hands per square inch than almost anywhere else."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> full coverage — fingertips to elbow, not just the palms — while the treatment continues processing above.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-9-wrap">
-            <div class="sms-video-thumb" id="smsvid-9-thumb" onclick="loadStepVideo(9)">
+            <button type="button" class="sms-video-thumb" id="smsvid-9-thumb" onclick="loadStepVideo(9)" aria-label="Play video: Step 12 — Hand Massage">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Step 12 — Hand Massage</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow.</div>
+          <div class="sms-what">Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client's consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say</span><span class="sms-teach-text">"While that processes, I'm going to work on your hands and forearms — a favorite moment for a lot of clients."</span></div>
+          <div class="sms-note">Next: the waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-10" onclick="toggleServiceStep(10)">
-        <div class="sms-head"><div class="sms-num">13–15</div><div class="sms-info"><div class="sms-title">Waterfall rinse → Cooling spray → Hot towel</div><div class="sms-timing"><span class="t-badge">1hr: ~7 min</span><span class="t-badge t-2hr">2hr: ~7 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-10">
+        <div class="sms-head" id="m8ch-10"><div class="sms-num">13–15</div><div class="sms-info"><div class="sms-title">Waterfall rinse → Cooling spray → Hot towel</div><div class="sms-timing"><span class="t-badge">1hr: ~7 min</span><span class="t-badge t-2hr">2hr: ~7 min</span></div></div></div>
         <div class="sms-body" id="smsb-10">
-          <div class="sms-what"><strong>What you do:</strong> Waterfall neck rinse — confirm alignment and temperature before water contacts client. Cooling scalp spray — the temperature contrast closes the cuticle and stimulates a final circulation response. Hot towel press — warm compression, signals transition toward completion.</div>
-          <div class="sms-teach"><span class="teach-label">Micro-teach (cooling spray)</span>"This is a temperature contrast — the coolness after warm water closes the cuticle and gives the scalp a final circulatory boost. It's going to feel slightly startling and then very good."</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> the temperature contrast and pacing — these are sensory signature moments, not just rinsing steps.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-10-wrap">
-            <div class="sms-video-thumb" id="smsvid-10-thumb" onclick="loadStepVideo(10)">
+            <button type="button" class="sms-video-thumb" id="smsvid-10-thumb" onclick="loadStepVideo(10)" aria-label="Play video: Steps 13–15 — Waterfall, Cooling Spray, Hot Towel">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Steps 13–15 — Waterfall, Cooling Spray, Hot Towel</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Waterfall neck rinse — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.</div>
+          <div class="sms-teach"><span class="teach-label">What you might say (cooling spray)</span><span class="sms-teach-text">"This is a temperature contrast — it's going to feel slightly startling for a second, and then very good. It's one of the moments clients remember most about this service."</span></div>
+          <div class="sms-note">Next: towel wrap and the service close follow — the client begins the transition out of the treatment.</div>
         </div>
       </div>
-      <div class="sm-step" id="sms-11" onclick="toggleServiceStep(11)">
-        <div class="sms-head"><div class="sms-num">16–17</div><div class="sms-info"><div class="sms-title">Towel wrap → Close & checkout</div><div class="sms-timing"><span class="t-badge">1hr: ~6 min</span><span class="t-badge t-2hr">2hr: ~6 min</span></div></div><div class="sms-arrow">+</div></div>
+      <div class="sm-step" id="sms-11">
+        <div class="sms-head" id="m8ch-11"><div class="sms-num">16–17</div><div class="sms-info"><div class="sms-title">Towel wrap → Close & checkout</div><div class="sms-timing"><span class="t-badge">1hr: ~6 min</span><span class="t-badge t-2hr">2hr: ~6 min</span></div></div></div>
         <div class="sms-body" id="smsb-11">
-          <div class="sms-what"><strong>What you do:</strong> Wrap hair. Help client sit up slowly — they've been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.</div>
-          <div class="sms-teach"><span class="teach-label">Closing script</span>"Today I focused on [what you observed]. I used [products] because of [reason]. For home care, I'd recommend [one specific thing]. How are you feeling?"</div>
-          <div class="sms-note">One specific, personalized observation at close drives rebooking more than any other single moment in the service.</div>
-        
+          <div class="sms-watchfor"><strong>Watch for:</strong> the pace of sitting the client up — they've been horizontal for up to two hours, so this transition is gradual, not abrupt.</div>
+          <div class="m8-video-stage">
           <div class="sms-video" id="smsvid-11-wrap">
-            <div class="sms-video-thumb" id="smsvid-11-thumb" onclick="loadStepVideo(11)">
+            <button type="button" class="sms-video-thumb" id="smsvid-11-thumb" onclick="loadStepVideo(11)" aria-label="Play video: Steps 16–17 — Towel Wrap & Close">
               <div class="sms-video-play">
                 <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
               </div>
               <div class="sms-video-label">Steps 16–17 — Towel Wrap & Close</div>
               <div class="sms-video-sublabel">Add Vimeo link in admin</div>
-            </div>
+            </button>
           </div>
+          </div>
+          <div class="sms-what">Wrap hair. Help client sit up slowly — they've been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.</div>
+          <div class="sms-teach"><span class="teach-label">Closing script</span><span class="sms-teach-text">"Today I focused on [what you observed]. I used [products] because of [reason]. For home care, I'd recommend [one specific thing]. How are you feeling?"</span></div>
+          <div class="sms-note">A specific, personalized observation at close is one of the strongest ways to make a service feel complete and intentional rather than rushed. Clients remember being seen — that's worth doing well regardless of what it does for your schedule.</div>
+          <div class="sms-note">That's the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.</div>
         </div>
       </div>
     </div>
@@ -6232,7 +6316,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="info-card">
       <div class="ic-title">Pressure consistency</div>
-      <div class="body-text" style="margin:0">Clients don't analyze pressure. They feel inconsistency. Good pressure is predictable, even, and stable. Bad pressure is random, uneven, and disconnected. This is the most overlooked technical skill in the service — and the one clients feel most clearly, even when they can't name it.</div>
+      <div class="body-text" style="margin:0">Clients don't analyze pressure. They feel inconsistency. Consistent pressure reads as intentional. Uneven or unpredictable pressure reads as uncertain — even when the underlying technique is sound. Consistency, not any single pressure level, is what a client actually feels as skill — an often-underestimated part of the service.</div>
     </div>
 
     <div class="info-card">
@@ -6252,38 +6336,91 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
+    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-title">Protect the Flow</div>
+    <div class="body-text">The plan changes mid-service more often than a beginner expects. Below are three moments where it does — decide how you'd preserve the service's flow and experience. This is ungraded; nothing here is saved or scored.</div>
+
+    <div class="m5-decision-block" id="m8Protect1">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 1.</strong> A client who opted into fragrance at the start of the service now asks, midway through, to skip it going forward.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 1. A client's fragrance preference changes mid-service. Choose your response.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m8Protect(1,0,this)">Explain that the fragrance was already chosen together and continue as planned</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m8Protect(1,1,this)">Adjust without treating it as a disruption — acknowledge briefly and move on fragrance-free</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m8Protect(1,2,this)">Pause the service to ask several follow-up questions about why they changed their mind</button>
+      </div>
+      <div class="bq-feedback" id="m8Protect1Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m8ProtectReset(1)">Reset this scenario</button>
+    </div>
+
+    <div class="m5-decision-block" id="m8Protect2">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 2.</strong> You're moving into Step 4. The scalp presentation in front of you tells you a strong exfoliation approach would be too aggressive today.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 2. A strong exfoliation approach is too aggressive for this scalp. Choose your response.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m8Protect(2,0,this)">Skip exfoliation entirely and move to the next step</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m8Protect(2,1,this)">Reduce intensity, pressure, or product strength and adapt the method — without eliminating the step</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m8Protect(2,2,this)">Apply the standard approach as planned since the client didn't say anything was wrong</button>
+      </div>
+      <div class="bq-feedback" id="m8Protect2Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m8ProtectReset(2)">Reset this scenario</button>
+    </div>
+
+    <div class="m5-decision-block" id="m8Protect3">
+      <div class="body-text" style="margin-bottom:0.75rem;"><strong>Scenario 3.</strong> The conditioning treatment needs more processing time than the format allows for today's appointment.</div>
+      <div class="bq-options" role="group" aria-label="Scenario 3. A processing step needs more time than planned. Choose your response.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m8Protect(3,0,this)">Adjust the pacing for the rest of the service calmly, without visibly scrambling</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m8Protect(3,1,this)">Cut the processing time short so the rest of the service stays exactly on schedule</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m8Protect(3,2,this)">Stop and audibly recalculate the timing in front of the client</button>
+      </div>
+      <div class="bq-feedback" id="m8Protect3Feedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m8ProtectReset(3)">Reset this scenario</button>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">The protocol gives structure. Judgment keeps it appropriate.</div>
+    </div>
+
+    <hr class="divider">
+
     <div class="sec-eyebrow">8.4 — Checkpoint</div>
-    <div class="sec-title">The micro-teach moment.</div>
-    <div class="body-text">Pick any two steps from the service map above. Write the micro-teach you would deliver at each one — in your own voice, to a real client who has never had a head spa before. Don't copy the examples. Make it yours.</div>
+    <div class="sec-title">Adapting exfoliation without breaking flow.</div>
+    <div class="body-text">You are moving into the exfoliation portion of the service and determine that a strong exfoliation approach is not appropriate for this client today. Walk through how you would modify the treatment while preserving the service flow. Include what you would change about product, pressure, technique, or intensity, and what you would communicate to the client.</div>
     <div class="cp-box">
       <div class="cp-label">Cadence is reading this</div>
       <div class="cp-input-row">
-        <textarea class="cp-input" id="m8cp1In" placeholder="Name the two steps and write what you'd actually say to the client during each one..." onkeydown="m8cpKey(event,'m8cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m8cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <textarea class="cp-input" id="m8cp1In" placeholder="Walk through what you'd change and what you'd say..." onkeydown="m8cpKey(event,'m8cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m8cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m8cp1Btn" onclick="submitM8CP('m8cp1')">Submit to Cadence →</button>
-      <div class="cp-response" id="m8cp1Res"></div>
+      <button class="cp-btn" id="m8cp1Btn" onclick="submitM8CP('m8cp1')" aria-label="Send response to Cadence">Submit to Cadence →</button>
+      <div class="cp-response" id="m8cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
     <div class="sec-eyebrow">8.5 — Checkpoint</div>
     <div class="sec-title">A client asks mid-service.</div>
-    <div class="body-text">You're in Step 5 — the scalp massage, about twelve minutes in. Your client opens her eyes and asks: "What exactly is the difference between this and a regular shampoo at the salon?" She's not being critical — she's genuinely curious. What do you say, without breaking the experience?</div>
+    <div class="body-text">You are in the scalp-massage portion of the service when your client asks, "What makes this different from a regular shampoo at the salon?" What would you say in the moment without breaking the experience?</div>
     <div class="cp-box">
       <div class="cp-label">Cadence is reading this</div>
       <div class="cp-input-row">
         <textarea class="cp-input" id="m8cp2In" placeholder="Write your response — in the moment, staying in the service..." onkeydown="m8cpKey(event,'m8cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m8cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        <button class="voice-btn" onclick="startVoice('m8cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m8cp2Btn" onclick="submitM8CP('m8cp2')">Submit to Cadence →</button>
-      <div class="cp-response" id="m8cp2Res"></div>
+      <button class="cp-btn" id="m8cp2Btn" onclick="submitM8CP('m8cp2')" aria-label="Send response to Cadence">Submit to Cadence →</button>
+      <div class="cp-response" id="m8cp2Res" aria-live="polite"></div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">Take the Service Into Practice</div>
+    <div class="sec-title">Rehearsing before you run it live.</div>
+    <div class="info-card">
+      <div class="ic-title">AIMT Service Timer</div>
+      <div class="body-text" style="margin:0">A companion tool for the treatment room, coming to your AIMT dashboard. Once you know this service, the Service Timer helps you rehearse it, build pacing awareness, and stay on track during a real appointment — without needing to reopen this lesson. It's in development and will be introduced here once it's ready.</div>
     </div>
 
     <div class="lesson-complete" id="m8Complete" style="display:none;">
       <div class="lc-check">✓</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You know the map. Now the system that lets you run it back-to-back, every client, every day — without dropping quality.</div>
+      <div class="lc-body">You can run the full service, adapt it when conditions change, and communicate with intention — not just recite the steps. Next: what happens between services.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 9</div>
         <div class="lc-next-text">Sanitation and reset systems. The work between every service that separates consistent professionals from inconsistent ones.</div>
@@ -7537,12 +7674,40 @@ const M7 = {
 };
 
 // ── MODULE 8 ──
+// Displayed and evaluated question strings must match exactly — see .body-text
+// markup for m8cp1 / m8cp2 inside #module8Wrap.
 const M8 = {
   questions: {
-    m8cp1: 'Pick any two steps from the 17-step service map. Write the micro-teach you would deliver at each one — in your own voice, to a real client who has never had a head spa before.',
-    m8cp2: 'You are in Step 5 — the scalp massage, about twelve minutes in. Your client opens her eyes and asks: "What exactly is the difference between this and a regular shampoo at the salon?" She is not being critical. What do you say?'
+    m8cp1: 'You are moving into the exfoliation portion of the service and determine that a strong exfoliation approach is not appropriate for this client today. Walk through how you would modify the treatment while preserving the service flow. Include what you would change about product, pressure, technique, or intensity, and what you would communicate to the client.',
+    m8cp2: 'You are in the scalp-massage portion of the service when your client asks, "What makes this different from a regular shampoo at the salon?" What would you say in the moment without breaking the experience?'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 8 (The Head Spa Service) checkpoint. Question: "' + q + '". Key concepts: 17 steps, two formats (1hr streamlined, 2hr with extended massage + steam + hand massage). Micro-teach while doing — naming what you are doing and why — is what elevates client perception. Good micro-teach is specific, calm, and does not over-explain. Response to the "shampoo" question: cover circulation, scalp focus, water immersion, exfoliation, intentional product selection — without sounding clinical. Stay in the service experience. 3-5 sentences, warm and direct.'
+  // Module-8/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer().
+  systems: {
+    m8cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 8 competency: adapting exfoliation intensity for a real presentation without breaking service flow, and communicating the adjustment appropriately.\n\n' +
+      'The student passes only when the response demonstrates all of the following:\n\n' +
+      '1. Recognizes that adapting the treatment does not automatically mean eliminating all exfoliative action.\n' +
+      '2. Reduces or otherwise adjusts intensity, rather than either continuing unchanged or stopping the step outright without cause.\n' +
+      '3. Names an appropriate product or method modification (a gentler product, a less aggressive method, or similar).\n' +
+      '4. Addresses pressure or technique adjustment specifically.\n' +
+      '5. Preserves a smooth transition — the change reads as part of the service, not a visible break in it.\n' +
+      '6. Includes concise client communication where it has a purpose, not a long explanation.\n' +
+      '7. Reasoning is non-diagnostic — no medical or dermatological diagnosis is implied or attempted.\n\n' +
+      'The student does not need to use these exact words or address every element in equal depth. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Immediately correct — do not pass — any answer stating exfoliation should simply be skipped or removed with no safety or scope reason given, any answer that continues a strong exfoliation approach unchanged despite the stated presentation, or any diagnostic language naming or implying a specific medical condition.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the student eases off appropriately but is not specific about what changes about product, pressure, or technique, ask for that specifically. If the adjustment is good but nothing is said to the client, ask what they would say while making the change.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.',
+    m8cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 8 competency: answering a genuine in-service client question briefly and accurately, without unsupported claims or breaking the relaxation experience.\n\n' +
+      'The student passes when the response references a reasonable subset of the following, in any natural wording: a structured, scalp-focused service (versus a generic shampoo); intentional pacing; assessment or observation informing technique; product or cleansing decisions made specifically for this client; scalp-focused massage; the water/technique sequence; adaptation to what this client\'s scalp or service needs; the overall client experience.\n\n' +
+      'The answer does not need to be long — a short, accurate, in-the-moment response is a pass. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Do not require or reward detoxification claims, circulation-enhancement claims, hair-growth claims, medical-treatment framing, diagnosis, or lymphatic-treatment claims — an answer built entirely around one or more of these does not pass, even if fluent and confident. An answer that is generic enough to describe any spa service, with no head-spa-specific content, is also incomplete.\n\n' +
+      'Immediately correct — do not pass — any answer asserting a medical, circulatory, lymphatic, or hair-growth outcome as fact, or any diagnostic language.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the answer is pleasant but generic, ask what is actually different about the technique or approach, not just that it feels nice. If the answer relies on an unsupported claim, name it and ask the student to reframe around structure and technique instead.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ── MODULE 9 ──
@@ -7576,7 +7741,7 @@ const MODULE_GUIDE_SYSTEMS = {
   5: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 5, Scalp Patterns & Service Adaptation. Help the student translate supported observations, client-reported experience, and regional differences into conservative cosmetic service decisions. Use the five service levers: cleansing, exfoliation, water and steam, pressure and tempo, and product placement and finish. Reinforce the order: safety limit, client comfort/reactivity, surface tolerance, visible cosmetic need, then client preference. Do not diagnose, prescribe, claim medical treatment, claim personal practitioner experience, restore the compensatory-oil claim, call follicles clogged, imply hair-growth obstruction, or teach named dandruff/dermatitis content that belongs in Module 6. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; do not claim that experience as your own. Be direct, warm, practical, and concise.',
   6: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 6, Conditions & Disorders. Help the student distinguish a dry-scalp presentation from the dandruff-to-seborrheic-dermatitis spectrum, recognize that appearance alone does not establish cause, and decide whether to proceed, modify, or refer. Reinforce that spread beyond the scalp combined with redness, broken or weeping skin, severe symptoms, or no improvement with reasonable care are referral-relevant findings. Do not diagnose, prescribe, name a specific medical condition as confirmed fact, claim personal practitioner experience, or treat any illustrative image as clinical proof. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise.',
   7: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 7, Equipment & Room Setup — bed selection, tool organization, station prep, and client positioning. Help the student reason through equipment trade-offs, station organization, and positioning decisions using the module\'s function-based framework, not brand or product recommendations. If a student reports a client discomfort scenario, reinforce the stop, adjust, communicate, resume sequence. Do not state that any single bed model or brand is required. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
-  8: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 8 (The Head Spa Service): 17 steps, two formats, micro-teach while doing. If the student has an existing service background, acknowledge that some steps will feel familiar but the intentionality behind each one is specific to the head spa experience. The closing script with one personal scalp observation drives rebooking. 3-5 sentences. No bullet points.',
+  8: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 8, The Head Spa Service — the full 17-step, two-format service, taught through the instructional videos. Your role here is service-flow and practitioner-judgment coach: help the student with smooth transitions, adapting intensity or technique (especially exfoliation, which is adapted by degree, not switched on or off), client communication in the moment, and identifying when context changes the default plan. Communication should be explained as intentional, not continuous — quiet is appropriate during most of the service. Do not state that a specific closing observation guarantees rebooking or any other business outcome. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Do not give exact stopwatch pacing advice — timing guidance belongs to the AIMT Service Timer, which has its own separate audit. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
   9: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 9 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
   10: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 10 (Pricing Strategy): three-tier menu, cost-first pricing, add-ons as enhancements, client perception. Price for the value of the head spa experience you are delivering. If the student is building a new menu or repricing, keep the conversation anchored to head spa service value — not other services. 3-5 sentences. No bullet points.',
   11: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student has completed the course. This is about execution now. Reference what you know about this student specifically — their background, their goals, what they shared at the start — and connect everything to how they will now deliver head spa and scalp wellness services. Knowing and doing are not the same. Repetition makes it real. 3-5 sentences. No bullet points.'
@@ -7591,7 +7756,7 @@ const MODULE_QUICK_PROMPTS = {
   5: ['How do I build one service for a mixed regional presentation?', 'When should I skip exfoliation or steam?', 'How do I explain a gentler plan without disappointing the client?'],
   6: ['How do I tell dry scalp from dandruff?', 'When should a flaking presentation raise more concern?', 'What botanicals work for inflammation?'],
   7: ['What should I actually prioritize when choosing a bed?', 'How do I know if a client\'s positioning needs adjusting mid-service?', 'What\'s the one prep step I should never skip?'],
-  8: ['What makes the micro-teach effective?', 'How do I handle a question mid-service?', 'What is the most important step?'],
+  8: ['How do I keep transitions smooth?', 'How do I adapt a step without breaking the flow?', 'What should I say when a client asks what I\'m doing?'],
   9: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
   10: ['How do I price my anchor service?', 'What add-ons convert best?', 'How do I respond when someone says it is expensive?'],
   11: ['How do I maintain quality consistently?', 'What should I focus on in my first real services?', 'How do I know if I am improving?']
@@ -8477,7 +8642,8 @@ function m7cpKey(e, id) {
 
 // ── MODULE 8 ──
 function submitM8CP(id) {
-  submitCheckpoint(8, id, M8.system, M8.questions[id]);
+  submitCheckpoint(8, id, M8.systems[id], M8.questions[id],
+    'Cadence couldn\'t review your response. Check your connection and try again.');
 }
 function m8cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM8CP(id); }
@@ -8624,31 +8790,101 @@ function m7CardNext(idx) {
 // card 1's initial unanswered state (same pattern as m6Sort).
 
 // ══════════════════════════════════════════════════════
-// MODULE 8 INTERACTIVE — Service step accordion + Format toggle
+// MODULE 8 INTERACTIVE — Format toggle + "Protect the Flow"
 // ══════════════════════════════════════════════════════
 
-function toggleServiceStep(idx) {
-  const body = document.getElementById('smsb-' + idx);
-  const step = document.getElementById('sms-' + idx);
-  if (!body || !step) return;
-  const isOpen = body.classList.contains('open');
-  document.querySelectorAll('.sms-body').forEach(b => b.classList.remove('open'));
-  document.querySelectorAll('.sm-step').forEach(s => {
-    s.classList.remove('open');
-    const a = s.querySelector('.sms-arrow');
-    if (a) a.textContent = '+';
+// Format toggle has real instructional function: selecting a format
+// emphasizes that format's timing badges across all 12 chapters and
+// dims the other format's, so the toggle answers "which service am I
+// learning to run today" rather than only changing a highlight color.
+// Selected state is exposed via aria-pressed and a text "Selected" tag,
+// not color alone.
+function selectFormat(fmt) {
+  const is1 = fmt === 1;
+  const card1 = document.getElementById('fmt1hr');
+  const card2 = document.getElementById('fmt2hr');
+  if (card1) { card1.classList.toggle('selected', is1); card1.setAttribute('aria-pressed', is1 ? 'true' : 'false'); }
+  if (card2) { card2.classList.toggle('selected', !is1); card2.setAttribute('aria-pressed', !is1 ? 'true' : 'false'); }
+
+  const wrap = document.querySelector('.lesson-wrap');
+  if (!wrap) return;
+  wrap.querySelectorAll('.t-badge').forEach(b => {
+    const is2hrBadge = b.classList.contains('t-2hr');
+    const matchesSelection = is1 ? !is2hrBadge : is2hrBadge;
+    b.classList.toggle('t-dim', !matchesSelection);
   });
-  if (!isOpen) {
-    body.classList.add('open');
-    step.classList.add('open');
-    const arrow = step.querySelector('.sms-arrow');
-    if (arrow) arrow.textContent = '−';
-  }
 }
 
-function selectFormat(fmt) {
-  document.getElementById('fmt1hr').classList.toggle('selected', fmt === 1);
-  document.getElementById('fmt2hr').classList.toggle('selected', fmt === 2);
+// "Protect the Flow" — ungraded compare-and-decide scenarios. No
+// APP_STATE write, no persistence across a module reopen, no scoring.
+// Mirrors the existing m5Decide pattern: only the option the student
+// selects receives a state; feedback is specific to that option.
+const M8_PROTECT_ANSWERS = {
+  1: {
+    best: 1,
+    feedback: {
+      0: 'Holding the original plan treats a client\'s changed mind as an inconvenience rather than a preference. The scent was never the point of the service — the client\'s comfort is.',
+      1: 'This preserves the flow. A brief acknowledgment and moving on fragrance-free keeps the client from feeling like they disrupted anything.',
+      2: 'A short follow-up is fine if genuinely needed, but several questions mid-service turns a simple preference change into an interrogation and breaks the relaxation experience.'
+    }
+  },
+  2: {
+    best: 1,
+    feedback: {
+      0: 'Skipping exfoliation entirely isn\'t the same as adapting it. Unless there\'s a genuine safety or scope reason, some form of gentler exfoliation is usually still appropriate — this treats the decision as a switch instead of a dial.',
+      1: 'This is the adjustment, not the elimination. Reducing intensity, choosing a gentler product, or changing method preserves the step while matching what this scalp is telling you today.',
+      2: 'Applying the standard approach because the client stayed quiet ignores what you observed. The client isn\'t the one trained to flag this — you are.'
+    }
+  },
+  3: {
+    best: 0,
+    feedback: {
+      0: 'Adjusting pacing calmly for the rest of the service is exactly what keeps a plan change invisible to the client — the service still feels intentional, not improvised.',
+      1: 'Cutting a step short to protect the schedule sacrifices the treatment itself for the appearance of being on time — the opposite trade-off from what the client is paying for.',
+      2: 'Visibly recalculating in front of the client turns a routine adjustment into a moment of visible uncertainty, which breaks the experience more than the time change itself would.'
+    }
+  }
+};
+
+function m8Protect(scenario, choice, btn) {
+  const block = getActiveElementById('m8Protect' + scenario);
+  const feedback = getActiveElementById('m8Protect' + scenario + 'Feedback');
+  if (!block || !feedback) return;
+  const answer = M8_PROTECT_ANSWERS[scenario];
+  const opts = block.querySelectorAll('.bq-opt');
+
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  const preservesFlow = choice === answer.best;
+  btn.classList.add(preservesFlow ? 'correct' : 'wrong');
+  const tag = document.createElement('span');
+  tag.className = 'bq-tag';
+  tag.textContent = preservesFlow ? 'Preserves the flow' : 'Breaks the flow';
+  btn.appendChild(tag);
+
+  feedback.style.display = 'block';
+  feedback.textContent = answer.feedback[choice];
+}
+
+function m8ProtectReset(scenario) {
+  const block = getActiveElementById('m8Protect' + scenario);
+  const feedback = getActiveElementById('m8Protect' + scenario + 'Feedback');
+  if (!block || !feedback) return;
+  block.querySelectorAll('.bq-opt').forEach(o => {
+    o.setAttribute('aria-pressed', 'false');
+    o.classList.remove('selected', 'correct', 'wrong');
+    const tag = o.querySelector('.bq-tag');
+    if (tag) tag.remove();
+  });
+  feedback.style.display = 'none';
+  feedback.textContent = '';
 }
 
 // ══════════════════════════════════════════════════════
@@ -9641,11 +9877,14 @@ function loadStepVideo(stepIdx) {
     return;
   }
 
-  // Replace thumb with Vimeo iframe
+  // Replace thumb with Vimeo iframe. No autoplay — a student's click starts
+  // only this chapter's video, never the next one automatically.
   thumb.classList.add('loaded');
+  const chapterLabel = thumb.getAttribute('aria-label') || ('Step ' + (stepIdx + 1) + ' video');
   const iframe = document.createElement('iframe');
-  iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?autoplay=1&color=a3968d&title=0&byline=0&portrait=0';
-  iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+  iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?color=a3968d&title=0&byline=0&portrait=0';
+  iframe.title = chapterLabel.replace(/^Play video:\s*/, '');
+  iframe.allow = 'fullscreen; picture-in-picture';
   iframe.allowFullscreen = true;
   iframe.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:block;';
   wrap.appendChild(iframe);

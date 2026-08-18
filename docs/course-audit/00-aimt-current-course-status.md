@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 17, 2026
+**Last updated:** August 17, 2026 (Module 8 Phase 1 non-video implementation)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's Module 8 approved-specification commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `762fdd04b6479722ae304717f078ef0a90c4c850` — "Extract Module 8 for external audit", pushed to `origin/course-audit-build`.
+- Latest controlling commit: pending — this task's Module 8 Phase 1 (non-video) implementation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `872193f` — "Add approved Module 8 audit specification", pushed to `origin/course-audit-build`.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -40,11 +40,11 @@ Do not merge or deploy yet.
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
 | Module 7 | Implemented — manual QA approved |
-| Module 8 | Approved for controlled implementation |
+| Module 8 | Phase 1 (non-video) implemented — Phase 2 (real video installation) pending; NOT manually QA'd, NOT approved |
 | Modules 9–11 | Pending |
 | Module 12 | Planned — do not begin |
 
-**Latest approved module: Module 7** — manually approved August 12, 2026. The owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Modules 0–7 are now approved; Module 8 has an approved specification but is not yet implemented, manually QA'd, or approved; Modules 9–11 remain pending.
+**Latest approved module: Module 7** — manually approved August 12, 2026. The owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Modules 0–7 remain approved. Module 8's approved non-video specification is now implemented in `headspa-mastery.html`, but Module 8 is explicitly **not** ready for manual QA and **not** manually approved — the required service videos remain uninstalled, per `module-08.md`'s own two-phase implementation boundary. Modules 9–11 remain pending.
 
 ---
 
@@ -74,6 +74,36 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 1 (non-video) implementation — August 18, 2026.** Implemented the approved `module-08.md` specification in `headspa-mastery.html`, covering every Phase 1 acceptance item (1–30) except real video installation, which is explicitly out of scope for this task and remains Phase 2.
+
+**Preflight confirmed before any change:** active branch `course-audit-build`, working tree clean, `origin/course-audit-build` contains `872193f` ("Add approved Module 8 audit specification") and local was not behind, `module-08.md` status "Approved for controlled implementation," current gate "Module 8 implementation," Module 9 not begun, no pending merge/deployment. All 12 protected video positions (`STEP_VIDEO_IDS`, `smsvid-0` through `smsvid-11`) were inventoried against `module-08-source.md` §5 before any edit.
+
+**Curriculum/claims corrections applied exactly per `module-08.md`:** Step 01 (optional fragrance, consent-before-touch, optional eyes-closed); Step 05 (circulation/lymphatic/parasympathetic claim removed, replaced with rhythm/pressure/skill framing); Steps 07 and 12 (identical approved scope-guardrail sentence added to each, inline in guidance, not a separate disclaimer section); Step 11 (steam-penetration claim removed, replaced with product/equipment-direction guidance); Steps 13–15 (cuticle-closure/circulatory-boost claim removed, sensory/experiential framing kept); Steps 16–17 (rebooking-causation claim removed, replaced with the approved "clients remember being seen" framing); Section 8.3's absolute pressure claim softened to judgment-based language (the temperature-safety statement was preserved unchanged, as instructed); the two unqualified superlative claims ("your highest skill," "the most overlooked technical skill") replaced with non-superlative framing. The exfoliation framework was rewritten from an implicit binary into the approved adaptable-intensity model, with the exact approved addition to Step 04's guidance and the same framework carried through "Protect the Flow" and `m8cp1`. Two claims not explicitly itemized in `module-08.md`'s numbered corrections but named in its "Basis for this specification" (nerve-density language in Step 12's script, and a dangling reference to Step 05's removed circulation claim inside Steps 08–10's script) were also corrected as a direct, minimal consequence of the approved corrections — recorded here as a judgment call, not a silent addition.
+
+**Video-led chapter architecture implemented.** The 12-item accordion is no longer the module's primary presentation pattern — all 12 chapters' watch-for cues, guidance text, and adaptation cues now render always-visible, in document order, with no click required. Each of the 12 chapters uses the approved six-part shell (preserved title/numbering, watch-for cue, video stage, guidance, adaptation cue where genuinely useful, next-step continuity), including the worked Chapter 5 example's exact approved copy. A native, keyboard-operable chapter-jump navigation list (12 anchor links) was added as a wayfinding aid, not counted as an interaction. The video stage intentionally exceeds the standard 680px reading column on desktop (confirmed 872px at a 1400px viewport, still zero page-level horizontal overflow) and remains full-width with no overflow at 375–390px. All 12 video positions, IDs, and `STEP_VIDEO_IDS` entries are unchanged and still `null`; no video, Vimeo ID, or poster was installed.
+
+**Interaction cleanup:** the dead "Tap each phase" hint is removed — the 7-phase grid is now labeled "Seven phases, at a glance," a genuine static orientation device. The format toggle gained real instructional function: selecting 1-Hour or 2-Hour now dims the other format's timing badges across all 12 chapters (confirmed programmatically — selecting 1-Hour dims exactly the 12 badges tagged `t-2hr`; selecting 2-Hour dims exactly the 11 non-2-hour badges, one fewer because Chapter 10/Hand Massage carries no 1-hour badge) and exposes selected state via `aria-pressed` plus a text "Selected" tag, not color alone. The per-step "Micro-teach" label is replaced with "What you might say" (the closing step keeps its approved "Closing script" label), and "Explain intentionally, not continuously" is stated once, prominently, before the chapter sequence begins.
+
+**"Protect the Flow" implemented per specification.** Three compare-and-decide scenarios (fragrance/touch preference change, an over-aggressive exfoliation approach needing to become gentler without elimination, and a processing-time adaptation), placed after Section 8.3 and before `m8cp1`. Confirmed by direct interaction testing: selecting an option applies a specific per-choice feedback string and a text tag ("Preserves the flow" / "Breaks the flow," never color alone), the reset control fully clears state, and no `localStorage`/`APP_STATE` write occurs at any point — confirmed byte-identical `levo_app` before and after exercising the interaction. The closing line ("The protocol gives structure. Judgment keeps it appropriate.") is a permanent, always-visible callout, not gated behind completing all three scenarios.
+
+**Both checkpoints corrected and verified byte-identical.** `m8cp1` and `m8cp2` now use the exact approved questions from `module-08.md`, and a programmatic comparison confirmed the displayed `.body-text` string and the evaluated `M8.questions.m8cp1`/`m8cp2` string are character-for-character identical for both. The single shared `M8.system` function is gone; `M8.systems.m8cp1` and `M8.systems.m8cp2` now exist as separate rubrics encoding each checkpoint's specific pass criteria, immediate-correction triggers, and one-focused-follow-up guidance from `module-08.md`'s "Checkpoint specification." `submitM8CP` now passes the approved module-specific network-error text as the 5th argument. Both checkpoints' voice buttons carry `aria-label="Speak your answer"`, both submit buttons carry `aria-label="Send response to Cadence"`, and both `.cp-response` regions carry `aria-live="polite"` — all confirmed present in the rendered DOM.
+
+**Cadence corrected.** `MODULE_GUIDE_SYSTEMS[8]` no longer says "HeadSpa Mastery," no longer claims "nearly two decades" personal experience, and no longer echoes the rebooking-causation claim — replaced verbatim with `module-08.md`'s approved guide-system string, reframing Cadence's Module 8 role as "service-flow and practitioner-judgment coach." `MODULE_QUICK_PROMPTS[8]` now matches the three approved prompts exactly ("How do I keep transitions smooth?", "How do I adapt a step without breaking the flow?", "What should I say when a client asks what I'm doing?"). The module-opening greeting was confirmed to already need no change, per `module-08.md`.
+
+**AIMT Service Timer introduced without a functional control.** A "Take the Service Into Practice" card, titled "AIMT Service Timer," was added after both checkpoints and before completion — informative, no dead or disabled-looking launch button, no invented hosting URL. Confirmed present with no `onclick`/link of any kind.
+
+**Downloadable:** none created, per `module-08.md`'s explicit "Not recommended at this stage" decision.
+
+**Accessibility and responsive work completed for Phase 1.** The 12 video-load trigger `<div>`s were converted to real `<button>` elements with chapter-specific `aria-label`s (e.g., "Play video: Step 01 — Aromatherapy Selection"), confirmed keyboard-focusable with a visible `:focus-visible` outline. The format toggle is now a pair of native `<button>` elements with `aria-pressed`. The dead accordion's unguarded `slideDown` animation was removed along with the accordion mechanic itself, rather than merely reduced-motion-guarded — there is no remaining chapter-transition/expand animation to guard. Confirmed zero horizontal overflow at 375×812 and 390×844 (programmatic `scrollWidth` check plus visual screenshots of the phase grid, a full chapter, "Protect the Flow," both checkpoints, and the Service Timer card, all at 375–390px). The hard-coded hero `<br>` is removed; the title now wraps naturally.
+
+**Completion and gating verified by direct state manipulation (outside Course Review Mode, which by design never persists).** With Module 7 marked complete, Module 8 became accessible; with only `m8cp1` passed, `isModuleComplete(8)` and `canAccessModule(9)` both remained false; only after both `m8cp1` and `m8cp2` were marked passed did `isModuleComplete(8)` become true, `canAccessModule(9)` become true, and the completion card render with the exact approved copy ("You can run the full service, adapt it when conditions change, and communicate with intention — not just recite the steps. Next: what happens between services."). "Protect the Flow" was confirmed to have no bearing on this gating at any point. Course Review Mode was separately confirmed to still route Module 8 checkpoint submissions through the existing unsaved-test path (no `APP_STATE` write, no `localStorage` write).
+
+**Regression check.** Modules 0, 1, 2, 3, 4, 5, 6, 7, and 9 were each reopened under Course Review Mode and confirmed to render distinct, non-empty content with zero console errors; no Module 8 change touched any other module's markup, JavaScript, or CSS (all edited classes/functions/objects were confirmed Module-8-exclusive before editing). Static validation also passed: every inline `<script>` block parses cleanly (`node --check`), `<div>`/`<button>` tag balance across the full `#module8Wrap` block is even, no duplicate element IDs were introduced, and all 17 step titles plus all 12 chapter labels were confirmed present verbatim by direct string comparison against `module-08-source.md` §4–§5.
+
+**This is implementation-level validation only — not full lifecycle static/mocked validation, and not manual QA.** Per `module-08.md`'s own acceptance criteria, items 31–37 (real video/poster/caption installation and the re-run of static/mocked validation and manual QA against real video) remain unmet and are explicitly deferred to Phase 2. **Module 8 is NOT ready for manual QA and NOT manually approved.** The AIMT Service Timer was not built, wired, or audited — only its non-functional introductory card was added, per instruction. Module 9 was not begun, modified, or extracted. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 external audit / approved specification created — August 17, 2026.** Created `docs/course-audit/modules/module-08.md`, converting an external audit of `module-08-source.md` — already reviewed and approved by the owner — into the controlling Module 8 specification. Status: **Approved for controlled implementation.** This was documentation only; no production file was modified, no video was installed or removed, the Service Timer was not touched, and Module 9 was not begun.
 
@@ -280,22 +310,22 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 ## Current gate
 
-Module 8 implementation.
+Module 8 final video installation (Phase 2).
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's approved specification (`docs/course-audit/modules/module-08.md`) now exists — external audit is complete. Modules 0–7 remain implemented and manually approved. The next lifecycle step is Module 8 implementation, which has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
 
 ---
 
 ## Exact next task
 
-Implement the approved **non-video** Module 8 specification (`module-08.md`'s "Phase 1") in `headspa-mastery.html` — curriculum/claims corrections, the video-led chapter presentation shells (with placeholder players preserved, not installed), interaction cleanup (phase map, format toggle, accordion removal), the new "Protect the Flow" interaction, checkpoint/Cadence/accessibility corrections, completion-copy correction, and the non-functional Service Timer introduction card — while preserving all 12 protected video-player positions and their current placeholder behavior. Final service-video installation (`module-08.md`'s "Phase 2") remains a later, explicitly gated implementation sub-step and is not authorized by this task's completion. This was not begun by this task.
+Install/wire the owner-provided real Module 8 service videos into the approved 12-chapter architecture (`module-08.md`'s "Phase 2" — acceptance items 31–37): the 12 Vimeo IDs into `STEP_VIDEO_IDS`, verified correct chapter/order/grouping with no duplicate or missing media; the 12 required video posters per the approved "Visual asset plan," sourced only from the real footage; captions/subtitles for spoken content; confirmed no autoplay and correct chapter-specific `title` attributes. Then re-run static/mocked validation with real video installed, and only then may owner manual QA and manual approval proceed. This was not begun by this task.
 
 ---
 
 ## Do not begin
 
-- Module 8 implementation (the exact next task, but explicitly not begun by this task — see "Exact next task")
-- Module 8 final video installation (Phase 2) — blocked until Phase 1 is complete, per `module-08.md`'s "Implementation boundary"
+- Module 8 final video installation (Phase 2) — the exact next task, but explicitly not begun by this task; blocked until real service videos and posters are supplied, per `module-08.md`'s "Implementation boundary"
+- Module 8 manual QA or manual approval — blocked until Phase 2 is complete and re-validated
 - The AIMT Head Spa Service Timer — not to be installed, integrated, audited, or modified; it is a known future companion tool with its own separate audit (see `module-08.md`'s "Service Timer" section)
 - Module 9
 - Module 12
@@ -362,7 +392,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner has reviewed Module 7 against this preview and manually approved it.
-- Push status: this task's Module 8 approved-specification commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's Module 8 Phase 1 (non-video) implementation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -370,7 +400,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's Module 8 approved-specification commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's Module 8 Phase 1 (non-video) implementation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `872193f` — Add approved Module 8 audit specification
 - `762fdd04b6479722ae304717f078ef0a90c4c850` — Extract Module 8 for external audit
 - `25afcf3654f4144acda027084a10104211d5b062` — Add Module 7 video production source
 - `847d31dc00b67d17cc81da74e959cc814e6fb6d5` — Approve Module 7 manual QA
