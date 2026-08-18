@@ -8,6 +8,8 @@
 **Status:** Approved for controlled implementation
 **Production source of truth:** `headspa-mastery.html`
 
+> **Amendment — August 18, 2026 (owner-directed Phase 1 remediation).** Following owner rendered review of the first Phase 1 implementation (commit `ed4d381`), four corrections were approved that supersede conflicting portions of this document below: (1) a global course-foundation-consistency requirement, recorded in `00-global-decisions.md` and applied to Section 8.2's typography and to both checkpoints' component structure; (2) the 12-chapter presentation is now **one contained masterclass player** showing the active chapter only, not twelve vertically stacked video stages; (3) **video completion is now required for Module 8 completion** — all 12 chapters, not just the two checkpoints; (4) the **AIMT Service Timer becomes a major feature section** with a functional ~3-step preview. Sections below marked "Amended" reflect this; unmarked sections remain controlling as originally approved. All 17 step titles, all 12 chapter labels, the exfoliation framework, the claims corrections, "Explain intentionally, not continuously," "Protect the Flow," and both checkpoints' questions/rubrics are unchanged by this amendment. Real video installation remains deferred to Phase 2.
+
 This document is the approved implementation specification for Module 8. It replaces the source extraction as the controlling Module 8 content authority.
 
 It does not authorize changes to authentication, entitlements, payments, database policies, certificate issuance, Modules 0–7, Module 9, the future Module 12 Final Exam, the AIMT Service Timer (a separately audited tool), or the monolithic course-file architecture. Nothing in this document authorizes video installation, image generation, downloadable production, or Service Timer work — those remain separate, later, or explicitly out-of-scope tasks.
@@ -142,20 +144,32 @@ If the final supplied footage contains distinct subclips within a grouped chapte
 
 ---
 
-## Video-led chapter architecture
+## Video-led chapter architecture — AMENDED August 18, 2026
 
-**Governing requirement:** the videos are the dominant instructional hierarchy. Module 8 should read as a guided technique masterclass, not a page of embedded videos with an accordion wrapped around them. The service-step accordion is removed as the module's primary presentation pattern (correction #8).
+**This section supersedes the original "12 vertically stacked chapter stages" design.** Owner rendered review of the first Phase 1 implementation found twelve consecutive full-size video stages visually excessive and too long as a page — rejected. The videos remain the dominant instructional hierarchy, but the module must present them as **one contained masterclass player**, not a scroll of embedded videos.
 
-**Approved chapter shell — applied to all 12 chapters:**
+**Governing requirement:** one primary masterclass component shows the **active chapter only**. The information around the player (title, watch-for cue, guidance, adaptation cue, continuity) changes with the active chapter. The remaining 11 chapters are represented in a compact chapter rail/progress indicator, not as additional full video stages rendered on the page.
 
-1. **Existing service-step title / numbering** — the preserved chapter label (e.g., "Step 05 — Scalp Massage"), always visible, never behind a click.
-2. **Concise orientation / "watch for" cue** — one or two sentences telling the student what to pay attention to in the demonstration before they watch it (e.g., pressure changes, hand transitions, sectioning). Short by design — it primes observation, it does not narrate the video.
-3. **Large, prominent video player** — see "Video player implementation requirements." The player may exceed the standard text column width on desktop.
-4. **Short practitioner guidance** — text that adds what the demonstration cannot show: why the step belongs here, pressure/intensity judgment, preparation, product or technique decision rules, mistakes beginners miss, client communication, safety/scope, and transitions. This is where each step's corrected content (per "Step-specific approved corrections") lives.
-5. **Adaptation/mistake/decision cue** — included only where genuinely useful (per-step judgment, not a mandatory field on all 12 chapters). Present for steps with real adaptation content: Step 04/05 (exfoliation and pressure), Step 07/12 (scope), and others where a beginner mistake or decision point is real and specific.
-6. **Next-step continuity** — a brief line connecting this chapter to the next, reinforcing flow rather than treating each chapter as an isolated unit.
+**Approved masterclass component — the six content fields are unchanged, applied to whichever chapter is currently active:**
 
-**Presentation is sequential, not accordion-gated.** All 12 chapters' orientation cues, guidance text, and adaptation cues render as always-visible content — nothing is hidden behind a "+"/"−" toggle the way the current accordion hides everything until clicked. A slim **chapter-jump navigation** (a list of the 12 preserved chapter labels that scrolls the page to that chapter) is a reasonable, optional wayfinding aid for a long page and should be implemented as a native, keyboard-operable navigation list — it is a navigation aid, not a graded or judgment-requiring interaction, and does not count toward interaction density (the same reclassification already applied to Module 7's tool-category accordion).
+1. **Existing service-step title / numbering** — the preserved chapter label (e.g., "Step 05 — Scalp Massage"), always visible for the active chapter.
+2. **Concise orientation / "watch for" cue** — one or two sentences priming observation, not narrating the video.
+3. **One large, prominent video stage** — see "Video player implementation requirements." May exceed the standard text column width on desktop. Only one video stage exists in the DOM/renders at a time.
+4. **Short practitioner guidance** — text carrying what the demonstration cannot show (per "Step-specific approved corrections"). **Must use the shared course body-text foundation** — see "Course foundation consistency."
+5. **Adaptation/mistake/decision cue** — included only where genuinely useful, same per-step judgment as before (Step 04/05, Step 07/12, others where real and specific).
+6. **Next-step continuity** — a brief line connecting the active chapter to the next.
+
+**Chapter progression (new, approved):**
+
+- Chapter 1 is available first; later chapters unlock in sequence as the required instructional video for the active chapter reaches genuine completion (a real player "ended"/completion event — not merely opening, starting, or seeking to the end).
+- A completed chapter remains available and may be replayed at any time.
+- The student can always see, without relying on color alone: the current chapter, which chapters are completed, and which remain locked/upcoming.
+- Clicking forward into a chapter that has not yet unlocked must not be possible in normal student mode — a student may not click through all 12 positions to manufacture completion.
+- The chapter rail/progress indicator must remain restrained: a simple segmented progress row plus a navigable list of chapter labels with their state is sufficient. No game-like reward styling (no confetti, no XP, no badges beyond a plain "completed" indicator).
+- On phone, do not render twelve small, unreadable, individually-tappable rail segments — a segmented progress bar paired with a current-chapter text readout ("Chapter 5 of 12 — Scalp Massage") and a full-width, one-row-per-chapter navigable list satisfies this without crowding.
+- **Course Review Mode may include a non-persisting inspection affordance** that lets a reviewer move freely through all 12 chapters without exercising real playback — this must be explicitly gated to Review Mode only, must not write real student progress, and must not be reachable in normal student mode. This is the one authorized exception to "no testing shortcut."
+
+**Phase 1 condition:** the real videos are not installed by this amendment. The masterclass architecture, chapter data, and completion-state plumbing are built now; genuine chapter completion cannot organically occur until Phase 2 wires a real completion event to each installed video. No chapter may be marked complete by loading, starting, or clicking through a video in normal student mode during Phase 1 — this is expected and correct, not a defect to route around with a fake completion.
 
 **What moves from "What you do" prose into which field:** the existing per-step "What you do" copy currently narrates hand movement, technique mechanics, and sectioning in prose (per `module-08-source.md` §4). Per the governing video/text division, movement, hand placement, sectioning, and physical technique become the video's job, not the paragraph's. Each chapter's guidance text (field 4 above) should be trimmed of pure movement narration and should carry forward, or add, the judgment-oriented content the video cannot show: why the step matters here, pressure/intensity reasoning, product/technique decisions, mistakes to avoid, safety/scope, and communication. This is a re-weighting of existing accurate content, not a wholesale rewrite — curriculum preservation still applies; only the specific corrections listed in "Required corrections" change substance.
 
@@ -281,9 +295,10 @@ This directly corrects `M8.system`'s current framing ("Micro-teach while doing..
 
 Applies to the eventual real-video implementation (deferred — see "Implementation boundary"); the shells and requirements below govern player behavior once installed.
 
-- Preserve all 12 legitimate chapter positions, IDs, and `STEP_VIDEO_IDS` entries.
+- Preserve all 12 legitimate chapter positions, IDs, and `STEP_VIDEO_IDS` entries — these remain the underlying data model even though only the active chapter's player renders at a time (see "Video-led chapter architecture — AMENDED").
 - **No autoplay.** Remove `autoplay=1` from the eventual embed configuration. A student's click to start a chapter's video should start that video only — never the next chapter's.
 - No forced automatic playback of any kind; no autoplay into the next chapter.
+- **Completion event (amended):** Phase 2 must wire the installed player's genuine "ended"/completion event to the video-chapter-completion state (see "Completion behavior — AMENDED"). Do not infer completion from opening, starting, or seeking a video.
 - Accessible, chapter-specific player titles/labels (each eventual `<iframe>`/`<video>` receives a `title` naming its preserved chapter label — corrects the current gap where no `title` attribute is ever set).
 - Responsive, mobile-comfortable playback at consistent proportions (16:9, matching the existing aspect-ratio approach).
 - Native/approved player controls — no custom chrome that hides standard play/pause/scrub/volume/fullscreen behavior.
@@ -362,7 +377,9 @@ Feedback for each scenario should reinforce this — naming what adaptation pres
 
 ### Shared technical requirements
 
-Preserve: IDs `m8cp1` and `m8cp2`; stored passed state; voice input; Enter to submit; Shift+Enter for a new line; Review Mode's unsaved behavior; Module 9 gating only after both checkpoints pass.
+**Component (amended August 18, 2026):** both checkpoints must use the canonical, most-recently-approved course checkpoint component — `.checkpoint` / `.cp-head` / `.cp-av` / `.cp-label` / `.cp-q` / `.cp-row` / `.cp-input-row` / `.cp-res` — the same structure used by Modules 0, 1, 2, 4, 5, 6, and 7 (verified identical across 5, 6, and 7; the `.cp-box`/`.cp-response` variant Module 8's first Phase 1 pass used is a pre-audit pattern shared only with the not-yet-audited Modules 9–10 and is not canonical). This is a presentation/component change only — Module 8's own approved questions and per-checkpoint rubrics below are unchanged.
+
+Preserve: IDs `m8cp1` and `m8cp2`; stored passed state; voice input; Enter to submit; Shift+Enter for a new line; Review Mode's unsaved behavior; Module 9 gating only after all 12 video chapters are complete and both checkpoints pass (see "Completion behavior — AMENDED").
 
 Add: checkpoint-specific rubrics; exact displayed/evaluated question equality; module-specific network-error text; `aria-label` on voice/submit buttons; `aria-live="polite"` on both `.cp-response` regions; one focused revision request for an incomplete answer; correction of unsafe or diagnostic reasoning.
 
@@ -481,22 +498,28 @@ Persistent Cadence threads remain deferred.
 
 ---
 
-## Service Timer
+## Service Timer — AMENDED August 18, 2026
 
-**Classification:** Recommended hosted student tool / practice companion. Not automatically classified as a conventional downloadable.
+**This section supersedes the original "informational card only" treatment.** Owner rendered review found the informational-card presentation too weak for what the Service Timer actually is — a major, practical, included professional tool, not a minor mention.
 
-**Likely eventual architecture:** hosted on the AIMT site, accessible from the student dashboard, introduced in Module 8, usable later during practice or real service execution. None of this is built by this specification — the timer receives its own, separate, dedicated audit. Its current timings, copy, service-step data, branding, safety language, and implementation are **not** approved authority for anything in this document and are not imported here.
+**Classification:** unchanged — recommended hosted student tool / practice companion, not a conventional downloadable.
 
-**Module 8 introduction — working conceptual placement:** a section near the end of the module, after the video-led instruction and "Protect the Flow," titled approximately **"Take the Service Into Practice."** It introduces the **AIMT Service Timer** by name and purpose:
+**Likely eventual architecture:** unchanged — hosted on the AIMT site, accessible from the student dashboard, introduced in Module 8. The complete Timer still requires its own, separate, dedicated audit before Module 8's final manual approval; nothing in this section substitutes for that audit.
 
-- help rehearse the service;
-- support pacing awareness;
-- give students a treatment-room companion once they understand the curriculum;
-- reduce the need to repeatedly reopen the full lesson during practice.
+**Module 8 presentation (amended):** a substantial feature section, still working title **"Take the Service Into Practice,"** featuring the **AIMT Service Timer**, positioned near the end of the module (after the video-led instruction and "Protect the Flow"). The visual hierarchy must communicate that this is a meaningful, included tool — a product moment, not a footnote — while avoiding exaggerated marketing language. It explains the Timer:
 
-**Implementation constraint:** do not create a fake or dead launch button. If the hosted timer is not yet ready at the time of initial (non-video) implementation, this section presents as an introductory card describing the tool and its purpose, with no non-functional "Launch" control. The actual link/launch control is added only once the timer is separately audited, approved, hosted, and functional.
+- is the student's service protocol, available anywhere;
+- helps rehearse the full service and build pacing awareness;
+- gives students a treatment-room companion once they understand the curriculum;
+- reduces the need to repeatedly reopen the full lesson during practice.
 
-**Exact final timer allocations are intentionally not frozen by this specification.** Module 8 may teach relative pacing, service rhythm, and where more or less time may be spent — it must not imply a service is wrong merely because a stopwatch passes an arbitrary second. Known differences between Module 8's current timing references and the owner's Service Timer are reconciled during the timer's own separate audit, not here.
+**Embedded functional preview (new, approved):** the section must contain an actual, usable, contained preview of the Timer — not a screenshot, not a video, not a decorative mockup — covering approximately the first three service steps (Aromatherapy Selection, Dry Brushing & Hair Play, Halo Activation & Wet Massage). Approved preview functionality: start, an active-step display, real countdown behavior, pause/resume, and a clear end-of-preview state after Step 3. The preview is a small, contained experience, not a second full application embedded in the page — the complete Timer remains the primary tool.
+
+**Timer source authority.** An owner-created Service Timer prototype exists outside this repository (found at `~/Downloads/AIMT-Service-Timer-clean.html` at the time of this amendment — a local file on the owner's machine, not part of `aimt-site`). The preview is derived from that real source's functional concept (mode/format select → active-step countdown with phase/note/next-step preview → pause/resume → completion state) and its actual Steps 01–03 timing values (5 min/5 min, 3 min/5 min, 5 min/8 min for 1-hour/2-hour respectively), which already match Module 8's own lesson timing badges for those steps. **Step 01's preview copy is reconciled with Module 8's approved consent/fragrance-optional correction** (the prototype's own Step 01 text predates that correction and does not mention the fragrance-free option or consent-before-touch by name) — this is the one substantive content change made to the borrowed source; Steps 02 and 03 needed no correction. **This narrow reconciliation is not a substitute for the Timer's own future dedicated audit**, which still governs the complete 17-step tool.
+
+**Implementation constraint (unchanged in spirit, sharpened):** do not create a fake or dead "Open Full Service Timer" launch control. If no verified hosted destination for the complete Timer exists at implementation time, the feature section and preview still ship; the full-Timer link is recorded as pending and is not rendered as a dead or disabled-looking actionable control in normal student mode.
+
+**Exact final timer allocations remain intentionally not frozen by this specification.** The preview's three step timings are the prototype's own current values, used because they already agree with the lesson's own badges — they are not new curriculum authority, and the complete Timer's full 17-step timing set is still reconciled during its own separate audit, not here.
 
 ---
 
@@ -607,7 +630,9 @@ Module 8 is intentionally media-light outside the real videos — the videos are
 
 ## Accessibility requirements
 
-- Semantic, keyboard-operable chapter navigation (the optional chapter-jump list) — no plain `<div onclick>`.
+- **Course foundation consistency (amended, new):** Section 8.2's instructional/guidance prose uses the shared `.body-text` treatment (font, size, line-height, color, measure) rather than a bespoke Module 8 size; both checkpoints use the canonical `.checkpoint` component. See `00-global-decisions.md`'s foundation-consistency standard and "Video-led chapter architecture — AMENDED" / "Checkpoint specification" above.
+- **Chapter rail/progress state (amended, new):** current, completed, and locked chapter states are each exposed as text/accessible-name information, not color alone; locked chapters are programmatically non-actionable (e.g., `disabled`/`aria-disabled`), not merely visually dimmed; the active chapter's identity is announced/available to assistive technology without requiring the rail itself.
+- Semantic, keyboard-operable chapter navigation (the chapter rail/list) — no plain `<div onclick>`.
 - Format toggle converted to a native, keyboard-operable control with correct pressed/selected state semantics (`aria-pressed` or equivalent) and a text/icon indicator in addition to color.
 - Full keyboard operability of every pre-play video trigger; visible focus on every interactive control.
 - Appropriate accessible names — chapter labels are exposed as real accessible names on their respective players and navigation entries, not only as visible text on a non-semantic `<div>`.
@@ -629,31 +654,42 @@ Do not claim manual assistive-technology QA is complete — none has been perfor
 Real phone use matters here specifically because students may reference this module near the treatment room.
 
 - Remove the hero's hard-coded `<br>`; let the title wrap naturally at all widths.
-- The large video player remains dominant but fits the viewport with no horizontal overflow at any width, including 375×812-class widths.
+- The one active video stage remains dominant but fits the viewport with no horizontal overflow at any width, including 375×812-class widths.
 - Chapter identity (label/number) remains visible at all times, including while a video plays.
+- **Chapter rail/progress on phone (amended, new):** no small, unreadable, individually-tappable twelve-segment rail — use a segmented progress indicator paired with a current-chapter text readout and a full-width, one-row-per-chapter navigable list; completed/current/locked meaning does not depend on color alone at any width.
 - Orientation cues, guidance text, and adaptation cues remain concise and legible on mobile — no truncation that hides judgment-relevant content.
-- Every control (format toggle, chapter-jump navigation, "Protect the Flow," checkpoints) is touch-friendly at a comfortable minimum target size.
+- Every control (format toggle, chapter rail, "Protect the Flow," checkpoints, the Timer preview) is touch-friendly at a comfortable minimum target size.
 - No component in this module may introduce horizontal overflow at 375×812.
 - Video posters, once installed, must not crop away the technique being demonstrated.
-- The "Take the Service Into Practice" / Service Timer introduction card must remain usable on phone once the timer is eventually linked.
+- **The Service Timer feature section and its 3-step preview (amended)** must remain usable on phone — contained, no horizontal overflow, controls touch-friendly.
 - Completion and both checkpoints remain comfortable on mobile.
 
 ---
 
-## Completion behavior
+## Completion behavior — AMENDED August 18, 2026
 
-**Required checkpoint state:** both `m8cp1` and `m8cp2` graded `passed`. No read-percentage minimum, no video-watch-percentage minimum, no accordion-open count, no interaction-click count, no Service Timer use requirement.
+**This section supersedes the original checkpoints-only completion rule.** Owner-approved change: video completion is now part of Module 8 competency, not merely a presentation upgrade.
+
+**Required for `isModuleComplete(8)`:**
+
+1. All 12 required instructional video chapters marked complete (genuine player completion event, once Phase 2 installs real video — see "Video-led chapter architecture — AMENDED").
+2. `m8cp1` graded `passed`.
+3. `m8cp2` graded `passed`.
+
+No read-percentage minimum, no accordion-open count, no interaction-click count, no Service Timer (or Service Timer preview) use requirement. **Does not gate on:** "Protect the Flow," the format toggle, or the Service Timer preview.
 
 **Does "Protect the Flow" gate completion:** no. It remains ungraded; it neither writes progress nor is checked at completion time.
 
-**Approved completion-card competency language** (replaces the current unconditional "You know the map" framing, which does not depend on any actual engagement with the video content):
+**Approved completion-card competency language** (unchanged from the original amendment):
 
 > **Module complete.**
 > You can run the full service, adapt it when conditions change, and communicate with intention — not just recite the steps. Next: what happens between services.
 
-**Module 9 unlock:** unchanged — `APP_STATE.canAccessModule(9)` still requires `isModuleComplete(8)` (both checkpoints passed).
+**Module 9 unlock:** `APP_STATE.canAccessModule(9)` requires `isModuleComplete(8)`, which now requires all 12 video chapters complete **and** both checkpoints passed — not checkpoints alone.
 
-**Review Mode:** unchanged — routes through the existing shared unsaved-test-submission path.
+**Review Mode:** unchanged for checkpoints — routes through the existing shared unsaved-test-submission path. For video-chapter state, Review Mode may use its own non-persisting inspection affordance (see "Video-led chapter architecture — AMENDED") but must never write real chapter-completion progress.
+
+**Phase 1 implication:** because no real video exists yet, no student can complete all 12 video chapters during Phase 1 — Module 8 (and therefore Module 9) cannot be organically completed by a real student until Phase 2 installs real video. This is an accurate, expected Phase 1 state, not a defect.
 
 ---
 
@@ -713,7 +749,7 @@ Implementation is not complete until all of the following are verifiable.
 
 1. All 17 step titles and all 12 chapter labels are unchanged from `module-08-source.md` §4–§5 — verified by direct string comparison, not visual inspection alone.
 2. Hero eyebrow, title, and description are unchanged except for removal of the hard-coded `<br>`.
-3. The service-step accordion is no longer the module's primary presentation pattern; all 12 chapters' orientation cues, guidance text, and adaptation cues render without requiring a click to reveal.
+3. **(Amended)** The service-step accordion is no longer the module's primary presentation pattern; Module 8 presents one contained masterclass player showing the active chapter's orientation cue, guidance text, and adaptation cue, with the remaining 11 chapters represented in a chapter rail/progress list, not as additional full video stages — see "Video-led chapter architecture — AMENDED."
 4. The 7-phase concept grid no longer displays the "Tap each phase" (or equivalent) interaction hint.
 5. The format toggle has real instructional function (timing-badge emphasis tied to selection) and a non-color-only selected-state indicator.
 6. Step 01's guidance and example client language reflect optional fragrance, consent-before-touch, and optional (not required) eyes-closed framing.
@@ -733,7 +769,7 @@ Implementation is not complete until all of the following are verifiable.
 20. Both checkpoint voice buttons carry `aria-label="Speak your answer"`; both submit buttons carry `aria-label="Send response to Cadence"`; both `.cp-response` regions carry `aria-live="polite"`.
 21. `M8.systems.*`/`MODULE_GUIDE_SYSTEMS[8]` no longer contain "HeadSpa Mastery," the "nearly two decades" personal-experience claim, or the rebooking-causation claim.
 22. `MODULE_QUICK_PROMPTS[8]` matches the three approved prompts exactly.
-23. All 12 video-player shells/slots remain present and functional (showing the existing placeholder state) throughout this phase — none removed, consolidated, or replaced with static imagery.
+23. **(Amended)** All 12 video-chapter positions and `STEP_VIDEO_IDS` entries remain present in the data model (showing the existing placeholder state when active) throughout this phase — none removed, consolidated, or replaced with static imagery; only one chapter's player renders/is active in the DOM at a time, per "Video-led chapter architecture — AMENDED."
 24. The Service Timer introduction card is present with no functional launch control (no dead button).
 25. The completion card no longer contains "You know the map" as an unconditional claim and instead uses the approved replacement copy.
 26. Module 9 unlock behavior is unaffected (still requires both `m8cp1` and `m8cp2` passed).
@@ -741,6 +777,18 @@ Implementation is not complete until all of the following are verifiable.
 28. Mobile viewport (375×812) shows no horizontal overflow across the chapter sequence, format toggle, "Protect the Flow," and both checkpoints.
 29. Review Mode continues to route Module 8 checkpoint test submissions through the existing unsaved test path.
 30. `prefers-reduced-motion` guard exists on any chapter-transition/expand animation.
+
+**Phase 1 remediation acceptance criteria (added August 18, 2026 — owner-directed amendment):**
+
+R1. Section 8.2's instructional/guidance prose uses the shared `.body-text` treatment — verified by class/computed-style comparison, not visual inspection alone.
+R2. Both checkpoints use the canonical `.checkpoint`/`.cp-head`/`.cp-av`/`.cp-q`/`.cp-row`/`.cp-res` component structure, matching Modules 5, 6, and 7; the pre-audit `.cp-box`/`.cp-response` pattern is no longer used by Module 8.
+R3. Only one video stage renders/is active at a time; all 12 chapter identities and `STEP_VIDEO_IDS` entries remain present in the underlying data/navigation.
+R4. A chapter rail/progress indicator exposes current, completed, and locked state via text/accessible name, not color alone; locked chapters are not clickable/reachable in normal student mode.
+R5. A video-chapter-completion state architecture exists (12 individually identifiable chapter-completion flags per module, persisted the same way checkpoint state is persisted, respecting Review Mode's unsaved behavior) even though no chapter can organically complete until Phase 2 installs real video.
+R6. `isModuleComplete(8)` requires all 12 video chapters complete **and** both checkpoints passed; `canAccessModule(9)` reads this combined state.
+R7. No normal-student-mode control can mark a chapter complete without a genuine completion event; any Review-Mode-only inspection affordance is explicitly gated and writes no real progress.
+R8. The Service Timer section is a substantial feature presentation (not a small informational card) containing a functional, contained ~3-step preview (start/active step/countdown/pause/resume/end state) with no fake "Open Full Service Timer" control.
+R9. No regression to the approved Section 8.2 step-specific corrections, "Protect the Flow," Cadence identity, or claims corrections already implemented in the first Phase 1 pass.
 
 **Phase 2 (video installation) — blocks manual QA and manual approval until met:**
 
@@ -761,6 +809,7 @@ No implementation task may mark Module 8 "Implemented — manual QA approved" wh
 - The video-led chapter shell (title, cue, player, guidance, adaptation cue, continuity) is specified once with a worked example (Chapter 5) rather than fully rewritten for all 12 chapters in this document — implementation should apply the same shell and re-weighting rule to the remaining 11 chapters, preserving all curriculum content not explicitly corrected above.
 - The chapter-jump navigation is an optional wayfinding aid, not a required element — if implementation finds the video-led sequence sufficiently navigable without it (e.g., because the page is not excessively long once player shells are sized appropriately), it may be omitted without violating this specification.
 - Do not silently reintroduce the removed physiological, business-outcome, or superlative claims during implementation "for flavor" — their removal is a deliberate audit decision, not an oversight to be reversed.
+- The August 18, 2026 amendment (masterclass single-player, video completion requirement, checkpoint/typography foundation match, Service Timer feature promotion) is owner-directed and supersedes the corresponding original Phase 1 design decisions above; it does not reopen or change the curriculum/claims corrections, "Protect the Flow," or Cadence corrections from the original specification.
 - Do not begin Module 9 extraction, implementation, or any certificate/completion-flow work as a result of this specification.
 - Do not install, link, or modify the AIMT Service Timer as a result of this specification — it remains a separately audited future tool; only its introductory card (with no functional launch control) belongs to this module's implementation.
 - Implementation of this specification is a separate, later task. Phase 1 may proceed independently; Phase 2 (video installation) and everything after it (static/mocked validation with real video, rendered manual QA, owner manual approval) are explicitly blocked until Phase 1 is complete and the real service videos are available to install.

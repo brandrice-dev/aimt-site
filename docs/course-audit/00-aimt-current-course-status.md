@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 17, 2026 (Module 8 Phase 1 non-video implementation)
+**Last updated:** August 18, 2026 (Module 8 Phase 1 owner-review remediation)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's Module 8 Phase 1 (non-video) implementation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `872193f` — "Add approved Module 8 audit specification", pushed to `origin/course-audit-build`.
+- Latest controlling commit: pending — this task's Module 8 Phase 1 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `ed4d381` — "Implement Module 8 non-video experience", pushed to `origin/course-audit-build`.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,24 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 1 owner-review remediation — August 18, 2026.** The owner reviewed the rendered Phase 1 implementation (commit `ed4d381`) and identified four blocking design/system issues, approved as an amendment to `module-08.md` and a new global rule in `00-global-decisions.md`, then remediated in production. Real video installation was explicitly not part of this task and remains deferred.
+
+**1. Global course-foundation-consistency rule added.** `00-global-decisions.md` now documents which elements must stay consistent across every approved module (body typography, checkpoint structure/controls, semantic colors, spacing, accessibility patterns) versus what may legitimately vary per module's own learning experience, plus a determination procedure for future audits. Applied immediately to Module 8: Section 8.2's instructional/guidance prose now uses the shared `.body-text` treatment instead of bespoke smaller sizing (verified: the "sms-what"/"sms-watchfor" rules now only add italic/color/margin, never override font-size or line-height).
+
+**2. Both checkpoints rebuilt on the canonical `.checkpoint` component.** Inspection of Modules 5, 6, and 7 (identical across all three, so no ambiguity to resolve) found Module 8 was using an older `.cp-box`/`.cp-response` pattern that only the not-yet-audited Modules 9–10 still use — a stale CSS comment had incorrectly labeled `.cp-box` the "new pattern (modules 7–10)" even though Module 7's own approved implementation never adopted it. Module 8's `m8cp1`/`m8cp2` now use `.checkpoint`/`.cp-head`/`.cp-av`/`.cp-q`/`.cp-row`/`.cp-res`, matching Modules 5–7 exactly (auto-growing textarea, icon-only submit button, `.cp-res` feedback class) — the stale comment was corrected in place. Module 8's own approved questions, per-checkpoint rubrics, and displayed/evaluated byte-identity are unchanged and re-verified.
+
+**3. Twelve stacked video chapters replaced with one contained masterclass player.** The owner rejected the first Phase 1 pass's twelve consecutive full-size video stages as visually excessive. Section 8.2 now shows one active chapter at a time (title, watch-for cue, single video stage, guidance, adaptation cue, continuity, Prev/Next), backed by a `M8_CHAPTERS` data array and a full-width, one-row-per-chapter navigable list (not a cramped twelve-segment rail) showing Completed/Current/Locked state via text, never color alone. All 12 chapter identities, labels, and `STEP_VIDEO_IDS` positions are unchanged and preserved as the underlying data model — confirmed by direct DOM inspection that exactly one `.m8-video-stage` renders in the live copy at a time.
+
+**4. Video completion is now required for Module 8 completion.** `assets/js/headspa-state.js` gained a video-chapter-completion architecture (`videoChapters.completed[]`/`current` per module, sanitized, `MODULE_REQUIRED_VIDEO_CHAPTERS` config, `setVideoChapterComplete`/`isVideoChapterUnlocked`/`_isModuleFullyComplete`) that only affects Module 8 — every other module's completion path is provably unchanged since they declare no video requirement. `isModuleComplete(8)` now requires all 12 video chapters complete **and** both checkpoints passed; `_checkModuleComplete`, `reconcileModuleState`, `setCheckpointResult`, and `_syncDerivedState` were all updated to the combined check. Verified end-to-end: both checkpoints passed with videos incomplete → module not complete, Module 9 inaccessible; completing the 12th video afterward → module complete, Module 9 accessible, completion card reveals (a gap found and fixed during validation — video completion now triggers the same completion-card reveal a passing checkpoint does, via a new `APP_STATE._checkModuleComplete(8)` call in the Phase-2-ready `markVideoChapterEnded()` hook). In normal student mode, chapters unlock strictly in sequence via a genuine completion event only — clicking a placeholder "Video coming soon" trigger does not complete a chapter. Course Review Mode has its own inspection bypass (clicking the placeholder trigger simulates completion for review purposes only) that writes no real progress, verified by confirming zero `localStorage` writes during Review Mode use.
+
+**Service Timer promoted to a major feature with a functional 3-step preview.** The prior small informational card is replaced with a substantial dark feature section ("AIMT Service Timer," "Included with your certification") plus a contained, working preview covering Steps 01–03: start, live per-second countdown, pause/resume, manual skip, and a clear end-of-preview state — built from the owner's real Service Timer prototype found at `~/Downloads/AIMT-Service-Timer-clean.html` (a local file outside the repository; the two older duplicate copies in the same folder were identical to each other and superseded by the "-clean" file's later modification date). The prototype's own Step 01 copy was reconciled with Module 8's approved fragrance-optional/consent-before-touch correction (the prototype predates that correction and didn't mention the fragrance-free option); Steps 02–03 needed no change on review. The preview's timings are the prototype's own current Step 01–03 values, which already match this module's lesson timing badges — not new curriculum authority. No "Open Full Service Timer" link was added (none exists to link to); the full Timer explicitly still requires its own separate, dedicated audit, stated in the card's own footer text.
+
+**Validation.** All inline `<script>` blocks parse cleanly; full `<div>`/`<button>`/`<ol>`/`<li>`/`<nav>` tag balance across `#module8Wrap` is even; no new duplicate element IDs (one harmless vestigial duplicate ID was found and removed during this pass; the one remaining file-wide duplicate, `studentFirstName`, predates this task and is unrelated); both checkpoints' displayed/evaluated question strings remain byte-identical; all 17 step titles and 12 chapter labels confirmed present verbatim. Browser validation (Course Review Mode and normal mode, both re-verified after resolving two browser-cache false alarms during testing — the underlying code was correct both times) confirmed: exactly one video stage in the live DOM; format toggle, "Protect the Flow," and both checkpoints all still function; zero horizontal overflow at 390×844; zero console errors across a full regression open of Modules 0, 1, 2, 3, 4, 5, 6, 7, and 9.
+
+**This is implementation-level validation only.** Real video installation (Phase 2) remains unmet. **Module 8 is NOT ready for manual QA and NOT manually approved.** The Service Timer was not built as a full tool and was not separately audited — only the narrow Step 1–3 consistency check described above was performed, exactly as the amendment scoped. Module 9 was not begun, modified, or extracted. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 1 (non-video) implementation — August 18, 2026.** Implemented the approved `module-08.md` specification in `headspa-mastery.html`, covering every Phase 1 acceptance item (1–30) except real video installation, which is explicitly out of scope for this task and remains Phase 2.
 
@@ -312,13 +330,13 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 Module 8 final video installation (Phase 2).
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation, including the August 18, 2026 owner-review remediation (masterclass single-player, video-completion requirement, checkpoint/typography foundation match, Service Timer feature promotion), is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
 
 ---
 
 ## Exact next task
 
-Install/wire the owner-provided real Module 8 service videos into the approved 12-chapter architecture (`module-08.md`'s "Phase 2" — acceptance items 31–37): the 12 Vimeo IDs into `STEP_VIDEO_IDS`, verified correct chapter/order/grouping with no duplicate or missing media; the 12 required video posters per the approved "Visual asset plan," sourced only from the real footage; captions/subtitles for spoken content; confirmed no autoplay and correct chapter-specific `title` attributes. Then re-run static/mocked validation with real video installed, and only then may owner manual QA and manual approval proceed. This was not begun by this task.
+Install/wire the owner-provided real Module 8 service videos into the approved masterclass architecture (`module-08.md`'s "Phase 2" — acceptance items 31–37, plus this task's `markVideoChapterEnded()` completion hook): the 12 Vimeo IDs into `STEP_VIDEO_IDS`, verified correct chapter/order/grouping with no duplicate or missing media; wire each installed player's genuine completion/"ended" event to `markVideoChapterEnded(chapterIndex)` so the video-chapter-completion requirement (now part of Module 8 completion) is driven by real playback, not a placeholder; the 12 required video posters per the approved "Visual asset plan," sourced only from the real footage; captions/subtitles for spoken content; confirmed no autoplay and correct chapter-specific `title` attributes. Then re-run static/mocked validation with real video installed, and only then may owner manual QA and manual approval proceed. This was not begun by this task.
 
 ---
 
@@ -392,7 +410,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner has reviewed Module 7 against this preview and manually approved it.
-- Push status: this task's Module 8 Phase 1 (non-video) implementation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's Module 8 Phase 1 owner-review remediation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -400,7 +418,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's Module 8 Phase 1 (non-video) implementation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's Module 8 Phase 1 owner-review remediation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `ed4d381` — Implement Module 8 non-video experience
 - `872193f` — Add approved Module 8 audit specification
 - `762fdd04b6479722ae304717f078ef0a90c4c850` — Extract Module 8 for external audit
 - `25afcf3654f4144acda027084a10104211d5b062` — Add Module 7 video production source

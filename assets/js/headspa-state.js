@@ -170,7 +170,13 @@
       lastVisitedAt: null,
       lastScrollY: 0,
       maxReadPercent: 0,
-      completedAt: null
+      completedAt: null,
+      /* Video-chapter completion (currently only Module 8's masterclass
+         player uses this — see MODULE_REQUIRED_VIDEO_CHAPTERS). `completed`
+         holds distinct chapter indices (0-based) marked complete by a real
+         player completion event; `current` is a resume convenience only and
+         never gates anything. */
+      videoChapters: { completed: [], current: 0 }
     };
   }
 
@@ -407,6 +413,15 @@
           updatedAt
         };
       });
+      const rawVideo = raw && raw.videoChapters && typeof raw.videoChapters === 'object' ? raw.videoChapters : null;
+      const completedVideoChapters = Array.isArray(rawVideo && rawVideo.completed)
+        ? Array.from(new Set(
+            rawVideo.completed
+              .map((n) => sanitizeNumber(n, -1))
+              .filter((n) => Number.isInteger(n) && n >= 0 && n < 12)
+          )).sort((a, b) => a - b)
+        : [];
+
       progress[id] = {
         checkpoints: Array.isArray(raw && raw.checkpoints)
           ? raw.checkpoints.filter((cp) => typeof cp === 'string')
@@ -418,7 +433,11 @@
         lastVisitedAt: sanitizeNumber(raw && raw.lastVisitedAt, null),
         lastScrollY: Math.max(0, sanitizeNumber(raw && raw.lastScrollY, 0)),
         maxReadPercent: Math.max(0, Math.min(100, sanitizeNumber(raw && raw.maxReadPercent, 0))),
-        completedAt: sanitizeNumber(raw && raw.completedAt, null)
+        completedAt: sanitizeNumber(raw && raw.completedAt, null),
+        videoChapters: {
+          completed: completedVideoChapters,
+          current: Math.max(0, Math.min(11, sanitizeNumber(rawVideo && rawVideo.current, 0)))
+        }
       };
     }
     return progress;
@@ -520,8 +539,8 @@
       for (let i = 0; i < MODULE_COUNT; i++) {
         const mod = this.reconcileModuleState(i);
         const required = this.getRequiredCheckpointIds(i);
-        if (required.length) {
-          mod.complete = this._hasAllRequiredCheckpoints(i);
+        if (required.length || this.getRequiredVideoChapterCount(i)) {
+          mod.complete = this._isModuleFullyComplete(i);
         }
         mod.unlocked = i === 0 || this.isModuleComplete(i - 1);
         if (!mod.complete) {
@@ -569,7 +588,7 @@
         return !!(meta && meta.status === 'passed');
       });
 
-      mod.complete = this._hasAllRequiredCheckpoints(moduleId);
+      mod.complete = this._isModuleFullyComplete(moduleId);
       if (mod.complete && !mod.completedAt) {
         mod.completedAt = now();
       }
@@ -592,6 +611,92 @@
       });
     },
 
+    /* ── Video-chapter completion (Module 8 masterclass player) ──
+       Declared via window.MODULE_REQUIRED_VIDEO_CHAPTERS[moduleId] = count
+       (see headspa-mastery.html). Modules without an entry are unaffected —
+       this never changes behavior for Modules 0–7, 9–11. */
+    getRequiredVideoChapterCount(moduleId) {
+      const all = window.MODULE_REQUIRED_VIDEO_CHAPTERS || {};
+      return Math.max(0, sanitizeNumber(all[String(moduleId)], 0));
+    },
+
+    getCompletedVideoChapters(moduleId) {
+      return this.getModuleProgress(moduleId).videoChapters.completed.slice();
+    },
+
+    isVideoChapterComplete(moduleId, chapterIndex) {
+      return this.getModuleProgress(moduleId).videoChapters.completed.indexOf(Number(chapterIndex)) !== -1;
+    },
+
+    /* A chapter is reachable in normal student mode once the chapter before
+       it is complete (chapter 0 is always reachable); a completed chapter
+       stays reachable so it can be replayed. Review Mode may bypass this in
+       the UI layer for inspection only — this method itself never checks
+       Review Mode, so it always reflects the real, would-be-locked state. */
+    isVideoChapterUnlocked(moduleId, chapterIndex) {
+      const idx = Number(chapterIndex);
+      if (idx <= 0) return true;
+      const completed = this.getModuleProgress(moduleId).videoChapters.completed;
+      return completed.indexOf(idx) !== -1 || completed.indexOf(idx - 1) !== -1;
+    },
+
+    _hasAllRequiredVideoChapters(moduleId) {
+      const required = this.getRequiredVideoChapterCount(moduleId);
+      if (!required) return true;
+      return this.getCompletedVideoChapters(moduleId).length >= required;
+    },
+
+    /* Combined checkpoint + video-chapter requirement — the single source
+       of truth for module completion. For modules with no declared video
+       requirement this reduces to _hasAllRequiredCheckpoints exactly as
+       before. */
+    _isModuleFullyComplete(moduleId) {
+      return this._hasAllRequiredCheckpoints(moduleId) && this._hasAllRequiredVideoChapters(moduleId);
+    },
+
+    /* Marks one chapter genuinely complete (intended to be called only from
+       a real player completion/"ended" event once Phase 2 installs real
+       video — never from opening, starting, or seeking a video). No-ops
+       outside the valid chapter range. Respects Course Review Mode via the
+       shared save() guard, exactly like setCheckpointResult. */
+    setVideoChapterComplete(moduleId, chapterIndex) {
+      const idx = Number(chapterIndex);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= 12) return;
+      const mod = this.getModuleProgress(moduleId);
+      if (mod.videoChapters.completed.indexOf(idx) === -1) {
+        mod.videoChapters.completed.push(idx);
+        mod.videoChapters.completed.sort((a, b) => a - b);
+      }
+      mod.videoChapters.current = Math.min(11, idx + 1);
+      mod.lastVisitedAt = now();
+      if (!mod.startedAt) mod.startedAt = mod.lastVisitedAt;
+
+      mod.complete = this._isModuleFullyComplete(moduleId);
+      if (mod.complete && !mod.completedAt) {
+        mod.completedAt = now();
+      }
+      if (!mod.complete) {
+        mod.completedAt = null;
+      }
+
+      this.data.resume.moduleId = Number(moduleId);
+      this.data.resume.updatedAt = now();
+      this.save();
+    },
+
+    /* Resume convenience only — which chapter the student was last viewing.
+       Never used to gate access or completion. */
+    setActiveVideoChapter(moduleId, chapterIndex) {
+      const idx = Math.max(0, Math.min(11, Number(chapterIndex) || 0));
+      const mod = this.getModuleProgress(moduleId);
+      mod.videoChapters.current = idx;
+      this.save();
+    },
+
+    getActiveVideoChapter(moduleId) {
+      return this.getModuleProgress(moduleId).videoChapters.current || 0;
+    },
+
     getCheckpointMeta(moduleId, cpId) {
       const mod = this.getModuleProgress(moduleId);
       if (!mod.checkpointMeta[cpId]) {
@@ -612,7 +717,7 @@
       if (!mod.startedAt) mod.startedAt = meta.updatedAt;
 
       this.reconcileModuleState(moduleId);
-      mod.complete = this._hasAllRequiredCheckpoints(moduleId);
+      mod.complete = this._isModuleFullyComplete(moduleId);
       if (mod.complete && !mod.completedAt) {
         mod.completedAt = now();
       }
@@ -738,7 +843,7 @@
 
     _checkModuleComplete(moduleId) {
       const mod = this.getModuleProgress(moduleId);
-      const isComplete = this._hasAllRequiredCheckpoints(moduleId);
+      const isComplete = this._isModuleFullyComplete(moduleId);
       if (!isComplete) {
         mod.complete = false;
         mod.completedAt = null;
@@ -766,8 +871,8 @@
     isModuleComplete(moduleId) {
       if (Number(moduleId) < 0) return true;
       const mod = this.getModuleProgress(moduleId);
-      if (this.getRequiredCheckpointIds(moduleId).length) {
-        return this._hasAllRequiredCheckpoints(moduleId);
+      if (this.getRequiredCheckpointIds(moduleId).length || this.getRequiredVideoChapterCount(moduleId)) {
+        return this._isModuleFullyComplete(moduleId);
       }
       return mod.complete;
     },

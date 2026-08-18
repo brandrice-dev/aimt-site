@@ -214,6 +214,44 @@ From this point forward, every module audit (`module-XX.md`) must document:
 
 ---
 
+## Course foundation consistency (added August 18, 2026)
+
+Owner rendered review of Module 8's first Phase 1 implementation identified visible foundation drift — most concretely, Section 8.2's instructional-copy typography and the checkpoint component both departed from the pattern already established and manually approved in Modules 5–7. This is now a standing rule for every future module audit and implementation, not a one-time Module 8 fix.
+
+**Module-specific learning experiences may differ. The foundation should not.**
+
+Distinct module learning experiences are encouraged *above* the foundation — Module 7's visual judgment cards, Module 8's masterclass video player, and a future module's matching or sequencing interaction are all legitimate, different "rooms" in the same course. They must not become different software products by drifting on the elements below.
+
+### What counts as foundation (must stay consistent across approved modules)
+
+- Body typography and instructional-text styling (the shared `.body-text` treatment: font, size, line-height, weight, color, measure).
+- Heading hierarchy (`.sec-eyebrow` / `.sec-title` conventions).
+- Eyebrow/section-label treatment.
+- Copy width (established `ch`-based measures, not ad hoc values).
+- Paragraph spacing and card spacing logic.
+- Semantic colors — success/error/warning/neutral states (see the existing Module 4 semantic baseline below).
+- Checkpoint visual structure and component markup.
+- Checkpoint textarea/input treatment (including auto-grow behavior).
+- Voice control presentation.
+- Submit control presentation.
+- Loading state.
+- Revision feedback, passed feedback, and network-error feedback presentation.
+- Accessible labels and focus treatment.
+- Interaction-control baseline (native semantic controls, not bespoke non-semantic elements, for equivalent interaction types).
+- Mobile spacing behavior.
+
+### How to apply this during a module audit or implementation
+
+1. **Do not guess the current foundation.** Before implementing or correcting a module, inspect the most recently manually approved modules (not the oldest, and not whichever file happens to be open) to confirm the governing pattern actually in production today.
+2. **If approved modules disagree with each other,** determine which pattern is the most recently manually approved governing pattern, use that one, and record the determination in the module's own audit file — do not average or invent a third option.
+3. **A module may introduce a new component for its own distinct learning experience** (a masterclass player, a matching board, a scenario deck) — but any *foundation* element that component touches (its body copy, its checkpoint if it has one, its semantic states) must still use the shared tokens and patterns, not a bespoke reimplementation.
+4. **Stale scaffolding is not authority.** If a code comment or an old CSS block claims to be the "new pattern" for a set of modules but the modules actually shipped and approved since then use something else, the shipped/approved pattern governs, and the stale comment should be corrected, not followed.
+5. **Do not broadly restyle already-approved modules to fix a drift found elsewhere** — correct the drifting module to match the foundation; a repo-wide restyle is a separate, deliberate, later decision, not an automatic consequence of finding drift.
+
+This does not authorize a full design-system rewrite or a new visual language — it is a consistency check against what the course already has, applied going forward to every module audit.
+
+---
+
 ## Varied learning rhythm
 
 Do not force every module into the same structural template. The Welcome
