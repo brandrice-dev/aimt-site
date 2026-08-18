@@ -61,11 +61,11 @@ assumed.
 
 ---
 
-## Approved titles and practitioner payoffs — Modules 0–6
+## Approved titles and practitioner payoffs — Modules 0–7
 
-Only these seven modules have a completed, approved audit and manual
-approval (`docs/course-audit/modules/module-0{0,1,2,3,4,5,6}.md`, each with
-an "Approve Module N audit"/manual-approval step in
+Only these eight modules have a completed, approved audit and manual
+approval (`docs/course-audit/modules/module-0{0,1,2,3,4,5,6,7}.md`, each
+with an "Approve Module N audit"/manual-approval step in
 `implementation-log.md`). Titles and payoffs below are drawn from those
 approved specifications.
 
@@ -142,20 +142,34 @@ modify, pause, or refer — without diagnosing. See
 [`module-06-video-source.md`](module-06-video-source.md) for the complete
 video-source brief.
 
+### Module 7 — Equipment & Room Setup
+
+**Hero headline:** "Before the service starts, your setup is already
+speaking."
+**Practitioner payoff:** Teaches the student to build the physical and
+procedural system the rest of the course happens inside — evaluating a
+bed by function rather than appearance, organizing a station by
+reach-zone and service sequence, and positioning a client using three
+concrete checks, including the non-alarmist safety context for why
+sustained neck hyperextension is avoided and the stop/adjust/communicate/
+resume sequence for a live setup or comfort problem. See
+[`module-07-video-source.md`](module-07-video-source.md) for the complete
+video-source brief.
+
 ---
 
-## Modules 7–12 — Awaiting audit
+## Modules 8–12 — Awaiting audit
 
 | Module | Status |
 |---|---|
-| Modules 7–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
+| Modules 8–11 | **Awaiting audit.** Not yet extracted. No source or specification files exist. |
 | Module 12 — Final Exam | **Awaiting audit.** Approved only as a structural placeholder (see "Student-facing module sequence" above) — no content, design, or technical implementation is approved. |
 
 Do not invent titles, hero lines, outcomes, or continuity detail for any
-module in this table. Where a module's relationship to Module 6 needs to be
-described (e.g., "what comes next"), state only what Module 6's own approved
-spec says about its handoff position — Module 6 precedes Module 7, and
-detailed continuity toward Module 7 is awaiting Module 7's own audit — and
+module in this table. Where a module's relationship to Module 7 needs to be
+described (e.g., "what comes next"), state only what Module 7's own approved
+spec says about its handoff position — Module 7 precedes Module 8, and
+detailed continuity toward Module 8 is awaiting Module 8's own audit — and
 go no further than that.
 
 ---

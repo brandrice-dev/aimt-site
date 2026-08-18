@@ -457,7 +457,15 @@ findings list.
 
 A minor documentation-only correction was also made: correction #6's "See 'Final replacement copy' for the corrected note" pointed to a section that does not exist in `module-07.md`; the already-implemented corrected copy was quoted inline in its place. No curriculum was changed.
 
-**Video-source creation is now the current gate** — `docs/course-video-sources/module-07-video-source.md` does not yet exist. See Step 51 in `implementation-log.md` for the full record. Module 8 remains blocked until that file exists.
+**Video-source created (Step 52).**
+[`docs/course-video-sources/module-07-video-source.md`](../../course-video-sources/module-07-video-source.md)
+is now the approved primary authority for a future, separately scoped
+video-production task — status **Approved for video production**. This
+completes lifecycle step 9 for Module 7. `docs/course-video-sources/00-aimt-course-map.md`
+was narrowly updated to add Module 7's entry and move it out of the
+"awaiting audit" table; `docs/course-video-sources/00-aimt-video-direction.md`
+required no change. **Module 7's full lifecycle is now complete — the
+current gate is Module 8 source extraction**, which has not begun.
 
 ### Prior task (unchanged, recorded for continuity)
 
