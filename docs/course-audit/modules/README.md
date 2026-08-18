@@ -525,7 +525,31 @@ incorrect-positioning comparison of any kind — both existing placeholder
 photo slots are labeled "Correct Positioning." See `module-07-source.md`
 §19 for the complete pre-audit findings list.
 
-Modules 8–11 have not been extracted yet. Source files for those modules
+## Module 8 — The Head Spa Service
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 8** (unchanged — Welcome Module naming applies only to technical module `0`) |
+| Source file | [`module-08-source.md`](module-08-source.md) — full verbatim extraction |
+| Approved specification file | Not yet created — awaiting external audit |
+| Wrapper ID | `module8Wrap` — standard hidden-template pattern |
+| Checkpoint IDs | `m8cp1`, `m8cp2` — standard `mNcpX` pattern |
+| Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
+| **Status** | **Source extracted — awaiting external audit** |
+
+Extracted per this task, August 17, 2026. No `module-08-assets.md` was created — Module 8 currently contains zero real image/diagram/downloadable assets, matching the precedent already set for Modules 5–7 (`module-08-source.md` §6).
+
+**Structurally distinct from every prior module.** Module 8 is the full head spa service: an unnumbered "Think in phases, not steps" 7-phase concept-grid section precedes the numbered 8.1–8.5 sections (a shape not seen in Modules 0–7), and Section 8.2 (the service map) covers all 17 client-facing service steps across 12 expandable step cards, each with its own embedded video-player slot.
+
+**Video-player inventory — the module's highest-priority finding.** All 12 Module 8 video slots (`STEP_VIDEO_IDS`, all `null`) were individually inventoried and each marked **PROTECTED**. The owner already possesses the final instructional service-step videos and considers them the module's signature learning experience; `module-08-source.md` records this owner priority in full and adds a dedicated "Protected video-player inventory / deferred media installation" section stating that video-player removal is prohibited through audit and initial implementation, that the later external audit must reconsider the video-learning architecture (player hierarchy, scale, chapter identity, navigation, poster system, captions, and more), and that actual video installation is deliberately the final Module 8 implementation sub-step — Module 8 cannot receive manual approval while the required service videos are absent.
+
+**Known future companion tool recorded.** A dedicated "Known future student tool — AIMT Service Timer" section records the owner-created Head Spa Service Timer as existing outside this repository, intended as a future dashboard-hosted companion to this module's curriculum, subject to its own separate audit — not installed, integrated, or audited by this task. Module 9's unrelated, already-implemented `startResetTimer()` reset-walkthrough feature was confirmed distinct and not conflated with it.
+
+Notable findings recorded in the extraction (not fixed at extraction time): Module 8's displayed and evaluated checkpoint questions do not match for both `m8cp1` (the evaluated string drops two full sentences present in the displayed version) and `m8cp2` (contractions expanded, two clauses dropped) — the same defect class already found, and for Modules 1–4 and 7 corrected, elsewhere; `M8.system` is a single shared rubric for both checkpoints; `submitM8CP` supplies no module-specific network-error text; both checkpoints' voice/submit buttons lack `aria-label` and both `.cp-response` regions lack `aria-live`; the 7-phase concept grid's "Tap each phase" interaction hint has no corresponding click handler anywhere in the code (a dead hint, the same class already corrected in Module 5); the format toggle, service-step accordion, and all 12 video triggers are plain `<div onclick>` elements with zero keyboard/ARIA semantics; the format toggle communicates its selected state by color alone; the accordion's `slideDown` animation has no `prefers-reduced-motion` guard (unlike comparable guarded animations elsewhere in the file); `M8.system` still says "instructor of HeadSpa Mastery" and `MODULE_GUIDE_SYSTEMS[8]` still frames Cadence as personally "a mentor built from nearly two decades in the head spa industry" — the same old-name/personal-experience-claim pattern already found uncorrected in Modules 5, 6, 9, and 10 (no comparable claim was found in Module 8's *visible* curriculum body, unlike Module 7's pre-audit state); and several physiological, business-outcome-causation, and superlative claims are stated as unqualified fact and inventoried for the external audit. See `module-08-source.md` for the complete pre-audit findings list.
+
+**Module 8 is now source-extracted. It is NOT externally audited, NOT implemented, NOT manually QA'd, and NOT approved for release.** No production file (`headspa-mastery.html`, `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was modified by this task. No video, image, or other media was installed. No video player was removed or redesigned. The Service Timer was not installed, modified, or audited. Module 9 was not begun. No merge or deployment occurred.
+
+Modules 9–11 have not been extracted yet. Source files for those modules
 will be added in later audit passes. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.
