@@ -6893,6 +6893,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 <script src="assets/js/headspa-state.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
+<script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // HEADSPA MASTERY — Powered by Lēvo
@@ -9875,7 +9876,7 @@ function startVoice(inputId, btn) {
 // player below — one entry per protected chapter, order unchanged.
 const STEP_VIDEO_IDS = [
   null, // Step 01 — Aromatherapy Selection
-  null, // Step 02 — Dry Brushing & Hair Play
+  '1214280975', // Step 02 — Dry Brushing & Hair Play — INTEGRATION TEST (password-protected in Vimeo; owner enters password in-player)
   null, // Step 03 — Halo Activation & Wet Massage
   null, // Step 04 — Exfoliant Application
   null, // Step 05 — Scalp Massage
@@ -10141,15 +10142,23 @@ function m8PlayActiveVideo() {
   thumb.classList.add('loaded');
   const chapterLabel = thumb.getAttribute('aria-label') || ('Step ' + (idx + 1) + ' video');
   const iframe = document.createElement('iframe');
+  // No autoplay param — a click loads the player; playback still requires
+  // the student's own play press (and, while password-protected, Vimeo's
+  // own in-player password prompt) before anything plays.
   iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?color=a3968d&title=0&byline=0&portrait=0';
   iframe.title = chapterLabel.replace(/^Play video:\s*/, '');
   iframe.allow = 'fullscreen; picture-in-picture';
   iframe.allowFullscreen = true;
   iframe.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:block;';
   wrap.appendChild(iframe);
-  // Phase 2 hook: wire the installed player's real "ended" event (e.g. the
-  // Vimeo Player SDK's postMessage API) to call markVideoChapterEnded(idx)
-  // here. Not wired in Phase 1 — no real video exists yet.
+
+  // Real completion event: the installed player's genuine Vimeo "ended"
+  // event, via the official Vimeo Player SDK, drives markVideoChapterEnded()
+  // — never opening, starting, or seeking a video.
+  if (window.Vimeo && window.Vimeo.Player) {
+    const player = new window.Vimeo.Player(iframe);
+    player.on('ended', () => markVideoChapterEnded(idx));
+  }
 }
 
 // Phase 2 hook — call from the real installed player's genuine completion
