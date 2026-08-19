@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 19, 2026 (Module 8 Phase 1 second owner-review remediation)
+**Last updated:** August 19, 2026 (Module 8 Phase 1 third owner-review remediation)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's second Module 8 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `35f34e6` — "Remediate Module 8 owner review", pushed to `origin/course-audit-build`.
+- Latest controlling commit: pending — this task's third Module 8 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `3d9915d` — "Refine Module 8 masterclass and timer preview" (the second owner-review remediation), local-only at the start of this task, pushed to `origin/course-audit-build` as part of this task's push. Before that: `35f34e6` — "Remediate Module 8 owner review".
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,20 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 1 third owner-review remediation — August 19, 2026.** The owner continued live review of Module 8 in Course Review Mode (`http://localhost:8890/headspa-mastery.html?review=1`) and identified three further polish items ahead of real video installation, approved as a third amendment to `module-08.md`, then implemented. Real video installation was explicitly not part of this task and remains deferred.
+
+**1. Pacing-marker explanation added.** A restrained `.info-card` — "Reading the pacing markers" — was added to Section 8.2, immediately before the masterclass, where the per-chapter timing pills first appear. It explains that pills like "1hr: ~5 min" are approximate pacing landmarks (not rigid deadlines, absolute timing rules, or pass/fail stop times) showing roughly how much of the selected 60- or 120-minute service a chapter is meant to take, and states the connection explicitly: the masterclass teaches the technique, the pacing markers teach the rhythm, and the Service Timer (later in the module) turns that rhythm into a live protocol companion.
+
+**2. Timer UI taught.** The Timer preview gained a phase badge (`#m8tpPhase`) and an "Up next" preview line (`#m8tpNext`/`#m8tpNextTitle`), both driven by a new `phase` field added to `M8_TIMER_PREVIEW_STEPS` taken directly from the real prototype's own `STEPS` data (Steps 01–02 are phase "Opening," Step 03 is phase "Wet Phase"); the "Up next" line correctly hides on the preview's final step, matching the real Timer's own behavior when there is no next step. A concise "How to read the Timer" guide (`.m8tf-guide`, a 2-column grid collapsing to 1 column under 600px) was added after the preview and before the footer, covering ring & clock, top timeline, phase, and up next in one line each.
+
+**3. "Start preview" removed; auto-start via `IntersectionObserver`.** The manual `#m8tpStartBtn` button was removed along with its idle-state prompt; the idle text now reads "It begins automatically as you reach it." A new `m8InitTimerAutostart()` function, called from `m8InitMasterclass()` on every Module 8 open, observes `#m8TimerFeature` with a 35% intersection threshold, calls the existing `m8TimerStart()` exactly once when the feature meaningfully enters the viewport, and disconnects immediately after firing — so scrolling away and back does not restart it. A feature-detection fallback calls `m8TimerStart()` immediately if `IntersectionObserver` is unavailable. No audio was introduced; Pause/Resume, the real per-second countdown, and manual Back/Skip navigation are all unchanged and confirmed still functional after auto-start (verified by direct function-level testing: start → phase/next-preview populate correctly → pause shows the paused overlay → resume → skip advances phase from "Opening" to "Wet Phase" on Step 03 and correctly hides "Up next" → finish shows the done state → restart returns to idle). This does not authorize autoplay of the instructional videos, which remain manual-play only and were not touched. A `prefers-reduced-motion` guard was added to the ring/timeline fill transitions (functional countdown numbers are unaffected; only the animated sweep is suppressed).
+
+**Validation.** All inline `<script>` blocks parse cleanly (`node --check`); no `m8tpStartBtn`/"Start preview" references remain anywhere in the file. Browser validation in Course Review Mode confirmed: the pacing-marker card renders with the exact approved copy at its intended position; the Timer preview's phase badge, "Up next" line, and "How to read the Timer" guide all render correctly and match the real Timer's visual language; zero horizontal overflow at 1280px desktop, 390×844, and 375×812 (the guide grid correctly collapses to one column on mobile); a regression pass reopened Modules 0, 1, 2, 3, 4, 5, 6, 7, and 9 with zero console errors. `git diff` confirms the change is scoped entirely to Module 8's masterclass-intro and Timer-feature markup/CSS/JS — no other module's wrapper, checkpoints, or content was touched, and `STEP_VIDEO_IDS` remains all-`null`.
+
+**This is implementation-level validation only.** Real video installation (Phase 2) remains unmet. **Module 8 is NOT ready for manual QA and NOT manually approved.** The Service Timer was not built as a full tool and was not separately audited. Module 9 was not begun, modified, or extracted. No merge or deployment occurred. The local Course Review Mode server (`http://localhost:8890/headspa-mastery.html?review=1`) was confirmed reachable and was kept running throughout this task, per explicit instruction, and remains running after this task's completion.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 1 second owner-review remediation — August 19, 2026.** The owner reviewed the rendered result of the August 18 remediation (commit `35f34e6`) live in Course Review Mode and requested three further corrections, approved as a second amendment to `module-08.md`, then implemented. Real video installation was explicitly not part of this task and remains deferred.
 
@@ -344,7 +358,7 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 Module 8 final video installation (Phase 2).
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation, including both the August 18, 2026 owner-review remediation (masterclass single-player, video-completion requirement, checkpoint/typography foundation match, Service Timer feature promotion) and the August 19, 2026 second remediation (step-count copy reduction, cohesive contained player shell, Timer preview visual/functional fidelity), is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation, including the August 18, 2026 owner-review remediation (masterclass single-player, video-completion requirement, checkpoint/typography foundation match, Service Timer feature promotion), the August 19, 2026 second remediation (step-count copy reduction, cohesive contained player shell, Timer preview visual/functional fidelity), and the August 19, 2026 third remediation (pacing-marker explanation, Timer UI teaching, "Start preview" removal in favor of viewport-triggered auto-start), is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
 
 ---
 
@@ -424,7 +438,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner has reviewed Module 7 against this preview and manually approved it.
-- Push status: this task's second Module 8 owner-review remediation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's third Module 8 owner-review remediation commit, plus the still-unpushed `3d9915d` (second remediation) ahead of it, will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -432,7 +446,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's second Module 8 owner-review remediation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's third Module 8 owner-review remediation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `3d9915d` — Refine Module 8 masterclass and timer preview (second owner-review remediation)
 - `35f34e6` — Remediate Module 8 owner review
 - `ed4d381` — Implement Module 8 non-video experience
 - `872193f` — Add approved Module 8 audit specification

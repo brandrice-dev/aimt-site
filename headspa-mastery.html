@@ -1688,6 +1688,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8tf-body { font-size:0.88rem; line-height:1.8; color:rgba(255,255,255,0.78); font-weight:300; margin-bottom:1.5rem; max-width:58ch; }
 .m8tf-footer { margin-top:1.5rem; padding-top:1.15rem; border-top:0.5px solid rgba(255,255,255,0.12); }
 .m8tf-footer-text { font-size:0.76rem; line-height:1.7; color:rgba(255,255,255,0.45); font-weight:300; }
+.m8tf-guide { margin-top:1.25rem; padding-top:1.15rem; border-top:0.5px solid rgba(255,255,255,0.12); }
+.m8tf-guide-title { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:0.85rem; }
+.m8tf-guide-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.7rem 1.1rem; }
+@media(max-width:600px){ .m8tf-guide-grid { grid-template-columns:1fr !important; } }
+.m8tf-guide-item { font-size:0.78rem; line-height:1.6; color:rgba(255,255,255,0.62); font-weight:300; }
+.m8tf-guide-item strong { color:rgba(255,255,255,0.88); font-weight:500; }
 
 /* ── Embedded AIMT Service Timer preview ──────────────────────────────
    Deliberately NOT restyled into Module 8 card chrome — this reuses the
@@ -1727,6 +1733,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8rt-meta { font-size:9.5px; font-weight:400; letter-spacing:0.06em; color:var(--rt-w40); }
 .m8rt-meta span { color:var(--rt-accent); }
 
+.m8rt-phase { display:inline-block; font-family:'Montserrat',var(--aimt-font-mont); font-size:8px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--rt-w40); background:var(--rt-surface); border:0.5px solid var(--rt-w08); border-radius:980px; padding:3px 9px; margin-bottom:10px; }
 .m8rt-step-label { font-family:'Montserrat',var(--aimt-font-mont); font-size:9px; font-weight:700; letter-spacing:0.26em; text-transform:uppercase; color:var(--rt-accent); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
 .m8rt-step-label::before { content:''; display:block; width:14px; height:1px; background:var(--rt-a40); }
 .m8rt-title { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(20px,6vw,28px); font-weight:900; line-height:0.98; letter-spacing:-0.02em; text-transform:uppercase; color:var(--rt-white); margin-bottom:10px; }
@@ -1736,8 +1743,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8rt-note-icon { font-size:8px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--rt-accent); padding-top:2px; white-space:nowrap; flex-shrink:0; }
 .m8rt-note-text { font-size:12.5px; font-weight:400; line-height:1.55; color:var(--rt-w88); font-style:italic; }
 
+.m8rt-next { display:flex; align-items:center; gap:8px; margin-top:12px; opacity:0.55; }
+.m8rt-next[hidden] { display:none; }
+.m8rt-next-label { font-size:9px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--rt-accent); white-space:nowrap; }
+.m8rt-next-title { font-family:'Montserrat',var(--aimt-font-mont); font-size:10.5px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; color:var(--rt-white); }
+
 .m8rt-idle { padding:20px 16px 22px; text-align:center; }
-.m8rt-idle-text { font-size:0.83rem; line-height:1.7; color:var(--rt-w65); margin:0 auto 1.1rem; max-width:38ch; }
+.m8rt-idle-text { font-size:0.83rem; line-height:1.7; color:var(--rt-w65); margin:0 auto; max-width:38ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .m8rt-ring-fill, .m8rt-tl-fill { transition:none; }
+}
 
 .m8rt-bottombar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 16px; padding-bottom:max(11px, env(safe-area-inset-bottom)); border-top:0.5px solid var(--rt-w08); }
 .m8rt-nav-btn { background:none; border:0.5px solid var(--rt-w18); border-radius:8px; padding:10px 16px; color:var(--rt-w65); font-family:'Outfit',var(--aimt-font-sans); font-size:10.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; min-height:40px; transition:all 0.15s; }
@@ -6161,6 +6177,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="m8-principle-body">Communication should have a purpose — consent, comfort, introducing an unfamiliar step, a meaningful change, a client question, an observation, or after-service guidance. Quiet is allowed to remain quiet. A premium relaxation service does not require constant narration, so the language below each chapter is labeled "What you might say" — an example for steps where speaking has a purpose, not a script to recite at every step.</div>
     </div>
 
+    <div class="info-card">
+      <div class="ic-title">Reading the pacing markers</div>
+      <div class="body-text" style="margin:0">Each chapter carries small timing pills like <span class="t-badge" style="cursor:default;">1hr: ~5 min</span> — approximate pacing landmarks, not rules. They show roughly how much of your selected 60- or 120-minute service that chapter is meant to take, so you can sense where you should be within the full flow. They aren't rigid deadlines, absolute timing rules, or pass/fail stop times — client needs, product instructions, technique requirements, and your own judgment can all shift the actual pace. The masterclass teaches the technique. These markers teach the rhythm. The Service Timer, ahead in this module, turns that rhythm into a live protocol companion you can run during service.</div>
+    </div>
+
     <div class="m8-masterclass" id="m8Masterclass">
       <div class="m8mc-top">
         <div class="sms-head" id="m8mcHead">
@@ -6326,15 +6347,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">Your service protocol, available anywhere.</div>
     <div class="body-text">Once you know this service, you shouldn't have to reopen this lesson to run it. The AIMT Service Timer is that protocol, made practical — a treatment-room companion for training the full service, rehearsing pacing, refreshing before a client, and keeping the sequence available without reopening the course.</div>
 
-    <div class="m8-timer-feature">
+    <div class="m8-timer-feature" id="m8TimerFeature">
       <div class="m8tf-badge">Included with your certification</div>
       <div class="m8tf-title">AIMT Service Timer</div>
-      <div class="m8tf-body">This is the actual AIMT Service Timer, embedded and limited to the first three steps. Start it, let it run, and see what a real treatment-room rehearsal feels like.</div>
+      <div class="m8tf-body">This is the actual AIMT Service Timer, embedded and limited to the first three steps. It starts on its own as you reach it below — let it run and see what a real treatment-room rehearsal feels like.</div>
 
       <div class="m8rt" id="m8TimerPreview">
         <div class="m8rt-idle" id="m8tpIdle">
-          <div class="m8rt-idle-text">A contained preview of the real Timer — Steps 01–03, real timing.</div>
-          <button type="button" class="lc-btn" id="m8tpStartBtn" onclick="m8TimerStart()">Start preview</button>
+          <div class="m8rt-idle-text">A contained preview of the real Timer — Steps 01–03, real timing. It begins automatically as you reach it.</div>
         </div>
 
         <div id="m8tpApp" hidden>
@@ -6363,12 +6383,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               </div>
             </div>
 
+            <div class="m8rt-phase" id="m8tpPhase"></div>
             <div class="m8rt-step-label" id="m8tpStepLabel">Step 01</div>
             <div class="m8rt-title" id="m8tpTitle"></div>
             <div class="m8rt-desc" id="m8tpDesc"></div>
             <div class="m8rt-note" id="m8tpNote" hidden>
               <span class="m8rt-note-icon">Note</span>
               <span class="m8rt-note-text" id="m8tpNoteText"></span>
+            </div>
+            <div class="m8rt-next" id="m8tpNext" hidden>
+              <span class="m8rt-next-label">Up next →</span>
+              <span class="m8rt-next-title" id="m8tpNextTitle"></span>
             </div>
 
             <div class="m8rt-paused" id="m8tpPausedOverlay">
@@ -6390,6 +6415,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="m8rt-done-title">Preview<br>Complete</div>
           <div class="m8rt-done-text">That's the first three steps. The full Service Timer carries the complete sequence, in both formats, from open to close.</div>
           <button type="button" class="lc-btn" onclick="m8TimerRestart()">Restart preview</button>
+        </div>
+      </div>
+
+      <div class="m8tf-guide">
+        <div class="m8tf-guide-title">How to read the Timer</div>
+        <div class="m8tf-guide-grid">
+          <div class="m8tf-guide-item"><strong>Ring &amp; clock</strong> — time left on the technique you're performing right now.</div>
+          <div class="m8tf-guide-item"><strong>Top timeline</strong> — where you are across the whole service, not just this step.</div>
+          <div class="m8tf-guide-item"><strong>Phase</strong> — the broader section of the protocol you're in.</div>
+          <div class="m8tf-guide-item"><strong>Up next</strong> — what's coming, so you can start the transition before the clock runs out.</div>
         </div>
       </div>
 
@@ -9947,6 +9982,7 @@ function m8InitMasterclass() {
   m8ActiveChapter = Math.max(0, Math.min(11, start));
   m8RenderChapter(m8ActiveChapter);
   m8RenderChapterList();
+  m8InitTimerAutostart();
 }
 
 function m8GoToChapter(idx) {
@@ -10139,15 +10175,15 @@ function markVideoChapterEnded(chapterIndex) {
 // badges — not new curriculum authority, and not the full Timer's frozen
 // timing (that remains subject to the Timer's own separate audit).
 const M8_TIMER_PREVIEW_STEPS = [
-  { num:'01', title:'Aromatherapy Selection',
+  { num:'01', title:'Aromatherapy Selection', phase:'Opening',
     desc:'Offer the three essential oil blends and a fragrance-free option, with equal weight. Ask before the first touch — then rest a hand at the shoulder if welcomed. Wait for the client to choose.',
     note:'Fragrance-free is a genuine choice, not a fallback — ask before the first touch, every time.',
     dur: 5 * 60 },
-  { num:'02', title:'Dry Brushing & Hair Play',
+  { num:'02', title:'Dry Brushing & Hair Play', phase:'Opening',
     desc:'Hairline to crown to nape — slow, stimulating strokes. The scalp should move under the brush. Follow with fingers, root to tip, to distribute oils.',
     note:'If it feels slow, it’s probably right.',
     dur: 3 * 60 },
-  { num:'03', title:'Halo Activation & Wet Massage',
+  { num:'03', title:'Halo Activation & Wet Massage', phase:'Wet Phase',
     desc:'Palm check under the halo stream before any water touches the client. Redirect to scalp. Begin massage immediately under the flow.',
     note:'Hold the temperature check long enough to be unambiguous — this is a safety step.',
     dur: 5 * 60 }
@@ -10162,6 +10198,29 @@ let m8tpElapsedTotal = 0;
 let m8tpServiceTotalSeconds = M8_TIMER_PREVIEW_STEPS.reduce((a, s) => a + s.dur, 0);
 let m8tpPaused = false;
 let m8tpInterval = null;
+let m8tpAutoObserver = null;
+let m8tpAutoStarted = false;
+
+// Auto-starts the preview once, the first time the Timer feature
+// meaningfully enters the viewport — no separate "Start preview" control.
+// Disconnects after firing so scrolling away/back never restarts it.
+function m8InitTimerAutostart() {
+  m8tpAutoStarted = false;
+  if (m8tpAutoObserver) { m8tpAutoObserver.disconnect(); m8tpAutoObserver = null; }
+  const feature = document.getElementById('m8TimerFeature');
+  if (!feature) return;
+  if (!('IntersectionObserver' in window)) { m8TimerStart(); return; }
+  m8tpAutoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !m8tpAutoStarted) {
+        m8tpAutoStarted = true;
+        m8TimerStart();
+        if (m8tpAutoObserver) { m8tpAutoObserver.disconnect(); m8tpAutoObserver = null; }
+      }
+    });
+  }, { threshold: 0.35 });
+  m8tpAutoObserver.observe(feature);
+}
 
 function m8TimerFmt(totalSeconds) {
   const m = Math.floor(totalSeconds / 60), s = totalSeconds % 60;
@@ -10192,11 +10251,20 @@ function m8TimerRenderStep() {
 
   stepLabel.textContent = 'Step ' + step.num;
   document.getElementById('m8tpCounter').textContent = (m8tpIndex + 1) + ' of ' + M8_TIMER_PREVIEW_STEPS.length;
+  const phaseEl = document.getElementById('m8tpPhase');
+  if (phaseEl) phaseEl.textContent = step.phase;
   document.getElementById('m8tpTitle').textContent = step.title;
   document.getElementById('m8tpDesc').textContent = step.desc;
   const noteEl = document.getElementById('m8tpNote');
   const noteText = document.getElementById('m8tpNoteText');
   if (step.note) { noteEl.hidden = false; noteText.textContent = step.note; } else { noteEl.hidden = true; }
+  const nextWrap = document.getElementById('m8tpNext');
+  const nextTitle = document.getElementById('m8tpNextTitle');
+  const nextStep = M8_TIMER_PREVIEW_STEPS[m8tpIndex + 1];
+  if (nextWrap && nextTitle) {
+    if (nextStep) { nextTitle.textContent = 'Step ' + nextStep.num + ' — ' + nextStep.title; nextWrap.hidden = false; }
+    else { nextWrap.hidden = true; }
+  }
 
   document.getElementById('m8tpBackBtn').disabled = m8tpIndex === 0;
   const skipBtn = document.getElementById('m8tpSkipBtn');
