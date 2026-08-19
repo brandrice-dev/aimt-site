@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 18, 2026 (Module 8 Phase 1 owner-review remediation)
+**Last updated:** August 19, 2026 (Module 8 Phase 1 second owner-review remediation)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's Module 8 Phase 1 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `ed4d381` — "Implement Module 8 non-video experience", pushed to `origin/course-audit-build`.
+- Latest controlling commit: pending — this task's second Module 8 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `35f34e6` — "Remediate Module 8 owner review", pushed to `origin/course-audit-build`.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,20 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 1 second owner-review remediation — August 19, 2026.** The owner reviewed the rendered result of the August 18 remediation (commit `35f34e6`) live in Course Review Mode and requested three further corrections, approved as a second amendment to `module-08.md`, then implemented. Real video installation was explicitly not part of this task and remains deferred.
+
+**1. Hero rewrite + reduced fixed step-count language.** The headline "This is not about memorizing steps." is replaced with **"Master the flow, not the script,"** with new supporting copy centered on service flow and real-time adaptation rather than a checklist framing. Visible "17 steps"/"all 17 steps" phrasing was reduced throughout Module 8's copy (the 8.1 section title, the 8.2 intro, and the Service Timer feature's body/idle/done/footer text) in favor of "full service," "service flow," "chapters," and similar — confirmed by a full-text search of the rendered module block returning zero remaining matches for "17 step," "17-step," "all 17," or "seventeen." The underlying 17-numbered-step data model, the 12 chapter identities, and every existing step/chapter title are unchanged and re-verified.
+
+**2. Masterclass repackaged into one cohesive contained player shell.** The prior pass's masterclass (Aug 18) was directionally correct but read as assembled parts — a video plus disconnected cards, with a large always-visible 12-row chapter list sitting separately beneath it. It is now one bordered, backgrounded shell containing chapter identity (a large numeral + title + timing, replacing the small "Chapter 1 of 12" text line), a quiet 12-segment progress bar, the video stage, guidance/adaptation/continuity content, and Prev/Next controls — all inside a single visual container. The always-visible chapter list is now a **collapsed-by-default drawer** behind a compact "Chapters" toggle, keeping it secondary to the video; Completed/Current/Locked state inside the drawer remains exposed as text, not color alone. "Chapter X of 12" text is no longer repeated in the visible UI — the bare numeral is the visible position, and full ordinal position ("Chapter 5 of 12 — Scalp Massage") is still exposed to assistive technology via an `aria-label` on the chapter-identity region. **A regression was found and fixed during validation:** the video stage's earlier desktop breakout (deliberately exceeding the reading column, approved in the first remediation) was still active and caused the video to visually spill past the new shell's rounded edges at wide viewports — confirmed via `getBoundingClientRect()` before the fix (video spanning 826px against a 552px-wide shell) and after (fully contained). The breakout CSS was removed and `module-08.md`'s "Player width" language was corrected to match, since a video escaping its own container directly contradicts "one cohesive contained player."
+
+**3. Timer preview rebuilt to visually and functionally match the real Timer.** The August 18 preview was a generic countdown widget restyled into Module 8 card chrome — rejected. It is now derived directly from the real prototype at `~/Downloads/AIMT-Service-Timer-clean.html`: the preview widget switches to the Timer's own near-black palette (its exact `--bg`/`--surface`/`--accent`/white-alpha values, deliberately distinct from Module 8's own dark feature-card tone, which reinforces rather than undermines the "this is the real tool" impression), its Montserrat/Outfit type hierarchy, a genuine SVG step-timer ring, a running total-service timeline bar, phase/step-label conventions, step title/description/note treatment (including the note's left-accent-border quote box), a paused overlay matching the real Timer's own, and a bottom bar with Back/Skip controls mirroring the real Timer's manual-navigation behavior exactly (Skip credits the remaining step time to elapsed before advancing; Back subtracts the current step's spent time plus the previous step's full duration). AIMT's existing Google Fonts `<link>` (which already loads Montserrat and Outfit — the same two families the real Timer uses) was extended additively with weights 900 (Montserrat) and 600 (Outfit) to reach the specific weights the real Timer uses; no new font family was introduced and no other module's typography is affected. Verified end-to-end in the browser: start → live per-second countdown on both the ring and the timeline (confirmed ticking down from 5:00 in real time) → pause (overlay shows) → resume → skip through all 3 steps → back-navigation → "Preview complete" end state → restart, all working, with Step 01's copy still carrying the approved fragrance-optional/consent-before-touch correction from the first remediation.
+
+**Validation.** All inline `<script>` blocks parse cleanly; full tag balance across `#module8Wrap` (`div`/`button`/`ol`/`li`/`nav`/`svg`) is even; no new duplicate element IDs; both checkpoints' displayed/evaluated question strings remain byte-identical; all 17 step titles and 12 chapter labels confirmed present verbatim. Browser validation confirmed: hero and reduced-count copy render correctly; the chapter drawer opens/closes correctly (`aria-expanded` toggles, 12 rows render); the Timer preview's full interaction cycle works as described above; zero horizontal overflow at 1280px desktop, 390×844, and 375×812; a regression pass reopened Modules 0, 1, 2, 3, 4, 5, 6, 7, and 9 with zero console errors and no unintended markup changes (confirmed via `git diff`, which shows no lines touching any other module's wrapper, checkpoints, or content).
+
+**This is implementation-level validation only.** Real video installation (Phase 2) remains unmet. **Module 8 is NOT ready for manual QA and NOT manually approved.** The Service Timer was not built as a full tool and was not separately audited. Module 9 was not begun, modified, or extracted. No merge or deployment occurred. The local Course Review Mode server (`http://localhost:8890/headspa-mastery.html?review=1`) was kept running throughout this task, per explicit instruction, and remains running after this task's completion.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 1 owner-review remediation — August 18, 2026.** The owner reviewed the rendered Phase 1 implementation (commit `ed4d381`) and identified four blocking design/system issues, approved as an amendment to `module-08.md` and a new global rule in `00-global-decisions.md`, then remediated in production. Real video installation was explicitly not part of this task and remains deferred.
 
@@ -330,7 +344,7 @@ All validation items passed: no flagged phrases remain; the new interaction tags
 
 Module 8 final video installation (Phase 2).
 
-Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation, including the August 18, 2026 owner-review remediation (masterclass single-player, video-completion requirement, checkpoint/typography foundation match, Service Timer feature promotion), is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
+Per the governing module lifecycle (`00-aimt-course-audit-master-instructions.md`: source extraction → external audit → approved specification → implementation → static/mocked validation → manual QA → manual approval → video-source creation → next module begins), Module 8's Phase 1 (non-video) implementation, including both the August 18, 2026 owner-review remediation (masterclass single-player, video-completion requirement, checkpoint/typography foundation match, Service Timer feature promotion) and the August 19, 2026 second remediation (step-count copy reduction, cohesive contained player shell, Timer preview visual/functional fidelity), is now complete in `headspa-mastery.html`. Modules 0–7 remain implemented and manually approved. Module 8 is implemented but not ready for manual QA — Phase 2 (real video/poster/caption installation, per `module-08.md`'s "Implementation boundary") has not begun.
 
 ---
 
@@ -410,7 +424,7 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 ## Preview, push, merge, and deployment status
 
 - Branch preview: `course-audit-build` remains the audit environment; the owner has reviewed Module 7 against this preview and manually approved it.
-- Push status: this task's Module 8 Phase 1 owner-review remediation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
+- Push status: this task's second Module 8 owner-review remediation commit will be pushed to `origin/course-audit-build` via CLI if authenticated, otherwise via **GitHub Desktop → Push origin** — see the final task report for the actual result.
 - Merge status: no merge to `main` has occurred or is authorized.
 - Deployment status: no production deployment has occurred or is authorized.
 
@@ -418,7 +432,8 @@ The approved downloadable (`AIMT Regional Service Adaptation Guide`) remains rec
 
 ## Latest relevant commits
 
-- This task's Module 8 Phase 1 owner-review remediation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- This task's second Module 8 owner-review remediation commit — hash recorded in the final task report (**latest controlling commit** once pushed)
+- `35f34e6` — Remediate Module 8 owner review
 - `ed4d381` — Implement Module 8 non-video experience
 - `872193f` — Add approved Module 8 audit specification
 - `762fdd04b6479722ae304717f078ef0a90c4c850` — Extract Module 8 for external audit

@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="HeadSpa Mastery — AIMT">
 <meta name="twitter:description" content="Structured, clinically grounded HeadSpa certification for practitioners ready to refine execution, protocol clarity, and client trust.">
 <meta name="twitter:image" content="https://aimt-site.pages.dev/assets/aimt-share.png">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1605,10 +1605,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .t-badge.t-dim { opacity:0.32; }
 
 /* ── MODULE 8 — Masterclass chapter header (single active chapter) ── */
-.sms-head { display:flex; align-items:baseline; gap:10px; margin-bottom:0.6rem; }
-.sms-num { font-family:var(--aimt-font-mono); font-size:0.65rem; color:var(--muted2); letter-spacing:0.06em; flex-shrink:0; }
-.sms-info { flex:1; }
-.sms-title { font-family:var(--aimt-font-mont); font-size:1.02rem; font-weight:600; letter-spacing:-0.01em; margin-bottom:5px; }
+.sms-head { display:flex; align-items:center; gap:14px; margin-bottom:0; flex:1; min-width:0; }
+.sms-num { font-family:var(--aimt-font-mont); font-size:1.55rem; font-weight:700; color:var(--muted); letter-spacing:-0.01em; flex-shrink:0; line-height:1; min-width:2.1ch; }
+.sms-info { flex:1; min-width:0; }
+.sms-title { font-family:var(--aimt-font-mont); font-size:1.05rem; font-weight:600; letter-spacing:-0.01em; margin-bottom:5px; }
 .sms-timing { display:flex; gap:6px; flex-wrap:wrap; }
 /* Foundation-consistency fix (Aug 18, 2026): Section 8.2 instructional copy
    uses the shared .body-text sizing (0.94rem/1.84/66ch) rather than bespoke
@@ -1623,35 +1623,40 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .sms-teach-text { font-size:0.86rem; line-height:1.7; color:rgba(255,255,255,0.82); font-weight:300; font-family:var(--aimt-font-serif); font-style:italic; }
 
 /* Video stage — intentionally exceeds the standard reading measure on desktop */
+/* No longer breaks out past the reading column — the video now lives
+   inside the single cohesive player shell (owner correction, Aug 19 2026)
+   and must stay contained within it, not spill past its rounded edges. */
 .m8-video-stage { margin:1.1rem 0 0; }
-@media(min-width:900px){ .m8-video-stage { margin-left:-100px; margin-right:-100px; } }
-@media(min-width:1200px){ .m8-video-stage { margin-left:-160px; margin-right:-160px; } }
 
 /* Chapter-jump navigation — plain accessible link list, not a graded interaction */
-.m8-jump-nav-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted2); margin-bottom:8px; }
-
 /* ── MODULE 8 — Masterclass (single active-chapter player) ── */
-.m8-masterclass { margin:1.25rem 0 1.5rem; }
-.m8mc-progress { margin-bottom:1.25rem; }
-.m8mc-progress-text { font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); margin-bottom:8px; }
-.m8mc-segments { display:flex; gap:4px; }
-.m8mc-seg { flex:1; height:4px; border-radius:4px; background:#e5e0d6; }
+/* One cohesive player shell — chapter identity, video, guidance, and nav
+   all live inside a single visual container so the masterclass reads as
+   one product, not a video plus disconnected cards (owner correction,
+   Aug 19 2026). */
+.m8-masterclass { background:rgba(255,255,255,0.6); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-lg); padding:1.5rem 1.4rem 1.75rem; margin:1.25rem 0 1.5rem; }
+.m8mc-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:1rem; }
+.m8mc-chapters-toggle { flex-shrink:0; display:flex; align-items:center; gap:6px; background:none; border:0.5px solid var(--border2); border-radius:980px; padding:0.42rem 0.9rem; font-family:var(--aimt-font-sans); font-size:0.72rem; font-weight:500; color:var(--text); cursor:pointer; transition:all 0.2s; min-height:36px; margin-top:2px; }
+.m8mc-chapters-toggle:hover { background:rgba(255,255,255,0.8); }
+.m8mc-chapters-toggle:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m8mc-chapters-toggle svg { width:8px; height:8px; transition:transform 0.2s; flex-shrink:0; }
+.m8mc-chapters-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+
+/* Quiet, secondary progress indicator — no "Chapter X of 12" text repeated;
+   the numeral in the chapter header plus this bar are enough. */
+.m8mc-segments { display:flex; gap:4px; margin-bottom:1.15rem; }
+.m8mc-seg { flex:1; height:3px; border-radius:4px; background:#e5e0d6; }
 .m8mc-seg.done { background: var(--aimt-success, #3a5a3a); }
 .m8mc-seg.current { background: var(--text); }
-.m8mc-nav { display:flex; gap:10px; margin-top:1.5rem; }
-.m8mc-nav-btn { flex:1; border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; font-family:var(--aimt-font-sans); font-size:0.82rem; font-weight:500; letter-spacing:0.01em; cursor:pointer; border:0.5px solid var(--border2); background:rgba(255,255,255,0.7); color:var(--text); transition:all 0.2s; min-height:48px; }
-.m8mc-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,0.95); }
-.m8mc-nav-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
-.m8mc-nav-btn:disabled { opacity:0.35; cursor:not-allowed; }
-.m8mc-nav-btn.primary { background:var(--hero-bg); border-color:transparent; color:white; }
-.m8mc-nav-btn.primary:hover:not(:disabled) { background:#1f1c17; }
-.m8mc-review-hint { font-size:0.72rem; color:var(--muted2); text-align:center; margin-top:0.6rem; font-style:italic; }
 
-/* Chapter list — full-width rows, not a cramped 12-column rail */
-.m8mc-list-wrap { margin:1.75rem 0 2rem; }
-.m8mc-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+/* Chapter drawer — collapsed by default; secondary to the video, not a
+   large always-visible list competing with it. Full-width rows inside,
+   not a cramped 12-column rail. */
+.m8mc-drawer { margin:0 0 1.25rem; padding-top:0.9rem; border-top:0.5px solid var(--border); }
+.m8mc-drawer[hidden] { display:none; }
+.m8mc-list { list-style:none; display:flex; flex-direction:column; gap:6px; max-height:15rem; overflow-y:auto; }
 .m8mc-list-item { margin:0; }
-.m8mc-list-btn { width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:0.75rem 0.9rem; border-radius: var(--aimt-radius-sm); border:0.5px solid var(--border2); background:rgba(255,255,255,0.55); cursor:pointer; font-family:inherit; min-height:44px; transition:background 0.2s, border-color 0.2s; }
+.m8mc-list-btn { width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:0.7rem 0.85rem; border-radius: var(--aimt-radius-sm); border:0.5px solid var(--border2); background:rgba(255,255,255,0.55); cursor:pointer; font-family:inherit; min-height:44px; transition:background 0.2s, border-color 0.2s; }
 .m8mc-list-btn:hover:not(:disabled) { background:rgba(255,255,255,0.9); }
 .m8mc-list-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .m8mc-list-btn:disabled { cursor:not-allowed; opacity:0.55; }
@@ -1661,6 +1666,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8mc-list-state { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted2); flex-shrink:0; white-space:nowrap; }
 .m8mc-list-state.done { color: var(--aimt-success, #3a5a3a); }
 .m8mc-list-state.current { color:var(--text); font-weight:600; }
+
+.m8mc-nav { display:flex; gap:10px; margin-top:1.6rem; padding-top:1.4rem; border-top:0.5px solid var(--border); }
+.m8mc-nav-btn { flex:1; border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; font-family:var(--aimt-font-sans); font-size:0.82rem; font-weight:500; letter-spacing:0.01em; cursor:pointer; border:0.5px solid var(--border2); background:rgba(255,255,255,0.7); color:var(--text); transition:all 0.2s; min-height:48px; }
+.m8mc-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,0.95); }
+.m8mc-nav-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m8mc-nav-btn:disabled { opacity:0.35; cursor:not-allowed; }
+.m8mc-nav-btn.primary { background:var(--hero-bg); border-color:transparent; color:white; }
+.m8mc-nav-btn.primary:hover:not(:disabled) { background:#1f1c17; }
+.m8mc-review-hint { font-size:0.72rem; color:var(--muted2); text-align:center; margin-top:0.8rem; font-style:italic; }
 
 /* Communication principle, stated once before the chapter sequence */
 .m8-principle { background:var(--hero-bg); border-radius: var(--aimt-radius-md); padding:1.2rem 1.35rem; margin:1.25rem 0 1.75rem; }
@@ -1675,20 +1689,76 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8tf-footer { margin-top:1.5rem; padding-top:1.15rem; border-top:0.5px solid rgba(255,255,255,0.12); }
 .m8tf-footer-text { font-size:0.76rem; line-height:1.7; color:rgba(255,255,255,0.45); font-weight:300; }
 
-.m8tf-preview { background:rgba(255,255,255,0.06); border:0.5px solid rgba(255,255,255,0.14); border-radius: var(--aimt-radius-md); padding:1.35rem 1.4rem; }
-.m8tp-idle-text { font-size:0.85rem; line-height:1.7; color:rgba(255,255,255,0.6); margin-bottom:1.1rem; max-width:44ch; }
-.m8tp-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:0.6rem; }
-.m8tp-step-label { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.45); }
-.m8tp-title { font-family:var(--aimt-font-mont); font-size:1.15rem; font-weight:600; margin-bottom:0.55rem; }
-.m8tp-desc { font-size:0.83rem; line-height:1.75; color:rgba(255,255,255,0.72); font-weight:300; margin-bottom:0.8rem; }
-.m8tp-note { font-size:0.78rem; line-height:1.65; color:rgba(255,255,255,0.55); font-style:italic; margin-bottom:1.1rem; }
-.m8tp-note[hidden] { display:none; }
-.m8tp-clock-row { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-.m8tp-clock { font-family:var(--aimt-font-mont); font-size:2.2rem; font-weight:700; letter-spacing:-0.02em; color:white; font-variant-numeric:tabular-nums; }
-.m8tp-done-title { font-family:var(--aimt-font-mont); font-size:1.1rem; font-weight:700; margin-bottom:0.55rem; }
-.m8tp-done-text { font-size:0.83rem; line-height:1.75; color:rgba(255,255,255,0.7); font-weight:300; margin-bottom:1.1rem; max-width:48ch; }
-.m8tf-preview .lc-btn, .m8tf-preview .lc-btn-ghost { width:auto; max-width:none; margin:0; display:inline-block; }
-@media(min-width:600px){ .m8tp-clock-row .lc-btn { min-width:150px; } }
+/* ── Embedded AIMT Service Timer preview ──────────────────────────────
+   Deliberately NOT restyled into Module 8 card chrome — this reuses the
+   real Service Timer's own palette, type system, and component shapes
+   (derived from the owner's actual prototype) so the preview reads as the
+   real tool embedded and limited to 3 steps, not a Module 8 reinterpretation. */
+.m8rt {
+  --rt-bg: #0f0d0b; --rt-surface: #1a1814; --rt-s2: #222018;
+  --rt-accent: #a3968d; --rt-a15: rgba(163,150,141,0.15); --rt-a25: rgba(163,150,141,0.25); --rt-a40: rgba(163,150,141,0.40);
+  --rt-white: #faf8f5; --rt-w88: rgba(250,248,245,0.88); --rt-w65: rgba(250,248,245,0.65); --rt-w40: rgba(250,248,245,0.40); --rt-w18: rgba(250,248,245,0.18); --rt-w08: rgba(250,248,245,0.08);
+  --rt-green: #4caf7d; --rt-red: #e05c5c;
+  background:var(--rt-bg); border:0.5px solid var(--rt-w08); border-radius: var(--aimt-radius-md);
+  overflow:hidden; color:var(--rt-white); font-family:'Outfit',var(--aimt-font-sans);
+}
+.m8rt-topbar { display:flex; flex-direction:column; gap:9px; padding:14px 16px 12px; border-bottom:0.5px solid var(--rt-w08); }
+.m8rt-toprow { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.m8rt-brand { font-family:'Montserrat',var(--aimt-font-mont); font-size:8px; font-weight:700; letter-spacing:0.24em; text-transform:uppercase; color:var(--rt-accent); white-space:nowrap; }
+.m8rt-counter { font-family:'Montserrat',var(--aimt-font-mont); font-size:9px; font-weight:700; letter-spacing:0.14em; color:var(--rt-w40); white-space:nowrap; }
+.m8rt-pause-btn { background:none; border:0.5px solid var(--rt-w18); border-radius:6px; padding:6px 13px; color:var(--rt-w65); font-family:'Outfit',var(--aimt-font-sans); font-size:9.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; min-height:30px; transition:opacity 0.2s; }
+.m8rt-pause-btn:hover { opacity:0.75; }
+.m8rt-pause-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m8rt-timeline { display:flex; align-items:center; gap:8px; }
+.m8rt-tl-label { font-family:'Montserrat',var(--aimt-font-mont); font-size:8px; font-weight:600; letter-spacing:0.08em; color:var(--rt-w40); min-width:26px; }
+.m8rt-tl-label.right { text-align:right; }
+.m8rt-tl-track { flex:1; height:3px; background:var(--rt-w08); border-radius:4px; position:relative; }
+.m8rt-tl-fill { position:absolute; top:0; left:0; height:100%; background:var(--rt-accent); border-radius:4px; transition:width 0.8s linear; }
+
+.m8rt-main { padding:18px 16px 16px; position:relative; }
+.m8rt-timer-block { display:flex; align-items:center; gap:14px; padding:12px 14px; background:var(--rt-surface); border:0.5px solid var(--rt-w08); border-radius:12px; margin-bottom:16px; }
+.m8rt-ring { width:48px; height:48px; transform:rotate(-90deg); flex-shrink:0; }
+.m8rt-ring-bg { fill:none; stroke:var(--rt-w08); stroke-width:4; }
+.m8rt-ring-fill { fill:none; stroke:var(--rt-accent); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.m8rt-time-nums { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+.m8rt-time { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(24px,7vw,32px); font-weight:900; letter-spacing:-0.03em; color:var(--rt-white); line-height:1; font-variant-numeric:tabular-nums; }
+.m8rt-time.urgent { color:var(--rt-red); }
+.m8rt-time.done { color:var(--rt-green); }
+.m8rt-meta { font-size:9.5px; font-weight:400; letter-spacing:0.06em; color:var(--rt-w40); }
+.m8rt-meta span { color:var(--rt-accent); }
+
+.m8rt-step-label { font-family:'Montserrat',var(--aimt-font-mont); font-size:9px; font-weight:700; letter-spacing:0.26em; text-transform:uppercase; color:var(--rt-accent); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.m8rt-step-label::before { content:''; display:block; width:14px; height:1px; background:var(--rt-a40); }
+.m8rt-title { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(20px,6vw,28px); font-weight:900; line-height:0.98; letter-spacing:-0.02em; text-transform:uppercase; color:var(--rt-white); margin-bottom:10px; }
+.m8rt-desc { font-size:clamp(12.5px,3.2vw,14.5px); font-weight:300; line-height:1.65; color:var(--rt-w65); margin-bottom:12px; }
+.m8rt-note { display:flex; align-items:flex-start; gap:10px; padding:11px 13px; background:var(--rt-a15); border-left:3px solid var(--rt-accent); border-radius:0 8px 8px 0; }
+.m8rt-note[hidden] { display:none; }
+.m8rt-note-icon { font-size:8px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--rt-accent); padding-top:2px; white-space:nowrap; flex-shrink:0; }
+.m8rt-note-text { font-size:12.5px; font-weight:400; line-height:1.55; color:var(--rt-w88); font-style:italic; }
+
+.m8rt-idle { padding:20px 16px 22px; text-align:center; }
+.m8rt-idle-text { font-size:0.83rem; line-height:1.7; color:var(--rt-w65); margin:0 auto 1.1rem; max-width:38ch; }
+
+.m8rt-bottombar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 16px; padding-bottom:max(11px, env(safe-area-inset-bottom)); border-top:0.5px solid var(--rt-w08); }
+.m8rt-nav-btn { background:none; border:0.5px solid var(--rt-w18); border-radius:8px; padding:10px 16px; color:var(--rt-w65); font-family:'Outfit',var(--aimt-font-sans); font-size:10.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; min-height:40px; transition:all 0.15s; }
+.m8rt-nav-btn:disabled { opacity:0.18; pointer-events:none; }
+.m8rt-nav-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m8rt-nav-btn.primary { background:var(--rt-white); border-color:var(--rt-white); color:#1a1814; padding:10px 22px; }
+.m8rt-tap-hint { font-size:9px; color:var(--rt-w18); letter-spacing:0.08em; text-transform:uppercase; text-align:center; flex:1; }
+
+.m8rt-paused { position:absolute; inset:0; z-index:5; background:rgba(15,13,11,0.94); display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px; text-align:center; }
+.m8rt-paused.show { display:flex; }
+.m8rt-paused-label { font-family:'Montserrat',var(--aimt-font-mont); font-size:9px; font-weight:700; letter-spacing:0.28em; text-transform:uppercase; color:var(--rt-accent); }
+.m8rt-paused-title { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(28px,8vw,40px); font-weight:900; letter-spacing:-0.03em; text-transform:uppercase; color:var(--rt-white); }
+.m8rt-resume-btn { margin-top:4px; background:var(--rt-white); border:none; border-radius:8px; padding:12px 32px; font-family:'Outfit',var(--aimt-font-sans); font-size:11.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#1a1814; cursor:pointer; min-height:44px; }
+.m8rt-resume-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+
+.m8rt-done { padding:32px 20px; text-align:center; }
+.m8rt-done-icon { font-size:24px; color:var(--rt-accent); margin-bottom:14px; }
+.m8rt-done-title { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(24px,7vw,34px); font-weight:900; letter-spacing:-0.03em; text-transform:uppercase; color:var(--rt-white); line-height:1; margin-bottom:12px; }
+.m8rt-done-text { font-size:0.83rem; line-height:1.75; color:var(--rt-w65); font-weight:300; margin:0 auto 1.2rem; max-width:40ch; }
+
+.m8rt .lc-btn { width:auto; max-width:none; margin:0; display:inline-block; }
 
 /* ── MODULE 9 — Reset sequence ── */
 .reset-sequence { display:flex; flex-direction:column; gap:4px; margin:1.25rem 0; }
@@ -6000,8 +6070,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 8 · The Head Spa Service</div>
-      <div class="mh-title">This is not about memorizing steps.</div>
-      <div class="mh-desc">By this point you understand the scalp, the conditions, and the setup. Now everything comes together. Two people can follow the same steps and deliver completely different services. This module trains the part you can't get from a checklist — flow, timing, decision-making, and control.</div>
+      <div class="mh-title">Master the flow, not the script.</div>
+      <div class="mh-desc">This module is about understanding how the service moves — from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience.</div>
     </div>
 
     <div class="sec-eyebrow">Think in phases, not steps</div>
@@ -6057,7 +6127,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="sec-eyebrow">8.1 — The two formats</div>
-    <div class="sec-title">Same 17 steps. Different depth.</div>
+    <div class="sec-title">Same service. Different depth.</div>
     <div class="body-text">The difference between the 1-hour and 2-hour service is not what you do — it's how long you spend doing it, and two additions in the extended format. The foundation is the same. The depth is different. Understanding this makes it easy to upsell and easy to explain.</div>
     <div class="interaction-hint">↓ Select the format you're building today's service around — it emphasizes that format's timings below</div>
 
@@ -6084,7 +6154,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">8.2 — The service map</div>
     <div class="sec-title">The masterclass, one chapter at a time.</div>
-    <div class="body-text">The 17 steps are the map. Each of the 12 chapters below is built around the instructional demonstration for that part of the service — what the video shows you does not need to be repeated in prose here. The text is for what the camera can't teach: why the step belongs here, the judgment calls, and what to adapt.</div>
+    <div class="body-text">This is the map, chapter by chapter. Each one is built around the instructional demonstration for that part of the service — what the video shows you does not need to be repeated in prose here. The text is for what the camera can't teach: why the step belongs here, the judgment calls, and what to adapt.</div>
 
     <div class="m8-principle">
       <div class="m8-principle-line">Explain intentionally, not continuously.</div>
@@ -6092,17 +6162,24 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="m8-masterclass" id="m8Masterclass">
-      <div class="m8mc-progress">
-        <div class="m8mc-progress-text" id="m8mcProgressText">Chapter 1 of 12</div>
-        <div class="m8mc-segments" id="m8mcSegments" aria-hidden="true"></div>
+      <div class="m8mc-top">
+        <div class="sms-head" id="m8mcHead">
+          <div class="sms-num" id="m8mcNum">01</div>
+          <div class="sms-info">
+            <div class="sms-title" id="m8mcTitle">Aromatherapy selection</div>
+            <div class="sms-timing" id="m8mcTiming"></div>
+          </div>
+        </div>
+        <button type="button" class="m8mc-chapters-toggle" id="m8mcChaptersToggle" onclick="m8ToggleChapterDrawer()" aria-expanded="false" aria-controls="m8mcDrawer">
+          Chapters
+          <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
 
-      <div class="sms-head">
-        <div class="sms-num" id="m8mcNum">01</div>
-        <div class="sms-info">
-          <div class="sms-title" id="m8mcTitle">Aromatherapy selection</div>
-          <div class="sms-timing" id="m8mcTiming"></div>
-        </div>
+      <div class="m8mc-segments" id="m8mcSegments" aria-hidden="true"></div>
+
+      <div class="m8mc-drawer" id="m8mcDrawer" hidden>
+        <ol class="m8mc-list" id="m8mcList" aria-label="Module 8 chapters"></ol>
       </div>
 
       <div class="body-text sms-watchfor" id="m8mcWatchFor"></div>
@@ -6127,11 +6204,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <button type="button" class="m8mc-nav-btn primary" id="m8mcNextBtn" onclick="m8GoToChapter(m8ActiveChapter + 1)">Next chapter →</button>
       </div>
       <div class="m8mc-review-hint" id="m8mcReviewHint" hidden>Course Review Mode — chapters unlocked for inspection only; nothing here is saved.</div>
-    </div>
-
-    <div class="m8mc-list-wrap">
-      <div class="m8-jump-nav-label">All chapters</div>
-      <ol class="m8mc-list" id="m8mcList" aria-label="Module 8 chapters"></ol>
     </div>
 
     <hr class="divider">
@@ -6252,40 +6324,77 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">Take the Service Into Practice</div>
     <div class="sec-title">Your service protocol, available anywhere.</div>
-    <div class="body-text">Once you know this service, you shouldn't have to reopen this lesson to run it. The AIMT Service Timer is that protocol, made practical — a treatment-room companion for training the full service, rehearsing pacing, and refreshing before a real appointment.</div>
+    <div class="body-text">Once you know this service, you shouldn't have to reopen this lesson to run it. The AIMT Service Timer is that protocol, made practical — a treatment-room companion for training the full service, rehearsing pacing, refreshing before a client, and keeping the sequence available without reopening the course.</div>
 
     <div class="m8-timer-feature">
       <div class="m8tf-badge">Included with your certification</div>
       <div class="m8tf-title">AIMT Service Timer</div>
-      <div class="m8tf-body">Rehearse the full 17-step sequence, both formats, start to finish — pacing built in, no lesson reopening required. Try the first three steps below.</div>
+      <div class="m8tf-body">This is the actual AIMT Service Timer, embedded and limited to the first three steps. Start it, let it run, and see what a real treatment-room rehearsal feels like.</div>
 
-      <div class="m8tf-preview" id="m8TimerPreview">
-        <div id="m8tpIdle">
-          <div class="m8tp-idle-text">A contained preview — Steps 01–03, real timing. The full Timer covers all 17 steps.</div>
+      <div class="m8rt" id="m8TimerPreview">
+        <div class="m8rt-idle" id="m8tpIdle">
+          <div class="m8rt-idle-text">A contained preview of the real Timer — Steps 01–03, real timing.</div>
           <button type="button" class="lc-btn" id="m8tpStartBtn" onclick="m8TimerStart()">Start preview</button>
         </div>
-        <div id="m8tpActive" hidden>
-          <div class="m8tp-head">
-            <div class="m8tp-step-label" id="m8tpStepLabel">Step 1 of 3</div>
-            <button type="button" class="lc-btn-ghost" id="m8tpPauseBtn" onclick="m8TimerTogglePause()" aria-label="Pause preview timer">Pause</button>
+
+        <div id="m8tpApp" hidden>
+          <div class="m8rt-topbar">
+            <div class="m8rt-toprow">
+              <div class="m8rt-brand">AIMT · Service Timer</div>
+              <div class="m8rt-counter" id="m8tpCounter"></div>
+              <button type="button" class="m8rt-pause-btn" id="m8tpPauseBtn" onclick="m8TimerTogglePause()" aria-label="Pause preview timer">Pause</button>
+            </div>
+            <div class="m8rt-timeline">
+              <div class="m8rt-tl-label" id="m8tpTlLeft">0:00</div>
+              <div class="m8rt-tl-track"><div class="m8rt-tl-fill" id="m8tpTlFill"></div></div>
+              <div class="m8rt-tl-label right" id="m8tpTlRight"></div>
+            </div>
           </div>
-          <div class="m8tp-title" id="m8tpTitle"></div>
-          <div class="m8tp-desc" id="m8tpDesc"></div>
-          <div class="m8tp-note" id="m8tpNote" hidden></div>
-          <div class="m8tp-clock-row">
-            <div class="m8tp-clock" id="m8tpClock" aria-live="polite">0:00</div>
-            <button type="button" class="lc-btn" id="m8tpSkipBtn" onclick="m8TimerSkip()">Next step →</button>
+
+          <div class="m8rt-main">
+            <div class="m8rt-timer-block">
+              <svg class="m8rt-ring" viewBox="0 0 48 48">
+                <circle class="m8rt-ring-bg" cx="24" cy="24" r="20"/>
+                <circle class="m8rt-ring-fill" id="m8tpRingFill" cx="24" cy="24" r="20"/>
+              </svg>
+              <div class="m8rt-time-nums">
+                <div class="m8rt-time" id="m8tpClock" aria-live="polite">0:00</div>
+                <div class="m8rt-meta">this step · <span id="m8tpDurLabel"></span> total</div>
+              </div>
+            </div>
+
+            <div class="m8rt-step-label" id="m8tpStepLabel">Step 01</div>
+            <div class="m8rt-title" id="m8tpTitle"></div>
+            <div class="m8rt-desc" id="m8tpDesc"></div>
+            <div class="m8rt-note" id="m8tpNote" hidden>
+              <span class="m8rt-note-icon">Note</span>
+              <span class="m8rt-note-text" id="m8tpNoteText"></span>
+            </div>
+
+            <div class="m8rt-paused" id="m8tpPausedOverlay">
+              <div class="m8rt-paused-label">Timer paused</div>
+              <div class="m8rt-paused-title">Paused</div>
+              <button type="button" class="m8rt-resume-btn" onclick="m8TimerTogglePause()">Resume</button>
+            </div>
+          </div>
+
+          <div class="m8rt-bottombar">
+            <button type="button" class="m8rt-nav-btn" id="m8tpBackBtn" onclick="m8TimerBack()">← Back</button>
+            <div class="m8rt-tap-hint">Real countdown · pause or skip anytime</div>
+            <button type="button" class="m8rt-nav-btn primary" id="m8tpSkipBtn" onclick="m8TimerSkip()">Skip →</button>
           </div>
         </div>
-        <div id="m8tpDone" hidden>
-          <div class="m8tp-done-title">Preview complete.</div>
-          <div class="m8tp-done-text">That's the first three of seventeen. The full Service Timer carries the complete sequence, in both formats, from open to close.</div>
+
+        <div class="m8rt-done" id="m8tpDone" hidden>
+          <div class="m8rt-done-icon">✦</div>
+          <div class="m8rt-done-title">Preview<br>Complete</div>
+          <div class="m8rt-done-text">That's the first three steps. The full Service Timer carries the complete sequence, in both formats, from open to close.</div>
           <button type="button" class="lc-btn" onclick="m8TimerRestart()">Restart preview</button>
         </div>
       </div>
 
       <div class="m8tf-footer">
-        <div class="m8tf-footer-text">The complete Service Timer covers all 17 steps and both service formats. It receives its own separate, dedicated audit before it's linked here and from your student dashboard — this preview is not that audit, and its timings are current tool behavior, not frozen course authority.</div>
+        <div class="m8tf-footer-text">The complete Service Timer covers the full sequence in both service formats. It receives its own separate, dedicated audit before it's linked here and from your student dashboard — this preview is not that audit, and its timings are current tool behavior, not frozen course authority.</div>
       </div>
     </div>
 
@@ -9846,8 +9955,30 @@ function m8GoToChapter(idx) {
   APP_STATE.setActiveVideoChapter(8, idx);
   m8RenderChapter(idx);
   m8RenderChapterList();
+  m8CloseChapterDrawer();
   const mc = document.getElementById('m8Masterclass');
   if (mc) mc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Chapter drawer — collapsed by default so the chapter list stays
+// secondary to the video, not a large list permanently competing with it.
+function m8ToggleChapterDrawer() {
+  const drawer = document.getElementById('m8mcDrawer');
+  const toggle = document.getElementById('m8mcChaptersToggle');
+  if (!drawer || !toggle) return;
+  if (drawer.hidden) {
+    drawer.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+  } else {
+    m8CloseChapterDrawer();
+  }
+}
+
+function m8CloseChapterDrawer() {
+  const drawer = document.getElementById('m8mcDrawer');
+  const toggle = document.getElementById('m8mcChaptersToggle');
+  if (drawer) drawer.hidden = true;
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
 }
 
 function m8RefreshChapterChrome(idx) {
@@ -9890,8 +10021,11 @@ function m8RenderChapter(idx) {
   const ch = M8_CHAPTERS[idx];
   if (!ch) return;
 
-  const progressText = document.getElementById('m8mcProgressText');
-  if (progressText) progressText.textContent = 'Chapter ' + (idx + 1) + ' of 12 — ' + ch.label.replace(/^Steps? \d+(–\d+)? — /, '');
+  // Visually, only the numeral + title identify the chapter (no repeated
+  // "Chapter X of 12" text) — the full position is still exposed to
+  // assistive technology via this aria-label.
+  const headEl = document.getElementById('m8mcHead');
+  if (headEl) headEl.setAttribute('aria-label', 'Chapter ' + (idx + 1) + ' of 12 — ' + ch.label.replace(/^Steps? \d+(–\d+)? — /, ''));
   document.getElementById('m8mcNum').textContent = ch.num;
   document.getElementById('m8mcTitle').innerHTML = ch.title + (ch.titleSuffix ? ' <span style="font-size:.65rem;font-weight:400;color:var(--muted);margin-left:4px;">' + ch.titleSuffix + '</span>' : '');
   document.getElementById('m8mcTiming').innerHTML = (ch.t1 ? '<span class="t-badge">' + ch.t1 + '</span>' : '') + (ch.t2 ? '<span class="t-badge t-2hr">' + ch.t2 + '</span>' : '');
@@ -10019,8 +10153,13 @@ const M8_TIMER_PREVIEW_STEPS = [
     dur: 5 * 60 }
 ];
 
+const M8TP_RING_CIRC = 2 * Math.PI * 20; // r=20, matches the .m8rt-ring viewBox
+
 let m8tpIndex = 0;
+let m8tpStepTotalSeconds = 0;
 let m8tpSecondsLeft = 0;
+let m8tpElapsedTotal = 0;
+let m8tpServiceTotalSeconds = M8_TIMER_PREVIEW_STEPS.reduce((a, s) => a + s.dur, 0);
 let m8tpPaused = false;
 let m8tpInterval = null;
 
@@ -10031,13 +10170,16 @@ function m8TimerFmt(totalSeconds) {
 
 function m8TimerStart() {
   const idle = document.getElementById('m8tpIdle');
-  const active = document.getElementById('m8tpActive');
+  const app = document.getElementById('m8tpApp');
   const done = document.getElementById('m8tpDone');
-  if (!idle || !active || !done) return;
+  if (!idle || !app || !done) return;
   idle.hidden = true;
   done.hidden = true;
-  active.hidden = false;
+  app.hidden = false;
   m8tpIndex = 0;
+  m8tpElapsedTotal = 0;
+  const tlRight = document.getElementById('m8tpTlRight');
+  if (tlRight) tlRight.textContent = m8TimerFmt(m8tpServiceTotalSeconds);
   m8TimerRenderStep();
   clearInterval(m8tpInterval);
   m8tpInterval = setInterval(m8TimerTick, 1000);
@@ -10046,24 +10188,48 @@ function m8TimerStart() {
 function m8TimerRenderStep() {
   const step = M8_TIMER_PREVIEW_STEPS[m8tpIndex];
   const stepLabel = document.getElementById('m8tpStepLabel');
-  if (!stepLabel) { clearInterval(m8tpInterval); return; }
-  stepLabel.textContent = 'Step ' + (m8tpIndex + 1) + ' of ' + M8_TIMER_PREVIEW_STEPS.length;
-  document.getElementById('m8tpTitle').textContent = step.num + ' — ' + step.title;
+  if (!stepLabel) { clearInterval(m8tpInterval); return; } // preview left the page
+
+  stepLabel.textContent = 'Step ' + step.num;
+  document.getElementById('m8tpCounter').textContent = (m8tpIndex + 1) + ' of ' + M8_TIMER_PREVIEW_STEPS.length;
+  document.getElementById('m8tpTitle').textContent = step.title;
   document.getElementById('m8tpDesc').textContent = step.desc;
   const noteEl = document.getElementById('m8tpNote');
-  if (step.note) { noteEl.hidden = false; noteEl.textContent = step.note; } else { noteEl.hidden = true; }
+  const noteText = document.getElementById('m8tpNoteText');
+  if (step.note) { noteEl.hidden = false; noteText.textContent = step.note; } else { noteEl.hidden = true; }
+
+  document.getElementById('m8tpBackBtn').disabled = m8tpIndex === 0;
+  const skipBtn = document.getElementById('m8tpSkipBtn');
+  if (skipBtn) skipBtn.textContent = m8tpIndex >= M8_TIMER_PREVIEW_STEPS.length - 1 ? 'Finish' : 'Skip →';
+  document.getElementById('m8tpDurLabel').textContent = m8TimerFmt(step.dur);
+
+  m8tpStepTotalSeconds = step.dur;
   m8tpSecondsLeft = step.dur;
   m8tpPaused = false;
-  const pauseBtn = document.getElementById('m8tpPauseBtn');
-  if (pauseBtn) pauseBtn.textContent = 'Pause';
-  const skipBtn = document.getElementById('m8tpSkipBtn');
-  if (skipBtn) skipBtn.textContent = m8tpIndex >= M8_TIMER_PREVIEW_STEPS.length - 1 ? 'Finish preview' : 'Next step →';
-  m8TimerUpdateClock();
+  document.getElementById('m8tpPausedOverlay').classList.remove('show');
+  document.getElementById('m8tpPauseBtn').textContent = 'Pause';
+  m8TimerUpdateRing();
+  m8TimerUpdateTimeline();
 }
 
-function m8TimerUpdateClock() {
+function m8TimerUpdateRing() {
+  const ring = document.getElementById('m8tpRingFill');
   const clockEl = document.getElementById('m8tpClock');
-  if (clockEl) clockEl.textContent = m8TimerFmt(m8tpSecondsLeft);
+  if (!ring || !clockEl) return;
+  const pct = m8tpStepTotalSeconds > 0 ? m8tpSecondsLeft / m8tpStepTotalSeconds : 0;
+  ring.style.strokeDasharray = M8TP_RING_CIRC;
+  ring.style.strokeDashoffset = M8TP_RING_CIRC * (1 - pct);
+  clockEl.textContent = m8TimerFmt(m8tpSecondsLeft);
+  clockEl.className = 'm8rt-time' + (m8tpSecondsLeft <= 15 && m8tpSecondsLeft > 0 ? ' urgent' : m8tpSecondsLeft === 0 ? ' done' : '');
+}
+
+function m8TimerUpdateTimeline() {
+  const fill = document.getElementById('m8tpTlFill');
+  const left = document.getElementById('m8tpTlLeft');
+  if (!fill || !left) return;
+  const pct = Math.min(m8tpElapsedTotal / m8tpServiceTotalSeconds, 1);
+  fill.style.width = (pct * 100) + '%';
+  left.textContent = m8TimerFmt(m8tpElapsedTotal);
 }
 
 function m8TimerTick() {
@@ -10072,7 +10238,9 @@ function m8TimerTick() {
   if (m8tpPaused) return;
   if (m8tpSecondsLeft > 0) {
     m8tpSecondsLeft--;
-    m8TimerUpdateClock();
+    m8tpElapsedTotal++;
+    m8TimerUpdateRing();
+    m8TimerUpdateTimeline();
   } else {
     m8TimerAdvance();
   }
@@ -10081,11 +10249,25 @@ function m8TimerTick() {
 function m8TimerTogglePause() {
   m8tpPaused = !m8tpPaused;
   const pauseBtn = document.getElementById('m8tpPauseBtn');
+  const overlay = document.getElementById('m8tpPausedOverlay');
   if (pauseBtn) pauseBtn.textContent = m8tpPaused ? 'Resume' : 'Pause';
+  if (overlay) overlay.classList.toggle('show', m8tpPaused);
 }
 
 function m8TimerSkip() {
+  // Credit the remaining time of the current step, matching the real
+  // Timer's own manual-skip behavior.
+  m8tpElapsedTotal += m8tpSecondsLeft;
   m8TimerAdvance();
+}
+
+function m8TimerBack() {
+  if (m8tpIndex === 0) return;
+  const spentOnCurrent = m8tpStepTotalSeconds - m8tpSecondsLeft;
+  const prevDur = M8_TIMER_PREVIEW_STEPS[m8tpIndex - 1].dur;
+  m8tpElapsedTotal = Math.max(0, m8tpElapsedTotal - spentOnCurrent - prevDur);
+  m8tpIndex--;
+  m8TimerRenderStep();
 }
 
 function m8TimerAdvance() {
@@ -10099,19 +10281,19 @@ function m8TimerAdvance() {
 
 function m8TimerFinish() {
   clearInterval(m8tpInterval);
-  const active = document.getElementById('m8tpActive');
+  const app = document.getElementById('m8tpApp');
   const done = document.getElementById('m8tpDone');
-  if (active) active.hidden = true;
+  if (app) app.hidden = true;
   if (done) done.hidden = false;
 }
 
 function m8TimerRestart() {
   clearInterval(m8tpInterval);
   const idle = document.getElementById('m8tpIdle');
-  const active = document.getElementById('m8tpActive');
+  const app = document.getElementById('m8tpApp');
   const done = document.getElementById('m8tpDone');
   if (done) done.hidden = true;
-  if (active) active.hidden = true;
+  if (app) app.hidden = true;
   if (idle) idle.hidden = false;
 }
 

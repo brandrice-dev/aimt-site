@@ -9,6 +9,8 @@
 **Production source of truth:** `headspa-mastery.html`
 
 > **Amendment — August 18, 2026 (owner-directed Phase 1 remediation).** Following owner rendered review of the first Phase 1 implementation (commit `ed4d381`), four corrections were approved that supersede conflicting portions of this document below: (1) a global course-foundation-consistency requirement, recorded in `00-global-decisions.md` and applied to Section 8.2's typography and to both checkpoints' component structure; (2) the 12-chapter presentation is now **one contained masterclass player** showing the active chapter only, not twelve vertically stacked video stages; (3) **video completion is now required for Module 8 completion** — all 12 chapters, not just the two checkpoints; (4) the **AIMT Service Timer becomes a major feature section** with a functional ~3-step preview. Sections below marked "Amended" reflect this; unmarked sections remain controlling as originally approved. All 17 step titles, all 12 chapter labels, the exfoliation framework, the claims corrections, "Explain intentionally, not continuously," "Protect the Flow," and both checkpoints' questions/rubrics are unchanged by this amendment. Real video installation remains deferred to Phase 2.
+>
+> **Amendment — August 19, 2026 (second owner-review remediation).** Following owner rendered review of the August 18 remediation, three further corrections were approved, superseding conflicting portions below: (1) the hero headline no longer centers an exact step count, and student-facing copy throughout Module 8 minimizes unnecessary fixed-number framing ("17 steps," "all 17 steps") in favor of "full service," "complete service," "service flow," "protocol," "chapters" — the underlying 17-numbered-step / 12-video-chapter data model and every existing step/chapter title are unchanged; (2) the masterclass is repackaged into **one cohesive, contained player shell** (chapter identity, video, guidance, and navigation inside a single visual container) with the chapter list now a **collapsed-by-default drawer** secondary to the video, and "Chapter X of 12"-style text removed from the visible UI (a bare current-chapter numeral remains visible; full position is still exposed to assistive technology via `aria-label`); (3) the **Timer preview is rebuilt to visually and functionally derive from the real owner Timer prototype** (`~/Downloads/AIMT-Service-Timer-clean.html`) — dark palette, ring countdown, timeline, step label/title/description/note, pause overlay, and prev/skip bottom bar all reused from that source, rather than reinterpreted into Module 8's own card styling. Sections marked "Amended" a second time reflect this pass. No step/chapter title, curriculum correction, checkpoint, or completion-gating requirement changed.
 
 This document is the approved implementation specification for Module 8. It replaces the source extraction as the controlling Module 8 content authority.
 
@@ -32,15 +34,25 @@ Where a claim in the source extraction (`module-08-source.md` §12) asserted a s
 
 **Hero eyebrow:** "Module 8 · The Head Spa Service" — kept verbatim.
 
-**Hero headline:** "This is not about memorizing steps." — kept verbatim. The hard-coded `<br>` after "about" is removed so the title wraps naturally at all widths (see "Responsive/mobile requirements"); the words themselves are unchanged.
+**Hero headline — AMENDED August 19, 2026:** "This is not about memorizing steps." is replaced with **"Master the flow, not the script."** Owner rationale: the original headline (and much of the surrounding copy) leaned too heavily on the exact step count, making the module feel rigid and checklist-bound rather than centered on flow and adaptation, which is the module's actual thesis. The hard-coded `<br>` remains removed; the new title wraps naturally at all widths.
 
-**Hero description:** kept verbatim.
+**Hero description — AMENDED August 19, 2026:** replaced with: "This module is about understanding how the service moves — from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience." Kept short by design — this is not a long hero paragraph.
 
 **Relationship to Module 7:** no change required. Module 7 ends by previewing Module 8 accurately ("the full 17-step service map... every transition and every micro-teach moment"); Module 8's hero opens its own frame without needing a backward callback sentence, consistent with the pattern already approved for Module 7's relationship to Module 6.
 
 **Transition to Module 9:** the completion card's existing Module 9 preview text ("Sanitation and reset systems...") is retained — nothing in this audit found reason to doubt it, though Module 9 itself has not been separately audited.
 
 **Module-opening Cadence greeting:** kept verbatim — "This is the full picture — every step in sequence. If you have questions about timing or technique for any specific step, I am right here." No old-course-name or personal-experience-claim defect was found in this string; no correction needed.
+
+---
+
+## Student-facing count language — AMENDED August 19, 2026
+
+Throughout Module 8's visible copy, unnecessary fixed-number framing ("17 steps," "all 17 steps," repeated numeric protocol framing) is reduced. Prefer: full service, complete service, service flow, protocol, service sequence, chapters, phases.
+
+**Do not remove the actual numbered step identities from instructional material where they are useful** — the 17-step numbering inside the masterclass chapters (`sms-num`, step ranges like "08–10") and the "12 chapters" data model are unaffected; this is a visible-copy reduction, not a removal of the underlying structure. **Do not rename any existing service-step or video title** — the videos are already produced around those titles.
+
+Confirmed reduced: the 8.1 section title ("Same 17 steps. Different depth." → "Same service. Different depth."), the 8.2 section intro body copy, and the Service Timer feature's body/idle/done/footer copy. The masterclass's "Chapter X of 12" style repetition is addressed separately — see "Video-led chapter architecture — AMENDED (August 19, 2026)."
 
 ---
 
@@ -144,17 +156,24 @@ If the final supplied footage contains distinct subclips within a grouped chapte
 
 ---
 
-## Video-led chapter architecture — AMENDED August 18, 2026
+## Video-led chapter architecture — AMENDED August 18, 2026, further amended August 19, 2026
 
 **This section supersedes the original "12 vertically stacked chapter stages" design.** Owner rendered review of the first Phase 1 implementation found twelve consecutive full-size video stages visually excessive and too long as a page — rejected. The videos remain the dominant instructional hierarchy, but the module must present them as **one contained masterclass player**, not a scroll of embedded videos.
 
 **Governing requirement:** one primary masterclass component shows the **active chapter only**. The information around the player (title, watch-for cue, guidance, adaptation cue, continuity) changes with the active chapter. The remaining 11 chapters are represented in a compact chapter rail/progress indicator, not as additional full video stages rendered on the page.
 
+**Second amendment (August 19, 2026) — one cohesive player shell, not assembled parts.** Owner review of the August 18 masterclass found it directionally correct but "assembled" rather than a single premium product: a video stage plus disconnected cards, with a large always-visible 12-row chapter list sitting beside/under it competing for attention. Approved correction:
+
+- **One visual shell.** Chapter identity (numeral + title + timing), the watch-for cue, the video stage, guidance, adaptation cue, continuity, and Prev/Next controls all live inside a single bordered/backgrounded container — not separate boxes.
+- **Chapter navigation is visually secondary and defaults to collapsed.** The always-visible 12-row list is replaced by a compact "Chapters" toggle inside the shell that opens a drawer (the same full-width, one-row-per-chapter rows as before, with Completed/Current/Locked exposed as text, not color alone) — collapsed by default so it never competes with the video for attention. A small segmented progress bar remains visible (quiet, secondary) as a supplementary, non-textual sense of position.
+- **No repeated "Chapter X of 12" text.** The visible chapter numeral (e.g., "05") is sufficient as the visible current-chapter number; full ordinal position ("Chapter 5 of 12 — Scalp Massage") is still exposed to assistive technology via an `aria-label` on the chapter-identity region, so screen-reader users are not shortchanged by the visual simplification.
+- Locked chapters remain programmatically non-actionable in the drawer (as before); completed chapters remain replayable; Course Review Mode's non-persisting inspection bypass is unchanged.
+
 **Approved masterclass component — the six content fields are unchanged, applied to whichever chapter is currently active:**
 
 1. **Existing service-step title / numbering** — the preserved chapter label (e.g., "Step 05 — Scalp Massage"), always visible for the active chapter.
 2. **Concise orientation / "watch for" cue** — one or two sentences priming observation, not narrating the video.
-3. **One large, prominent video stage** — see "Video player implementation requirements." May exceed the standard text column width on desktop. Only one video stage exists in the DOM/renders at a time.
+3. **One large, prominent video stage** — see "Video player implementation requirements." **Amended August 19, 2026:** the video stays contained within the single player shell (it no longer breaks out past the standard text column) — the earlier "may exceed the standard column width" allowance is superseded by the "one cohesive player shell" requirement; a video visually spilling past its own container's edges is not "contained." Only one video stage exists in the DOM/renders at a time.
 4. **Short practitioner guidance** — text carrying what the demonstration cannot show (per "Step-specific approved corrections"). **Must use the shared course body-text foundation** — see "Course foundation consistency."
 5. **Adaptation/mistake/decision cue** — included only where genuinely useful, same per-step judgment as before (Step 04/05, Step 07/12, others where real and specific).
 6. **Next-step continuity** — a brief line connecting the active chapter to the next.
@@ -313,7 +332,7 @@ Applies to the eventual real-video implementation (deferred — see "Implementat
 
 **Posters:** should ultimately come from the actual service footage, not decorative generated imagery (see "Visual asset plan"). Do not generate decorative replacement imagery for video posters unless separately, explicitly authorized later.
 
-**Player width:** may exceed the standard text-reading column width on desktop where that makes the demonstration appropriately prominent — this is an intentional exception to the module's otherwise-standard text width, in service of the "videos are the dominant hierarchy" requirement.
+**Player width — AMENDED August 19, 2026:** the video stage stays within the masterclass player shell's own width; it no longer breaks out past the standard text-reading column. The earlier exception is superseded — video dominance now comes from the video being the largest, most visually prominent element inside one cohesive contained shell, not from exceeding the module's text measure.
 
 ---
 
@@ -498,9 +517,16 @@ Persistent Cadence threads remain deferred.
 
 ---
 
-## Service Timer — AMENDED August 18, 2026
+## Service Timer — AMENDED August 18, 2026, further amended August 19, 2026
 
 **This section supersedes the original "informational card only" treatment.** Owner rendered review found the informational-card presentation too weak for what the Service Timer actually is — a major, practical, included professional tool, not a minor mention.
+
+**Second amendment (August 19, 2026) — the preview must look and behave like the real Timer, not a Module 8 reinterpretation of it.** Owner review of the August 18 preview found it did not sufficiently resemble the actual AIMT Service Timer — rejected. Approved correction: the embedded preview reuses the real prototype's own visual and functional language directly, so a student immediately understands "this is the actual AIMT Service Timer," not a decorative countdown widget:
+
+- **Visual continuity preserved:** the Timer's own dark palette (its exact `--bg`/`--surface`/`--accent`/white-alpha tokens, not Module 8's own card colors), its Montserrat/Outfit type hierarchy, the step-timer ring, the total-service timeline treatment, phase/step-label conventions, current-step title/description/note treatment, pause-overlay behavior, and its nav-button/spacing language are all carried into the preview.
+- **The outer feature section** (badge, title, body copy, footer) remains in Module 8's own dark feature-card styling — only the embedded preview widget itself switches to the Timer's own distinct palette, which reinforces (rather than undermines) the "real tool embedded here" impression by making it visually distinct from the surrounding lesson chrome.
+- **Genuinely functional, not decorative:** start, a real per-second countdown on both the step ring and the running service timeline, pause/resume (with a paused overlay matching the real Timer's own), forward (skip) and backward (back) step navigation mirroring the real Timer's own manual-navigation behavior, and a clear end-of-preview state.
+- Fonts: Module 8 (and the rest of the course) already loads Montserrat and Outfit for its own type system; the existing Google Fonts `<link>` was extended additively (Montserrat 900, Outfit 600) to reach the specific weights the real Timer uses — no new font family was introduced, and no other module's typography is affected.
 
 **Classification:** unchanged — recommended hosted student tool / practice companion, not a conventional downloadable.
 
@@ -513,7 +539,7 @@ Persistent Cadence threads remain deferred.
 - gives students a treatment-room companion once they understand the curriculum;
 - reduces the need to repeatedly reopen the full lesson during practice.
 
-**Embedded functional preview (new, approved):** the section must contain an actual, usable, contained preview of the Timer — not a screenshot, not a video, not a decorative mockup — covering approximately the first three service steps (Aromatherapy Selection, Dry Brushing & Hair Play, Halo Activation & Wet Massage). Approved preview functionality: start, an active-step display, real countdown behavior, pause/resume, and a clear end-of-preview state after Step 3. The preview is a small, contained experience, not a second full application embedded in the page — the complete Timer remains the primary tool.
+**Embedded functional preview (new, approved):** the section must contain an actual, usable, contained preview of the Timer — not a screenshot, not a video, not a decorative mockup — covering approximately the first three service steps (Aromatherapy Selection, Dry Brushing & Hair Play, Halo Activation & Wet Massage). Approved preview functionality: start, an active-step display, real per-second countdown behavior (ring + running timeline), pause/resume, forward (skip) and backward (back) step navigation, and a clear end-of-preview state after Step 3. The preview is a small, contained experience, not a second full application embedded in the page — the complete Timer remains the primary tool.
 
 **Timer source authority.** An owner-created Service Timer prototype exists outside this repository (found at `~/Downloads/AIMT-Service-Timer-clean.html` at the time of this amendment — a local file on the owner's machine, not part of `aimt-site`). The preview is derived from that real source's functional concept (mode/format select → active-step countdown with phase/note/next-step preview → pause/resume → completion state) and its actual Steps 01–03 timing values (5 min/5 min, 3 min/5 min, 5 min/8 min for 1-hour/2-hour respectively), which already match Module 8's own lesson timing badges for those steps. **Step 01's preview copy is reconciled with Module 8's approved consent/fragrance-optional correction** (the prototype's own Step 01 text predates that correction and does not mention the fragrance-free option or consent-before-touch by name) — this is the one substantive content change made to the borrowed source; Steps 02 and 03 needed no correction. **This narrow reconciliation is not a substitute for the Timer's own future dedicated audit**, which still governs the complete 17-step tool.
 
@@ -632,6 +658,7 @@ Module 8 is intentionally media-light outside the real videos — the videos are
 
 - **Course foundation consistency (amended, new):** Section 8.2's instructional/guidance prose uses the shared `.body-text` treatment (font, size, line-height, color, measure) rather than a bespoke Module 8 size; both checkpoints use the canonical `.checkpoint` component. See `00-global-decisions.md`'s foundation-consistency standard and "Video-led chapter architecture — AMENDED" / "Checkpoint specification" above.
 - **Chapter rail/progress state (amended, new):** current, completed, and locked chapter states are each exposed as text/accessible-name information, not color alone; locked chapters are programmatically non-actionable (e.g., `disabled`/`aria-disabled`), not merely visually dimmed; the active chapter's identity is announced/available to assistive technology without requiring the rail itself.
+- **Chapter position without visible "X of 12" (amended August 19, 2026):** since the visible UI no longer repeats "Chapter X of 12" text, the full ordinal position is instead exposed via an `aria-label` on the chapter-identity region (e.g., "Chapter 5 of 12 — Scalp Massage"), so screen-reader users are not shortchanged by the visual simplification. The chapter drawer's toggle button uses `aria-expanded`/`aria-controls`.
 - Semantic, keyboard-operable chapter navigation (the chapter rail/list) — no plain `<div onclick>`.
 - Format toggle converted to a native, keyboard-operable control with correct pressed/selected state semantics (`aria-pressed` or equivalent) and a text/icon indicator in addition to color.
 - Full keyboard operability of every pre-play video trigger; visible focus on every interactive control.
@@ -790,6 +817,15 @@ R7. No normal-student-mode control can mark a chapter complete without a genuine
 R8. The Service Timer section is a substantial feature presentation (not a small informational card) containing a functional, contained ~3-step preview (start/active step/countdown/pause/resume/end state) with no fake "Open Full Service Timer" control.
 R9. No regression to the approved Section 8.2 step-specific corrections, "Protect the Flow," Cadence identity, or claims corrections already implemented in the first Phase 1 pass.
 
+**Second Phase 1 remediation acceptance criteria (added August 19, 2026 — owner-directed amendment):**
+
+R10. Hero headline reads "Master the flow, not the script."; hero description reflects service-flow/adaptation framing, not a checklist framing.
+R11. Visible "17 steps"/"all 17 steps"/equivalent fixed-count phrasing is substantially reduced across Module 8's copy (hero, 8.1, 8.2, Service Timer feature); the underlying 17-step numbering and 12-chapter data model, and all existing step/chapter titles, are unchanged.
+R12. The masterclass renders as one visually cohesive shell — chapter identity, video, guidance, and Prev/Next controls inside a single container, not separate competing boxes.
+R13. The chapter list is a collapsed-by-default drawer, secondary to the video; no "Chapter X of 12" text is visibly repeated outside the drawer (a bare chapter numeral is visible; full position is exposed via `aria-label`).
+R14. The Timer preview visually and functionally derives from the real prototype (dark Timer-native palette distinct from Module 8's own card chrome, ring countdown, running timeline, step label/title/description/note, pause overlay, back/skip bottom bar) — confirmed against `~/Downloads/AIMT-Service-Timer-clean.html`.
+R15. No regression to any acceptance criterion in the original list (1–30) or the first remediation pass (R1–R9).
+
 **Phase 2 (video installation) — blocks manual QA and manual approval until met:**
 
 31. All 12 chapters have the correct video installed, in the correct order, with correct grouped/subclip behavior, no duplicate, no missing media.
@@ -810,6 +846,7 @@ No implementation task may mark Module 8 "Implemented — manual QA approved" wh
 - The chapter-jump navigation is an optional wayfinding aid, not a required element — if implementation finds the video-led sequence sufficiently navigable without it (e.g., because the page is not excessively long once player shells are sized appropriately), it may be omitted without violating this specification.
 - Do not silently reintroduce the removed physiological, business-outcome, or superlative claims during implementation "for flavor" — their removal is a deliberate audit decision, not an oversight to be reversed.
 - The August 18, 2026 amendment (masterclass single-player, video completion requirement, checkpoint/typography foundation match, Service Timer feature promotion) is owner-directed and supersedes the corresponding original Phase 1 design decisions above; it does not reopen or change the curriculum/claims corrections, "Protect the Flow," or Cadence corrections from the original specification.
+- The August 19, 2026 amendment (hero/copy step-count reduction, cohesive masterclass shell with a collapsed chapter drawer, Timer preview visual/functional fidelity to the real prototype) is likewise owner-directed and supersedes only the specific design decisions it names; it does not reopen curriculum, claims, checkpoints, Cadence, or the video-completion requirement.
 - Do not begin Module 9 extraction, implementation, or any certificate/completion-flow work as a result of this specification.
 - Do not install, link, or modify the AIMT Service Timer as a result of this specification — it remains a separately audited future tool; only its introductory card (with no functional launch control) belongs to this module's implementation.
 - Implementation of this specification is a separate, later task. Phase 1 may proceed independently; Phase 2 (video installation) and everything after it (static/mocked validation with real video, rendered manual QA, owner manual approval) are explicitly blocked until Phase 1 is complete and the real service videos are available to install.
