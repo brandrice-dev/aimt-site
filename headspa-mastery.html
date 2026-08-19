@@ -10072,11 +10072,21 @@ function m8RenderChapter(idx) {
   const wrap = document.getElementById('m8mcVideoWrap');
   const existingIframe = wrap.querySelector('iframe');
   if (existingIframe) existingIframe.remove();
-  thumb.classList.remove('loaded');
-  thumb.setAttribute('aria-label', 'Play video: ' + ch.label);
-  thumb.innerHTML = '<div class="sms-video-play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>' +
-    '<div class="sms-video-label">' + ch.label + '</div>' +
-    '<div class="sms-video-sublabel">Add Vimeo link in admin</div>';
+
+  if (STEP_VIDEO_IDS[idx]) {
+    // Real installed video: load the player directly on activation — no
+    // outer click-to-load thumbnail step. Vimeo's own resting frame is
+    // the chapter's poster state; the only remaining play action is the
+    // student's own press inside the real player.
+    thumb.classList.add('loaded');
+    m8LoadRealVideo(idx);
+  } else {
+    thumb.classList.remove('loaded');
+    thumb.setAttribute('aria-label', 'Play video: ' + ch.label);
+    thumb.innerHTML = '<div class="sms-video-play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>' +
+      '<div class="sms-video-label">' + ch.label + '</div>' +
+      '<div class="sms-video-sublabel">Add Vimeo link in admin</div>';
+  }
 
   document.getElementById('m8mcGuidance').innerHTML = ch.guidance.map((p) => '<div class="body-text sms-what">' + p + '</div>').join('');
   document.getElementById('m8mcTeach').innerHTML = ch.teachLabel
@@ -10112,42 +10122,30 @@ function m8RenderChapterList() {
   }).join('');
 }
 
-// Click handler for the single active video stage. No autoplay; a click
-// starts only the active chapter's own video. Real completion (Phase 2)
+// Loads the real installed player for a chapter directly — called from
+// m8RenderChapter() the moment that chapter becomes active, so there is no
+// separate outer click-to-load step. Vimeo's own resting frame is the
+// chapter's poster state; the one remaining play action is the student's
+// own press inside the real player. No autoplay. Real completion (Phase 2)
 // must come from the installed player's genuine "ended" event via
-// markVideoChapterEnded() below — never from opening/starting a video.
-function m8PlayActiveVideo() {
-  const idx = m8ActiveChapter;
+// markVideoChapterEnded() below — never from opening, starting, or seeking
+// a video.
+function m8LoadRealVideo(idx) {
   const vimeoId = STEP_VIDEO_IDS[idx];
-  const thumb = document.getElementById('m8mcVideoThumb');
   const wrap = document.getElementById('m8mcVideoWrap');
-  if (!thumb || !wrap) return;
+  if (!wrap || !vimeoId) return;
+  const existing = wrap.querySelector('iframe');
+  if (existing) existing.remove();
 
-  if (!vimeoId) {
-    thumb.innerHTML = '<div class="sms-video-label" style="color:rgba(255,255,255,0.25);">Video coming soon</div>';
-    // Course Review Mode ONLY: simulate this chapter's completion so a
-    // reviewer can inspect every chapter without real footage. This never
-    // runs in normal student mode (m8ChapterReachable/save() both gate on
-    // Review Mode), and writes no real progress — APP_STATE.save() itself
-    // no-ops while Review Mode is active, identical to how checkpoint
-    // submissions behave in Review Mode.
-    if (window.ReviewMode && window.ReviewMode.isActive()) {
-      APP_STATE.setVideoChapterComplete(8, idx);
-      m8RefreshChapterChrome(idx);
-      m8RenderChapterList();
-    }
-    return;
-  }
-
-  thumb.classList.add('loaded');
-  const chapterLabel = thumb.getAttribute('aria-label') || ('Step ' + (idx + 1) + ' video');
+  const ch = M8_CHAPTERS[idx];
   const iframe = document.createElement('iframe');
-  // No autoplay param — a click loads the player; playback still requires
-  // the student's own play press. Vimeo enforces this video's own privacy
-  // (embed-only, restricted to the aimtrichology.com production domain) on
-  // its side — nothing here requests, stores, or bypasses that.
+  // No autoplay param — the player loads showing Vimeo's own resting
+  // frame; playback still requires the student's own play press inside it.
+  // Vimeo enforces this video's own privacy (embed-only, restricted to the
+  // aimtrichology.com production domain) on its side — nothing here
+  // requests, stores, or bypasses that.
   iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?color=a3968d&title=0&byline=0&portrait=0';
-  iframe.title = chapterLabel.replace(/^Play video:\s*/, '');
+  iframe.title = ch ? ch.label : ('Step ' + (idx + 1) + ' video');
   iframe.allow = 'fullscreen; picture-in-picture';
   iframe.allowFullscreen = true;
   iframe.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:block;';
@@ -10159,6 +10157,38 @@ function m8PlayActiveVideo() {
   if (window.Vimeo && window.Vimeo.Player) {
     const player = new window.Vimeo.Player(iframe);
     player.on('ended', () => markVideoChapterEnded(idx));
+  }
+}
+
+// Click handler for the placeholder thumbnail — only ever rendered for a
+// chapter with no real video installed yet (see m8RenderChapter()). A
+// chapter with a real video never shows this thumb, so this normally only
+// handles the "video coming soon" / Review Mode inspection path.
+function m8PlayActiveVideo() {
+  const idx = m8ActiveChapter;
+  const vimeoId = STEP_VIDEO_IDS[idx];
+  const thumb = document.getElementById('m8mcVideoThumb');
+  if (!thumb) return;
+
+  if (vimeoId) {
+    // Defensive fallback only — normal rendering never reaches this
+    // branch, since a chapter with a real video loads it directly instead
+    // of showing a clickable thumb.
+    m8LoadRealVideo(idx);
+    return;
+  }
+
+  thumb.innerHTML = '<div class="sms-video-label" style="color:rgba(255,255,255,0.25);">Video coming soon</div>';
+  // Course Review Mode ONLY: simulate this chapter's completion so a
+  // reviewer can inspect every chapter without real footage. This never
+  // runs in normal student mode (m8ChapterReachable/save() both gate on
+  // Review Mode), and writes no real progress — APP_STATE.save() itself
+  // no-ops while Review Mode is active, identical to how checkpoint
+  // submissions behave in Review Mode.
+  if (window.ReviewMode && window.ReviewMode.isActive()) {
+    APP_STATE.setVideoChapterComplete(8, idx);
+    m8RefreshChapterChrome(idx);
+    m8RenderChapterList();
   }
 }
 

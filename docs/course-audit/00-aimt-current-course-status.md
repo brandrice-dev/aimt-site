@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 19, 2026 (Module 8 Phase 2 — Step 02 Vimeo integration test)
+**Last updated:** August 19, 2026 (Module 8 Phase 2 — Step 02 Vimeo player UX polish)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Test Module 8 Vimeo integration" commit (hash recorded in the final task report). Prior local-only commit: `c33afef` — "Test Module 8 Vimeo player integration" (the first Step 02 wiring pass). Before that, on `origin/course-audit-build`: `1d49987` — "Clarify Module 8 pacing and elevate service timer". Local commits from these two Vimeo-integration-test tasks have not yet been pushed — push requires the owner's own GitHub Desktop credentials, unavailable in this environment.
+- Latest controlling commit: pending — this task's "Polish Module 8 Vimeo player UX" commit (hash recorded in the final task report). The owner has since pushed the prior two Vimeo-integration-test commits (`c33afef`, `5699809`) to `origin/course-audit-build` via GitHub Desktop, and confirmed real Vimeo playback works correctly on the resulting hosted branch preview (`https://course-audit-build.aimt-site.pages.dev`).
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,10 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 2 — Step 02 Vimeo player UX polish — August 19, 2026.** Owner feedback on the now-working hosted-preview playback: Step 02 required two separate play actions (an outer black placeholder click, then the real Vimeo play button) — undesired friction. Fixed: for a chapter with a real installed video, `m8RenderChapter()` now loads the Vimeo player directly the moment that chapter becomes active, instead of waiting for a click on an outer thumbnail. The iframe-building and `Vimeo.Player`/`ended`-event wiring (previously inline in `m8PlayActiveVideo()`) was extracted into a new `m8LoadRealVideo(idx)`, called directly from `m8RenderChapter()` for any chapter with a non-null `STEP_VIDEO_IDS` entry; `m8PlayActiveVideo()` now only handles the placeholder thumbnail's click (the "video coming soon" / Review Mode inspection path for the 11 not-yet-installed chapters), which is unchanged. The resting state relies on Vimeo's own default embed poster/thumbnail (no separate local still asset was added, per the task's own stated preference to avoid unnecessary complexity for a one-video test) — no black placeholder box appears for Step 02 anymore. No cropping was introduced: the iframe's existing `width:100%;aspect-ratio:16/9` sizing is unchanged, confirmed rendering at the correct 16:9 ratio with zero horizontal overflow at 1280px/390×844/375×812. No autoplay, no password/credential, the `ended`-to-`markVideoChapterEnded` wiring, Timer feature, both checkpoints, Module 9 gating, and Review Mode's unsaved behavior were all re-verified unchanged. Only `headspa-mastery.html` was touched (65 insertions/35 deletions, one function extracted, no new file). Module 8 remains in Phase 2 — 11 chapters still uninstalled, not ready for manual QA, not manually approved.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 2 — Step 02 Vimeo integration test — August 19, 2026.** A single real Vimeo-hosted video (owner-supplied ID `1214280975`) was wired to exactly one Module 8 chapter, Step 02 — Dry Brushing & Hair Play, as an integration test of the existing single-player masterclass architecture ahead of installing the remaining 11 chapters. This is the second of two sessions doing this work; the first session's commit (`c33afef`, "Test Module 8 Vimeo player integration") wired the same video under an earlier assumption that it was password-protected, then this session corrected that assumption once the owner clarified the video's actual Vimeo privacy configuration (embed-only, restricted to the `aimtrichology.com` production domain, autoplay off, downloads off) and updated the explanatory code comments to match — no functional code changed as a result, since domain-restriction is enforced entirely by Vimeo server-side and the implementation never touched that layer.
 
