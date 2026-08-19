@@ -555,6 +555,8 @@ Persistent Cadence threads remain deferred.
 
 **Exact final timer allocations remain intentionally not frozen by this specification.** The preview's three step timings are the prototype's own current values, used because they already agree with the lesson's own badges — they are not new curriculum authority, and the complete Timer's full 17-step timing set is still reconciled during its own separate audit, not here.
 
+**Full-Timer links — approved, pending the hosted route (recorded August 19, 2026).** Once a real hosted AIMT Service Timer route exists, Module 8 requires two links to it, exact approved copy: (1) a CTA shown when the embedded preview concludes — "Open the Full Service Timer →"; (2) a persistent link below the feature section, available regardless of preview state — "Open the AIMT Service Timer →". Per the standing implementation constraint above, neither link is built until a verified destination URL exists — no URL is invented, and no dead or disabled-looking control ships in the meantime.
+
 ---
 
 ## Practitioner insider value

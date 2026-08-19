@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 19, 2026 (Module 8 Phase 1 third owner-review remediation)
+**Last updated:** August 19, 2026 (Module 8 Phase 2 — Step 02 Vimeo integration test)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's third Module 8 owner-review remediation commit (hash recorded in the final task report and appended to "Latest relevant commits" below once created). Prior controlling commit: `3d9915d` — "Refine Module 8 masterclass and timer preview" (the second owner-review remediation), local-only at the start of this task, pushed to `origin/course-audit-build` as part of this task's push. Before that: `35f34e6` — "Remediate Module 8 owner review".
+- Latest controlling commit: pending — this task's "Test Module 8 Vimeo integration" commit (hash recorded in the final task report). Prior local-only commit: `c33afef` — "Test Module 8 Vimeo player integration" (the first Step 02 wiring pass). Before that, on `origin/course-audit-build`: `1d49987` — "Clarify Module 8 pacing and elevate service timer". Local commits from these two Vimeo-integration-test tasks have not yet been pushed — push requires the owner's own GitHub Desktop credentials, unavailable in this environment.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -40,7 +40,7 @@ Do not merge or deploy yet.
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
 | Module 7 | Implemented — manual QA approved |
-| Module 8 | Phase 1 (non-video) implemented — Phase 2 (real video installation) pending; NOT manually QA'd, NOT approved |
+| Module 8 | Phase 1 (non-video) implemented — Phase 2 (real video installation) in progress: 1 of 12 chapters (Step 02) wired as a Vimeo integration test, 11 remain uninstalled; NOT manually QA'd, NOT approved |
 | Modules 9–11 | Pending |
 | Module 12 | Planned — do not begin |
 
@@ -74,6 +74,18 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 2 — Step 02 Vimeo integration test — August 19, 2026.** A single real Vimeo-hosted video (owner-supplied ID `1214280975`) was wired to exactly one Module 8 chapter, Step 02 — Dry Brushing & Hair Play, as an integration test of the existing single-player masterclass architecture ahead of installing the remaining 11 chapters. This is the second of two sessions doing this work; the first session's commit (`c33afef`, "Test Module 8 Vimeo player integration") wired the same video under an earlier assumption that it was password-protected, then this session corrected that assumption once the owner clarified the video's actual Vimeo privacy configuration (embed-only, restricted to the `aimtrichology.com` production domain, autoplay off, downloads off) and updated the explanatory code comments to match — no functional code changed as a result, since domain-restriction is enforced entirely by Vimeo server-side and the implementation never touched that layer.
+
+**Implementation.** The Vimeo Player SDK (`https://player.vimeo.com/api/player.js`) is now loaded alongside the site's other external scripts. `STEP_VIDEO_IDS[1]` (Step 02) is set to `'1214280975'`; all other 11 entries remain `null`. `m8PlayActiveVideo()` now instantiates a `Vimeo.Player` against the created iframe and binds its genuine `ended` event to the existing `markVideoChapterEnded(idx)` completion path — the same function Phase 1 already built (unlocks the next chapter, keeps the completed chapter replayable, calls `APP_STATE._checkModuleComplete(8)`). No second completion system was created. No autoplay param is present in the iframe URL. No Vimeo password or credential of any kind was requested, stored, or committed anywhere — Step 02's video does not require one; nothing in source code reads, stores, or transmits any credential.
+
+**Domain-restriction reality, confirmed exactly.** Because Vimeo's embed is restricted to `aimtrichology.com` and Course Review Mode runs at `localhost:8890`, genuine playback cannot succeed in this local environment — this was confirmed directly, not assumed: attaching a Vimeo Player `ready()` listener to the created iframe returned a rejected promise with `name: "PrivacyError"`, `message: "Because of its privacy settings, this video cannot be played here."` This is Vimeo correctly enforcing its own configured privacy from an unauthorized origin — expected, not a defect — and no workaround was attempted (no privacy setting was loosened, no domain was added, no code bypassed the restriction). **Genuine end-to-end playback and the real `ended` event firing still require testing from the actual hosted `aimtrichology.com`-origin branch preview, not localhost.** Everything that could be verified locally was verified: correct Vimeo ID resolution, correct iframe/title/no-autoplay construction, correct SDK initialization, the exact `ended`-event-to-`markVideoChapterEnded` wiring (confirmed present by direct source inspection), zero console errors, zero horizontal overflow at 1280px/390×844/375×812, Review Mode remaining unsaved (`localStorage.levo_app` stayed `null` throughout), Step 01 remaining incomplete, Timer feature and both checkpoints unchanged, and Modules 0, 1, 7, and 9 all still rendering distinct non-empty content with zero console errors.
+
+**Pending Timer-link dependency, recorded (not built).** Per the owner's already-approved direction, once a real hosted AIMT Service Timer route exists, Module 8 will need two links to it: a CTA at the conclusion of the Timer preview reading "Open the Full Service Timer →", and a persistent link below the feature reading "Open the AIMT Service Timer →". No URL exists yet, so neither link was added — recording this here (and in `module-08.md`) keeps the requirement from being lost without inventing a destination or shipping a dead control.
+
+**This remains an integration test only.** 11 of 12 required instructional video chapters are still uninstalled. Module 8 remains in Phase 2, is NOT ready for manual QA, and is NOT manually approved. Module 9 was not begun. No merge or deployment occurred. Course Review Mode (`http://localhost:8890/headspa-mastery.html?review=1`) was kept running throughout and remains running.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 1 third owner-review remediation — August 19, 2026.** The owner continued live review of Module 8 in Course Review Mode (`http://localhost:8890/headspa-mastery.html?review=1`) and identified three further polish items ahead of real video installation, approved as a third amendment to `module-08.md`, then implemented. Real video installation was explicitly not part of this task and remains deferred.
 
