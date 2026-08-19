@@ -10144,8 +10144,23 @@ function m8LoadRealVideo(idx) {
   // Vimeo enforces this video's own privacy (embed-only, restricted to the
   // aimtrichology.com production domain) on its side — nothing here
   // requests, stores, or bypasses that.
-  iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?color=a3968d&title=0&byline=0&portrait=0';
+  //
+  // On phone widths only (the project's existing 600px breakpoint, same as
+  // every other mobile CSS rule in this file), the player is requested
+  // with playsinline=0 so the student's own Play press can trigger the
+  // device's native fullscreen video playback where the browser supports
+  // it — desktop keeps Vimeo's default inline playback in the masterclass
+  // shell. This is a playback-presentation param only: it does not
+  // autoplay, and it adds no second play control of any kind.
+  const isPhoneWidth = !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+  const embedParams = 'color=a3968d&title=0&byline=0&portrait=0' + (isPhoneWidth ? '&playsinline=0' : '');
+  iframe.src = 'https://player.vimeo.com/video/' + vimeoId + '?' + embedParams;
   iframe.title = ch ? ch.label : ('Step ' + (idx + 1) + ' video');
+  // fullscreen (modern allow declaration) + allowfullscreen (legacy but
+  // still-required attribute some browsers/webviews check) together give
+  // Vimeo's own fullscreen control — including phone-native fullscreen
+  // triggered by playsinline=0 above — full permission to work. Nothing
+  // here hides or replaces Vimeo's own fullscreen control.
   iframe.allow = 'fullscreen; picture-in-picture';
   iframe.allowFullscreen = true;
   iframe.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:block;';

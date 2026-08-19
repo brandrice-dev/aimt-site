@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 19, 2026 (Module 8 Phase 2 — Step 02 Vimeo player UX polish)
+**Last updated:** August 19, 2026 (Module 8 Phase 2 — Step 02 mobile fullscreen playback polish)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Polish Module 8 Vimeo player UX" commit (hash recorded in the final task report). The owner has since pushed the prior two Vimeo-integration-test commits (`c33afef`, `5699809`) to `origin/course-audit-build` via GitHub Desktop, and confirmed real Vimeo playback works correctly on the resulting hosted branch preview (`https://course-audit-build.aimt-site.pages.dev`).
+- Latest controlling commit: pending — this task's "Optimize Module 8 video playback for mobile" commit (hash recorded in the final task report). Prior local-only commit `567126c` ("Polish Module 8 Vimeo player UX") has not yet been pushed — push requires the owner's own GitHub Desktop credentials, unavailable in this environment; preserved, not reset. Before that, on `origin/course-audit-build`: `5699809` — "Test Module 8 Vimeo integration".
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,10 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 2 — Step 02 mobile fullscreen playback polish — August 19, 2026.** Owner decision after the prior UX polish: on phone widths the inline masterclass video reads too small for technique-focused instruction. Fixed by adding Vimeo's own supported mechanism, `playsinline=0`, to the Step 02 embed URL **only** at the project's existing 600px mobile breakpoint (checked via `window.matchMedia('(max-width: 600px)')` inside `m8LoadRealVideo(idx)`, matching every other mobile rule already in this file) — desktop/larger screens are unaffected and keep Vimeo's default inline playback inside the masterclass shell. This changes only which URL parameter Vimeo receives; it does not add a second play control, does not autoplay, and does not touch the completion architecture. Fullscreen permission (`iframe.allow="fullscreen; picture-in-picture"` and `iframe.allowFullscreen = true`) was already present and unchanged, confirmed sufficient for phone-native fullscreen triggered by `playsinline=0`. Re-verified unchanged: no autoplay, true 16:9 sizing with zero cropping and zero horizontal overflow at 1280px/390×844/375×812, the `ended`-to-`markVideoChapterEnded` wiring, Step 01 remaining uninstalled, exactly one non-null `STEP_VIDEO_IDS` entry, Timer feature, both checkpoints, Module 9 gating logic, and Review Mode's unsaved behavior. Only `headspa-mastery.html` was touched (16 insertions, 1 deletion). **A real owner phone test on the hosted branch preview remains outstanding and is required before this can be considered validated end-to-end** — specifically: fullscreen actually engaging on a real device/browser combination, the full frame displaying without cropping in that native fullscreen mode, fullscreen exiting cleanly, and the genuine Vimeo `ended` event still firing and completing the chapter when a real phone's native fullscreen player is used (this cannot be proven from source inspection or a desktop-browser viewport simulation alone). Module 8 remains in Phase 2 — 11 chapters still uninstalled, not ready for manual QA, not manually approved.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 2 — Step 02 Vimeo player UX polish — August 19, 2026.** Owner feedback on the now-working hosted-preview playback: Step 02 required two separate play actions (an outer black placeholder click, then the real Vimeo play button) — undesired friction. Fixed: for a chapter with a real installed video, `m8RenderChapter()` now loads the Vimeo player directly the moment that chapter becomes active, instead of waiting for a click on an outer thumbnail. The iframe-building and `Vimeo.Player`/`ended`-event wiring (previously inline in `m8PlayActiveVideo()`) was extracted into a new `m8LoadRealVideo(idx)`, called directly from `m8RenderChapter()` for any chapter with a non-null `STEP_VIDEO_IDS` entry; `m8PlayActiveVideo()` now only handles the placeholder thumbnail's click (the "video coming soon" / Review Mode inspection path for the 11 not-yet-installed chapters), which is unchanged. The resting state relies on Vimeo's own default embed poster/thumbnail (no separate local still asset was added, per the task's own stated preference to avoid unnecessary complexity for a one-video test) — no black placeholder box appears for Step 02 anymore. No cropping was introduced: the iframe's existing `width:100%;aspect-ratio:16/9` sizing is unchanged, confirmed rendering at the correct 16:9 ratio with zero horizontal overflow at 1280px/390×844/375×812. No autoplay, no password/credential, the `ended`-to-`markVideoChapterEnded` wiring, Timer feature, both checkpoints, Module 9 gating, and Review Mode's unsaved behavior were all re-verified unchanged. Only `headspa-mastery.html` was touched (65 insertions/35 deletions, one function extracted, no new file). Module 8 remains in Phase 2 — 11 chapters still uninstalled, not ready for manual QA, not manually approved.
 
