@@ -414,11 +414,16 @@
         };
       });
       const rawVideo = raw && raw.videoChapters && typeof raw.videoChapters === 'object' ? raw.videoChapters : null;
+      // Bound against this module's own declared chapter count (see
+      // MODULE_REQUIRED_VIDEO_CHAPTERS in headspa-mastery.html) rather than
+      // a hardcoded literal, so a future chapter-count change for any
+      // module can't leave a stale ceiling here.
+      const videoChapterCeiling = Math.max(1, sanitizeNumber((window.MODULE_REQUIRED_VIDEO_CHAPTERS || {})[id], 12));
       const completedVideoChapters = Array.isArray(rawVideo && rawVideo.completed)
         ? Array.from(new Set(
             rawVideo.completed
               .map((n) => sanitizeNumber(n, -1))
-              .filter((n) => Number.isInteger(n) && n >= 0 && n < 12)
+              .filter((n) => Number.isInteger(n) && n >= 0 && n < videoChapterCeiling)
           )).sort((a, b) => a - b)
         : [];
 
@@ -436,7 +441,7 @@
         completedAt: sanitizeNumber(raw && raw.completedAt, null),
         videoChapters: {
           completed: completedVideoChapters,
-          current: Math.max(0, Math.min(11, sanitizeNumber(rawVideo && rawVideo.current, 0)))
+          current: Math.max(0, Math.min(videoChapterCeiling - 1, sanitizeNumber(rawVideo && rawVideo.current, 0)))
         }
       };
     }
@@ -661,13 +666,14 @@
        shared save() guard, exactly like setCheckpointResult. */
     setVideoChapterComplete(moduleId, chapterIndex) {
       const idx = Number(chapterIndex);
-      if (!Number.isInteger(idx) || idx < 0 || idx >= 12) return;
+      const required = this.getRequiredVideoChapterCount(moduleId);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= required) return;
       const mod = this.getModuleProgress(moduleId);
       if (mod.videoChapters.completed.indexOf(idx) === -1) {
         mod.videoChapters.completed.push(idx);
         mod.videoChapters.completed.sort((a, b) => a - b);
       }
-      mod.videoChapters.current = Math.min(11, idx + 1);
+      mod.videoChapters.current = Math.min(required - 1, idx + 1);
       mod.lastVisitedAt = now();
       if (!mod.startedAt) mod.startedAt = mod.lastVisitedAt;
 
@@ -687,7 +693,8 @@
     /* Resume convenience only — which chapter the student was last viewing.
        Never used to gate access or completion. */
     setActiveVideoChapter(moduleId, chapterIndex) {
-      const idx = Math.max(0, Math.min(11, Number(chapterIndex) || 0));
+      const ceiling = Math.max(0, this.getRequiredVideoChapterCount(moduleId) - 1);
+      const idx = Math.max(0, Math.min(ceiling, Number(chapterIndex) || 0));
       const mod = this.getModuleProgress(moduleId);
       mod.videoChapters.current = idx;
       this.save();

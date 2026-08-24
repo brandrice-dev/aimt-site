@@ -1642,7 +1642,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8mc-chapters-toggle svg { width:8px; height:8px; transition:transform 0.2s; flex-shrink:0; }
 .m8mc-chapters-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
 
-/* Quiet, secondary progress indicator — no "Chapter X of 12" text repeated;
+/* Quiet, secondary progress indicator — no "Chapter X of N" text repeated;
    the numeral in the chapter header plus this bar are enough. */
 .m8mc-segments { display:flex; gap:4px; margin-bottom:1.15rem; }
 .m8mc-seg { flex:1; height:3px; border-radius:4px; background:#e5e0d6; }
@@ -6930,7 +6930,7 @@ window.MODULE_CP_COUNTS = MODULE_CP_COUNTS;
 // Modules whose completion also requires video-chapter completion (see
 // APP_STATE._isModuleFullyComplete). Only Module 8's masterclass player
 // uses this today — every other module is unaffected.
-window.MODULE_REQUIRED_VIDEO_CHAPTERS = { '8': 12 };
+window.MODULE_REQUIRED_VIDEO_CHAPTERS = { '8': 9 };
 
 const CADENCE_CHECKPOINT_TONE = 'Tone: warm, direct, clinically aware, and grounded. Supportive without being intimate, cheesy, robotic, or therapist-like. No filler. No coddling. No phrases about this being secret, private, or "just between us."';
 
@@ -8816,8 +8816,8 @@ function m7CardNext(idx) {
 // ══════════════════════════════════════════════════════
 
 // Format toggle has real instructional function: selecting a format
-// emphasizes that format's timing badges across all 12 chapters and
-// dims the other format's, so the toggle answers "which service am I
+// emphasizes that format's timing badge on the active masterclass chapter
+// and dims the other format's, so the toggle answers "which service am I
 // learning to run today" rather than only changing a highlight color.
 // Selected state is exposed via aria-pressed and a text "Selected" tag,
 // not color alone.
@@ -9870,101 +9870,104 @@ function startVoice(inputId, btn) {
 }
 
 // ══ MODULE 8 STEP VIDEOS ══
-// Replace each null with a Vimeo video ID (the number from the Vimeo URL)
-// e.g. https://vimeo.com/123456789 → use '123456789'
-// These 12 positions are the underlying data model for the masterclass
-// player below — one entry per protected chapter, order unchanged.
+// Owner-authoritative final sequence (reconciled from the earlier 12-slot
+// working structure to the real finished footage) — 9 instructional video
+// chapters. Video 01 (Aromatherapy) has no finished footage yet and stays
+// null/placeholder; do not simulate its completion. Replace null with a
+// Vimeo video ID (the number from the Vimeo URL) only once real footage
+// exists — e.g. https://vimeo.com/123456789 → use '123456789'.
 const STEP_VIDEO_IDS = [
-  null, // Step 01 — Aromatherapy Selection
-  '1214280975', // Step 02 — Dry Brushing & Hair Play — INTEGRATION TEST (Vimeo privacy: embed-only, domain-restricted to aimtrichology.com)
-  null, // Step 03 — Halo Activation & Wet Massage
-  null, // Step 04 — Exfoliant Application
-  null, // Step 05 — Scalp Massage
-  null, // Step 06 — First Rinse
-  null, // Step 07 — Neck & Shoulder Massage
-  null, // Steps 08–10 — Second Rinse, Shampoo, Rinse
-  null, // Step 11 — Conditioning & Treatment
-  null, // Step 12 — Hand Massage
-  null, // Steps 13–15 — Waterfall, Cooling Spray, Hot Towel
-  null  // Steps 16–17 — Towel Wrap & Close
+  null,           // Video 01 — Aromatherapy (placeholder — real footage not yet delivered)
+  '1214280975',   // Video 02 — Client Positioning & Comfort
+  '1213974160',   // Video 03 — Dry Brushing and Hair Play
+  '1213975936',   // Video 04 — Halo Activation & Wet Massage
+  '1213972891',   // Video 05 — Exfoliant & Scalp Massage
+  '1213970537',   // Video 06 — Neck & Shoulder Massage
+  '1214855873',   // Video 07 — Shampoo & Rinse
+  '1214959378',   // Video 08 — Deep Conditioning & Hand + Arm Massage
+  '1214960268'    // Video 09 — Final Rinse & Halo Massage
 ];
 
 // ══ MODULE 8 MASTERCLASS — one active chapter at a time ══
-// Content for all 12 chapters. Titles/labels preserved verbatim from the
-// approved specification — do not rename.
+// Reconciled to the owner's final 9-video sequence (previously modeled as
+// 12 chapters against a placeholder structure). All prior curriculum
+// content — corrections, scope guardrails, adaptation cues, client
+// language — is preserved below, regrouped under the real video chapter
+// it now belongs to; none was dropped. `teach` and `adapt` are arrays so a
+// chapter that absorbs more than one prior step keeps every client-language
+// example and every adaptation cue, not just one. Titles are the owner's
+// exact authoritative titles — do not rename.
 const M8_CHAPTERS = [
-  { num:'01', title:'Aromatherapy selection', label:'Step 01 — Aromatherapy Selection', t1:'1hr: ~5 min', t2:'2hr: ~5 min',
+  { num:'01', title:'Aromatherapy', label:'Video 01 — Aromatherapy', t1:'1hr: ~5 min', t2:'2hr: ~5 min',
     watchFor:'how the choice is offered — fragrance and fragrance-free carry equal weight, and consent comes before the first touch.',
     guidance:['Offer the three essential oil blends and a fragrance-free option with equal weight — fragrance-free is a genuinely valid choice, not a fallback. Ask before the first touch. If a client wants to close their eyes while they sample, that\'s their choice to offer, never an instruction.'],
-    teachLabel:'What you might say', teachText:'"I have three blends today, or we can skip fragrance entirely if you\'d prefer — whichever sounds better to you. I\'m going to rest my hand here on your shoulder while you sample, if that\'s alright."',
+    teach:[{ label:'What you might say', text:'"I have three blends today, or we can skip fragrance entirely if you\'d prefer — whichever sounds better to you. I\'m going to rest my hand here on your shoulder while you sample, if that\'s alright."' }],
     notes:['The first touch happens here, and it\'s the client\'s choice how immersive this moment is. Consent and first-touch framing are covered in depth in Module 2.'],
-    adapt:null, continuity:'Dry brushing begins once the client has settled into their choice — no reset needed between them.' },
-  { num:'02', title:'Dry brushing & hair play', label:'Step 02 — Dry Brushing & Hair Play', t1:'1hr: ~3 min', t2:'2hr: ~5 min',
+    adapt:[], continuity:'Client positioning and comfort come next — getting fully settled before the rest of the service begins.' },
+  { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', t1:null, t2:null,
+    watchFor:'how the client is settled into position — physical comfort, support, and consent checked before anything else begins.',
+    guidance:['Help the client get fully settled and supported on the treatment bed — head, neck, and shoulders comfortably aligned — before the service continues. Confirm comfort directly rather than assuming it; this is the moment to adjust support, draping, or positioning before momentum makes that harder to do smoothly.'],
+    teach:[{ label:'What you might say', text:'"Let\'s get you comfortable first — tell me if anything needs adjusting before we start. There\'s no rush."' }],
+    notes:[], adapt:[], continuity:'Dry brushing begins once the client is fully settled and comfortable — no reset needed between them.' },
+  { num:'03', title:'Dry Brushing and Hair Play', label:'Video 03 — Dry Brushing and Hair Play', t1:'1hr: ~3 min', t2:'2hr: ~5 min',
     watchFor:'brush-to-scalp contact and hand transitions — a short step that sets the tempo for what follows.',
     guidance:['Introduce the scalp to stimulation. Distribute natural oils through the lengths. Begin activating circulation before water contact.'],
-    teachLabel:'What you might say', teachText:'"This is just me waking up your scalp a little — distributing your own natural oils before we add anything."',
-    notes:[], adapt:null, continuity:'The halo activates next — the client moves from dry contact into their first water and massage combined.' },
-  { num:'03', title:'Halo activation — wet massage', label:'Step 03 — Halo Activation & Wet Massage', t1:'1hr: ~5 min', t2:'2hr: ~8 min',
+    teach:[{ label:'What you might say', text:'"This is just me waking up your scalp a little — distributing your own natural oils before we add anything."' }],
+    notes:[], adapt:[], continuity:'The halo activates next — the client moves from dry contact into their first water and massage combined.' },
+  { num:'04', title:'Halo Activation + Wet Massage', label:'Video 04 — Halo Activation & Wet Massage', t1:'1hr: ~5 min', t2:'2hr: ~8 min',
     watchFor:'the temperature check before first water contact — every time, regardless of what the thermostat says.',
     guidance:['Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.'],
-    teachLabel:'What you might say', teachText:'"The water is a closed loop — it recirculates, stays warm, and keeps you completely supported."',
+    teach:[{ label:'What you might say', text:'"The water is a closed loop — it recirculates, stays warm, and keeps you completely supported."' }],
     notes:['Temperature check is non-negotiable. Equipment fails. Your hand is the safeguard.'],
-    adapt:null, continuity:'Exfoliation follows once the scalp is fully wet and warmed.' },
-  { num:'04', title:'Exfoliant application', label:'Step 04 — Exfoliant Application', t1:'1hr: ~5 min', t2:'2hr: ~5 min',
-    watchFor:'how technique varies by quadrant — intensity, product, and pressure are selected for this client, not applied on autopilot.',
+    adapt:[], continuity:'Exfoliation follows once the scalp is fully wet and warmed.' },
+  { num:'05', title:'Exfoliant + Scalp Massage', label:'Video 05 — Exfoliant & Scalp Massage', t1:'1hr: ~23 min', t2:'2hr: ~38 min',
+    watchFor:'how exfoliation technique and intensity are selected for this client rather than applied on autopilot, how pressure and rhythm shift across regions during the massage that follows, and the clean rinse that closes the sequence out.',
     guidance:['Apply exfoliant from mixing bowl using applicator brush. Work in four quadrants — frontal, temporal, crown, occipital.',
-      'Exfoliation intensity, product, and technique should match what this client\'s scalp is telling you today. A stronger application is not the default you dial back only when there\'s a problem — it\'s one point on a range you select from every time.'],
-    teachLabel:'What you might say', teachText:'"This is a scalp exfoliant — same idea as exfoliating your face, formulated for the scalp. It lifts buildup from the follicle openings before we cleanse."',
-    notes:[], adapt:'<strong>Adapt by degree, not by switch:</strong> a strong approach that suits one scalp can be too much for another. Reduce pressure, choose a gentler product, or work more selectively by region — rather than skipping the step outright unless there\'s a genuine safety reason to omit it.',
-    continuity:'The scalp massage — the heart of the service — follows directly, working with the same warmth and contact you\'ve already established.' },
-  { num:'05', title:'Scalp massage', label:'Step 05 — Scalp Massage', t1:'1hr: ~15 min', t2:'2hr: ~30 min',
-    watchFor:'how pressure and rhythm shift across regions — this is the section of the service most defined by consistency, not force.',
-    guidance:['The heart of the service. Systematic scalp and head massage — cover all regions, vary pressure, work the occipital ridge, temples, and neck junction.',
-      'What makes this step read as skilled is controlled technique — rhythm, continuity, pressure, broad versus targeted contact, and reading client response — not a specific physiological outcome. Pacing and smooth transitions between regions matter more than any single technique choice.'],
-    teachLabel:'What you might say', teachText:'"This is the part where you can really let go. I\'ll keep a steady rhythm and check that the pressure feels right as we go."',
+      'Exfoliation intensity, product, and technique should match what this client\'s scalp is telling you today. A stronger application is not the default you dial back only when there\'s a problem — it\'s one point on a range you select from every time.',
+      'The heart of the service. Systematic scalp and head massage — cover all regions, vary pressure, work the occipital ridge, temples, and neck junction.',
+      'What makes this step read as skilled is controlled technique — rhythm, continuity, pressure, broad versus targeted contact, and reading client response — not a specific physiological outcome. Pacing and smooth transitions between regions matter more than any single technique choice.',
+      'Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.'],
+    teach:[
+      { label:'What you might say (exfoliant)', text:'"This is a scalp exfoliant — same idea as exfoliating your face, formulated for the scalp. It lifts buildup from the follicle openings before we cleanse."' },
+      { label:'What you might say (massage)', text:'"This is the part where you can really let go. I\'ll keep a steady rhythm and check that the pressure feels right as we go."' },
+      { label:'What you might say (rinse)', text:'"I\'m rinsing the exfoliant now — you\'ll feel the water shift and get clearer."' }
+    ],
     notes:['This is where the 1-hour and 2-hour diverge most. Know your pace for each format.'],
-    adapt:'<strong>Adapt to response, not habit:</strong> pressure and intensity should be checked against client response, not applied uniformly regardless of what this client\'s scalp presentation and comfort are telling you in the moment.',
-    continuity:'First rinse follows directly — client stays in this position; only the water changes.' },
-  { num:'06', title:'First rinse', label:'Step 06 — First Rinse', t1:'1hr: ~3 min', t2:'2hr: ~3 min',
-    watchFor:'water-temperature consistency and shower-head angle — small technical details that keep this transition from breaking the client\'s relaxation.',
-    guidance:['Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.'],
-    teachLabel:'What you might say', teachText:'"I\'m rinsing the exfoliant now — you\'ll feel the water shift and get clearer."',
-    notes:[], adapt:null, continuity:'Neck and shoulder work begins, extending the service outward from the scalp.' },
-  { num:'07', title:'Neck & shoulder massage', label:'Step 07 — Neck & Shoulder Massage', t1:'1hr: ~5 min', t2:'2hr: ~12 min',
+    adapt:[
+      '<strong>Adapt by degree, not by switch:</strong> a strong approach that suits one scalp can be too much for another. Reduce pressure, choose a gentler product, or work more selectively by region — rather than skipping the step outright unless there\'s a genuine safety reason to omit it.',
+      '<strong>Adapt to response, not habit:</strong> pressure and intensity should be checked against client response, not applied uniformly regardless of what this client\'s scalp presentation and comfort are telling you in the moment.'
+    ],
+    continuity:'Neck and shoulder work begins, extending the service outward from the scalp.' },
+  { num:'06', title:'Neck and Shoulder Massage', label:'Video 06 — Neck & Shoulder Massage', t1:'1hr: ~5 min', t2:'2hr: ~12 min',
     watchFor:'how the transition into the neck and shoulders is paced — this section extends significantly in the 2-hour format.',
     guidance:['Transition to neck, upper traps, and shoulder work. Extended significantly in the 2-hour format.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
-    teachLabel:'What you might say', teachText:'"The neck holds a lot — most people carry tension here without realizing how much. I\'m going to work through this slowly."',
-    notes:[], adapt:null, continuity:'The second rinse, shampoo, and rinse sequence follows — the client stays deeply relaxed through this stretch.' },
-  { num:'08–10', title:'Second rinse → Shampoo → Rinse', label:'Steps 08–10 — Second Rinse, Shampoo, Rinse', t1:'1hr: ~10 min', t2:'2hr: ~10 min',
+    teach:[{ label:'What you might say', text:'"The neck holds a lot — most people carry tension here without realizing how much. I\'m going to work through this slowly."' }],
+    notes:[], adapt:[], continuity:'The second rinse, shampoo, and rinse sequence follows — the client stays deeply relaxed through this stretch.' },
+  { num:'07', title:'Shampoo + Rinse', label:'Video 07 — Shampoo & Rinse', t1:'1hr: ~10 min', t2:'2hr: ~10 min',
     watchFor:'the shift in energy here — the client is deeply relaxed, so this sequence runs with minimal narration.',
     guidance:['Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.'],
-    teachLabel:'What you might say (shampoo)', teachText:'"I\'m using [product] — chosen for your scalp specifically. The way I\'m working it in continues the same rhythm from the massage."',
-    notes:[], adapt:null, continuity:'Conditioning or treatment follows, on the format-specific path.' },
-  { num:'11', title:'Conditioning / treatment', label:'Step 11 — Conditioning & Treatment', t1:'1hr: quick conditioning', t2:'2hr: mask + steam',
-    watchFor:'the difference in depth between formats — this is where the 2-hour service adds the intensive mask and steam.',
+    teach:[{ label:'What you might say', text:'"I\'m using [product] — chosen for your scalp specifically. The way I\'m working it in continues the same rhythm from the massage."' }],
+    notes:[], adapt:[], continuity:'Conditioning or treatment follows, on the format-specific path.' },
+  { num:'08', title:'Deep Conditioning / Hand + Arm Massage', label:'Video 08 — Deep Conditioning & Hand + Arm Massage', t1:'1hr: quick conditioning', t2:'2hr: mask + steam + hand & arm massage',
+    watchFor:'the difference in depth between formats during conditioning, and — in the 2-hour service — full hand-and-forearm coverage while the treatment processes.',
     guidance:['1-hour: conditioning treatment, brief processing, rinse. 2-hour: intensive hair mask, steam hood 15–20 minutes, rinse.',
-      'Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client\'s scalp is responding today, not a fixed penetration claim.'],
-    teachLabel:null, teachText:null,
-    notes:['Explain the format difference clearly during booking — clients who\'ve had the 2-hour will notice the absence of steam.'],
-    adapt:null, continuity:'Hand massage follows in the 2-hour format while the treatment processes; 1-hour moves straight to the waterfall sequence.' },
-  { num:'12', title:'Hand massage', titleSuffix:'2-hour only', label:'Step 12 — Hand Massage', t1:null, t2:'2hr: ~8 min',
-    watchFor:'full coverage — fingertips to elbow, not just the palms — while the treatment continues processing above.',
-    guidance:['Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow.',
+      'Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client\'s scalp is responding today, not a fixed penetration claim.',
+      'Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
-    teachLabel:'What you might say', teachText:'"While that processes, I\'m going to work on your hands and forearms — a favorite moment for a lot of clients."',
-    notes:[], adapt:null, continuity:'The waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.' },
-  { num:'13–15', title:'Waterfall rinse → Cooling spray → Hot towel', label:'Steps 13–15 — Waterfall, Cooling Spray, Hot Towel', t1:'1hr: ~7 min', t2:'2hr: ~7 min',
-    watchFor:'the temperature contrast and pacing — these are sensory signature moments, not just rinsing steps.',
-    guidance:['Waterfall neck rinse — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.'],
-    teachLabel:'What you might say (cooling spray)', teachText:'"This is a temperature contrast — it\'s going to feel slightly startling for a second, and then very good. It\'s one of the moments clients remember most about this service."',
-    notes:[], adapt:null, continuity:'Towel wrap and the service close follow — the client begins the transition out of the treatment.' },
-  { num:'16–17', title:'Towel wrap → Close & checkout', label:'Steps 16–17 — Towel Wrap & Close', t1:'1hr: ~6 min', t2:'2hr: ~6 min',
-    watchFor:'the pace of sitting the client up — they\'ve been horizontal for up to two hours, so this transition is gradual, not abrupt.',
-    guidance:['Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.'],
-    teachLabel:'Closing script', teachText:'"Today I focused on [what you observed]. I used [products] because of [reason]. For home care, I\'d recommend [one specific thing]. How are you feeling?"',
+    teach:[{ label:'What you might say', text:'"While that processes, I\'m going to work on your hands and forearms — a favorite moment for a lot of clients."' }],
+    notes:['Explain the format difference clearly during booking — clients who\'ve had the 2-hour will notice the absence of steam and hand massage.'],
+    adapt:[], continuity:'The waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.' },
+  { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', t1:'1hr: ~13 min', t2:'2hr: ~13 min',
+    watchFor:'the temperature contrast during the final rinse and cooling spray, then the gradual pace of sitting the client back up to close the service.',
+    guidance:['Waterfall neck rinse under the halo — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.',
+      'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.'],
+    teach:[
+      { label:'What you might say (cooling spray)', text:'"This is a temperature contrast — it\'s going to feel slightly startling for a second, and then very good. It\'s one of the moments clients remember most about this service."' },
+      { label:'Closing script', text:'"Today I focused on [what you observed]. I used [products] because of [reason]. For home care, I\'d recommend [one specific thing]. How are you feeling?"' }
+    ],
     notes:['A specific, personalized observation at close is one of the strongest ways to make a service feel complete and intentional rather than rushed. Clients remember being seen — that\'s worth doing well regardless of what it does for your schedule.'],
-    adapt:null, continuity:'That\'s the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.' }
+    adapt:[], continuity:'That\'s the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.' }
 ];
 
 let m8ActiveChapter = 0;
@@ -9975,19 +9978,20 @@ function m8ChapterReachable(idx) {
 }
 
 function m8InitMasterclass() {
+  const total = M8_CHAPTERS.length;
   let start = 0;
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < total; i++) {
     if (!APP_STATE.isVideoChapterComplete(8, i)) { start = i; break; }
-    start = Math.min(11, i + 1);
+    start = Math.min(total - 1, i + 1);
   }
-  m8ActiveChapter = Math.max(0, Math.min(11, start));
+  m8ActiveChapter = Math.max(0, Math.min(total - 1, start));
   m8RenderChapter(m8ActiveChapter);
   m8RenderChapterList();
   m8InitTimerAutostart();
 }
 
 function m8GoToChapter(idx) {
-  if (idx < 0 || idx > 11 || !m8ChapterReachable(idx)) return;
+  if (idx < 0 || idx > M8_CHAPTERS.length - 1 || !m8ChapterReachable(idx)) return;
   m8ActiveChapter = idx;
   APP_STATE.setActiveVideoChapter(8, idx);
   m8RenderChapter(idx);
@@ -10019,11 +10023,12 @@ function m8CloseChapterDrawer() {
 }
 
 function m8RefreshChapterChrome(idx) {
+  const lastIdx = M8_CHAPTERS.length - 1;
   const completed = APP_STATE.getCompletedVideoChapters(8);
   const segWrap = document.getElementById('m8mcSegments');
   if (segWrap) {
     segWrap.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < M8_CHAPTERS.length; i++) {
       const seg = document.createElement('div');
       seg.className = 'm8mc-seg' + (completed.indexOf(i) !== -1 ? ' done' : (i === idx ? ' current' : ''));
       segWrap.appendChild(seg);
@@ -10034,10 +10039,10 @@ function m8RefreshChapterChrome(idx) {
   const prevBtn = document.getElementById('m8mcPrevBtn');
   const nextBtn = document.getElementById('m8mcNextBtn');
   if (prevBtn) prevBtn.disabled = idx === 0;
-  const nextReachable = idx < 11 && m8ChapterReachable(idx + 1);
+  const nextReachable = idx < lastIdx && m8ChapterReachable(idx + 1);
   if (nextBtn) {
-    nextBtn.disabled = idx >= 11 || !nextReachable;
-    nextBtn.textContent = idx >= 11 ? 'Final chapter' : 'Next chapter →';
+    nextBtn.disabled = idx >= lastIdx || !nextReachable;
+    nextBtn.textContent = idx >= lastIdx ? 'Final chapter' : 'Next chapter →';
   }
 
   const hint = document.getElementById('m8mcReviewHint');
@@ -10045,7 +10050,7 @@ function m8RefreshChapterChrome(idx) {
     if (reviewActive) {
       hint.hidden = false;
       hint.textContent = 'Course Review Mode — chapters unlocked for inspection only; nothing here is saved.';
-    } else if (idx < 11 && !nextReachable) {
+    } else if (idx < lastIdx && !nextReachable) {
       hint.hidden = false;
       hint.textContent = 'This chapter’s video must reach completion to unlock the next chapter.';
     } else {
@@ -10059,10 +10064,10 @@ function m8RenderChapter(idx) {
   if (!ch) return;
 
   // Visually, only the numeral + title identify the chapter (no repeated
-  // "Chapter X of 12" text) — the full position is still exposed to
+  // "Chapter X of N" text) — the full position is still exposed to
   // assistive technology via this aria-label.
   const headEl = document.getElementById('m8mcHead');
-  if (headEl) headEl.setAttribute('aria-label', 'Chapter ' + (idx + 1) + ' of 12 — ' + ch.label.replace(/^Steps? \d+(–\d+)? — /, ''));
+  if (headEl) headEl.setAttribute('aria-label', 'Chapter ' + (idx + 1) + ' of ' + M8_CHAPTERS.length + ' — ' + ch.label.replace(/^Video \d+ — /, ''));
   document.getElementById('m8mcNum').textContent = ch.num;
   document.getElementById('m8mcTitle').innerHTML = ch.title + (ch.titleSuffix ? ' <span style="font-size:.65rem;font-weight:400;color:var(--muted);margin-left:4px;">' + ch.titleSuffix + '</span>' : '');
   document.getElementById('m8mcTiming').innerHTML = (ch.t1 ? '<span class="t-badge">' + ch.t1 + '</span>' : '') + (ch.t2 ? '<span class="t-badge t-2hr">' + ch.t2 + '</span>' : '');
@@ -10081,20 +10086,24 @@ function m8RenderChapter(idx) {
     thumb.classList.add('loaded');
     m8LoadRealVideo(idx);
   } else {
+    // Premium "not yet filmed" placeholder — never claims playability and
+    // never simulates completion in normal student mode. Currently only
+    // reachable for Video 01 (Aromatherapy), the one chapter still awaiting
+    // real footage.
     thumb.classList.remove('loaded');
-    thumb.setAttribute('aria-label', 'Play video: ' + ch.label);
+    thumb.setAttribute('aria-label', ch.label + ' — instructional video in production, available soon');
     thumb.innerHTML = '<div class="sms-video-play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>' +
       '<div class="sms-video-label">' + ch.label + '</div>' +
-      '<div class="sms-video-sublabel">Add Vimeo link in admin</div>';
+      '<div class="sms-video-sublabel">Instructional video in production — available soon</div>';
   }
 
   document.getElementById('m8mcGuidance').innerHTML = ch.guidance.map((p) => '<div class="body-text sms-what">' + p + '</div>').join('');
-  document.getElementById('m8mcTeach').innerHTML = ch.teachLabel
-    ? '<div class="sms-teach"><span class="teach-label">' + ch.teachLabel + '</span><span class="sms-teach-text">' + ch.teachText + '</span></div>'
-    : '';
-  document.getElementById('m8mcAdapt').innerHTML = ch.adapt
-    ? '<div class="key-point"><div class="kp-icon">→</div><div class="kp-text">' + ch.adapt + '</div></div>'
-    : '';
+  document.getElementById('m8mcTeach').innerHTML = (ch.teach || []).map((t) =>
+    '<div class="sms-teach"><span class="teach-label">' + t.label + '</span><span class="sms-teach-text">' + t.text + '</span></div>'
+  ).join('');
+  document.getElementById('m8mcAdapt').innerHTML = (ch.adapt || []).map((a) =>
+    '<div class="key-point"><div class="kp-icon">→</div><div class="kp-text">' + a + '</div></div>'
+  ).join('');
   document.getElementById('m8mcNotes').innerHTML =
     (ch.notes || []).map((n) => '<div class="sms-note">' + n + '</div>').join('') +
     '<div class="sms-note">Next: ' + ch.continuity + '</div>';
@@ -10193,7 +10202,7 @@ function m8PlayActiveVideo() {
     return;
   }
 
-  thumb.innerHTML = '<div class="sms-video-label" style="color:rgba(255,255,255,0.25);">Video coming soon</div>';
+  thumb.innerHTML = '<div class="sms-video-label" style="color:rgba(255,255,255,0.55);">Instructional video in production — available soon</div>';
   // Course Review Mode ONLY: simulate this chapter's completion so a
   // reviewer can inspect every chapter without real footage. This never
   // runs in normal student mode (m8ChapterReachable/save() both gate on
