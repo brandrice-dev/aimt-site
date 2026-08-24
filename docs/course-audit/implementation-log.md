@@ -4620,3 +4620,17 @@ Work remains on branch `course-audit-build`.
 Module 8 status is unchanged by this task — still Phase 2, not manually approved. Module 9 was not begun. No merge or deployment occurred. Local Review Mode server kept running throughout.
 
 Work remains on branch `course-audit-build`.
+
+## 2026-08-24 — Step 64: Refine Module 8 client communication cues
+
+**Scope.** Content-polish only — audited all 12 "What you might say" client-language cues across the 9 masterclass chapters against the approved principle "Explain intentionally, not continuously" and the module's existing curriculum guardrails. No chapter titles, Vimeo mappings, video architecture, or completion logic touched.
+
+**Decisions:** KEEP 4 (Video 01 Aromatherapy; Video 02 Positioning; Video 05's massage cue; Video 09's cooling-spray cue — all already-approved, on-point consent/comfort/sensation language). REVISE 5 (Video 04 — reworded from equipment-mechanics narration to a direct temperature/comfort check-in; Video 05's exfoliant cue — reworded to reflect the approved adapt-by-degree framework instead of a generic "buildup" claim; Video 06 — replaced an unverified "most people" generalization with an explicit consent/pressure check for this newly-introduced bodywork region; Video 08 — dropped an unverified "favorite moment for a lot of clients" claim, added an explicit consent check for hand/forearm bodywork; Video 09's closing cue — trimmed the home-care/product-recommendation portion, which is business-side retail content belonging to Module 9, "Checkout, Client Closing & Pricing Strategy," not Module 8). REMOVE 3 (Video 03 Dry Brushing — pure narration of a self-evident, low-intensity sensation; Video 05's rinse cue — narrated the obvious sensation of water starting; Video 07 Shampoo & Rinse — directly contradicted the chapter's own guidance text, "no over-explanation — client is deeply relaxed").
+
+**Component change: none needed.** `#m8mcTeach` was already a bare wrapper with no static label, and `ch.teach` was already an array (from the prior 9-video reconciliation) — setting it to `[]` for Videos 03 and 07 renders a genuinely empty, zero-height container with no leftover markup or awkward blank space, confirmed directly (`offsetHeight: 0`).
+
+**Validation.** `node --check` passes. Every chapter's `teach` array content matches the audit exactly, confirmed by direct enumeration. Zero horizontal overflow at 1280px, 390×844, and 375×812 for both a no-cue chapter (Video 03) and a multi-cue chapter (Video 05/09). Zero console errors. Full regression: all 9 chapters still resolve their exact prior Vimeo IDs, Video 01 still a placeholder, `MODULE_REQUIRED_VIDEO_CHAPTERS['8']` still 9, the AIMT completion overlay and `m8HandleVideoEnded` from the prior task untouched, Timer/Protect the Flow/checkpoints/Cadence all present and unchanged, Modules 0–7 and 9–11 all render distinct content with zero console errors, Review Mode confirmed unsaved (`localStorage.levo_app` stayed `null`).
+
+Module 8 status is unchanged — still Phase 2, not manually approved. Module 9 was not begun. No merge or deployment occurred. Local Review Mode server kept running throughout.
+
+Work remains on branch `course-audit-build`.

@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 Phase 2 — Vimeo end-screen replaced with AIMT replay overlay)
+**Last updated:** August 24, 2026 (Module 8 Phase 2 — client communication cues refined)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Replace Vimeo end screen with AIMT replay state" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`d36609f`) at the start of this task.
+- Latest controlling commit: pending — this task's "Refine Module 8 client communication cues" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`e1d0dac`) at the start of this task.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,10 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 2 — client communication cues refined — August 24, 2026.** Narrow content-polish task: audited all 12 existing "What you might say" cues across the 9 masterclass chapters against the approved "Explain intentionally, not continuously" principle and Module 8's curriculum guardrails (consent/fragrance, adaptable exfoliation, no unsupported physiological claims, bodywork consent, no rebooking-causation language). Result: 4 kept as-is (already strong, on-point), 5 revised (mostly to add explicit consent/comfort check-ins for bodywork moments and remove soft unverified claims like "a favorite moment for a lot of clients" or "most people... without realizing," and to trim Video 09's closing cue down to the treatment-experience observation — the home-care/product-recommendation portion was business-side retail content that belongs to Module 9, "Checkout, Client Closing & Pricing Strategy," not Module 8), 3 removed entirely (Video 03 Dry Brushing, Video 05's rinse cue, and Video 07 Shampoo & Rinse — all pure narration of self-evident sensations with no consent/comfort/unfamiliar-sensation purpose; Video 07's in particular directly contradicted its own chapter's "no over-explanation, client deeply relaxed" guidance). No component change was needed for the two now-cue-free chapters — the existing `teach: []` array architecture (from the prior 9-video reconciliation) already renders a clean, zero-height empty container. No chapter titles, Vimeo IDs, video architecture, or completion logic touched. Full regression (9-chapter count, video mappings, Video 01 placeholder, Timer, Protect the Flow, checkpoints, Cadence, the completion overlay from the prior task, Review Mode unsaved behavior, Modules 0–7/9–11) confirmed unchanged. Module 8 status is unchanged (Phase 2, not manually approved). Module 9 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 2 — Vimeo end screen replaced with AIMT replay overlay — August 24, 2026.** Focused UX correction, not a lifecycle change. Problem: at genuine video end, Vimeo's own resting state showed account-level recommendation content ("More videos from Cady") inside the paid course — unacceptable, and the owner does not want to upgrade Vimeo's plan just to get its paid end-screen customization. Fix: the existing `markVideoChapterEnded(idx)` completion path is unchanged and remains authoritative; after it fires, a new `m8HandleVideoEnded()` best-effort resets the Vimeo player to `0` and exits fullscreen (both via the official Vimeo Player API, `.catch()`-guarded so a failure never undoes completion or logs noise), then a new restrained AIMT-owned overlay ("Chapter complete" + a single "Replay" button — no second Next CTA, no confetti/branding) covers the video stage. The overlay is gated to the still-active chapter only (a stale late `ended` for a chapter the student already left is discarded) and is unconditionally hidden on every chapter render, so it never leaks between chapters and never reappears just because a chapter is already saved complete. Replay reuses the same Vimeo.Player instance; a second genuine completion is already idempotent and cannot duplicate progress. No Vimeo plan, privacy, password, or domain-restriction change of any kind. Verified via simulated `ended`/Replay calls (localhost cannot play the domain-restricted videos for real): correct call order, no autoplay, zero overflow and true 16:9 at 1280px/390×844/375×812, 44px Replay touch target, zero console errors, Timer/Protect the Flow/checkpoints/Cadence/Video 01 placeholder/9-chapter count/Review Mode all unchanged. **The actual Vimeo recommendation-screen suppression and real fullscreen-exit behavior still require the owner testing from `https://course-audit-build.aimt-site.pages.dev/headspa-mastery.html?review=1`** once this commit is pushed and deployed — this was not visually verified in this task. Module 8 status is unchanged (Phase 2, not manually approved). Module 9 was not begun. No merge or deployment occurred.
 
