@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 final communication-cue polish and closeout)
+**Last updated:** August 24, 2026 (Module 8 communication guidance rebuilt around relaxation-first service flow)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Finalize Module 8 communication guidance" commit (hash recorded in the final task report). Local HEAD (`2eab9fc`) was one commit ahead of `origin/course-audit-build` at the start of this task — preserved, not reset; owner must push via GitHub Desktop if credentials remain unavailable.
+- Latest controlling commit: pending — this task's "Align Module 8 communication with relaxation-first flow" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`e033e52`) at the start of this task.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -86,6 +86,24 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 — communication guidance rebuilt around relaxation-first service flow — August 24, 2026.** The owner corrected the prior communication-cue pass on two points: (1) the "What you might say" scripts are not a running service narration — their real purpose is so a practitioner already knows the answer to a likely client question and can respond briefly and confidently without breaking the relaxation flow, not so every step gets spoken aloud; (2) standard protocol steps (neck/shoulder massage, hand/forearm massage) must not be repeatedly re-offered as mid-service opt-ins — adaptations and omissions belong at intake, before treatment begins.
+
+**Label/structure change.** The two-form model from the prior pass is kept (a `type` field on each `teach` entry) but relabeled and clarified: **"Communication cue"** (replaces "What you might say" — reserved for genuine proactive needs: positioning, temperature, pressure, a real transition, a necessary pre-service choice), **"Keep the flow quiet"** (replaces "Keep this quiet" — the default; explains why silence is preferable), and **"If they ask"** (unchanged — a ready response to a likely client question, now used more broadly, including standalone alongside a proactive cue, not only nested inside a quiet entry). No new component; same `.sms-teach` card, same accessibility approach (all labels literal readable text).
+
+**The two critical corrections:**
+- **Video 06 (Neck & Shoulder):** "Would you like me to include some neck and shoulder work here?" → **"I'm going to move into your neck and shoulders now. Let me know if you'd like more or less pressure at any point."** — an announced transition with a live pressure check, not a mid-service consent question for an established step.
+- **Video 08 (Deep Conditioning / Hand + Arm):** "Would you like me to include a hand and forearm massage while this processes? You can also just rest." → **"While your treatment processes, I'm going to move into the hand and forearm massage. Let me know if you'd like more or less pressure at any point."** — the owner considers this a meaningful, established enhancement to the service, not a timid mid-service ask; guidance text also gained one sentence on making intentional use of processing time.
+
+**Also revised:** Video 01's cue split into two sequential prompts (fragrance choice, then touch consent) so consent is never implied to follow contact already begun; Video 04 gained a "keep quiet afterward" entry once temperature is established, with an "if they ask about the halo" response; Video 05's exfoliant cue and rinse both moved to the quiet form (know the answer, don't volunteer it); Video 09's cooling-transition cue no longer offers to skip the step by default (removed "let me know if you'd rather skip it" — that decision belongs at intake), and gained an "if they ask why it's included" response; a new quiet entry was added for Video 09's final-rinse/halo-massage portion itself ("do not narrate the obvious water movements").
+
+**Module-level explanation added** to the existing `.m8-principle` block (Section 8.2, immediately before the masterclass) — two short paragraphs, not a new section: one framing the scripts as prepared answers rather than narration ("Learn them so that if a client asks a question, you can answer in a sentence or two, confidently, and return attention to the treatment"), one stating the intake/adaptation relationship plainly (the protocol is explained at intake; during treatment, communication manages comfort, pressure, temperature, positioning, and real transitions — not whether each standard step happens). Kept practitioner-practical, not written as a legal disclaimer.
+
+**Validation.** `node --check` and `git diff --check` both pass. Every chapter's final `teach` content verified by direct enumeration against the owner's exact wording. The one entry with no "if they ask" response (Video 09's quiet rinse/halo-massage entry) confirmed to render cleanly with no broken/empty sub-block. Zero horizontal overflow at 1280px, 390×844, and 375×812 across all 9 chapters. Zero console errors. Full regression: 9-chapter count and titles, all 8 installed Vimeo IDs, Video 01 placeholder, `MODULE_REQUIRED_VIDEO_CHAPTERS['8']` still 9, the AIMT replay overlay and `ended`-event wiring, Timer, Protect the Flow, both checkpoints, Cadence, and Modules 0–7/9–11 all confirmed unchanged. Review Mode confirmed unsaved throughout.
+
+Module 8 status is unchanged — **"Substantially complete — final owner pass deferred,"** still explicitly not `Implemented — manual QA approved`. Module 9 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 final communication-cue polish and closeout — August 24, 2026.** Following the prior task's independent communication-cue audit, the owner supplied exact, final, owner-approved wording for all 9 chapters and corrected the underlying teaching model: a chapter where the default is silence needed explicit "why quiet" + "if they ask" teaching, not just an empty field. `teach` array entries now carry an optional `type:'quiet'` — rendered in the same `.sms-teach` card with a **"Keep this quiet"** label, an explanation, and (nested, own label) an **"If they ask"** response — while every other entry is an unchanged direct spoken cue. Both label types are literal readable text, not color-coded.
 
