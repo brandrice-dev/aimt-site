@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 communication guidance rebuilt around relaxation-first service flow)
+**Last updated:** August 24, 2026 (Module 8 broad student-facing curriculum-coherence pass)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Align Module 8 communication with relaxation-first flow" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`e033e52`) at the start of this task.
+- Latest controlling commit: pending — this task's "Complete Module 8 student-facing coherence pass" commit (hash recorded in the final task report). Local HEAD (`24ac2b5`) was one commit ahead of `origin/course-audit-build` at the start of this task — preserved, not reset.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -86,6 +86,41 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 — broad student-facing curriculum-coherence pass — August 24, 2026.** Following the owner's observation that individual sentences may each sound cautious while collectively making the service feel uncertain or over-explained, this task systematically audited the *entire* rendered Module 8 student experience — not just the previously-flagged Aromatherapy chapter — against a newly formalized governing service-communication model, now recorded in `module-08.md`:
+
+> **Intake determines the plan. The service executes the plan. In-service communication manages comfort and answers questions without repeatedly rebuilding the protocol.**
+
+**Audit method.** Every student-facing string in Module 8 was pulled and reviewed against 12 categories (mid-service optionalization; over-compliance/disclaimer language; unnecessary narration; internal authoring language; text that repeats the video without adding value; client-experience confidence; protocol vs. adaptation; Module 9 boundary drift; duplication/repetition; claims/scope regression; the three-part communication-component model; Timer/checkpoint/Cadence consistency) via targeted regex sweeps across the full `#module8Wrap` block and the `M8_CHAPTERS`/`M8_TIMER_PREVIEW_STEPS` data, cross-checked by hand.
+
+**Result: the prior two communication-cue passes had already resolved this pattern comprehensively.** Regex sweeps for "would you like," "would you rather," "we can skip," "if you'd prefer," "do you want," "shall I," "if allowed," "if permitted," "if appropriate," and "skip if" across the entire rendered module found **zero remaining matches outside Video 01** — Videos 02–09's mid-service-optionalization language, unnecessary narration, and Module 9 boundary content had already been corrected in the two prior sessions. A full claims-term sweep (lymph, detox, parasympathetic, follicle-feeding, hair-growth, circulation-improvement, cuticle-open/close, penetration guarantees, therapeutic-effect claims, rebooking causation, diagnosis) found zero restored claims — the two remaining matches were both the existing, correct *negations* of those claims.
+
+**Video 01 (Aromatherapy) was the one chapter still carrying the old pattern**, exactly as the owner flagged, and is corrected here:
+- **Intake teaching added to guidance:** "Fragrance sensitivity, known intolerance, strong preference, or a reason to adapt or omit aromatherapy should already be identified at intake — not discovered here. By the time this chapter begins, you should already know which options are appropriate to present, or that a predetermined fragrance-free path applies."
+- **Communication cue changed** from "I have three fragrance options, or we can skip fragrance altogether. Which would you prefer?" to **"I have three scent options for you today. Take a moment with each and tell me which one you're most drawn to."**
+- **Separate "touch consent" cue removed** as a repeated re-ask. Reframed in `notes` as: "Touch expectations for this first-contact moment are established at intake and covered in depth in Module 2 — this is where you put that understanding into practice with genuine attentiveness, not where you ask for it from scratch." **This is the one genuine judgment call in this pass — flagged explicitly for owner confirmation, see below.**
+- **Ripple corrections:** the Timer preview's Step 01 description/note (`M8_TIMER_PREVIEW_STEPS[0]`) and `MODULE_GUIDE_SYSTEMS[8]` (Cadence) were updated narrowly to stay consistent with the corrected framing — Cadence now reinforces "intake determines the plan... established protocol steps are executed with confidence during treatment, not repeatedly re-offered as optional."
+
+**Categories audited and found already clean (no change needed):**
+- **Mid-service optionalization (Videos 02–09):** already corrected in the two prior sessions (06 and 08's "Would you like me to include...?" already changed to confident transitions; 09's cooling cue already drops its skip-offer).
+- **Unnecessary narration:** already reduced via the quiet-form entries (03, 04's post-temperature portion, 05's exfoliant/rinse, 07, 09's final-rinse portion).
+- **Internal authoring language:** the Section 8.2 intro was already corrected in the immediately preceding task; no further instances found anywhere in Module 8's rendered copy.
+- **Over-compliance/disclaimer language:** the two neck/shoulder and hand/forearm scope-guardrail sentences (Videos 06, 08) are identical by design (each chapter can be watched standalone) and are not excessive repetition — left unchanged, consistent with the module's own approved correction #12.
+- **Protocol vs. adaptation:** the exfoliation adapt-by-degree framework (intensity, method, product, pressure, technique) remains intact everywhere; no binary exfoliate/don't-exfoliate framing found.
+- **Module 9 boundary:** Video 09's closing cue and notes are already limited to the treatment-closing observation and wellbeing check; no retail/rebooking/pricing/checkout-scripting content found in Module 8's teach/notes/guidance fields. (Module 8's completion card still previews "Module 9: Sanitation and reset systems" — this is the pre-existing Module 9 title/order conflict already flagged in an earlier task, out of scope here since it's Module 9 content, not Module 8's.)
+- **Claims/scope:** confirmed clean, see claims sweep above.
+- **Communication-component model:** the three-part system (Communication cue / Keep the flow quiet / If they ask) is coherent and consistently applied across all 9 chapters.
+- **Timer:** no rigid-stopwatch language, no contradiction with intake/adaptation logic beyond Step 01 (corrected above), no unnecessary narration.
+- **Checkpoints (`m8cp1`, `m8cp2`):** reviewed for direct contradiction with the new model — none found; both remain unchanged, still testing exfoliation-adaptation judgment and in-service client communication respectively.
+- **Cadence quick prompts:** all three ("How do I keep transitions smooth?", "How do I adapt a step without breaking the flow?", "What should I say when a client asks what I'm doing?") already align with the model; unchanged.
+
+**Flagged for owner judgment — not silently decided:** dropping Video 01's separate spoken touch-consent question (rather than keeping it as a second cue) is a genuine interpretive call. The task instructions said not to "repeatedly re-consent to established expected service contact if appropriate consent/service expectations were already established before treatment," and to "correct the PRE-SERVICE guidance rather than inserting repeated permission questions" if that expectation isn't yet established — but Module 2 (out of scope for this task) was not directly inspected to confirm it actually establishes touch expectations clearly enough to make a Step-01-specific question redundant. The `notes` field cross-references Module 2 as already documented in the original module-08.md audit; this pass trusted that existing cross-reference rather than re-verifying Module 2's actual content. **If the owner wants the touch-consent line restored as a second, brief spoken cue, that is a one-line reversal, not a rearchitecture.**
+
+**Validation.** `node --check` and `git diff --check` pass. Zero horizontal overflow at 1280px, 390×844, and 375×812 across all 9 chapters. Zero console errors. Full regression: all 9 chapter titles unchanged, all 8 installed Vimeo IDs unchanged, Video 01 still placeholder, `MODULE_REQUIRED_VIDEO_CHAPTERS['8']` still 9, the AIMT replay overlay and `ended`-event wiring untouched, Timer, Protect the Flow, both checkpoint questions, and Modules 0–7/9–11 all confirmed unchanged. Review Mode confirmed unsaved.
+
+Module 8 status is unchanged — **"Substantially complete — final owner pass deferred,"** still not `Implemented — manual QA approved`. Module 9 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 — communication guidance rebuilt around relaxation-first service flow — August 24, 2026.** The owner corrected the prior communication-cue pass on two points: (1) the "What you might say" scripts are not a running service narration — their real purpose is so a practitioner already knows the answer to a likely client question and can respond briefly and confidently without breaking the relaxation flow, not so every step gets spoken aloud; (2) standard protocol steps (neck/shoulder massage, hand/forearm massage) must not be repeatedly re-offered as mid-service opt-ins — adaptations and omissions belong at intake, before treatment begins.
 
