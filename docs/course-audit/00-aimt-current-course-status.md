@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 Phase 2 — client communication cues refined)
+**Last updated:** August 24, 2026 (Module 8 final communication-cue polish and closeout)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Refine Module 8 client communication cues" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`e1d0dac`) at the start of this task.
+- Latest controlling commit: pending — this task's "Finalize Module 8 communication guidance" commit (hash recorded in the final task report). Local HEAD (`2eab9fc`) was one commit ahead of `origin/course-audit-build` at the start of this task — preserved, not reset; owner must push via GitHub Desktop if credentials remain unavailable.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -40,11 +40,23 @@ Do not merge or deploy yet.
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
 | Module 7 | Implemented — manual QA approved |
-| Module 8 | Phase 1 (non-video) implemented — masterclass reconciled to the owner's final 9-video architecture; 8 of 9 chapters installed with real Vimeo media, Video 01 (Aromatherapy) remains a placeholder pending real footage; NOT manually QA'd, NOT approved |
-| Modules 9–11 | Pending |
-| Module 12 | Planned — do not begin |
+| Module 8 | **Substantially complete — final owner pass deferred.** Curriculum, masterclass architecture, 9-video reconciliation, Videos 02–09 installed, one-play/replay/mobile-fullscreen Vimeo UX, communication-cue final polish, Timer preview, checkpoints, and Cadence are all done. Deferred: real Video 01 (Aromatherapy), final hosted real-video owner verification, full manual QA, final approval. NOT `Implemented — manual QA approved`. |
+| Module 9 | Not begun. Owner has authorized progression into Module 9 source extraction despite Module 8's deferred final-pass items above. See "Locked future module order" below — its working title conflicts with `MODULE_TITLES[9]` currently in code; **reconcile before implementation, do not silently overwrite.** |
+| Modules 10–11 | Pending. See "Locked future module order" below — same code/title conflict applies. |
+| Module 12 | Planned — do not begin. Does not yet exist as a distinct technical module in code (`MODULE_COUNT` is currently 12, i.e. technical modules 0–11 only); reconciling a true 13th "Final Exam" module is a later, separate decision. |
 
-**Latest approved module: Module 7** — manually approved August 12, 2026. The owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Modules 0–7 remain approved. Module 8's approved non-video specification is now implemented in `headspa-mastery.html`, but Module 8 is explicitly **not** ready for manual QA and **not** manually approved — the required service videos remain uninstalled, per `module-08.md`'s own two-phase implementation boundary. Modules 9–11 remain pending.
+**Latest approved module: Module 7** — manually approved August 12, 2026. The owner reviewed the rendered `course-audit-build` branch preview and confirmed "everything looks and functions properly." Modules 0–7 remain approved. **Module 8 is substantially complete but is explicitly not ready for manual QA and not manually approved** — Video 01 (Aromatherapy) has no real footage yet, and the required hosted-origin video/completion verification has not been performed by the owner. The owner has authorized starting Module 9 source extraction/audit work despite these deferred items — this is a documented, explicit exception, not a silent skip of Module 8's own manual-QA gate.
+
+### Locked future module order (recorded August 24, 2026 — reconciliation flagged)
+
+This task's instructions state the owner's intended upcoming module order as:
+
+- **Module 9 — Checkout, Client Closing & Pricing Strategy**
+- **Module 10 — Sanitation & Reset Systems**
+- **Module 11 — AI / Modern Practice Tools**
+- **Module 12 — Final Exam**
+
+**This does not yet match what is actually in the codebase.** `MODULE_TITLES` in `headspa-mastery.html` currently reads: `9: 'Module 9 — Sanitation & Reset Systems'`, `10: 'Module 10 — Pricing Strategy'`, `11: 'Course Completion & Certification'` — and `MODULE_COUNT` is `12` (technical modules `0`–`11` only; there is no existing technical module `12`). Module 8's own completion card also still previews Module 9 as "Sanitation and reset systems," matching the older assumption. **This is recorded as the owner's stated direction, not as an already-implemented fact** — no code was changed to match it in this task (out of scope). Before Module 9 source extraction begins, this naming/order conflict should be explicitly reconciled with the owner (which module is actually next, whether `MODULE_TITLES`/`MODULE_COUNT`/the Module 8 completion-card preview text need updating, and how a true 13th "Final Exam" module would be technically implemented) — do not assume the codebase's current 9/10/11 order is simply wrong and silently overwrite it, and do not assume this task's stated order is what ships without owner confirmation.
 
 ---
 
@@ -74,6 +86,33 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 final communication-cue polish and closeout — August 24, 2026.** Following the prior task's independent communication-cue audit, the owner supplied exact, final, owner-approved wording for all 9 chapters and corrected the underlying teaching model: a chapter where the default is silence needed explicit "why quiet" + "if they ask" teaching, not just an empty field. `teach` array entries now carry an optional `type:'quiet'` — rendered in the same `.sms-teach` card with a **"Keep this quiet"** label, an explanation, and (nested, own label) an **"If they ask"** response — while every other entry is an unchanged direct spoken cue. Both label types are literal readable text, not color-coded.
+
+**Final per-chapter communication presentation:**
+
+| Chapter | Form | Content |
+|---|---|---|
+| 01 Aromatherapy | Speak | "I have three fragrance options, or we can skip fragrance altogether. Which would you prefer? And is it okay if I rest my hand on your shoulder while you choose?" |
+| 02 Positioning + Comfort | Speak | "Let's get you comfortable first. Tell me if anything needs adjusting before we start." |
+| 03 Dry Brushing | **Quiet** | Keep this quiet — "This portion generally does not require narration. Let the sensory experience continue unless the client asks a question." If they ask: "I'm using the dry brushing to work through the scalp and hair before we move into the wet portion of the service." |
+| 04 Halo + Wet Massage | Speak | "How does the water temperature feel? Let me know anytime if you want it warmer or cooler." |
+| 05 Exfoliant | Speak | "I'm going to apply a scalp exfoliant here. I'll adjust the amount, pressure, and technique based on what I'm seeing and how it feels for you." |
+| 05 Massage | Speak | "Let me know anytime if you'd like more or less pressure." |
+| 05 Rinse | **Quiet** | Keep this quiet — "There is usually no reason to announce a self-evident rinse transition." If they ask: "I'm rinsing everything through now before we move into the next part of the service." |
+| 06 Neck & Shoulder | Speak (true consent question) | "Would you like me to include some neck and shoulder work here? Let me know if you'd like lighter pressure at any point." |
+| 07 Shampoo & Rinse | **Quiet** | Keep this quiet — "This is generally a quiet portion of the service. Avoid turning product application into continuous narration while the client is deeply relaxed." If they ask: "I'm using [product] here because it fits what we're focusing on for your scalp and hair today." |
+| 08 Deep Conditioning / Hand + Arm | Speak (true consent question) | "Would you like me to include a hand and forearm massage while this processes? You can also just rest." |
+| 09 Cooling spray | Speak | "I'm going to use a cool mist next, so you'll feel a quick temperature change. Let me know if you'd rather skip it." |
+| 09 Closing | Speak | "Today I focused a little more on [area or service priority you addressed]. How are you feeling?" |
+
+Chapters 06 and 08 were specifically corrected from the prior pass's "announcement + opt-out" framing (e.g., "I'm going to move into your neck and shoulders now — let me know if you'd rather I skip this") to genuine consent **questions**, per explicit owner correction. Video 09's cooling-spray cue dropped the "startling and then very good... clients remember most" language (soft claim/marketing tone) for a plain, accurate preparation statement. One additional, narrowly-scoped fix: Video 03's **guidance** text ("introduce the scalp to stimulation... activating circulation") made an unsupported physiological claim never previously flagged in `module-08.md`'s claims corrections — corrected to technique-only language as a direct, disclosed consequence of the owner's explicit "do not restore... circulation... stimulation" instruction, not a separate audit pass.
+
+**Validation.** `node --check` and `git diff --check` both pass cleanly. Rendered HTML confirmed correct for both a quiet-type chapter (Video 03: `.sms-teach-quiet` card with nested `.sms-teach-ifasked` sub-block) and multi-entry chapters. Zero horizontal overflow at 1280px, 390×844, and 375×812. Zero console errors. Full regression: 9-chapter count, all 8 installed Vimeo IDs, Video 01 placeholder, `MODULE_REQUIRED_VIDEO_CHAPTERS['8']` still 9, the AIMT replay overlay and `m8HandleVideoEnded`/`m8ReplayActiveVideo` from the prior task, Timer, Protect the Flow, checkpoints, Cadence, and Modules 0–7/9–11 all confirmed unchanged. Review Mode confirmed unsaved throughout.
+
+**Module 8 status recorded as "Substantially complete — final owner pass deferred"** (not `Implemented — manual QA approved`) — see the Module status table above for the exact completed/deferred breakdown. The owner has authorized proceeding to Module 9 source extraction despite the deferred items; this is recorded as an explicit, documented exception, not a silent skip. The "locked future module order" the owner specified in this task's instructions was recorded below, flagged against a real conflict with the current codebase's `MODULE_TITLES`/completion-card text — see "Locked future module order" above. No merge or deployment occurred. Local Review Mode server kept running throughout.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 2 — client communication cues refined — August 24, 2026.** Narrow content-polish task: audited all 12 existing "What you might say" cues across the 9 masterclass chapters against the approved "Explain intentionally, not continuously" principle and Module 8's curriculum guardrails (consent/fragrance, adaptable exfoliation, no unsupported physiological claims, bodywork consent, no rebooking-causation language). Result: 4 kept as-is (already strong, on-point), 5 revised (mostly to add explicit consent/comfort check-ins for bodywork moments and remove soft unverified claims like "a favorite moment for a lot of clients" or "most people... without realizing," and to trim Video 09's closing cue down to the treatment-experience observation — the home-care/product-recommendation portion was business-side retail content that belongs to Module 9, "Checkout, Client Closing & Pricing Strategy," not Module 8), 3 removed entirely (Video 03 Dry Brushing, Video 05's rinse cue, and Video 07 Shampoo & Rinse — all pure narration of self-evident sensations with no consent/comfort/unfamiliar-sensation purpose; Video 07's in particular directly contradicted its own chapter's "no over-explanation, client deeply relaxed" guidance). No component change was needed for the two now-cue-free chapters — the existing `teach: []` array architecture (from the prior 9-video reconciliation) already renders a clean, zero-height empty container. No chapter titles, Vimeo IDs, video architecture, or completion logic touched. Full regression (9-chapter count, video mappings, Video 01 placeholder, Timer, Protect the Flow, checkpoints, Cadence, the completion overlay from the prior task, Review Mode unsaved behavior, Modules 0–7/9–11) confirmed unchanged. Module 8 status is unchanged (Phase 2, not manually approved). Module 9 was not begun. No merge or deployment occurred.
 

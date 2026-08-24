@@ -1621,6 +1621,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .sms-teach { background:var(--hero-bg); border-radius: var(--aimt-radius-sm); padding:0.85rem 1rem; margin:0.85rem 0 0; max-width:64ch; }
 .teach-label { font-family:var(--aimt-font-mono); font-size:0.52rem; letter-spacing:0.1em; text-transform:uppercase; color:#cdc8bc; display:block; margin-bottom:5px; }
 .sms-teach-text { font-size:0.86rem; line-height:1.7; color:rgba(255,255,255,0.82); font-weight:300; font-family:var(--aimt-font-serif); font-style:italic; }
+.sms-teach-ifasked { margin-top:0.65rem; padding-top:0.65rem; border-top:1px solid rgba(255,255,255,0.1); }
+.sms-teach-ifasked .teach-label { margin-bottom:5px; }
 
 /* Video stage — intentionally exceeds the standard reading measure on desktop */
 /* No longer breaks out past the reading column — the video now lives
@@ -9943,28 +9945,29 @@ const M8_CHAPTERS = [
   { num:'01', title:'Aromatherapy', label:'Video 01 — Aromatherapy', t1:'1hr: ~5 min', t2:'2hr: ~5 min',
     watchFor:'how the choice is offered — fragrance and fragrance-free carry equal weight, and consent comes before the first touch.',
     guidance:['Offer the three essential oil blends and a fragrance-free option with equal weight — fragrance-free is a genuinely valid choice, not a fallback. Ask before the first touch. If a client wants to close their eyes while they sample, that\'s their choice to offer, never an instruction.'],
-    teach:[{ label:'What you might say', text:'"I have three blends today, or we can skip fragrance entirely if you\'d prefer — whichever sounds better to you. I\'m going to rest my hand here on your shoulder while you sample, if that\'s alright."' }],
+    teach:[{ label:'What you might say', text:'"I have three fragrance options, or we can skip fragrance altogether. Which would you prefer? And is it okay if I rest my hand on your shoulder while you choose?"' }],
     notes:['The first touch happens here, and it\'s the client\'s choice how immersive this moment is. Consent and first-touch framing are covered in depth in Module 2.'],
     adapt:[], continuity:'Client positioning and comfort come next — getting fully settled before the rest of the service begins.' },
   { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', t1:null, t2:null,
     watchFor:'how the client is settled into position — physical comfort, support, and consent checked before anything else begins.',
     guidance:['Help the client get fully settled and supported on the treatment bed — head, neck, and shoulders comfortably aligned — before the service continues. Confirm comfort directly rather than assuming it; this is the moment to adjust support, draping, or positioning before momentum makes that harder to do smoothly.'],
-    teach:[{ label:'What you might say', text:'"Let\'s get you comfortable first — tell me if anything needs adjusting before we start. There\'s no rush."' }],
+    teach:[{ label:'What you might say', text:'"Let\'s get you comfortable first. Tell me if anything needs adjusting before we start."' }],
     notes:[], adapt:[], continuity:'Dry brushing begins once the client is fully settled and comfortable — no reset needed between them.' },
   { num:'03', title:'Dry Brushing and Hair Play', label:'Video 03 — Dry Brushing and Hair Play', t1:'1hr: ~3 min', t2:'2hr: ~5 min',
     watchFor:'brush-to-scalp contact and hand transitions — a short step that sets the tempo for what follows.',
-    guidance:['Introduce the scalp to stimulation. Distribute natural oils through the lengths. Begin activating circulation before water contact.'],
-    // No client-language example: dry brushing is brief, low-intensity, and
-    // self-evident — narrating it adds nothing a client needs (Explain
-    // intentionally, not continuously). Removed per Module 8 client-
-    // communication audit; was purely descriptive narration, not consent,
-    // comfort, or an unfamiliar-sensation explanation.
-    teach:[],
+    // Corrected per this pass: the prior wording ("introduce the scalp to
+    // stimulation," "activating circulation") made an unsupported
+    // physiological claim never previously flagged in module-08.md's
+    // claims corrections. Replaced with a technique-only description —
+    // brush contact and oil distribution, no stimulation/circulation claim.
+    guidance:['Work the brush across the scalp and through the lengths, distributing natural oils, ahead of the wet portion of the service.'],
+    teach:[{ type:'quiet', label:'Keep this quiet', note:'This portion generally does not require narration. Let the sensory experience continue unless the client asks a question.',
+      ifAsked:'"I\'m using the dry brushing to work through the scalp and hair before we move into the wet portion of the service."' }],
     notes:[], adapt:[], continuity:'The halo activates next — the client moves from dry contact into their first water and massage combined.' },
   { num:'04', title:'Halo Activation + Wet Massage', label:'Video 04 — Halo Activation & Wet Massage', t1:'1hr: ~5 min', t2:'2hr: ~8 min',
     watchFor:'the temperature check before first water contact — every time, regardless of what the thermostat says.',
     guidance:['Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.'],
-    teach:[{ label:'What you might say', text:'"The water should feel warm and steady the whole time — tell me right away if that ever changes."' }],
+    teach:[{ label:'What you might say', text:'"How does the water temperature feel? Let me know anytime if you want it warmer or cooler."' }],
     notes:['Temperature check is non-negotiable. Equipment fails. Your hand is the safeguard.'],
     adapt:[], continuity:'Exfoliation follows once the scalp is fully wet and warmed.' },
   { num:'05', title:'Exfoliant + Scalp Massage', label:'Video 05 — Exfoliant & Scalp Massage', t1:'1hr: ~23 min', t2:'2hr: ~38 min',
@@ -9975,11 +9978,10 @@ const M8_CHAPTERS = [
       'What makes this step read as skilled is controlled technique — rhythm, continuity, pressure, broad versus targeted contact, and reading client response — not a specific physiological outcome. Pacing and smooth transitions between regions matter more than any single technique choice.',
       'Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.'],
     teach:[
-      { label:'What you might say (exfoliant)', text:'"This is a gentle scalp exfoliant — I\'ve chosen it, and how much pressure I use, based on what your scalp needs today."' },
-      { label:'What you might say (massage)', text:'"This is the part where you can really let go. I\'ll keep a steady rhythm and check that the pressure feels right as we go."' }
-      // Rinse cue removed: narrated a self-evident physical sensation
-      // (water) with no consent, comfort, or unfamiliar-sensation purpose —
-      // see Module 8 client-communication audit.
+      { label:'What you might say (exfoliant)', text:'"I\'m going to apply a scalp exfoliant here. I\'ll adjust the amount, pressure, and technique based on what I\'m seeing and how it feels for you."' },
+      { label:'What you might say (massage)', text:'"Let me know anytime if you\'d like more or less pressure."' },
+      { type:'quiet', label:'Keep this quiet', note:'There is usually no reason to announce a self-evident rinse transition.',
+        ifAsked:'"I\'m rinsing everything through now before we move into the next part of the service."' }
     ],
     notes:['This is where the 1-hour and 2-hour diverge most. Know your pace for each format.'],
     adapt:[
@@ -9991,17 +9993,13 @@ const M8_CHAPTERS = [
     watchFor:'how the transition into the neck and shoulders is paced — this section extends significantly in the 2-hour format.',
     guidance:['Transition to neck, upper traps, and shoulder work. Extended significantly in the 2-hour format.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
-    teach:[{ label:'What you might say', text:'"I\'m going to move into your neck and shoulders now — let me know if you\'d rather I skip this or ease up at any point."' }],
+    teach:[{ label:'What you might say', text:'"Would you like me to include some neck and shoulder work here? Let me know if you\'d like lighter pressure at any point."' }],
     notes:[], adapt:[], continuity:'The second rinse, shampoo, and rinse sequence follows — the client stays deeply relaxed through this stretch.' },
   { num:'07', title:'Shampoo + Rinse', label:'Video 07 — Shampoo & Rinse', t1:'1hr: ~10 min', t2:'2hr: ~10 min',
     watchFor:'the shift in energy here — the client is deeply relaxed, so this sequence runs with minimal narration.',
     guidance:['Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.'],
-    // No client-language example: the chapter's own guidance already calls
-    // for minimal narration here (client deeply relaxed) — the prior product-
-    // explanation cue contradicted that. Removed per Module 8 client-
-    // communication audit; speak only if temperature/comfort genuinely
-    // requires it.
-    teach:[],
+    teach:[{ type:'quiet', label:'Keep this quiet', note:'This is generally a quiet portion of the service. Avoid turning product application into continuous narration while the client is deeply relaxed.',
+      ifAsked:'"I\'m using [product] here because it fits what we\'re focusing on for your scalp and hair today."' }],
     notes:[], adapt:[], continuity:'Conditioning or treatment follows, on the format-specific path.' },
   { num:'08', title:'Deep Conditioning / Hand + Arm Massage', label:'Video 08 — Deep Conditioning & Hand + Arm Massage', t1:'1hr: quick conditioning', t2:'2hr: mask + steam + hand & arm massage',
     watchFor:'the difference in depth between formats during conditioning, and — in the 2-hour service — full hand-and-forearm coverage while the treatment processes.',
@@ -10009,7 +10007,7 @@ const M8_CHAPTERS = [
       'Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client\'s scalp is responding today, not a fixed penetration claim.',
       'Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
-    teach:[{ label:'What you might say', text:'"While that processes, I\'ll move to your hands and forearms, if that\'s alright with you — just let me know if you\'d rather I skip it."' }],
+    teach:[{ label:'What you might say', text:'"Would you like me to include a hand and forearm massage while this processes? You can also just rest."' }],
     notes:['Explain the format difference clearly during booking — clients who\'ve had the 2-hour will notice the absence of steam and hand massage.'],
     adapt:[], continuity:'The waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.' },
   { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', t1:'1hr: ~13 min', t2:'2hr: ~13 min',
@@ -10017,12 +10015,12 @@ const M8_CHAPTERS = [
     guidance:['Waterfall neck rinse under the halo — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.',
       'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.'],
     teach:[
-      { label:'What you might say (cooling spray)', text:'"This is a temperature contrast — it\'s going to feel slightly startling for a second, and then very good. It\'s one of the moments clients remember most about this service."' },
-      // Trimmed to the treatment-closing observation and wellbeing check
-      // only — the prior home-care/product-recommendation portion was
-      // business-side retail content, which belongs to Module 9 (Checkout,
-      // Client Closing & Pricing Strategy), not duplicated here.
-      { label:'What you might say (closing)', text:'"Today I focused on [what you observed]. How are you feeling?"' }
+      { label:'What you might say (cooling spray)', text:'"I\'m going to use a cool mist next, so you\'ll feel a quick temperature change. Let me know if you\'d rather skip it."' },
+      // Closing cue stays limited to the treatment-closing observation and
+      // wellbeing check — retail/home-care recommendations, rebooking, and
+      // pricing belong to Module 9 (Checkout, Client Closing & Pricing
+      // Strategy), not duplicated here.
+      { label:'What you might say (closing)', text:'"Today I focused a little more on [area or service priority you addressed]. How are you feeling?"' }
     ],
     notes:['A specific, personalized observation at close is one of the strongest ways to make a service feel complete and intentional rather than rushed. Clients remember being seen — that\'s worth doing well regardless of what it does for your schedule.'],
     adapt:[], continuity:'That\'s the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.' }
@@ -10170,9 +10168,22 @@ function m8RenderChapter(idx) {
   }
 
   document.getElementById('m8mcGuidance').innerHTML = ch.guidance.map((p) => '<div class="body-text sms-what">' + p + '</div>').join('');
-  document.getElementById('m8mcTeach').innerHTML = (ch.teach || []).map((t) =>
-    '<div class="sms-teach"><span class="teach-label">' + t.label + '</span><span class="sms-teach-text">' + t.text + '</span></div>'
-  ).join('');
+  // Each teach entry is either a direct spoken cue (default) or quiet-step
+  // guidance (type:'quiet') — silence is taught as a deliberate choice, not
+  // represented by simply having no entry. A quiet entry states why
+  // narration is unnecessary here and, where useful, an "If they ask"
+  // response so the student still has an accurate answer ready. Both share
+  // the same .sms-teach card and .teach-label/.sms-teach-text typography;
+  // the distinction is carried in readable label text, not color.
+  document.getElementById('m8mcTeach').innerHTML = (ch.teach || []).map((t) => {
+    if (t.type === 'quiet') {
+      return '<div class="sms-teach sms-teach-quiet"><span class="teach-label">' + (t.label || 'Keep this quiet') + '</span>' +
+        '<span class="sms-teach-text">' + t.note + '</span>' +
+        (t.ifAsked ? '<div class="sms-teach-ifasked"><span class="teach-label">If they ask</span><span class="sms-teach-text">' + t.ifAsked + '</span></div>' : '') +
+        '</div>';
+    }
+    return '<div class="sms-teach"><span class="teach-label">' + t.label + '</span><span class="sms-teach-text">' + t.text + '</span></div>';
+  }).join('');
   document.getElementById('m8mcAdapt').innerHTML = (ch.adapt || []).map((a) =>
     '<div class="key-point"><div class="kp-icon">→</div><div class="kp-text">' + a + '</div></div>'
   ).join('');
