@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 Phase 2 — final 9-video reconciliation and batch installation)
+**Last updated:** August 24, 2026 (Module 8 Phase 2 — Vimeo end-screen replaced with AIMT replay overlay)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Install final Module 8 video sequence" commit (hash recorded in the final task report). The owner pushed the prior mobile-playback commit since the last session; local was 2 commits ahead of `origin/course-audit-build` (`567126c`, `f5a7d71`) at the start of this task, preserved, not reset.
+- Latest controlling commit: pending — this task's "Replace Vimeo end screen with AIMT replay state" commit (hash recorded in the final task report). `origin/course-audit-build` matched local HEAD (`d36609f`) at the start of this task.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -74,6 +74,10 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 Phase 2 — Vimeo end screen replaced with AIMT replay overlay — August 24, 2026.** Focused UX correction, not a lifecycle change. Problem: at genuine video end, Vimeo's own resting state showed account-level recommendation content ("More videos from Cady") inside the paid course — unacceptable, and the owner does not want to upgrade Vimeo's plan just to get its paid end-screen customization. Fix: the existing `markVideoChapterEnded(idx)` completion path is unchanged and remains authoritative; after it fires, a new `m8HandleVideoEnded()` best-effort resets the Vimeo player to `0` and exits fullscreen (both via the official Vimeo Player API, `.catch()`-guarded so a failure never undoes completion or logs noise), then a new restrained AIMT-owned overlay ("Chapter complete" + a single "Replay" button — no second Next CTA, no confetti/branding) covers the video stage. The overlay is gated to the still-active chapter only (a stale late `ended` for a chapter the student already left is discarded) and is unconditionally hidden on every chapter render, so it never leaks between chapters and never reappears just because a chapter is already saved complete. Replay reuses the same Vimeo.Player instance; a second genuine completion is already idempotent and cannot duplicate progress. No Vimeo plan, privacy, password, or domain-restriction change of any kind. Verified via simulated `ended`/Replay calls (localhost cannot play the domain-restricted videos for real): correct call order, no autoplay, zero overflow and true 16:9 at 1280px/390×844/375×812, 44px Replay touch target, zero console errors, Timer/Protect the Flow/checkpoints/Cadence/Video 01 placeholder/9-chapter count/Review Mode all unchanged. **The actual Vimeo recommendation-screen suppression and real fullscreen-exit behavior still require the owner testing from `https://course-audit-build.aimt-site.pages.dev/headspa-mastery.html?review=1`** once this commit is pushed and deployed — this was not visually verified in this task. Module 8 status is unchanged (Phase 2, not manually approved). Module 9 was not begun. No merge or deployment occurred.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 Phase 2 — final 9-video masterclass reconciliation and batch installation — August 24, 2026.** The owner supplied the final, real finished instructional footage and corrected the working assumption from earlier sessions: the masterclass consists of **9 instructional video chapters, not 12**. The prior 12-position structure was reconciled to the owner's authoritative 9-title sequence — not blindly reindexed — by reviewing each of the 17 numbered practitioner service steps' actual content and regrouping it under the correct real video chapter.
 

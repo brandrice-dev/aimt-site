@@ -2380,6 +2380,41 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 .sms-video-placeholder .sms-video-label { color: rgba(255,255,255,0.2); }
 
+/* AIMT-owned completion state — replaces Vimeo's own end-of-video resting
+   state (which otherwise shows account-level recommendation content) with
+   a restrained, contained overlay inside the existing video stage. Shown
+   only after a genuine Vimeo "ended" event; the real video underneath is
+   reset to its start so Vimeo's own recommendation screen is not the
+   resting frame beneath this overlay. */
+.m8-video-complete {
+  position: absolute; inset: 0;
+  background: rgba(15,13,10,0.94);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem; text-align: center; padding: 1rem;
+}
+.m8-video-complete[hidden] { display: none; }
+.m8vc-eyebrow {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-family: var(--aimt-font-mono); font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+}
+.m8vc-eyebrow svg { width: 14px; height: 14px; }
+.m8vc-replay {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.65rem 1.35rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: var(--aimt-radius-sm);
+  color: #fff; font-family: var(--aimt-font-sans); font-size: 0.82rem; font-weight: 400;
+  cursor: pointer; transition: background 0.2s;
+}
+.m8vc-replay:hover { background: rgba(255,255,255,0.18); }
+.m8vc-replay:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.m8vc-replay svg { width: 15px; height: 15px; }
+
 /* ══ CADENCE SIGNATURE ══ */
 .cadence-sig {
   margin: 1.5rem 0 0.5rem;
@@ -6212,6 +6247,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
             <div class="sms-video-label"></div>
             <div class="sms-video-sublabel">Add Vimeo link in admin</div>
           </button>
+          <div class="m8-video-complete" id="m8mcVideoComplete" hidden role="status">
+            <div class="m8vc-eyebrow"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Chapter complete</div>
+            <button type="button" class="m8vc-replay" id="m8mcReplayBtn" onclick="m8ReplayActiveVideo()" aria-label="Replay this chapter's video">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 10a6 6 0 1 1 1.8 4.3M4 10V6M4 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Replay
+            </button>
+          </div>
         </div>
       </div>
 
@@ -9971,6 +10013,11 @@ const M8_CHAPTERS = [
 ];
 
 let m8ActiveChapter = 0;
+// The live Vimeo.Player instance for whichever real video is currently
+// loaded, if any — used only by m8ReplayActiveVideo() to seek/play the
+// same player the student just watched. Reset to null on every chapter
+// render; reassigned in m8LoadRealVideo() when a real video loads.
+let m8ActiveVimeoPlayer = null;
 
 function m8ChapterReachable(idx) {
   if (window.ReviewMode && window.ReviewMode.isActive()) return true;
@@ -10078,6 +10125,15 @@ function m8RenderChapter(idx) {
   const existingIframe = wrap.querySelector('iframe');
   if (existingIframe) existingIframe.remove();
 
+  // Every chapter render — whether switching chapters or returning to one
+  // already completed — starts with the AIMT completion overlay hidden and
+  // no stale player reference. It only reappears from a genuine "ended"
+  // event during THIS viewing session, never merely because the chapter is
+  // already saved as complete.
+  const completeOverlay = document.getElementById('m8mcVideoComplete');
+  if (completeOverlay) completeOverlay.hidden = true;
+  m8ActiveVimeoPlayer = null;
+
   if (STEP_VIDEO_IDS[idx]) {
     // Real installed video: load the player directly on activation — no
     // outer click-to-load thumbnail step. Vimeo's own resting frame is
@@ -10180,8 +10236,62 @@ function m8LoadRealVideo(idx) {
   // — never opening, starting, or seeking a video.
   if (window.Vimeo && window.Vimeo.Player) {
     const player = new window.Vimeo.Player(iframe);
-    player.on('ended', () => markVideoChapterEnded(idx));
+    m8ActiveVimeoPlayer = player;
+    player.on('ended', () => m8HandleVideoEnded(idx, player));
   }
+}
+
+// Runs once per genuine Vimeo "ended" event. Completion is recorded first
+// and is authoritative regardless of anything below it. Everything after
+// that is best-effort cleanup of the real Vimeo player — AIMT does not pay
+// for (or depend on) Vimeo's paid end-screen customization, so instead of
+// leaving Vimeo's own end-of-video recommendation content ("More videos
+// from Cady") as the resting state, the player is reset to its start and
+// (if still in device/browser fullscreen) asked to exit, then AIMT's own
+// contained completion state is shown over the video stage. A failure at
+// any of the Vimeo API steps never undoes or duplicates the completion
+// already recorded, and is swallowed rather than logged — an unsupported
+// or already-settled player state here is expected, not an application
+// error worth surfacing.
+function m8HandleVideoEnded(idx, player) {
+  markVideoChapterEnded(idx);
+
+  if (player && typeof player.setCurrentTime === 'function') {
+    player.setCurrentTime(0).catch(() => {});
+  }
+  if (player && typeof player.exitFullscreen === 'function') {
+    player.exitFullscreen().catch(() => {});
+  }
+
+  m8ShowVideoCompleteOverlay(idx);
+}
+
+// Only shows the overlay if the student is still on the chapter that just
+// finished — if they already navigated away before this ran, the overlay
+// must not leak onto whatever chapter is active now (see m8RenderChapter(),
+// which unconditionally hides it on every chapter render).
+function m8ShowVideoCompleteOverlay(idx) {
+  if (Number(idx) !== m8ActiveChapter) return;
+  const overlay = document.getElementById('m8mcVideoComplete');
+  if (overlay) overlay.hidden = false;
+}
+
+// Replay — the only action inside the AIMT completion overlay. Course
+// progression stays with the existing chapter navigation outside the
+// video; this only re-plays the same chapter's video from a genuine user
+// click. Reuses the same Vimeo.Player instance and its already-bound
+// "ended" listener, so a second genuine completion shows the same overlay
+// again without any new wiring — and setVideoChapterComplete() is already
+// idempotent, so replaying a completed chapter can never duplicate or
+// regress its saved completion.
+function m8ReplayActiveVideo() {
+  const overlay = document.getElementById('m8mcVideoComplete');
+  if (overlay) overlay.hidden = true;
+  const player = m8ActiveVimeoPlayer;
+  if (!player) return;
+  player.setCurrentTime(0)
+    .catch(() => {})
+    .then(() => player.play().catch(() => {}));
 }
 
 // Click handler for the placeholder thumbnail — only ever rendered for a
