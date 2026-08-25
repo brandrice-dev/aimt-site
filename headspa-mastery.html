@@ -1801,25 +1801,20 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 .m8rt .lc-btn { width:auto; max-width:none; margin:0; display:inline-block; }
 
-/* ── MODULE 9 — Reset sequence ── */
+/* ── MODULE 10 — Reset phase flow (static list; no auto-advance JS) ── */
 .reset-sequence { display:flex; flex-direction:column; gap:4px; margin:1.25rem 0; }
-.rst-step { display:flex; align-items:flex-start; gap:12px; padding:0.85rem 1rem; background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); transition:all 0.3s; }
-.rst-step.active { background:var(--hero-bg); border-color:transparent; }
-.rst-step.active .rst-num { color:#cdc8bc; }
-.rst-step.active .rst-title { color:white; }
-.rst-step.active .rst-body { color:rgba(255,255,255,0.6); }
+.rst-step { display:flex; align-items:flex-start; gap:12px; padding:0.85rem 1rem; background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); }
 .rst-num { font-family:var(--aimt-font-mono); font-size:0.62rem; color:var(--muted2); min-width:22px; flex-shrink:0; padding-top:2px; }
 .rst-content { flex:1; }
 .rst-title { font-size:0.875rem; font-weight:500; margin-bottom:2px; }
 .rst-body { font-size:0.78rem; color:var(--muted); font-weight:300; line-height:1.55; }
-.rst-timer { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.06em; color:var(--muted2); flex-shrink:0; padding-top:2px; }
 
-/* ── MODULE 9 — Sanitation cards ── */
+/* ── MODULE 10 — Item/process cards ── */
 .sanit-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:1.5rem 0; }
 @media(max-width:600px){ .sanit-grid { grid-template-columns:1fr !important; } }
 .sanit-card { background:rgba(255,255,255,0.65); border:0.5px solid var(--border2); border-radius:14px; padding:1rem 1.1rem; }
 .sc-freq { font-family:var(--aimt-font-mono); font-size:0.55rem; letter-spacing:0.08em; text-transform:uppercase; padding:2px 7px; border-radius:980px; display:inline-block; margin-bottom:8px; }
-.freq-every { background:#fde8e8; color:#c0392b; }
+.freq-between { background:var(--warn-light); color:var(--aimt-neutral); }
 .freq-weekly { background:#f5f3ee; color:#7a5a20; }
 .freq-daily { background:#e8ede8; color:#3a5a3a; }
 .sc-title { font-size:0.875rem; font-weight:500; margin-bottom:5px; }
@@ -6563,95 +6558,149 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mh-desc">Most people treat sanitation and reset as something separate from the service. It's not. Clients may not watch you clean — but they feel freshness, organization, and readiness. And they also feel leftover clutter, damp linens, and signs of the previous client. That's what breaks a premium experience.</div>
     </div>
 
-    <div class="sec-eyebrow">Cleaning vs resetting — not the same thing</div>
-    <div class="sec-title">You need both. Most people only do one.</div>
-    <div class="body-text">Cleaning removes what was used. Resetting prepares for what's next. If you only clean, your station looks empty and you start the next service unprepared — reaching mid-service, hesitating, scrambling. If you reset properly, everything is ready, you move without interruption, and your service feels controlled from the first moment.</div>
+    <div class="sec-eyebrow">Building on Your Licensure</div>
+    <div class="sec-title">You already know sanitation fundamentals. This module teaches you how to apply them to the specific realities of a Head Spa.</div>
+    <div class="body-text">This module builds on the sanitation and disinfection education you already completed for your license. AIMT's focus is how those fundamentals apply to wet systems, halo equipment, reusable tools, service surfaces, linens, product handling, room reset, and workflow when the schedule is tight.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>The standard:</strong> After reset, your room should look like the next client is about to walk in right now. If it doesn't, reset is not complete.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Governing sources</div>
+        <div class="kp-text">Your current state or local requirements, your disinfectant and product labels, and your equipment manufacturer's instructions remain controlling wherever they're more specific than this module. AIMT teaches how those requirements apply inside a Head Spa — this course doesn't replace them.</div>
+      </div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.1 — What you sanitize and when</div>
-    <div class="sec-title">Clean what clients touch. Every time. No exceptions.</div>
-    <div class="body-text">High-touch surfaces must be sanitized between every single client. There is no "it looks clean" exception. Cross-contamination is how clients get hurt and how practitioners lose licenses. The standard exists because skin-to-surface contact is direct — and your clients are trusting you with that.</div>
+    <div class="sec-eyebrow">10.1 — Use the Right Process for the Job</div>
+    <div class="sec-title">Five words. Five different actions.</div>
+    <div class="body-text">"Clean," "disinfect," "sanitize," and "sterile" get used interchangeably in casual conversation — but they aren't the same action, and using the wrong one in the wrong place is where real risk lives.</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-icon">①</div>
+        <div class="cc-term">Cleaning</div>
+        <div class="cc-sub">Removal, not treatment</div>
+        <div class="cc-def">Removes soil, residue, and debris. Often required before an item can be properly disinfected.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">②</div>
+        <div class="cc-term">Disinfection</div>
+        <div class="cc-sub">Follows the label, every time</div>
+        <div class="cc-def">Treats an appropriate item or surface with a disinfectant according to its label — approved use, dilution where applicable, required contact time, and applicable rules. One product does not work for everything.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">③</div>
+        <div class="cc-term">Launder / Replace / Discard</div>
+        <div class="cc-sub">Not one path</div>
+        <div class="cc-def">Washable porous goods, disposable single-use items, and reusable hard nonporous tools each follow a different process — they were never interchangeable.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">④</div>
+        <div class="cc-term">Reset</div>
+        <div class="cc-sub">Preparing for what's next</div>
+        <div class="cc-def">Preparing the cleaned, processed room, supplies, and equipment for the next service. Reset is not a substitute for disinfection.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">⑤</div>
+        <div class="cc-term">Sterilization</div>
+        <div class="cc-sub">A different standard</div>
+        <div class="cc-def">A higher standard than disinfection, used only where it's specifically required. Disinfected is not the same as sterile, and not every Head Spa setup requires sterilization equipment.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">10.2 — Process the Right Item the Right Way</div>
+    <div class="sec-title">Match the process to what the item actually is.</div>
+    <div class="body-text">Instead of one universal schedule, think item → process. Some processing happens between clients, some follows a daily opening/closing routine, and some is periodic and manufacturer-directed. Actual frequency depends on your product label, equipment manufacturer instructions, applicable rules, service use, and your own business's SOP — not a single number this course can certify for every setup.</div>
 
     <div class="sanit-grid">
       <div class="sanit-card">
-        <span class="sc-freq freq-every">Every client</span>
-        <div class="sc-title">Halo & water system</div>
-        <div class="sc-items">Full flush sequence — Barbicide rinse, then plain water until clear. Never skip this. The halo contacts the client's scalp directly.</div>
+        <span class="sc-freq freq-between">Between clients</span>
+        <div class="sc-title">Reusable hard, nonporous tools</div>
+        <div class="sc-items">Remove soil and debris. Disinfect before reuse with an appropriate labeled product. Preserve the required contact time. Keep clean and used tools separated — never together.</div>
       </div>
       <div class="sanit-card">
-        <span class="sc-freq freq-every">Every client</span>
-        <div class="sc-title">Bed vinyl & surfaces</div>
-        <div class="sc-items">EPA-registered disinfecting wipe on all vinyl surfaces, handles, cart trays, and anything the client or your hands touched during service.</div>
+        <span class="sc-freq freq-between">Between clients</span>
+        <div class="sc-title">Hard, nonporous service surfaces</div>
+        <div class="sc-items">Clean as needed. Disinfect with an appropriate labeled product. Respect the required wet/contact time before the surface is back in use.</div>
       </div>
       <div class="sanit-card">
-        <span class="sc-freq freq-every">Every client</span>
-        <div class="sc-title">Tools in Barbicide</div>
-        <div class="sc-items">Combs, brushes, clips — fully submerged for the manufacturer's required contact time. Separate bins for clean and dirty. Never place a dirty tool near a clean one.</div>
+        <span class="sc-freq freq-between">Between clients</span>
+        <div class="sc-title">Linens / washable porous goods</div>
+        <div class="sc-items">Remove immediately after use and contain away from clean stock. Launder before reuse. Store clean linens protected from contamination.</div>
       </div>
       <div class="sanit-card">
-        <span class="sc-freq freq-daily">Daily</span>
-        <div class="sc-title">Bed maintenance check</div>
-        <div class="sc-items">Follow manufacturer instructions for your specific model. Heated pump beds and standard models have different requirements. Know yours.</div>
+        <span class="sc-freq freq-between">Between clients</span>
+        <div class="sc-title">Single-use items</div>
+        <div class="sc-items">Discard after their intended single use. Never reprocess a single-use item as if it were reusable.</div>
       </div>
       <div class="sanit-card">
-        <span class="sc-freq freq-weekly">Weekly</span>
-        <div class="sc-title">Deep clean</div>
-        <div class="sc-items">Halo line cleaner — manufacturer-specific product, not generic. Run the full recommended sequence. Log it.</div>
+        <span class="sc-freq freq-weekly">Periodic / manufacturer-directed</span>
+        <div class="sc-title">Halo / basin / water system / equipment</div>
+        <div class="sc-items">Follow your specific equipment manufacturer's cleaning, disinfection, and maintenance instructions, plus any applicable regulatory requirements. Your bed or halo system's own manual is the actual authority here — not a generic routine.</div>
       </div>
       <div class="sanit-card">
-        <span class="sc-freq freq-weekly">Log it</span>
-        <div class="sc-title">Sanitation records</div>
-        <div class="sc-items">Date, time, products used, who performed it. This documentation protects you in an audit and in a client complaint. Keep it current.</div>
+        <span class="sc-freq freq-between">Between clients</span>
+        <div class="sc-title">Product bowls / applicators / supplies</div>
+        <div class="sc-items">Clean applicators between clients. Portion and dispense hygienically. Never reuse a client's leftover product on the next client.</div>
       </div>
     </div>
 
-    <div class="cadence-note">
-      <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"Sanitation is not glamorous but it is the most professional thing you do. The moment you start skipping steps because you're busy is the moment you're working outside your professional standards — regardless of how clean it looks."</div>
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Instructor tip</div>
+        <div class="kp-text">In our own Head Spa, a whirlpool/jet-system cleaner has worked especially well for periodic cleaning of the halo/water lines. If you choose to use one, confirm first that it's compatible with your specific bed or halo system, and follow both the cleaner's label and your equipment manufacturer's instructions. This is a maintenance tip, not a required procedure — it doesn't replace any disinfection step your system actually requires.</div>
+      </div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.2 — The reset sequence</div>
-    <div class="sec-title">Under 15 minutes. Every time.</div>
-    <div class="body-text">A reliable reset sequence means you are never scrambling between clients. The goal is a repeatable series you can complete in under 15 minutes that returns the room to exactly the state it was in when the previous client arrived. The less decision-making required, the faster and more consistent it becomes.</div>
-    <div class="interaction-hint">↓ Tap Start to walk through the sequence</div>
+    <div class="sec-eyebrow">10.3 — Build a Reset Around What Cannot Be Rushed</div>
+    <div class="sec-title">Contain. Clean. Disinfect. Reset. Verify.</div>
+    <div class="body-text">A reliable reset isn't a race — it's a repeatable flow with one phase that sets the actual pace: whatever process time the item or equipment genuinely requires.</div>
 
-    <div class="reset-sequence" id="resetSequence">
-      <div class="rst-step" id="rst-0"><div class="rst-num">01</div><div class="rst-content"><div class="rst-title">Halo flush</div><div class="rst-body">Barbicide rinse immediately after client leaves, then plain water until clear. Start this first — it runs while you do everything else.</div></div><div class="rst-timer">~3 min</div></div>
-      <div class="rst-step" id="rst-1"><div class="rst-num">02</div><div class="rst-content"><div class="rst-title">Strip the bed</div><div class="rst-body">All linens into the dirty bin. Sheet, headrest cover, towels used. Clean set ready to go.</div></div><div class="rst-timer">~1 min</div></div>
-      <div class="rst-step" id="rst-2"><div class="rst-num">03</div><div class="rst-content"><div class="rst-title">Wipe all surfaces</div><div class="rst-body">EPA-registered wipe on bed vinyl, cart surfaces, handles, tray. Everything touched — yours or theirs.</div></div><div class="rst-timer">~2 min</div></div>
-      <div class="rst-step" id="rst-3"><div class="rst-num">04</div><div class="rst-content"><div class="rst-title">Tools to Barbicide</div><div class="rst-body">Combs, brushes, clips — into the dirty bin first, then submerge in Barbicide for required contact time. Do not rush contact time.</div></div><div class="rst-timer">~1 min</div></div>
-      <div class="rst-step" id="rst-4"><div class="rst-num">05</div><div class="rst-content"><div class="rst-title">Make the bed</div><div class="rst-body">Fresh sheet, headrest cover. Knee bolster in place. Eye mask ready. Bed warmer on.</div></div><div class="rst-timer">~2 min</div></div>
-      <div class="rst-step" id="rst-5"><div class="rst-num">06</div><div class="rst-content"><div class="rst-title">Restock product dishes</div><div class="rst-body">Three bowls refilled: shampoo, mask, exfoliant. Applicator brush clean and ready. Massage oil and lotion accessible.</div></div><div class="rst-timer">~2 min</div></div>
-      <div class="rst-step" id="rst-6"><div class="rst-num">07</div><div class="rst-content"><div class="rst-title">Refresh ambient</div><div class="rst-body">Diffuser refreshed if needed. Lighting reset. Music still running. Room temperature checked.</div></div><div class="rst-timer">~1 min</div></div>
-      <div class="rst-step" id="rst-7"><div class="rst-num">08</div><div class="rst-content"><div class="rst-title">Reload towel warmer</div><div class="rst-body">Fresh towels in and warming. Confirm warm before next client arrives — not just loaded.</div></div><div class="rst-timer">~1 min</div></div>
-      <div class="rst-step" id="rst-8"><div class="rst-num">09</div><div class="rst-content"><div class="rst-title">Final check</div><div class="rst-body">Walk the room as if you are the client. Anything out of place, anything missing, anything that breaks the experience? Fix it now.</div></div><div class="rst-timer">~1 min</div></div>
+    <div class="reset-sequence">
+      <div class="rst-step"><div class="rst-num">01</div><div class="rst-content"><div class="rst-title">Contain</div><div class="rst-body">Move used linens, disposable items, and dirty implements into their correct used/dirty handling path immediately — before anything else.</div></div></div>
+      <div class="rst-step"><div class="rst-num">02</div><div class="rst-content"><div class="rst-title">Clean</div><div class="rst-body">Remove soil, product residue, and debris wherever the next required process depends on it.</div></div></div>
+      <div class="rst-step"><div class="rst-num">03</div><div class="rst-content"><div class="rst-title">Disinfect / Process</div><div class="rst-body">Start whatever disinfectant contact time, equipment cycle, or manufacturer-directed process is actually required. This step doesn't get shortened.</div></div></div>
+      <div class="rst-step"><div class="rst-num">04</div><div class="rst-content"><div class="rst-title">Reset</div><div class="rst-body">Rebuild clean linens, protected supplies, necessary products, sensory setup, and equipment — without recontaminating anything you just processed.</div></div></div>
+      <div class="rst-step"><div class="rst-num">05</div><div class="rst-content"><div class="rst-title">Verify</div><div class="rst-body">Walk the room before the next client. Confirm equipment is ready, required process time is complete, clean and used items stay separated, supplies are stocked, and nothing from the last client remains.</div></div></div>
     </div>
-    <div style="margin-top:0.75rem;">
-      <button onclick="startResetTimer();this.style.display='none'" style="width:100%;background:var(--hero-bg);color:white;border:none;border-radius: var(--aimt-radius-sm);padding:0.75rem;font-size:0.85rem;font-weight:500;font-family:var(--aimt-font-sans);cursor:pointer;">Start reset walkthrough →</button>
-    </div>
-    <div id="resetComplete" style="display:none;margin-top:0.75rem;padding:1rem;background:#e8ede8;border-radius: var(--aimt-radius-sm);text-align:center;color:#3a5a3a;">
-      <div style="font-weight:500;margin-bottom:3px;">Room reset complete.</div>
-      <div style="font-size:.78rem;font-weight:300;">Under 15 minutes. Every time.</div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Practitioner note</div>
+        <div class="kp-text">Once your process is correct, practice it until it's repeatable. Then measure your actual reset time and build enough turnover into your schedule to run it without rushing anything required. Independent tasks can happen while a required contact time or equipment cycle runs — the required process itself never gets shortened because the next client is waiting.</div>
+      </div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.3 — Compliance</div>
-    <div class="sec-title">Know your state requirements. Check them annually.</div>
-    <div class="body-text">State regulations regarding sanitation requirements for head spa services vary and are updated periodically. What was compliant last year may not be this year. Check your state board's current requirements at minimum once a year. Keep records of your sanitation practices — date, time, products used. This documentation protects you if you are ever audited or if a client complaint is filed.</div>
+    <div class="sec-eyebrow">Reset Under Pressure</div>
+    <div class="sec-title">The room isn't fully ready. The next client already is.</div>
+    <div class="body-text">The next client has arrived early. Most of the room is reset, but a reusable item or surface is still completing its required disinfectant contact time. What do you do?</div>
 
-    <div class="info-card" style="margin:1.5rem 0;">
-      <div class="ic-title">What to keep in your sanitation log</div>
-      <div style="font-size:.82rem;font-weight:300;line-height:1.7;color:var(--text);">Date and time of each sanitation procedure · Products used and dilution ratios · Contact times for disinfectants · Who performed the sanitation · Any equipment issues noted · Bed maintenance dates and what was done</div>
+    <div class="m5-decision-block" id="m10RupDecision">
+      <div class="bq-options" role="group" aria-label="Choose what you do when a required process is still running and the next client has arrived early.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m10RupSelect(0,this)">Let the required contact time finish undisturbed. Use another already-clean, ready item or surface if one is available, or continue other reset tasks in parallel. Delay the client's start briefly if you need to.</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m10RupSelect(1,this)">Wipe the item or surface dry now since it already looks clean, to save time.</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m10RupSelect(2,this)">Skip the remaining contact time — the client is already waiting.</button>
+        <button type="button" class="bq-opt" data-choice="3" aria-pressed="false" onclick="m10RupSelect(3,this)">Grab an unprocessed backup tool or surface instead of waiting.</button>
+        <button type="button" class="bq-opt" data-choice="4" aria-pressed="false" onclick="m10RupSelect(4,this)">Start the service anyway and finish processing the item afterward, since the schedule matters more right now.</button>
+      </div>
+      <div class="bq-feedback" id="m10RupFeedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m10RupReset()">Reset this scenario</button>
     </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">10.4 — Build the System Before You're Under Pressure</div>
+    <div class="sec-title">Reduce decisions. Not standards.</div>
+    <div class="body-text">Reliability doesn't come from moving faster under pressure. It comes from a system that already removed the decisions pressure would otherwise force you to make badly.</div>
 
     <div class="info-card">
       <div class="ic-title">What this looks like under pressure</div>
@@ -6660,39 +6709,89 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="body-text" style="margin:0;"><strong>Strong system:</strong> automatic reset, no thinking required, everything already in place. Next service starts controlled. The difference is not discipline in the moment — it's the system you built before the moment.</div>
     </div>
 
+    <div class="info-card">
+      <div class="ic-title">Consistency comes from</div>
+      <div style="font-size:.82rem;font-weight:300;line-height:1.7;color:var(--text);">Clear clean/used zones · Known product label and contact-time instructions · Equipment instructions accessible · Appropriate clean backups on hand · Protected clean linens and supplies · A room-specific reset order · Adequate turnover time built into the schedule</div>
+    </div>
+
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>Pressure test your system:</strong> Can I reset without thinking? Does this hold up when I'm behind? Is everything always within reach? If not, the system is not complete.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Pressure test your system</div>
+        <div class="kp-text">Can I reset without thinking? Does it hold up when I'm behind? Is everything I need already within reach? If not, the system isn't finished — the pressure just revealed it.</div>
+      </div>
+    </div>
+
+    <div class="body-text">Records can support consistency, maintenance history, traceability, and review when a concern occurs. Keep any records your jurisdiction requires, plus any additional logs your own business uses to verify its procedures.</div>
+
+    <div class="info-card">
+      <div class="ic-title">Possible log fields</div>
+      <div style="font-size:.82rem;font-weight:300;line-height:1.7;color:var(--text);">Date/time · Product used · Dilution where applicable · Contact time · Equipment maintenance performed · Person performing the procedure · Issues or deviations</div>
+    </div>
+
+    <div class="body-text">Use your current state or local requirements, and set up a recurring compliance review — not a once-a-year checkbox. Recheck whenever your regulations, equipment, disinfectants, services, or procedures change. An annual internal review is a reasonable business habit, not a guarantee of compliance on its own.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">10.5 — When Routine Reset Is Not Enough</div>
+    <div class="sec-title">Blood or body fluid is not a routine reset.</div>
+    <div class="body-text">Blood or another potentially infectious material changes what happens next. It isn't handled with your normal between-client reset.</div>
+
+    <div class="key-point kp-warn">
+      <div class="kp-icon" aria-hidden="true">⚠</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Caution</div>
+        <div class="kp-text">Stop your normal reset flow. Follow your business's applicable exposure/cleanup procedure. Use appropriate PPE. Contain and remove visible material safely. Clean and process affected reusable items and surfaces appropriately, using products according to their labels. Handle contaminated laundry and disposables appropriately. Document and follow your workplace's and regulatory process. Employee/employer exposure requirements can depend on your applicable workplace law and business structure — know what applies to yours.</div>
+      </div>
+    </div>
+
+    <div class="body-text">A client reporting a rash the next day doesn't prove sanitation caused it, a product caused it, an allergy caused it, friction caused it, that the business is at fault, or that it isn't. Your job is to respond professionally — not to diagnose or assume a cause.</div>
+
+    <div class="info-card">
+      <div class="ic-title">How to respond</div>
+      <div class="body-text" style="margin:0;">Acknowledge the concern. Document exactly what the client reports. Don't diagnose. Don't assume or deny a cause. Review the service, intake, and product records. Review sanitation, equipment, linen, and process records where relevant. Identify any actual deviation. Follow your business's incident or compliance procedure. Suggest medical evaluation when it's warranted, without attempting to diagnose.</div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.4 — Checkpoint</div>
-    <div class="sec-title">Walk me through your reset.</div>
-    <div class="body-text">After a 2-hour service, walk through your complete reset sequence. Name the steps in order and explain what happens if you skip one — any one. What is the consequence?</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m9cp1In" placeholder="Walk through the sequence and the consequences of skipping any step..." onkeydown="m9cpKey(event,'m9cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m9cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    <div class="checkpoint" id="m9cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Between-client reset reasoning</div>
+      </div>
+      <div class="cp-q">Walk me through your between-client reset in the order that works for your setup. Identify what you remove or contain, what you clean and disinfect, what you replace or restock, and any required contact or equipment time you would not shorten.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <label for="m9cp1In" class="aimt-sr-only">Walk me through your between-client reset in the order that works for your setup. Identify what you remove or contain, what you clean and disinfect, what you replace or restock, and any required contact or equipment time you would not shorten.</label>
+          <textarea class="cp-input" id="m9cp1In" placeholder="Walk through your reset — what you contain, clean, disinfect, restock, and never shorten..." rows="1" oninput="grow(this)" onkeydown="m9cpKey(event,'m9cp1')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m9cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m9cp1Btn" onclick="submitM9CP('m9cp1')">Submit to Cadence →</button>
-      <div class="cp-response" id="m9cp1Res"></div>
+        <button class="cp-btn" id="m9cp1Btn" onclick="submitM9CP('m9cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m9cp1Res" aria-live="polite"></div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.5 — Checkpoint</div>
-    <div class="sec-title">A client calls the next day.</div>
-    <div class="body-text">A client calls to say she developed a rash on her neck the day after her service. Walk through how you investigate and respond — to her, and internally.</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m9cp2In" placeholder="How you respond to the client, what you investigate, and what you document..." onkeydown="m9cpKey(event,'m9cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m9cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    <div class="checkpoint" id="m9cp2">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Post-service concern response</div>
+      </div>
+      <div class="cp-q">A client contacts you the next day and reports a rash on her neck after the service. What would you say to her, what facts would you document, and what would you review internally without diagnosing or assuming the cause?</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <label for="m9cp2In" class="aimt-sr-only">A client contacts you the next day and reports a rash on her neck after the service. What would you say to her, what facts would you document, and what would you review internally without diagnosing or assuming the cause?</label>
+          <textarea class="cp-input" id="m9cp2In" placeholder="What you'd say to her, what you'd document, and what you'd review internally..." rows="1" oninput="grow(this)" onkeydown="m9cpKey(event,'m9cp2')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m9cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
         </div>
-      <button class="cp-btn" id="m9cp2Btn" onclick="submitM9CP('m9cp2')">Submit to Cadence →</button>
-      <div class="cp-response" id="m9cp2Res"></div>
+        <button class="cp-btn" id="m9cp2Btn" onclick="submitM9CP('m9cp2')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m9cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m10Complete" style="display:none;">
@@ -7976,12 +8075,48 @@ const M8 = {
 };
 
 // ── MODULE 9 ──
+// Module 10 (Sanitation & Reset Systems) checkpoint data. Per-checkpoint
+// rubrics (M9.systems.m9cp1/m9cp2), replacing the old shared M9.system —
+// matches the per-checkpoint pattern used by M10.systems (Module 9's own
+// checkpoints) below. Checkpoint IDs m9cp1/m9cp2 preserved unrenamed per
+// the 9<->10 reorder; see docs/course-audit/modules/module-10.md.
 const M9 = {
   questions: {
-    m9cp1: 'Walk through your complete reset sequence after a 2-hour service. What is the order, and what happens if you skip a step?',
-    m9cp2: 'A client calls to say she developed a rash on her neck the day after her service. Walk through how you investigate and respond.'
+    m9cp1: 'Walk me through your between-client reset in the order that works for your setup. Identify what you remove or contain, what you clean and disinfect, what you replace or restock, and any required contact or equipment time you would not shorten.',
+    m9cp2: 'A client contacts you the next day and reports a rash on her neck after the service. What would you say to her, what facts would you document, and what would you review internally without diagnosing or assuming the cause?'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 10 (Sanitation & Reset Systems) checkpoint. Question: "' + q + '". Key concepts: reset sequence must be repeatable and under 15 minutes. Halo flush is always first after service. Separate bins for clean and dirty tools — never mix. Bed vinyl wiped between every client. Sanitation logs protect you legally. Post-service client complaint: document, review sanitation log, check product used, respond with calm and specific information — never defensive. State regulations vary and must be checked annually. 3-5 sentences, direct and warm.'
+  systems: {
+    m9cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 10 competency: building a coherent, safe, room-specific between-client reset using correct process distinctions — not memorized wording.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. Containment of used/dirty linens, disposables, and implements.\n' +
+      '2. An appropriate distinction between cleaning and disinfection.\n' +
+      '3. Clean and used items kept separated.\n' +
+      '4. Replenishment/reset of the room, supplies, and equipment.\n' +
+      '5. Respect for required product or equipment process/contact time — not shortened.\n' +
+      '6. A coherent return to a service-ready state.\n\n' +
+      'The student does not need to state a specific time target, name a specific product or brand, follow one universal step order, treat the halo/water system as always first, or use exact terminology if the reasoning is correct. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer that lists actions with no order or reasoning, or that never distinguishes cleaning from disinfection, or that never addresses contact/process time at all.\n\n' +
+      'Immediately correct — do not pass — any answer that states a reset must be completed in a specific universal time (for example under 15 minutes), states the halo or water system must always be flushed first, cites a specific commercial disinfectant brand or product as universally required, or claims that shortening a required contact/process time is acceptable when running behind schedule.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if containment and disinfection are clear, ask what required process time they would never shorten. If the process steps are correct, ask how the room ends up ready for the next client.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, background, or license type.',
+    m9cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 10 competency: responding professionally to a reported post-service concern without diagnosing or assuming causation.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. Acknowledgment of the client\'s concern.\n' +
+      '2. Calm, professional communication.\n' +
+      '3. No diagnosis of the rash.\n' +
+      '4. No assumed cause — sanitation, product, allergy, or friction are not stated as the confirmed reason.\n' +
+      '5. Documentation of what the client reported.\n' +
+      '6. Review of relevant intake, service, and product records.\n' +
+      '7. Review of relevant sanitation, equipment, linen, or process information.\n' +
+      '8. Appropriate internal follow-up.\n\n' +
+      'Strong answers may appropriately suggest medical evaluation. The student is not required to admit fault, and should not be rewarded for automatically denying fault either — do not require or reward a conclusion about causation in either direction. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer that responds to the client appropriately but never mentions any internal documentation or review, or that lists a thorough internal review but never addresses what the practitioner would actually say to the client.\n\n' +
+      'Immediately correct — do not pass — any answer that diagnoses the rash, states or implies sanitation or a specific product definitely caused it, states or implies the business is definitely not at fault, or responds to the client defensively or dismissively.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the client response is professional and appropriate, ask what the student would review internally afterward. If the internal review is thorough, ask what the student would actually say to the client in the moment.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, background, or license type.'
+  }
 };
 
 // ── MODULE 9 (Checkout, Client Closing & Pricing Strategy) — historically
@@ -8046,7 +8181,7 @@ const MODULE_GUIDE_SYSTEMS = {
   /* Module 9 <-> 10 reorder: Cadence config now follows content, not the
      historical numbering — see MODULE_CHECKPOINTS/MODULE_TITLES above. */
   9: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied business experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 9, Checkout, Client Closing & Pricing Strategy — your role here is business-decision and client-closing coach. Before recommending any change, help the student distinguish a cost problem, a pricing problem, a menu problem, a positioning problem, a service-delivery problem, and a market-fit problem from each other — one client comment rarely proves a single cause. Reinforce that competitor pricing is context, not a pricing formula, and that full practitioner time (not treatment time alone) belongs in any real cost model. Price feedback such as "it felt high" is not automatically a positioning problem — treat it as evidence to review, not a conclusion to assume. Do not provide tax advice, legal advice, state-specific pricing-compliance guidance, or bookkeeping advice presented as professional accounting guidance — point the student to a qualified professional for those questions instead. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
-  10: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 10 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
+  10: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 10, Sanitation & Reset Systems — your role here is sanitation-process and operational-consistency coach for a student who already completed licensed sanitation/disinfection education. Help the student distinguish cleaning from disinfection from reset, and reason through a repeatable reset built around whatever contact or process time is actually required — never shortened for schedule pressure. When the exact answer depends on a disinfectant label, equipment manufacturer instructions, a state/local rule, or a workplace exposure procedure, tell the student to follow that source rather than inventing a specific contact time, dilution, chemical compatibility, state law, or universal maintenance frequency. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
   11: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student has completed the course. This is about execution now. Reference what you know about this student specifically — their background, their goals, what they shared at the start — and connect everything to how they will now deliver head spa and scalp wellness services. Knowing and doing are not the same. Repetition makes it real. 3-5 sentences. No bullet points.'
 };
 
@@ -8061,7 +8196,7 @@ const MODULE_QUICK_PROMPTS = {
   7: ['What should I actually prioritize when choosing a bed?', 'How do I know if a client\'s positioning needs adjusting mid-service?', 'What\'s the one prep step I should never skip?'],
   8: ['How do I keep transitions smooth?', 'How do I adapt a step without breaking the flow?', 'What should I say when a client asks what I\'m doing?'],
   9: ['How do I know what my service really costs?', 'How do I make my menu easier to understand?', 'What do I say when someone thinks the price is high?'],
-  10: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
+  10: ['What needs cleaning vs. disinfection?', 'How do I build a reset that holds up when I\'m behind?', 'What should I document after a client concern?'],
   11: ['How do I maintain quality consistently?', 'What should I focus on in my first real services?', 'How do I know if I am improving?']
 };
 
@@ -8961,7 +9096,7 @@ function m8cpKey(e, id) {
 //    only the moduleId passed into the state pipeline changes, since that
 //    is what determines which progress slot the result is written to. ──
 function submitM9CP(id) {
-  submitCheckpoint(10, id, M9.system, M9.questions[id], 'Cadence couldn\'t review your answer. Check your connection and try again.');
+  submitCheckpoint(10, id, M9.systems[id], M9.questions[id], 'Cadence couldn\'t review your sanitation response. Check your connection and try again.');
 }
 function m9cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM9CP(id); }
@@ -9202,35 +9337,69 @@ function m8ProtectReset(scenario) {
 }
 
 // ══════════════════════════════════════════════════════
-// MODULE 9 INTERACTIVE — Reset timer sequence
+// MODULE 10 INTERACTIVE — Reset Under Pressure
 // ══════════════════════════════════════════════════════
 
-let _resetTimerInterval = null;
-let _resetCurrentStep = -1;
-
-function startResetTimer() {
-  if (_resetTimerInterval) return;
-  _resetCurrentStep = 0;
-  advanceResetStep();
-  _resetTimerInterval = setInterval(() => {
-    advanceResetStep();
-  }, 2200);
-}
-
-function advanceResetStep() {
-  const steps = document.querySelectorAll('.rst-step');
-  if (!steps.length) return;
-  steps.forEach(s => s.classList.remove('active'));
-  if (_resetCurrentStep < steps.length) {
-    steps[_resetCurrentStep].classList.add('active');
-    steps[_resetCurrentStep].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    _resetCurrentStep++;
-  } else {
-    clearInterval(_resetTimerInterval);
-    _resetTimerInterval = null;
-    const comp = document.getElementById('resetComplete');
-    if (comp) comp.style.display = 'block';
+// Reset Under Pressure — ungraded interaction (Module 10). Reuses the
+// established m5Decide/m9Cwp single-select-with-per-option-feedback
+// pattern: state applies only to the selected option, the strongest
+// response is never pre-highlighted, feedback is text (not color-only),
+// and nothing here touches APP_STATE — no persistence, no completion gate.
+const M10_RUP_ANSWER = {
+  strongest: 0,
+  feedback: {
+    0: 'This preserves the required process. The client can wait a few minutes, you can keep working on other reset tasks in parallel, or you can use an already-clean, ready alternative if one exists — the process finishes on its own schedule, not the client\'s.',
+    1: 'Wiping it dry because it looks clean skips the actual requirement. Visual cleanliness is not the same as a completed disinfectant contact time or equipment process.',
+    2: 'Skipping the remaining contact time defeats the reason the process exists. The client arriving early doesn\'t change what the product or equipment actually requires.',
+    3: 'An unprocessed backup hasn\'t gone through cleaning or disinfection yet — using it introduces exactly the risk the reset process exists to prevent.',
+    4: 'Starting the service before the process finishes and catching up afterward reverses the order that keeps the room and tools safe for the next step. The process comes first.'
   }
+};
+function m10RupSelect(choice, btn) {
+  const block = getActiveElementById('m10RupDecision');
+  const feedback = getActiveElementById('m10RupFeedback');
+  if (!block || !feedback) return;
+  const opts = block.querySelectorAll('.bq-opt');
+
+  // Reset every option to neutral first — only the option the student just
+  // selected receives a state. The strongest response is never revealed on
+  // an unselected option; it only turns green when the student picks it.
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  const isStrongest = choice === M10_RUP_ANSWER.strongest;
+  const tag = document.createElement('span');
+  tag.className = 'bq-tag';
+  if (isStrongest) {
+    btn.classList.add('correct');
+    tag.textContent = 'Strongest response';
+  } else {
+    btn.classList.add('wrong');
+    tag.textContent = 'Worth reconsidering';
+  }
+  btn.appendChild(tag);
+
+  feedback.style.display = 'block';
+  feedback.textContent = M10_RUP_ANSWER.feedback[choice];
+}
+function m10RupReset() {
+  const block = getActiveElementById('m10RupDecision');
+  const feedback = getActiveElementById('m10RupFeedback');
+  if (!block || !feedback) return;
+  block.querySelectorAll('.bq-opt').forEach(o => {
+    o.setAttribute('aria-pressed', 'false');
+    o.classList.remove('selected', 'correct', 'wrong');
+    const tag = o.querySelector('.bq-tag');
+    if (tag) tag.remove();
+  });
+  feedback.style.display = 'none';
+  feedback.textContent = '';
 }
 
 // ══════════════════════════════════════════════════════

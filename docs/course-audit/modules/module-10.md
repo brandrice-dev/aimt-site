@@ -7,9 +7,9 @@
 **Source reviewed:** `module-10-source.md`
 **External audit:** completed and approved — this document converts that audit into the controlling specification
 **Audit date:** August 25, 2026
-**Implementation:** **Not begun.** This is a documentation-only specification task.
-**Status:** **Approved for controlled implementation**
-**Production source of truth:** `headspa-mastery.html` (unchanged by this task)
+**Implementation:** Implemented in `headspa-mastery.html` August 25, 2026 (see `implementation-log.md` Step 79). Static validation and Review Mode desktop/phone browser QA complete.
+**Status:** **Implemented — awaiting manual QA**
+**Production source of truth:** `headspa-mastery.html` (implemented per this specification)
 
 This document is the approved content and technical authority for a future Module 10 implementation task. It does **not** itself authorize implementation, does not touch any production file, and does not begin the technical work it describes. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 10 — step 5 (implementation) is the next, separate gate.
 
