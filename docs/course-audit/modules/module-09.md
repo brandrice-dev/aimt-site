@@ -574,6 +574,8 @@ The student should experience the difference between *"What are other people cha
 
 This resource is not created or linked by this specification. Production remains deferred, matching the existing Module 5/6 downloadable-decision precedent and the governing downloadable-resource policy (selective, not mandatory).
 
+**Update, August 25, 2026 — resource patch installed.** The owner supplied a distinct, ready-to-ship PDF, the **Head Spa Enhancement Strategy Guide** (`assets/images/course/module-09/AIMT-Head-Spa-Enhancement-Strategy-Guide.pdf`), and this has now been installed as Module 9's single in-lesson downloadable, placed directly with Section 9.7 via a compact `.info-card`/`.format-card` link (the same component already used for Module 8's Printable Service Maps). **This is not the fillable Enhancement Menu & Positioning Guide described above** — that worksheet remains explicitly deferred, reserved for the future Student Dashboard Resources Library, and was not created, populated, or linked by this patch. Module 9 has exactly one downloadable resource.
+
 ---
 
 ## Guided completion structure
