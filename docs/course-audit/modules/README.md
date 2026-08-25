@@ -596,7 +596,28 @@ Notable findings recorded in the extraction (not fixed at extraction time): Modu
 
 **Module 8 is now source-extracted. It is NOT externally audited, NOT implemented, NOT manually QA'd, and NOT approved for release.** No production file (`headspa-mastery.html`, `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`) was modified by this task. No video, image, or other media was installed. No video player was removed or redesigned. The Service Timer was not installed, modified, or audited. Module 9 was not begun. No merge or deployment occurred.
 
-Modules 9–11 have not been extracted yet. Source files for those modules
-will be added in later audit passes. Module 12 (Final Exam) has not been
+## Module 9 — Checkout, Client Closing & Pricing Strategy
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 9** — new curriculum identity; distinct from the technical module currently numbered 9 in code (Sanitation) |
+| Primary technical source | Technical Module 10 (Pricing Strategy), `headspa-mastery.html:6677–6862` — see "Locked future module order" in `00-aimt-current-course-status.md` for the full technical/curriculum numbering conflict |
+| Source file | [`module-09-source.md`](module-09-source.md) — full verbatim extraction, reconciled against repository truth |
+| Approved specification file | [`module-09.md`](module-09.md) — drafted from the approved external audit; **not yet reviewed/accepted as implementation authority** |
+| Checkpoint IDs | `m10cp1`, `m10cp2` — **preserved unrenamed** from technical Module 10; `m9cp1`/`m9cp2` already belong to Sanitation and must not be reused |
+| Wrapper ID | Unresolved pending the technical reorder — see `module-09.md`'s "Critical technical requirement" |
+| **Status** | **Externally audited, approved specification drafted. NOT implemented, NOT manually QA'd, NOT approved for release.** |
+
+**Source extraction reconciled for external audit (August 24, 2026).** The existing `module-09-source.md` (from an earlier task) was cross-checked directly against `headspa-mastery.html`/`assets/js/headspa-state.js` and found to need reconciliation, not a rewrite. Closed gaps: cited Known Risk #8 (the pricing calculator mislabeling a margin-loaded price as "break even," `headspa-mastery.html:9030–9044`) with exact code evidence for the first time; found and flagged a second, distinct old-course-name defect in the checkpoint rubrics themselves (`M9.system`/`M10.system`, "instructor of HeadSpa Mastery") separate from the already-known Cadence-persona defect; found and flagged a foundation-consistency accessibility regression (Module 9/10's checkpoints use the pre-correction `cp-response` class with no `aria-live`/`aria-label`, unlike Module 8's corrected `cp-res` pattern); corrected a `MODULE_COUNT`/`TOTAL_MODULES` naming inaccuracy. See `implementation-log.md` Step 70.
+
+**Approved specification created from external audit (August 24, 2026).** The owner's external audit approved the source for "controlled specification creation," directing that the existing business-content foundation (real costs, full practitioner time, cost-first pricing, competitor pricing as context, the calculator) be preserved while its sales-psychology layer (the universal `$120–150/hr` benchmark, "three tiers, no more," FOMO premium-framing, guaranteed-conversion language, the break-even mislabel, fear-as-primary-underpricing-cause) is removed and replaced with financial clarity, intentional client closing, and client autonomy. `module-09.md` now carries the full approved specification: 11 outcomes; an 11-part section structure (treatment-close-to-checkout, a new "Close Without Pressure" ungraded interaction, cost framework, a new margin-vs-markup teaching section, the corrected Cost Base → Target Price calculator, market context, menu design, enhancements, `m10cp1`, price feedback, underpricing causes, `m10cp2`); preserved, unrenamed checkpoint IDs; corrected Cadence behavior; a recommended downloadable (Head Spa Enhancement Menu & Positioning Guide); and 24 acceptance criteria. The specification's highest-risk section, "Critical technical requirement," documents — grounded in direct inspection of `assets/js/headspa-state.js`'s `mod.unlocked = i === 0 || this.isModuleComplete(i - 1)` sequential-unlock logic and the `MODULE_CHECKPOINTS`/per-slot `progress[String(id)]` persisted-state schema — that the module reorder is a genuine content/index swap requiring an explicit, reviewed migration plan, not a label-only rename, and blocks any reorder implementation until that plan is designed and accepted. See `implementation-log.md` Step 71.
+
+**`module-09.md` is a drafted specification, not yet reviewed or accepted as implementation authority.** Per the governing module lifecycle, review/acceptance and implementation are separate, later steps. No production file was modified by either task. Module 9 production implementation, the technical reorder, Module 10's (Sanitation) own external audit, and any Module 11 (AI / Modern Practice Tools) curriculum work were all explicitly not begun. No merge or deployment occurred.
+
+Modules 10–11 have not been extracted yet. Source files for those modules
+will be added in later audit passes — Module 10's own audit is additionally
+gated on Module 9's technical reorder being resolved first, since Sanitation's
+curriculum content is expected to relocate intact into the Module 10 slot as
+a structural dependency of that reorder. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.
