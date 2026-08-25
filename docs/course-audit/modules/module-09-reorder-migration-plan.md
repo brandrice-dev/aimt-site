@@ -2,11 +2,13 @@
 
 **Course:** AIMT Head Spa Certification Course
 **Scope:** technical slot 9 ↔ slot 10 content/index swap required by `module-09.md`'s "Critical technical requirement"
-**Status:** **Proposed migration plan — awaiting external review/approval.** This document is a technical implementation plan. It is **not** permission to implement, and no production file was modified to produce it.
+**Status:** **Approved migration design candidate — ready for final external approval.** The prior review pass found two concrete omissions (see "Correction history" below); both have been resolved without expanding the migration's scope beyond one version-gated migration, one 9↔10 whole-object state swap, explicit named-field pointer remaps, and narrow quarantine support (classified **SIMPLE/CONTAINED**). This document is still **not** permission to implement — it remains a technical design document awaiting explicit sign-off.
 **Depends on:** `docs/course-audit/modules/module-09.md` (curriculum specification, approved in substance)
 **Governs:** step 2 of `module-09.md`'s "Critical technical requirement" → "Required sequence" — this plan itself must clear step 3 (external review and explicit approval) before step 4 (implementation) may begin.
 
-This plan is grounded entirely in direct inspection of the current repository — `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`, and the relevant data maps in `headspa-mastery.html` — performed during this task. No production file was edited to produce it.
+**Correction history:** an initial external review of this plan found it approvable after two narrow corrections: (1) the originally proposed `_migrationQuarantine` state-object field would have been silently discarded by `sanitizeState()`'s fixed reconstruction (§2.8) and never actually persisted — corrected to a separate `localStorage` key (§6.1); (2) two persisted numeric "which module is the student in" pointers (`guide.currentModule`, `resume.moduleId`) were omitted from the swap — corrected with an explicit, narrowly-scoped `9 → 10` / `10 → 9` remap (§3.2). Both corrections are reflected throughout this document, including the pseudocode (§7) and test matrix (§8).
+
+This plan is grounded entirely in direct inspection of the current repository — `assets/js/headspa-state.js`, `assets/js/aimt-progress-sync.js`, and the relevant data maps in `headspa-mastery.html` — performed during this task and the prior one. No production file was edited to produce it.
 
 ---
 
@@ -78,6 +80,31 @@ Direct inspection surfaced two additional places, beyond `MODULE_CHECKPOINTS` an
 
 **Why this matters for the migration plan specifically, even though it is an implementation-task concern:** the *pseudocode and test matrix below only need to move already-computed `notableAnswers` entries correctly* (see §5, §7) — those entries' `tags`/`summary` were computed at capture time from the answer's actual content, and remain valid regardless of which slot number is later attached to them. This migration does not need to recompute tags. But the **implementation task** must still update `MODULE_MEMORY_TAGS[9]`/`[10]` and the `moduleId === 9`/`=== 10` branches inside `getCheckpointMemoryTags`/`getCheckpointMemorySummary` so that *future* checkpoint submissions (post-reorder) are tagged correctly — this expands the known code-change surface for the eventual implementation beyond what `module-09.md`'s "Critical technical requirement" originally named (`MODULE_CHECKPOINTS`, `MODULE_TITLES`). Recorded here so it is not lost before implementation begins.
 
+### 2.8 `sanitizeState()` is a fixed reconstruction, not a passthrough — confirmed by direct code reading (governs §6.1's correction)
+
+Directly quoted, `sanitizeState(raw)` (`headspa-state.js:451–487`):
+
+```js
+function sanitizeState(raw) {
+  const defaults = createDefaults();
+  if (!raw || typeof raw !== 'object') return defaults;
+
+  const state = {
+    schemaVersion: SCHEMA_VERSION,
+    student: { /* ...five explicit fields... */ },
+    progress: sanitizeProgress(raw.progress),
+    guide: { currentModule: /* ... */ },
+    resume: { /* ...four explicit fields... */ }
+  };
+
+  return state;
+}
+```
+
+**This function returns a hand-built object literal containing exactly five top-level keys — `schemaVersion`, `student`, `progress`, `guide`, `resume` — and nothing else.** It does not spread `...raw`, does not copy any unrecognized top-level property, and does not preserve any field outside this fixed shape. `sanitizeCadenceMemory()` (`headspa-state.js:257–274`) and `sanitizeProgress()` (`headspa-state.js:390–449`) both follow the identical pattern one level down: every sanitize function in this file reconstructs a known, fixed shape field-by-field and silently drops anything not explicitly named.
+
+**Direct consequence, confirmed by this reading, not assumed:** if a migration step were to write a new top-level property (e.g., `rawParsedState._migrationQuarantine = {...}`) onto the object passed into `sanitizeState()`, that property would **not** appear in `sanitizeState()`'s return value — it would be silently discarded in the same `load()` call that created it, before `this.data` is ever assigned and long before `save()` ever writes anything to `localStorage`. **The original plan's `_migrationQuarantine`-as-a-state-field design, as written in the version of this document reviewed previously, does not actually survive the pipeline it depends on.** This is corrected in §6.1 below.
+
 ---
 
 ## 3. State shape inventory — `progress["9"]` and `progress["10"]`
@@ -104,6 +131,27 @@ Not part of the per-module `progress` object, but keyed to a checkpoint and ther
 - `checkpointId` — **do not change.** Checkpoint IDs are not renamed.
 - `summary` / `tags` — **do not recompute.** These describe the actual answer content (via `getCheckpointMemoryTags`/`getCheckpointMemorySummary`, run once at capture time) and remain valid regardless of which slot number is later attached — see §2.7.
 - `moduleId` — **must be corrected** to the new slot number matching its `checkpointId` (an entry with `checkpointId: 'm9cp1'` gets `moduleId: 10`; an entry with `checkpointId: 'm10cp1'` gets `moduleId: 9`), since this field is surfaced directly to Cadence as display text (`"Module " + item.moduleId + " — " + item.summary"`, `headspa-state.js:1003`) and would otherwise show the wrong module number to the student-facing AI after the reorder.
+
+### 3.2 Numeric navigation/content-identity pointers — corrected, previously incomplete
+
+**This subsection was added during external review.** The original plan correctly swapped `progress["9"]`/`["10"]` and corrected `notableAnswers[].moduleId`, but omitted two other persisted numeric fields that also mean "which module the student is currently in" and are therefore subject to the identical identity confusion the reorder must avoid: a student who was last known to be in old Module 9 (Sanitation) must resume into *new* Module 10 (Sanitation) — not new Module 9 (Pricing), which the raw number `9` would otherwise point to.
+
+Verified directly against `sanitizeState()` (`headspa-state.js:451–487`, quoted in §2.8) — this is the complete, exhaustive top-level shape; there are no other top-level fields to check beyond `schemaVersion`, `student`, `progress`, `guide`, `resume`.
+
+| Field path | Current use, verified | Classification | Migration rule |
+|---|---|---|---|
+| `data.guide.currentModule` (`headspa-state.js:200–202` default; `469–474` sanitize) | The module Cadence's guide context currently treats as active. Set by `setCurrentModule(moduleId)` (`headspa-state.js:767–781`) whenever a student opens a module; read wherever the UI needs "what module is the student looking at right now." | **Content-identity pointer — remaps** | `9 → 10`, `10 → 9`, every other value (0–8, 11) unchanged. |
+| `data.resume.moduleId` (`headspa-state.js:204–206` default; `475–483` sanitize) | Which module a returning student resumes into. Set alongside `guide.currentModule` in `setCurrentModule()`, and independently in `setCheckpointResult()` (`headspa-state.js:735`) and `setLessonScroll()` (`headspa-state.js:796`) — every place that touches `resume.moduleId` writes the numeric module ID directly. | **Content-identity pointer — remaps** | `9 → 10`, `10 → 9`, every other value (0–8, 11) unchanged. |
+| `student.cadenceMemory.notableAnswers[].moduleId` | Already covered in §3.1 — remapped by matching each entry's `checkpointId` prefix, not by a blind numeric swap (a different, checkpoint-anchored mechanism, but the same underlying goal). | **Content-identity pointer — remaps (already specified)** | See §3.1 — driven by `checkpointId`, not by comparing the stored number directly. |
+
+**Fields checked and explicitly ruled out — do not swap, to avoid an over-broad "swap every 9 or 10" mistake:**
+
+- `progress[id].checkpointMeta[cpId].attempts` (an integer attempt counter) — could coincidentally equal `9` or `10` for a student who retried a checkpoint many times. This is **not** a module identity — it is a per-checkpoint counter, entirely unrelated to which slot the checkpoint occupies, and must never be touched by pointer-remap logic. (It already travels correctly as an untouched sub-field of the whole-object swap in §3.)
+- `progress[id].videoChapters.current` (0-based chapter index, only meaningful for Module 8, range 0–8) — represents "which video chapter within this module," not "which module." Its value space (0–8) is unrelated to slot numbers 9/10, and it already travels correctly with its parent whole-object swap; it must never be independently remapped.
+- `student.cadenceMemory.notableAnswers[].updatedAt` / any other timestamp (epoch milliseconds) — could numerically be anything; obviously not a module pointer, listed only to be explicit that timestamp fields are never in scope for this correction.
+- `resume.scrollY` (pixel offset) — could coincidentally be `9` or `10` for a barely-scrolled page. Not a module identity.
+
+**Rule, stated once, precisely:** the 9↔10 remap applies **only** to the two named fields above (`guide.currentModule`, `resume.moduleId`) plus the already-specified `notableAnswers[].moduleId` correction — never to any other numeric value anywhere in the state object merely because it happens to equal 9 or 10.
 
 ---
 
@@ -138,7 +186,7 @@ The migration must classify incoming state into exactly one of five categories b
 2. **Already migrated** — `schemaVersion >= 3`. → no-op; proceed normally. This is what makes the migration safe to run on every load without re-applying it.
 3. **Fresh/new** — no prior `progress` data at all (a brand-new student, i.e. `raw` is `null` or has no meaningful `progress` object). → skip the migration entirely and stamp `schemaVersion = 3` directly; there is nothing to move. This must be checked **before** category 1's swap logic runs, so a fresh student is never routed through swap code that assumes pre-existing data.
 4. **Partially populated** — `schemaVersion < 3`, and `progress["9"]`/`progress["10"]` exist but one or both have no meaningful `checkpointMeta` (e.g., a student who opened Sanitation but never attempted a checkpoint, and never touched Pricing at all). → still run the migration (§6) — an empty/default module-progress object swaps just as safely as a populated one; there is no special case required here, only a specific outcome to verify (see §7, "Partial Sanitation checkpoint state" / "Partial Pricing checkpoint state" test cases).
-5. **Malformed/unknown** — `progress["9"]` or `progress["10"]` exists but is not a well-formed object matching the known shape (e.g., corrupted JSON survived `JSON.parse` as some other type, or a future unrelated bug produced garbage). → **fail closed** (§6.5) — do not guess a mapping; do not swap; log and leave the slot in the safest available state.
+5. **Malformed/unknown** — `progress["9"]` or `progress["10"]` exists but is not a well-formed object matching the known shape (e.g., corrupted JSON survived `JSON.parse` as some other type, or a future unrelated bug produced garbage). → **fail closed** (§6.1) — do not guess a mapping; do not swap; log and leave the slot in the safest available state.
 
 ### 5.3 Why a second page load cannot swap the modules back again
 
@@ -150,15 +198,27 @@ Because `SCHEMA_VERSION` is bumped to `3` **as part of the same migration write*
 
 **Overriding rule, verbatim from the governing instruction: false incompletion is preferable to false completion.** But preserve demonstrated competency whenever the state provides enough evidence to map it safely — do not discard real evidence merely because it is convenient not to reason about it.
 
-### 6.1 What "fail closed" means concretely here
+### 6.1 What "fail closed" means concretely here — **corrected quarantine mechanism**
 
-If the migration encounters category 5 (malformed/unknown) for either slot 9 or slot 10:
+**This subsection was corrected during external review.** The originally proposed design — writing quarantined data onto a new `_migrationQuarantine` property of the raw state object — was found not to survive the pipeline it depends on (§2.8: `sanitizeState()` reconstructs a fixed five-key shape and silently drops any unrecognized top-level property, in the same `load()` call, before `this.data` is ever assigned). That design is replaced below with a mechanism verified to actually persist.
 
-- **Do not** mark either slot `complete` as a result of the migration — this is automatic in this design anyway, since `complete` is always recomputed from `checkpointMeta` (§2.4), never written directly by the migration.
-- **Do not** silently unlock slot 10 (or any downstream slot) based on an assumption about slot 9's state — again automatic, since `unlocked` is always recomputed from the *previous* slot's `isModuleComplete()`, which itself derives from `checkpointMeta`.
-- **Do not discard the malformed data.** Preserve it, unmapped, under a clearly-namespaced side location (e.g., `data._migrationQuarantine = { slot9: <raw>, slot10: <raw>, migratedAt: null }`) rather than deleting it — this keeps the door open for manual/future recovery without ever presenting it as valid progress in the meantime. A quarantined slot is treated as though it had no `checkpointMeta` at all for completion purposes (i.e., it behaves like a fresh, empty module-progress object going forward) until someone with more context resolves it.
-- **Do not reset the whole course** merely because slots 9/10 are ambiguous — Modules 0–8's data is untouched by this migration entirely (§7, regression case) and must not be touched as a side effect of handling an ambiguous slot 9/10.
-- Record the fact that a malformed-state fallback occurred (e.g., a console warning in the pattern already used elsewhere in this file, plus the quarantine object above) so it is discoverable, not silent.
+**Corrected mechanism: a separate `localStorage` key, entirely outside the sanitized `levo_app` blob — following the codebase's own existing precedent.** This repository already has exactly this pattern: `LEGACY_PROFILE_KEY = 'levo4_profile'` (`headspa-state.js:3`) is a second, adjacent `localStorage` key holding data that `_migrate()` reads once, independent of `sanitizeState()`'s fixed shape. The quarantine mechanism reuses this same architecture rather than inventing a new one.
+
+- **Exact key name:** `aimt_module9_reorder_quarantine` (matching this codebase's existing `aimt_`-prefixed key-naming convention, e.g. `REVIEW_MODE_SESSION_KEY = 'aimt_review_mode'`, `headspa-state.js:17`).
+- **Exact shape (a JSON string via `localStorage.setItem`):** `{ slot9: <raw slot 9 value, verbatim, whatever it was>, slot10: <raw slot 10 value, verbatim>, quarantinedAt: <timestamp> }`.
+- **When populated:** only inside the malformed-state fallback branch (§5.2 category 5) — the overwhelming majority of students never write this key at all.
+- **How it is written:** a direct `localStorage.setItem('aimt_module9_reorder_quarantine', JSON.stringify(...))` call, performed as its own explicit step, **entirely independent of `sanitizeState()`/`this.data`/`save()`.** Because it never enters the `levo_app` object or the sanitize pipeline, it is not reconstructed, filtered, or dropped by anything described in §2.8 — it survives by never being subject to that pipeline in the first place, not by being added to a schema that would need to recognize it.
+- **How long it remains:** indefinitely. No automatic expiry or deletion is proposed — inventing a TTL/cleanup mechanism for what should be an exceedingly rare case (corrupted JSON that survived `JSON.parse` as a non-object shape) would be unnecessary complexity. It may be manually inspected and cleared once resolved, or removed by a later, separate cleanup task. This mirrors `LEGACY_PROFILE_KEY`'s own precedent: `_migrate()` never deletes `levo4_profile` after reading it either.
+- **Never interpreted as valid progress, by construction, not by convention:** no code path that computes `complete`, `unlocked`, `checkpoints`, `getOverallPct()`, or any other completion/progress value reads any `localStorage` key other than `levo_app` (and, once, `levo4_profile` for the unrelated intro-field backfill). Since `aimt_module9_reorder_quarantine` lives at a different key entirely, it is structurally impossible for it to be read into any completion/unlock calculation — there is no filtering rule to get wrong, because there is no read path to it at all from that logic.
+- **Excluded from completion/unlock calculations:** see above — enforced by the absence of any read path, not by an explicit exclusion check that could be bypassed or forgotten.
+
+Given this correction, the fail-closed behavior for a malformed slot is:
+
+- **Do not** mark either slot `complete` as a result of the migration — automatic, since `complete` is always recomputed from `checkpointMeta` (§2.4), never written directly by the migration.
+- **Do not** silently unlock slot 10 (or any downstream slot) based on an assumption about slot 9's state — automatic, since `unlocked` is always recomputed from the *previous* slot's `isModuleComplete()`, which itself derives from `checkpointMeta`.
+- **Do not discard the malformed data.** Write it verbatim to `aimt_module9_reorder_quarantine` (above) before replacing `rawParsedState.progress["9"]`/`["10"]` with safe empty defaults — this keeps the door open for manual/future recovery without ever presenting it as valid progress in the meantime. A quarantined slot is treated as though it had no `checkpointMeta` at all for completion purposes (i.e., it behaves like a fresh, empty module-progress object going forward) until someone with more context resolves it.
+- **Do not reset the whole course** merely because slots 9/10 are ambiguous — Modules 0–8's data is untouched by this migration entirely (§8, regression case) and must not be touched as a side effect of handling an ambiguous slot 9/10.
+- Record the fact that a malformed-state fallback occurred (e.g., a console warning in the pattern already used elsewhere in this file) so it is discoverable, not silent — the quarantine key's mere existence is itself a discoverable signal, but a warning at the moment of detection is still worthwhile.
 
 ### 6.2 Safest outcome, stated as a single sentence
 
@@ -168,17 +228,20 @@ When in doubt, a slot ends up looking exactly like a **fresh, never-visited modu
 
 ## 7. Migration algorithm — pseudocode
 
-**Not implemented by this plan.** Provided to make the design concrete and reviewable.
+**Not implemented by this plan.** Provided to make the design concrete and reviewable. **Revised to incorporate both corrections** from this review pass: the quarantine write now targets a separate `localStorage` key (§6.1) instead of a dropped state-object property, and two content-identity pointers (§3.2) are now explicitly remapped alongside `notableAnswers`.
 
 ```
 function migrateModule9ReorderIfNeeded(rawParsedState):
-    # Step 1–2: detect current state/schema, determine whether migration is required
+    # Step 1: detect raw schema version BEFORE sanitization
+    # (sanitizeState() would otherwise unconditionally overwrite it — §2.3)
     if rawParsedState is null or has no meaningful progress object:
         # Category 3: fresh/new student — nothing to migrate
         stamp schemaVersion = 3 on the object that will be returned
         return  # normal sanitize/defaults path continues unchanged
 
     version = rawParsedState.schemaVersion if present else 0
+
+    # Step 2: classify fresh / old / migrated / malformed
     if version >= 3:
         # Category 2: already migrated — hard no-op
         return
@@ -188,33 +251,34 @@ function migrateModule9ReorderIfNeeded(rawParsedState):
 
     if slot9 is not a well-formed module-progress-shaped object
        or slot10 is not a well-formed module-progress-shaped object:
-        # Category 5: malformed/unknown — fail closed, do not guess
-        quarantine = { slot9: slot9, slot10: slot10, migratedAt: null }
-        rawParsedState._migrationQuarantine = quarantine
+        # Category 5: malformed/unknown — fail closed, do not guess.
+        # CORRECTED (§6.1): write quarantine to its OWN localStorage key,
+        # never as a property of rawParsedState — a property added here
+        # would be silently dropped by sanitizeState() (§2.8) before
+        # save() ever runs, and would never actually persist.
+        localStorage.setItem(
+            'aimt_module9_reorder_quarantine',
+            JSON.stringify({ slot9: slot9, slot10: slot10, quarantinedAt: now() })
+        )
         rawParsedState.progress["9"] = createModuleProgress(9)   # safe, empty default
         rawParsedState.progress["10"] = createModuleProgress(10) # safe, empty default
         stamp schemaVersion = 3  # still mark handled — see note below
-        log a warning identifying the quarantine
+        log a warning identifying the quarantine key
         return
 
     # Step 3: preserve a safe copy/reference of pre-migration slot 9 and 10 state
     preSwapSlot9 = deepClone(slot9)
     preSwapSlot10 = deepClone(slot10)
 
-    # Step 4–5: map competency/state to its new slot by physically swapping
-    # the whole per-slot objects (see §3 — checkpointMeta + its consistent
-    # engagement metadata travel together; complete/unlocked/completedAt/
-    # checkpoints are NOT hand-copied here because they self-correct below)
+    # Step 4: swap the whole per-slot module-progress objects (see §3 —
+    # checkpointMeta + its consistent engagement metadata travel together;
+    # complete/unlocked/completedAt/checkpoints are NOT hand-copied here
+    # because they self-correct in step 10 below)
     rawParsedState.progress["9"] = preSwapSlot10   # Pricing's data now under slot 9
     rawParsedState.progress["10"] = preSwapSlot9   # Sanitation's data now under slot 10
 
-    # Step 6: preserve semantic checkpoint metadata with its competency —
-    # already satisfied by the whole-object swap above, since checkpointMeta
-    # is keyed by checkpoint ID (m9cp1/m10cp1, unrenamed) inside each object,
-    # not by the slot number it lives under.
-
-    # Also correct notableAnswers[].moduleId to match each entry's
-    # checkpointId's NEW slot (see §3.1) — tags/summary are untouched.
+    # Step 5: correct notableAnswers[].moduleId to match each entry's
+    # checkpointId's NEW slot (§3.1) — tags/summary are untouched.
     for entry in rawParsedState.student.cadenceMemory.notableAnswers:
         if entry.checkpointId starts with "m9cp":
             entry.moduleId = 10
@@ -222,41 +286,63 @@ function migrateModule9ReorderIfNeeded(rawParsedState):
             entry.moduleId = 9
         # any other checkpointId (other modules) is left untouched
 
-    # Step 7: update the migration/version marker
+    # Step 6: correct verified resume/current-module pointers — CORRECTED,
+    # newly added (§3.2). Applies ONLY to these two named fields, never to
+    # any other number that happens to equal 9 or 10 (see §3.2's explicit
+    # ruled-out list — attempts counters, video-chapter indices, scrollY,
+    # timestamps are never touched here).
+    if rawParsedState.guide and rawParsedState.guide.currentModule == 9:
+        rawParsedState.guide.currentModule = 10
+    else if rawParsedState.guide and rawParsedState.guide.currentModule == 10:
+        rawParsedState.guide.currentModule = 9
+    # else: 0-8, 11, or absent — unchanged
+
+    if rawParsedState.resume and rawParsedState.resume.moduleId == 9:
+        rawParsedState.resume.moduleId = 10
+    else if rawParsedState.resume and rawParsedState.resume.moduleId == 10:
+        rawParsedState.resume.moduleId = 9
+    # else: 0-8, 11, or absent — unchanged
+
+    # Step 7: preserve malformed evidence through a quarantine mechanism
+    # that survives sanitization — N/A on this branch (only the malformed
+    # branch above writes quarantine data); listed here only to keep the
+    # step numbering aligned with the governing instruction's 12-step list.
+
+    # Step 8: update the migration/version marker
     rawParsedState.schemaVersion = 3
 
-    # Step 8–9: recompute derived completion/unlock state using the
-    # post-reorder MODULE_CHECKPOINTS (production code, already updated by
-    # the implementation task by the time this runs in production) —
-    # NOT done here explicitly, because sanitizeState()/_syncDerivedState()
-    # unconditionally perform this recomputation immediately after this
-    # function returns, as part of the existing load() pipeline. This
-    # function must run BEFORE sanitizeState()/_syncDerivedState(), not
-    # duplicate their work.
+    # Step 9: allow normal sanitization to proceed — do nothing further
+    # here; return control to the existing load() pipeline, which calls
+    # sanitizeState(rawParsedState) immediately next.
 
     return  # control returns to the existing load() pipeline
 
 
-# Step 10: persist through the existing approved persistence path
-# — no new persistence code. The existing load() → ...→ save() sequence
-# (headspa-state.js:501–514) already writes the migrated, derived-state
-# result back to localStorage via the unmodified save() path, which in
-# turn triggers the unmodified aimt-progress-sync.js push-on-save
-# behavior for authenticated students. No separate remote-write step
-# is introduced by this migration.
+# Step 10: recompute derived completion/checkpoint/unlock state.
+# NOT done explicitly by this function — sanitizeState()/_syncDerivedState()
+# unconditionally perform this recomputation immediately after this function
+# returns, as part of the existing, unmodified load() pipeline. This
+# function must run BEFORE sanitizeState()/_syncDerivedState(), not
+# duplicate their work.
 
-# Step 11: handle failure without creating false completion
-# — covered by §6: any detection failure routes through the malformed-
-# state branch above, which never marks a slot complete and never
-# unlocks anything beyond what the (untouched) sequential unlock rule
-# already permits from confirmed-safe data.
+# Step 11: persist through the existing approved persistence path
+# — no new persistence code for the progress/pointer swap. The existing
+# load() → ...→ save() sequence (headspa-state.js:501–514) already writes
+# the migrated, derived-state result back to localStorage via the
+# unmodified save() path, which in turn triggers the unmodified
+# aimt-progress-sync.js push-on-save behavior for authenticated students.
+# No separate remote-write step is introduced by this migration. (The
+# quarantine key from step 2's malformed branch is written directly via
+# its own localStorage.setItem call, independent of this path — see §6.1.)
 
 # Step 12: verify idempotency on subsequent load
 # — covered by §5.3: schemaVersion >= 3 short-circuits to a no-op on
-# every subsequent call, by construction.
+# every subsequent call, by construction. The quarantine key, once
+# written, is never re-written on a subsequent load either, since the
+# malformed-state branch is only reachable when schemaVersion < 3.
 ```
 
-**Where this runs in the existing pipeline:** immediately before `sanitizeState(parsed)` is called inside `load()` (`headspa-state.js:501–514`), operating on the raw parsed object, not the already-sanitized one — because `sanitizeState()` today unconditionally overwrites `schemaVersion` and reconstructs `progress` field-by-field (§2.3, §3), so migration must happen on the raw shape first, then flow into the existing, unmodified sanitize → `_migrate()` → `_syncDerivedState()` sequence, which already does the recomputation this plan deliberately does not duplicate.
+**Where this runs in the existing pipeline:** immediately before `sanitizeState(parsed)` is called inside `load()` (`headspa-state.js:501–514`), operating on the raw parsed object, not the already-sanitized one — because `sanitizeState()` today unconditionally overwrites `schemaVersion` and reconstructs `progress`/the entire top-level shape field-by-field (§2.3, §2.8, §3), so migration must happen on the raw shape first, then flow into the existing, unmodified sanitize → `_migrate()` → `_syncDerivedState()` sequence, which already does the recomputation this plan deliberately does not duplicate.
 
 ---
 
@@ -275,24 +361,28 @@ Deterministic fixtures the later implementation must pass before this migration 
 | 7 | Partial Pricing checkpoint state | Old slot 10: `m10cp1` passed, `m10cp2` in `retry` status with feedback/attempts recorded | New slot 9: `m10cp1` passed, `m10cp2` still `retry` with its exact feedback/attempts/answer text intact — state follows Pricing into slot 9 exactly. |
 | 8 | Mixed pass/fail metadata | Old slot 9: `m9cp1` passed (attempts: 2, with feedback text and a specific `updatedAt`); old slot 10: `m10cp2` `retry` (attempts: 1) | Every field of every `checkpointMeta` entry (`status`, `feedback`, `answer`, `attempts`, `updatedAt`) is byte-identical after the swap, just filed under the new slot key — no field is dropped, defaulted, or recomputed. |
 | 9 | Already-migrated state | `schemaVersion: 3`, `progress["9"]` already holds Pricing-shaped data | Migration is a hard no-op — state is returned unchanged (aside from the normal, pre-existing sanitize/derive pass every load already performs regardless of this migration). Running the fixture through the migration function twice in a row produces identical output both times. |
-| 10 | Malformed/unexpected state | `progress["9"]` is a string, an array, or otherwise not the expected object shape | No swap is attempted; both slots 9 and 10 are replaced with safe empty defaults; the original malformed data is preserved under `_migrationQuarantine`, not deleted; `schemaVersion` is still stamped to `3` (see note on this design choice below); no completion or unlock is falsely granted anywhere. |
+| 10 | Malformed/unexpected state — **corrected fixture, full-cycle required** | `progress["9"]` is a string, an array, or otherwise not the expected object shape | No swap is attempted; both slots 9 and 10 are replaced with safe empty defaults; `schemaVersion` is stamped to `3` (see note below). **This fixture must be run through the full planned cycle — migration → `sanitizeState()` → `_migrate()` → `_syncDerivedState()` → `save()` → a subsequent fresh `load()` — not merely the migration function in isolation**, specifically to prove the corrected quarantine mechanism (§6.1) actually survives: (a) `localStorage['aimt_module9_reorder_quarantine']` exists and contains the original malformed `slot9`/`slot10` values verbatim after the full cycle completes; (b) `this.data` (the in-memory sanitized state) contains no trace of the malformed data and no `_migrationQuarantine`-style property anywhere; (c) `getOverallPct()`/`isModuleComplete()`/`canAccessModule()` behave identically to a fresh student for slots 9 and 10 — no completion or unlock is falsely granted anywhere; (d) reloading a second time (simulating a new page load) leaves the quarantine key untouched and does not re-trigger the malformed-state branch (since `schemaVersion >= 3` now short-circuits first). |
 | 11 | Review Mode | Review Mode active (`window.ReviewMode.isActive() === true`) | No persisted write occurs at all — confirmed by `save()`'s existing Review-Mode guard (§2.5) and `AIMT_SYNC.init()`'s existing Review-Mode guard. If the migration function is invoked at all in this context (e.g., because Review Mode still calls `load()` to read state for inspection), any resulting change stays in memory only and is never written to `localStorage` or Supabase. |
 | 12 | Remote pull triggers migration | A student's remote `course_progress.state` row is still pre-reorder-shaped (`schemaVersion < 3` or absent) and wins the merge (`pullAndMerge()` decides `remoteWins: true`) | Because `applyRemoteState()` writes the remote blob into `localStorage` and then calls the same `APP_STATE.load()` (§2.2), the migration runs identically to a local pre-reorder blob — no separate remote-path test logic is required, but this fixture exists to confirm the assumption is actually exercised, not merely asserted. |
-| 13 | Regression — Modules 0–8 | Any fixture from #1–#9 also carries populated `progress["0"]` through `progress["8"]` data | Every field of every module-0-through-8 progress object is confirmed byte-identical before and after the migration runs — the swap logic must only ever touch keys `"9"` and `"10"` (and the `notableAnswers` correction in §3.1), never iterate or mutate any other slot. |
+| 13 | Regression — Modules 0–8 | Any fixture from #1–#9 also carries populated `progress["0"]` through `progress["8"]` data | Every field of every module-0-through-8 progress object is confirmed byte-identical before and after the migration runs — the swap logic must only ever touch keys `"9"` and `"10"` (and the `notableAnswers`/pointer corrections in §3.1/§3.2), never iterate or mutate any other slot. |
+| 14 | Resume pointer — old Sanitation — **new fixture, added during review** | `resume.moduleId = 9`, `guide.currentModule = 9` (student was last viewing old slot 9, Sanitation) | Both fields read `10` after migration — the student resumes into new slot 10, which now holds Sanitation, the actual subject they were last viewing. Never resumes into new slot 9 (Pricing) merely because the raw number was `9`. |
+| 15 | Resume pointer — old Pricing — **new fixture, added during review** | `resume.moduleId = 10`, `guide.currentModule = 10` (student was last viewing old slot 10, Pricing) | Both fields read `9` after migration — the student resumes into new slot 9, which now holds Pricing, the actual subject they were last viewing. |
+| 16 | Other resume pointer, unaffected — **new fixture, added during review** | `resume.moduleId = 8`, `guide.currentModule = 8` (student was last viewing Module 8) | Both fields remain `8` after migration — confirms the remap rule applies **only** to values `9`/`10`, not to every field named `moduleId`/`currentModule` regardless of value. A second variant of this fixture with `moduleId = 11` (Course Completion) must also remain `11` unchanged. |
+| 17 | Ruled-out numeric fields, unaffected — **new fixture, added during review** | A checkpoint `checkpointMeta` entry with `attempts: 9`; `resume.scrollY: 10` — both fields deliberately set to values that coincidentally equal 9 or 10 but are not module pointers | Neither field is touched by the pointer-remap logic — `attempts` remains `9` and `scrollY` remains `10` exactly as they were, confirming the remap is scoped to the two named fields (§3.2) and not a blind search-and-replace of the numbers 9/10 anywhere in the state tree. |
 
-**Note on fixture 10's `schemaVersion` stamping:** stamping `schemaVersion = 3` even in the malformed-state fallback path is a deliberate idempotency choice — it prevents the migration from re-attempting (and potentially re-quarantining, or worse, behaving inconsistently on repeated retries) the same malformed data on every subsequent load. The quarantined data remains available for manual recovery regardless of the version stamp; the stamp only controls whether the *automatic* swap logic runs again.
+**Note on fixture 10's `schemaVersion` stamping:** stamping `schemaVersion = 3` even in the malformed-state fallback path is a deliberate idempotency choice — it prevents the migration from re-attempting (and potentially re-quarantining, or worse, behaving inconsistently on repeated retries) the same malformed data on every subsequent load. The quarantined data, once written to its own `localStorage` key (§6.1), remains available for manual recovery regardless of the version stamp; the stamp only controls whether the *automatic* swap logic runs again.
 
 ---
 
 ## 9. Pre-implementation state-backup strategy
 
-**Assessment: no separate, durable backup mechanism is warranted beyond what §6.1's in-transaction quarantine already provides, for the following reasons, verified against the actual architecture rather than assumed:**
+**Assessment: no separate, durable backup mechanism is warranted beyond what §6.1's corrected quarantine key already provides, for the following reasons, verified against the actual architecture rather than assumed:**
 
 - **Remote persistence is already versioned by write, not merely overwritten blindly.** Supabase's `course_progress` table stores `updated_at` per row (read in `pullAndMerge()`, `aimt-progress-sync.js:77`) — Supabase's own point-in-time recovery / backup posture (a platform-level concern, not something this migration needs to duplicate) already provides a recovery path for the remote copy independent of this migration.
-- **The migration is designed to be non-destructive by construction for every well-formed input** (fixtures 1–9, §8) — it relocates data, it does not delete it, for any case where the data is recognizable. The only case where original data could be *lost* to a casual reader is the malformed-state fallback (fixture 10), and §6.1 already specifies preserving that data under `_migrationQuarantine` rather than discarding it — this **is** the backup mechanism for the one case that actually needs one.
-- **A permanent, durable, separate backup table or key would create unnecessary duplicate user data** for the overwhelming majority of students (every well-formed case), which the governing instruction explicitly warns against.
+- **The migration is designed to be non-destructive by construction for every well-formed input** (fixtures 1–9, §8) — it relocates data, it does not delete it, for any case where the data is recognizable. The only case where original data could be *lost* to a casual reader is the malformed-state fallback (fixture 10), and §6.1 (corrected during this review) now specifies preserving that data under its own dedicated `localStorage` key, `aimt_module9_reorder_quarantine`, rather than discarding it — this **is** the backup mechanism for the one case that actually needs one, and unlike the originally proposed design, it is verified to actually survive the sanitize pipeline (§2.8).
+- **A permanent, durable, separate backup table or key would create unnecessary duplicate user data** for the overwhelming majority of students (every well-formed case), which the governing instruction explicitly warns against. The one key this plan does add (`aimt_module9_reorder_quarantine`) is written only for the rare malformed-state case, not for every student — it does not duplicate well-formed progress data.
 
-**Recommendation:** no new durable backup infrastructure. The in-transaction quarantine object (§6.1, scoped to the rare malformed-state case only) is sufficient, minimal, and consistent with the existing architecture's own non-destructive sanitize/derive pattern.
+**Recommendation:** no new durable backup infrastructure beyond the one narrowly-scoped, rarely-written quarantine key already specified in §6.1. This is sufficient, minimal, and consistent with the existing architecture's own non-destructive sanitize/derive pattern and its existing `LEGACY_PROFILE_KEY` precedent for adjacent-key data.
 
 ---
 
@@ -344,11 +434,13 @@ The following structural changes are expected **after** this migration plan clea
 
 ## 13. Summary of safety properties
 
-- **Idempotent:** yes — gated by `schemaVersion >= 3`, verified by fixture 9 (§8) running the function twice with identical output both times.
+- **Idempotent:** yes — gated by `schemaVersion >= 3`, verified by fixture 9 (§8) running the function twice with identical output both times; the quarantine key (§6.1) is also written at most once, since its only write path is unreachable once `schemaVersion >= 3`.
 - **Fail-closed:** yes — malformed input never produces a false completion or a false unlock (§6); the worst case is a safely-empty slot with its original data quarantined, not deleted.
+- **Quarantine data actually survives the pipeline — corrected in this review pass.** The original design (a `_migrationQuarantine` property on the state object) did not survive `sanitizeState()`'s fixed five-key reconstruction (§2.8) and has been replaced with a separate `localStorage` key (`aimt_module9_reorder_quarantine`, §6.1), verified by construction to sit entirely outside the sanitize pipeline and therefore to actually persist — proven end-to-end by fixture 10's corrected full-cycle test (§8).
 - **Checkpoint-identity preserving:** yes — no checkpoint ID is renamed; `checkpointMeta` travels keyed by its own ID, cross-referenced against the (separately updated) `MODULE_CHECKPOINTS` map (§4).
 - **Partial-progress preserving:** yes — every field of every `checkpointMeta` entry, in any status (`passed`, `retry`, or unset), travels intact with its whole progress object (§3, fixtures 6–8 in §8).
-- **Modules 0–8 preserving:** yes — the swap operation is scoped exclusively to keys `"9"` and `"10"` (plus the narrowly-targeted `notableAnswers[].moduleId` correction, §3.1); every other module's data is never read or written by this migration (§8, fixture 13).
+- **Navigation/content-identity pointers preserving — corrected in this review pass.** `guide.currentModule` and `resume.moduleId` (§3.2, previously omitted) now remap `9 → 10` and `10 → 9` explicitly, so a returning student resumes into the module actually holding the competency they were last engaged with, not into whichever content now occupies the raw number they were last pointing at. The remap is scoped to exactly these two fields plus the already-specified `notableAnswers[].moduleId` — never a blind swap of every number equal to 9 or 10 (fixtures 14–17, §8, including an explicit ruled-out-fields fixture).
+- **Modules 0–8 preserving:** yes — the swap operation is scoped exclusively to keys `"9"` and `"10"` (plus the narrowly-targeted pointer corrections in §3.1/§3.2); every other module's data is never read or written by this migration (§8, fixture 13).
 - **Single shared code path for local and remote:** yes — both storage layers materialize through the same `load()` pipeline (§2.2), so this migration requires no separate remote-specific logic.
 
 ---
