@@ -1,8 +1,14 @@
 (function() {
   const STORAGE_KEY = 'levo_app';
   const LEGACY_PROFILE_KEY = 'levo4_profile';
-  const SCHEMA_VERSION = 2;
+  const SCHEMA_VERSION = 3;
   const MODULE_COUNT = 12;
+  /* Module 9 ↔ 10 reorder — saved-state migration quarantine key.
+     See docs/course-audit/modules/module-09-reorder-migration-plan.md §6.1.
+     Deliberately a separate localStorage key, outside the sanitized
+     'levo_app' blob: sanitizeState() reconstructs a fixed five-key shape
+     and would silently drop anything written onto the raw object instead. */
+  const MODULE9_REORDER_QUARANTINE_KEY = 'aimt_module9_reorder_quarantine';
 
   function now() {
     return Date.now();
@@ -138,8 +144,13 @@
     6: ['pattern-recognition', 'referral-judgment', 'barrier-thinking'],
     7: ['service-flow', 'room-prep', 'client-guidance'],
     8: ['client-explanation', 'service-flow', 'client-guidance'],
-    9: ['sanitation-discipline', 'complaint-response', 'service-flow'],
-    10: ['pricing-logic', 'positioning', 'client-explanation'],
+    /* Module 9 ↔ 10 reorder: slot 9 is now Checkout, Client Closing &
+       Pricing Strategy (m10cp1/m10cp2 content); slot 10 is now Sanitation &
+       Reset Systems (m9cp1/m9cp2 content). Tags follow the content, not the
+       historical checkpoint-ID numbering. See
+       docs/course-audit/modules/module-09-reorder-migration-plan.md §2.7. */
+    9: ['pricing-logic', 'positioning', 'client-explanation'],
+    10: ['sanitation-discipline', 'complaint-response', 'service-flow'],
     11: ['service-flow', 'scope-awareness', 'client-guidance', 'pricing-logic', 'pattern-recognition']
   };
 
@@ -343,16 +354,20 @@
       if (/\b(step|sequence|massage|shampoo|service)\b/i.test(text)) tags.push('service-flow');
       if (/\b(calm|specific|without over-explain|guide)\b/i.test(text)) tags.push('client-guidance');
     } else if (moduleId === 9) {
-      if (/\b(reset|flush|sanitize|log|bin|bed vinyl|sequence)\b/i.test(text)) tags.push('sanitation-discipline');
-      if (/\b(client calls|complaint|document|respond|investigate)\b/i.test(text)) tags.push('complaint-response');
-      if (/\b(order|sequence|after service)\b/i.test(text)) tags.push('service-flow');
-    } else if (moduleId === 10) {
+      /* Post-reorder: slot 9 = Checkout, Client Closing & Pricing Strategy
+         (m10cp1/m10cp2 content) — see MODULE_MEMORY_TAGS[9] above. */
       if (/\b(price|pricing|profit|overhead|cost|margin|tier)\b/i.test(text)) tags.push('pricing-logic');
       if (/\b(position|value|expensive|perception)\b/i.test(text)) tags.push('positioning');
       if (/\b(explain|respond|say to the client)\b/i.test(text)) tags.push('client-explanation');
+    } else if (moduleId === 10) {
+      /* Post-reorder: slot 10 = Sanitation & Reset Systems (m9cp1/m9cp2
+         content) — see MODULE_MEMORY_TAGS[10] above. */
+      if (/\b(reset|flush|sanitize|log|bin|bed vinyl|sequence)\b/i.test(text)) tags.push('sanitation-discipline');
+      if (/\b(client calls|complaint|document|respond|investigate)\b/i.test(text)) tags.push('complaint-response');
+      if (/\b(order|sequence|after service)\b/i.test(text)) tags.push('service-flow');
     }
 
-    if (/\bclient\b/i.test(text) && !tags.includes('client-guidance') && moduleId !== 8 && moduleId !== 10) {
+    if (/\bclient\b/i.test(text) && !tags.includes('client-guidance') && moduleId !== 8 && moduleId !== 9) {
       tags.push('client-guidance');
     }
 
@@ -448,6 +463,113 @@
     return progress;
   }
 
+  /* ══════════════════════════════════════════════════════
+     MODULE 9 ↔ 10 REORDER — saved-state migration.
+     See docs/course-audit/modules/module-09-reorder-migration-plan.md
+     (approved design) for the full rationale, state-shape inventory, and
+     fail-closed rules this function implements.
+
+     Runs on the RAW parsed localStorage object, before sanitizeState() —
+     sanitizeState() unconditionally overwrites schemaVersion and rebuilds
+     progress/guide/resume from a fixed shape, so the pre-migration version
+     number and pre-swap slot data must be read/mutated here first.
+
+     Idempotent: gated by schemaVersion >= 3. A fresh student (no raw state
+     at all) is left untouched — sanitizeState(null) already produces
+     schemaVersion-3 defaults with no old 9/10 data to move.
+     ══════════════════════════════════════════════════════ */
+  function isWellFormedModuleProgressShape(value) {
+    return !!(value && typeof value === 'object' && !Array.isArray(value));
+  }
+
+  function migrateModule9ReorderIfNeeded(rawParsedState) {
+    if (!rawParsedState || typeof rawParsedState !== 'object') return;
+
+    const rawProgress = rawParsedState.progress;
+    if (!rawProgress || typeof rawProgress !== 'object') return;
+
+    const version = sanitizeNumber(rawParsedState.schemaVersion, 0);
+    if (version >= 3) return; // already migrated — hard no-op
+
+    const slot9Present = Object.prototype.hasOwnProperty.call(rawProgress, '9');
+    const slot10Present = Object.prototype.hasOwnProperty.call(rawProgress, '10');
+    if (!slot9Present && !slot10Present) return; // nothing to migrate
+
+    const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
+
+    const slot9 = rawProgress['9'];
+    const slot10 = rawProgress['10'];
+    const slot9Malformed = slot9Present && !isWellFormedModuleProgressShape(slot9);
+    const slot10Malformed = slot10Present && !isWellFormedModuleProgressShape(slot10);
+
+    if (slot9Malformed || slot10Malformed) {
+      // Fail closed: quarantine the raw evidence (outside levo_app, never
+      // interpreted as progress), then replace both ambiguous slots with
+      // safe empty defaults. Never persisted while Review Mode is active —
+      // Review Mode's contract is unsaved inspection, not a write path.
+      if (!reviewModeActive) {
+        try {
+          localStorage.setItem(MODULE9_REORDER_QUARANTINE_KEY, JSON.stringify({
+            slot9: slot9,
+            slot10: slot10,
+            quarantinedAt: now()
+          }));
+        } catch (e) {}
+        try {
+          console.warn('[AIMT] Module 9/10 saved progress was malformed on load — quarantined to localStorage[\'' + MODULE9_REORDER_QUARANTINE_KEY + '\'] and reset to safe defaults.');
+        } catch (e) {}
+      }
+      rawProgress['9'] = createModuleProgress(9);
+      rawProgress['10'] = createModuleProgress(10);
+    } else {
+      // Swap the two ENTIRE per-slot progress objects (not a field merge) —
+      // checkpointMeta (the real evidence) travels with its consistent
+      // engagement metadata (startedAt, lastVisitedAt, etc.). complete/
+      // unlocked/completedAt/checkpoints are never hand-copied here; they
+      // self-correct via reconcileModuleState()/_syncDerivedState(), which
+      // load() always runs immediately after this function returns.
+      rawProgress['9'] = slot10Present ? slot10 : null;
+      rawProgress['10'] = slot9Present ? slot9 : null;
+    }
+
+    // Content-identity pointer: student.cadenceMemory.notableAnswers[].moduleId
+    // — remapped by each entry's own checkpointId prefix (the stable
+    // identity), never by blindly comparing the stored moduleId number.
+    const notableAnswers = rawParsedState.student
+      && rawParsedState.student.cadenceMemory
+      && Array.isArray(rawParsedState.student.cadenceMemory.notableAnswers)
+      ? rawParsedState.student.cadenceMemory.notableAnswers
+      : [];
+    notableAnswers.forEach((entry) => {
+      if (!entry || typeof entry !== 'object') return;
+      const cpId = typeof entry.checkpointId === 'string' ? entry.checkpointId : '';
+      if (cpId.indexOf('m9cp') === 0) entry.moduleId = 10;
+      else if (cpId.indexOf('m10cp') === 0) entry.moduleId = 9;
+    });
+
+    // Content-identity pointers: guide.currentModule / resume.moduleId —
+    // remapped ONLY when the raw value is exactly 9 or 10. Every other
+    // numeric field (attempts counters, scrollY, video chapter index,
+    // timestamps) is left untouched, even when it coincidentally equals
+    // 9 or 10 — see module-09-reorder-migration-plan.md §3.2's explicit
+    // ruled-out-fields list.
+    if (rawParsedState.guide && typeof rawParsedState.guide === 'object') {
+      if (rawParsedState.guide.currentModule === 9) rawParsedState.guide.currentModule = 10;
+      else if (rawParsedState.guide.currentModule === 10) rawParsedState.guide.currentModule = 9;
+    }
+    if (rawParsedState.resume && typeof rawParsedState.resume === 'object') {
+      if (rawParsedState.resume.moduleId === 9) rawParsedState.resume.moduleId = 10;
+      else if (rawParsedState.resume.moduleId === 10) rawParsedState.resume.moduleId = 9;
+    }
+
+    // Stamp handled — prevents re-running (and re-quarantining) on every
+    // subsequent load, including the malformed-state branch. Never reaches
+    // localStorage while Review Mode is active, since save() itself is
+    // guarded (see APP_STATE.save()) and this assignment only mutates the
+    // in-memory object load() is about to hand to sanitizeState().
+    rawParsedState.schemaVersion = 3;
+  }
+
   function sanitizeState(raw) {
     const defaults = createDefaults();
     if (!raw || typeof raw !== 'object') return defaults;
@@ -506,6 +628,8 @@
       } catch (e) {
         parsed = null;
       }
+
+      migrateModule9ReorderIfNeeded(parsed);
 
       this.data = sanitizeState(parsed);
       this._migrate();

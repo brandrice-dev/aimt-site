@@ -2749,12 +2749,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="9" onclick="openModuleById(9)">
         <div class="mr-num mr-active" id="mnum-9">9</div>
-        <div class="mr-info"><div class="mr-title">Module 9 — Sanitation & Reset Systems</div><div class="mr-sub">Cleaning, maintenance, troubleshooting</div></div>
+        <div class="mr-info"><div class="mr-title">Module 9 — Checkout, Client Closing &amp; Pricing Strategy</div><div class="mr-sub">Closing the appointment, menu design, real-cost pricing</div></div>
         <span class="mr-badge mb-active" id="mbadge-9">Start</span>
       </div>
       <div class="module-row" data-module-id="10" onclick="openModuleById(10)">
         <div class="mr-num mr-active" id="mnum-10">10</div>
-        <div class="mr-info"><div class="mr-title">Module 10 — Pricing Strategy</div><div class="mr-sub">Menu creation, add-ons, positioning</div></div>
+        <div class="mr-info"><div class="mr-title">Module 10 — Sanitation &amp; Reset Systems</div><div class="mr-sub">Cleaning, maintenance, troubleshooting</div></div>
         <span class="mr-badge mb-active" id="mbadge-10">Start</span>
       </div>
       <div class="module-row" data-module-id="11" onclick="openModuleById(11)">
@@ -6530,11 +6530,19 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 </div>
 
 <!-- ══ MODULE 9 CONTENT ══ -->
-<div id="module9Wrap" style="display:none;">
+<!-- ══ SANITATION & RESET SYSTEMS — relocated to student-facing Module 10
+     by the course-audit-build 9<->10 reorder. Content unchanged/unaudited
+     (its own audit is a later, separate task) — only the wrapper id, hero
+     eyebrow, section numbering, and completion-card slot/handoff were
+     corrected for the new slot. Checkpoint IDs (m9cp1/m9cp2) intentionally
+     keep their historical "m9" prefix even though this content now lives
+     at slot 10 — see MODULE_CHECKPOINTS['10'] above and
+     docs/course-audit/modules/module-09-reorder-migration-plan.md §11. ══ -->
+<div id="module10Wrap" style="display:none;">
   <div class="lesson-wrap">
 
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 9 · Sanitation & Reset Systems</div>
+      <div class="mh-eyebrow">Module 10 · Sanitation & Reset Systems</div>
       <div class="mh-title">This is not<br>behind-the-scenes.</div>
       <div class="mh-desc">Most people treat sanitation and reset as something separate from the service. It's not. Clients may not watch you clean — but they feel freshness, organization, and readiness. And they also feel leftover clutter, damp linens, and signs of the previous client. That's what breaks a premium experience.</div>
     </div>
@@ -6550,7 +6558,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">9.1 — What you sanitize and when</div>
+    <div class="sec-eyebrow">10.1 — What you sanitize and when</div>
     <div class="sec-title">Clean what clients touch. Every time. No exceptions.</div>
     <div class="body-text">High-touch surfaces must be sanitized between every single client. There is no "it looks clean" exception. Cross-contamination is how clients get hurt and how practitioners lose licenses. The standard exists because skin-to-surface contact is direct — and your clients are trusting you with that.</div>
 
@@ -6594,7 +6602,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">9.2 — The reset sequence</div>
+    <div class="sec-eyebrow">10.2 — The reset sequence</div>
     <div class="sec-title">Under 15 minutes. Every time.</div>
     <div class="body-text">A reliable reset sequence means you are never scrambling between clients. The goal is a repeatable series you can complete in under 15 minutes that returns the room to exactly the state it was in when the previous client arrived. The less decision-making required, the faster and more consistent it becomes.</div>
     <div class="interaction-hint">↓ Tap Start to walk through the sequence</div>
@@ -6620,7 +6628,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">9.3 — Compliance</div>
+    <div class="sec-eyebrow">10.3 — Compliance</div>
     <div class="sec-title">Know your state requirements. Check them annually.</div>
     <div class="body-text">State regulations regarding sanitation requirements for head spa services vary and are updated periodically. What was compliant last year may not be this year. Check your state board's current requirements at minimum once a year. Keep records of your sanitation practices — date, time, products used. This documentation protects you if you are ever audited or if a client complaint is filed.</div>
 
@@ -6643,7 +6651,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">9.4 — Checkpoint</div>
+    <div class="sec-eyebrow">10.4 — Checkpoint</div>
     <div class="sec-title">Walk me through your reset.</div>
     <div class="body-text">After a 2-hour service, walk through your complete reset sequence. Name the steps in order and explain what happens if you skip one — any one. What is the consequence?</div>
     <div class="cp-box">
@@ -6658,7 +6666,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">9.5 — Checkpoint</div>
+    <div class="sec-eyebrow">10.5 — Checkpoint</div>
     <div class="sec-title">A client calls the next day.</div>
     <div class="body-text">A client calls to say she developed a rash on her neck the day after her service. Walk through how you investigate and respond — to her, and internally.</div>
     <div class="cp-box">
@@ -6671,201 +6679,296 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cp-response" id="m9cp2Res"></div>
     </div>
 
-    <div class="lesson-complete" id="m9Complete" style="display:none;">
+    <div class="lesson-complete" id="m10Complete" style="display:none;">
       <div class="lc-check">✓</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You can deliver a great service. You can reset it cleanly. One module left — making sure you're paid what it's worth.</div>
+      <div class="lc-body">You can deliver a great service. You can reset it cleanly. That discipline is what makes the experience repeatable — for every client, every time.</div>
       <div class="lc-next">
-        <div class="lc-next-label">Up next — Module 10</div>
-        <div class="lc-next-text">Pricing strategy, menu design, and how to position a premium service without apologizing for the price.</div>
+        <div class="lc-next-label">Up next — Module 11 (locked)</div>
+        <div class="lc-next-text">AI / Modern Practice Tools. This module is not yet available — it will unlock once it has been built.</div>
       </div>
-      <button class="lc-btn" onclick="openModuleById(10)">Start Module 10 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
     </div>
 
   </div>
 </div>
 
-<!-- ══ MODULE 10 CONTENT ══ -->
-<div id="module10Wrap" style="display:none;">
+<!-- ══ MODULE 9 CONTENT (Checkout, Client Closing & Pricing Strategy) ══ -->
+<div id="module9Wrap" style="display:none;">
   <div class="lesson-wrap">
 
     <div class="mod-hero">
-      <div class="mh-eyebrow">Module 10 · Pricing Strategy</div>
-      <div class="mh-title">Pricing is not just a number.<br>It controls everything.</div>
-      <div class="mh-desc">Pricing determines how your service is perceived, how your day feels, how many clients you take, and how much attention you can give each one. If your pricing is wrong, everything downstream suffers.</div>
+      <div class="mh-eyebrow">Module 9 · Checkout, Client Closing &amp; Pricing Strategy</div>
+      <div class="mh-title">Close the experience<br>as intentionally as you opened it.</div>
+      <div class="mh-desc">The treatment is done. What happens next — how you close the appointment, and how you price what you do — is its own skill. This module is a Business Decision Lab: less about performing, more about deciding, from real numbers and calm communication.</div>
     </div>
 
-    <div class="sec-eyebrow">What you are actually selling</div>
-    <div class="sec-title">Not shampoo. Not water. Not massage.</div>
-    <div class="body-text">You are selling a controlled experience, your time and skill, your environment, and how the service feels. If you price based on products alone, you will underprice. The most common mistake is asking "what are others charging?" instead of "what does it cost me to deliver this properly?" Those are not the same question.</div>
+    <div class="sec-eyebrow">9.1 — From treatment close to checkout</div>
+    <div class="sec-title">The moment isn't over when the treatment is.</div>
+    <div class="body-text">Module 8 ends with one line: "Today I focused a little more on [area or service priority you addressed]. How are you feeling?" That's a treatment-closing observation, not a business conversation. What happens after it — checkout, questions, whether to book again — is this module's subject.</div>
+
+    <div class="info-card">
+      <div class="ic-title">A shape, not a script</div>
+      <div class="body-text" style="margin:0;">Reorient → briefly recap → answer or recommend where relevant → invite future options without pressure → complete checkout. This is not a rigid or exact universal order — treat it as a shape you move through naturally, not a script to recite.</div>
+    </div>
+
+    <div class="body-text">Give the client a moment to reorient before you speak further. A quiet, relaxation-first service shouldn't end with an abrupt shift into a rapid sales pitch — speak at a normal, calm pace.</div>
+    <div class="body-text">Recap only what you genuinely did during the service. Don't diagnose. Don't exaggerate results — a short, honest sentence is more credible than an impressive one.</div>
+    <div class="body-text">Answer questions clearly, but don't unload every possible recommendation at once. A recommendation should have a specific reason tied to the service you just delivered — not exist because it's on the menu. And the flow has to work cleanly for a client who says no to everything — retail, enhancements, rebooking. Declining should never create awkwardness.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Rebooking</strong> is an available next step, not proof you successfully "closed." If a client wants to plan another visit, help them choose the service or timing that fits their goals, preferences, and schedule — don't teach yourself a universal treatment frequency just to manufacture a future booking.</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Checkout, platform-neutral</div>
+      <div class="body-text" style="margin:0;">Confirm what the client is paying for. Communicate the total clearly. Process payment through your business's own normal system. Provide a receipt or confirmation as appropriate. If your business accepts gratuity, keep the presentation neutral. This course doesn't teach a specific point-of-sale platform, and gratuity is never mandatory or a fixed percentage — both are business decisions.</div>
+    </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">Know your real cost — not your guess</div>
-    <div class="sec-title">Every service has a cost. Most people get this wrong.</div>
+    <div class="sec-eyebrow">Close Without Pressure</div>
+    <div class="sec-title">Choose the response that keeps the experience intact.</div>
+    <div class="body-text">A client has just finished an Extended-format Head Spa service. She's sitting up, taking a slow breath, reorienting to the room. Which response best moves toward checkout without breaking the experience you just built?</div>
+
+    <div class="m5-decision-block" id="m9CwpDecision">
+      <div class="bq-options" role="group" aria-label="Choose the response that best preserves the relaxation-first experience while moving toward checkout.">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="m9CwpSelect(0,this)">"Take your time. [pause] Today I focused a little more on your neck and shoulders — how are you feeling? Whenever you're ready, I can walk you through checkout, and if you'd like to talk about coming back or anything else, I'm happy to."</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="m9CwpSelect(1,this)">"That was amazing, right? Before we head to checkout, let's go ahead and get your next appointment booked — I have an opening next week that would be perfect."</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="m9CwpSelect(2,this)">"So today I started with the aromatherapy blend, then dry brushing to prep the scalp, then the halo massage with the heated water system, then the exfoliant, then neck and shoulder work, then a deep conditioning mask while I did your hands and arms, then a full rinse, then a cooling mist — that's everything we did today."</button>
+        <button type="button" class="bq-opt" data-choice="3" aria-pressed="false" onclick="m9CwpSelect(3,this)">"Your scalp was pretty congested today, especially at the crown — that's something to keep an eye on. I really worked on clearing that up for you."</button>
+        <button type="button" class="bq-opt" data-choice="4" aria-pressed="false" onclick="m9CwpSelect(4,this)">"You should definitely add the deep conditioning upgrade next time, and I'd recommend the scalp serum for home care, and you should really come back in two weeks to keep this going."</button>
+        <button type="button" class="bq-opt" data-choice="5" aria-pressed="false" onclick="m9CwpSelect(5,this)">"I should mention this time slot is really hard to get, so if you want to lock in the same time next month, you'd want to decide before you leave today."</button>
+      </div>
+      <div class="bq-feedback" id="m9CwpFeedback" aria-live="polite" style="display:none;"></div>
+      <button type="button" class="m5-reset-btn" onclick="m9CwpReset()">Reset this scenario</button>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">9.2 — Know the real cost</div>
+    <div class="sec-title">Four inputs. Not a rigid formula — a way of thinking.</div>
+    <div class="body-text">Real cost isn't a guess, and it isn't one universal number either. It's components you account for deliberately.</div>
 
     <div class="concept-grid">
       <div class="concept-card">
         <div class="cc-icon">①</div>
-        <div class="cc-term">Fixed costs</div>
-        <div class="cc-sub">Rent, utilities, insurance, software</div>
-        <div class="cc-def">These exist whether you see a client or not. Divide monthly total by number of services to get your fixed cost per service.</div>
+        <div class="cc-term">Direct &amp; variable costs</div>
+        <div class="cc-sub">Products, consumables, laundry, disposables</div>
+        <div class="cc-def">These scale with each service. Track your actual use per service — not a rough guess.</div>
       </div>
       <div class="concept-card">
         <div class="cc-icon">②</div>
-        <div class="cc-term">Variable costs</div>
-        <div class="cc-sub">Product, laundry, disposables, labor</div>
-        <div class="cc-def">These scale with each service. Track your actual product use per service — not what you think it is.</div>
+        <div class="cc-term">Allocated overhead</div>
+        <div class="cc-sub">Rent, utilities, insurance, software, shared supplies</div>
+        <div class="cc-def">These exist whether you see a client or not. There's no single universally correct way to allocate them across your services — how you divide them is a business decision, not a course requirement.</div>
       </div>
       <div class="concept-card">
         <div class="cc-icon">③</div>
-        <div class="cc-term">Time cost — this is where people go wrong</div>
-        <div class="cc-sub">Setup + service + reset</div>
-        <div class="cc-def">A "1-hour service" is not 1 hour. Add setup and reset and you're closer to 1 hour 20–30 minutes. If you ignore this, you underprice automatically.</div>
+        <div class="cc-term">Practitioner time — broader than treatment time</div>
+        <div class="cc-sub">Setup, consultation, treatment, transitions, cleanup, checkout, documentation</div>
+        <div class="cc-def">A "60-minute service" can require meaningfully more than 60 minutes of your capacity. Account for your own full time — not someone else's ratio.</div>
       </div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">A simple pricing framework</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Step 1</strong> — Determine your hourly target. What do you need to make per working hour? ($120–150/hr is a sustainable starting point for most markets.)</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Step 2</strong> — Calculate real service time. A 1-hour service = roughly 1.25 hours of your time.</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Step 3</strong> — Multiply. $120 × 1.25 = $150 minimum target.</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Step 4</strong> — Add cost buffer. Product cost + overhead brings you to ~$160–180 baseline.</div>
-      <div class="body-text" style="margin:0;"><strong>Step 5</strong> — Adjust for experience, demand, and market. This is how you land on a real number — not guessing.</div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">10.1 — Build your menu</div>
-    <div class="sec-title">Three tiers. No more.</div>
-    <div class="body-text">Start with your anchor service — the 60-minute head spa at a price that reflects your market and overhead. Build up to a 90-minute or 2-hour signature service, and build down to an introductory option if appropriate. Stop there. Too many choices cause clients to choose down rather than up — three tiers is the ceiling, not the floor.</div>
-
-    <div class="cadence-note">
-      <div class="cn-label">From Cadence</div>
-      <div class="cn-text">"Your job is to make the premium option feel like the obvious one. Not by hiding the lower option — by framing the premium one so clearly that a client who can afford it would feel like they're leaving something behind by not choosing it."</div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">10.2 — Know your numbers first</div>
-    <div class="sec-title">Price what you need. Not what competitors charge.</div>
-    <div class="body-text">A common mistake: pricing based on what competitors charge without calculating your own costs first. A competitor's price may not cover their actual costs — you don't want to copy a model that's losing money. Price what you need to be sustainable, position it clearly, and let your results justify it.</div>
-
-    <div class="price-calc">
-      <div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Service pricing calculator</div>
-      <div class="calc-grid">
-        <div class="calc-field">
-          <label class="calc-label">Product cost per service ($)</label>
-          <input class="calc-input" id="calcProduct" type="number" placeholder="e.g. 12" min="0">
-        </div>
-        <div class="calc-field">
-          <label class="calc-label">Overhead per service ($)</label>
-          <input class="calc-input" id="calcOverhead" type="number" placeholder="e.g. 25" min="0">
-        </div>
-        <div class="calc-field">
-          <label class="calc-label">Your time cost ($)</label>
-          <input class="calc-input" id="calcTime" type="number" placeholder="e.g. 40" min="0">
-        </div>
-        <div class="calc-field">
-          <label class="calc-label">Target margin (%)</label>
-          <input class="calc-input" id="calcMargin" type="number" placeholder="e.g. 30" min="0" max="90" value="30">
-        </div>
-      </div>
-      <button class="calc-btn" onclick="calcPrice()">Calculate minimum price →</button>
-      <div class="calc-result" id="calcResult"></div>
-    </div>
-
-    <div class="body-text" style="margin-top:1rem;">Your time cost includes setup and reset — not just service time. A 60-minute service may require 90 minutes of your time once prep and reset are accounted for. Price for actual time, not clock time.</div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">10.3 — Add-ons</div>
-    <div class="sec-title">Enhancements, not upsells.</div>
-    <div class="body-text">The most effective add-ons are ones you recommend based on what you observed during the service — not a menu item you offer at checkout. Frame them as a response to something specific, and they land as care rather than a sales pitch. If add-ons feel required, trust drops. If they feel easy to say yes to, they convert.</div>
-
-    <div class="addon-list">
-      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Scalp treatment serum</div><div class="addon-frame">"Based on what I'm seeing with your scalp today, I'd love to add a treatment serum — it takes about 5 minutes and would really support what we're doing."</div></div><div class="addon-price">+$20–35</div></div>
-      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Extended massage time</div><div class="addon-frame">"If you'd like, I can extend your massage by 15 minutes — your shoulders were holding a lot today."</div></div><div class="addon-price">+$25–40</div></div>
-      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Deep conditioning upgrade</div><div class="addon-frame">"Your ends are pretty dry — I can swap in a protein mask and add steam. It makes a real difference on lengths like yours."</div></div><div class="addon-price">+$15–30</div></div>
-      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Blow dry</div><div class="addon-frame">Decide in advance whether blow dry is included or an add-on. Both are valid — just be consistent and clear at booking.</div></div><div class="addon-price">+$30–60</div></div>
-      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Aromatherapy enhancement</div><div class="addon-frame">"We can add a custom aromatherapy blend to your service today — I'd pick it based on what your scalp needs."</div></div><div class="addon-price">+$10–20</div></div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="sec-eyebrow">The real problem — fear-based pricing</div>
-    <div class="sec-title">Most people don't underprice because of math.</div>
-    <div class="body-text">They underprice because of fear. "What if no one books? What if I'm too expensive? What if competitors are lower?" These are not financial questions. They are confidence questions.</div>
-
-    <div class="info-card">
-      <div class="ic-title">What underpricing actually looks like</div>
-      <div class="body-text" style="margin:0 0 0.5rem;">Fully booked but exhausted. Rushing every service. Cutting small corners. Feeling behind all day. Over time: inconsistent service quality, decreased client experience, burnout, inability to grow. This is not a short-term issue. It compounds.</div>
-      <div class="body-text" style="margin:0;">If your service feels premium, is consistent, and is well-positioned — people will pay for it. The real risk is not charging enough, because that guarantees poor experience delivery over time.</div>
-    </div>
-
-    <div class="info-card">
-      <div class="ic-title">Positioning language matters</div>
-      <div class="body-text" style="margin:0 0 0.5rem;">Avoid: "This is our basic option." Use: "This is our core service."</div>
-      <div class="body-text" style="margin:0 0 0.5rem;">Avoid: "This is more expensive." Use: "This is our extended experience."</div>
-      <div class="body-text" style="margin:0;">Confidence removes resistance. The way you say it shapes how the client receives it.</div>
     </div>
 
     <div class="key-point">
       <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>Signs you're underpriced:</strong> fully booked with no space, feeling rushed, inconsistent quality, attracting price-sensitive clients. <strong>Signs you're aligned:</strong> steady bookings, manageable schedule, consistent delivery, business feels stable.</div>
+      <div class="kp-text"><strong>The fourth input: desired profitability.</strong> How much margin you want isn't a course-prescribed number — it's a deliberate business decision you make and can explain, not a default you accept without thinking about it.</div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.4 — Positioning</div>
-    <div class="sec-title">When a client says it feels expensive.</div>
-    <div class="body-text">A client who says a service felt expensive is giving you marketing feedback, not financial feedback. It means they did not fully understand the value before they paid for it. That is a positioning problem — solve it before they arrive, not after. Your intake form, your booking language, your website, and your consultation all set expectations. If clients are surprised by the price at checkout, the problem started earlier.</div>
+    <div class="sec-eyebrow">9.3 — Margin vs. markup</div>
+    <div class="sec-title">Two words. Two different prices.</div>
+    <div class="body-text">Markup is calculated from cost: a 30% markup on a $100 cost is $130. Margin is calculated from selling price: a 30% margin means 30% of the selling price is profit, which requires solving price = cost ÷ (1 − margin) — at a 30% margin, a $100 cost produces a price of about $143, not $130.</div>
 
     <div class="info-card">
-      <div class="ic-title">What positions premium correctly</div>
-      <div style="font-size:.82rem;font-weight:300;line-height:1.75;color:var(--text);">Specific language at booking about what is included and why · A consultation that demonstrates your expertise before the service starts · A clear closing script that names what you did and why — making the value tangible · Follow-up home care recommendations that extend the value beyond the appointment</div>
+      <div class="ic-title">Same $100 cost. Two different results.</div>
+      <div class="body-text" style="margin:0 0 0.5rem;"><strong>30% markup</strong> on a $100 cost: $100 × 1.30 = $130.</div>
+      <div class="body-text" style="margin:0;"><strong>30% margin</strong> on a $100 cost: $100 ÷ (1 − 0.30) ≈ $143.</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">"30% markup" and "30% margin" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.</div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.5 — Checkpoint</div>
-    <div class="sec-title">Build your menu.</div>
-    <div class="body-text">Name your three service tiers. Describe what each includes. Price each one. Then explain — briefly — why you priced it that way. Use the calculator above if helpful.</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m10cp1In" placeholder="Your three tiers — name, description, price, and your reasoning..." onkeydown="m10cpKey(event,'m10cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m10cp1In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+    <div class="sec-eyebrow">9.4 — Price your service</div>
+    <div class="sec-title">Cost base → target price.</div>
+    <div class="body-text">Enter your own numbers — real or illustrative — for a service you offer or plan to offer. The calculator uses margin, the concept from 9.3: it solves for the selling price required to hit the target margin you choose, starting from your modeled cost base.</div>
+
+    <div class="price-calc">
+      <div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Cost base → target price calculator</div>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <label class="calc-label" for="calcProduct">Product cost per service ($)</label>
+          <input class="calc-input" id="calcProduct" type="number" placeholder="e.g. 12" min="0">
         </div>
-      <button class="cp-btn" id="m10cp1Btn" onclick="submitM10CP('m10cp1')">Submit to Cadence →</button>
-      <div class="cp-response" id="m10cp1Res"></div>
+        <div class="calc-field">
+          <label class="calc-label" for="calcOverhead">Overhead per service ($)</label>
+          <input class="calc-input" id="calcOverhead" type="number" placeholder="e.g. 25" min="0">
+        </div>
+        <div class="calc-field">
+          <label class="calc-label" for="calcTime">Your full practitioner time cost ($)</label>
+          <input class="calc-input" id="calcTime" type="number" placeholder="e.g. 40" min="0">
+        </div>
+        <div class="calc-field">
+          <label class="calc-label" for="calcMargin">Target margin (%)</label>
+          <input class="calc-input" id="calcMargin" type="number" placeholder="e.g. 30" min="0" max="90">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcPrice()">Calculate target price →</button>
+      <div class="calc-result" id="calcResult" aria-live="polite"></div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">This calculator is a planning tool</div>
+      <div class="body-text" style="margin:0;">A business may also need to account for items such as taxes, payroll burden, payment-processing costs, insurance, locally required charges, and other operating expenses, depending on business structure and jurisdiction. AIMT does not prescribe state-specific tax treatment or business/legal structure.</div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">10.6 — Checkpoint</div>
-    <div class="sec-title">A client says the price felt high.</div>
-    <div class="body-text">A client at checkout says the service was amazing but the price felt a little high. How do you respond in the moment — and what does this tell you about your positioning?</div>
-    <div class="cp-box">
-      <div class="cp-label">Cadence is reading this</div>
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="m10cp2In" placeholder="Your response in the moment, and what it tells you about your positioning..." onkeydown="m10cpKey(event,'m10cp2')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m10cp2In',this)" title="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
-        </div>
-      <button class="cp-btn" id="m10cp2Btn" onclick="submitM10CP('m10cp2')">Submit to Cadence →</button>
-      <div class="cp-response" id="m10cp2Res"></div>
+    <div class="sec-eyebrow">9.5 — Market context, not copycat pricing</div>
+    <div class="sec-title">Look at the market after you know your own numbers — not instead of them.</div>
+    <div class="body-text">A competitor's price may not cover their own actual costs — copying it risks copying a model that's already losing money. Know your own economics first, then look at your local market. Market context can legitimately inform client expectations, positioning, local price ranges, service comparison, demand, and business model — it isn't irrelevant, just secondary.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">Final price sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of these alone.</div>
     </div>
 
-    <div class="lesson-complete" id="m10Complete" style="display:none;">
+    <hr class="divider">
+
+    <div class="sec-eyebrow">9.6 — Design your menu</div>
+    <div class="sec-title">Make the menu easy to understand.</div>
+    <div class="body-text">A concise menu is generally easier for a client to navigate. Two or three clearly differentiated Head Spa options may be a useful structure for some businesses — but the number of services should follow your actual business and protocol design, not a universal rule.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text"><strong>Require meaningful differentiation.</strong> Different menu options should change something real — treatment time, massage or bodywork, processing, included enhancements, service scope, sensory work, or another deliberate component. Don't engineer an artificial "premium" difference just to create an anchor, and don't try to make the higher-priced option feel like the obvious choice.</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Core and Extended are AIMT's teaching labels — not required menu names</div>
+      <div class="body-text" style="margin:0;">Core and Extended, from Module 8's masterclass, are AIMT's own reference-format teaching labels. They are not required client-facing menu names. Your business can name and package its own services differently.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">9.7 — Enhancements that earn their place</div>
+    <div class="sec-title">An enhancement should add something real.</div>
+    <div class="body-text">A genuine enhancement has a distinct purpose, a real service difference, a time effect where applicable, a cost effect, clear client-facing positioning, and an appropriate place in the client journey. Base a recommendation on the established service plan, the client's goals and preferences, your observation within scope, product directions, contraindications or modifications already identified, your training, and the appointment time you actually have.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">Don't imply "what the scalp needs" — that phrasing crosses into diagnosis. Don't recommend an enhancement merely because it's on the menu. Don't claim an enhancement "converts" because of how it's presented.</div>
+    </div>
+
+    <div class="addon-list">
+      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Scalp treatment serum</div><div class="addon-frame">"Based on what I'm observing today, I'd suggest adding a treatment serum — it takes about 5 minutes and supports what we're already doing."</div></div></div>
+      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Extended massage time</div><div class="addon-frame">"If you'd like, I can extend your massage by 15 minutes — I noticed some tension through your shoulders today."</div></div></div>
+      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Deep conditioning upgrade</div><div class="addon-frame">"Your ends could use extra moisture — I can swap in a protein mask and add steam. It makes a real difference on lengths like yours."</div></div></div>
+      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Blow dry</div><div class="addon-frame">Decide in advance whether a blow dry is included or an add-on for your business. Both are valid — just be consistent and clear at booking.</div></div></div>
+      <div class="addon-card"><div class="addon-dot"></div><div class="addon-content"><div class="addon-name">Aromatherapy enhancement</div><div class="addon-frame">"We can add a custom aromatherapy blend today, based on your preference."</div></div></div>
+    </div>
+
+    <div class="body-text">An enhancement recommendation must never override a genuine scalp-presentation safety reason not to add a product — from Module 5 and 6's adaptation and contraindication judgment. If a presentation calls for restraint, restraint wins over the recommendation.</div>
+
+    <hr class="divider">
+
+    <div class="checkpoint" id="m10cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Pricing and menu reasoning</div>
+      </div>
+      <div class="cp-q">Build or evaluate a Head Spa service menu for your business. For each service, name what it includes and its price. Then explain the real costs and practitioner time behind the pricing and why the differences between the options are clear to a client.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <textarea class="cp-input" id="m10cp1In" placeholder="Your menu — what each service includes, its price, and your cost/time reasoning..." rows="1" oninput="grow(this)" onkeydown="m10cpKey(event,'m10cp1')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m10cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m10cp1Btn" onclick="submitM10CP('m10cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m10cp1Res" aria-live="polite"></div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">9.8 — When a client says the price felt high</div>
+    <div class="sec-title">One comment. Several possible causes.</div>
+    <div class="body-text">"That felt expensive" can mean several different things: a price/market mismatch, unclear expectations, unclear inclusions, poor menu differentiation, weak positioning, a service-delivery mismatch, genuine affordability, one client's individual preference, a repeated pattern worth addressing — or, sometimes, that nothing needs to change at all. Don't diagnose the business problem from one sentence.</div>
+
+    <div class="info-card">
+      <div class="ic-title">In the moment</div>
+      <div class="body-text" style="margin:0;">Acknowledge. Stay calm. Don't argue. Don't reach for an immediate discount. Don't lecture the client on value. Answer a genuine question clearly. Preserve the client's autonomy.</div>
+    </div>
+
+    <div class="cadence-note">
+      <div class="cn-label">A model response — not a required script</div>
+      <div class="cn-text">"Thank you for telling me. I'm glad you enjoyed the service. Our pricing reflects the time and components included, and I'm happy to explain what was included or help you compare options for a future visit."</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Afterward, review the evidence</div>
+      <div style="font-size:.82rem;font-weight:300;line-height:1.75;color:var(--text);">Was the price clear before booking? Were the inclusions clear? Does the price cover your real cost structure? Does the menu communicate meaningful differences? Is this feedback recurring? Does the service experience support the positioning you intend? Is the price appropriate for the market you're actually serving?</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">Don't assume the client is wrong. Don't assume the price is wrong.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">9.9 — Why pricing really goes wrong</div>
+    <div class="sec-title">Confidence is not a financial model.</div>
+    <div class="body-text">Underpricing has more causes than fear: incomplete cost data, poor overhead allocation, inaccurate time assumptions, competitor copying, an intentional launch strategy, market constraints, weak service differentiation, a lack of pricing knowledge — or, yes, sometimes fear or a lack of confidence. Fear is one cause among several, not the default explanation.</div>
+
+    <div class="key-point">
+      <div class="kp-icon">→</div>
+      <div class="kp-text">Persistent underpricing can contribute to financial strain, unsustainable workload, overbooking, or inconsistent delivery over time — not a guaranteed outcome, but a real pattern worth watching for.</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Positioning language matters</div>
+      <div class="body-text" style="margin:0 0 0.5rem;">"This is our basic option" → "This is our core service."</div>
+      <div class="body-text" style="margin:0;">"This is more expensive" → "This is our extended experience." These describe accurate framing — not engineered pressure.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="checkpoint" id="m10cp2">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Price feedback and client closing</div>
+      </div>
+      <div class="cp-q">At checkout, a client says, "I loved the service, but the price felt high." What would you say in the moment, and what would you review afterward before deciding whether anything about your pricing, menu, or positioning should change?</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <textarea class="cp-input" id="m10cp2In" placeholder="What you'd say in the moment, and what you'd review afterward..." rows="1" oninput="grow(this)" onkeydown="m10cpKey(event,'m10cp2')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m10cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m10cp2Btn" onclick="submitM10CP('m10cp2')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m10cp2Res" aria-live="polite"></div>
+    </div>
+
+    <div class="lesson-complete" id="m9Complete" style="display:none;">
       <div class="lc-check">✦</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You have the pricing framework. Now use it — and don't apologize for the number it produces.</div>
+      <div class="lc-body">You can close a service the way you opened it, and price it from real numbers instead of pressure or guesswork.</div>
       <div class="lc-next">
-        <div class="lc-next-label">Up next — Course completion</div>
-        <div class="lc-next-text">One final module: what comes after the course — and the standard you're now responsible for holding.</div>
+        <div class="lc-next-label">Up next — Module 10</div>
+        <div class="lc-next-text">Sanitation and reset systems — the work between every service that separates consistent professionals from inconsistent ones.</div>
       </div>
-      <button class="lc-btn" onclick="openModuleById(11)">Complete the course →</button>
+      <button class="lc-btn" onclick="openModuleById(10)">Start Module 10 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
     </div>
 
@@ -6997,8 +7100,14 @@ const MODULE_CHECKPOINTS = {
   '6': ['m6cp1', 'm6cp2'],
   '7': ['m7cp1', 'm7cp2'],
   '8': ['m8cp1', 'm8cp2'],
-  '9': ['m9cp1', 'm9cp2'],
-  '10': ['m10cp1', 'm10cp2'],
+  /* Module 9 <-> 10 reorder (course-audit-build): slot 9 is now Checkout,
+     Client Closing & Pricing Strategy (the historically-named M10/m10cp*
+     checkpoints); slot 10 is now Sanitation & Reset Systems (the
+     historically-named M9/m9cp* checkpoints). Checkpoint ID strings are
+     intentionally NOT renamed — only which slot requires them changes. See
+     docs/course-audit/modules/module-09-reorder-migration-plan.md §4/§11. */
+  '9': ['m10cp1', 'm10cp2'],
+  '10': ['m9cp1', 'm9cp2'],
   '11': []
 };
 window.MODULE_CHECKPOINTS = MODULE_CHECKPOINTS;
@@ -7034,8 +7143,8 @@ const MODULE_TITLES = {
   6: 'Module 6 — Conditions & Disorders',
   7: 'Module 7 — Equipment & Room Setup',
   8: 'Module 8 — The Head Spa Service',
-  9: 'Module 9 — Sanitation & Reset Systems',
-  10: 'Module 10 — Pricing Strategy',
+  9: 'Module 9 — Checkout, Client Closing & Pricing Strategy',
+  10: 'Module 10 — Sanitation & Reset Systems',
   11: 'Course Completion & Certification'
 };
 
@@ -7819,16 +7928,52 @@ const M9 = {
     m9cp1: 'Walk through your complete reset sequence after a 2-hour service. What is the order, and what happens if you skip a step?',
     m9cp2: 'A client calls to say she developed a rash on her neck the day after her service. Walk through how you investigate and respond.'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 9 (Sanitation & Reset Systems) checkpoint. Question: "' + q + '". Key concepts: reset sequence must be repeatable and under 15 minutes. Halo flush is always first after service. Separate bins for clean and dirty tools — never mix. Bed vinyl wiped between every client. Sanitation logs protect you legally. Post-service client complaint: document, review sanitation log, check product used, respond with calm and specific information — never defensive. State regulations vary and must be checked annually. 3-5 sentences, direct and warm.'
+  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 10 (Sanitation & Reset Systems) checkpoint. Question: "' + q + '". Key concepts: reset sequence must be repeatable and under 15 minutes. Halo flush is always first after service. Separate bins for clean and dirty tools — never mix. Bed vinyl wiped between every client. Sanitation logs protect you legally. Post-service client complaint: document, review sanitation log, check product used, respond with calm and specific information — never defensive. State regulations vary and must be checked annually. 3-5 sentences, direct and warm.'
 };
 
-// ── MODULE 10 ──
+// ── MODULE 9 (Checkout, Client Closing & Pricing Strategy) — historically
+//    named M10/m10cp* per the course-audit-build 9<->10 reorder; see
+//    docs/course-audit/modules/module-09-reorder-migration-plan.md §11. ──
 const M10 = {
   questions: {
-    m10cp1: 'Build your three-tier service menu. Name each tier, describe what it includes, and price it. Then explain why you priced it that way.',
-    m10cp2: 'A client at checkout says the service was amazing but the price felt a little high. How do you respond — and what does this tell you about your positioning?'
+    m10cp1: 'Build or evaluate a Head Spa service menu for your business. For each service, name what it includes and its price. Then explain the real costs and practitioner time behind the pricing and why the differences between the options are clear to a client.',
+    m10cp2: 'At checkout, a client says, "I loved the service, but the price felt high." What would you say in the moment, and what would you review afterward before deciding whether anything about your pricing, menu, or positioning should change?'
   },
-  system: (q) => 'You are Cadence, instructor of HeadSpa Mastery. Module 10 (Pricing Strategy) checkpoint. Question: "' + q + '". Key concepts: three tiers is optimal — too many options cause clients to choose down. Price must cover product cost per service + overhead + full time (setup and reset) + profit margin. Never price by copying competitors — their costs may not be covered. Add-ons framed as enhancements land better than upsells. "Felt expensive" often means positioning, not price — what the client understood the value to be before they paid. A client who says this is giving you marketing feedback. 3-5 sentences, business-direct and warm.'
+  // Module-9/checkpoint-specific evaluator configuration (one rubric per
+  // checkpoint), combined with the shared tone/format rules inside
+  // evaluateCheckpointAnswer(). Replaces the old shared M10.system.
+  systems: {
+    m10cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 9 competency: building a coherent, differentiated service menu grounded in real cost and time reasoning, not a memorized formula or an arbitrary tier count.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. Real cost awareness — product/consumable costs where relevant, and overhead.\n' +
+      '2. Full practitioner time, not treatment time alone.\n' +
+      '3. Deliberate profitability/margin reasoning — a chosen number with some rationale, not a default accepted uncritically.\n' +
+      '4. Clear, meaningful differences between the service options offered.\n' +
+      '5. Prices supported by business logic rather than an unexplained figure.\n' +
+      '6. Competitor prices are not used as the sole pricing formula.\n\n' +
+      'The student does not need to name one specific dollar amount, use a $120-150/hour figure, use a 30% margin, offer exactly three services, or use exact terminology such as the word "margin" if the reasoning is sound. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer that lists prices with no cost/time reasoning behind them, or that explains the reasoning but never states what makes the options different from a client\'s perspective.\n\n' +
+      'Immediately correct — do not pass — any answer that cites $120-150/hr as a required or "correct" benchmark, cites a historical enhancement dollar range (for example "+$20-35") as a required or AIMT-recommended figure rather than reasoning from the student\'s own numbers, states one specific price as the only right answer, treats a client choosing a lower-priced option as a failure or something to prevent through framing, or recommends copying a competitor\'s price with no cost reasoning of their own.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the cost and time reasoning is solid, ask what makes each option genuinely different for a client, not just the price. If the menu is clearly differentiated, ask for the real cost and practitioner-time reasoning behind at least one price.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.',
+    m10cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 9 competency: responding to price feedback calmly and non-defensively in the moment, and reasoning about it afterward as ambiguous business evidence rather than jumping to one conclusion.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. Acknowledging the client.\n' +
+      '2. Calm, non-defensive communication.\n' +
+      '3. No immediate discount reflex.\n' +
+      '4. No pressure or guilt directed at the client.\n' +
+      '5. No argument that the client simply failed to understand the value.\n' +
+      '6. An appropriate explanation if the client asks a genuine question.\n' +
+      '7. Recognition that several distinct business factors may need review, not a single assumed cause.\n' +
+      '8. Willingness to look for a pattern across clients rather than drawing a conclusion from one comment.\n\n' +
+      'Strong answers may mention cost structure, the actual price, client expectations, menu clarity or inclusions, positioning, service delivery, market fit, or repeated client feedback — not every factor is required. The student does not need to conclude that the price should or should not change. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer where the in-the-moment response is calm and professional but the afterward reasoning jumps to a single assumed cause, or where the afterward reasoning is thoughtful but the in-the-moment response is defensive, discounts immediately, or argues with the client.\n\n' +
+      'Immediately correct — do not pass — any answer that offers an immediate discount as the default response, argues with or lectures the client about value, concludes with certainty from one comment that the price is wrong (or that it definitely isn\'t), or treats the client\'s feedback as something to be talked out of or overridden through persuasion.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the in-the-moment response is calm and appropriate, ask what the student would actually review afterward before deciding anything should change. If the afterward reasoning considers several real factors, ask what the student would say to the client in the actual moment.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, career stage, or background.'
+  }
 };
 
 // ══════════════════════════════════════════════════════
@@ -7845,8 +7990,10 @@ const MODULE_GUIDE_SYSTEMS = {
   6: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 6, Conditions & Disorders. Help the student distinguish a dry-scalp presentation from the dandruff-to-seborrheic-dermatitis spectrum, recognize that appearance alone does not establish cause, and decide whether to proceed, modify, or refer. Reinforce that spread beyond the scalp combined with redness, broken or weeping skin, severe symptoms, or no improvement with reasonable care are referral-relevant findings. Do not diagnose, prescribe, name a specific medical condition as confirmed fact, claim personal practitioner experience, or treat any illustrative image as clinical proof. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise.',
   7: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 7, Equipment & Room Setup — bed selection, tool organization, station prep, and client positioning. Help the student reason through equipment trade-offs, station organization, and positioning decisions using the module\'s function-based framework, not brand or product recommendations. If a student reports a client discomfort scenario, reinforce the stop, adjust, communicate, resume sequence. Do not state that any single bed model or brand is required. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
   8: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. The student is in Module 8, The Head Spa Service — the full 17-step, two-format service, taught through the instructional videos. Your role here is service-flow and practitioner-judgment coach: help the student with smooth transitions, adapting intensity or technique (especially exfoliation, which is adapted by degree, not switched on or off), client communication in the moment, and identifying when context changes the default plan. Reinforce that intake determines the plan — fragrance, bodywork, and other adaptations are identified before service — and that established protocol steps are executed with confidence during treatment, not repeatedly re-offered as optional. Communication should be explained as intentional, not continuous — quiet is appropriate during most of the service. Do not state that a specific closing observation guarantees rebooking or any other business outcome. Your guidance is built from AIMT\'s approved curriculum and the instructor\'s applied experience; you do not claim that experience as your own. Do not give exact stopwatch pacing advice — timing guidance belongs to the AIMT Service Timer, which has its own separate audit. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
-  9: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 9 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
-  10: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 10 (Pricing Strategy): three-tier menu, cost-first pricing, add-ons as enhancements, client perception. Price for the value of the head spa experience you are delivering. If the student is building a new menu or repricing, keep the conversation anchored to head spa service value — not other services. 3-5 sentences. No bullet points.',
+  /* Module 9 <-> 10 reorder: Cadence config now follows content, not the
+     historical numbering — see MODULE_CHECKPOINTS/MODULE_TITLES above. */
+  9: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied business experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 9, Checkout, Client Closing & Pricing Strategy — your role here is business-decision and client-closing coach. Before recommending any change, help the student distinguish a cost problem, a pricing problem, a menu problem, a positioning problem, a service-delivery problem, and a market-fit problem from each other — one client comment rarely proves a single cause. Reinforce that competitor pricing is context, not a pricing formula, and that full practitioner time (not treatment time alone) belongs in any real cost model. Price feedback such as "it felt high" is not automatically a positioning problem — treat it as evidence to review, not a conclusion to assume. Do not provide tax advice, legal advice, state-specific pricing-compliance guidance, or bookkeeping advice presented as professional accounting guidance — point the student to a qualified professional for those questions instead. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
+  10: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student is in Module 10 (Sanitation & Reset Systems): halo flush first always, separate bins, reset under 15 minutes, log everything. If the student comes from a licensed background, connect this to what is specific about a wet scalp service environment. Consistency here makes or breaks the premium head spa experience. 3-5 sentences. No bullet points.',
   11: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student has completed the course. This is about execution now. Reference what you know about this student specifically — their background, their goals, what they shared at the start — and connect everything to how they will now deliver head spa and scalp wellness services. Knowing and doing are not the same. Repetition makes it real. 3-5 sentences. No bullet points.'
 };
 
@@ -7860,8 +8007,8 @@ const MODULE_QUICK_PROMPTS = {
   6: ['How do I tell dry scalp from dandruff?', 'When should a flaking presentation raise more concern?', 'What botanicals work for inflammation?'],
   7: ['What should I actually prioritize when choosing a bed?', 'How do I know if a client\'s positioning needs adjusting mid-service?', 'What\'s the one prep step I should never skip?'],
   8: ['How do I keep transitions smooth?', 'How do I adapt a step without breaking the flow?', 'What should I say when a client asks what I\'m doing?'],
-  9: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
-  10: ['How do I price my anchor service?', 'What add-ons convert best?', 'How do I respond when someone says it is expensive?'],
+  9: ['How do I know what my service really costs?', 'How do I make my menu easier to understand?', 'What do I say when someone thinks the price is high?'],
+  10: ['What is the fastest reliable reset?', 'How do I respond to a post-service complaint?', 'What do I log and why?'],
   11: ['How do I maintain quality consistently?', 'What should I focus on in my first real services?', 'How do I know if I am improving?']
 };
 
@@ -8099,8 +8246,10 @@ function openModuleById(id, options = {}) {
       6: 'Module 5 taught you how to adapt a service. Module 6 teaches you how to interpret what you\'re looking at before you decide anything — because the same flakes can mean two very different things, and treating the wrong one usually makes it worse.',
       7: 'Equipment and room setup feel like logistics, but they directly shape the service. A well-designed station removes friction before the first step even begins. Ask me anything.',
       8: 'This is the full picture — every step in sequence. If you have questions about timing or technique for any specific step, I am right here.',
-      9: 'Sanitation does not get talked about enough. It is what separates consistent professionals from inconsistent ones.',
-      10: 'Pricing is where a lot of talented practitioners undersell themselves. Let us fix that.',
+      // Module 9 <-> 10 reorder: greeting content follows the slot's actual
+      // subject now, not its historical key.
+      9: 'Pricing is where a lot of talented practitioners undersell themselves. Let us fix that.',
+      10: 'Sanitation does not get talked about enough. It is what separates consistent professionals from inconsistent ones.',
       11: 'You made it to the end. But this is not the end — it is the beginning of repetition. Read this module slowly. Then go practice.'
     };
     const baseGreeting = greetings[id] || 'I am here if anything is unclear as you move through this module.';
@@ -8752,17 +8901,25 @@ function m8cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM8CP(id); }
 }
 
-// ── MODULE 9 ──
+// ── SANITATION CHECKPOINTS (m9cp1/m9cp2 — historically named; now belong
+//    to student-facing Module 10 after the course-audit-build 9<->10
+//    reorder. Function/variable names kept for historical continuity per
+//    docs/course-audit/modules/module-09-reorder-migration-plan.md §11 —
+//    only the moduleId passed into the state pipeline changes, since that
+//    is what determines which progress slot the result is written to. ──
 function submitM9CP(id) {
-  submitCheckpoint(9, id, M9.system, M9.questions[id]);
+  submitCheckpoint(10, id, M9.system, M9.questions[id], 'Cadence couldn\'t review your answer. Check your connection and try again.');
 }
 function m9cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM9CP(id); }
 }
 
-// ── MODULE 10 ──
+// ── PRICING/CLOSING CHECKPOINTS (m10cp1/m10cp2 — historically named; now
+//    belong to student-facing Module 9, Checkout, Client Closing & Pricing
+//    Strategy, after the course-audit-build 9<->10 reorder. Same naming
+//    rationale as above. ──
 function submitM10CP(id) {
-  submitCheckpoint(10, id, M10.system, M10.questions[id]);
+  submitCheckpoint(9, id, M10.systems[id], M10.questions[id], 'Cadence couldn\'t review your pricing. Check your connection and try again.');
 }
 function m10cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM10CP(id); }
@@ -9027,20 +9184,122 @@ function advanceResetStep() {
 // MODULE 10 INTERACTIVE — Pricing calculator
 // ══════════════════════════════════════════════════════
 
+// Module 9 (Checkout, Client Closing & Pricing Strategy) — Cost Base ->
+// Target Price calculator. Corrected per
+// docs/course-audit/modules/module-09.md "Pricing calculator — required
+// correction": no unexplained 30% default, no silent all-zero success
+// state, no break-even mislabel (a true break-even price is simply the
+// cost base at margin 0 — this now falls out of the formula naturally
+// rather than being special-cased), and explicit validation instead of
+// `|| fallback` values that silently change meaning.
 function calcPrice() {
-  const product = parseFloat(document.getElementById('calcProduct').value) || 0;
-  const overhead = parseFloat(document.getElementById('calcOverhead').value) || 0;
-  const time = parseFloat(document.getElementById('calcTime').value) || 0;
-  const margin = parseFloat(document.getElementById('calcMargin').value) || 30;
-  const cost = product + overhead + time;
-  const price = cost / (1 - margin / 100);
+  const productEl = document.getElementById('calcProduct');
+  const overheadEl = document.getElementById('calcOverhead');
+  const timeEl = document.getElementById('calcTime');
+  const marginEl = document.getElementById('calcMargin');
   const result = document.getElementById('calcResult');
-  if (result) {
-    result.innerHTML = '<div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Minimum price to break even</div>'
-      + '<div style="font-family:var(--aimt-font-serif);font-size:2rem;letter-spacing:-.02em;color:var(--text)">$' + price.toFixed(0) + '</div>'
-      + '<div style="font-size:.78rem;color:var(--muted);font-weight:300;margin-top:4px;">Cost: $' + cost.toFixed(0) + ' · ' + margin + '% margin built in</div>';
+  if (!productEl || !overheadEl || !timeEl || !marginEl || !result) return;
+
+  const productRaw = productEl.value.trim();
+  const overheadRaw = overheadEl.value.trim();
+  const timeRaw = timeEl.value.trim();
+  const marginRaw = marginEl.value.trim();
+
+  if (!productRaw && !overheadRaw && !timeRaw && !marginRaw) {
+    result.innerHTML = '<div style="font-size:.85rem;color:var(--muted);font-weight:300;">Enter your cost inputs and a target margin to calculate a price.</div>';
     result.style.display = 'block';
+    return;
   }
+
+  const marginNum = parseFloat(marginRaw);
+  const marginValid = marginRaw !== '' && Number.isFinite(marginNum) && marginNum >= 0 && marginNum < 100;
+  if (!marginValid) {
+    result.innerHTML = '<div style="font-size:.85rem;color:var(--muted);font-weight:300;">Enter a target margin between 0 and 99% to calculate a target price.</div>';
+    result.style.display = 'block';
+    return;
+  }
+
+  const productNum = parseFloat(productRaw);
+  const overheadNum = parseFloat(overheadRaw);
+  const timeNum = parseFloat(timeRaw);
+  const product = productRaw !== '' && Number.isFinite(productNum) ? productNum : 0;
+  const overhead = overheadRaw !== '' && Number.isFinite(overheadNum) ? overheadNum : 0;
+  const time = timeRaw !== '' && Number.isFinite(timeNum) ? timeNum : 0;
+
+  const cost = product + overhead + time;
+  const price = cost / (1 - marginNum / 100);
+
+  result.innerHTML =
+    '<div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Modeled cost base</div>'
+    + '<div style="font-family:var(--aimt-font-serif);font-size:1.4rem;letter-spacing:-.02em;color:var(--text);margin-bottom:10px;">$' + cost.toFixed(0) + '</div>'
+    + '<div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Selected target margin</div>'
+    + '<div style="font-family:var(--aimt-font-serif);font-size:1.4rem;letter-spacing:-.02em;color:var(--text);margin-bottom:10px;">' + marginNum + '%</div>'
+    + '<div style="font-family:var(--aimt-font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Calculated target price</div>'
+    + '<div style="font-family:var(--aimt-font-serif);font-size:2rem;letter-spacing:-.02em;color:var(--text);">$' + price.toFixed(0) + '</div>';
+  result.style.display = 'block';
+}
+
+// Close Without Pressure — ungraded interaction (Module 9). Reuses the
+// established m5Decide/m6Sort single-select-with-per-option-feedback
+// pattern: state applies only to the selected option, the strongest
+// response is never pre-highlighted, feedback is text (not color-only),
+// and nothing here touches APP_STATE — no persistence, no completion gate.
+const M9_CWP_ANSWER = {
+  strongest: 0,
+  feedback: {
+    0: 'This keeps the shape from 9.1: a moment to reorient, a concise truthful recap, an open door for questions, and an invitation to future options without pressure — nothing here is being pushed.',
+    1: 'This skips reorientation and jumps straight into booking before the client has had a moment to settle. Give the recap and the reorientation moment first — sales pressure, even friendly-sounding pressure, is still pressure.',
+    2: 'This recites the entire service back step by step instead of a concise, genuine recap. A brief acknowledgment of what mattered is enough — narrating everything can feel like a performance report, not a closing conversation.',
+    3: '"Congested" states a conclusion about the client\'s scalp rather than describing what was done. Recap what you did, not a diagnosis of what you found.',
+    4: 'Retail, home care, and rebooking are all offered in one breath. A recommendation should have a specific reason tied to the service you just delivered — and shouldn\'t be unloaded all at once.',
+    5: 'Implying the client needs to decide immediately creates artificial urgency. Future options should be offered without pressure — the client can always call to book.'
+  }
+};
+function m9CwpSelect(choice, btn) {
+  const block = getActiveElementById('m9CwpDecision');
+  const feedback = getActiveElementById('m9CwpFeedback');
+  if (!block || !feedback) return;
+  const opts = block.querySelectorAll('.bq-opt');
+
+  // Reset every option to neutral first — only the option the student just
+  // selected receives a state. The strongest response is never revealed on
+  // an unselected option; it only turns green when the student picks it.
+  opts.forEach(o => {
+    const isSelected = o === btn;
+    o.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    o.classList.toggle('selected', isSelected);
+    o.classList.remove('correct', 'wrong');
+    const existingTag = o.querySelector('.bq-tag');
+    if (existingTag) existingTag.remove();
+  });
+
+  const isStrongest = choice === M9_CWP_ANSWER.strongest;
+  const tag = document.createElement('span');
+  tag.className = 'bq-tag';
+  if (isStrongest) {
+    btn.classList.add('correct');
+    tag.textContent = 'Strongest response';
+  } else {
+    btn.classList.add('wrong');
+    tag.textContent = 'Worth reconsidering';
+  }
+  btn.appendChild(tag);
+
+  feedback.style.display = 'block';
+  feedback.textContent = M9_CWP_ANSWER.feedback[choice];
+}
+function m9CwpReset() {
+  const block = getActiveElementById('m9CwpDecision');
+  const feedback = getActiveElementById('m9CwpFeedback');
+  if (!block || !feedback) return;
+  block.querySelectorAll('.bq-opt').forEach(o => {
+    o.setAttribute('aria-pressed', 'false');
+    o.classList.remove('selected', 'correct', 'wrong');
+    const tag = o.querySelector('.bq-tag');
+    if (tag) tag.remove();
+  });
+  feedback.style.display = 'none';
+  feedback.textContent = '';
 }
 
 // ══════════════════════════════════════════════════════
