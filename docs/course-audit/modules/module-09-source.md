@@ -19,9 +19,11 @@ Per the owner's locked future module order, the technical (in-code) module numbe
 | `9`: "Module 9 — Sanitation & Reset Systems" | → future **Module 10** — Sanitation & Reset Systems |
 | `10`: "Module 10 — Pricing Strategy" | → primary source for new **Module 9** — Checkout, Client Closing & Pricing Strategy |
 | `11`: "Course Completion & Certification" | → preserved for a later completion/certificate audit, **not** folded into a future AI module |
-| *(no technical module 12 exists — `MODULE_COUNT` is 12, i.e. technical `0`–`11` only)* | → future **Module 11** — AI / Modern Practice Tools (new curriculum, currently unbuilt); future **Module 12** — Final Exam (unbuilt) |
+| *(no technical module 12 exists — `TOTAL_MODULES` is 12, i.e. technical `0`–`11` only)* | → future **Module 11** — AI / Modern Practice Tools (new curriculum, currently unbuilt); future **Module 12** — Final Exam (unbuilt) |
 
-**No code was changed to reflect this.** `MODULE_TITLES`, `MODULE_COUNT`, routing (`openModuleById`), and every module's own "up next" copy (e.g. technical Module 8's completion card still says "Up next — Module 9: Sanitation and reset systems," technical Module 10's completion card still says "Up next — Course completion") all still reflect the **old** technical order. This is the same conflict already flagged in `00-aimt-current-course-status.md`'s "Locked future module order" note (recorded August 24, 2026) — this document does not resolve it, only extracts against it.
+**Naming correction (this task):** the module-count constant is `TOTAL_MODULES = 12` in `headspa-mastery.html:6988` (`// 0 through 11`), read by `renderHomeProgress()`. A separately declared `MODULE_COUNT = 12` also exists, but only inside `assets/js/headspa-state.js:5` (the progress/state engine), used by its own sanitize/completion-count logic — the two are same-value, different-file constants, not one shared identifier. Both currently read `12`; neither was changed by this extraction.
+
+**No code was changed to reflect the new order.** `MODULE_TITLES`, `TOTAL_MODULES`/`MODULE_COUNT`, routing (`openModuleById`), and every module's own "up next" copy (e.g. technical Module 8's completion card still says "Up next — Module 9: Checkout, client closing, and pricing strategy" — already corrected in Module 8's own polish pass to preview the *new* Module 9 identity, see `00-aimt-current-course-status.md` — while technical Module 10's completion card still says "Up next — Course completion," the **old** order, uncorrected) all still reflect a mix of old and newly-corrected technical order. This is the same conflict already flagged in `00-aimt-current-course-status.md`'s "Locked future module order" note (recorded August 24, 2026) — this document does not resolve it, only extracts against it.
 
 ---
 
@@ -53,7 +55,7 @@ A full-file search was run for: treatment close, client close, checkout, payment
 2. *(unnumbered)* "Know your real cost — not your guess" — 3-card concept grid: Fixed costs, Variable costs, Time cost ("A '1-hour service' is not 1 hour... closer to 1 hour 20–30 minutes").
 3. *(unnumbered, info-card)* "A simple pricing framework" — 5-step formula: hourly target ($120–150/hr stated as "a sustainable starting point for most markets") → real service time (×1.25) → multiply → add cost buffer → adjust for market.
 4. **10.1 — Build your menu.** "Three tiers. No more." Anchor (60-min) → premium (90-min/2-hour signature) → optional intro tier. Cadence note on framing premium as "the obvious one."
-5. **10.2 — Know your numbers first.** Warns against competitor-based pricing. Contains the **interactive price calculator** (`#calcProduct`/`#calcOverhead`/`#calcTime`/`#calcMargin` → `calcPrice()` → `price = cost / (1 - margin/100)`, displayed to the nearest dollar).
+5. **10.2 — Know your numbers first.** Warns against competitor-based pricing. Contains the **interactive price calculator** (`#calcProduct`/`#calcOverhead`/`#calcTime`/`#calcMargin` → `calcPrice()` → `price = cost / (1 - margin/100)`, displayed to the nearest dollar). See §7a below for the exact code, output label, and a confirmed math/label discrepancy.
 6. **10.3 — Add-ons.** "Enhancements, not upsells." 5 add-on cards, each with a name, an observation-framed client script, and a price range: Scalp treatment serum (+$20–35), Extended massage time (+$25–40), Deep conditioning upgrade (+$15–30), Blow dry (+$30–60, "decide in advance whether included or add-on"), Aromatherapy enhancement (+$10–20).
 7. *(unnumbered)* "The real problem — fear-based pricing." Reframes underpricing as a confidence problem, not a math problem. Two info-cards: "What underpricing actually looks like" (burnout/compounding-decline framing) and "Positioning language matters" (word-swap pairs: "basic option" → "core service"; "more expensive" → "extended experience"). Key-point: signs of underpriced vs. aligned.
 8. **10.4 — Positioning.** "When a client says it feels expensive." Reframes this as marketing feedback, not financial feedback — a positioning problem that started before the appointment (intake form, booking language, website, consultation). Info-card: "What positions premium correctly" (booking language, consultation-as-expertise-demonstration, closing script naming value, home-care follow-up).
@@ -102,6 +104,40 @@ Technical Module 10 §10.3, in full (see §3 above) — 5 named add-ons with cli
 
 The complete 5-step formula, the fixed/variable/time cost framework, the three-tier menu structure, the fear-based-underpricing reframe, and the positioning-language word-swap pairs — all in technical Module 10, fully catalogued in §3 above. No separate pricing content exists elsewhere in the course.
 
+### 7a. Pricing calculator — exact code, labels, and a confirmed math/label discrepancy
+
+Verified directly against `headspa-mastery.html` (reconciliation pass, this task).
+
+**Inputs (`headspa-mastery.html:6748–6764`):** four `<input type="number">` fields, each preceded by a `<label class="calc-label">` with **no `for` attribute** — the label text and input are visually adjacent but not programmatically associated for assistive technology (see §17 below).
+- `#calcProduct` — "Product cost per service ($)" — placeholder `e.g. 12`, `min="0"`, no default value
+- `#calcOverhead` — "Overhead per service ($)" — placeholder `e.g. 25`, `min="0"`, no default value
+- `#calcTime` — "Your time cost ($)" — placeholder `e.g. 40`, `min="0"`, no default value
+- `#calcMargin` — "Target margin (%)" — placeholder `e.g. 30`, `min="0" max="90"`, **`value="30"` is a real pre-filled default**, not just a placeholder
+
+**Formula and output — exact code (`calcPrice()`, `headspa-mastery.html:9030–9044`):**
+```js
+function calcPrice() {
+  const product = parseFloat(document.getElementById('calcProduct').value) || 0;
+  const overhead = parseFloat(document.getElementById('calcOverhead').value) || 0;
+  const time = parseFloat(document.getElementById('calcTime').value) || 0;
+  const margin = parseFloat(document.getElementById('calcMargin').value) || 30;
+  const cost = product + overhead + time;
+  const price = cost / (1 - margin / 100);
+  const result = document.getElementById('calcResult');
+  if (result) {
+    result.innerHTML = '...Minimum price to break even...'
+      + '...$' + price.toFixed(0) + '...'
+      + '...Cost: $' + cost.toFixed(0) + ' · ' + margin + '% margin built in...';
+    result.style.display = 'block';
+  }
+}
+```
+The rendered output label (`headspa-mastery.html:9039`) reads exactly: **"Minimum price to break even."**
+
+**Validation/fallback behavior:** any blank or non-numeric `product`/`overhead`/`time` field silently falls back to `0` (not an error state, no user-facing message); a blank/non-numeric `margin` field falls back to `30`, not `0`. There is no minimum-input requirement, no disabled state before input, and no error/empty state distinct from "all zeros" — an all-blank submission silently computes and displays `$0`.
+
+**Confirmed discrepancy (this is Known External-Audit Risk #8 — see §9 below):** the formula `price = cost / (1 - margin/100)` computes a price that *includes* the student's chosen profit margin (e.g., at the pre-filled 30% default, a $100 cost produces a $143 output) — this is a margin-loaded target price, not a break-even price. A genuine break-even price is simply `cost` itself (margin = 0%, since below cost is a loss and above cost is profit). Labeling the margin-inclusive output "Minimum price to break even" is a direct terminology error: the number shown is the minimum price to hit the *chosen margin*, not the minimum price to avoid a loss. The 30% margin default is also never explained or connected back to the $120–150/hr benchmark used earlier in the same section (already flagged in the pre-existing §9 "Arbitrary-reading margin defaults" risk) — both defects sit in the same UI element.
+
 ---
 
 ## 8. Existing interactions, checkpoint IDs, and Cadence — consolidated
@@ -117,6 +153,10 @@ The complete 5-step formula, the fixed/variable/time cost framework, the three-t
 
 For completeness, technical Module 9 (future Module 10, Sanitation) carries the parallel `m9cp1`/`m9cp2`/`M9.system`/`MODULE_GUIDE_SYSTEMS[9]`/`MODULE_QUICK_PROMPTS[9]` — same shared-rubric and old-persona pattern, recorded here only because it is adjacent, not because it belongs to new Module 9.
 
+**Checkpoint submission wiring — verified (`headspa-mastery.html:8756–8769`):** `submitM9CP(id)` calls `submitCheckpoint(9, id, M9.system, M9.questions[id])`; `submitM10CP(id)` calls `submitCheckpoint(10, id, M10.system, M10.questions[id])` — both use the same shared `submitCheckpoint()` function every other module uses (`headspa-mastery.html:7341`), including the same Review Mode branch (`submitCheckpointReviewMode`, never persists, never marks passed, never completes/unlocks). Enter submits / Shift+Enter inserts a newline via `m9cpKey`/`m10cpKey`, matching the established pattern.
+
+**Missing module-specific network-error text.** `submitCheckpoint(moduleId, cpId, systemPrompt, question, errorMessage)` accepts an optional 5th `errorMessage` argument, used by other already-corrected modules (e.g. Module 5's README entry: *"`submitM5CP` now passes the approved Module 5 network-error text"*) to show a module-tailored message on a failed grading call. **Neither `submitM9CP` nor `submitM10CP` passes this argument** — both fall back to the generic default (`'Cadence didn't respond — check your connection and try again.'`, `headspa-mastery.html:7396`). Not a defect in isolation, but it is the same class of pre-audit gap already closed in Modules 1–8; flagged here since the future Module 9 will inherit this checkpoint wiring from technical Module 10's `submitM10CP`.
+
 **Existing visuals/resources for technical Modules 9–11:** none (confirmed above).
 
 ---
@@ -129,7 +169,9 @@ Per instruction, these are recorded for the external audit's attention, not fixe
 - **Guaranteed/near-guaranteed outcome language.** "If they feel easy to say yes to, they convert" (add-on framing) implies a predictable conversion outcome from a communication technique. "The most effective add-ons are ones you recommend based on what you observed" states a causal best-practice as settled fact without qualification.
 - **Borderline manipulative-selling framing.** The Cadence note on making "the premium option feel like the obvious one... a client who can afford it would feel like they're leaving something behind by not choosing it" edges toward engineered FOMO rather than transparent value communication — worth the external audit's explicit judgment call.
 - **Old Cadence persona pattern, uncorrected.** `MODULE_GUIDE_SYSTEMS[9]`, `[10]`, and `[11]` all still open "You are Cadence — a mentor built from nearly two decades in the head spa industry" (personal-experience claim, old framing) — the same defect class already corrected for Modules 0–8's guide strings. Flagged for correction whenever this content is actually implemented, not fixed here.
+- **Old course name, separately, in the checkpoint rubric text itself.** Distinct from the persona claim above: `M9.system` and `M10.system` (`headspa-mastery.html:7822` and `:7831` — the actual grading-rubric strings sent to the AI, not the module-aware guide strings) both still open **"You are Cadence, instructor of HeadSpa Mastery"** — the old course name (per `00-global-decisions.md`'s "Course name" rule, target is "Head Spa Certification Course"). Verified by direct comparison: every other module's checkpoint rubric (`M0` through `M8`, `headspa-mastery.html:7509–7812`) already opens with the corrected "You are Cadence, [the/AIMT's] curriculum-grounded [learning] guide for the Head Spa Certification Course" framing — `M9`/`M10` are the only two remaining holdouts of this specific old-name pattern anywhere in the checkpoint-rubric layer.
 - **Shared single-function rubric.** `M10.system` (and `M9.system`) use one shared `system(q)` function for both checkpoints rather than per-checkpoint rubrics — the same pre-audit pattern already replaced with `M{n}.systems.{cpId}` for Modules 1–8.
+- **Calculator mislabels a margin-loaded price as "break even."** Confirmed present — see §7a above for the full code, exact label text, and the specific math/label contradiction (`headspa-mastery.html:9030–9044`). This is Known External-Audit Risk #8 from the prior handoff; it was not previously cited with code/line evidence in this extraction and is added here.
 - **No tax/legal/employment content** exists anywhere in the pricing material — pricing is discussed as if 100% of revenue is discretionary net income; no mention of self-employment tax, sales tax on services (state-dependent), or business-structure implications. Not necessarily a defect (may be intentionally out of scope for a cosmetology-certification course), but worth an explicit scope decision.
 - **Arbitrary-reading margin defaults.** The calculator defaults to a 30% target margin with no explanation of why 30% versus another figure, and no connection back to the "$120–150/hr" benchmark used earlier in the same section (the two aren't mathematically reconciled for the reader).
 - **Scope/safety note absent from enhancement marketing.** The "Scalp treatment serum" and "Deep conditioning upgrade" add-on scripts recommend product/treatment changes framed purely as sales language, with no cross-reference to Module 5/6's contraindication or adaptation judgment — worth checking whether an in-service upsell script could ever conflict with a genuine scalp-presentation safety reason to *not* add a product.
@@ -179,12 +221,37 @@ Technical Module 10 currently has zero images/diagrams (confirmed §3). A future
 ## 15. Future module mapping (recorded, not implemented)
 
 - **Future Module 10 — Sanitation & Reset Systems.** Primary source = current technical Module 9 (`headspa-mastery.html:6520–6676`), subject to its own later audit. Confirmed zero overlap with new Module 9's subject matter.
-- **Future Module 11 — AI / Modern Practice Tools.** New curriculum. Confirmed **not built** — no technical module exists for this subject anywhere in `headspa-mastery.html` (`MODULE_COUNT` is 12, i.e. technical `0`–`11` only, and technical `11` is Course Completion & Certification, not AI tools).
+- **Future Module 11 — AI / Modern Practice Tools.** New curriculum. Confirmed **not built** — no technical module exists for this subject anywhere in `headspa-mastery.html` (`TOTAL_MODULES` is 12, i.e. technical `0`–`11` only, and technical `11` is Course Completion & Certification, not AI tools).
 - **Future Module 12 — Final Exam.** Confirmed **not built** — no technical module 12 exists in code at all.
 - **Completion/certification content disposition.** Current technical Module 11 (`headspa-mastery.html:6863–6958`, plus the certificate overlay markup and `showCertificate()`/cert-generation logic elsewhere in the file) is preserved exactly as-is, reserved for the separate, later completion/certificate-flow audit named in the master instructions (`00-aimt-course-audit-master-instructions.md`'s master project order, item 2) — explicitly **not** treated as a source for the future AI module, and not touched by this extraction.
 
 ---
 
-## 16. No implementation performed
+## 16. Accessibility / technical implementation
 
-This extraction did not: rename any module, change `MODULE_TITLES`, change `MODULE_COUNT`, correct any of the flagged audit risks (old Cadence persona, shared rubric function, unqualified formulas), build any new interaction, or create the Enhancement Guide downloadable. `git diff --check` on this task's full changeset confirms no production code (`headspa-mastery.html`, `assets/js/*.js`, `functions/*`) was touched by Module 9 work — only this new documentation file was added.
+Verified directly against `headspa-mastery.html` (reconciliation pass, this task) — not assessed in the original extraction pass.
+
+**Checkpoint controls — foundation-consistency regression confirmed against Module 8.** Per `00-global-decisions.md`'s "Course foundation consistency" rule, the checkpoint component is explicitly named foundation and must stay consistent across approved modules. Technical Module 10's checkpoints (the primary source for new Module 9) do **not** match Module 8's (the most recently worked module) checkpoint markup:
+
+| Element | Module 8 (`m8cp1`/`m8cp2`, current pattern) | Module 10 (`m10cp1`/`m10cp2`, pre-audit) |
+|---|---|---|
+| Response container class | `cp-res` | `cp-response` (different class name) |
+| Response container `aria-live` | `aria-live="polite"` present | **absent** |
+| Voice button `aria-label` | `aria-label="Speak your answer"` present | **absent** (only `title="Speak your answer"`) |
+| Submit button `aria-label` | `aria-label="Send response to Cadence"` present | **absent** |
+
+Technical Module 9's checkpoints (`m9cp1`/`m9cp2`) carry the identical pre-audit pattern (same `cp-response` class, same missing `aria-label`/`aria-live` trio). This means a screen-reader user gets no live announcement when Cadence's graded response arrives on either checkpoint, and the voice/submit controls have only a `title` tooltip (not reliably exposed to assistive tech) instead of an accessible name. This is the same defect class already corrected for Modules 1, 3, 5, and 8's checkpoints (confirmed present there) — Module 10 was never included in that correction pass.
+
+**Pricing calculator inputs.** The four calculator `<label>` elements have no `for` attribute pointing at their paired `<input>`'s `id` (see §7a) — visually adjacent but not programmatically associated. `#calcResult` (the output region `calcPrice()` writes into) has no `aria-live` — a screen-reader user who activates "Calculate minimum price" gets no announcement that a result appeared. The four number inputs use native `<input type="number">` (semantically correct control type) with visible native labels, `min`/`max` attributes present on 3 of 4 fields (none on `#calcTime`).
+
+**Reset-sequence interaction (technical Module 9, §9.2, `#resetSequence`/`startResetTimer()`)** was not deep-audited here since it belongs to future Module 10 (Sanitation), not new Module 9 — noted only because it lives in the same technical module currently reconciled as future Module 9's counterpart. Not in scope for this extraction.
+
+**Review Mode behavior — confirmed consistent.** Both technical Modules 9 and 10 route through the same shared `submitCheckpoint()` → `submitCheckpointReviewMode()` branch as every other module (§8 above) — Review Mode's non-persisting checkpoint behavior is already correct for this content and needs no correction.
+
+**Mobile/saved-state:** not separately verified in this pass (no rendered-browser QA was performed for this source-extraction task, per the task's read/reconciliation-only scope) — flagged as unverified rather than assumed clean.
+
+---
+
+## 17. No implementation performed
+
+This extraction did not: rename any module, change `MODULE_TITLES`, change `TOTAL_MODULES`/`MODULE_COUNT`, correct any of the flagged audit risks (old Cadence persona, old course name in the checkpoint rubrics, shared rubric function, unqualified formulas, the calculator's break-even mislabel, the missing checkpoint accessibility attributes), build any new interaction, or create the Enhancement Guide downloadable. `git diff --check` on this task's full changeset confirms no production code (`headspa-mastery.html`, `assets/js/*.js`, `functions/*`) was touched by Module 9 work — only this documentation file was added/updated.
