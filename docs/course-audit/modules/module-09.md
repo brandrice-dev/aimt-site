@@ -5,10 +5,13 @@
 **Approved module title:** Checkout, Client Closing & Pricing Strategy
 **Primary curriculum source:** technical Module 10 (Pricing Strategy), `headspa-mastery.html:6677–6862`
 **Source reviewed:** `module-09-source.md`
-**External audit:** approved for controlled specification creation (this task)
-**Audit date:** August 24, 2026
-**Status:** Drafted from the approved external audit. **Not yet reviewed or accepted as implementation authority.** Per the governing module lifecycle, this document is step 4 (approved audit specification) — implementation (step 5) must not begin until this specification is explicitly reviewed and accepted in a separate, later task.
+**External audit:** approved for controlled specification creation (prior task)
+**Specification review:** **approved in substance** — five narrow amendments applied plus a saved-state migration-plan requirement (this task, August 24, 2026)
+**Audit date:** August 24, 2026 (specification drafted); August 24, 2026 (specification reviewed and amended)
+**Status:** **Approved curriculum specification — implementation blocked pending migration-plan approval.** Curriculum and content direction are locked (see "Module 9 core direction — locked" below); the only remaining gate before implementation authority is external review and explicit approval of the saved-state migration plan (`module-09-reorder-migration-plan.md`). This is **not** `Approved for implementation`.
 **Production source of truth:** `headspa-mastery.html`
+
+**Specification review corrections (this task, not a reopened audit):** the external reviewer examined the drafted specification itself (not just the source extraction) and approved it in substance, requiring five narrow corrections before it can become implementation authority: (1) resolved a genuine internal contradiction over whether the five existing enhancement examples' old dollar ranges may appear as illustrative student-facing content — they may not; they are source-history evidence only (see "Enhancement price ranges — source-history only" below); (2) replaced clinical-sounding diagnostic terminology describing the price-feedback review process with plain "multi-factor business review" language; (3) qualified the underpricing/burnout language so it states a possible contribution rather than an automatic causal guarantee; (4) made the migration-plan review gate strictly sequential and unambiguous — no reorder code may be written before the migration plan is externally reviewed and approved, full stop, not "reviewed within implementation"; (5) locked the eventual Sanitation-slot completion handoff to explicitly name Module 11 — AI / Modern Practice Tools as the next identity, while being explicit that no live functional route into that nonexistent module may be built. A sixth narrow wording cleanup softened one absolute claim ("damages" → "can disrupt"). None of these corrections reopens or weakens the approved curriculum direction — see "Module 9 core direction — locked" below.
 
 This document converts the approved external audit into the controlling content and technical authority for future Module 9. It does not itself authorize implementation, does not touch any production file, and does not begin the technical reorder it requires — see "Critical technical requirement" below, which is a blocking pre-implementation investigation, not a decision made by this document.
 
@@ -71,13 +74,14 @@ Explicitly remove or rewrite the following from the primary source (technical Mo
 - `Three tiers. No more.` and the rubric-level claim that "three tiers is optimal — too many options cause clients to choose down" — no basis for one universal service-count rule. See "Menu design" below.
 - The Cadence note that the premium option should be framed so a client "would feel like they're leaving something behind by not choosing it" — engineered FOMO. Removed entirely, not softened.
 - `If they feel easy to say yes to, they convert` and any other claim that a specific framing technique produces a predictable sales outcome.
-- The unqualified `"felt expensive" = positioning problem` framing — replaced with a differential-diagnosis approach to price feedback (see "Price feedback" below).
+- The unqualified `"felt expensive" = positioning problem` framing — replaced with a multi-factor business-review approach to price feedback (see "Price feedback" below).
 - Fear/confidence treated as the primary explanation for underpricing — replaced with a broader set of causes, evidence-based and business-grounded.
 - The unexplained 30% margin default (`#calcMargin value="30"`, `headspa-mastery.html:6764`) — the student must now choose a margin deliberately.
 - The "Minimum price to break even" mislabel (`headspa-mastery.html:9039`) — a confirmed math/label contradiction (see `module-09-source.md` §7a and "Pricing calculator — required correction" below).
 - The old course name in `M10.system` ("instructor of HeadSpa Mastery," `headspa-mastery.html:7831`) and the "nearly two decades" Cadence persona claim in `MODULE_GUIDE_SYSTEMS[10]` (`headspa-mastery.html:7849`) — the same corrections already applied to Modules 0–8.
 - The shared single-function `M10.system` rubric — replaced with per-checkpoint rubrics, matching Modules 1–8's pattern.
 - Enhancement-script language that implies diagnosis (e.g., framing a recommendation around "what the scalp needs") or ignores the contraindication/adaptation judgment taught in Modules 5–6.
+- The five existing enhancement examples' old dollar ranges (e.g., "+$20–35") as shipped student-facing content anywhere — lesson, downloadable guide, Cadence, or checkpoints. See "Enhancement price ranges — source-history only" below.
 
 ---
 
@@ -86,6 +90,36 @@ Explicitly remove or rewrite the following from the primary source (technical Mo
 **Close the experience as intentionally as you opened it. Price from real numbers, not pressure or guesswork.**
 
 Module 9 is a **Business Decision Lab**, not a sales lesson. It should feel like the module where the student stops performing a script and starts reasoning like a business owner — the same shift Module 5 made from "recite the protocol" to "adapt the protocol," applied here to money and client communication instead of technique.
+
+---
+
+## Module 9 core direction — locked
+
+The specification review confirmed the following as approved curriculum direction, **not reconsidered or weakened** by this task's five amendments. This task is a narrow correction pass, not a second external audit:
+
+- Title: **Checkout, Client Closing & Pricing Strategy.**
+- Business Decision Lab learning rhythm.
+- Relaxation-first closing.
+- Client autonomy.
+- Financial clarity.
+- Real cost + full practitioner time.
+- Margin vs. markup (Section 9.3).
+- The corrected Cost Base → Target Price calculator.
+- No universal `$120–150/hr` benchmark.
+- No unexplained 30% margin default.
+- No break-even mislabel.
+- Competitor pricing as context, not formula.
+- No universal three-tier menu rule.
+- No premium FOMO framing.
+- Enhancements must earn their place.
+- No predictable conversion/rebooking claims.
+- Multi-factor price-feedback review (see "Amendment 2" correction above — now named without diagnostic terminology).
+- **Close Without Pressure** as the only new ungraded interaction.
+- `m10cp1` and `m10cp2` preserved as stable competency IDs.
+- Per-checkpoint rubrics.
+- Cadence as business-decision/client-closing coach.
+- Head Spa Enhancement Menu & Positioning Guide as the approved downloadable opportunity.
+- Calculator + one ungraded interaction + two checkpoints as the approved interaction density.
 
 ---
 
@@ -112,7 +146,7 @@ Module 9 is a **Business Decision Lab**, not a sales lesson. It should feel like
 
 **Content changes:** entirely new — nothing in the current source covers this transition (confirmed in `module-09-source.md` §4–§5: zero existing content on payment methods, gratuity, cancellation/deposit policy, rebooking mechanics, or point-of-sale closeout).
 
-**Before moving on, the student should:** be able to describe the five-part closing shape in their own words and explain why skipping the reorientation step damages the relaxation-first experience the entire course has built toward.
+**Before moving on, the student should:** be able to describe the five-part closing shape in their own words and explain why skipping the reorientation step can disrupt the relaxation-first experience the entire course has built toward.
 
 ### Close Without Pressure — new ungraded interaction
 
@@ -197,10 +231,10 @@ Placed immediately after 9.1. Full specification below (see "Close Without Press
 - An enhancement should have: a distinct purpose; a real service difference; a time effect where applicable; a cost effect; clear client-facing positioning; and an appropriate place in the client journey.
 - Recommendations should be based on the established service plan, the client's goals/preferences, practitioner observation *within scope*, product directions, contraindications or modifications already identified (direct continuity with Modules 5–6), training, and available appointment time.
 - **Do not** imply "what the scalp needs" — that phrasing crosses into diagnosis. **Do not** recommend an enhancement merely because it exists on the menu. **Do not** claim an enhancement "converts" because of how it is presented.
-- Retain the five existing add-on examples (Scalp treatment serum, Extended massage time, Deep conditioning upgrade, Blow dry, Aromatherapy enhancement — `headspa-mastery.html:6752–6756`) as illustrative examples, corrected per the scope note below — their client-facing scripts are otherwise strong and observation-framed.
+- Retain the five existing add-on examples' **service concepts, client-positioning structure, and client-facing scripts** (Scalp treatment serum, Extended massage time, Deep conditioning upgrade, Blow dry, Aromatherapy enhancement — `headspa-mastery.html:6752–6756`) — these are otherwise strong and observation-framed. **Do not retain their old dollar ranges as shipped student-facing content** — see "Enhancement price ranges — source-history only" below for the full, unambiguous rule.
 - Add an explicit scope cross-reference: an in-service enhancement recommendation must never override a genuine scalp-presentation safety reason (from Module 5/6's adaptation and contraindication judgment) not to add a product. If a presentation calls for restraint, restraint wins over the sale.
 
-**Content changes:** retain the five add-on examples' structure and price-range framing as historical/illustrative reference (not certified universal pricing — see the downloadable resource section below); add the scope cross-reference sentence to the section's close.
+**Content changes:** retain the five add-on examples' service concepts, structure, and client-facing script language; **remove the old dollar ranges from the shipped lesson** (see "Enhancement price ranges — source-history only" below — they are source-history evidence, not illustrative or AIMT-recommended student-facing figures); add the scope cross-reference sentence to the section's close.
 
 **Before moving on, the student should:** be able to describe, for one enhancement example, what observation would make it appropriate to offer and what observation would make it inappropriate to offer.
 
@@ -210,7 +244,7 @@ Placed here because it synthesizes Sections 9.2–9.7: cost awareness, practitio
 
 ### 9.8 — When a client says the price felt high
 
-**Purpose:** Replace the unqualified "felt expensive = positioning problem" framing with a differential-diagnosis approach that treats price feedback as genuinely ambiguous evidence.
+**Purpose:** Replace the unqualified "felt expensive = positioning problem" framing with a multi-factor business-review approach that treats price feedback as genuinely ambiguous evidence — one client comment does not prove one cause. This is ordinary business analysis, not a clinical diagnostic process, and should not borrow diagnostic terminology.
 
 **Key teaching points:**
 
@@ -226,9 +260,9 @@ Placed here because it synthesizes Sections 9.2–9.7: cost awareness, practitio
 
 **Purpose:** Replace "fear-based pricing" as the primary explanation for underpricing with a broader, more accurate set of causes — this is a required correction, not a stylistic softening (see "Remove fear-based pricing as a universal diagnosis" below).
 
-**Key teaching points:** a practitioner may underprice because of incomplete cost data, poor overhead allocation, inaccurate time assumptions, competitor copying, an intentional launch strategy, market constraints, weak service differentiation, lack of pricing knowledge, *or* fear — fear is one cause among several, not the default explanation. **Confidence is not a financial model.** Preserve the source's useful encouragement (underpricing compounds into burnout and inconsistent delivery over time — this observation is accurate and stays) but ground the *diagnosis* in business evidence, not psychology alone.
+**Key teaching points:** a practitioner may underprice because of incomplete cost data, poor overhead allocation, inaccurate time assumptions, competitor copying, an intentional launch strategy, market constraints, weak service differentiation, lack of pricing knowledge, *or* fear — fear is one cause among several, not the default explanation. **Confidence is not a financial model.** Preserve the source's useful underlying observation, **stated as a qualified relationship, not a guaranteed outcome**: persistent underpricing *can contribute to* financial strain, unsustainable workload, overbooking, or inconsistent delivery over time. Do not claim underpricing *automatically causes* burnout or service decline — ground the *diagnosis* in business evidence, not psychology alone, and do not overstate the certainty of the consequence either.
 
-**Content changes:** rewrite "The real problem — fear-based pricing" (`headspa-mastery.html:6758–6768`) per the above; retain the "what underpricing actually looks like" burnout/compounding-decline observation largely as-is (it survives audit); retain the positioning-language word-swap pairs ("basic option" → "core service"; "more expensive" → "extended experience") as legitimate, non-manipulative language guidance — these describe accurate framing, not engineered pressure, and are not on the "remove or replace" list.
+**Content changes:** rewrite "The real problem — fear-based pricing" (`headspa-mastery.html:6758–6768`) per the above; retain the substance of the "what underpricing actually looks like" observation but **rewrite it as a qualified contributing relationship, not a causal guarantee** (see the approved key-teaching-points wording above) — the source's current phrasing risks reading as "underpricing automatically causes burnout/decline," which overstates certainty even though the underlying pattern is real and worth teaching; retain the positioning-language word-swap pairs ("basic option" → "core service"; "more expensive" → "extended experience") as legitimate, non-manipulative language guidance — these describe accurate framing, not engineered pressure, and are not on the "remove or replace" list.
 
 **Before moving on, the student should:** be able to name at least three possible causes of underpricing beyond "not enough confidence."
 
@@ -275,6 +309,23 @@ See "Completion and gating" below.
 **Classification:** **ungraded.** Writes nothing to `APP_STATE`, does not persist between module visits, and does not gate module completion — consistent with the governing interaction standard and with the audit's explicit instruction that the calculator and this interaction must not gate completion.
 
 **Interaction density note:** this is the module's only new ungraded interaction, alongside the calculator. Do not add more interactions simply to increase activity — the audit is explicit that sales games, conversion scoring, simulated revenue rewards, XP, artificial urgency, or multiple redundant closing scenarios are all rejected. Two applied tools (calculator, Close Without Pressure) plus two required checkpoints is the approved density for this module.
+
+---
+
+## Enhancement price ranges — source-history only
+
+**Final authority (resolves a contradiction the specification review found between Section 9.7 and the downloadable-resource section below — both now say the same thing).**
+
+**Preserve:** the five enhancement examples; their service concepts; their client-positioning structure and script language where otherwise approved per Section 9.7.
+
+**Do not preserve in any shipped student-facing surface:** the old dollar ranges themselves (e.g., "+$20–35" for a scalp treatment serum). These figures are **source-history only** — they may remain visible in `module-09-source.md` as extracted evidence of what the pre-audit curriculum said, but they must not appear as AIMT-recommended or illustrative student-facing ranges in:
+
+- the implemented Module 9 lesson (Section 9.7's rendered copy);
+- the Head Spa Enhancement Menu & Positioning Guide (the downloadable — see "Downloadable resource opportunity" below);
+- Cadence (guide responses or checkpoint rubrics);
+- either checkpoint (`m10cp1` or `m10cp2`).
+
+Every actual price the student sees or produces should come from their own numbers, or — only where necessary to teach the math (e.g., the margin-vs-markup worked example in 9.3) — an explicitly labeled hypothetical figure, never a figure presented as AIMT's recommendation.
 
 ---
 
@@ -381,7 +432,7 @@ Do not fail students for grammar, spelling, concise wording, natural spoken lang
 - "Your cost and time reasoning is solid. Add what makes each option genuinely different for a client — not just the price."
 - "Your menu is clearly differentiated. Add the real cost and practitioner-time reasoning behind at least one price."
 
-**Immediate correction triggers:** cites the removed $120–150/hr figure as a required or "correct" benchmark; states a specific price as the only right answer; treats a client choosing a lower-priced option as a failure or something to be prevented through framing; recommends copying a competitor's price without any own-cost reasoning.
+**Immediate correction triggers:** cites the removed $120–150/hr figure as a required or "correct" benchmark; cites one of the source's historical enhancement dollar ranges (e.g., "+$20–35") as a required or AIMT-recommended figure rather than reasoning from the student's own numbers; states a specific price as the only right answer; treats a client choosing a lower-priced option as a failure or something to be prevented through framing; recommends copying a competitor's price without any own-cost reasoning.
 
 **Use a checkpoint-specific rubric** (`M10.systems.m10cp1`) — see "Approved Cadence behavior" below for its content requirements.
 
@@ -455,7 +506,8 @@ Cadence's Module 9 role: **business-decision and client-closing coach.** Cadence
 - guaranteed conversion language ("if they feel easy to say yes to, they convert" or equivalent);
 - guaranteed rebooking language;
 - "premium should feel obvious" / FOMO framing;
-- any claim that confidence alone solves pricing resistance.
+- any claim that confidence alone solves pricing resistance;
+- citing the pre-audit source's specific historical enhancement dollar ranges (e.g., "+$20–35") as an AIMT-recommended or illustrative figure — Cadence should reference only the student's own entered numbers or an explicitly hypothetical figure, per "Enhancement price ranges — source-history only."
 
 ### Out of scope for Cadence
 
@@ -509,7 +561,7 @@ The student should experience the difference between *"What are other people cha
 
 **Suggested fields (per enhancement entry):** enhancement name; what it adds; best-fit situation; when it does not make sense; added treatment time; business cost considerations; **student-entered price** (not a certified AIMT figure); client-facing explanation; best point in the client journey to offer it; scope/training/product-direction note.
 
-**Do not populate with universal AIMT price ranges.** The current source's price ranges (e.g., "+$20–35" for a scalp treatment serum) may be used as historical source evidence in designing the guide's structure, but must not become certified universal pricing guidance in the shipped downloadable — every price field the student sees should be their own entered number.
+**Do not populate with the source's old dollar ranges.** Per "Enhancement price ranges — source-history only" above, the pre-audit price ranges (e.g., "+$20–35" for a scalp treatment serum) are source-history evidence only — they may inform the guide's *structure* (which fields to include) but must not appear anywhere in the shipped guide as an AIMT-recommended, illustrative, or default figure. Every price field the student sees in the guide should be their own entered number.
 
 **Format:** single-page or short multi-page PDF, printable and mobile-viewable, editable/fillable where practical.
 
@@ -571,6 +623,20 @@ Review Mode remains unsaved.
 
 **This is a blocking pre-implementation investigation requirement, not a decision made by this specification.** It must be resolved, reviewed, and explicitly documented before any implementation task touches `headspa-mastery.html` or `assets/js/headspa-state.js` for this module.
 
+### Required sequence — strictly ordered, no ambiguity
+
+The specification review found a timing contradiction between this section (which correctly required review before reorder code) and an earlier version of "Implementation notes" (which described migration-plan review as happening "within implementation"). That ambiguity is resolved here, once, as the single governing sequence for the rest of this document:
+
+1. Finalize the Module 9 curriculum specification (this document).
+2. Produce the saved-state migration plan (`module-09-reorder-migration-plan.md`).
+3. External review and **explicit approval** of the migration plan.
+4. **Only then** may production implementation/reorder work begin.
+5. Static/mocked validation of the implementation.
+6. Manual QA.
+7. Approval.
+
+**No production reorder code may be written before step 3 clears.** Every other reference to migration-plan review anywhere in this specification — including "Implementation notes" and the acceptance criteria — means step 3 of this sequence and nothing else. There is no interpretation under which the migration plan is reviewed "during" or "as part of" implementation; review and approval are steps 2–3, strictly prior to step 4.
+
 ### The constraint, verified directly against the current architecture
 
 The current technical/persisted-state architecture is more tightly coupled to numeric module position than a simple relabeling can accommodate. Verified by direct code inspection during this specification task:
@@ -604,7 +670,7 @@ A controlled structural move is authorized **only** as required to place Checkou
 
 - Existing Sanitation curriculum may be moved intact into the student-facing Module 10 slot as a structural dependency of this move.
 - **Do not** externally audit, rewrite, or otherwise substantively touch Sanitation's own curriculum content during Module 9 implementation — it moves as-is; its own audit is a separate, later task.
-- **Do not** begin any AI/Modern Practice Tools (future Module 11) curriculum work during this task — it does not yet exist as a technical module and is out of scope entirely.
+- **Do not** begin any AI/Modern Practice Tools (future Module 11) curriculum work during this task — it does not yet exist as a technical module and is out of scope entirely. Sanitation's own relocated completion card (see acceptance criterion 22) may **name** Module 11 as the locked next course identity, but must not build a live functional route into it — no working launch control, no placeholder content page — since no gate or content exists for it yet.
 - **Do not** touch technical Module 11 (Course Completion & Certification) beyond what the slot-swap mechanically requires (it is not involved in the 9/10 swap and should be unaffected) — its content remains reserved for the separate, later completion/certificate-flow audit named in the master instructions.
 
 ---
@@ -644,6 +710,7 @@ Explicitly remove or rewrite, cross-referenced to where each is specified above:
 12. "Nearly two decades" Cadence persona — see "Approved Cadence behavior."
 13. Shared one-rubric-for-both-checkpoints architecture — see "Checkpoint foundation."
 14. Enhancement recommendations that imply diagnosis or ignore adaptation/scope — see Section 9.7.
+15. The five enhancement examples' old dollar ranges as shipped student-facing content in the lesson, downloadable guide, Cadence, or checkpoints — see "Enhancement price ranges — source-history only."
 
 ---
 
@@ -687,14 +754,14 @@ Implementation is not complete until all of the following are verifiable. Items 
 
 ### Reorder / migration acceptance (highest risk — verify with particular care)
 
-15. A documented, reviewed migration plan exists and was accepted **before** any code implementing the reorder was written — per "Critical technical requirement," this is a hard precondition, not a parallel task.
+15. Steps 1–3 of "Critical technical requirement" → "Required sequence" are complete — a documented migration plan exists and was **explicitly approved by external review** — before step 4 (any code implementing the reorder) begins. This is a hard precondition, not a parallel or overlapping task.
 16. `MODULE_CHECKPOINTS['9']` resolves to the Pricing/Closing checkpoint IDs (`m10cp1`, `m10cp2`) and `MODULE_CHECKPOINTS['10']` resolves to the Sanitation checkpoint IDs (`m9cp1`, `m9cp2`) post-reorder — checkpoint ID strings themselves are unchanged from their pre-reorder names.
 17. `MODULE_TITLES['9']` reads the new Module 9 identity (Checkout, Client Closing & Pricing Strategy) and `MODULE_TITLES['10']` reads Sanitation & Reset Systems.
 18. A fresh student (no existing `progress` data) who completes slot 9 sees Pricing/Closing content and Pricing/Closing checkpoints, and unlocking slot 10 reveals Sanitation content — verified end-to-end.
 19. A simulated **pre-reorder** saved-state fixture (representing a student who had completed old technical Module 9 Sanitation, old technical Module 10 Pricing, neither, or both) is constructed and run through the migration; the resulting post-reorder state is verified by direct inspection to correctly reflect that student's actual demonstrated competencies under the *new* slot assignment — not a blind carry-over of the old `complete` booleans.
 20. No fixture produces a state where a student appears to have completed content they never actually engaged with (fail-closed verified, not just fail-open avoided).
 21. Module 8's completion-card handoff (already corrected in a prior task to preview the new Module 9 identity) still resolves correctly to the reordered slot 9.
-22. Technical Module 10's own completion card (post-reorder, now Sanitation's slot) no longer says "Up next — Course completion" and instead correctly hands off to whatever now follows Sanitation in sequence.
+22. **Corrected during specification review — this criterion previously mislabeled which completion card it meant.** Two distinct completion-card corrections are required, not one: (a) Pricing's own completion card (currently technical Module 10, relocating to slot 9) currently says "Up next — Course completion" (`headspa-mastery.html`, Module 10's `lc-next` markup) — per "Completion and gating" above, this must instead hand off to Module 10 — Sanitation & Reset Systems, the module now immediately following it. (b) Sanitation's own completion card (currently technical Module 9, relocating to slot 10) currently says "Up next — Module 10 / Pricing strategy, menu design..." — this is now stale after the reorder and must be corrected to hand off to **Module 11 — AI / Modern Practice Tools** by name, per the locked future course sequence. Because Module 11 does not exist as a technical module yet, this handoff must **not** create a live functional route (e.g., no working "Start Module 11 →" button that opens content) — it may name Module 11 as the next course identity while remaining visibly locked/unavailable until Module 11 is actually built and gated, consistent with how the course already communicates an upcoming-but-unbuilt module elsewhere.
 23. Regression: Modules 0–8 are confirmed byte-identical in content and unaffected in checkpoint/progress state after the reorder.
 24. `git diff --check` and a full inline-`<script>` syntax check (`node --check` per block, matching the validation pattern used for every prior module) both pass on the actual implementation changeset.
 
@@ -718,8 +785,8 @@ Compared to Module 8 (technique-led, video masterclass, minimal interaction dens
 ## Implementation notes
 
 - This specification does not resolve the technical reorder — see "Critical technical requirement" for the full blocking investigation this implementation must complete and have reviewed before writing any migration code.
-- The five existing enhancement examples' price ranges (Section 9.7) may be reused as historical source evidence when designing the downloadable Enhancement Guide's structure, but must not appear as certified universal pricing in the shipped module or downloadable — every price the student sees in the calculator or menu checkpoint should be their own entered number.
+- The five existing enhancement examples' old dollar ranges (Section 9.7) are source-history only — see "Enhancement price ranges — source-history only" for the complete, unambiguous rule. They may inform the downloadable Enhancement Guide's structure but must not appear anywhere in the shipped module, the downloadable, Cadence, or either checkpoint as an AIMT-recommended or illustrative figure — every price the student sees in the lesson, calculator, guide, or menu checkpoint should be their own entered number or an explicitly labeled hypothetical.
 - The margin-vs-markup worked example (9.3) should reuse whatever hypothetical cost figure the implementation settles on elsewhere in the module for consistency, rather than introducing a third unrelated example number.
 - Do not begin Module 10's (Sanitation) own external audit as a result of implementing this specification — its content moves intact per "Structural reindex boundary" and receives its own audit later.
 - Do not begin any Module 11 (AI / Modern Practice Tools) curriculum work as a result of implementing this specification — it does not exist yet.
-- Do not implement production Module 9 in the same task that reviews/accepts this specification — per the master instructions' module lifecycle, specification acceptance and implementation are separate, sequential steps, and the reorder's migration plan (see "Critical technical requirement") must be reviewed as its own gate within implementation, not folded silently into a single implementation pass.
+- Do not implement production Module 9 in the same task that reviews/accepts this specification — per the master instructions' module lifecycle, specification acceptance and implementation are separate, sequential steps. The reorder's migration plan (see "Critical technical requirement" → "Required sequence") must be externally reviewed and **explicitly approved before implementation begins** — this review happens strictly prior to any reorder code being written, never "within" or "during" implementation, and never folded silently into a single implementation pass.
