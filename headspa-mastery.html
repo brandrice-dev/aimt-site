@@ -368,11 +368,27 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .phase-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
 .phase-detail { font-size: 0.75rem; color: var(--muted); margin-top: 5px; font-style: italic; }
 
-/* Key point */
+/* Key point — AIMT shared callout primitive. Default (no modifier) is the
+   neutral/instructional callout: warm-taupe background, restrained border,
+   ✦ marker, optional .kp-eyebrow label. Existing bare .key-point/.kp-icon/
+   .kp-text markup (used across already-approved modules) renders exactly
+   as before — .kp-body/.kp-eyebrow/.kp-warn/.kp-success are purely additive
+   and only activate when a module opts in. See
+   docs/course-audit/00-global-decisions.md, "AIMT Callout System." */
 .key-point { background: var(--warn-light); border: 0.5px solid rgba(160,104,48,0.2); border-radius: 14px; padding: 1.1rem 1.25rem; margin: 1.5rem 0; display: flex; gap: 10px; }
 .kp-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
 .kp-text { font-size: 0.875rem; line-height: 1.7; font-weight: 300; }
 .kp-text strong { font-weight: 500; }
+.kp-body { flex: 1; min-width: 0; }
+.kp-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--aimt-neutral); margin-bottom: 4px; }
+/* Warning/caution variant — reserved for genuine safety/contraindication/
+   do-not-proceed content. Never applied merely for emphasis. */
+.key-point.kp-warn { background: var(--aimt-warning-light); border-color: rgba(139,94,0,0.25); }
+.key-point.kp-warn .kp-eyebrow { color: var(--aimt-warning); }
+/* Success/approved-direction variant — used sparingly, only where a
+   direction is genuinely correct/approved, never for ordinary teaching. */
+.key-point.kp-success { background: var(--aimt-success-light); border-color: rgba(58,90,58,0.25); }
+.key-point.kp-success .kp-eyebrow { color: var(--aimt-success); }
 
 /* Clinical note */
 .clinical-note { background: var(--surface); border-left: 3px solid #262626; border-radius: 0 12px 12px 0; padding: 1rem 1.1rem; margin: 1.5rem 0; }
@@ -6717,8 +6733,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">Answer questions clearly, but don't unload every possible recommendation at once. A recommendation should have a specific reason tied to the service you just delivered — not exist because it's on the menu. And the flow has to work cleanly for a client who says no to everything — retail, enhancements, rebooking. Declining should never create awkwardness.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>Rebooking</strong> is an available next step, not proof you successfully "closed." If a client wants to plan another visit, help them choose the service or timing that fits their goals, preferences, and schedule — don't teach yourself a universal treatment frequency just to manufacture a future booking.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text"><strong>Rebooking</strong> is an available next step, not proof you successfully "closed." If a client wants to plan another visit, help them choose the service or timing that fits their goals, preferences, and schedule — don't teach yourself a universal treatment frequency just to manufacture a future booking.</div>
+      </div>
     </div>
 
     <div class="info-card">
@@ -6791,8 +6810,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text">"30% markup" and "30% margin" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Key point</div>
+        <div class="kp-text">"30% markup" and "30% margin" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.</div>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6825,9 +6847,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="calc-result" id="calcResult" aria-live="polite"></div>
     </div>
 
-    <div class="info-card">
-      <div class="ic-title">This calculator is a planning tool</div>
-      <div class="body-text" style="margin:0;">A business may also need to account for items such as taxes, payroll burden, payment-processing costs, insurance, locally required charges, and other operating expenses, depending on business structure and jurisdiction. AIMT does not prescribe state-specific tax treatment or business/legal structure.</div>
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Business note</div>
+        <div class="kp-text"><strong>This calculator is a planning tool.</strong> A business may also need to account for items such as taxes, payroll burden, payment-processing costs, insurance, locally required charges, and other operating expenses, depending on business structure and jurisdiction. AIMT does not prescribe state-specific tax treatment or business/legal structure.</div>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6837,8 +6862,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">A competitor's price may not cover their own actual costs — copying it risks copying a model that's already losing money. Know your own economics first, then look at your local market. Market context can legitimately inform client expectations, positioning, local price ranges, service comparison, demand, and business model — it isn't irrelevant, just secondary.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text">Final price sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of these alone.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Why this matters</div>
+        <div class="kp-text">Final price sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of these alone.</div>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6848,13 +6876,19 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">A concise menu is generally easier for a client to navigate. Two or three clearly differentiated Head Spa options may be a useful structure for some businesses — but the number of services should follow your actual business and protocol design, not a universal rule.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text"><strong>Require meaningful differentiation.</strong> Different menu options should change something real — treatment time, massage or bodywork, processing, included enhancements, service scope, sensory work, or another deliberate component. Don't engineer an artificial "premium" difference just to create an anchor, and don't try to make the higher-priced option feel like the obvious choice.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Service design note</div>
+        <div class="kp-text"><strong>Require meaningful differentiation.</strong> Different menu options should change something real — treatment time, massage or bodywork, processing, included enhancements, service scope, sensory work, or another deliberate component. Don't engineer an artificial "premium" difference just to create an anchor, and don't try to make the higher-priced option feel like the obvious choice.</div>
+      </div>
     </div>
 
-    <div class="info-card">
-      <div class="ic-title">Core and Extended are AIMT's teaching labels — not required menu names</div>
-      <div class="body-text" style="margin:0;">Core and Extended, from Module 8's masterclass, are AIMT's own reference-format teaching labels. They are not required client-facing menu names. Your business can name and package its own services differently.</div>
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text"><strong>Core and Extended are AIMT's teaching labels — not required menu names.</strong> Core and Extended, from Module 8's masterclass, are AIMT's own reference-format teaching labels. They are not required client-facing menu names. Your business can name and package its own services differently.</div>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6864,8 +6898,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">A genuine enhancement has a distinct purpose, a real service difference, a time effect where applicable, a cost effect, clear client-facing positioning, and an appropriate place in the client journey. Base a recommendation on the established service plan, the client's goals and preferences, your observation within scope, product directions, contraindications or modifications already identified, your training, and the appointment time you actually have.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text">Don't imply "what the scalp needs" — that phrasing crosses into diagnosis. Don't recommend an enhancement merely because it's on the menu. Don't claim an enhancement "converts" because of how it's presented.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Practitioner note</div>
+        <div class="kp-text">Don't imply "what the scalp needs" — that phrasing crosses into diagnosis. Don't recommend an enhancement merely because it's on the menu. Don't claim an enhancement "converts" because of how it's presented.</div>
+      </div>
     </div>
 
     <div class="addon-list">
@@ -6929,8 +6966,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text">Don't assume the client is wrong. Don't assume the price is wrong.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text">Don't assume the client is wrong. Don't assume the price is wrong.</div>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6940,8 +6980,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">Underpricing has more causes than fear: incomplete cost data, poor overhead allocation, inaccurate time assumptions, competitor copying, an intentional launch strategy, market constraints, weak service differentiation, a lack of pricing knowledge — or, yes, sometimes fear or a lack of confidence. Fear is one cause among several, not the default explanation.</div>
 
     <div class="key-point">
-      <div class="kp-icon">→</div>
-      <div class="kp-text">Persistent underpricing can contribute to financial strain, unsustainable workload, overbooking, or inconsistent delivery over time — not a guaranteed outcome, but a real pattern worth watching for.</div>
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Why this matters</div>
+        <div class="kp-text">Persistent underpricing can contribute to financial strain, unsustainable workload, overbooking, or inconsistent delivery over time — not a guaranteed outcome, but a real pattern worth watching for.</div>
+      </div>
     </div>
 
     <div class="info-card">

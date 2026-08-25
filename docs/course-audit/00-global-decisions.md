@@ -378,6 +378,65 @@ decision.
 
 ---
 
+## AIMT Callout System (added August 25, 2026)
+
+Owner-approved, course-wide standard for instructional callouts, replacing
+inconsistent ad hoc use of warning/yield symbols on ordinary teaching notes.
+
+**Shared structural component.** The existing `.key-point` component
+(`.key-point` > `.kp-icon` + `.kp-text`, already used across every approved
+module) is AIMT's one callout primitive. It is extended, not replaced —
+existing `.key-point`/`.kp-icon`/`.kp-text` markup in already-approved
+modules renders exactly as before; the extension adds two new, opt-in
+pieces:
+
+- `.kp-body` — wraps the eyebrow and body text as one flex column beside
+  the icon.
+- `.kp-eyebrow` — a small uppercase mono label carrying the actual semantic
+  meaning. The icon is a visual marker only; the eyebrow is what a screen
+  reader, a grayscale render, or a glance without styling still conveys.
+
+**Neutral / instructional callout (the default).** No modifier class.
+Warm-taupe background (`--warn-light`), a warm neutral/accent-toned border,
+14px rounded corners — visually distinct from an ordinary white
+`.info-card` but restrained, not "app notification" styling. Marker: `✦`.
+Eyebrow is chosen for meaning, not fixed to one word — `KEY POINT`,
+`PRACTITIONER NOTE`, `WHY THIS MATTERS`, `REMEMBER`, `SERVICE DESIGN NOTE`,
+`BUSINESS NOTE`, and similar are all valid; the box design does not change
+between them.
+
+**Warning / caution variant — `.key-point.kp-warn`.** Reserved for genuine
+safety, contraindication, or do-not-proceed content — never used for
+ordinary emphasis. Amber background/border (`--aimt-warning-light`/
+`--aimt-warning`), the same shared structure. Eyebrows: `CAUTION`,
+`SAFETY`, `WATCH FOR`, `DO NOT PROCEED`. The course's existing warning
+convention (a caution emoji as `.kp-icon`) is preserved where it already
+appears in approved modules — it is not retroactively replaced by this
+decision.
+
+**Success / approved-direction variant — `.key-point.kp-success`.** Used
+sparingly, only where a direction is genuinely correct/approved — never to
+make ordinary instructional content green. Uses the course's existing
+approved success color (`--aimt-success-light`/`--aimt-success`, the same
+tokens already governing correct/accepted states elsewhere). Marker: `✓`.
+Eyebrows: `APPROVED DIRECTION`, `GOOD PRACTICE`, `CORRECT`.
+
+**Accessibility.** Decorative icons (`✦`, `✓`, a caution symbol) carry
+`aria-hidden="true"`. Meaning must never depend on the icon or color alone
+— the eyebrow text is always present and always states the semantic
+category in words.
+
+**Rollout.** Module 9 is the first complete implementation, applied to its
+genuine callouts only (key teaching points, practitioner notes, business/
+scope notes) — reference cards, worked examples, and the downloadable-
+resource card remain plain `.info-card`s, preserving a clear hierarchy
+between content cards and callouts. Older, already-approved modules
+(0–8) are not retrofitted individually — normalization there happens during
+the course-wide final styling/responsive pass, not as a side effect of this
+decision.
+
+---
+
 ## Scope reminders (from `CLAUDE.md`, restated for this audit)
 
 - No entitlement/auth/payment/Supabase/progress-locking/certificate-logic

@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 25, 2026 (Module 9 resource patch — Head Spa Enhancement Strategy Guide PDF installed as the module's single downloadable; still awaiting manual QA)
+**Last updated:** August 25, 2026 (AIMT callout system established as a course-wide design decision and applied to Module 9; still awaiting manual QA)
 
 ---
 
@@ -89,6 +89,10 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**AIMT callout system established; applied to Module 9 — August 25, 2026.** Course-wide design-system decision (owner-approved): standardized instructional callouts on a single `✦` neutral marker with a semantic-eyebrow label, reserving warning-triangle/caution treatment for genuine safety content. Extended the existing shared `.key-point` component (used identically across every approved module) with two purely-additive pieces — `.kp-body`/`.kp-eyebrow` — plus `.kp-warn`/`.kp-success` semantic variant classes reusing the course's existing amber/green tokens. No new component was invented and no redundant CSS was added. Applied to Module 9 as the first complete implementation: all 7 existing key-points plus 2 genuinely-instructional info-cards (the calculator's scope note, the Core/Extended terminology note) converted to the callout treatment with meaning-specific eyebrows (`Remember`, `Key point`, `Why this matters`, `Service design note`, `Practitioner note`, `Business note`); 7 other info-cards (reference diagrams, worked examples, reference checklists, the downloadable-resource card) were deliberately left as plain content cards. Full desktop/phone validation and a 0–8 regression pass both clean. Recorded as a new current-authority entry in `docs/course-audit/00-global-decisions.md` ("AIMT Callout System"), explicitly noting Modules 0–8 are normalized during the later course-wide styling pass, not individually reopened now. Module 9 status unchanged: **Implemented — awaiting manual QA**. See `implementation-log.md` Step 76.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 9 resource patch — Head Spa Enhancement Strategy Guide installed — August 25, 2026.** Narrow, controlled patch on `course-audit-build`; Module 9's curriculum and architecture were not reopened. The owner supplied `AIMT-Head-Spa-Enhancement-Strategy-Guide.pdf` (found in an untracked intake folder, `assets/images/course/module - 09/`, renamed to the repo's existing `module-09` asset-folder convention — matching the Module 8 `module - 08` → `module-08` precedent). Installed as Module 9's single in-lesson downloadable: a compact `.info-card`/`.format-card` component (the same pattern already used for Module 8's Printable Service Maps) placed directly after Section 9.7's content, before the `hr` that precedes `m10cp1`. Title "Head Spa Enhancement Strategy Guide," supporting copy and button wording per the approved copy, `download` attribute preserved (matching existing course convention). Confirmed exactly one Module 9 download link exists — the separate, still-fillable **Head Spa Enhancement Menu & Positioning Guide** was explicitly **not** created or wired in; it remains reserved for the future Student Dashboard Resources Library, per the owner's explicit instruction. Validation: `git diff --check` clean, inline-script syntax check clean, PDF fetch returns `200`/`application/pdf`/correct byte size, zero horizontal overflow at 375px and 1280px, no layout regression to Section 9.7 or the untouched Section 9.2 four-card grid. Migration fixture suite was not re-run (this patch touches no migration/state code). Module 9 status remains **Implemented — awaiting manual QA** — not advanced to manual QA approved by this patch. Next gate is unchanged: Module 9 manual QA.
 
