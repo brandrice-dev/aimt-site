@@ -1624,6 +1624,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .sms-teach-text { font-size:0.86rem; line-height:1.7; color:rgba(255,255,255,0.82); font-weight:300; font-family:var(--aimt-font-serif); font-style:italic; }
 .sms-teach-ifasked { margin-top:0.65rem; padding-top:0.65rem; border-top:1px solid rgba(255,255,255,0.1); }
 .sms-teach-ifasked .teach-label { margin-bottom:5px; }
+/* Restrained three-layer masterclass model: How to do it / Why we do it /
+   How to communicate it. Reuses .interaction-hint's mono-eyebrow treatment
+   as a section label above each existing content group — no new cards. */
+.sms-section-label { font-family:var(--aimt-font-mono); font-size:0.56rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); margin:1.15rem 0 0.35rem; }
+.sms-section-label:first-child { margin-top:0.5rem; }
 
 /* Video stage — intentionally exceeds the standard reading measure on desktop */
 /* No longer breaks out past the reading column — the video now lives
@@ -6206,8 +6211,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="info-card">
-      <div class="ic-title">Why Core and Extended stop at 60 and 90</div>
-      <div class="body-text" style="margin:0">Shorter or longer services may require a deliberately different protocol — not simply the same protocol compressed or stretched. A much shorter service would generally mean deliberately omitting or restructuring components, not just running every technique faster. A longer service shouldn't be built by stretching every step or multiplying the existing timing — it should be deliberately designed around what genuinely earns the additional time. AIMT's current reference scope is Core (60) and Extended (90); shorter or longer formats aren't covered here.</div>
+      <div class="ic-title">Designed around the service, not the clock</div>
+      <div class="body-text" style="margin:0">Core (60) and Extended (90) are AIMT's current reference formats. Each is intentionally built as its own service structure — not as a formula for simply speeding up or stretching every step. A shorter service may require a more streamlined protocol, with deliberate decisions about which components belong. A longer service should expand only where additional time genuinely improves the experience — such as massage, bodywork, processing, or selected sensory work. The goal is to decide where the time adds value, not force the protocol to fit a number. For this module, pacing stays anchored to the Core and Extended reference formats.</div>
     </div>
 
     <hr class="divider">
@@ -6255,7 +6260,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <button type="button" class="sms-video-thumb" id="m8mcVideoThumb" onclick="m8PlayActiveVideo()" aria-label="Play video">
             <div class="sms-video-play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
             <div class="sms-video-label"></div>
-            <div class="sms-video-sublabel">Add Vimeo link in admin</div>
+            <div class="sms-video-sublabel">Instructional video in production — available soon</div>
           </button>
           <div class="m8-video-complete" id="m8mcVideoComplete" hidden role="status">
             <div class="m8vc-eyebrow"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Chapter complete</div>
@@ -6267,9 +6272,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
 
+      <div class="sms-section-label">How to do it</div>
       <div id="m8mcGuidance"></div>
-      <div id="m8mcTeach"></div>
       <div id="m8mcAdapt"></div>
+
+      <div class="sms-section-label">Why we do it</div>
+      <div id="m8mcWhy"></div>
+
+      <div class="sms-section-label">How to communicate it</div>
+      <div id="m8mcTeach"></div>
+
       <div id="m8mcNotes"></div>
 
       <div class="m8mc-nav">
@@ -6277,6 +6289,21 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <button type="button" class="m8mc-nav-btn primary" id="m8mcNextBtn" onclick="m8GoToChapter(m8ActiveChapter + 1)">Next chapter →</button>
       </div>
       <div class="m8mc-review-hint" id="m8mcReviewHint" hidden>Course Review Mode — chapters unlocked for inspection only; nothing here is saved.</div>
+    </div>
+
+    <div class="info-card" style="margin-top:1.1rem;">
+      <div class="ic-title">Printable Head Spa Service Maps</div>
+      <div class="body-text" style="margin:0 0 0.85rem;">Keep the Core and Extended service flow within reach while you practice.</div>
+      <div class="grid-2col">
+        <a class="format-card" href="assets/images/course/module-08/module-08-core-format-service-map.png" download style="text-decoration:none;display:block;">
+          <div class="fmt-label-row"><div class="fmt-label">Download Core Service Map</div></div>
+          <div class="fmt-price-hint">60-minute reference · download</div>
+        </a>
+        <a class="format-card" href="assets/images/course/module-08/module-08-extended-format-service-map.png" download style="text-decoration:none;display:block;">
+          <div class="fmt-label-row"><div class="fmt-label">Download Extended Service Map</div></div>
+          <div class="fmt-price-hint">90-minute reference · download</div>
+        </a>
+      </div>
     </div>
 
     <hr class="divider">
@@ -6487,27 +6514,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
-    <div class="sec-eyebrow">Service Maps</div>
-    <div class="sec-title">Core and Extended, one page each.</div>
-    <div class="body-text">Quick protocol and pacing references for the Core and Extended formats — a companion to the masterclass and the Service Timer, usable outside the lesson whenever you need a fast reminder of the sequence.</div>
-    <div class="grid-2col">
-      <a class="format-card" href="assets/images/course/module-08/module-08-core-format-service-map.png" download style="text-decoration:none;display:block;">
-        <div class="fmt-label-row"><div class="fmt-label">Core Format Map</div></div>
-        <div class="fmt-price-hint">60-minute reference · download</div>
-      </a>
-      <a class="format-card" href="assets/images/course/module-08/module-08-extended-format-service-map.png" download style="text-decoration:none;display:block;">
-        <div class="fmt-label-row"><div class="fmt-label">Extended Format Map</div></div>
-        <div class="fmt-price-hint">90-minute reference · download</div>
-      </a>
-    </div>
-
     <div class="lesson-complete" id="m8Complete" style="display:none;">
       <div class="lc-check">✓</div>
       <div class="lc-title">Module complete.</div>
       <div class="lc-body">You can run the full service, adapt it when conditions change, and communicate with intention — not just recite the steps. Next: what happens between services.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 9</div>
-        <div class="lc-next-text">Sanitation and reset systems. The work between every service that separates consistent professionals from inconsistent ones.</div>
+        <div class="lc-next-text">Checkout, client closing, and pricing strategy. How to close the appointment, communicate value, and price the services you now know how to perform.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(9)">Start Module 9 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
@@ -9978,6 +9991,7 @@ const M8_CHAPTERS = [
     watchFor:'how a pre-identified fragrance choice is presented with confidence — this is a considered moment of the service, not an open-ended decision made on the spot.',
     guidance:['Fragrance sensitivity, known intolerance, strong preference, or a reason to adapt or omit aromatherapy should already be identified at intake — not discovered here. By the time this chapter begins, you should already know which options are appropriate to present, or that a predetermined fragrance-free path applies.',
       'Offer the three essential oil blends with equal weight — or, if fragrance-free was already established, follow that plan rather than presenting scent choices that don\'t apply. Rest a hand at the shoulder as an already-understood part of this moment, staying attentive and ready to adjust if the client seems hesitant. If a client wants to close their eyes while they sample, that\'s their choice to offer, never an instruction.'],
+    why:['Aromatherapy creates a deliberate sensory opening to the service. It helps shift the client from ordinary appointment interaction into the Head Spa experience before the hands-on treatment begins, and contributes to the tone and identity of the service.'],
     teach:[
       { label:'Communication cue', text:'"I have three scent options for you today. Take a moment with each and tell me which one you\'re most drawn to."' },
       { label:'If they ask', text:'"Aromatherapy is part of the sensory opening of the service. It helps establish the tone of the experience before we move into the hands-on treatment."' }
@@ -9987,6 +10001,7 @@ const M8_CHAPTERS = [
   { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', preTimer:true,
     watchFor:'how the client is settled into position — physical comfort, support, and consent checked before anything else begins.',
     guidance:['Help the client get fully settled and supported on the treatment bed — head, neck, and shoulders comfortably aligned — before the service continues. Confirm comfort directly rather than assuming it; this is the moment to adjust support, draping, or positioning before momentum makes that harder to do smoothly.'],
+    why:['Positioning creates the physical foundation for everything that follows. A fully supported client can remain settled instead of repeatedly adjusting the head, neck, shoulders, or body — protecting service continuity and letting you work without repeatedly interrupting the treatment to reposition the client.'],
     teach:[
       { label:'Communication cue', text:'"Let\'s get you comfortable first. Tell me if anything needs adjusting before we start."' },
       { label:'If they ask (why positioning matters)', text:'"I want your head and neck fully supported so you can relax without having to hold any tension or reposition yourself during the service."' }
@@ -10000,12 +10015,14 @@ const M8_CHAPTERS = [
     // claims corrections. Replaced with a technique-only description —
     // brush contact and oil distribution, no stimulation/circulation claim.
     guidance:['Work the brush across the scalp and through the lengths, distributing natural oils, ahead of the wet portion of the service.'],
+    why:['This is the tactile bridge between the pre-timer opening and the wet service. It establishes tempo, introduces sustained hands-on contact, and gives the service a deliberate beginning before water enters the experience.'],
     teach:[{ type:'quiet', label:'Keep the flow quiet', note:'This does not normally need narration. Let the tactile/sensory experience stand on its own.',
       ifAsked:'"I\'m dry brushing through the scalp and hair before we move into the wet portion of the service."' }],
     notes:[], adapt:[], continuity:'The halo activates next — the client moves from dry contact into their first water and massage combined.' },
   { num:'04', title:'Halo Activation + Wet Massage', label:'Video 04 — Halo Activation & Wet Massage', tCore:'Core: ~45 min left', tExtended:'Extended: ~75 min left',
     watchFor:'the temperature check before first water contact — every time, regardless of what the thermostat says.',
     guidance:['Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.'],
+    why:['The Halo helps the wet phase feel integrated. Water flow, temperature, placement, touch, and massage operate as one continuous transition rather than rinse, stop, massage — the goal is continuity and a controlled sensory experience.'],
     teach:[
       { label:'Communication cue', text:'"How does the water temperature feel? Let me know anytime if you want it warmer or cooler."' },
       { type:'quiet', label:'Keep the flow quiet', note:'Once temperature is established, the wet massage should generally return to quiet.',
@@ -10018,8 +10035,8 @@ const M8_CHAPTERS = [
     guidance:['Apply exfoliant from mixing bowl using applicator brush. Work in four quadrants — frontal, temporal, crown, occipital.',
       'Exfoliation intensity, product, and technique should match what this client\'s scalp is telling you today. A stronger application is not the default you dial back only when there\'s a problem — it\'s one point on a range you select from every time.',
       'The heart of the service. Systematic scalp and head massage — cover all regions, vary pressure, work the occipital ridge, temples, and neck junction.',
-      'What makes this step read as skilled is controlled technique — rhythm, continuity, pressure, broad versus targeted contact, and reading client response — not a specific physiological outcome. Pacing and smooth transitions between regions matter more than any single technique choice.',
       'Rinse the exfoliant thoroughly. Consistent water temperature throughout. Shower head angled slightly — never directly overhead.'],
+    why:['Exfoliation gives you a deliberate pre-cleanse method for surface buildup — the real skill is adapting product, amount, intensity, pressure, and technique to intake, observation, and client response, not applying one fixed routine. Scalp massage is one of the anchors of the Head Spa service: its value comes from intentional rhythm, full coverage, continuity, and appropriate pressure — controlled technique, not casual rubbing, and not a specific physiological outcome.'],
     teach:[
       { type:'quiet', label:'Keep the flow quiet', note:'Do not automatically explain exfoliation while applying it — know the explanation in case the client asks.',
         ifAsked:'"It\'s a scalp exfoliant. I\'m adjusting the product, pressure, and technique based on what I\'m seeing and how your scalp feels today."' },
@@ -10037,6 +10054,7 @@ const M8_CHAPTERS = [
     watchFor:'how the transition into the neck and shoulders is paced — this combined scalp/neck/shoulder massage block runs about 10 minutes in Core and about 20 minutes in Extended.',
     guidance:['Transition to neck, upper traps, and shoulder work. Meaningfully longer in the Extended reference than in Core.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
+    why:['The Head Spa experience does not have to stop at the hairline. Neck and shoulder work extends the hands-on relaxation experience beyond the scalp and helps maintain continuity between service phases — it should feel like part of one complete service, not a disconnected massage inserted in the middle.'],
     // Corrected per owner instruction: neck/shoulder work is an established
     // service step, not a mid-service opt-in — do not ask whether to
     // include it. Any reason to omit/adapt should already be identified at
@@ -10051,6 +10069,7 @@ const M8_CHAPTERS = [
   { num:'07', title:'Shampoo + Rinse', label:'Video 07 — Shampoo & Rinse', tCore:'Core: ~15 min left', tExtended:'Extended: ~27 min left',
     watchFor:'the shift in energy here — the client is deeply relaxed, so this sequence runs with minimal narration.',
     guidance:['Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.'],
+    why:['This is the cleansing phase of the Head Spa protocol, not simply a standard salon shampoo dropped into the service. Controlled pressure, scalp focus, rhythm, and water-temperature awareness carry forward here while appropriately clearing the prior product and treatment.'],
     teach:[{ type:'quiet', label:'Keep the flow quiet', note:'This should generally remain quiet. The client is already immersed in the experience and there is usually no reason to narrate shampooing or rinsing.',
       ifAsked:'"I\'m using [product] here because it fits what we\'re focusing on for your scalp and hair today."' }],
     notes:[], adapt:[], continuity:'Conditioning or treatment follows, on the format-specific path.' },
@@ -10058,8 +10077,9 @@ const M8_CHAPTERS = [
     watchFor:'the difference in depth between formats during conditioning, and — in the Extended reference — full hand-and-forearm coverage while the treatment processes.',
     guidance:['Core: conditioning treatment, brief processing, rinse. Extended: masque, steam, and processing, rinse.',
       'Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client\'s scalp is responding today, not a fixed penetration claim.',
-      'Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow. This makes intentional use of otherwise passive processing time and helps maintain continuity of the service experience — implement it whenever it\'s within your scope, you\'re trained, and nothing from intake indicates it should be skipped or adapted.',
+      'Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow — implement it whenever it\'s within your scope, you\'re trained, and nothing from intake indicates it should be skipped or adapted.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
+    why:['The conditioning/treatment portion supports the actual hair and scalp service plan and follows the product\'s legitimate processing requirements. Processing time should still feel intentional — hand and forearm massage makes productive use of otherwise passive processing time and keeps the service experience active and connected, wherever it fits your scope, training, and service design.'],
     // Corrected per owner instruction: hand/forearm massage during
     // processing is a meaningful, established part of this service format,
     // not something timidly opt-in — do not ask whether to include it.
@@ -10072,7 +10092,8 @@ const M8_CHAPTERS = [
   { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', tCore:'Core: ~2 min left', tExtended:'Extended: ~2 min left',
     watchFor:'the temperature contrast during the final rinse and cooling spray, then the gradual pace of sitting the client back up to close the service.',
     guidance:['Waterfall neck rinse under the halo — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.',
-      'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.'],
+      'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing observation. Share one specific detail from the service before moving toward the end of the appointment.'],
+    why:['This phase clears the conditioning portion while intentionally transitioning the client toward the close — the final Halo work should feel controlled and unhurried, not rushed to finish. Cooling creates a deliberate sensory contrast after an extended warm-water experience; its value is experiential — temperature contrast, a recognizable sensory transition, and an identity for the closing phase before the appointment wraps up.'],
     teach:[
       { type:'quiet', label:'Keep the flow quiet', note:'This part of the service is largely sensory. Do not narrate the obvious water movements of the final rinse and halo massage.' },
       // Corrected per owner instruction: do not offer to skip the cooling
@@ -10235,6 +10256,7 @@ function m8RenderChapter(idx) {
   }
 
   document.getElementById('m8mcGuidance').innerHTML = ch.guidance.map((p) => '<div class="body-text sms-what">' + p + '</div>').join('');
+  document.getElementById('m8mcWhy').innerHTML = (ch.why || []).map((p) => '<div class="body-text sms-what">' + p + '</div>').join('');
   // Each teach entry is either a direct spoken cue (default) or quiet-step
   // guidance (type:'quiet') — silence is taught as a deliberate choice, not
   // represented by simply having no entry. A quiet entry states why
