@@ -4721,3 +4721,27 @@ Work remains on branch `course-audit-build`.
 **Resulting status.** Module 8 status unchanged — **"Substantially complete — final owner pass deferred,"** still not `Implemented — manual QA approved`. Deferred items unchanged: real Video 01 footage, final hosted-origin owner verification, full manual QA, final approval. Module 9 was not begun. No merge or deployment occurred. Local Review Mode server kept running throughout.
 
 Work remains on branch `course-audit-build`.
+
+## 2026-08-24 — Step 68: Module 8 final convergence — Core/Extended timing model, canonical Service Timer, service maps
+
+Located and installed the owner's final assets: `AIMT-Service-Timer-Module8-aligned.html` (repo root) and two ChatGPT-generated Core/Extended Format Head Spa Service Map PNGs (`assets/images/course/module - 08/`) — both verified against the task's asset criteria by direct inspection.
+
+**Timer:** audited against the legacy `~/Downloads/AIMT-Service-Timer.html` (old 17-step/60-120 model, superseded, no valuable behavior lost); corrected two "if they ask" lines using weaker "we include it" framing to the task's approved purpose-driven wording (neck/shoulder, hand/forearm) plus tightened the cooling "if they ask" line; added a read-only Supabase entitlement gate matching `my-aimt.html`'s pattern (verified: signed-out load redirects to `student-access.html` before content renders); renamed to canonical `aimt-service-timer.html`.
+
+**Core/Extended (60/90) replaces the retired 1-Hour/2-Hour (60/120) model** across Module 8: `fmt1hr`/`fmt2hr` → `fmtCore`/`fmtExtended`, `selectFormat('core'|'extended')`, `.t-2hr` → `.t-extended`, new `.t-pretimer` badge. Section 8.1 rewritten around service structure with a new "why Core/Extended stop at 60/90" card. Every chapter's timing badge converted to truthful Core/Extended "~X min left" landmarks sourced from the two service-map images (Chapters 01–02 show `Pre-Timer Opening`; Chapter 03 shows the clock-start landmark) rather than fabricated per-chapter durations, since the 9 chapters and the Timer's operational blocks aren't 1:1. Stray 1hr/2hr copy corrected in the home-row subtitle, pacing-markers card, and Chapters 05/06/08 guidance/notes.
+
+**Timer preview extended to Steps 01–04** with genuine pre-timer behavior (no ticking clock for Steps 01–02, Pause disabled, Skip relabeled "Next →"; live countdown starts at Step 03) matching the canonical Timer exactly and previewing the Extended reference specifically, not forcing a Core/Extended choice.
+
+**Two Full-Timer links wired** (end-of-preview CTA, persistent footer link), both to `aimt-service-timer.html`; a restrained dashboard entry added to `my-aimt.html`'s Resources card.
+
+**Service Maps installed** as a new downloadable section (renamed to the project's `module-08-*` asset convention).
+
+**`M8_CHAPTERS` communication corrections:** Chapter 01 gained the "If they ask" response it was missing entirely; Chapters 06/08/09 corrected to match the Timer's fixes above.
+
+**Validation.** All inline `<script>` blocks (5 in `headspa-mastery.html`, 2 in `aimt-service-timer.html`) parse via `node --check`; `git diff --check` clean; tag balance even. Browser-verified in Course Review Mode: format toggle/timing badges correct for both formats, zero console errors across Modules 0/1/5/7/8, `MODULE_REQUIRED_VIDEO_CHAPTERS['8']`/`M8_CHAPTERS.length` still 9, checkpoints/Protect the Flow/Cadence prompts unchanged, `localStorage.levo_app` stayed `null` throughout. Zero horizontal overflow at 375×812 for Module 8 and both Timer views. The canonical Timer's pre-timer→clock-start→pause/resume→exit/resume flow was verified end-to-end via a temporary gate-bypassed local copy, never committed (deleted, `git status` confirmed clean before commit).
+
+**Deferred/flagged, not silently skipped:** the literal "HOW TO DO IT / WHY WE DO IT / HOW TO COMMUNICATE IT" labeled UI restructure was judged already substantively satisfied by the existing guidance/teach fields rather than rebuilt as three new labeled sections per chapter, to avoid a non-surgical restructure of an approved, working component — flagged for explicit owner confirmation.
+
+Module 8 status unchanged — **"Substantially complete — final owner pass deferred,"** not `Implemented — manual QA approved`. Video 01 remains a placeholder. Module 9 source extraction begins next per the owner's standing authorization. No merge or deployment occurred. Local Review Mode server kept running throughout.
+
+Work remains on branch `course-audit-build`.

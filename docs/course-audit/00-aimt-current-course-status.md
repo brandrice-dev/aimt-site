@@ -3,7 +3,7 @@
 **Repository:** `aimt-site`
 **Active branch:** `course-audit-build`
 **Production branch:** `main`
-**Last updated:** August 24, 2026 (Module 8 broad student-facing curriculum-coherence pass)
+**Last updated:** August 24, 2026 (Module 8 final convergence — Core/Extended timing model, canonical Service Timer, service maps; Module 9 source extraction begun)
 
 ---
 
@@ -12,7 +12,7 @@
 - Repository: `aimt-site`
 - Active branch: `course-audit-build`
 - Production branch: `main`
-- Latest controlling commit: pending — this task's "Complete Module 8 student-facing coherence pass" commit (hash recorded in the final task report). Local HEAD (`24ac2b5`) was one commit ahead of `origin/course-audit-build` at the start of this task — preserved, not reset.
+- Latest controlling commit: pending — this task's "Finalize Module 8 masterclass and service timer" and "Extract new Module 9 for external audit" commits (hashes recorded in the final task report). Local HEAD (`1430ca0`) matched `origin/course-audit-build` at the start of this task — preserved, not reset.
 - Branch preview remains the audit environment.
 - No merge or production deployment is authorized.
 
@@ -40,7 +40,7 @@ Do not merge or deploy yet.
 | Module 5 | Implemented — manual QA approved |
 | Module 6 | Implemented — manual QA approved |
 | Module 7 | Implemented — manual QA approved |
-| Module 8 | **Substantially complete — final owner pass deferred.** Curriculum, masterclass architecture, 9-video reconciliation, Videos 02–09 installed, one-play/replay/mobile-fullscreen Vimeo UX, communication-cue final polish, Timer preview, checkpoints, and Cadence are all done. Deferred: real Video 01 (Aromatherapy), final hosted real-video owner verification, full manual QA, final approval. NOT `Implemented — manual QA approved`. |
+| Module 8 | **Substantially complete — final owner pass deferred.** Curriculum, masterclass architecture, 9-video reconciliation, Videos 02–09 installed, one-play/replay/mobile-fullscreen Vimeo UX, communication-cue final polish, checkpoints, Cadence, the Core/Extended (60/90) timing model, the canonical hosted AIMT Service Timer (`aimt-service-timer.html`), the Timer preview (Steps 01–04, Extended reference), and the Core/Extended service-map downloadables are all done. Deferred: real Video 01 (Aromatherapy), final hosted real-video owner verification, full manual QA, final approval. NOT `Implemented — manual QA approved`. |
 | Module 9 | Not begun. Owner has authorized progression into Module 9 source extraction despite Module 8's deferred final-pass items above. See "Locked future module order" below — its working title conflicts with `MODULE_TITLES[9]` currently in code; **reconcile before implementation, do not silently overwrite.** |
 | Modules 10–11 | Pending. See "Locked future module order" below — same code/title conflict applies. |
 | Module 12 | Planned — do not begin. Does not yet exist as a distinct technical module in code (`MODULE_COUNT` is currently 12, i.e. technical modules 0–11 only); reconciling a true 13th "Final Exam" module is a later, separate decision. |
@@ -86,6 +86,28 @@ Manually approved, but the following still require later or manual review — no
 ---
 
 ## Task just completed
+
+**Module 8 final convergence — Core/Extended timing model, canonical Service Timer, service maps — August 24, 2026.** Owner-supplied final assets located and installed: `AIMT-Service-Timer-Module8-aligned.html` (repo root, untracked) and two ChatGPT-generated Core/Extended Format Head Spa Service Map PNGs (`assets/images/course/module - 08/`, untracked). Both matched the task's asset-verification criteria exactly (AIMT branding, "Cotton eye mask THEN Start timer @ 60 min" on Core, no "Refresh"/"Signature" naming, Extended's first halo block = Apply halo/Turn on steamer/Wet massage with tools).
+
+**Timer promoted to canonical.** The new Timer was audited against its own spec and against the legacy `~/Downloads/AIMT-Service-Timer.html` (old 17-step/60-120 model, superseded, no valuable behavior lost — neither timer persists to `localStorage`). Two genuine content defects were found and fixed before promotion: the neck/shoulder and hand/forearm "If they ask" lines used the weaker "we include it as part of the service" framing this task's authoritative content explicitly flags to avoid — corrected to the approved purpose-driven wording; the cooling "if they ask" line was tightened to the exact approved wording. A read-only Supabase entitlement gate (same anon-key + RLS pattern as `my-aimt.html`: `auth.getUser()` + `course_entitlements` lookup for `headspa-mastery`, redirect to `student-access.html` on failure) was added since the file previously shipped with no access control at all — verified by direct test: an unauthenticated load genuinely redirects before any content renders. The file was renamed to `aimt-service-timer.html` at the repo root, the flat-site convention already used by `student-access.html`/`success.html`/`my-aimt.html`.
+
+**Core/Extended (60/90) timing model replaces the retired 1-Hour/2-Hour (60/120) model throughout Module 8.** `fmt1hr`/`fmt2hr` → `fmtCore`/`fmtExtended`; `selectFormat(1|2)` → `selectFormat('core'|'extended')`; CSS `.t-2hr` → `.t-extended`, plus a new `.t-pretimer` badge style. Section 8.1 was rewritten to teach service *structure* (what each format scales vs. keeps fixed) rather than just two numbers, with a new restrained "Why Core and Extended stop at 60 and 90" card — no fabricated 30/45/120-minute schedule was introduced. Every chapter's timing badge was converted from stale 1hr/2hr minute estimates to truthful Core/Extended "~X min left" landmarks sourced directly from the two service-map images (verified by direct visual inspection of both), since the 9 video chapters and the Timer's own operational blocks are not a forced 1:1 mapping — Chapters 01–02 (the pre-timer opening) now show a `Pre-Timer Opening` badge instead of a numeric pill; Chapter 03 (Dry Brushing) shows "starts at 60:00"/"starts at 90:00," making the clock-start point unmistakable per the task's requirement. Stray 1hr/2hr copy was corrected in the home-row subtitle, the "Reading the pacing markers" card, and per-chapter guidance/notes text (Chapters 05, 06, 08).
+
+**Timer preview (Section 8.2's "Take the Service Into Practice") rebuilt to match the canonical Timer exactly.** Extended from 3 steps (Aromatherapy/Dry Brushing/Halo) to 4 (Aromatherapy, Client Positioning + Comfort, Dry Brushing, Halo), with Steps 01–02 now genuinely pre-timer — no ticking clock, ring shows "PRE," Pause disabled, Skip relabeled "Next →" — and the live per-second countdown starting only at Step 03, previewing the Extended (90-minute) reference specifically per the task's instruction not to force a Core/Extended choice inside the small preview.
+
+**Two Full Timer links added to Module 8**, both pointing to `aimt-service-timer.html`: an end-of-preview CTA ("Open the Full Service Timer →") and a persistent footer link ("Open the AIMT Service Timer →"). A third, restrained "AIMT Service Timer" entry was added to the student dashboard (`my-aimt.html`'s Resources card, always visible to signed-in students; the Timer page's own entitlement check is the actual gate).
+
+**Service Maps installed as a new Module 8 downloadable section**, positioned after the Timer feature: the two PNGs (renamed to the project's `module-08-*` asset convention, folder renamed from `module - 08` to `module-08`) as direct-download cards, framed as a quick protocol/pacing companion to the masterclass and Timer.
+
+**Three communication corrections applied to `M8_CHAPTERS`** (kept in sync with the same corrections made in the canonical Timer's own data): Chapter 01 Aromatherapy gained the "If they ask" response it was missing entirely (only a proactive cue existed before); Chapter 06 and Chapter 08's "if they ask" lines were corrected from "we include it as part of the service" framing to purpose-driven answers; Chapter 09's cooling "if they ask" was tightened to the exact approved wording.
+
+**Validation.** All 5 inline `<script>` blocks across `headspa-mastery.html` and both scripts in `aimt-service-timer.html` parse cleanly (`node --check` per block). `git diff --check` clean. `div`/`button`/`a`/`ol` tag balance even across `#module8Wrap`. Browser-verified in Course Review Mode: format toggle and timing badges render/dim correctly for both formats; zero console errors opening Modules 0, 1, 5, 7, 8; `MODULE_REQUIRED_VIDEO_CHAPTERS['8']` still 9, `M8_CHAPTERS.length` still 9, both checkpoints and all three "Protect the Flow" scenarios present, Cadence quick prompts unchanged; `localStorage.levo_app` stayed `null` throughout (Review Mode unsaved). Zero horizontal overflow at 375×812 for both Module 8 and the Timer's resource and immersive views. The canonical Timer was functionally verified end-to-end via a temporary, gate-bypassed local copy (never committed): Core format opens at Step 01 (pre-timer) → Step 02 → Step 03 correctly starts the treatment clock at 60:00 → pause/resume → exit → resume-bar persists — all confirmed working; the QA copy was deleted and `git status` confirmed clean before commit.
+
+**Not done in this pass, recorded rather than silently skipped:** the literal "HOW TO DO IT / WHY WE DO IT / HOW TO COMMUNICATE IT" framework was judged already substantively present (guidance text carries how+why, `teach` carries communication) rather than re-architected into three separately-labeled UI sections per chapter — doing so would be a substantial visual restructure of an already-approved, working component, in tension with this codebase's standing "surgical, minimal edits only" rule for `headspa-mastery.html`. This is flagged for explicit owner confirmation rather than assumed.
+
+Module 8 status is unchanged — **"Substantially complete — final owner pass deferred,"** still not `Implemented — manual QA approved`. Video 01 (Aromatherapy) remains a placeholder; no owner media was newly supplied for it in this task. The owner's Phase B authorization (below) was exercised: Module 9 source extraction began after this task, per the owner's explicit instruction that Video 01's absence does not block it. No merge or deployment occurred. Local Review Mode server (`localhost:8890`) was kept running throughout.
+
+### Prior task (unchanged, recorded for continuity)
 
 **Module 8 — broad student-facing curriculum-coherence pass — August 24, 2026.** Following the owner's observation that individual sentences may each sound cautious while collectively making the service feel uncertain or over-explained, this task systematically audited the *entire* rendered Module 8 student experience — not just the previously-flagged Aromatherapy chapter — against a newly formalized governing service-communication model, now recorded in `module-08.md`:
 

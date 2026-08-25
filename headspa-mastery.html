@@ -1601,8 +1601,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .fmt-bullet { font-size:0.78rem; font-weight:300; color:var(--text); line-height:1.7; }
 .fmt-bullet::before { content:'— '; color:var(--muted2); }
 .t-badge { font-family:var(--aimt-font-mono); font-size:0.55rem; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:980px; background:#f0ece4; color:#7a5a20; transition:opacity 0.2s; }
-.t-2hr { background:#e8ede8; color:#3a5a3a; }
+.t-extended { background:#e8ede8; color:#3a5a3a; }
 .t-badge.t-dim { opacity:0.32; }
+.t-pretimer { background:#f0ece4; color:#7a5a20; letter-spacing:0.08em; }
 
 /* ── MODULE 8 — Masterclass chapter header (single active chapter) ── */
 .sms-head { display:flex; align-items:center; gap:14px; margin-bottom:0; flex:1; min-width:0; }
@@ -2738,7 +2739,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="module-row" data-module-id="8" onclick="openModuleById(8)">
         <div class="mr-num mr-active" id="mnum-8">8</div>
-        <div class="mr-info"><div class="mr-title">Module 8 — The Head Spa Service</div><div class="mr-sub">Step-by-step service map, 1hr and 2hr</div></div>
+        <div class="mr-info"><div class="mr-title">Module 8 — The Head Spa Service</div><div class="mr-sub">Step-by-step service map, Core and Extended</div></div>
         <span class="mr-badge mb-active" id="mbadge-8">Start</span>
       </div>
       <div class="module-row" data-module-id="9" onclick="openModuleById(9)">
@@ -6180,28 +6181,33 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">8.1 — The two formats</div>
-    <div class="sec-title">Same service. Different depth.</div>
-    <div class="body-text">The difference between the 1-hour and 2-hour service is not what you do — it's how long you spend doing it, and two additions in the extended format. The foundation is the same. The depth is different. Understanding this makes it easy to upsell and easy to explain.</div>
-    <div class="interaction-hint">↓ Select the format you're building today's service around — it emphasizes that format's timings below</div>
+    <div class="sec-eyebrow">8.1 — Core and Extended</div>
+    <div class="sec-title">Two AIMT reference protocols, one foundation.</div>
+    <div class="body-text">Core and Extended are AIMT reference protocols that show how a complete service contracts or expands within a deliberately designed structure — not just two numbers on a menu. The difference is service structure, not simply "less time" versus "more time": Core keeps the essential flow intact with its scalable massage, bodywork, and sensory portions tighter; Extended directs its added time intentionally toward selected massage, bodywork, and treatment portions, not spread evenly across every step. The masterclass ahead demonstrates the Extended 90-minute reference.</div>
+    <div class="interaction-hint">↓ Select the format you're studying today — it emphasizes that format's pacing landmarks below</div>
 
     <div class="grid-2col">
-      <button type="button" class="format-card" id="fmt1hr" onclick="selectFormat(1)" aria-pressed="false">
-        <div class="fmt-label-row"><div class="fmt-label">1-Hour</div><span class="fmt-selected-tag">Selected</span></div>
-        <div class="fmt-price-hint">Entry / Standard</div>
-        <div class="fmt-bullet">Streamlined massage</div>
-        <div class="fmt-bullet">Quick conditioning</div>
-        <div class="fmt-bullet">No hand massage</div>
-        <div class="fmt-bullet">No steam treatment</div>
+      <button type="button" class="format-card selected" id="fmtCore" onclick="selectFormat('core')" aria-pressed="true">
+        <div class="fmt-label-row"><div class="fmt-label">Core Format</div><span class="fmt-selected-tag">Selected</span></div>
+        <div class="fmt-price-hint">60-minute AIMT reference protocol</div>
+        <div class="fmt-bullet">Complete condensed reference</div>
+        <div class="fmt-bullet">Essential service flow preserved</div>
+        <div class="fmt-bullet">Scalable massage, bodywork &amp; sensory portions tighter</div>
+        <div class="fmt-bullet">No hand and forearm massage</div>
       </button>
-      <button type="button" class="format-card selected" id="fmt2hr" onclick="selectFormat(2)" aria-pressed="true">
-        <div class="fmt-label-row"><div class="fmt-label">2-Hour</div><span class="fmt-selected-tag">Selected</span></div>
-        <div class="fmt-price-hint">Signature / Premium</div>
-        <div class="fmt-bullet">Extended massage</div>
-        <div class="fmt-bullet">Intensive mask + steam</div>
-        <div class="fmt-bullet">Hand massage included</div>
-        <div class="fmt-bullet">Extended neck work</div>
+      <button type="button" class="format-card" id="fmtExtended" onclick="selectFormat('extended')" aria-pressed="false">
+        <div class="fmt-label-row"><div class="fmt-label">Extended Format</div><span class="fmt-selected-tag">Selected</span></div>
+        <div class="fmt-price-hint">90-minute AIMT reference protocol</div>
+        <div class="fmt-bullet">More expansive reference</div>
+        <div class="fmt-bullet">Added time directed intentionally, not spread evenly</div>
+        <div class="fmt-bullet">Deeper massage, bodywork &amp; treatment portions</div>
+        <div class="fmt-bullet">Hand and forearm massage included</div>
       </button>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Why Core and Extended stop at 60 and 90</div>
+      <div class="body-text" style="margin:0">Shorter or longer services may require a deliberately different protocol — not simply the same protocol compressed or stretched. A much shorter service would generally mean deliberately omitting or restructuring components, not just running every technique faster. A longer service shouldn't be built by stretching every step or multiplying the existing timing — it should be deliberately designed around what genuinely earns the additional time. AIMT's current reference scope is Core (60) and Extended (90); shorter or longer formats aren't covered here.</div>
     </div>
 
     <hr class="divider">
@@ -6218,7 +6224,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="info-card">
       <div class="ic-title">Reading the pacing markers</div>
-      <div class="body-text" style="margin:0">Each chapter carries small timing pills like <span class="t-badge" style="cursor:default;">1hr: ~5 min</span> — approximate pacing landmarks, not rules. They show roughly how much of your selected 60- or 120-minute service that chapter is meant to take, so you can sense where you should be within the full flow. They aren't rigid deadlines, absolute timing rules, or pass/fail stop times — client needs, product instructions, technique requirements, and your own judgment can all shift the actual pace. The masterclass teaches the technique. These markers teach the rhythm. The Service Timer, ahead in this module, turns that rhythm into a live protocol companion you can run during service.</div>
+      <div class="body-text" style="margin:0">Each chapter carries small timing pills like <span class="t-badge" style="cursor:default;">Core: ~45 min left</span> — approximate pacing landmarks, not rules, showing roughly how much of the selected Core (60-minute) or Extended (90-minute) reference protocol remains at that point in the service. Steps 01–02 are the pre-timer opening — the treatment clock itself starts at Step 03. These aren't rigid deadlines, absolute timing rules, or pass/fail stop times — client needs, product instructions, technique requirements, and your own judgment can all shift the actual pace. The masterclass teaches the technique. These markers teach the rhythm. The Service Timer, ahead in this module, turns that rhythm into a live protocol companion you can run during service.</div>
     </div>
 
     <div class="m8-masterclass" id="m8Masterclass">
@@ -6396,11 +6402,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="m8-timer-feature" id="m8TimerFeature">
       <div class="m8tf-badge">Included with your certification</div>
       <div class="m8tf-title">AIMT Service Timer</div>
-      <div class="m8tf-body">This is the actual AIMT Service Timer, embedded and limited to the first three steps. It starts on its own as you reach it below — let it run and see what a real treatment-room rehearsal feels like.</div>
+      <div class="m8tf-body">This is the actual AIMT Service Timer, embedded and limited to Steps 01–04 of the Extended (90-minute) reference. It starts on its own as you reach it below — let it run and see what a real treatment-room rehearsal feels like.</div>
 
       <div class="m8rt" id="m8TimerPreview">
         <div class="m8rt-idle" id="m8tpIdle">
-          <div class="m8rt-idle-text">A contained preview of the real Timer — Steps 01–03, real timing. It begins automatically as you reach it.</div>
+          <div class="m8rt-idle-text">A contained preview of the real Timer — Steps 01–04, Extended reference, real timing. It begins automatically as you reach it.</div>
         </div>
 
         <div id="m8tpApp" hidden>
@@ -6459,24 +6465,40 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="m8rt-done" id="m8tpDone" hidden>
           <div class="m8rt-done-icon">✦</div>
           <div class="m8rt-done-title">Preview<br>Complete</div>
-          <div class="m8rt-done-text">That's the first three steps. The full Service Timer carries the complete sequence, in both formats, from open to close.</div>
+          <div class="m8rt-done-text">That's the pre-timer opening and the treatment clock's first two steps. The full Service Timer carries the complete Core and Extended sequences, from open to close.</div>
           <button type="button" class="lc-btn" onclick="m8TimerRestart()">Restart preview</button>
+          <a class="lc-btn" href="aimt-service-timer.html" style="margin-top:0.6rem;">Open the Full Service Timer →</a>
         </div>
       </div>
 
       <div class="m8tf-guide">
         <div class="m8tf-guide-title">How to read the Timer</div>
         <div class="m8tf-guide-grid">
+          <div class="m8tf-guide-item"><strong>Service remaining</strong> — where you are across the whole treatment, not just this step.</div>
           <div class="m8tf-guide-item"><strong>Ring &amp; clock</strong> — time left on the technique you're performing right now.</div>
-          <div class="m8tf-guide-item"><strong>Top timeline</strong> — where you are across the whole service, not just this step.</div>
           <div class="m8tf-guide-item"><strong>Phase</strong> — the broader section of the protocol you're in.</div>
           <div class="m8tf-guide-item"><strong>Up next</strong> — what's coming, so you can start the transition before the clock runs out.</div>
         </div>
       </div>
 
       <div class="m8tf-footer">
-        <div class="m8tf-footer-text">The complete Service Timer covers the full sequence in both service formats. It receives its own separate, dedicated audit before it's linked here and from your student dashboard — this preview is not that audit, and its timings are current tool behavior, not frozen course authority.</div>
+        <div class="m8tf-footer-text">The complete Service Timer covers the full Core (60-minute) and Extended (90-minute) sequences, open to close, in an immersive treatment-room mode. This preview is Steps 01–04 of the Extended reference only.</div>
+        <a class="lc-btn-ghost" href="aimt-service-timer.html" style="display:inline-block;margin-top:0.75rem;">Open the AIMT Service Timer →</a>
       </div>
+    </div>
+
+    <div class="sec-eyebrow">Service Maps</div>
+    <div class="sec-title">Core and Extended, one page each.</div>
+    <div class="body-text">Quick protocol and pacing references for the Core and Extended formats — a companion to the masterclass and the Service Timer, usable outside the lesson whenever you need a fast reminder of the sequence.</div>
+    <div class="grid-2col">
+      <a class="format-card" href="assets/images/course/module-08/module-08-core-format-service-map.png" download style="text-decoration:none;display:block;">
+        <div class="fmt-label-row"><div class="fmt-label">Core Format Map</div></div>
+        <div class="fmt-price-hint">60-minute reference · download</div>
+      </a>
+      <a class="format-card" href="assets/images/course/module-08/module-08-extended-format-service-map.png" download style="text-decoration:none;display:block;">
+        <div class="fmt-label-row"><div class="fmt-label">Extended Format Map</div></div>
+        <div class="fmt-price-hint">90-minute reference · download</div>
+      </a>
     </div>
 
     <div class="lesson-complete" id="m8Complete" style="display:none;">
@@ -8868,17 +8890,18 @@ function m7CardNext(idx) {
 // Selected state is exposed via aria-pressed and a text "Selected" tag,
 // not color alone.
 function selectFormat(fmt) {
-  const is1 = fmt === 1;
-  const card1 = document.getElementById('fmt1hr');
-  const card2 = document.getElementById('fmt2hr');
-  if (card1) { card1.classList.toggle('selected', is1); card1.setAttribute('aria-pressed', is1 ? 'true' : 'false'); }
-  if (card2) { card2.classList.toggle('selected', !is1); card2.setAttribute('aria-pressed', !is1 ? 'true' : 'false'); }
+  const isCore = fmt === 'core';
+  const cardCore = document.getElementById('fmtCore');
+  const cardExtended = document.getElementById('fmtExtended');
+  if (cardCore) { cardCore.classList.toggle('selected', isCore); cardCore.setAttribute('aria-pressed', isCore ? 'true' : 'false'); }
+  if (cardExtended) { cardExtended.classList.toggle('selected', !isCore); cardExtended.setAttribute('aria-pressed', !isCore ? 'true' : 'false'); }
 
   const wrap = document.querySelector('.lesson-wrap');
   if (!wrap) return;
   wrap.querySelectorAll('.t-badge').forEach(b => {
-    const is2hrBadge = b.classList.contains('t-2hr');
-    const matchesSelection = is1 ? !is2hrBadge : is2hrBadge;
+    if (b.classList.contains('t-pretimer')) return;
+    const isExtendedBadge = b.classList.contains('t-extended');
+    const matchesSelection = isCore ? !isExtendedBadge : isExtendedBadge;
     b.classList.toggle('t-dim', !matchesSelection);
   });
 }
@@ -9951,14 +9974,17 @@ const M8_CHAPTERS = [
   // present (or that a fragrance-free path applies) by the time this
   // chapter begins. Touch expectations for this first-contact moment are
   // likewise established beforehand rather than re-asked from scratch here.
-  { num:'01', title:'Aromatherapy', label:'Video 01 — Aromatherapy', t1:'1hr: ~5 min', t2:'2hr: ~5 min',
+  { num:'01', title:'Aromatherapy', label:'Video 01 — Aromatherapy', preTimer:true,
     watchFor:'how a pre-identified fragrance choice is presented with confidence — this is a considered moment of the service, not an open-ended decision made on the spot.',
     guidance:['Fragrance sensitivity, known intolerance, strong preference, or a reason to adapt or omit aromatherapy should already be identified at intake — not discovered here. By the time this chapter begins, you should already know which options are appropriate to present, or that a predetermined fragrance-free path applies.',
       'Offer the three essential oil blends with equal weight — or, if fragrance-free was already established, follow that plan rather than presenting scent choices that don\'t apply. Rest a hand at the shoulder as an already-understood part of this moment, staying attentive and ready to adjust if the client seems hesitant. If a client wants to close their eyes while they sample, that\'s their choice to offer, never an instruction.'],
-    teach:[{ label:'Communication cue', text:'"I have three scent options for you today. Take a moment with each and tell me which one you\'re most drawn to."' }],
+    teach:[
+      { label:'Communication cue', text:'"I have three scent options for you today. Take a moment with each and tell me which one you\'re most drawn to."' },
+      { label:'If they ask', text:'"Aromatherapy is part of the sensory opening of the service. It helps establish the tone of the experience before we move into the hands-on treatment."' }
+    ],
     notes:['Touch expectations for this first-contact moment are established at intake and covered in depth in Module 2 — this is where you put that understanding into practice with genuine attentiveness, not where you ask for it from scratch.'],
     adapt:[], continuity:'Client positioning and comfort come next — getting fully settled before the rest of the service begins.' },
-  { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', t1:null, t2:null,
+  { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', preTimer:true,
     watchFor:'how the client is settled into position — physical comfort, support, and consent checked before anything else begins.',
     guidance:['Help the client get fully settled and supported on the treatment bed — head, neck, and shoulders comfortably aligned — before the service continues. Confirm comfort directly rather than assuming it; this is the moment to adjust support, draping, or positioning before momentum makes that harder to do smoothly.'],
     teach:[
@@ -9966,8 +9992,8 @@ const M8_CHAPTERS = [
       { label:'If they ask (why positioning matters)', text:'"I want your head and neck fully supported so you can relax without having to hold any tension or reposition yourself during the service."' }
     ],
     notes:[], adapt:[], continuity:'Dry brushing begins once the client is fully settled and comfortable — no reset needed between them.' },
-  { num:'03', title:'Dry Brushing and Hair Play', label:'Video 03 — Dry Brushing and Hair Play', t1:'1hr: ~3 min', t2:'2hr: ~5 min',
-    watchFor:'brush-to-scalp contact and hand transitions — a short step that sets the tempo for what follows.',
+  { num:'03', title:'Dry Brushing and Hair Play', label:'Video 03 — Dry Brushing and Hair Play', tCore:'Core: starts at 60:00', tExtended:'Extended: starts at 90:00',
+    watchFor:'brush-to-scalp contact and hand transitions — a short step that sets the tempo for what follows. This is where the treatment clock itself starts.',
     // Corrected per this pass: the prior wording ("introduce the scalp to
     // stimulation," "activating circulation") made an unsupported
     // physiological claim never previously flagged in module-08.md's
@@ -9977,7 +10003,7 @@ const M8_CHAPTERS = [
     teach:[{ type:'quiet', label:'Keep the flow quiet', note:'This does not normally need narration. Let the tactile/sensory experience stand on its own.',
       ifAsked:'"I\'m dry brushing through the scalp and hair before we move into the wet portion of the service."' }],
     notes:[], adapt:[], continuity:'The halo activates next — the client moves from dry contact into their first water and massage combined.' },
-  { num:'04', title:'Halo Activation + Wet Massage', label:'Video 04 — Halo Activation & Wet Massage', t1:'1hr: ~5 min', t2:'2hr: ~8 min',
+  { num:'04', title:'Halo Activation + Wet Massage', label:'Video 04 — Halo Activation & Wet Massage', tCore:'Core: ~45 min left', tExtended:'Extended: ~75 min left',
     watchFor:'the temperature check before first water contact — every time, regardless of what the thermostat says.',
     guidance:['Activate the halo. Begin scalp massage under water flow. Check temperature with your hand before any client contact — even when the thermostat is set.'],
     teach:[
@@ -9987,7 +10013,7 @@ const M8_CHAPTERS = [
     ],
     notes:['Temperature check is non-negotiable. Equipment fails. Your hand is the safeguard.'],
     adapt:[], continuity:'Exfoliation follows once the scalp is fully wet and warmed.' },
-  { num:'05', title:'Exfoliant + Scalp Massage', label:'Video 05 — Exfoliant & Scalp Massage', t1:'1hr: ~23 min', t2:'2hr: ~38 min',
+  { num:'05', title:'Exfoliant + Scalp Massage', label:'Video 05 — Exfoliant & Scalp Massage', tCore:'Core: ~42 min left', tExtended:'Extended: ~70 min left',
     watchFor:'how exfoliation technique and intensity are selected for this client rather than applied on autopilot, how pressure and rhythm shift across regions during the massage that follows, and the clean rinse that closes the sequence out.',
     guidance:['Apply exfoliant from mixing bowl using applicator brush. Work in four quadrants — frontal, temporal, crown, occipital.',
       'Exfoliation intensity, product, and technique should match what this client\'s scalp is telling you today. A stronger application is not the default you dial back only when there\'s a problem — it\'s one point on a range you select from every time.',
@@ -10001,15 +10027,15 @@ const M8_CHAPTERS = [
       { type:'quiet', label:'Keep the flow quiet', note:'No additional narration needed for the rinse.',
         ifAsked:'"I\'m rinsing everything through now before we move into the next part of the service."' }
     ],
-    notes:['This is where the 1-hour and 2-hour diverge most. Know your pace for each format.'],
+    notes:['This is where Core and Extended diverge most. Know your pace for each reference format.'],
     adapt:[
       '<strong>Adapt by degree, not by switch:</strong> a strong approach that suits one scalp can be too much for another. Reduce pressure, choose a gentler product, or work more selectively by region — rather than skipping the step outright unless there\'s a genuine safety reason to omit it.',
       '<strong>Adapt to response, not habit:</strong> pressure and intensity should be checked against client response, not applied uniformly regardless of what this client\'s scalp presentation and comfort are telling you in the moment.'
     ],
     continuity:'Neck and shoulder work begins, extending the service outward from the scalp.' },
-  { num:'06', title:'Neck and Shoulder Massage', label:'Video 06 — Neck & Shoulder Massage', t1:'1hr: ~5 min', t2:'2hr: ~12 min',
-    watchFor:'how the transition into the neck and shoulders is paced — this section extends significantly in the 2-hour format.',
-    guidance:['Transition to neck, upper traps, and shoulder work. Extended significantly in the 2-hour format.',
+  { num:'06', title:'Neck and Shoulder Massage', label:'Video 06 — Neck & Shoulder Massage', tCore:'Core: ~32 min left', tExtended:'Extended: ~60 min left',
+    watchFor:'how the transition into the neck and shoulders is paced — this combined scalp/neck/shoulder massage block runs about 10 minutes in Core and about 20 minutes in Extended.',
+    guidance:['Transition to neck, upper traps, and shoulder work. Meaningfully longer in the Extended reference than in Core.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
     // Corrected per owner instruction: neck/shoulder work is an established
     // service step, not a mid-service opt-in — do not ask whether to
@@ -10019,18 +10045,18 @@ const M8_CHAPTERS = [
     // for the step itself.
     teach:[
       { label:'Communication cue (transition)', text:'"I\'m going to move into your neck and shoulders now. Let me know if you\'d like more or less pressure at any point."' },
-      { label:'If they ask (why this is part of the service)', text:'"We include it as part of the service flow so the relaxation experience continues beyond just the scalp."' }
+      { label:'If they ask (why this is part of the service)', text:'"This extends the relaxation experience beyond the scalp and helps keep the service feeling continuous rather than stopping the hands-on flow at the hairline."' }
     ],
     notes:[], adapt:[], continuity:'The second rinse, shampoo, and rinse sequence follows — the client stays deeply relaxed through this stretch.' },
-  { num:'07', title:'Shampoo + Rinse', label:'Video 07 — Shampoo & Rinse', t1:'1hr: ~10 min', t2:'2hr: ~10 min',
+  { num:'07', title:'Shampoo + Rinse', label:'Video 07 — Shampoo & Rinse', tCore:'Core: ~15 min left', tExtended:'Extended: ~27 min left',
     watchFor:'the shift in energy here — the client is deeply relaxed, so this sequence runs with minimal narration.',
     guidance:['Second rinse (same method, no over-explanation — client is deeply relaxed). Shampoo applied with therapeutic massage technique, not standard lather. Final rinse at consistent temperature.'],
     teach:[{ type:'quiet', label:'Keep the flow quiet', note:'This should generally remain quiet. The client is already immersed in the experience and there is usually no reason to narrate shampooing or rinsing.',
       ifAsked:'"I\'m using [product] here because it fits what we\'re focusing on for your scalp and hair today."' }],
     notes:[], adapt:[], continuity:'Conditioning or treatment follows, on the format-specific path.' },
-  { num:'08', title:'Deep Conditioning / Hand + Arm Massage', label:'Video 08 — Deep Conditioning & Hand + Arm Massage', t1:'1hr: quick conditioning', t2:'2hr: mask + steam + hand & arm massage',
-    watchFor:'the difference in depth between formats during conditioning, and — in the 2-hour service — full hand-and-forearm coverage while the treatment processes.',
-    guidance:['1-hour: conditioning treatment, brief processing, rinse. 2-hour: intensive hair mask, steam hood 15–20 minutes, rinse.',
+  { num:'08', title:'Deep Conditioning / Hand + Arm Massage', label:'Video 08 — Deep Conditioning & Hand + Arm Massage', tCore:'Core: ~10 min left', tExtended:'Extended: ~20 min left',
+    watchFor:'the difference in depth between formats during conditioning, and — in the Extended reference — full hand-and-forearm coverage while the treatment processes.',
+    guidance:['Core: conditioning treatment, brief processing, rinse. Extended: masque, steam, and processing, rinse.',
       'Follow the product and equipment directions for processing time and temperature. Steam adds warmth and client comfort during processing — treatment selection and timing follow what the product calls for and how this client\'s scalp is responding today, not a fixed penetration claim.',
       'Work hands and forearms while treatment processes. Use massage lotion. Cover both hands fully, fingertips to elbow. This makes intentional use of otherwise passive processing time and helps maintain continuity of the service experience — implement it whenever it\'s within your scope, you\'re trained, and nothing from intake indicates it should be skipped or adapted.',
       'Neck, shoulder, hand, and forearm work is offered only within your applicable professional scope, your training, and this client\'s consent for this specific service. Completing this course does not expand what you are licensed to perform — confirm your own state and salon requirements before including this work in a service.'],
@@ -10039,11 +10065,11 @@ const M8_CHAPTERS = [
     // not something timidly opt-in — do not ask whether to include it.
     teach:[
       { label:'Communication cue (transition)', text:'"While your treatment processes, I\'m going to move into the hand and forearm massage. Let me know if you\'d like more or less pressure at any point."' },
-      { label:'If they ask (why it is included)', text:'"We include it during processing so the service continues to feel complete rather than leaving that time inactive."' }
+      { label:'If they ask (why it is included)', text:'"We use the processing time intentionally so the service stays active and connected instead of leaving that portion of the appointment inactive."' }
     ],
-    notes:['Explain the format difference clearly during booking — clients who\'ve had the 2-hour will notice the absence of steam and hand massage.'],
+    notes:['Explain the format difference clearly during booking — clients who\'ve had the Extended service will notice the absence of steam and hand massage in Core.'],
     adapt:[], continuity:'The waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.' },
-  { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', t1:'1hr: ~13 min', t2:'2hr: ~13 min',
+  { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', tCore:'Core: ~2 min left', tExtended:'Extended: ~2 min left',
     watchFor:'the temperature contrast during the final rinse and cooling spray, then the gradual pace of sitting the client back up to close the service.',
     guidance:['Waterfall neck rinse under the halo — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.',
       'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing script. Transition to blow dry or checkout. Share one specific observation from the service.'],
@@ -10054,7 +10080,7 @@ const M8_CHAPTERS = [
       // mid-service opt-out. The temperature change is still worth
       // preparing the client for.
       { label:'Communication cue (cooling transition)', text:'"I\'m going to move into the cool mist next, so you\'ll notice a quick temperature change."' },
-      { label:'If they ask (why the cooling step is included)', text:'"It\'s part of the sensory close of the service and gives you a contrast from the warm water we\'ve been using."' },
+      { label:'If they ask (why the cooling step is included)', text:'"It creates sensory contrast after the warm-water portion and helps signal that the service is moving into its closing phase."' },
       // Closing cue stays limited to the treatment-closing observation and
       // wellbeing check — retail/home-care recommendations, rebooking, and
       // pricing belong to Module 9 (Checkout, Client Closing & Pricing
@@ -10170,7 +10196,9 @@ function m8RenderChapter(idx) {
   if (headEl) headEl.setAttribute('aria-label', 'Chapter ' + (idx + 1) + ' of ' + M8_CHAPTERS.length + ' — ' + ch.label.replace(/^Video \d+ — /, ''));
   document.getElementById('m8mcNum').textContent = ch.num;
   document.getElementById('m8mcTitle').innerHTML = ch.title + (ch.titleSuffix ? ' <span style="font-size:.65rem;font-weight:400;color:var(--muted);margin-left:4px;">' + ch.titleSuffix + '</span>' : '');
-  document.getElementById('m8mcTiming').innerHTML = (ch.t1 ? '<span class="t-badge">' + ch.t1 + '</span>' : '') + (ch.t2 ? '<span class="t-badge t-2hr">' + ch.t2 + '</span>' : '');
+  document.getElementById('m8mcTiming').innerHTML = ch.preTimer
+    ? '<span class="t-badge t-pretimer">Pre-Timer Opening</span>'
+    : (ch.tCore ? '<span class="t-badge">' + ch.tCore + '</span>' : '') + (ch.tExtended ? '<span class="t-badge t-extended">' + ch.tExtended + '</span>' : '');
   document.getElementById('m8mcWatchFor').innerHTML = '<strong>Watch for:</strong> ' + ch.watchFor;
 
   const thumb = document.getElementById('m8mcVideoThumb');
@@ -10405,27 +10433,29 @@ function markVideoChapterEnded(chapterIndex) {
   APP_STATE._checkModuleComplete(8);
 }
 
-// ══ MODULE 8 — AIMT Service Timer preview (~3 steps) ══
-// Contained, functional preview derived from the real owner-created Service
-// Timer prototype's mode/step/countdown concept. Step 01's copy is
-// reconciled with Module 8's approved fragrance-optional/consent-before-
-// touch correction (the prototype predates that correction); Steps 02–03
-// needed no change. Durations are the prototype's own current 1-hour-format
-// values for these steps, which already match this module's own timing
-// badges — not new curriculum authority, and not the full Timer's frozen
-// timing (that remains subject to the Timer's own separate audit).
+// ══ MODULE 8 — AIMT Service Timer preview (Steps 01–04, Extended reference) ══
+// Contained, functional preview derived from the canonical AIMT Service
+// Timer (aimt-service-timer.html). Steps 01–02 are the pre-timer opening —
+// no clock runs; the treatment clock genuinely starts at Step 03, matching
+// the canonical Timer exactly. Durations for Steps 03–04 are the canonical
+// Timer's own Extended-format values (90-minute reference) — not new
+// curriculum authority, sourced from the same tool this previews.
 const M8_TIMER_PREVIEW_STEPS = [
-  { num:'01', title:'Aromatherapy Selection', phase:'Opening',
+  { num:'01', title:'Aromatherapy', phase:'Pre-Timer Opening', preTimer:true,
     desc:'Offer the fragrance options already identified as appropriate from intake — or follow the fragrance-free path if that was established. Rest a hand at the shoulder as an understood part of the moment.',
-    note:'Fragrance-free is a genuine choice, not a fallback — know which path applies before this step begins.',
-    dur: 5 * 60 },
-  { num:'02', title:'Dry Brushing & Hair Play', phase:'Opening',
-    desc:'Hairline to crown to nape — slow, stimulating strokes. The scalp should move under the brush. Follow with fingers, root to tip, to distribute oils.',
-    note:'If it feels slow, it’s probably right.',
-    dur: 3 * 60 },
-  { num:'03', title:'Halo Activation & Wet Massage', phase:'Wet Phase',
-    desc:'Palm check under the halo stream before any water touches the client. Redirect to scalp. Begin massage immediately under the flow.',
-    note:'Hold the temperature check long enough to be unambiguous — this is a safety step.',
+    note:'The treatment clock has not started yet — Steps 01–02 are the pre-timer opening.',
+    dur: 0 },
+  { num:'02', title:'Client Positioning + Comfort', phase:'Pre-Timer Opening', preTimer:true,
+    desc:'Help the client get fully settled and supported — head, neck, and shoulders comfortably aligned — before the timed treatment begins.',
+    note:'Confirm comfort directly. The treatment clock starts with the next step.',
+    dur: 0 },
+  { num:'03', title:'Dry Brushing + Hair Play', phase:'Opening',
+    desc:'Work the brush across the scalp and through the lengths, distributing natural oils, ahead of the wet portion of the service.',
+    note:'This is the Extended (90-minute) reference — the treatment clock starts here at 90:00.',
+    dur: 15 * 60 },
+  { num:'04', title:'Halo Activation + Wet Massage', phase:'Wet Phase',
+    desc:'Apply the halo, confirm water temperature by hand before any client contact, then move into wet massage under the flow.',
+    note:'Temperature check is non-negotiable — equipment fails, your hand is the safeguard.',
     dur: 5 * 60 }
 ];
 
@@ -10435,7 +10465,7 @@ let m8tpIndex = 0;
 let m8tpStepTotalSeconds = 0;
 let m8tpSecondsLeft = 0;
 let m8tpElapsedTotal = 0;
-let m8tpServiceTotalSeconds = M8_TIMER_PREVIEW_STEPS.reduce((a, s) => a + s.dur, 0);
+let m8tpServiceTotalSeconds = M8_TIMER_PREVIEW_STEPS.reduce((a, s) => a + (s.preTimer ? 0 : s.dur), 0);
 let m8tpPaused = false;
 let m8tpInterval = null;
 let m8tpAutoObserver = null;
@@ -10508,14 +10538,15 @@ function m8TimerRenderStep() {
 
   document.getElementById('m8tpBackBtn').disabled = m8tpIndex === 0;
   const skipBtn = document.getElementById('m8tpSkipBtn');
-  if (skipBtn) skipBtn.textContent = m8tpIndex >= M8_TIMER_PREVIEW_STEPS.length - 1 ? 'Finish' : 'Skip →';
-  document.getElementById('m8tpDurLabel').textContent = m8TimerFmt(step.dur);
+  if (skipBtn) skipBtn.textContent = m8tpIndex >= M8_TIMER_PREVIEW_STEPS.length - 1 ? 'Finish' : (step.preTimer ? 'Next →' : 'Skip →');
+  document.getElementById('m8tpDurLabel').textContent = step.preTimer ? 'pre-timer, no clock' : m8TimerFmt(step.dur);
 
-  m8tpStepTotalSeconds = step.dur;
-  m8tpSecondsLeft = step.dur;
+  m8tpStepTotalSeconds = step.preTimer ? 0 : step.dur;
+  m8tpSecondsLeft = step.preTimer ? 0 : step.dur;
   m8tpPaused = false;
   document.getElementById('m8tpPausedOverlay').classList.remove('show');
   document.getElementById('m8tpPauseBtn').textContent = 'Pause';
+  document.getElementById('m8tpPauseBtn').disabled = !!step.preTimer;
   m8TimerUpdateRing();
   m8TimerUpdateTimeline();
 }
@@ -10524,6 +10555,14 @@ function m8TimerUpdateRing() {
   const ring = document.getElementById('m8tpRingFill');
   const clockEl = document.getElementById('m8tpClock');
   if (!ring || !clockEl) return;
+  const step = M8_TIMER_PREVIEW_STEPS[m8tpIndex];
+  if (step && step.preTimer) {
+    ring.style.strokeDasharray = M8TP_RING_CIRC;
+    ring.style.strokeDashoffset = '0';
+    clockEl.textContent = 'PRE';
+    clockEl.className = 'm8rt-time';
+    return;
+  }
   const pct = m8tpStepTotalSeconds > 0 ? m8tpSecondsLeft / m8tpStepTotalSeconds : 0;
   ring.style.strokeDasharray = M8TP_RING_CIRC;
   ring.style.strokeDashoffset = M8TP_RING_CIRC * (1 - pct);
@@ -10544,6 +10583,8 @@ function m8TimerTick() {
   const clockEl = document.getElementById('m8tpClock');
   if (!clockEl) { clearInterval(m8tpInterval); return; } // preview left the page — stop ticking
   if (m8tpPaused) return;
+  const currentStep = M8_TIMER_PREVIEW_STEPS[m8tpIndex];
+  if (currentStep && currentStep.preTimer) return; // no clock runs during the pre-timer opening
   if (m8tpSecondsLeft > 0) {
     m8tpSecondsLeft--;
     m8tpElapsedTotal++;
@@ -10564,15 +10605,18 @@ function m8TimerTogglePause() {
 
 function m8TimerSkip() {
   // Credit the remaining time of the current step, matching the real
-  // Timer's own manual-skip behavior.
-  m8tpElapsedTotal += m8tpSecondsLeft;
+  // Timer's own manual-skip behavior. Pre-timer steps carry no clock time.
+  const currentStep = M8_TIMER_PREVIEW_STEPS[m8tpIndex];
+  if (!(currentStep && currentStep.preTimer)) m8tpElapsedTotal += m8tpSecondsLeft;
   m8TimerAdvance();
 }
 
 function m8TimerBack() {
   if (m8tpIndex === 0) return;
-  const spentOnCurrent = m8tpStepTotalSeconds - m8tpSecondsLeft;
-  const prevDur = M8_TIMER_PREVIEW_STEPS[m8tpIndex - 1].dur;
+  const currentStep = M8_TIMER_PREVIEW_STEPS[m8tpIndex];
+  const spentOnCurrent = (currentStep && currentStep.preTimer) ? 0 : (m8tpStepTotalSeconds - m8tpSecondsLeft);
+  const prevStep = M8_TIMER_PREVIEW_STEPS[m8tpIndex - 1];
+  const prevDur = prevStep.preTimer ? 0 : prevStep.dur;
   m8tpElapsedTotal = Math.max(0, m8tpElapsedTotal - spentOnCurrent - prevDur);
   m8tpIndex--;
   m8TimerRenderStep();

@@ -279,8 +279,11 @@ async function loadCertificates() {
 
 async function loadResources() {
   const card = document.getElementById('resourcesCard');
+  const timerItem = '<div class="resource-item"><div><div class="r-name">AIMT Service Timer</div>' +
+    '<div class="r-desc">Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion.</div></div>' +
+    '<a href="aimt-service-timer.html">Open</a></div>';
   if (!RESOURCES.length) {
-    card.innerHTML = '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
+    card.innerHTML = timerItem + '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
     return;
   }
   const items = await Promise.all(RESOURCES.map(async r => {
@@ -296,7 +299,7 @@ async function loadResources() {
         '</div>';
     } catch (_) { return ''; }
   }));
-  card.innerHTML = items.join('') || '<div class="empty">Resources are temporarily unavailable.</div>';
+  card.innerHTML = timerItem + (items.join('') || '<div class="empty">Resources are temporarily unavailable.</div>');
 }
 
 async function signOut() {

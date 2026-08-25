@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0d0b">
+<title>AIMT Service Timer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#141210;
+  --paper:#f3efe9;
+  --paper-2:#ebe5dc;
+  --line:#d6cec2;
+  --muted:#6f685f;
+  --warm:#a3968d;
+  --warm-dark:#786d65;
+  --timer-bg:#0f0d0b;
+  --timer-surface:#1a1814;
+  --timer-s2:#242019;
+  --timer-s3:#2e2921;
+  --white:#faf8f5;
+  --w90:rgba(250,248,245,.90);
+  --w68:rgba(250,248,245,.68);
+  --w48:rgba(250,248,245,.48);
+  --w28:rgba(250,248,245,.28);
+  --w16:rgba(250,248,245,.16);
+  --w08:rgba(250,248,245,.08);
+  --a12:rgba(163,150,141,.12);
+  --a20:rgba(163,150,141,.20);
+  --a36:rgba(163,150,141,.36);
+  --good:#8ea892;
+  --pad:clamp(20px,5vw,72px);
+}
+html{scroll-behavior:smooth;background:var(--paper);color:var(--ink)}
+body{font-family:'Outfit',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--paper);color:var(--ink);min-width:0}
+button,a{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+/* RESOURCE PAGE */
+.resource-page{min-height:100vh;overflow-x:hidden}
+.sitebar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px var(--pad);border-bottom:1px solid var(--line);background:rgba(243,239,233,.96);position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
+.sitebrand{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}
+.sitecontext{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;text-align:right}
+.hero{padding:clamp(54px,9vw,110px) var(--pad) clamp(52px,8vw,96px);border-bottom:1px solid var(--line)}
+.hero-inner{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:clamp(36px,7vw,96px);align-items:end}
+.eyebrow{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--warm-dark);margin-bottom:18px}
+.hero h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(56px,9vw,126px);font-weight:400;line-height:.82;letter-spacing:-.055em;max-width:820px}
+.hero h1 span{display:block;font-family:'Montserrat',sans-serif;font-size:.16em;font-weight:700;letter-spacing:.28em;text-transform:uppercase;line-height:1.3;margin-top:22px}
+.hero-side{padding-bottom:6px}
+.hero-lead{font-size:clamp(17px,2vw,22px);line-height:1.52;font-weight:300;margin-bottom:18px}
+.hero-note{font-size:14px;line-height:1.65;color:var(--muted);margin-bottom:24px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn-primary,.btn-ghost{min-height:50px;border-radius:999px;padding:0 22px;font-weight:600;font-size:12px;letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-ghost{background:transparent;color:var(--ink)}
+
+.section{padding:clamp(58px,8vw,100px) var(--pad);border-bottom:1px solid var(--line)}
+.section-inner{max-width:1180px;margin:0 auto}
+.section-head{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:clamp(28px,7vw,90px);margin-bottom:42px;align-items:start}
+.section-num{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm-dark)}
+.section-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(38px,6vw,72px);font-weight:400;line-height:.98;letter-spacing:-.035em;margin-bottom:16px}
+.section-copy{font-size:clamp(16px,1.8vw,20px);font-weight:300;line-height:1.65;max-width:820px;color:#39342f}
+
+.format-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:30px}
+.format-card{border:1px solid var(--line);border-radius:22px;padding:clamp(24px,4vw,38px);background:rgba(255,255,255,.34)}
+.format-card .format-kicker{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm-dark);margin-bottom:14px}
+.format-card h3{font-family:'Montserrat',sans-serif;font-size:clamp(28px,4vw,46px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.95;margin-bottom:12px}
+.format-card .format-time{font-family:'Playfair Display',Georgia,serif;font-size:clamp(48px,7vw,88px);line-height:.9;margin:18px 0 12px}
+.format-card p{font-size:15px;line-height:1.65;color:var(--muted);max-width:520px}
+
+.logic-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:20px;align-items:stretch}
+.table-card,.principle-card{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.28);overflow:hidden}
+.table-card{padding:10px 0}
+.compare-table{width:100%;border-collapse:collapse;font-size:14px}
+.compare-table th,.compare-table td{padding:14px 18px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.compare-table th{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.compare-table tr:last-child td{border-bottom:0}
+.compare-table td:nth-child(2),.compare-table td:nth-child(3){font-family:'Montserrat',sans-serif;font-weight:700;white-space:nowrap}
+.behavior{font-size:12px;color:var(--muted)}
+.principle-card{padding:28px}
+.principle-card h4{font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
+.principle-card p{font-size:15px;line-height:1.65;color:#403a35;margin-bottom:16px}
+.principle-card p:last-child{margin-bottom:0}
+.callout{margin-top:24px;border-left:3px solid var(--warm-dark);padding:4px 0 4px 18px;font-size:15px;line-height:1.65;color:#413b36}
+.callout strong{font-weight:600}
+
+.read-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:clamp(28px,6vw,72px);align-items:center}
+.demo-shell{background:var(--timer-bg);border-radius:24px;padding:18px;color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.demo-top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--w08);padding:4px 2px 12px;margin-bottom:16px}
+.demo-brand{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm)}
+.demo-service{font-size:10px;color:var(--w48)}
+.demo-progress-labels{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:8px}
+.demo-remaining span,.demo-elapsed span{display:block;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--w48);margin-bottom:3px}
+.demo-remaining strong{font-family:'Montserrat',sans-serif;font-size:26px;letter-spacing:-.04em}
+.demo-elapsed{text-align:right;color:var(--w68);font-size:12px}
+.demo-track{height:5px;background:var(--w08);border-radius:99px;position:relative;margin-bottom:18px}
+.demo-track::before{content:'';position:absolute;left:0;top:0;bottom:0;width:17%;border-radius:99px;background:var(--warm)}
+.demo-card{display:grid;grid-template-columns:78px 1fr auto;gap:14px;align-items:center;background:var(--timer-surface);border:1px solid var(--w08);border-radius:14px;padding:14px;margin-bottom:15px}
+.demo-ring{width:68px;height:68px;border-radius:50%;border:5px solid var(--warm);display:grid;place-items:center;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800}
+.demo-step small,.demo-phase{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--warm)}
+.demo-step strong{display:block;font-family:'Montserrat',sans-serif;font-size:18px;line-height:1.05;text-transform:uppercase;margin-top:5px}
+.demo-phase{text-align:right;align-self:start;padding-top:4px}
+.demo-next{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--w08);padding-top:12px;font-size:10px;color:var(--w48)}
+.demo-next strong{color:var(--w90);font-family:'Montserrat',sans-serif;text-transform:uppercase;font-size:10px}
+.demo-comm{margin-top:12px;padding:10px 11px;border:1px solid var(--w08);border-radius:9px;background:var(--timer-surface);font-size:10px;line-height:1.5;color:var(--w68)}
+.demo-comm strong{display:block;font-family:'Montserrat',sans-serif;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--warm);margin-bottom:3px}
+.read-list{display:grid;gap:0}
+.read-item{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:17px 0;border-bottom:1px solid var(--line)}
+.read-item:last-child{border-bottom:0}
+.read-index{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;color:var(--warm-dark);padding-top:3px}
+.read-item h4{font-family:'Montserrat',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.read-item p{font-size:14px;line-height:1.55;color:var(--muted)}
+.pacing-note{margin-top:26px;padding:20px 22px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.28)}
+.pacing-note strong{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:7px}
+.pacing-note p{font-size:14px;line-height:1.6;color:#403a35}
+
+.launch-section{background:var(--ink);color:var(--paper);border-bottom:0}
+.launch-section .section-num{color:var(--warm)}
+.launch-section .section-title{color:var(--paper)}
+.launch-section .section-copy{color:rgba(243,239,233,.7)}
+.launch-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.launch-card{border:1px solid rgba(243,239,233,.14);border-radius:22px;background:rgba(255,255,255,.035);padding:clamp(24px,4vw,38px);display:flex;flex-direction:column;min-height:330px}
+.launch-card .tag{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);margin-bottom:16px}
+.launch-card h3{font-family:'Montserrat',sans-serif;font-size:clamp(32px,4vw,48px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.95;margin-bottom:10px}
+.launch-card .minutes{font-family:'Playfair Display',Georgia,serif;font-size:clamp(58px,8vw,92px);line-height:.9;margin:18px 0 16px}
+.launch-card p{font-size:14px;line-height:1.6;color:rgba(243,239,233,.64);max-width:520px;margin-bottom:24px}
+.launch-card button{margin-top:auto;min-height:54px;border:1px solid var(--paper);border-radius:999px;background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 20px}
+.resume-bar{display:none;margin-top:18px;border:1px solid rgba(243,239,233,.18);border-radius:16px;padding:16px 18px;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.04)}
+.resume-bar.show{display:flex}
+.resume-copy strong{display:block;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.resume-copy span{font-size:13px;color:rgba(243,239,233,.62)}
+.resume-actions{display:flex;gap:8px;flex-wrap:wrap}
+.resume-actions button{min-height:42px;border-radius:999px;padding:0 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(243,239,233,.25);color:var(--paper);background:transparent}
+.resume-actions .resume-primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.resource-foot{padding:24px var(--pad);background:var(--ink);color:rgba(243,239,233,.48);border-top:1px solid rgba(243,239,233,.08);font-size:11px;text-align:center}
+
+/* IMMERSIVE TIMER */
+body.timer-open{overflow:hidden}
+.timer-app{position:fixed;inset:0;z-index:1000;background:var(--timer-bg);color:var(--white);display:none;flex-direction:column;overflow:hidden;font-family:'Outfit',system-ui,sans-serif}
+.timer-app.active{display:flex}
+.timer-top{flex-shrink:0;padding:10px clamp(14px,3vw,32px) 9px;border-bottom:1px solid var(--w08);background:var(--timer-bg)}
+.timer-top-row{display:flex;align-items:center;gap:10px;min-width:0}
+.timer-brand{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-format{font-size:9px;color:var(--w48);white-space:nowrap;margin-left:auto}
+.timer-top button{min-height:38px;border-radius:8px;padding:0 12px;border:1px solid var(--w16);background:transparent;color:var(--w68);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.timer-top button:disabled{opacity:.3;cursor:not-allowed}
+.timer-service-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-top:9px}
+.service-remaining span,.service-elapsed span{display:block;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--w48);margin-bottom:2px}
+.service-remaining strong{font-family:'Montserrat',sans-serif;font-size:clamp(15px,3vw,22px);letter-spacing:-.03em;white-space:nowrap}
+.service-elapsed{text-align:right;font-size:10px;color:var(--w68);white-space:nowrap}
+.timer-track{height:5px;background:var(--w08);border-radius:99px;position:relative;overflow:visible}
+.timer-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--warm);border-radius:99px}
+.timer-marker{position:absolute;left:0;top:50%;width:10px;height:10px;border-radius:50%;background:var(--white);border:2px solid var(--timer-bg);transform:translate(-50%,-50%)}
+
+.timer-main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:clamp(14px,2.8vw,28px) clamp(14px,4vw,44px) 16px;-webkit-overflow-scrolling:touch}
+.timer-inner{max-width:1050px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.status-banner{display:none;padding:10px 13px;border-left:3px solid var(--warm);background:var(--a12);border-radius:0 9px 9px 0;margin-bottom:12px;font-size:11px;line-height:1.45;color:var(--w90)}
+.status-banner.show{display:block}
+.step-clock-card{display:grid;grid-template-columns:74px minmax(0,1fr) auto;align-items:center;gap:15px;padding:14px 16px;background:var(--timer-surface);border:1px solid var(--w08);border-radius:14px;margin-bottom:15px}
+.step-ring-svg{width:72px;height:72px;transform:rotate(-90deg);flex-shrink:0}
+.ring-bg{fill:none;stroke:var(--w08);stroke-width:4}
+.ring-fill{fill:none;stroke:var(--warm);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.step-clock-text{min-width:0}
+.step-time{font-family:'Montserrat',sans-serif;font-size:clamp(30px,6vw,50px);font-weight:900;letter-spacing:-.05em;line-height:1;white-space:nowrap}
+.step-time.pre{font-size:clamp(24px,5vw,40px)}
+.step-meta{font-size:9px;color:var(--w48);margin-top:4px;line-height:1.4}
+.step-meta strong{color:var(--warm);font-weight:600}
+.phase-pill{font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--warm);text-align:right;align-self:start;padding-top:5px;max-width:120px;line-height:1.3}
+.step-eyebrow{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm);margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.step-eyebrow::before{content:'';width:16px;height:1px;background:var(--a36)}
+.step-title{font-family:'Montserrat',sans-serif;font-size:clamp(27px,6vw,58px);font-weight:900;letter-spacing:-.04em;line-height:.95;text-transform:uppercase;margin-bottom:12px;overflow-wrap:anywhere}
+.step-purpose{font-size:clamp(14px,2vw,18px);line-height:1.6;color:var(--w68);font-weight:300;max-width:880px;margin-bottom:13px}
+.guide-box{padding:13px 15px;border-left:3px solid var(--warm);border-top:1px solid var(--a20);border-right:1px solid var(--a20);border-bottom:1px solid var(--a20);border-radius:0 10px 10px 0;background:var(--a12);margin-bottom:11px;max-width:900px}
+.guide-label{font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--warm);display:block;margin-bottom:5px}
+.guide-text{font-size:clamp(13px,1.8vw,16px);line-height:1.52;color:var(--w90)}
+.comm-box{display:none;padding:11px 13px;border:1px solid var(--w08);border-radius:10px;background:var(--timer-surface);max-width:900px;margin-bottom:11px}
+.comm-box.show{display:block}
+.comm-head{font-family:'Montserrat',sans-serif;font-size:7px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--w48);margin-bottom:8px}
+.comm-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;padding:7px 0;border-top:1px solid var(--w08);align-items:start}
+.comm-row:first-of-type{border-top:0;padding-top:0}
+.comm-row:last-child{padding-bottom:0}
+.comm-label{font-family:'Montserrat',sans-serif;font-size:7px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);padding-top:2px}
+.comm-copy{font-size:12px;line-height:1.5;color:var(--w68)}
+.next-strip{margin-top:auto;padding-top:13px;border-top:1px solid var(--w08);display:flex;justify-content:space-between;align-items:flex-start;gap:15px;color:var(--w48);font-size:9px}
+.next-strip strong{font-family:'Montserrat',sans-serif;text-transform:uppercase;font-size:10px;color:var(--w90);text-align:right;line-height:1.35}
+
+.timer-bottom{flex-shrink:0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px clamp(14px,3vw,32px) max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--w08);background:var(--timer-bg)}
+.timer-bottom button{height:50px;border-radius:10px;border:1px solid var(--w16);background:transparent;color:var(--w68);padding:0 18px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+.timer-bottom button:disabled{opacity:.22;cursor:not-allowed}
+.timer-bottom .next-btn{background:var(--white);color:var(--timer-surface);border-color:var(--white);min-width:128px}
+.bottom-hint{text-align:center;font-size:8px;line-height:1.35;color:var(--w28);letter-spacing:.05em;text-transform:uppercase}
+
+.pause-overlay,.exit-dialog,.complete-screen{position:absolute;inset:0;z-index:30;background:rgba(15,13,11,.95);display:none;align-items:center;justify-content:center;text-align:center;padding:28px}
+.pause-overlay.show,.exit-dialog.show,.complete-screen.show{display:flex}
+.overlay-card{width:min(470px,100%)}
+.overlay-kicker{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm);margin-bottom:12px}
+.overlay-title{font-family:'Montserrat',sans-serif;font-size:clamp(36px,9vw,64px);font-weight:900;letter-spacing:-.05em;line-height:.92;text-transform:uppercase;margin-bottom:14px}
+.overlay-copy{font-size:14px;line-height:1.6;color:var(--w68);max-width:420px;margin:0 auto 22px}
+.overlay-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px}
+.overlay-actions button{min-height:50px;border-radius:999px;padding:0 20px;border:1px solid var(--w16);background:transparent;color:var(--w90);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.overlay-actions .primary{background:var(--white);color:var(--timer-bg);border-color:var(--white)}
+.complete-time{font-family:'Montserrat',sans-serif;font-size:14px;color:var(--warm);letter-spacing:.08em;margin-bottom:10px}
+.transition-toast{position:absolute;left:50%;bottom:76px;z-index:15;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--timer-s3);border:1px solid var(--a20);border-radius:999px;padding:9px 15px;font-size:10px;color:var(--w90);white-space:nowrap;transition:opacity .2s,transform .2s;max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
+.transition-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:820px){
+  .hero-inner,.section-head,.read-grid,.logic-wrap{grid-template-columns:1fr}
+  .hero h1{max-width:700px}
+  .section-head{gap:16px}
+  .format-grid,.launch-grid{grid-template-columns:1fr}
+  .logic-wrap{gap:14px}
+}
+@media (max-width:600px){
+  .sitebar{padding:14px 18px}.sitecontext{display:none}
+  .hero,.section{padding-left:18px;padding-right:18px}
+  .hero{padding-top:48px}
+  .hero h1{font-size:clamp(48px,18vw,76px)}
+  .hero h1 span{font-size:.14em;margin-top:17px;letter-spacing:.22em}
+  .format-card,.launch-card{border-radius:18px}
+  .table-card{overflow-x:auto}
+  .compare-table{min-width:650px}
+  .demo-shell{border-radius:18px;padding:14px}
+  .demo-card{grid-template-columns:64px 1fr}.demo-phase{display:none}.demo-ring{width:58px;height:58px;font-size:14px}
+  .resume-bar{align-items:flex-start;flex-direction:column}
+  .timer-top{padding-left:12px;padding-right:12px}
+  .timer-format{display:none}
+  .timer-top button{padding:0 10px}
+  .timer-service-row{gap:8px;grid-template-columns:auto 1fr auto}
+  .step-clock-card{grid-template-columns:58px minmax(0,1fr) auto;padding:12px;gap:11px}
+  .step-ring-svg{width:56px;height:56px}
+  .phase-pill{max-width:86px;font-size:7px}
+  .timer-bottom{grid-template-columns:1fr 1fr;padding-left:12px;padding-right:12px}
+  .timer-bottom button{width:100%;padding:0 10px}
+  .bottom-hint{grid-column:1/-1;grid-row:2}
+  .comm-row{grid-template-columns:1fr;gap:3px}
+}
+@media (max-width:360px){
+  .service-elapsed span{display:none}
+  .service-remaining strong{font-size:14px}
+  .step-clock-card{grid-template-columns:52px 1fr;gap:10px}.step-ring-svg{width:50px;height:50px}.phase-pill{grid-column:2;text-align:left;padding-top:0}
+  .timer-bottom button{font-size:9px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}.ring-fill,.transition-toast{transition:none!important}
+}
+.access-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:13px;letter-spacing:.05em;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="access-gate" id="accessGate">Checking your AIMT access…</div>
+<div class="resource-page" id="resource-page" style="display:none">
+  <header class="sitebar">
+    <div class="sitebrand">AIMT · Service Timer</div>
+    <div class="sitecontext">Module 8 · Practitioner Resource</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="eyebrow">American Institute of Modern Trichology</div>
+          <h1>Service Timer<span>Head Spa Pacing Companion</span></h1>
+        </div>
+        <div class="hero-side">
+          <p class="hero-lead">Use the AIMT reference formats to understand how a complete Head Spa service contracts and expands without simply speeding every technique up or stretching every step equally.</p>
+          <p class="hero-note">The reference timing is designed to support practitioner judgment, service flow and client comfort. Your business can name and package its services however it chooses.</p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="#formats">Understand the formats</a>
+            <a class="btn-ghost" href="#launch">Open the timer</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="formats">
+      <div class="section-inner">
+        <div class="section-head">
+          <div class="section-num">01 · Understand the service</div>
+          <div>
+            <h2 class="section-title">The clock follows the protocol.</h2>
+            <p class="section-copy">Core and Extended describe how the same service framework contracts or expands. They are not menu names, and they are not universal industry appointment lengths. In this Timer, AIMT uses two concrete reference protocols so students can learn pacing from a real service structure.</p>
+          </div>
+        </div>
+
+        <div class="format-grid">
+          <article class="format-card">
+            <div class="format-kicker">AIMT Reference Protocol</div>
+            <h3>Core Format</h3>
+            <div class="format-time">60 min</div>
+            <p>The condensed complete reference. It preserves the essential service flow while keeping expandable massage, sensory and bodywork portions tighter.</p>
+          </article>
+          <article class="format-card">
+            <div class="format-kicker">AIMT Reference Protocol</div>
+            <h3>Extended Format</h3>
+            <div class="format-time">90 min</div>
+            <p>The more expansive reference. Additional time is directed intentionally toward selected massage, bodywork, sensory and treatment portions rather than distributed proportionally across every step.</p>
+          </article>
+        </div>
+
+        <div class="logic-wrap">
+          <div class="table-card" aria-label="Core and Extended timing comparison">
+            <table class="compare-table">
+              <thead><tr><th>Protocol block</th><th>Core</th><th>Extended</th><th>What the comparison teaches</th></tr></thead>
+              <tbody>
+                <tr><td>Dry opening</td><td>15 min</td><td>15 min</td><td class="behavior">Fixed reference anchor</td></tr>
+                <tr><td>Halo + wet massage</td><td>3 min</td><td>5 min</td><td class="behavior">Small scalable range</td></tr>
+                <tr><td>Exfoliation + massage + rinse</td><td>10 min</td><td>10 min</td><td class="behavior">Fixed reference anchor</td></tr>
+                <tr><td>Treatment massage / bodywork</td><td>12 min</td><td>30 min</td><td class="behavior">Primary expansion zone</td></tr>
+                <tr><td>Rinse + cleanse preparation</td><td>5 min</td><td>3 min</td><td class="behavior">Operational / constrained transition</td></tr>
+                <tr><td>Shampoo + rinse</td><td>5 min</td><td>7 min</td><td class="behavior">Slightly scalable</td></tr>
+                <tr><td>Conditioning portion</td><td>8 min</td><td>10 min</td><td class="behavior">Scalable; Extended adds bodywork</td></tr>
+                <tr><td>Final rinse + Halo massage</td><td>—</td><td>8 min</td><td class="behavior">Extended-format component</td></tr>
+                <tr><td>Cooling drops + hot towel finish</td><td>2 min</td><td>2 min</td><td class="behavior">Fixed reference anchor</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <aside class="principle-card">
+            <h4>Why this matters</h4>
+            <p><strong>More time does not mean more time everywhere.</strong> The 90-minute reference earns its additional time primarily through expandable experience-building portions.</p>
+            <p>Some transitions, rinses and product requirements are constrained by what the service actually needs. They should not be stretched merely to fill time.</p>
+            <p>At the other end, a service cannot be compressed indefinitely. Once important components must be removed rather than shortened, it becomes a deliberately different protocol.</p>
+          </aside>
+        </div>
+
+        <div class="callout"><strong>Current AIMT Timer scope:</strong> 60- and 90-minute reference protocols. AIMT is not presenting 30- or 45-minute services as compressed versions of this same protocol, and a 120-minute version should only be added after its own pacing map is deliberately designed.</div>
+      </div>
+    </section>
+
+    <section class="section" id="read-timer">
+      <div class="section-inner">
+        <div class="section-head">
+          <div class="section-num">02 · Read the timer</div>
+          <div>
+            <h2 class="section-title">Use landmarks, not pressure.</h2>
+            <p class="section-copy">The Timer is a pacing companion. It helps you see where you are in the complete service, what you are doing now, and what transition is coming next. It is not a pass/fail stopwatch and should never override client comfort, safety, product directions or practitioner judgment.</p>
+          </div>
+        </div>
+
+        <div class="read-grid">
+          <div class="demo-shell" aria-label="Example AIMT service timer display">
+            <div class="demo-top"><div class="demo-brand">AIMT · Extended Format</div><div class="demo-service">Reference example</div></div>
+            <div class="demo-progress-labels">
+              <div class="demo-remaining"><span>Service remaining</span><strong>75:00</strong></div>
+              <div class="demo-elapsed"><span>Elapsed</span>15:00</div>
+            </div>
+            <div class="demo-track" aria-hidden="true"></div>
+            <div class="demo-card">
+              <div class="demo-ring">5:00</div>
+              <div class="demo-step"><small>Current step</small><strong>Halo Activation + Wet Massage</strong></div>
+              <div class="demo-phase">Wet Phase</div>
+            </div>
+            <div class="demo-next"><span>Up next →</span><strong>Exfoliation + Scalp Massage + Rinse</strong></div>
+            <div class="demo-comm"><strong>If they ask</strong>“This is the halo rinse. It gives me a steady flow of water while I work through the scalp.”</div>
+          </div>
+
+          <div>
+            <div class="read-list">
+              <div class="read-item"><div class="read-index">01</div><div><h4>Service remaining</h4><p>The primary overall landmark. It matches the remaining-time positions used on the companion service map: 75, 70, 60, 30 and so on.</p></div></div>
+              <div class="read-item"><div class="read-index">02</div><div><h4>Current-step clock</h4><p>Shows how much time remains until the next reference landmark for the technique or operational block you are in.</p></div></div>
+              <div class="read-item"><div class="read-index">03</div><div><h4>Phase</h4><p>Provides quick orientation within the larger service flow without adding another task for the practitioner to manage.</p></div></div>
+              <div class="read-item"><div class="read-index">04</div><div><h4>Up next</h4><p>Lets you anticipate the next transition before the current block ends, especially when equipment, water, products or positioning need to change.</p></div></div>
+              <div class="read-item"><div class="read-index">05</div><div><h4>Communication cues</h4><p><strong>Say when needed</strong> is reserved for positioning, temperature, pressure, comfort or a meaningful transition. <strong>If they ask</strong> gives you a short answer for a direct client question; it is not an instruction to narrate the service.</p></div></div>
+            </div>
+            <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
+            <div class="pacing-note"><strong>Before the clock</strong><p>Aromatherapy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section launch-section" id="launch">
+      <div class="section-inner">
+        <div class="section-head">
+          <div class="section-num">03 · Start the service</div>
+          <div>
+            <h2 class="section-title">Choose the reference format.</h2>
+            <p class="section-copy">Starting a service enters an immersive Timer-only mode. The education page disappears so the clock, current step and next transition are the only things competing for your attention.</p>
+          </div>
+        </div>
+
+        <div class="launch-grid">
+          <article class="launch-card">
+            <div class="tag">Reference Protocol</div>
+            <h3>Core Format</h3>
+            <div class="minutes">60</div>
+            <p>A complete condensed service flow. The treatment clock begins after the pre-timer opening and runs from 60:00 to 0:00.</p>
+            <button type="button" data-start-format="core">Open Core Timer →</button>
+          </article>
+          <article class="launch-card">
+            <div class="tag">Reference Protocol</div>
+            <h3>Extended Format</h3>
+            <div class="minutes">90</div>
+            <p>A more expansive service flow with additional time directed toward selected massage, bodywork and treatment portions.</p>
+            <button type="button" data-start-format="extended">Open Extended Timer →</button>
+          </article>
+        </div>
+
+        <div class="resume-bar" id="resume-bar">
+          <div class="resume-copy"><strong id="resume-title">Active service paused</strong><span id="resume-detail"></span></div>
+          <div class="resume-actions"><button type="button" id="discard-session">Discard</button><button type="button" class="resume-primary" id="resume-session">Resume Timer →</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="resource-foot">AIMT practitioner resource · Included with HeadSpa Mastery certification.</footer>
+</div>
+
+<!-- IMMERSIVE TIMER -->
+<div class="timer-app" id="timer-app" aria-hidden="true">
+  <div class="timer-top">
+    <div class="timer-top-row">
+      <div class="timer-brand" id="timer-brand">AIMT · Service Timer</div>
+      <div class="timer-format" id="timer-format"></div>
+      <button type="button" id="pause-btn" disabled aria-pressed="false">Pause</button>
+      <button type="button" id="exit-btn">Exit Timer</button>
+    </div>
+    <div class="timer-service-row">
+      <div class="service-remaining"><span id="service-label">Service remaining</span><strong id="service-remaining">PRE-TIMER</strong></div>
+      <div class="timer-track" id="timer-track" role="progressbar" aria-label="Overall treatment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="timer-fill" id="timer-fill"></div><div class="timer-marker" id="timer-marker"></div>
+      </div>
+      <div class="service-elapsed"><span>Elapsed</span><strong id="service-elapsed">0:00</strong></div>
+    </div>
+  </div>
+
+  <div class="timer-main" id="timer-main" tabindex="-1">
+    <div class="timer-inner">
+      <div class="status-banner" id="status-banner"></div>
+      <div class="step-clock-card">
+        <svg class="step-ring-svg" viewBox="0 0 72 72" aria-hidden="true">
+          <circle class="ring-bg" cx="36" cy="36" r="30"></circle>
+          <circle class="ring-fill" id="ring-fill" cx="36" cy="36" r="30"></circle>
+        </svg>
+        <div class="step-clock-text">
+          <div class="step-time pre" id="step-time">PRE</div>
+          <div class="step-meta" id="step-meta">Treatment clock not running</div>
+        </div>
+        <div class="phase-pill" id="phase-pill">Pre-Timer Opening</div>
+      </div>
+
+      <div class="step-eyebrow" id="step-eyebrow">Step 01 · Pre-Timer Opening</div>
+      <h2 class="step-title" id="step-title">Aromatherapy</h2>
+      <p class="step-purpose" id="step-purpose"></p>
+      <div class="guide-box"><span class="guide-label">Practitioner cue</span><div class="guide-text" id="guide-text"></div></div>
+      <div class="comm-box" id="comm-box"></div>
+      <div class="next-strip" id="next-strip"><span>Up next →</span><strong id="up-next"></strong></div>
+    </div>
+  </div>
+
+  <div class="timer-bottom">
+    <button type="button" id="back-btn">← Back</button>
+    <div class="bottom-hint" id="bottom-hint">Pre-timer opening · no treatment time running</div>
+    <button type="button" class="next-btn" id="next-btn">Next →</button>
+  </div>
+
+  <div class="pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="overlay-card">
+      <div class="overlay-kicker">Service clock paused</div>
+      <div class="overlay-title" id="pause-title">Paused</div>
+      <div class="overlay-copy">Both the overall treatment clock and the current-step clock are stopped. Resume when you are ready to continue.</div>
+      <div class="overlay-actions"><button type="button" class="primary" id="resume-overlay-btn">Resume Timer</button></div>
+    </div>
+  </div>
+
+  <div class="exit-dialog" id="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title">
+    <div class="overlay-card">
+      <div class="overlay-kicker">Exit immersive mode</div>
+      <div class="overlay-title" id="exit-title">Leave Timer?</div>
+      <div class="overlay-copy" id="exit-copy">Your active service will remain paused and can be resumed from this page.</div>
+      <div class="overlay-actions"><button type="button" id="cancel-exit">Stay in Timer</button><button type="button" class="primary" id="confirm-exit">Exit Timer</button></div>
+    </div>
+  </div>
+
+  <div class="complete-screen" id="complete-screen" role="dialog" aria-modal="true" aria-labelledby="complete-title">
+    <div class="overlay-card">
+      <div class="overlay-kicker">AIMT Service Timer</div>
+      <div class="overlay-title" id="complete-title">Treatment Complete</div>
+      <div class="complete-time" id="complete-time"></div>
+      <div class="overlay-copy">The timed treatment is complete. The Timer ends here; checkout, client closing and pricing strategy belong outside this protocol companion.</div>
+      <div class="overlay-actions"><button type="button" id="new-service-btn">Start New Service</button><button type="button" class="primary" id="complete-exit-btn">Exit Timer</button></div>
+    </div>
+  </div>
+
+  <div class="transition-toast" id="transition-toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="sr-status" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/*
+  AIMT SERVICE TIMER — ACCESS GATE
+  ---------------------------------
+  Same read-only Supabase pattern used by my-aimt.html: the anon key is public
+  by design and RLS enforces which rows a signed-in user can actually read.
+  A signed-out visitor, or one with no headspa-mastery entitlement row, is
+  redirected before the resource page or timer ever renders.
+*/
+(function () {
+  const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+
+  function denyAccess() {
+    window.location.href = 'student-access.html?next=aimt-service-timer.html';
+  }
+
+  (async function checkAccess() {
+    try {
+      const { data } = await client.auth.getUser();
+      const user = data && data.user;
+      if (!user) { denyAccess(); return; }
+      const email = (user.email || '').toLowerCase();
+      const { data: ents, error } = await client
+        .from('course_entitlements')
+        .select('course_slug')
+        .eq('course_slug', 'headspa-mastery')
+        .or('user_id.eq.' + user.id + ',purchaser_email.eq.' + email);
+      if (error || !ents || !ents.length) { denyAccess(); return; }
+      document.getElementById('accessGate').style.display = 'none';
+      document.getElementById('resource-page').style.display = '';
+    } catch (e) {
+      denyAccess();
+    }
+  })();
+})();
+</script>
+<script>
+/*
+  AIMT SERVICE TIMER
+  ------------------
+  Core and Extended are AIMT pacing-framework labels, not menu/service names.
+  Timing references are derived from the supplied 60- and 90-minute service maps,
+  with the Core clock corrected to begin at 60:00 as directed by the owner.
+*/
+
+const PRE_TIMER_STEPS = [
+  {
+    id:'01', phase:'Pre-Timer Opening', title:'Aromatherapy',
+    purpose:'Confirm the client’s scent preference before the treatment clock begins. Keep the choice concise and compatible with the intake plan.',
+    cue:'A fragrance-free service is valid. If essential oils are included, have the selected option ready before you begin the timed dry opening.',
+    communication:{proactive:'“I have three scent options for you today. Take a moment with each and tell me which one you’re most drawn to.”',ifAsked:'“Aromatherapy is part of the sensory opening of the service. It helps establish the tone of the experience before we move into the hands-on treatment.”'}
+  },
+  {
+    id:'02', phase:'Pre-Timer Opening', title:'Client Positioning + Comfort',
+    purpose:'Complete positioning, linens, support and any selected eye covering before the treatment timer starts so the timed service begins from a settled setup.',
+    cue:'Check head and neck alignment, basin position, blanket/bolster support and general comfort now. The treatment clock begins with Dry Brushing + Hair Play.',
+    communication:{proactive:'“Let’s get you comfortable first. Tell me if anything needs adjusting before we start.”',ifAsked:'“I want your head and neck fully supported so you can relax without having to hold any tension or reposition yourself during the service.”'}
+  }
+];
+
+const PROTOCOLS = {
+  core:{
+    key:'core', label:'Core Format', totalSeconds:60*60,
+    description:'60-minute reference protocol',
+    timed:[
+      {id:'03', phase:'Opening', title:'Dry Brushing + Hair Play', duration:15*60,
+       purpose:'Begin the timed treatment with the dry sensory opening while the client is settled and supported.',
+       cue:'Use the selected oil in the palms as demonstrated, then move into controlled dry brushing and hair play. The treatment clock starts here at 60:00.',
+       communication:{proactive:null,ifAsked:'“I’m dry brushing through the scalp and hair before we move into the wet portion of the service.”'}},
+      {id:'04', phase:'Wet Phase', title:'Halo Activation + Wet Massage', duration:3*60,
+       purpose:'Transition cleanly from the dry opening into water and wet massage.',
+       cue:'Apply the Halo, start the steamer when it is part of your trained setup, confirm water temperature, then move directly into wet massage with the approved tools or hand techniques.',
+       communication:{proactive:'“How does the water temperature feel? Let me know anytime if you want it warmer or cooler.” Then return to quiet.',ifAsked:'“This is the halo rinse. It gives me a steady flow of water while I work through the scalp.”'}},
+      {id:'05', phase:'Treatment', title:'Exfoliation + Scalp Massage + Rinse', duration:10*60,
+       purpose:'Complete the selected exfoliation approach, integrate scalp massage, and clear the product before moving on.',
+       cue:'Adapt exfoliation to intake, assessment and product directions. Keep pressure controlled, then rinse thoroughly before the next block.',
+       communication:{proactive:'During massage: “Let me know anytime if you’d like more or less pressure.” Otherwise keep the application/rinse quiet.',ifAsked:'“It’s a scalp exfoliant. I’m adjusting the product, pressure, and technique based on what I’m seeing and how your scalp feels today.”'}},
+      {id:'06', phase:'Bodywork', title:'Treatment Massage · Scalp, Neck + Shoulders', duration:12*60,
+       purpose:'Use the primary massage/bodywork block to build rhythm and coverage without compromising positioning or scope.',
+       cue:'Use the oil-application method or approved tool demonstrated in training. The Core reference includes a 10-minute scalp, neck and shoulder massage within this block, then warming the Halo near the transition.',
+       communication:{proactive:'“I’m going to move into your neck and shoulders now. Let me know if you’d like more or less pressure at any point.”',ifAsked:'“This extends the relaxation experience beyond the scalp and helps keep the service feeling continuous rather than stopping the hands-on flow at the hairline.”'}},
+      {id:'07', phase:'Cleanse Prep', title:'Rinse + Cleanse Preparation', duration:5*60,
+       purpose:'Clear the treatment phase and prepare the cleanse products without losing the service rhythm.',
+       cue:'Rinse methodically, then prepare the hair bath/shampoo and conditioner so the next transition is ready before you need it.',
+       communication:null},
+      {id:'08', phase:'Cleanse', title:'Shampoo + Rinse', duration:5*60,
+       purpose:'Cleanse thoroughly while keeping the service deliberate and scalp-focused.',
+       cue:'Use finger pads rather than nails, maintain controlled pressure, and rinse completely. Recheck water temperature whenever the transition or client response calls for it.',
+       communication:{proactive:null,ifAsked:'“I’m using [product] here because it fits what we’re focusing on for your scalp and hair today.”'}},
+      {id:'09', phase:'Conditioning', title:'Conditioning + Rinse', duration:8*60,
+       purpose:'Apply the selected conditioner or treatment according to the service plan and product directions, then rinse completely.',
+       cue:'Protect any genuine product-processing requirement. Do not invent processing time simply to fill the clock.',
+       communication:null},
+      {id:'10', phase:'Finish', title:'Hot Towel Press + Cooling Drops', duration:2*60,
+       purpose:'Close the timed treatment with a concise, controlled sensory finish.',
+       cue:'Complete the hot towel press and cooling-drop finish in the order demonstrated for the Core reference. Keep the ending calm and intentional.',
+       communication:{proactive:'Before cooling: “I’m going to move into the cool mist next, so you’ll notice a quick temperature change.” At the treatment close: “Today I focused a little more on [area or service priority you addressed]. How are you feeling?”',ifAsked:'“It creates sensory contrast after the warm-water portion and helps signal that the service is moving into its closing phase.”'}}
+    ]
+  },
+  extended:{
+    key:'extended', label:'Extended Format', totalSeconds:90*60,
+    description:'90-minute reference protocol',
+    timed:[
+      {id:'03', phase:'Opening', title:'Dry Brushing + Hair Play', duration:15*60,
+       purpose:'Begin the timed treatment with the dry sensory opening while the client is settled and supported.',
+       cue:'Use the selected oil in the palms as demonstrated, then move into controlled dry brushing and hair play. The treatment clock starts here at 90:00.',
+       communication:{proactive:null,ifAsked:'“I’m dry brushing through the scalp and hair before we move into the wet portion of the service.”'}},
+      {id:'04', phase:'Wet Phase', title:'Halo Activation + Wet Massage', duration:5*60,
+       purpose:'Transition cleanly from the dry opening into water and a more expansive wet-massage portion.',
+       cue:'Apply the Halo, start the steamer at this reference landmark, confirm water temperature, then move into wet massage with the approved tools or hand techniques.',
+       communication:{proactive:'“How does the water temperature feel? Let me know anytime if you want it warmer or cooler.” Then return to quiet.',ifAsked:'“This is the halo rinse. It gives me a steady flow of water while I work through the scalp.”'}},
+      {id:'05', phase:'Treatment', title:'Exfoliation + Scalp Massage + Rinse', duration:10*60,
+       purpose:'Complete the selected exfoliation approach, integrate scalp massage, and clear the product before moving on.',
+       cue:'Adapt exfoliation to intake, assessment and product directions. Keep pressure controlled, then rinse thoroughly before the next block.',
+       communication:{proactive:'During massage: “Let me know anytime if you’d like more or less pressure.” Otherwise keep the application/rinse quiet.',ifAsked:'“It’s a scalp exfoliant. I’m adjusting the product, pressure, and technique based on what I’m seeing and how your scalp feels today.”'}},
+      {id:'06', phase:'Bodywork', title:'Treatment Massage · Scalp, Neck + Shoulders', duration:30*60,
+       purpose:'Use the largest expansion block for the treatment massage/bodywork that distinguishes the Extended reference from the Core reference.',
+       cue:'Use the oil-application method or approved tool demonstrated in training. The Extended map includes the mask transition and a 20-minute scalp, neck and shoulder massage within this 30-minute operational block, then warming the Halo near the transition.',
+       communication:{proactive:'“I’m going to move into your neck and shoulders now. Let me know if you’d like more or less pressure at any point.”',ifAsked:'“This extends the relaxation experience beyond the scalp and helps keep the service feeling continuous rather than stopping the hands-on flow at the hairline.”'}},
+      {id:'07', phase:'Cleanse Prep', title:'Rinse + Cleanse Preparation', duration:3*60,
+       purpose:'Clear the treatment phase and prepare the cleanse products efficiently without turning a necessary transition into filler.',
+       cue:'Rinse methodically, then prepare the hair bath/shampoo and conditioner so the next transition is ready.',
+       communication:null},
+      {id:'08', phase:'Cleanse', title:'Shampoo + Rinse', duration:7*60,
+       purpose:'Cleanse thoroughly while allowing slightly more time for massage/tools than the Core reference.',
+       cue:'Start the steamer at this reference landmark when it is part of your trained setup. Use finger pads rather than nails and rinse completely.',
+       communication:{proactive:null,ifAsked:'“I’m using [product] here because it fits what we’re focusing on for your scalp and hair today.”'}},
+      {id:'09', phase:'Conditioning', title:'Deep Conditioning + Hand/Arm Massage', duration:10*60,
+       purpose:'Use conditioning/processing time intentionally while adding the hand and arm bodywork included in the Extended reference.',
+       cue:'Apply the selected masque or conditioner according to product directions. Protect required processing time and use hand/arm massage only when trained, permitted, included and consented to.',
+       communication:{proactive:'“While your treatment processes, I’m going to move into the hand and forearm massage. Let me know if you’d like more or less pressure at any point.”',ifAsked:'“We use the processing time intentionally so the service stays active and connected instead of leaving that portion of the appointment inactive.”'}},
+      {id:'10', phase:'Finish', title:'Final Rinse + Halo Massage', duration:8*60,
+       purpose:'Clear the conditioning treatment and use the final Halo neck/shoulder massage to create a controlled, unhurried close.',
+       cue:'Rinse thoroughly, recheck water temperature as needed, then complete the final Halo massage sequence without rushing the finish.',
+       communication:null},
+      {id:'11', phase:'Finish', title:'Cooling Drops + Hot Towel Press', duration:2*60,
+       purpose:'Close the timed treatment with the final sensory finish demonstrated in the Extended reference.',
+       cue:'Complete the cooling-drop and hot-towel sequence calmly and intentionally. The Timer ends with the treatment, not with checkout or sales language.',
+       communication:{proactive:'Before cooling: “I’m going to move into the cool mist next, so you’ll notice a quick temperature change.” At the treatment close: “Today I focused a little more on [area or service priority you addressed]. How are you feeling?”',ifAsked:'“It creates sensory contrast after the warm-water portion and helps signal that the service is moving into its closing phase.”'}}
+    ]
+  }
+};
+
+function validateProtocols(){
+  for(const protocol of Object.values(PROTOCOLS)){
+    const total=protocol.timed.reduce((sum,s)=>sum+s.duration,0);
+    if(total!==protocol.totalSeconds) throw new Error(`${protocol.label} timing totals ${total}s, expected ${protocol.totalSeconds}s`);
+  }
+}
+validateProtocols();
+
+const ALL = {
+  resource:document.getElementById('resource-page'), timer:document.getElementById('timer-app'),
+  timerBrand:document.getElementById('timer-brand'), timerFormat:document.getElementById('timer-format'),
+  pauseBtn:document.getElementById('pause-btn'), exitBtn:document.getElementById('exit-btn'),
+  serviceLabel:document.getElementById('service-label'), serviceRemaining:document.getElementById('service-remaining'), serviceElapsed:document.getElementById('service-elapsed'),
+  track:document.getElementById('timer-track'), fill:document.getElementById('timer-fill'), marker:document.getElementById('timer-marker'),
+  main:document.getElementById('timer-main'), status:document.getElementById('status-banner'), ringFill:document.getElementById('ring-fill'),
+  stepTime:document.getElementById('step-time'), stepMeta:document.getElementById('step-meta'), phase:document.getElementById('phase-pill'),
+  eyebrow:document.getElementById('step-eyebrow'), title:document.getElementById('step-title'), purpose:document.getElementById('step-purpose'),
+  guide:document.getElementById('guide-text'), comm:document.getElementById('comm-box'), upNext:document.getElementById('up-next'), nextStrip:document.getElementById('next-strip'),
+  back:document.getElementById('back-btn'), next:document.getElementById('next-btn'), hint:document.getElementById('bottom-hint'),
+  pauseOverlay:document.getElementById('pause-overlay'), resumeOverlayBtn:document.getElementById('resume-overlay-btn'),
+  exitDialog:document.getElementById('exit-dialog'), exitCopy:document.getElementById('exit-copy'), cancelExit:document.getElementById('cancel-exit'), confirmExit:document.getElementById('confirm-exit'),
+  complete:document.getElementById('complete-screen'), completeTime:document.getElementById('complete-time'), newService:document.getElementById('new-service-btn'), completeExit:document.getElementById('complete-exit-btn'),
+  toast:document.getElementById('transition-toast'), sr:document.getElementById('sr-status'), resumeBar:document.getElementById('resume-bar'), resumeTitle:document.getElementById('resume-title'), resumeDetail:document.getElementById('resume-detail'), resumeSession:document.getElementById('resume-session'), discard:document.getElementById('discard-session')
+};
+
+const CIRC=2*Math.PI*30;
+ALL.ringFill.style.strokeDasharray=String(CIRC);
+ALL.ringFill.style.strokeDashoffset='0';
+
+let session=null;
+let ticker=null;
+let toastTimer=null;
+let resumeAfterExitCancel=false;
+
+function makeSession(key){
+  const protocol=PROTOCOLS[key];
+  return {
+    protocolKey:key,
+    protocol,
+    currentIndex:0,
+    treatmentStarted:false,
+    serviceStartMs:null,
+    paused:false,
+    pauseStartMs:null,
+    pausedAccumMs:0,
+    completed:false,
+    exited:false
+  };
+}
+
+function stepsFor(sessionObj=session){ return [...PRE_TIMER_STEPS,...sessionObj.protocol.timed]; }
+function timedOffset(){ return PRE_TIMER_STEPS.length; }
+function fmt(seconds){
+  const s=Math.max(0,Math.floor(seconds));
+  const m=Math.floor(s/60); const sec=s%60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+function announce(msg){ ALL.sr.textContent=''; setTimeout(()=>{ALL.sr.textContent=msg},20); }
+function showToast(msg){ ALL.toast.textContent=msg; ALL.toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>ALL.toast.classList.remove('show'),1800); }
+
+function requestImmersiveFullscreen(){
+  const root=document.documentElement;
+  if(root.requestFullscreen && !document.fullscreenElement){ root.requestFullscreen().catch(()=>{}); }
+}
+function exitBrowserFullscreen(){ if(document.fullscreenElement && document.exitFullscreen){ document.exitFullscreen().catch(()=>{}); } }
+
+function openTimer(key, existing=false){
+  if(!existing) session=makeSession(key);
+  if(!session) return;
+  session.exited=false;
+  document.body.classList.add('timer-open');
+  ALL.timer.classList.add('active');
+  ALL.timer.setAttribute('aria-hidden','false');
+  requestImmersiveFullscreen();
+  render();
+  startTicker();
+  setTimeout(()=>ALL.main.focus({preventScroll:true}),30);
+  announce(`${session.protocol.label} timer opened. Step 01 Aromatherapy. Treatment clock has not started.`);
+}
+
+function closeTimerToPage(){
+  stopTicker();
+  ALL.timer.classList.remove('active');
+  ALL.timer.setAttribute('aria-hidden','true');
+  document.body.classList.remove('timer-open');
+  exitBrowserFullscreen();
+  if(session && !session.completed){ session.exited=true; updateResumeBar(); }
+  else hideResumeBar();
+  document.getElementById('launch').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function updateResumeBar(){
+  if(!session || session.completed){ hideResumeBar(); return; }
+  ALL.resumeBar.classList.add('show');
+  ALL.resumeTitle.textContent=`${session.protocol.label} · active service paused`;
+  if(session.treatmentStarted){
+    ALL.resumeDetail.textContent=`${fmt(getServiceRemaining())} remaining. Resume returns to the active treatment clock.`;
+  } else {
+    ALL.resumeDetail.textContent='Pre-timer opening in progress. The treatment clock has not started.';
+  }
+}
+function hideResumeBar(){ ALL.resumeBar.classList.remove('show'); }
+
+function startTicker(){
+  stopTicker();
+  ticker=setInterval(()=>{ if(session && session.treatmentStarted && !session.paused && !session.completed) tick(); },250);
+}
+function stopTicker(){ if(ticker){ clearInterval(ticker); ticker=null; } }
+
+function nowForService(){ return session && session.paused ? session.pauseStartMs : Date.now(); }
+function getElapsed(){
+  if(!session || !session.treatmentStarted || session.serviceStartMs===null) return 0;
+  return Math.max(0,(nowForService()-session.serviceStartMs-session.pausedAccumMs)/1000);
+}
+function getServiceRemaining(){ return Math.max(0,session.protocol.totalSeconds-getElapsed()); }
+
+function cumulativeEndSeconds(timedIndex){
+  let total=0;
+  for(let i=0;i<=timedIndex;i++) total+=session.protocol.timed[i].duration;
+  return total;
+}
+function timedIndexForElapsed(elapsed){
+  let total=0;
+  for(let i=0;i<session.protocol.timed.length;i++){
+    total+=session.protocol.timed[i].duration;
+    if(elapsed<total) return i;
+  }
+  return session.protocol.timed.length-1;
+}
+function scheduledGlobalIndex(){ return timedOffset()+timedIndexForElapsed(getElapsed()); }
+
+function stepRemainingForGlobalIndex(globalIndex){
+  if(globalIndex<timedOffset()) return null;
+  const timedIndex=globalIndex-timedOffset();
+  const targetEnd=cumulativeEndSeconds(timedIndex);
+  return Math.max(0,targetEnd-getElapsed());
+}
+function plannedDurationForGlobalIndex(globalIndex){
+  if(globalIndex<timedOffset()) return null;
+  return session.protocol.timed[globalIndex-timedOffset()].duration;
+}
+function landmarkRemainingAfterStep(globalIndex){
+  if(globalIndex<timedOffset()) return session.protocol.totalSeconds;
+  const timedIndex=globalIndex-timedOffset();
+  return Math.max(0,session.protocol.totalSeconds-cumulativeEndSeconds(timedIndex));
+}
+
+function tick(){
+  if(!session || !session.treatmentStarted || session.paused || session.completed) return;
+  const elapsed=getElapsed();
+  if(elapsed>=session.protocol.totalSeconds){ completeService(); return; }
+
+  const scheduled=scheduledGlobalIndex();
+  if(scheduled>session.currentIndex){
+    session.currentIndex=scheduled;
+    renderStep(true);
+    showToast(`Up next · ${stepsFor()[scheduled].title}`);
+    announce(`Advanced to ${stepsFor()[scheduled].title}.`);
+  }
+  updateClocks();
+}
+
+function render(){
+  if(!session) return;
+  ALL.timerBrand.textContent=`AIMT · ${session.protocol.label}`;
+  ALL.timerFormat.textContent=session.protocol.description;
+  ALL.complete.classList.toggle('show',session.completed);
+  ALL.pauseOverlay.classList.toggle('show',session.paused && !session.exited && !ALL.exitDialog.classList.contains('show'));
+  renderStep(false);
+  updateClocks();
+}
+
+function renderStep(fromAuto=false){
+  if(!session) return;
+  const steps=stepsFor();
+  const step=steps[session.currentIndex];
+  const isPre=session.currentIndex<timedOffset();
+  ALL.status.classList.remove('show');
+  ALL.comm.classList.remove('show');
+  ALL.stepTime.classList.toggle('pre',isPre || !session.treatmentStarted);
+
+  ALL.eyebrow.textContent=isPre ? `Step ${step.id} · Pre-Timer Opening` : `Step ${step.id}`;
+  ALL.title.textContent=step.title;
+  ALL.purpose.textContent=step.purpose;
+  ALL.guide.textContent=step.cue;
+  ALL.phase.textContent=step.phase;
+  if(step.communication){
+    const rows=[];
+    if(step.communication.proactive) rows.push(`<div class="comm-row"><div class="comm-label">Say when needed</div><div class="comm-copy">${escapeHTML(step.communication.proactive)}</div></div>`);
+    if(step.communication.ifAsked) rows.push(`<div class="comm-row"><div class="comm-label">If they ask</div><div class="comm-copy">${escapeHTML(step.communication.ifAsked)}</div></div>`);
+    ALL.comm.innerHTML=`<div class="comm-head">Communication cue · explain intentionally, not continuously</div>${rows.join('')}`;
+    ALL.comm.classList.toggle('show',rows.length>0);
+  } else { ALL.comm.textContent=''; }
+
+  const next=steps[session.currentIndex+1];
+  if(next){ ALL.nextStrip.style.display='flex'; ALL.upNext.textContent=`Step ${next.id} — ${next.title}`; }
+  else { ALL.nextStrip.style.display='none'; }
+
+  ALL.back.disabled=session.currentIndex===0;
+
+  if(isPre){
+    ALL.next.disabled=false;
+    ALL.next.textContent=session.currentIndex===timedOffset()-1 ? `Step 03 →` : 'Next →';
+    ALL.pauseBtn.disabled=true;
+    ALL.hint.textContent='Pre-timer opening · no treatment time running';
+    ALL.stepTime.textContent='PRE';
+    ALL.stepMeta.textContent='Treatment clock not running';
+    ALL.ringFill.style.strokeDashoffset='0';
+  } else if(!session.treatmentStarted){
+    ALL.back.disabled=false;
+    ALL.next.disabled=false;
+    ALL.next.textContent=`Start ${fmt(session.protocol.totalSeconds)}`;
+    ALL.pauseBtn.disabled=true;
+    ALL.hint.textContent='Step 03 starts the overall treatment clock';
+    ALL.status.textContent=`${session.protocol.label} treatment clock begins here at ${fmt(session.protocol.totalSeconds)}.`;
+    ALL.status.classList.add('show');
+    const planned=plannedDurationForGlobalIndex(session.currentIndex);
+    ALL.stepTime.textContent=fmt(planned);
+    ALL.stepMeta.innerHTML=`reference allocation · <strong>${fmt(planned)}</strong>`;
+    ALL.ringFill.style.strokeDashoffset='0';
+  } else {
+    ALL.pauseBtn.disabled=false;
+    ALL.next.disabled=session.currentIndex>=steps.length-1;
+    ALL.next.textContent=ALL.next.disabled ? 'Complete at 0:00' : 'Advance →';
+    ALL.hint.textContent='Overall service clock continues through step navigation';
+    const scheduled=scheduledGlobalIndex();
+    if(session.currentIndex<scheduled){
+      ALL.status.textContent='This reference landmark has already passed. The overall service clock is still running.';
+      ALL.status.classList.add('show');
+    } else if(session.currentIndex>scheduled){
+      ALL.status.textContent='You advanced before the reference transition. The extra time remains available inside this next block; the overall service landmarks have not moved.';
+      ALL.status.classList.add('show');
+    }
+  }
+
+  if(!fromAuto) ALL.main.scrollTo({top:0,behavior:'auto'});
+}
+
+function updateClocks(){
+  if(!session) return;
+  if(!session.treatmentStarted){
+    ALL.serviceLabel.textContent='Treatment clock';
+    ALL.serviceRemaining.textContent='PRE-TIMER';
+    ALL.serviceElapsed.textContent='0:00';
+    setProgress(0);
+    ALL.pauseBtn.textContent='Pause';
+    ALL.pauseBtn.setAttribute('aria-pressed','false');
+    return;
+  }
+
+  const elapsed=Math.min(session.protocol.totalSeconds,getElapsed());
+  const remaining=Math.max(0,session.protocol.totalSeconds-elapsed);
+  ALL.serviceLabel.textContent='Service remaining';
+  ALL.serviceRemaining.textContent=fmt(remaining);
+  ALL.serviceElapsed.textContent=fmt(elapsed);
+  setProgress((elapsed/session.protocol.totalSeconds)*100);
+
+  if(session.currentIndex>=timedOffset()){
+    const planned=plannedDurationForGlobalIndex(session.currentIndex);
+    const stepRemaining=stepRemainingForGlobalIndex(session.currentIndex);
+    const targetLandmark=landmarkRemainingAfterStep(session.currentIndex);
+    ALL.stepTime.textContent=fmt(stepRemaining);
+    ALL.stepMeta.innerHTML=`next landmark · <strong>${fmt(targetLandmark)} remaining</strong> · reference ${fmt(planned)}`;
+    const denominator=Math.max(planned,stepRemaining,1);
+    const pct=Math.min(1,Math.max(0,stepRemaining/denominator));
+    ALL.ringFill.style.strokeDashoffset=String(CIRC*(1-pct));
+  }
+  ALL.pauseBtn.textContent=session.paused?'Resume':'Pause';
+  ALL.pauseBtn.setAttribute('aria-pressed',session.paused?'true':'false');
+}
+
+function setProgress(pct){
+  const p=Math.min(100,Math.max(0,pct));
+  ALL.fill.style.width=`${p}%`; ALL.marker.style.left=`${p}%`;
+  ALL.track.setAttribute('aria-valuenow',String(Math.round(p)));
+}
+
+function startTreatment(){
+  if(session.treatmentStarted) return;
+  session.treatmentStarted=true;
+  session.serviceStartMs=Date.now();
+  session.paused=false; session.pausedAccumMs=0; session.pauseStartMs=null;
+  ALL.pauseBtn.disabled=false;
+  renderStep(false); updateClocks(); startTicker();
+  announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
+}
+
+function manualNext(){
+  if(!session || session.completed) return;
+  const steps=stepsFor();
+  const isPre=session.currentIndex<timedOffset();
+  if(!session.treatmentStarted && !isPre){ startTreatment(); return; }
+  if(session.currentIndex>=steps.length-1) return;
+  session.currentIndex++;
+  renderStep(false); updateClocks();
+  announce(`${steps[session.currentIndex].title}.`);
+}
+
+function manualBack(){
+  if(!session || session.currentIndex===0 || session.completed) return;
+  if(session.treatmentStarted){
+    const scheduled=scheduledGlobalIndex();
+    if(session.currentIndex-1<scheduled){
+      showToast('That reference landmark has already passed');
+      announce('Previous reference landmark has already passed. Overall service clock continues.');
+      return;
+    }
+  }
+  session.currentIndex--;
+  renderStep(false); updateClocks();
+  announce(`${stepsFor()[session.currentIndex].title}.`);
+}
+
+function pauseSession(showOverlay=true){
+  if(!session || !session.treatmentStarted || session.paused || session.completed) return;
+  session.paused=true; session.pauseStartMs=Date.now();
+  ALL.pauseBtn.textContent='Resume'; ALL.pauseBtn.setAttribute('aria-pressed','true');
+  if(showOverlay) ALL.pauseOverlay.classList.add('show');
+  updateClocks(); announce('Service timer paused.');
+}
+function resumeSession(){
+  if(!session || !session.paused || session.completed) return;
+  const now=Date.now();
+  session.pausedAccumMs+=Math.max(0,now-session.pauseStartMs);
+  session.pauseStartMs=null; session.paused=false;
+  ALL.pauseOverlay.classList.remove('show');
+  ALL.pauseBtn.textContent='Pause'; ALL.pauseBtn.setAttribute('aria-pressed','false');
+  renderStep(false); updateClocks(); startTicker(); announce('Service timer resumed.');
+}
+function togglePause(){ if(!session || !session.treatmentStarted || session.completed) return; session.paused?resumeSession():pauseSession(true); }
+
+function openExitDialog(){
+  if(!session) return;
+  resumeAfterExitCancel=session.treatmentStarted && !session.paused && !session.completed;
+  if(resumeAfterExitCancel) pauseSession(false);
+  ALL.pauseOverlay.classList.remove('show');
+  ALL.exitCopy.textContent=session.treatmentStarted && !session.completed
+    ? 'Your active service will remain paused and can be resumed from this page.'
+    : 'You can return to this format from the resource page at any time.';
+  ALL.exitDialog.classList.add('show');
+  ALL.cancelExit.focus();
+}
+function cancelExit(){
+  ALL.exitDialog.classList.remove('show');
+  if(resumeAfterExitCancel) resumeSession();
+  else if(session && session.paused && session.treatmentStarted) ALL.pauseOverlay.classList.add('show');
+  resumeAfterExitCancel=false;
+}
+function confirmExit(){
+  ALL.exitDialog.classList.remove('show');
+  if(session && session.treatmentStarted && !session.paused && !session.completed) pauseSession(false);
+  closeTimerToPage(); resumeAfterExitCancel=false;
+}
+
+function completeService(){
+  if(!session || session.completed) return;
+  session.completed=true; session.paused=false; stopTicker();
+  ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
+  ALL.serviceRemaining.textContent='0:00'; ALL.serviceElapsed.textContent=fmt(session.protocol.totalSeconds); setProgress(100);
+  ALL.completeTime.textContent=`${session.protocol.label} · ${fmt(session.protocol.totalSeconds)} timed treatment`;
+  ALL.complete.classList.add('show');
+  hideResumeBar();
+  announce('Treatment complete.');
+}
+
+function resetToNewService(){
+  stopTicker();
+  const key=session ? session.protocolKey : 'core';
+  session=makeSession(key);
+  ALL.complete.classList.remove('show'); ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
+  render(); startTicker(); announce(`${session.protocol.label} reset. Step 01 Aromatherapy.`);
+}
+
+function discardSession(){
+  stopTicker(); session=null; hideResumeBar();
+}
+
+function escapeHTML(value){
+  return String(value).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+}
+
+for(const btn of document.querySelectorAll('[data-start-format]')){
+  btn.addEventListener('click',()=>{ discardSession(); openTimer(btn.dataset.startFormat,false); });
+}
+ALL.next.addEventListener('click',manualNext);
+ALL.back.addEventListener('click',manualBack);
+ALL.pauseBtn.addEventListener('click',togglePause);
+ALL.resumeOverlayBtn.addEventListener('click',resumeSession);
+ALL.exitBtn.addEventListener('click',openExitDialog);
+ALL.cancelExit.addEventListener('click',cancelExit);
+ALL.confirmExit.addEventListener('click',confirmExit);
+ALL.resumeSession.addEventListener('click',()=>{ if(!session) return; openTimer(session.protocolKey,true); if(session.paused) ALL.pauseOverlay.classList.add('show'); });
+ALL.discard.addEventListener('click',discardSession);
+ALL.newService.addEventListener('click',resetToNewService);
+ALL.completeExit.addEventListener('click',()=>{ session=null; ALL.complete.classList.remove('show'); closeTimerToPage(); });
+
+document.addEventListener('keydown',e=>{
+  if(!ALL.timer.classList.contains('active')) return;
+  const target=e.target;
+  if(target && /INPUT|TEXTAREA|SELECT/.test(target.tagName)) return;
+  if(ALL.exitDialog.classList.contains('show')){
+    if(e.key==='Escape'){ e.preventDefault(); cancelExit(); }
+    return;
+  }
+  if(ALL.complete.classList.contains('show')) return;
+  if(e.key==='p' || e.key==='P'){ e.preventDefault(); togglePause(); }
+  else if(e.key==='ArrowRight'){ e.preventDefault(); manualNext(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); manualBack(); }
+  else if(e.key==='Escape'){ e.preventDefault(); openExitDialog(); }
+});
+
+window.addEventListener('pagehide',()=>stopTicker());
+</script>
+</body>
+</html>
