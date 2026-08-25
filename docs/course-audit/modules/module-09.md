@@ -9,7 +9,7 @@
 **Specification review:** **approved in substance** — five narrow amendments applied plus a saved-state migration-plan requirement (prior task, August 24, 2026)
 **Audit date:** August 24, 2026 (specification drafted); August 24, 2026 (specification reviewed and amended)
 **Implementation:** Controlled implementation completed August 25, 2026 on `course-audit-build` — see `docs/course-audit/implementation-log.md` for the full step entry (migration, structural reorder, curriculum, calculator, checkpoints, Cadence, validation).
-**Status:** **Implemented — awaiting manual QA.** The saved-state migration plan (`module-09-reorder-migration-plan.md`) was implemented as approved; all 20 required migration fixtures pass; the 9↔10 structural reorder and full Module 9 curriculum are implemented per this specification. This is **not** `Implemented — manual QA approved` — the owner's own rendered-preview review has not yet occurred.
+**Status:** **Implemented — manual QA approved.** The owner reviewed the rendered `course-audit-build` branch preview (Local Review Mode, `localhost:8890`) and confirmed Module 9 looks and functions well enough to proceed — August 25, 2026. This closes Module 9's manual-QA gate per the master instructions' module lifecycle. See "Manual QA approval — August 25, 2026" below for the full record, including deferred QA items honestly carried forward (not resolved by this approval).
 **Production source of truth:** `headspa-mastery.html`
 
 **Specification review corrections (this task, not a reopened audit):** the external reviewer examined the drafted specification itself (not just the source extraction) and approved it in substance, requiring five narrow corrections before it can become implementation authority: (1) resolved a genuine internal contradiction over whether the five existing enhancement examples' old dollar ranges may appear as illustrative student-facing content — they may not; they are source-history evidence only (see "Enhancement price ranges — source-history only" below); (2) replaced clinical-sounding diagnostic terminology describing the price-feedback review process with plain "multi-factor business review" language; (3) qualified the underpricing/burnout language so it states a possible contribution rather than an automatic causal guarantee; (4) made the migration-plan review gate strictly sequential and unambiguous — no reorder code may be written before the migration plan is externally reviewed and approved, full stop, not "reviewed within implementation"; (5) locked the eventual Sanitation-slot completion handoff to explicitly name Module 11 — AI / Modern Practice Tools as the next identity, while being explicit that no live functional route into that nonexistent module may be built. A sixth narrow wording cleanup softened one absolute claim ("damages" → "can disrupt"). None of these corrections reopens or weakens the approved curriculum direction — see "Module 9 core direction — locked" below.
@@ -17,6 +17,25 @@
 This document converts the approved external audit into the controlling content and technical authority for future Module 9. It does not itself authorize implementation, does not touch any production file, and does not begin the technical reorder it requires — see "Critical technical requirement" below, which is a blocking pre-implementation investigation, not a decision made by this document.
 
 It does not authorize changes to authentication, entitlements, payments, database policies, certificate issuance, Module 8, Module 10's future Sanitation audit, Module 11's future AI curriculum, the Module 12 Final Exam, persistent Cadence threads, the Guided Completion Path interface, Listen Mode, or the monolithic course-file architecture.
+
+---
+
+## Manual QA approval — August 25, 2026
+
+The owner reviewed the rendered `course-audit-build` branch preview (Local Review Mode, `localhost:8890/headspa-mastery.html?review=1`) and explicitly approved Module 9 as implemented — confirming it looks and functions well enough to proceed. This closes the manual-QA gate from the master instructions' module lifecycle (step 7–8) for Module 9. No additional curriculum or visual polish pass was performed as part of this approval — the approved implementation is exactly the one already recorded in `docs/course-audit/implementation-log.md` (migration, 9↔10 structural reorder, four-card Section 9.2, Close Without Pressure interaction, the corrected Cost Base → Target Price calculator, margin-vs-markup teaching, the Head Spa Enhancement Strategy Guide downloadable, both required checkpoints, the corrected Cadence role, and the shared AIMT callout foundation applied to Module 9 — see "Task just completed" in `00-aimt-current-course-status.md` for the complete implementation record).
+
+**Honestly deferred, not resolved by this approval** (recorded rather than silently marked complete, per the manual-QA checklist's accessibility section):
+
+- Live-model checkpoint grading QA (`m10cp1`/`m10cp2` were verified by rubric/config inspection and mocked-`callAI` validation, not by exercising the real model against live student answers).
+- Live Cadence response QA (quick-prompt text and the guide-system prompt were verified by source inspection only).
+- Screen-reader QA.
+- Physical-keyboard QA.
+- Real touch-device QA.
+- Medical/dermatological or legal/scope review (not applicable to this module's business content in the same way as Modules 3/4/6, but recorded for consistency with the course-wide deferred-review list).
+
+**Next gate:** Module 9's own video-source file (see `docs/course-video-sources/module-09-video-source.md`) and Module 10 (Sanitation & Reset Systems) source extraction, per the master instructions' module lifecycle steps 9–10.
+
+---
 
 Module 8 ends deliberately at the treatment close. Module 9 begins with everything that happens after — reorienting the client, closing the appointment without breaking the relaxation experience, and pricing the business from real numbers rather than pressure or guesswork. This is the first module whose subject is explicitly business judgment rather than technique, so its governing tension is different from every prior module: the existing source material is directionally useful but was written with a sales-psychology voice this course does not want. The audit's job — and this specification's job — is to keep the real business content and remove the manipulation.
 

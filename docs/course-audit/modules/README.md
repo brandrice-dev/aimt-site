@@ -607,7 +607,8 @@ Notable findings recorded in the extraction (not fixed at extraction time): Modu
 | Migration plan | [`module-09-reorder-migration-plan.md`](module-09-reorder-migration-plan.md) — **implemented as designed**; all 20 required fixtures pass (`tests/module-09-migration.test.js`) |
 | Checkpoint IDs | `m10cp1`, `m10cp2` — **preserved unrenamed**, now required by `MODULE_CHECKPOINTS['9']`; `m9cp1`/`m9cp2` (Sanitation) relocated to `MODULE_CHECKPOINTS['10']` |
 | Wrapper ID | `module9Wrap` (content swapped with the former `module10Wrap`, per the approved migration plan's structural swap section) |
-| **Status** | **Implemented — awaiting manual QA.** Curriculum implemented per `module-09.md`, structural reorder complete, migration fixtures pass, static/mocked validation and desktop/mobile Review Mode browser QA complete. NOT manually QA'd by the owner yet, NOT approved for release. |
+| **Status** | **Implemented — manual QA approved.** Curriculum implemented per `module-09.md`, structural reorder complete, migration fixtures pass, static/mocked validation and desktop/mobile Review Mode browser QA complete, and the owner's own rendered-preview review is now complete and approved (August 25, 2026). |
+| Video source | [`module-09-video-source.md`](../../course-video-sources/module-09-video-source.md) — **Approved for video production** |
 
 **Source extraction reconciled for external audit (August 24, 2026).** The existing `module-09-source.md` (from an earlier task) was cross-checked directly against `headspa-mastery.html`/`assets/js/headspa-state.js` and found to need reconciliation, not a rewrite. Closed gaps: cited Known Risk #8 (the pricing calculator mislabeling a margin-loaded price as "break even," `headspa-mastery.html:9030–9044`) with exact code evidence for the first time; found and flagged a second, distinct old-course-name defect in the checkpoint rubrics themselves (`M9.system`/`M10.system`, "instructor of HeadSpa Mastery") separate from the already-known Cadence-persona defect; found and flagged a foundation-consistency accessibility regression (Module 9/10's checkpoints use the pre-correction `cp-response` class with no `aria-live`/`aria-label`, unlike Module 8's corrected `cp-res` pattern); corrected a `MODULE_COUNT`/`TOTAL_MODULES` naming inaccuracy. See `implementation-log.md` Step 70.
 
@@ -626,3 +627,23 @@ Notable findings recorded in the extraction (not fixed at extraction time): Modu
 Module 11 (Course Completion & Certification, technical slot 11) was not touched beyond confirming Module 9's/10's handoffs resolve correctly — its own audit remains a separate, later, deferred task per the master instructions. Module 12 (Final Exam) has not been
 audited — its technical relationship to the existing Module 11 and
 certificate flow is still to be determined.
+
+**Manual QA approved (August 25, 2026).** The owner reviewed the rendered `course-audit-build` branch preview in Local Review Mode and confirmed Module 9 looks and functions well enough to proceed. No additional curriculum or visual polish pass was performed as part of this approval — see `module-09.md`'s new "Manual QA approval" section for the full record, including deferred QA items (live-model grading, screen-reader, physical-keyboard, and real touch-device QA — none actually performed, recorded honestly rather than marked complete). Module 9 status is now **Implemented — manual QA approved**. This completes module-lifecycle step 8; step 9 (video-source creation) follows immediately below.
+
+**Video-source created (August 25, 2026).** [`docs/course-video-sources/module-09-video-source.md`](../../course-video-sources/module-09-video-source.md) is now the approved primary authority for a future, separately scoped video-production task — status **Approved for video production**. This is an opening-video-only package (orientation and curiosity, not a full narration of the module), per AIMT's one-opening-video-per-module standard. This completes lifecycle step 9 for Module 9.
+
+---
+
+## Module 10 — Sanitation & Reset Systems
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 10 — Sanitation & Reset Systems** — now the actual technical slot 10, per the completed Module 9 9↔10 reorder |
+| Primary technical source | Technical Module 9 (Sanitation & Reset Systems) content, relocated intact into technical slot 10 by the Module 9 reorder — not rewritten, not audited |
+| Source file | [`module-10-source.md`](module-10-source.md) — neutral pre-audit extraction, created this task |
+| Approved specification file | Does not exist yet — Module 10 has not been externally audited |
+| Checkpoint IDs | `m9cp1`, `m9cp2` — historically named for the pre-reorder technical Module 9; now required by `MODULE_CHECKPOINTS['10']` |
+| Wrapper ID | `module10Wrap` (content swapped with the former `module9Wrap`, per the Module 9 reorder) |
+| **Status** | **Structurally moved — external curriculum audit pending.** Sanitation & Reset Systems occupies technical slot 10, relocated intact (unaudited, unrewritten) as a structural dependency of the Module 9 reorder. Its own external curriculum audit has not begun. |
+
+**Source extraction completed (August 25, 2026).** `module-10-source.md` is a neutral, pre-audit extraction of the current Sanitation & Reset Systems implementation — identity/structure, full sanitation curriculum (cleaning vs. resetting, the six-card sanitize-and-when grid, the nine-step reset sequence, state-compliance/logging content), the `#resetSequence`/`startResetTimer()` interaction (found to be a decorative auto-advancing walkthrough, not a graded or student-decision interaction, and does not write `APP_STATE` progress), both Sanitation checkpoints (`m9cp1`/`m9cp2`), Cadence (the shared `M9.system` checkpoint rubric and `MODULE_GUIDE_SYSTEMS['10']`), accessibility gaps against the current course foundation, a downloadable-resource opportunity assessment, preliminary video considerations, and a labeled audit-risk inventory. This is extraction only — no curriculum was corrected, no interaction was redesigned, no checkpoint was fixed, and no production file was changed. See `module-10-source.md` for the complete record and `implementation-log.md` for this task's step entry.
