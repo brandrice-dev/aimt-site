@@ -1931,6 +1931,23 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .m11-hear-step:first-child { border-top:none; }
 }
 
+/* 11.4 — AI scalp-analysis example image paired with the Human Review
+   card. Top-aligned (not stretched) so the Human Review card keeps its
+   own natural height instead of being padded out to match the image —
+   the image is allowed to carry more visual weight, per the approved
+   design. Scoped to this one .grid-2col instance; the shared component's
+   default (stretch) is unchanged for its other usages elsewhere. */
+.m11-ai-compare { align-items: start; }
+.m11-ai-image { border-radius: 14px; overflow: hidden; line-height: 0; }
+.m11-ai-image img { width: 100%; height: auto; display: block; }
+.m11-ai-fullsize-link { display:inline-block; margin-top:0.5rem; font-family: var(--aimt-font-sans); font-size:0.68rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent2); text-decoration:underline; }
+
+/* 11.4 "What can shift the result" — compact factor list. Was previously
+   plain .body-text (line-height 1.84, margin-bottom 1.15rem), which read
+   as loose/uneven for a short bulleted list and added extra blank space
+   below the last item on top of the card's own bottom padding. */
+.m11-shift-list { font-size: 0.82rem; font-weight: 300; line-height: 1.75; color: var(--text); }
+
 /* ── MODULE 10 — Pricing calculator ── */
 .price-calc { background:rgba(255,255,255,0.7); border:0.5px solid var(--border2); border-radius:16px; padding:1.25rem 1.4rem; margin:1.5rem 0; backdrop-filter:blur(10px); }
 .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1rem; }
@@ -7456,10 +7473,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">A Confidence Score Is Information — Not a Verdict</div>
     <div class="body-text">AI-assisted scalp/hair analysis is a legitimate modern tool category — real benefits include consistency, measurement, comparison, tracking, pattern recognition, organization, and client engagement. It also has real limitations you need to hold onto.</div>
 
-    <div class="grid-2col">
-      <div class="cadence-note" style="margin:0;">
-        <div class="cn-label">AI output</div>
-        <div class="cn-text">"Seborrheic dermatitis — 87%"</div>
+    <div class="grid-2col m11-ai-compare">
+      <div>
+        <div class="m11-ai-image">
+          <img src="assets/images/course/module-11/module-11-ai-scalp-analysis-dashboard.png" alt="Example AI-assisted scalp-analysis interface displaying a condition label and an 87 percent confidence score." width="1448" height="1086" loading="lazy">
+        </div>
+        <a href="assets/images/course/module-11/module-11-ai-scalp-analysis-dashboard.png" target="_blank" rel="noopener" class="m11-ai-fullsize-link">View full-size example</a>
       </div>
       <div class="info-card" style="margin:0;">
         <div class="ic-title">Human review</div>
@@ -7467,9 +7486,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
-    <div class="info-card">
+    <div class="info-card m11-shift-card">
       <div class="ic-title">What can shift the result</div>
-      <div class="body-text" style="margin:0;">+ Training data<br>+ Image quality / lighting<br>+ Capture conditions<br>+ Populations represented<br>+ Independent validation</div>
+      <div class="m11-shift-list">+ Training data<br>+ Image quality / lighting<br>+ Capture conditions<br>+ Populations represented<br>+ Independent validation</div>
     </div>
 
     <div class="body-text">You don't need an AI-engineering lesson — you need enough literacy that a polished percentage never reads as universal truth. General conversational AI should not become your scalp diagnostician.</div>
