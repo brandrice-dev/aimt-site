@@ -7,11 +7,12 @@
 **Source reviewed:** `module-11-source.md`
 **External audit:** the owner's full direction, provided directly as this task's instructions, functions as the external audit for this module
 **Audit date:** August 25, 2026
-**Implementation:** pending — this document authorizes controlled implementation
-**Status:** **Approved for controlled implementation**
-**Production source of truth (once implemented):** `headspa-mastery.html`, technical module slot `11`
+**Correction pass:** August 25, 2026 — the initial implementation drifted from the approved learning/design intent (excessive `✦` usage, an overbuilt five-card checkpoint-style accordion for the B.R.I.E.F. interaction, HEAR/OBSERVE/BOUNDARY/NEXT STEP split into four separate callouts, borrowed section headlines instead of the approved hierarchy). This document has been updated in place to record the **locked, corrected** structure below — it no longer describes the original overbuilt implementation. See `implementation-log.md` for the full before/after record.
+**Implementation:** implemented, corrected
+**Status:** **Implemented — awaiting resource pass + manual QA**
+**Production source of truth:** `headspa-mastery.html`, technical module slot `11`
 
-This document is the approved content and technical authority for the Module 11 implementation task. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 11 — step 5 (implementation) follows in the same authorized task, per the owner's explicit instruction.
+This document is the approved content and technical authority for Module 11. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 11 — step 5 (implementation, and the subsequent correction pass) followed in the same and a later authorized task, per the owner's explicit instruction.
 
 It does not authorize changes to authentication, entitlements, payments, database policies beyond the already-completed Module 11 → 12 structural relocation, the Module 12 Final Exam redesign, persistent Cadence threads, the Guided Completion Path interface, or Listen Mode.
 
@@ -50,101 +51,126 @@ By the end of Module 11, the student should be able to:
 
 ---
 
-## Section-by-section approved structure
+## Section-by-section approved structure (locked, corrected — August 25, 2026)
 
-### Opening — "Modern Practice Includes Knowing How to Use New Tools"
+This section records the **actual implemented and corrected** structure. It supersedes the original draft structure, which used a headline-under-eyebrow pattern, six `✦`-marked category cards per grid, a five-card accordion for B.R.I.E.F., and four separate callouts for HEAR/OBSERVE/BOUNDARY/NEXT STEP — all overbuilt relative to the intended editorial, restrained design. See `implementation-log.md` for the specific correction record.
 
-Establishes that AIMT intentionally teaches AI because modern practitioners already encounter it through business systems, marketing, communication, research, education, automation, scalp imaging/analysis, and client conversations.
+### Star (`✦`) restraint — governs the whole module
 
-Explicitly and accurately frames Cadence as the student's lived example of AIMT's philosophy already in action: AIMT curriculum is human practitioner/professional-led; Cadence is an AI learning-support tool built around that curriculum; AI can make education and practice more useful and responsive; it does not replace the human expertise behind the program; hands-on training, webinars, and clinical/practical education remain human-led.
+Exactly **two** intentional `✦` moments in the entire module:
 
-Core thought: **Modern does not mean less human.** No unsupported "first/only/revolutionary" claims.
+1. **AIMT position** (opening, after the Cadence paragraph): *"If you're going to use AI, learn to use it well."*
+2. **Closing principle** (end of 11.8, before `m11cp2`): *"Use technology to become more capable — not less present."*
 
-### 11.1 — AI Is Not One Tool
+No other `✦` appears anywhere in Module 11 — not on category cards, not on the B.R.I.E.F. key, not on the HEAR framework, not on the privacy framework, not on the practice-leverage cards. Where a marker helps scanning, use `+` (11.4's confidence-score factor list only) or plain typography — never a blanket icon-per-card default.
 
-Teaches four durable categories, framed by function rather than current brand names:
+### Hero
 
-- **Language/reasoning assistants** — drafting, brainstorming, summarizing, organizing, comparison, research assistance, explanation, decision support. Key point: *professional-looking output is not automatically verified output.*
-- **Creative AI** — marketing concepts, imagery, educational visuals, promotional creative, content/video workflows. Human remains responsible for accuracy, claims, brand fit, misleading imagery, and final approval.
-- **AI-enabled scalp/hair/imaging analysis** — imaging, comparison, density measurement, pattern recognition, tracking, scoring, product/routine suggestions. Distinguishes *observation/measurement support* from *diagnostic authority.*
-- **Automation/practice systems** — scheduling, CRM, email, workflows, analytics, documentation, customer-service systems. Taught as functions, not current brands.
+- Eyebrow: `Module 11 · AI / Modern Practice Tools`
+- Title (renders on two lines): **Human-led.** / **AI-assisted.**
+- Description: *"AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well."*
+- Opening paragraph (polished AIMT/Cadence framing, unchanged in substance from the original draft): frames Cadence as the student's lived example of the course's human-led/AI-assisted philosophy.
+- One `✦` callout: eyebrow **AIMT position**, text *"If you're going to use AI, learn to use it well."*
 
-### 11.2 — Give AI a Better B.R.I.E.F.
+### 11.1 — Tool Literacy: "What AI Is Actually Good At"
 
-Headline: **Better Input Produces More Useful Output.**
+Eyebrow `11.1 — Tool literacy`. Intro: *"The specific tools will change. The more durable skill is understanding what kind of job you're giving them — and what kind of output they can realistically produce."* Four category cards (`.concept-grid`, no icons): Language / reasoning assistants; Creative AI; Scalp / hair imaging analysis; Automation / practice systems — same substance as originally approved. Closing principle rendered as normal bolded prose, not a callout: *"**Professional-looking output is not automatically verified output.** Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool."*
 
-Teaches the B.R.I.E.F. framework:
+### 11.2 — Better Input: "Give AI a Better B.R.I.E.F."
 
-- **B — Background:** relevant context.
-- **R — Request:** what you actually want.
-- **I — Instructions:** tone, audience, constraints, claims to avoid, terminology, required information.
-- **E — Expected Output:** caption, email, FAQ, comparison, checklist, response, summary, options, etc.
-- **F — Fact-check:** what requires human verification — especially health information, product/ingredient claims, regulations, legal requirements, math/pricing, statistics, citations, current policies, product/manufacturer instructions.
+Eyebrow `11.2 — Better input`. Intro: *"Better input produces more useful output. Prompting isn't magic wording — it's giving the tool a clear job."*
 
-Does not treat prompting as magic wording — teaches giving the tool a good brief.
+**B.R.I.E.F. compact teaching key** — a five-item reference row (letter + label + one-line description), not five cards or an accordion:
 
-**Ungraded interaction — "Build a Better B.R.I.E.F." (the module's one formal interaction):**
+| | Label | Description |
+|---|---|---|
+| B | Background | What does the tool need to know? |
+| R | Request | What do you actually want it to do? |
+| I | Instructions | What tone, audience, boundaries, or requirements matter? |
+| E | Expected Output | What should the finished response look like? |
+| F | Fact-check | What still needs human verification? |
 
-- Starting prompt shown to the student: *"Write a post about my head spa."*
-- The student improves it step by step through the B.R.I.E.F. framework (Background, Request, Instructions, Expected Output), then is asked what still requires human review before it could actually be posted.
-- Ungraded, revisable, text-based feedback, no persistence, no progress write, no completion gate, no autoplay, touch + keyboard accessible, no color-only meaning, no gamification (matches `00-global-decisions.md`'s "Interaction standard" and "Rejected mechanics").
-- This is the module's single formal interaction, per the task's explicit "Use ONE formal Module 11 interaction" instruction — the Hear → Observe → Boundary → Next Step material in 11.5 is taught through worked example/explanation, not a second scored or gated interaction.
+**"Build Your B.R.I.E.F." — one ungraded practice workspace** (the module's single formal interaction): a labeled `Ungraded practice · nothing here is saved or scored` tag, the starting prompt *"Write a post about my head spa."* shown at the top, then five compact rows (label + helper text + a scratch field) inside one visual container — not five accordion cards, not `.cp-input` styling. One optional reveal, **"See a completed example"**, shows a single complete B.R.I.E.F. example broken into B/R/I/E/F, labeled *"A strong example — not a required script."* No separate reflection field — the Fact-check row already asks what requires human review, so the question is not asked twice. Ungraded, revisable, no `APP_STATE` write, no persistence, no completion gate, no autoplay, keyboard + touch accessible, no color-only meaning, no gamification.
 
-### 11.3 — Not Every AI Task Needs the Same Level of Trust
+### 11.3 — Human Authority: "Decide How Much Authority to Give the Tool"
 
-Three levels:
+Eyebrow `11.3 — Human authority`. The module's signature question is surfaced here as a standalone course-authored statement (serif pull-quote typography, no card, no Cadence attribution): *"What are you asking the tool to do — and what still belongs to you?"*
+
+**AI Use / Authority Matrix** — one coherent three-column framework (not three separate floating `.info-card`s), desktop three-column / mobile stacked:
 
 - **Level 1 — AI can lead the first draft:** social copy, brainstorming, content calendars, service-description drafts, email drafts, messages, FAQs, internal organization. Human reviews.
 - **Level 2 — AI can assist, but you verify:** research, ingredient explanations, product comparisons, pricing calculations, regulatory research, educational claims, business forecasting, source gathering. Core principle: *AI can accelerate the search. It does not eliminate verification.* Use authoritative sources when facts matter.
 - **Level 3 — Keep final authority human:** diagnosing, establishing a medical condition, prescribing, deciding medical safety, exceeding professional role, making claims the practitioner could not responsibly make. Core rule: *the tool does not expand your professional authority.*
 
-### 11.4 — AI in Scalp & Hair Analysis
+Below the matrix, the signature takeaway as a second standalone statement, no Cadence attribution: *"Use AI for leverage. Keep human authority where it matters."*
 
-Headline: **A Confidence Score Is Information — Not a Verdict.**
+### 11.4 — Scalp & Hair Analysis: "A Confidence Score Is Information — Not a Verdict"
 
-Treats AI-assisted scalp/hair analysis as a legitimate modern tool category with real benefits (consistency, measurement, comparison, tracking, pattern recognition, organization, client engagement) alongside real limitations.
+Eyebrow `11.4 — Scalp & hair analysis`. Title unchanged from the original draft (already strong and clear). Same substantive curriculum, restructured presentation:
 
-Worked example: a displayed result such as *"Seborrheic dermatitis — 87%"* must never be taught or treated as *"You have seborrheic dermatitis."* Teaches: confidence ≠ certainty; a model score ≠ a confirmed diagnosis; training data, image quality/lighting/capture conditions, represented populations, and independent validation all matter. No AI-engineering lesson — just enough literacy that a polished percentage is never mistaken for universal truth. General conversational AI should not become the practitioner's scalp diagnostician.
+- Two-column example (not `.clinical-note`): left column, **AI output** — *"Seborrheic dermatitis — 87%"*; right column, **Human review** — *"A model confidence score is information generated by the system — not a confirmed diagnosis. It may influence what you look at more closely, but it does not become 'You have seborrheic dermatitis' in your client language."*
+- A restrained `+`-marked factor list: `+ Training data`, `+ Image quality / lighting`, `+ Capture conditions`, `+ Populations represented`, `+ Independent validation`.
+- Closing paragraph unchanged in substance: no AI-engineering lesson needed, just enough literacy that a polished percentage never reads as universal truth; general conversational AI should not become the practitioner's scalp diagnostician.
 
-### 11.5 — Your Client May Have Already Asked AI
+### 11.5 — Client-Supplied AI: "When the Client Brings an AI Answer"
 
-A major section. Opens with realistic client statements ("I asked ChatGPT and it says I have dandruff," "I uploaded a photo and AI says this is psoriasis," "AI says my hair loss is hormonal"). AIMT does not teach ridiculing the client or attacking the AI.
+Eyebrow `11.5 — Client-supplied AI`. Opening meaning (replaces the old headline "Don't defeat the AI answer..." — that principle now closes the section instead): *"Clients are already arriving with information and conclusions they got from AI. The goal is not to ridicule the client, automatically agree with the result, or prove the software wrong. The professional skill is knowing how to receive the information and bring the conversation back to what you can responsibly establish."*
 
-Teaches **HEAR → OBSERVE → BOUNDARY → NEXT STEP**:
+Client-statement examples card unchanged: *"I asked ChatGPT about my scalp and it says I have dandruff." · "I uploaded a photo and AI says this is psoriasis." · "AI says my hair loss is hormonal."*
 
-- **HEAR** — acknowledge what the client brought in (e.g., *"Okay — tell me what you were noticing that made you look into it."*).
-- **OBSERVE** — return to the current consultation and observable findings.
-- **BOUNDARY** — explain what the practitioner can responsibly establish (e.g., *"That may have given you useful information to start with. What I can do here is talk through what we're actually seeing today. I can't confirm a medical diagnosis from an AI result."*).
-- **NEXT STEP** — depending on actual findings: continue/adapt service, avoid the affected area, pause/decline, or recommend appropriate professional evaluation.
+**HEAR → OBSERVE → BOUNDARY → NEXT STEP — one unified, connected framework** (a single 2×2 grid on desktop, single-column numbered sequence on mobile — not four separate stacked callouts):
 
-No exact script is required of the student. Core point: the goal is not to defeat the AI answer — it is to return the conversation to responsible human judgment.
+- **01 — Hear:** acknowledge what they brought in. *"Okay — tell me what you were noticing that made you look into it."*
+- **02 — Observe:** return to the current consultation and what's actually observable today.
+- **03 — Boundary:** explain what you can responsibly establish. *"That may have given you useful information to start with. What I can do here is talk through what we're actually seeing today. I can't confirm a medical diagnosis from an AI result."*
+- **04 — Next step:** depending on what you actually find — continue/adapt, avoid the affected area, pause/decline, or recommend appropriate professional evaluation.
 
-### 11.6 — Client Information, Images & AI
+Closing statement (typographic emphasis, not a callout): *"The goal is not to defeat the AI answer. It is to return the conversation to responsible human judgment."*
 
-Headline: **Convenience Does Not Cancel Confidentiality.**
+Then `m11cp1` — **unchanged**, byte-identical to its original implementation.
 
-Explicitly avoids blanket, dated claims about how "all AI systems" handle data. Teaches a durable framework of questions instead: Does the AI actually need this information? Can identifiers be removed? Is the image actually necessary? What are the tool's *current* data/privacy practices? What account/settings are being used? Are privacy/consent/workplace requirements relevant? Is permission required? Can the same task be done with less identifiable information?
+### 11.6 — Privacy & Client Data: "Client Information, Images & AI"
 
-Core principle: **give the tool what the task needs — not everything you know.** Does not normalize casually uploading client scalp imagery into general-purpose AI systems.
+Eyebrow `11.6 — Privacy & client data`. Intro (headline "Convenience does not cancel confidentiality" removed as the main title, its idea folded into supporting copy): *"Data and privacy practices differ by tool and change over time. Do not rely on one frozen claim about what 'AI' does with information."*
 
-### 11.7 — Use AI to Remove Friction — Not Humanity
+**Need / Minimize / Verify** — reuses the same three-part framework component as 11.3's authority matrix:
 
-Concrete practice uses, organized by function:
+- **Need:** does the AI actually need this information or image?
+- **Minimize:** can identifying details be removed? Can the task be completed with less client information?
+- **Verify:** what are the tool's current data/privacy practices, account settings, permission/consent requirements, and applicable workplace/business requirements?
 
-- **Marketing** — captions, campaigns, emails, web copy, FAQ, repurposing.
-- **Client communication** — appointment messages, difficult-response drafts, policy explanations, rebooking, education.
-- **Business thinking** — pricing scenarios, packages, projections, comparisons, expenses, SOPs, system brainstorming.
-- **Research** — terminology, possible sources, summarization, questions, comparisons. Teaches: *research with AI, verify outside AI* — if AI supplies a citation, open it, read it, check the date, verify it actually supports the claim.
-- **Training/staff development** — outlines, quizzes, scenarios, internal references, exercises.
-- **Administrative leverage** — reduce repetitive work where useful; does not automate human interaction merely because it is possible.
+Closing note: *"Give the tool what the task needs — not everything you know. Uploading client scalp imagery into a general-purpose AI tool should not be treated as a casual default."*
 
-### 11.8 — Modern Does Not Mean Less Human
+### 11.7 — Practice Leverage: "Where AI Can Strengthen Your Practice"
 
-Closing section. AIMT stance: **human + AI, with the human leading.** AI may draft — the practitioner owns the message. AI may organize information — the practitioner owns the judgment. AI may identify patterns — the practitioner owns what gets communicated. AI may help build the business — the practitioner creates the experience. AI may support education — human professionals still teach touch, technique, judgment, hands-on skill, client communication, and real-world decision-making.
+Eyebrow `11.7 — Practice leverage`. Six category cards (`.concept-grid`, no icons), exact titles: **Marketing**, **Client Communication**, **Business Thinking**, **Research**, **Training / Staff Development**, **Administrative Leverage**. The "research with AI, verify outside AI" principle (open the source, read it, check the date, confirm it supports the claim) is folded directly into the Research card's own body copy rather than a separate callout.
 
-Protects what derives value from being human: trust, touch, empathy, observation, professional judgment, accountability, hands-on skill, the practitioner/client relationship.
+### 11.8 — Human-Led Practice: "Stay Human Where Human Matters"
 
-Closing principle: **Use technology to become more capable — not less present.**
+Eyebrow `11.8 — Human-led practice`. Opens with a standalone statement: *"Modern does not mean less human."* Then the AI/practitioner relationship, formatted as five short editorial line-pairs rather than one dense paragraph:
+
+- **AI may draft.** The practitioner owns the message.
+- **AI may organize information.** The practitioner owns the judgment.
+- **AI may identify patterns.** The practitioner owns what gets communicated.
+- **AI may help build the business.** The practitioner creates the experience.
+- **AI may support education.** Human professionals still teach touch, technique, judgment, hands-on skill, client communication, and real-world decision-making.
+
+The former "From Cadence" quote containing the signature question/takeaway was removed from this section — those two lines now correctly belong to AIMT and are surfaced in 11.3 instead, not attributed to Cadence in-character.
+
+**Closing — the module's second and final `✦` moment:** eyebrow **Closing principle**, text *"Use technology to become more capable — not less present."* Followed by a plain supporting sentence: *"Protect the parts of professional practice whose value comes from being human: trust, touch, empathy, observation, judgment, accountability, hands-on skill, and the practitioner-client relationship."*
+
+Then `m11cp2` — **unchanged**, byte-identical to its original implementation.
+
+### Shared component reuse
+
+- `.concept-grid`/`.concept-card` (11.1, 11.7) — icons removed.
+- `.m11-brief-key`, `.m11-brief-workspace` (11.2) — new, Module 11-scoped, deliberately distinct from `.checkpoint`/`.cp-input`.
+- `.m11-framework` (11.3, 11.6) — new, one component reused for both three-part frameworks.
+- `.m11-hear` (11.5) — new, the unified HEAR grid.
+- `.m11-statement` (11.3 ×2, 11.5, 11.8) — new, standalone course-authored statement typography.
+- `.key-point` (AIMT Callout System) — used only for the two intentional `✦` moments.
+- `.grid-2col`, `.cadence-note`, `.info-card` — existing shared components, reused as-is for 11.4's AI-output/human-review example.
+- `.m11-scope` — new, Module 11's own desktop `.sec-title` breathing-room override (`max-width:32ch; line-height:1.08; letter-spacing:-0.008em` at `>=768px`), matching the `.m10-scope` precedent.
 
 ---
 
@@ -182,11 +208,13 @@ Cadence must not: claim AI is always correct; claim AI is inherently bad; diagno
 
 Cadence should distinguish a **draft** from an **inference** from a **verified fact** from a **human decision.**
 
-**Approved quick prompts (exact):**
+**Approved quick prompts (exact, unchanged by the correction pass):**
 
 1. `Help me turn this into a better AI brief.`
 2. `How should I respond when a client brings an AI diagnosis?`
 3. `How should I evaluate an AI scalp-analysis result?`
+
+**Module-open greeting (locked, corrected — August 25, 2026):** *"Human-led. AI-assisted. This module is about using AI well — not fearing it or handing it your judgment. Ask me anything as you work through the tools."* — aligned to the corrected hero identity; the system prompt itself (role, must-not list) is unchanged.
 
 ---
 
@@ -262,9 +290,13 @@ Follows the current course-wide foundation (per `00-global-decisions.md`'s "Cour
 16. Module 10's stale "Up next — Module 11 ... not yet available" text is corrected.
 17. Completion requires both checkpoints; Module 12 unlocks only after Module 11 completes.
 18. Desktop and mobile layouts pass the course's standard visual/accessibility checklist; no horizontal overflow; no color-only meaning.
+19. **(Correction pass)** Exactly two `✦` moments appear in Module 11 student-facing content — the AIMT position callout and the closing principle callout. No category card, framework, or routine "Remember" note uses a star icon.
+20. **(Correction pass)** The B.R.I.E.F. interaction is one workspace with five compact rows (not five accordion cards), uses `.m11-brief-input` (not `.cp-input`), and has exactly one example reveal (not five).
+21. **(Correction pass)** HEAR/OBSERVE/BOUNDARY/NEXT STEP renders as one unified, visually connected framework — not four separate `.key-point` callouts.
+22. **(Correction pass)** `m11cp1`, `m11cp2`, `M11.systems.m11cp1`/`m11cp2`, the three Cadence quick prompts, checkpoint IDs, and all completion/unlock/migration logic are confirmed byte-identical to the pre-correction implementation.
 
 ---
 
 ## Implementation notes
 
-Implementation proceeds directly from this document in the same authorized task, per the owner's explicit instruction (structural move → source extraction → this specification → implementation, all in one authorized task). Static validation and Review Mode desktop/mobile QA are required before status can read "awaiting manual QA"; only the owner's own rendered-preview review can advance status to "manual QA approved," per the master instructions' manual-approval rule.
+Implementation proceeded directly from this document in the original authorized task (structural move → source extraction → this specification → implementation, all in one authorized task). A subsequent, separately authorized **correction pass** (August 25, 2026) corrected the drift documented at the top of this file — this document was updated in place to reflect the corrected, locked structure rather than being left describing the superseded overbuilt version. Static validation and Review Mode desktop/mobile QA are complete for both the original implementation and the correction pass; only the owner's own rendered-preview review can advance status to "manual QA approved," per the master instructions' manual-approval rule — that has not yet occurred.
