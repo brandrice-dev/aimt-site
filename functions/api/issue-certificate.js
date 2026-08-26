@@ -8,7 +8,7 @@
    Verifies (server-side, none of this trusts the browser):
      1. Valid signed-in user
      2. Active entitlement for the course
-     3. Real progress in course_progress (modules 0–10 complete)
+     3. Real progress in course_progress (modules 0–11 complete)
    Then issues a unique credential ID (AIMT-HSM-2026-XXXXXX) or
    returns the existing one (idempotent — one credential per student).
 
@@ -17,8 +17,13 @@
 
 const COURSE_SLUG = 'headspa-mastery';
 const CREDENTIAL_PREFIX = 'AIMT-HS';
-/* Modules 0–10 complete = 11 x 100 in the progress score */
-const REQUIRED_SCORE = 1100;
+/* Module 11 → 12 structural relocation (course-audit-build): the
+   Course Completion & Certification screen now lives at technical slot
+   12, so the prerequisite is one module further than before — modules
+   0–11 complete = 12 x 100 in the progress score. See
+   docs/course-audit/modules/module-11.md and headspa-mastery.html's
+   showCertificate(), which enforces the same 0–11 requirement client-side. */
+const REQUIRED_SCORE = 1200;
 /* Unambiguous alphabet: no 0/O, 1/I/L */
 const ID_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 

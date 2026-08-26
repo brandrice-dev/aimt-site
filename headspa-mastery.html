@@ -2795,9 +2795,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <span class="mr-badge mb-active" id="mbadge-10">Start</span>
       </div>
       <div class="module-row" data-module-id="11" onclick="openModuleById(11)">
-        <div class="mr-num mr-active" id="mnum-11">✦</div>
+        <div class="mr-num mr-active" id="mnum-11">11</div>
+        <div class="mr-info"><div class="mr-title">Module 11 — AI / Modern Practice Tools</div><div class="mr-sub">Using AI tools well — and knowing what still requires you</div></div>
+        <span class="mr-badge mb-active" id="mbadge-11">Start</span>
+      </div>
+      <div class="module-row" data-module-id="12" onclick="openModuleById(12)">
+        <div class="mr-num mr-active" id="mnum-12">✦</div>
         <div class="mr-info"><div class="mr-title">Course Completion & Certification</div><div class="mr-sub">The standard moving forward</div></div>
-        <span class="mr-badge mb-active" id="mbadge-11">Finish</span>
+        <span class="mr-badge mb-active" id="mbadge-12">Finish</span>
       </div>
     </div>
   </div>
@@ -7174,7 +7179,12 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 </div>
 
 <!-- ══ FINAL MODULE CONTENT ══ -->
-<div id="module11Wrap" style="display:none;">
+<!-- Module 11 → 12 structural relocation (course-audit-build): this is the
+     former module11Wrap, unchanged in content — Course Completion &
+     Certification now lives at technical slot 12. See
+     docs/course-audit/modules/module-11.md and
+     assets/js/headspa-state.js's migrateModule11To12IfNeeded(). -->
+<div id="module12Wrap" style="display:none;">
   <div class="lesson-wrap">
 
     <div class="mod-hero">
@@ -7257,7 +7267,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cn2-text">This certification confirms that you have completed the HeadSpa Mastery training program. It does not replace state licensing, medical authority, or legal scope of practice. Your responsibility is to operate within your local regulations. Always.</div>
     </div>
 
-    <div class="lesson-complete" id="m11Complete" style="display:block;">
+    <div class="lesson-complete" id="m12Complete" style="display:block;">
       <div class="lc-gold">✦</div>
       <div class="lc-title">HeadSpa Mastery complete.</div>
       <div class="lc-sub">Now go build something worth coming back to.</div>
@@ -7286,7 +7296,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 const PROXY_URL = 'https://headspa-proxy.brandrice.workers.dev/';
 
 // ── MODULE METADATA ──
-const TOTAL_MODULES = 12; // 0 through 11
+const TOTAL_MODULES = 13; // 0 through 12 (Module 11 → 12 structural relocation)
 
 const MODULE_CHECKPOINTS = {
   '0': ['m0cp1'],
@@ -7306,7 +7316,14 @@ const MODULE_CHECKPOINTS = {
      docs/course-audit/modules/module-09-reorder-migration-plan.md §4/§11. */
   '9': ['m10cp1', 'm10cp2'],
   '10': ['m9cp1', 'm9cp2'],
-  '11': []
+  /* Module 11 → 12 structural relocation (course-audit-build): slot 11 is
+     now AI / Modern Practice Tools (new checkpoints m11cp1/m11cp2); slot
+     12 is now Course Completion & Certification, relocated from slot 11,
+     which never required checkpoints (completion is driven by
+     showCertificate()). See assets/js/headspa-state.js's
+     migrateModule11To12IfNeeded() for the saved-state migration. */
+  '11': ['m11cp1', 'm11cp2'],
+  '12': []
 };
 window.MODULE_CHECKPOINTS = MODULE_CHECKPOINTS;
 
@@ -7343,7 +7360,8 @@ const MODULE_TITLES = {
   8: 'Module 8 — The Head Spa Service',
   9: 'Module 9 — Checkout, Client Closing & Pricing Strategy',
   10: 'Module 10 — Sanitation & Reset Systems',
-  11: 'Course Completion & Certification'
+  11: 'Module 11 — AI / Modern Practice Tools',
+  12: 'Course Completion & Certification'
 };
 
 // ══════════════════════════════════════════════════════
@@ -7377,7 +7395,7 @@ function renderHomeProgress() {
   }
 
   // Update each module row
-  for (let i = 0; i <= 11; i++) {
+  for (let i = 0; i < TOTAL_MODULES; i++) {
     const numEl = document.getElementById('mnum-' + i);
     const badgeEl = document.getElementById('mbadge-' + i);
     const rowEl = document.querySelector('[data-module-id="' + i + '"]');
@@ -8228,7 +8246,12 @@ const MODULE_GUIDE_SYSTEMS = {
      historical numbering — see MODULE_CHECKPOINTS/MODULE_TITLES above. */
   9: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied business experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 9, Checkout, Client Closing & Pricing Strategy — your role here is business-decision and client-closing coach. Before recommending any change, help the student distinguish a cost problem, a pricing problem, a menu problem, a positioning problem, a service-delivery problem, and a market-fit problem from each other — one client comment rarely proves a single cause. Reinforce that competitor pricing is context, not a pricing formula, and that full practitioner time (not treatment time alone) belongs in any real cost model. Price feedback such as "it felt high" is not automatically a positioning problem — treat it as evidence to review, not a conclusion to assume. Do not provide tax advice, legal advice, state-specific pricing-compliance guidance, or bookkeeping advice presented as professional accounting guidance — point the student to a qualified professional for those questions instead. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
   10: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 10, Sanitation & Reset Systems — your role here is sanitation-process and operational-consistency coach for a student who already completed licensed sanitation/disinfection education. Help the student distinguish cleaning from disinfection from reset, and reason through a repeatable reset built around whatever contact or process time is actually required — never shortened for schedule pressure. When the exact answer depends on a disinfectant label, equipment manufacturer instructions, a state/local rule, or a workplace exposure procedure, tell the student to follow that source rather than inventing a specific contact time, dilution, chemical compatibility, state law, or universal maintenance frequency. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
-  11: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student has completed the course. This is about execution now. Reference what you know about this student specifically — their background, their goals, what they shared at the start — and connect everything to how they will now deliver head spa and scalp wellness services. Knowing and doing are not the same. Repetition makes it real. 3-5 sentences. No bullet points.'
+  /* Module 11 → 12 structural relocation: slot 11 is now AI / Modern
+     Practice Tools; slot 12 is now Course Completion & Certification,
+     relocated verbatim from the former slot 11 (not redesigned by this
+     relocation — see docs/course-audit/modules/module-11.md). */
+  11: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\'s applied experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 11, AI / Modern Practice Tools — your role here is AI-literacy and modern-practice coach. Distinguish a draft from an inference from a verified fact from a human decision. Do not claim AI is always correct or inherently bad, diagnose, invent or fabricate a citation, falsely claim something has been verified when it has not, claim personal practitioner experience, encourage sharing more client data or imagery than a task actually needs, imply that AI expands the student\'s professional or legal authority, or present a platform\'s current data or privacy policy as a permanent fact — policies change, so point the student to check the tool\'s current settings instead. Reinforce AIMT\'s position: human-led, AI-assisted — AI may draft, organize, or identify patterns, but the practitioner owns the message, the judgment, and what gets communicated to a client. Be direct, warm, practical, and concise. 3-5 sentences, no bullet points.',
+  12: 'You are Cadence — a mentor built from nearly two decades in the head spa industry. The student has completed the course. This is about execution now. Reference what you know about this student specifically — their background, their goals, what they shared at the start — and connect everything to how they will now deliver head spa and scalp wellness services. Knowing and doing are not the same. Repetition makes it real. 3-5 sentences. No bullet points.'
 };
 
 const MODULE_QUICK_PROMPTS = {
@@ -8243,7 +8266,8 @@ const MODULE_QUICK_PROMPTS = {
   8: ['How do I keep transitions smooth?', 'How do I adapt a step without breaking the flow?', 'What should I say when a client asks what I\'m doing?'],
   9: ['How do I know what my service really costs?', 'How do I make my menu easier to understand?', 'What do I say when someone thinks the price is high?'],
   10: ['What needs cleaning vs. disinfection?', 'How do I build a reset that holds up when I\'m behind?', 'What should I document after a client concern?'],
-  11: ['How do I maintain quality consistently?', 'What should I focus on in my first real services?', 'How do I know if I am improving?']
+  11: ['Help me turn this into a better AI brief.', 'How should I respond when a client brings an AI diagnosis?', 'How should I evaluate an AI scalp-analysis result?'],
+  12: ['How do I maintain quality consistently?', 'What should I focus on in my first real services?', 'How do I know if I am improving?']
 };
 
 // ── GUIDE STATE ──
@@ -8442,7 +8466,8 @@ function openModuleById(id, options = {}) {
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m8InitMasterclass(); },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     10: () => { const w = document.getElementById('module10Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    11: () => { const w = document.getElementById('module11Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; }
+    11: () => { const w = document.getElementById('module11Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
+    12: () => { const w = document.getElementById('module12Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; }
   };
 
   if (STATIC_MODULES[id]) {
@@ -8484,7 +8509,10 @@ function openModuleById(id, options = {}) {
       // subject now, not its historical key.
       9: 'Pricing is where a lot of talented practitioners undersell themselves. Let us fix that.',
       10: 'Sanitation does not get talked about enough. It is what separates consistent professionals from inconsistent ones.',
-      11: 'You made it to the end. But this is not the end — it is the beginning of repetition. Read this module slowly. Then go practice.'
+      // Module 11 → 12 structural relocation: greeting content follows the
+      // slot's actual subject now, not its historical key.
+      11: 'Modern practice includes knowing how to use new tools. This module is not about fearing AI or using it blindly — it is about using it well, with your judgment still in charge. Ask me anything.',
+      12: 'You made it to the end. But this is not the end — it is the beginning of repetition. Read this module slowly. Then go practice.'
     };
     const baseGreeting = greetings[id] || 'I am here if anything is unclear as you move through this module.';
     const callback = getAdaptiveGreetingCallback(id);
@@ -10272,18 +10300,21 @@ function showCertificate() {
     alert('Certificate issuance is disabled in Course Review Mode.');
     return;
   }
-  // Verify all modules 0–10 are complete before issuing certificate
-  for (let i = 0; i <= 10; i++) {
+  // Verify all modules 0–11 are complete before issuing certificate
+  // (Module 11 → 12 structural relocation: the certificate/completion
+  // experience now lives at slot 12, so the prerequisite check covers one
+  // module further than before — see module-11.md.)
+  for (let i = 0; i <= 11; i++) {
     if (!APP_STATE.isModuleComplete(i)) {
       alert('Please complete all modules before downloading your certificate. Module ' + i + ' is not yet complete.');
       return;
     }
   }
-  // Save completion date and mark module 11 complete
+  // Save completion date and mark module 12 complete
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   APP_STATE.setStudent({ completionDate: dateStr });
-  APP_STATE.markModuleComplete(11);
+  APP_STATE.markModuleComplete(12);
   // Note: renderHomeProgress() intentionally NOT called here — it triggers
   // view animations that create stacking contexts and hide the overlay
 

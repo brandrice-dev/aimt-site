@@ -10,6 +10,14 @@
  *
  * Run with: node tests/module-09-migration.test.js
  * No npm dependencies — uses only Node's built-in `vm`, `fs`, `path`.
+ *
+ * Note (Module 11 -> 12 structural relocation): SCHEMA_VERSION was bumped
+ * 3 -> 4 in assets/js/headspa-state.js for the unrelated
+ * migrateModule11To12IfNeeded() migration (see
+ * tests/module-11-relocation-migration.test.js). Final persisted/in-memory
+ * schemaVersion assertions below were updated from the literal 3 to 4 to
+ * match — this migration's own behavior (the 9<->10 swap itself) is
+ * unchanged.
  */
 
 'use strict';
@@ -176,7 +184,7 @@ function deepEqual(a, b) {
   const h = createHarness();
   h.window.APP_STATE.load();
   const d = h.window.APP_STATE.data;
-  check(name, 'schemaVersion stamped 3', d.schemaVersion === 3);
+  check(name, 'schemaVersion stamped current (4 — see Module 11->12 relocation migration)', d.schemaVersion === 4);
   check(name, 'slot 9 has empty checkpointMeta', deepEqual(d.progress['9'].checkpointMeta, {}));
   check(name, 'slot 10 has empty checkpointMeta', deepEqual(d.progress['10'].checkpointMeta, {}));
   check(name, 'slot 9 not complete', d.progress['9'].complete === false);
@@ -369,7 +377,7 @@ function deepEqual(a, b) {
   check(name, 'quarantine has quarantinedAt timestamp', !!quarantine && typeof quarantine.quarantinedAt === 'number');
   check(name, 'slot 9 reset to safe empty default', deepEqual(d.progress['9'].checkpointMeta, {}) && d.progress['9'].complete === false);
   check(name, 'slot 10 reset to safe empty default (ambiguous pair, both reset)', deepEqual(d.progress['10'].checkpointMeta, {}) && d.progress['10'].complete === false);
-  check(name, 'schemaVersion stamped 3 (prevents re-quarantine on reload)', d.schemaVersion === 3);
+  check(name, 'schemaVersion stamped current (prevents re-quarantine on reload)', d.schemaVersion === 4);
 })();
 
 // 11. Review Mode — no persisted migration side effect.
@@ -590,7 +598,7 @@ function deepEqual(a, b) {
   check(name, 'quarantine contains original malformed slot9 verbatim', !!quarantineParsed && deepEqual(quarantineParsed.slot9, malformedSlot9));
 
   const persistedState = JSON.parse(persistedAfterFirstLoad);
-  check(name, 'persisted schemaVersion is 3', persistedState.schemaVersion === 3);
+  check(name, 'persisted schemaVersion is current (4)', persistedState.schemaVersion === 4);
   check(name, 'persisted slot 9 is safe empty default (no false completion)', deepEqual(persistedState.progress['9'].checkpointMeta, {}) && persistedState.progress['9'].complete === false);
 
   // Second load — simulates a fresh page load reading the now-migrated,
@@ -599,7 +607,7 @@ function deepEqual(a, b) {
   const persistedAfterSecondLoad = h.localStorage.getItem('levo_app');
   const quarantineAfterSecondLoad = h.localStorage.getItem(QUARANTINE_KEY);
   check(name, 'quarantine key untouched by second load (no re-quarantine)', quarantineAfterSecondLoad === quarantineAfterFirstLoad);
-  check(name, 'levo_app stable after second load (idempotent)', JSON.parse(persistedAfterSecondLoad).schemaVersion === 3);
+  check(name, 'levo_app stable after second load (idempotent)', JSON.parse(persistedAfterSecondLoad).schemaVersion === 4);
   check(name, 'slots 9/10 still show no false completion after reload', h.window.APP_STATE.data.progress['9'].complete === false && h.window.APP_STATE.data.progress['10'].complete === false);
 })();
 

@@ -1,14 +1,22 @@
 (function() {
   const STORAGE_KEY = 'levo_app';
   const LEGACY_PROFILE_KEY = 'levo4_profile';
-  const SCHEMA_VERSION = 3;
-  const MODULE_COUNT = 12;
+  const SCHEMA_VERSION = 4;
+  /* Technical module slots 0–12 (13 total): 0 = Welcome, 1–11 = instructional
+     modules, 12 = Course Completion & Certification. See "Module 11 → 12
+     structural relocation" below. */
+  const MODULE_COUNT = 13;
   /* Module 9 ↔ 10 reorder — saved-state migration quarantine key.
      See docs/course-audit/modules/module-09-reorder-migration-plan.md §6.1.
      Deliberately a separate localStorage key, outside the sanitized
      'levo_app' blob: sanitizeState() reconstructs a fixed five-key shape
      and would silently drop anything written onto the raw object instead. */
   const MODULE9_REORDER_QUARANTINE_KEY = 'aimt_module9_reorder_quarantine';
+  /* Module 11 → 12 structural relocation — saved-state migration quarantine
+     key. Same rationale as MODULE9_REORDER_QUARANTINE_KEY above: a separate
+     localStorage key outside the sanitized 'levo_app' blob so quarantined
+     evidence survives sanitizeState()'s fixed-shape reconstruction. */
+  const MODULE11_RELOCATE_QUARANTINE_KEY = 'aimt_module11_relocate_quarantine';
 
   function now() {
     return Date.now();
@@ -151,7 +159,12 @@
        docs/course-audit/modules/module-09-reorder-migration-plan.md §2.7. */
     9: ['pricing-logic', 'positioning', 'client-explanation'],
     10: ['sanitation-discipline', 'complaint-response', 'service-flow'],
-    11: ['service-flow', 'scope-awareness', 'client-guidance', 'pricing-logic', 'pattern-recognition']
+    /* Module 11 → 12 structural relocation: slot 11 is now AI / Modern
+       Practice Tools (m11cp1/m11cp2); slot 12 is now Course Completion &
+       Certification (the historically-tagged, no-checkpoint final module —
+       see migrateModule11To12IfNeeded above). */
+    11: ['ai-literacy', 'verification-judgment', 'client-guidance', 'privacy-judgment'],
+    12: ['service-flow', 'scope-awareness', 'client-guidance', 'pricing-logic', 'pattern-recognition']
   };
 
   function createCadenceMemory() {
@@ -570,6 +583,83 @@
     rawParsedState.schemaVersion = 3;
   }
 
+  /* Module 11 → 12 structural relocation (course-audit-build): the
+     existing "Course Completion & Certification" experience — previously
+     technical slot 11 — moves to technical slot 12. Slot 11 becomes a new
+     module, AI / Modern Practice Tools, with its own competency state.
+     This is a one-directional relocation, not a swap like the 9/10 reorder
+     above: old slot 11 progress belongs to the content now living at slot
+     12, and the new slot 11 must begin genuinely empty — a student's prior
+     "I finished the course" state must never be interpreted as AI-module
+     competency. Confirmed by direct inspection of MODULE_CHECKPOINTS['11']
+     (empty array pre-relocation — Course Completion & Certification had no
+     required checkpoints) and sanitizeNotableAnswers() (which discards any
+     entry without a non-empty checkpointId) that no cadenceMemory
+     notableAnswers entry can exist tagged to old moduleId 11 — so unlike
+     the 9/10 migration, no notableAnswers remap is needed here. */
+  function migrateModule11To12IfNeeded(rawParsedState) {
+    if (!rawParsedState || typeof rawParsedState !== 'object') return;
+
+    const rawProgress = rawParsedState.progress;
+    if (!rawProgress || typeof rawProgress !== 'object') return;
+
+    const version = sanitizeNumber(rawParsedState.schemaVersion, 0);
+    if (version >= 4) return; // already migrated — hard no-op
+
+    const slot11Present = Object.prototype.hasOwnProperty.call(rawProgress, '11');
+    if (!slot11Present) {
+      rawParsedState.schemaVersion = 4;
+      return; // nothing to relocate
+    }
+
+    const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
+    const slot11 = rawProgress['11'];
+    const slot11Malformed = !isWellFormedModuleProgressShape(slot11);
+
+    if (slot11Malformed) {
+      // Fail closed: quarantine the raw evidence, then replace both the
+      // relocated slot and the new slot with safe empty defaults. Never
+      // persisted while Review Mode is active.
+      if (!reviewModeActive) {
+        try {
+          localStorage.setItem(MODULE11_RELOCATE_QUARANTINE_KEY, JSON.stringify({
+            slot11: slot11,
+            quarantinedAt: now()
+          }));
+        } catch (e) {}
+        try {
+          console.warn('[AIMT] Module 11 saved progress was malformed on load — quarantined to localStorage[\'' + MODULE11_RELOCATE_QUARANTINE_KEY + '\'] and reset to safe defaults.');
+        } catch (e) {}
+      }
+      rawProgress['11'] = createModuleProgress(11);
+      rawProgress['12'] = createModuleProgress(12);
+    } else {
+      // Whole-object move (not a field merge) — the entire old slot 11
+      // progress object (checkpointMeta, complete, completedAt, etc.)
+      // becomes slot 12's progress verbatim. complete/unlocked are never
+      // hand-trusted past this point; they self-correct via the existing,
+      // unmodified reconcileModuleState()/_syncDerivedState() pipeline
+      // load() always runs immediately after migration.
+      rawProgress['12'] = slot11;
+      rawProgress['11'] = createModuleProgress(11);
+    }
+
+    // Content-identity pointers: guide.currentModule / resume.moduleId —
+    // remapped ONLY when the raw value is exactly 11 (a student who was on
+    // the completion/certificate screen resumes on the relocated version
+    // of that same screen, now at slot 12). Every other numeric field
+    // (attempts counters, scrollY, timestamps) is left untouched, matching
+    // the ruled-out-fields precedent in migrateModule9ReorderIfNeeded.
+    if (rawParsedState.guide && typeof rawParsedState.guide === 'object') {
+      if (rawParsedState.guide.currentModule === 11) rawParsedState.guide.currentModule = 12;
+    }
+    if (rawParsedState.resume && typeof rawParsedState.resume === 'object') {
+      if (rawParsedState.resume.moduleId === 11) rawParsedState.resume.moduleId = 12;
+    }
+
+    rawParsedState.schemaVersion = 4;
+  }
+
   function sanitizeState(raw) {
     const defaults = createDefaults();
     if (!raw || typeof raw !== 'object') return defaults;
@@ -630,6 +720,7 @@
       }
 
       migrateModule9ReorderIfNeeded(parsed);
+      migrateModule11To12IfNeeded(parsed);
 
       this.data = sanitizeState(parsed);
       this._migrate();
@@ -1106,12 +1197,16 @@
         .slice()
         .map((item) => ({ item, score: scoreMemoryItemForModule(item, moduleNumber) }))
         .sort((a, b) => b.score - a.score);
+      /* moduleNumber === 12: Course Completion & Certification (relocated
+         from 11 — see migrateModule11To12IfNeeded above) is the closing
+         conversation, so it draws on the student's full notable-answer
+         history rather than only topically relevant ones. */
       let relevantAnswers = scoredAnswers
-        .filter((entry) => entry.score > 0 || moduleNumber === 11)
+        .filter((entry) => entry.score > 0 || moduleNumber === 12)
         .map((entry) => entry.item)
         .slice(0, purpose === 'checkpoint' ? 1 : 2);
 
-      if (!relevantAnswers.length && purpose === 'guide' && memory.notableAnswers.length && moduleNumber === 11) {
+      if (!relevantAnswers.length && purpose === 'guide' && memory.notableAnswers.length && moduleNumber === 12) {
         relevantAnswers = memory.notableAnswers.slice(-2);
       }
 
