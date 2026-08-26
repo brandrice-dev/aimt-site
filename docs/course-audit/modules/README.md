@@ -7,17 +7,23 @@ for the decisions every module spec must be checked against.
 
 ## Approved student-facing course sequence
 
-Per [`../00-global-decisions.md`](../00-global-decisions.md#course-sequence--final-exam-module-12):
+Per [`../00-global-decisions.md`](../00-global-decisions.md#course-sequence--final-exam-module-12)
+and the Module 11 → 12 structural relocation (August 25, 2026 — see
+`implementation-log.md` Step 83):
 
 - **Welcome Module** (technical module ID `0`)
-- **Modules 1–11** — instructional curriculum
-- **Module 12 — Final Exam** — demonstrates course-wide competency before
-  certification is issued
+- **Modules 1–11** — instructional curriculum (Module 11: AI / Modern
+  Practice Tools)
+- **Module 12 — Course Completion & Certification** — currently the
+  relocated certificate/completion experience (content unchanged from its
+  former slot 11); its own external audit and redesign into the approved
+  **Final Exam** is a separate, later, not-yet-begun task.
 
-Technical module IDs, wrapper IDs, and state keys are not renumbered by this
-sequence — only student-facing labels change. Module 12's technical
-implementation is undetermined until Module 11 and the certificate flow are
-audited.
+Technical slots `0`–`12` (13 total) are now fixed: `MODULE_COUNT`
+(`assets/js/headspa-state.js`) and `TOTAL_MODULES` (`headspa-mastery.html`)
+are both `13`. The saved-state migration for this relocation is
+`migrateModule11To12IfNeeded()` in `headspa-state.js` — see
+`tests/module-11-relocation-migration.test.js`.
 
 ## Required fields for every future module audit
 
@@ -655,3 +661,43 @@ certificate flow is still to be determined.
 **Visual polish (August 25, 2026).** Section 10.4's weak/strong system comparison was converted to two explicit semantic cards reusing the Module 4 baseline red/green tokens (`--aimt-error`/`--aimt-success`); a scoping bug in an initial desktop-heading-spacing fix (an id-based selector that never matched the live rendered DOM) was caught and corrected via a `.m10-scope` class; the hero title was updated to "Build a Sanitation System That Holds Up All Day." See `implementation-log.md` Step 80.
 
 **Resource installed; manually approved (August 25, 2026).** The Between-Client Sanitation & Reset Checklist (a 2-page fillable PDF matching the approved Contain→Clean→Disinfect/Process→Reset→Verify workflow plus a "Verified Details for My Setup" fillable page) was installed as a download card after Section 10.5, before `m9cp1` — link verified in Review Mode (HTTP 200, byte-exact `content-length`). The owner reviewed the rendered branch preview and manually approved Module 10. Status: **Implemented — manual QA approved.** See `module-10.md`'s "Manual QA approval" section and `implementation-log.md` Step 81 for the full record.
+---
+
+## Module 11 — AI / Modern Practice Tools
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Module 11 — AI / Modern Practice Tools** — new module, technical slot 11 |
+| Primary source | None — authored fresh; no prior AI curriculum ever existed in this repository (confirmed by repo-wide search, see `module-11-source.md`) |
+| Source file | [`module-11-source.md`](module-11-source.md) — neutral pre-audit extraction |
+| Approved specification file | [`module-11.md`](module-11.md) — implemented per this specification, August 25, 2026 |
+| Checkpoint IDs | `m11cp1`, `m11cp2` — new, required by `MODULE_CHECKPOINTS['11']` |
+| Wrapper ID | `module11Wrap` (new; freed by the Module 11 → 12 structural relocation) |
+| **Status** | **Implemented — awaiting resource pass + manual QA.** Curriculum (opening + 11.1–11.8), the ungraded "Build a Better B.R.I.E.F." interaction, both checkpoints with per-checkpoint rubrics, and Cadence configuration are all implemented per `module-11.md`. Static validation and Review Mode desktop/phone QA are complete. Not yet manually approved by the owner. |
+
+**Structural precondition — Module 11 → 12 relocation (August 25, 2026).** Before this module could be built, the existing Course Completion & Certification experience (previously technical slot 11) was relocated intact to a new technical slot 12, freeing slot 11. `MODULE_COUNT`/`TOTAL_MODULES` bumped 12 → 13. A saved-state migration (`migrateModule11To12IfNeeded()` in `assets/js/headspa-state.js`, `SCHEMA_VERSION` 3 → 4) moves any existing slot-11 progress whole to slot 12 and starts a genuinely fresh slot 11 — a student's prior "finished the course" state can never read as AI-module competency. 10 fixtures in `tests/module-11-relocation-migration.test.js` all pass. `functions/api/issue-certificate.js`'s `REQUIRED_SCORE` was raised 1100 → 1200 to match the new module-0–11 prerequisite for certificate issuance. See `implementation-log.md` Step 83 for the full record.
+
+**Source extraction (August 25, 2026).** `module-11-source.md` confirms, via repo-wide `grep` and `git log --all`, that no AI/modern-practice curriculum, checkpoints, or Cadence configuration ever existed in this codebase before this task — only a forward-looking placeholder reference in Module 10's own completion-card text. Recommends proceeding directly to the approved specification, since there is no legacy content to reconcile.
+
+**Approved specification (August 25, 2026).** `module-11.md` converts the owner's full direction into the course's standard audit-spec format. Core thesis: "AI should strengthen the practitioner — not replace the practitioner," human-led/AI-assisted. Approved structure: opening ("Modern Practice Includes Knowing How to Use New Tools") → 11.1 AI Is Not One Tool → 11.2 Give AI a Better B.R.I.E.F. (with the single approved ungraded interaction, "Build a Better B.R.I.E.F.") → 11.3 Not Every AI Task Needs the Same Level of Trust → 11.4 AI in Scalp & Hair Analysis → 11.5 Your Client May Have Already Asked AI (Hear → Observe → Boundary → Next Step) → `m11cp1` → 11.6 Client Information, Images & AI → 11.7 Use AI to Remove Friction — Not Humanity → 11.8 Modern Does Not Mean Less Human → `m11cp2` → completion. Both checkpoints' displayed/evaluated questions are specified byte-for-byte; per-checkpoint rubrics required (not a shared rubric). Approved Cadence role: AI-literacy and modern-practice coach, with an explicit must-not list and three exact quick prompts. One future downloadable recorded as an opportunity (AIMT AI Practice Toolkit) and explicitly not built in this pass.
+
+**Implemented (August 25, 2026).** `module11Wrap` built in full per the approved section order, reusing existing foundation components throughout — `.concept-grid`/`.concept-card` for the AI-category and practice-use cards, the AIMT Callout System (`.key-point`) for the HEAR/OBSERVE/BOUNDARY/NEXT STEP sequence and key points, `.clinical-note` for the confidence-score worked example, `.cadence-note` for model-response quotes, and the current checkpoint accessibility foundation (the `aimt-sr-only` per-textarea `<label>` pattern established in Module 10's `m9cp1`/`m9cp2` — used here as the most-recently-approved governing pattern). The B.R.I.E.F. interaction reuses Module 7's `.tool-category` accordion shell directly (five cards — one per letter — each with a definition, a scratch textarea, and a "See a strong example" reveal, plus a closing reflection field with a "See what AIMT would flag" reveal); the only new CSS is a small `.m11-reveal` show/hide utility for the nested reveals. `M11` rubric object, `submitM11CP`/`m11cpKey`, `MODULE_GUIDE_SYSTEMS[11]`, and `MODULE_QUICK_PROMPTS[11]` all added following the established per-module patterns. Module 10's own completion-card handoff text (previously "not yet available — it will unlock once it has been built") was corrected to accurate, unlocked copy with a working "Start Module 11 →" button. See `module-11.md` for the complete specification and `implementation-log.md` Step 83 for the full implementation record.
+
+**Validation.** All 13 technical modules (0–12) open cleanly via `openModuleById()` with zero console errors (regression sweep). Both checkpoints' displayed question text confirmed byte-identical to `module-11.md`. The B.R.I.E.F. accordion and nested reveals confirmed functionally (not just visually) via direct DOM/class/`aria-expanded` inspection. Checkpoint submission in Review Mode confirmed reaching the real evaluation pipeline with the correct "Review Mode test — not saved" labeling and zero persistence. Zero horizontal overflow at 375px. Deferred, not resolved: live-model grading QA, screen-reader QA, physical-keyboard QA, real touch-device QA, and manual owner approval.
+
+**Next gate:** create and install the AIMT AI Practice Toolkit downloadable, then manual owner QA.
+
+---
+
+## Module 12 — Course Completion & Certification
+
+| Field | Value |
+|---|---|
+| Student-facing name | **Course Completion & Certification** — relocated from the former technical slot 11 |
+| Wrapper ID | `module12Wrap` (formerly `module11Wrap`; content unchanged by the relocation) |
+| Checkpoint IDs | None — completion is set directly by `showCertificate()` via `APP_STATE.markModuleComplete(12)`, same as its pre-relocation behavior at slot 11 |
+| **Status** | **Structurally relocated, content unchanged — not yet externally audited.** This is not the approved Final Exam described in `00-global-decisions.md`'s "Course sequence & Final exam" section; that redesign is a separate, later, not-yet-begun task. |
+
+Relocated intact from technical slot 11 by the Module 11 → 12 structural relocation (August 25, 2026) — see the Module 11 entry above and `implementation-log.md` Step 83. Per the explicit "primarily a safe structural relocation, do not redesign" instruction, no curriculum, Cadence copy (including its pre-existing "nearly two decades" persona line), or certificate-generation logic was corrected — only relocated. `showCertificate()` now requires modules 0–11 complete (was 0–10) and marks module 12 complete (was 11); `functions/api/issue-certificate.js`'s `REQUIRED_SCORE` raised to 1200 to match. The saved-state migration (`migrateModule11To12IfNeeded()`) moves any existing slot-11 progress whole to slot 12.
+
+**Next gate:** Module 12's own external audit and redesign into the approved Final Exam — a separate, later, explicitly authorized task. Do not begin from this entry.

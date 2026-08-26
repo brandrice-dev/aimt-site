@@ -1496,6 +1496,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .tc-arrow { font-family:var(--aimt-font-mono); font-size:0.9rem; color:var(--muted); font-weight:400; flex-shrink:0; transition:transform 0.2s; }
 .tc-body { display:none; border-top:0.5px solid var(--border); padding:0.5rem 0 0.75rem; }
 .tc-body.open { display:block; }
+/* MODULE 11 — secondary reveal inside an open B.R.I.E.F. accordion card
+   ("See a strong example" / "See what AIMT would flag"). Independent
+   show/hide utility, not part of the .tool-category accordion above. */
+.m11-reveal { display:none; margin-top:0.6rem; }
+.m11-reveal.open { display:block; }
 .tc-item { display:flex; align-items:flex-start; gap:10px; padding:0.6rem 1.1rem; font-size:0.82rem; font-weight:300; color:var(--text); line-height:1.5; }
 .tc-badge { font-family:var(--aimt-font-mono); font-size:0.52rem; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:980px; flex-shrink:0; margin-top:2px; }
 .ess-badge { background:#e8ede8; color:#3a5a3a; }
@@ -6850,9 +6855,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lc-title">Module complete.</div>
       <div class="lc-body">You can deliver a great service. You can reset it cleanly. That discipline is what makes the experience repeatable — for every client, every time.</div>
       <div class="lc-next">
-        <div class="lc-next-label">Up next — Module 11 (locked)</div>
-        <div class="lc-next-text">AI / Modern Practice Tools. This module is not yet available — it will unlock once it has been built.</div>
+        <div class="lc-next-label">Up next — Module 11</div>
+        <div class="lc-next-text">AI / Modern Practice Tools. Modern practitioners are already encountering AI — this module teaches you to use it well, without losing the judgment that makes you a professional.</div>
       </div>
+      <button class="lc-btn" onclick="openModuleById(11)">Start Module 11 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
     </div>
 
@@ -7172,6 +7178,393 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lc-next-text">Sanitation and reset systems — the work between every service that separates consistent professionals from inconsistent ones.</div>
       </div>
       <button class="lc-btn" onclick="openModuleById(10)">Start Module 10 →</button>
+      <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODULE 11 CONTENT (AI / Modern Practice Tools) ══ -->
+<!-- New module, technical slot 11, per docs/course-audit/modules/module-11.md. -->
+<div id="module11Wrap" style="display:none;">
+  <div class="lesson-wrap">
+
+    <div class="mod-hero">
+      <div class="mh-eyebrow">Module 11 · AI / Modern Practice Tools</div>
+      <div class="mh-title">Modern practice includes<br>knowing how to use new tools.</div>
+      <div class="mh-desc">Modern practitioners are already encountering AI — in business systems, marketing, communication, research, education, automation, scalp imaging, and client conversations. This module teaches you to use it well. Human-led. AI-assisted.</div>
+    </div>
+
+    <div class="body-text">You've already experienced AIMT's philosophy in action through Cadence. This course's curriculum is human practitioner-led — Cadence is an AI learning-support tool built around that curriculum. AI can make education and practice more useful and responsive, but it does not replace the human expertise behind this program. The hands-on training, webinars, and clinical/practical education that make you a practitioner remain human-led.</div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Core thought</div>
+        <div class="kp-text">Modern does not mean less human.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.1 — AI is not one tool</div>
+    <div class="sec-title">Four categories, not one thing called "AI."</div>
+    <div class="body-text">Naming a specific app or brand would go stale fast. What lasts is knowing the categories and what each is actually good for.</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Language / reasoning assistants</div>
+        <div class="cc-sub">Drafting, brainstorming, summarizing, organizing, comparison, research, explanation, decision support</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Creative AI</div>
+        <div class="cc-sub">Marketing concepts, imagery, educational visuals, promotional creative, content/video workflows</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Scalp / hair imaging analysis</div>
+        <div class="cc-sub">Imaging, comparison, density measurement, pattern recognition, tracking, scoring, routine suggestions</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Automation / practice systems</div>
+        <div class="cc-sub">Scheduling, CRM, email, workflows, analytics, documentation, customer service</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text">Professional-looking output is not automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.2 — Give AI a better B.R.I.E.F.</div>
+    <div class="sec-title">Better input produces more useful output.</div>
+    <div class="body-text">Prompting isn't magic wording — it's giving the tool a good brief. Five things make a request useful:</div>
+
+    <div class="info-card">
+      <div class="ic-title">B.R.I.E.F.</div>
+      <div class="body-text" style="margin:0;"><strong>B</strong>ackground — relevant context. <strong>R</strong>equest — what you actually want. <strong>I</strong>nstructions — tone, audience, constraints, claims to avoid, terminology. <strong>E</strong>xpected Output — caption, email, FAQ, comparison, checklist, summary. <strong>F</strong>act-check — what still requires human verification, especially health information, product/ingredient claims, regulations, math/pricing, statistics, citations, and current policies.</div>
+    </div>
+
+    <div class="body-text">Try it yourself below. You'll take one weak prompt and strengthen it, one letter at a time — then decide what still needs a human before it ships. This is ungraded practice; nothing here is saved or scored.</div>
+
+    <div class="cadence-note">
+      <div class="cn-label">Starting point</div>
+      <div class="cn-text">"Write a post about my head spa."</div>
+    </div>
+
+    <div class="m11b-cards" style="display:flex;flex-direction:column;gap:0.6rem;margin:1rem 0;">
+      <div class="tool-category m11b-card" id="m11b-background">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="m11b-background-body" onclick="m11ToggleReveal('m11b-background')"><div class="tc-icon" aria-hidden="true">B</div><div class="tc-label">Background — give it context</div><div class="tc-arrow">+</div></button>
+        <div class="tc-body" id="m11b-background-body">
+          <div class="body-text" style="margin:0 0 0.6rem;">What does the AI need to know before it can write anything useful? Your service, your clients, what makes your head spa distinct.</div>
+          <label for="m11bBackgroundIn" class="aimt-sr-only">Draft the Background part of your brief</label>
+          <textarea class="cp-input" id="m11bBackgroundIn" placeholder="e.g. I run a solo head spa studio focused on relaxation and scalp health for clients with busy schedules..." rows="2" oninput="grow(this)"></textarea>
+          <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-background','See a strong example','Hide the strong example')">See a strong example</button>
+          <div class="cadence-note m11-reveal" id="m11ex-background">
+            <div class="cn-label">A strong example — not a required script</div>
+            <div class="cn-text">"I run a solo head spa studio. My clients are mostly working professionals booking a relaxation-focused scalp treatment on their lunch break or after work. My brand voice is calm and unhurried, not high-energy."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-category m11b-card" id="m11b-request">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="m11b-request-body" onclick="m11ToggleReveal('m11b-request')"><div class="tc-icon" aria-hidden="true">R</div><div class="tc-label">Request — say what you actually want</div><div class="tc-arrow">+</div></button>
+        <div class="tc-body" id="m11b-request-body">
+          <div class="body-text" style="margin:0 0 0.6rem;">"A post" isn't a request. What kind of post, and what should it accomplish?</div>
+          <label for="m11bRequestIn" class="aimt-sr-only">Draft the Request part of your brief</label>
+          <textarea class="cp-input" id="m11bRequestIn" placeholder="e.g. Write a 100-word Instagram caption inviting people to book a lunch-break scalp treatment..." rows="2" oninput="grow(this)"></textarea>
+          <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-request','See a strong example','Hide the strong example')">See a strong example</button>
+          <div class="cadence-note m11-reveal" id="m11ex-request">
+            <div class="cn-label">A strong example — not a required script</div>
+            <div class="cn-text">"Write a 100-word Instagram caption inviting followers to book a 45-minute lunch-break scalp treatment, ending with a clear call to book."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-category m11b-card" id="m11b-instructions">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="m11b-instructions-body" onclick="m11ToggleReveal('m11b-instructions')"><div class="tc-icon" aria-hidden="true">I</div><div class="tc-label">Instructions — set the boundaries</div><div class="tc-arrow">+</div></button>
+        <div class="tc-body" id="m11b-instructions-body">
+          <div class="body-text" style="margin:0 0 0.6rem;">Tone, audience, claims to avoid, terminology, anything that must or must not appear.</div>
+          <label for="m11bInstructionsIn" class="aimt-sr-only">Draft the Instructions part of your brief</label>
+          <textarea class="cp-input" id="m11bInstructionsIn" placeholder="e.g. Calm, unhurried tone. Do not claim the service treats any medical condition or guarantees hair growth..." rows="2" oninput="grow(this)"></textarea>
+          <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-instructions','See a strong example','Hide the strong example')">See a strong example</button>
+          <div class="cadence-note m11-reveal" id="m11ex-instructions">
+            <div class="cn-label">A strong example — not a required script</div>
+            <div class="cn-text">"Keep the tone calm and unhurried, not salesy. Don't claim the treatment cures anything or guarantees hair growth. No exclamation points."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-category m11b-card" id="m11b-output">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="m11b-output-body" onclick="m11ToggleReveal('m11b-output')"><div class="tc-icon" aria-hidden="true">E</div><div class="tc-label">Expected Output — describe the shape</div><div class="tc-arrow">+</div></button>
+        <div class="tc-body" id="m11b-output-body">
+          <div class="body-text" style="margin:0 0 0.6rem;">Caption, email, FAQ, comparison, checklist, summary, options — tell it the format you need back.</div>
+          <label for="m11bOutputIn" class="aimt-sr-only">Draft the Expected Output part of your brief</label>
+          <textarea class="cp-input" id="m11bOutputIn" placeholder="e.g. One caption under 100 words, plus three shorter alternate versions I can choose between..." rows="2" oninput="grow(this)"></textarea>
+          <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-output','See a strong example','Hide the strong example')">See a strong example</button>
+          <div class="cadence-note m11-reveal" id="m11ex-output">
+            <div class="cn-label">A strong example — not a required script</div>
+            <div class="cn-text">"Give me one caption under 100 words, plus two shorter alternate versions I can pick between."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-category m11b-card" id="m11b-factcheck">
+        <button type="button" class="tc-head" aria-expanded="false" aria-controls="m11b-factcheck-body" onclick="m11ToggleReveal('m11b-factcheck')"><div class="tc-icon" aria-hidden="true">F</div><div class="tc-label">Fact-check — decide what still needs you</div><div class="tc-arrow">+</div></button>
+        <div class="tc-body" id="m11b-factcheck-body">
+          <div class="body-text" style="margin:0 0 0.6rem;">Before this could actually post, what would you personally check? Health claims, pricing, current promotions, anything stated as fact.</div>
+          <label for="m11bFactcheckIn" class="aimt-sr-only">Draft the Fact-check part of your brief</label>
+          <textarea class="cp-input" id="m11bFactcheckIn" placeholder="e.g. I'd check that no health or product claim appears, that the price/promo mentioned is current..." rows="2" oninput="grow(this)"></textarea>
+          <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-factcheck','See a strong example','Hide the strong example')">See a strong example</button>
+          <div class="cadence-note m11-reveal" id="m11ex-factcheck">
+            <div class="cn-label">A strong example — not a required script</div>
+            <div class="cn-text">"I'd check that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Before you move on</div>
+      <div class="body-text" style="margin:0 0 0.85rem;">What still requires human review before this post could actually go out?</div>
+      <label for="m11ReflectIn" class="aimt-sr-only">What still requires human review before this could actually be posted?</label>
+      <textarea class="cp-input" id="m11ReflectIn" placeholder="What would you personally verify or change before publishing this?" rows="2" oninput="grow(this)"></textarea>
+      <button type="button" class="lc-btn-ghost" style="margin-top:0.6rem;padding:0.5rem 1rem;font-size:0.72rem;" aria-expanded="false" onclick="m11ToggleExample(this,'m11ex-reflect','See what AIMT would flag','Hide what AIMT would flag')">See what AIMT would flag</button>
+      <div class="info-card m11-reveal" id="m11ex-reflect" style="margin-top:0.6rem;">
+        <div class="ic-title">What AIMT would flag</div>
+        <div class="body-text" style="margin:0;">Any health, medical, or "cures" claim. Any guarantee about results. Any price, promotion, or availability detail that could be out of date. Any statistic or "fact" the AI stated with no source. Whether the voice actually sounds like your business, not a generic one.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.3 — Not every AI task needs the same level of trust</div>
+    <div class="sec-title">Three levels. Different rules for each.</div>
+
+    <div class="info-card">
+      <div class="ic-title">Level 1 — AI can lead the first draft</div>
+      <div class="body-text" style="margin:0;">Social copy, brainstorming, content calendars, service-description drafts, email drafts, messages, FAQs, internal organization. Human reviews before anything ships.</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Level 2 — AI can assist, but you verify</div>
+      <div class="body-text" style="margin:0;">Research, ingredient explanations, product comparisons, pricing calculations, regulatory research, educational claims, business forecasting, source gathering. AI can accelerate the search — it does not eliminate verification. Use authoritative sources when facts matter.</div>
+    </div>
+
+    <div class="info-card">
+      <div class="ic-title">Level 3 — Keep final authority human</div>
+      <div class="body-text" style="margin:0;">Diagnosing, establishing a medical condition, prescribing, deciding medical safety, exceeding your professional role, making claims you could not responsibly make yourself. The tool does not expand your professional authority.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.4 — AI in scalp &amp; hair analysis</div>
+    <div class="sec-title">A confidence score is information — not a verdict.</div>
+    <div class="body-text">AI-assisted scalp/hair analysis is a legitimate modern tool category — real benefits include consistency, measurement, comparison, tracking, pattern recognition, organization, and client engagement. It also has real limitations you need to hold onto.</div>
+
+    <div class="clinical-note">
+      <div class="cn2-label">What a result like this actually means</div>
+      <div class="cn2-text">A tool displays: "Seborrheic dermatitis — 87%." That is a model's confidence score against its training data — not a confirmed diagnosis. It never becomes "You have seborrheic dermatitis" out of your mouth.</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text">Confidence is not certainty. A model score is not a confirmed diagnosis. Training data, image quality and lighting, capture conditions, represented populations, and independent validation all shape what a score can and can't tell you.</div>
+      </div>
+    </div>
+
+    <div class="body-text">You don't need an AI-engineering lesson — you need enough literacy that a polished percentage never reads as universal truth. General conversational AI should not become your scalp diagnostician.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.5 — Your client may have already asked AI</div>
+    <div class="sec-title">Don't defeat the AI answer. Return to responsible judgment.</div>
+    <div class="body-text">Clients increasingly arrive having already asked. AIMT does not teach ridiculing the client or attacking the tool.</div>
+
+    <div class="info-card">
+      <div class="ic-title">What a client might say</div>
+      <div class="body-text" style="margin:0;">"I asked ChatGPT about my scalp and it says I have dandruff." · "I uploaded a photo and AI says this is psoriasis." · "AI says my hair loss is hormonal."</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Hear</div>
+        <div class="kp-text">Acknowledge what they brought in. "Okay — tell me what you were noticing that made you look into it."</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Observe</div>
+        <div class="kp-text">Return to the current consultation and what's actually observable today.</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Boundary</div>
+        <div class="kp-text">Explain what you can responsibly establish. "That may have given you useful information to start with. What I can do here is talk through what we're actually seeing today. I can't confirm a medical diagnosis from an AI result."</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Next step</div>
+        <div class="kp-text">Depending on what you actually find: continue or adapt the service, avoid the affected area, pause or decline, or recommend appropriate professional evaluation.</div>
+      </div>
+    </div>
+
+    <div class="body-text">No exact script is required. The goal is not to defeat the AI answer — it's to return the conversation to responsible human judgment.</div>
+
+    <hr class="divider">
+
+    <div class="checkpoint" id="m11cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Responding to a client's AI result</div>
+      </div>
+      <div class="cp-q">A client tells you, "I asked ChatGPT about my scalp and it says I have dandruff." Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <label for="m11cp1In" class="aimt-sr-only">A client tells you, "I asked ChatGPT about my scalp and it says I have dandruff." Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.</label>
+          <textarea class="cp-input" id="m11cp1In" placeholder="What you'd say, what you would and wouldn't confirm, and how you'd decide what happens next..." rows="1" oninput="grow(this)" onkeydown="m11cpKey(event,'m11cp1')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m11cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m11cp1Btn" onclick="submitM11CP('m11cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m11cp1Res" aria-live="polite"></div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.6 — Client information, images &amp; AI</div>
+    <div class="sec-title">Convenience does not cancel confidentiality.</div>
+    <div class="body-text">Data and privacy practices differ by tool and change over time — don't rely on a fixed claim about what "AI" does with information. Rely on a durable set of questions instead.</div>
+
+    <div class="info-card">
+      <div class="ic-title">Ask before you share anything</div>
+      <div style="font-size:.82rem;font-weight:300;line-height:1.75;color:var(--text);">Does the AI actually need this information? Can identifiers be removed? Is the image actually necessary? What are the tool's current data/privacy practices? What account or settings are being used? Are privacy, consent, or workplace requirements relevant? Is permission required? Can the same task be done with less identifiable information?</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text">Give the tool what the task needs — not everything you know. Uploading client scalp imagery into a general-purpose AI tool is not a casual, default move.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.7 — Use AI to remove friction — not humanity</div>
+    <div class="sec-title">Concrete places it helps.</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Marketing</div>
+        <div class="cc-sub">Captions, campaigns, emails, web copy, FAQ, repurposing</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Client communication</div>
+        <div class="cc-sub">Appointment messages, difficult-response drafts, policy explanations, rebooking, education</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Business thinking</div>
+        <div class="cc-sub">Pricing scenarios, packages, projections, comparisons, expenses, SOPs</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Research</div>
+        <div class="cc-sub">Terminology, possible sources, summarization, questions, comparisons</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Training</div>
+        <div class="cc-sub">Outlines, quizzes, scenarios, internal references, exercises</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-icon">✦</div>
+        <div class="cc-term">Administrative leverage</div>
+        <div class="cc-sub">Reduce repetitive work where useful — don't automate human interaction just because you can</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Remember</div>
+        <div class="kp-text">Research with AI. Verify outside AI. If AI supplies a citation, open it, read it, check the date, and confirm it actually supports the claim.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">11.8 — Modern does not mean less human</div>
+    <div class="sec-title">Human + AI, with the human leading.</div>
+    <div class="body-text">AI may draft — the practitioner owns the message. AI may organize information — the practitioner owns the judgment. AI may identify patterns — the practitioner owns what gets communicated. AI may help build the business — the practitioner creates the experience. AI may support education — human professionals still teach touch, technique, judgment, hands-on skill, client communication, and real-world decision-making.</div>
+
+    <div class="cadence-note">
+      <div class="cn-label">From Cadence</div>
+      <div class="cn-text">"What are you asking the tool to do — and what still belongs to you? Use AI for leverage. Keep human authority where it matters."</div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true">✦</div>
+      <div class="kp-body">
+        <div class="kp-eyebrow">Closing principle</div>
+        <div class="kp-text">Use technology to become more capable — not less present. Protect what derives value from being human: trust, touch, empathy, observation, professional judgment, accountability, hands-on skill, and the practitioner-client relationship.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="checkpoint" id="m11cp2">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">A real AI request, with real verification</div>
+      </div>
+      <div class="cp-q">Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+          <label for="m11cp2In" class="aimt-sr-only">Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.</label>
+          <textarea class="cp-input" id="m11cp2In" placeholder="The task, the request you'd give the AI, and what you'd review or verify before using the output..." rows="1" oninput="grow(this)" onkeydown="m11cpKey(event,'m11cp2')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m11cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m11cp2Btn" onclick="submitM11CP('m11cp2')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m11cp2Res" aria-live="polite"></div>
+    </div>
+
+    <div class="lesson-complete" id="m11Complete" style="display:none;">
+      <div class="lc-check">✓</div>
+      <div class="lc-title">Module complete.</div>
+      <div class="lc-body">You now know how to hand AI real leverage without handing it your judgment. That distinction is what separates a practitioner who uses modern tools well from one who either avoids them or defers to them.</div>
+      <div class="lc-next">
+        <div class="lc-next-label">Up next — Module 12</div>
+        <div class="lc-next-text">Course completion and certification. Take a moment — you built something real.</div>
+      </div>
+      <button class="lc-btn" onclick="openModuleById(12)">Start Module 12 →</button>
       <button class="lc-btn-ghost" onclick="showHome()">Back to course</button>
     </div>
 
@@ -8228,6 +8621,46 @@ const M10 = {
   }
 };
 
+// ── MODULE 11 (AI / Modern Practice Tools) — new module, technical slot 11
+//    after the Module 11 -> 12 structural relocation. See
+//    docs/course-audit/modules/module-11.md. ──
+const M11 = {
+  questions: {
+    m11cp1: 'A client tells you, "I asked ChatGPT about my scalp and it says I have dandruff." Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.',
+    m11cp2: 'Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.'
+  },
+  systems: {
+    m11cp1: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 11 competency: responding professionally to a client who has already consulted AI about their scalp, without ridicule and without confirming a diagnosis from an AI result.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. Respectful acknowledgment of what the client brought in.\n' +
+      '2. No ridicule of the client or of AI as a tool.\n' +
+      '3. No automatic agreement with or confirmation of the AI\'s stated result as a diagnosis.\n' +
+      '4. A return to the current consultation and observable findings.\n' +
+      '5. A stated professional boundary — what the practitioner can and cannot responsibly establish.\n' +
+      '6. A reasonable next-step decision (continue, modify, pause, or refer) with some reasoning behind it.\n\n' +
+      'The student does not need to use the exact words "hear," "observe," "boundary," or "next step," recite a fixed script, or automatically recommend referral — a reasoned decision to proceed or modify, with observable findings behind it, can pass. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer that is warm and reassuring but never states a professional boundary or returns to observable findings, or that jumps straight to a service decision with no acknowledgment of what the client raised.\n\n' +
+      'Immediately correct — do not pass — any answer that confirms the AI\'s stated condition as an established diagnosis, mocks the client or the AI tool, or implies that using AI expanded the practitioner\'s license or legal authority to diagnose.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the acknowledgment and boundary are clear, ask what the student would actually observe or ask about today. If the observation is strong, ask how the student would decide whether to continue, modify, pause, or refer.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, technical skill with AI tools, or background.',
+    m11cp2: 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. Evaluate the student\'s Module 11 competency: giving an AI tool a well-formed request for a real practice task and identifying appropriate human verification before using the output.\n\n' +
+      'The student passes when the response demonstrates, in any natural wording:\n\n' +
+      '1. A realistic, practice-relevant task (marketing, client communication, business thinking, research, training, or administrative work).\n' +
+      '2. Enough context in the drafted request for the output to actually be useful (background, audience, tone, or constraints).\n' +
+      '3. A clear, specific ask — not a vague one-line prompt.\n' +
+      '4. At least one meaningful instruction or constraint (tone, claims to avoid, required information, or similar).\n' +
+      '5. Human ownership of the final result, stated or clearly implied — the student, not the AI, is responsible for what ships.\n' +
+      '6. Appropriate verification named for the specific task chosen — what a human would check before using the output.\n\n' +
+      'The student does not need to label their answer with the literal words "Background," "Request," "Instructions," "Expected Output," or "Fact-check" — the underlying competency (context, a clear ask, at least one constraint, and named verification) is what matters. Do not fail for grammar, spelling, concise wording, spoken phrasing, or non-native English when the concept is correct.\n\n' +
+      'Mark incomplete — do not pass — an answer that describes a task and a request but never says what would be reviewed or verified before use, or that lists verification steps in the abstract with no actual task or request described.\n\n' +
+      'Immediately correct — do not pass — any answer that delegates a diagnosis, medical claim, or safety-critical decision to the AI as the final output with no human review, or that states the AI\'s output requires no verification at all.\n\n' +
+      'If the response is almost complete, identify only the single most important missing element and ask one focused follow-up question — do not repeat the entire prompt. For example: if the task and request are clear and specific, ask what the student would check before actually using the output. If the verification plan is strong, ask for the actual request they would give the AI.\n\n' +
+      'If all required elements are demonstrated, return pass true with a concise explanation of why the answer meets the standard, referencing one specific part of the student\'s answer.\n\n' +
+      'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, technical skill with AI tools, or background.'
+  }
+};
+
 // ══════════════════════════════════════════════════════
 // CADENCE GUIDE — Module-aware context
 // ══════════════════════════════════════════════════════
@@ -9187,6 +9620,14 @@ function m10cpKey(e, id) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM10CP(id); }
 }
 
+// ── MODULE 11 CHECKPOINTS (AI / Modern Practice Tools) ──
+function submitM11CP(id) {
+  submitCheckpoint(11, id, M11.systems[id], M11.questions[id], 'Cadence couldn\'t review your response. Check your connection and try again.');
+}
+function m11cpKey(e, id) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitM11CP(id); }
+}
+
 // ══════════════════════════════════════════════════════
 // MODULE 7 INTERACTIVE — Tool categories + Prep checklist
 // ══════════════════════════════════════════════════════
@@ -9212,6 +9653,59 @@ function toggleToolCat(id) {
     const arrow = cat.querySelector('.tc-arrow');
     if (arrow) arrow.textContent = '−';
     if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// MODULE 11 INTERACTIVE — "Build a Better B.R.I.E.F." (ungraded)
+// Reuses the Module 7 tool-category accordion component (.tool-category/
+// .tc-head/.tc-body/.tc-arrow) — the shell is identical, only scoped by a
+// dedicated .m11b-card class so this never touches Module 7's own
+// categories (though only one module's markup is ever live in the DOM at
+// once, since openModuleById() replaces .lesson-wrap's innerHTML wholesale).
+// Purely client-side: no APP_STATE write, no persistence, no grading, no
+// completion gate, no autoplay.
+// ══════════════════════════════════════════════════════
+function m11ToggleReveal(id) {
+  const root = document.querySelector('.lesson-wrap') || document;
+  const body = root.querySelector('#' + id + '-body');
+  const cat = root.querySelector('#' + id);
+  if (!body || !cat) return;
+  const btn = cat.querySelector('.tc-head');
+  const isOpen = body.classList.contains('open');
+  root.querySelectorAll('.m11b-card .tc-body').forEach(b => b.classList.remove('open'));
+  root.querySelectorAll('.m11b-card').forEach(c => {
+    c.classList.remove('open');
+    const arrow = c.querySelector('.tc-arrow');
+    if (arrow) arrow.textContent = '+';
+    const b = c.querySelector('.tc-head');
+    if (b) b.setAttribute('aria-expanded', 'false');
+  });
+  if (!isOpen) {
+    body.classList.add('open');
+    cat.classList.add('open');
+    const arrow = cat.querySelector('.tc-arrow');
+    if (arrow) arrow.textContent = '−';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// Secondary reveal nested inside an open B.R.I.E.F. card ("See a strong
+// example") or the closing reflection card ("See what AIMT would flag").
+// Independent toggles, not part of the accordion above — a student may
+// have several open at once while comparing their own draft.
+function m11ToggleExample(btn, exampleId, openLabel, closeLabel) {
+  const el = document.getElementById(exampleId);
+  if (!el || !btn) return;
+  const isOpen = el.classList.contains('open');
+  if (isOpen) {
+    el.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.textContent = openLabel;
+  } else {
+    el.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.textContent = closeLabel;
   }
 }
 
