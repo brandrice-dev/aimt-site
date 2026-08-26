@@ -7779,6 +7779,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 <script src="assets/js/headspa-state.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
+<script src="assets/js/module12-certification.js"></script>
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -9001,7 +9002,7 @@ function openModuleById(id, options = {}) {
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     10: () => { const w = document.getElementById('module10Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     11: () => { const w = document.getElementById('module11Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    12: () => { const w = document.getElementById('module12Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; }
+    12: () => { if (wrap && window.Module12Cert) { window.Module12Cert.render(wrap); } else { const w = document.getElementById('module12Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; } }
   };
 
   if (STATIC_MODULES[id]) {

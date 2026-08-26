@@ -129,6 +129,27 @@ export async function onRequestPost(context) {
     }, 409);
   }
 
+  /* 4b. Module 12 Final Certification Assessment must show an authoritative
+     PASS. This is separate from (and in addition to) the modules-0-11
+     progress gate above — see docs/course-audit/00-aimt-certification-assessment-standard.md
+     Section 16 and docs/course-audit/modules/module-12.md. Course completion
+     is a prerequisite for attempting certification, never a substitute for
+     passing it. Client-submitted scores are never trusted; this reads the
+     server-computed decision written by functions/api/certification/finalize-assessment.js. */
+  const examParams = new URLSearchParams({
+    select: 'certification_decision',
+    user_id: `eq.${user.id}`,
+    course_slug: `eq.${COURSE_SLUG}`,
+    certification_decision: 'eq.pass',
+    limit: '1'
+  });
+  const examResult = await supabaseRest(env, `certification_attempts?${examParams}`);
+  if (!examResult.ok || !Array.isArray(examResult.body) || !examResult.body.length) {
+    return json({
+      error: 'The Module 12 final certification assessment has not been passed yet.'
+    }, 409);
+  }
+
   /* 5. Issue. Retry on the (astronomically unlikely) ID collision. */
   let studentName = '';
   try {
