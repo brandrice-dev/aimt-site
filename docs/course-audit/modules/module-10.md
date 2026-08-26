@@ -7,13 +7,29 @@
 **Source reviewed:** `module-10-source.md`
 **External audit:** completed and approved — this document converts that audit into the controlling specification
 **Audit date:** August 25, 2026
-**Implementation:** Implemented in `headspa-mastery.html` August 25, 2026 (see `implementation-log.md` Step 79). Static validation and Review Mode desktop/phone browser QA complete.
-**Status:** **Implemented — awaiting manual QA**
+**Implementation:** Implemented in `headspa-mastery.html` August 25, 2026 (see `implementation-log.md` Step 79). Static validation and Review Mode desktop/phone browser QA complete. Between-Client Sanitation & Reset Checklist downloadable installed and link-verified August 25, 2026 (see `implementation-log.md` Step 81). Manually approved by the owner August 25, 2026.
+**Status:** **Implemented — manual QA approved**
 **Production source of truth:** `headspa-mastery.html` (implemented per this specification)
 
 This document is the approved content and technical authority for a future Module 10 implementation task. It does **not** itself authorize implementation, does not touch any production file, and does not begin the technical work it describes. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 10 — step 5 (implementation) is the next, separate gate.
 
 It does not authorize changes to authentication, entitlements, payments, database policies, certificate issuance, Module 9 (already manually approved — not reopened by this document), Module 11's future AI/Modern Practice Tools curriculum, the Module 12 Final Exam, persistent Cadence threads, the Guided Completion Path interface, Listen Mode, or the monolithic course-file architecture.
+
+---
+
+## Manual QA approval — August 25, 2026
+
+The owner reviewed the rendered `course-audit-build` branch preview and confirmed Module 10's implementation looks and functions well enough to proceed, and supplied the Between-Client Sanitation & Reset Checklist PDF for installation. This closes the manual-QA gate from the master instructions' module lifecycle for Module 10. The approved implementation is the one recorded in `docs/course-audit/implementation-log.md` Steps 79–81 (curriculum implementation, visual polish, and the downloadable installation).
+
+**Honestly deferred, not resolved by this approval:**
+
+- Live-model checkpoint grading QA (`m9cp1`/`m9cp2` were verified by rubric/config inspection and mocked-`callAI` validation, not by exercising the real model against live student answers).
+- Live Cadence response QA (quick-prompt text and the guide-system prompt were verified by source inspection only).
+- Screen-reader QA.
+- Physical-keyboard QA.
+- Real touch-device QA.
+
+**Next gate:** Module 10's own video-source file (see `docs/course-video-sources/module-10-video-source.md`) — the exact next project task after that is Module 11 (AI / Modern Practice Tools), a separate, later, explicitly authorized task.
 
 ---
 
@@ -345,14 +361,19 @@ Replaces `What is the fastest reliable reset?` — speed is not the core compete
 
 ## Downloadable resource opportunity
 
-**Approved for a future, separate task:** **Between-Client Sanitation & Reset Checklist.** Not created in this task — recorded here as the sole approved future Module 10 downloadable, per the downloadable-resource policy (one resource is enough; do not also approve a second Sanitation Quick Reference).
+**Installed (August 25, 2026):** **Between-Client Sanitation & Reset Checklist** — the sole approved Module 10 downloadable, per the downloadable-resource policy (one resource is enough; a second Sanitation Quick Reference was not created). File: `assets/images/course/module-10/module-10-between-client-sanitation-reset-checklist-fillable.pdf`, a 2-page fillable PDF, linked from a download card placed after Section 10.5's "How to respond" content, before the divider leading into `m9cp1`. Link verified in Review Mode: `fetch()` returns HTTP 200, `content-type: application/pdf`, byte-exact `content-length` match against the file on disk.
 
-**Recommended practical structure:**
+**Actual structure, matching the recommended structure below:**
+
+- **Page 1** — "Between-Client Sanitation & Reset Checklist," the Contain → Clean → Disinfect/Process → Reset → Verify workflow as five checklist steps, framed "Run the process — not the clock," with an "If you are behind" callout matching the approved pacing teaching (continue independent tasks, use an already-clean alternative, or delay start — never shorten the required process).
+- **Page 2 — "Verified Details for My Setup"** — fillable fields for business/room/practitioner/last-verified-date; product/disinfectant name, dilution, EPA registration number, labeled contact time, approved use/compatible items, and where the current label is stored; equipment/bed/halo model, manufacturer instructions source, periodic water-line maintenance process, and maintenance-log location; linen handling, clean/used separation, and single-use handling; and a recurring-review-trigger checklist (regulation, product, equipment, service, or workflow changes) with an applicable state/local source and last-check date field.
+
+The course framework stays general; the student fills in the exact details that apply to their business. No universal time target, product/brand requirement, or legal guarantee appears anywhere in the installed file — confirmed by direct read of its content before linking it into production.
+
+**Recommended practical structure (original, superseded by "Actual structure" above once the file was installed):**
 
 - **Page 1** — the student's actual workflow organized around Contain → Clean → Disinfect/Process → Reset → Verify.
 - **Page 2 — Verified Details for My Setup** — possible fillable fields: disinfectant/product name; EPA registration number where applicable; dilution; labeled contact time; compatible items/surfaces; equipment manufacturer cleaning/maintenance process; linen handling; clean/used storage; single-use handling; applicable state-board/regulatory source; date guidance was last verified.
-
-The course framework stays general; the student fills in the exact details that apply to their business.
 
 ---
 
