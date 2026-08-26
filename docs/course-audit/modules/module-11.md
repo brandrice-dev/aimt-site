@@ -10,8 +10,9 @@
 **Correction pass:** August 25, 2026 — the initial implementation drifted from the approved learning/design intent (excessive `✦` usage, an overbuilt five-card checkpoint-style accordion for the B.R.I.E.F. interaction, HEAR/OBSERVE/BOUNDARY/NEXT STEP split into four separate callouts, borrowed section headlines instead of the approved hierarchy). This document has been updated in place to record the **locked, corrected** structure below — it no longer describes the original overbuilt implementation. See `implementation-log.md` for the full before/after record.
 **Resource install + final polish pass:** August 26, 2026 — the AIMT AI Practice Toolkit (fillable PDF) was installed as Module 11's single downloadable, and a restrained visual/spacing pass corrected two real inconsistencies (an oversized Research card in 11.7, uneven B.R.I.E.F. row heights in 11.2). See `implementation-log.md` for the full record.
 **11.4 image pass:** August 26, 2026 — the owner-supplied AI scalp-analysis dashboard image was installed as the "AI output" side of 11.4's comparison (replacing the original dark text-only card), paired with a "View full-size example" link for readability at the course's narrow content width, and the "What can shift the result" factor list's spacing was corrected. See `implementation-log.md` for the full record.
-**Implementation:** implemented, corrected, resource installed
-**Status:** **Implemented — resource complete, awaiting final owner/manual QA**
+**Implementation:** implemented, corrected, resource installed, manually approved
+**Manual QA approval:** August 26, 2026 — the owner reviewed the rendered `course-audit-build` branch preview and explicitly approved Module 11.
+**Status:** **Implemented — manual QA approved**
 **Production source of truth:** `headspa-mastery.html`, technical module slot `11`
 
 This document is the approved content and technical authority for Module 11. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 11 — step 5 (implementation, and the subsequent correction pass) followed in the same and a later authorized task, per the owner's explicit instruction.
@@ -303,4 +304,17 @@ Follows the current course-wide foundation (per `00-global-decisions.md`'s "Cour
 
 ## Implementation notes
 
-Implementation proceeded directly from this document in the original authorized task (structural move → source extraction → this specification → implementation, all in one authorized task). A subsequent, separately authorized **correction pass** (August 25, 2026) corrected the drift documented at the top of this file — this document was updated in place to reflect the corrected, locked structure rather than being left describing the superseded overbuilt version. Static validation and Review Mode desktop/mobile QA are complete for both the original implementation and the correction pass; only the owner's own rendered-preview review can advance status to "manual QA approved," per the master instructions' manual-approval rule — that has not yet occurred.
+Implementation proceeded directly from this document in the original authorized task (structural move → source extraction → this specification → implementation, all in one authorized task). A subsequent, separately authorized **correction pass** (August 25, 2026) corrected the drift documented at the top of this file — this document was updated in place to reflect the corrected, locked structure rather than being left describing the superseded overbuilt version. Static validation and Review Mode desktop/mobile QA are complete for both the original implementation and the correction pass.
+
+## Manual QA approval
+
+**Approved August 26, 2026.** The owner reviewed the real rendered branch preview (desktop and phone) and explicitly approved Module 11, per the master instructions' manual-approval rule. Confirmed at approval:
+
+- the AIMT AI Practice Toolkit downloadable is installed and its link functions correctly (HTTP 200, correct content-type, byte-exact content-length — verified in Review Mode prior to this approval);
+- both required checkpoints (`m11cp1`, `m11cp2`) remain correct — displayed/evaluated question strings byte-identical, per-checkpoint rubrics intact, accessibility foundation in place;
+- the Module 11 → Module 12 completion/unlock relationship is correct;
+- no known functional blocker remains.
+
+**Deferred, not resolved by this approval** — recorded honestly, not claimed as complete: live-model grading QA, screen-reader QA, physical-keyboard QA, real touch-device QA. These remain open items for later production QA, consistent with every other approved module in this course.
+
+Module 11 is now closed from the curriculum-build side. The next gate is the Module 12 Final Exam — its institutional certification standard and raw blueprint are a separate, later, explicitly authorized task (see `00-aimt-certification-assessment-standard.md` and `modules/module-12-final-exam-raw-blueprint.md`).
