@@ -1890,8 +1890,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m11-brief-start { font-family: var(--aimt-font-serif); font-size: 0.95rem; font-style: italic; color: var(--text); margin-bottom: 0.9rem; }
 .m11-brief-row { display:grid; grid-template-columns: 168px 1fr; gap: 16px; padding: 0.9rem 0; border-top: 0.5px solid var(--border); align-items:start; }
 .m11-brief-row:first-of-type { border-top: none; padding-top: 0; }
+.m11-brief-meta { min-height: 73px; }
 .m11-brief-label { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .m11-brief-helper { font-size: 0.73rem; font-weight: 300; color: var(--muted); line-height: 1.5; }
+@media(max-width:600px){ .m11-brief-meta { min-height: 0; } }
 .m11-brief-input { width:100%; background: rgba(255,255,255,0.7); border: 0.5px solid var(--border2); border-radius: var(--aimt-radius-sm); padding: 0.55rem 0.75rem; font-size: 0.82rem; line-height: 1.55; font-family: var(--aimt-font-sans); font-weight: 300; color: var(--text); resize: none; outline: none; min-height: 44px; max-height: 120px; transition: border-color 0.2s; }
 .m11-brief-input:focus { border-color: #262626; background: white; }
 .m11-brief-input::placeholder { color: var(--muted2); }
@@ -7572,7 +7574,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <div class="concept-card">
         <div class="cc-term">Research</div>
-        <div class="cc-sub">Terminology, possible sources, summarization, questions, comparisons. Research with AI. Verify outside AI: open the source, read it, check the date, and confirm it actually supports the claim.</div>
+        <div class="cc-sub">Terminology, possible sources, summarization, comparisons. Research with AI — verify outside it: open the source, check the date.</div>
       </div>
       <div class="concept-card">
         <div class="cc-term">Training / Staff Development</div>
@@ -7605,6 +7607,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="body-text">Protect the parts of professional practice whose value comes from being human: trust, touch, empathy, observation, judgment, accountability, hands-on skill, and the practitioner-client relationship.</div>
+
+    <div class="info-card" style="margin-top:1.1rem;">
+      <div class="ic-title">AIMT AI Practice Toolkit</div>
+      <div class="body-text" style="margin:0 0 0.85rem;">A practical reference for using AI with more structure and better judgment — including the B.R.I.E.F. prompt framework, AI-use and verification matrix, client-brings-AI response framework, privacy/data checks, and ready-to-customize practice prompts.</div>
+      <a class="format-card" href="assets/images/course/module-11/module-11-aimt-ai-practice-toolkit-fillable.pdf" download style="text-decoration:none;display:block;">
+        <div class="fmt-label-row"><div class="fmt-label">Download AI Practice Toolkit</div></div>
+        <div class="fmt-price-hint">PDF · fillable · download</div>
+      </a>
+    </div>
 
     <hr class="divider">
 

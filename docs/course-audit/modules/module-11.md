@@ -8,8 +8,9 @@
 **External audit:** the owner's full direction, provided directly as this task's instructions, functions as the external audit for this module
 **Audit date:** August 25, 2026
 **Correction pass:** August 25, 2026 — the initial implementation drifted from the approved learning/design intent (excessive `✦` usage, an overbuilt five-card checkpoint-style accordion for the B.R.I.E.F. interaction, HEAR/OBSERVE/BOUNDARY/NEXT STEP split into four separate callouts, borrowed section headlines instead of the approved hierarchy). This document has been updated in place to record the **locked, corrected** structure below — it no longer describes the original overbuilt implementation. See `implementation-log.md` for the full before/after record.
-**Implementation:** implemented, corrected
-**Status:** **Implemented — awaiting resource pass + manual QA**
+**Resource install + final polish pass:** August 26, 2026 — the AIMT AI Practice Toolkit (fillable PDF) was installed as Module 11's single downloadable, and a restrained visual/spacing pass corrected two real inconsistencies (an oversized Research card in 11.7, uneven B.R.I.E.F. row heights in 11.2). See `implementation-log.md` for the full record.
+**Implementation:** implemented, corrected, resource installed
+**Status:** **Implemented — resource complete, awaiting final owner/manual QA**
 **Production source of truth:** `headspa-mastery.html`, technical module slot `11`
 
 This document is the approved content and technical authority for Module 11. Per the master instructions' module lifecycle, this closes step 3 (external audit) and step 4 (approved specification) for Module 11 — step 5 (implementation, and the subsequent correction pass) followed in the same and a later authorized task, per the owner's explicit instruction.
@@ -159,6 +160,8 @@ The former "From Cadence" quote containing the signature question/takeaway was r
 
 **Closing — the module's second and final `✦` moment:** eyebrow **Closing principle**, text *"Use technology to become more capable — not less present."* Followed by a plain supporting sentence: *"Protect the parts of professional practice whose value comes from being human: trust, touch, empathy, observation, judgment, accountability, hands-on skill, and the practitioner-client relationship."*
 
+**AIMT AI Practice Toolkit download card** (installed August 26, 2026): `.info-card`/`.format-card` component, title "AIMT AI Practice Toolkit," linking to the fillable PDF — placed here, after all of 11.8's content, before `m11cp2`.
+
 Then `m11cp2` — **unchanged**, byte-identical to its original implementation.
 
 ### Shared component reuse
@@ -220,9 +223,9 @@ Cadence should distinguish a **draft** from an **inference** from a **verified f
 
 ## Downloadable resource opportunity
 
-**Approved future resource:** AIMT AI Practice Toolkit — B.R.I.E.F. Prompt Builder, weak → stronger prompt examples, the three-level AI Use Matrix, Hear → Observe → Boundary → Next Step, an output-verification checklist, a client-data/image check, and a practice prompt library for marketing, communication, SOPs, research, business, and training.
+**Installed (August 26, 2026): AIMT AI Practice Toolkit.** A 4-page fillable PDF — B.R.I.E.F. builder (starting prompt + five fillable B/R/I/E/F fields + "My final prompt"), the AI Use & Verification Matrix (the same three levels as 11.3, plus a "Before you trust, share, or act" checklist), "When a Client Brings an AI Answer" (the same HEAR → OBSERVE → BOUNDARY → NEXT STEP framework as 11.5, with fillable "My language / decision" fields, plus the client-data/image quick check from 11.6), and a Practice Prompt Library (six ready-to-customize prompts — Marketing, Client Communication, SOP/Operations, Research, Business Decisions, Training/Staff Development — plus a reusable-prompt field and a "before I use the output" checklist). Content read and confirmed before linking: no universal claims, no medical/diagnostic language, no brand names, matches the in-course curriculum's substance and framing exactly.
 
-**Not built during this implementation task**, per the current project workflow's dedicated-resource-pass convention (matching Module 9's and Module 10's own downloadable-installation pattern — implemented as its own later, separate step) and the explicit instruction not to create a dead placeholder. The truthful next-task status after implementation is: *Implemented — awaiting resource pass + manual QA.*
+**Installed as Module 11's single downloadable**, per the downloadable-resource policy (one resource is enough). Placed as a compact `.info-card`/`.format-card` component (the same pattern used for Module 9's Enhancement Strategy Guide and Module 10's Sanitation & Reset Checklist), positioned after 11.8's closing content and before `m11cp2` — after the full teaching arc, so the toolkit is a practical take-away rather than an interruption of the B.R.I.E.F. interaction earlier in the module. File: `assets/images/course/module-11/module-11-aimt-ai-practice-toolkit-fillable.pdf`. Link verified in Review Mode: HTTP 200, `content-type: application/pdf`, byte-exact `content-length` match against the file on disk.
 
 ---
 
@@ -286,7 +289,7 @@ Follows the current course-wide foundation (per `00-global-decisions.md`'s "Cour
 12. `m11cp1`/`m11cp2` displayed and evaluated question strings are byte-identical to this document's exact wording.
 13. Each checkpoint uses its own `M11.systems.m11cp1`/`m11cp2` rubric (not a shared rubric), matching the current course pattern.
 14. Cadence's role, "must not" list, and the three exact quick prompts match this document.
-15. No downloadable is created or falsely linked in this implementation pass.
+15. **(Updated)** The AIMT AI Practice Toolkit is installed, linked to the real fillable PDF, verified functionally (HTTP 200, correct content-type, byte-exact content-length), and placed after 11.8's closing content, before `m11cp2`.
 16. Module 10's stale "Up next — Module 11 ... not yet available" text is corrected.
 17. Completion requires both checkpoints; Module 12 unlocks only after Module 11 completes.
 18. Desktop and mobile layouts pass the course's standard visual/accessibility checklist; no horizontal overflow; no color-only meaning.
