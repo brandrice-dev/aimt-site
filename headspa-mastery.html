@@ -1820,6 +1820,32 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .sc-title { font-size:0.875rem; font-weight:500; margin-bottom:5px; }
 .sc-items { font-size:0.78rem; color:var(--muted); font-weight:300; line-height:1.65; }
 
+/* ── MODULE 10 — Weak/Strong system comparison. Reuses the course's
+   established Module 4 semantic pair (--aimt-error/--aimt-success and
+   their light backgrounds) rather than inventing new colors. Meaning is
+   never color-only — each card keeps an explicit text heading. ── */
+.ws-compare { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:1rem 0 1.5rem; }
+@media(max-width:600px){ .ws-compare { grid-template-columns:1fr !important; } }
+.ws-card { border-radius:14px; padding:1rem 1.1rem; border:0.5px solid; }
+.ws-weak { background:var(--aimt-error-light); border-color:rgba(122,48,48,0.25); }
+.ws-strong { background:var(--aimt-success-light); border-color:rgba(58,90,58,0.25); }
+.ws-label { font-family:var(--aimt-font-mono); font-size:0.6rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px; }
+.ws-weak .ws-label { color:var(--aimt-error); }
+.ws-strong .ws-label { color:var(--aimt-success); }
+.ws-text { font-size:0.82rem; font-weight:300; line-height:1.7; color:var(--text); }
+
+/* ── MODULE 10 — Desktop heading breathing room. Several Module 10 section
+   titles run noticeably longer than the shared .sec-title component was
+   designed around, so its default 18ch cap forces many tightly-leaded
+   wrapped lines on desktop. Scoped via .m10-scope (a class on Module 10's
+   own content root, since the #module10Wrap id only exists on the hidden
+   template and is not present once its innerHTML is copied into the live
+   .lesson-wrap) — desktop/tablet only (>=768px). The shared .sec-title
+   rule and the mobile treatment are untouched. ── */
+@media (min-width: 768px) {
+  .m10-scope .sec-title { max-width: 34ch; line-height: 1.32; letter-spacing: -0.01em; }
+}
+
 /* ── MODULE 10 — Pricing calculator ── */
 .price-calc { background:rgba(255,255,255,0.7); border:0.5px solid var(--border2); border-radius:16px; padding:1.25rem 1.4rem; margin:1.5rem 0; backdrop-filter:blur(10px); }
 .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1rem; }
@@ -6550,7 +6576,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
      at slot 10 — see MODULE_CHECKPOINTS['10'] above and
      docs/course-audit/modules/module-09-reorder-migration-plan.md §11. ══ -->
 <div id="module10Wrap" style="display:none;">
-  <div class="lesson-wrap">
+  <div class="lesson-wrap m10-scope">
 
     <div class="mod-hero">
       <div class="mh-eyebrow">Module 10 · Sanitation & Reset Systems</div>
@@ -6704,10 +6730,21 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="info-card">
       <div class="ic-title">What this looks like under pressure</div>
-      <div class="body-text" style="margin:0 0 0.5rem;">You are running behind. One client just left. The next client arrives early.</div>
-      <div class="body-text" style="margin:0 0 0.5rem;"><strong>Weak system:</strong> rushed cleaning, missing items, scattered tools. Next service starts unstable.</div>
-      <div class="body-text" style="margin:0;"><strong>Strong system:</strong> automatic reset, no thinking required, everything already in place. Next service starts controlled. The difference is not discipline in the moment — it's the system you built before the moment.</div>
+      <div class="body-text" style="margin:0;">You are running behind. One client just left. The next client arrives early.</div>
     </div>
+
+    <div class="ws-compare">
+      <div class="ws-card ws-weak">
+        <div class="ws-label">Weak system</div>
+        <div class="ws-text">Rushed cleaning, missing items, scattered tools. Next service starts unstable.</div>
+      </div>
+      <div class="ws-card ws-strong">
+        <div class="ws-label">Strong system</div>
+        <div class="ws-text">Automatic reset, no thinking required, everything already in place. Next service starts controlled.</div>
+      </div>
+    </div>
+
+    <div class="body-text">The difference is not discipline in the moment — it's the system you built before the moment.</div>
 
     <div class="info-card">
       <div class="ic-title">Consistency comes from</div>
