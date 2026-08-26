@@ -30,7 +30,7 @@ export const CONTENT_STATUS = 'INSTALLED';
 export const bankVersion = 'headspa-fe-bank-v1-2026-08-26';
 
 export const SOURCE_HASHES = {
-  "knowledgeBankMd": "acaa86687581df4213686483748b42eb35e79e6a7f323cc28723a62ea14df0d0",
+  "knowledgeBankMd": "4fb96d8f9c5c4f1f0d542f1c6965e859417af0e1cceb8d2aa77e82f2221294d5",
   "appliedCasesMd": "df60822daa285d36014b01cdbd85436ac255daa3d53cf23dc96175e281a6769d",
   "interviewBankMd": "ee76472b379a9ea3c3129389d655499dc371c7740c9ab625180b239fdc3f15c7"
 };
@@ -284,20 +284,20 @@ export const knowledgeBank = [
     "id": "M02-005",
     "version": 1,
     "sourceModule": 2,
-    "sourceSection": "Module 2 checkpoint `m2cp1`.",
+    "sourceSection": "Module 2 — Section 2.6 “Rushing the beginning” + checkpoint `m2cp1`.",
     "competency": "Arrival leadership under schedule pressure",
     "difficulty": "applied",
     "criticalDomainEvidence": [],
-    "prompt": "A client arrives eight minutes late, visibly stressed. Completing the original appointment exactly as scheduled may affect the next booking.\n\nWhich response best protects both the client experience and the practitioner’s operational responsibility?",
+    "prompt": "A new client arrives visibly stressed and apologizes for being two minutes late.\n\nWhich response best reflects the arrival standard taught in Module 2?",
     "choices": [
-      "Skip parts of the arrival sequence so the hands-on service can still receive its full planned time",
-      "Settle the client first, complete the required intake/privacy/consent steps, and only then communicate any genuinely necessary timing adjustment without blame or visible rushing",
-      "Tell the client immediately that the service will be shortened so expectations are clear before anything else happens",
-      "Promise the full original service and quietly make up the lost time by moving faster through transitions"
+      "Shorten intake confirmation and preparation so the hands-on service can begin as close to schedule as possible",
+      "Keep the arrival calm, confirm relevant intake information, protect privacy and choice, ask permission before first touch, and avoid turning the client’s delay into a rushed experience",
+      "Skip the normal orientation because mentioning adjustments or expectations may make the client feel more rushed",
+      "Tell the client immediately that the appointment may need to be shortened before continuing with the arrival sequence"
     ],
     "correctChoice": 1,
-    "rationale": "AIMT teaches absorbing schedule pressure professionally without skipping required arrival standards or transferring stress to the client.",
-    "status": "draft"
+    "rationale": "Schedule pressure belongs to the business, not the client. Required arrival standards remain intact even when the client arrives stressed or slightly late.",
+    "status": "approved"
   },
   {
     "id": "M02-006",
@@ -1435,22 +1435,20 @@ export const knowledgeBank = [
     "id": "M07-006",
     "version": 1,
     "sourceModule": 7,
-    "sourceSection": "Module 7 approved specification — clean/dirty separation.",
-    "competency": "Clean/dirty separation",
+    "sourceSection": "Module 7 — function-based equipment philosophy; reach-zone/service-sequence organization.",
+    "competency": "Functional equipment selection",
     "difficulty": "applied",
-    "criticalDomainEvidence": [
-      "D4"
-    ],
-    "prompt": "During a busy service day, a used tool is accidentally placed into the container designated for clean tools. No one is certain whether it touched the other items.\n\nWhat is the most responsible response?",
+    "criticalDomainEvidence": [],
+    "prompt": "A practitioner sees a specialty scalp tool she likes and is considering adding it to an already functional treatment room.\n\nWhich question should carry the most weight?",
     "choices": [
-      "Remove the used tool and keep the remaining items in service because they still look clean",
-      "Disinfect only the used tool because cross-contact cannot be assumed without visible residue",
-      "Treat the clean-zone integrity as compromised and process the affected items according to the appropriate sanitation requirements before use",
-      "Move the entire container to the dirty zone and wait until closing to address it"
+      "Will clients recognize the tool as something premium or specialized?",
+      "Does the tool serve a clear purpose in the service and fit the room’s workflow without creating unnecessary clutter or reach problems?",
+      "Are other Head Spas in the area using the same type of tool?",
+      "Can the tool be displayed where clients will see it during the appointment?"
     ],
-    "correctChoice": 2,
-    "rationale": "Uncertain cross-contact means the clean state can no longer be assumed.",
-    "status": "draft"
+    "correctChoice": 1,
+    "rationale": "AIMT teaches equipment and room setup around function and practitioner workflow—not tool count, trends, or appearance.",
+    "status": "approved"
   },
   {
     "id": "M07-007",
@@ -1751,22 +1749,22 @@ export const knowledgeBank = [
     "id": "M08-012",
     "version": 1,
     "sourceModule": 8,
-    "sourceSection": "Module 8 approved specification — aromatherapy/fragrance choice.",
+    "sourceSection": "Module 8 — current approved aromatherapy/intake amendment.",
     "competency": "Aromatherapy choice/autonomy",
     "difficulty": "applied",
     "criticalDomainEvidence": [
       "D3"
     ],
-    "prompt": "A client seems hesitant when presented with the scent options.\n\nWhich approach best reflects the course?",
+    "prompt": "During intake, a client chooses a fragrance-free service.\n\nWhen you reach the sensory opening of the Head Spa service, what is the strongest approach?",
     "choices": [
-      "Recommend the practitioner’s mildest scent so the client does not miss the aromatherapy portion",
-      "Present the available options, including fragrance-free, without steering the client toward a scented choice",
-      "Use no fragrance automatically because hesitation means the client has declined",
-      "Ask which scent category she normally likes, then choose for her"
+      "Offer the scent options again in case the client has changed her mind once the service begins",
+      "Honor the fragrance-free plan and continue the opening without treating scented aromatherapy as a required part of the service",
+      "Use a very small amount of the mildest scent so the client still receives the complete opening experience",
+      "Ask the client to choose a scent for the room even if no scented product is used on her"
     ],
     "correctChoice": 1,
-    "rationale": "Fragrance-free is a valid option and the practitioner should not steer the choice.",
-    "status": "draft"
+    "rationale": "Fragrance-free is a valid service path. Once that preference has been established at intake, scented aromatherapy should not be reintroduced as though it is required.",
+    "status": "approved"
   },
   {
     "id": "M08-013",

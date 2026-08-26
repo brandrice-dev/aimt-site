@@ -43,22 +43,16 @@ const OUT_FILE = path.join(ROOT, 'functions/_lib/certification/content-bank.mjs'
 // Every item not listed here verified cleanly against its cited Module 1-11
 // approved specification. Never add an entry here to "make a test pass" —
 // only to record a genuine, documented traceability gap the owner must see.
+//
+// HISTORY: M02-005, M07-006, and M08-012 were blocked in the initial
+// installation pass (see git history / implementation-log.md Step 90). The
+// owner supplied replacement wording for all three, re-verified independently
+// against the current approved module-02.md/module-07.md/module-08.md content
+// (not merely accepted because the owner supplied it) in the Step 91
+// remediation pass — see module-12-content-traceability.md. All three are now
+// VERIFIED and this map is empty.
 // ---------------------------------------------------------------------------
-const BLOCKED_KNOWLEDGE_ITEMS = {
-  'M02-005': 'Scenario/answer not supported by module-02.md. The only late-arrival scenario documented ' +
-    '(checkpoint m2cp1) specifies a 2-minute delay, not 8, and does not involve a subsequent-booking timing ' +
-    'concern. module-02.md teaches "schedule pressure belongs to the business, not the client" and that the ' +
-    'practitioner should absorb, not communicate, schedule pressure — it never instructs communicating a ' +
-    '"genuinely necessary timing adjustment" to the client, which is the marked-correct answer’s core claim.',
-  'M07-006': 'module-07.md documents only a general "never mix clean/dirty bins" instruction. It does not teach ' +
-    'the specific decision rule this item tests (an item of uncertain cross-contact status must be treated as ' +
-    'compromised and reprocessed before use) as a scenario or named rule.',
-  'M08-012': 'The scenario and marked-correct answer reflect a superseded (pre-August-24-2026) version of Module ' +
-    '8’s fragrance-selection script. The current controlling text moved fragrance-free determination to intake ' +
-    '(a predetermined fragrance-free path is followed when intake has already established one); the live, ' +
-    'in-service "three options, equal weight, or skip fragrance altogether" presentation this item tests no ' +
-    'longer exists in approved Module 8 content.',
-};
+const BLOCKED_KNOWLEDGE_ITEMS = {};
 
 // Internal-metadata-only correction (does not touch any student-facing wording):
 // the locked bank cites M11-005 to "Module 11 checkpoint `m11cp1`", but m11cp1's

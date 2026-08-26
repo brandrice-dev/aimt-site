@@ -85,15 +85,28 @@ function mulberry32(seed) {
   }
 })();
 
-// ---- CONTENT: traceability status / no blocked item is approved ----
+// ---- CONTENT: traceability status ----
+// Step 91 remediation: the owner supplied replacement wording for the three
+// items blocked in the initial installation (Step 90); each was independently
+// re-verified against the current approved Module 2/7/8 content (not merely
+// approved because the owner supplied it -- see
+// docs/course-audit/modules/module-12-content-traceability.md's "Remediation
+// pass" section) and all three are now active/approved. 141/141 assets VERIFIED.
 (function traceabilityStatus() {
-  const expectedBlocked = new Set(['M02-005', 'M07-006', 'M08-012']);
-  for (const id of expectedBlocked) {
+  const remediatedIds = ['M02-005', 'M07-006', 'M08-012'];
+  for (const id of remediatedIds) {
     const item = knowledgeBank.find((i) => i.id === id);
-    check('CONTENT traceability', `${id} is present with status other than 'approved'`, !!item && item.status !== 'approved', item && item.status);
+    check('CONTENT traceability', `${id} is present and active (status 'approved')`, !!item && item.status === 'approved', item && item.status);
   }
+  const m02005 = knowledgeBank.find((i) => i.id === 'M02-005');
+  check('CONTENT traceability', 'M02-005 carries no critical-domain evidence (Standard)', m02005 && m02005.criticalDomainEvidence.length === 0, JSON.stringify(m02005 && m02005.criticalDomainEvidence));
+  const m07006 = knowledgeBank.find((i) => i.id === 'M07-006');
+  check('CONTENT traceability', 'M07-006 is active and no longer tagged D4 (replacement competency does not touch D4)', m07006 && !m07006.criticalDomainEvidence.includes('D4'), JSON.stringify(m07006 && m07006.criticalDomainEvidence));
+  const m08012 = knowledgeBank.find((i) => i.id === 'M08-012');
+  check('CONTENT traceability', 'M08-012 is active and still tagged D3', m08012 && m08012.criticalDomainEvidence.includes('D3'), JSON.stringify(m08012 && m08012.criticalDomainEvidence));
+
   const approvedCount = knowledgeBank.filter((i) => i.status === 'approved').length;
-  check('CONTENT traceability', 'Exactly 117 knowledge items are approved (120 - 3 blocked)', approvedCount === 117, `got ${approvedCount}`);
+  check('CONTENT traceability', 'All 120 knowledge items are approved (0 blocked after remediation)', approvedCount === 120, `got ${approvedCount}`);
   check('CONTENT traceability', 'All 12 cases are approved', caseBank.every((c) => c.status === 'approved'));
   check('CONTENT traceability', 'All 9 interviews are approved', interviewBank.every((i) => i.status === 'approved'));
 })();
@@ -172,7 +185,12 @@ function mulberry32(seed) {
   const seenIds = new Set();
   let failures = 0;
   let warningsSeen = 0;
-  const N = 300;
+  // N=1000: deliberately substantial post-remediation re-check, since Step 91
+  // removed M07-006's D4 tag (its replacement competency -- function-based
+  // equipment selection -- does not touch D4) and D4 coverage must still be
+  // guaranteed by the remaining bank (CASE-04, CASE-08, INT-03, and several
+  // other D4-tagged Knowledge items), not by chance.
+  const N = 1000;
   for (let s = 1; s <= N; s++) {
     const rng = mulberry32(s);
     const result = assembleAttempt(banks, config, { rng });
@@ -205,19 +223,23 @@ function mulberry32(seed) {
   check('SELECTION', 'Foundational share stays within a reasonable band of the 20% target across 100 draws', foundationalPct > 0.1 && foundationalPct < 0.35, `${(foundationalPct * 100).toFixed(1)}%`);
   check('SELECTION', 'Advanced/synthesis share stays within a reasonable band of the 20% target across 100 draws', advancedPct > 0.08 && advancedPct < 0.35, `${(advancedPct * 100).toFixed(1)}%`);
 
-  // D1-D4 evidence coverage across many draws.
+  // D1-D4 evidence coverage across many draws (N=500 -- same post-remediation
+  // rationale as above).
   const rng3 = mulberry32(4242);
   let domainFailures = 0;
-  for (let s = 0; s < 200; s++) {
+  const minEvidenceSeen = { D1: Infinity, D2: Infinity, D3: Infinity, D4: Infinity };
+  for (let s = 0; s < 500; s++) {
     const result = assembleAttempt(banks, config, { rng: rng3 });
     if (!result.ok) { domainFailures++; continue; }
     for (const domainId of Object.keys(result.evidenceMatrix)) {
       const ev = result.evidenceMatrix[domainId];
       if (ev.total < 2) domainFailures++;
       if (ev.fromNonPartOne < 1) domainFailures++;
+      if (ev.total < minEvidenceSeen[domainId]) minEvidenceSeen[domainId] = ev.total;
     }
   }
-  check('SELECTION', 'Every D1-D4 domain gets >=2 total evidence points and >=1 non-Part-I point in 200 draws', domainFailures === 0, `${domainFailures} shortfalls`);
+  check('SELECTION', 'Every D1-D4 domain gets >=2 total evidence points and >=1 non-Part-I point in 500 draws', domainFailures === 0, `${domainFailures} shortfalls`);
+  check('SELECTION', 'D4 coverage holds across 500 draws even after M07-006 no longer contributes D4 evidence', minEvidenceSeen.D4 >= 2 && Number.isFinite(minEvidenceSeen.D4), `min D4 evidence seen: ${minEvidenceSeen.D4}`);
 
   // Retake minimization: a second draw excluding seen IDs from the first
   // should prefer unseen items where the bank can still satisfy coverage.

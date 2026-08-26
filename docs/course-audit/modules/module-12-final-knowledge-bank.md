@@ -246,18 +246,18 @@ D. Ask the client to decide after the practitioner explains that removing the ga
 **Evidence:** Standard  
 **Competency:** Arrival leadership under schedule pressure
 
-A client arrives eight minutes late, visibly stressed. Completing the original appointment exactly as scheduled may affect the next booking.
+A new client arrives visibly stressed and apologizes for being two minutes late.
 
-Which response best protects both the client experience and the practitioner’s operational responsibility?
+Which response best reflects the arrival standard taught in Module 2?
 
-A. Skip parts of the arrival sequence so the hands-on service can still receive its full planned time  
-B. Settle the client first, complete the required intake/privacy/consent steps, and only then communicate any genuinely necessary timing adjustment without blame or visible rushing  
-C. Tell the client immediately that the service will be shortened so expectations are clear before anything else happens  
-D. Promise the full original service and quietly make up the lost time by moving faster through transitions
+A. Shorten intake confirmation and preparation so the hands-on service can begin as close to schedule as possible  
+B. Keep the arrival calm, confirm relevant intake information, protect privacy and choice, ask permission before first touch, and avoid turning the client’s delay into a rushed experience  
+C. Skip the normal orientation because mentioning adjustments or expectations may make the client feel more rushed  
+D. Tell the client immediately that the appointment may need to be shortened before continuing with the arrival sequence
 
 **Correct:** B  
-**Rationale:** AIMT teaches absorbing schedule pressure professionally without skipping required arrival standards or transferring stress to the client.  
-**Source:** Module 2 checkpoint `m2cp1`.
+**Rationale:** Schedule pressure belongs to the business, not the client. Required arrival standards remain intact even when the client arrives stressed or slightly late.  
+**Source:** Module 2 — Section 2.6 “Rushing the beginning” + checkpoint `m2cp1`.
 
 ### M02-006 — Ritual versus standard
 **Difficulty:** Advanced / Synthesis  
@@ -1299,23 +1299,23 @@ D. Ask whether she thinks the dizziness is severe enough to stop the appointment
 **Rationale:** Dizziness/visual changes move the situation beyond ordinary positioning discomfort into a medical-concern stop.  
 **Source:** Module 7 approved specification — ordinary discomfort vs. medical-emergency signals.
 
-### M07-006 — Clean zone integrity
+### M07-006 — A tool has to earn its place
 **Difficulty:** Applied  
-**Evidence:** Critical-Domain Evidence: D4  
-**Competency:** Clean/dirty separation
+**Evidence:** Standard  
+**Competency:** Functional equipment selection
 
-During a busy service day, a used tool is accidentally placed into the container designated for clean tools. No one is certain whether it touched the other items.
+A practitioner sees a specialty scalp tool she likes and is considering adding it to an already functional treatment room.
 
-What is the most responsible response?
+Which question should carry the most weight?
 
-A. Remove the used tool and keep the remaining items in service because they still look clean  
-B. Disinfect only the used tool because cross-contact cannot be assumed without visible residue  
-C. Treat the clean-zone integrity as compromised and process the affected items according to the appropriate sanitation requirements before use  
-D. Move the entire container to the dirty zone and wait until closing to address it
+A. Will clients recognize the tool as something premium or specialized?  
+B. Does the tool serve a clear purpose in the service and fit the room’s workflow without creating unnecessary clutter or reach problems?  
+C. Are other Head Spas in the area using the same type of tool?  
+D. Can the tool be displayed where clients will see it during the appointment?
 
-**Correct:** C  
-**Rationale:** Uncertain cross-contact means the clean state can no longer be assumed.  
-**Source:** Module 7 approved specification — clean/dirty separation.
+**Correct:** B  
+**Rationale:** AIMT teaches equipment and room setup around function and practitioner workflow—not tool count, trends, or appearance.  
+**Source:** Module 7 — function-based equipment philosophy; reach-zone/service-sequence organization.
 
 ### M07-007 — What kind of stop is this?
 **Difficulty:** Advanced / Synthesis  
@@ -1589,23 +1589,23 @@ D. Aromatherapy → conditioning → massage → shampoo → assessment
 **Rationale:** This captures the broad service progression without turning the exam into memorization of every numbered step.  
 **Source:** Module 8 approved specification — service sequence.
 
-### M08-012 — Equal-weight scent choice
+### M08-012 — The intake already answered the scent question
 **Difficulty:** Applied  
 **Evidence:** Critical-Domain Evidence: D3  
 **Competency:** Aromatherapy choice/autonomy
 
-A client seems hesitant when presented with the scent options.
+During intake, a client chooses a fragrance-free service.
 
-Which approach best reflects the course?
+When you reach the sensory opening of the Head Spa service, what is the strongest approach?
 
-A. Recommend the practitioner’s mildest scent so the client does not miss the aromatherapy portion  
-B. Present the available options, including fragrance-free, without steering the client toward a scented choice  
-C. Use no fragrance automatically because hesitation means the client has declined  
-D. Ask which scent category she normally likes, then choose for her
+A. Offer the scent options again in case the client has changed her mind once the service begins  
+B. Honor the fragrance-free plan and continue the opening without treating scented aromatherapy as a required part of the service  
+C. Use a very small amount of the mildest scent so the client still receives the complete opening experience  
+D. Ask the client to choose a scent for the room even if no scented product is used on her
 
 **Correct:** B  
-**Rationale:** Fragrance-free is a valid option and the practitioner should not steer the choice.  
-**Source:** Module 8 approved specification — aromatherapy/fragrance choice.
+**Rationale:** Fragrance-free is a valid service path. Once that preference has been established at intake, scented aromatherapy should not be reintroduced as though it is required.  
+**Source:** Module 8 — current approved aromatherapy/intake amendment.
 
 ### M08-013 — Consent/preferences remain active
 **Difficulty:** Applied  

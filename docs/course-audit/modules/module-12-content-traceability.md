@@ -28,6 +28,63 @@ wording — see the LOCKED markdown authority files for that:
 
 ---
 
+## Remediation pass (August 26, 2026 — Step 91)
+
+The initial installation pass blocked three Knowledge items (`M02-005`,
+`M07-006`, `M08-012`). The owner supplied replacement wording for all three.
+Per instruction, replacement wording was **not** auto-approved merely
+because the owner supplied it — each was independently re-verified against
+the current approved `module-02.md`/`module-07.md`/`module-08.md` content,
+by direct re-reading of the primary source, before being marked VERIFIED.
+All three passed. **Result: 141/141 assessment assets VERIFIED, 0 BLOCKED.**
+The three items' entries below have been updated in place; their prior
+BLOCKED status and reasons are preserved in git history
+(`docs/course-audit/implementation-log.md` Step 90) and are not repeated
+here.
+
+- **M02-005 — VERIFIED (new wording).** The new scenario ("A new client
+  arrives visibly stressed and apologizes for being two minutes late")
+  matches checkpoint `m2cp1`'s documented scenario almost word for word
+  (`module-02.md`: *"A new client arrives visibly stressed after rushing and
+  apologizes for being two minutes late..."*) and the correct answer's
+  elements (confirm intake, protect privacy/choice, ask permission before
+  first touch) are each explicitly named in that same checkpoint's prompt.
+  The rationale ("Schedule pressure belongs to the business, not the
+  client") is a near-verbatim quote of `module-02.md` Section 2.6 ("What
+  goes wrong") → "Rushing the beginning": *"Schedule pressure belongs to the
+  business, not the client. Rushing changing, intake confirmation, or
+  consent can make the service feel transactional..."* Each distractor
+  (shortening intake, skipping orientation, pre-announcing a shortened
+  appointment) is a form of "rushing the beginning" that section explicitly
+  names as a mistake.
+- **M07-006 — VERIFIED (new wording, Evidence corrected to Standard).** The
+  new item ("A practitioner sees a specialty scalp tool... which question
+  should carry the most weight?") matches Approved Outcome #1 ("Evaluate a
+  head spa bed against function-based decision categories... rather than by
+  appearance") and Outcome #3 ("Arrange tools... by service sequence and
+  frequency of use — not by category alone") and the practitioner-insight
+  line *"More equipment can create more friction, not more capability. Every
+  upgrade-tier item added to the working surface is one more thing to reach
+  past."* Distractors (client-perceived prestige, competitor ownership,
+  visible display) are each appearance/marketing-based reasoning the module
+  explicitly rejects in favor of function. **This item no longer involves
+  D4 (Sanitation/Process Integrity) at all** — it is about functional
+  equipment selection, not clean/dirty separation — so its `Evidence` line
+  was correctly changed to `Standard` with no replacement critical-domain
+  tag invented. Real-bank selection was re-validated after this removal (see
+  "Real-bank randomization revalidation," below).
+- **M08-012 — VERIFIED (new wording, Evidence D3 preserved).** The new item
+  tests the **current** approved Module 8 content directly: `module-08.md`'s
+  August 24, 2026 amendment states *"a predetermined fragrance-free path is
+  followed instead when intake has already established one"* and *"Fragrance-
+  free service remains fully valid."* The new scenario ("During intake, a
+  client chooses a fragrance-free service. When you reach the sensory
+  opening...") and correct answer ("Honor the fragrance-free plan...")
+  match this exactly. This replaces the prior wording, which tested a
+  superseded pre-August-24 script and was correctly blocked for that reason.
+
+---
+
 ## Parsing rules recorded for audit (generator: `scripts/build-module12-assessment-bank.mjs`)
 
 These are documented, deterministic decisions made while converting locked
@@ -88,7 +145,7 @@ wording; they only affect internal metadata/data-shape.
 | M01-007 | §D shedding/thinning script + §E referral copy | Referral communication | Applied | D1 | VERIFIED |
 | M01-008 | §F Card 1 "non-prescription cosmetic product guidance" vs. Card 2 "prescribing" | Cosmetic guidance vs. prescribing | Applied | D1 | VERIFIED |
 
-### Module 2 — Welcoming Your Client (9 items — 8 VERIFIED, 1 BLOCKED)
+### Module 2 — Welcoming Your Client (9 items, all VERIFIED)
 
 | ID | Source teaching point | Competency | Difficulty | Domain evidence | Status |
 |---|---|---|---|---|---|
@@ -96,24 +153,18 @@ wording; they only affect internal metadata/data-shape.
 | M02-002 | §K "Prior visits, a signed intake form, closed eyes, or silence do not replace permission for a new touch" | Explicit consent before touch | Applied | D3 | VERIFIED |
 | M02-003 | §E tea must not be presented as treatment; §5 no health/treatment claims | Hospitality without physiological claims | Applied | — | VERIFIED |
 | M02-004 | §4/§D "ask the client to remove only what is necessary... offer an alternative" | Privacy/autonomy | Applied | D3 | VERIFIED |
-| **M02-005** | **BLOCKED** — see reason below | Arrival leadership under schedule pressure | Applied | — | **BLOCKED** |
+| M02-005 | §2.6 "Rushing the beginning" ("Schedule pressure belongs to the business, not the client") + `m2cp1`'s exact 2-minute-late scenario | Arrival leadership under schedule pressure | Applied | — | VERIFIED (replaced Step 91) |
 | M02-006 | §K "Prior visits... do not replace permission for a new touch or service choice" | Distinguishing ritual from standard | Advanced/Synthesis | D3 | VERIFIED |
 | M02-007 | §C intake review: "should never... override what the client tells you in person" | Verbal intake confirmation | Applied | D3 | VERIFIED |
 | M02-008 | Approved judgment-check feedback: "a fragrance-free service is a valid client choice" | Client choice/autonomy | Applied | D3 | VERIFIED |
 | M02-009 | §2.5 example script: "let me know at any point if you want pressure/temperature/position/scent/anything adjusted" | Concise orientation | Applied | — | VERIFIED |
 
-**M02-005 — BLOCKED, exact reason.** The locked item's scenario (client 8
-minutes late, concern framed around the *next* booking, correct answer
-requiring the practitioner to "communicate any genuinely necessary timing
-adjustment") is not supported by `module-02.md`. The only late-arrival
-scenario documented is checkpoint `m2cp1`, which specifies a **2-minute**
-delay with no mention of a subsequent appointment. `module-02.md` teaches
-"schedule pressure belongs to the business, not the client" (§K) and that
-schedule pressure should be *absorbed*, not communicated to the client
-(outcome #8) — the marked-correct answer's core instruction (communicate a
-timing adjustment to the client) is not a taught behavior and arguably runs
-against the module's actual teaching. The item's own `**Source:**` citation
-to checkpoint `m2cp1` is also factually inaccurate (wrong delay length).
+**M02-005 — VERIFIED, replaced Step 91.** See "Remediation pass" above for
+the full comparison against `module-02.md`. The prior wording (client 8
+minutes late, correct answer requiring the practitioner to communicate a
+timing adjustment) was BLOCKED for the reasons recorded in
+`implementation-log.md` Step 90 and git history; it has been fully replaced,
+not patched.
 
 ### Module 3 — Hair & Scalp Anatomy (12 items, all VERIFIED)
 
@@ -183,7 +234,7 @@ to checkpoint `m2cp1` is also factually inaccurate (wrong delay length).
 | M06-010 | §6.2: presentations resembling psoriasis/tinea capitis/dermatitis; cosmetic assessment cannot rule these out | Similar appearance, different possibilities | Applied | — | VERIFIED |
 | M06-011 | Correction #8 (stress vs. diet evidence strength) + correction #9 (heat/humidity association, not rule) | Evidence strength is not causation | Advanced/Synthesis | — | VERIFIED |
 
-### Module 7 — Equipment & Room Setup (10 items — 9 VERIFIED, 1 BLOCKED)
+### Module 7 — Equipment & Room Setup (10 items, all VERIFIED)
 
 | ID | Source teaching point | Competency | Difficulty | Domain evidence | Status |
 |---|---|---|---|---|---|
@@ -192,21 +243,22 @@ to checkpoint `m2cp1` is also factually inaccurate (wrong delay length).
 | M07-003 | §7.3: ten-step order is "sanitation-and-structure first, then staging, comfort, ambiance"; `m7cp1` criterion 1 | Build order | Applied | — | VERIFIED |
 | M07-004 | §7.4 callout (verbatim): stop → adjust → communicate → resume once client confirms comfort; `m7cp2` exact scenario | Stop before you adjust | Applied | — | VERIFIED |
 | M07-005 | §7.4 "Watch for" callout: dizziness/visual changes/slurred speech = medical concern, not positioning fix | Discomfort or medical concern | Applied | D2 | VERIFIED |
-| **M07-006** | **BLOCKED** — see reason below | Clean zone integrity | Applied | D4 | **BLOCKED** |
+| M07-006 | Approved Outcomes #1/#3 (function over appearance/category) + "more equipment... one more thing to reach past" | Functional equipment selection | Applied | — | VERIFIED (replaced Step 91; D4 correctly dropped, not replaced) |
 | M07-007 | §7.4 safety-callout distinction (ordinary strain vs. dizziness/visual changes) | What kind of stop is this | Applied | — | VERIFIED |
 | M07-008 | §7.4: three positioning checks named verbatim (halo alignment, shoulder position, occipital support) | Three positioning checks | Foundational | — | VERIFIED |
 | M07-009 | §7.1 occipital-support/headrest-curve teaching + "chin is visibly lifting" sign | Identify the failed check | Applied | — | VERIFIED |
 | M07-010 | §7.2 tool philosophy: "more tools does not equal a better service... essentials-first" | Startup priorities | Applied | — | VERIFIED |
 
-**M07-006 — BLOCKED, exact reason.** `module-07.md` documents only a general
-"never mix clean/dirty bins" instruction (Tools/supplies standard;
-sanitation separation). It does not teach the specific decision rule this
-item tests — that an item of *uncertain* cross-contact status must be
-treated as compromised and reprocessed before use, as opposed to an item
-that is *known* to be dirty. That ambiguity-resolution rule does not appear
-in `module-07.md` as a named rule or worked scenario.
+**M07-006 — VERIFIED, replaced Step 91.** See "Remediation pass" above for
+the full comparison against `module-07.md`. The prior wording (a
+cross-contact-ambiguity sanitation scenario tagged Critical-Domain Evidence
+D4) was BLOCKED for the reasons recorded in `implementation-log.md` Step 90
+and git history — that specific decision rule was never taught. The new
+item tests a genuinely different, taught competency (function-based
+equipment selection) and carries no critical-domain tag, since this
+competency does not touch D4 or any other named domain.
 
-### Module 8 — The Head Spa Service (14 items — 13 VERIFIED, 1 BLOCKED)
+### Module 8 — The Head Spa Service (14 items, all VERIFIED)
 
 | ID | Source teaching point | Competency | Difficulty | Domain evidence | Status |
 |---|---|---|---|---|---|
@@ -221,19 +273,18 @@ in `module-07.md` as a named rule or worked scenario.
 | M08-009 | Steps 13–15 correction: cooling-spray "temperature contrast," not a circulation/mechanism claim | Describe the sensation, not a mechanism | Applied | — | VERIFIED |
 | M08-010 | Retained closing-script pattern ("Today I focused on..."), non-diagnostic, observation-based | The professional close | Applied | — | VERIFIED |
 | M08-011 | Approved chapter order (dry opening → wet/treatment → conditioning → final rinse/close) | Broad sequence matters | Applied | — | VERIFIED |
-| **M08-012** | **BLOCKED** — see reason below | Equal-weight scent choice | Applied | D3 | **BLOCKED** |
+| M08-012 | August 24, 2026 amendment (verbatim): "a predetermined fragrance-free path is followed instead when intake has already established one" | Aromatherapy choice/autonomy | Applied | D3 | VERIFIED (replaced Step 91) |
 | M08-013 | Governing service-communication model: "The client can always request a change or stop; that is not... re-litigating the protocol" | Consent/preferences remain active | Applied | — | VERIFIED |
 | M08-014 | Step 11 correction ("follow product/equipment directions for processing time") + Scenario 3 | Required processing time vs. pacing | Applied | D4 | VERIFIED |
 
-**M08-012 — BLOCKED, exact reason.** The scenario and marked-correct answer
-test a live, in-service, equal-weight three-scent-or-skip-entirely
-presentation. That script was **superseded** by the August 24, 2026
-"relaxation-first communication rebuild" amendment in `module-08.md`, which
-moved fragrance-free determination to **intake** ("a predetermined
-fragrance-free path is followed instead when intake has already established
-one") and changed the live spoken cue to a non-optionalized transition
-statement. The item tests the pre-August-24 version of Module 8, which is no
-longer the approved, current content.
+**M08-012 — VERIFIED, replaced Step 91.** See "Remediation pass" above for
+the full comparison against `module-08.md`. The prior wording (a live,
+in-service, equal-weight three-scent-or-skip-entirely presentation) tested a
+script **superseded** by the August 24, 2026 "relaxation-first
+communication rebuild" amendment, which moved fragrance-free determination
+to intake — recorded as BLOCKED in `implementation-log.md` Step 90 and git
+history. The new item tests the current, controlling intake-determines-
+fragrance content directly.
 
 *(M08-013's finding — "the client can always request a change... that is not
 re-litigating the protocol" — was itself used to confirm CASE-09 and
@@ -423,19 +474,25 @@ locked banks specify:
 
 ---
 
-## Summary
+## Summary (updated Step 91)
 
-- **Knowledge Bank:** 120 items parsed and installed; **117 VERIFIED /
-  approved**, **3 BLOCKED / draft** (M02-005, M07-006, M08-012).
+- **Knowledge Bank:** 120 items parsed and installed; **120 VERIFIED /
+  approved, 0 BLOCKED.** (Step 90 originally blocked M02-005, M07-006, and
+  M08-012; the owner supplied replacement wording for all three, each was
+  independently re-verified against the current approved Module 2/7/8
+  content per "Remediation pass" above, and all three are now VERIFIED.)
 - **Applied Case Bank:** 12 cases, all **VERIFIED / approved**.
 - **Practitioner Conversation Bank:** 9 interviews, all **VERIFIED /
   approved**.
+- **Total: 141/141 assessment assets VERIFIED, 0 BLOCKED.**
 - **No raw-blueprint wording was used as a source for verification or
   installation** — `module-12-final-exam-raw-blueprint.md` was not read
-  during this task's content installation or traceability pass.
-- Blocking M02-005/M07-006/M08-012 leaves Module 2 at 8/9 approved, Module 7
-  at 9/10 approved, and Module 8 at 13/14 approved knowledge items — every
-  module still clears the engine's `partI.minPerModule: 1` requirement, and
-  the 500-seeded-draw randomization test (see traceability-adjacent test
-  suite) confirms a valid 40/4/3 attempt still assembles with full critical-
-  domain coverage in every draw.
+  during either the Step 90 content installation or this Step 91
+  remediation pass.
+- `M07-006`'s critical-domain evidence changed from `D4` to none (`Standard`)
+  as part of its replacement — the new item's competency (function-based
+  equipment selection) does not touch D4 or any other named domain, and no
+  replacement tag was invented. This was re-validated against the full
+  constrained-selection engine (500+ seeded real-bank draws, zero coverage
+  warnings, D1–D4 each still meeting the ≥2-total/≥1-non-Part-I evidence rule)
+  — see `implementation-log.md` Step 91 and `tests/certification-content-bank.test.mjs`.
