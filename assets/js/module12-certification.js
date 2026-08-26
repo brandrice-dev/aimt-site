@@ -186,8 +186,24 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  // The locked exam-content banks use markdown "**bold**" for genuine
+  // emphasis inside otherwise-plain question/scenario prose (e.g. "crosses
+  // the line from an **adapted ritual** into a **breakdown of a professional
+  // standard**"). Content is never rewritten to remove it, so the renderer
+  // must convert it -- escape first (so a literal "<" in student text can't
+  // inject markup), then turn the untouched "**" markers into <strong>.
+  function mdBold(escapedText) {
+    return escapedText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
   function paras(text) {
-    return String(text || '').split('\n\n').map(function (p) { return '<p class="body-text">' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
+    return String(text || '').split('\n\n').map(function (p) { return '<p class="body-text">' + mdBold(esc(p)).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  }
+  // For inline contexts (a <legend>, a single scenario line) where a full
+  // paragraph wrapper isn't appropriate but the source text may still contain
+  // real line breaks (a stem with a bulleted history list, e.g. M03-003) that
+  // must not collapse into one run-on sentence.
+  function multilineInline(text) {
+    return mdBold(esc(text)).replace(/\n/g, '<br>');
   }
   function firstName() {
     try {
@@ -380,7 +396,7 @@
         html += '<button class="m12x-jump' + (answered ? ' answered' : '') + (i === idx ? ' current' : '') + '" data-jump="' + i + '" aria-label="Question ' + (i + 1) + (answered ? ', answered' : ', unanswered') + '">' + (i + 1) + '</button>';
       }
       html += '</div>';
-      html += '<fieldset><legend class="m12x-q">' + esc(item.prompt) + '</legend>';
+      html += '<fieldset><legend class="m12x-q">' + multilineInline(item.prompt) + '</legend>';
       item.choices.forEach(function (choice, i) {
         var checked = responses[item.id] === i;
         html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="m12q" value="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
@@ -456,6 +472,126 @@
     renderPartII(container, attemptId, res.body.cases);
   }
 
+  // A part is "answered" enough to allow submission: a deterministic part
+  // has some response recorded; a short-response part has non-empty text.
+  // Case submission locks the case permanently, so this guards against
+  // accidentally losing a scored case to a blank answer, not against
+  // choosing "wrong" -- there is no wrong shape to block here.
+  function casePartAnswered(part, responses) {
+    var r = responses[part.id];
+    if (part.type === 'structured-short-response') return !!(r && String(r).trim());
+    if (part.type === 'multi-select') return Array.isArray(r) && r.length > 0;
+    if (part.type === 'classification') {
+      if (!r) return false;
+      return (part.items || []).every(function (item) { return !!r[item.id]; });
+    }
+    if (part.type === 'sequencing') return Array.isArray(r) && r.length === (part.choices || []).length;
+    return r != null; // single-best-answer
+  }
+
+  function renderCasePartFieldset(part, responses) {
+    var html = '<fieldset style="margin-bottom:0.8rem;"><legend class="m12x-q">' + multilineInline(part.prompt) + '</legend>';
+    if (part.type === 'structured-short-response') {
+      var val = responses[part.id] || '';
+      html += '<textarea class="cp-input" data-part="' + part.id + '" rows="3" style="width:100%;" aria-label="Your response">' + esc(val) + '</textarea>';
+    } else if (part.type === 'single-best-answer') {
+      (part.choices || []).forEach(function (choice, i) {
+        var checked = responses[part.id] === i;
+        html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="cpart-' + part.id + '" data-part="' + part.id + '" data-choice="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
+      });
+    } else if (part.type === 'multi-select') {
+      (part.choices || []).forEach(function (choice, i) {
+        var arr = responses[part.id] || [];
+        var checked = arr.indexOf(i) !== -1;
+        html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="checkbox" data-part="' + part.id + '" data-choice="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
+      });
+    } else if (part.type === 'sequencing') {
+      var order = responses[part.id] || (part.choices || []).map(function (_, i) { return i; });
+      responses[part.id] = order;
+      html += '<ol class="m12x-seq" style="padding-left:1.2rem;">';
+      order.forEach(function (choiceIdx, pos) {
+        html += '<li class="body-text" style="margin-bottom:0.5rem;">' + esc(part.choices[choiceIdx]) +
+          ' <button type="button" class="m12x-btn secondary" data-seq-up="' + part.id + '" data-pos="' + pos + '" aria-label="Move up"' + (pos === 0 ? ' disabled' : '') + '>↑</button>' +
+          ' <button type="button" class="m12x-btn secondary" data-seq-down="' + part.id + '" data-pos="' + pos + '" aria-label="Move down"' + (pos === order.length - 1 ? ' disabled' : '') + '>↓</button></li>';
+      });
+      html += '</ol>';
+    } else if (part.type === 'classification') {
+      (part.items || []).forEach(function (item) {
+        html += '<div style="margin-bottom:0.7rem;"><div class="body-text" style="margin-bottom:0.3rem;font-weight:500;">' + esc(item.label) + '</div>';
+        (part.categories || []).forEach(function (cat) {
+          var current = (responses[part.id] || {})[item.id];
+          var checked = current === cat;
+          html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="cpart-' + part.id + '-' + item.id + '" data-part="' + part.id + '" data-item="' + esc(item.id) + '" data-cat="' + esc(cat) + '"' + (checked ? ' checked' : '') + '> <span>' + esc(cat) + '</span></label>';
+        });
+        html += '</div>';
+      });
+    }
+    html += '</fieldset>';
+    return html;
+  }
+
+  function wireCasePartInputs(container, part, responses, onChange, onLightChange) {
+    if (part.type === 'structured-short-response') {
+      // Deliberately does NOT call onChange() (a full redraw) on every
+      // keystroke -- that would rebuild the textarea's DOM node mid-typing
+      // and drop the cursor/focus. Only the submit-button gating updates.
+      var ta = container.querySelector('textarea[data-part="' + part.id + '"]');
+      if (ta) ta.addEventListener('input', function () { responses[part.id] = ta.value; onLightChange(); });
+      return;
+    }
+    if (part.type === 'single-best-answer') {
+      Array.prototype.forEach.call(container.querySelectorAll('input[type=radio][data-part="' + part.id + '"][data-choice]'), function (input) {
+        input.addEventListener('change', function () { responses[part.id] = Number(input.getAttribute('data-choice')); onChange(); });
+      });
+      return;
+    }
+    if (part.type === 'multi-select') {
+      Array.prototype.forEach.call(container.querySelectorAll('input[type=checkbox][data-part="' + part.id + '"]'), function (cb) {
+        cb.addEventListener('change', function () {
+          var i = Number(cb.getAttribute('data-choice'));
+          var arr = (responses[part.id] || []).slice();
+          var pos = arr.indexOf(i);
+          if (cb.checked && pos === -1) arr.push(i);
+          if (!cb.checked && pos !== -1) arr.splice(pos, 1);
+          responses[part.id] = arr.sort(function (a, b) { return a - b; });
+          onChange();
+        });
+      });
+      return;
+    }
+    if (part.type === 'sequencing') {
+      Array.prototype.forEach.call(container.querySelectorAll('[data-seq-up="' + part.id + '"]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var pos = Number(btn.getAttribute('data-pos'));
+          var order = responses[part.id];
+          if (pos > 0) { var tmp = order[pos - 1]; order[pos - 1] = order[pos]; order[pos] = tmp; }
+          onChange();
+        });
+      });
+      Array.prototype.forEach.call(container.querySelectorAll('[data-seq-down="' + part.id + '"]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var pos = Number(btn.getAttribute('data-pos'));
+          var order = responses[part.id];
+          if (pos < order.length - 1) { var tmp = order[pos + 1]; order[pos + 1] = order[pos]; order[pos] = tmp; }
+          onChange();
+        });
+      });
+      return;
+    }
+    if (part.type === 'classification') {
+      Array.prototype.forEach.call(container.querySelectorAll('input[type=radio][data-part="' + part.id + '"]'), function (input) {
+        input.addEventListener('change', function () {
+          var itemId = input.getAttribute('data-item');
+          var cat = input.getAttribute('data-cat');
+          var obj = Object.assign({}, responses[part.id] || {});
+          obj[itemId] = cat;
+          responses[part.id] = obj;
+          onChange();
+        });
+      });
+    }
+  }
+
   function renderPartII(container, attemptId, cases) {
     var c = COPY.partII;
     var idx = cases.findIndex(function (k) { return !k.submitted; });
@@ -469,32 +605,25 @@
       html += '<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>';
       html += '<p class="body-text">' + esc(c.meta) + ' — case ' + (idx + 1) + ' of ' + cases.length + '</p>';
       html += paras(c.body);
-      html += '<div class="m12x-part-card"><div class="m12x-case-scenario">' + esc(current.scenario) + '</div>';
-      current.parts.forEach(function (part) {
-        html += '<fieldset style="margin-bottom:0.8rem;"><legend class="m12x-q">' + esc(part.prompt) + '</legend>';
-        if (part.type === 'structured-short-response') {
-          html += '<textarea class="cp-input" data-part="' + part.id + '" rows="3" style="width:100%;"></textarea>';
-        } else {
-          (part.choices || []).forEach(function (choice, i) {
-            html += '<label class="m12x-choice"><input type="checkbox" data-part="' + part.id + '" data-choice="' + i + '"> <span>' + esc(choice) + '</span></label>';
-          });
-        }
-        html += '</fieldset>';
-      });
-      html += '<button class="m12x-btn" id="m12SubmitCase">Submit this case</button></div>';
+      html += '<div class="m12x-part-card">' + paras(current.scenario).replace(/class="body-text"/g, 'class="body-text m12x-case-scenario"');
+      current.parts.forEach(function (part) { html += renderCasePartFieldset(part, responses); });
+      var allAnswered = current.parts.every(function (part) { return casePartAnswered(part, responses); });
+      html += '<button class="m12x-btn" id="m12SubmitCase"' + (allAnswered ? '' : ' disabled') + '>Submit this case</button>';
+      html += '<p class="body-text" id="m12CaseHint" style="font-size:0.78rem;color:#8a8078;margin-top:0.4rem;' + (allAnswered ? 'display:none;' : '') + '">Answer every part of this case before submitting — submitting locks it.</p>';
+      html += '</div>';
       container.innerHTML = frame(html);
 
-      Array.prototype.forEach.call(container.querySelectorAll('textarea[data-part]'), function (ta) {
-        ta.addEventListener('input', function () { responses[ta.getAttribute('data-part')] = ta.value; });
-      });
-      Array.prototype.forEach.call(container.querySelectorAll('input[type=checkbox][data-part]'), function (cb) {
-        cb.addEventListener('change', function () {
-          var partId = cb.getAttribute('data-part');
-          responses[partId] = Number(cb.getAttribute('data-choice'));
-        });
-      });
+      function updateSubmitButtonState() {
+        var stillAnswered = current.parts.every(function (part) { return casePartAnswered(part, responses); });
+        var submitBtn = document.getElementById('m12SubmitCase');
+        var hint = document.getElementById('m12CaseHint');
+        if (submitBtn) submitBtn.disabled = !stillAnswered;
+        if (hint) hint.style.display = stillAnswered ? 'none' : '';
+      }
+
+      current.parts.forEach(function (part) { wireCasePartInputs(container, part, responses, draw, updateSubmitButtonState); });
       var submitBtn = document.getElementById('m12SubmitCase');
-      if (submitBtn) submitBtn.addEventListener('click', function () { onSubmitCase(container, attemptId, cases, idx, responses); });
+      if (submitBtn) submitBtn.addEventListener('click', function () { if (!submitBtn.disabled) onSubmitCase(container, attemptId, cases, idx, responses); });
     }
     draw();
   }

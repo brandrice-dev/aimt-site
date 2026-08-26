@@ -5,22 +5,36 @@
 **Approved module title:** Final Certification Assessment (student-facing "Module 12 · Final Exam")
 **Governed by:** `docs/course-audit/00-aimt-certification-assessment-standard.md` (AIMT Certification & Assessment Standard, Version 1 — architecture locked) and `docs/course-audit/modules/module-12-final-exam-raw-blueprint.md` (Head Spa-specific competency map, critical-domain architecture, and state design — architecture locked, exam wording still raw/unapproved).
 **Audit date:** August 26, 2026
-**Implementation date:** August 26, 2026
-**Implementation:** certification-assessment ENGINE + Module 12 UI architecture implemented. Production exam content is **NOT installed** — see "Content status" below.
-**Status:** **Approved for controlled architecture implementation — final assessment content pending installation.** NOT manually approved. NOT launch-ready.
-**Production source of truth:** `headspa-mastery.html` (`module12Wrap`, technical slot `12`, view routing) + `assets/js/module12-certification.js` (client controller) + `functions/_lib/certification/*.mjs` (engine) + `functions/api/certification/*.js` (server-authoritative endpoints) + `supabase/migrations/20260826_create_certification_assessment.sql` (schema).
+**Implementation date:** August 26, 2026 (engine); August 26, 2026 (content installation, this update)
+**Implementation:** certification-assessment ENGINE + Module 12 UI architecture implemented. Production exam content is **NOW INSTALLED** (117/120 Knowledge, 12/12 Applied Cases, 9/9 Practitioner Conversations approved) — see "Content status" below, which replaces the prior CONTENT PENDING record.
+**Status:** **Final assessment content installed — pending environment integration (Supabase migration not yet run, `ANTHROPIC_API_KEY` not yet provisioned) and full owner manual QA.** NOT manually approved. NOT launch-ready.
+**Production source of truth:** `headspa-mastery.html` (`module12Wrap`, technical slot `12`, view routing) + `assets/js/module12-certification.js` (client controller) + `functions/_lib/certification/*.mjs` (engine, now including installed `content-bank.mjs`) + `functions/api/certification/*.js` (server-authoritative endpoints) + `supabase/migrations/20260826_create_certification_assessment.sql` (schema, not yet run). Content-installation source of truth: the three LOCKED markdown authority files in `docs/course-audit/modules/` (`module-12-final-knowledge-bank.md`, `module-12-final-applied-cases.md`, `module-12-final-interview-bank.md`), `scripts/build-module12-assessment-bank.mjs` (generator), and [`module-12-content-traceability.md`](module-12-content-traceability.md) (per-item audit record).
 
-This document does not authorize installing real exam content, marking Module 12 manually approved, or deploying/merging to `main`. It records what was actually built so the next task (content installation) has an accurate implementation map.
+This document does not authorize marking Module 12 manually approved or deploying/merging to `main`. It records what was actually built — engine, then content installation — so the next task (environment integration + owner QA) has an accurate implementation map.
 
 ---
 
-## Content status — CONTENT PENDING
+## Content status — INSTALLED (August 26, 2026)
 
-The raw Claude-generated wording in `module-12-final-exam-raw-blueprint.md` (80 knowledge questions, 8 applied cases, 8 interview prompts) is **explicitly not approved for student-facing use** and was **not** copied into the production content bank. No substitute questions were generated to fill the gap either.
+The raw Claude-generated wording in `module-12-final-exam-raw-blueprint.md` (80 knowledge questions, 8 applied cases, 8 interview prompts) remains **explicitly not approved for student-facing use** and was never copied into the production content bank, then or now.
 
-`functions/_lib/certification/content-bank.mjs` ships with empty `knowledgeBank`/`caseBank`/`interviewBank` arrays and `bankVersion: 'headspa-fe-bank-v0-content-pending'`. Every part of the engine that reads this bank (`randomization.mjs`, the `start-attempt` endpoint) handles the empty-bank case explicitly rather than assuming it's a bug: `start-attempt.js` returns `503` with `"The final assessment content has not been installed yet."` until the externally finalized 120/12/9 bank is installed.
+Instead, the owner supplied three separate, LOCKED markdown authority files with student-facing wording frozen:
 
-**As a direct consequence, no student can currently complete a real Module 12 attempt, and `issue-certificate.js` can never issue a certificate** (see "Certificate issuance," below) until that content is installed. This is intentional — see Section 16 of the certification standard ("no student certified without server-verified passing").
+- `docs/course-audit/modules/module-12-final-knowledge-bank.md` (120 Knowledge questions)
+- `docs/course-audit/modules/module-12-final-applied-cases.md` (12 Applied Practitioner Cases)
+- `docs/course-audit/modules/module-12-final-interview-bank.md` (9 Practitioner Conversations)
+
+A new deterministic generator, `scripts/build-module12-assessment-bank.mjs`, parses these three files programmatically (regex/line-based, never by hand-typing student-facing wording) into `functions/_lib/certification/content-bank.mjs`, which now ships `CONTENT_STATUS: 'INSTALLED'`, `bankVersion: 'headspa-fe-bank-v1-2026-08-26'`, and real `knowledgeBank`/`caseBank`/`interviewBank` arrays. `SOURCE_HASHES` embeds a SHA-256 of each locked source file at generation time; `tests/certification-content-bank-sync.test.mjs` fails if a locked file changes without re-running the generator.
+
+**Traceability audit.** Every item was checked against the actual approved Module 1–11 specifications (`docs/course-audit/modules/module-0N.md`), not the raw blueprint and not from memory — see [`module-12-content-traceability.md`](module-12-content-traceability.md) for the full per-item record. Result: **117 of 120 Knowledge items VERIFIED and shipped `status:'approved'`; 3 BLOCKED and shipped `status:'draft'`** (`M02-005` — tests an 8-minute-late scenario/timing-communication instruction not supported by `module-02.md`, whose only documented late-arrival scenario is a 2-minute checkpoint delay with the opposite teaching, "absorb schedule pressure, don't communicate it"; `M07-006` — tests a cross-contact-ambiguity decision rule `module-07.md` doesn't teach; `M08-012` — tests a live equal-weight fragrance-choice script superseded by Module 8's August 24, 2026 intake-determines-fragrance rebuild). All 12 Applied Cases and all 9 Practitioner Conversations VERIFIED and shipped `status:'approved'`. `status:'draft'` items are excluded from any real student selection by `isApprovedForProduction()` — they are never silently rewritten or dropped, only quarantined and reported.
+
+**Engine extensions required (not exam-content changes).** The engine built in the prior task (against an empty bank) needed two small, necessary additions once real content revealed answer shapes it hadn't yet needed to support: a `classification` `CasePart` type (`content-schema.mjs`, `scoring.mjs` — CASE-08's "classify each item" part) and a `choiceIncludes` critical-flag trigger for multi-select parts (`scoring.mjs` — CASE-04's "flag this specific unsafe multi-select option regardless of what else was picked"). Neither changes any scoring philosophy, weighting, or gate rule from the prior task's locked design.
+
+**Client UI extensions.** `assets/js/module12-certification.js`'s Part II renderer previously rendered every non-short-response case part as a generic checkbox list (correct only by accident for multi-select, structurally wrong for single-best-answer/sequencing/classification, and with no rendering path at all for the latter two) — this was harmless while the bank was empty but would have broken on real content. It now dispatches per part type: radio buttons for single-best-answer, checkboxes for multi-select, an accessible up/down-reorderable list for sequencing, and a per-item category selector for classification; a case's submit button is disabled with a visible hint until every part has a response, since submission permanently locks the case. Multi-line and markdown-bold-aware prompt/scenario rendering was also added — several Knowledge items and Case scenarios contain bulleted history lists, blockquoted client dialogue, or **bold** emphasis that the prior bare `esc()`-only rendering (built and only ever tested against single-line fixture content) would have collapsed into a run-on sentence with literal, unrendered asterisks.
+
+**Real-bank validation.** 500+ seeded draws of `assembleAttempt()` against the real installed bank all succeed: exactly 40/4/3 selected, full Module 1–11 coverage, no duplicate IDs, and every one of D1–D4 meeting the ≥2-total/≥1-non-Part-I evidence rule with zero coverage warnings. `tests/certification-content-bank.test.mjs` (806 assertions) and `tests/certification-content-bank-sync.test.mjs` (4 assertions) are new; the pre-existing `tests/certification-randomization.test.mjs` (27), `tests/certification-scoring.test.mjs` (21), `tests/certification-attempt-ladder.test.mjs` (12), and the two migration suites (108 combined) all remain green — 978 total assertions, zero regressions.
+
+**As a direct consequence of content now being installed, a real Module 12 attempt can be completed end-to-end once the remaining environment steps below are done** — but `issue-certificate.js` still correctly requires a server-authoritative passing `certification_attempts` row (see "Certificate issuance," below), and no attempt can be recorded until the Supabase migration is run and `ANTHROPIC_API_KEY` is provisioned (neither was done by this task — see "Explicitly not done," below).
 
 ---
 
@@ -120,14 +134,14 @@ Semantic `<fieldset>`/radio groups for Part I choices, labeled textareas for str
 
 ---
 
-## Explicitly not done by this task
+## Explicitly not done by this task (content-installation task, August 26, 2026)
 
-- Real exam content (120 Knowledge / 12 Applied Cases / 9 Practitioner Conversations) was **not** installed, written, or generated.
-- The Supabase migration was **not** run against the live database.
-- `ANTHROPIC_API_KEY` was not provisioned as a Cloudflare Pages Functions env var (required before `submit-case`/`submit-interview-turn` can actually call Cadence — this is a deployment-configuration step, not a code change).
-- No manual QA (desktop/phone rendering, live-model grading, screen-reader, physical-keyboard, real touch-device) was performed — the content-pending bank makes an end-to-end run impossible until the next task installs real content.
+- The Supabase migration (`supabase/migrations/20260826_create_certification_assessment.sql`) was **not** run against the live database — still committed for record-keeping only, per `CLAUDE.md`.
+- `ANTHROPIC_API_KEY` was **not** provisioned as a Cloudflare Pages Functions env var — `submit-case`/`submit-interview-turn` cannot actually call Cadence until this deployment-configuration step is done.
+- No manual QA (desktop/phone rendering, live-model grading, screen-reader, physical-keyboard, real touch-device) was performed. The content bank is now populated so an end-to-end run is *possible* once the two environment steps above are done, but this task did not attempt one — that requires the live environment plus an actual owner review session.
+- No student-facing wording was rewritten, paraphrased, shortened, or "improved" anywhere in the three locked banks — every extracted string was produced by deterministic parsing of the original markdown, not retyped by hand.
 - No merge to `main`, no deployment, no push.
 
 ## Next task
 
-**INSTALL EXTERNALLY FINALIZED 120 / 12 / 9 ASSESSMENT CONTENT + FULL OWNER QA.** Populate `functions/_lib/certification/content-bank.mjs` with the approved, externally rewritten item banks (status `'approved'`), run the Supabase migration, provision `ANTHROPIC_API_KEY`, then perform a full owner-reviewed QA pass across every Module 12 state before this module can be marked manually approved.
+**RUN THE SUPABASE MIGRATION + PROVISION `ANTHROPIC_API_KEY` + FULL OWNER MANUAL QA.** With content installed, the two remaining environment steps (run the migration; add the API key as a Cloudflare Pages Functions env var) unblock a real end-to-end attempt. Owner QA should then exercise every Module 12 state (A/B/C/D) — `scripts/review-module12-bank.mjs` gives an offline, no-network way to browse the entire installed bank or preview a fresh seeded 40/4/3 sample attempt (with its answer key, for the owner's own use only — never publish or deploy its output) without touching production data; the existing in-browser Review Mode fixture-state switcher remains available for exercising the client UI's flow/copy across all ten states. Only after that full pass may Module 12's status become "Implemented — manual QA approved."

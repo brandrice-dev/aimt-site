@@ -87,6 +87,16 @@ function scoreDeterministicPart(part, response) {
       if (expected.length !== got.length) return 0;
       return expected.every((v, i) => v === got[i]) ? 1 : 0;
     }
+    case 'classification': {
+      // e.g. CASE-08: classify each named item into one of a fixed set of
+      // category labels. All-or-nothing, consistent with multi-select/
+      // sequencing -- partial credit is not part of this bank's design.
+      const expected = part.correctAnswer || {};
+      const got = response || {};
+      const keys = Object.keys(expected);
+      if (!keys.length) return 0;
+      return keys.every((k) => got[k] === expected[k]) ? 1 : 0;
+    }
     default:
       return null; // structured-short-response resolved externally
   }
@@ -113,10 +123,18 @@ export function scoreCaseSubmission(caseDef, response, options = {}) {
         patternTag: ce.patternTag || null,
       };
     }
-    const deterministicScore = scoreDeterministicPart(part, (response || {})[part.id]);
-    const flag = (caseDef.criticalFlags || []).find(
-      (f) => f.partId === part.id && f.triggerType === 'choiceEquals' && JSON.stringify(f.value) === JSON.stringify((response || {})[part.id])
-    );
+    const partResponse = (response || {})[part.id];
+    const deterministicScore = scoreDeterministicPart(part, partResponse);
+    const flag = (caseDef.criticalFlags || []).find((f) => {
+      if (f.partId !== part.id) return false;
+      if (f.triggerType === 'choiceEquals') return JSON.stringify(f.value) === JSON.stringify(partResponse);
+      // 'choiceIncludes' — for multi-select parts, flags a specific unsafe
+      // option regardless of what else was also selected alongside it (e.g.
+      // CASE-04 Part B: selecting "shorten the contact time" is Type A D4
+      // evidence even if the student also picked several correct options).
+      if (f.triggerType === 'choiceIncludes') return Array.isArray(partResponse) && partResponse.includes(f.value);
+      return false;
+    });
     return {
       partId: part.id,
       correctnessScore: deterministicScore,

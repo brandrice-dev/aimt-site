@@ -27,7 +27,7 @@
 /**
  * @typedef {Object} CasePart
  * @property {string} id
- * @property {'single-best-answer'|'multi-select'|'sequencing'|'structured-short-response'} type
+ * @property {'single-best-answer'|'multi-select'|'sequencing'|'classification'|'structured-short-response'} type
  * @property {string} prompt
  * @property {string[]} [choices]
  * @property {*} [correctAnswer]                - Shape depends on `type`. NEVER sent to client.
@@ -94,6 +94,13 @@ export function projectCaseForClient(item) {
       type: part.type,
       prompt: part.prompt,
       choices: part.choices,
+      // 'classification' parts render as a fixed category list per named
+      // item rather than lettered choices -- categories/items carry no
+      // answer-key information (correctAnswer is never included here), so
+      // they are safe to send, and the client cannot render this part type
+      // without them.
+      categories: part.categories,
+      items: part.items,
     })),
   };
 }
