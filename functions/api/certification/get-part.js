@@ -9,6 +9,7 @@
 import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { projectCaseForClient, projectInterviewItemForClient } from '../../_lib/certification/content-schema.mjs';
+import { findNextInterview } from '../../_lib/certification/interview-progression.mjs';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -44,8 +45,8 @@ export async function onRequestGet(context) {
     return json({ error: 'Submit Part II before starting Part III.' }, 409);
   }
   const conversationState = attempt.part3_conversation_state || {};
-  const nextInterviewId = (attempt.part3_selected_ids || []).find((id) => !(conversationState[id] && conversationState[id].finalized));
-  if (!nextInterviewId) {
+  const { nextInterviewId, isFirstConversation, allFinalized } = findNextInterview(attempt.part3_selected_ids, conversationState);
+  if (allFinalized) {
     return json({ allConversationsFinalized: true });
   }
   const interviewDef = banks.interviewBank.find((i) => i.id === nextInterviewId);
@@ -57,6 +58,7 @@ export async function onRequestGet(context) {
       ...projectInterviewItemForClient(interviewDef),
       transcript: state.transcript || [],
       followUpUsed: !!state.followUpUsed,
+      isFirstConversation,
     },
   });
 }

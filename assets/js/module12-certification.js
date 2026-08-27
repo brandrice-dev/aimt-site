@@ -136,8 +136,9 @@
       eyebrow: 'Part 3 of 3',
       title: 'Final Practitioner Conversation',
       body: 'Cadence has been part of your learning throughout this course.\n\nFor this final section, she is not here to teach you the answer.\n\nShe is here to understand how you reason through a situation when there is not a multiple-choice option in front of you.\n\nYou’ll have three short conversations.\n\nAnswer the way you would explain your thinking to a knowledgeable instructor or mentor.\n\nIf something important is unclear, Cadence may ask one follow-up before moving on.',
-      openingWithName: function (name) { return 'You made it to the final part, ' + name + '. We’re done with multiple choice. I just want to talk through a few situations with you and understand how you think about them. There isn’t one perfect script I’m looking for, so answer naturally. Ready?'; },
-      openingNoName: 'You made it to the final part. We’re done with multiple choice. I just want to talk through a few situations with you and understand how you think about them. There isn’t one perfect script I’m looking for, so answer naturally. Ready?',
+      openingWithName: function (name) { return 'You made it to the final part, ' + name + '. This part is a little different. I’m going to give you a few situations you might run into in practice, and I want to hear how you’d think through them. There isn’t one perfect script — just talk to me the way you normally would.'; },
+      openingNoName: 'You made it to the final part. This part is a little different. I’m going to give you a few situations you might run into in practice, and I want to hear how you’d think through them. There isn’t one perfect script — just talk to me the way you normally would.',
+      startLine: 'Let’s start with this one.',
       followUpLead: 'There’s one piece I want to hear a little more about before we move on.',
       closingWithName: function (name) { return 'Thanks, ' + name + '. That’s everything I needed from you. I’m submitting this part with the rest of your assessment now.'; },
       closingNoName: 'Thanks. That’s everything I needed from you. I’m submitting this part with the rest of your assessment now.'
@@ -931,9 +932,29 @@
   function renderPartIII(container, attemptId, conversation) {
     var c = COPY.partIII;
     var name = firstName();
-    var transcript = (conversation.transcript && conversation.transcript.length) ? conversation.transcript.slice() : [
-      { role: 'assistant', content: name ? c.openingWithName(name) : c.openingNoName }
-    ];
+    // The generic Part III welcome is presentation only -- it must never
+    // substitute for a selected interview's real primary prompt (that was
+    // the exact defect: an empty transcript at the start of ANY conversation
+    // fell through to this generic text with an active composer beneath it,
+    // so the student's answer to "Ready?" was graded as the response to a
+    // primary prompt they never saw). A brand-new conversation now always
+    // shows its own primaryPrompt as a real message before the composer is
+    // reachable; the welcome + "Let's start with this one" only prepend it
+    // once, before the very first conversation of the attempt.
+    var transcript;
+    if (conversation.transcript && conversation.transcript.length) {
+      transcript = conversation.transcript.slice();
+    } else if (conversation.isFirstConversation) {
+      transcript = [
+        { role: 'assistant', content: name ? c.openingWithName(name) : c.openingNoName },
+        { role: 'assistant', content: c.startLine },
+        { role: 'assistant', content: conversation.primaryPrompt }
+      ];
+    } else {
+      transcript = [
+        { role: 'assistant', content: conversation.primaryPrompt }
+      ];
+    }
 
     function draw() {
       var html = '';
@@ -1139,7 +1160,7 @@
     });
   }
   function fixtureConversation() {
-    return { id: 'review-fixture-i1', primaryPrompt: 'Review Mode fixture conversation prompt (not real exam content).', transcript: [] };
+    return { id: 'review-fixture-i1', primaryPrompt: 'Review Mode fixture conversation prompt (not real exam content).', transcript: [], isFirstConversation: true };
   }
 
   function renderFromStatus(container, status) {

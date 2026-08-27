@@ -174,7 +174,7 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     scoreCaseSubmission, computeAppliedCasesComponent,
     scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState,
     computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
-    assembleAttempt, config, banks, HEAD_SPA_CRITICAL_DOMAINS,
+    assembleAttempt, config, banks, HEAD_SPA_CRITICAL_DOMAINS, findNextInterview,
   } = ENGINE;
 
   const htmlPath = path.join(ROOT, 'headspa-mastery.html');
@@ -218,6 +218,13 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
       part2Locked: false,
       part3Locked: false,
       finalized: false,
+      // QA-only, never a production concept: lets the owner deterministically
+      // preview both the mock PASS and mock NOT YET PASSED result screens
+      // without retaking 40 knowledge items twice. null = real mock scoring
+      // (currently a comfortable pass by construction). Set via the banner
+      // control below, which round-trips through GET / -- never sent to, or
+      // readable by, the production endpoints.
+      mockOutcomeOverride: null,
     };
   }
 
@@ -230,14 +237,24 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     return { correctnessScore: 0.75, explicitUnsafe: false, patternTag: null };
   }
 
-  function mockEvaluateInterviewTurn(interviewDef, state) {
-    // Always uses the ONE allowed follow-up (using the interview's real,
-    // human-authored followUpPrompt) before finalizing, so the follow-up UI
-    // is reliably visible for every conversation during visual QA -- a real
-    // Cadence call decides this contextually; this mock does not attempt to.
+  function mockEvaluateInterviewTurn(interviewDef, state, conversationIndex) {
+    // Deterministically exercises BOTH real Part III paths across a normal
+    // 3-conversation QA session rather than always forcing the one-follow-up
+    // path: even conversation indices (0, 2, 4, ...) use the interview's
+    // real, human-authored followUpPrompt once before finalizing; odd
+    // indices (1, 3, 5, ...) finalize immediately on the primary response.
+    // A real Cadence call decides this contextually; this mock does not
+    // attempt to -- it only needs to be deterministic and cover both paths.
+    // Real scoreInterviewConversation() (scoring.mjs, unmodified/real here)
+    // grades each criterion on the locked 0/1/2 scale -- 2 is full credit.
+    // This mock models a solid, professional response (full credit on every
+    // criterion) so the default "auto" mock outcome is a genuine pass-
+    // quality interview score, not silently capped at 50% by a placeholder
+    // half-credit value.
     const criterionScores = {};
-    for (const c of interviewDef.rubricCriteria) criterionScores[c.id] = 1;
-    if (!state.followUpUsed) {
+    for (const c of interviewDef.rubricCriteria) criterionScores[c.id] = 2;
+    const immediateFinalize = Number(conversationIndex) % 2 === 1;
+    if (!immediateFinalize && !state.followUpUsed) {
       return { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: true, followUpPrompt: interviewDef.followUpPrompt, transitionLine: null };
     }
     return { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, followUpPrompt: null, transitionLine: 'That makes sense. I’ve got what I need there. Let’s look at another situation.' };
@@ -253,7 +270,15 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
       return scoreInterviewConversation(i, st.criterionScores || {}, flags);
     });
     const interviewComponent = computeInterviewComponent(interviewResults);
-    const knowledgePercent = 0.8; // Part I scoring against a real correctChoice key is exercised by the deterministic test suite, not this visual tool.
+    // Part I scoring against a real correctChoice key is exercised by the
+    // deterministic test suite, not this visual tool -- 0.8 is a fixed mock
+    // input. When the owner has asked (via the banner control) to preview
+    // the NOT YET PASSED result screen, this is deliberately dropped below
+    // config.minimums.knowledge (0.75) so the REAL, unmodified
+    // determineCertificationDecision() gate (independent per-component
+    // minimums, no compensation) fails on its own logic -- not a fabricated
+    // decision.
+    const knowledgePercent = session.mockOutcomeOverride === 'not_yet_passed' ? 0.5 : 0.8;
     const overallPercent = computeOverallWeighted({ knowledgePercent, appliedCasesPercent: appliedCasesComponent.percent, interviewPercent: interviewComponent.percent }, config.weights);
     const allEvidence = [
       ...session.part2.cases.flatMap((c) => (session.part2.state[c.id] && session.part2.state[c.id].evidencePoints) || []),
@@ -297,7 +322,7 @@ ${siteStyle}
 </style>
 </head><body>
 <div id="m12qa-banner">
-  <b>LOCAL VISUAL QA — not production.</b> Real installed content bank (real renderer: assets/js/module12-certification.js, unmodified). Part II shows all 12 cases; Part III shows all 9 conversations (real exam draws only 4/3). Case/interview scoring uses a MOCK evaluator (no live Cadence, no ANTHROPIC_API_KEY) — always demonstrates the one allowed follow-up. No Supabase writes, no attempt/certificate records.
+  <b>LOCAL VISUAL QA — not production.</b> Real installed content bank (real renderer: assets/js/module12-certification.js, unmodified). Part II shows all 12 cases; Part III shows all 9 conversations (real exam draws only 4/3). Case/interview scoring uses a MOCK evaluator (no live Cadence, no ANTHROPIC_API_KEY) — deterministically alternates conversation-by-conversation between the immediate-finalize path and the one-allowed-follow-up path, so both are reachable in one normal run. No Supabase writes, no attempt/certificate records.
   <div id="m12qa-controls">
     <span>Seed: ${seedValue}</span>
     <a href="/?seed=${seedValue + 1}">Regenerate Part I (new seed)</a>
@@ -305,6 +330,13 @@ ${siteStyle}
     <a href="/debug" target="_blank">Internal answer-key view (separate page)</a>
     <label>Student name: <input id="m12qaName" value="Jordan" size="10"></label>
     <button id="m12qaSetName">Set</button>
+  </div>
+  <div id="m12qa-controls">
+    <span><b>QA ONLY</b> — force the Processing → result screen:</span>
+    <a href="/?mockOutcome=pass">Mock PASS</a>
+    <a href="/?mockOutcome=not_yet_passed">Mock NOT YET PASSED</a>
+    <a href="/?mockOutcome=auto">Auto (real mock scoring)</a>
+    <span>Current: ${session.mockOutcomeOverride || 'auto'}</span>
   </div>
 </div>
 <div id="m12container"></div>
@@ -340,6 +372,9 @@ ${siteStyle}
     if (pathname === '/' && req.method === 'GET') {
       const requestedSeed = url.searchParams.get('seed');
       if (requestedSeed != null) session = freshSession(Number(requestedSeed));
+      const requestedMockOutcome = url.searchParams.get('mockOutcome');
+      if (requestedMockOutcome === 'pass' || requestedMockOutcome === 'not_yet_passed') session.mockOutcomeOverride = requestedMockOutcome;
+      else if (requestedMockOutcome === 'auto') session.mockOutcomeOverride = null;
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(harnessHtml(session.seed));
       return;
@@ -410,10 +445,11 @@ ${siteStyle}
         json(res, 200, { cases });
         return;
       }
-      const nextInterview = session.part3.interviews.find((i) => !(session.part3.state[i.id] && session.part3.state[i.id].finalized));
-      if (!nextInterview) { json(res, 200, { allConversationsFinalized: true }); return; }
+      const selection = findNextInterview(session.part3.interviews.map((i) => i.id), session.part3.state);
+      if (selection.allFinalized) { json(res, 200, { allConversationsFinalized: true }); return; }
+      const nextInterview = session.part3.interviews.find((i) => i.id === selection.nextInterviewId);
       const st = session.part3.state[nextInterview.id] || { transcript: [], followUpUsed: false };
-      json(res, 200, { conversation: { ...ProjectInterview(nextInterview), transcript: st.transcript || [], followUpUsed: !!st.followUpUsed } });
+      json(res, 200, { conversation: { ...ProjectInterview(nextInterview), transcript: st.transcript || [], followUpUsed: !!st.followUpUsed, isFirstConversation: selection.isFirstConversation } });
       return;
     }
 
@@ -445,7 +481,12 @@ ${siteStyle}
         const interviewDef = session.part3.interviews.find((i) => i.id === parsed.interviewId);
         if (!interviewDef) { json(res, 404, { error: 'Unknown conversation.' }); return; }
         const state = session.part3.state[interviewDef.id] || { transcript: [{ role: 'assistant', content: interviewDef.primaryPrompt }], followUpUsed: false, finalized: false, criterionScores: {} };
-        const evaluation = mockEvaluateInterviewTurn(interviewDef, state);
+        // Parity with the real endpoint (functions/api/certification/submit-
+        // interview-turn.js): a finalized conversation is locked and cannot
+        // be restarted or re-scored by a later turn.
+        if (state.finalized) { json(res, 200, { finalized: true, alreadyFinalized: true }); return; }
+        const conversationIndex = session.part3.interviews.findIndex((i) => i.id === interviewDef.id);
+        const evaluation = mockEvaluateInterviewTurn(interviewDef, state, conversationIndex);
         let transcript = state.transcript.concat([{ role: 'user', content: parsed.studentResponse }]);
         if (evaluation.needsFollowUp) {
           transcript = transcript.concat([{ role: 'assistant', content: evaluation.followUpPrompt }]);
@@ -518,6 +559,7 @@ async function main() {
       computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
     } = await import(path.join(ROOT, 'functions/_lib/certification/scoring.mjs'));
     const { HEAD_SPA_CRITICAL_DOMAINS } = await import(path.join(ROOT, 'functions/_lib/certification/critical-domains.mjs'));
+    const { findNextInterview } = await import(path.join(ROOT, 'functions/_lib/certification/interview-progression.mjs'));
     await runBrowserServer({
       ROOT,
       seed,
@@ -529,7 +571,7 @@ async function main() {
         scoreCaseSubmission, computeAppliedCasesComponent,
         scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState,
         computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
-        assembleAttempt, config: getCurrentAssessmentConfig(), banks, HEAD_SPA_CRITICAL_DOMAINS,
+        assembleAttempt, config: getCurrentAssessmentConfig(), banks, HEAD_SPA_CRITICAL_DOMAINS, findNextInterview,
       },
     });
     return; // keep process alive; server.listen() holds the event loop open
