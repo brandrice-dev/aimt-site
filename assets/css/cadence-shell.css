@@ -1,0 +1,362 @@
+/* ═══════════════════════════════════════════════════════════════
+   Cadence full-screen conversation shell — Phase 2 of the Cadence
+   launch sweep (docs/course-audit/00-cadence-launch-sweep-build-
+   contract.md Section 8). One reusable shell, mounted once into
+   #cadenceShellRoot on headspa-mastery.html, opened/closed via
+   assets/js/cadence-shell.js.
+
+   Uses the page's own design tokens (defined inline in
+   headspa-mastery.html's :root and assets/css/aimt-design-system.css)
+   rather than introducing new ones — restrained, quiet, institutional,
+   matching the existing .checkpoint / #guidePanel surfaces.
+   ═══════════════════════════════════════════════════════════════ */
+
+#cadenceShellRoot {
+  position: relative;
+  z-index: 0;
+}
+
+.cshell-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 15, 0.42);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease;
+  z-index: 2490;
+}
+.cshell-overlay.show { opacity: 1; visibility: visible; }
+
+.cshell {
+  position: fixed;
+  inset: 0;
+  /* Above every other fixed/sticky surface in the page (.lesson-nav at
+     100, #guidePanel at 300, #guideBtn at 200) but below the global
+     #reviewModeBanner (3000), which must stay visible even while the
+     shell is open. */
+  z-index: 2500;
+  background: var(--bg, #faf8f5);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  /* Dynamic viewport height keeps the shell correctly sized on mobile
+     browsers whose chrome resizes on scroll, and shrinks to make room
+     for the review-mode banner (see getPageChromeOffsetTop()) and an
+     open on-screen keyboard. JS sets an explicit px height via
+     --cshell-vh (updateViewportHeight()) and deliberately never sets it
+     to 0 -- an unset value here correctly falls through to 100dvh. Do
+     NOT add a `min-height: 100vh` floor here: it was tried and found to
+     override the intentionally-smaller chrome-adjusted height,
+     overflowing the composer past the bottom of the viewport (confirmed
+     via 375x812 mobile QA) -- the JS guard is what actually prevents
+     collapse, not a CSS floor.  */
+  height: 100dvh;
+  height: calc(var(--cshell-vh, 100dvh));
+}
+.cshell.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cshell-overlay, .cshell { transition: none; }
+}
+
+/* ── Header ── */
+.cshell-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(0.85rem + env(safe-area-inset-top, 0px)) 1.1rem 0.85rem;
+  border-bottom: 0.5px solid var(--border, rgba(0,0,0,0.06));
+  background: var(--white, #fff);
+}
+.cshell-id {
+  width: 36px; height: 36px; border-radius: 18px;
+  background: var(--hero-bg, #262626);
+  display: flex; align-items: center; gap: 7px; padding: 0 10px;
+  flex-shrink: 0;
+}
+/* CADENCE_AVATAR_ASSET integration point: the real approved Cadence
+   avatar image is not yet in the repository. This breathing-dot +
+   wordmark treatment is the deliberate temporary identity mark (matches
+   the guide panel's .gp-av-dot / .gp-av-label). When the real asset is
+   supplied, swap the contents of .cshell-id-dot / .cshell-id-label for
+   an <img> here — nothing else in this shell needs to change. */
+.cshell-id-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal, #a3968d);
+  animation: cshellBreathe 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) { .cshell-id-dot { animation: none; } }
+@keyframes cshellBreathe { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+.cshell-id-label {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #fff; white-space: nowrap;
+}
+.cshell-titles { min-width: 0; flex: 1; }
+.cshell-module {
+  font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 500;
+  color: var(--text, #262626);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cshell-status {
+  font-family: var(--aimt-font-sans); font-size: 0.68rem; color: var(--muted, #a3968d);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cshell-close {
+  flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted2, #c4bdb5);
+  transition: background 0.15s, color 0.15s;
+}
+.cshell-close:hover { background: var(--surface, #f0ede8); color: var(--text, #262626); }
+.cshell-close svg { width: 15px; height: 15px; }
+
+.cshell-review-banner {
+  flex-shrink: 0;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0.45rem 1.1rem;
+  background: #fff4e8;
+  color: #8b5e00;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-bottom: 0.5px solid rgba(139,94,0,0.15);
+}
+.cshell.review-mode .cshell-review-banner { display: flex; }
+
+.cshell-fixtures {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0.55rem 1.1rem;
+  border-bottom: 0.5px solid var(--border, rgba(0,0,0,0.06));
+  background: var(--surface, #f0ede8);
+}
+.cshell.review-mode .cshell-fixtures { display: flex; }
+.cshell-fixture-btn {
+  background: var(--white, #fff) !important;
+  border: 0.5px solid var(--border2, rgba(0,0,0,0.09)) !important;
+  border-radius: var(--aimt-radius-pill, 980px);
+  padding: 0.28rem 0.7rem;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.66rem;
+  color: var(--muted, #a3968d);
+  cursor: pointer;
+}
+.cshell-fixture-btn:hover, .cshell-fixture-btn.active { color: var(--text, #262626); border-color: var(--text, #262626) !important; }
+
+/* ── Transcript ── */
+.cshell-transcript {
+  /* min-height:0 is load-bearing, not decorative: flex items default to
+     min-height:auto (content-based), which for a tall transcript would
+     otherwise stretch .cshell taller than the viewport and push the
+     composer below the fold instead of letting this pane scroll
+     internally. Confirmed via mobile-viewport QA (375x812). */
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1.1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.cshell-transcript-inner {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.cshell-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0.9rem 0 0.3rem;
+  font-family: var(--aimt-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted2, #c4bdb5);
+}
+.cshell-divider::before, .cshell-divider::after {
+  content: ''; flex: 1; height: 0.5px; background: var(--border2, rgba(0,0,0,0.09));
+}
+
+.cshell-msg { display: flex; gap: 9px; max-width: 100%; }
+.cshell-msg.assistant { align-self: flex-start; }
+.cshell-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.cshell-msg-av {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; align-self: flex-end;
+  display: flex; align-items: center; justify-content: center;
+}
+.cshell-msg.assistant .cshell-msg-av { background: var(--hero-bg, #262626); }
+.cshell-msg.assistant .cshell-msg-av span { width: 5px; height: 5px; border-radius: 50%; background: var(--teal, #a3968d); }
+.cshell-msg.user .cshell-msg-av { background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
+.cshell-bub {
+  padding: 0.7rem 0.95rem;
+  border-radius: 16px;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  font-weight: 300;
+  max-width: 82%;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.cshell-msg.assistant .cshell-bub { background: var(--white, #fff); border: 0.5px solid var(--border, rgba(0,0,0,0.06)); color: var(--text, #262626); border-bottom-left-radius: 4px; }
+.cshell-msg.user .cshell-bub { background: var(--teal2, #4d403a); color: #fff; border-bottom-right-radius: 4px; }
+.cshell-bub p { margin: 0; }
+.cshell-bub p + p { margin-top: 0.45rem; }
+
+.cshell-kicker {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8078;
+  margin: 0 0 0.35rem 33px;
+}
+
+.cshell-typing { display: flex; gap: 4px; align-items: center; padding: 0.1rem 0; }
+.cshell-typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted2, #c4bdb5); animation: cshellTyping 1.2s infinite; }
+.cshell-typing span:nth-child(2) { animation-delay: .18s; }
+.cshell-typing span:nth-child(3) { animation-delay: .36s; }
+@keyframes cshellTyping { 0%,80%,100% { transform: scale(1); opacity: .4; } 40% { transform: scale(1.4); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cshell-typing span { animation: none; opacity: .7; } }
+
+/* ── Historical / read-only fallback card (Section 7) ── */
+.cshell-fallback-card {
+  align-self: stretch;
+  max-width: 100%;
+  border: 0.5px solid var(--border2, rgba(0,0,0,0.09));
+  border-radius: var(--aimt-radius-md, 12px);
+  background: var(--white, #fff);
+  padding: 1rem 1.1rem;
+}
+.cshell-fallback-title {
+  font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 600;
+  color: var(--aimt-success, #3a5a3a); margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 6px;
+}
+.cshell-fallback-title svg { width: 13px; height: 13px; flex-shrink: 0; }
+.cshell-fallback-label { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #a3968d); margin: 0.6rem 0 0.2rem; }
+.cshell-fallback-body { font-family: var(--aimt-font-sans); font-size: 0.85rem; line-height: 1.65; font-weight: 300; color: var(--text, #262626); }
+
+/* ── Pass state banner ── */
+.cshell-pass-banner {
+  align-self: center;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--aimt-radius-pill, 980px);
+  background: var(--aimt-success-light, #e8ede8);
+  color: var(--aimt-success, #3a5a3a);
+  font-family: var(--aimt-font-sans); font-size: 0.76rem; font-weight: 600;
+  margin: 0.4rem 0;
+}
+.cshell-pass-banner svg { width: 13px; height: 13px; }
+
+/* ── Composer ── */
+.cshell-composer {
+  flex-shrink: 0;
+  border-top: 0.5px solid var(--border, rgba(0,0,0,0.06));
+  background: var(--white, #fff);
+  padding: 0.75rem 1.1rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+}
+.cshell-composer-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  background: var(--surface, #f0ede8);
+  border-radius: var(--aimt-radius-md, 12px);
+  padding: 8px 8px 8px 14px;
+  transition: background 0.15s, border-color 0.15s;
+  border: 0.5px solid transparent;
+}
+.cshell-composer-inner:focus-within { background: var(--white, #fff); border-color: rgba(0,0,0,0.15); }
+.cshell-input {
+  flex: 1;
+  min-width: 0;
+  background: none; border: none; outline: none; resize: none;
+  font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 300;
+  line-height: 1.55; color: var(--text, #262626);
+  min-height: 24px; max-height: 168px; padding: 3px 0;
+}
+.cshell-input::placeholder { color: var(--muted2, #c4bdb5); }
+.cshell-input[disabled] { opacity: 0.6; }
+.cshell-send {
+  width: 34px; height: 34px; border-radius: var(--aimt-radius-sm, 10px);
+  background: #262626; border: none; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.15s, opacity 0.15s;
+}
+.cshell-send:disabled { background: var(--muted2, #c4bdb5); cursor: not-allowed; opacity: 0.75; }
+.cshell-send svg { width: 13px; height: 13px; }
+
+.cshell-hint {
+  max-width: 640px;
+  margin: 0.4rem auto 0;
+  font-family: var(--aimt-font-sans); font-size: 0.68rem; color: var(--muted, #a3968d);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.cshell-retry-btn, .cshell-continue-btn {
+  font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 600;
+  padding: 0.55rem 1.15rem; border-radius: var(--aimt-radius-sm, 10px);
+  border: none; cursor: pointer; transition: background 0.15s;
+}
+.cshell-retry-btn { background: #4d403a; color: #fff; }
+.cshell-retry-btn:hover { background: #5d4f48; }
+.cshell-continue-row { max-width: 640px; margin: 0 auto; display: flex; justify-content: flex-end; padding-top: 0.15rem; }
+.cshell-continue-btn { background: var(--aimt-success, #3a5a3a); color: #fff; }
+.cshell-continue-btn:hover { background: #335133; }
+
+.cshell-error-row {
+  max-width: 640px; margin: 0 auto 0.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 0.6rem 0.85rem;
+  background: var(--aimt-error-light, #f0e8e8);
+  border-radius: var(--aimt-radius-md, 12px);
+}
+.cshell-error-text { font-family: var(--aimt-font-sans); font-size: 0.78rem; color: var(--aimt-error, #7a3030); }
+
+/* ── Focus visibility (Section 23) ── */
+.cshell *:focus-visible {
+  outline: 2px solid var(--text, #262626);
+  outline-offset: 2px;
+}
+
+/* ── Desktop restraint: keep the transcript/composer column comfortable
+   rather than edge-to-edge on very wide viewports ── */
+@media (min-width: 900px) {
+  .cshell-head { padding-left: calc((100% - 640px) / 2 + 1.1rem); padding-right: calc((100% - 640px) / 2 + 1.1rem); }
+  .cshell-composer { padding-left: calc((100% - 640px) / 2 + 1.1rem); padding-right: calc((100% - 640px) / 2 + 1.1rem); }
+}
+
+/* ── Mobile: near-native messaging feel ── */
+@media (max-width: 480px) {
+  .cshell-transcript { padding: 1rem 0.85rem 1.25rem; }
+  .cshell-bub { max-width: 88%; font-size: 0.86rem; }
+  .cshell-head { padding-left: 0.85rem; padding-right: 0.85rem; }
+  .cshell-composer { padding-left: 0.85rem; padding-right: 0.85rem; }
+}
+
+/* Activation affordance applied by JS to the (now inert-for-typing)
+   inline checkpoint textarea — see wireCheckpoint() in cadence-shell.js.
+   Kept intentionally subtle to match the restrained aesthetic. */
+.cp-input.cadence-shell-trigger { cursor: pointer; }
+.cp-input.cadence-shell-trigger:hover { background: rgba(255,255,255,0.98); }
+.cp-status[data-cshell-viewable="1"] { cursor: pointer; }
+.cp-res[data-cshell-viewable="1"] { cursor: pointer; }

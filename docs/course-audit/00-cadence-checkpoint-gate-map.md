@@ -121,3 +121,38 @@ Per this task's explicit instruction: **no gating behavior is changed by
 this document.** It is a map of the current, verified state for Phase 2 to
 build against — not an implementation, not a proposal to add new gates, and
 not authorization to begin the full-screen UI migration.
+
+## Phase 2 implementation notes (added post-migration)
+
+Phase 2 (`docs/course-audit/implementation-log.md` Step 103) built the
+shared full-screen shell and migrated all 22 checkpoints above onto it,
+confirming every prediction this document made and changing none of the
+gating mechanics it described:
+
+- **Gating mechanism unchanged.** `wireCheckpoint()` (`assets/js/
+  cadence-shell.js`) intercepts each checkpoint's existing inline
+  composer/button and opens the shell in place of inline submission —
+  it does not add, remove, or alter any gate. A checkpoint's pass still
+  contributes to its module's completion via the exact same
+  `APP_STATE.setCheckpointResult()` / `_checkModuleComplete()` sequence
+  `submitCheckpoint()` always used; verified live end-to-end (a real
+  pass through the new shell correctly marked Module 0 complete and
+  unlocked Module 1, with no code path change to that chain).
+- **The Module 9<->10 id/slot swap is preserved exactly**, including at
+  the content level, not just structurally: a new deterministic test
+  (`tests/cadence-phase2-shell.test.mjs`) confirms slot 9 (`m10cp1`)
+  resolves pricing/closing subject matter and slot 10 (`m9cp1`) resolves
+  sanitation/reset subject matter, and that the swapped ids do not also
+  resolve at the wrong slot.
+- **No new mid-module content-hiding gate was introduced.** The shell is
+  an overlay on the existing lesson page, not a route change or a new
+  progressive-disclosure mechanism — closing it returns the student to
+  exactly where they were, with all of a module's content still visible
+  regardless of checkpoint status, matching this document's own finding
+  that no such gate exists anywhere today.
+- **Module 12 confirmed untouched** by construction: `MODULE_CHECKPOINTS['12']`
+  is still `[]`, so the one generic wiring call this task added
+  (inside `restoreLessonState()`) never fires for Module 12, and a static
+  test asserts `cadence-shell.js` never references
+  `certification_attempts`, `part3_conversation_state`, or
+  `/api/certification/*`.

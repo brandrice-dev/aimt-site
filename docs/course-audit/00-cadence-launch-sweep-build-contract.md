@@ -357,9 +357,43 @@ remediation conversation UX, and Phase 2's full-screen shell itself — the
 schema/API support these modes' data shape, nothing more, per this task's
 own explicit scope boundary.
 
-**Phase 2 — Shared Conversation Shell + Checkpoints.** Gate map first (see
-Section 9); full-screen shell; one thread per module; composer/voice/mobile;
-passed-state read-only + Continue; resume.
+**Phase 2 — Shared Conversation Shell + Checkpoints. COMPLETE (follow-up
+task, same day as Phase 1 core).** `assets/js/cadence-shell.js` +
+`assets/css/cadence-shell.css` — one reusable, mode-agnostic shell
+(`window.CadenceShell = {openCheckpoint, wireCheckpoint}`), presentation/
+transport only, never deciding pass/revise or inventing checkpoint
+content. A single new accessor, `getCadenceCheckpointDefinition()`
+(placed once in `headspa-mastery.html`, right after `M11`), reads the
+exact, unmodified `M0..M11` rubric/question objects and assembles the
+system prompt byte-for-byte the same way `submitCheckpoint()`/
+`submitCheckpointReviewMode()` always did. Because `restoreLessonState()`
+already iterates `MODULE_CHECKPOINTS[String(moduleId)]` on every module
+render, one added line there (`if (window.CadenceShell)
+window.CadenceShell.wireCheckpoint(moduleId, checkpointId);`) wires **all
+22 required checkpoints across Modules 0-11 simultaneously** — the
+canary and the full migration are the same change; no per-checkpoint or
+per-module special-casing was needed for any rubric shape, including
+Module 3's bare ids and the Module 9<->10 historical swap. The
+`headspa-mastery.html` diff is 60 insertions / 2 deletions across the
+whole ~500KB file. `evaluateCheckpointAnswer()` gained one optional,
+backward-compatible 6th parameter (`providedRequestId`) so the shell can
+reuse Phase 1's existing idempotency key across a retry or a
+resume-after-refresh, reusing the same server-side guarantee rather than
+adding a second one. Historical passed checkpoints with no durable
+transcript (true for every pass predating this branch) render an honest
+read-only fallback from the student's actually-stored answer/feedback,
+never a fabricated conversation. Review Mode gets a structurally separate
+non-persisting path plus a fixture switcher covering every required QA
+state. Five real bugs (a mount-point DOM-nesting trap, a CSS custom-
+property fallback defeated by writing `0` instead of leaving it unset, a
+`min-height` floor that then overrode the correct smaller height, a
+missing flex `min-height:0` that pushed the composer off-screen on
+mobile, and a z-index/stacking issue with the page's sticky nav) were
+found via live-browser QA and fixed in the same task, each with a
+regression test. See `implementation-log.md` Step 103 for the full
+record. **Module 12 untouched** (`MODULE_CHECKPOINTS['12']` stays empty,
+so the wiring line never fires there); **Ask Cadence's real migration and
+a remediation mode remain Phase 4**, not built by this task.
 
 **Phase 3 — Module 12 Live Integration.** Reuse the shared shell for Part
 III's presentation only; preserve the certification state machine exactly;
@@ -420,13 +454,18 @@ shell, bugs fixed before UI is built on top of them).
 - 120/12/9 content counts, 141/141 traceability, and the certificate gate
   are unchanged after every phase — verified by the existing test suites
   on every change, not assumed.
-- (Later phases) full-screen shell, one thread per module, safe-area/
-  keyboard-avoidance mobile behavior, persistent Ask Cadence, evaluate/
-  decide separation for checkpoints, model regression suite exercised
-  before any promotion.
+- (Phase 2, complete) full-screen shell, one thread per module, safe-area/
+  keyboard-avoidance mobile behavior, historical passed-state fallback,
+  Review Mode fixtures — all verified via live-browser QA, not assumed.
+- (Later phases) persistent Ask Cadence, a remediation mode, model
+  regression suite exercised before any promotion, live-model QA once an
+  `APPROVED` model exists.
 
 ## 17. Unresolved owner decisions
 
 Only Decision 9 (the real Cadence avatar asset timeline) remains open —
 carried forward from the audit, not created by this document, and not a
-blocker for anything in Phase 0 or Phase 1.
+blocker for anything in Phase 0, Phase 1, or Phase 2. `cadence-shell.js`
+documents the exact swap point (`.cshell-id`/`CADENCE_AVATAR_ASSET`
+comment) so replacing the placeholder identity mark is a one-file change
+whenever that asset is supplied.

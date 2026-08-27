@@ -21,6 +21,7 @@
 <meta name="twitter:image" content="https://aimt-site.pages.dev/assets/aimt-share.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/cadence-shell.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -7672,6 +7673,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   </div>
 </div>
 
+<!-- Cadence full-screen shell mount point (Phase 2). Placed here,
+     immediately before module12Wrap, because module12Wrap's own markup
+     runs to the end of <body> without a clean closing point earlier in
+     the document — mounting after it (e.g. just before </body>) would
+     silently nest this inside a display:none subtree. Not itself
+     display:none; assets/js/cadence-shell.js controls visibility. -->
+<div id="cadenceShellRoot"></div>
+
 <!-- ══ FINAL MODULE CONTENT ══ -->
 <!-- Module 11 → 12 structural relocation (course-audit-build): this is the
      former module11Wrap, unchanged in content — Course Completion &
@@ -7780,6 +7789,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <script src="assets/js/headspa-state.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
 <script src="assets/js/module12-certification.js"></script>
+<script src="assets/js/cadence-shell.js" defer></script>
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -8071,6 +8081,8 @@ function restoreLessonState(moduleId) {
 
     applyCheckpointInputState(moduleId, checkpointId, { moduleIsComplete });
 
+    if (window.CadenceShell) window.CadenceShell.wireCheckpoint(moduleId, checkpointId);
+
     if (response && !response.innerHTML.trim() && meta && meta.feedback) {
       response.innerHTML = '<p style="font-size:.875rem;line-height:1.7;font-weight:300;color:var(--text);margin-bottom:.3rem">' + meta.feedback + '</p>';
       response.classList.add('show');
@@ -8131,9 +8143,15 @@ function normalizeCheckpointEvaluation(raw) {
 // function decides pass/revise -- this function no longer trusts a model's
 // own `pass` field directly. Same {pass, feedback} shape callers already
 // expect; the rubric/question sent are unchanged from the original design.
-async function evaluateCheckpointAnswer(moduleId, checkpointId, systemPrompt, question, answer) {
+async function evaluateCheckpointAnswer(moduleId, checkpointId, systemPrompt, question, answer, providedRequestId) {
   const evaluatorSystem = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
-  const requestId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('cp-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+  // Optional 6th param: lets a caller (assets/js/cadence-shell.js) reuse a
+  // stable requestId across a retry or a resume-after-refresh, so the
+  // existing server-side idempotency key (functions/api/cadence/
+  // evaluate-checkpoint.js) treats it as the same logical submission
+  // rather than a new one. Falls back to the original random-per-call
+  // behavior when omitted, so every existing caller is unaffected.
+  const requestId = providedRequestId || ((window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('cp-' + Date.now() + '-' + Math.random().toString(16).slice(2)));
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
@@ -8808,6 +8826,46 @@ const M11 = {
       'Cadence does not claim personal practitioner experience. Do not grade the student\'s personal confidence, technical skill with AI tools, or background.'
   }
 };
+
+// ══════════════════════════════════════════════════════
+// CADENCE FULL-SCREEN SHELL — checkpoint definition accessor
+// (assets/js/cadence-shell.js, Phase 2 of the Cadence launch sweep)
+//
+// Slots 9/10 deliberately read from the OTHER module's config object —
+// this mirrors submitM9CP()/submitM10CP() exactly (see those wrappers
+// above) and preserves the historical id/slot mismatch from the
+// Module 9<->10 reorder. Do not "fix" this mapping; doing so would
+// desync from MODULE_CHECKPOINTS and the already-passed student data
+// it describes. See docs/course-audit/00-cadence-checkpoint-gate-map.md.
+const CADENCE_CHECKPOINT_SOURCES = {
+  0: M0, 1: M1, 2: M2, 3: M3, 4: M4, 5: M5, 6: M6, 7: M7, 8: M8,
+  9: M10, 10: M9,
+  11: M11
+};
+
+// Returns the exact, unmodified rubric/question for (moduleId, cpId),
+// with the system prompt assembled identically to submitCheckpoint()'s
+// production path (`system`) and submitCheckpointReviewMode()'s path
+// (`reviewSystem`) — byte-for-byte the same assembly, just exposed for
+// cadence-shell.js to call rather than duplicated there. Never invents,
+// rewrites, or rephrases any checkpoint content.
+function getCadenceCheckpointDefinition(moduleId, cpId) {
+  const src = CADENCE_CHECKPOINT_SOURCES[moduleId];
+  if (!src) return null;
+  const rawSystem = src.systems ? src.systems[cpId] : src.system;
+  const question = src.questions ? src.questions[cpId] : null;
+  if (!rawSystem || !question) return null;
+  const systemBase = typeof rawSystem === 'function' ? rawSystem(question) : rawSystem;
+  const system = systemBase +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
+    APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
+  const reviewSystem = systemBase +
+    '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
+    '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
+  return { moduleId, cpId, question, system, reviewSystem };
+}
+window.getCadenceCheckpointDefinition = getCadenceCheckpointDefinition;
 
 // ══════════════════════════════════════════════════════
 // CADENCE GUIDE — Module-aware context

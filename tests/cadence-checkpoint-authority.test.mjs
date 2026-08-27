@@ -359,7 +359,10 @@ await runIntegrationChecks();
 (function clientWiringStatic() {
   const src = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
 
-  check('CLIENT WIRING', 'evaluateCheckpointAnswer() now takes moduleId/checkpointId and POSTs to /api/cadence/evaluate-checkpoint', /async function evaluateCheckpointAnswer\(moduleId, checkpointId, systemPrompt, question, answer\)/.test(src) && /fetch\('\/api\/cadence\/evaluate-checkpoint'/.test(src));
+  // Optional trailing param (added in Phase 2) lets a caller supply a
+  // stable requestId for idempotent retry/resume -- see cadence-shell.js
+  // and headspa-mastery.html's own comment at this function's definition.
+  check('CLIENT WIRING', 'evaluateCheckpointAnswer() now takes moduleId/checkpointId and POSTs to /api/cadence/evaluate-checkpoint', /async function evaluateCheckpointAnswer\(moduleId, checkpointId, systemPrompt, question, answer(?:, \w+)?\)/.test(src) && /fetch\('\/api\/cadence\/evaluate-checkpoint'/.test(src));
   check('CLIENT WIRING', 'The real submission generates a stable per-attempt requestId (idempotency)', /crypto\.randomUUID/.test(src) && /requestId/.test(src));
   check('CLIENT WIRING', "submitCheckpoint()'s real (non-Review-Mode) path calls evaluateCheckpointAnswer(moduleId, cpId, ...)", /evaluateCheckpointAnswer\(moduleId, cpId, system, question, text\)/.test(src));
 
