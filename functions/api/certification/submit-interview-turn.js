@@ -27,8 +27,11 @@
      near-simultaneous submissions for the same conversation from both
      reaching Anthropic and racing to write the result — the second sees
      the lock and is rejected before any Anthropic call or state mutation.
-     The lock self-heals after LOCK_TIMEOUT_MS so a crashed/stalled request
-     can never leave a conversation permanently stuck.
+     The lock self-heals after its timeout so a crashed/stalled request can
+     never leave a conversation permanently stuck. The staleness check and
+     the timeout constant now live in functions/_lib/cadence/turn-lock.mjs
+     (Phase 1) so a future conversational mode does not re-derive the same
+     math or pick its own ad hoc number.
    - A per-user rate limit runs before any attempt state is read or
      mutated, so a rejected request never consumes a follow-up, touches the
      transcript, or looks like a failed evaluation.
@@ -39,17 +42,13 @@ import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { evaluateInterviewTurn } from '../../_lib/certification/cadence-grader.mjs';
 import { scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState } from '../../_lib/certification/scoring.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
+import { isTurnLockActive, claimTurnLock, releaseTurnLock } from '../../_lib/cadence/turn-lock.mjs';
 
 // A real certification interview turn involves reading a prompt, thinking,
 // and typing a substantive response — nowhere near this pace even across a
 // full attempt (9 turns max). Generous on purpose: a rejection here must
 // never be mistaken by a legitimate student for "the exam is broken."
 const RATE_LIMIT = { perMinute: 10, perDay: 60 };
-
-// Comfortably above typical Anthropic latency for this call shape, short
-// enough that a genuinely abandoned/crashed request self-heals quickly
-// rather than leaving a conversation stuck for the rest of the session.
-const LOCK_TIMEOUT_MS = 20000;
 
 function mergeCriterionScores(previous, latest) {
   const merged = { ...(previous || {}) };
@@ -58,13 +57,6 @@ function mergeCriterionScores(previous, latest) {
     if (merged[criterionId] < 0) merged[criterionId] = Number(score) || 0;
   }
   return merged;
-}
-
-function isLockActive(turnInFlightAt) {
-  if (!turnInFlightAt) return false;
-  const claimedAt = Date.parse(turnInFlightAt);
-  if (!Number.isFinite(claimedAt)) return false;
-  return Date.now() - claimedAt < LOCK_TIMEOUT_MS;
 }
 
 export async function onRequestPost(context) {
@@ -108,14 +100,14 @@ export async function onRequestPost(context) {
   const state = conversationState[interviewId] || { transcript: [], followUpUsed: false, finalized: false, criterionScores: null };
   if (state.finalized) return json({ finalized: true, alreadyFinalized: true });
 
-  if (isLockActive(state.turnInFlightAt)) {
+  if (isTurnLockActive(state.turnInFlightAt)) {
     return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
   }
 
   // Claim the lock before calling Anthropic so a near-simultaneous second
   // request sees it on its own read and is rejected above, rather than both
   // requests racing to evaluate and write the result.
-  const claimedState = { ...state, turnInFlightAt: new Date().toISOString() };
+  const claimedState = { ...state, turnInFlightAt: claimTurnLock() };
   conversationState[interviewId] = claimedState;
   const claim = await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
     method: 'PATCH',
@@ -144,7 +136,7 @@ export async function onRequestPost(context) {
     // proceed immediately.
     conversationState[interviewId] = {
       ...state,
-      turnInFlightAt: null,
+      turnInFlightAt: releaseTurnLock(),
       pendingResponse: studentResponse,
       pendingUpdatedAt: new Date().toISOString(),
     };
@@ -173,7 +165,7 @@ export async function onRequestPost(context) {
       criterionScores: mergedCriterionScores,
       explicitUnsafeDomains: mergedExplicitUnsafeDomains,
       patternTags: mergedPatternTags,
-      turnInFlightAt: null,
+      turnInFlightAt: releaseTurnLock(),
       pendingResponse: null,
       lastGradedWith,
     };
@@ -193,7 +185,7 @@ export async function onRequestPost(context) {
     explicitUnsafeDomains: mergedExplicitUnsafeDomains,
     patternTags: mergedPatternTags,
     finalizedAt: new Date().toISOString(),
-    turnInFlightAt: null,
+    turnInFlightAt: releaseTurnLock(),
     pendingResponse: null,
     lastGradedWith,
   };

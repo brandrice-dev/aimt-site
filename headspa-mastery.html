@@ -8136,7 +8136,7 @@ async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
     '\n' + CHECKPOINT_EVAL_FORMAT;
 
   try {
-    const raw = await callAI(
+    const { text: raw, modelInfo } = await callAI(
       evaluatorSystem,
       [{
         role: 'user',
@@ -8145,7 +8145,7 @@ async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
       }],
       110
     );
-    return normalizeCheckpointEvaluation(raw);
+    return Object.assign(normalizeCheckpointEvaluation(raw), { modelInfo });
   } catch (e) {
     const error = new Error('Checkpoint evaluation unavailable');
     error.code = 'checkpoint_eval_unavailable';
@@ -8186,7 +8186,8 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question, errorMessage) 
       APP_STATE.setCheckpointResult(moduleId, cpId, {
         passed: result.pass,
         feedback: result.feedback,
-        answer: text
+        answer: text,
+        modelInfo: result.modelInfo
       });
       if (result.pass) APP_STATE.captureCheckpointMemory(moduleId, cpId);
       renderCheckpointOutcomeLabel(moduleId, cpId);
@@ -8858,7 +8859,7 @@ async function gpSend() {
   document.getElementById('quickPs').style.display = 'none';
   gpShowTyping();
   try {
-    const r = await callAI(getGuideSystem(), gpHistory, 512);
+    const { text: r } = await callAI(getGuideSystem(), gpHistory, 512);
     gpHideTyping();
     await gpStream(r);
     gpHistory.push({ role: 'assistant', content: r });
@@ -9129,7 +9130,7 @@ async function evaluateScript() {
   const sys = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. A student just wrote their own version of the optional scent-introduction script for Module 2. Reference script: "Before we begin, I can offer a few scent options, or we can keep the service fragrance-free. Would you like to sample them? You may close your eyes while I guide you through each one, but you do not have to. Before I touch your shoulder, I\'ll ask your permission." Evaluate whether the student\'s version: 1) clearly introduces the optional scent experience, 2) offers a fragrance-free choice, 3) avoids medical or nervous-system claims, 4) does not require eye closure, 5) asks permission before touch, 6) stays concise and natural. Reference one specific strength and identify one focused correction when needed. Avoid pass/fail language. Give feedback in 2-3 concise sentences.' +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
   callAI(sys, [{ role: 'user', content: text }], 300)
-    .then(r => { fb.textContent = r; })
+    .then(({ text: r }) => { fb.textContent = r; })
     .catch(() => { fb.textContent = 'Cadence couldn’t review your script. Check your connection and try again.'; });
 }
 
@@ -10192,7 +10193,16 @@ async function callAI(system, messages, maxTokens = 600) {
     clearTimeout(timeout);
     if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error?.message || 'Network error'); }
     const d = await r.json();
-    return d.content[0].text;
+    // Diagnostic only (Phase 1 model/version logging) — the Worker reports
+    // what actually graded this response via headers; never used to decide
+    // anything client-side. See docs/course-audit/00-cadence-launch-sweep-
+    // build-contract.md Section 6a.
+    const modelInfo = {
+      modelName: r.headers.get('X-Cadence-Model') || '',
+      status: r.headers.get('X-Cadence-Model-Status') || '',
+      registryVersion: r.headers.get('X-Cadence-Registry-Version') || ''
+    };
+    return { text: d.content[0].text, modelInfo };
   } catch(e) {
     clearTimeout(timeout);
     if (e.name === 'AbortError') throw new Error('Request timed out — check your connection');
@@ -10768,7 +10778,7 @@ async function submitIntro() {
     '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
 
   callAI(ctx, [{ role: 'user', content: text }], 400)
-    .then(r => {
+    .then(({ text: r }) => {
       const textEl = document.getElementById('introCadenceText');
       if (textEl) textEl.innerHTML = r.split('\n').filter(l => l.trim()).map(l => '<p>' + l + '</p>').join('');
       const beginBtn = document.getElementById('introBeginBtn');

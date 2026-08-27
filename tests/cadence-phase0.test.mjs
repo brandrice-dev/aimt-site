@@ -116,8 +116,9 @@ function check(fixtureName, label, condition, detail) {
     check('WORKER DRIFT', "Worker's LEGACY_CHAT_MODEL matches the registry's LEGACY-status model", registry.models[legacyMatch[1]] && registry.models[legacyMatch[1]].status === 'LEGACY');
   }
   check('WORKER DRIFT', 'Worker fails safe (returns null, not a fallback string) when nothing is approved and no override matches', (workerSrc.match(/return null;/g) || []).length >= 2);
-  check('WORKER DRIFT', 'Worker returns a 503 (not a silent fallback) when resolveChatModel() fails safe', /if\s*\(!model\)\s*\{[\s\S]{0,200}503/.test(workerSrc));
-  check('WORKER DRIFT', 'Worker resolves the model server-side via resolveChatModel(env)', /const model = resolveChatModel\(env\);/.test(workerSrc));
+  check('WORKER DRIFT', 'Worker returns a 503 (not a silent fallback) when resolveChatModel() fails safe', /if\s*\(!modelInfo\)\s*\{[\s\S]{0,200}503/.test(workerSrc));
+  check('WORKER DRIFT', 'Worker resolves the model server-side via resolveChatModel(env)', /const modelInfo = resolveChatModel\(env\);/.test(workerSrc));
+  check('WORKER DRIFT', 'Worker exposes model identity via response headers for diagnostic logging, mirroring the certification path', /X-Cadence-Model['"]:\s*modelInfo\.modelName/.test(workerSrc));
   check('WORKER DRIFT', "The model resolution itself never reads a client-sent model field (only the request's messages/system/max_tokens do)", !/body\.model\b/.test(workerSrc.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')));
 
   const clientSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');

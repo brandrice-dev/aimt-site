@@ -99,7 +99,11 @@ function seed(localStorage, rawStateObj) {
 // ── Fixture data builders ──────────────────────────────────────────────
 
 function cpMeta(status, answer, feedback, attempts, updatedAt) {
-  return { status, answer, feedback, attempts, updatedAt };
+  // lastGradedWith: null matches sanitizeProgress()'s own default (Phase 1
+  // model/version logging, see assets/js/headspa-state.js) so fixtures that
+  // assert byte-identical checkpointMeta after a load()/sanitize pass don't
+  // spuriously fail on this additive field.
+  return { status, answer, feedback, attempts, updatedAt, lastGradedWith: null };
 }
 
 function passedCP(answer, attempts, updatedAt) {

@@ -114,7 +114,13 @@
       feedback: '',
       answer: '',
       attempts: 0,
-      updatedAt: null
+      updatedAt: null,
+      // Which Cadence model actually graded the current answer/feedback
+      // pair -- {provider, modelName, status, registryVersion, at} or null.
+      // Diagnostic only (Phase 1 model/version logging, see
+      // functions/_lib/cadence/model-config.mjs); never read for grading
+      // or progress decisions.
+      lastGradedWith: null
     };
   }
 
@@ -433,12 +439,23 @@
           : (meta && meta.status === 'retry' && (attempts > 0 || feedback || answer || updatedAt))
             ? 'retry'
             : '';
+        const rawGradedWith = meta && meta.lastGradedWith && typeof meta.lastGradedWith === 'object' ? meta.lastGradedWith : null;
+        const lastGradedWith = rawGradedWith && rawGradedWith.modelName
+          ? {
+              provider: sanitizeString(rawGradedWith.provider, ''),
+              modelName: sanitizeString(rawGradedWith.modelName, ''),
+              status: sanitizeString(rawGradedWith.status, ''),
+              registryVersion: sanitizeString(rawGradedWith.registryVersion, ''),
+              at: sanitizeNumber(rawGradedWith.at, null)
+            }
+          : null;
         checkpointMeta[cpId] = {
           status,
           feedback,
           answer,
           attempts,
-          updatedAt
+          updatedAt,
+          lastGradedWith
         };
       });
       const rawVideo = raw && raw.videoChapters && typeof raw.videoChapters === 'object' ? raw.videoChapters : null;
@@ -935,6 +952,15 @@
       meta.answer = sanitizeString(result && result.answer, '');
       meta.attempts = Math.max(1, (meta.attempts || 0) + 1);
       meta.updatedAt = now();
+      if (result && result.modelInfo && typeof result.modelInfo === 'object') {
+        meta.lastGradedWith = {
+          provider: sanitizeString(result.modelInfo.provider, ''),
+          modelName: sanitizeString(result.modelInfo.modelName, ''),
+          status: sanitizeString(result.modelInfo.status, ''),
+          registryVersion: sanitizeString(result.modelInfo.registryVersion, ''),
+          at: meta.updatedAt
+        };
+      }
       mod.lastVisitedAt = meta.updatedAt;
       if (!mod.startedAt) mod.startedAt = meta.updatedAt;
 

@@ -53,14 +53,20 @@ const LEGACY_CHAT_MODEL = 'claude-sonnet-4-20250514';
 const CANDIDATE_CHAT_MODEL = 'claude-sonnet-5';
 const APPROVED_CHAT_MODEL = null; // no model promoted yet — see header above
 
+const CHAT_MODEL_REGISTRY_VERSION = 'cadence-model-registry-v2'; // mirrors functions/_lib/cadence/model-config.mjs
+
+// Returns {modelName, status} or null (fail safe). Exposed to the client via
+// response headers (Phase 1 model/version logging — see the fetch handler
+// below) so a graded checkpoint's stored record can note what actually
+// graded it, the same way Module 12's certification path already does.
 function resolveChatModel(env) {
   const override = typeof env.CADENCE_CHAT_MODEL === 'string' ? env.CADENCE_CHAT_MODEL.trim() : '';
   if (override) {
-    if (APPROVED_CHAT_MODEL && override === APPROVED_CHAT_MODEL) return APPROVED_CHAT_MODEL;
-    if (override === CANDIDATE_CHAT_MODEL) return CANDIDATE_CHAT_MODEL;
+    if (APPROVED_CHAT_MODEL && override === APPROVED_CHAT_MODEL) return { modelName: APPROVED_CHAT_MODEL, status: 'APPROVED' };
+    if (override === CANDIDATE_CHAT_MODEL) return { modelName: CANDIDATE_CHAT_MODEL, status: 'CANDIDATE' };
     return null; // unregistered / legacy / retired / arbitrary override — fail safe
   }
-  if (APPROVED_CHAT_MODEL) return APPROVED_CHAT_MODEL;
+  if (APPROVED_CHAT_MODEL) return { modelName: APPROVED_CHAT_MODEL, status: 'APPROVED' };
   return null; // no approved model registered — fail safe
 }
 
@@ -208,8 +214,8 @@ export default {
     // Model identity is a server-side decision, never a client one — the
     // client no longer sends a model string at all (see headspa-mastery.
     // html's callAI()); any legacy/unexpected body.model is ignored.
-    const model = resolveChatModel(env);
-    if (!model) {
+    const modelInfo = resolveChatModel(env);
+    if (!modelInfo) {
       return json({ error: { message: 'Cadence is not currently configured with an approved model. Please try again later.' } }, 503, cors);
     }
     const maxTokens = Math.min(
@@ -228,7 +234,7 @@ export default {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model,
+        model: modelInfo.modelName,
         max_tokens: maxTokens,
         system: typeof body.system === 'string' ? body.system : undefined,
         messages: body.messages
@@ -238,7 +244,16 @@ export default {
     const data = await upstream.text();
     return new Response(data, {
       status: upstream.status,
-      headers: { 'Content-Type': 'application/json', ...cors }
+      headers: {
+        'Content-Type': 'application/json',
+        ...cors,
+        // Diagnostic only (Phase 1 model/version logging) — the client
+        // never uses these to decide anything, only to record what
+        // actually graded a response. See headspa-mastery.html's callAI().
+        'X-Cadence-Model': modelInfo.modelName,
+        'X-Cadence-Model-Status': modelInfo.status,
+        'X-Cadence-Registry-Version': CHAT_MODEL_REGISTRY_VERSION
+      }
     });
   }
 };

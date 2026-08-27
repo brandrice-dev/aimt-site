@@ -140,6 +140,19 @@ Worker is not touched or redeployed by this task.**
 
 ### 6a. Model-lifecycle correction (locked, supersedes the original Phase 0 pass)
 
+**Owner model decision (locked):** proceed with `claude-sonnet-5` as the
+`CANDIDATE` for both `CADENCE_CHAT_MODEL` and `CADENCE_GRADING_MODEL` — do
+not re-approve `claude-sonnet-4-20250514`; do not treat the live
+`claude-sonnet-4-6` Worker drift as approved configuration. Chat and
+grading promotion remain independent decisions. Required path: candidate →
+its own regression suite (conversation-quality for chat, grading accuracy
+for grading) → independent `APPROVED` decision per role, only on a pass →
+explicit configuration/deploy. Until a role is approved, it fails safe —
+this is not a temporary Phase 0 state to be relaxed informally; it is the
+standing rule going forward. This matches exactly what was already built
+below; the owner decision ratifies the architecture, no code changed as a
+result of it.
+
 The first Phase 0 pass of this section set both roles' approved fallback to
 `claude-sonnet-4-20250514` and treated that as the new long-term baseline.
 **That was wrong and has been corrected in this same build.** By the time
@@ -294,6 +307,27 @@ verification checklist.
 (generalize Phase 0's foundation); durable message/thread schema; structured
 evaluation contract for checkpoints; model/version logging persisted
 properly; idempotency/retry primitives generalized beyond Part III.
+
+*Progress this task:* provider config confirmed used everywhere (only two
+real Anthropic call sites exist, both already routed through the registry —
+no gap found). The in-flight-lock primitive was extracted into
+`functions/_lib/cadence/turn-lock.mjs` and `submit-interview-turn.js`
+refactored to use it (proven behavior-preserving — all Phase 0 tests
+unchanged). Model/version logging was extended to checkpoint (chat)
+grading: the Worker exposes resolved model identity via response headers,
+and `assets/js/headspa-state.js` persists it into each checkpoint's stored
+`lastGradedWith`, mirroring Module 12's pattern — diagnostic only, never
+authoritative for progress. A durable `cadence_threads`/`cadence_messages`
+schema was drafted (`supabase/migrations/20260827_create_cadence_threads.sql`)
+covering the three non-certification modes — **committed for record-keeping
+only, not applied**, and deliberately not yet wired to any endpoint.
+*Deliberately not attempted this task* (flagged, not guessed at): the
+structured evaluation contract / evaluate-decide authority split for
+checkpoint grading (Owner Decision 6's actual implementation) changes live
+behavior across 12 already-approved, QA-signed-off modules and deserves its
+own scoped pass rather than being bundled in; wiring Cloudflare Function
+endpoints to the new thread/message schema is real, separate, dependent
+work once the schema itself is reviewed.
 
 **Phase 2 — Shared Conversation Shell + Checkpoints.** Gate map first (see
 Section 9); full-screen shell; one thread per module; composer/voice/mobile;
