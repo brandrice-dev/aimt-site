@@ -159,7 +159,7 @@ export async function onRequestPost(context) {
   const mergedExplicitUnsafeDomains = Array.from(new Set([...(state.explicitUnsafeDomains || []), ...evaluation.explicitUnsafeDomains]));
   const mergedPatternTags = { ...(state.patternTags || {}), ...(evaluation.patternTags || {}) };
   const lastGradedWith = evaluation.modelInfo
-    ? { provider: evaluation.modelInfo.provider, modelName: evaluation.modelInfo.modelName, configVersion: evaluation.modelInfo.configVersion, at: new Date().toISOString() }
+    ? { provider: evaluation.modelInfo.provider, modelName: evaluation.modelInfo.modelName, status: evaluation.modelInfo.status, registryVersion: evaluation.modelInfo.registryVersion, at: new Date().toISOString() }
     : (state.lastGradedWith || null);
 
   let transcript = priorTranscript.concat([{ role: 'user', content: studentResponse }]);

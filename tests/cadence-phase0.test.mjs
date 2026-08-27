@@ -1,9 +1,11 @@
 // Phase 0 regression tests — AIMT Cadence Launch Sweep.
-// See docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 12.
+// See docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 12
+// and Section 6a (model-lifecycle correction).
 //
 // Covers:
-//  1. Centralized model config (no "latest", env override must be
-//     pre-registered, repo-internal Worker/Pages-Function drift check).
+//  1. Model lifecycle registry: LEGACY/CANDIDATE/APPROVED, fail-safe
+//     resolution (no silent legacy fallback, no "latest" alias reachable),
+//     repo-internal Worker/Pages-Function drift check.
 //  2. Rate limiter behavior.
 //  3. Real submit-interview-turn.js (imported and invoked directly, not
 //     re-mocked) against a mocked fetch/Supabase/Anthropic layer:
@@ -17,7 +19,7 @@
 //
 // Run: node tests/cadence-phase0.test.mjs
 
-import { getCadenceModelConfig, resolveCadenceModel } from '../functions/_lib/cadence/model-config.mjs';
+import { getCadenceModelRegistry, resolveCadenceModel, describeCadenceModelStatus, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
 import { checkRateLimit, _resetRateLimitBucketsForTests } from '../functions/_lib/cadence/rate-limit.mjs';
 import { getProductionBanks } from '../functions/_lib/certification/content-bank.mjs';
 import { readFileSync } from 'node:fs';
@@ -33,34 +35,64 @@ function check(fixtureName, label, condition, detail) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// 1. MODEL CONFIG
+// 1. MODEL LIFECYCLE REGISTRY
 // ─────────────────────────────────────────────────────────────────────────
-(function modelConfigUnitTests() {
-  const config = getCadenceModelConfig();
-  check('MODEL CONFIG', 'Defines both CADENCE_CHAT_MODEL and CADENCE_GRADING_MODEL roles', !!config.roles.CADENCE_CHAT_MODEL && !!config.roles.CADENCE_GRADING_MODEL);
-  check('MODEL CONFIG', 'Provider is anthropic', config.provider === 'anthropic');
+(function modelLifecycleUnitTests() {
+  const registry = getCadenceModelRegistry();
+  check('MODEL LIFECYCLE', 'Defines both CADENCE_CHAT_MODEL and CADENCE_GRADING_MODEL roles', !!registry.roles.CADENCE_CHAT_MODEL && !!registry.roles.CADENCE_GRADING_MODEL);
+  check('MODEL LIFECYCLE', 'Provider is anthropic', registry.provider === 'anthropic');
+
+  // The legacy generation must be registered LEGACY, not APPROVED -- this
+  // is the exact correction this file exists to guard against regressing.
+  check('MODEL LIFECYCLE', 'claude-sonnet-4-20250514 (the original Phase 0 fallback) is registered LEGACY in the current registry', registry.models['claude-sonnet-4-20250514'] && registry.models['claude-sonnet-4-20250514'].status === 'LEGACY');
+  check('MODEL LIFECYCLE', 'claude-sonnet-4-6 (the uncontrolled live-Worker drift the audit found) is NOT registered at all', !registry.models['claude-sonnet-4-6']);
+  check('MODEL LIFECYCLE', 'claude-sonnet-5 (current Anthropic Sonnet generation) is registered CANDIDATE, not APPROVED', registry.models['claude-sonnet-5'] && registry.models['claude-sonnet-5'].status === 'CANDIDATE');
 
   for (const role of ['CADENCE_CHAT_MODEL', 'CADENCE_GRADING_MODEL']) {
-    check('MODEL CONFIG', `${role}: no env binding -> resolves to the approved default`, resolveCadenceModel({}, role).modelName === config.roles[role].approved);
-    check('MODEL CONFIG', `${role}: approved value is not a "latest"/generic alias`, !/latest|default/i.test(config.roles[role].approved));
+    check('MODEL LIFECYCLE', `${role}: no APPROVED model is registered yet (the correct, current state -- not an oversight)`, registry.roles[role].approved === null);
 
-    const arbitrary = resolveCadenceModel({ [role]: 'claude-totally-made-up-latest' }, role);
-    check('MODEL CONFIG', `${role}: an unregistered env override is ignored, falls back to approved`, arbitrary.modelName === config.roles[role].approved && arbitrary.source === 'approved-default');
+    // FAIL SAFE: with no env override and no approved model, resolution
+    // must throw -- never silently return the legacy or candidate model.
+    let failSafeError = null;
+    try { resolveCadenceModel({}, role); } catch (e) { failSafeError = e; }
+    check('MODEL LIFECYCLE', `${role}: with nothing approved and no override, resolveCadenceModel() throws CadenceModelConfigError (fails safe)`, failSafeError instanceof CadenceModelConfigError);
 
-    const emptyCandidate = resolveCadenceModel({ [role]: '' }, role);
-    check('MODEL CONFIG', `${role}: an empty env override is ignored`, emptyCandidate.modelName === config.roles[role].approved);
+    // An unregistered / arbitrary / "latest"-style override is REJECTED
+    // outright, never silently ignored back to some default.
+    let arbitraryError = null;
+    try { resolveCadenceModel({ [role]: 'claude-totally-made-up-latest' }, role); } catch (e) { arbitraryError = e; }
+    check('MODEL LIFECYCLE', `${role}: an unregistered env override throws rather than silently falling back to anything`, arbitraryError instanceof CadenceModelConfigError);
+
+    // The LEGACY model is explicitly refused even as an env override --
+    // "no silent downgrade to an old model" applies to deliberate
+    // misconfiguration too, not only to defaults.
+    let legacyOverrideError = null;
+    try { resolveCadenceModel({ [role]: 'claude-sonnet-4-20250514' }, role); } catch (e) { legacyOverrideError = e; }
+    check('MODEL LIFECYCLE', `${role}: an env override pointing at the LEGACY model is refused, not honored`, legacyOverrideError instanceof CadenceModelConfigError);
+
+    // The registered CANDIDATE, deliberately opted into via env override
+    // (exactly how a controlled regression-test run would exercise it),
+    // IS honored -- this is the one legitimate way to reach a non-approved
+    // model, and it must be clearly flagged as such.
+    const candidateResolution = resolveCadenceModel({ [role]: 'claude-sonnet-5' }, role);
+    check('MODEL LIFECYCLE', `${role}: an env override matching the registered CANDIDATE resolves successfully and is flagged as candidate-sourced`, candidateResolution.modelName === 'claude-sonnet-5' && candidateResolution.status === 'CANDIDATE' && candidateResolution.source === 'env-override-candidate');
+
+    const emptyOverride = (() => { try { return resolveCadenceModel({ [role]: '' }, role); } catch (e) { return e; } })();
+    check('MODEL LIFECYCLE', `${role}: an empty env override is treated as absent (still fails safe, not silently accepted as "no override")`, emptyOverride instanceof CadenceModelConfigError);
   }
 
-  let threw = false;
-  try { resolveCadenceModel({}, 'CADENCE_NOT_A_REAL_ROLE'); } catch (_) { threw = true; }
-  check('MODEL CONFIG', 'Resolving an unknown role throws rather than silently returning something', threw);
+  let unknownRoleThrew = false;
+  try { resolveCadenceModel({}, 'CADENCE_NOT_A_REAL_ROLE'); } catch (_) { unknownRoleThrew = true; }
+  check('MODEL LIFECYCLE', 'Resolving an unknown role throws rather than silently returning something', unknownRoleThrew);
 
-  // A candidate override must be honored ONLY when it matches the exact
-  // pre-registered candidate string for the current version -- simulated
-  // here since the shipped config has no live candidate yet (none has been
-  // promoted for testing).
-  const versionWithCandidate = getCadenceModelConfig('cadence-model-config-v1');
-  check('MODEL CONFIG', 'Current version has no live candidate registered (nothing to silently promote)', versionWithCandidate.roles.CADENCE_CHAT_MODEL.candidate === null);
+  // Historical version v1 is preserved unmutated for auditability (it
+  // recorded the original, now-corrected, approve-the-legacy-model state)
+  // -- rollback/history relies on this never being edited in place.
+  const v1 = getCadenceModelRegistry('cadence-model-registry-v1');
+  check('MODEL LIFECYCLE', 'Historical registry v1 is preserved unmutated (approved the legacy model -- the exact state this correction fixed)', v1.roles.CADENCE_CHAT_MODEL.approved === 'claude-sonnet-4-20250514');
+
+  const status = describeCadenceModelStatus({});
+  check('MODEL LIFECYCLE', 'describeCadenceModelStatus() reports failSafeTriggered:true for both roles when nothing is approved and no override is given', status.roles.CADENCE_CHAT_MODEL.failSafeTriggered === true && status.roles.CADENCE_GRADING_MODEL.failSafeTriggered === true);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -68,20 +100,31 @@ function check(fixtureName, label, condition, detail) {
 // ─────────────────────────────────────────────────────────────────────────
 (function workerModelDriftCheck() {
   const workerSrc = readFileSync(path.join(ROOT, 'cadence-worker/worker.js'), 'utf8');
-  const match = workerSrc.match(/const APPROVED_CHAT_MODEL\s*=\s*'([^']+)'/);
-  check('WORKER DRIFT', "cadence-worker/worker.js declares APPROVED_CHAT_MODEL as a named constant", !!match);
-  if (match) {
-    const config = getCadenceModelConfig();
-    check('WORKER DRIFT', "Worker's APPROVED_CHAT_MODEL matches functions/_lib/cadence/model-config.mjs's CADENCE_CHAT_MODEL.approved (repo-internal only -- cannot see what is actually deployed live)", match[1] === config.roles.CADENCE_CHAT_MODEL.approved, `worker=${match[1]} config=${config.roles.CADENCE_CHAT_MODEL.approved}`);
+  const approvedMatch = workerSrc.match(/const APPROVED_CHAT_MODEL\s*=\s*(null|'([^']+)')/);
+  const candidateMatch = workerSrc.match(/const CANDIDATE_CHAT_MODEL\s*=\s*'([^']+)'/);
+  const legacyMatch = workerSrc.match(/const LEGACY_CHAT_MODEL\s*=\s*'([^']+)'/);
+  check('WORKER DRIFT', 'cadence-worker/worker.js declares APPROVED_CHAT_MODEL, CANDIDATE_CHAT_MODEL, LEGACY_CHAT_MODEL as named constants', !!approvedMatch && !!candidateMatch && !!legacyMatch);
+
+  const registry = getCadenceModelRegistry();
+  if (approvedMatch) {
+    check('WORKER DRIFT', "Worker's APPROVED_CHAT_MODEL matches the registry's CADENCE_CHAT_MODEL.approved (both null -- repo-internal only, cannot see what is actually deployed live)", approvedMatch[1] === 'null' && registry.roles.CADENCE_CHAT_MODEL.approved === null);
   }
-  check('WORKER DRIFT', 'Worker never hardcodes a model string directly into ALLOWED_MODELS (uses the named constants)', !/ALLOWED_MODELS\s*=\s*\['claude-/.test(workerSrc));
-  check('WORKER DRIFT', "Worker resolves the model server-side from env.CADENCE_CHAT_MODEL / APPROVED_CHAT_MODEL, never from the client's request body", /env\.CADENCE_CHAT_MODEL/.test(workerSrc) && !/ALLOWED_MODELS\.includes\(body\.model\)/.test(workerSrc));
+  if (candidateMatch) {
+    check('WORKER DRIFT', "Worker's CANDIDATE_CHAT_MODEL matches the registry's CADENCE_CHAT_MODEL.candidate", candidateMatch[1] === registry.roles.CADENCE_CHAT_MODEL.candidate);
+  }
+  if (legacyMatch) {
+    check('WORKER DRIFT', "Worker's LEGACY_CHAT_MODEL matches the registry's LEGACY-status model", registry.models[legacyMatch[1]] && registry.models[legacyMatch[1]].status === 'LEGACY');
+  }
+  check('WORKER DRIFT', 'Worker fails safe (returns null, not a fallback string) when nothing is approved and no override matches', (workerSrc.match(/return null;/g) || []).length >= 2);
+  check('WORKER DRIFT', 'Worker returns a 503 (not a silent fallback) when resolveChatModel() fails safe', /if\s*\(!model\)\s*\{[\s\S]{0,200}503/.test(workerSrc));
+  check('WORKER DRIFT', 'Worker resolves the model server-side via resolveChatModel(env)', /const model = resolveChatModel\(env\);/.test(workerSrc));
+  check('WORKER DRIFT', "The model resolution itself never reads a client-sent model field (only the request's messages/system/max_tokens do)", !/body\.model\b/.test(workerSrc.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')));
 
   const clientSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
   check('WORKER DRIFT', 'Client-side callAI() no longer sends a model name in the request body', !/body:\s*JSON\.stringify\(\{\s*model:/.test(clientSrc));
 
   const graderSrc = readFileSync(path.join(ROOT, 'functions/_lib/certification/cadence-grader.mjs'), 'utf8');
-  check('WORKER DRIFT', 'cadence-grader.mjs no longer hardcodes ALLOWED_MODEL; imports the shared config instead', !/const ALLOWED_MODEL\s*=/.test(graderSrc) && /resolveCadenceModel/.test(graderSrc));
+  check('WORKER DRIFT', 'cadence-grader.mjs no longer hardcodes any model constant; imports the shared registry instead', !/const ALLOWED_MODEL\s*=/.test(graderSrc) && /resolveCadenceModel/.test(graderSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -205,7 +248,37 @@ async function withMockFetch(mockImpl, fn) {
 async function runIntegrationChecks() {
   // Import once, real production module.
   const { onRequestPost } = await import('../functions/api/certification/submit-interview-turn.js');
-  const env = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key' };
+
+  // No registered model is APPROVED for CADENCE_GRADING_MODEL yet (this is
+  // the correct, current state -- see MODEL LIFECYCLE tests above). Tests
+  // that need a working evaluation deliberately opt into the registered
+  // CANDIDATE via an explicit env override -- exactly the same mechanism a
+  // real controlled regression-test run would use, not a hidden test-only
+  // shortcut. This IS the "explicit fixture/test default" the model-
+  // lifecycle correction calls for.
+  const env = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_GRADING_MODEL: 'claude-sonnet-5' };
+  // A "production-like" env with no model override -- used to prove the
+  // fail-safe path integrates correctly with the retry-safety fix (0B).
+  const envNoModelApproved = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key' };
+
+  // --- No approved model: fails safe, and the failure is handled exactly
+  //     like any other evaluator failure (preserve response, no transcript
+  //     mutation) -- proves Phase 0B's fix and the model-lifecycle fail-
+  //     safe compose correctly rather than needing separate handling. ---
+  {
+    const attemptRow = makeAttemptRow();
+    // No Anthropic call should even be attempted -- resolveCadenceModel()
+    // throws before cadence-grader.mjs ever calls fetch() for the model API.
+    const mock = buildMockFetch({ attemptRow, anthropicBehavior: 'no-followup' });
+    const res = await withMockFetch(mock.impl, () =>
+      onRequestPost({ request: makeRequest({ attemptId: 'attempt-1', interviewId: realInterview.id, studentResponse: 'A response with no approved model configured.' }), env: envNoModelApproved })
+    );
+    const body = await res.json();
+    check('PHASE0 MODEL FAILSAFE', 'With no approved model, the request fails safe (502) via the same path as an Anthropic outage', res.status === 502 && body.preserved === true);
+    check('PHASE0 MODEL FAILSAFE', 'No Anthropic call is made when there is no approved model to call', mock.getAnthropicCallCount() === 0);
+    check('PHASE0 MODEL FAILSAFE', "The student's response is still preserved server-side even though the failure is a config issue, not a network issue", attemptRow.part3_conversation_state[realInterview.id].pendingResponse === 'A response with no approved model configured.');
+    check('PHASE0 MODEL FAILSAFE', 'The transcript is not mutated (same guarantee as the network-failure case)', !attemptRow.part3_conversation_state[realInterview.id].transcript || attemptRow.part3_conversation_state[realInterview.id].transcript.length === 0);
+  }
 
   // --- Retry after failure never duplicates a transcript turn ---
   {
@@ -245,7 +318,8 @@ async function runIntegrationChecks() {
       onRequestPost({ request: makeRequest({ attemptId: 'attempt-1', interviewId: realInterview.id, studentResponse: 'A complete answer.' }), env })
     );
     const graded = attemptRow.part3_conversation_state[realInterview.id].lastGradedWith;
-    check('PHASE0 MODEL LOG', 'A successful evaluation records model provider/name/configVersion internally', !!graded && graded.provider === 'anthropic' && typeof graded.modelName === 'string' && typeof graded.configVersion === 'string');
+    check('PHASE0 MODEL LOG', 'A successful evaluation records model provider/name/status/registryVersion internally', !!graded && graded.provider === 'anthropic' && typeof graded.modelName === 'string' && typeof graded.registryVersion === 'string');
+    check('PHASE0 MODEL LOG', 'The recorded status reflects that this ran on the CANDIDATE model via a deliberate override (nothing is APPROVED yet)', graded.status === 'CANDIDATE' && graded.modelName === 'claude-sonnet-5');
   }
 
   // --- One-follow-up rule preserved across the fixed flow ---

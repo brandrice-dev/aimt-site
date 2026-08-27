@@ -123,32 +123,96 @@ Modes (share the above, never share authority)
 
 ## 6. Provider/model architecture (Phase 0 foundation, built this task)
 
-`functions/_lib/cadence/model-config.mjs` — one versioned config exposing
-`CADENCE_CHAT_MODEL` and `CADENCE_GRADING_MODEL` roles, each with an
-`approved` and optional `candidate` value. `resolveCadenceModel(env, role)`
-honors an env-var override **only** when it matches a pre-registered value
-for that role — an arbitrary string (including any "latest" alias) is
-never trusted. This is enforced in code, not only by policy.
+`functions/_lib/cadence/model-config.mjs` — one versioned **registry**
+exposing `CADENCE_CHAT_MODEL` and `CADENCE_GRADING_MODEL` roles.
+`resolveCadenceModel(env, role)` honors an env-var override **only** when
+it matches a pre-registered model for that role — an arbitrary string
+(including any "latest" alias) is never trusted. This is enforced in code,
+not only by policy.
 
 Cloudflare Workers deploy by dashboard paste and cannot `import` this
-module. `cadence-worker/worker.js`'s constants are a **hand-kept mirror**
-of `CADENCE_CHAT_MODEL`, documented as such, checked for repo-internal
-drift by a static test. This does not and cannot detect drift between the
-repo and what is actually deployed — only a manual dashboard check (or a
-future deploy-automation project, out of this sweep's scope) closes that
-gap. **The currently-live Worker is not touched or redeployed by this
-task.**
+module. `cadence-worker/worker.js`'s constants are a **hand-kept mirror**,
+documented as such, checked for repo-internal drift by a static test. This
+does not and cannot detect drift between the repo and what is actually
+deployed — only a manual dashboard check (or a future deploy-automation
+project, out of this sweep's scope) closes that gap. **The currently-live
+Worker is not touched or redeployed by this task.**
 
-Approved fallback values (this task, config version `cadence-model-config-v1`):
-`CADENCE_CHAT_MODEL.approved = 'claude-sonnet-4-20250514'`,
-`CADENCE_GRADING_MODEL.approved = 'claude-sonnet-4-20250514'` — the
-git-documented, already-tested value for both roles. The live Worker's
-`claude-sonnet-4-6` is recorded as an **unreconciled discrepancy**, not
-silently adopted as the new approved value — reconciling it (either
-redeploying the Worker to match `approved`, or deliberately promoting
-`claude-sonnet-4-6` through the candidate → regression → approval workflow
-this foundation establishes) is a separate, explicit owner-authorized
-action.
+### 6a. Model-lifecycle correction (locked, supersedes the original Phase 0 pass)
+
+The first Phase 0 pass of this section set both roles' approved fallback to
+`claude-sonnet-4-20250514` and treated that as the new long-term baseline.
+**That was wrong and has been corrected in this same build.** By the time
+of the correction, that generation was already superseded — the current
+Anthropic Sonnet generation for new API integrations is `claude-sonnet-5`.
+Enshrining an old generation as "approved" would have been exactly the kind
+of uncontrolled model authority this whole module exists to prevent.
+
+**Every registered model now carries an explicit lifecycle status:**
+
+| Status | Meaning |
+|---|---|
+| `LEGACY` | A superseded generation. Still may be technically callable via the provider, but never eligible for silent/automatic production use again without a new, explicit, recorded approval. |
+| `CANDIDATE` | Registered and eligible for controlled regression testing, not yet cleared for default production traffic. |
+| `APPROVED` | Cleared for default production use. A role's default resolution may point only at a model with this status. |
+| `RETIRED` | No longer available from the provider at all. |
+
+**Current registry (`cadence-model-registry-v2`):**
+
+- `claude-sonnet-4-20250514` → `LEGACY`. AIMT's original Cadence generation.
+- `claude-sonnet-5` → `CANDIDATE` for both `CADENCE_CHAT_MODEL` and
+  `CADENCE_GRADING_MODEL`. Pending the AIMT grading/conversation regression
+  suite (Section 13) before promotion.
+- `claude-sonnet-4-6` (the string this build's audit found actually running
+  on the live `headspa-proxy` Worker) is **deliberately not registered at
+  all** — uncontrolled live drift does not become authoritative by being
+  observed; it would have to be evaluated and registered like any other
+  candidate before it could mean anything to this system.
+- **Neither role has an `APPROVED` model right now.** This is the correct,
+  current state of the project, not an oversight.
+
+**Fail-safe rule (enforced in code):** `resolveCadenceModel()` throws
+`CadenceModelConfigError` — never silently resolves to a `LEGACY`,
+`RETIRED`, or unregistered model — whenever a role has no `APPROVED` model
+and no valid override is given. Calling code (`cadence-grader.mjs`,
+`cadence-worker/worker.js`'s mirror) treats this exactly like any other
+evaluator failure: preserve the student's response, return a retriable
+error, never fall back quietly. Concretely today: **if this branch were
+deployed as-is, right now, Cadence's chat and grading paths would both
+return a clear error instead of silently running on the legacy generation**
+— this is intentional, and is the real operational consequence the owner
+should weigh before authorizing any live deployment of this work: either
+explicitly, deliberately approve a model (after regression testing clears
+`claude-sonnet-5`, or as a recorded, conscious exception to keep the legacy
+generation running a little longer) or accept that Cadence stays
+unavailable until one is approved. Nothing in this branch is deployed —
+per the standing course-audit branch rule (no merge, no deploy without
+explicit approval) — so this has no live consequence today; it becomes a
+real decision only once the owner authorizes deploying this work.
+
+**Promotion (candidate → approved):** add a **new** registry version
+(`cadence-model-registry-v3`, etc.) that sets a role's default to the
+now-cleared model — never edit `cadence-model-registry-v2` in place, same
+discipline already used by
+`functions/_lib/certification/assessment-config.mjs`'s
+`getAssessmentConfig(version)`. Requires the AIMT grading/conversation
+regression suite (Section 13, not yet built) to have run against the
+candidate first. **Chat-model and grading-model promotion are independent
+decisions** — promoting one role's default does not promote the other's.
+
+**Rollback:** add a new registry version whose `approved` field reverts to
+a previously-approved model, or points `CURRENT_REGISTRY_VERSION` at an
+earlier version. A shipped version is never edited in place — rollback is
+always a new, explicit, dated decision, never a silent reversion. Reaching
+all the way back to the `LEGACY` generation requires the same explicit
+re-approval process, not an automatic capability.
+
+**Testing:** production code never receives an implicit test fallback. A
+test that needs a working resolution passes an explicit env override naming
+the registered `CANDIDATE` — the same mechanism a real controlled
+regression-test run uses, not a hidden separate path. See
+`tests/cadence-phase0.test.mjs`'s `MODEL LIFECYCLE` and integration
+sections.
 
 ## 7. Grading-authority architecture
 
@@ -278,6 +342,11 @@ shell, bugs fixed before UI is built on top of them).
 - No model name in client-visible code; both roles resolve through
   `resolveCadenceModel()` or its Worker-side mirror; no "latest" alias
   reachable by any env override.
+- Before live deployment: an explicit, recorded `APPROVED` model exists for
+  each role the deployment actually needs — Cadence fails safe rather than
+  silently running on a `LEGACY` generation if this is not yet true (Section
+  6a). Deploying with no `APPROVED` model means Cadence is unavailable, not
+  degraded-but-working — the owner must decide this deliberately.
 - Module 12 Part III survives a simulated Anthropic failure and a retry
   without a duplicated or non-alternating transcript.
 - No two concurrent submissions for the same conversation both reach

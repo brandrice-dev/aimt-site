@@ -1,85 +1,216 @@
 // Centralized, server-side-only Cadence provider/model configuration.
 //
-// Closes a real drift this repo's own launch-sweep audit found: the live
-// deployed `headspa-proxy` Worker was running a different model string than
-// the one committed in cadence-worker/worker.js, with no shared source of
-// truth to catch it. See docs/course-audit/00-cadence-launch-sweep-audit.md
-// Section 4 and docs/course-audit/00-cadence-launch-sweep-build-contract.md.
+// MODEL-LIFECYCLE CORRECTION (this version, v2): the original Phase 0 pass
+// of this module pointed both roles' `approved` value directly at
+// claude-sonnet-4-20250514 and treated that as the new long-term baseline.
+// That was wrong -- by the time this correction landed, Anthropic's Sonnet
+// 4 generation was already superseded (current generation: Sonnet 5), and
+// enshrining an old generation as "approved" is exactly the kind of
+// uncontrolled, undocumented model authority this whole module exists to
+// prevent. See docs/course-audit/00-cadence-launch-sweep-build-contract.md
+// Section 6a for the full correction record.
 //
-// Both Cloudflare Pages Functions call sites import this module directly
-// (functions/_lib/certification/cadence-grader.mjs today; any future
-// checkpoint-grading Pages Function later). cadence-worker/worker.js cannot
-// import it -- Cloudflare Worker dashboard-paste deploys have no build step
-// -- so its model constants are a hand-kept mirror of the CADENCE_CHAT_MODEL
-// role below, checked for drift by tests/cadence-phase0.test.mjs.
+// Every registered model carries an explicit lifecycle status:
+//   LEGACY    - a superseded generation. Still may be technically callable
+//               via the API, but never eligible for silent/automatic
+//               production use again without a new, explicit, recorded
+//               approval decision.
+//   CANDIDATE - registered and eligible for controlled regression testing,
+//               but not yet cleared for default production traffic.
+//   APPROVED  - cleared for default production use. A role's `approved`
+//               field may point ONLY at a model with this status.
+//   RETIRED   - no longer available from the provider at all.
 //
-// Promotion discipline: never set a role's `approved` value to "latest" or
-// a provider default. To promote a model, add its string as that role's
-// `candidate` first (so it can be selected only via an explicit env-var
-// override that matches a pre-registered value -- see resolveCadenceModel),
-// run it through the regression suite, then move it to a NEW versioned
-// config entry's `approved` field. Never mutate an existing version's
-// values in place -- same pattern already used by
-// functions/_lib/certification/assessment-config.mjs's getAssessmentConfig().
+// FAIL-SAFE RULE: resolveCadenceModel() throws CadenceModelConfigError
+// rather than silently resolving to a LEGACY, RETIRED, or unregistered
+// model. If a role has no APPROVED model, calling code must NOT run --
+// this is deliberate: it is safer for Cadence to be temporarily
+// unavailable than to silently keep serving traffic on an unreviewed
+// model. Callers (functions/_lib/certification/cadence-grader.mjs,
+// cadence-worker/worker.js's hand-kept mirror) are expected to catch this
+// the same way they catch any other evaluator failure -- preserve the
+// student's response, return a retriable error, never fall back quietly.
+//
+// PROMOTION: a model moves CANDIDATE -> APPROVED only by adding a NEW
+// registry version below (never mutating an existing one, same pattern as
+// functions/_lib/certification/assessment-config.mjs's
+// getAssessmentConfig(version)) that sets a role's `approved` field to that
+// model's name -- and, per the AIMT Cadence launch-sweep direction, only
+// after the AIMT grading/conversation regression suite (build contract
+// Section 13, not yet built) has been run against it. Chat-model and
+// grading-model promotion are independent decisions; promoting one role
+// does not promote the other.
+//
+// ROLLBACK: point CURRENT_REGISTRY_VERSION at an earlier version, or add a
+// new version whose `approved` field reverts to a previously-approved
+// model. A version already shipped is never edited in place -- rollback is
+// always a new, explicit, dated decision, never a silent reversion.
+//
+// TEST/DEV: production code never receives an implicit test fallback. A
+// test that needs a working resolution passes an explicit env override
+// naming the registered CANDIDATE (see tests/cadence-phase0.test.mjs) --
+// exactly the same mechanism a real controlled regression-test run would
+// use, not a separate hidden path.
 
-const CONFIG_VERSIONS = {
-  'cadence-model-config-v1': {
+export class CadenceModelConfigError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'CadenceModelConfigError';
+  }
+}
+
+const PROVIDER = 'anthropic';
+
+const REGISTRY_VERSIONS = {
+  // Historical -- the original Phase 0 pass. Preserved for auditability,
+  // never mutated. This is the exact shape the correction found wrong:
+  // both roles pointed straight at a single generation with no lifecycle
+  // distinction at all.
+  'cadence-model-registry-v1': {
+    models: {
+      'claude-sonnet-4-20250514': { status: 'APPROVED', label: 'Claude Sonnet 4 (2025-05-14)' },
+    },
     roles: {
-      // Checkpoints (Modules 0-11) + the guide-panel chat -- today served
-      // through cadence-worker/worker.js.
-      CADENCE_CHAT_MODEL: {
-        approved: 'claude-sonnet-4-20250514',
-        candidate: null,
+      CADENCE_CHAT_MODEL: { approved: 'claude-sonnet-4-20250514', candidate: null },
+      CADENCE_GRADING_MODEL: { approved: 'claude-sonnet-4-20250514', candidate: null },
+    },
+  },
+
+  // Current. Corrects v1: claude-sonnet-4-20250514 is reclassified LEGACY
+  // (no role may point `approved` at it anymore); claude-sonnet-5 (current
+  // Anthropic Sonnet generation, per this environment's own model
+  // guidance) is registered CANDIDATE for both roles, pending the
+  // regression suite. Neither role has an APPROVED model yet -- this is
+  // intentional and is the real, current state of the project, not an
+  // oversight. See build contract Section 6a for the owner decision this
+  // surfaces before any live deployment of this branch.
+  'cadence-model-registry-v2': {
+    models: {
+      'claude-sonnet-4-20250514': {
+        status: 'LEGACY',
+        label: 'Claude Sonnet 4 (2025-05-14)',
+        note: 'AIMT\'s original Cadence generation. Superseded by Sonnet 5. Not eligible for new production approval without an explicit, recorded decision.',
       },
-      // Module 12 Part II/III certification grading -- today served
-      // through functions/_lib/certification/cadence-grader.mjs, never
-      // through the client-facing Worker.
-      CADENCE_GRADING_MODEL: {
-        approved: 'claude-sonnet-4-20250514',
-        candidate: null,
+      'claude-sonnet-5': {
+        status: 'CANDIDATE',
+        label: 'Claude Sonnet 5',
+        note: 'Current Anthropic Sonnet generation for new API integrations. Pending the AIMT grading/conversation regression suite (build contract Section 13) before promotion to APPROVED for either role.',
       },
+      // Deliberately NOT registered: claude-sonnet-4-6, the string this
+      // repo's launch-sweep audit found actually running on the live
+      // deployed headspa-proxy Worker. That is uncontrolled live drift,
+      // not a reviewed model -- it does not become authoritative by being
+      // observed live, and it is not added here until/unless it is
+      // explicitly evaluated and registered the same way any other
+      // candidate would be.
+    },
+    roles: {
+      CADENCE_CHAT_MODEL: { approved: null, candidate: 'claude-sonnet-5' },
+      CADENCE_GRADING_MODEL: { approved: null, candidate: 'claude-sonnet-5' },
     },
   },
 };
 
-const CURRENT_CONFIG_VERSION = 'cadence-model-config-v1';
-const PROVIDER = 'anthropic';
+const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v2';
 
-export function getCadenceModelConfig(version = CURRENT_CONFIG_VERSION) {
-  const config = CONFIG_VERSIONS[version];
-  if (!config) throw new Error(`Unknown Cadence model config version: ${version}`);
-  return { version, provider: PROVIDER, roles: config.roles };
+export function getCadenceModelRegistry(version = CURRENT_REGISTRY_VERSION) {
+  const registry = REGISTRY_VERSIONS[version];
+  if (!registry) throw new CadenceModelConfigError(`Unknown Cadence model registry version: ${version}`);
+  return { version, provider: PROVIDER, models: registry.models, roles: registry.roles };
 }
 
 /**
- * Resolves the model string for one logical Cadence role.
+ * Resolves the model to use for one logical Cadence role.
  *
- * An environment-variable override (env[roleName], e.g. env.CADENCE_GRADING_MODEL)
- * is honored ONLY when it exactly matches that role's pre-registered `approved`
- * or `candidate` value for this config version -- an arbitrary or unregistered
- * string (including any provider "latest" alias) is never trusted and silently
- * falls back to `approved`. This is what makes "no automatic latest-model
- * switching" a property of the code, not just a policy.
+ * Default (no env override): resolves to the role's `approved` model, IF
+ * that model is registered with status APPROVED. If the role has no
+ * approved model, throws CadenceModelConfigError -- fail safe, never a
+ * silent LEGACY fallback.
+ *
+ * Env override (env[roleName]): honored ONLY when it exactly matches a
+ * registered model with status APPROVED or CANDIDATE. Any other value --
+ * unregistered, LEGACY, RETIRED, or an arbitrary/"latest" string -- is
+ * rejected outright, never silently ignored back to a default. This is
+ * what makes "no automatic latest-model switching" a property of the
+ * code, not only a policy, and it is the same mechanism a deliberate
+ * controlled regression-test run uses to exercise a candidate.
  *
  * @param {Object} env - Cloudflare Pages Function env bindings
  * @param {'CADENCE_CHAT_MODEL'|'CADENCE_GRADING_MODEL'} roleName
- * @param {string} [version]
- * @returns {{provider:string, modelName:string, configVersion:string, role:string, source:'approved-default'|'env-override-candidate'}}
+ * @param {{version?:string}} [options]
+ * @returns {{provider:string, modelName:string, status:string, registryVersion:string, role:string, source:string}}
  */
-export function resolveCadenceModel(env, roleName, version = CURRENT_CONFIG_VERSION) {
-  const config = getCadenceModelConfig(version);
-  const role = config.roles[roleName];
-  if (!role) throw new Error(`Unknown Cadence model role: ${roleName}`);
+export function resolveCadenceModel(env, roleName, options = {}) {
+  const version = options.version || CURRENT_REGISTRY_VERSION;
+  const registry = getCadenceModelRegistry(version);
+  const role = registry.roles[roleName];
+  if (!role) throw new CadenceModelConfigError(`Unknown Cadence model role: ${roleName}`);
 
-  const registered = [role.approved, role.candidate].filter(Boolean);
+  const lookup = (modelName) => (modelName ? registry.models[modelName] : null);
+
   const override = env && typeof env[roleName] === 'string' ? env[roleName].trim() : '';
-  const useOverride = override && registered.includes(override) && override !== role.approved;
+  if (override) {
+    const entry = lookup(override);
+    if (entry && (entry.status === 'APPROVED' || entry.status === 'CANDIDATE')) {
+      return {
+        provider: registry.provider,
+        modelName: override,
+        status: entry.status,
+        registryVersion: version,
+        role: roleName,
+        source: entry.status === 'APPROVED' ? 'env-override-approved' : 'env-override-candidate',
+      };
+    }
+    throw new CadenceModelConfigError(
+      `${roleName} env override "${override}" is not an APPROVED or CANDIDATE model in registry ${version} ` +
+      `(status: ${entry ? entry.status : 'UNREGISTERED'}). Refusing to silently fall back.`
+    );
+  }
 
-  return {
-    provider: config.provider,
-    modelName: useOverride ? override : role.approved,
-    configVersion: config.version,
-    role: roleName,
-    source: useOverride ? 'env-override-candidate' : 'approved-default',
-  };
+  const approvedEntry = lookup(role.approved);
+  if (role.approved && approvedEntry && approvedEntry.status === 'APPROVED') {
+    return {
+      provider: registry.provider,
+      modelName: role.approved,
+      status: 'APPROVED',
+      registryVersion: version,
+      role: roleName,
+      source: 'approved-default',
+    };
+  }
+
+  throw new CadenceModelConfigError(
+    `No APPROVED model is registered for ${roleName} in registry ${version}. Cadence must not run without an ` +
+    `explicit approval -- see docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 6a.`
+  );
+}
+
+/**
+ * Diagnostic snapshot of every role's current resolution -- never throws.
+ * Useful for a future status surface and for producing an accurate,
+ * verifiable model-lifecycle report rather than one reasoned about by hand.
+ */
+export function describeCadenceModelStatus(env, version = CURRENT_REGISTRY_VERSION) {
+  const registry = getCadenceModelRegistry(version);
+  const roles = {};
+  for (const roleName of Object.keys(registry.roles)) {
+    const roleConfig = registry.roles[roleName];
+    let resolved = null;
+    let failSafeError = null;
+    try {
+      resolved = resolveCadenceModel(env, roleName, { version });
+    } catch (e) {
+      failSafeError = e.message;
+    }
+    roles[roleName] = {
+      approved: roleConfig.approved,
+      approvedStatus: roleConfig.approved ? (registry.models[roleConfig.approved] || {}).status || 'UNREGISTERED' : null,
+      candidate: roleConfig.candidate,
+      candidateStatus: roleConfig.candidate ? (registry.models[roleConfig.candidate] || {}).status || 'UNREGISTERED' : null,
+      resolved,
+      failSafeTriggered: !!failSafeError,
+      failSafeError,
+    };
+  }
+  return { registryVersion: version, provider: registry.provider, models: registry.models, roles };
 }

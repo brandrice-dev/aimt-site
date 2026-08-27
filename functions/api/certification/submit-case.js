@@ -97,7 +97,7 @@ export async function onRequestPost(context) {
   const scored = scoreCaseSubmission(caseDef, finalResponses, { cadenceEvaluatedParts });
   const lastEvaluated = Object.values(cadenceEvaluatedParts).find((p) => p && p.modelInfo);
   const lastGradedWith = lastEvaluated
-    ? { provider: lastEvaluated.modelInfo.provider, modelName: lastEvaluated.modelInfo.modelName, configVersion: lastEvaluated.modelInfo.configVersion, at: new Date().toISOString() }
+    ? { provider: lastEvaluated.modelInfo.provider, modelName: lastEvaluated.modelInfo.modelName, status: lastEvaluated.modelInfo.status, registryVersion: lastEvaluated.modelInfo.registryVersion, at: new Date().toISOString() }
     : null;
   caseState[caseId] = { submitted: true, responses: finalResponses, score: scored.percent, evidencePoints: scored.evidencePoints, submittedAt: new Date().toISOString(), lastGradedWith };
 
