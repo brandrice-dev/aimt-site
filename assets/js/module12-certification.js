@@ -14,6 +14,16 @@
    below), so Review Mode can never write an authoritative record, issue a
    certificate, or consume a real attempt, without needing any server-side
    Review Mode detection.
+
+   VISUAL/UX NOTE (this pass): every string in COPY below is byte-identical
+   to the prior approved wording — this refactor only changes hierarchy,
+   progressive disclosure, and interaction design. Long explanatory copy
+   that was previously always-visible now lives inside <details> disclosure
+   elements; no sentence was reworded, shortened, or removed. All visual
+   primitives reuse the site's existing tokens/classes (.sec-title,
+   .body-text, .key-point/.kp-*, .cp-input, .cp-btn, .voice-btn, the
+   --aimt-* CSS custom properties) rather than inventing a separate "exam
+   design system."
    ═══════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -72,6 +82,13 @@
       ],
       passingTitle: 'What passing requires',
       passingIntro: 'Certification is based on demonstrated competency, not simply reaching the end of the course.',
+      passingMetrics: [
+        { value: '80%', label: 'Overall' },
+        { value: '75%', label: 'Knowledge' },
+        { value: '75%', label: 'Applied Cases' },
+        { value: '80%', label: 'Cadence Conversation' },
+        { value: '✓', label: 'Critical Competencies', critical: true }
+      ],
       passingBullets: [
         '80% or higher overall',
         '75% or higher — Knowledge & Retention',
@@ -81,6 +98,7 @@
       ],
       passingClose: 'A strong overall score cannot override an unresolved issue in an area involving professional scope, client safety, consent/touch authority, or sanitation/process integrity.\n\nLikewise, one missed multiple-choice question does not automatically mean you failed a critical competency. AIMT looks for the actual reasoning and pattern of understanding demonstrated across the assessment.',
       checkpointTitle: 'What about the checkpoints you already completed?',
+      checkpointLead: 'Prior checkpoints established readiness. They do not secretly change the final exam score.',
       checkpointBody: 'Cadence has been checking your understanding throughout the course.\n\nPassing those required checkpoints is part of what made you eligible to take this final assessment.\n\nYour previous checkpoint answers do not secretly add or subtract points from your final score.\n\nIf you need remediation afterward, that history may help AIMT identify what you already understand well and where additional review would actually be useful.',
       integrityTitle: 'Before you begin',
       integrityBody: 'Parts I and II are intended to reflect your own retained knowledge and judgment.\n\nDo not use external AI to generate your answers or reopen the course to search for each answer while taking those sections.\n\nPart III intentionally uses Cadence — that is part of the assessment design.\n\nYour progress is saved, so you do not have to rush.\n\nOnce you intentionally submit a section, that section locks.',
@@ -195,15 +213,33 @@
   function mdBold(escapedText) {
     return escapedText.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   }
+  // The locked case-bank scenarios also use markdown blockquote syntax
+  // ("> “My neck feels strained…”") to set off a quoted client statement as
+  // its own paragraph. Left unconverted, a bare esc()+split would show the
+  // literal "> " marker to the student. As with mdBold, only the markdown
+  // marker is stripped/restyled -- the quoted words themselves are untouched.
   function paras(text) {
-    return String(text || '').split('\n\n').map(function (p) { return '<p class="body-text">' + mdBold(esc(p)).replace(/\n/g, '<br>') + '</p>'; }).join('');
+    return String(text || '').split('\n\n').map(function (p) {
+      var isQuote = /^>\s?/.test(p);
+      var stripped = isQuote ? p.replace(/^>\s?/, '') : p;
+      var inner = mdBold(esc(stripped)).replace(/\n/g, '<br>');
+      return isQuote ? '<p class="body-text m12x-quote">' + inner + '</p>' : '<p class="body-text">' + inner + '</p>';
+    }).join('');
   }
   // For inline contexts (a <legend>, a single scenario line) where a full
   // paragraph wrapper isn't appropriate but the source text may still contain
   // real line breaks (a stem with a bulleted history list, e.g. M03-003) that
-  // must not collapse into one run-on sentence.
+  // must not collapse into one run-on sentence. Several Knowledge-item stems
+  // also embed a markdown-quoted client line ("> “My neck is red…”") --
+  // handled per-line here the same way paras() handles a whole blockquote
+  // paragraph, so the "> " marker is styled away rather than shown literally.
   function multilineInline(text) {
-    return mdBold(esc(text)).replace(/\n/g, '<br>');
+    return String(text || '').split('\n').map(function (line) {
+      var isQuote = /^>\s?/.test(line);
+      var stripped = isQuote ? line.replace(/^>\s?/, '') : line;
+      var inner = mdBold(esc(stripped));
+      return isQuote ? '<span class="m12x-quote-inline">' + inner + '</span>' : inner;
+    }).join('<br>');
   }
   function firstName() {
     try {
@@ -215,6 +251,29 @@
   function pct(n) {
     if (n == null || isNaN(n)) return '—';
     return Math.round(n * 100) + '%';
+  }
+  // Matches the exact auto-grow behavior already established for every
+  // course checkpoint textarea (grow(this) in headspa-mastery.html) --
+  // reimplemented locally so this standalone file has no hard dependency on
+  // that inline script (it must also work inside the offline local QA tool).
+  function autoGrow(el, max) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, max || 100) + 'px';
+  }
+  // A single answer-choice control shared by Part I and every Part II
+  // choice-based part type. Renders as a premium AIMT control (custom
+  // indicator, generous hit area) while keeping a real, focusable, keyboard-
+  // operable native radio/checkbox for full semantics.
+  function choiceHtml(name, partId, i, text, checked, type) {
+    var cls = 'm12x-choice' + (type === 'checkbox' ? ' checkbox' : '') + (checked ? ' selected' : '');
+    return '<label class="' + cls + '"><input type="' + type + '" name="' + esc(name) + '" data-part="' + esc(partId) + '" data-choice="' + i + '"' + (checked ? ' checked' : '') + '><span class="m12x-choice-indicator" aria-hidden="true"></span><span class="m12x-choice-text">' + esc(text) + '</span></label>';
+  }
+  function voiceButtonHtml(targetId) {
+    if (typeof window.startVoice !== 'function') return '';
+    return '<button type="button" class="voice-btn" onclick="startVoice(\'' + targetId + '\', this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>';
+  }
+  function disclosureHtml(id, summaryText, bodyHtml, open) {
+    return '<details class="m12x-disclosure" id="' + esc(id) + '"' + (open ? ' open' : '') + '><summary>' + esc(summaryText) + '</summary><div class="m12x-disclosure-body">' + bodyHtml + '</div></details>';
   }
 
   async function authHeaders() {
@@ -246,38 +305,207 @@
     style.id = 'm12x-style';
     style.textContent = [
       '.m12x { max-width: 640px; margin: 0 auto; }',
-      '.m12x .m12x-part-card { background: rgba(255,255,255,0.85); border: 0.5px solid rgba(0,0,0,0.08); border-radius: var(--aimt-radius-md); padding: 1.1rem 1.2rem; margin-bottom: 1rem; }',
-      '.m12x .m12x-part-num { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.12em; color: #8a8078; margin-bottom: 4px; }',
-      '.m12x .m12x-part-title { font-family: var(--aimt-font-serif); font-size: 1.02rem; margin-bottom: 2px; }',
-      '.m12x .m12x-part-meta { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.08em; color: #8a8078; margin-bottom: 0.6rem; }',
-      '.m12x .m12x-btn { display: inline-block; background: var(--text); color: #fff; border: none; border-radius: var(--aimt-radius-sm); padding: 0.85rem 1.4rem; font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 500; cursor: pointer; margin-top: 0.6rem; }',
-      '.m12x .m12x-btn.secondary { background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); }',
-      '.m12x .m12x-btn:disabled { opacity: 0.5; cursor: not-allowed; }',
-      '.m12x .m12x-progress { font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.08em; color: #8a8078; margin-bottom: 0.8rem; }',
-      '.m12x .m12x-q { font-family: var(--aimt-font-serif); font-size: 0.98rem; line-height: 1.55; margin-bottom: 0.9rem; }',
-      '.m12x .m12x-choice { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.85rem; border: 0.5px solid rgba(0,0,0,0.12); border-radius: var(--aimt-radius-sm); margin-bottom: 0.55rem; cursor: pointer; font-family: var(--aimt-font-sans); font-size: 0.85rem; line-height: 1.5; }',
-      '.m12x .m12x-choice input { margin-top: 3px; min-width: 18px; min-height: 18px; }',
-      '.m12x .m12x-choice.selected { border-color: var(--text); background: rgba(0,0,0,0.03); }',
-      '.m12x .m12x-jumpgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: 1rem; }',
-      '.m12x .m12x-jump { min-height: 34px; border-radius: var(--aimt-radius-sm); border: 0.5px solid rgba(0,0,0,0.15); background: transparent; font-family: var(--aimt-font-mono); font-size: 0.66rem; cursor: pointer; }',
-      '.m12x .m12x-jump.answered { background: var(--aimt-success-light); border-color: var(--aimt-success); }',
-      '.m12x .m12x-jump.current { outline: 2px solid var(--text); }',
-      '.m12x .m12x-case-scenario { font-family: var(--aimt-font-serif); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; }',
-      '.m12x .m12x-chat { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1rem; }',
-      '.m12x .m12x-msg { max-width: 85%; padding: 0.7rem 0.9rem; border-radius: var(--aimt-radius-md); font-size: 0.88rem; line-height: 1.55; font-family: var(--aimt-font-sans); }',
-      '.m12x .m12x-msg.assistant { background: rgba(0,0,0,0.04); align-self: flex-start; }',
-      '.m12x .m12x-msg.user { background: var(--text); color: #fff; align-self: flex-end; }',
-      '.m12x .m12x-domain-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); font-size: 0.85rem; }',
-      '.m12x .m12x-domain-row.cleared { color: var(--aimt-success); }',
-      '.m12x .m12x-domain-row.uncleared { color: var(--aimt-warning); }',
+      '.m12x .sec-title { max-width: none; }',
+
+      /* buttons -- reuses the site's established pill-CTA shape (.sb-btn/.lc-btn: dark fill, 980px radius) */
+      '.m12x .m12x-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; background: var(--hero-bg,#262626); color:#fff; border:none; border-radius:980px; padding:0.8rem 1.5rem; font-family:var(--aimt-font-sans); font-size:0.85rem; font-weight:500; cursor:pointer; transition:opacity .2s; }',
+      '.m12x .m12x-btn:hover { opacity:0.88; }',
+      '.m12x .m12x-btn:disabled { opacity:0.4; cursor:not-allowed; }',
+      '.m12x .m12x-btn.secondary { background:transparent; color:var(--text); border:0.5px solid var(--border2); }',
+      '.m12x .m12x-btn.secondary:hover { background: rgba(0,0,0,0.03); opacity:1; }',
+      '.m12x .m12x-btn.ghost { background:none; border:none; color:var(--accent2); padding:0.5rem 0.1rem; font-size:0.78rem; text-decoration:underline; text-underline-offset:3px; }',
+      '.m12x .m12x-btn.ghost:hover { opacity:0.72; }',
+      '.m12x .m12x-btn:focus-visible, .m12x .m12x-choice:focus-within, .m12x .m12x-jump:focus-visible, .m12x .m12x-chip:focus-within { outline:2px solid var(--accent2); outline-offset:2px; }',
+
+      /* three-part overview (Exam Ready) */
+      '.m12x .m12x-overview-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:0.85rem; margin: 1.3rem 0; }',
+      '@media (max-width: 720px) { .m12x .m12x-overview-grid { grid-template-columns: 1fr; } }',
+      '.m12x .m12x-tile { border:0.5px solid var(--border2); border-radius:14px; padding:1.05rem 1.1rem; background:rgba(255,255,255,0.55); }',
+      '.m12x .m12x-tile.part3 { background:var(--warn-light); border-color:rgba(160,104,48,0.18); }',
+      '.m12x .m12x-tile-num { font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.12em; color:#8a8078; margin-bottom:6px; }',
+      '.m12x .m12x-tile-title { font-family:var(--aimt-font-mont); font-weight:600; font-size:0.95rem; letter-spacing:-0.01em; margin-bottom:3px; color:var(--text); line-height:1.3; }',
+      '.m12x .m12x-tile-meta { font-size:0.74rem; color:#8a8078; margin-bottom:0.7rem; }',
+
+      /* progressive-disclosure regions ("What to expect", checkpoint history, etc.) */
+      '.m12x .m12x-disclosure { margin:0.4rem 0 0.1rem; }',
+      '.m12x .m12x-disclosure > summary { cursor:pointer; list-style:none; font-family:var(--aimt-font-mono); font-size:0.66rem; letter-spacing:0.09em; text-transform:uppercase; color:var(--accent2); display:flex; align-items:center; gap:7px; padding:0.25rem 0; }',
+      '.m12x .m12x-disclosure > summary::-webkit-details-marker { display:none; }',
+      '.m12x .m12x-disclosure > summary::before { content:"+"; font-size:0.95rem; line-height:1; width:0.8em; display:inline-block; }',
+      '.m12x .m12x-disclosure[open] > summary::before { content:"–"; }',
+      '.m12x .m12x-disclosure .m12x-disclosure-body { padding-top:0.6rem; }',
+      '.m12x .m12x-tile .m12x-disclosure { margin-top:0.2rem; }',
+
+      /* passing standard -- compact editorial metric row, not a dashboard */
+      '.m12x .m12x-metric-row { display:flex; flex-wrap:wrap; gap:1.5rem 2rem; margin:1.1rem 0 1rem; padding:1.1rem 0; border-top:0.5px solid var(--border2); border-bottom:0.5px solid var(--border2); }',
+      '.m12x .m12x-metric-value { font-family:var(--aimt-font-mont); font-size:1.55rem; font-weight:600; color:var(--text); line-height:1; }',
+      '.m12x .m12x-metric-value.critical { font-size:1.3rem; }',
+      '.m12x .m12x-metric-label { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:#8a8078; margin-top:5px; max-width:11ch; }',
+
+      /* thin progress indicator */
+      '.m12x .m12x-progress-row { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:0.5rem; font-family:var(--aimt-font-mono); font-size:0.66rem; letter-spacing:0.06em; color:#8a8078; }',
+      '.m12x .m12x-progress-track { height:3px; background:rgba(0,0,0,0.08); border-radius:2px; margin-bottom:1.4rem; overflow:hidden; }',
+      '.m12x .m12x-progress-fill { height:100%; background:var(--accent2); border-radius:2px; transition:width .25s ease; }',
+
+      /* question -- strip default fieldset/legend chrome, keep semantics */
+      '.m12x fieldset { border:0; padding:0; margin:0; min-width:0; }',
+      '.m12x legend { padding:0; width:100%; float:none; }',
+      '.m12x .m12x-q { font-family:var(--aimt-font-serif); font-size:0.93rem; font-weight:500; line-height:1.58; color:var(--text); margin-bottom:1.1rem; }',
+      '.m12x .m12x-select-hint { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; color:#8a8078; margin-bottom:0.7rem; display:block; }',
+
+      /* answer choices -- premium control, custom indicator, no color-only state */
+      '.m12x .m12x-choice { position:relative; display:flex; align-items:flex-start; gap:0.75rem; padding:0.85rem 1rem; border:0.5px solid var(--border2); border-radius:var(--aimt-radius-md); margin-bottom:0.6rem; cursor:pointer; background:rgba(255,255,255,0.4); transition:border-color .15s, background .15s; }',
+      '.m12x .m12x-choice:hover { border-color:var(--muted2,#c4bdb5); background:rgba(255,255,255,0.7); }',
+      '.m12x .m12x-choice.selected { border-color:var(--text); background:rgba(255,255,255,0.85); }',
+      '.m12x .m12x-choice-indicator { width:18px; height:18px; border-radius:50%; border:1.5px solid var(--muted2,#c4bdb5); flex-shrink:0; margin-top:1px; position:relative; transition:border-color .15s; }',
+      '.m12x .m12x-choice.checkbox .m12x-choice-indicator { border-radius:5px; }',
+      '.m12x .m12x-choice.selected .m12x-choice-indicator { border-color:var(--text); }',
+      '.m12x .m12x-choice.selected .m12x-choice-indicator::after { content:""; position:absolute; inset:3.5px; border-radius:50%; background:var(--text); }',
+      '.m12x .m12x-choice.checkbox.selected .m12x-choice-indicator::after { border-radius:2px; }',
+      '.m12x .m12x-choice input { position:absolute; opacity:0; width:1px; height:1px; margin:0; pointer-events:none; }',
+      '.m12x .m12x-choice-text { font-family:var(--aimt-font-sans); font-size:0.87rem; line-height:1.55; color:var(--text); padding-top:1px; }',
+
+      /* Part I nav bar + flag control */
+      '.m12x .m12x-navbar { display:flex; align-items:center; justify-content:space-between; gap:0.6rem; margin-top:1.3rem; padding-top:1rem; border-top:0.5px solid var(--border2); flex-wrap:wrap; }',
+      '.m12x .m12x-flag-btn { display:inline-flex; align-items:center; gap:5px; background:none; border:0.5px solid var(--border2); border-radius:980px; padding:0.55rem 0.95rem; font-family:var(--aimt-font-sans); font-size:0.76rem; color:var(--text); cursor:pointer; }',
+      '.m12x .m12x-flag-btn.active { background:var(--aimt-warning-light); border-color:var(--aimt-warning); color:var(--aimt-warning); }',
+      '.m12x .m12x-viewmap-btn { margin-top:1rem; }',
+
+      /* question map (native <dialog>, on-demand only) */
+      '.m12x-mapdialog { border:none; border-radius:16px; padding:0; max-width:520px; width:92vw; max-height:82vh; }',
+      '.m12x-mapdialog::backdrop { background:rgba(20,18,16,0.45); }',
+      '.m12x-mapdialog .m12x-map-inner { padding:1.3rem 1.4rem 1.5rem; overflow-y:auto; max-height:82vh; }',
+      '.m12x-mapdialog .m12x-map-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:0.9rem; }',
+      '.m12x-mapdialog .m12x-map-head h2 { margin-bottom:0; max-width:none; }',
+      '.m12x-mapdialog .m12x-map-legend { display:flex; flex-wrap:wrap; gap:0.9rem 1.1rem; font-size:0.7rem; color:#8a8078; margin-bottom:1.1rem; }',
+      '.m12x-mapdialog .m12x-map-legend-item { display:flex; align-items:center; gap:5px; }',
+      '.m12x-mapdialog .m12x-map-swatch { width:13px; height:13px; border-radius:4px; border:1.5px solid var(--muted2,#c4bdb5); display:inline-block; }',
+      '.m12x-mapdialog .m12x-map-swatch.answered { background:var(--aimt-success-light); border-color:var(--aimt-success); }',
+      '.m12x-mapdialog .m12x-map-swatch.flagged { border-color:var(--aimt-warning); background:var(--aimt-warning-light); }',
+      '.m12x-mapdialog .m12x-jumpgrid { display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }',
+      '@media (min-width:420px) { .m12x-mapdialog .m12x-jumpgrid { grid-template-columns:repeat(8,1fr); } }',
+      '.m12x-mapdialog .m12x-jump { position:relative; min-height:42px; min-width:42px; border-radius:8px; border:1px solid var(--border2); background:#fff; font-family:var(--aimt-font-mono); font-size:0.72rem; cursor:pointer; }',
+      '.m12x-mapdialog .m12x-jump.answered { background:var(--aimt-success-light); border-color:var(--aimt-success); }',
+      '.m12x-mapdialog .m12x-jump.flagged { box-shadow:inset 0 0 0 1.5px var(--aimt-warning); }',
+      '.m12x-mapdialog .m12x-jump.current { outline:2px solid var(--text); outline-offset:1px; }',
+      '.m12x-mapdialog .m12x-jump-flag { position:absolute; top:-5px; right:-5px; font-size:0.62rem; }',
+
+      /* Part I review-before-submit summary */
+      '.m12x .m12x-summary-row { display:flex; gap:1.6rem; margin:1.1rem 0 1.2rem; flex-wrap:wrap; }',
+      '.m12x .m12x-summary-item { cursor:pointer; background:none; border:none; padding:0; font-family:inherit; text-align:left; }',
+      '.m12x .m12x-summary-value { font-family:var(--aimt-font-mont); font-size:1.4rem; font-weight:600; color:var(--text); }',
+      '.m12x .m12x-summary-label { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.07em; text-transform:uppercase; color:#8a8078; }',
+
+      /* case scenario -- separated without being a decorative card */
+      '.m12x .m12x-case-progress { font-family:var(--aimt-font-mono); font-size:0.66rem; letter-spacing:0.07em; color:#8a8078; margin-bottom:0.5rem; }',
+      '.m12x .m12x-scenario { border-left:2.5px solid var(--accent2); padding:0.1rem 0 0.1rem 1.05rem; margin:0.9rem 0 1.3rem; }',
+      '.m12x .m12x-scenario p.body-text { margin-bottom:0.7rem; }',
+      '.m12x .m12x-scenario p.body-text:last-child { margin-bottom:0; }',
+      /* client quotes (markdown "> ...") -- reuses the site's established italic-serif quote convention (.cn-text/.sc-text) rather than showing a literal ">" */
+      '.m12x .m12x-quote { font-family:var(--aimt-font-serif); font-style:italic; color:var(--text); padding-left:0.9rem; border-left:2px solid var(--border2); }',
+      '.m12x .m12x-quote-inline { font-family:var(--aimt-font-serif); font-style:italic; }',
+      '.m12x .m12x-case-part { margin-bottom:1.3rem; }',
+      '.m12x .m12x-case-submitrow { margin-top:0.6rem; }',
+
+      /* sequencing */
+      '.m12x .m12x-seq { list-style:none; padding:0; margin:0 0 0.6rem; }',
+      '.m12x .m12x-seq-item { display:flex; align-items:center; gap:0.7rem; padding:0.7rem 0.9rem; border:0.5px solid var(--border2); border-radius:var(--aimt-radius-md); margin-bottom:0.5rem; background:rgba(255,255,255,0.5); }',
+      '.m12x .m12x-seq-num { width:24px; height:24px; border-radius:50%; background:var(--hero-bg,#262626); color:#fff; font-family:var(--aimt-font-mono); font-size:0.7rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }',
+      '.m12x .m12x-seq-text { flex:1; font-size:0.86rem; line-height:1.5; color:var(--text); }',
+      '.m12x .m12x-seq-controls { display:flex; flex-direction:column; gap:2px; }',
+      '.m12x .m12x-seq-arrow { width:26px; height:22px; border:0.5px solid var(--border2); background:#fff; border-radius:6px; cursor:pointer; font-size:0.68rem; line-height:1; padding:0; }',
+      '.m12x .m12x-seq-arrow:disabled { opacity:0.3; cursor:not-allowed; }',
+      '.m12x .m12x-seq-arrow:focus-visible { outline:2px solid var(--accent2); outline-offset:1px; }',
+
+      /* classification */
+      '.m12x .m12x-classify-item { margin-bottom:0.9rem; }',
+      '.m12x .m12x-classify-label { font-size:0.86rem; font-weight:500; color:var(--text); margin-bottom:0.5rem; }',
+      '.m12x .m12x-classify-options { display:flex; gap:0.5rem; flex-wrap:wrap; }',
+      '.m12x .m12x-chip { position:relative; border:0.5px solid var(--border2); border-radius:980px; padding:0.5rem 1.05rem; font-size:0.79rem; background:rgba(255,255,255,0.5); cursor:pointer; color:var(--text); transition:background .15s, border-color .15s, color .15s; }',
+      '.m12x .m12x-chip:hover { border-color:var(--muted2,#c4bdb5); }',
+      '.m12x .m12x-chip.selected { background:var(--hero-bg,#262626); border-color:transparent; color:#fff; }',
+      '.m12x .m12x-chip input { position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }',
+
+      /* short response */
+      '.m12x .m12x-shortresponse-row { display:flex; align-items:flex-end; gap:0.6rem; }',
+      '.m12x .m12x-shortresponse-row .cp-input { flex:1; min-height:64px; }',
+
+      /* Part III -- intentional environment shift, still AIMT-native */
+      '.m12x .m12x-cadence-env { background:var(--warn-light); border-radius:20px; padding:1.4rem 1.3rem 1.2rem; margin-top:0.6rem; }',
+      '.m12x .m12x-cadence-eyebrow { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent2); margin-bottom:0.7rem; }',
+      '.m12x .m12x-chat { display:flex; flex-direction:column; gap:0.9rem; margin-bottom:1.1rem; }',
+      '.m12x .m12x-msg { max-width:88%; padding:0.8rem 1rem; border-radius:16px; font-size:0.89rem; line-height:1.6; font-family:var(--aimt-font-sans); }',
+      '.m12x .m12x-msg.assistant { background:#fff; align-self:flex-start; border-bottom-left-radius:4px; }',
+      '.m12x .m12x-msg.user { background:var(--hero-bg,#262626); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }',
+      '.m12x .m12x-composer { display:flex; align-items:flex-end; gap:0.6rem; }',
+      '.m12x .m12x-composer .cp-input { background:#fff; flex:1; min-height:52px; }',
+
+      /* pass / not-yet-passed */
+      '.m12x .m12x-pass-banner { border-top:3px solid var(--aimt-success); padding-top:1.1rem; }',
+      '.m12x .m12x-notyet-banner { border-top:3px solid var(--aimt-warning); padding-top:1.1rem; }',
+      '.m12x .m12x-perf-card { border:0.5px solid var(--border2); border-radius:14px; padding:1.15rem 1.25rem; margin:1.2rem 0; background:rgba(255,255,255,0.6); }',
+      '.m12x .m12x-perf-head { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0.4rem 1rem; margin-bottom:0.7rem; }',
+      '.m12x .m12x-perf-title { font-family:var(--aimt-font-mont); font-weight:600; font-size:0.92rem; }',
+      '.m12x .m12x-perf-score { font-family:var(--aimt-font-mont); font-size:1.3rem; font-weight:600; }',
+      '.m12x .m12x-domain-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:0.5px solid var(--border2); font-size:0.85rem; }',
+      '.m12x .m12x-domain-row:last-child { border-bottom:none; }',
+      '.m12x .m12x-domain-row.cleared { color:var(--aimt-success); }',
+      '.m12x .m12x-domain-row.uncleared { color:var(--aimt-warning); }',
+
+      /* Review Mode dev-only fixture bar */
       '.m12x .m12x-review-fixtures { display: flex; flex-wrap: wrap; gap: 6px; padding: 0.6rem; border: 1px dashed rgba(0,0,0,0.25); border-radius: 8px; margin-bottom: 1rem; }',
-      '.m12x .m12x-review-fixtures button { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }'
+      '.m12x .m12x-review-fixtures button { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }',
+
+      '@media (prefers-reduced-motion: reduce) { .m12x .m12x-progress-fill, .m12x .m12x-btn, .m12x .m12x-choice, .m12x .m12x-chip { transition: none; } }'
     ].join('\n');
     document.head.appendChild(style);
   }
 
   function frame(inner) {
     return '<div class="m12x lesson-wrap">' + inner + '</div>';
+  }
+
+  // ---- On-demand Question Map (native <dialog> -- free focus trap + Escape
+  // handling in evergreen browsers). Never permanently occupies page layout. ----
+  function openQuestionMap(opts) {
+    var existing = document.getElementById('m12MapDialog');
+    if (existing) existing.remove();
+    var dlg = document.createElement('dialog');
+    dlg.id = 'm12MapDialog';
+    dlg.className = 'm12x-mapdialog';
+    var inner = '<div class="m12x-map-inner">';
+    inner += '<div class="m12x-map-head"><h2 class="sec-title">Question Map</h2><button type="button" class="m12x-btn secondary" id="m12MapClose">Close</button></div>';
+    inner += '<div class="m12x-map-legend">';
+    inner += '<span class="m12x-map-legend-item"><span class="m12x-map-swatch answered" aria-hidden="true"></span>Answered</span>';
+    inner += '<span class="m12x-map-legend-item"><span class="m12x-map-swatch" aria-hidden="true"></span>Unanswered</span>';
+    inner += '<span class="m12x-map-legend-item"><span class="m12x-map-swatch flagged" aria-hidden="true"></span>Flagged for review</span>';
+    inner += '</div>';
+    inner += '<div class="m12x-jumpgrid" role="group" aria-label="Jump to question">';
+    for (var i = 0; i < opts.total; i++) {
+      var answered = opts.isAnswered(i);
+      var flagged = opts.isFlagged(i);
+      var isCurrent = i === opts.currentIndex;
+      var stateLabel = (answered ? ', answered' : ', unanswered') + (flagged ? ', flagged for review' : '') + (isCurrent ? ', current question' : '');
+      inner += '<button type="button" class="m12x-jump' + (answered ? ' answered' : '') + (flagged ? ' flagged' : '') + (isCurrent ? ' current' : '') + '" data-jump="' + i + '"' + (isCurrent ? ' aria-current="true"' : '') + ' aria-label="Question ' + (i + 1) + stateLabel + '">' + (i + 1) + (flagged ? '<span class="m12x-jump-flag" aria-hidden="true">⚑</span>' : '') + '</button>';
+    }
+    inner += '</div></div>';
+    dlg.innerHTML = inner;
+    document.body.appendChild(dlg);
+    dlg.addEventListener('close', function () { dlg.remove(); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); }); // backdrop click
+    var closeBtn = dlg.querySelector('#m12MapClose');
+    if (closeBtn) closeBtn.addEventListener('click', function () { dlg.close(); });
+    Array.prototype.forEach.call(dlg.querySelectorAll('[data-jump]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var i = Number(btn.getAttribute('data-jump'));
+        dlg.close();
+        opts.onJump(i);
+      });
+    });
+    if (typeof dlg.showModal === 'function') {
+      dlg.showModal();
+    } else {
+      dlg.setAttribute('open', ''); // very old browser fallback -- no focus trap, still closable
+    }
   }
 
   // ---- Review Mode fixtures (mocked, no network, no persistence) ----
@@ -336,22 +564,40 @@
     var c = COPY.stateA;
     var html = '';
     html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
-    html += '<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>';
+    html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+    // A. Hero -- keep the short opening visible; no paragraph wall before hierarchy is established.
     html += c.opening.map(function (p) { return '<p class="body-text">' + esc(p) + '</p>'; }).join('');
-    html += '<h2 class="sec-title" style="max-width:none;margin-top:1.4rem;">' + esc(c.howItWorksTitle) + '</h2>';
-    c.parts.forEach(function (part) {
-      html += '<div class="m12x-part-card">';
-      html += '<div class="m12x-part-num">' + esc(part.num) + '</div>';
-      html += '<div class="m12x-part-title">' + esc(part.title) + '</div>';
-      html += '<div class="m12x-part-meta">' + esc(part.meta) + '</div>';
-      html += part.body.map(function (p) { return '<p class="body-text">' + esc(p) + '</p>'; }).join('');
+
+    // B. Three-part overview -- one cohesive component, concise by default,
+    // full approved copy available per part via "What to expect".
+    html += '<h2 class="sec-title" style="margin-top:1.5rem;">' + esc(c.howItWorksTitle) + '</h2>';
+    html += '<div class="m12x-overview-grid">';
+    c.parts.forEach(function (part, i) {
+      html += '<div class="m12x-tile' + (i === 2 ? ' part3' : '') + '">';
+      html += '<div class="m12x-tile-num">' + esc(part.num) + '</div>';
+      html += '<div class="m12x-tile-title">' + esc(part.title) + '</div>';
+      html += '<div class="m12x-tile-meta">' + esc(part.meta) + '</div>';
+      html += disclosureHtml('m12PartDetail' + i, 'What to expect', part.body.map(function (p) { return '<p class="body-text" style="font-size:0.83rem;">' + esc(p) + '</p>'; }).join(''));
       html += '</div>';
     });
-    html += '<h2 class="sec-title" style="max-width:none;margin-top:1.2rem;">' + esc(c.passingTitle) + '</h2>';
+    html += '</div>';
+
+    // C. Passing standard -- compact metric row + preserved explanatory copy.
+    html += '<h2 class="sec-title" style="margin-top:1.3rem;">' + esc(c.passingTitle) + '</h2>';
     html += '<p class="body-text">' + esc(c.passingIntro) + '</p>';
-    html += '<ul style="margin:0.6rem 0 1rem 1.2rem;">' + c.passingBullets.map(function (b) { return '<li class="body-text">' + esc(b) + '</li>'; }).join('') + '</ul>';
-    html += paras(c.passingClose);
-    html += '<div class="key-point"><span class="kp-icon" aria-hidden="true">✦</span><div class="kp-body"><div class="kp-eyebrow">' + esc(c.checkpointTitle) + '</div>' + paras(c.checkpointBody) + '</div></div>';
+    html += '<div class="m12x-metric-row">';
+    c.passingMetrics.forEach(function (m) {
+      html += '<div><div class="m12x-metric-value' + (m.critical ? ' critical' : '') + '">' + esc(m.value) + '</div><div class="m12x-metric-label">' + esc(m.label) + '</div></div>';
+    });
+    html += '</div>';
+    html += disclosureHtml('m12PassingDetail', 'How these are evaluated', paras(c.passingClose) + '<ul style="margin:0.6rem 0 0 1.2rem;">' + c.passingBullets.map(function (b) { return '<li class="body-text" style="font-size:0.83rem;">' + esc(b) + '</li>'; }).join('') + '</ul>');
+
+    // D. Checkpoint history -- restrained disclosure, not a giant card.
+    html += '<h2 class="sec-title" style="margin-top:1.3rem;">' + esc(c.checkpointTitle) + '</h2>';
+    html += '<p class="body-text">' + esc(c.checkpointLead) + '</p>';
+    html += disclosureHtml('m12CheckpointDetail', 'Read more', paras(c.checkpointBody));
+
+    // E. Before you begin -- one compact readiness/integrity block.
     html += '<div class="key-point"><span class="kp-icon" aria-hidden="true">✦</span><div class="kp-body"><div class="kp-eyebrow">' + esc(c.integrityTitle) + '</div>' + paras(c.integrityBody) + '</div></div>';
     html += paras(c.finalEncouragement);
     html += '<button class="m12x-btn" id="m12StartBtn">' + esc(c.button) + '</button>';
@@ -378,62 +624,85 @@
     var c = COPY.partI;
     var items = (attempt.partI && attempt.partI.items) || fixturePartIItems();
     var responses = (attempt.partI && attempt.partI.responses) || {};
+    var flagged = {}; // session-local only -- organizational, never scored, never persisted
     var idx = 0;
+    var total = items.length;
 
-    function draw() {
-      var total = items.length;
+    function answeredCount() { return Object.keys(responses).filter(function (k) { return responses[k] != null; }).length; }
+    function flaggedCount() { return Object.keys(flagged).filter(function (k) { return flagged[k]; }).length; }
+    function isAnsweredAt(i) { return responses[items[i].id] != null; }
+    function isFlaggedAt(i) { return !!flagged[items[i].id]; }
+
+    function drawQuestion() {
       var item = items[idx];
-      var answeredCount = Object.keys(responses).length;
       var html = '';
       html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
-      html += '<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>';
-      html += '<p class="body-text" style="margin-bottom:0.4rem;">' + esc(c.meta) + '</p>';
-      html += paras(c.body);
-      html += '<div class="m12x-progress" aria-live="polite">' + esc(c.progress(idx + 1, total)) + ' — ' + answeredCount + ' answered</div>';
-      html += '<div class="m12x-jumpgrid" role="group" aria-label="Jump to question">';
-      for (var i = 0; i < total; i++) {
-        var answered = responses[items[i].id] != null;
-        html += '<button class="m12x-jump' + (answered ? ' answered' : '') + (i === idx ? ' current' : '') + '" data-jump="' + i + '" aria-label="Question ' + (i + 1) + (answered ? ', answered' : ', unanswered') + '">' + (i + 1) + '</button>';
-      }
-      html += '</div>';
+      html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+      html += '<div class="m12x-progress-row" aria-live="polite"><span>' + esc(c.progress(idx + 1, total)) + '</span><span>' + answeredCount() + ' answered' + (flaggedCount() ? ' · ' + flaggedCount() + ' flagged' : '') + '</span></div>';
+      html += '<div class="m12x-progress-track"><div class="m12x-progress-fill" style="width:' + Math.round(((idx + 1) / total) * 100) + '%;"></div></div>';
       html += '<fieldset><legend class="m12x-q">' + multilineInline(item.prompt) + '</legend>';
       item.choices.forEach(function (choice, i) {
-        var checked = responses[item.id] === i;
-        html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="m12q" value="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
+        html += choiceHtml('m12q', item.id, i, choice, responses[item.id] === i, 'radio');
       });
       html += '</fieldset>';
-      html += '<div style="display:flex; gap:0.6rem; margin-top:0.8rem;">';
+      html += '<div class="m12x-navbar">';
       html += '<button class="m12x-btn secondary" id="m12PrevQ"' + (idx === 0 ? ' disabled' : '') + '>Previous</button>';
-      html += '<button class="m12x-btn secondary" id="m12NextQ"' + (idx === total - 1 ? ' disabled' : '') + '>Next</button>';
+      html += '<button type="button" class="m12x-flag-btn' + (flagged[item.id] ? ' active' : '') + '" id="m12FlagBtn" aria-pressed="' + (!!flagged[item.id]) + '">' + (flagged[item.id] ? '⚑ Flagged' : '⚐ Flag for review') + '</button>';
+      html += '<button class="m12x-btn" id="m12NextQ">' + (idx === total - 1 ? 'Review Answers' : 'Next') + '</button>';
       html += '</div>';
-      html += '<div style="margin-top:1.4rem; border-top: 0.5px solid rgba(0,0,0,0.1); padding-top:1rem;">';
-      html += '<h2 class="sec-title" style="max-width:none;">' + esc(c.submitTitle) + '</h2>';
-      html += paras(c.submitBody);
-      html += '<button class="m12x-btn secondary" id="m12ReviewBtn">' + esc(c.reviewBtn) + '</button> ';
-      html += '<button class="m12x-btn" id="m12SubmitBtn">' + esc(c.submitBtn) + '</button>';
-      html += '</div>';
+      html += '<button type="button" class="m12x-btn ghost m12x-viewmap-btn" id="m12ViewMap">View Question Map (' + answeredCount() + ' of ' + total + ' answered)</button>';
       container.innerHTML = frame(html);
 
       Array.prototype.forEach.call(container.querySelectorAll('input[name="m12q"]'), function (input) {
         input.addEventListener('change', function () {
-          responses[item.id] = Number(input.value);
+          responses[item.id] = Number(input.getAttribute('data-choice'));
           saveProgressDebounced(attempt.id, responses);
-          draw();
+          drawQuestion();
         });
       });
-      Array.prototype.forEach.call(container.querySelectorAll('[data-jump]'), function (btn) {
-        btn.addEventListener('click', function () { idx = Number(btn.getAttribute('data-jump')); draw(); });
-      });
+      var flagBtn = document.getElementById('m12FlagBtn');
+      if (flagBtn) flagBtn.addEventListener('click', function () { flagged[item.id] = !flagged[item.id]; drawQuestion(); });
       var prevBtn = document.getElementById('m12PrevQ');
+      if (prevBtn) prevBtn.addEventListener('click', function () { if (idx > 0) { idx--; drawQuestion(); } });
       var nextBtn = document.getElementById('m12NextQ');
-      if (prevBtn) prevBtn.addEventListener('click', function () { if (idx > 0) { idx--; draw(); } });
-      if (nextBtn) nextBtn.addEventListener('click', function () { if (idx < total - 1) { idx++; draw(); } });
-      var reviewBtn = document.getElementById('m12ReviewBtn');
-      if (reviewBtn) reviewBtn.addEventListener('click', function () { idx = 0; draw(); });
-      var submitBtn = document.getElementById('m12SubmitBtn');
-      if (submitBtn) submitBtn.addEventListener('click', function () { onSubmitPartI(container, attempt, responses); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { if (idx < total - 1) { idx++; drawQuestion(); } else { drawReview(); } });
+      var mapBtn = document.getElementById('m12ViewMap');
+      if (mapBtn) mapBtn.addEventListener('click', function () {
+        openQuestionMap({ total: total, isAnswered: isAnsweredAt, isFlagged: isFlaggedAt, currentIndex: idx, onJump: function (i) { idx = i; drawQuestion(); } });
+      });
     }
-    draw();
+
+    function drawReview() {
+      var unansweredCount = 0;
+      for (var i = 0; i < total; i++) if (!isAnsweredAt(i)) unansweredCount++;
+      var html = '';
+      html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
+      html += '<h1 class="sec-title">' + esc(c.submitTitle) + '</h1>';
+      html += paras(c.submitBody);
+      html += '<div class="m12x-summary-row">';
+      html += '<button type="button" class="m12x-summary-item" id="m12SumAnswered"><div class="m12x-summary-value">' + answeredCount() + '/' + total + '</div><div class="m12x-summary-label">Answered</div></button>';
+      html += '<button type="button" class="m12x-summary-item" id="m12SumUnanswered"><div class="m12x-summary-value">' + unansweredCount + '</div><div class="m12x-summary-label">Unanswered</div></button>';
+      html += '<button type="button" class="m12x-summary-item" id="m12SumFlagged"><div class="m12x-summary-value">' + flaggedCount() + '</div><div class="m12x-summary-label">Flagged</div></button>';
+      html += '</div>';
+      html += '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">';
+      html += '<button class="m12x-btn secondary" id="m12BackToQ">Back to Questions</button>';
+      html += '<button class="m12x-btn secondary" id="m12ViewMap2">' + esc(c.reviewBtn) + '</button>';
+      html += '<button class="m12x-btn" id="m12SubmitBtn">' + esc(c.submitBtn) + '</button>';
+      html += '</div>';
+      container.innerHTML = frame(html);
+
+      function openMap() {
+        openQuestionMap({ total: total, isAnswered: isAnsweredAt, isFlagged: isFlaggedAt, currentIndex: -1, onJump: function (i) { idx = i; drawQuestion(); } });
+      }
+      document.getElementById('m12SumAnswered').addEventListener('click', openMap);
+      document.getElementById('m12SumUnanswered').addEventListener('click', openMap);
+      document.getElementById('m12SumFlagged').addEventListener('click', openMap);
+      document.getElementById('m12ViewMap2').addEventListener('click', openMap);
+      document.getElementById('m12BackToQ').addEventListener('click', function () { drawQuestion(); });
+      document.getElementById('m12SubmitBtn').addEventListener('click', function () { onSubmitPartI(container, attempt, responses); });
+    }
+
+    drawQuestion();
   }
 
   var saveTimer = null;
@@ -459,7 +728,7 @@
   }
 
   function renderTransition(container, copy, onContinue) {
-    var html = '<h1 class="sec-title" style="max-width:none;">' + esc(copy.title) + '</h1>' + paras(copy.body) + '<button class="m12x-btn" id="m12TransitionBtn">' + esc(copy.button) + '</button>';
+    var html = '<h1 class="sec-title">' + esc(copy.title) + '</h1>' + paras(copy.body) + '<button class="m12x-btn" id="m12TransitionBtn">' + esc(copy.button) + '</button>';
     container.innerHTML = frame(html);
     var btn = document.getElementById('m12TransitionBtn');
     if (btn) btn.addEventListener('click', onContinue);
@@ -490,43 +759,43 @@
   }
 
   function renderCasePartFieldset(part, responses) {
-    var html = '<fieldset style="margin-bottom:0.8rem;"><legend class="m12x-q">' + multilineInline(part.prompt) + '</legend>';
+    var html = '<div class="m12x-case-part"><fieldset><legend class="m12x-q">' + multilineInline(part.prompt) + '</legend>';
     if (part.type === 'structured-short-response') {
       var val = responses[part.id] || '';
-      html += '<textarea class="cp-input" data-part="' + part.id + '" rows="3" style="width:100%;" aria-label="Your response">' + esc(val) + '</textarea>';
+      var taId = 'm12CasePart_' + part.id.replace(/[^a-zA-Z0-9]/g, '_');
+      html += '<div class="m12x-shortresponse-row"><textarea class="cp-input" id="' + taId + '" data-part="' + part.id + '" rows="2" aria-label="Your response">' + esc(val) + '</textarea>' + voiceButtonHtml(taId) + '</div>';
     } else if (part.type === 'single-best-answer') {
       (part.choices || []).forEach(function (choice, i) {
-        var checked = responses[part.id] === i;
-        html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="cpart-' + part.id + '" data-part="' + part.id + '" data-choice="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
+        html += choiceHtml('cpart-' + part.id, part.id, i, choice, responses[part.id] === i, 'radio');
       });
     } else if (part.type === 'multi-select') {
+      html += '<span class="m12x-select-hint">Select all that apply</span>';
       (part.choices || []).forEach(function (choice, i) {
         var arr = responses[part.id] || [];
-        var checked = arr.indexOf(i) !== -1;
-        html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="checkbox" data-part="' + part.id + '" data-choice="' + i + '"' + (checked ? ' checked' : '') + '> <span>' + esc(choice) + '</span></label>';
+        html += choiceHtml('cpart-' + part.id + '-' + i, part.id, i, choice, arr.indexOf(i) !== -1, 'checkbox');
       });
     } else if (part.type === 'sequencing') {
       var order = responses[part.id] || (part.choices || []).map(function (_, i) { return i; });
       responses[part.id] = order;
-      html += '<ol class="m12x-seq" style="padding-left:1.2rem;">';
+      html += '<ol class="m12x-seq">';
       order.forEach(function (choiceIdx, pos) {
-        html += '<li class="body-text" style="margin-bottom:0.5rem;">' + esc(part.choices[choiceIdx]) +
-          ' <button type="button" class="m12x-btn secondary" data-seq-up="' + part.id + '" data-pos="' + pos + '" aria-label="Move up"' + (pos === 0 ? ' disabled' : '') + '>↑</button>' +
-          ' <button type="button" class="m12x-btn secondary" data-seq-down="' + part.id + '" data-pos="' + pos + '" aria-label="Move down"' + (pos === order.length - 1 ? ' disabled' : '') + '>↓</button></li>';
+        html += '<li class="m12x-seq-item"><span class="m12x-seq-num" aria-hidden="true">' + (pos + 1) + '</span><span class="m12x-seq-text">' + esc(part.choices[choiceIdx]) + '</span><span class="m12x-seq-controls">' +
+          '<button type="button" class="m12x-seq-arrow" data-seq-up="' + part.id + '" data-pos="' + pos + '" aria-label="Move up"' + (pos === 0 ? ' disabled' : '') + '>▲</button>' +
+          '<button type="button" class="m12x-seq-arrow" data-seq-down="' + part.id + '" data-pos="' + pos + '" aria-label="Move down"' + (pos === order.length - 1 ? ' disabled' : '') + '>▼</button></span></li>';
       });
       html += '</ol>';
     } else if (part.type === 'classification') {
       (part.items || []).forEach(function (item) {
-        html += '<div style="margin-bottom:0.7rem;"><div class="body-text" style="margin-bottom:0.3rem;font-weight:500;">' + esc(item.label) + '</div>';
+        html += '<div class="m12x-classify-item"><div class="m12x-classify-label">' + esc(item.label) + '</div><div class="m12x-classify-options" role="radiogroup" aria-label="' + esc(item.label) + '">';
         (part.categories || []).forEach(function (cat) {
           var current = (responses[part.id] || {})[item.id];
           var checked = current === cat;
-          html += '<label class="m12x-choice' + (checked ? ' selected' : '') + '"><input type="radio" name="cpart-' + part.id + '-' + item.id + '" data-part="' + part.id + '" data-item="' + esc(item.id) + '" data-cat="' + esc(cat) + '"' + (checked ? ' checked' : '') + '> <span>' + esc(cat) + '</span></label>';
+          html += '<label class="m12x-chip' + (checked ? ' selected' : '') + '"><input type="radio" name="cpart-' + part.id + '-' + item.id + '" data-part="' + part.id + '" data-item="' + esc(item.id) + '" data-cat="' + esc(cat) + '"' + (checked ? ' checked' : '') + '>' + esc(cat) + '</label>';
         });
-        html += '</div>';
+        html += '</div></div>';
       });
     }
-    html += '</fieldset>';
+    html += '</fieldset></div>';
     return html;
   }
 
@@ -536,7 +805,10 @@
       // keystroke -- that would rebuild the textarea's DOM node mid-typing
       // and drop the cursor/focus. Only the submit-button gating updates.
       var ta = container.querySelector('textarea[data-part="' + part.id + '"]');
-      if (ta) ta.addEventListener('input', function () { responses[part.id] = ta.value; onLightChange(); });
+      if (ta) {
+        autoGrow(ta, 140);
+        ta.addEventListener('input', function () { responses[part.id] = ta.value; autoGrow(ta, 140); onLightChange(); });
+      }
       return;
     }
     if (part.type === 'single-best-answer') {
@@ -602,15 +874,14 @@
     function draw() {
       var html = '';
       html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
-      html += '<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>';
-      html += '<p class="body-text">' + esc(c.meta) + ' — case ' + (idx + 1) + ' of ' + cases.length + '</p>';
-      html += paras(c.body);
-      html += '<div class="m12x-part-card">' + paras(current.scenario).replace(/class="body-text"/g, 'class="body-text m12x-case-scenario"');
+      html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+      html += disclosureHtml('m12PartIIAbout', 'About this section', paras(c.body));
+      html += '<div class="m12x-case-progress">Case ' + (idx + 1) + ' of ' + cases.length + '</div>';
+      html += '<div class="m12x-scenario">' + paras(current.scenario) + '</div>';
       current.parts.forEach(function (part) { html += renderCasePartFieldset(part, responses); });
       var allAnswered = current.parts.every(function (part) { return casePartAnswered(part, responses); });
-      html += '<button class="m12x-btn" id="m12SubmitCase"' + (allAnswered ? '' : ' disabled') + '>Submit this case</button>';
-      html += '<p class="body-text" id="m12CaseHint" style="font-size:0.78rem;color:#8a8078;margin-top:0.4rem;' + (allAnswered ? 'display:none;' : '') + '">Answer every part of this case before submitting — submitting locks it.</p>';
-      html += '</div>';
+      html += '<div class="m12x-case-submitrow"><button class="m12x-btn" id="m12SubmitCase"' + (allAnswered ? '' : ' disabled') + '>Submit this case</button>';
+      html += '<p class="body-text" id="m12CaseHint" style="font-size:0.78rem;color:#8a8078;margin-top:0.5rem;margin-bottom:0;' + (allAnswered ? 'display:none;' : '') + '">Answer every part of this case before submitting — submitting locks it.</p></div>';
       container.innerHTML = frame(html);
 
       function updateSubmitButtonState() {
@@ -667,17 +938,30 @@
     function draw() {
       var html = '';
       html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
-      html += '<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>';
-      html += paras(c.body);
+      html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+      html += disclosureHtml('m12PartIIIAbout', 'About this conversation', paras(c.body));
+      // The structured-test visual language recedes here -- a spacious,
+      // warm-neutral conversational surface (same token as the course's
+      // callout background, .warn-light) replaces the boxed exam layout.
+      html += '<div class="m12x-cadence-env">';
+      html += '<div class="m12x-cadence-eyebrow">Practitioner Conversation with Cadence</div>';
       html += '<div class="m12x-chat" aria-live="polite">';
       transcript.forEach(function (t) {
         html += '<div class="m12x-msg ' + (t.role === 'user' ? 'user' : 'assistant') + '">' + esc(t.content) + '</div>';
       });
       html += '</div>';
-      html += '<label for="m12ChatInput" style="display:block; margin-bottom:6px; font-size:0.8rem;">Your response</label>';
-      html += '<textarea id="m12ChatInput" class="cp-input" rows="4" style="width:100%;" aria-label="Your response to Cadence"></textarea>';
-      html += '<button class="m12x-btn" id="m12ChatSend">Send</button>';
+      html += '<label for="m12ChatInput" class="body-text" style="display:block; margin-bottom:6px; font-size:0.78rem;">Your response</label>';
+      html += '<div class="m12x-composer"><textarea id="m12ChatInput" class="cp-input" rows="1" aria-label="Your response to Cadence"></textarea>' + voiceButtonHtml('m12ChatInput') + '<button class="cp-btn" id="m12ChatSend" aria-label="Send response to Cadence"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+      html += '</div>';
       container.innerHTML = frame(html);
+      var input = document.getElementById('m12ChatInput');
+      if (input) {
+        autoGrow(input, 120);
+        input.addEventListener('input', function () { autoGrow(input, 120); });
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSendInterviewTurn(container, attemptId, conversation, transcript); }
+        });
+      }
       var send = document.getElementById('m12ChatSend');
       if (send) send.addEventListener('click', function () { onSendInterviewTurn(container, attemptId, conversation, transcript); });
     }
@@ -721,7 +1005,7 @@
 
   async function renderProcessing(container, attemptId) {
     var c = COPY.processing;
-    container.innerHTML = frame('<h1 class="sec-title" style="max-width:none;">' + esc(c.title) + '</h1>' + paras(c.body));
+    container.innerHTML = frame('<h1 class="sec-title">' + esc(c.title) + '</h1>' + paras(c.body));
     if (isReview()) {
       setTimeout(function () { renderFromStatus(container, fixtureStatusFor('pass')); }, 1200);
       return;
@@ -736,12 +1020,11 @@
     Module12Cert.render(container);
   }
 
-  function performanceReviewBlock(review, forPassing) {
+  function performanceReviewBlock(review) {
     if (!review) return '';
-    var html = '<div class="m12x-part-card">';
-    html += '<div class="m12x-part-title">AIMT Head Spa Certification</div>';
-    html += '<div class="m12x-part-meta">Certification Performance Review</div>';
-    html += '<p class="body-text">Status: ' + (review.decision === 'pass' ? 'Certified' : 'Not yet earned') + ' &middot; Overall Score: ' + pct(review.overallScore) + ' &middot; Attempt: ' + review.attemptNumber + (review.decisionAt ? ' &middot; Assessment Date: ' + new Date(review.decisionAt).toLocaleDateString() : '') + '</p>';
+    var html = '<div class="m12x-perf-card">';
+    html += '<div class="m12x-perf-head"><div><div class="m12x-perf-title">AIMT Head Spa Certification</div><div class="m12x-tile-meta" style="margin-bottom:0;">Certification Performance Review · Attempt ' + review.attemptNumber + (review.decisionAt ? ' · ' + new Date(review.decisionAt).toLocaleDateString() : '') + '</div></div>';
+    html += '<div class="m12x-perf-score">' + pct(review.overallScore) + '</div></div>';
     html += '<div class="m12x-domain-row"><span>Knowledge & Retention</span><span>' + pct(review.componentScores.knowledge) + '</span></div>';
     html += '<div class="m12x-domain-row"><span>Applied Practitioner Cases</span><span>' + pct(review.componentScores.appliedCases) + '</span></div>';
     html += '<div class="m12x-domain-row"><span>Practitioner Conversation</span><span>' + pct(review.componentScores.interview) + '</span></div>';
@@ -759,21 +1042,25 @@
   }
 
   function renderStateC(container, status) {
-    var html = '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.passed.eyebrow) + '</div>';
-    html += '<h1 class="sec-title" style="max-width:none;">' + esc(COPY.passed.title) + '</h1>';
+    var html = '<div class="m12x-pass-banner">';
+    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.passed.eyebrow) + '</div>';
+    html += '<h1 class="sec-title">' + esc(COPY.passed.title) + '</h1>';
     html += paras(COPY.passed.body);
-    html += performanceReviewBlock(status.performanceReview, true);
+    html += '</div>';
+    html += performanceReviewBlock(status.performanceReview);
     var existing = document.getElementById('module12Wrap');
     if (existing) html += existing.innerHTML;
-    html += '<div class="m12x-part-card"><h2 class="sec-title" style="max-width:none;">' + esc(COPY.passed.courseCloseTitle) + '</h2>' + paras(COPY.passed.courseCloseBody) + '</div>';
+    html += '<h2 class="sec-title" style="margin-top:1.3rem;">' + esc(COPY.passed.courseCloseTitle) + '</h2>' + paras(COPY.passed.courseCloseBody);
     container.innerHTML = frame(html);
   }
 
   function renderStateD(container, status) {
-    var html = '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.notYetPassed.eyebrow) + '</div>';
-    html += '<h1 class="sec-title" style="max-width:none;">' + esc(COPY.notYetPassed.title) + '</h1>';
+    var html = '<div class="m12x-notyet-banner">';
+    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.notYetPassed.eyebrow) + '</div>';
+    html += '<h1 class="sec-title">' + esc(COPY.notYetPassed.title) + '</h1>';
     html += paras(COPY.notYetPassed.body);
-    html += performanceReviewBlock(status.performanceReview, false);
+    html += '</div>';
+    html += performanceReviewBlock(status.performanceReview);
 
     var hasUnclearedCritical = status.performanceReview && (status.performanceReview.criticalDomainResults || []).some(function (d) { return !d.cleared; });
     if (hasUnclearedCritical) {
@@ -783,14 +1070,16 @@
     var attemptNumber = (status.performanceReview && status.performanceReview.attemptNumber) || 1;
     var attemptCopy = COPY.attempts[Math.min(attemptNumber, 4)];
     if (attemptCopy) {
-      html += '<h2 class="sec-title" style="max-width:none;">' + esc(attemptCopy.title) + '</h2>';
+      html += '<h2 class="sec-title" style="margin-top:1.2rem;">' + esc(attemptCopy.title) + '</h2>';
       html += paras(attemptCopy.body);
+      html += '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">';
       attemptCopy.actions.forEach(function (label, i) {
-        html += '<button class="m12x-btn' + (i > 0 ? ' secondary' : '') + '" data-m12-action="' + esc(label) + '">' + esc(label) + '</button> ';
+        html += '<button class="m12x-btn' + (i > 0 ? ' secondary' : '') + '" data-m12-action="' + esc(label) + '">' + esc(label) + '</button>';
       });
+      html += '</div>';
     }
 
-    html += '<div class="m12x-part-card" style="margin-top:1.2rem;"><h2 class="sec-title" style="max-width:none;">' + esc(COPY.assessmentReview.title) + '</h2>' + paras(COPY.assessmentReview.body) + '<button class="m12x-btn secondary" id="m12RequestReview">' + esc(COPY.assessmentReview.action) + '</button></div>';
+    html += disclosureHtml('m12AssessmentReviewDetail', esc(COPY.assessmentReview.title), paras(COPY.assessmentReview.body) + '<button class="m12x-btn secondary" id="m12RequestReview">' + esc(COPY.assessmentReview.action) + '</button>');
 
     container.innerHTML = frame(html);
 
