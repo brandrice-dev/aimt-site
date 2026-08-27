@@ -127,6 +127,17 @@ export function collectWeakCompetencyAreas(weakSpots) {
  *   this function only converts them into remediation records, it does not
  *   itself decide what counts as "weak."
  */
+// MVP remediation activity type: required course review (open the relevant
+// module, then an explicit "Mark Review Complete" student action -- see
+// functions/api/certification/complete-remediation.js). Deliberately the
+// only implemented type for launch (standard Section 8 / task instruction
+// "do not invent dozens of bespoke exercises") -- a reflection/application
+// activity type is architecturally possible later (a distinct
+// remediation_activity value + its own completion validation) without any
+// schema change, but authoring real, traceable per-competency reflection
+// prompts is out of scope here.
+const REMEDIATION_ACTIVITY_COURSE_REVIEW = 'course_review';
+
 export function buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }) {
   const assignments = [];
   for (const domain of criticalDomainResults || []) {
@@ -136,7 +147,7 @@ export function buildRemediationAssignments({ criticalDomainResults, weakCompete
         critical_domain: domain.domainId,
         module_ref: null,
         section_ref: null,
-        remediation_activity: 'CONTENT_PENDING', // authored during the remediation-content phase
+        remediation_activity: REMEDIATION_ACTIVITY_COURSE_REVIEW,
         required_before_next_attempt: true,
       });
     }
@@ -147,7 +158,7 @@ export function buildRemediationAssignments({ criticalDomainResults, weakCompete
       critical_domain: null,
       module_ref: area.moduleRef || null,
       section_ref: area.sectionRef || null,
-      remediation_activity: 'CONTENT_PENDING',
+      remediation_activity: REMEDIATION_ACTIVITY_COURSE_REVIEW,
       required_before_next_attempt: true,
     });
   }

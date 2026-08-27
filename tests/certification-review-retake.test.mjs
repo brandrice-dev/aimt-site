@@ -212,9 +212,13 @@ async function runIntegrationChecks() {
     const status1 = await get('/api/certification/get-status');
     check('INTEGRATION Recommended Review', 'A failed attempt produces real remediation rows (not an empty placeholder)', Array.isArray(status1.body.remediation) && status1.body.remediation.length > 0, JSON.stringify(status1.body.remediation && status1.body.remediation.length));
 
-    const forbiddenKeys = ['id', 'prompt', 'choices', 'correctChoice', 'rationale', 'correctAnswer', 'rubricCriteria', 'scenario', 'primaryPrompt'];
+    // `id` is the remediation ASSIGNMENT's own row id (required so the
+    // Remediation Plan screen can call complete-remediation on a specific
+    // item) -- not an exam item id, and never included in this list.
+    const forbiddenKeys = ['prompt', 'choices', 'correctChoice', 'rationale', 'correctAnswer', 'rubricCriteria', 'scenario', 'primaryPrompt'];
     const leaked = (status1.body.remediation || []).some((r) => forbiddenKeys.some((k) => k in r));
-    check('INTEGRATION Recommended Review', 'Remediation rows never leak an item id, prompt, scenario, choices, or answer key', !leaked);
+    check('INTEGRATION Recommended Review', 'Remediation rows never leak an exam item\'s prompt, scenario, choices, or answer key', !leaked);
+    check('INTEGRATION Recommended Review', 'Every remediation row includes its own assignment id (required for completion actions)', (status1.body.remediation || []).every((r) => !!r.id));
 
     const modulesReferenced = (status1.body.remediation || []).filter((r) => r.module_ref != null).map((r) => Number(r.module_ref));
     check('INTEGRATION Recommended Review', 'Every module_ref present is a real course module number (1-11)', modulesReferenced.every((n) => Number.isInteger(n) && n >= 1 && n <= 11), JSON.stringify(modulesReferenced));

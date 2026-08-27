@@ -304,7 +304,12 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     if (!immediateFinalize && !state.followUpUsed) {
       return { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: true, followUpPrompt: interviewDef.followUpPrompt, transitionLine: null };
     }
-    return { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, followUpPrompt: null, transitionLine: 'That makes sense. I’ve got what I need there. Let’s look at another situation.' };
+    // transitionLine intentionally null: a real dynamic transition sentence
+    // only ever comes from live Cadence (cadence-grader.mjs), which this
+    // mock never calls. Leaving it null exercises the client's own bridge-
+    // library fallback (module12-certification.js's pickBridge()) during
+    // local QA, instead of masking it behind a fake "dynamic" placeholder.
+    return { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, followUpPrompt: null, transitionLine: null };
   }
 
   function finalizeIfReady() {
@@ -317,24 +322,52 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
       return scoreInterviewConversation(i, st.criterionScores || {}, flags);
     });
     const interviewComponent = computeInterviewComponent(interviewResults);
-    // Part I scoring against a real correctChoice key is exercised by the
-    // deterministic test suite, not this visual tool -- 0.8 is a fixed mock
-    // input. When the owner has asked (via the banner control) to preview
-    // the NOT YET PASSED result screen, this is deliberately dropped below
-    // config.minimums.knowledge (0.75) so the REAL, unmodified
-    // determineCertificationDecision() gate (independent per-component
-    // minimums, no compensation) fails on its own logic -- not a fabricated
-    // decision.
-    const knowledgePercent = session.mockOutcomeOverride === 'not_yet_passed' ? 0.5 : 0.8;
-    const overallPercent = computeOverallWeighted({ knowledgePercent, appliedCasesPercent: appliedCasesComponent.percent, interviewPercent: interviewComponent.percent }, config.weights);
+    // Real Part I score against the actual correctChoice key -- an
+    // unanswered item scores 0, denominator stays the full selected count
+    // (40 in a real attempt). This is the same scoreKnowledgeResponses()
+    // production uses; it must never be shortcut to a fixed placeholder
+    // percent during the normal ("auto") student-style QA path -- that was
+    // the exact defect (an unanswered MCQ still showing 80%).
+    const knowledgeMock = scoreKnowledgeResponses(session.partI.items, session.partI.responses || {});
     const allEvidence = [
       ...session.part2.cases.flatMap((c) => (session.part2.state[c.id] && session.part2.state[c.id].evidencePoints) || []),
       ...interviewResults.flatMap((r) => r.evidencePoints),
     ];
-    const criticalDomainResults = evaluateCriticalDomains(allEvidence, HEAD_SPA_CRITICAL_DOMAINS);
-    const decision = determineCertificationDecision({ knowledgePercent, appliedCasesPercent: appliedCasesComponent.percent, interviewPercent: interviewComponent.percent, criticalDomainResults, config });
+    const realCriticalDomainResults = evaluateCriticalDomains(allEvidence, HEAD_SPA_CRITICAL_DOMAINS);
+
+    var knowledgePercent, appliedCasesPercent, interviewPercent, criticalDomainResults;
+    if (session.mockOutcomeOverride === 'not_yet_passed') {
+      // Force ONLY knowledge below its own minimum (config.minimums.knowledge,
+      // 0.75) -- determineCertificationDecision()'s gates are independent and
+      // unioned (standard Section 4), so this alone guarantees the overall
+      // decision fails regardless of what was actually submitted elsewhere;
+      // appliedCases/interview/critical-domain stay real and internally
+      // coherent rather than also being faked.
+      knowledgePercent = 0.5;
+      appliedCasesPercent = appliedCasesComponent.percent;
+      interviewPercent = interviewComponent.percent;
+      criticalDomainResults = realCriticalDomainResults;
+    } else if (session.mockOutcomeOverride === 'pass') {
+      // Explicit QA shortcut: guarantees a clean PASS regardless of what was
+      // actually answered (a real attempt could easily NOT pass even with
+      // this override active, e.g. a deliberately wrong case choice --
+      // "must be PASS" requires overriding every gate input, not just one).
+      // Never a production code path.
+      knowledgePercent = 0.9;
+      appliedCasesPercent = 0.9;
+      interviewPercent = 0.9;
+      criticalDomainResults = HEAD_SPA_CRITICAL_DOMAINS.map((d) => ({ domainId: d.id, cleared: true, failureType: null, evidenceCount: 0, triggeringEvidence: [] }));
+    } else {
+      // auto -- exactly what the student actually submitted, start to finish.
+      knowledgePercent = knowledgeMock.percent;
+      appliedCasesPercent = appliedCasesComponent.percent;
+      interviewPercent = interviewComponent.percent;
+      criticalDomainResults = realCriticalDomainResults;
+    }
+
+    const decision = determineCertificationDecision({ knowledgePercent, appliedCasesPercent, interviewPercent, criticalDomainResults, config });
     session.finalized = true;
-    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesComponent.percent, interview: interviewComponent.percent }, criticalDomainResults, attemptNumber: session.attemptNumber, decisionAt: new Date().toISOString() };
+    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesPercent, interview: interviewPercent }, criticalDomainResults, attemptNumber: session.attemptNumber, decisionAt: new Date().toISOString() };
 
     attemptHistory.push({ attemptNumber: session.attemptNumber, decision: decision.decision, criticalDomainResults });
 
@@ -342,9 +375,10 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
       // Real weak-spot detection, mirroring finalize-assessment.js exactly
       // (same helpers, same thresholds) -- never a hardcoded fixture row --
       // so the QA harness's Recommended Review panel shows genuinely
-      // representative data, not placeholder text.
+      // representative data, not placeholder text. Uses the real per-item
+      // correctness computed above (knowledgeMock), independent of any
+      // mockOutcome override on the aggregate decision.
       const weakSpots = [];
-      const knowledgeMock = scoreKnowledgeResponses(session.partI.items, session.partI.responses || {});
       const knowledgeItemsById = {};
       for (const item of session.partI.items) knowledgeItemsById[item.id] = item;
       for (const p of knowledgeMock.perItem) {
@@ -366,7 +400,7 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
         for (const competency of i.competencies || []) weakSpots.push({ competency, sourceModules: i.sourceModules, sectionRef: null });
       }
       const weakCompetencyAreas = collectWeakCompetencyAreas(weakSpots);
-      const assignments = buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }).map((a) => ({ ...a, attemptNumber: session.attemptNumber }));
+      const assignments = buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }).map((a) => ({ ...a, id: randomUUID(), attemptNumber: session.attemptNumber }));
       remediationAssignments.push(...assignments);
     }
   }
@@ -424,11 +458,56 @@ ${siteStyle}
     <span><b>QA ONLY</b> — simulate completing recommended review/remediation (real content doesn't exist yet):</span>
     <a href="/?completeRemediation=1">Mark all outstanding remediation complete</a>
   </div>
+  <div id="m12qa-controls">
+    <span><b>QA ONLY</b> — instant state view (skips 40/4/3 entirely; renders from the same local fixture set as the site's own Review Mode, never a network call):</span>
+    <a href="/?qaState=examReady">Exam Ready</a>
+    <a href="/?qaState=part1">Part I</a>
+    <a href="/?qaState=part2">Part II</a>
+    <a href="/?qaState=part3">Part III</a>
+    <a href="/?qaState=processing">Processing</a>
+    <a href="/?qaState=pass">PASS</a>
+    <a href="/?qaState=attempt1">Attempt 1 Not Yet Passed</a>
+    <a href="/?qaState=attempt2">Attempt 2 Remediation</a>
+    <a href="/?qaState=attempt3">Attempt 3 Educator</a>
+    <a href="/?qaState=attempt4">Attempt 4 Individual Review</a>
+    <a href="#" id="m12qaExitInstant" style="display:none;">Exit instant state view</a>
+  </div>
 </div>
 <div id="m12container"></div>
 <script>
   window.APP_STATE = { data: { student: { name: 'Jordan' } } };
-  window.ReviewMode = { isActive: function () { return false; } }; // real (non-fixture) render path
+  // QA ONLY -- instant state view. Bootstraps the SAME fixture-based Review
+  // Mode already built into module12-certification.js (fixtureStatusFor(),
+  // the in-page state-switcher bar) rather than a second parallel mocking
+  // system, so every one of the 10 states renders through code already
+  // exercised by production's own Review Mode. Sticks for the rest of this
+  // browser session (sessionStorage) once a ?qaState= link is used, so the
+  // owner doesn't need to keep re-adding the query param -- the in-page
+  // fixture bar (visible once active) freely switches between all 10 states
+  // from there with no further reloads. Purely a browser-side flag: no
+  // request ever reaches a server endpoint while active, and this whole
+  // mechanism only exists in this local, never-deployed harness script --
+  // absent from the production client bundle entirely.
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var qaState = params.get('qaState');
+    if (qaState) {
+      try { sessionStorage.setItem('aimt_m12_qa_review_active', '1'); sessionStorage.setItem('aimt_m12_review_fixture', qaState); } catch (e) {}
+    }
+    function isInstantStateActive() {
+      try { return sessionStorage.getItem('aimt_m12_qa_review_active') === '1'; } catch (e) { return false; }
+    }
+    window.ReviewMode = { isActive: isInstantStateActive };
+    var exitLink = document.getElementById('m12qaExitInstant');
+    if (exitLink && isInstantStateActive()) {
+      exitLink.style.display = '';
+      exitLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        try { sessionStorage.removeItem('aimt_m12_qa_review_active'); sessionStorage.removeItem('aimt_m12_review_fixture'); } catch (err) {}
+        window.location.href = '/';
+      });
+    }
+  })();
   // QA ONLY -- this harness never loads headspa-mastery.html's full course
   // state machine (out of scope for a Module-12-content QA tool), so there
   // is no real course navigation to hand off to. This stub lets the owner
@@ -511,12 +590,14 @@ ${siteStyle}
         // harness actually demonstrates the Attempt 3 remediation gate.
         const ladder = determineNextAttemptEligibility({ attempts: attemptHistory, remediationAssignments, educatorRequests: [], config });
         const state = ladder.alreadyCertified ? 'C' : (attemptHistory.some((a) => a.decision === 'not_yet_passed') ? 'D' : 'A');
-        const remediationForLatestAttempt = state === 'D'
-          ? remediationAssignments
-              .filter((r) => r.attemptNumber === session.attemptNumber)
-              .map((r) => ({ competency_area: r.competency_area, critical_domain: r.critical_domain, module_ref: r.module_ref, section_ref: r.section_ref, required_before_next_attempt: r.required_before_next_attempt, completed: r.completed }))
+        // ALL remediation rows, not just the latest attempt's -- mirrors the
+        // production get-status.js fix: the real ladder gate evaluates
+        // required_before_next_attempt + completed across every attempt, so
+        // an older still-outstanding item must stay visible/completable too.
+        const remediationAll = state === 'D'
+          ? remediationAssignments.map((r) => ({ id: r.id, competency_area: r.competency_area, critical_domain: r.critical_domain, module_ref: r.module_ref, section_ref: r.section_ref, remediation_activity: r.remediation_activity, required_before_next_attempt: r.required_before_next_attempt, completed: r.completed }))
           : null;
-        json(res, 200, { eligible: true, state, ladder, performanceReview: session.result, remediation: remediationForLatestAttempt });
+        json(res, 200, { eligible: true, state, ladder, performanceReview: session.result, remediation: remediationAll });
         return;
       }
       if (session.started || session.part1Locked || session.part2Locked || session.part3Locked) {
@@ -593,7 +674,7 @@ ${siteStyle}
       if (selection.allFinalized) { json(res, 200, { allConversationsFinalized: true }); return; }
       const nextInterview = session.part3.interviews.find((i) => i.id === selection.nextInterviewId);
       const st = session.part3.state[nextInterview.id] || { transcript: [], followUpUsed: false };
-      json(res, 200, { conversation: { ...ProjectInterview(nextInterview), transcript: st.transcript || [], followUpUsed: !!st.followUpUsed, isFirstConversation: selection.isFirstConversation } });
+      json(res, 200, { conversation: { ...ProjectInterview(nextInterview), transcript: st.transcript || [], followUpUsed: !!st.followUpUsed, isFirstConversation: selection.isFirstConversation, conversationIndex: selection.conversationIndex, totalConversations: session.part3.interviews.length } });
       return;
     }
 
@@ -649,6 +730,22 @@ ${siteStyle}
     if (pathname === '/api/certification/finalize-assessment' && req.method === 'POST') {
       finalizeIfReady();
       json(res, 200, { ok: true });
+      return;
+    }
+
+    if (pathname === '/api/certification/complete-remediation' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (d) => (body += d));
+      req.on('end', () => {
+        let parsed = {};
+        try { parsed = JSON.parse(body || '{}'); } catch (_) {}
+        const item = remediationAssignments.find((r) => r.id === parsed.remediationId);
+        if (!item) { json(res, 404, { error: 'Remediation item not found.' }); return; }
+        if (item.completed) { json(res, 200, { completed: true, alreadyCompleted: true }); return; }
+        item.completed = true;
+        item.completed_at = new Date().toISOString();
+        json(res, 200, { completed: true, alreadyCompleted: false });
+      });
       return;
     }
 

@@ -45,7 +45,7 @@ export async function onRequestGet(context) {
     return json({ error: 'Submit Part II before starting Part III.' }, 409);
   }
   const conversationState = attempt.part3_conversation_state || {};
-  const { nextInterviewId, isFirstConversation, allFinalized } = findNextInterview(attempt.part3_selected_ids, conversationState);
+  const { nextInterviewId, conversationIndex, isFirstConversation, allFinalized } = findNextInterview(attempt.part3_selected_ids, conversationState);
   if (allFinalized) {
     return json({ allConversationsFinalized: true });
   }
@@ -59,6 +59,8 @@ export async function onRequestGet(context) {
       transcript: state.transcript || [],
       followUpUsed: !!state.followUpUsed,
       isFirstConversation,
+      conversationIndex,
+      totalConversations: (attempt.part3_selected_ids || []).length,
     },
   });
 }

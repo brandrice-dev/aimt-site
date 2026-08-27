@@ -114,7 +114,11 @@
       submitTitle: 'Ready to submit Part I?',
       submitBody: 'You can still go back and review any question before submitting.\n\nAfter submission, your Knowledge & Retention answers are locked and cannot be changed during this attempt.',
       reviewBtn: 'Review Answers',
-      submitBtn: 'Submit Part I'
+      submitBtn: 'Submit Part I',
+      unansweredWarning: function (count) { return 'You still have ' + count + ' unanswered ' + (count === 1 ? 'question' : 'questions') + '.'; },
+      unansweredNoCredit: 'Unanswered questions will receive no credit once this section is submitted.',
+      returnToReview: 'Return to Review',
+      submitAnyway: 'Submit Anyway'
     },
     part1to2: {
       title: 'Part I complete.',
@@ -138,8 +142,34 @@
       body: 'Cadence has been part of your learning throughout this course.\n\nFor this final section, she is not here to teach you the answer.\n\nShe is here to understand how you reason through a situation when there is not a multiple-choice option in front of you.\n\nYou’ll have three short conversations.\n\nAnswer the way you would explain your thinking to a knowledgeable instructor or mentor.\n\nIf something important is unclear, Cadence may ask one follow-up before moving on.',
       openingWithName: function (name) { return 'You made it to the final part, ' + name + '. This part is a little different. I’m going to give you a few situations you might run into in practice, and I want to hear how you’d think through them. There isn’t one perfect script — just talk to me the way you normally would.'; },
       openingNoName: 'You made it to the final part. This part is a little different. I’m going to give you a few situations you might run into in practice, and I want to hear how you’d think through them. There isn’t one perfect script — just talk to me the way you normally would.',
+      // Bridge into Conversation 1's primary prompt -- used only when that
+      // prompt doesn't already open with its own "Let's..." framing (see
+      // opensWithLetsStart() below), so the two never read as duplicate
+      // conversational setup.
       startLine: 'Let’s start with this one.',
-      followUpLead: 'There’s one piece I want to hear a little more about before we move on.',
+      // Presentation-only bridge libraries (task-provided tone examples).
+      // Purely cosmetic transition text prepended to a conversation's real,
+      // locked primary/follow-up prompt to make consecutive Cadence turns
+      // read as one natural tutor conversation instead of a repeated
+      // canned phrase -- never sent to the grader, never part of the
+      // student's answer, never affects interview ID/turn count/follow-up
+      // consumption/rubric/score (see pickBridge() and onSendInterviewTurn()).
+      followUpBridges: [
+        'I want to stay with that for a second.',
+        'Okay — let me change one piece of that.',
+        'There’s one part of that I want to hear a little more about.',
+        'Stay with me on that one for a second.',
+        'Okay. What I want to understand next is this.',
+        'Let me add one wrinkle to that.'
+      ],
+      nextBridges: [
+        'Okay. Let’s switch gears a little.',
+        'Got it. Let’s look at a different kind of situation.',
+        'Alright. Here’s another situation I want you to think through.',
+        'Okay, I have a good sense of how you’re approaching that. Let’s try something different.',
+        'Got it. Let’s move from that into another part of practice.',
+        'Alright. I want to take you somewhere a little different with this next one.'
+      ],
       closingWithName: function (name) { return 'Thanks, ' + name + '. That’s everything I needed from you. I’m submitting this part with the rest of your assessment now.'; },
       closingNoName: 'Thanks. That’s everything I needed from you. I’m submitting this part with the rest of your assessment now.'
     },
@@ -199,6 +229,30 @@
       competencyWhy: 'Your assessment showed this is an area worth strengthening before your next attempt.',
       reviewLabel: 'Review: ',
       openModule: function (title) { return 'Open ' + title; },
+      back: 'Back to Performance Review'
+    },
+    // Required Remediation -- deliberately distinct from Recommended Review
+    // above: mandatory completion status per item, gates the next attempt.
+    // Tone stays respectful (no red "failed" styling, no punitive language)
+    // per standard Section 8.
+    remediationPlan: {
+      eyebrow: 'Certification Performance Review',
+      title: 'Your Remediation Plan',
+      intro: 'Complete each required activity below before your next attempt becomes available. This is targeted to what you need — you are not repeating the entire course.',
+      empty: 'Your outstanding remediation is being finalized. Check back shortly.',
+      progressLabel: function (done, total) { return done + ' of ' + total + ' remediation activities complete'; },
+      domainWhy: 'This is a required professional competency area that needs to be demonstrated more clearly before certification can be issued.',
+      competencyWhy: 'Your assessment showed this is an area worth strengthening before your next attempt.',
+      reviewLabel: 'Review: ',
+      requiredBadge: 'Required',
+      statusNotStarted: 'Not Started',
+      statusInProgress: 'In Progress',
+      statusComplete: 'Complete',
+      openModule: function (title) { return 'Open ' + title; },
+      markComplete: 'Mark Review Complete',
+      readyTitle: 'Attempt Ready',
+      readyBody: 'You’ve completed every required remediation activity. Your next attempt is a fresh, complete assessment — not a retest of only what you missed.',
+      startAttempt: function (n) { return 'Start Attempt ' + n; },
       back: 'Back to Performance Review'
     }
   };
@@ -290,6 +344,38 @@
   function autoGrow(el, max) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, max || 100) + 'px';
+  }
+  // True when a locked primary prompt already opens with its own "Let's..."
+  // framing (e.g. "Let's start with something...", "Let's say it's one of
+  // those days...") -- used only to skip the redundant startLine bridge, so
+  // the welcome + prompt never read as duplicate conversational setup. Never
+  // alters the prompt text itself.
+  function opensWithLetsStart(text) {
+    return /^\s*let’s\s|^\s*let's\s/i.test(String(text || ''));
+  }
+  // Presentation-only bridge selection: picks a random line from the given
+  // library, avoiding an immediate repeat of the same bridge (tracked per
+  // library so the follow-up and next-conversation pools don't interfere
+  // with each other). Purely cosmetic -- see the COPY.partIII.*Bridges
+  // comment for why this can never affect grading.
+  var lastBridgeUsed = {};
+  function pickBridge(list, poolKey) {
+    if (!list || !list.length) return '';
+    if (list.length === 1) return list[0];
+    var choice;
+    do {
+      choice = list[Math.floor(Math.random() * list.length)];
+    } while (choice === lastBridgeUsed[poolKey] && list.length > 1);
+    lastBridgeUsed[poolKey] = choice;
+    return choice;
+  }
+  // PLACEHOLDER Cadence identity anchor -- see the m12x-cadence-id CSS
+  // comment above for why (owner-confirmed asset not yet located; reuses
+  // the site's real, already-approved guide-panel identity mark verbatim,
+  // not a new design). Rendered once per conversation screen, not per
+  // message, per the "avoid excessive avatar repetition" direction.
+  function cadenceIdentityHtml() {
+    return '<div class="m12x-cadence-id"><span class="m12x-cadence-dot" aria-hidden="true"></span><span class="m12x-cadence-id-label">Cadence</span></div>';
   }
   // A single answer-choice control shared by Part I and every Part II
   // choice-based part type. Renders as a premium AIMT control (custom
@@ -460,15 +546,40 @@
       '.m12x .m12x-shortresponse-row { display:flex; align-items:flex-end; gap:0.6rem; }',
       '.m12x .m12x-shortresponse-row .cp-input { flex:1; min-height:64px; }',
 
-      /* Part III -- intentional environment shift, still AIMT-native */
-      '.m12x .m12x-cadence-env { background:var(--warn-light); border-radius:20px; padding:1.4rem 1.3rem 1.2rem; margin-top:0.6rem; }',
-      '.m12x .m12x-cadence-eyebrow { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent2); margin-bottom:0.7rem; }',
-      '.m12x .m12x-chat { display:flex; flex-direction:column; gap:0.9rem; margin-bottom:1.1rem; }',
-      '.m12x .m12x-msg { max-width:88%; padding:0.8rem 1rem; border-radius:16px; font-size:0.89rem; line-height:1.6; font-family:var(--aimt-font-sans); }',
-      '.m12x .m12x-msg.assistant { background:#fff; align-self:flex-start; border-bottom-left-radius:4px; }',
+      /* Part III -- a conversation, not an exam form with chat bubbles.
+         Lighter canvas than the original boxed .warn-light card: a subtle
+         tint and no heavy nested-card border, so Cadence turns/composer sit
+         on one open surface instead of card-on-card. */
+      '.m12x .m12x-cadence-env { background:rgba(0,0,0,0.015); border-radius:20px; padding:0.2rem 0.1rem 1.1rem; margin-top:0.4rem; }',
+      '.m12x .m12x-cadence-progress { font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:#8a8078; margin-bottom:0.9rem; }',
+      /* Identity anchor -- PLACEHOLDER pending the real Cadence avatar asset
+         (owner confirmed one exists but could not locate the file at task
+         time; explicitly approved to ship a placeholder meanwhile). Reuses
+         the site's own existing, already-approved Cadence identity mark
+         verbatim -- the breathing-dot + wordmark badge from the persistent
+         guide panel (.gp-av/.gp-av-dot/.gp-av-label, headspa-mastery.html)
+         -- rather than inventing a new mark or an emoji/generic-AI icon.
+         Swap point: once a real image asset lands, replace m12x-cadence-id's
+         inner .m12x-cadence-dot span with an <img>; no other markup needs
+         to change. */
+      '.m12x .m12x-cadence-id { display:inline-flex; align-items:center; gap:7px; background:var(--hero-bg,#262626); border-radius:980px; padding:0 12px; height:30px; margin-bottom:0.9rem; }',
+      '.m12x .m12x-cadence-dot { width:6px; height:6px; border-radius:50%; background:var(--teal,#4a9b8e); animation:cadenceBreathe 2.4s ease-in-out infinite; flex-shrink:0; }',
+      '.m12x .m12x-cadence-id-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:#fff; }',
+      '@keyframes cadenceBreathe { 0%,100% { opacity:0.45; } 50% { opacity:1; } }',
+      '.m12x .m12x-chat { display:flex; flex-direction:column; gap:0.85rem; margin-bottom:1.1rem; }',
+      '.m12x .m12x-msg { max-width:82%; padding:0.75rem 1rem; border-radius:16px; font-size:0.89rem; line-height:1.62; font-family:var(--aimt-font-sans); }',
+      '.m12x .m12x-msg.assistant { background:#fff; align-self:flex-start; border-bottom-left-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }',
       '.m12x .m12x-msg.user { background:var(--hero-bg,#262626); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }',
-      '.m12x .m12x-composer { display:flex; align-items:flex-end; gap:0.6rem; }',
-      '.m12x .m12x-composer .cp-input { background:#fff; flex:1; min-height:52px; }',
+      '.m12x .m12x-typing { align-self:flex-start; display:flex; gap:4px; padding:0.85rem 1rem; }',
+      '.m12x .m12x-typing span { width:6px; height:6px; border-radius:50%; background:var(--muted2,#c4bdb5); animation:m12xTypingDot 1.1s ease-in-out infinite; }',
+      '.m12x .m12x-typing span:nth-child(2) { animation-delay:0.15s; }',
+      '.m12x .m12x-typing span:nth-child(3) { animation-delay:0.3s; }',
+      '@keyframes m12xTypingDot { 0%,60%,100% { opacity:0.3; transform:translateY(0); } 30% { opacity:1; transform:translateY(-2px); } }',
+      '.m12x .m12x-composer { display:flex; align-items:flex-end; gap:0.6rem; background:#fff; border-radius:22px; padding:0.4rem 0.5rem 0.4rem 1.1rem; border:0.5px solid var(--border2); }',
+      '.m12x .m12x-composer .cp-input { background:none; border:none; flex:1; min-height:24px; padding:0.5rem 0; box-shadow:none; }',
+      '.m12x .m12x-composer .cp-input:focus { outline:none; box-shadow:none; }',
+      '.m12x .m12x-composer.disabled { opacity:0.6; }',
+      '.m12x .m12x-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }',
 
       /* pass / not-yet-passed */
       '.m12x .m12x-pass-banner { border-top:3px solid var(--aimt-success); padding-top:1.1rem; }',
@@ -481,6 +592,13 @@
       '.m12x .m12x-domain-row:last-child { border-bottom:none; }',
       '.m12x .m12x-domain-row.cleared { color:var(--aimt-success); }',
       '.m12x .m12x-domain-row.uncleared { color:var(--aimt-warning); }',
+
+      /* Required Remediation -- semantic caution/review treatment, never red/failed styling */
+      '.m12x .m12x-remediation-meta { display:flex; align-items:center; gap:0.5rem; margin-top:0.4rem; flex-wrap:wrap; }',
+      '.m12x .m12x-remediation-badge { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; padding:3px 9px; border-radius:980px; background:var(--warn-light); color:var(--aimt-warning); }',
+      '.m12x .m12x-remediation-status { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; padding:3px 9px; border-radius:980px; border:0.5px solid var(--border2); color:#8a8078; }',
+      '.m12x .m12x-remediation-status.inprogress { border-color:var(--accent2); color:var(--accent2); }',
+      '.m12x .m12x-remediation-status.complete { border-color:var(--aimt-success); color:var(--aimt-success); background:rgba(0,0,0,0.02); }',
 
       /* Review Mode dev-only fixture bar */
       '.m12x .m12x-review-fixtures { display: flex; flex-wrap: wrap; gap: 6px; padding: 0.6rem; border: 1px dashed rgba(0,0,0,0.25); border-radius: 8px; margin-bottom: 1rem; }',
@@ -539,6 +657,36 @@
     }
   }
 
+  // Confirms an intentional submission of Part I while questions remain
+  // unanswered -- never auto-fills an answer, never submits silently.
+  // Reuses the same native-<dialog> chrome as the question map.
+  function openUnansweredConfirm(opts) {
+    var c = COPY.partI;
+    var existing = document.getElementById('m12UnansweredDialog');
+    if (existing) existing.remove();
+    var dlg = document.createElement('dialog');
+    dlg.id = 'm12UnansweredDialog';
+    dlg.className = 'm12x-mapdialog';
+    var inner = '<div class="m12x-map-inner">';
+    inner += '<p class="body-text">' + esc(c.unansweredWarning(opts.count)) + '</p>';
+    inner += '<p class="body-text">' + esc(c.unansweredNoCredit) + '</p>';
+    inner += '<div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.6rem;">';
+    inner += '<button type="button" class="m12x-btn secondary" id="m12UnansweredReview">' + esc(c.returnToReview) + '</button>';
+    inner += '<button type="button" class="m12x-btn" id="m12UnansweredSubmit">' + esc(c.submitAnyway) + '</button>';
+    inner += '</div></div>';
+    dlg.innerHTML = inner;
+    document.body.appendChild(dlg);
+    dlg.addEventListener('close', function () { dlg.remove(); });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    document.getElementById('m12UnansweredReview').addEventListener('click', function () { dlg.close(); });
+    document.getElementById('m12UnansweredSubmit').addEventListener('click', function () { dlg.close(); opts.onConfirm(); });
+    if (typeof dlg.showModal === 'function') {
+      dlg.showModal();
+    } else {
+      dlg.setAttribute('open', '');
+    }
+  }
+
   // ---- Review Mode fixtures (mocked, no network, no persistence) ----
   var REVIEW_STATES = ['examReady', 'part1', 'part2', 'part3', 'processing', 'pass', 'attempt1', 'attempt2', 'attempt3', 'attempt4'];
 
@@ -566,10 +714,13 @@
       case 'processing': return { eligible: true, state: 'B', inProgressAttempt: { id: 'fixture', attemptNumber: 1, status: 'part3_locked' } };
       case 'pass': return { eligible: true, state: 'C', ladder: { alreadyCertified: true }, performanceReview: perfReview('pass', domainsAllCleared) };
       case 'attempt1': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: true, nextAttemptNumber: 2 }, performanceReview: perfReview('not_yet_passed', domainsAllCleared), remediation: [
-        { competency_area: 'Fixture competency — Service Adaptation', critical_domain: null, module_ref: '5', section_ref: null, completed: false, required_before_next_attempt: true },
-        { competency_area: 'Fixture competency — Sanitation Between Clients', critical_domain: null, module_ref: '10', section_ref: null, completed: false, required_before_next_attempt: true }
+        { id: 'fixture-rec-1', competency_area: 'Fixture competency — Service Adaptation', critical_domain: null, module_ref: '5', section_ref: null, completed: false, required_before_next_attempt: true },
+        { id: 'fixture-rec-2', competency_area: 'Fixture competency — Sanitation Between Clients', critical_domain: null, module_ref: '10', section_ref: null, completed: false, required_before_next_attempt: true }
       ] };
-      case 'attempt2': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 3, blockedReason: 'remediation_required', outstandingCount: 2 }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsAllCleared), { attemptNumber: 2 }), remediation: [{ competency_area: 'Fixture competency area', completed: false, required_before_next_attempt: true }] };
+      case 'attempt2': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 3, blockedReason: 'remediation_required', outstandingCount: 2 }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsAllCleared), { attemptNumber: 2 }), remediation: [
+        { id: 'fixture-rem-1', competency_area: 'Fixture competency — Service Adaptation', critical_domain: null, module_ref: '5', section_ref: null, completed: true, required_before_next_attempt: true },
+        { id: 'fixture-rem-2', competency_area: 'Fixture competency — Sanitation & Process Integrity', critical_domain: null, module_ref: '10', section_ref: null, completed: false, required_before_next_attempt: true }
+      ] };
       case 'attempt3': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 4, blockedReason: 'educator_authorization_required' }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsOneUncleared), { attemptNumber: 3 }), remediation: [], educatorRequest: null };
       case 'attempt4': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 5, blockedReason: 'individual_aimt_review' }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsOneUncleared), { attemptNumber: 4 }), remediation: [], educatorRequest: { status: 'completed', attempt4_authorized: true } };
       default: return { eligible: true, state: 'A', ladder: { canStartNewAttempt: true, nextAttemptNumber: 1 } };
@@ -733,7 +884,13 @@
       document.getElementById('m12SumFlagged').addEventListener('click', openMap);
       document.getElementById('m12ViewMap2').addEventListener('click', openMap);
       document.getElementById('m12BackToQ').addEventListener('click', function () { drawQuestion(); });
-      document.getElementById('m12SubmitBtn').addEventListener('click', function () { onSubmitPartI(container, attempt, responses); });
+      document.getElementById('m12SubmitBtn').addEventListener('click', function () {
+        if (unansweredCount > 0) {
+          openUnansweredConfirm({ count: unansweredCount, onConfirm: function () { onSubmitPartI(container, attempt, responses); } });
+        } else {
+          onSubmitPartI(container, attempt, responses);
+        }
+      });
     }
 
     drawQuestion();
@@ -954,15 +1111,31 @@
     }
   }
 
-  async function loadAndRenderPartIII(container, attemptId) {
+  async function loadAndRenderPartIII(container, attemptId, pendingBridge) {
     if (isReview()) return renderPartIII(container, attemptId, fixtureConversation());
     var res = await apiGet('/get-part?attemptId=' + encodeURIComponent(attemptId) + '&part=3');
     if (!res.ok) { container.innerHTML = frame('<p class="body-text">Could not load the conversation.</p>'); return; }
     if (res.body.allConversationsFinalized) return renderProcessing(container, attemptId);
-    renderPartIII(container, attemptId, res.body.conversation);
+    var conversation = res.body.conversation;
+    // Carries the bridge chosen when the PRIOR conversation finalized (real
+    // Cadence-generated transitionLine when live, else a client-picked
+    // bridge -- see onSendInterviewTurn) so it renders combined with this
+    // conversation's real primary prompt as one Cadence turn, never a
+    // separate transition bubble that appears then disappears.
+    if (pendingBridge) conversation.pendingBridge = pendingBridge;
+    renderPartIII(container, attemptId, conversation);
   }
 
-  function renderPartIII(container, attemptId, conversation) {
+  // options:
+  //   showTyping    -- append a transient "Cadence is responding" indicator
+  //                     and disable the composer (evaluation in progress).
+  //   hideComposer  -- omit the composer entirely (nothing more to submit --
+  //                     the final close, before Processing).
+  //   draft         -- text to restore into the composer (a send that failed
+  //                     network-side; the student's typed answer is never
+  //                     silently dropped).
+  function renderPartIII(container, attemptId, conversation, options) {
+    options = options || {};
     var c = COPY.partIII;
     var name = firstName();
     // The generic Part III welcome is presentation only -- it must never
@@ -972,65 +1145,86 @@
     // so the student's answer to "Ready?" was graded as the response to a
     // primary prompt they never saw). A brand-new conversation now always
     // shows its own primaryPrompt as a real message before the composer is
-    // reachable; the welcome + "Let's start with this one" only prepend it
-    // once, before the very first conversation of the attempt.
+    // reachable. The welcome/bridge and the primary prompt render as ONE
+    // combined Cadence turn (a single message bubble, paragraph-separated)
+    // rather than several separate standalone bubbles.
     var transcript;
     if (conversation.transcript && conversation.transcript.length) {
       transcript = conversation.transcript.slice();
     } else if (conversation.isFirstConversation) {
-      transcript = [
-        { role: 'assistant', content: name ? c.openingWithName(name) : c.openingNoName },
-        { role: 'assistant', content: c.startLine },
-        { role: 'assistant', content: conversation.primaryPrompt }
-      ];
+      var opening = name ? c.openingWithName(name) : c.openingNoName;
+      // Skip the "Let's start with this one." bridge when the locked prompt
+      // already opens with its own "Let's..." framing (several do) -- never
+      // duplicate conversational setup, and never alter the locked prompt.
+      var intro = opensWithLetsStart(conversation.primaryPrompt) ? '' : (c.startLine + ' ');
+      transcript = [{ role: 'assistant', content: opening + '\n\n' + intro + conversation.primaryPrompt }];
     } else {
-      transcript = [
-        { role: 'assistant', content: conversation.primaryPrompt }
-      ];
+      var bridge = conversation.pendingBridge || pickBridge(c.nextBridges, 'next');
+      transcript = [{ role: 'assistant', content: bridge + '\n\n' + conversation.primaryPrompt }];
     }
+    conversation.transcript = transcript;
 
     function draw() {
       var html = '';
       html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
       html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+      if (conversation.conversationIndex != null && conversation.totalConversations) {
+        html += '<div class="m12x-cadence-progress">Conversation ' + (conversation.conversationIndex + 1) + ' of ' + conversation.totalConversations + '</div>';
+      }
       html += disclosureHtml('m12PartIIIAbout', 'About this conversation', paras(c.body));
-      // The structured-test visual language recedes here -- a spacious,
-      // warm-neutral conversational surface (same token as the course's
-      // callout background, .warn-light) replaces the boxed exam layout.
+      // A light conversation canvas -- not a boxed exam card. The Cadence
+      // identity badge (see cadenceIdentityHtml()) is the one place her
+      // presence is anchored, rather than a redundant "PRACTITIONER
+      // CONVERSATION WITH CADENCE" label repeating what the badge + page
+      // hierarchy (Part 3 of 3 / Final Practitioner Conversation) already say.
       html += '<div class="m12x-cadence-env">';
-      html += '<div class="m12x-cadence-eyebrow">Practitioner Conversation with Cadence</div>';
+      html += cadenceIdentityHtml();
       html += '<div class="m12x-chat" aria-live="polite">';
       transcript.forEach(function (t) {
-        html += '<div class="m12x-msg ' + (t.role === 'user' ? 'user' : 'assistant') + '">' + esc(t.content) + '</div>';
+        html += '<div class="m12x-msg ' + (t.role === 'user' ? 'user' : 'assistant') + '">' + multilineInline(t.content) + '</div>';
       });
+      if (options.showTyping) {
+        html += '<div class="m12x-typing" aria-hidden="true"><span></span><span></span><span></span></div>';
+      }
       html += '</div>';
-      html += '<label for="m12ChatInput" class="body-text" style="display:block; margin-bottom:6px; font-size:0.78rem;">Your response</label>';
-      html += '<div class="m12x-composer"><textarea id="m12ChatInput" class="cp-input" rows="1" aria-label="Your response to Cadence"></textarea>' + voiceButtonHtml('m12ChatInput') + '<button class="cp-btn" id="m12ChatSend" aria-label="Send response to Cadence"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+      if (!options.hideComposer) {
+        var dis = options.showTyping;
+        html += '<label for="m12ChatInput" class="m12x-sr-only">Your response</label>';
+        html += '<div class="m12x-composer' + (dis ? ' disabled' : '') + '"><textarea id="m12ChatInput" class="cp-input" rows="1" placeholder="Type your response…" aria-label="Your response to Cadence"' + (dis ? ' disabled' : '') + '>' + esc(options.draft || '') + '</textarea>' + voiceButtonHtml('m12ChatInput') + '<button class="cp-btn" id="m12ChatSend" aria-label="Send response to Cadence"' + (dis ? ' disabled' : '') + '><svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
+      }
       html += '</div>';
       container.innerHTML = frame(html);
       var input = document.getElementById('m12ChatInput');
-      if (input) {
+      if (input && !options.showTyping) {
         autoGrow(input, 120);
+        if (options.draft) autoGrow(input, 120);
         input.addEventListener('input', function () { autoGrow(input, 120); });
         input.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSendInterviewTurn(container, attemptId, conversation, transcript); }
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSendInterviewTurn(container, attemptId, conversation); }
         });
       }
       var send = document.getElementById('m12ChatSend');
-      if (send) send.addEventListener('click', function () { onSendInterviewTurn(container, attemptId, conversation, transcript); });
+      if (send && !options.showTyping) send.addEventListener('click', function () { onSendInterviewTurn(container, attemptId, conversation); });
     }
     draw();
   }
 
-  async function onSendInterviewTurn(container, attemptId, conversation, transcript) {
+  async function onSendInterviewTurn(container, attemptId, conversation) {
     var input = document.getElementById('m12ChatInput');
     var text = input ? input.value.trim() : '';
     if (!text) return;
+    var transcript = conversation.transcript.slice();
     transcript.push({ role: 'user', content: text });
+    conversation.transcript = transcript;
+    // Show the student's own message immediately, then a brief "Cadence is
+    // responding" beat (composer disabled) while evaluation is in progress
+    // -- never leaves the composer active/ambiguous mid-evaluation.
+    renderPartIII(container, attemptId, conversation, { showTyping: true });
 
     if (isReview()) {
       transcript.push({ role: 'assistant', content: firstName() ? COPY.partIII.closingWithName(firstName()) : COPY.partIII.closingNoName });
-      renderPartIII(container, attemptId, { id: conversation.id, transcript: transcript });
+      conversation.transcript = transcript;
+      renderPartIII(container, attemptId, conversation, { hideComposer: true });
       setTimeout(function () { setReviewFixtureKey('processing'); renderProcessing(container, attemptId); }, 900);
       return;
     }
@@ -1038,23 +1232,40 @@
     var res = await apiPost('/submit-interview-turn', { attemptId: attemptId, interviewId: conversation.id, studentResponse: text });
     if (!res.ok) {
       transcript.pop();
-      renderPartIII(container, attemptId, { id: conversation.id, transcript: transcript });
+      conversation.transcript = transcript;
+      renderPartIII(container, attemptId, conversation, { draft: text });
       return;
     }
     if (res.body.needsFollowUp) {
-      transcript.push({ role: 'assistant', content: COPY.partIII.followUpLead + ' ' + res.body.followUpPrompt });
-      renderPartIII(container, attemptId, { id: conversation.id, transcript: transcript });
+      // The bridge is presentation only -- see the COPY.partIII.*Bridges
+      // comment. It is never sent to the server, never affects interview
+      // ID/turn count/follow-up consumption/rubric/score: the follow-up
+      // question itself (res.body.followUpPrompt) is the exact, unmodified
+      // approved text already returned by submit-interview-turn.js.
+      var followUpBridge = pickBridge(COPY.partIII.followUpBridges, 'followup');
+      transcript.push({ role: 'assistant', content: followUpBridge + '\n\n' + res.body.followUpPrompt });
+      conversation.transcript = transcript;
+      renderPartIII(container, attemptId, conversation);
       return;
     }
-    var name = firstName();
-    var closing = res.body.allConversationsFinalized ? (name ? COPY.partIII.closingWithName(name) : COPY.partIII.closingNoName) : res.body.transitionLine;
-    transcript.push({ role: 'assistant', content: closing || '' });
-    renderPartIII(container, attemptId, { id: conversation.id, transcript: transcript });
     if (res.body.allConversationsFinalized) {
+      var name = firstName();
+      transcript.push({ role: 'assistant', content: name ? COPY.partIII.closingWithName(name) : COPY.partIII.closingNoName });
+      conversation.transcript = transcript;
+      // No bridge implying another question is coming, and no composer --
+      // there is nothing left to submit before Processing.
+      renderPartIII(container, attemptId, conversation, { hideComposer: true });
       setTimeout(function () { renderProcessing(container, attemptId); }, 1200);
-    } else {
-      setTimeout(function () { loadAndRenderPartIII(container, attemptId); }, 1200);
+      return;
     }
+    // Advance to the next conversation. Prefer the real, live-Cadence-
+    // generated transitionLine when present (a genuinely dynamic bridge);
+    // otherwise pick from the client bridge library -- either way it
+    // renders combined with the next conversation's real primary prompt as
+    // one Cadence turn (see loadAndRenderPartIII's pendingBridge), not a
+    // standalone bubble that flashes and disappears.
+    var nextBridge = res.body.transitionLine || pickBridge(COPY.partIII.nextBridges, 'next');
+    setTimeout(function () { loadAndRenderPartIII(container, attemptId, nextBridge); }, 550);
   }
 
   async function renderProcessing(container, attemptId) {
@@ -1193,6 +1404,113 @@
     if (backBtn) backBtn.addEventListener('click', function () { Module12Cert.render(container); });
   }
 
+  // Client-side-only "opened this module" hint for the Not Started / In
+  // Progress / Complete status label -- purely cosmetic. The one
+  // AUTHORITATIVE signal is still the server's `completed` flag; opening a
+  // module never marks anything complete by itself (standard Section 8 /
+  // task instruction: completion requires an explicit student action).
+  function markRemediationOpened(id) {
+    try {
+      var opened = JSON.parse(sessionStorage.getItem('aimt_m12_remediation_opened') || '[]');
+      if (opened.indexOf(id) === -1) { opened.push(id); sessionStorage.setItem('aimt_m12_remediation_opened', JSON.stringify(opened)); }
+    } catch (e) {}
+  }
+  function isRemediationOpened(id) {
+    try { return JSON.parse(sessionStorage.getItem('aimt_m12_remediation_opened') || '[]').indexOf(String(id)) !== -1; } catch (e) { return false; }
+  }
+
+  // Required Remediation: same underlying status.remediation rows as
+  // Recommended Review, but deliberately presented as mandatory, tracked
+  // work with a completion action and an Attempt-Ready unlock -- never
+  // identical to the optional Recommended Review view (standard Section 8).
+  // Reads only competency/domain/module/section labels -- never a missed
+  // item's own text, choices, or the correct answer.
+  function renderRemediationPlan(container, status) {
+    var c = COPY.remediationPlan;
+    var rows = (status.remediation || []).slice();
+    var total = rows.length;
+    var doneCount = rows.filter(function (r) { return !!r.completed; }).length;
+    var allDone = total > 0 && doneCount === total;
+    var nextAttemptNumber = (status.ladder && status.ladder.nextAttemptNumber) || (((status.performanceReview && status.performanceReview.attemptNumber) || 0) + 1);
+
+    var html = '';
+    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
+    html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+    html += '<p class="body-text">' + esc(c.intro) + '</p>';
+
+    if (!total) {
+      html += '<p class="body-text">' + esc(c.empty) + '</p>';
+    } else {
+      html += '<div class="m12x-progress-row" aria-live="polite"><span>' + esc(c.progressLabel(doneCount, total)) + '</span></div>';
+      html += '<div class="m12x-progress-track"><div class="m12x-progress-fill" style="width:' + Math.round((doneCount / total) * 100) + '%;"></div></div>';
+
+      rows.forEach(function (row) {
+        var isDomain = !!row.critical_domain;
+        var label = row.competency_area || (isDomain ? (DOMAIN_LABELS[row.critical_domain] || row.critical_domain) : 'Required review');
+        var moduleNum = row.module_ref ? Number(row.module_ref) : null;
+        var hasModule = moduleNum != null && !isNaN(moduleNum);
+        var title = hasModule ? moduleTitle(moduleNum) : null;
+        var why = isDomain ? c.domainWhy : c.competencyWhy;
+        var opened = isRemediationOpened(row.id);
+        var statusLabel = row.completed ? c.statusComplete : (opened ? c.statusInProgress : c.statusNotStarted);
+        var statusClass = row.completed ? 'complete' : (opened ? 'inprogress' : '');
+
+        html += '<div class="m12x-perf-card">';
+        if (isDomain) html += '<div class="m12x-tile-meta" style="margin-bottom:3px;">' + esc(COPY.requiredCompetencyReview.title) + '</div>';
+        html += '<div class="m12x-perf-title">' + esc(label) + '</div>';
+        if (title) html += '<div class="m12x-tile-meta">' + esc(title) + '</div>';
+        if (row.section_ref) html += '<p class="body-text" style="font-size:0.83rem;">' + esc(c.reviewLabel) + esc(row.section_ref) + '</p>';
+        html += '<p class="body-text" style="font-size:0.83rem;">' + esc(why) + '</p>';
+        html += '<div class="m12x-remediation-meta"><span class="m12x-remediation-badge">' + esc(c.requiredBadge) + '</span><span class="m12x-remediation-status ' + statusClass + '">' + esc(statusLabel) + '</span></div>';
+        html += '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.6rem;">';
+        if (hasModule) html += '<button class="m12x-btn secondary" data-m12-open-module="' + esc(String(moduleNum)) + '" data-m12-remediation-id="' + esc(String(row.id)) + '">' + esc(c.openModule(title)) + '</button>';
+        if (!row.completed) html += '<button class="m12x-btn" data-m12-complete-remediation="' + esc(String(row.id)) + '">' + esc(c.markComplete) + '</button>';
+        html += '</div></div>';
+      });
+    }
+
+    if (allDone) {
+      html += '<div class="key-point"><span class="kp-icon" aria-hidden="true">✦</span><div class="kp-body"><div class="kp-eyebrow">' + esc(c.readyTitle) + '</div><p class="body-text">' + esc(c.readyBody) + '</p></div></div>';
+      html += '<button class="m12x-btn" id="m12StartAfterRemediation">' + esc(c.startAttempt(nextAttemptNumber)) + '</button>';
+    }
+    html += '<button class="m12x-btn secondary" id="m12BackToRemediation" style="margin-top:0.6rem;">' + esc(c.back) + '</button>';
+    container.innerHTML = frame(html);
+
+    Array.prototype.forEach.call(container.querySelectorAll('[data-m12-open-module]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var rid = btn.getAttribute('data-m12-remediation-id');
+        if (rid) markRemediationOpened(rid);
+        var n = Number(btn.getAttribute('data-m12-open-module'));
+        if (typeof window.openModuleById === 'function') window.openModuleById(n);
+      });
+    });
+    Array.prototype.forEach.call(container.querySelectorAll('[data-m12-complete-remediation]'), function (btn) {
+      btn.addEventListener('click', function () { onCompleteRemediation(container, status, btn.getAttribute('data-m12-complete-remediation')); });
+    });
+    var startBtn = document.getElementById('m12StartAfterRemediation');
+    if (startBtn) startBtn.addEventListener('click', function () { onStartExam(container); });
+    var backBtn = document.getElementById('m12BackToRemediation');
+    if (backBtn) backBtn.addEventListener('click', function () { Module12Cert.render(container); });
+  }
+
+  async function onCompleteRemediation(container, status, remediationId) {
+    if (isReview()) {
+      // No real remediation record exists in Review Mode / Instant State QA
+      // -- mutate this fixture's own in-memory row so the "all complete ->
+      // Attempt Ready" transition is still demonstrable locally, exactly
+      // like every other Review Mode interaction (never a network call).
+      var row = (status.remediation || []).find(function (r) { return String(r.id) === String(remediationId); });
+      if (row) row.completed = true;
+      renderRemediationPlan(container, status);
+      return;
+    }
+    var res = await apiPost('/complete-remediation', { remediationId: remediationId });
+    if (!res.ok) { alert('Could not update your remediation status — please try again.'); return; }
+    // Re-fetch status so the plan reflects the real, authoritative record --
+    // never assume success client-side.
+    Module12Cert.render(container);
+  }
+
   async function onAttemptAction(container, status, label) {
     if (/^Start Attempt/.test(label) || label === 'Start Final Exam') {
       return onStartExam(container);
@@ -1204,8 +1522,11 @@
       Module12Cert.render(container);
       return;
     }
-    if (label === 'Review My Recommended Sections' || label === 'Begin My Remediation Plan') {
+    if (label === 'Review My Recommended Sections') {
       return renderRecommendedReview(container, status);
+    }
+    if (label === 'Begin My Remediation Plan') {
+      return renderRemediationPlan(container, status);
     }
     // "View Review Status" — navigate the student back to course content /
     // dashboard; no dedicated Individual AIMT Review status UI exists yet

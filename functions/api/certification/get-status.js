@@ -52,13 +52,20 @@ export async function onRequestGet(context) {
 
   let remediation = null;
   if (state === 'D' && latestFinalized) {
+    // Deliberately NOT filtered to latestFinalized's attempt_id: the real
+    // ladder gate (determineNextAttemptEligibility, Section 8) evaluates
+    // required_before_next_attempt + completed across every remediation row
+    // the student has ever been assigned, not just the most recent attempt.
+    // A student who left Attempt 1's recommended-review items incomplete
+    // and then also failed Attempt 2 must still see and be able to complete
+    // those older items -- otherwise Attempt 3 would stay locked for a
+    // reason the Remediation Plan screen never showed them.
     const remRes = await supabaseRest(
       env,
       `certification_remediation_assignments?${new URLSearchParams({
-        select: 'competency_area,critical_domain,module_ref,section_ref,required_before_next_attempt,completed',
+        select: 'id,competency_area,critical_domain,module_ref,section_ref,remediation_activity,required_before_next_attempt,completed',
         user_id: `eq.${user.id}`,
         course_slug: `eq.${COURSE_SLUG}`,
-        attempt_id: `eq.${latestFinalized.id}`,
       })}`
     );
     remediation = remRes.ok && Array.isArray(remRes.body) ? remRes.body : [];
