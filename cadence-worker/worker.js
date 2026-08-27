@@ -14,16 +14,33 @@
      ALLOWED_ORIGINS            comma-separated, e.g.
                                 https://yourdomain.com,https://aimt-site.pages.dev
      STAFF_EMAILS               comma-separated staff emails (optional)
+     CADENCE_CHAT_MODEL         optional override — MUST equal APPROVED_CHAT_MODEL
+                                or CANDIDATE_CHAT_MODEL below, or it is ignored.
+                                Never set this to a provider "latest" alias.
 
    Limits enforced:
-     - model allowlist (only your course model)
+     - model allowlist (only the approved/candidate course model — see below)
      - max_tokens clamp (1000)
      - 20 requests/min per user (in-memory; resets on isolate recycle —
        good enough to stop abuse; upgrade to KV/DO later if needed)
      - 300 requests/day per user (in-memory, same caveat)
-   ═══════════════════════════════════════════════════════════════ */
 
-const ALLOWED_MODELS = ['claude-sonnet-4-20250514'];
+   ─── MODEL CONFIGURATION (mirrors functions/_lib/cadence/model-config.mjs's
+   CADENCE_CHAT_MODEL role, config version 'cadence-model-config-v1') ───
+   This Worker deploys by dashboard paste and cannot import that module
+   directly. Keep the value below in sync with it BY HAND — a repo-internal
+   test (tests/cadence-phase0.test.mjs) fails the local suite if this file's
+   value and the Pages Function config module's value disagree, but it
+   cannot see what is actually deployed live. See
+   docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 6.
+   Promotion is deliberate: to test a candidate, set CANDIDATE_CHAT_MODEL
+   below AND bind CADENCE_CHAT_MODEL to that exact string in the Worker's
+   env vars — an env value that matches neither constant is ignored, so a
+   provider "latest" alias can never reach this Worker. ───────────────── */
+
+const APPROVED_CHAT_MODEL = 'claude-sonnet-4-20250514';
+const CANDIDATE_CHAT_MODEL = null; // set only during a deliberate promotion test
+const ALLOWED_MODELS = [APPROVED_CHAT_MODEL, CANDIDATE_CHAT_MODEL].filter(Boolean);
 const MAX_TOKENS_CAP = 1000;
 const RATE_PER_MINUTE = 20;
 const RATE_PER_DAY = 300;
@@ -165,7 +182,13 @@ export default {
       return json({ error: { message: 'Invalid request' } }, 400, cors);
     }
 
-    const model = ALLOWED_MODELS.includes(body.model) ? body.model : ALLOWED_MODELS[0];
+    // Model identity is a server-side decision, never a client one — the
+    // client no longer sends a model string at all (see headspa-mastery.
+    // html's callAI()); any legacy/unexpected body.model is ignored. An
+    // env override is honored only when it exactly matches the approved or
+    // candidate value above, so this can never resolve to an arbitrary or
+    // "latest" string regardless of what is bound.
+    const model = ALLOWED_MODELS.includes(env.CADENCE_CHAT_MODEL) ? env.CADENCE_CHAT_MODEL : APPROVED_CHAT_MODEL;
     const maxTokens = Math.min(
       Number.isFinite(Number(body.max_tokens)) ? Number(body.max_tokens) : MAX_TOKENS_CAP,
       MAX_TOKENS_CAP

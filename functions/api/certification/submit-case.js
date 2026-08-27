@@ -11,12 +11,22 @@
    the rubric never reaches the client. Once every selected case is
    submitted, Part II locks as a whole and the attempt advances toward
    Part III.
+
+   Rate-limited the same way as submit-interview-turn.js (Phase 0D, see
+   docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 12)
+   — checked before any attempt state is read, so a rejection never
+   consumes a case submission or looks like a failed evaluation.
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { scoreCaseSubmission, computeAppliedCasesComponent } from '../../_lib/certification/scoring.mjs';
 import { evaluateStructuredCasePart } from '../../_lib/certification/cadence-grader.mjs';
+import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
+
+// A full attempt only ever submits 4 cases; generous on purpose so a
+// legitimate retry after a network hiccup is never mistaken for abuse.
+const RATE_LIMIT = { perMinute: 10, perDay: 60 };
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -24,6 +34,15 @@ export async function onRequestPost(context) {
 
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
+
+  const limited = checkRateLimit(`case:${user.id}`, RATE_LIMIT);
+  if (limited) {
+    return json({
+      error: limited === 'minute'
+        ? 'Cadence needs a short breather — try again in a minute.'
+        : 'Daily case-submission limit reached — this resets tomorrow. Your progress is saved.',
+    }, 429);
+  }
 
   let body;
   try {
@@ -76,7 +95,11 @@ export async function onRequestPost(context) {
   }
 
   const scored = scoreCaseSubmission(caseDef, finalResponses, { cadenceEvaluatedParts });
-  caseState[caseId] = { submitted: true, responses: finalResponses, score: scored.percent, evidencePoints: scored.evidencePoints, submittedAt: new Date().toISOString() };
+  const lastEvaluated = Object.values(cadenceEvaluatedParts).find((p) => p && p.modelInfo);
+  const lastGradedWith = lastEvaluated
+    ? { provider: lastEvaluated.modelInfo.provider, modelName: lastEvaluated.modelInfo.modelName, configVersion: lastEvaluated.modelInfo.configVersion, at: new Date().toISOString() }
+    : null;
+  caseState[caseId] = { submitted: true, responses: finalResponses, score: scored.percent, evidencePoints: scored.evidencePoints, submittedAt: new Date().toISOString(), lastGradedWith };
 
   const allSelected = attempt.part2_selected_ids || [];
   const allSubmitted = allSelected.every((id) => caseState[id] && caseState[id].submitted);

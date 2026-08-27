@@ -10,12 +10,46 @@
    exactly ONE follow-up, and the conversation locks once a result is
    finalized. Rubric criteria/scores are never sent to the client mid-
    conversation — only the next prompt or a natural transition line.
+
+   Phase 0 hotfixes (docs/course-audit/00-cadence-launch-sweep-build-
+   contract.md Section 12):
+
+   - Retry-after-failure no longer mutates the persisted transcript. The
+     prior implementation appended the student's turn to `transcript` even
+     when Anthropic failed, then a retry appended it AGAIN on top of the
+     client's own (reverted) local view — producing two consecutive
+     user-role transcript entries with no assistant turn between them,
+     which reliably fails Anthropic's role-alternation requirement on the
+     retry itself. The student's response is now preserved in a separate
+     `pendingResponse` field, never inside the graded transcript, so a
+     retry is a clean, ordinary evaluation attempt every time.
+   - A short server-side in-flight lock (`turnInFlightAt`) prevents two
+     near-simultaneous submissions for the same conversation from both
+     reaching Anthropic and racing to write the result — the second sees
+     the lock and is rejected before any Anthropic call or state mutation.
+     The lock self-heals after LOCK_TIMEOUT_MS so a crashed/stalled request
+     can never leave a conversation permanently stuck.
+   - A per-user rate limit runs before any attempt state is read or
+     mutated, so a rejected request never consumes a follow-up, touches the
+     transcript, or looks like a failed evaluation.
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { evaluateInterviewTurn } from '../../_lib/certification/cadence-grader.mjs';
 import { scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState } from '../../_lib/certification/scoring.mjs';
+import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
+
+// A real certification interview turn involves reading a prompt, thinking,
+// and typing a substantive response — nowhere near this pace even across a
+// full attempt (9 turns max). Generous on purpose: a rejection here must
+// never be mistaken by a legitimate student for "the exam is broken."
+const RATE_LIMIT = { perMinute: 10, perDay: 60 };
+
+// Comfortably above typical Anthropic latency for this call shape, short
+// enough that a genuinely abandoned/crashed request self-heals quickly
+// rather than leaving a conversation stuck for the rest of the session.
+const LOCK_TIMEOUT_MS = 20000;
 
 function mergeCriterionScores(previous, latest) {
   const merged = { ...(previous || {}) };
@@ -26,12 +60,30 @@ function mergeCriterionScores(previous, latest) {
   return merged;
 }
 
+function isLockActive(turnInFlightAt) {
+  if (!turnInFlightAt) return false;
+  const claimedAt = Date.parse(turnInFlightAt);
+  if (!Number.isFinite(claimedAt)) return false;
+  return Date.now() - claimedAt < LOCK_TIMEOUT_MS;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   if (!hasSupabaseEnv(env)) return json({ error: 'Misconfigured' }, 500);
 
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
+
+  // Rate limit before touching any attempt state — a rejection here must
+  // have zero side effects on the attempt.
+  const limited = checkRateLimit(`interview:${user.id}`, RATE_LIMIT);
+  if (limited) {
+    return json({
+      error: limited === 'minute'
+        ? 'Cadence needs a short breather — try again in a minute.'
+        : 'Daily practitioner-conversation limit reached — this resets tomorrow. Your progress is saved.',
+    }, 429);
+  }
 
   let body;
   try {
@@ -56,6 +108,21 @@ export async function onRequestPost(context) {
   const state = conversationState[interviewId] || { transcript: [], followUpUsed: false, finalized: false, criterionScores: null };
   if (state.finalized) return json({ finalized: true, alreadyFinalized: true });
 
+  if (isLockActive(state.turnInFlightAt)) {
+    return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
+  }
+
+  // Claim the lock before calling Anthropic so a near-simultaneous second
+  // request sees it on its own read and is rejected above, rather than both
+  // requests racing to evaluate and write the result.
+  const claimedState = { ...state, turnInFlightAt: new Date().toISOString() };
+  conversationState[interviewId] = claimedState;
+  const claim = await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ part3_conversation_state: conversationState }),
+  });
+  if (!claim.ok) return json({ error: 'Could not start evaluation. Please retry.' }, 500);
+
   const banks = getProductionBanks();
   const interviewDef = banks.interviewBank.find((i) => i.id === interviewId);
   if (!interviewDef) return json({ error: 'Assessment content unavailable.' }, 503);
@@ -71,19 +138,29 @@ export async function onRequestPost(context) {
       followUpAlreadyUsed: state.followUpUsed,
     });
   } catch (e) {
-    // Preserve the student's response; do not finalize or falsely score on evaluator failure.
-    const transcriptWithPreservedResponse = priorTranscript.concat([{ role: 'user', content: studentResponse }]);
-    conversationState[interviewId] = { ...state, transcript: transcriptWithPreservedResponse };
+    // Preserve the student's response WITHOUT touching the graded
+    // transcript — see the file header for why the transcript must never
+    // be mutated on a failed evaluation. Release the lock so a retry can
+    // proceed immediately.
+    conversationState[interviewId] = {
+      ...state,
+      turnInFlightAt: null,
+      pendingResponse: studentResponse,
+      pendingUpdatedAt: new Date().toISOString(),
+    };
     await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
       method: 'PATCH',
       body: JSON.stringify({ part3_conversation_state: conversationState }),
     });
-    return json({ error: 'Cadence is temporarily unavailable — your response was saved. Please retry.' }, 502);
+    return json({ error: 'Cadence is temporarily unavailable — your response was saved. Please retry.', preserved: true }, 502);
   }
 
   const mergedCriterionScores = mergeCriterionScores(state.criterionScores, evaluation.criterionScores);
   const mergedExplicitUnsafeDomains = Array.from(new Set([...(state.explicitUnsafeDomains || []), ...evaluation.explicitUnsafeDomains]));
   const mergedPatternTags = { ...(state.patternTags || {}), ...(evaluation.patternTags || {}) };
+  const lastGradedWith = evaluation.modelInfo
+    ? { provider: evaluation.modelInfo.provider, modelName: evaluation.modelInfo.modelName, configVersion: evaluation.modelInfo.configVersion, at: new Date().toISOString() }
+    : (state.lastGradedWith || null);
 
   let transcript = priorTranscript.concat([{ role: 'user', content: studentResponse }]);
 
@@ -96,6 +173,9 @@ export async function onRequestPost(context) {
       criterionScores: mergedCriterionScores,
       explicitUnsafeDomains: mergedExplicitUnsafeDomains,
       patternTags: mergedPatternTags,
+      turnInFlightAt: null,
+      pendingResponse: null,
+      lastGradedWith,
     };
     await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
       method: 'PATCH',
@@ -113,6 +193,9 @@ export async function onRequestPost(context) {
     explicitUnsafeDomains: mergedExplicitUnsafeDomains,
     patternTags: mergedPatternTags,
     finalizedAt: new Date().toISOString(),
+    turnInFlightAt: null,
+    pendingResponse: null,
+    lastGradedWith,
   };
 
   const allSelected = attempt.part3_selected_ids || [];

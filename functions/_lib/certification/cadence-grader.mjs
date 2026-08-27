@@ -8,8 +8,14 @@
 // checkpoint-grading calls with client-visible system prompts. Requires its
 // own `ANTHROPIC_API_KEY` env var on the Pages project (separate from the
 // Worker's copy of the same secret — same key value, different binding).
+//
+// Model identity is resolved through the centralized CADENCE_GRADING_MODEL
+// role (functions/_lib/cadence/model-config.mjs) rather than a local
+// hardcoded constant — see docs/course-audit/00-cadence-launch-sweep-build-
+// contract.md Section 6 for why that constant used to drift silently.
 
-const ALLOWED_MODEL = 'claude-sonnet-4-20250514';
+import { resolveCadenceModel } from '../cadence/model-config.mjs';
+
 const MAX_TOKENS_CAP = 1000;
 
 const CADENCE_EXAM_TONE =
@@ -28,6 +34,7 @@ function extractFirstJsonObject(text) {
 
 async function callAnthropic(env, { system, messages, maxTokens = 600 }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
+  const modelInfo = resolveCadenceModel(env, 'CADENCE_GRADING_MODEL');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -36,7 +43,7 @@ async function callAnthropic(env, { system, messages, maxTokens = 600 }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: ALLOWED_MODEL,
+      model: modelInfo.modelName,
       max_tokens: Math.min(maxTokens, MAX_TOKENS_CAP),
       system,
       messages,
@@ -47,7 +54,8 @@ async function callAnthropic(env, { system, messages, maxTokens = 600 }) {
     throw new Error(`Cadence evaluation request failed (${res.status}): ${errBody.slice(0, 300)}`);
   }
   const data = await res.json();
-  return (data && data.content && data.content[0] && data.content[0].text) || '';
+  const text = (data && data.content && data.content[0] && data.content[0].text) || '';
+  return { text, modelInfo };
 }
 
 /**
@@ -81,7 +89,7 @@ export async function evaluateInterviewTurn(env, { interviewDef, priorTranscript
     `Return valid JSON only in this shape: {"criterionScores": {"<criterionId>": 0|1|2, ...every criterion...}, "explicitUnsafeDomains": ["D1"], "patternTags": {"D1": "short_tag"}, "needsFollowUp": true|false, "followUpPrompt": "string, only if needsFollowUp is true", "transitionLine": "one short natural transition sentence, only if needsFollowUp is false"}`;
 
   const messages = [...priorTranscript, { role: 'user', content: studentResponse }];
-  const raw = await callAnthropic(env, { system, messages, maxTokens: 700 });
+  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, maxTokens: 700 });
   const parsed = extractFirstJsonObject(raw);
   if (!parsed || typeof parsed.criterionScores !== 'object') {
     throw new Error('Cadence returned an unparseable interview evaluation.');
@@ -93,6 +101,7 @@ export async function evaluateInterviewTurn(env, { interviewDef, priorTranscript
     needsFollowUp: !!parsed.needsFollowUp && !followUpAlreadyUsed,
     followUpPrompt: parsed.followUpPrompt || null,
     transitionLine: parsed.transitionLine || null,
+    modelInfo,
   };
 }
 
@@ -113,7 +122,7 @@ export async function evaluateStructuredCasePart(env, { scenario, part, studentR
     CADENCE_EXAM_TONE +
     '\n\nReturn valid JSON only: {"correctnessScore": 0-1, "explicitUnsafe": true|false, "patternTag": null or a short snake_case tag naming the specific misunderstanding if present}';
   const messages = [{ role: 'user', content: `Case scenario: ${scenario}\n\nPrompt: ${part.prompt}\n\nStudent response: ${studentResponse}` }];
-  const raw = await callAnthropic(env, { system, messages, maxTokens: 400 });
+  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, maxTokens: 400 });
   const parsed = extractFirstJsonObject(raw);
   if (!parsed || typeof parsed.correctnessScore !== 'number') {
     throw new Error('Cadence returned an unparseable case evaluation.');
@@ -122,5 +131,6 @@ export async function evaluateStructuredCasePart(env, { scenario, part, studentR
     correctnessScore: Math.max(0, Math.min(1, parsed.correctnessScore)),
     explicitUnsafe: !!parsed.explicitUnsafe,
     patternTag: parsed.patternTag || null,
+    modelInfo,
   };
 }
