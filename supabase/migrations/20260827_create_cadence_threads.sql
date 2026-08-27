@@ -2,14 +2,12 @@
 -- Run in Supabase SQL editor. Idempotent; safe to re-run. Additive only —
 -- no existing table is dropped, altered destructively, or rewritten.
 --
--- ⚠ THIS MIGRATION IS COMMITTED FOR RECORD-KEEPING ONLY — IT HAS NOT BEEN
--- RUN. Per CLAUDE.md, it must be executed manually in the Supabase SQL
--- editor (or applied by a later, separately authorized task) before any
--- endpoint depends on these tables existing. Nothing in this repository
--- reads from or writes to cadence_threads/cadence_messages yet — wiring
--- Cloudflare Function endpoints to them is deliberately separate,
--- dependent follow-up work (build contract Section 8/14, Phase 1
--- continuation or Phase 2), not bundled into this schema-only commit.
+-- Drafted in the same repository commit as the endpoints that use it
+-- (functions/api/cadence/*.js, functions/_lib/cadence/threads.mjs) and
+-- reviewed for RLS/additivity before being applied to the connected
+-- Supabase project — see docs/course-audit/00-cadence-launch-sweep-
+-- build-contract.md Section 6a/14 for the review record and the exact
+-- date this was applied.
 --
 -- Governs: docs/course-audit/00-cadence-launch-sweep-build-contract.md
 --          Section 2 ("one visible thread per module"), Section 8 ("one
@@ -106,11 +104,22 @@ create table if not exists public.cadence_messages (
   -- course_progress, not here.
   checkpoint_id text,
 
-  -- Diagnostic only — {provider, modelName, status, registryVersion} for
-  -- an assistant message that involved a model call. Null for a student
-  -- message or a message that didn't require one. Never read to decide
-  -- anything; see the authority-boundary note above.
+  -- The structured evidence + decision + model identity behind an assistant
+  -- message that involved a model call (functions/_lib/cadence/checkpoint-
+  -- evaluation.mjs's record shape). Null for a student message or a message
+  -- that didn't require one. This IS where a computed decision is cached
+  -- for idempotent retries (see idempotency_key below) -- it is still never
+  -- treated as authoritative for progress; course_progress remains the one
+  -- authoritative record of a checkpoint's pass/fail state.
   grading_metadata jsonb,
+
+  -- Stable per-submission identity, supplied by the server-authoritative
+  -- endpoint that writes this row (never trusted verbatim from the
+  -- client) so a network retry of the same logical send cannot produce a
+  -- duplicate student message, a duplicate model call once an assistant
+  -- reply already exists, or a duplicate assistant message. Null is
+  -- allowed for rows written by a path that doesn't need this guarantee.
+  idempotency_key text,
 
   created_at timestamptz not null default timezone('utc'::text, now())
 );
@@ -120,6 +129,10 @@ create index if not exists cadence_messages_thread_created_idx
 
 create index if not exists cadence_messages_user_course_idx
   on public.cadence_messages (user_id, course_slug);
+
+create unique index if not exists cadence_messages_thread_idempotency_key_idx
+  on public.cadence_messages (thread_id, idempotency_key)
+  where idempotency_key is not null;
 
 alter table public.cadence_messages enable row level security;
 

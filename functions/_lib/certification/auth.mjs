@@ -1,5 +1,9 @@
-// Shared identity/entitlement/REST helpers for functions/api/certification/*.js.
-// Mirrors the exact pattern already established by functions/api/issue-certificate.js
+// Shared identity/entitlement/REST helpers, originally built for
+// functions/api/certification/*.js and now also reused by
+// functions/api/cadence/*.js (functions/_lib/cadence/threads.mjs and its
+// callers) — same identity/entitlement rules apply to both, so this stays
+// the one place that logic lives rather than a second copy. Mirrors the
+// exact pattern already established by functions/api/issue-certificate.js
 // and cadence-worker/worker.js — bearer token -> GET {SUPABASE_URL}/auth/v1/user
 // (service-role apikey, user's own token as Authorization) -> resolve user
 // server-side -> entitlement check via course_entitlements. No parallel auth

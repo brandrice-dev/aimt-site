@@ -192,7 +192,7 @@ function loadHeadspaState() {
   const sql = readFileSync(path.join(ROOT, 'supabase/migrations/20260827_create_cadence_threads.sql'), 'utf8');
   const sqlLower = sql.toLowerCase();
 
-  check('MIGRATION SAFETY', 'File is explicitly marked as committed-but-not-run', /HAS NOT BEEN\s*\n?-- RUN/.test(sql) || /has not been\s*\n?-- run/i.test(sql));
+  check('MIGRATION SAFETY', 'File documents where its review/application record lives', /build-contract\.md Section/i.test(sql));
   check('MIGRATION SAFETY', 'No DROP TABLE anywhere', !/drop table/.test(sqlLower));
   check('MIGRATION SAFETY', 'No DROP COLUMN anywhere', !/drop column/.test(sqlLower));
   check('MIGRATION SAFETY', 'No TRUNCATE anywhere', !/truncate/.test(sqlLower));

@@ -243,14 +243,18 @@ keyboard-avoidance), voice button (`startVoice()`, reused as-is), mounted
 by the guide panel, any future full-screen checkpoint UX, and Module 12
 Part III. Authority/mode logic stays outside the shell.
 
-## 9. Checkpoint gate-map requirement (Phase 2 prerequisite, not built this task)
+## 9. Checkpoint gate-map requirement (built this task — Phase 2 authority)
 
-Before any course-wide checkpoint-gating change, produce
-`docs/course-audit/00-cadence-checkpoint-gate-map.md`: every checkpoint's
-ID, module, competency, content visible before/unlocked after, whether it
-is a final module gate, persistence key, and migration implications. Phase
-0 does not change gating and does not require this document yet — it gates
-Phase 2/5, not Phase 0.
+`docs/course-audit/00-cadence-checkpoint-gate-map.md` — built this task.
+Inventories all 22 checkpoints across Modules 0–11: ID, module, competency
+label, content visible before/unlocked after, persistence key, and a key
+finding — **no mid-module content-hiding gate exists anywhere today**;
+every checkpoint's only real effect is (a) its own resolved/read-only state
+and (b) contributing to its module's completion, which gates the *next*
+module's unlock. Module 9↔10's checkpoint-ID/slot mismatch (from the
+historical reorder) is recorded explicitly so Phase 2 doesn't "fix" it and
+break existing students' saved progress. This document does not itself
+change any gating behavior — it is the map Phase 2 builds against.
 
 ## 10. Ask Cadence target (Phase 4, not built this task)
 
@@ -321,13 +325,37 @@ authoritative for progress. A durable `cadence_threads`/`cadence_messages`
 schema was drafted (`supabase/migrations/20260827_create_cadence_threads.sql`)
 covering the three non-certification modes — **committed for record-keeping
 only, not applied**, and deliberately not yet wired to any endpoint.
-*Deliberately not attempted this task* (flagged, not guessed at): the
-structured evaluation contract / evaluate-decide authority split for
-checkpoint grading (Owner Decision 6's actual implementation) changes live
-behavior across 12 already-approved, QA-signed-off modules and deserves its
-own scoped pass rather than being bundled in; wiring Cloudflare Function
-endpoints to the new thread/message schema is real, separate, dependent
-work once the schema itself is reviewed.
+**PHASE 1 CORE: COMPLETE (follow-up task, same day).** The two items flagged
+above as deliberately deferred were completed once the owner explicitly
+authorized them: the structured evaluate/decide authority split for
+checkpoint grading is implemented
+(`functions/_lib/cadence/checkpoint-evaluation.mjs`,
+`functions/api/cadence/evaluate-checkpoint.js`) — a deterministic,
+human-authored `decideCheckpointOutcome()` function (never the model's own
+prose) now decides pass/revise from structured evidence, gated by a
+behavior-compatibility suite (8 response categories × 2 real checkpoints,
+16/16 matching the existing standard, zero mismatches — see
+`tests/cadence-checkpoint-authority.test.mjs`) before the live path was
+rewired. `evaluateCheckpointAnswer()` (the real, non-Review-Mode path) now
+calls this endpoint; Review Mode was deliberately kept on the prior
+direct-to-Worker path, preserving its "never persists a result" guarantee
+by construction. The `cadence_threads`/`cadence_messages` migration was
+finalized (added an `idempotency_key` column + unique partial index),
+reviewed for RLS/additivity, and **applied to the connected `aimt` Supabase
+project** — verified live (schema, RLS policies via `pg_policies`,
+anonymous REST rejection, a full isolated smoke test using existing QA
+identities, cleaned up afterward). `functions/_lib/cadence/threads.mjs` and
+two endpoints (`evaluate-checkpoint.js`, `get-thread.js`) implement the
+core get-or-create-thread / append-message-with-idempotency /
+get-messages primitives Phase 2 needs. Partial-failure recovery (student
+message durable before the model call; assistant-write failure returns the
+already-computed decision without re-persisting; idempotent replay via a
+client-generated `requestId` caches the decision rather than re-calling
+Anthropic) is implemented and tested. **Not built** (genuinely separate,
+still-future work, not deferred by oversight): Ask Cadence's UI, a
+remediation conversation UX, and Phase 2's full-screen shell itself — the
+schema/API support these modes' data shape, nothing more, per this task's
+own explicit scope boundary.
 
 **Phase 2 — Shared Conversation Shell + Checkpoints.** Gate map first (see
 Section 9); full-screen shell; one thread per module; composer/voice/mobile;

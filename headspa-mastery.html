@@ -8125,7 +8125,52 @@ function normalizeCheckpointEvaluation(raw) {
   };
 }
 
-async function evaluateCheckpointAnswer(systemPrompt, question, answer) {
+// Server-authoritative checkpoint evaluation (docs/course-audit/00-cadence-
+// launch-sweep-build-contract.md Section 15): Cadence evaluates evidence,
+// functions/api/cadence/evaluate-checkpoint.js's deterministic decision
+// function decides pass/revise -- this function no longer trusts a model's
+// own `pass` field directly. Same {pass, feedback} shape callers already
+// expect; the rubric/question sent are unchanged from the original design.
+async function evaluateCheckpointAnswer(moduleId, checkpointId, systemPrompt, question, answer) {
+  const evaluatorSystem = typeof systemPrompt === 'function' ? systemPrompt(question) : systemPrompt;
+  const requestId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('cp-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+  try {
+    let accessToken = '';
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      accessToken = data?.session?.access_token || '';
+    } catch (_) {}
+    const r = await fetch('/api/cadence/evaluate-checkpoint', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {})
+      },
+      body: JSON.stringify({ moduleId, checkpointId, systemPrompt: evaluatorSystem, question, studentResponse: answer, requestId }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || 'Network error'); }
+    const d = await r.json();
+    return { pass: d.pass === true, feedback: typeof d.feedback === 'string' ? d.feedback : '', modelInfo: d.modelInfo || null };
+  } catch (e) {
+    clearTimeout(timeout);
+    const error = new Error('Checkpoint evaluation unavailable');
+    error.code = 'checkpoint_eval_unavailable';
+    throw error;
+  }
+}
+
+// Review Mode ONLY -- deliberately kept on the prior direct-to-Worker path
+// (never the server-authoritative endpoint above), which is what makes
+// Review Mode's "never persists a result" guarantee true by construction
+// rather than by a server-side flag that could be spoofed (see
+// docs/course-audit/00-cadence-launch-sweep-handoff.md Section 2.6 and
+// module-12.md's Review Mode isolation, applied the same way here).
+async function evaluateCheckpointAnswerReviewMode(systemPrompt, question, answer) {
   const evaluatorSystem =
     systemPrompt +
     '\n\nDecide whether the student can pass this checkpoint right now.' +
@@ -8181,7 +8226,7 @@ function submitCheckpoint(moduleId, cpId, systemPrompt, question, errorMessage) 
     '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
     APP_STATE.getCadenceMemoryContext(moduleId, 'checkpoint');
 
-  evaluateCheckpointAnswer(system, question, text)
+  evaluateCheckpointAnswer(moduleId, cpId, system, question, text)
     .then((result) => {
       APP_STATE.setCheckpointResult(moduleId, cpId, {
         passed: result.pass,
@@ -8245,7 +8290,7 @@ function submitCheckpointReviewMode(moduleId, cpId, systemPrompt, question) {
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
     '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
 
-  evaluateCheckpointAnswer(system, question, text)
+  evaluateCheckpointAnswerReviewMode(system, question, text)
     .then((result) => {
       res.innerHTML = reviewLabel + result.feedback.split('\n').filter(l => l.trim())
         .map(l => '<p style="font-size:.875rem;line-height:1.7;font-weight:300;color:var(--text);margin-bottom:.3rem">' + l + '</p>')
