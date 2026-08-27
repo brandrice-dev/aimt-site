@@ -5485,3 +5485,11 @@ Final pre-migration task on `course-audit-build`, HEAD `1d6e999` at start. Close
 **Explicitly not done in this task:** no assessment content/scoring rule/weighting/critical-domain logic/randomization/attempt-size behavior changed; no locked wording changed; no real Cadence avatar image added (explicit owner-authorized placeholder); no reflection/application remediation activity type built (course_review only, for MVP); no educator-scheduling platform, CMS, or per-remediation certificate/transcript built; no section-level deep-linking built; the Supabase migration was not run; `ANTHROPIC_API_KEY` was not provisioned; no manual QA against the live environment was performed; no merge, no deployment, no push.
 
 **Next gate: OWNER FINAL PRE-MIGRATION QA → SUPABASE MIGRATION → LIVE CADENCE ENVIRONMENT QA.** Module 12 remains not manually approved and not launch-ready.
+
+---
+
+## 2026-08-27 — Step 96: Module 12 certification-close copy patch
+
+Copy-only patch on `course-audit-build`, HEAD `19224b8` at start. Owner requested a warmer final PASS-state course-close message. Replaced `COPY.passed.courseCloseTitle`/`courseCloseBody` in `assets/js/module12-certification.js` (the only two strings touched) — "You finished the course. Now use it." / "...This course is complete. Your development as a practitioner is not." became "Congratulations — you did it!" with the owner's exact new paragraphs, ending in a bolded "Congratulations on becoming AIMT Head Spa Certified." (via the existing `**bold**` → `<strong>` markdown convention `paras()` already supports). No other Module 12 wording, layout, assessment logic, scoring, bank content, remediation, or UI changed. Verified via the local `--browser` harness's instant `?qaState=pass` state that the new copy renders correctly, including the bolded closing line. All 1219 pre-existing deterministic assertions re-run clean — no test hardcoded the old strings, so none needed updating.
+
+**Next gate: OWNER FINAL PRE-MIGRATION QA → SUPABASE MIGRATION → LIVE CADENCE ENVIRONMENT QA.** Module 12 remains not manually approved and not launch-ready.

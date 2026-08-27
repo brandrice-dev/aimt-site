@@ -181,8 +181,8 @@
       eyebrow: 'AIMT Head Spa Certification',
       title: 'You met the standard.',
       body: 'You’ve completed the course and demonstrated the knowledge, application, and professional judgment AIMT requires for certification.\n\nYou showed that you can retain what you learned, apply it to realistic situations, and explain your reasoning when there isn’t a script in front of you.\n\nYour AIMT Head Spa Certification is now complete.',
-      courseCloseTitle: 'You finished the course. Now use it.',
-      courseCloseBody: 'You now have the framework.\n\nThe next stage comes from repetition — performing the service, refining your setup, learning how different clients present, strengthening your communication, and becoming more confident in the decisions that cannot be learned from a script alone.\n\nYour AIMT resources, certification record, Performance Review, and certificate remain available from your Student Dashboard.\n\nThis course is complete.\n\nYour development as a practitioner is not.'
+      courseCloseTitle: 'Congratulations — you did it!',
+      courseCloseBody: 'You’ve completed the AIMT Head Spa Certification Course and earned your certification. Take a moment to enjoy that accomplishment.\n\nYou now have a strong foundation to bring into your own practice — from assessment and service design to client communication, safety, sanitation, business judgment, and modern practice tools.\n\nAs you begin putting what you’ve learned into practice, your confidence will continue to grow with experience, repetition, and the clients you serve.\n\nYour AIMT resources, certification record, Performance Review, and certificate will remain available from your Student Dashboard whenever you need them.\n\n**Congratulations on becoming AIMT Head Spa Certified.**'
     },
     notYetPassed: {
       eyebrow: 'Final Assessment Results',
