@@ -88,6 +88,34 @@ export function determineNextAttemptEligibility({ attempts, remediationAssignmen
 }
 
 /**
+ * Aggregates already-identified weak spots (a missed Knowledge item, a
+ * low-scoring Case, a low-scoring Interview — each already reduced by the
+ * caller to competency + source module(s), never the item text/prompt/
+ * answer) into deduplicated weak-competency-area records: one per distinct
+ * (competency, primary module) pair. Pure — the caller decides what counts
+ * as "missed"/"low-scoring" using the real scoring engine and the current
+ * assessment config; this function only dedupes and shapes the result for
+ * buildRemediationAssignments(), so a student who missed several items in
+ * the same competency/module doesn't get several near-identical rows.
+ *
+ * @param {Array<{competency:string, sourceModules:number[], sectionRef?:string|null}>} weakSpots
+ * @returns {Array<{competency:string, moduleRef:string, sectionRef:string|null}>}
+ */
+export function collectWeakCompetencyAreas(weakSpots) {
+  const seen = new Map();
+  for (const spot of weakSpots || []) {
+    const competency = String(spot && spot.competency ? spot.competency : '').trim();
+    const modules = ((spot && spot.sourceModules) || []).filter((m) => Number.isInteger(m));
+    if (!competency || !modules.length) continue;
+    const primaryModule = modules[0];
+    const key = competency + '|' + primaryModule;
+    if (seen.has(key)) continue;
+    seen.set(key, { competency, moduleRef: String(primaryModule), sectionRef: (spot && spot.sectionRef) || null });
+  }
+  return Array.from(seen.values());
+}
+
+/**
  * Groups deficiencies into remediation assignment records by competency/
  * critical-domain area rather than one row per missed item (standard
  * Section 8 / task instruction #22). Pure — callers persist the result.

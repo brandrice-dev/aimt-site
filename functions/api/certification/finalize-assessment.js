@@ -17,8 +17,10 @@ import {
   scoreKnowledgeResponses,
   evaluateCriticalDomains,
   determineCertificationDecision,
+  scoreInterviewConversation,
+  interviewEvaluatorFlagsFromState,
 } from '../../_lib/certification/scoring.mjs';
-import { buildRemediationAssignments } from '../../_lib/certification/attempt-ladder.mjs';
+import { buildRemediationAssignments, collectWeakCompetencyAreas } from '../../_lib/certification/attempt-ladder.mjs';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -101,7 +103,53 @@ export async function onRequestPost(context) {
   if (!update.ok) return json({ error: 'Could not finalize the assessment.' }, 500);
 
   if (decisionResult.decision === 'not_yet_passed') {
-    const weakCompetencyAreas = []; // Grouped competency-level remediation content is authored in a later phase.
+    // Grouped, competency-level recommended-review areas — never one row per
+    // missed item, never the item's prompt/choices/correct-answer/rationale.
+    // Each "weak spot" below is reduced to only a competency label + the
+    // source module(s) it comes from before collectWeakCompetencyAreas()
+    // dedupes it; the specific question/case-part/interview-criterion that
+    // produced it is never carried forward into the remediation record.
+    const weakSpots = [];
+
+    const knowledgeItemsById = {};
+    for (const item of knowledgeItems) knowledgeItemsById[item.id] = item;
+    for (const p of knowledgeResult.perItem) {
+      if (p.correct) continue;
+      const item = knowledgeItemsById[p.id];
+      if (item) weakSpots.push({ competency: item.competency, sourceModules: [item.sourceModule], sectionRef: item.sourceSection });
+    }
+
+    const caseState = attempt.part2_case_state || {};
+    for (const caseId of attempt.part2_selected_ids || []) {
+      const cs = caseState[caseId];
+      if (!cs || cs.score == null || cs.score >= config.minimums.appliedCases) continue;
+      const def = banks.caseBank.find((c) => c.id === caseId);
+      if (!def) continue;
+      for (const competency of def.competencies || []) {
+        weakSpots.push({ competency, sourceModules: def.sourceModules, sectionRef: null });
+      }
+    }
+
+    // Recomputed from stored criterionScores (never trusting a client-
+    // submitted score, same principle as Part I above) purely to identify
+    // which conversations scored below the interview minimum for review
+    // purposes — this does not change the interview_score already stored
+    // at submit-interview-turn.js finalization time.
+    const interviewState = attempt.part3_conversation_state || {};
+    for (const interviewId of banksInterviewIds) {
+      const cs = interviewState[interviewId];
+      if (!cs || !cs.finalized) continue;
+      const def = banks.interviewBank.find((i) => i.id === interviewId);
+      if (!def) continue;
+      const flags = interviewEvaluatorFlagsFromState(cs);
+      const result = scoreInterviewConversation(def, cs.criterionScores || {}, flags);
+      if (result.percent >= config.minimums.interview) continue;
+      for (const competency of def.competencies || []) {
+        weakSpots.push({ competency, sourceModules: def.sourceModules, sectionRef: null });
+      }
+    }
+
+    const weakCompetencyAreas = collectWeakCompetencyAreas(weakSpots);
     const assignments = buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }).map((a) => ({
       ...a,
       user_id: user.id,

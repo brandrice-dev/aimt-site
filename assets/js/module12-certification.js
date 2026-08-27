@@ -189,6 +189,17 @@
       title: 'Something about your assessment doesn’t look right?',
       body: 'If you believe a question was unclear or flawed, Cadence misunderstood your response, a technical issue affected your assessment, or an accessibility or language issue affected how your competency was evaluated, you may request human review.\n\nAIMT review can correct an assessment or technical error.\n\nIt does not waive a competency that still needs to be demonstrated.',
       action: 'Request Assessment Review'
+    },
+    recommendedReview: {
+      eyebrow: 'Certification Performance Review',
+      title: 'Recommended Review',
+      intro: 'These are the areas your assessment showed could use more attention. Reviewing them is study — it does not start a new attempt, use up an attempt, or change your results.',
+      empty: 'Your Performance Review didn’t identify any specific recommended sections beyond what’s already noted above.',
+      domainWhy: 'This is a required professional competency area that needs to be demonstrated more clearly before certification can be issued.',
+      competencyWhy: 'Your assessment showed this is an area worth strengthening before your next attempt.',
+      reviewLabel: 'Review: ',
+      openModule: function (title) { return 'Open ' + title; },
+      back: 'Back to Performance Review'
     }
   };
 
@@ -248,6 +259,25 @@
       var name = String(full).trim().split(/\s+/)[0];
       return name || '';
     } catch (e) { return ''; }
+  }
+  // Reads the page's real module title map (declared in headspa-mastery.html,
+  // e.g. "Module 5 — Scalp Patterns & Service Adaptation") rather than
+  // duplicating those titles here, so a future course rename can't drift out
+  // of sync with the Recommended Review panel. `MODULE_TITLES` is a plain
+  // top-level `const` in the host page (not a `window` property), so it is
+  // only readable via bare-identifier lookup, and only once the host page's
+  // own script has actually run -- true for every real click here, since
+  // this is only ever called from a user-initiated interaction well after
+  // page load. `typeof` on a possibly-undeclared identifier never throws
+  // (unlike a direct reference), so this degrades safely wherever
+  // MODULE_TITLES doesn't exist at all (e.g. the local QA harness, which
+  // intentionally never loads headspa-mastery.html's full state machine).
+  function moduleTitle(moduleNumber) {
+    try {
+      /* eslint-disable-next-line no-undef */
+      if (typeof MODULE_TITLES !== 'undefined' && MODULE_TITLES && MODULE_TITLES[moduleNumber]) return MODULE_TITLES[moduleNumber];
+    } catch (e) {}
+    return 'Module ' + moduleNumber;
   }
   function pct(n) {
     if (n == null || isNaN(n)) return '—';
@@ -535,7 +565,10 @@
       case 'part3': return { eligible: true, state: 'B', inProgressAttempt: { id: 'fixture', attemptNumber: 1, status: 'part2_locked' } };
       case 'processing': return { eligible: true, state: 'B', inProgressAttempt: { id: 'fixture', attemptNumber: 1, status: 'part3_locked' } };
       case 'pass': return { eligible: true, state: 'C', ladder: { alreadyCertified: true }, performanceReview: perfReview('pass', domainsAllCleared) };
-      case 'attempt1': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: true, nextAttemptNumber: 2 }, performanceReview: perfReview('not_yet_passed', domainsAllCleared), remediation: [] };
+      case 'attempt1': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: true, nextAttemptNumber: 2 }, performanceReview: perfReview('not_yet_passed', domainsAllCleared), remediation: [
+        { competency_area: 'Fixture competency — Service Adaptation', critical_domain: null, module_ref: '5', section_ref: null, completed: false, required_before_next_attempt: true },
+        { competency_area: 'Fixture competency — Sanitation Between Clients', critical_domain: null, module_ref: '10', section_ref: null, completed: false, required_before_next_attempt: true }
+      ] };
       case 'attempt2': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 3, blockedReason: 'remediation_required', outstandingCount: 2 }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsAllCleared), { attemptNumber: 2 }), remediation: [{ competency_area: 'Fixture competency area', completed: false, required_before_next_attempt: true }] };
       case 'attempt3': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 4, blockedReason: 'educator_authorization_required' }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsOneUncleared), { attemptNumber: 3 }), remediation: [], educatorRequest: null };
       case 'attempt4': return { eligible: true, state: 'D', ladder: { canStartNewAttempt: false, nextAttemptNumber: 5, blockedReason: 'individual_aimt_review' }, performanceReview: Object.assign(perfReview('not_yet_passed', domainsOneUncleared), { attemptNumber: 4 }), remediation: [], educatorRequest: { status: 'completed', attempt4_authorized: true } };
@@ -1111,6 +1144,55 @@
     if (reviewBtn) reviewBtn.addEventListener('click', function () { onRequestAssessmentReview(container, status); });
   }
 
+  // Recommended Review: reads status.remediation (server-authoritative,
+  // grouped competency/critical-domain rows -- never one row per missed
+  // item, never a correct answer or the item's own text). This is a
+  // read-only study view: opening it, and opening a recommended module from
+  // it, never calls start-attempt, finalize-assessment, or anything else
+  // that could create/consume an attempt or alter stored scores.
+  function renderRecommendedReview(container, status) {
+    var c = COPY.recommendedReview;
+    var rows = (status.remediation || []).slice();
+    var html = '';
+    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(c.eyebrow) + '</div>';
+    html += '<h1 class="sec-title">' + esc(c.title) + '</h1>';
+    html += '<p class="body-text">' + esc(c.intro) + '</p>';
+
+    if (!rows.length) {
+      html += '<p class="body-text">' + esc(c.empty) + '</p>';
+    } else {
+      rows.forEach(function (row, i) {
+        var isDomain = !!row.critical_domain;
+        var label = row.competency_area || (isDomain ? (DOMAIN_LABELS[row.critical_domain] || row.critical_domain) : 'Recommended review');
+        var moduleNum = row.module_ref ? Number(row.module_ref) : null;
+        var hasModule = moduleNum != null && !isNaN(moduleNum);
+        var title = hasModule ? moduleTitle(moduleNum) : null;
+        var why = isDomain ? c.domainWhy : c.competencyWhy;
+        html += '<div class="m12x-perf-card">';
+        html += '<div class="m12x-perf-title">' + esc(label) + '</div>';
+        if (title) html += '<div class="m12x-tile-meta">' + esc(title) + '</div>';
+        if (row.section_ref) html += '<p class="body-text" style="font-size:0.85rem;">' + esc(c.reviewLabel) + esc(row.section_ref) + '</p>';
+        html += '<p class="body-text" style="font-size:0.85rem;">' + esc(why) + '</p>';
+        if (hasModule) {
+          html += '<button class="m12x-btn secondary" data-m12-open-module="' + esc(String(moduleNum)) + '" data-m12-row="' + i + '">' + esc(c.openModule(title)) + '</button>';
+        }
+        html += '</div>';
+      });
+    }
+
+    html += '<button class="m12x-btn" id="m12BackToReview" style="margin-top:0.6rem;">' + esc(c.back) + '</button>';
+    container.innerHTML = frame(html);
+
+    Array.prototype.forEach.call(container.querySelectorAll('[data-m12-open-module]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var n = Number(btn.getAttribute('data-m12-open-module'));
+        if (typeof window.openModuleById === 'function') window.openModuleById(n);
+      });
+    });
+    var backBtn = document.getElementById('m12BackToReview');
+    if (backBtn) backBtn.addEventListener('click', function () { Module12Cert.render(container); });
+  }
+
   async function onAttemptAction(container, status, label) {
     if (/^Start Attempt/.test(label) || label === 'Start Final Exam') {
       return onStartExam(container);
@@ -1122,9 +1204,12 @@
       Module12Cert.render(container);
       return;
     }
-    // "Review My Recommended Sections", "Begin My Remediation Plan", "View Review Status" —
-    // navigate the student back to course content / dashboard; no dedicated
-    // remediation-content UI exists yet (content pending a later, separate task).
+    if (label === 'Review My Recommended Sections' || label === 'Begin My Remediation Plan') {
+      return renderRecommendedReview(container, status);
+    }
+    // "View Review Status" — navigate the student back to course content /
+    // dashboard; no dedicated Individual AIMT Review status UI exists yet
+    // (content pending a later, separate task).
     if (typeof window.showHome === 'function') window.showHome();
   }
 

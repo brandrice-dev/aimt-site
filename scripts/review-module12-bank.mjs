@@ -175,6 +175,7 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState,
     computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
     assembleAttempt, config, banks, HEAD_SPA_CRITICAL_DOMAINS, findNextInterview,
+    scoreKnowledgeResponses, determineNextAttemptEligibility, collectWeakCompetencyAreas, buildRemediationAssignments,
   } = ENGINE;
 
   const htmlPath = path.join(ROOT, 'headspa-mastery.html');
@@ -211,9 +212,11 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     return {
       id: randomUUID(),
       seed: seedValue,
+      attemptNumber: 1,
       partI: { items: partIResult.ok ? partIResult.partI : [], responses: {} },
       part2: { cases: allCases, state: {} }, // caseId -> {submitted, responses}
       part3: { interviews: allInterviews, state: {} }, // interviewId -> {transcript, followUpUsed, finalized, criterionScores, explicitUnsafeDomains, patternTags}
+      started: false, // flips true the moment /api/certification/start-attempt is called -- mirrors production inserting the certification_attempts row.
       part1Locked: false,
       part2Locked: false,
       part3Locked: false,
@@ -229,6 +232,50 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
   }
 
   let session = freshSession(seed);
+  // Cross-attempt QA state, separate from `session` (which is replaced
+  // wholesale each time a genuinely new attempt starts): which items this
+  // student has already been given (for retake-overlap minimization,
+  // exactly like production's fetchPriorSelectedIds), the finalized-attempt
+  // history the real attempt-ladder gate reads, and the real (never
+  // fixture-hardcoded) remediation records finalize-assessment.js's logic
+  // produces. Reset together with `session` whenever ?seed= restarts.
+  let seenIds = { knowledge: [], cases: [], interviews: [] };
+  let attemptHistory = []; // [{attemptNumber, decision, criticalDomainResults}]
+  let remediationAssignments = []; // [{competency_area, critical_domain, module_ref, section_ref, required_before_next_attempt, completed, attemptNumber}]
+
+  // A genuinely fresh, complete 40/4/3 attempt -- the real constrained draw
+  // (unlike freshSession()'s deliberate "show everything" browsing mode),
+  // with retake-overlap minimization against every item this QA session has
+  // already drawn. This is what "Start Attempt 2" (and any later attempt)
+  // actually calls, exactly mirroring functions/api/certification/
+  // start-attempt.js's real behavior: no carried-over responses, no
+  // carried-over Part I/II/III locks.
+  function freshRealAttempt(attemptNumber) {
+    const rng = mulberry32Local((seed * 1000 + attemptNumber) >>> 0);
+    const assembled = assembleAttempt(banks, config, {
+      rng,
+      seenKnowledgeIds: seenIds.knowledge,
+      seenCaseIds: seenIds.cases,
+      seenInterviewIds: seenIds.interviews,
+    });
+    const partI = assembled.ok ? assembled.partI : [];
+    const partII = assembled.ok ? assembled.partII : [];
+    const partIII = assembled.ok ? assembled.partIII : [];
+    return {
+      id: randomUUID(),
+      seed: session.seed,
+      attemptNumber,
+      partI: { items: partI, responses: {} },
+      part2: { cases: partII, state: {} },
+      part3: { interviews: partIII, state: {} },
+      started: false,
+      part1Locked: false,
+      part2Locked: false,
+      part3Locked: false,
+      finalized: false,
+      mockOutcomeOverride: session.mockOutcomeOverride,
+    };
+  }
 
   function mockEvaluateStructuredCasePart() {
     // Not real Cadence judgment -- constant, clearly-labeled placeholder so
@@ -287,7 +334,41 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     const criticalDomainResults = evaluateCriticalDomains(allEvidence, HEAD_SPA_CRITICAL_DOMAINS);
     const decision = determineCertificationDecision({ knowledgePercent, appliedCasesPercent: appliedCasesComponent.percent, interviewPercent: interviewComponent.percent, criticalDomainResults, config });
     session.finalized = true;
-    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesComponent.percent, interview: interviewComponent.percent }, criticalDomainResults, attemptNumber: 1, decisionAt: new Date().toISOString() };
+    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesComponent.percent, interview: interviewComponent.percent }, criticalDomainResults, attemptNumber: session.attemptNumber, decisionAt: new Date().toISOString() };
+
+    attemptHistory.push({ attemptNumber: session.attemptNumber, decision: decision.decision, criticalDomainResults });
+
+    if (decision.decision === 'not_yet_passed') {
+      // Real weak-spot detection, mirroring finalize-assessment.js exactly
+      // (same helpers, same thresholds) -- never a hardcoded fixture row --
+      // so the QA harness's Recommended Review panel shows genuinely
+      // representative data, not placeholder text.
+      const weakSpots = [];
+      const knowledgeMock = scoreKnowledgeResponses(session.partI.items, session.partI.responses || {});
+      const knowledgeItemsById = {};
+      for (const item of session.partI.items) knowledgeItemsById[item.id] = item;
+      for (const p of knowledgeMock.perItem) {
+        if (p.correct) continue;
+        const item = knowledgeItemsById[p.id];
+        if (item) weakSpots.push({ competency: item.competency, sourceModules: [item.sourceModule], sectionRef: item.sourceSection });
+      }
+      for (const c of session.part2.cases) {
+        const cs = session.part2.state[c.id];
+        if (!cs || cs.score == null || cs.score >= config.minimums.appliedCases) continue;
+        for (const competency of c.competencies || []) weakSpots.push({ competency, sourceModules: c.sourceModules, sectionRef: null });
+      }
+      for (const i of session.part3.interviews) {
+        const st = session.part3.state[i.id];
+        if (!st || !st.finalized) continue;
+        const flags = interviewEvaluatorFlagsFromState(st);
+        const result = scoreInterviewConversation(i, st.criterionScores || {}, flags);
+        if (result.percent >= config.minimums.interview) continue;
+        for (const competency of i.competencies || []) weakSpots.push({ competency, sourceModules: i.sourceModules, sectionRef: null });
+      }
+      const weakCompetencyAreas = collectWeakCompetencyAreas(weakSpots);
+      const assignments = buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }).map((a) => ({ ...a, attemptNumber: session.attemptNumber }));
+      remediationAssignments.push(...assignments);
+    }
   }
 
   function json(res, status, body) {
@@ -325,6 +406,7 @@ ${siteStyle}
   <b>LOCAL VISUAL QA — not production.</b> Real installed content bank (real renderer: assets/js/module12-certification.js, unmodified). Part II shows all 12 cases; Part III shows all 9 conversations (real exam draws only 4/3). Case/interview scoring uses a MOCK evaluator (no live Cadence, no ANTHROPIC_API_KEY) — deterministically alternates conversation-by-conversation between the immediate-finalize path and the one-allowed-follow-up path, so both are reachable in one normal run. No Supabase writes, no attempt/certificate records.
   <div id="m12qa-controls">
     <span>Seed: ${seedValue}</span>
+    <span><b>Attempt: ${session.attemptNumber}</b></span>
     <a href="/?seed=${seedValue + 1}">Regenerate Part I (new seed)</a>
     <a href="/">Restart</a>
     <a href="/debug" target="_blank">Internal answer-key view (separate page)</a>
@@ -338,11 +420,23 @@ ${siteStyle}
     <a href="/?mockOutcome=auto">Auto (real mock scoring)</a>
     <span>Current: ${session.mockOutcomeOverride || 'auto'}</span>
   </div>
+  <div id="m12qa-controls">
+    <span><b>QA ONLY</b> — simulate completing recommended review/remediation (real content doesn't exist yet):</span>
+    <a href="/?completeRemediation=1">Mark all outstanding remediation complete</a>
+  </div>
 </div>
 <div id="m12container"></div>
 <script>
   window.APP_STATE = { data: { student: { name: 'Jordan' } } };
   window.ReviewMode = { isActive: function () { return false; } }; // real (non-fixture) render path
+  // QA ONLY -- this harness never loads headspa-mastery.html's full course
+  // state machine (out of scope for a Module-12-content QA tool), so there
+  // is no real course navigation to hand off to. This stub lets the owner
+  // confirm the Recommended Review panel's "Open Module N" buttons are
+  // wired to the correct module number without needing that whole page.
+  window.openModuleById = function (moduleNumber) {
+    alert('QA harness stub: in the real course this opens Module ' + moduleNumber + '.');
+  };
   document.getElementById('m12qaSetName').addEventListener('click', function () {
     var v = document.getElementById('m12qaName').value.trim();
     window.APP_STATE.data.student.name = v;
@@ -371,10 +465,23 @@ ${siteStyle}
 
     if (pathname === '/' && req.method === 'GET') {
       const requestedSeed = url.searchParams.get('seed');
-      if (requestedSeed != null) session = freshSession(Number(requestedSeed));
+      if (requestedSeed != null) {
+        session = freshSession(Number(requestedSeed));
+        seenIds = { knowledge: [], cases: [], interviews: [] };
+        attemptHistory = [];
+        remediationAssignments = [];
+      }
       const requestedMockOutcome = url.searchParams.get('mockOutcome');
       if (requestedMockOutcome === 'pass' || requestedMockOutcome === 'not_yet_passed') session.mockOutcomeOverride = requestedMockOutcome;
       else if (requestedMockOutcome === 'auto') session.mockOutcomeOverride = null;
+      // QA ONLY -- simulates completing the remediation the owner would
+      // otherwise do through real course content, so the Attempt 3 gate
+      // (real determineNextAttemptEligibility logic below) can be tested
+      // both blocked and unblocked without a remediation-content UI, which
+      // doesn't exist yet (content pending a later, separate task).
+      if (url.searchParams.get('completeRemediation') === '1') {
+        for (const r of remediationAssignments) if (r.required_before_next_attempt) r.completed = true;
+      }
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(harnessHtml(session.seed));
       return;
@@ -397,19 +504,56 @@ ${siteStyle}
 
     if (pathname === '/api/certification/get-status' && req.method === 'GET') {
       if (session.finalized) {
-        json(res, 200, { eligible: true, state: session.result.decision === 'pass' ? 'C' : 'D', ladder: { canStartNewAttempt: true, nextAttemptNumber: 2 }, performanceReview: session.result });
+        // Real attempt-ladder gate (functions/_lib/certification/attempt-
+        // ladder.mjs, unmodified) fed by this QA session's real finalized-
+        // attempt history and real remediation records -- never a
+        // hardcoded "you can always retake immediately" shortcut, so the
+        // harness actually demonstrates the Attempt 3 remediation gate.
+        const ladder = determineNextAttemptEligibility({ attempts: attemptHistory, remediationAssignments, educatorRequests: [], config });
+        const state = ladder.alreadyCertified ? 'C' : (attemptHistory.some((a) => a.decision === 'not_yet_passed') ? 'D' : 'A');
+        const remediationForLatestAttempt = state === 'D'
+          ? remediationAssignments
+              .filter((r) => r.attemptNumber === session.attemptNumber)
+              .map((r) => ({ competency_area: r.competency_area, critical_domain: r.critical_domain, module_ref: r.module_ref, section_ref: r.section_ref, required_before_next_attempt: r.required_before_next_attempt, completed: r.completed }))
+          : null;
+        json(res, 200, { eligible: true, state, ladder, performanceReview: session.result, remediation: remediationForLatestAttempt });
         return;
       }
-      if (session.part1Locked || session.part2Locked || session.part3Locked) {
+      if (session.started || session.part1Locked || session.part2Locked || session.part3Locked) {
         const status = !session.part1Locked ? 'in_progress' : !session.part2Locked ? 'part1_locked' : !session.part3Locked ? 'part2_locked' : 'part3_locked';
-        json(res, 200, { eligible: true, state: 'B', inProgressAttempt: { id: session.id, attemptNumber: 1, status } });
+        json(res, 200, { eligible: true, state: 'B', inProgressAttempt: { id: session.id, attemptNumber: session.attemptNumber, status } });
         return;
       }
-      json(res, 200, { eligible: true, state: 'A', ladder: { canStartNewAttempt: true, nextAttemptNumber: 1 } });
+      json(res, 200, { eligible: true, state: 'A', ladder: { canStartNewAttempt: true, nextAttemptNumber: session.attemptNumber } });
       return;
     }
 
     if (pathname === '/api/certification/start-attempt' && req.method === 'POST') {
+      if (!session.finalized) {
+        session.started = true;
+        json(res, 200, { attempt: { id: session.id, partI: { items: session.partI.items.map(ProjectK), responses: session.partI.responses } } });
+        return;
+      }
+      // A prior attempt in this QA session has been finalized -- "Start
+      // Attempt N" must be a genuinely new, complete 40/4/3 assessment,
+      // exactly like production's start-attempt.js: a fresh constrained
+      // draw with retake-overlap minimization, zero carried-over
+      // responses, and every part's lock state reset. Gated by the same
+      // real ladder function used by get-status above, so a remediation-
+      // blocked Attempt 3 is actually refused here too, not silently
+      // allowed.
+      const ladder = determineNextAttemptEligibility({ attempts: attemptHistory, remediationAssignments, educatorRequests: [], config });
+      if (!ladder.canStartNewAttempt) {
+        json(res, 409, { error: 'Next attempt is not yet available.', blockedReason: ladder.blockedReason, details: ladder });
+        return;
+      }
+      seenIds = {
+        knowledge: seenIds.knowledge.concat(session.partI.items.map((i) => i.id)),
+        cases: seenIds.cases.concat(session.part2.cases.map((c) => c.id)),
+        interviews: seenIds.interviews.concat(session.part3.interviews.map((i) => i.id)),
+      };
+      session = freshRealAttempt(ladder.nextAttemptNumber);
+      session.started = true;
       json(res, 200, { attempt: { id: session.id, partI: { items: session.partI.items.map(ProjectK), responses: session.partI.responses } } });
       return;
     }
@@ -557,9 +701,11 @@ async function main() {
       scoreCaseSubmission, computeAppliedCasesComponent,
       scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState,
       computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
+      scoreKnowledgeResponses,
     } = await import(path.join(ROOT, 'functions/_lib/certification/scoring.mjs'));
     const { HEAD_SPA_CRITICAL_DOMAINS } = await import(path.join(ROOT, 'functions/_lib/certification/critical-domains.mjs'));
     const { findNextInterview } = await import(path.join(ROOT, 'functions/_lib/certification/interview-progression.mjs'));
+    const { determineNextAttemptEligibility, collectWeakCompetencyAreas, buildRemediationAssignments } = await import(path.join(ROOT, 'functions/_lib/certification/attempt-ladder.mjs'));
     await runBrowserServer({
       ROOT,
       seed,
@@ -572,6 +718,7 @@ async function main() {
         scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState,
         computeOverallWeighted, evaluateCriticalDomains, determineCertificationDecision,
         assembleAttempt, config: getCurrentAssessmentConfig(), banks, HEAD_SPA_CRITICAL_DOMAINS, findNextInterview,
+        scoreKnowledgeResponses, determineNextAttemptEligibility, collectWeakCompetencyAreas, buildRemediationAssignments,
       },
     });
     return; // keep process alive; server.listen() holds the event loop open
