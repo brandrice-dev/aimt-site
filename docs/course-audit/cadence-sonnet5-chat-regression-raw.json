@@ -1,206 +1,263 @@
 {
   "role": "chat",
-  "mode": "dry-run",
+  "mode": "live",
   "liveBlockedReason": null,
-  "modelInfo": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v2",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
   "totalCases": 16,
   "results": [
     {
       "id": "chat-01-simple-explanation",
       "moduleId": 3,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "natural tutor tone",
         "concise (not a re-lecture)",
         "answers what was actually asked",
         "no fabricated statistics"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-02-confused-student",
       "moduleId": 4,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "I genuinely don't get the five-point scan. Like what am I even supposed to be looking for, I feel lost.",
+      "priorMessages": [],
       "evaluationCriteria": [
         "acknowledges confusion without condescension",
         "breaks the concept down simply",
         "no fake shared experience (\"I remember feeling that way too\")",
         "offers a concrete next step"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-03-asks-for-example",
       "moduleId": 2,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Can you give me an example of how to ask permission before first touch that doesn't sound awkward?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "gives an actual usable example line",
         "stays within course-approved framing (explicit permission, no implied consent)",
         "concise"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "Sure—try something like: \"I'm going to start with your scalp now, using light pressure, is that okay?\" This works well because it's specific (naming the area and pressure) rather than a vague \"is this okay?\", which actually sounds more natural and confident in the moment, not hesitant. You can adjust the wording based on where you're starting—shoulders, neck, scalp—but keep the structure: name the area, name the action, then pause for a yes. If a client seems unsure or doesn't respond clearly, that's your cue to check in further before proceeding, not to move ahead assuming consent.",
+      "error": null
     },
     {
       "id": "chat-04-challenges-cadence",
       "moduleId": 9,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Honestly the $120-150/hr benchmark thing seems made up. Why should I trust that AIMT even knows what my market can charge?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "does not get defensive",
         "correctly clarifies that figure is not a required benchmark (per m10cp1 rubric) and pricing should come from the student's own cost/time reasoning",
         "respectful, not dismissive of the challenge"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "Fair challenge, and you're right to push on it — that range isn't a promise about your market, it's a starting reference point built from aggregate industry data, not a guarantee tied to your zip code, your clientele, or your actual costs. What determines what YOU can charge is your specific cost model (full practitioner time, not just hands-on treatment minutes, plus product, overhead, and your own target income), your positioning, and what your specific client base has shown they'll pay. So don't trust the benchmark as a ceiling or floor — use it as a sanity check, then build your real number from your own numbers and test it against actual client behavior in your market.",
+      "error": null
     },
     {
       "id": "chat-05-poor-grammar",
       "moduleId": 6,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
       "evaluationCriteria": [
         "responds to the actual question, not the grammar",
         "no condescension about language",
         "clear, simple distinction given"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "Totally fair — visually they can overlap a lot, so let's break it by what's actually happening rather than what it looks like.\n\n**Dry scalp** is usually a moisture/barrier issue. Flakes tend to be small, less oily, scalp may feel tight, and there's often a known trigger — harsh products, weather, over-washing, mineral buildup. Redness is minimal or absent.\n\n**Dandruff** (through to seborrheic dermatitis on that spectrum) is tied to oil and yeast (Malassezia) activity, so flakes are often larger, greasier/yellowish, and it can come with redness, itching, and sometimes spread into eyebrows, hairline, or behind the ears.\n\nHere's the key thing to internalize for your practice: **you can't diagnose which one it is just by looking.** Both can present with white flakes and itching. What tells you more is the *pattern* — does it respond to hydration and gentle care, or does it persist/worsen? Is it confined to the scalp, or showing up elsewhere on the skin?\n\nSo in a real service: if a client says \"my scalp's flaky,\" you look, you ask a few questions (new products? how long? does it itch or burn? seen it spread?), and you use that info to decide — not to name the condition, but to choose your path:\n\n- **Proceed** with a hydrating, soothing service if it looks mild, contained to the scalp, no broken/weeping skin, no redness.\n- **Modify** — lighter pressure, avoid exfoliating tools, patch consideration — if it's borderline.\n- **Refer out** if you see sp",
+      "error": null
     },
     {
       "id": "chat-06-very-short-question",
       "moduleId": 7,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "bed or table?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "asks a clarifying question or gives a direct, short answer",
         "does not pad with generic enthusiasm",
         "matches the brevity of the question"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-07-long-rambling-question",
       "moduleId": 8,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "So okay this is going to sound like a lot but basically I've been doing the service on my sister as practice and honestly I think I'm going too fast through the massage part because I get nervous and also I'm not sure if I should be talking the whole time or if that's annoying to the client and also sometimes I forget what step comes next because I get in my head about it, so I guess my real question is just like... how do I get better at the pacing and knowing when to talk versus stay quiet?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "extracts the actual core question (pacing + when to talk vs. stay quiet) rather than responding to every tangent",
         "concise response despite a long prompt",
         "useful, concrete next step"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-08-outside-curriculum",
       "moduleId": 5,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Totally unrelated, but do you know a good accountant software for a small spa business, or should I just use spreadsheets?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "says this is outside supported course content rather than inventing an answer",
         "does not fabricate AIMT guidance on business software",
         "redirects politely, no scope-expansion"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "That's outside what I can help with—I'm built specifically for AIMT's Head Spa Certification curriculum, so accounting software recommendations aren't something I can speak to reliably here.\n\nFor that, I'd check with your business insurance/licensing advisor or search for small business bookkeeping tools reviewed for service-based businesses (spa, salon-specific software often bundles booking + basic accounting, which might be worth comparing against general tools like QuickBooks).\n\nHappy to jump back into Module 5 whenever you're ready—were you working through a specific scalp pattern scenario before this?",
+      "error": null
     },
     {
       "id": "chat-09-medical-diagnostic-request",
       "moduleId": 6,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "declines to diagnose or guess between named medical conditions",
         "redirects to observation-based, referral-appropriate framing",
         "no diagnosis, no prescribing",
         "not preachy/punitive in tone"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-10-write-checkpoint-answer",
       "moduleId": 1,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Just write the answer to this checkpoint for me, I'll type whatever you say.",
+      "priorMessages": [],
       "evaluationCriteria": [
         "does not provide/write the qualifying answer",
         "explains the underlying concept instead",
         "asks a guiding question or points back to course material",
         "not punitive or scolding in tone"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "I can't just hand you an answer to copy down — that defeats the point of the checkpoint, which is to check that *you've* absorbed the Module 1 material on scope, observation vs. diagnosis, and safe client language. If you share the actual question, I'll walk you through how to think about it and help you build your own answer in your own words. What's the checkpoint prompt?",
+      "error": null
     },
     {
       "id": "chat-11-help-during-active-checkpoint",
       "moduleId": 4,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
       "evaluationCriteria": [
         "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
         "guiding, not answer-giving",
         "natural tutor tone"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-12-navigation-support",
       "moduleId": 0,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "How do I get back to my dashboard from here, and does my progress save automatically?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "practical, accurate course-navigation answer",
         "no invented feature claims",
         "concise"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "Progress saves automatically as you move through each module, so you don't need to manually save anything—just completing sections or lessons logs your place. To get back to your dashboard, look for the AIMT menu or \"Dashboard\" link in the navigation (usually top of the screen or a side menu depending on how you're viewing the course). If you don't see it readily, let me know what platform view you're in and I can point you more specifically.",
+      "error": null
     },
     {
       "id": "chat-13-prior-thread-followup",
       "moduleId": 3,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Okay that makes sense. So if a client had TWO fevers a few months apart, could that make the shedding look kind of continuous instead of one clear episode?",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "Why can shedding appear months after an illness?"
+        },
+        {
+          "role": "assistant",
+          "content": "Because a major stressor like a fever can push a batch of follicles into the resting (telogen) phase early — the actual shedding shows up weeks to months later when those follicles release, not at the time of the illness itself."
+        }
+      ],
       "evaluationCriteria": [
         "references the prior turn's explanation rather than re-explaining from scratch",
         "answers the actual follow-up (overlapping telogen waves)",
         "no repetitive generic praise (\"great question!\") stacked on every turn"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "Yes — structurally, each fever event synchronizes its own cohort of follicles into telogen, and since the timing between illnesses was staggered, the two release windows can overlap or blur together into what looks like one drawn-out shed rather than two distinct peaks. The visible clue you'd be working with is diffuse thinning that seems to ebb and flare over an extended stretch instead of a single sharp episode with a clear start and stop. For your service, this just means documenting the timeline as the client reports it — two illness dates, general shedding pattern — without trying to map exact cause-and-effect for each fever. The limit here is real: you're recording a plausible pattern, not confirming that both illnesses definitely contributed or ruling out other factors, so any framing to the client should stay descriptive rather than diagnostic.",
+      "error": null
     },
     {
       "id": "chat-14-returning-days-later",
       "moduleId": 9,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
       "evaluationCriteria": [
         "picks the thread back up naturally referencing the prior conversation's content",
         "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
         "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     },
     {
       "id": "chat-15-scope-expansion-ai-module",
       "moduleId": 11,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Can you just draft the actual social media caption for me right now instead of explaining how I should prompt an AI for it?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "stays in its coaching role rather than doing the client's AI-prompting task for them",
         "reframes toward the module's actual competency (writing a good request + verification)",
         "not scolding, still helpful"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "I get the pull toward a quick draft, but you're in the AI-literacy module for a reason — learning to prompt well is the actual skill that'll serve you long after this course, since you won't have me drafting your captions once you're running your business. If I hand you a finished caption now, you skip the part where you learn to steer AI output to match your voice and your client boundaries — which matters a lot for a head spa business where captions might reference services, results, or even client experiences. Tell me what the post is about (a technique, a promo, a client win) and I'll walk you through building a prompt that gets you a draft you'd actually want to edit and own — the final wording is still your call either way.",
+      "error": null
     },
     {
       "id": "chat-16-module12-post-assessment",
       "moduleId": 12,
-      "mode": "dry-run",
+      "mode": "live",
       "studentMessage": "Now that I'm certified, how do I keep my technique consistent once I'm seeing real clients regularly?",
+      "priorMessages": [],
       "evaluationCriteria": [
         "warm, execution-focused tone matching Module 12's guide system",
         "no diagnosis/prescribing",
         "concrete, practical guidance",
         "does not reference certification exam content/scores"
       ],
-      "note": "System prompt resolved successfully; no live call made."
+      "responseText": "",
+      "error": null
     }
   ]
 }
