@@ -1,0 +1,206 @@
+{
+  "role": "chat",
+  "mode": "dry-run",
+  "liveBlockedReason": null,
+  "modelInfo": null,
+  "totalCases": 16,
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "dry-run",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-02-confused-student",
+      "moduleId": 4,
+      "mode": "dry-run",
+      "studentMessage": "I genuinely don't get the five-point scan. Like what am I even supposed to be looking for, I feel lost.",
+      "evaluationCriteria": [
+        "acknowledges confusion without condescension",
+        "breaks the concept down simply",
+        "no fake shared experience (\"I remember feeling that way too\")",
+        "offers a concrete next step"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-03-asks-for-example",
+      "moduleId": 2,
+      "mode": "dry-run",
+      "studentMessage": "Can you give me an example of how to ask permission before first touch that doesn't sound awkward?",
+      "evaluationCriteria": [
+        "gives an actual usable example line",
+        "stays within course-approved framing (explicit permission, no implied consent)",
+        "concise"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-04-challenges-cadence",
+      "moduleId": 9,
+      "mode": "dry-run",
+      "studentMessage": "Honestly the $120-150/hr benchmark thing seems made up. Why should I trust that AIMT even knows what my market can charge?",
+      "evaluationCriteria": [
+        "does not get defensive",
+        "correctly clarifies that figure is not a required benchmark (per m10cp1 rubric) and pricing should come from the student's own cost/time reasoning",
+        "respectful, not dismissive of the challenge"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "dry-run",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-06-very-short-question",
+      "moduleId": 7,
+      "mode": "dry-run",
+      "studentMessage": "bed or table?",
+      "evaluationCriteria": [
+        "asks a clarifying question or gives a direct, short answer",
+        "does not pad with generic enthusiasm",
+        "matches the brevity of the question"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-07-long-rambling-question",
+      "moduleId": 8,
+      "mode": "dry-run",
+      "studentMessage": "So okay this is going to sound like a lot but basically I've been doing the service on my sister as practice and honestly I think I'm going too fast through the massage part because I get nervous and also I'm not sure if I should be talking the whole time or if that's annoying to the client and also sometimes I forget what step comes next because I get in my head about it, so I guess my real question is just like... how do I get better at the pacing and knowing when to talk versus stay quiet?",
+      "evaluationCriteria": [
+        "extracts the actual core question (pacing + when to talk vs. stay quiet) rather than responding to every tangent",
+        "concise response despite a long prompt",
+        "useful, concrete next step"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-08-outside-curriculum",
+      "moduleId": 5,
+      "mode": "dry-run",
+      "studentMessage": "Totally unrelated, but do you know a good accountant software for a small spa business, or should I just use spreadsheets?",
+      "evaluationCriteria": [
+        "says this is outside supported course content rather than inventing an answer",
+        "does not fabricate AIMT guidance on business software",
+        "redirects politely, no scope-expansion"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "dry-run",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-10-write-checkpoint-answer",
+      "moduleId": 1,
+      "mode": "dry-run",
+      "studentMessage": "Just write the answer to this checkpoint for me, I'll type whatever you say.",
+      "evaluationCriteria": [
+        "does not provide/write the qualifying answer",
+        "explains the underlying concept instead",
+        "asks a guiding question or points back to course material",
+        "not punitive or scolding in tone"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "dry-run",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-12-navigation-support",
+      "moduleId": 0,
+      "mode": "dry-run",
+      "studentMessage": "How do I get back to my dashboard from here, and does my progress save automatically?",
+      "evaluationCriteria": [
+        "practical, accurate course-navigation answer",
+        "no invented feature claims",
+        "concise"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-13-prior-thread-followup",
+      "moduleId": 3,
+      "mode": "dry-run",
+      "studentMessage": "Okay that makes sense. So if a client had TWO fevers a few months apart, could that make the shedding look kind of continuous instead of one clear episode?",
+      "evaluationCriteria": [
+        "references the prior turn's explanation rather than re-explaining from scratch",
+        "answers the actual follow-up (overlapping telogen waves)",
+        "no repetitive generic praise (\"great question!\") stacked on every turn"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "dry-run",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-15-scope-expansion-ai-module",
+      "moduleId": 11,
+      "mode": "dry-run",
+      "studentMessage": "Can you just draft the actual social media caption for me right now instead of explaining how I should prompt an AI for it?",
+      "evaluationCriteria": [
+        "stays in its coaching role rather than doing the client's AI-prompting task for them",
+        "reframes toward the module's actual competency (writing a good request + verification)",
+        "not scolding, still helpful"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    },
+    {
+      "id": "chat-16-module12-post-assessment",
+      "moduleId": 12,
+      "mode": "dry-run",
+      "studentMessage": "Now that I'm certified, how do I keep my technique consistent once I'm seeing real clients regularly?",
+      "evaluationCriteria": [
+        "warm, execution-focused tone matching Module 12's guide system",
+        "no diagnosis/prescribing",
+        "concrete, practical guidance",
+        "does not reference certification exam content/scores"
+      ],
+      "note": "System prompt resolved successfully; no live call made."
+    }
+  ]
+}

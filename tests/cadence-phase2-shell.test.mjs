@@ -186,7 +186,12 @@ function loadCheckpointDefinitions() {
 // 4. cadence-shell.js — shape, Review Mode isolation, authority glue
 // ─────────────────────────────────────────────────────────────────────────
 (function shellShapeAndIsolation() {
-  check('SHELL MODULE', 'Exposes window.CadenceShell with openCheckpoint + wireCheckpoint', /window\.CadenceShell = \{ openCheckpoint, wireCheckpoint \};/.test(shellSrc));
+  // Phase 3 extended this shape with openAskCadence (tests/cadence-phase3-
+  // ask-cadence.test.mjs covers the addition itself) -- this check now
+  // only confirms the original two Phase 2 exports are still present,
+  // rather than an exact-shape match that would need updating on every
+  // future addition.
+  check('SHELL MODULE', 'Exposes window.CadenceShell with openCheckpoint + wireCheckpoint', /window\.CadenceShell = \{[^}]*\bopenCheckpoint\b[^}]*\bwireCheckpoint\b[^}]*\};/.test(shellSrc));
   check('SHELL MODULE', 'Escapes untrusted text before injecting into innerHTML (student answers and model feedback are both external input)', /function escapeHtml/.test(shellSrc) && /function multilineHtml/.test(shellSrc));
 
   // Review Mode isolation: the production send path calls

@@ -8935,12 +8935,43 @@ function getAdaptiveGreetingCallback(moduleId) {
   return 'You already showed this in Module ' + priorModule + ': ' + summary;
 }
 
+// Cadence pill entry point (Phase 3 — Ask Cadence). Opens the SAME shared
+// Cadence shell required checkpoints already use (assets/js/cadence-
+// shell.js's openAskCadence()), in mode=ask_cadence, scoped to the
+// student's current module thread. Replaces the old floating guide-panel
+// experience below as the actual conversation surface — per the
+// launch-sweep build contract, the bottom pill is only an entry point,
+// never a second parallel chat UI. The old #guidePanel/#overlay markup,
+// gpSend()/gpStream()/gpHistory/MODULE_QUICK_PROMPTS/qa() below are now
+// DEPRECATED and unreachable from this button; left in place rather than
+// deleted, per this file's surgical-edit-only rule (CLAUDE.md) — nothing
+// else in this file depends on them beyond harmless `gpHistory = []`
+// resets on module navigation.
 function toggleGuide() {
-  const panel = document.getElementById('guidePanel');
-  if (panel.classList.contains('open')) { closeGuide(); return; }
-  panel.classList.add('open');
-  document.getElementById('overlay').classList.add('show');
-  setTimeout(() => document.getElementById('gpInput').focus(), 350);
+  if (!window.CadenceShell) return;
+  const moduleId = APP_STATE.data.guide.currentModule;
+  const moduleCheckpoints = (window.MODULE_CHECKPOINTS && window.MODULE_CHECKPOINTS[String(moduleId)]) || [];
+  const progress = APP_STATE.getModuleProgress(moduleId) || {};
+  const meta = progress.checkpointMeta || {};
+  // Best-effort "active checkpoint" signal for the client-side guardrail
+  // hint: the module's first not-yet-passed required checkpoint, if any.
+  // The server independently VERIFIES this against course_progress before
+  // trusting it (functions/_lib/cadence/ask-cadence.mjs) — this is only a
+  // convenience so the guardrail can apply on the very first message
+  // rather than only after a round trip.
+  const activeCheckpointId = moduleCheckpoints.find((cpId) => !(meta[cpId] && meta[cpId].status === 'passed')) || null;
+  window.CadenceShell.openAskCadence({
+    moduleId,
+    moduleLabel: (typeof MODULE_TITLES !== 'undefined' && MODULE_TITLES[moduleId]) || ('Module ' + moduleId),
+    guideSystemPrompt: getGuideSystem(),
+    activeCheckpointId,
+    // document.body, not guideBtn itself — returning focus to the pill
+    // that opened the shell would re-trigger its own onclick handler and
+    // instantly reopen the shell, the exact close/reopen-loop bug already
+    // fixed for checkpoints (see cadence-shell.js openCheckpoint()'s BUG
+    // FIX comment). Body is a safe, non-reopening focus target.
+    returnFocusEl: document.body,
+  });
 }
 
 function closeGuide() {
@@ -9081,7 +9112,16 @@ function openModuleById(id, options = {}) {
   // Show lesson view
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('lessonView').classList.add('active');
-  document.getElementById('guideBtn').classList.add('visible');
+  // Ask Cadence entry point is hidden for the entire Module 12 view, not
+  // only mid-assessment -- Module 12's certification engine is
+  // architecturally separate (see docs/course-audit/00-cadence-launch-
+  // sweep-build-contract.md Section 15's stop-loss) and has no existing
+  // Ask Cadence affordance to preserve. Server-side, /api/cadence/ask
+  // independently refuses moduleId '12' whenever the student's latest
+  // certification attempt is not yet scored (functions/_lib/cadence/
+  // ask-cadence.mjs's isModule12AssessmentActive()) -- this client-side
+  // hide is a defense-in-depth UI convenience, never the only guard.
+  document.getElementById('guideBtn').classList.toggle('visible', String(id) !== '12');
   window.scrollTo(0, 0);
   if (!shouldRestoreScroll) {
     APP_STATE.setLessonScroll(id, 0);

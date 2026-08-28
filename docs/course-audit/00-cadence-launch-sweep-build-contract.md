@@ -298,6 +298,22 @@ correct, grammar/spelling noise, spoken/non-native phrasing, borderline,
 unsafe/diagnostic, partial, prompt injection, answer-extraction attempts)
 is real future work — not fabricated or stubbed by this task.
 
+*Progress (Cadence Launch Sweep Phase 3):* the evaluation-set/harness this
+section named as "real future work" is now built —
+`node scripts/run-cadence-model-regression.mjs --role=grading|chat
+[--live]`, a 72-case grading dataset and a 16-case chat dataset (both
+human-authored directly from the real, unmodified `M0..M11` rubric text
+and `MODULE_GUIDE_SYSTEMS`, extracted at run time rather than duplicated
+by hand), independent per Chat/Grading role, reusable for any future
+candidate model. This session's environment has no `ANTHROPIC_API_KEY`,
+so the live Sonnet 5 run itself did not happen — the harness was proven
+against the deterministic decision layer only and fails safe/reports the
+exact blocker rather than fabricating a result. See
+`docs/course-audit/cadence-sonnet5-grading-regression.md` and
+`cadence-sonnet5-chat-review.md`. Neither `CADENCE_CHAT_MODEL` nor
+`CADENCE_GRADING_MODEL` was promoted as a result of this task — both
+remain `CANDIDATE` in `cadence-model-registry-v2`, unchanged.
+
 ---
 
 ## 14. Implementation phases
@@ -402,6 +418,50 @@ live grading validation once `ANTHROPIC_API_KEY` is confirmed.
 **Phase 4 — Ask Cadence + Remediation.** Persistent optional Ask Cadence
 from the guide panel's capability; dashboard entry if justified; new
 remediation mode; hard separation from graded state.
+
+*Progress (Cadence Launch Sweep Phase 3, same branch, follow-up task):*
+**Ask Cadence's shared-shell migration is COMPLETE; a new remediation
+surface remains explicitly deferred.** The bottom-corner Cadence pill
+(`headspa-mastery.html`'s `toggleGuide()`) now opens the exact same shared
+shell required checkpoints use (`assets/js/cadence-shell.js`'s new
+`openAskCadence()`), in a new `mode='ask_cadence'`, scoped to the
+student's *current* module thread via the existing Phase 1
+`cadence_threads`/`cadence_messages` schema (that schema's `mode` check
+constraint already included `'ask_cadence'` from Phase 1 — no migration
+change needed). The old floating `#guidePanel`/`gpSend()`/`gpHistory`
+experience is deactivated (unreachable from the pill) rather than
+deleted, per this file's own surgical-edit-only convention for
+`headspa-mastery.html`. A new endpoint, `functions/api/cadence/ask.js`
+(backed by `functions/_lib/cadence/ask-cadence.mjs`), reuses Phase 1's
+thread/idempotency/rate-limit primitives and the same `CADENCE_CHAT_MODEL`
+role/fail-safe resolution every other chat call site uses — it has no
+decision function at all (unlike checkpoint grading), so it can never
+submit a checkpoint evaluation, alter progress, or touch
+`course_progress`, verified both statically (tests) and by the endpoint's
+own code shape. Two guardrails were built: (1) a standing base
+instruction present in every Ask Cadence system prompt that Cadence must
+never hand over a checkpoint's qualifying answer, and (2) a **server-
+verified** (never client-trusted) per-checkpoint reminder added only when
+`course_progress` actually shows the referenced checkpoint unresolved.
+Module 12 exam integrity: the pill is hidden for the entire Module 12
+view client-side, and `ask.js` independently refuses (403) any request
+for `moduleId: '12'` while the student's latest certification attempt is
+not yet `scored` — the server guard does not depend on the client hiding
+anything. Real Supabase persistence QA (isolated QA identity, cleaned up
+afterward) confirmed live: one thread per module enforced by the
+database's own unique constraint, idempotent duplicate-request rejection
+enforced by the database's own partial unique index, RLS unchanged
+(`select`-own only, no `insert`/`update` for `authenticated`/`anon`), and
+no foreign-key/trigger path from `cadence_messages`/`cadence_threads` to
+`course_progress` — architectural isolation, not merely a code
+convention. **Not built** (deferred, not by oversight): a standalone
+generalized remediation conversation mode — same-thread checkpoint
+clarification and Module 12's existing course-review remediation remain
+the launch-scope answer; a dashboard Cadence entry point (the owner
+specifically approved the bottom-pill-only entry for this launch); and
+any live-model QA of Ask Cadence's actual conversational quality (blocked
+on `ANTHROPIC_API_KEY`, same blocker as Section 13's regression suite
+below).
 
 **Phase 5 — Course-Wide Migration/Cleanup.** Smaller than originally
 anticipated — no sprawling legacy checkpoint implementations exist. Real

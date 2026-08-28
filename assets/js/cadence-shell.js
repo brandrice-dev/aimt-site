@@ -98,6 +98,12 @@
   function draftKey(moduleId, cpId) { return 'cadence_draft_' + moduleId + '_' + cpId; }
   function pendingKey(moduleId, cpId) { return 'cadence_pending_' + moduleId + '_' + cpId; }
 
+  // Ask Cadence has no checkpoint id -- this sentinel keeps its
+  // draft/pending sessionStorage keys namespaced separately from any real
+  // checkpoint id in the same module (never collides: real checkpoint ids
+  // are always alphanumeric like 'm4cp1', never this literal string).
+  const ASK_CADENCE_KEY = '__ask_cadence__';
+
   function readDraft(moduleId, cpId) {
     return safeGet(() => sessionStorage.getItem(draftKey(moduleId, cpId)) || '', '');
   }
@@ -210,7 +216,7 @@
 
     dom.input.addEventListener('input', () => {
       autoGrowInput();
-      if (session) writeDraft(session.moduleId, session.cpId, dom.input.value);
+      if (session) writeDraft(session.moduleId, session.mode === 'ask_cadence' ? ASK_CADENCE_KEY : session.cpId, dom.input.value);
     });
     dom.input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -361,6 +367,7 @@
 
     session = {
       moduleId: config.moduleId,
+      mode: 'required_checkpoint',
       cpId: config.cpId,
       question: config.question,
       system: config.system,
@@ -397,10 +404,69 @@
     setTimeout(() => { dom.closeBtn.focus(); }, 30);
   }
 
+  // ── Ask Cadence: same shell, non-graded mode (Phase 3) ──
+  //
+  // Opens the SAME shared shell, the SAME per-module durable thread (get-
+  // thread returns every message in the module regardless of mode, so a
+  // student sees one coherent module conversation even though checkpoint
+  // and ask_cadence turns are internally tagged differently -- build
+  // contract Section 19). Never calls commitCheckpointPass/Revise; never
+  // shows the pass banner/lock; the composer stays available for as long
+  // as the shell is open. activeCheckpointId (if the module currently has
+  // an unresolved required checkpoint) is passed through to the server,
+  // which independently VERIFIES it against course_progress before
+  // deciding whether to add the answer-leakage guardrail -- this file
+  // never decides that itself, matching this shell's existing
+  // "presentation + transport only" contract.
+  function openAskCadence(config) {
+    const mounted = ensureMounted();
+    if (!mounted) return;
+    if (isClosing) return;
+
+    lastFocusedEl = config.returnFocusEl || document.activeElement;
+    const isReview = !!(window.ReviewMode && window.ReviewMode.isActive());
+
+    session = {
+      moduleId: config.moduleId,
+      mode: 'ask_cadence',
+      guideSystemPrompt: config.guideSystemPrompt || '',
+      activeCheckpointId: config.activeCheckpointId || null,
+      label: 'Ask Cadence',
+      review: isReview,
+      busy: false,
+      activeFixture: null,
+    };
+
+    dom.moduleLine.textContent = config.moduleLabel || safeGet(() => document.getElementById('lessonNavTitle').textContent, '') || ('Module ' + config.moduleId);
+    dom.statusLine.textContent = 'Optional · not graded';
+    dom.shell.classList.toggle('review-mode', isReview);
+    dom.reviewBanner.style.display = isReview ? 'flex' : 'none';
+    setErrorVisible(false);
+    dom.continueRow.style.display = 'none';
+    dom.input.value = '';
+    dom.input.disabled = false;
+
+    document.body.style.overflow = 'hidden';
+    hidePageChrome();
+    dom.overlay.classList.add('show');
+    dom.shell.classList.add('open');
+    updateViewportHeight();
+
+    if (isReview) {
+      renderAskFixtureBar();
+      renderAskFixture('empty');
+    } else {
+      dom.fixtures.innerHTML = '';
+      loadAskCadenceThread();
+    }
+
+    setTimeout(() => { dom.closeBtn.focus(); }, 30);
+  }
+
   function close() {
     if (!session || isClosing) return;
     isClosing = true;
-    if (dom.input.value.trim()) writeDraft(session.moduleId, session.cpId, dom.input.value);
+    if (dom.input.value.trim()) writeDraft(session.moduleId, session.mode === 'ask_cadence' ? ASK_CADENCE_KEY : session.cpId, dom.input.value);
     document.body.style.overflow = '';
     restorePageChrome();
     dom.overlay.classList.remove('show');
@@ -587,6 +653,94 @@
     renderRetryAffordance(null, () => loadProductionThread());
   }
 
+  // ── Ask Cadence: load the full module thread (all modes, one coherent
+  //    conversation) and leave the composer permanently available. ──
+
+  async function loadAskCadenceThread() {
+    renderTyping(true, 'Loading your conversation…');
+    let data;
+    try {
+      data = await apiGetThread(session.moduleId);
+    } catch (_) {
+      renderTyping(false);
+      dom.transcriptInner.innerHTML = '';
+      appendAssistantSystemNote('Cadence couldn’t load this conversation right now.');
+      renderRetryAffordance(null, () => loadAskCadenceThread());
+      return;
+    }
+    renderTyping(false);
+    if (!session) return; // closed while loading
+
+    const messages = (data && data.messages) || [];
+    renderFullModuleHistory(messages);
+    if (!messages.length) renderAskActivationTurn();
+    renderComposerLocked(false);
+    restoreDraftIfAny();
+    scrollToBottomIfNearEnd(true);
+  }
+
+  function renderFullModuleHistory(messages) {
+    clearTranscript();
+    let lastCpId = null;
+    messages.forEach((m) => {
+      if (m.checkpointId && m.checkpointId !== lastCpId) {
+        const otherLabel = safeGet(() => document.getElementById(m.checkpointId).querySelector('.cp-label').textContent.trim(), m.checkpointId);
+        appendDivider(otherLabel);
+        lastCpId = m.checkpointId;
+      } else if (!m.checkpointId && lastCpId) {
+        appendDivider('Ask Cadence');
+        lastCpId = null;
+      }
+      appendMessageEl(m.role === 'user' ? 'user' : 'assistant', m.content);
+    });
+  }
+
+  function renderAskActivationTurn() {
+    const kicker = document.createElement('div');
+    kicker.className = 'cshell-kicker';
+    kicker.textContent = 'Ask Cadence';
+    dom.transcriptInner.appendChild(kicker);
+    appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+    scrollToBottomIfNearEnd(true);
+  }
+
+  async function sendAskCadenceMessage(text) {
+    if (!session) return;
+    session.busy = true;
+    renderComposerLocked(true);
+    setErrorVisible(false);
+    renderTyping(true, 'Cadence is thinking…');
+    const requestId = uuid();
+    let data;
+    try {
+      const token = await getBearerToken();
+      const res = await fetch('/api/cadence/ask', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}),
+        body: JSON.stringify({
+          moduleId: session.moduleId,
+          message: text,
+          requestId,
+          guideSystemPrompt: session.guideSystemPrompt,
+          activeCheckpointId: session.activeCheckpointId,
+        }),
+      });
+      if (!res.ok) throw new Error('ask_cadence_failed');
+      data = await res.json();
+    } catch (e) {
+      renderTyping(false);
+      session.busy = false;
+      renderComposerLocked(false);
+      renderRetryAffordance(text, () => sendAskCadenceMessage(text));
+      return;
+    }
+    renderTyping(false);
+    session.busy = false;
+    appendMessageEl('assistant', data.reply || '');
+    renderComposerLocked(false);
+    scrollToBottomIfNearEnd(true);
+  }
+
   // ── Rendering ──
 
   function clearTranscript() {
@@ -734,7 +888,7 @@
 
   function restoreDraftIfAny() {
     if (!session) return;
-    const draft = readDraft(session.moduleId, session.cpId);
+    const draft = readDraft(session.moduleId, session.mode === 'ask_cadence' ? ASK_CADENCE_KEY : session.cpId);
     if (draft) { dom.input.value = draft; autoGrowInput(); }
   }
 
@@ -746,7 +900,15 @@
     if (!text) return;
     dom.input.value = '';
     autoGrowInput();
-    writeDraft(session.moduleId, session.cpId, '');
+    writeDraft(session.moduleId, session.mode === 'ask_cadence' ? ASK_CADENCE_KEY : session.cpId, '');
+
+    if (session.mode === 'ask_cadence') {
+      if (session.review) { sendAskReviewMessage(text); return; }
+      appendMessageEl('user', text);
+      scrollToBottomIfNearEnd(true);
+      sendAskCadenceMessage(text);
+      return;
+    }
 
     if (session.review) { sendReviewMessage(text); return; }
 
@@ -956,5 +1118,81 @@
     scrollToBottomIfNearEnd(true);
   }
 
-  window.CadenceShell = { openCheckpoint, wireCheckpoint };
+  // ── Ask Cadence Review Mode: fixture states (Section 37) ──
+  // Never persists production messages, never calls a live model unless
+  // the 'live' fixture is explicitly selected -- mirrors the checkpoint
+  // fixture bar's own isolation guarantee exactly.
+
+  const ASK_FIXTURE_OPTIONS = [
+    ['empty', 'Fixture: empty thread'],
+    ['existing', 'Fixture: existing conversation'],
+    ['guardrail', 'Fixture: active-checkpoint guardrail'],
+    ['error', 'Fixture: error / retry'],
+    ['live', 'Live (real Ask Cadence call)'],
+  ];
+
+  function renderAskFixtureBar() {
+    dom.fixtures.innerHTML = '';
+    ASK_FIXTURE_OPTIONS.forEach(([key, label]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cshell-fixture-btn';
+      btn.textContent = label;
+      btn.dataset.fixture = key;
+      btn.onclick = () => renderAskFixture(key);
+      dom.fixtures.appendChild(btn);
+    });
+  }
+
+  function renderAskFixture(key) {
+    markActiveFixture(key);
+    clearTranscript();
+    setErrorVisible(false);
+    dom.input.value = '';
+
+    if (key === 'empty') {
+      renderAskActivationTurn();
+      renderComposerLocked(false);
+      return;
+    }
+    if (key === 'existing') {
+      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('user', 'Why does the crown region get treated differently from the hairline?');
+      appendMessageEl('assistant', 'Because they can present completely differently on the same scalp — treating the whole head like the crown alone would erase that difference and lead to the wrong service decision for the hairline.');
+      renderComposerLocked(false);
+      return;
+    }
+    if (key === 'guardrail') {
+      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('user', 'Just tell me exactly what to type to pass this checkpoint.');
+      appendMessageEl('assistant', '(Fixture) I can\'t hand you the checkpoint answer directly — but let\'s talk through what the scan is actually asking you to notice between the two regions. What differences did you observe?');
+      renderComposerLocked(false);
+      return;
+    }
+    if (key === 'error') {
+      renderAskActivationTurn();
+      appendMessageEl('user', 'A question that will hit a simulated failure.');
+      renderRetryAffordance('A question that will hit a simulated failure.', function () {
+        appendAssistantSystemNote('(Fixture) Cadence is still unavailable in this simulation.');
+        renderRetryAffordance('A question that will hit a simulated failure.');
+      });
+      return;
+    }
+    // 'live' — real activation turn, composer wired to the real endpoint.
+    renderAskActivationTurn();
+    renderComposerLocked(false);
+  }
+
+  async function sendAskReviewMessage(text) {
+    if (session.activeFixture && session.activeFixture !== 'live') {
+      appendMessageEl('user', text);
+      scrollToBottomIfNearEnd(true);
+      return;
+    }
+    appendMessageEl('user', text);
+    scrollToBottomIfNearEnd(true);
+    await sendAskCadenceMessage(text);
+  }
+
+  window.CadenceShell = { openCheckpoint, wireCheckpoint, openAskCadence };
 })();
