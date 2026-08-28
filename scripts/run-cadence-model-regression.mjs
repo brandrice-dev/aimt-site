@@ -7,6 +7,14 @@
 // Usage:
 //   node scripts/run-cadence-model-regression.mjs --role=grading [--live] [--repeat=3] [--out=path.json]
 //   node scripts/run-cadence-model-regression.mjs --role=chat    [--live] [--out-dir=path]
+//   node scripts/run-cadence-model-regression.mjs --help
+//
+// Case filtering (for a targeted sentinel/retest instead of the full
+// dataset): --cases=id1,id2,id3 (exact, comma-separated dataset "id"
+// values) or --sentinel (the locked 17-case grading sentinel from
+// scripts/cadence-model-regression/sentinel.mjs). A filtered run never
+// writes to the historical full-suite raw-evidence filename -- see
+// --help for the exact default paths and copy/paste example commands.
 //
 // --live requires ANTHROPIC_API_KEY in the environment and calls the real
 // Anthropic API through the exact same server-side contract production
@@ -38,6 +46,8 @@ import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
 import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, parseCheckpointEvaluation, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
 import { extractAnthropicTextSafe } from '../functions/_lib/cadence/anthropic-response.mjs';
+import { selectCases, CaseSelectionError } from './cadence-model-regression/case-selection.mjs';
+import { GRADING_SENTINEL_CASE_IDS, CHAT_TARGETED_CASE_IDS } from './cadence-model-regression/sentinel.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,9 +55,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // 768: the prior 512 cap truncated a real Sonnet 5 chat response mid-word).
 const CHAT_MAX_TOKENS = 768;
 
-function parseArgs(argv) {
-  const args = { role: null, live: false, repeat: 1, model: null, out: null, outDir: null };
+const USAGE = 'Usage: node scripts/run-cadence-model-regression.mjs --role=grading|chat ' +
+  '[--live] [--repeat=N] [--model=NAME] [--out=path.json] [--cases=id1,id2,...] [--sentinel] [--help]';
+
+export function parseArgs(argv) {
+  const args = { role: null, live: false, repeat: 1, model: null, out: null, outDir: null, cases: null, sentinel: false, help: false };
   for (const raw of argv) {
+    if (raw === '--help' || raw === '-h') { args.help = true; continue; }
     const [k, v] = raw.replace(/^--/, '').split('=');
     if (k === 'role') args.role = v;
     else if (k === 'live') args.live = true;
@@ -55,8 +69,35 @@ function parseArgs(argv) {
     else if (k === 'model') args.model = v;
     else if (k === 'out') args.out = v;
     else if (k === 'out-dir') args.outDir = v;
+    else if (k === 'cases') args.cases = String(v || '').split(',').map((s) => s.trim()).filter(Boolean);
+    else if (k === 'sentinel') args.sentinel = true;
   }
   return args;
+}
+
+/**
+ * Resolves the raw-evidence output path. A filtered (--cases/--sentinel)
+ * run never silently lands on the historical full-suite filename -- if no
+ * --out was given it gets its own distinct default, and an explicit --out
+ * that collides with the historical default is rejected outright rather
+ * than quietly overwriting real prior evidence.
+ */
+export function resolveOutputPath({ role, explicitOut, filtered }) {
+  const historicalDefault = path.join(__dirname, '..', 'docs', 'course-audit', `cadence-sonnet5-${role}-regression-raw.json`);
+  if (explicitOut) {
+    if (filtered && path.resolve(explicitOut) === path.resolve(historicalDefault)) {
+      throw new Error(
+        `--out would overwrite the historical full-suite evidence file ` +
+        `(${path.relative(process.cwd(), historicalDefault)}). Choose a different --out path for a filtered/sentinel run.`
+      );
+    }
+    return explicitOut;
+  }
+  if (filtered) {
+    const suffix = role === 'grading' ? 'sentinel' : 'targeted';
+    return path.join(__dirname, '..', 'docs', 'course-audit', `cadence-sonnet5-${role}-${suffix}-raw.json`);
+  }
+  return historicalDefault;
 }
 
 function resolveHarnessModel(env, roleName, explicitModel) {
@@ -179,8 +220,9 @@ async function liveRunGradingCase(testCase, def, { apiKey, model, repeat }) {
   };
 }
 
-async function runGrading(args) {
+async function runGrading(args, caseIds) {
   const rubrics = loadCheckpointRubrics();
+  const { selected, filtered } = selectCases(GRADING_DATASET, caseIds);
   const results = [];
   let modelInfo = null;
   let liveBlocked = null;
@@ -194,7 +236,7 @@ async function runGrading(args) {
     }
   }
 
-  for (const testCase of GRADING_DATASET) {
+  for (const testCase of selected) {
     const def = resolveCheckpointDefinition(rubrics, testCase.checkpointId);
     if (args.live && !liveBlocked) {
       results.push(await liveRunGradingCase(testCase, def, { apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, repeat: args.repeat }));
@@ -208,10 +250,10 @@ async function runGrading(args) {
   // dryRunGradingCase() above regardless of the --live flag the caller
   // passed, so the summary must follow the same fallback or it will look
   // for live-only fields (unsafeMatch/stable) that were never populated.
-  return summarizeGrading(results, { modelInfo, liveBlocked, live: args.live && !liveBlocked });
+  return summarizeGrading(results, { modelInfo, liveBlocked, live: args.live && !liveBlocked, filtered, caseIds });
 }
 
-function summarizeGrading(results, { modelInfo, liveBlocked, live }) {
+function summarizeGrading(results, { modelInfo, liveBlocked, live, filtered, caseIds }) {
   const total = results.length;
   const matched = results.filter((r) => r.match).length;
   const safetyCases = results.filter((r) => r.expectUnsafeFlag === true);
@@ -237,15 +279,17 @@ function summarizeGrading(results, { modelInfo, liveBlocked, live }) {
     leakageGuard: { total: leakageCases.length, failures: leakageFailures.length, failureIds: leakageFailures.map((r) => r.id) },
     languageVariantGuard: { total: styleCases.length, failures: styleFailures.length, failureIds: styleFailures.map((r) => r.id) },
     stability: live ? { rerunCases: results.length, unstableCount: unstable.length, unstableIds: unstable.map((r) => r.id) } : null,
+    caseSelection: filtered ? { count: results.length, ids: caseIds } : null,
     results,
   };
 }
 
 // ── CHAT ROLE ──
 
-async function runChat(args) {
+async function runChat(args, caseIds) {
   const guideSystems = loadModuleGuideSystems();
   const tone = loadSharedToneConstants();
+  const { selected, filtered } = selectCases(CHAT_DATASET, caseIds);
   let modelInfo = null;
   let liveBlocked = null;
 
@@ -259,7 +303,7 @@ async function runChat(args) {
   }
 
   const results = [];
-  for (const testCase of CHAT_DATASET) {
+  for (const testCase of selected) {
     const guideSystem = (guideSystems[String(testCase.moduleId)] || guideSystems['0']) +
       '\n' + tone.CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
       '\n' + tone.CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
@@ -284,27 +328,111 @@ async function runChat(args) {
     }
   }
 
-  return { role: 'chat', mode: args.live ? (modelInfo ? 'live' : 'blocked') : 'dry-run', liveBlockedReason: liveBlocked, modelInfo, totalCases: results.length, results };
+  return {
+    role: 'chat',
+    mode: args.live ? (modelInfo ? 'live' : 'blocked') : 'dry-run',
+    liveBlockedReason: liveBlocked,
+    modelInfo,
+    totalCases: results.length,
+    caseSelection: filtered ? { count: results.length, ids: caseIds } : null,
+    results,
+  };
 }
 
 // ── MAIN ──
 
+function printHelp() {
+  const chatCases = CHAT_TARGETED_CASE_IDS.join(',');
+  console.log(`
+${USAGE}
+
+Flags:
+  --role=grading|chat   Required. Independent roles -- never combined into one score.
+  --live                Make real Anthropic calls. Without it, runs the deterministic-layer-only dry check.
+  --repeat=N            Re-run each selected case N times (grading only) to check decision stability.
+  --model=NAME           Override the resolved model -- must be a REGISTERED (APPROVED or CANDIDATE) model.
+  --out=path.json        Explicit output path. Rejected if it would collide with the historical full-suite
+                          filename while --cases/--sentinel is also set.
+  --cases=id1,id2,...    Run only these dataset case IDs (exact match, comma-separated). Rejects unknown
+                          IDs and an empty selection. Never modifies the underlying dataset.
+  --sentinel             Shorthand for the locked 17-case grading sentinel
+                          (scripts/cadence-model-regression/sentinel.mjs). Grading only.
+  --help, -h             Show this help.
+
+Default output paths:
+  Full suite (no --cases/--sentinel):  docs/course-audit/cadence-sonnet5-<role>-regression-raw.json
+  Filtered grading run:                docs/course-audit/cadence-sonnet5-grading-sentinel-raw.json
+  Filtered chat run:                   docs/course-audit/cadence-sonnet5-chat-targeted-raw.json
+  A filtered run never overwrites the historical full-suite file, whether the path is auto-generated
+  or given explicitly via --out.
+
+Copy/paste commands:
+  A. Grading sentinel, repeat=1:
+     node scripts/run-cadence-model-regression.mjs --role=grading --sentinel --live --repeat=1
+
+  B. Grading sentinel safety-stability re-run (only if A passes all hard gates):
+     node scripts/run-cadence-model-regression.mjs --role=grading --sentinel --live --repeat=3
+
+  C. Targeted chat retest:
+     node scripts/run-cadence-model-regression.mjs --role=chat --cases=${chatCases} --live
+
+  D. Full grading suite (only after A/B pass):
+     node scripts/run-cadence-model-regression.mjs --role=grading --live
+
+  E. Full chat suite (only after C looks right):
+     node scripts/run-cadence-model-regression.mjs --role=chat --live
+`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.help) {
+    printHelp();
+    return;
+  }
+
   if (args.role !== 'grading' && args.role !== 'chat') {
-    console.error('Usage: node scripts/run-cadence-model-regression.mjs --role=grading|chat [--live] [--repeat=N] [--model=NAME] [--out=path.json]');
+    console.error(USAGE);
     process.exit(1);
   }
 
-  const summary = args.role === 'grading' ? await runGrading(args) : await runChat(args);
+  if (args.sentinel && args.cases) {
+    console.error('Cannot combine --sentinel and --cases -- pick one.');
+    process.exit(1);
+  }
+  if (args.sentinel && args.role !== 'grading') {
+    console.error('--sentinel is grading-only. For chat, use --cases=... (see --help for the targeted chat command).');
+    process.exit(1);
+  }
 
-  const outPath = args.out || path.join(__dirname, '..', 'docs', 'course-audit', `cadence-sonnet5-${args.role}-regression-raw.json`);
+  const caseIds = args.sentinel ? GRADING_SENTINEL_CASE_IDS : args.cases;
+
+  let summary;
+  try {
+    summary = args.role === 'grading' ? await runGrading(args, caseIds) : await runChat(args, caseIds);
+  } catch (e) {
+    if (e instanceof CaseSelectionError) {
+      console.error(`Case selection error: ${e.message}`);
+      process.exit(1);
+    }
+    throw e;
+  }
+
+  let outPath;
+  try {
+    outPath = resolveOutputPath({ role: args.role, explicitOut: args.out, filtered: !!caseIds });
+  } catch (e) {
+    console.error(e.message);
+    process.exit(1);
+  }
   mkdirSync(path.dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(summary, null, 2));
 
   console.log(`\n=== Cadence ${args.role.toUpperCase()} regression — mode: ${summary.mode} ===`);
   if (summary.liveBlockedReason) console.log(`BLOCKED: ${summary.liveBlockedReason}`);
   if (summary.modelInfo) console.log(`Model: ${summary.modelInfo.modelName} (${summary.modelInfo.status}, registry ${summary.modelInfo.registryVersion})`);
+  if (summary.caseSelection) console.log(`Case selection: ${summary.caseSelection.count} case(s) selected (${args.sentinel ? 'sentinel' : 'explicit --cases'})`);
   console.log(`Total cases: ${summary.totalCases}`);
   if (args.role === 'grading') {
     console.log(`Overall agreement: ${(summary.overallAgreement * 100).toFixed(1)}%`);
@@ -316,4 +444,10 @@ async function main() {
   console.log(`Raw output written to: ${path.relative(process.cwd(), outPath)}`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+// Guarded so this module can be imported (e.g. by tests, for parseArgs/
+// resolveOutputPath) without immediately executing the CLI against
+// whatever argv the importing process happens to have.
+const isMainModule = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
