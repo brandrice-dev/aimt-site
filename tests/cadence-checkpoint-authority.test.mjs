@@ -233,7 +233,7 @@ function buildMockFetch({ threadsStore, messagesStore, entitled = true, anthropi
       const payload = anthropicBehavior === 'pass'
         ? { requiredElementsDemonstrated: M1CP1_ALL_ELEMENTS, requiredElementsMissing: [], unsafeReasoning: false, feedback: 'Solid answer.' }
         : { requiredElementsDemonstrated: ['no_diagnosis_language'], requiredElementsMissing: ['recommends_referral'], unsafeReasoning: false, feedback: 'Add a referral recommendation.' };
-      return { ok: true, status: 200, json: async () => ({ content: [{ text: JSON.stringify(payload) }] }) };
+      return { ok: true, status: 200, json: async () => ({ content: [{ type: 'text', text: JSON.stringify(payload) }] }) };
     }
     throw new Error('Unexpected fetch URL in test: ' + u);
   };

@@ -234,3 +234,23 @@ pattern and the token-cap truncation, then re-run
 `node scripts/run-cadence-model-regression.mjs --role=chat --live`
 targeting at minimum the two missing boundary cases (9, 11) plus the
 6 other empty cases, before asking the owner for a tone read.
+
+---
+
+## FIX APPLIED — 2026-08-27 (follow-up task, same day)
+
+Both defects this document root-caused were fixed. Full detail: `docs/course-audit/implementation-log.md` Step 106.
+
+- **Response extraction:** `ask-cadence.mjs` and the harness now use the shared `functions/_lib/cadence/anthropic-response.mjs` extractor instead of `data.content[0].text` — it collects every `type: 'text'` content block regardless of position and never assumes the first block is text, which was the suspected cause of the 8/16 empty transcripts.
+- **Token ceiling:** `ask-cadence.mjs`'s `MAX_TOKENS_CAP` raised from 512 to 768 — the smallest step in the reviewed 768–1024 range, chosen because the one truncated transcript (case 5, poor grammar) was already close to the old cap when it cut off mid-word.
+- **No tone or prompt change.** The shared tone constants (`CADENCE_RESPONSE_CONSISTENCY_ANCHOR`/`CADENCE_SELECTIVE_MEMORY_INSTRUCTION`) were inspected and contain no length/verbosity instruction; none was added. The 8 real transcripts already reviewed were well-calibrated in length except for the one truncation, so there was no evidence-based reason to tune tone, and `headspa-mastery.html` was not touched.
+
+**Tests:** the shared extractor's block-shape handling (leading non-text block, text not at index 0, multiple text blocks, empty content, no thinking-content leakage) is covered by the new `tests/cadence-anthropic-response.test.mjs` (23 assertions, shared with the grading-side fix). A pre-existing mock in `tests/cadence-phase3-ask-cadence.test.mjs` was missing `type: 'text'` on its fake Anthropic response — corrected to match the real API shape. All 19/19 test files pass.
+
+**Live retest — still blocked.** No `ANTHROPIC_API_KEY` in this follow-up session. The targeted chat retest (case 6 "bed or table?", case 9 medical/diagnostic, case 11 active-checkpoint guardrail, case 14 returning-thread, plus one long-response/truncation-risk case) was not attempted. **CHAT: still not clearable.** The fix directly addresses both defects this document identified, but nothing here is evidence of a passing live result until the fix is exercised against a real Sonnet 5 call.
+
+**Next step:** owner provisions a QA-usable `ANTHROPIC_API_KEY`, then run the targeted retest before the full 16-case suite:
+```
+node scripts/run-cadence-model-regression.mjs --role=chat --live
+```
+Confirm text extraction works on every case (no more silent empties), the two safety-boundary cases (9, 11) produce real transcripts, and no response truncates mid-word under the new 768-token cap — before asking the owner for the tone read this document exists to support.

@@ -119,7 +119,7 @@ function buildFullMockFetch({ threadsStore, messagesStore, courseProgressStore, 
     if (u.includes('api.anthropic.com/v1/messages')) {
       capture.lastAnthropicBody = JSON.parse(options.body);
       if (capture.forceAnthropicError) return { ok: false, status: 502, text: async () => 'upstream error' };
-      return { ok: true, status: 200, json: async () => ({ content: [{ text: anthropicReplyText }] }) };
+      return { ok: true, status: 200, json: async () => ({ content: [{ type: 'text', text: anthropicReplyText }] }) };
     }
     throw new Error('Unexpected fetch URL in test: ' + u);
   };

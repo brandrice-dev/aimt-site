@@ -14,6 +14,7 @@
 // nothing here to decide. That absence is the point.
 
 import { resolveCadenceModel } from './model-config.mjs';
+import { extractAnthropicTextSafe } from './anthropic-response.mjs';
 import { supabaseRest, fetchAttemptSummaries } from '../certification/auth.mjs';
 
 // Defense-in-depth: present in EVERY Ask Cadence system prompt regardless
@@ -68,7 +69,14 @@ export async function isModule12AssessmentActive(env, userId) {
   return latest.status !== 'scored';
 }
 
-const MAX_TOKENS_CAP = 512;
+// 768, not 512: the Sonnet 5 live regression showed a real, well-formed
+// response truncate mid-word at the 512 cap (see
+// docs/course-audit/cadence-sonnet5-chat-review.md, poor-grammar case).
+// 768 is the smallest step up in the reviewed 768-1024 range that gives
+// that response (and similarly-sized ones) comfortable headroom without
+// inviting verbosity -- Cadence's brevity comes from its prompting, not
+// from a tight token cap forcing a cutoff.
+const MAX_TOKENS_CAP = 768;
 
 async function callAnthropicForAskCadence(env, { system, messages }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
@@ -87,7 +95,7 @@ async function callAnthropicForAskCadence(env, { system, messages }) {
     throw new Error(`Ask Cadence request failed (${res.status}): ${errBody.slice(0, 300)}`);
   }
   const data = await res.json();
-  const text = (data && data.content && data.content[0] && data.content[0].text) || '';
+  const text = extractAnthropicTextSafe(data);
   return { text, modelInfo };
 }
 

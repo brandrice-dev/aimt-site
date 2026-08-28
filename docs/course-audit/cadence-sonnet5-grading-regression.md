@@ -252,3 +252,26 @@ Every piece of direct evidence of Sonnet 5's actual reasoning in this run — th
 Only after all of the above pass should `--role=grading --live --repeat=3` be run against the full 72-case suite again.
 
 **No safety requirement, scope rule, or expected competency was loosened to produce this diagnosis or this proposal — the goal throughout is the same AIMT standard with a contract Sonnet 5 can actually satisfy.**
+
+---
+
+## 9. FIX APPLIED — 2026-08-27 (follow-up task, same day)
+
+The evaluator/prompt/schema change Section 8.8 proposed was implemented. Summary — full detail in `docs/course-audit/implementation-log.md` Step 106:
+
+- **Shared extraction:** new `functions/_lib/cadence/anthropic-response.mjs` (`extractAnthropicText`/`extractAnthropicTextSafe`) replaces the `content[0].text` assumption at every in-scope call site (checkpoint grading, Ask Cadence, the regression harness). Never assumes the text block is first; never reads thinking-block content.
+- **Grading contract — primary fix:** `evaluateCheckpointServerSide()` and the harness's grading call now send `output_config: { format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } }` — Anthropic structured outputs, confirmed supported for the Sonnet 5 candidate on the current Messages API, no SDK/beta header required. This constrains the entire response text to the schema, which architecturally removes the "prose around the JSON" failure mode rather than just re-wording the ask.
+- **Grading contract — fallback layer:** `parseCheckpointEvaluation()` no longer uses any regex over arbitrary text. Order: direct `JSON.parse()` of the full trimmed response → one cleanly-fenced ` ```json ` block → fail safe. A malformed/wrongly-shaped response still can never pass (`decideCheckpointOutcome()` unchanged).
+- **`CHECKPOINT_EVAL_INSTRUCTION` reworded** — the self-contradictory "in addition to your normal evaluation... and nothing else" language is gone. Two new field-semantics lines added per the diagnosis: language style/grammar/phrasing is never grounds for `requiredElementsMissing`; `unsafeReasoning` requires a taught, high-consequence, out-of-scope position, never mere incompleteness. No required element, rubric, or pass standard changed.
+- **QA-only raw diagnostic capture** added to the harness (`buildRawDiagnostic()`): on a parse failure, records `stop_reason`, the ordered content-block *types*, and a 2000-char text-only preview — never secret values, never thinking-block content, never HTTP headers. This is what the next live run needs to actually root-cause any remaining failure instead of only showing the fallback fingerprint.
+- **`functions/_lib/certification/cadence-grader.mjs` (Module 12) has the identical bug shape in two call sites and was found during the Section 3 inventory — deliberately NOT fixed**, per the explicit "do not change Module 12" instruction for this task. Flagged for a separate, explicitly-authorized task.
+
+**Tests:** `tests/cadence-anthropic-response.test.mjs` (new, 23 assertions) covers every case requested — non-text first block, multiple text blocks, text block not at index 0, empty content, malformed structured result, valid fenced JSON, valid direct JSON, prose-wrapped JSON rejected on both sides, no thinking-content leakage, no false pass on parser error. Two pre-existing test fixtures (`cadence-checkpoint-authority.test.mjs`, `cadence-phase3-ask-cadence.test.mjs`) had mocked Anthropic responses missing `type: 'text'` on their content blocks — a gap the old, type-blind extraction never surfaced; corrected to match the real API shape. **All 19/19 test files pass, 0 failures.**
+
+**Live retest — still blocked.** No `ANTHROPIC_API_KEY` in this follow-up session (same check as before: `env`, a fresh login shell, `.env`/`.dev.vars`/`wrangler.toml`). The 17-case sentinel from Section 8.8 was not run. **GRADING: still DO NOT PROMOTE** — the fix is applied and unit-tested against the exact failure shapes this diagnosis found, but has not been re-verified against a real Sonnet 5 call. This is a materially stronger position than before the fix (root cause addressed, not just documented), but it is not evidence of a passing live result.
+
+**Next step:** owner provisions a QA-usable `ANTHROPIC_API_KEY`, then run the 17-case sentinel from Section 8.8:
+```
+node scripts/run-cadence-model-regression.mjs --role=grading --live --repeat=1
+```
+against exactly the sentinel case IDs listed there. Only on a clean pass against all hard gates should the full 72-case suite run again.

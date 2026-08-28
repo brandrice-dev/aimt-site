@@ -35,10 +35,15 @@ import { loadCheckpointRubrics, loadModuleGuideSystems, loadSharedToneConstants 
 import { resolveCheckpointDefinition } from './cadence-model-regression/checkpoint-map.mjs';
 import { GRADING_DATASET } from './cadence-model-regression/grading-dataset.mjs';
 import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
-import { CHECKPOINT_EVAL_INSTRUCTION, parseCheckpointEvaluation, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
+import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, parseCheckpointEvaluation, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
+import { extractAnthropicTextSafe } from '../functions/_lib/cadence/anthropic-response.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Mirrors ask-cadence.mjs's MAX_TOKENS_CAP (see that file's comment for why
+// 768: the prior 512 cap truncated a real Sonnet 5 chat response mid-word).
+const CHAT_MAX_TOKENS = 768;
 
 function parseArgs(argv) {
   const args = { role: null, live: false, repeat: 1, model: null, out: null, outDir: null };
@@ -72,7 +77,9 @@ function resolveHarnessModel(env, roleName, explicitModel) {
   return resolveCadenceModel({ [roleName]: candidate }, roleName);
 }
 
-async function callAnthropic({ apiKey, model, system, messages, maxTokens }) {
+async function callAnthropic({ apiKey, model, system, messages, maxTokens, outputConfig }) {
+  const body = { model, max_tokens: maxTokens, system, messages };
+  if (outputConfig) body.output_config = outputConfig;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -80,14 +87,38 @@ async function callAnthropic({ apiKey, model, system, messages, maxTokens }) {
       'anthropic-version': '2023-06-01',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ model, max_tokens: maxTokens, system, messages }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Anthropic request failed (${res.status}): ${body.slice(0, 300)}`);
+    const errBody = await res.text().catch(() => '');
+    throw new Error(`Anthropic request failed (${res.status}): ${errBody.slice(0, 300)}`);
   }
   const data = await res.json();
-  return (data && data.content && data.content[0] && data.content[0].text) || '';
+  return { text: extractAnthropicTextSafe(data), raw: data };
+}
+
+/**
+ * QA-only diagnostic snapshot for a parse failure or empty response --
+ * written into the raw regression JSON so the next live run is actually
+ * debuggable instead of only showing the safe-fallback fingerprint. Never
+ * captures secret values (no key material ever reaches this function),
+ * never captures hidden chain-of-thought (thinking/redacted_thinking block
+ * CONTENT is never read -- only its type name is recorded, same as every
+ * other non-text block type), never captures HTTP headers, and never
+ * touches anything student- or production-facing -- this writes only to
+ * docs/course-audit/*-raw.json.
+ */
+function buildRawDiagnostic(raw) {
+  const blocks = Array.isArray(raw && raw.content) ? raw.content : [];
+  return {
+    stopReason: (raw && raw.stop_reason) || null,
+    blockTypes: blocks.map((b) => b && b.type).filter(Boolean),
+    textPreview: blocks
+      .filter((b) => b && b.type === 'text' && typeof b.text === 'string')
+      .map((b) => b.text)
+      .join('')
+      .slice(0, 2000),
+  };
 }
 
 // ── GRADING ROLE ──
@@ -120,12 +151,16 @@ function dryRunGradingCase(testCase) {
 async function liveRunGradingCase(testCase, def, { apiKey, model, repeat }) {
   const system = def.system + '\n\n' + CHECKPOINT_EVAL_INSTRUCTION;
   const messages = [{ role: 'user', content: 'Checkpoint question: ' + def.question + '\n\nStudent answer: ' + testCase.studentResponse }];
+  const outputConfig = { format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } };
   const runs = [];
   for (let i = 0; i < repeat; i++) {
     let record;
     try {
-      const rawText = await callAnthropic({ apiKey, model, system, messages, maxTokens: 400 });
+      const { text: rawText, raw } = await callAnthropic({ apiKey, model, system, messages, maxTokens: 400, outputConfig });
       record = buildCheckpointEvaluationRecord({ checkpointId: testCase.checkpointId, rubricVersion: rubricVersionTag(def.system), rawText, modelInfo: { modelName: model } });
+      if (parseCheckpointEvaluation(rawText).malformed) {
+        record.rawDiagnostic = buildRawDiagnostic(raw);
+      }
     } catch (e) {
       record = { decision: 'error', unsafeReasoning: false, malformedOrError: String(e.message || e) };
     }
@@ -233,12 +268,17 @@ async function runChat(args) {
       const messages = [...testCase.priorMessages, { role: 'user', content: testCase.studentMessage }];
       let responseText = null;
       let error = null;
+      let rawDiagnostic = null;
       try {
-        responseText = await callAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, system: guideSystem, messages, maxTokens: 512 });
+        const { text, raw } = await callAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, system: guideSystem, messages, maxTokens: CHAT_MAX_TOKENS });
+        responseText = text;
+        if (!text) rawDiagnostic = buildRawDiagnostic(raw);
       } catch (e) {
         error = String(e.message || e);
       }
-      results.push({ id: testCase.id, moduleId: testCase.moduleId, mode: 'live', studentMessage: testCase.studentMessage, priorMessages: testCase.priorMessages, evaluationCriteria: testCase.evaluationCriteria, responseText, error });
+      const result = { id: testCase.id, moduleId: testCase.moduleId, mode: 'live', studentMessage: testCase.studentMessage, priorMessages: testCase.priorMessages, evaluationCriteria: testCase.evaluationCriteria, responseText, error };
+      if (rawDiagnostic) result.rawDiagnostic = rawDiagnostic;
+      results.push(result);
     } else {
       results.push({ id: testCase.id, moduleId: testCase.moduleId, mode: 'dry-run', studentMessage: testCase.studentMessage, evaluationCriteria: testCase.evaluationCriteria, note: 'System prompt resolved successfully; no live call made.' });
     }

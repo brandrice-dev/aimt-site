@@ -16,42 +16,103 @@
 // stated required elements were demonstrated vs. missing, and whether an
 // explicit unsafe/prohibited response (already described in the rubric
 // text itself) was given -- never to invent new requirements.
+//
+// RESPONSE-FORMAT CONTRACT (corrected): the original instruction asked for
+// "your normal evaluation" *in addition to* a JSON object "(and nothing
+// else)" -- a self-contradictory ask that invited prose, which then broke
+// extractFirstJsonObject()'s single greedy brace-match regex (any brace in
+// that prose shifted the match boundary). Root-caused in the Sonnet 5 live
+// regression -- see docs/course-audit/cadence-sonnet5-grading-regression.md
+// Section 8. Fixed two ways, together: (1) the request now sends
+// `output_config.format` (JSON Schema structured outputs -- confirmed
+// supported for the CADENCE_GRADING_MODEL/CADENCE_CHAT_MODEL candidate on
+// the current Messages API, no SDK/beta header needed, works over plain
+// fetch), which constrains the entire response text to the schema rather
+// than merely asking nicely; (2) parseCheckpointEvaluation() below no
+// longer uses a greedy regex at all -- it attempts a direct parse of the
+// full (trimmed) response, falls back to one cleanly-fenced ```json block,
+// and otherwise fails safe. Both layers matter: structured outputs is the
+// primary fix, but refusals/truncation/a fallback model without structured-
+// output support can still produce non-conformant text, so the parser
+// stays defensive rather than assuming the schema was honored.
 
 import { resolveCadenceModel } from './model-config.mjs';
+import { extractAnthropicTextSafe } from './anthropic-response.mjs';
 
 export const CHECKPOINT_EVAL_CONTRACT_VERSION = 'checkpoint-eval-v1';
 
-export const CHECKPOINT_EVAL_INSTRUCTION =
-  'In addition to your normal evaluation, return your assessment as a single JSON object (and nothing else) in exactly this shape:\n' +
-  '{"requiredElementsDemonstrated": ["short label for each required element from the rubric above that this answer clearly demonstrates"], ' +
-  '"requiredElementsMissing": ["short label for each required element from the rubric above that is missing, vague, or incorrect"], ' +
-  '"unsafeReasoning": true|false, ' +
-  '"unsafeReasoningDescription": "one sentence, only if unsafeReasoning is true, else null", ' +
-  '"feedback": "the same short, specific feedback you would give the student"}\n' +
-  'Base "required elements" strictly on the numbered/listed requirements already stated in the rubric above -- do not invent, add, or drop a requirement the rubric does not state. ' +
-  'Set unsafeReasoning to true only for the specific unsafe, diagnostic, or prohibited response the rubric above already describes as something to correct immediately -- never for an ordinary incomplete or generic answer.';
+// JSON Schema for output_config.format -- kept to the documented supported
+// subset (basic types, enum/anyOf, additionalProperties:false; no
+// minLength/numeric constraints, no recursive $ref).
+export const CHECKPOINT_EVALUATION_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    requiredElementsDemonstrated: { type: 'array', items: { type: 'string' } },
+    requiredElementsMissing: { type: 'array', items: { type: 'string' } },
+    unsafeReasoning: { type: 'boolean' },
+    unsafeReasoningDescription: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    feedback: { type: 'string' },
+  },
+  required: ['requiredElementsDemonstrated', 'requiredElementsMissing', 'unsafeReasoning', 'unsafeReasoningDescription', 'feedback'],
+  additionalProperties: false,
+};
 
-/** Extracts the first top-level JSON object from free-form model text. */
-function extractFirstJsonObject(text) {
-  const match = String(text || '').match(/\{[\s\S]*\}/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]);
-  } catch (_) {
-    return null;
-  }
+export const CHECKPOINT_EVAL_INSTRUCTION =
+  'Evaluate the student answer above against the rubric. The response format is already constrained by the request -- your job is what goes in each field, not how to format the response:\n' +
+  '"requiredElementsDemonstrated": a short label for each required element from the rubric above that this answer clearly demonstrates.\n' +
+  '"requiredElementsMissing": a short label for each required element from the rubric above that is missing, vague, or incorrect. Grammar, spelling, phrasing style, and non-native or spoken-language patterns are never grounds to list an element here -- judge only whether the required reasoning or content is present, never the writing quality it is expressed in.\n' +
+  '"unsafeReasoning": true only when the response contains the specific unsafe, diagnostic, or prohibited position the rubric above already describes as something to correct immediately -- a taught, high-consequence, out-of-scope claim. An answer that is merely incomplete, vague, or generically wrong is never grounds for unsafeReasoning: true on its own.\n' +
+  '"unsafeReasoningDescription": one sentence naming the unsafe position, only when unsafeReasoning is true, else null.\n' +
+  '"feedback": the same short, specific feedback you would give the student.\n' +
+  'Base "required elements" strictly on the numbered/listed requirements already stated in the rubric above -- do not invent, add, or drop a requirement the rubric does not state.';
+
+/** Extracts the content of one cleanly-fenced ```json ... ``` or ``` ... ``` block, if present. */
+function extractFencedJsonBlock(text) {
+  const match = String(text || '').match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return match ? match[1] : null;
+}
+
+function isWellShapedEvaluation(parsed) {
+  return !!parsed && typeof parsed === 'object' &&
+    Array.isArray(parsed.requiredElementsDemonstrated) &&
+    Array.isArray(parsed.requiredElementsMissing) &&
+    typeof parsed.unsafeReasoning === 'boolean';
 }
 
 /**
  * Parses raw model text into structured evidence. Never throws; an
- * unparseable response becomes evidence with one missing element
- * (`unparseable-response`), which decideCheckpointOutcome() below always
- * treats as REVISE -- a malformed model response can never pass by
+ * unparseable or wrongly-shaped response becomes evidence with one missing
+ * element (`unparseable-response`), which decideCheckpointOutcome() below
+ * always treats as REVISE -- a malformed model response can never pass by
  * construction, not by a special case bolted on afterward.
+ *
+ * Order: (1) direct JSON.parse of the full trimmed text -- the expected
+ * path when output_config.format constrained the response; (2) one
+ * cleanly-fenced ```json block, for a fallback model or edge case that
+ * didn't honor structured outputs; (3) fail safe. Deliberately no regex
+ * that scans for balanced/arbitrary braces -- that's the exact mechanism
+ * that let surrounding prose corrupt extraction before this fix.
  */
 export function parseCheckpointEvaluation(rawText) {
-  const parsed = extractFirstJsonObject(rawText);
-  if (!parsed || typeof parsed !== 'object') {
+  const trimmed = String(rawText || '').trim();
+
+  let parsed = null;
+  if (trimmed) {
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch (_) {
+      const fenced = extractFencedJsonBlock(trimmed);
+      if (fenced) {
+        try {
+          parsed = JSON.parse(fenced.trim());
+        } catch (_) {
+          parsed = null;
+        }
+      }
+    }
+  }
+
+  if (!isWellShapedEvaluation(parsed)) {
     return {
       requiredElementsDemonstrated: [],
       requiredElementsMissing: ['unparseable-response'],
@@ -62,12 +123,8 @@ export function parseCheckpointEvaluation(rawText) {
     };
   }
   return {
-    requiredElementsDemonstrated: Array.isArray(parsed.requiredElementsDemonstrated)
-      ? parsed.requiredElementsDemonstrated.filter((x) => typeof x === 'string')
-      : [],
-    requiredElementsMissing: Array.isArray(parsed.requiredElementsMissing)
-      ? parsed.requiredElementsMissing.filter((x) => typeof x === 'string')
-      : [],
+    requiredElementsDemonstrated: parsed.requiredElementsDemonstrated.filter((x) => typeof x === 'string'),
+    requiredElementsMissing: parsed.requiredElementsMissing.filter((x) => typeof x === 'string'),
     unsafeReasoning: parsed.unsafeReasoning === true,
     unsafeReasoningDescription: typeof parsed.unsafeReasoningDescription === 'string' ? parsed.unsafeReasoningDescription : null,
     feedback: typeof parsed.feedback === 'string' ? parsed.feedback.trim() : '',
@@ -160,14 +217,20 @@ async function callAnthropicForCheckpoint(env, { system, messages }) {
       'anthropic-version': '2023-06-01',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ model: modelInfo.modelName, max_tokens: MAX_TOKENS_CAP, system, messages }),
+    body: JSON.stringify({
+      model: modelInfo.modelName,
+      max_tokens: MAX_TOKENS_CAP,
+      system,
+      messages,
+      output_config: { format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } },
+    }),
   });
   if (!res.ok) {
     const errBody = await res.text().catch(() => '');
     throw new Error(`Checkpoint evaluation request failed (${res.status}): ${errBody.slice(0, 300)}`);
   }
   const data = await res.json();
-  const text = (data && data.content && data.content[0] && data.content[0].text) || '';
+  const text = extractAnthropicTextSafe(data);
   return { text, modelInfo };
 }
 
