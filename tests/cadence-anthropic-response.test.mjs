@@ -110,9 +110,16 @@ function check(fixtureName, label, condition, detail) {
   check('PARSER CONTRACT', 'Empty string input is malformed and cannot pass',
     empty.malformed === true && decideCheckpointOutcome(empty).decision === 'revise');
 
+  // Corrected (see the follow-up "fix Sonnet 5 grading output budget"
+  // task): a malformed/truncated response is an evaluator failure, not a
+  // student revise. buildCheckpointEvaluationRecord() now short-circuits
+  // to decision:'error' BEFORE decideCheckpointOutcome() is ever called,
+  // so "never a pass" is joined by "never a revise either" — no
+  // authoritative grading decision is recorded from evidence that was
+  // never actually evaluated.
   const record = buildCheckpointEvaluationRecord({ checkpointId: 'm0cp1', rubricVersion: 'rubric-test', rawText: 'not json at all', modelInfo: { modelName: 'claude-sonnet-5' } });
-  check('PARSER CONTRACT', 'A malformed structured result flows end-to-end through buildCheckpointEvaluationRecord to a revise decision, never a pass',
-    record.decision === 'revise' && record.reason === 'missing_required_elements');
+  check('PARSER CONTRACT', 'A malformed structured result flows end-to-end through buildCheckpointEvaluationRecord to a recoverable error -- never a pass, and never a revise either',
+    record.decision === 'error' && record.reason === 'evaluation_incomplete' && record.malformed === true);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

@@ -67,3 +67,80 @@ export function extractAnthropicTextSafe(response) {
     return '';
   }
 }
+
+// Transient, retry-worthy provider/infrastructure failures. Deliberately
+// excludes 4xx (400/401/403/404/...) -- a bad request or bad credential
+// will not succeed on retry, so those fail on the first attempt instead of
+// wasting latency and spend on a loop that can't help. Root-caused by a
+// live Sonnet 5 sentinel run: 1 of 17 live calls returned 503 "credential
+// validation failed" while every surrounding call on the same key
+// succeeded -- a transient blip, not a real auth problem.
+const RETRYABLE_STATUS = new Set([500, 502, 503, 504, 529]);
+
+export class AnthropicRequestError extends Error {
+  constructor(message, { status, retryable } = {}) {
+    super(message);
+    this.name = 'AnthropicRequestError';
+    this.status = status || null;
+    this.retryable = !!retryable;
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * POSTs to the Anthropic Messages API with a small, bounded retry for
+ * transient infrastructure failures. Up to `maxRetries` additional
+ * attempts (default 2 -- 3 attempts total) on a retryable 5xx-class
+ * status or a network-level failure, with a short linear backoff plus
+ * jitter between attempts (never exponential/long-running -- this sits on
+ * a synchronous request path a student is waiting on). A non-retryable
+ * status (4xx, including 401/403) throws immediately on the first
+ * attempt -- fail fast, no loop.
+ *
+ * This retries the upstream HTTP call only, inside one logical evaluation
+ * -- it never re-sends the student's message, never re-derives a new
+ * idempotency identity, and never decides pass/revise itself. Callers
+ * remain responsible for what happens once this resolves or throws.
+ *
+ * @returns {Promise<object>} the parsed JSON response body on success
+ * @throws {AnthropicRequestError} once retries are exhausted or the
+ *   failure is not retryable
+ */
+export async function fetchAnthropicMessages({ apiKey, body, maxRetries = 2, baseDelayMs = 250 }) {
+  let lastError = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (networkErr) {
+      lastError = new AnthropicRequestError(`Anthropic request failed (network): ${String(networkErr.message || networkErr)}`, { retryable: true });
+      if (attempt < maxRetries) {
+        await delay(baseDelayMs * (attempt + 1) + Math.random() * baseDelayMs);
+        continue;
+      }
+      throw lastError;
+    }
+
+    if (res.ok) return res.json();
+
+    const status = res.status;
+    const errBody = await res.text().catch(() => '');
+    const retryable = RETRYABLE_STATUS.has(status);
+    lastError = new AnthropicRequestError(`Anthropic request failed (${status}): ${errBody.slice(0, 300)}`, { status, retryable });
+
+    if (!retryable || attempt >= maxRetries) throw lastError;
+    await delay(baseDelayMs * (attempt + 1) + Math.random() * baseDelayMs);
+  }
+  throw lastError;
+}

@@ -43,9 +43,9 @@ import { loadCheckpointRubrics, loadModuleGuideSystems, loadSharedToneConstants 
 import { resolveCheckpointDefinition } from './cadence-model-regression/checkpoint-map.mjs';
 import { GRADING_DATASET } from './cadence-model-regression/grading-dataset.mjs';
 import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
-import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, parseCheckpointEvaluation, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
+import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, GRADING_MAX_TOKENS, GRADING_EFFORT, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
-import { extractAnthropicTextSafe } from '../functions/_lib/cadence/anthropic-response.mjs';
+import { extractAnthropicTextSafe, fetchAnthropicMessages } from '../functions/_lib/cadence/anthropic-response.mjs';
 import { selectCases, CaseSelectionError } from './cadence-model-regression/case-selection.mjs';
 import { GRADING_SENTINEL_CASE_IDS, CHAT_TARGETED_CASE_IDS } from './cadence-model-regression/sentinel.mjs';
 
@@ -118,23 +118,14 @@ function resolveHarnessModel(env, roleName, explicitModel) {
   return resolveCadenceModel({ [roleName]: candidate }, roleName);
 }
 
-async function callAnthropic({ apiKey, model, system, messages, maxTokens, outputConfig }) {
+// Mirrors production's fetchAnthropicMessages() usage exactly -- same
+// small bounded retry on transient 5xx (a live sentinel hit one isolated
+// 503 among 17 otherwise-successful calls), same fail-fast on 4xx.
+async function callAnthropic({ apiKey, model, system, messages, maxTokens, outputConfig, thinking }) {
   const body = { model, max_tokens: maxTokens, system, messages };
   if (outputConfig) body.output_config = outputConfig;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    throw new Error(`Anthropic request failed (${res.status}): ${errBody.slice(0, 300)}`);
-  }
-  const data = await res.json();
+  if (thinking) body.thinking = thinking;
+  const data = await fetchAnthropicMessages({ apiKey, body });
   return { text: extractAnthropicTextSafe(data), raw: data };
 }
 
@@ -183,44 +174,89 @@ function dryRunGradingCase(testCase) {
   const outcome = decideCheckpointOutcome(evidence);
   return {
     id: testCase.id, checkpointId: testCase.checkpointId, category: testCase.category,
-    mode: 'dry-run', expectedDecision: testCase.expectedDecision, observedDecision: outcome.decision,
+    mode: 'dry-run', evaluationStatus: 'completed',
+    expectedDecision: testCase.expectedDecision, observedDecision: outcome.decision,
     match: outcome.decision === testCase.expectedDecision,
     expectUnsafeFlag: testCase.expectUnsafeFlag,
+    infraFailureCount: 0, parseFailureCount: 0,
   };
 }
 
+/**
+ * Classifies each run as exactly one of:
+ *   'completed'    -- a genuine structured decision was reached (pass or
+ *                      revise); usable for model-agreement comparison.
+ *   'parse_failure' -- a 200 OK response that could not be turned into
+ *                      usable evidence (truncated by max_tokens, malformed
+ *                      JSON, missing fields, textless). buildCheckpointEvaluationRecord()
+ *                      already refuses to call decideCheckpointOutcome() on
+ *                      this (decision:'error'); the harness must likewise
+ *                      refuse to score it as a disagreement.
+ *   'infra_error'   -- the request itself never completed (network/5xx
+ *                      after the shared retry was exhausted, or a
+ *                      non-retryable 4xx). Not a model opinion of any kind.
+ *
+ * This distinction (task: "regression harness must distinguish MODEL
+ * DISAGREEMENT from INFRASTRUCTURE/TRANSPORT/PARSE FAILURE") is what a
+ * live 17-case sentinel needed and didn't have: it reported 64.7%
+ * agreement and 1/6 safety-critical purely because 12 of 17 live calls
+ * hit max_tokens truncation and 1 hit a transient 503 -- none of which
+ * were the model disagreeing with anything.
+ */
 async function liveRunGradingCase(testCase, def, { apiKey, model, repeat }) {
   const system = def.system + '\n\n' + CHECKPOINT_EVAL_INSTRUCTION;
   const messages = [{ role: 'user', content: 'Checkpoint question: ' + def.question + '\n\nStudent answer: ' + testCase.studentResponse }];
-  const outputConfig = { format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } };
+  const outputConfig = { effort: GRADING_EFFORT, format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } };
+  const thinking = { type: 'adaptive' };
   const runs = [];
   for (let i = 0; i < repeat; i++) {
     let record;
+    let runType;
     try {
-      const { text: rawText, raw } = await callAnthropic({ apiKey, model, system, messages, maxTokens: 400, outputConfig });
+      const { text: rawText, raw } = await callAnthropic({ apiKey, model, system, messages, maxTokens: GRADING_MAX_TOKENS, outputConfig, thinking });
       record = buildCheckpointEvaluationRecord({ checkpointId: testCase.checkpointId, rubricVersion: rubricVersionTag(def.system), rawText, modelInfo: { modelName: model } });
-      if (parseCheckpointEvaluation(rawText).malformed) {
+      if (record.malformed) {
+        runType = 'parse_failure';
         record.rawDiagnostic = buildRawDiagnostic(raw);
+      } else {
+        runType = 'completed';
       }
     } catch (e) {
+      runType = 'infra_error';
       record = { decision: 'error', unsafeReasoning: false, malformedOrError: String(e.message || e) };
     }
-    runs.push(record);
+    runs.push({ ...record, runType });
   }
-  const decisions = runs.map((r) => r.decision);
-  const unsafeFlags = runs.map((r) => !!r.unsafeReasoning);
-  const stable = new Set(decisions).size === 1;
+
+  const completedRuns = runs.filter((r) => r.runType === 'completed');
+  const decisions = completedRuns.map((r) => r.decision);
+  const unsafeFlags = completedRuns.map((r) => !!r.unsafeReasoning);
+  const stable = completedRuns.length > 0 ? new Set(decisions).size === 1 : null;
+  const infraFailureCount = runs.filter((r) => r.runType === 'infra_error').length;
+  const parseFailureCount = runs.filter((r) => r.runType === 'parse_failure').length;
+  const evaluationStatus = completedRuns.length === 0 ? 'blocked' : (completedRuns.length < runs.length ? 'partial' : 'completed');
+
   return {
     id: testCase.id, checkpointId: testCase.checkpointId, category: testCase.category, mode: 'live',
-    expectedDecision: testCase.expectedDecision, observedDecisions: decisions,
-    match: decisions.every((d) => d === testCase.expectedDecision),
-    expectUnsafeFlag: testCase.expectUnsafeFlag, observedUnsafeFlags: unsafeFlags,
-    unsafeMatch: unsafeFlags.every((f) => f === testCase.expectUnsafeFlag),
-    stable, runs,
+    evaluationStatus,
+    expectedDecision: testCase.expectedDecision,
+    // Only completed runs feed observedDecisions/match/unsafeMatch -- a
+    // case with zero completed runs reports match/unsafeMatch as null
+    // ("we don't know, it was never evaluated"), never false ("the model
+    // disagreed"), which would misrepresent an infra/parse failure as a
+    // model opinion.
+    observedDecisions: decisions,
+    match: completedRuns.length > 0 ? decisions.every((d) => d === testCase.expectedDecision) : null,
+    expectUnsafeFlag: testCase.expectUnsafeFlag,
+    observedUnsafeFlags: unsafeFlags,
+    unsafeMatch: completedRuns.length > 0 ? unsafeFlags.every((f) => f === testCase.expectUnsafeFlag) : null,
+    stable,
+    infraFailureCount, parseFailureCount,
+    runs,
   };
 }
 
-async function runGrading(args, caseIds) {
+export async function runGrading(args, caseIds) {
   const rubrics = loadCheckpointRubrics();
   const { selected, filtered } = selectCases(GRADING_DATASET, caseIds);
   const results = [];
@@ -255,18 +291,29 @@ async function runGrading(args, caseIds) {
 
 function summarizeGrading(results, { modelInfo, liveBlocked, live, filtered, caseIds }) {
   const total = results.length;
-  const matched = results.filter((r) => r.match).length;
-  const safetyCases = results.filter((r) => r.expectUnsafeFlag === true);
+  // Blocked cases (evaluationStatus:'blocked' -- zero completed runs) are
+  // excluded from every agreement/guard denominator below. A blocked case
+  // was never evaluated at all; counting it as a disagreement would
+  // misrepresent an infra/parse failure as the model deciding the
+  // opposite of what was expected. See liveRunGradingCase's
+  // evaluationStatus classification.
+  const blocked = live ? results.filter((r) => r.evaluationStatus === 'blocked') : [];
+  const evaluated = live ? results.filter((r) => r.evaluationStatus !== 'blocked') : results;
+  const matched = evaluated.filter((r) => r.match).length;
+  const infraFailureCount = results.reduce((sum, r) => sum + (r.infraFailureCount || 0), 0);
+  const parseFailureCount = results.reduce((sum, r) => sum + (r.parseFailureCount || 0), 0);
+
+  const safetyCases = evaluated.filter((r) => r.expectUnsafeFlag === true);
   const safetyFailures = live
     ? safetyCases.filter((r) => !r.match || !r.unsafeMatch)
     : safetyCases.filter((r) => !r.match); // dry-run has no observed unsafe flag to check
   const leakageCategories = new Set(['answer-coaxing', 'prompt-injection', 'social-engineering']);
-  const leakageCases = results.filter((r) => leakageCategories.has(r.category));
+  const leakageCases = evaluated.filter((r) => leakageCategories.has(r.category));
   const leakageFailures = leakageCases.filter((r) => !r.match);
   const styleCategories = new Set(['competent-non-native-phrasing', 'competent-grammar-errors', 'competent-spoken-phrasing']);
-  const styleCases = results.filter((r) => styleCategories.has(r.category));
+  const styleCases = evaluated.filter((r) => styleCategories.has(r.category));
   const styleFailures = styleCases.filter((r) => !r.match);
-  const unstable = live ? results.filter((r) => r.stable === false) : [];
+  const unstable = live ? evaluated.filter((r) => r.stable === false) : [];
 
   return {
     role: 'grading',
@@ -274,11 +321,20 @@ function summarizeGrading(results, { modelInfo, liveBlocked, live, filtered, cas
     liveBlockedReason: liveBlocked,
     modelInfo,
     totalCases: total,
-    overallAgreement: total ? matched / total : 0,
+    completedCases: evaluated.length,
+    blockedCases: blocked.length,
+    blockedCaseIds: blocked.map((r) => r.id),
+    infraFailureCount,
+    parseFailureCount,
+    // A sentinel/run with any blocked case is incomplete evidence about
+    // the model, not a negative finding about it -- report it as such
+    // rather than letting a low overallAgreement number stand unexplained.
+    runStatus: blocked.length > 0 ? 'INCOMPLETE_BLOCKED' : 'COMPLETE',
+    overallAgreement: evaluated.length ? matched / evaluated.length : 0,
     safetyCritical: { total: safetyCases.length, failures: safetyFailures.length, failureIds: safetyFailures.map((r) => r.id) },
     leakageGuard: { total: leakageCases.length, failures: leakageFailures.length, failureIds: leakageFailures.map((r) => r.id) },
     languageVariantGuard: { total: styleCases.length, failures: styleFailures.length, failureIds: styleFailures.map((r) => r.id) },
-    stability: live ? { rerunCases: results.length, unstableCount: unstable.length, unstableIds: unstable.map((r) => r.id) } : null,
+    stability: live ? { rerunCases: evaluated.length, unstableCount: unstable.length, unstableIds: unstable.map((r) => r.id) } : null,
     caseSelection: filtered ? { count: results.length, ids: caseIds } : null,
     results,
   };
@@ -435,11 +491,14 @@ async function main() {
   if (summary.caseSelection) console.log(`Case selection: ${summary.caseSelection.count} case(s) selected (${args.sentinel ? 'sentinel' : 'explicit --cases'})`);
   console.log(`Total cases: ${summary.totalCases}`);
   if (args.role === 'grading') {
-    console.log(`Overall agreement: ${(summary.overallAgreement * 100).toFixed(1)}%`);
+    console.log(`Run status: ${summary.runStatus}  (completed: ${summary.completedCases}/${summary.totalCases}, blocked: ${summary.blockedCases}${summary.blockedCases ? ' [' + summary.blockedCaseIds.join(', ') + ']' : ''})`);
+    console.log(`Infra failures: ${summary.infraFailureCount}   Parse/truncation failures: ${summary.parseFailureCount}`);
+    console.log(`Overall agreement (of ${summary.completedCases} completed): ${(summary.overallAgreement * 100).toFixed(1)}%`);
     console.log(`Safety-critical: ${summary.safetyCritical.total - summary.safetyCritical.failures}/${summary.safetyCritical.total} correct (failures: ${summary.safetyCritical.failureIds.join(', ') || 'none'})`);
     console.log(`Leakage/injection guard: ${summary.leakageGuard.total - summary.leakageGuard.failures}/${summary.leakageGuard.total} correct`);
     console.log(`Language-variant guard: ${summary.languageVariantGuard.total - summary.languageVariantGuard.failures}/${summary.languageVariantGuard.total} correct`);
     if (summary.stability) console.log(`Stability: ${summary.stability.unstableCount} unstable of ${summary.stability.rerunCases} rerun cases`);
+    if (summary.runStatus === 'INCOMPLETE_BLOCKED') console.log('NOTE: this run is INCOMPLETE -- one or more cases never reached a completed evaluation. Do not read the metrics above as a model-quality result until re-run cleanly.');
   }
   console.log(`Raw output written to: ${path.relative(process.cwd(), outPath)}`);
 }

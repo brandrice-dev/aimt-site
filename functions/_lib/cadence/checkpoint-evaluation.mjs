@@ -37,7 +37,7 @@
 // stays defensive rather than assuming the schema was honored.
 
 import { resolveCadenceModel } from './model-config.mjs';
-import { extractAnthropicTextSafe } from './anthropic-response.mjs';
+import { extractAnthropicTextSafe, fetchAnthropicMessages } from './anthropic-response.mjs';
 
 export const CHECKPOINT_EVAL_CONTRACT_VERSION = 'checkpoint-eval-v1';
 
@@ -167,9 +167,41 @@ const DEFAULT_REVISE_FEEDBACK = 'Your answer is not complete yet. Tighten it up 
  * Combines evidence + the decision function into the full structured
  * record. Server-only -- checkpointId/rubricVersion/provider/modelName are
  * known server-side context, never asked of the model.
+ *
+ * MALFORMED EVIDENCE NEVER REACHES decideCheckpointOutcome() (corrected --
+ * see docs/course-audit/cadence-sonnet5-grading-regression.md, the
+ * post-parser-fix sentinel). A truncated/malformed/textless response is
+ * not the student's failure to answer -- it's the evaluator failing to
+ * produce a usable result, and "revise" is itself an authoritative
+ * grading decision that should never be manufactured from evidence that
+ * was never actually evaluated. `decision: 'error'` here means exactly
+ * that: no pass, no revise, nothing decided -- the caller
+ * (evaluateCheckpointServerSide below) turns this into a thrown error so
+ * the endpoint's existing preserve-student-response/retry path handles it
+ * exactly like any other evaluator failure. The regression harness, which
+ * calls this function directly, uses `malformed`/`decision === 'error'`
+ * to classify a run as a parse failure rather than a model disagreement.
  */
 export function buildCheckpointEvaluationRecord({ checkpointId, rubricVersion, rawText, modelInfo }) {
   const evidence = parseCheckpointEvaluation(rawText);
+
+  if (evidence.malformed) {
+    return {
+      contractVersion: CHECKPOINT_EVAL_CONTRACT_VERSION,
+      checkpointId,
+      rubricVersion: rubricVersion || null,
+      decision: 'error',
+      reason: 'evaluation_incomplete',
+      requiredElementsDemonstrated: [],
+      requiredElementsMissing: [],
+      unsafeReasoning: false,
+      unsafeReasoningDescription: null,
+      feedback: '',
+      modelInfo: modelInfo || null,
+      malformed: true,
+    };
+  }
+
   const outcome = decideCheckpointOutcome(evidence);
   const feedback = evidence.feedback || (outcome.decision === 'pass' ? DEFAULT_PASS_FEEDBACK : DEFAULT_REVISE_FEEDBACK);
   return {
@@ -184,6 +216,7 @@ export function buildCheckpointEvaluationRecord({ checkpointId, rubricVersion, r
     unsafeReasoningDescription: evidence.unsafeReasoningDescription,
     feedback,
     modelInfo: modelInfo || null,
+    malformed: false,
   };
 }
 
@@ -205,31 +238,47 @@ export function rubricVersionTag(rubricText) {
   return 'rubric-' + (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-const MAX_TOKENS_CAP = 400;
+// Grading output budget (corrected -- see docs/course-audit/
+// cadence-sonnet5-grading-regression.md). Sonnet 5 uses adaptive thinking
+// by default (no explicit `thinking` param needed to enable it), and
+// max_tokens is a single hard ceiling shared by thinking + the visible
+// structured response. The prior 400-token cap left no room for both on a
+// model that thinks by default: a live 17-case sentinel showed adaptive
+// thinking alone consuming the entire budget on several cases (some with
+// zero text emitted at all), truncating well-formed, often-correct JSON
+// mid-object. This is not a grading-quality or parser defect -- it is a
+// provider-execution-configuration defect, fixed here without touching
+// what's graded.
+//
+// GRADING_MAX_TOKENS: 4096 -- generous headroom (roughly 10x what a
+// complete response has ever needed) without being an unbounded/arbitrary
+// budget; picked as the smallest round number that removes routine
+// max_tokens termination for this task shape.
+// GRADING_EFFORT: 'medium' -- checkpoint grading is a bounded,
+// well-specified task (match evidence against a short enumerated
+// rubric), not open-ended agentic reasoning, so it does not need the
+// implicit 'high' default. 'medium' (rather than the lowest 'low' tier)
+// is a deliberate choice: this evaluator also carries safety-critical
+// unsafe-response detection, so a moderate reduction in thinking depth
+// was preferred over the most aggressive one until a live re-run
+// confirms quality holds at this level.
+export const GRADING_MAX_TOKENS = 4096;
+export const GRADING_EFFORT = 'medium';
 
 async function callAnthropicForCheckpoint(env, { system, messages }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
   const modelInfo = resolveCadenceModel(env, 'CADENCE_CHAT_MODEL');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  const data = await fetchAnthropicMessages({
+    apiKey: env.ANTHROPIC_API_KEY,
+    body: {
       model: modelInfo.modelName,
-      max_tokens: MAX_TOKENS_CAP,
+      max_tokens: GRADING_MAX_TOKENS,
       system,
       messages,
-      output_config: { format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } },
-    }),
+      thinking: { type: 'adaptive' },
+      output_config: { effort: GRADING_EFFORT, format: { type: 'json_schema', schema: CHECKPOINT_EVALUATION_JSON_SCHEMA } },
+    },
   });
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    throw new Error(`Checkpoint evaluation request failed (${res.status}): ${errBody.slice(0, 300)}`);
-  }
-  const data = await res.json();
   const text = extractAnthropicTextSafe(data);
   return { text, modelInfo };
 }
@@ -240,16 +289,28 @@ async function callAnthropicForCheckpoint(env, { system, messages }) {
  * calls Anthropic through the centralized CADENCE_CHAT_MODEL role (fails
  * safe -- see model-config.mjs -- if nothing is approved and no override
  * is given, exactly like any other evaluator failure to the caller), and
- * returns the full decided record. Never throws on a malformed model
- * response (that's handled by parseCheckpointEvaluation's safe default);
- * only throws on a genuine request/config failure, which the caller
- * (functions/api/cadence/evaluate-checkpoint.js) already handles the same
- * way submit-interview-turn.js handles an Anthropic outage.
+ * returns the full decided record.
+ *
+ * Throws in two cases now, both handled identically by the caller
+ * (functions/api/cadence/evaluate-checkpoint.js's existing preserve-
+ * student-response/retry path, unchanged by this function): (1) a
+ * genuine request/transport/config failure (AnthropicRequestError from
+ * fetchAnthropicMessages, after its own small internal retry is
+ * exhausted, or a missing API key/model config error), and (2) a
+ * response that came back 200 OK but could not be turned into usable
+ * structured evidence -- truncated by max_tokens, malformed JSON, or
+ * missing required fields (buildCheckpointEvaluationRecord's
+ * `decision: 'error'`). Both are evaluator failures, not student
+ * failures: neither may ever be recorded as pass or revise.
  */
 export async function evaluateCheckpointServerSide(env, { checkpointId, systemPrompt, question, studentResponse }) {
   const rubricVersion = rubricVersionTag(systemPrompt);
   const system = systemPrompt + '\n\n' + CHECKPOINT_EVAL_INSTRUCTION;
   const messages = [{ role: 'user', content: 'Checkpoint question: ' + question + '\n\nStudent answer: ' + studentResponse }];
   const { text: rawText, modelInfo } = await callAnthropicForCheckpoint(env, { system, messages });
-  return buildCheckpointEvaluationRecord({ checkpointId, rubricVersion, rawText, modelInfo });
+  const record = buildCheckpointEvaluationRecord({ checkpointId, rubricVersion, rawText, modelInfo });
+  if (record.malformed) {
+    throw new Error('Cadence evaluation did not complete (malformed or truncated structured response) -- treat as a recoverable evaluator failure, not a grading decision.');
+  }
+  return record;
 }
