@@ -193,6 +193,7 @@
   // ── Current open session ──
   let session = null; // { moduleId, cpId, question, system, reviewSystem, label, review, busy, lastFailedText, focusReturnEl }
   let lastFocusedEl = null;
+  let isClosing = false;
 
   function wireStaticHandlers() {
     dom.overlay.addEventListener('click', close);
@@ -233,10 +234,45 @@
       window.visualViewport.addEventListener('resize', updateViewportHeight);
       window.visualViewport.addEventListener('scroll', updateViewportHeight);
     }
+    // Plain window resize as a fallback/supplement: re-evaluates the
+    // mobile-vs-device-stage breakpoint (isDeviceStageLayout()) on a
+    // desktop browser resize or a tablet rotation, which doesn't always
+    // fire a visualViewport event on its own. orientationchange is an
+    // extra belt-and-suspenders signal for a real device rotation
+    // (fires slightly ahead of resize on some mobile browsers).
+    window.addEventListener('resize', updateViewportHeight);
+    window.addEventListener('orientationchange', updateViewportHeight);
+  }
+
+  // Matches the CSS device-stage breakpoint exactly (cadence-shell.css
+  // `@media (min-width: 768px)`) -- below it the shell is full-bleed
+  // mobile and needs JS-driven keyboard/safe-area handling; at or above
+  // it the shell is a CSS-centered, fixed-size card and must NOT have
+  // its `top`/height overridden inline, or the centering transform
+  // breaks. Kept as a function (not cached) since a real device can
+  // cross this breakpoint via rotation/window resize while open.
+  function isDeviceStageLayout() {
+    return !!(window.matchMedia && window.matchMedia('(min-width: 768px)').matches);
   }
 
   function updateViewportHeight() {
     if (!dom || !session) return;
+    const chromeOffset = getPageChromeOffsetTop();
+
+    if (isDeviceStageLayout()) {
+      // Let CSS own position/size entirely; only tell it how far to
+      // nudge the centered card down to clear the review-mode banner
+      // (half its height centers the card within the remaining space
+      // below the banner rather than the full viewport -- see the CSS
+      // comment above .cshell's transform).
+      dom.shell.style.removeProperty('top');
+      dom.shell.style.removeProperty('--cshell-vh');
+      dom.shell.style.setProperty('--cshell-banner-nudge', (chromeOffset / 2) + 'px');
+      scrollToBottomIfNearEnd(true);
+      return;
+    }
+
+    dom.shell.style.removeProperty('--cshell-banner-nudge');
     const vv = window.visualViewport;
     // Guard against a zero/unavailable reading (observed transiently in
     // some environments right at open time) -- setting the custom
@@ -244,7 +280,6 @@
     // fallback only applies when the property is entirely unset, not
     // when it holds a bad value. Leaving it unset here lets the CSS
     // `calc(var(--cshell-vh, 100dvh))` fall through to 100dvh instead.
-    const chromeOffset = getPageChromeOffsetTop();
     const vvOffset = (vv && vv.offsetTop) || 0;
     dom.shell.style.top = (vvOffset + chromeOffset) + 'px';
     if (!vv || !vv.height) { dom.shell.style.removeProperty('--cshell-vh'); return; }
@@ -272,7 +307,20 @@
   }
 
   function trapFocus(e) {
-    const focusable = dom.shell.querySelectorAll('button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    // BUG FIX (Cadence Phase 2A accessibility re-verification): the query
+    // alone matched elements like #cshellContinueBtn even while its
+    // parent .cshell-continue-row is display:none (e.g. mid-conversation,
+    // before a pass) -- .focus() on an element with no offsetParent is a
+    // silent no-op, so wrapping from the first element with Shift+Tab
+    // could land on a hidden "last" element and appear to do nothing.
+    // offsetParent === null reliably detects "not visible" (display:none
+    // on the element or an ancestor) without walking the ancestor chain
+    // by hand; it's not defined for position:fixed elements in some
+    // engines, but nothing in this list is itself position:fixed.
+    const focusable = Array.prototype.filter.call(
+      dom.shell.querySelectorAll('button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+      (el) => el.offsetParent !== null
+    );
     if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
@@ -285,8 +333,24 @@
   function openCheckpoint(config) {
     const mounted = ensureMounted();
     if (!mounted) return;
+    // Reentrancy guard: close() below intentionally moves focus, and
+    // focus can synchronously trigger this function again (see the
+    // returnFocusEl fix in close() for why) -- this stops any such loop
+    // dead regardless of which element ends up focused.
+    if (isClosing) return;
 
-    lastFocusedEl = document.activeElement;
+    // BUG FIX (Cadence Phase 2A): previously this captured
+    // `document.activeElement`, which for the normal open path (student
+    // clicks/focuses the checkpoint's own <textarea>) is that exact
+    // textarea -- and that textarea has `onfocus = open` (wireCheckpoint()
+    // below). close() calling .focus() on it to "restore focus" therefore
+    // re-fired `open` synchronously, instantly reopening the shell right
+    // after every close -- the reported "X/Escape don't work" bug. Fixed
+    // at the source: callers that know their trigger element has a
+    // reopening side effect (wireCheckpoint does) now pass an explicit,
+    // safe `returnFocusEl` (the checkpoint's own container, which has no
+    // such handler) instead of relying on whatever was focused.
+    lastFocusedEl = config.returnFocusEl || document.activeElement;
     const isReview = !!(window.ReviewMode && window.ReviewMode.isActive());
 
     session = {
@@ -328,7 +392,8 @@
   }
 
   function close() {
-    if (!session) return;
+    if (!session || isClosing) return;
+    isClosing = true;
     if (dom.input.value.trim()) writeDraft(session.moduleId, session.cpId, dom.input.value);
     document.body.style.overflow = '';
     restorePageChrome();
@@ -340,6 +405,12 @@
     if (returnEl && typeof returnEl.focus === 'function') {
       try { returnEl.focus(); } catch (_) { /* element may no longer be attached */ }
     }
+    // Cleared synchronously (not deferred) -- the guard only needs to
+    // survive the single synchronous .focus() call above, which is the
+    // only thing that could reenter openCheckpoint(). Leaving it set
+    // longer would block a legitimate fast re-open (e.g. Continue -> next
+    // checkpoint in a later mode).
+    isClosing = false;
   }
 
   // Belt-and-suspenders: the shell's own z-index already sits above every
@@ -376,9 +447,18 @@
     const btn = safeGet(() => document.getElementById(cpId + 'Btn'), null);
     if (!input || !btn) return;
 
-    const label = safeGet(() => document.getElementById(cpId).querySelector('.cp-label').textContent.trim(), '');
+    // The checkpoint's own container is the safe close-time focus target
+    // (see openCheckpoint()'s BUG FIX comment) -- unlike the textarea/
+    // button/voice/status elements below, it has no open-triggering
+    // handler of its own, so returning focus to it on close can never
+    // reopen the shell. tabIndex=-1 makes it programmatically focusable
+    // without joining the page's normal tab order.
+    const container = safeGet(() => document.getElementById(cpId), null);
+    if (container) container.tabIndex = -1;
+
+    const label = safeGet(() => container && container.querySelector('.cp-label').textContent.trim(), '');
     const open = function () {
-      openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label });
+      openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
     };
 
     input.readOnly = true;

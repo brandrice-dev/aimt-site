@@ -16,6 +16,18 @@
   z-index: 0;
 }
 
+/* Close-time focus return target (cadence-shell.js wireCheckpoint()):
+   the checkpoint's own container gets tabIndex=-1 so focus can land
+   there safely on close without joining the page's tab order. A
+   restrained ring (matching the page's own text color) replaces the
+   browser-default outline so this reads as intentional, not an
+   accidental blue-ring artifact. */
+.checkpoint:focus {
+  outline: 2px solid var(--text, #262626);
+  outline-offset: 3px;
+  border-radius: 18px;
+}
+
 .cshell-overlay {
   position: fixed;
   inset: 0;
@@ -60,6 +72,46 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cshell-overlay, .cshell { transition: none; }
+}
+
+/* ── Tablet/desktop: focused "device" presentation (Cadence Phase 2A) ──
+   Below 768px, Cadence stays true edge-to-edge full-screen (Section 4's
+   mobile requirement — untouched above). At 768px and up, the goal is
+   "entering a focused conversation environment," not a stretched browser
+   overlay: the page dims behind a centered, phone-shaped conversation
+   surface with an intentional, contained height — not full-bleed, not a
+   generic modal. */
+@media (min-width: 768px) {
+  .cshell-overlay {
+    /* Darker than the mobile/base value on purpose — on a full-bleed
+       mobile screen there's no page left to dim, but here the dimmed
+       page IS the point: it's what makes the centered card read as a
+       deliberate "stage," not a floating card with a faint tint. */
+    background: rgba(20, 18, 15, 0.6);
+  }
+  .cshell {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: min(440px, 92vw);
+    /* Intentionally not full viewport height — a phone-like vertical
+       silhouette, capped so it never becomes an oversized column on a
+       tall monitor, floored by vh so it still fits a shorter laptop
+       window. */
+    height: min(860px, 88vh);
+    /* var(--cshell-banner-nudge) shifts the centered card down to clear
+       the global #reviewModeBanner when Review Mode is active (see
+       getPageChromeOffsetTop() in cadence-shell.js) -- 0px the rest of
+       the time, so this has no effect in production. */
+    transform: translate(-50%, calc(-50% + var(--cshell-banner-nudge, 0px))) scale(0.97);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35), 0 4px 24px rgba(0, 0, 0, 0.18);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+  }
+  .cshell.open {
+    transform: translate(-50%, calc(-50% + var(--cshell-banner-nudge, 0px))) scale(1);
+  }
 }
 
 /* ── Header ── */
@@ -336,13 +388,6 @@
 .cshell *:focus-visible {
   outline: 2px solid var(--text, #262626);
   outline-offset: 2px;
-}
-
-/* ── Desktop restraint: keep the transcript/composer column comfortable
-   rather than edge-to-edge on very wide viewports ── */
-@media (min-width: 900px) {
-  .cshell-head { padding-left: calc((100% - 640px) / 2 + 1.1rem); padding-right: calc((100% - 640px) / 2 + 1.1rem); }
-  .cshell-composer { padding-left: calc((100% - 640px) / 2 + 1.1rem); padding-right: calc((100% - 640px) / 2 + 1.1rem); }
 }
 
 /* ── Mobile: near-native messaging feel ── */

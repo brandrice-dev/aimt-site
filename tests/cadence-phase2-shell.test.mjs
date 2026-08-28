@@ -28,6 +28,22 @@
 //     restoreLessonState() never wires the shell into Module 12, and
 //     module12-certification.js is not referenced anywhere in the new file.
 //
+// Phase 2A (UX polish / exit fix / device-stage presentation) additions:
+//  7. Regression guard for the "X/Escape don't work" bug: close()
+//     restoring focus to whatever was last focused (the checkpoint's own
+//     <textarea>, which has onfocus=open) instantly reopened the shell.
+//     Fixed by having wireCheckpoint() pass an explicit, non-reopening
+//     returnFocusEl (the checkpoint's container) instead.
+//  8. Regression guard for a focus-trap bug found during accessibility
+//     re-verification: trapFocus()'s focusable-element query didn't
+//     exclude elements hidden via display:none (e.g. the Continue button
+//     mid-conversation), so Shift+Tab from the first element could
+//     silently no-op instead of wrapping to the last *visible* one.
+//  9. The tablet/desktop "device-stage" presentation (dimmed page +
+//     centered, phone-shaped, rounded card) exists and is scoped to
+//     min-width:768px only -- mobile's full-bleed edge-to-edge layout is
+//     unchanged below that breakpoint.
+//
 // Run: node tests/cadence-phase2-shell.test.mjs
 
 import { readFileSync } from 'node:fs';
@@ -237,6 +253,52 @@ function loadCheckpointDefinitions() {
   check('SHELL CSS', 'Shell overlay/panel z-index sits above the page lesson-nav (100) and guide panel (300), confirmed via live stacking QA', /z-index: 2490;/.test(shellCss) && /z-index: 2500;/.test(shellCss));
   check('SHELL JS', 'Height is derived from visualViewport but only when a real (non-zero) reading is available -- setting it to "0px" would defeat the CSS var() fallback to 100dvh', /if \(!vv \|\| !vv\.height\) \{ dom\.shell\.style\.removeProperty\('--cshell-vh'\); return; \}/.test(shellSrc));
   check('SHELL JS', 'The shell is offset below the review-mode banner when present, measured live rather than hardcoded', /getPageChromeOffsetTop/.test(shellSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// 6. Phase 2A — exit-behavior fix (close/reopen loop root cause)
+// ─────────────────────────────────────────────────────────────────────────
+(function exitBehaviorFix() {
+  check('EXIT FIX', 'openCheckpoint() prefers an explicit config.returnFocusEl over document.activeElement (root cause of the close/reopen loop: activeElement at open time is the checkpoint textarea itself, which has onfocus=open)', /lastFocusedEl = config\.returnFocusEl \|\| document\.activeElement;/.test(shellSrc));
+  check('EXIT FIX', 'wireCheckpoint() passes its checkpoint container as returnFocusEl for every open() invocation (input/button/voice/status/response all share one open closure)', /openCheckpoint\(\{ moduleId, cpId, question: def\.question, system: def\.system, reviewSystem: def\.reviewSystem, label, returnFocusEl: container \}\);/.test(shellSrc));
+  check('EXIT FIX', 'The checkpoint container is made programmatically focusable (tabIndex=-1) without joining the page tab order', /container\.tabIndex = -1;/.test(shellSrc));
+  check('EXIT FIX', 'A reentrancy guard (isClosing) exists on both close() and openCheckpoint(), independent of which element ends up focused', /let isClosing = false;/.test(shellSrc) && /if \(!session \|\| isClosing\) return;/.test(shellSrc) && /if \(isClosing\) return;/.test(shellSrc));
+  check('EXIT FIX', 'A safe custom focus target gets a restrained, on-brand focus ring instead of the browser-default outline', /\.checkpoint:focus \{/.test(shellCss));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// 7. Phase 2A — focus-trap visibility fix
+// ─────────────────────────────────────────────────────────────────────────
+(function focusTrapVisibilityFix() {
+  const trapFocusMatch = shellSrc.match(/function trapFocus\(e\) \{[\s\S]*?\n  \}\n/);
+  check('FOCUS TRAP FIX', 'trapFocus() is present for this static check', !!trapFocusMatch);
+  if (trapFocusMatch) {
+    const body = trapFocusMatch[0];
+    check('FOCUS TRAP FIX', 'trapFocus() excludes elements with no offsetParent (display:none via itself or an ancestor -- e.g. the Continue button mid-conversation) from the wrap-around targets, not just [disabled]', /offsetParent !== null/.test(body));
+  }
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// 8. Phase 2A — responsive device-stage presentation
+// ─────────────────────────────────────────────────────────────────────────
+(function deviceStagePresentation() {
+  const deviceStageMatch = shellCss.match(/@media \(min-width: 768px\) \{([\s\S]*?)\n\}/);
+  check('DEVICE STAGE', 'A tablet/desktop device-stage media query exists at the documented 768px breakpoint', !!deviceStageMatch);
+  if (deviceStageMatch) {
+    const body = deviceStageMatch[1];
+    check('DEVICE STAGE', 'The card is a constrained, phone-like width/height (not full-bleed)', /width: min\(440px, 92vw\);/.test(body) && /height: min\(860px, 88vh\);/.test(body));
+    check('DEVICE STAGE', 'The card is centered via fixed positioning + transform, not inset:0', /inset: auto;/.test(body) && /top: 50%;/.test(body) && /left: 50%;/.test(body) && /transform: translate\(-50%,/.test(body));
+    check('DEVICE STAGE', 'Rounded, contained "device" framing (radius + clipped overflow + elevation)', /border-radius: 32px;/.test(body) && /overflow: hidden;/.test(body) && /box-shadow:/.test(body));
+    check('DEVICE STAGE', 'The background scrim darkens more than the mobile default, making the dimmed stage read as deliberate', /rgba\(20, 18, 15, 0\.6\)/.test(body));
+  }
+  // Mobile (below 768px) must still be the original true full-bleed
+  // shell -- the base (non-media-query) .cshell rule, not the device-
+  // stage override, is what mobile actually renders.
+  const baseCshellMatch = shellCss.match(/^\.cshell \{([^}]*)\}/m);
+  check('DEVICE STAGE', "Mobile's base .cshell rule (outside any media query) is still full-bleed (inset:0), preserving true edge-to-edge full-screen below 768px", !!baseCshellMatch && /inset: 0;/.test(baseCshellMatch[1]));
+
+  check('DEVICE STAGE', 'JS skips the mobile-only inline top/--cshell-vh overrides at/above the device-stage breakpoint, so they cannot fight the CSS centering transform', /function isDeviceStageLayout\(\)/.test(shellSrc) && /window\.matchMedia\('\(min-width: 768px\)'\)/.test(shellSrc));
+  check('DEVICE STAGE', 'The centered card is nudged clear of the (Review-Mode-only) global banner via a measured CSS variable, not a hardcoded guess', /--cshell-banner-nudge/.test(shellSrc) && /--cshell-banner-nudge/.test(shellCss));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
