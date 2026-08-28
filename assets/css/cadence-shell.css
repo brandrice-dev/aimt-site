@@ -364,16 +364,45 @@
   font-family: var(--aimt-font-sans); font-size: 0.68rem; color: var(--muted, #a3968d);
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
-.cshell-retry-btn, .cshell-continue-btn {
+.cshell-retry-btn {
   font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 600;
   padding: 0.55rem 1.15rem; border-radius: var(--aimt-radius-sm, 10px);
   border: none; cursor: pointer; transition: background 0.15s;
+  background: #4d403a; color: #fff;
 }
-.cshell-retry-btn { background: #4d403a; color: #fff; }
 .cshell-retry-btn:hover { background: #5d4f48; }
+
 .cshell-continue-row { max-width: 640px; margin: 0 auto; display: flex; justify-content: flex-end; padding-top: 0.15rem; }
-.cshell-continue-btn { background: var(--aimt-success, #3a5a3a); color: #fff; }
+/* Compact AIMT primary action, not a repeat of the "Competency
+   demonstrated" success badge above it -- Continue is navigation, so it
+   carries no checkmark of its own. height (not padding-driven) keeps it
+   a precise, on-brand 48-52px regardless of content; width stays auto/
+   content-sized so it reads as a normal button, not a filled square --
+   the previous version's oversized-square look was actually a bug: its
+   icon (ICON_CHECK) had no explicit svg sizing rule anywhere, so it
+   rendered at the browser's ~300x150px SVG default and inflated the
+   whole button around it. */
+.cshell-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 50px;
+  width: auto;
+  padding: 0 1.4rem;
+  border-radius: var(--aimt-radius-sm, 10px);
+  border: none;
+  cursor: pointer;
+  background: var(--aimt-success, #3a5a3a);
+  color: #fff;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.15s;
+}
 .cshell-continue-btn:hover { background: #335133; }
+.cshell-continue-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
 
 .cshell-error-row {
   max-width: 640px; margin: 0 auto 0.5rem;
@@ -396,6 +425,12 @@
   .cshell-bub { max-width: 88%; font-size: 0.86rem; }
   .cshell-head { padding-left: 0.85rem; padding-right: 0.85rem; }
   .cshell-composer { padding-left: 0.85rem; padding-right: 0.85rem; }
+  /* Full-width for easier touch targeting -- height stays the same
+     48-52px as desktop/tablet, only width changes. Bottom safe-area is
+     already handled by .cshell-composer's own padding, which this row
+     lives inside. */
+  .cshell-continue-row { justify-content: stretch; }
+  .cshell-continue-btn { width: 100%; }
 }
 
 /* Activation affordance applied by JS to the (now inert-for-typing)

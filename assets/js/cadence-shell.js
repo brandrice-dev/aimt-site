@@ -123,6 +123,12 @@
   const ICON_CLOSE = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   const ICON_VOICE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
   const ICON_CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // Continue is navigation, not a repeat of the "Competency demonstrated"
+  // success badge above it (which already owns ICON_CHECK) -- a subtle
+  // chevron, not a checkmark. Sized explicitly in CSS (.cshell-continue-btn
+  // svg), unlike the bug this replaces where ICON_CHECK had no sizing
+  // rule at all on that button and rendered at the browser's SVG default.
+  const ICON_CHEVRON_RIGHT = '<svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // ── DOM: built once, reused across opens ──
 
@@ -158,7 +164,7 @@
             '<button type="button" class="cshell-send" id="cshellSend" aria-label="Send response to Cadence">' + ICON_SEND + '</button>' +
           '</div>' +
           '<div class="cshell-continue-row" id="cshellContinueRow" style="display:none">' +
-            '<button type="button" class="cshell-continue-btn" id="cshellContinueBtn">Continue' + ICON_CHECK + '</button>' +
+            '<button type="button" class="cshell-continue-btn" id="cshellContinueBtn">Continue' + ICON_CHEVRON_RIGHT + '</button>' +
           '</div>' +
         '</div>' +
       '</div>';
