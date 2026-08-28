@@ -61,3 +61,34 @@ Not evaluated — requires live calls (the `--repeat` flag exists and was exerci
 Not because a defect was found — none was, because grading was never actually exercised against Sonnet 5. This is a **"blocked, not failed"** recommendation: the harness, dataset, and deterministic decision layer are all built, tested, and ready; what's missing is a real `ANTHROPIC_API_KEY` in a QA-safe environment to run `node scripts/run-cadence-model-regression.mjs --role=grading --live --repeat=3`. Promoting a model to `APPROVED` without ever having exercised it against this dataset would be exactly the kind of unreviewed model authority `functions/_lib/cadence/model-config.mjs`'s fail-safe design exists to prevent (see build contract Section 6a). Once a key is available, re-run this exact command — no dataset or harness changes needed — and update this document's Sections 3–5 with the real results before any promotion decision is made.
 
 **Next step:** owner provisions/confirms a QA-usable `ANTHROPIC_API_KEY`, then re-run live.
+
+---
+
+## 7. Validation-gate re-run — 2026-08-27 (same day, follow-up task)
+
+A dedicated "live Sonnet 5 validation gate" task attempted to execute this
+regression for real. Findings, checked directly in this environment:
+
+- `ANTHROPIC_API_KEY` — not set (`env`), and no `.env`/`.dev.vars`/
+  `wrangler.toml` in the repo provides one. Only `ANTHROPIC_BASE_URL` is
+  present. Per the gate task's own stop condition, **no live Anthropic
+  call was made and no result was fabricated.**
+- Live `headspa-proxy` Worker source fetched directly from Cloudflare
+  (read-only; not redeployed): `ALLOWED_MODELS = ['claude-sonnet-4-6']`
+  unchanged — the documented drift is still live and still unapproved.
+- `functions/_lib/cadence/model-config.mjs` re-read: registry is still
+  `cadence-model-registry-v2`; `claude-sonnet-4-20250514` is `LEGACY`;
+  `claude-sonnet-5` is `CANDIDATE` for both roles; neither role has an
+  `APPROVED` model. Unchanged.
+- Full deterministic test suite re-run (`node --test tests/*.test.mjs
+  tests/*.test.js`): **18/18 files passing, 0 failures** — includes the
+  fail-safe/model-lifecycle tests, checkpoint-authority tests, and content-
+  count/migration invariants this gate is required to keep green.
+
+**Conclusion: unchanged from Section 6 above.** GRADING: **DO NOT
+PROMOTE** — still blocked, not failed. The exact owner action required is
+unchanged: provision a QA-usable `ANTHROPIC_API_KEY` as a secure
+environment variable in the local/CI environment this harness runs in
+(never pasted into chat, code, or the production Worker's dashboard
+secret), then re-run `node scripts/run-cadence-model-regression.mjs
+--role=grading --live --repeat=3`.

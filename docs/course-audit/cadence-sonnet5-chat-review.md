@@ -49,3 +49,25 @@ Cases 9, 10, 11, and 15 specifically exercise the chat-role guardrails the launc
 Not a negative finding — no defect was found, because no live transcript was ever generated to review. "Technically cleared" would misrepresent the current evidence; this document instead reports the honest state: harness and suite ready, blocked on a live API key. Once `ANTHROPIC_API_KEY` is available, run the harness command above, paste the 16 real transcripts into this document in place of this section, and only then can an owner make the subjective "does this feel like Cadence" call Section 13 asks for — that call is explicitly the owner's, not something this task self-approves from automated criteria alone.
 
 **Next step:** same blocker as the grading regression — owner provisions/confirms a QA-usable `ANTHROPIC_API_KEY`, then re-run live and re-review this document.
+
+---
+
+## Validation-gate re-run — 2026-08-27 (same day, follow-up task)
+
+A dedicated "live Sonnet 5 validation gate" task attempted to execute this
+suite for real and confirmed the same blocker: no `ANTHROPIC_API_KEY` in
+this environment (checked `env`, `.env`/`.dev.vars`/`wrangler.toml` —
+none present; only `ANTHROPIC_BASE_URL` is set). No live call was made, no
+transcript was fabricated, and the optional live Ask Cadence smoke test
+(build contract-adjacent task Section 13) was not attempted for the same
+reason. The live `headspa-proxy` Worker was independently re-checked
+(read-only) and still serves `claude-sonnet-4-6`, not Sonnet 5 — so even
+routing through the deployed Worker instead of a direct API key would not
+have exercised the actual candidate model.
+
+**CHAT: still not clearable — owner review remains blocked on real
+transcripts, which remain blocked on a QA-usable key.** No change from the
+recommendation above. Same next step: provision the key, run
+`node scripts/run-cadence-model-regression.mjs --role=chat --live`, paste
+the 16 real transcripts in here, then the owner makes the "does this feel
+like Cadence" call.
