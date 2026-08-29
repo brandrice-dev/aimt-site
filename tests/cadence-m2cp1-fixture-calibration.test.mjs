@@ -158,10 +158,16 @@ const answer = m2.studentResponse;
   const others = GRADING_DATASET.filter((c) => c.id !== 'm2cp1-competent');
   check('NO OTHER FIXTURES CHANGED', 'Every GRADING_DATASET case other than m2cp1-competent hashes to the pre-task fingerprint -- proves no other fixture\'s text, expectedDecision, or metadata was touched',
     rubricVersionTag(JSON.stringify(others)) === 'rubric-e1f5005b');
-  check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET is completely untouched (count)',
+  check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET case count unchanged (16) as of this task -- this file only pins that this specific (grading-fixture) task didn\'t touch it',
     CHAT_DATASET.length === 16);
-  check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET is completely untouched (content hash)',
-    rubricVersionTag(JSON.stringify(CHAT_DATASET)) === 'rubric-4507b6cc');
+  // The content hash was legitimately updated in a later, unrelated task
+  // ("Tighten Cadence continuity and high-stakes precision") that corrected
+  // chat-12's and chat-15's evaluationCriteria text after verifying them
+  // against the real implementation and product review -- that intentional
+  // edit is what this fingerprint now reflects; this check still catches
+  // any OTHER, unintended edit to the dataset.
+  check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET content hash matches the current, intentionally-updated fingerprint',
+    rubricVersionTag(JSON.stringify(CHAT_DATASET)) === 'rubric-6f910215');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

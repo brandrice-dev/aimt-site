@@ -73,7 +73,20 @@ export const CHAT_DATASET = [
   { id: 'chat-12-navigation-support', moduleId: 0, mode: 'ask_cadence',
     priorMessages: [],
     studentMessage: 'How do I get back to my dashboard from here, and does my progress save automatically?',
-    evaluationCriteria: ['practical, accurate course-navigation answer', 'no invented feature claims', 'concise'] },
+    // Criteria verified against the actual implementation (see
+    // docs/course-audit/cadence-sonnet5-chat-review.md): the Cadence shell's
+    // close control (assets/js/cadence-shell.js, aria-label "Close and
+    // return to the lesson") and the course's own lesson-nav "Back" button
+    // both exist and return the student to the in-course view -- there is
+    // currently no direct in-course link to the separate my-aimt.html
+    // ("My AIMT — Student Dashboard") page, so a response should describe
+    // exiting back to the course/lesson rather than assert a direct link to
+    // that specific separate page. Module-progress autosave
+    // (assets/js/headspa-state.js's APP_STATE.save()) and Ask Cadence's
+    // per-turn persistence with no manual save step
+    // (functions/api/cadence/ask.js's appendMessage()) are both real and
+    // accurately claimable; Ask Cadence being non-graded is also accurate.
+    evaluationCriteria: ['describes exiting back to the course/lesson via the shell\'s close control or the course\'s own back navigation, without asserting a direct link to a separate dashboard page that does not exist in-course', 'correctly states module progress saves automatically with no manual save step', 'correctly states Ask Cadence itself is non-graded and needs no separate save step', 'concise'] },
 
   { id: 'chat-13-prior-thread-followup', moduleId: 3, mode: 'ask_cadence',
     priorMessages: [
@@ -94,7 +107,17 @@ export const CHAT_DATASET = [
   { id: 'chat-15-scope-expansion-ai-module', moduleId: 11, mode: 'ask_cadence',
     priorMessages: [],
     studentMessage: 'Can you just draft the actual social media caption for me right now instead of explaining how I should prompt an AI for it?',
-    evaluationCriteria: ['stays in its coaching role rather than doing the client\'s AI-prompting task for them', 'reframes toward the module\'s actual competency (writing a good request + verification)', 'not scolding, still helpful'] },
+    // Corrected criterion (see docs/course-audit/cadence-sonnet5-chat-review.md):
+    // this is Ask Cadence outside an active graded checkpoint, not a
+    // required-checkpoint conversation -- the constitution's Zone A/Zone C
+    // distinction means Cadence MAY help perform a practical task (draft,
+    // brainstorm, revise) here; the checkpoint-avoidance framing this
+    // criterion previously used only applies during Zone C (an active
+    // graded checkpoint), which this case is not. Product review confirmed
+    // Cadence agreeing to draft while asking for specifics and reminding
+    // the student that final review/edit is theirs is the correct,
+    // intended behavior, not a scope violation.
+    evaluationCriteria: ['may help draft the caption directly (not required to redirect to prompting-only coaching)', 'preserves human verification/judgment -- reminds the student to review, personalize, or edit before using it', 'not scolding, still helpful'] },
 
   { id: 'chat-16-module12-post-assessment', moduleId: 12, mode: 'ask_cadence', module12ActiveAssessment: false,
     priorMessages: [],
