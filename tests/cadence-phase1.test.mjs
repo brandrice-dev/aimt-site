@@ -182,7 +182,20 @@ function loadHeadspaState() {
 
   check('CLIENT MODEL LOG', 'evaluateCheckpointAnswer() destructures {text, modelInfo} from callAI() and attaches modelInfo to its return value', /const\s*\{\s*text:\s*raw,\s*modelInfo\s*\}\s*=\s*await callAI/.test(src) && /Object\.assign\(normalizeCheckpointEvaluation\(raw\),\s*\{\s*modelInfo\s*\}\)/.test(src));
   check('CLIENT MODEL LOG', 'submitCheckpoint() passes result.modelInfo through to APP_STATE.setCheckpointResult()', /APP_STATE\.setCheckpointResult\(moduleId, cpId, \{[\s\S]{0,120}modelInfo: result\.modelInfo/.test(src));
-  check('CLIENT MODEL LOG', 'The guide panel (gpSend) and the two ungraded Cadence responses (evaluateScript, submitIntro) all destructure callAI()\'s new shape', (src.match(/\.then\(\(\{\s*text:\s*r\s*\}\)\s*=>/g) || []).length >= 2 && /const\s*\{\s*text:\s*r\s*\}\s*=\s*await callAI/.test(src));
+  // SUPERSEDED premise: this originally asserted all three ungraded
+  // callers (gpSend, evaluateScript, submitIntro) destructured callAI()'s
+  // {text, modelInfo} shape. evaluateScript/submitIntro have since
+  // migrated off cadence-worker/worker.js entirely (see
+  // docs/course-audit/00-aimt-launch-readiness-gate-1.md Finding P0-1) --
+  // they now call callCadenceFormative() (POSTing to the new
+  // /api/cadence/evaluate-script and /api/cadence/submit-intro Pages
+  // Functions), which returns the identical {text, modelInfo} shape, so
+  // their .then(({ text: r }) => ...) destructuring pattern is unchanged
+  // even though the underlying transport is not callAI()/PROXY_URL
+  // anymore. Only the deactivated legacy guide panel (gpSend) still calls
+  // callAI() directly today.
+  check('CLIENT MODEL LOG', 'evaluateScript() and submitIntro() both destructure the {text, modelInfo} shape via callCadenceFormative(), not callAI()', (src.match(/\.then\(\(\{\s*text:\s*r\s*\}\)\s*=>/g) || []).length >= 2 && /callCadenceFormative\('\/api\/cadence\/evaluate-script'/.test(src) && /callCadenceFormative\('\/api\/cadence\/submit-intro'/.test(src));
+  check('CLIENT MODEL LOG', 'The deactivated legacy guide panel (gpSend) still destructures callAI()\'s {text, modelInfo} shape directly', /const\s*\{\s*text:\s*r\s*\}\s*=\s*await callAI/.test(src));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

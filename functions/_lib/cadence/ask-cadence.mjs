@@ -158,7 +158,22 @@ export class AskCadenceTruncationError extends Error {
   }
 }
 
-async function callAnthropicForAskCadence(env, { system, messages }) {
+/**
+ * Low-level CADENCE_CHAT_MODEL call primitive: resolves the centralized
+ * model authority + its execution config, calls Anthropic, and detects a
+ * mid-thought max_tokens truncation. Exported (not just used internally by
+ * askCadenceServerSide) so any other single-turn, non-graded, non-persisted
+ * Cadence formative-response endpoint -- currently
+ * functions/api/cadence/evaluate-script.js and
+ * functions/api/cadence/submit-intro.js, migrated off the legacy
+ * cadence-worker/worker.js Worker -- resolves the exact same centralized
+ * model authority and execution config rather than duplicating this logic
+ * or inventing a second one. Those callers do NOT get Ask Cadence's
+ * guardrail text, checkpoint verification, scenario-fact gate, or thread
+ * persistence -- this function is deliberately just the model-call
+ * primitive, not the Ask Cadence mode itself.
+ */
+export async function callCadenceChatModel(env, { system, messages }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
   const modelInfo = resolveCadenceModel(env, 'CADENCE_CHAT_MODEL');
   const execConfig = resolveChatExecutionConfig(modelInfo.modelName);
@@ -176,11 +191,11 @@ async function callAnthropicForAskCadence(env, { system, messages }) {
   });
   if (!res.ok) {
     const errBody = await res.text().catch(() => '');
-    throw new Error(`Ask Cadence request failed (${res.status}): ${errBody.slice(0, 300)}`);
+    throw new Error(`Cadence request failed (${res.status}): ${errBody.slice(0, 300)}`);
   }
   const data = await res.json();
   if (data && data.stop_reason === 'max_tokens') {
-    throw new AskCadenceTruncationError('Ask Cadence response was truncated by the token ceiling before it finished (stop_reason: max_tokens) -- treated as a recoverable failure, never returned to the student as a finished answer.');
+    throw new AskCadenceTruncationError('Cadence response was truncated by the token ceiling before it finished (stop_reason: max_tokens) -- treated as a recoverable failure, never returned to the student as a finished answer.');
   }
   const text = extractAnthropicTextSafe(data);
   return { text, modelInfo };
@@ -221,7 +236,7 @@ export async function askCadenceServerSide(env, { guideSystemPrompt, boundedCont
   if (activeCheckpointGuardrailText) system += '\n\n' + activeCheckpointGuardrailText;
   const messages = [...(boundedContext || []), { role: 'user', content: studentMessage }];
 
-  const original = await callAnthropicForAskCadence(env, { system, messages });
+  const original = await callCadenceChatModel(env, { system, messages });
 
   if (!detectActionableZoneBGuidance(original.text)) {
     const scenarioGate = scenarioGateResult({});
@@ -244,7 +259,7 @@ export async function askCadenceServerSide(env, { guideSystemPrompt, boundedCont
   // closed in both cases, never assume support without confirming it.
   let regenerated;
   try {
-    regenerated = await callAnthropicForAskCadence(env, {
+    regenerated = await callCadenceChatModel(env, {
       system: system + '\n\n' + SCENARIO_FACT_REGENERATION_INSTRUCTION,
       messages,
     });

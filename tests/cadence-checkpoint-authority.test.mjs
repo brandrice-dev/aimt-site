@@ -252,7 +252,12 @@ async function withMockFetch(mockImpl, fn) {
 
 async function runIntegrationChecks() {
   const { onRequestPost } = await import('../functions/api/cadence/evaluate-checkpoint.js');
-  const env = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_CHAT_MODEL: 'claude-sonnet-5' };
+  // Checkpoint grading resolves CADENCE_GRADING_MODEL (Gate-1 Finding
+  // P1-1 fix) -- this override is technically redundant since that role
+  // already has an APPROVED default (claude-sonnet-5), but is set
+  // explicitly so this test's env accurately documents which role the
+  // endpoint under test actually resolves.
+  const env = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_GRADING_MODEL: 'claude-sonnet-5' };
 
   const baseBody = { moduleId: 1, checkpointId: 'm1cp1', systemPrompt: 'You are Cadence...', question: 'A client says...', studentResponse: 'My full answer.', requestId: 'req-1' };
 
@@ -339,24 +344,25 @@ async function runIntegrationChecks() {
   // SUPERSEDED premise (see tests/cadence-chat-promotion.test.mjs for the
   // full, current lifecycle contract): this test originally exercised
   // "nothing approved, no override" as the fail-safe trigger, because at
-  // the time CADENCE_CHAT_MODEL had no approved default at all. Chat has
-  // since completed its own independent live validation program and was
-  // promoted to APPROVED (registry v5) -- production's real call site
-  // (functions/_lib/cadence/ask-cadence.mjs's callAnthropicForAskCadence)
-  // always resolves against the CURRENT registry version with no way for
-  // env to pin an older one, so "nothing approved" is no longer a state
-  // production can actually be in. The underlying property this test
-  // exists to prove -- a misconfigured/unregistered model still fails
-  // safe (502, preserved, zero Anthropic calls) rather than silently
+  // the time neither role had an approved default at all. Both Chat and
+  // Grading have since completed their own independent live validation
+  // programs and were promoted to APPROVED (registry v5) -- production's
+  // real call site always resolves against the CURRENT registry version
+  // with no way for env to pin an older one, so "nothing approved" is no
+  // longer a state production can actually be in. The underlying property
+  // this test exists to prove -- a misconfigured/unregistered model still
+  // fails safe (502, preserved, zero Anthropic calls) rather than silently
   // running on anything unreviewed -- is still fully real and still
   // reachable via an explicit override naming an unregistered model,
-  // which is what this now exercises.
+  // which is what this now exercises. The override targets
+  // CADENCE_GRADING_MODEL specifically because checkpoint grading resolves
+  // that role (Gate-1 Finding P1-1 fix), not CADENCE_CHAT_MODEL.
   {
     _resetRateLimitBucketsForTests();
     const threadsStore = [];
     const messagesStore = [];
     const mock = buildMockFetch({ threadsStore, messagesStore, anthropicBehavior: 'pass' });
-    const envBadModel = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_CHAT_MODEL: 'claude-totally-unregistered-model' };
+    const envBadModel = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_GRADING_MODEL: 'claude-totally-unregistered-model' };
     const res = await withMockFetch(mock.impl, () => onRequestPost({ request: makeRequest({ ...baseBody, requestId: 'req-nomodel' }), env: envBadModel }));
     const body = await res.json();
     check('ENDPOINT MODEL FAILSAFE', 'With an unregistered model override, the endpoint fails safe (502, preserved) rather than silently using it', res.status === 502 && body.preserved === true);

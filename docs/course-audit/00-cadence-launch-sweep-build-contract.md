@@ -652,3 +652,58 @@ triggering Zone B, verifier pass rate, regeneration rate, safe-fallback
 rate, average provider calls per turn, and latency/cost impact. This is
 operational guidance for the post-launch phase, not a requirement of this
 addendum.
+
+## 21. Model authority consistency + legacy Worker exit (2026-08-29 addendum)
+
+`docs/course-audit/00-aimt-launch-readiness-gate-1.md`'s audit (Step 120)
+found two governance gaps this section's Phase 0 foundation had left open
+rather than closed: (1) checkpoint grading resolved `CADENCE_CHAT_MODEL`
+instead of `CADENCE_GRADING_MODEL` (Finding P1-1), and (2) `evaluateScript()`
+and `submitIntro()` still depended on `cadence-worker/worker.js` directly,
+with no Pages Function counterpart (Finding P0-1) — the dual-authority
+problem Section 6 above already named as the reason the Worker's hand-kept
+mirror exists at all. Both are now closed (Step 122).
+
+**P1-1 fix.** `functions/_lib/cadence/checkpoint-evaluation.mjs` now
+resolves `CADENCE_GRADING_MODEL`, matching `cadence-grader.mjs`'s (Module
+12's) pattern this document's Section 7 already described as the target.
+No change to checkpoint IDs, rubrics, the evidence contract, or
+`decideCheckpointOutcome()`. Zero behavioral change today (both roles are
+`APPROVED` for the same model with matching execution configs); the fix
+restores the two roles' intended independent-rollback property.
+
+**P0-1 closure — full migration, not Worker reconciliation.** Section 6a's
+standing rule (only an `APPROVED` model may serve default traffic, no
+Worker-local shadow approval) is now satisfied for `evaluateScript()` and
+`submitIntro()` a different way than Section 2's original recommendation
+anticipated: instead of verifying/reconciling the Worker's live Cloudflare
+configuration (never attempted here — no Cloudflare access in this task),
+both features were migrated onto new Pages Function endpoints
+(`functions/api/cadence/evaluate-script.js`, `functions/api/cadence/
+submit-intro.js`) that resolve `CADENCE_CHAT_MODEL` through the exact same
+`model-config.mjs` registry every other Chat-role call site uses, via a
+shared primitive (`callCadenceChatModel()`) extracted from `ask-cadence.mjs`'s
+previously-internal `callAnthropicForAskCadence()`. Neither new endpoint
+introduces a second model authority, a hardcoded model string, a `"latest"`
+alias, or a silent fallback — verified by
+`tests/cadence-worker-migration.test.mjs`.
+
+**Worker classification changes.** `cadence-worker/worker.js` moves from
+this document's Section 2 "genuinely still live and required" to **LEGACY
+/ NOT REQUIRED FOR CURRENT STUDENT PRODUCTION**. It is retained in the
+repository (not deleted) for exactly one remaining live purpose — Review
+Mode's `evaluateCheckpointAnswerReviewMode()`, deliberately kept off the
+server-authoritative endpoint by design (Section 3's Review Mode
+isolation, hard-blocked on all production hostnames) — plus historical/
+rollback reference. This does not retire the Worker file itself, and does
+not touch its committed constants (`APPROVED_CHAT_MODEL`/
+`CANDIDATE_CHAT_MODEL`/`LEGACY_CHAT_MODEL`), Cloudflare secrets, or its
+live deployed configuration — none of that was in scope or touched.
+
+**No change to this document's Sections 1-20** beyond this addendum:
+no Cadence personality/prompt change, no model registry version added
+(Chat/Grading stay on `cadence-model-registry-v5`, unchanged), no Module
+12 change, no checkpoint content/rubric change, no curriculum change, no
+Cloudflare access, no live Anthropic call, no merge, no deploy, no push.
+Full detail: `docs/course-audit/00-aimt-launch-readiness-gate-1.md`'s P0-1
+and P1-1 RESOLUTION notes, and `implementation-log.md` Step 122.

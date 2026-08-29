@@ -267,7 +267,18 @@ export const GRADING_EFFORT = 'medium';
 
 async function callAnthropicForCheckpoint(env, { system, messages }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
-  const modelInfo = resolveCadenceModel(env, 'CADENCE_CHAT_MODEL');
+  // Checkpoint grading is a graded/authoritative decision (Section 5 of the
+  // build contract's mode authority table), so it resolves the GRADING
+  // role -- not CHAT -- matching cadence-grader.mjs's (Module 12's)
+  // already-correct pattern and the actual regression suite this role's
+  // approval evidence was built from (scripts/run-cadence-model-regression.mjs
+  // resolves CADENCE_GRADING_MODEL for every checkpointId-keyed case). See
+  // docs/course-audit/00-aimt-launch-readiness-gate-1.md Finding P1-1: prior
+  // to this fix, checkpoint grading resolved CADENCE_CHAT_MODEL, which
+  // happened to be behaviorally identical only because both roles pointed
+  // at the same approved model -- an independent Chat-only rollback would
+  // have silently broken all 22 checkpoints under the old binding.
+  const modelInfo = resolveCadenceModel(env, 'CADENCE_GRADING_MODEL');
   const data = await fetchAnthropicMessages({
     apiKey: env.ANTHROPIC_API_KEY,
     body: {

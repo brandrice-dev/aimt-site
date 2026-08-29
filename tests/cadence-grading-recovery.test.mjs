@@ -123,7 +123,12 @@ function textResponse(payload, extra = {}) {
 // preserve-student-response/retry path (unchanged) take over automatically.
 // ─────────────────────────────────────────────────────────────────────────
 await (async function endToEndRecoverableErrorTests() {
-  const env = { ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_CHAT_MODEL: 'claude-sonnet-5' };
+  // Checkpoint grading resolves CADENCE_GRADING_MODEL (Gate-1 Finding P1-1
+  // fix) -- this override is technically redundant since that role already
+  // has an APPROVED default (claude-sonnet-5), but is set explicitly so
+  // this env accurately documents which role evaluateCheckpointServerSide
+  // actually resolves.
+  const env = { ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_GRADING_MODEL: 'claude-sonnet-5' };
 
   await withMockFetch(
     async () => textResponse({ requiredElementsDemonstrated: ['a'] }), // missing required fields -- malformed
@@ -185,7 +190,12 @@ await (async function persistentFailureTests() {
 
   // Full-stack: confirm evaluateCheckpointServerSide also surfaces this as
   // a thrown error (never a synthesized grading decision).
-  const env = { ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_CHAT_MODEL: 'claude-sonnet-5' };
+  // Checkpoint grading resolves CADENCE_GRADING_MODEL (Gate-1 Finding P1-1
+  // fix) -- this override is technically redundant since that role already
+  // has an APPROVED default (claude-sonnet-5), but is set explicitly so
+  // this env accurately documents which role evaluateCheckpointServerSide
+  // actually resolves.
+  const env = { ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_GRADING_MODEL: 'claude-sonnet-5' };
   let endpointThrew = false;
   await withMockFetch(mock, async () => {
     try {

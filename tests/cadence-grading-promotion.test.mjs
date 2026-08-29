@@ -233,7 +233,11 @@ const registry = getCadenceModelRegistry(CURRENT_VERSION);
   check('ROLLBACK', 'A rollback changes the active binding (which registry version is CURRENT) without rewriting checkpoint code -- checkpoint-evaluation.mjs resolves the role by name only, never a hardcoded model string',
     (() => {
       const src = readFileSync(path.join(ROOT, 'functions/_lib/cadence/checkpoint-evaluation.mjs'), 'utf8');
-      return /resolveCadenceModel\(env, ['"]CADENCE_CHAT_MODEL['"]\)/.test(src) && !/model:\s*['"]claude-sonnet-5['"]/.test(src);
+      // Checkpoint grading resolves CADENCE_GRADING_MODEL (fixed post
+      // Gate-1 Finding P1-1 -- see docs/course-audit/
+      // 00-aimt-launch-readiness-gate-1.md) -- it is a graded/authoritative
+      // decision, not chat, matching cadence-grader.mjs's pattern.
+      return /resolveCadenceModel\(env, ['"]CADENCE_GRADING_MODEL['"]\)/.test(src) && !/model:\s*['"]claude-sonnet-5['"]/.test(src);
     })());
 
   check('ROLLBACK', 'No code path resolves an implicit "latest" model on failure -- resolveCadenceModel always throws rather than substituting any other registered model', (() => {

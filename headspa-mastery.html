@@ -9272,7 +9272,7 @@ async function evaluateScript() {
   fb.textContent = 'Cadence is reviewing your script…';
   const sys = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. A student just wrote their own version of the optional scent-introduction script for Module 2. Reference script: "Before we begin, I can offer a few scent options, or we can keep the service fragrance-free. Would you like to sample them? You may close your eyes while I guide you through each one, but you do not have to. Before I touch your shoulder, I\'ll ask your permission." Evaluate whether the student\'s version: 1) clearly introduces the optional scent experience, 2) offers a fragrance-free choice, 3) avoids medical or nervous-system claims, 4) does not require eye closure, 5) asks permission before touch, 6) stays concise and natural. Reference one specific strength and identify one focused correction when needed. Avoid pass/fail language. Give feedback in 2-3 concise sentences.' +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
-  callAI(sys, [{ role: 'user', content: text }], 300)
+  callCadenceFormative('/api/cadence/evaluate-script', sys, text)
     .then(({ text: r }) => { fb.textContent = r; })
     .catch(() => { fb.textContent = 'Cadence couldn’t review your script. Check your connection and try again.'; });
 }
@@ -10313,6 +10313,50 @@ function m9CwpReset() {
 // AI
 // ══════════════════════════════════════════════════════
 
+// Server-authoritative, non-graded formative-response call — replaces the
+// prior architecture (browser -> headspa-proxy Worker -> Anthropic, client
+// trusts the Worker's own model selection) for the two Worker-backed
+// features that had no Pages Function counterpart: evaluateScript() and
+// submitIntro(). Both are ungraded, single-turn, never touch APP_STATE or
+// course_progress from their own response — see
+// docs/course-audit/00-aimt-launch-readiness-gate-1.md Finding P0-1 and
+// functions/api/cadence/evaluate-script.js / submit-intro.js's own header
+// comments for the full authority trace. Deliberately NOT routed through
+// Ask Cadence's endpoint or callAI()/PROXY_URL — those remain in place for
+// their own existing roles (Ask Cadence's persisted thread; Review Mode's
+// deliberately Worker-only isolation, below).
+async function callCadenceFormative(endpoint, system, text) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+  try {
+    let accessToken = '';
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      accessToken = data?.session?.access_token || '';
+    } catch (_) {}
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {})
+      },
+      body: JSON.stringify({ system, text }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || 'Network error'); }
+    const d = await r.json();
+    return { text: d.text, modelInfo: d.modelInfo || null };
+  } catch (e) {
+    clearTimeout(timeout);
+    if (e.name === 'AbortError') throw new Error('Request timed out — check your connection');
+    throw e;
+  }
+}
+
+// Review Mode ONLY (see evaluateCheckpointAnswerReviewMode below) and the
+// deactivated legacy guide panel (gpSend) still call the Worker directly
+// through this function — kept unchanged for that purpose.
 async function callAI(system, messages, maxTokens = 600) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
@@ -10927,7 +10971,7 @@ async function submitIntro() {
     '\n\nEnd by naming one useful area of the course that appears especially relevant to what the student shared. Do not evaluate or grade the introduction.' +
     '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
 
-  callAI(ctx, [{ role: 'user', content: text }], 400)
+  callCadenceFormative('/api/cadence/submit-intro', ctx, text)
     .then(({ text: r }) => {
       const textEl = document.getElementById('introCadenceText');
       if (textEl) textEl.innerHTML = r.split('\n').filter(l => l.trim()).map(l => '<p>' + l + '</p>').join('');
