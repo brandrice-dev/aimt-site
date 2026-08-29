@@ -619,17 +619,26 @@ body {
       }, delayMs || 0);
     }
 
-    async function claimCourseAccess(email, userId) {
+    async function claimCourseAccess(email) {
       if (!checkoutSessionId) return { ok: false, skipped: true };
 
+      let accessToken = '';
+      let sessionUserId = null;
       try {
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        accessToken = (sessionData && sessionData.session && sessionData.session.access_token) || '';
+        sessionUserId = (sessionData && sessionData.session && sessionData.session.user && sessionData.session.user.id) || null;
+      } catch (_) {}
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
         const response = await fetch('/api/claim-course-access', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             sessionId: checkoutSessionId,
-            email: email || '',
-            userId: userId || ''
+            email: email || ''
           })
         });
 
@@ -638,14 +647,14 @@ body {
           clearPendingCheckoutSession();
           void logAimtEvent('success_claim_course_access_success', {
             email,
-            user_id: userId || null,
+            user_id: sessionUserId,
             message: 'claim_ok'
           });
         } else {
           persistPendingCheckoutSession();
           void logAimtEvent('success_claim_course_access_failure', {
             email,
-            user_id: userId || null,
+            user_id: sessionUserId,
             message: data.error || `http_${response.status}`
           });
         }
@@ -657,7 +666,7 @@ body {
         persistPendingCheckoutSession();
         void logAimtEvent('success_claim_course_access_failure', {
           email,
-          user_id: userId || null,
+          user_id: sessionUserId,
           message: 'claim_exception'
         });
         return {
@@ -713,7 +722,7 @@ body {
           return;
         }
 
-        const claim = await claimCourseAccess(data.session.user.email, data.session.user.id);
+        const claim = await claimCourseAccess(data.session.user.email);
 
         if (!claim.ok) {
           clearNotices();
@@ -781,7 +790,7 @@ body {
         if (error) {
           const lower = (error.message || '').toLowerCase();
           if (lower.includes('already') || lower.includes('registered') || lower.includes('exists')) {
-            await claimCourseAccess(email, null);
+            await claimCourseAccess(email);
             showMessage('An AIMT account already appears to exist for this email. Return to Student Access and sign in with that account to continue.');
             showNextStep('Already have an account?', 'Use the email tied to your enrollment and sign in through Student Access to enter the course.', COURSE_SIGNIN_URL, 'Sign in to Student Access');
           } else {
@@ -792,14 +801,14 @@ body {
         }
 
         if (maybeExistingAccount) {
-          await claimCourseAccess(email, null);
+          await claimCourseAccess(email);
           showMessage('An AIMT account already exists for this email. Sign in through Student Access to continue into your purchased course.');
           showNextStep('Already have an account?', 'Return to Student Access and use this same email to enter the course.', COURSE_SIGNIN_URL, 'Sign in to Student Access');
           return;
         }
 
         if (!data.session) {
-          const claim = await claimCourseAccess(email, null);
+          const claim = await claimCourseAccess(email);
           showMessage('Your account was created, but email confirmation is required before sign-in completes. Please check your inbox, then return to Student Access to sign in.');
           showNextStep('Need to sign in after confirmation?', 'Once you confirm your email, return to Student Access and sign in there.', COURSE_SIGNIN_URL, 'Back to Student Access');
           if (!claim.ok && !claim.skipped) {
@@ -808,7 +817,7 @@ body {
           return;
         }
 
-        const claim = await claimCourseAccess(email, data.session.user && data.session.user.id);
+        const claim = await claimCourseAccess(email);
         if (claim.skipped) {
           showMessage('Your account is ready, but checkout confirmation details are missing on this page. Continue through Student Access to enter your course.');
           showNextStep('Missing checkout confirmation?', 'Sign in through Student Access with this same email to continue.', COURSE_SIGNIN_URL, 'Go to Student Access');

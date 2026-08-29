@@ -11,6 +11,12 @@ below was either VERIFIED sound, or is documented as a blocker for a
 dedicated follow-up task, per this task's explicit boundaries (see
 "Why nothing was fixed in this task" at the end).
 
+> **Update (2026-08-29, Step 121):** P0-2 (entitlement claiming) has since
+> been closed under a separate, owner-authorized, narrowly-scoped follow-up
+> task. See the "RESOLUTION" note under Section 4's P0-2 finding below, and
+> `implementation-log.md`'s Step 121 entry for full detail. This document's
+> own findings and history are left otherwise unmodified.
+
 ---
 
 ## 1. What actually runs in production today — three request paths, verified by reading the live code
@@ -211,6 +217,58 @@ bearer-token verification binding it to the actual caller.**
   mismatched from the bearer token's real identity is rejected or
   corrected to the authenticated identity, plus a live Stripe-sandbox
   checkout confirming the normal flow still works.
+
+**RESOLUTION (2026-08-29, Step 121, owner-authorized) — P0-2 CLOSED.**
+`functions/api/claim-course-access.js` now calls `resolveUser(env, request)`
+(`functions/_lib/certification/auth.mjs`, the same shared bearer-token
+helper every other entitlement-gated endpoint in this codebase already
+uses) unconditionally, before any Stripe call. A missing or invalid/expired
+token returns 401. `body.userId` was removed from the request contract
+entirely — the written `user_id` is always `authenticatedUserId`, derived
+only from the verified token, never a client-supplied value. This alone
+closes the literal finding above (client-supplied `userId`, zero
+verification).
+
+A second layer was required because authentication alone does not stop the
+entitlement-hijack scenario this finding specifically named: a signed-in
+attacker who merely *observes* someone else's real, paid session ID
+(shared-device browser history, a leaked confirmation link) could still
+bind that stranger's purchase to their own authenticated account, since
+`upsertEntitlement()`'s `merge-duplicates` semantics make the last caller's
+write win. Closed by requiring the authenticated caller's own verified
+email to equal the checkout session's Stripe-verified email
+(`authenticatedEmail !== sessionEmail` → 403). This is not a new
+invariant — it is the same "purchaser email must match Stripe truth" check
+the old code already applied to a client-supplied string (weak, optional,
+spoofable); every legitimate current caller already sends the signed-in
+account's own email here, so no legitimate flow's behavior changed.
+
+Verified by `tests/claim-course-access-auth.test.mjs` (36 assertions):
+unauthenticated and invalid-token requests rejected 401 with no write; a
+client-supplied `userId` never reaches the written row under a valid
+authenticated claim; User A authenticated against User B's real paid
+session is rejected 403 (with and without an accompanying spoofed
+`userId`) and B's existing entitlement row is left untouched; the rightful
+authenticated purchaser's own claim succeeds and writes the correct
+`user_id`/email; unpaid and wrong-price sessions are still rejected 400
+with no write; a duplicate/retried legitimate claim is idempotent (one
+row, correct owner); an unrelated rejected claim never touches a different
+account's existing row; the Supabase service-role key and Stripe secret
+key never appear in any response body. All three client callers
+(`success.html`, `student-access.html`, `headspa-mastery.html`) updated to
+send `Authorization: Bearer <access_token>` and stop sending `userId` —
+verified this is a no-op for every legitimate flow (see Step 121,
+`implementation-log.md`, for the full call-site-by-call-site trace). Full
+suite: 33/33 test files pass, `git diff --check` clean, zero live
+Stripe/Anthropic calls. No Cadence/Module 12/curriculum file touched.
+
+One residual, non-blocking observation from the post-fix security review:
+an authenticated caller who already possesses someone else's unguessable
+session ID can still distinguish 400 (unpaid/wrong price) from 403 (paid,
+wrong owner) — an existence/payment-status oracle, not an access bypass
+(the entitlement itself is never written or exposed), and no worse in kind
+than the pre-fix code's own Stripe-error passthrough. Not fixed in this
+task; noted for a future hardening pass, not launch-blocking.
 
 ### P1 — MUST COMPLETE BEFORE PUBLIC COURSE LAUNCH
 
@@ -476,9 +534,13 @@ fix P1-1 (checkpoint grading → `CADENCE_GRADING_MODEL`) and reconcile P0-1
 (Worker config verification, and a scoped plan to migrate
 `evaluateScript()`/`submitIntro()` off the Worker). In parallel or after:
 a **Module 12 Concurrency Hardening** task (owner-authorized) to close
-P1-2 (`submit-case.js` lock) and P2-4/P2-5. Separately, an
-**Entitlement Hardening** task (owner-authorized, per `CLAUDE.md`'s rule)
-for P0-2. The **Dashboard/Resources pass** already anticipated by
-`00-aimt-current-course-status.md`'s own roadmap should absorb P1-3, P1-4,
-and P2-1/P2-2 together, since they share the same "student dashboard
-completeness" surface.
+P1-2 (`submit-case.js` lock) and P2-4/P2-5. The **Dashboard/Resources
+pass** already anticipated by `00-aimt-current-course-status.md`'s own
+roadmap should absorb P1-3, P1-4, and P2-1/P2-2 together, since they share
+the same "student dashboard completeness" surface.
+
+**Update (2026-08-29, Step 121):** the **Entitlement Hardening** task for
+P0-2 has been completed (owner-authorized, narrowly scoped) — see the
+RESOLUTION note under Section 4's P0-2 finding. **P0-1 (Worker config
+verification) is now the sole remaining P0 blocker before production
+deploy.**

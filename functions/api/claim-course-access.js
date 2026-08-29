@@ -1,3 +1,5 @@
+import { resolveUser } from '../_lib/certification/auth.mjs';
+
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const ENTITLEMENTS_TABLE = 'course_entitlements';
 const COURSE_SLUG = 'headspa-mastery';
@@ -119,8 +121,10 @@ export async function onRequestPost(context) {
   try {
     const body = await request.json().catch(() => ({}));
     const sessionId = String(body.sessionId || '').trim();
-    const providedEmail = normalizeEmail(body.email);
-    const userId = String(body.userId || '').trim() || null;
+    /* Client-reported, unverified -- used only to enrich the log line on
+       failures that occur before identity is established below. Never
+       used to decide whose entitlement gets written. */
+    const clientReportedEmail = normalizeEmail(body.email);
     const stripeSecretKey = env.STRIPE_SECRET_KEY;
     const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
     const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
@@ -129,8 +133,7 @@ export async function onRequestPost(context) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
+        email: clientReportedEmail,
         message: 'missing_checkout_session'
       });
       return json({ error: 'Missing checkout session.' }, 400);
@@ -139,8 +142,7 @@ export async function onRequestPost(context) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
+        email: clientReportedEmail,
         message: 'stripe_not_configured'
       });
       return json({ error: 'Stripe is not configured.' }, 500);
@@ -149,12 +151,29 @@ export async function onRequestPost(context) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
+        email: clientReportedEmail,
         message: 'supabase_service_role_not_configured'
       });
       return json({ error: 'Supabase service role is not configured.' }, 500);
     }
+
+    /* The authorized identity is derived only from a verified Supabase
+       session token -- never from a client-supplied userId. See
+       resolveUser() (functions/_lib/certification/auth.mjs), the same
+       bearer-token verification every other entitlement-gated endpoint
+       in this codebase already uses. */
+    const { user, errorResponse } = await resolveUser(env, request);
+    if (errorResponse) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl,
+        serviceRoleKey,
+        email: clientReportedEmail,
+        message: 'unauthenticated_claim_rejected'
+      });
+      return errorResponse;
+    }
+    const authenticatedUserId = user.id;
+    const authenticatedEmail = normalizeEmail(user.email);
 
     const session = await fetchCheckoutSession(sessionId, stripeSecretKey);
     const paid = session.payment_status === 'paid' || session.status === 'complete';
@@ -162,8 +181,8 @@ export async function onRequestPost(context) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
+        email: authenticatedEmail,
+        user_id: authenticatedUserId,
         message: 'checkout_not_completed'
       });
       return json({ error: 'Checkout session is not completed.' }, 400);
@@ -178,8 +197,8 @@ export async function onRequestPost(context) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
+        email: authenticatedEmail,
+        user_id: authenticatedUserId,
         message: 'price_mismatch_for_course'
       });
       return json({ error: 'This purchase does not include this course.' }, 400);
@@ -190,42 +209,49 @@ export async function onRequestPost(context) {
       session.customer_email ||
       session.customer_email_address
     );
-    const purchaserEmail = providedEmail || sessionEmail;
 
-    if (!purchaserEmail) {
+    if (!sessionEmail) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        user_id: userId,
+        email: authenticatedEmail,
+        user_id: authenticatedUserId,
         message: 'missing_purchaser_email'
       });
       return json({ error: 'No purchaser email found for this checkout session.' }, 400);
     }
 
-    if (providedEmail && sessionEmail && providedEmail !== sessionEmail) {
+    /* Bind the claim to the purchase: this checkout session's
+       Stripe-verified email must belong to the authenticated caller.
+       Without this, anyone who merely observes someone else's session
+       ID (shared-device browser history, a leaked confirmation link)
+       could attach that stranger's paid entitlement to their own
+       account -- authentication alone doesn't prevent that, since the
+       attacker is a real, logged-in user. */
+    if (authenticatedEmail !== sessionEmail) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,
         serviceRoleKey,
-        email: providedEmail,
-        user_id: userId,
-        message: 'email_mismatch_with_checkout'
+        email: authenticatedEmail,
+        user_id: authenticatedUserId,
+        message: 'authenticated_email_purchase_mismatch'
       });
-      return json({ error: 'Use the same email address tied to your enrollment.' }, 400);
+      return json({ error: 'This checkout session does not belong to your account.' }, 403);
     }
 
     await upsertEntitlement({
       supabaseUrl,
       serviceRoleKey,
       checkoutSessionId: session.id,
-      purchaserEmail,
-      userId
+      purchaserEmail: sessionEmail,
+      userId: authenticatedUserId
     });
 
     await logAimtEvent('api_claim_course_access_success', {
       supabaseUrl,
       serviceRoleKey,
-      email: purchaserEmail,
-      user_id: userId,
+      email: sessionEmail,
+      user_id: authenticatedUserId,
       message: 'entitlement_upserted'
     });
     return json({ ok: true });

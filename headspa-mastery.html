@@ -10542,14 +10542,21 @@ async function recoverHeadSpaEntitlement(user) {
   const sessionId = getPendingCheckoutSessionId();
   if (!sessionId || !user) return false;
 
+  let accessToken = '';
   try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    accessToken = (sessionData && sessionData.session && sessionData.session.access_token) || '';
+  } catch (_) {}
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
     const response = await fetch('/api/claim-course-access', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         sessionId,
-        email: normalizeAccessEmail(user.email),
-        userId: user.id || ''
+        email: normalizeAccessEmail(user.email)
       })
     });
 
