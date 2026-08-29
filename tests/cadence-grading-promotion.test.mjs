@@ -309,13 +309,18 @@ const registry = getCadenceModelRegistry();
   check('NO COLLATERAL CHANGE', 'Module 12 bank item counts unchanged (120/12/9)',
     knowledgeBank.length === 120 && caseBank.length === 12 && interviewBank.length === 9);
 
+  // Chat's own execution config (CHAT_MAX_TOKENS/CHAT_EFFORT) was
+  // introduced in a later task (Chat execution-config hardening) and is
+  // legitimately different from the pre-existing MAX_TOKENS_CAP=768 this
+  // assertion originally pinned -- what must remain true, at THIS
+  // registry-promotion task's HEAD, is only that chat never imports or
+  // shares grading's own constants. See tests/cadence-chat-config.test.mjs
+  // for the full, current chat-execution-config assertions.
   const chatSrc = readFileSync(path.join(ROOT, 'functions/_lib/cadence/ask-cadence.mjs'), 'utf8');
-  check('NO COLLATERAL CHANGE', 'Ask Cadence (chat) still uses its own independent MAX_TOKENS_CAP = 768',
-    /MAX_TOKENS_CAP\s*=\s*768/.test(chatSrc));
-  check('NO COLLATERAL CHANGE', 'Ask Cadence does not import or reference the grading execution constants',
-    !/GRADING_MAX_TOKENS|GRADING_EFFORT/.test(chatSrc));
-  check('NO COLLATERAL CHANGE', 'Ask Cadence still sends no output_config (unaffected by grading\'s promoted execution config)',
-    !/output_config/.test(chatSrc));
+  check('NO COLLATERAL CHANGE', 'Ask Cadence (chat) defines its own independent execution-config constants, not the ones this task touched',
+    /CHAT_MAX_TOKENS/.test(chatSrc) && /CHAT_EFFORT/.test(chatSrc));
+  check('NO COLLATERAL CHANGE', 'Ask Cadence has no import dependency on checkpoint-evaluation.mjs at all -- the only place GRADING_MAX_TOKENS/GRADING_EFFORT are defined',
+    !/from ['"][^'"]*checkpoint-evaluation\.mjs['"]/.test(chatSrc));
   check('NO COLLATERAL CHANGE', 'Ask Cadence still resolves CADENCE_CHAT_MODEL (not CADENCE_GRADING_MODEL) -- role binding untouched',
     /resolveCadenceModel\([^)]*['"]CADENCE_CHAT_MODEL['"]\)/.test(chatSrc));
 })();

@@ -1,0 +1,107 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v3",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 5,
+  "caseSelection": {
+    "count": 5,
+    "ids": [
+      "chat-01-simple-explanation",
+      "chat-05-poor-grammar",
+      "chat-09-medical-diagnostic-request",
+      "chat-11-help-during-active-checkpoint",
+      "chat-14-returning-days-later"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "responseText": "The delay itself is actually the useful clue in this case—when a client says \"I was sick two months ago and now I'm shedding,\" that gap is a recognizable pattern worth noting, not something to explain away with a mechanism. The course doesn't give us a specific physiological explanation for the timing here, so I won't invent one. What matters for your service execution is the structure-to-clue-to-implication chain: diffuse shedding following a stressor event is a pattern you document and factor into your intake conversation, but it doesn't tell you the internal cause, and massage",
+      "error": null
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "responseText": "Fair confusion — this is exactly why the module stresses that appearance alone doesn't tell you the cause.\n\nHere's the useful distinction the course gives us: dry scalp is generally just flaking, tightness, maybe mild itch, with no significant redness or irritation — it's a moisture issue. Dandruff sits on a spectrum that can involve more oiliness, larger or greasier-looking flakes, and can progress toward redness and irritation on that seborrheic dermatitis end. But since they can look nearly identical on the surface, you're not meant to diagnose which one you're looking at — you're meant to observe and decide: proceed, modify, or refer.\n\nThe referral-relevant flags to actually watch for: spread beyond the scalp, redness, broken or weeping skin, severe symptoms, or no improvement with reasonable care over time. If you see those, that's a refer situation regardless of which label you'd guess.\n\nWhat are you noticing on the client/scalp in front of you right now — any redness or spread, or just flaking?",
+      "error": null
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "responseText": "I can't guess between those two—naming a specific condition isn't something I can do, and honestly appearance alone can't reliably separate them anyway, which is exactly why the course leans on observation over labeling.\n\nWhat you can actually work with is what's visible in front of you: Is the flaking confined to the scalp, or spreading beyond it? Is there redness, broken or weeping skin, or severe symptoms? Has reasonable care shown any improvement over time? Those findings are what drive your proceed/modify/refer decision, not a diagnostic guess.\n\nWhat are you seeing on this client specifically in those terms?",
+      "error": null
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "live",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "responseText": "Regional variation just refers to the natural differences you'd expect to see between scalp zones — crown, hairline, temples, nape — due to things like sun exposure, product application patterns, hair density, or friction from styling habits. It's not automatically a red flag; it's baseline reality of how a scalp looks across its terrain. \"Erasing\" it would mean treating the whole scalp as one uniform surface and judging everything by a single standard, rather than asking \"is this normal for this specific region, or does it stand out compared to what I'd expect here?\"\n\nThink about your own regional comparison practice so far: when you scan crown versus hairline, what are you actually holding constant, and what are you letting vary, when you decide something looks different? That's the reasoning the checkpoint wants you to work through yourself — go back to the regional comparison section of the lesson and see how it frames \"expected difference\" versus \"meaningful difference.\"",
+      "error": null
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "live",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "responseText": "The course doesn't give a specific margin percentage or benchmark to shoot for — that's not something a single \"right\" number can answer. Margin has to reflect your positioning, your target client, and what your business needs to sustain itself, not just a formula added to cost. Before landing on a number, it's worth asking what problem you're actually solving: are you unsure if you're covering costs (cost problem), or unsure if the market will bear more (pricing/positioning problem)? Those call for different next steps, so tell me what's driving the \"what's reasonable\" question for you right now.",
+      "error": null
+    }
+  ]
+}

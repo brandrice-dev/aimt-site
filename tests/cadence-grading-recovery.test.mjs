@@ -292,12 +292,16 @@ await (async function harnessMetricSeparationTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function chatConfigIndependenceTests() {
   const chatSrc = readFileSync(path.join(ROOT, 'functions/_lib/cadence/ask-cadence.mjs'), 'utf8');
-  check('J. CHAT INDEPENDENCE', 'Ask Cadence keeps its own MAX_TOKENS_CAP (768, from the prior chat-truncation fix) rather than importing the grading budget',
-    /MAX_TOKENS_CAP\s*=\s*768/.test(chatSrc));
-  check('J. CHAT INDEPENDENCE', 'Ask Cadence does not import GRADING_MAX_TOKENS or GRADING_EFFORT from checkpoint-evaluation.mjs -- the roles stay decoupled',
-    !/GRADING_MAX_TOKENS|GRADING_EFFORT/.test(chatSrc));
-  check('J. CHAT INDEPENDENCE', 'Ask Cadence does not set output_config.effort at all -- this task did not touch chat\'s generation config',
-    !/output_config/.test(chatSrc));
+  // As of a later task (Chat execution-config hardening), Ask Cadence
+  // gained its own explicit thinking/effort/max_tokens config -- distinct
+  // from and no longer "no output_config at all" as this file's own task
+  // assumed. What must still hold, at THIS task's HEAD, is only that chat
+  // never imports or shares grading's specific constants. See
+  // tests/cadence-chat-config.test.mjs for the current, full assertions.
+  check('J. CHAT INDEPENDENCE', 'Ask Cadence defines its own execution-config constants (CHAT_MAX_TOKENS/CHAT_EFFORT), not the grading budget',
+    /CHAT_MAX_TOKENS/.test(chatSrc) && /CHAT_EFFORT/.test(chatSrc));
+  check('J. CHAT INDEPENDENCE', 'Ask Cadence has no import dependency on checkpoint-evaluation.mjs at all -- the roles stay decoupled',
+    !/from ['"][^'"]*checkpoint-evaluation\.mjs['"]/.test(chatSrc));
 })();
 
 // ---- Report ----

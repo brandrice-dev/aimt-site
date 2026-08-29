@@ -45,16 +45,12 @@ import { GRADING_DATASET } from './cadence-model-regression/grading-dataset.mjs'
 import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
 import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, GRADING_MAX_TOKENS, GRADING_EFFORT, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
-import { ASK_CADENCE_BASE_GUARDRAIL, buildActiveCheckpointGuardrail } from '../functions/_lib/cadence/ask-cadence.mjs';
+import { ASK_CADENCE_BASE_GUARDRAIL, buildActiveCheckpointGuardrail, CHAT_MAX_TOKENS, CHAT_EFFORT } from '../functions/_lib/cadence/ask-cadence.mjs';
 import { extractAnthropicTextSafe, fetchAnthropicMessages } from '../functions/_lib/cadence/anthropic-response.mjs';
 import { selectCases, CaseSelectionError } from './cadence-model-regression/case-selection.mjs';
 import { GRADING_SENTINEL_CASE_IDS, CHAT_TARGETED_CASE_IDS } from './cadence-model-regression/sentinel.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Mirrors ask-cadence.mjs's MAX_TOKENS_CAP (see that file's comment for why
-// 768: the prior 512 cap truncated a real Sonnet 5 chat response mid-word).
-const CHAT_MAX_TOKENS = 768;
 
 const USAGE = 'Usage: node scripts/run-cadence-model-regression.mjs --role=grading|chat ' +
   '[--live] [--repeat=N] [--model=NAME] [--out=path.json] [--cases=id1,id2,...] [--sentinel] [--help]';
@@ -145,6 +141,7 @@ function buildRawDiagnostic(raw) {
   const blocks = Array.isArray(raw && raw.content) ? raw.content : [];
   return {
     stopReason: (raw && raw.stop_reason) || null,
+    modelId: (raw && raw.model) || null,
     blockTypes: blocks.map((b) => b && b.type).filter(Boolean),
     textPreview: blocks
       .filter((b) => b && b.type === 'text' && typeof b.text === 'string')
@@ -364,17 +361,20 @@ export async function runChat(args, caseIds) {
     // Mirrors askCadenceServerSide()'s exact system-prompt assembly
     // (functions/_lib/cadence/ask-cadence.mjs), including the always-on
     // base guardrail and, when the case simulates an active unresolved
-    // checkpoint, the server-verified active-checkpoint guardrail --
-    // previously this harness sent only the module guide + tone constants,
+    // checkpoint, the server-verified active-checkpoint guardrail -- a
+    // prior harness defect sent only the module guide + tone constants,
     // silently omitting both guardrails, so a live case like
     // chat-11-help-during-active-checkpoint (which sets activeCheckpointId
     // in the dataset) was never actually testing the real production
-    // contract a student would receive.
+    // contract a student would receive. activeCheckpointGuardrailApplied
+    // below records, per case, whether that guardrail was actually
+    // included this run -- so a future reader never has to assume it was.
     let guideSystem = (guideSystems[String(testCase.moduleId)] || guideSystems['0']) +
       '\n' + tone.CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
       '\n' + tone.CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
       '\n\n' + ASK_CADENCE_BASE_GUARDRAIL;
-    if (testCase.activeCheckpointId && testCase.activeCheckpointStatus !== 'passed') {
+    const activeCheckpointGuardrailApplied = !!(testCase.activeCheckpointId && testCase.activeCheckpointStatus !== 'passed');
+    if (activeCheckpointGuardrailApplied) {
       guideSystem += '\n\n' + buildActiveCheckpointGuardrail(testCase.activeCheckpointId);
     }
 
@@ -383,20 +383,35 @@ export async function runChat(args, caseIds) {
       let responseText = null;
       let error = null;
       let rawDiagnostic = null;
+      let truncated = false;
       try {
-        const { text, raw } = await callAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, system: guideSystem, messages, maxTokens: CHAT_MAX_TOKENS });
+        // Mirrors callAnthropicForAskCadence()'s exact execution config
+        // (CHAT_MAX_TOKENS / CHAT_EFFORT / adaptive thinking) -- imported
+        // from ask-cadence.mjs, never a separate hardcoded copy, so the
+        // harness can never silently drift from what production sends.
+        const { text, raw } = await callAnthropic({
+          apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, system: guideSystem, messages,
+          maxTokens: CHAT_MAX_TOKENS, outputConfig: { effort: CHAT_EFFORT }, thinking: { type: 'adaptive' },
+        });
         responseText = text;
-        if (!text) rawDiagnostic = buildRawDiagnostic(raw);
+        truncated = !!(raw && raw.stop_reason === 'max_tokens');
+        // Truncation must be classified explicitly, not just detected when
+        // text happens to be empty -- a partial response (chat-01's real
+        // failure mode: real text, cut off mid-sentence, error:null) is
+        // exactly the case a text-emptiness check alone would miss.
+        if (!text || truncated) rawDiagnostic = buildRawDiagnostic(raw);
       } catch (e) {
         error = String(e.message || e);
       }
-      const result = { id: testCase.id, moduleId: testCase.moduleId, mode: 'live', studentMessage: testCase.studentMessage, priorMessages: testCase.priorMessages, evaluationCriteria: testCase.evaluationCriteria, responseText, error };
+      const result = { id: testCase.id, moduleId: testCase.moduleId, mode: 'live', studentMessage: testCase.studentMessage, priorMessages: testCase.priorMessages, evaluationCriteria: testCase.evaluationCriteria, activeCheckpointGuardrailApplied, responseText, truncated, error };
       if (rawDiagnostic) result.rawDiagnostic = rawDiagnostic;
       results.push(result);
     } else {
-      results.push({ id: testCase.id, moduleId: testCase.moduleId, mode: 'dry-run', studentMessage: testCase.studentMessage, evaluationCriteria: testCase.evaluationCriteria, note: 'System prompt resolved successfully; no live call made.' });
+      results.push({ id: testCase.id, moduleId: testCase.moduleId, mode: 'dry-run', studentMessage: testCase.studentMessage, evaluationCriteria: testCase.evaluationCriteria, activeCheckpointGuardrailApplied, note: 'System prompt resolved successfully; no live call made.' });
     }
   }
+
+  const truncatedCount = results.filter((r) => r.truncated === true).length;
 
   return {
     role: 'chat',
@@ -404,6 +419,7 @@ export async function runChat(args, caseIds) {
     liveBlockedReason: liveBlocked,
     modelInfo,
     totalCases: results.length,
+    truncatedCount,
     caseSelection: filtered ? { count: results.length, ids: caseIds } : null,
     results,
   };
@@ -513,6 +529,9 @@ async function main() {
     console.log(`Language-variant guard: ${summary.languageVariantGuard.total - summary.languageVariantGuard.failures}/${summary.languageVariantGuard.total} correct`);
     if (summary.stability) console.log(`Stability: ${summary.stability.unstableCount} unstable of ${summary.stability.rerunCases} rerun cases`);
     if (summary.runStatus === 'INCOMPLETE_BLOCKED') console.log('NOTE: this run is INCOMPLETE -- one or more cases never reached a completed evaluation. Do not read the metrics above as a model-quality result until re-run cleanly.');
+  } else if (args.role === 'chat' && args.live) {
+    console.log(`Truncated (stop_reason: max_tokens): ${summary.truncatedCount}/${summary.totalCases}`);
+    if (summary.truncatedCount > 0) console.log('NOTE: at least one response was cut off before it finished. Do not read a truncated response as a clean/finished tone or grounding result -- see its rawDiagnostic.');
   }
   console.log(`Raw output written to: ${path.relative(process.cwd(), outPath)}`);
 }

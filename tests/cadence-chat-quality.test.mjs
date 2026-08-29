@@ -116,9 +116,14 @@ function anthropicTextResponse(text) {
     /automatically produce a multi-section lecture/.test(BASE) && /automatic bullet list/.test(BASE) && /automatic follow-up exercise/.test(BASE));
   check('CONCISE DEFAULT', 'Explicitly allows expanding when the question genuinely requires it, INCLUDING when safety/referral guidance needs the room -- no rigid cutoff that would harm a necessary safety answer',
     /genuinely requires it/.test(BASE) && /safety or referral guidance needs the room/.test(BASE));
-  check('CONCISE DEFAULT', 'No character-count or token-count cutoff logic was introduced -- brevity is prompt guidance only, MAX_TOKENS_CAP is untouched at 768', (() => {
+  // The token ceiling itself (CHAT_MAX_TOKENS) is a separate, later
+  // concern -- see tests/cadence-chat-config.test.mjs. What this specific
+  // check protects is narrower and still true regardless of that value:
+  // brevity comes from prompt guidance, never from crude string-slicing
+  // the response text after the fact.
+  check('CONCISE DEFAULT', 'No character-count cutoff logic truncates the response text after the fact -- brevity is prompt guidance only', (() => {
     const src = readFileSync(path.join(ROOT, 'functions/_lib/cadence/ask-cadence.mjs'), 'utf8');
-    return /MAX_TOKENS_CAP\s*=\s*768/.test(src) && !/responseText\.length\s*[<>]/.test(src) && !/\.slice\(0,\s*\d+\)/.test(src.replace(/errBody\.slice/g, ''));
+    return !/responseText\.length\s*[<>]/.test(src) && !/\.slice\(0,\s*\d+\)/.test(src.replace(/errBody\.slice/g, ''));
   })());
 })();
 
