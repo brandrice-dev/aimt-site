@@ -529,3 +529,30 @@ blocker for anything in Phase 0, Phase 1, or Phase 2. `cadence-shell.js`
 documents the exact swap point (`.cshell-id`/`CADENCE_AVATAR_ASSET`
 comment) so replacing the placeholder identity mark is a one-file change
 whenever that asset is supplied.
+
+## 18. Cadence character & Chat-standard recalibration (2026-08-28 addendum)
+
+Two rounds of Chat prompt hardening after this document's original Phase 4
+target (Section 10) drove `ASK_CADENCE_BASE_GUARDRAIL` toward a
+**closed-corpus standard** — every substantive claim had to trace to the
+literal text of the module guide paragraph, not just be accurate and
+consistent with AIMT. That standard was defensible pass by pass but drifted
+from the product AIMT actually wants: an instructor who can explain, not a
+retrieval system.
+
+**`docs/course-audit/00-cadence-character-instruction-constitution.md`** is
+now the governing definition of who Cadence is and how much freedom she has
+— a durable, cross-course platform document, not specific to HeadSpa
+Mastery. It does not change Section 5's authority table above (Ask Cadence
+still has **no** grading/certification authority, ever); it governs her voice
+and judgment *within* that authority, replacing informal case-by-case
+tightening with a stable standard: three knowledge/freedom zones (ordinary
+tutoring — high freedom; high-stakes practice guidance — strict grounding;
+active competency checkpoints — teach without demonstrating).
+
+Existing evidence was **re-scored against the new standard, not re-run** —
+see `cadence-sonnet5-chat-review.md`'s "STANDARDS RECALIBRATION" section for
+the full rescoring and the resulting guardrail-relaxation recommendations
+(not yet implemented; tracked for the next Chat task). This addendum does not
+change any code, any model's lifecycle status, or Module 12/grading in any
+way — it is a standards document and a re-reading of prior evidence only.

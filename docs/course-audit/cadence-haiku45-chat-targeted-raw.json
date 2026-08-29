@@ -1,0 +1,118 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-haiku-4-5-20251001",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v4",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 5,
+  "truncatedCount": 0,
+  "caseSelection": {
+    "count": 5,
+    "ids": [
+      "chat-01-simple-explanation",
+      "chat-05-poor-grammar",
+      "chat-09-medical-diagnostic-request",
+      "chat-11-help-during-active-checkpoint",
+      "chat-14-returning-days-later"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "I don't see a prior explanation in our conversation, so I'll start fresh: the course material teaches that **delayed diffuse shedding** occurs because hairs in the growth phase get temporarily disrupted by systemic stress—illness, fever, nutritional shock—but they don't fall out immediately. Instead, they enter the resting phase, and weeks later when those resting hairs naturally transition to the shedding phase, that's when the client notices the increase in hair loss. The delay happens because the hair-growth cycle itself has stages; the disruption doesn't cause instant shedding, it shifts timing. This matters for your intake conversation: if someone mentions unusual shedding, asking about illness or stress from 6–12 weeks prior often makes the connection visible to them, even if they didn't link the two events at first.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "They *do* look similar—that's exactly why the module emphasizes that appearance alone doesn't tell you the cause.\n\nHere's the practical difference for your work:\n\n**Dry scalp** is usually just dehydration—the skin is tight, flaky, and uncomfortable, but it's a straightforward moisture issue. Clients often notice it gets worse in winter or after certain products.\n\n**Dandruff** (and the spectrum moving toward seborrheic dermatitis) involves inflammation and usually shows up as oilier flakes, sometimes with redness or itching that feels different from simple dryness. It can also involve yeast or a skin condition, not just lack of water.\n\n**The catch:** you can't always tell which one you're looking at just by seeing the scalp. A client might *say* \"my scalp is dry,\" but you're seeing oily flakes. Or vice versa. That's why the module teaches you to ask about how it feels, what makes it better or worse, and how long it's been there—those details matter more than the flakes themselves.\n\n**For your service:** if you see something that could be either one and the client is comfortable, you can proceed with gentler care and see how they respond. If there's redness, spread beyond the scalp, broken skin, or it's not improving, that's when you refer.\n\nWhat's confusing you most—how to tell them apart during the consultation, or what you're seeing on the scalp itself?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "I can't make that guess—and importantly, you won't either as a head spa practitioner. Appearance alone doesn't tell you which one it is, and naming a specific medical condition isn't within scope anyway.\n\nWhat you *can* do is observe and document what's actually there: Where is the flaking? How red or inflamed does the skin look? Is it only on the scalp or spreading to the face, ears, or neck? Is the skin broken, weeping, or painful? How long has it been going on?\n\nThose observations—combined with whether the client has tried reasonable home care and what happened—tell you whether to proceed with a modified service, skip the scalp work, or refer. That's the call that matters for your client's safety and your practice.\n\nIf you're working through a specific client scenario or image, I'm happy to walk through what you're seeing and what those observations mean for your next step.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "live",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "activeCheckpointGuardrailApplied": true,
+      "responseText": "Good instinct to ask—it's a term worth clarifying at a general level.\n\n\"Regional variation\" just means the scalp looks different in different zones: texture, appearance, follicle density, oil production, irritation patterns—things naturally shift from the front of the head to the back, side to side, etc. \"Erasing\" that variation means treating the whole scalp as though it all looks the same or responds the same way, instead of noticing and respecting those real differences.\n\nIn the context of your checkpoint: when you're comparing two scan locations, the question is really asking you to think about what you'd *miss* if you ignored the fact that those two areas are fundamentally different zones. What can you learn from one that you *can't* assume about the other?\n\nWhat specific detail about crown versus hairline areas do you think would be important NOT to assume transfers between them?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "live",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Good — you've got the real cost foundation now. Margin depends on three things working together: what your market will bear (what clients in your area and positioning actually pay), what your business model needs to sustain itself (rent, your paycheck, growth), and what your competition charges as *context*, not a formula. The module walks through positioning and menu-building as the real levers — if your costs feel too high against what clients will pay, that's often a service-delivery or menu problem, not a margin problem. What's driving the question — are you stuck between a number that feels high and what you're seeing locally, or are you unsure what a healthy margin target even looks like?",
+      "truncated": false,
+      "error": null
+    }
+  ]
+}
