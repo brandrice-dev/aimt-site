@@ -1,0 +1,66 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v4",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 2,
+  "truncatedCount": 0,
+  "caseSelection": {
+    "count": 2,
+    "ids": [
+      "chat-13-prior-thread-followup",
+      "chat-16-module12-post-assessment"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-13-prior-thread-followup",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Okay that makes sense. So if a client had TWO fevers a few months apart, could that make the shedding look kind of continuous instead of one clear episode?",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "Why can shedding appear months after an illness?"
+        },
+        {
+          "role": "assistant",
+          "content": "Because a major stressor like a fever can push a batch of follicles into the resting (telogen) phase early — the actual shedding shows up weeks to months later when those follicles release, not at the time of the illness itself."
+        }
+      ],
+      "evaluationCriteria": [
+        "references the prior turn's explanation rather than re-explaining from scratch",
+        "answers the actual follow-up (overlapping telogen waves)",
+        "no repetitive generic praise (\"great question!\") stacked on every turn"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Yes, that's a plausible pattern — two separate triggers spaced apart can push two different batches of follicles into shed phase at overlapping points, so instead of one distinct peak-and-taper episode, the client experiences what looks like a longer, continuous-feeling shed. Your service implication is the same either way: you're not diagnosing which trigger caused what, you're observing diffuse shedding without a scalp-condition pattern (no scarring, no patchiness, no scalp irritation) and proceeding with a gentle, soothing service while noting the history for referral context if it persists or worsens. The limit here is real — you can describe the mechanism as plausible, but you can't confirm it's actually two overlapping telogen releases versus something else going on; that determination belongs to a physician, not the service chair.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-16-module12-post-assessment",
+      "moduleId": 12,
+      "mode": "live",
+      "studentMessage": "Now that I'm certified, how do I keep my technique consistent once I'm seeing real clients regularly?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "warm, execution-focused tone matching Module 12's guide system",
+        "no diagnosis/prescribing",
+        "concrete, practical guidance",
+        "does not reference certification exam content/scores"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Consistency comes from treating your protocol like a spine, not a script — the sequence and checkpoints stay the same, but you adjust pressure and pacing to what each scalp tells you under your hands. Since you're moving into real clients now, the biggest test is week three or four, after the novelty wears off and it's tempting to rush steps when you're busy — that's exactly when you go back to your notes from training and re-check yourself against them. It helps to do a quick mental debrief after each service: what did you feel, what did you adjust, did you skip anything. Real repetition with real heads is what turns the certification into actual skill, so don't expect it to feel fully automatic for a while — that's normal, not a sign you did something wrong.",
+      "truncated": false,
+      "error": null
+    }
+  ]
+}
