@@ -45,7 +45,7 @@ import {
   CHECKPOINT_EVAL_INSTRUCTION,
   rubricVersionTag,
 } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
-import { getCadenceModelRegistry } from '../functions/_lib/cadence/model-config.mjs';
+import { getCadenceModelRegistry, resolveCadenceModel } from '../functions/_lib/cadence/model-config.mjs';
 import { loadCheckpointRubrics } from '../scripts/cadence-model-regression/load-checkpoint-rubrics.mjs';
 import { CHAT_DATASET } from '../scripts/cadence-model-regression/chat-dataset.mjs';
 import { GRADING_DATASET } from '../scripts/cadence-model-regression/grading-dataset.mjs';
@@ -287,8 +287,16 @@ await (async function harnessMirrorsProductionTests() {
   const registry = getCadenceModelRegistry();
   check('NO MODEL SWITCH', 'CADENCE_CHAT_MODEL candidate is still claude-sonnet-5 -- this task changed the prompt/context contract, not the model',
     registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5');
-  check('NO MODEL SWITCH', 'CADENCE_CHAT_MODEL.approved is still null -- Chat remains CANDIDATE, not promoted by this task',
-    registry.roles.CADENCE_CHAT_MODEL.approved === null);
+  // SUPERSEDED: this task pre-dates Chat's own promotion. "approved is
+  // still null" was correct to pin at the time this file was written --
+  // Chat has since completed its own independent live validation program
+  // and was promoted to APPROVED (registry v5, see
+  // tests/cadence-chat-promotion.test.mjs for the full contract). What
+  // must still hold from THIS file's original scope is only that the
+  // model identity itself (claude-sonnet-5) was not switched by the
+  // prompt/context work this file actually tests.
+  check('NO MODEL SWITCH', 'CADENCE_CHAT_MODEL still resolves claude-sonnet-5 -- this task changed the prompt/context contract, not the model identity',
+    registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && resolveCadenceModel({}, 'CADENCE_CHAT_MODEL').modelName === 'claude-sonnet-5');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -296,8 +304,8 @@ await (async function harnessMirrorsProductionTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function gradingUntouchedTests() {
   const registry = getCadenceModelRegistry();
-  check('GRADING UNTOUCHED', 'CADENCE_GRADING_MODEL remains APPROVED (claude-sonnet-5, registry v3) -- unchanged by this chat-only task',
-    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.version === 'cadence-model-registry-v4');
+  check('GRADING UNTOUCHED', 'CADENCE_GRADING_MODEL remains APPROVED (claude-sonnet-5) -- unchanged by this chat-only task, independent of whatever registry version is current',
+    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5');
   check('GRADING UNTOUCHED', 'GRADING_MAX_TOKENS is still exactly 4096',
     GRADING_MAX_TOKENS === 4096);
   check('GRADING UNTOUCHED', 'GRADING_EFFORT is still exactly "medium"',

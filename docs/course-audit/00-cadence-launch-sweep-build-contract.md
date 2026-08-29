@@ -589,3 +589,66 @@ grading/certification authority), does not alter the constitution (Section
 content/rubric — verified by test (`tests/cadence-chat-scenario-gate.test.mjs`).
 See `implementation-log.md` Step 117 and `cadence-sonnet5-chat-review.md`'s
 "NARROW ZONE B SCENARIO-FACT SAFETY GATE" section for full detail.
+
+## 20. Sonnet 5 approved for Chat; the classification-boundary product principle (2026-08-29 addendum)
+
+**`CADENCE_CHAT_MODEL` is now `APPROVED` for `claude-sonnet-5`** (registry
+`cadence-model-registry-v5`) alongside `CADENCE_GRADING_MODEL`, which
+remains `APPROVED` and untouched. This followed a live production-path QA
+run (`docs/course-audit/cadence-production-path-zone-b-live-qa.json`)
+exercising `askCadenceServerSide()` directly — the real, complete, gated
+server-side path, not the model-only regression harness — across the
+three cases the architecture exists to prove: ordinary tutoring, the
+historical chat-13 failure, and genuinely supported actionable guidance.
+Full evidence trail and promotion decision recorded on the
+`CADENCE_CHAT_MODEL` role itself
+(`functions/_lib/cadence/model-config.mjs`, `chatValidationEvidence`) and
+narrated in `implementation-log.md` Step 119 /
+`cadence-sonnet5-chat-review.md`'s "SONNET 5 APPROVED FOR CHAT" section.
+`claude-haiku-4-5-20251001` remains registered as a `CANDIDATE`-only
+comparison metadata entry — never approved, never active, never a
+fallback.
+
+**The product principle this live run made explicit, now locked as
+governing product direction:** Cadence is not classified once per student
+question. The Zone B boundary (Section 19) applies to what Cadence
+*actually says* on a given turn, not to the topic or intent of the
+student's question in the abstract.
+
+- **NORMAL EDUCATION** — free, natural tutoring. No verifier, no added
+  latency, no gating of any kind, for as long as the generated response
+  stays ordinary Zone A explanation.
+- **ACTIONABLE PRACTICE GUIDANCE** — the moment Cadence's own generated
+  response crosses into a proceed/modify/refer-style recommendation or
+  similar practice-authority conclusion, a quiet, narrow scenario-fact-
+  integrity check activates (Section 19). This can happen even when the
+  student's question was purely educational — QA A in the live run above
+  is the concrete proof: an educational question produced a response that
+  itself introduced actionable guidance, the gate correctly activated,
+  and the guidance was genuinely supported, so it was delivered
+  immediately. **A gate triggering here is correct behavior, not a
+  detection failure** — the boundary is content-based, not question-based.
+- **ACTIVE CHECKPOINT** — teach the underlying concept without performing
+  the competency (unchanged, Section 9 / `buildActiveCheckpointGuardrail`).
+
+This is the intended middle ground this entire launch-sweep has been
+building toward: not the safest possible chatbot, and not a robotic
+closed-corpus assistant, but the best possible instructor inside clearly
+defined, content-triggered safety boundaries.
+
+**Model promotion is not deployment.** Both Cadence roles are now
+`APPROVED` at the registry level. Production deployment remains **NOT
+AUTHORIZED**. Still pending: Cloudflare Pages production
+`ANTHROPIC_API_KEY`/config, production model bindings (including syncing
+`cadence-worker/worker.js`'s hand-kept `APPROVED_CHAT_MODEL` constant,
+deliberately left untouched by this addendum — it deploys separately via
+manual paste, never through this repo), the distributed rate-limiting
+launch decision, live deployed-endpoint QA, and the remaining items in
+`00-aimt-current-course-status.md`'s launch checklist.
+
+**Future observability (documented here as guidance, not built).** Once
+deployed, production monitoring should track: percentage of Chat turns
+triggering Zone B, verifier pass rate, regeneration rate, safe-fallback
+rate, average provider calls per turn, and latency/cost impact. This is
+operational guidance for the post-launch phase, not a requirement of this
+addendum.

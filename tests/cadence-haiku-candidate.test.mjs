@@ -46,6 +46,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
 const HAIKU_ID = 'claude-haiku-4-5-20251001';
+// PINNED, not "current": this file is about Haiku's addition as a Chat
+// comparison candidate at v4, where CADENCE_CHAT_MODEL had no approved
+// default yet. Chat has since completed its own independent live
+// validation program and was promoted to APPROVED (registry v5, Sonnet 5
+// -- see tests/cadence-chat-promotion.test.mjs), which is real and
+// intentional but out of this file's own historical scope. Explicitly
+// fetching v4 by name (rather than getCadenceModelRegistry()'s no-arg
+// "whatever is current" default) keeps this file's "Haiku is CANDIDATE-
+// only, chat still has no default" narrative stable and correct forever.
 const CURRENT_VERSION = 'cadence-model-registry-v4';
 
 const results = [];
@@ -53,7 +62,7 @@ function check(fixtureName, label, condition, detail) {
   results.push({ fixtureName, label, pass: !!condition, detail: detail || '' });
 }
 
-const registry = getCadenceModelRegistry();
+const registry = getCadenceModelRegistry(CURRENT_VERSION);
 
 async function withMockFetch(mockImpl, fn) {
   const original = globalThis.fetch;
@@ -88,10 +97,10 @@ function anthropicResponse(text, model) {
     !(registry.roles.CADENCE_GRADING_MODEL.additionalCandidates || []).includes(HAIKU_ID));
 
   let chatDefaultThrew = false;
-  try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL'); } catch (e) { chatDefaultThrew = e instanceof CadenceModelConfigError; }
-  check('HAIKU CANDIDATE ONLY', 'With no override, CADENCE_CHAT_MODEL still fails safe (adding a comparison candidate does not create a default)', chatDefaultThrew);
+  try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION }); } catch (e) { chatDefaultThrew = e instanceof CadenceModelConfigError; }
+  check('HAIKU CANDIDATE ONLY', 'With no override, CADENCE_CHAT_MODEL still fails safe at this pinned v4 snapshot (adding a comparison candidate does not create a default)', chatDefaultThrew);
 
-  const haikuOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: HAIKU_ID }, 'CADENCE_CHAT_MODEL');
+  const haikuOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: HAIKU_ID }, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION });
   check('HAIKU CANDIDATE ONLY', 'An explicit override naming Haiku resolves as CANDIDATE (source env-override-candidate), never APPROVED',
     haikuOverride.status === 'CANDIDATE' && haikuOverride.source === 'env-override-candidate' && haikuOverride.modelName === HAIKU_ID);
 })();
@@ -119,8 +128,8 @@ function anthropicResponse(text, model) {
   check('SONNET CHAT HISTORY', 'CADENCE_CHAT_MODEL.candidate is still exactly claude-sonnet-5 -- not replaced by Haiku', registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5');
   const v3 = getCadenceModelRegistry('cadence-model-registry-v3');
   check('SONNET CHAT HISTORY', 'Historical v3 registry remains fully intact and fetchable (rollback/history target)', v3.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && v3.roles.CADENCE_CHAT_MODEL.approved === null);
-  const sonnetOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: 'claude-sonnet-5' }, 'CADENCE_CHAT_MODEL');
-  check('SONNET CHAT HISTORY', 'Sonnet 5 remains fully usable as a Chat override candidate, unaffected by Haiku\'s addition', sonnetOverride.status === 'CANDIDATE' && sonnetOverride.modelName === 'claude-sonnet-5');
+  const sonnetOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: 'claude-sonnet-5' }, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION });
+  check('SONNET CHAT HISTORY', 'Sonnet 5 remains fully usable as a Chat override candidate at this pinned v4 snapshot, unaffected by Haiku\'s addition', sonnetOverride.status === 'CANDIDATE' && sonnetOverride.modelName === 'claude-sonnet-5');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

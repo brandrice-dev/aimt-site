@@ -43,8 +43,19 @@ function check(fixtureName, label, condition, detail) {
   results.push({ fixtureName, label, pass: !!condition, detail: detail || '' });
 }
 
+// PINNED, not "current": this file is a fixed historical snapshot of the
+// grading-only promotion moment (v4 -- the last registry version where
+// grading was APPROVED and chat was still CANDIDATE-only). Chat has
+// since completed its own independent live validation program and was
+// promoted to APPROVED in a later registry version (v5) -- see
+// tests/cadence-chat-promotion.test.mjs for the current, up-to-date
+// lifecycle contract. Explicitly fetching v4 by name here (rather than
+// getCadenceModelRegistry()'s no-arg "whatever is current" default)
+// keeps this file's entire "grading promoted, chat still separate"
+// narrative stable and correct forever, immune to later registry bumps
+// that are true but out of this file's own historical scope.
 const CURRENT_VERSION = 'cadence-model-registry-v4';
-const registry = getCadenceModelRegistry();
+const registry = getCadenceModelRegistry(CURRENT_VERSION);
 
 // ─────────────────────────────────────────────────────────────────────────
 // A. NEW REGISTRY VERSION, IMMUTABLE, HISTORY PRESERVED
@@ -78,41 +89,45 @@ const registry = getCadenceModelRegistry();
   check('GRADING APPROVED', 'claude-sonnet-5\'s registry entry has status APPROVED',
     registry.models['claude-sonnet-5'].status === 'APPROVED');
 
-  const resolved = resolveCadenceModel({}, 'CADENCE_GRADING_MODEL');
+  const resolved = resolveCadenceModel({}, 'CADENCE_GRADING_MODEL', { version: CURRENT_VERSION });
   check('GRADING APPROVED', 'resolveCadenceModel() with no override now resolves claude-sonnet-5 by default (the promotion actually taking functional effect, not just a data-shape change)',
     resolved.modelName === 'claude-sonnet-5' && resolved.status === 'APPROVED' && resolved.source === 'approved-default' && resolved.registryVersion === CURRENT_VERSION);
 
-  const status = describeCadenceModelStatus({});
+  const status = describeCadenceModelStatus({}, CURRENT_VERSION);
   check('GRADING APPROVED', 'describeCadenceModelStatus() reports CADENCE_GRADING_MODEL resolved with no fail-safe triggered',
     status.roles.CADENCE_GRADING_MODEL.failSafeTriggered === false && status.roles.CADENCE_GRADING_MODEL.approvedStatus === 'APPROVED');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// C. CHAT: STILL CANDIDATE, PROVABLY UNAFFECTED
+// C. CHAT: STILL CANDIDATE AT THIS PINNED SNAPSHOT (v4), PROVABLY UNAFFECTED
+// BY GRADING'S PROMOTION. Chat's OWN later promotion (v5) is real and
+// intentional -- see tests/cadence-chat-promotion.test.mjs -- this section
+// is pinned history, not a claim about the current registry.
 // ─────────────────────────────────────────────────────────────────────────
 (function chatUnaffectedTests() {
-  check('CHAT UNCHANGED', 'CADENCE_CHAT_MODEL.approved is still null',
+  check('CHAT UNCHANGED', 'CADENCE_CHAT_MODEL.approved is still null at this pinned v4 snapshot',
     registry.roles.CADENCE_CHAT_MODEL.approved === null);
   check('CHAT UNCHANGED', 'CADENCE_CHAT_MODEL.candidate is still claude-sonnet-5 (unchanged)',
     registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5');
 
   let chatFailSafe = null;
-  try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL'); } catch (e) { chatFailSafe = e; }
-  check('CHAT UNCHANGED', 'resolveCadenceModel(CADENCE_CHAT_MODEL) with no override still throws -- fails safe exactly as before grading\'s promotion',
+  try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION }); } catch (e) { chatFailSafe = e; }
+  check('CHAT UNCHANGED', 'resolveCadenceModel(CADENCE_CHAT_MODEL) with no override still throws at this pinned v4 snapshot -- fails safe exactly as before grading\'s promotion',
     chatFailSafe instanceof CadenceModelConfigError);
 
-  const status = describeCadenceModelStatus({});
-  check('CHAT UNCHANGED', 'describeCadenceModelStatus() still reports CADENCE_CHAT_MODEL failSafeTriggered:true',
+  const status = describeCadenceModelStatus({}, CURRENT_VERSION);
+  check('CHAT UNCHANGED', 'describeCadenceModelStatus() still reports CADENCE_CHAT_MODEL failSafeTriggered:true at this pinned v4 snapshot',
     status.roles.CADENCE_CHAT_MODEL.failSafeTriggered === true);
 
   // The one path that COULD have let grading's approval leak into chat:
   // claude-sonnet-5's global model status is now APPROVED. An env override
   // of CADENCE_CHAT_MODEL to claude-sonnet-5 must still resolve as a
   // CANDIDATE override for chat -- never APPROVED -- because chat's own
-  // role.approved is still null. This is the concrete, executable proof
-  // of "do not infer Chat approval from Grading approval."
-  const chatOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: 'claude-sonnet-5' }, 'CADENCE_CHAT_MODEL');
-  check('CHAT UNCHANGED', 'Overriding CADENCE_CHAT_MODEL with claude-sonnet-5 (globally APPROVED, via grading) still resolves status CANDIDATE / source env-override-candidate for chat',
+  // role.approved is still null at this pinned v4 snapshot. This is the
+  // concrete, executable proof of "do not infer Chat approval from
+  // Grading approval."
+  const chatOverride = resolveCadenceModel({ CADENCE_CHAT_MODEL: 'claude-sonnet-5' }, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION });
+  check('CHAT UNCHANGED', 'Overriding CADENCE_CHAT_MODEL with claude-sonnet-5 (globally APPROVED, via grading) still resolves status CANDIDATE / source env-override-candidate for chat at this pinned v4 snapshot',
     chatOverride.status === 'CANDIDATE' && chatOverride.source === 'env-override-candidate');
 })();
 
@@ -120,16 +135,16 @@ const registry = getCadenceModelRegistry();
 // D. ROLES REMAIN INDEPENDENTLY PROMOTABLE
 // ─────────────────────────────────────────────────────────────────────────
 (function independentPromotionTests() {
-  check('ROLE INDEPENDENCE', 'CADENCE_GRADING_MODEL.approved differs from CADENCE_CHAT_MODEL.approved (one is set, the other is null) -- promoting one role did not promote the other',
+  check('ROLE INDEPENDENCE', 'CADENCE_GRADING_MODEL.approved differs from CADENCE_CHAT_MODEL.approved at this pinned v4 snapshot (one is set, the other is null) -- promoting one role did not promote the other',
     registry.roles.CADENCE_GRADING_MODEL.approved !== registry.roles.CADENCE_CHAT_MODEL.approved);
   check('ROLE INDEPENDENCE', 'Both roles still independently expose their own approved/candidate fields (schema supports fully independent per-role promotion, not a shared flag)',
     'approved' in registry.roles.CADENCE_CHAT_MODEL && 'candidate' in registry.roles.CADENCE_CHAT_MODEL &&
     'approved' in registry.roles.CADENCE_GRADING_MODEL && 'candidate' in registry.roles.CADENCE_GRADING_MODEL);
-  check('ROLE INDEPENDENCE', 'resolveCadenceModel() resolves each role from that role\'s OWN roles[roleName] entry, never cross-reading the other role (grading resolves, chat still throws, in the same registry fetch)',
+  check('ROLE INDEPENDENCE', 'resolveCadenceModel() resolves each role from that role\'s OWN roles[roleName] entry, never cross-reading the other role (grading resolves, chat still throws at this pinned v4 snapshot, in the same registry fetch)',
     (() => {
       let gradingOk = false, chatThrew = false;
-      try { gradingOk = resolveCadenceModel({}, 'CADENCE_GRADING_MODEL').status === 'APPROVED'; } catch (_) {}
-      try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL'); } catch (_) { chatThrew = true; }
+      try { gradingOk = resolveCadenceModel({}, 'CADENCE_GRADING_MODEL', { version: CURRENT_VERSION }).status === 'APPROVED'; } catch (_) {}
+      try { resolveCadenceModel({}, 'CADENCE_CHAT_MODEL', { version: CURRENT_VERSION }); } catch (_) { chatThrew = true; }
       return gradingOk && chatThrew;
     })());
 })();

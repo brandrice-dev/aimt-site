@@ -56,35 +56,42 @@ function check(fixtureName, label, condition, detail) {
   const v2ForThisCheck = getCadenceModelRegistry('cadence-model-registry-v2');
   check('MODEL LIFECYCLE', 'Historical registry v2, fetched explicitly, still records claude-sonnet-5 as CANDIDATE for both roles -- unmutated by the v3 promotion', v2ForThisCheck.models['claude-sonnet-5'] && v2ForThisCheck.models['claude-sonnet-5'].status === 'CANDIDATE' && v2ForThisCheck.roles.CADENCE_CHAT_MODEL.approved === null && v2ForThisCheck.roles.CADENCE_GRADING_MODEL.approved === null);
 
-  // CADENCE_CHAT_MODEL: unchanged by the grading promotion -- still no
-  // approved default, still fails safe, exactly as before. Chat's own
-  // independent validation program (or lack of it) is asserted here so a
-  // future chat promotion is the only thing that can ever change these.
+  // CADENCE_CHAT_MODEL: SUPERSEDED premise (see
+  // tests/cadence-chat-promotion.test.mjs for the full, current lifecycle
+  // contract). This block originally asserted chat had no approved
+  // default -- correct at the time this file was written, before Chat
+  // completed its own independent live validation program (character
+  // constitution, full 16-case constitution-aligned run, trust/precision
+  // fixes, the Zone B scenario-fact safety gate, and decisive production-
+  // path live QA) and was promoted to APPROVED (registry v5). Chat is now
+  // in the same "promoted" state Grading already was when this file was
+  // last updated, so this block now mirrors the CADENCE_GRADING_MODEL
+  // block below -- the fail-safe MECHANISM itself (unregistered/LEGACY
+  // overrides still refused, empty override treated as absent) is still
+  // fully exercised and still must hold now that a default exists.
   {
     const role = 'CADENCE_CHAT_MODEL';
-    check('MODEL LIFECYCLE', `${role}: no APPROVED model is registered (chat has not completed its own independent validation program)`, registry.roles[role].approved === null);
+    check('MODEL LIFECYCLE', `${role}: APPROVED model registered is exactly claude-sonnet-5 (Chat's own independent validation program completed)`, registry.roles[role].approved === 'claude-sonnet-5');
 
-    let failSafeError = null;
-    try { resolveCadenceModel({}, role); } catch (e) { failSafeError = e; }
-    check('MODEL LIFECYCLE', `${role}: with nothing approved and no override, resolveCadenceModel() throws CadenceModelConfigError (fails safe, unaffected by grading's promotion)`, failSafeError instanceof CadenceModelConfigError);
+    const defaultResolution = resolveCadenceModel({}, role);
+    check('MODEL LIFECYCLE', `${role}: with no override, resolveCadenceModel() now succeeds by default, resolving the APPROVED model (this is Chat's promotion taking effect)`, defaultResolution.modelName === 'claude-sonnet-5' && defaultResolution.status === 'APPROVED' && defaultResolution.source === 'approved-default');
 
     let arbitraryError = null;
     try { resolveCadenceModel({ [role]: 'claude-totally-made-up-latest' }, role); } catch (e) { arbitraryError = e; }
-    check('MODEL LIFECYCLE', `${role}: an unregistered env override throws rather than silently falling back to anything`, arbitraryError instanceof CadenceModelConfigError);
+    check('MODEL LIFECYCLE', `${role}: an unregistered env override still throws even though a default now exists -- promotion never weakens misconfiguration handling`, arbitraryError instanceof CadenceModelConfigError);
 
     let legacyOverrideError = null;
     try { resolveCadenceModel({ [role]: 'claude-sonnet-4-20250514' }, role); } catch (e) { legacyOverrideError = e; }
-    check('MODEL LIFECYCLE', `${role}: an env override pointing at the LEGACY model is refused, not honored`, legacyOverrideError instanceof CadenceModelConfigError);
+    check('MODEL LIFECYCLE', `${role}: an env override pointing at the LEGACY model is still refused, not honored`, legacyOverrideError instanceof CadenceModelConfigError);
 
-    // claude-sonnet-5 is now globally APPROVED (for grading), but an env
-    // override of it for CHAT must still resolve as a CANDIDATE override,
-    // never APPROVED -- this is the concrete proof that grading's
-    // promotion cannot be inferred as chat approval through this path.
-    const candidateResolution = resolveCadenceModel({ [role]: 'claude-sonnet-5' }, role);
-    check('MODEL LIFECYCLE', `${role}: an env override of claude-sonnet-5 (APPROVED for grading, not chat) still resolves as a CANDIDATE override for chat, never APPROVED`, candidateResolution.modelName === 'claude-sonnet-5' && candidateResolution.status === 'CANDIDATE' && candidateResolution.source === 'env-override-candidate');
+    // Overriding chat to its own approved model reports as an
+    // approved-sourced resolution (role.approved === override) -- distinct
+    // from the default path only in `source`, never in modelName/status.
+    const ownApprovedOverride = resolveCadenceModel({ [role]: 'claude-sonnet-5' }, role);
+    check('MODEL LIFECYCLE', `${role}: an explicit override matching chat's own approved model resolves APPROVED, source env-override-approved`, ownApprovedOverride.status === 'APPROVED' && ownApprovedOverride.source === 'env-override-approved');
 
-    const emptyOverride = (() => { try { return resolveCadenceModel({ [role]: '' }, role); } catch (e) { return e; } })();
-    check('MODEL LIFECYCLE', `${role}: an empty env override is treated as absent (still fails safe, not silently accepted as "no override")`, emptyOverride instanceof CadenceModelConfigError);
+    const emptyOverride = resolveCadenceModel({ [role]: '' }, role);
+    check('MODEL LIFECYCLE', `${role}: an empty env override is treated as absent and now resolves the approved default (empty override = no override, and no override now legitimately succeeds for this role)`, emptyOverride.status === 'APPROVED' && emptyOverride.source === 'approved-default');
   }
 
   // CADENCE_GRADING_MODEL: promoted in registry v3. The default path now
@@ -128,7 +135,7 @@ function check(fixtureName, label, condition, detail) {
   check('MODEL LIFECYCLE', 'Historical registry v1 is preserved unmutated (approved the legacy model -- the exact state this correction fixed)', v1.roles.CADENCE_CHAT_MODEL.approved === 'claude-sonnet-4-20250514');
 
   const status = describeCadenceModelStatus({});
-  check('MODEL LIFECYCLE', 'describeCadenceModelStatus() reports failSafeTriggered:true for CADENCE_CHAT_MODEL (still nothing approved, no override given)', status.roles.CADENCE_CHAT_MODEL.failSafeTriggered === true);
+  check('MODEL LIFECYCLE', 'describeCadenceModelStatus() reports failSafeTriggered:false for CADENCE_CHAT_MODEL (now resolves the approved default, following Chat\'s own completed validation program) with the correct resolved model/status', status.roles.CADENCE_CHAT_MODEL.failSafeTriggered === false && status.roles.CADENCE_CHAT_MODEL.resolved && status.roles.CADENCE_CHAT_MODEL.resolved.modelName === 'claude-sonnet-5' && status.roles.CADENCE_CHAT_MODEL.resolved.status === 'APPROVED');
   check('MODEL LIFECYCLE', 'describeCadenceModelStatus() reports failSafeTriggered:false for CADENCE_GRADING_MODEL (now resolves the approved default) with the correct resolved model/status', status.roles.CADENCE_GRADING_MODEL.failSafeTriggered === false && status.roles.CADENCE_GRADING_MODEL.resolved && status.roles.CADENCE_GRADING_MODEL.resolved.modelName === 'claude-sonnet-5' && status.roles.CADENCE_GRADING_MODEL.resolved.status === 'APPROVED');
 })();
 
@@ -144,7 +151,17 @@ function check(fixtureName, label, condition, detail) {
 
   const registry = getCadenceModelRegistry();
   if (approvedMatch) {
-    check('WORKER DRIFT', "Worker's APPROVED_CHAT_MODEL matches the registry's CADENCE_CHAT_MODEL.approved (both null -- repo-internal only, cannot see what is actually deployed live)", approvedMatch[1] === 'null' && registry.roles.CADENCE_CHAT_MODEL.approved === null);
+    // Worker's APPROVED_CHAT_MODEL is a hand-kept mirror that deploys
+    // separately from this repo (CLAUDE.md: pasted into the Cloudflare
+    // Worker manually, never via Pages) -- it is EXPECTED to lag the
+    // registry the moment the registry changes, until someone
+    // deliberately syncs it as part of the actual production-deployment
+    // step. Chat's promotion to APPROVED (registry v5) intentionally does
+    // NOT touch this file (see the task's own "do not touch Cloudflare in
+    // this task" / "production model bindings" still-pending scope) -- so
+    // this now documents a known, correct, deliberate gap rather than
+    // asserting the two must match.
+    check('WORKER DRIFT', "Worker's APPROVED_CHAT_MODEL is still null, not yet synced to the registry's newly-APPROVED CADENCE_CHAT_MODEL -- expected: syncing the live Worker binding is explicitly pending production-deployment work, not part of the promotion decision itself", approvedMatch[1] === 'null' && registry.roles.CADENCE_CHAT_MODEL.approved === 'claude-sonnet-5');
   }
   if (candidateMatch) {
     check('WORKER DRIFT', "Worker's CANDIDATE_CHAT_MODEL matches the registry's CADENCE_CHAT_MODEL.candidate", candidateMatch[1] === registry.roles.CADENCE_CHAT_MODEL.candidate);
@@ -324,7 +341,7 @@ async function runIntegrationChecks() {
     // function also uses -- reset here so this new block doesn't shift the
     // exact budget the later concurrency/rate-limit tests depend on.
     _resetRateLimitBucketsForTests();
-    check('PHASE0 MODEL FAILSAFE', 'The model that graded it via the default path is the approved claude-sonnet-5 (registryVersion recorded, matching resolveCadenceModel()\'s own approved-default resolution -- lastGradedWith does not persist a `source` field, only provider/modelName/status/registryVersion)', !!graded && graded.modelName === 'claude-sonnet-5' && graded.status === 'APPROVED' && graded.registryVersion === 'cadence-model-registry-v4');
+    check('PHASE0 MODEL FAILSAFE', 'The model that graded it via the default path is the approved claude-sonnet-5 (registryVersion recorded, matching resolveCadenceModel()\'s own approved-default resolution -- lastGradedWith does not persist a `source` field, only provider/modelName/status/registryVersion)', !!graded && graded.modelName === 'claude-sonnet-5' && graded.status === 'APPROVED' && graded.registryVersion === 'cadence-model-registry-v5');
   }
 
   // --- Misconfigured (unregistered) override: still fails safe, and the
@@ -386,7 +403,7 @@ async function runIntegrationChecks() {
     );
     const graded = attemptRow.part3_conversation_state[realInterview.id].lastGradedWith;
     check('PHASE0 MODEL LOG', 'A successful evaluation records model provider/name/status/registryVersion internally', !!graded && graded.provider === 'anthropic' && typeof graded.modelName === 'string' && typeof graded.registryVersion === 'string');
-    check('PHASE0 MODEL LOG', 'The recorded status reflects that this ran on claude-sonnet-5, now APPROVED (registry v3), via an explicit override matching grading\'s own approved model', graded.status === 'APPROVED' && graded.modelName === 'claude-sonnet-5' && graded.registryVersion === 'cadence-model-registry-v4');
+    check('PHASE0 MODEL LOG', 'The recorded status reflects that this ran on claude-sonnet-5, APPROVED for grading, via an explicit override matching grading\'s own approved model', graded.status === 'APPROVED' && graded.modelName === 'claude-sonnet-5' && graded.registryVersion === 'cadence-model-registry-v5');
   }
 
   // --- One-follow-up rule preserved across the fixed flow ---

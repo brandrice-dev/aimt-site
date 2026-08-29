@@ -175,16 +175,29 @@ async function runLibChecks() {
     check('ASK CADENCE MODEL CALL', 'No active-checkpoint guardrail text is added when none is supplied', !capture.lastAnthropicBody.system.includes('unresolved required checkpoint'));
   }
 
-  // Fail-safe: no APPROVED model and no override -> throws, never silently runs
+  // Fail-safe: an unregistered model override -> throws, never silently runs
+  //
+  // SUPERSEDED premise (see tests/cadence-chat-promotion.test.mjs for the
+  // full, current lifecycle contract): this originally used "no override,
+  // nothing approved" as the fail-safe trigger. Chat has since completed
+  // its own independent live validation program and was promoted to
+  // APPROVED (registry v5) -- with no override, this env would now
+  // resolve successfully and this block (which runs with NO mocked
+  // fetch) would fall through to a REAL, live network call to the
+  // Anthropic API. Using an explicit unregistered override keeps
+  // resolveCadenceModel() throwing before askCadenceServerSide() ever
+  // reaches fetch -- the same fail-safe property this test exists to
+  // prove, reached the same way every other "misconfigured model" test
+  // in this suite now reaches it.
   {
-    const envNoOverride = { SUPABASE_URL: 'x', SUPABASE_SERVICE_ROLE_KEY: 'x', ANTHROPIC_API_KEY: 'x' };
+    const envBadOverride = { SUPABASE_URL: 'x', SUPABASE_SERVICE_ROLE_KEY: 'x', ANTHROPIC_API_KEY: 'x', CADENCE_CHAT_MODEL: 'claude-totally-unregistered-model' };
     let threw = false;
     try {
-      await askCadenceServerSide(envNoOverride, { guideSystemPrompt: 'x', boundedContext: [], studentMessage: 'hi' });
+      await askCadenceServerSide(envBadOverride, { guideSystemPrompt: 'x', boundedContext: [], studentMessage: 'hi' });
     } catch (e) {
       threw = e instanceof CadenceModelConfigError;
     }
-    check('ASK CADENCE FAIL-SAFE', 'With no APPROVED model and no override, Ask Cadence fails safe (throws) rather than silently running on a LEGACY model', threw);
+    check('ASK CADENCE FAIL-SAFE', 'With an unregistered model override, Ask Cadence fails safe (throws) rather than silently running on it, and never reaches fetch', threw);
   }
 }
 
@@ -395,7 +408,14 @@ async function runDatasetChecks() {
   check('REGRESSION DATASET', 'Every grading case resolves against the real, unmodified rubric text in headspa-mastery.html', allResolve);
 
   const registry = getCadenceModelRegistry();
-  check('MODEL REGISTRY', 'CADENCE_CHAT_MODEL has a registered CANDIDATE (claude-sonnet-5), not a silent APPROVED promotion -- chat has not completed its own independent live validation program', registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && registry.roles.CADENCE_CHAT_MODEL.approved === null);
+  // SUPERSEDED premise: this originally asserted Chat had only a
+  // CANDIDATE, no APPROVED default. Chat has since completed its own
+  // independent live validation program and was promoted to APPROVED
+  // (registry v5, see tests/cadence-chat-promotion.test.mjs for the full
+  // promotion-specific assertions) -- not a silent promotion, a new,
+  // dated registry version with recorded validation evidence, same
+  // discipline as grading's own promotion below.
+  check('MODEL REGISTRY', 'CADENCE_CHAT_MODEL is now APPROVED (claude-sonnet-5) via an explicit, evidenced promotion decision -- not a silent one', registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && registry.roles.CADENCE_CHAT_MODEL.approved === 'claude-sonnet-5');
   // CADENCE_GRADING_MODEL was promoted CANDIDATE -> APPROVED (registry v3)
   // via an explicit, recorded decision after completing its live grading
   // validation program -- see cadence-grading-promotion.test.mjs for the
@@ -403,7 +423,7 @@ async function runDatasetChecks() {
   // rollback path, role independence). This is deliberately NOT a silent
   // promotion: it is a new, dated registry version with recorded
   // validation evidence, and it never touched CADENCE_CHAT_MODEL.
-  check('MODEL REGISTRY', 'CADENCE_GRADING_MODEL is now APPROVED (claude-sonnet-5, registry v3) via an explicit, evidenced promotion decision -- not a silent one', registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.roles.CADENCE_GRADING_MODEL.candidate === 'claude-sonnet-5');
+  check('MODEL REGISTRY', 'CADENCE_GRADING_MODEL is now APPROVED (claude-sonnet-5) via an explicit, evidenced promotion decision -- not a silent one', registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.roles.CADENCE_GRADING_MODEL.candidate === 'claude-sonnet-5');
   check('MODEL REGISTRY', 'claude-sonnet-4-6 (the live Worker drift) is deliberately NOT registered', !registry.models['claude-sonnet-4-6']);
 }
 

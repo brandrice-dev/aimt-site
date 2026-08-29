@@ -334,17 +334,33 @@ async function runIntegrationChecks() {
     check('ENDPOINT AUTH', 'No thread or message is created for a rejected request', threadsStore.length === 0 && messagesStore.length === 0);
   }
 
-  // --- No approved/candidate model configured -> fails safe, same path as a network failure ---
+  // --- Misconfigured/unregistered model override -> fails safe, same path as a network failure ---
+  //
+  // SUPERSEDED premise (see tests/cadence-chat-promotion.test.mjs for the
+  // full, current lifecycle contract): this test originally exercised
+  // "nothing approved, no override" as the fail-safe trigger, because at
+  // the time CADENCE_CHAT_MODEL had no approved default at all. Chat has
+  // since completed its own independent live validation program and was
+  // promoted to APPROVED (registry v5) -- production's real call site
+  // (functions/_lib/cadence/ask-cadence.mjs's callAnthropicForAskCadence)
+  // always resolves against the CURRENT registry version with no way for
+  // env to pin an older one, so "nothing approved" is no longer a state
+  // production can actually be in. The underlying property this test
+  // exists to prove -- a misconfigured/unregistered model still fails
+  // safe (502, preserved, zero Anthropic calls) rather than silently
+  // running on anything unreviewed -- is still fully real and still
+  // reachable via an explicit override naming an unregistered model,
+  // which is what this now exercises.
   {
     _resetRateLimitBucketsForTests();
     const threadsStore = [];
     const messagesStore = [];
     const mock = buildMockFetch({ threadsStore, messagesStore, anthropicBehavior: 'pass' });
-    const envNoModel = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key' }; // no CADENCE_CHAT_MODEL override, nothing APPROVED
-    const res = await withMockFetch(mock.impl, () => onRequestPost({ request: makeRequest({ ...baseBody, requestId: 'req-nomodel' }), env: envNoModel }));
+    const envBadModel = { SUPABASE_URL: 'https://mock.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'mock-key', ANTHROPIC_API_KEY: 'mock-anthropic-key', CADENCE_CHAT_MODEL: 'claude-totally-unregistered-model' };
+    const res = await withMockFetch(mock.impl, () => onRequestPost({ request: makeRequest({ ...baseBody, requestId: 'req-nomodel' }), env: envBadModel }));
     const body = await res.json();
-    check('ENDPOINT MODEL FAILSAFE', 'With no approved/candidate-overridden model, the endpoint fails safe (502, preserved) rather than silently using the legacy generation', res.status === 502 && body.preserved === true);
-    check('ENDPOINT MODEL FAILSAFE', 'No legacy model string ever appears in an Anthropic request body', mock.getAnthropicCallCount() === 0);
+    check('ENDPOINT MODEL FAILSAFE', 'With an unregistered model override, the endpoint fails safe (502, preserved) rather than silently using it', res.status === 502 && body.preserved === true);
+    check('ENDPOINT MODEL FAILSAFE', 'No unregistered model string ever appears in an Anthropic request body', mock.getAnthropicCallCount() === 0);
   }
 }
 

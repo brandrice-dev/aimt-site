@@ -305,11 +305,21 @@ await (async function activeCheckpointActivationTests() {
 // J. GRADING REMAINS APPROVED / UNCHANGED
 // ─────────────────────────────────────────────────────────────────────────
 (function gradingUnchangedTests() {
+  // SUPERSEDED (see tests/cadence-chat-promotion.test.mjs for the full,
+  // current lifecycle contract): this task pre-dates Chat's own
+  // promotion. CADENCE_CHAT_MODEL.approved === null was the correct
+  // invariant to pin at the time this file was written, but Chat has
+  // since completed its own independent live validation program and was
+  // promoted to APPROVED (registry v5) -- that is expected, intentional,
+  // and covered in full by cadence-chat-promotion.test.mjs. What must
+  // still remain true at THIS file's original scope is only that
+  // Grading's own approval and execution config are untouched by
+  // whatever registry version is current.
   const registry = getCadenceModelRegistry();
-  check('GRADING UNCHANGED', 'CADENCE_GRADING_MODEL remains APPROVED (claude-sonnet-5, registry v3)',
-    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.version === 'cadence-model-registry-v4');
-  check('GRADING UNCHANGED', 'CADENCE_CHAT_MODEL remains CANDIDATE, still not promoted by this task',
-    registry.roles.CADENCE_CHAT_MODEL.approved === null && registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5');
+  check('GRADING UNCHANGED', 'CADENCE_GRADING_MODEL remains APPROVED (claude-sonnet-5), independent of whatever registry version is current',
+    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5');
+  check('GRADING UNCHANGED', 'CADENCE_CHAT_MODEL still resolves claude-sonnet-5 as its candidate slot (now also its approved default, since Chat\'s own later promotion -- see cadence-chat-promotion.test.mjs)',
+    registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5');
   check('GRADING UNCHANGED', 'GRADING_MAX_TOKENS is still exactly 4096', GRADING_MAX_TOKENS === 4096);
   check('GRADING UNCHANGED', 'GRADING_EFFORT is still exactly "medium"', GRADING_EFFORT === 'medium');
 })();

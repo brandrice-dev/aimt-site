@@ -288,9 +288,168 @@ const REGISTRY_VERSIONS = {
       },
     },
   },
+  // Current. CHAT PROMOTION: claude-sonnet-5 completed its own independent
+  // live validation program for CADENCE_CHAT_MODEL -- see the role entry
+  // below for the full evidence trail and
+  // docs/course-audit/cadence-sonnet5-chat-review.md for the narrative.
+  // This was not one clean first run: the character/instructor
+  // constitution was written specifically because two rounds of prompt
+  // hardening had drifted the acceptance standard toward closed-corpus
+  // precision; the full 16-case constitution-aligned run then surfaced two
+  // narrow trust/precision issues (chat-16 false continuity, chat-13
+  // invented numeric precision), fixed and live-confirmed; a further live
+  // retest of chat-13 surfaced a distinct invented-scenario-fact issue,
+  // fixed first with a prompt-only rule that a SUBSEQUENT live retest
+  // showed was insufficient on its own, which is why a structural,
+  // code-level Zone B scenario-fact gate exists at all
+  // (functions/_lib/cadence/scenario-fact-gate.mjs); and the decisive
+  // evidence for this promotion is production-path live QA that exercised
+  // the real gated askCadenceServerSide() endpoint directly (not the
+  // model-only regression harness), confirming ordinary tutoring stays
+  // free, the historical chat-13 failure is caught and corrected in
+  // place, and genuinely supported actionable guidance is delivered
+  // without being unnecessarily blocked or rewritten. CADENCE_GRADING_MODEL
+  // is completely untouched -- same approved model, same execution config,
+  // same evidence, copied forward unmodified, per this task's explicit
+  // "do not modify grading" instruction. claude-haiku-4-5-20251001 remains
+  // registered exactly as in v4 -- a CANDIDATE, never approved, never
+  // active, never a fallback; its own targeted regression was never run,
+  // so it is preserved as unevaluated historical/comparison metadata, not
+  // a rejected one.
+  'cadence-model-registry-v5': {
+    models: {
+      'claude-sonnet-4-20250514': {
+        status: 'LEGACY',
+        label: 'Claude Sonnet 4 (2025-05-14)',
+        note: 'AIMT\'s original Cadence generation. Superseded by Sonnet 5. Not eligible for new production approval without an explicit, recorded decision.',
+      },
+      'claude-sonnet-5': {
+        status: 'APPROVED',
+        label: 'Claude Sonnet 5',
+        note: 'APPROVED for both CADENCE_GRADING_MODEL and CADENCE_CHAT_MODEL. Grading completed its validation program first (see the CADENCE_GRADING_MODEL role entry below). Chat completed its own, independent, later live validation program -- the character/instructor constitution, a full 16-case constitution-aligned live run, continuity and high-stakes-numeric-precision fixes, and the narrow Zone B scenario-fact safety gate that closed the one issue a prompt-only correction could not fully resolve on its own (see the CADENCE_CHAT_MODEL role entry below for the exact validated execution configuration and evidence). These are two independent role-specific promotion decisions, not one shared approval -- resolveCadenceModel() still gates each role\'s own default resolution strictly on that role\'s own `approved` field.',
+      },
+      'claude-haiku-4-5-20251001': {
+        status: 'CANDIDATE',
+        label: 'Claude Haiku 4.5',
+        note: 'Registered as an alternate CADENCE_CHAT_MODEL comparison candidate after Sonnet 5 Chat\'s documented prompt/config stop-loss -- two rounds of prompt correction (see implementation-log.md Steps 110-111) left chat-01 (grounding) and chat-11 (active-checkpoint answer leakage) failing even against a fully healthy, 0-truncation execution config. This is a controlled A/B regression comparison, not a promotion and not a default: CADENCE_CHAT_MODEL.approved is null for both this model and claude-sonnet-5, and nothing resolves to Haiku without an explicit env/--model override naming it exactly. Pending its own live 5-case targeted regression against the identical prompt/context/guardrails Sonnet 5 was tested against -- see gradingValidationEvidence-style tracking once that run exists; no live evidence for this model exists yet as of this registry version. Preserved unchanged in this version as historical/comparison metadata following Sonnet 5\'s Chat approval below: Sonnet 5 completed its own live validation program and was approved on that basis, not because Haiku was evaluated and rejected -- Haiku\'s own targeted regression was simply never run. Still not approved, not active, not a fallback: nothing resolves to it without an explicit env/--model override naming it exactly, the identical fail-safe mechanism every other candidate goes through.',
+      },
+    },
+    roles: {
+      CADENCE_CHAT_MODEL: {
+        approved: 'claude-sonnet-5',
+        candidate: 'claude-sonnet-5',
+        // Preserved unchanged: Haiku remains a registered A/B comparison
+        // candidate, never approved, never active, never a fallback --
+        // resolveCadenceModel()'s no-override default resolves `approved`
+        // above (Sonnet 5) now that it is set; nothing resolves to Haiku
+        // without an explicit env/--model override naming it exactly, the
+        // same fail-safe mechanism every other candidate already goes
+        // through. No automatic "latest" model switching exists anywhere
+        // in this resolver.
+        additionalCandidates: ['claude-haiku-4-5-20251001'],
+        // Audit-trail record of the exact validated execution configuration
+        // this promotion was measured against. NOT the functional source
+        // of truth for runtime behavior -- that remains CHAT_MAX_TOKENS /
+        // CHAT_EFFORT (exported from functions/_lib/cadence/ask-cadence.mjs)
+        // and resolveChatExecutionConfig(), the same real call-site config
+        // production and the QA harness both actually use. This field
+        // exists so the promotion decision is traceable without
+        // cross-referencing docs/tests, and is covered by a test that
+        // cross-checks it against those real exported constants so the two
+        // can never silently diverge unnoticed.
+        chatExecutionConfig: {
+          thinking: { type: 'adaptive' },
+          outputConfigEffort: 'low',
+          maxTokens: 2048,
+        },
+        // Audit-trail record of the live validation evidence that
+        // authorized this promotion. File paths are relative to the repo
+        // root; each is committed, real evidence -- not reconstructed or
+        // summarized from memory. Deliberately records the actual,
+        // non-linear validation history (prompt corrections, a stop-loss,
+        // a structural gate added only after a prompt-only fix proved
+        // insufficient under live retest) rather than a single clean run.
+        chatValidationEvidence: {
+          promotionGate: 'Durable character/instructor constitution established; full 16-case constitution-aligned live run with strong product review and zero truncations; continuity and high-stakes numeric-precision trust issues found live and fixed; a further live-found scenario-fact-integrity issue closed with a structural (code-level, not prompt-only) Zone B safety gate; production-path live QA against the real gated server-side endpoint confirming (a) ordinary tutoring remains free and ungated, (b) the historical chat-13 failure is caught and corrected in place, (c) genuinely supported actionable guidance is delivered without unnecessary blocking or rewriting.',
+          gateResult: 'met',
+          evidence: [
+            {
+              name: 'Cadence Character & Instruction Constitution',
+              file: 'docs/course-audit/00-cadence-character-instruction-constitution.md',
+              note: 'Durable, cross-course instructor identity/personality/knowledge-zone authority -- the governing standard every run below is read against.',
+            },
+            {
+              name: 'Full constitution-aligned 16-case Chat run',
+              file: 'docs/course-audit/cadence-sonnet5-chat-full-constitution-raw.json',
+              completed: '16/16', truncatedCount: 0,
+              note: 'Strong instructor quality overall; checkpoint coaching acceptable; two narrow trust/precision issues identified (chat-16 false personal continuity, chat-13 invented high-stakes numeric precision) -- both fixed and covered by dedicated tests.',
+            },
+            {
+              name: 'Final two-case continuity/precision retest',
+              file: 'docs/course-audit/cadence-sonnet5-chat-final-two-case-raw.json',
+              note: 'chat-16: false-continuity issue confirmed resolved. chat-13: numeric-precision fix held, but revealed a distinct, remaining scenario-fact-integrity issue (invented absence of clinical findings stated as fact).',
+            },
+            {
+              name: 'Final single chat-13 retest (prompt-only fix)',
+              file: 'docs/course-audit/cadence-sonnet5-chat-final-case13-raw.json',
+              note: 'Confirmed the prompt-only scenario-fact-integrity rule was insufficient on its own -- the identical invented-finding violation reproduced with that rule already live in the system prompt. This is the finding that motivated the structural Zone B gate rather than a third prompt patch.',
+            },
+            {
+              name: 'Production-path Zone B live QA',
+              file: 'docs/course-audit/cadence-production-path-zone-b-live-qa.json',
+              note: 'The decisive system-level evidence: exercised askCadenceServerSide() directly -- the real, complete, gated production primitive -- not the model-only regression harness. QA A: the student\'s question was purely educational, but Cadence\'s own generated response introduced actionable practice guidance, so content-based Zone B detection correctly activated (triggered:true, unsupportedFactFound:false, outcome:original) -- this is correct behavior, not a failure; a turn stays ungated only while the GENERATED RESPONSE remains non-actionable Zone A tutoring, not merely because the student\'s question was educational in intent. QA B: the exact historical chat-13 scenario -- triggered:true, unsupportedFactFound:true, regenerated:true, outcome:regenerated; the gate caught the same invented-scenario-fact draft the two prior live retests reproduced, and the regenerated response reached the student instead, retaining natural Cadence teaching while converting the missing client facts into conditional/question-based reasoning. QA C: the student explicitly supplied the relevant facts -- triggered:true, unsupportedFactFound:false, regenerated:false, outcome:original; proves the gate does not become overprotective when guidance is genuinely supported.',
+            },
+          ],
+          narrative: 'docs/course-audit/cadence-sonnet5-chat-review.md',
+          decisionDate: '2026-08-29',
+        },
+      },
+      CADENCE_GRADING_MODEL: {
+        // Untouched, byte-for-byte, from v4 (and v3 before it) -- copied
+        // forward, never edited, per this task's explicit "do not modify
+        // grading" instruction. Covered by a test asserting this role is
+        // deep-equal to v4's.
+        approved: 'claude-sonnet-5',
+        candidate: 'claude-sonnet-5',
+        gradingExecutionConfig: {
+          thinking: { type: 'adaptive' },
+          outputConfigEffort: 'medium',
+          maxTokens: 4096,
+        },
+        gradingValidationEvidence: {
+          promotionGate: '>=95% overall agreement, 100% safety-critical, 100% injection/leakage guard, acceptable language-variant performance, zero parse failures, stable sentinel behavior',
+          gateResult: 'exceeded',
+          runs: [
+            {
+              name: 'Corrected targeted case retest (m2cp1-competent, repeat=3)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-m2cp1-targeted-repeat3-raw.json',
+              completed: '1/1', overallAgreement: 1, stable: true, infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Post-fixture 17-case sentinel',
+              file: 'docs/course-audit/cadence-sonnet5-grading-sentinel-post-fixture-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Full 72-case grading suite',
+              file: 'docs/course-audit/cadence-sonnet5-grading-full-post-fix-raw.json',
+              completed: '72/72', overallAgreement: 1, safetyCritical: '18/18', leakageGuard: '7/7', languageVariantGuard: '9/9', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Stability sentinel (repeated per-case)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-stability-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', unstableCount: 0, infraFailureCount: 0, parseFailureCount: 0,
+            },
+          ],
+          narrative: 'docs/course-audit/cadence-sonnet5-grading-regression.md',
+          decisionDate: '2026-08-28',
+        },
+      },
+    },
+  },
 };
 
-const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v4';
+const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v5';
 
 export function getCadenceModelRegistry(version = CURRENT_REGISTRY_VERSION) {
   const registry = REGISTRY_VERSIONS[version];
