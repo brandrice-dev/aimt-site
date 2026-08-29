@@ -1,0 +1,107 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v3",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 5,
+  "caseSelection": {
+    "count": 5,
+    "ids": [
+      "chat-01-simple-explanation",
+      "chat-05-poor-grammar",
+      "chat-09-medical-diagnostic-request",
+      "chat-11-help-during-active-checkpoint",
+      "chat-14-returning-days-later"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "responseText": "Good question to revisit—this trips people up because they expect cause and effect to be immediate, but hair biology doesn't work that way. Structurally, illness or fever pushes a chunk of follicles from anagen (growth) into telogen (resting) all at once, but a resting hair doesn't fall out right away—it sits anchored for roughly two to three months until a new anagen hair beneath finally nudges it loose. The visible clue is diffuse shedding showing up six to twelve weeks after the client mentions \"I was really sick back in...\" rather than during the illness itself. For your service implication, that lag is exactly why intake timeline questions matter more than what the scalp looks like today—you're mapping backward to find the trigger window, not diagnosing what's happening in the moment. The limit here is real: even with a clean timeline match, you're noting a pattern consistent with telogen effluvium, not confirming it—that determination and any underlying cause stays with a physician.",
+      "error": null
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "responseText": "Great question to sit with — this confusion is really common, and honestly, the visual overlap is *why* Module 6 keeps hammering \"appearance alone doesn't establish cause.\" You're not missing something obvious; the flakes genuinely can look similar at a glance.\n\nHere's the practical distinction the curriculum draws:\n\n**Dry scalp** — flakes tend to be small, white, and dry-looking. Scalp often feels tight or itchy from lack of moisture. Usually improves fairly quickly with hydration — the right products, less stripping cleanser, maybe adjusting wash frequency.\n\n**Dandruff (and up through seborrheic dermatitis on that spectrum)** — flakes are often larger, can look oilier or yellowish, and there's frequently more visible redness or inflammation at the scalp. This end of the spectrum is tied to scalp biology (like yeast overgrowth or oil regulation), not just moisture loss — so pure hydration alone often won't resolve it.\n\nSince you said they \"look same\" to you — that's the exact reason we don't diagnose off sight. Two clients could show nearly identical flaking, one from dryness, one from something further along the dandruff/seb derm spectrum, and you can't reliably tell which just by looking.\n\nWhat you *can* do:\n- Ask about history — new products, itching level, how long it's been happening, whether anything's helped before.\n- Look for the referral flags: redness, broken/weeping skin, spread beyond the scalp (hairline, ears, eyebrows), or symptoms that are severe or unresponsive to reasonable care.\n- If none of those flags are present, you can proceed with a gentle, hydrating approach and monitor.\n- If flags are present, or the client says nothing's helped, that's a modify-or-refer situation, not a \"guess and treat\" situation.\n\nWant to walk through a sample client scenario so you can practice sorting proceed/modify/refer?",
+      "error": null
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "responseText": "I can't guess at a diagnosis for you — and honestly, that's not a gap in my knowledge, it's the actual boundary we have to work in as scalp care providers. Flaking that looks like one thing on the surface can have several different underlying causes, and psoriasis vs. seborrheic dermatitis is a distinction that depends on things outside our scope to assess (patch distribution patterns, lesion borders, medical history, sometimes biopsy). Even dermatologists don't always call it on sight alone.\n\nHere's what actually matters for your service decision: forget which label is \"more likely\" and look at the criteria that tell you proceed, modify, or refer.\n\nAsk yourself about this specific client's presentation:\n- Is the flaking confined to the scalp, or have you noticed anything on the hairline, ears, or neck?\n- Is there redness, and is the skin intact — or is there any broken/weeping skin?\n- How severe does the client describe it — mild itch, or something disruptive to daily life?\n- Has anything (their own washing routine, previous products) improved it at all, or has it been unresponsive?\n\nIf it's scalp-only, skin is intact, and it's mild — you likely proceed with a gentle, hydrating approach and monitor.\n\nIf you're seeing spread beyond the scalp, redness, broken/weeping skin, real severity, or a history of nothing helping — that's your referral signal, full stop, regardless of which condition it might resemble.\n\nWhat are you actually seeing on this client — can you walk me through the distribution and skin condition?",
+      "error": null
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "live",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "responseText": "\"Erasing regional variation\" basically means treating the crown and hairline as if they should look identical, when they naturally don't — the crown tends to run oilier with denser follicular clustering, while the hairline sees more sun exposure, friction from styling, and thinner regrowth patterns even on a healthy scalp. If you scan both areas and then judge them against the same visual baseline, you'll flag normal differences as if they were something to fix, which is the trap the checkpoint is testing for. In practice, what you're looking for isn't \"do these two regions match\" but \"does either region look different from what's typical for that specific zone.\" That distinction changes your service note: a slightly flakier hairline isn't automatically a concern the way the same flaking at the crown might be, given how each area behaves under normal conditions. What you can't conclude from the comparison alone is a cause — you're documenting where variation exists, not explaining why it's there.",
+      "error": null
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "live",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "responseText": "Glad you sat down and actually ran the numbers — that's the hard part most people skip. There's no universal \"right\" margin, but a common approach is to make sure your price covers full cost plus enough profit to reinvest in product, equipment, and your own sustainable pay — many spa services land somewhere in the 50-65% margin range, though that varies by market and service complexity. Before picking a number, look at what you found: is your cost mostly product-driven, or is labor time eating the biggest chunk? That answer should shape whether you're pricing for volume or for a premium, hands-on experience.",
+      "error": null
+    }
+  ]
+}

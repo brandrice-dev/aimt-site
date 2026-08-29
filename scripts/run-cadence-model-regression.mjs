@@ -45,6 +45,7 @@ import { GRADING_DATASET } from './cadence-model-regression/grading-dataset.mjs'
 import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
 import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, GRADING_MAX_TOKENS, GRADING_EFFORT, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
+import { ASK_CADENCE_BASE_GUARDRAIL, buildActiveCheckpointGuardrail } from '../functions/_lib/cadence/ask-cadence.mjs';
 import { extractAnthropicTextSafe, fetchAnthropicMessages } from '../functions/_lib/cadence/anthropic-response.mjs';
 import { selectCases, CaseSelectionError } from './cadence-model-regression/case-selection.mjs';
 import { GRADING_SENTINEL_CASE_IDS, CHAT_TARGETED_CASE_IDS } from './cadence-model-regression/sentinel.mjs';
@@ -342,7 +343,7 @@ function summarizeGrading(results, { modelInfo, liveBlocked, live, filtered, cas
 
 // ── CHAT ROLE ──
 
-async function runChat(args, caseIds) {
+export async function runChat(args, caseIds) {
   const guideSystems = loadModuleGuideSystems();
   const tone = loadSharedToneConstants();
   const { selected, filtered } = selectCases(CHAT_DATASET, caseIds);
@@ -360,9 +361,22 @@ async function runChat(args, caseIds) {
 
   const results = [];
   for (const testCase of selected) {
-    const guideSystem = (guideSystems[String(testCase.moduleId)] || guideSystems['0']) +
+    // Mirrors askCadenceServerSide()'s exact system-prompt assembly
+    // (functions/_lib/cadence/ask-cadence.mjs), including the always-on
+    // base guardrail and, when the case simulates an active unresolved
+    // checkpoint, the server-verified active-checkpoint guardrail --
+    // previously this harness sent only the module guide + tone constants,
+    // silently omitting both guardrails, so a live case like
+    // chat-11-help-during-active-checkpoint (which sets activeCheckpointId
+    // in the dataset) was never actually testing the real production
+    // contract a student would receive.
+    let guideSystem = (guideSystems[String(testCase.moduleId)] || guideSystems['0']) +
       '\n' + tone.CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
-      '\n' + tone.CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
+      '\n' + tone.CADENCE_SELECTIVE_MEMORY_INSTRUCTION +
+      '\n\n' + ASK_CADENCE_BASE_GUARDRAIL;
+    if (testCase.activeCheckpointId && testCase.activeCheckpointStatus !== 'passed') {
+      guideSystem += '\n\n' + buildActiveCheckpointGuardrail(testCase.activeCheckpointId);
+    }
 
     if (args.live && !liveBlocked) {
       const messages = [...testCase.priorMessages, { role: 'user', content: testCase.studentMessage }];
