@@ -43,7 +43,7 @@ function check(fixtureName, label, condition, detail) {
   results.push({ fixtureName, label, pass: !!condition, detail: detail || '' });
 }
 
-const CURRENT_VERSION = 'cadence-model-registry-v3';
+const CURRENT_VERSION = 'cadence-model-registry-v4';
 const registry = getCadenceModelRegistry();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -162,7 +162,7 @@ const registry = getCadenceModelRegistry();
 // F. NO "LATEST" ALIAS, NO SILENT FALLBACK
 // ─────────────────────────────────────────────────────────────────────────
 (function noLatestNoFallbackTests() {
-  const allVersions = ['cadence-model-registry-v1', 'cadence-model-registry-v2', 'cadence-model-registry-v3'];
+  const allVersions = ['cadence-model-registry-v1', 'cadence-model-registry-v2', 'cadence-model-registry-v3', 'cadence-model-registry-v4'];
   for (const v of allVersions) {
     const r = getCadenceModelRegistry(v);
     check('NO LATEST / NO FALLBACK', `${v}: no registered model key contains "latest"`,

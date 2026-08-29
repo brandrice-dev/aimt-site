@@ -195,9 +195,102 @@ const REGISTRY_VERSIONS = {
       },
     },
   },
+
+  // Current. CHAT COMPARISON CANDIDATE ADDED: claude-haiku-4-5-20251001
+  // registered CANDIDATE for CADENCE_CHAT_MODEL, alongside (never
+  // replacing) claude-sonnet-5 -- Sonnet 5 keeps its `candidate` slot and
+  // its complete validation history unchanged below. Triggered by the
+  // documented Chat prompt/config stop-loss (see
+  // docs/course-audit/cadence-sonnet5-chat-review.md): two rounds of
+  // prompt/config correction left a final targeted control run with a
+  // fully healthy execution config (0/5 truncated) but two of five cases
+  // still behaviorally failing -- chat-01 (grounding: importing
+  // professional/physiological explanation not present in the supplied
+  // module guide content) and chat-11 (active-checkpoint answer leakage,
+  // despite the guardrail being verifiably active and an explicit
+  // higher-abstraction requirement). The stop-loss rule explicitly calls
+  // for evaluating a different Chat model candidate rather than a third
+  // prompt-patch round -- this version is that evaluation being set up,
+  // not its result. This is an A/B comparison registration, never a
+  // promotion: CADENCE_CHAT_MODEL.approved stays null for every model.
+  // CADENCE_GRADING_MODEL is completely untouched -- same approved model,
+  // same execution config, same evidence, copied forward unmodified.
+  'cadence-model-registry-v4': {
+    models: {
+      'claude-sonnet-4-20250514': {
+        status: 'LEGACY',
+        label: 'Claude Sonnet 4 (2025-05-14)',
+        note: 'AIMT\'s original Cadence generation. Superseded by Sonnet 5. Not eligible for new production approval without an explicit, recorded decision.',
+      },
+      'claude-sonnet-5': {
+        status: 'APPROVED',
+        label: 'Claude Sonnet 5',
+        note: 'APPROVED for CADENCE_GRADING_MODEL only, following its completed grading regression/validation program -- see the CADENCE_GRADING_MODEL role entry below for the exact validated execution configuration and evidence. Still CANDIDATE-only for CADENCE_CHAT_MODEL: chat has not completed its own independent live validation program (and has now hit its documented prompt/config stop-loss -- see claude-haiku-4-5-20251001 below), and grading approval must never be read as chat approval. Global "APPROVED" status here describes the model having reached that lifecycle stage for at least one role -- resolveCadenceModel() still gates each role\'s own default resolution strictly on that role\'s own `approved` field (CADENCE_CHAT_MODEL.approved is still null) and reports override status role-relatively, so chat cannot inherit this approval by any code path.',
+      },
+      'claude-haiku-4-5-20251001': {
+        status: 'CANDIDATE',
+        label: 'Claude Haiku 4.5',
+        note: 'Registered as an alternate CADENCE_CHAT_MODEL comparison candidate after Sonnet 5 Chat\'s documented prompt/config stop-loss -- two rounds of prompt correction (see implementation-log.md Steps 110-111) left chat-01 (grounding) and chat-11 (active-checkpoint answer leakage) failing even against a fully healthy, 0-truncation execution config. This is a controlled A/B regression comparison, not a promotion and not a default: CADENCE_CHAT_MODEL.approved is null for both this model and claude-sonnet-5, and nothing resolves to Haiku without an explicit env/--model override naming it exactly. Pending its own live 5-case targeted regression against the identical prompt/context/guardrails Sonnet 5 was tested against -- see gradingValidationEvidence-style tracking once that run exists; no live evidence for this model exists yet as of this registry version.',
+      },
+    },
+    roles: {
+      CADENCE_CHAT_MODEL: {
+        approved: null,
+        candidate: 'claude-sonnet-5',
+        // A/B comparison candidate, not a second "the" candidate and not
+        // a promotion path of its own -- resolveHarnessModel()'s
+        // no-explicit---model default still resolves `candidate` above
+        // (Sonnet 5) unchanged; Haiku is only ever reached via an
+        // explicit override naming it exactly, same fail-safe mechanism
+        // every other candidate use already goes through.
+        additionalCandidates: ['claude-haiku-4-5-20251001'],
+      },
+      CADENCE_GRADING_MODEL: {
+        // Untouched, byte-for-byte, from v3 -- copied forward, never
+        // edited, per this task's explicit "do not touch grading"
+        // instruction. Covered by a test asserting this role is
+        // deep-equal to v3's.
+        approved: 'claude-sonnet-5',
+        candidate: 'claude-sonnet-5',
+        gradingExecutionConfig: {
+          thinking: { type: 'adaptive' },
+          outputConfigEffort: 'medium',
+          maxTokens: 4096,
+        },
+        gradingValidationEvidence: {
+          promotionGate: '>=95% overall agreement, 100% safety-critical, 100% injection/leakage guard, acceptable language-variant performance, zero parse failures, stable sentinel behavior',
+          gateResult: 'exceeded',
+          runs: [
+            {
+              name: 'Corrected targeted case retest (m2cp1-competent, repeat=3)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-m2cp1-targeted-repeat3-raw.json',
+              completed: '1/1', overallAgreement: 1, stable: true, infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Post-fixture 17-case sentinel',
+              file: 'docs/course-audit/cadence-sonnet5-grading-sentinel-post-fixture-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Full 72-case grading suite',
+              file: 'docs/course-audit/cadence-sonnet5-grading-full-post-fix-raw.json',
+              completed: '72/72', overallAgreement: 1, safetyCritical: '18/18', leakageGuard: '7/7', languageVariantGuard: '9/9', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Stability sentinel (repeated per-case)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-stability-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', unstableCount: 0, infraFailureCount: 0, parseFailureCount: 0,
+            },
+          ],
+          narrative: 'docs/course-audit/cadence-sonnet5-grading-regression.md',
+          decisionDate: '2026-08-28',
+        },
+      },
+    },
+  },
 };
 
-const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v3';
+const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v4';
 
 export function getCadenceModelRegistry(version = CURRENT_REGISTRY_VERSION) {
   const registry = REGISTRY_VERSIONS[version];
@@ -299,11 +392,16 @@ export function describeCadenceModelStatus(env, version = CURRENT_REGISTRY_VERSI
     } catch (e) {
       failSafeError = e.message;
     }
+    const additionalCandidates = Array.isArray(roleConfig.additionalCandidates) ? roleConfig.additionalCandidates : [];
     roles[roleName] = {
       approved: roleConfig.approved,
       approvedStatus: roleConfig.approved ? (registry.models[roleConfig.approved] || {}).status || 'UNREGISTERED' : null,
       candidate: roleConfig.candidate,
       candidateStatus: roleConfig.candidate ? (registry.models[roleConfig.candidate] || {}).status || 'UNREGISTERED' : null,
+      // Additive, non-breaking: additional A/B comparison candidates
+      // beyond the primary `candidate` slot (e.g. Chat's Haiku 4.5
+      // comparison alongside Sonnet 5). Empty array when a role has none.
+      additionalCandidates: additionalCandidates.map((name) => ({ modelName: name, status: (registry.models[name] || {}).status || 'UNREGISTERED' })),
       resolved,
       failSafeTriggered: !!failSafeError,
       failSafeError,

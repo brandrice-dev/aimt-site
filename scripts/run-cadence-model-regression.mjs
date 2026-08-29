@@ -45,7 +45,7 @@ import { GRADING_DATASET } from './cadence-model-regression/grading-dataset.mjs'
 import { CHAT_DATASET } from './cadence-model-regression/chat-dataset.mjs';
 import { CHECKPOINT_EVAL_INSTRUCTION, CHECKPOINT_EVALUATION_JSON_SCHEMA, GRADING_MAX_TOKENS, GRADING_EFFORT, decideCheckpointOutcome, buildCheckpointEvaluationRecord, rubricVersionTag } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import { resolveCadenceModel, getCadenceModelRegistry, CadenceModelConfigError } from '../functions/_lib/cadence/model-config.mjs';
-import { ASK_CADENCE_BASE_GUARDRAIL, buildActiveCheckpointGuardrail, CHAT_MAX_TOKENS, CHAT_EFFORT } from '../functions/_lib/cadence/ask-cadence.mjs';
+import { ASK_CADENCE_BASE_GUARDRAIL, buildActiveCheckpointGuardrail, CHAT_MAX_TOKENS, CHAT_EFFORT, resolveChatExecutionConfig } from '../functions/_lib/cadence/ask-cadence.mjs';
 import { extractAnthropicTextSafe, fetchAnthropicMessages } from '../functions/_lib/cadence/anthropic-response.mjs';
 import { selectCases, CaseSelectionError } from './cadence-model-regression/case-selection.mjs';
 import { GRADING_SENTINEL_CASE_IDS, CHAT_TARGETED_CASE_IDS } from './cadence-model-regression/sentinel.mjs';
@@ -385,13 +385,20 @@ export async function runChat(args, caseIds) {
       let rawDiagnostic = null;
       let truncated = false;
       try {
-        // Mirrors callAnthropicForAskCadence()'s exact execution config
-        // (CHAT_MAX_TOKENS / CHAT_EFFORT / adaptive thinking) -- imported
-        // from ask-cadence.mjs, never a separate hardcoded copy, so the
-        // harness can never silently drift from what production sends.
+        // Mirrors callAnthropicForAskCadence()'s exact execution config,
+        // resolved per-model via the same resolveChatExecutionConfig()
+        // production uses (imported, never a separate hardcoded copy) --
+        // this is what lets --model=claude-haiku-4-5-20251001 run against
+        // the identical prompt/context/guardrails Sonnet 5 was tested
+        // against while only the model-specific API execution config
+        // differs, exactly as a valid A/B comparison requires. No routing:
+        // modelInfo.modelName was already resolved once, above, by the
+        // existing --model/registry mechanism -- this only decides what
+        // config accompanies whichever single model that already is.
+        const execConfig = resolveChatExecutionConfig(modelInfo.modelName);
         const { text, raw } = await callAnthropic({
           apiKey: process.env.ANTHROPIC_API_KEY, model: modelInfo.modelName, system: guideSystem, messages,
-          maxTokens: CHAT_MAX_TOKENS, outputConfig: { effort: CHAT_EFFORT }, thinking: { type: 'adaptive' },
+          maxTokens: execConfig.maxTokens, outputConfig: execConfig.outputConfig, thinking: execConfig.thinking,
         });
         responseText = text;
         truncated = !!(raw && raw.stop_reason === 'max_tokens');

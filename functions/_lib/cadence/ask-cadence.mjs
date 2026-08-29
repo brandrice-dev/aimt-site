@@ -100,6 +100,41 @@ export async function isModule12AssessmentActive(env, userId) {
 export const CHAT_MAX_TOKENS = 2048;
 export const CHAT_EFFORT = 'low';
 
+// Sonnet 5 and Haiku 4.5 do not share one generation-control API contract
+// -- Sonnet 5's adaptive-thinking/output_config.effort knobs are specific
+// to that generation, and sending them to Haiku 4.5 is not meaningful.
+// This resolver decides EXECUTION CONFIG for whichever single model was
+// already deterministically chosen upstream (by resolveCadenceModel()'s
+// approved-default or an explicit env/--model override) -- it never
+// chooses a model itself and is not consulted per-message; there is
+// exactly one resolution per call, matching the one-model-per-run
+// contract the Chat comparison harness uses. Throws for any model name
+// it doesn't explicitly know, rather than silently guessing a generation's
+// API contract -- the same fail-safe posture as resolveCadenceModel()
+// itself refusing an unregistered model.
+export function resolveChatExecutionConfig(modelName) {
+  if (modelName === 'claude-haiku-4-5-20251001') {
+    // Thinking deliberately OFF, no effort knob sent: Ask Cadence is a
+    // short, bounded conversational tutoring workload, and this
+    // comparison exists to test concise instruction-following and
+    // curriculum grounding, not extended reasoning. 1024 -- the smallest
+    // end of the suggested 1024-2048 range -- is well justified against
+    // the real Sonnet 5 chat evidence: the longest observed response
+    // (chat-05) is roughly 350-400 tokens, and with thinking off there is
+    // no competing token consumption the way there was for Sonnet, so a
+    // ~2.5-3x margin over the longest real response is ample headroom
+    // without inviting verbosity.
+    return { maxTokens: 1024, thinking: null, outputConfig: null };
+  }
+  if (modelName === 'claude-sonnet-5') {
+    return { maxTokens: CHAT_MAX_TOKENS, thinking: { type: 'adaptive' }, outputConfig: { effort: CHAT_EFFORT } };
+  }
+  throw new Error(
+    `No Chat execution config is registered for model "${modelName}" -- add one to resolveChatExecutionConfig() ` +
+    `in functions/_lib/cadence/ask-cadence.mjs before using it for Ask Cadence.`
+  );
+}
+
 // A mid-thought cutoff must never reach the student looking like a
 // finished answer. Distinct error class (matching this codebase's
 // AnthropicResponseError/AnthropicRequestError/CadenceModelConfigError
@@ -117,6 +152,10 @@ export class AskCadenceTruncationError extends Error {
 async function callAnthropicForAskCadence(env, { system, messages }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
   const modelInfo = resolveCadenceModel(env, 'CADENCE_CHAT_MODEL');
+  const execConfig = resolveChatExecutionConfig(modelInfo.modelName);
+  const body = { model: modelInfo.modelName, max_tokens: execConfig.maxTokens, system, messages };
+  if (execConfig.thinking) body.thinking = execConfig.thinking;
+  if (execConfig.outputConfig) body.output_config = execConfig.outputConfig;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -124,14 +163,7 @@ async function callAnthropicForAskCadence(env, { system, messages }) {
       'anthropic-version': '2023-06-01',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: modelInfo.modelName,
-      max_tokens: CHAT_MAX_TOKENS,
-      system,
-      messages,
-      thinking: { type: 'adaptive' },
-      output_config: { effort: CHAT_EFFORT },
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const errBody = await res.text().catch(() => '');

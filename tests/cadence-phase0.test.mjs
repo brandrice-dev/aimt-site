@@ -324,7 +324,7 @@ async function runIntegrationChecks() {
     // function also uses -- reset here so this new block doesn't shift the
     // exact budget the later concurrency/rate-limit tests depend on.
     _resetRateLimitBucketsForTests();
-    check('PHASE0 MODEL FAILSAFE', 'The model that graded it via the default path is the approved claude-sonnet-5 (registryVersion recorded, matching resolveCadenceModel()\'s own approved-default resolution -- lastGradedWith does not persist a `source` field, only provider/modelName/status/registryVersion)', !!graded && graded.modelName === 'claude-sonnet-5' && graded.status === 'APPROVED' && graded.registryVersion === 'cadence-model-registry-v3');
+    check('PHASE0 MODEL FAILSAFE', 'The model that graded it via the default path is the approved claude-sonnet-5 (registryVersion recorded, matching resolveCadenceModel()\'s own approved-default resolution -- lastGradedWith does not persist a `source` field, only provider/modelName/status/registryVersion)', !!graded && graded.modelName === 'claude-sonnet-5' && graded.status === 'APPROVED' && graded.registryVersion === 'cadence-model-registry-v4');
   }
 
   // --- Misconfigured (unregistered) override: still fails safe, and the
@@ -386,7 +386,7 @@ async function runIntegrationChecks() {
     );
     const graded = attemptRow.part3_conversation_state[realInterview.id].lastGradedWith;
     check('PHASE0 MODEL LOG', 'A successful evaluation records model provider/name/status/registryVersion internally', !!graded && graded.provider === 'anthropic' && typeof graded.modelName === 'string' && typeof graded.registryVersion === 'string');
-    check('PHASE0 MODEL LOG', 'The recorded status reflects that this ran on claude-sonnet-5, now APPROVED (registry v3), via an explicit override matching grading\'s own approved model', graded.status === 'APPROVED' && graded.modelName === 'claude-sonnet-5' && graded.registryVersion === 'cadence-model-registry-v3');
+    check('PHASE0 MODEL LOG', 'The recorded status reflects that this ran on claude-sonnet-5, now APPROVED (registry v3), via an explicit override matching grading\'s own approved model', graded.status === 'APPROVED' && graded.modelName === 'claude-sonnet-5' && graded.registryVersion === 'cadence-model-registry-v4');
   }
 
   // --- One-follow-up rule preserved across the fixed flow ---

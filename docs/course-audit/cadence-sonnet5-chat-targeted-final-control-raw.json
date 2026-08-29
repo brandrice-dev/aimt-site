@@ -1,0 +1,118 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v3",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 5,
+  "truncatedCount": 0,
+  "caseSelection": {
+    "count": 5,
+    "ids": [
+      "chat-01-simple-explanation",
+      "chat-05-poor-grammar",
+      "chat-09-medical-diagnostic-request",
+      "chat-11-help-during-active-checkpoint",
+      "chat-14-returning-days-later"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "The delayed timing comes from the growth cycle itself: illness or major stress pushes a batch of follicles into the resting phase, but those hairs don't actually release right away — they sit through the resting phase before shedding. So the visible clue (a noticeable increase in shed hair) shows up weeks after the triggering event, not during it, which is exactly why clients often can't connect the two on their own. Service implication: when a client mentions increased shedding, it's worth asking about their health and stress history from a few months back, not just recent weeks. The limit here is important — timing alone tells you there was likely a trigger, but it doesn't tell you what that trigger was, so it's a pattern to note and possibly refer out, not something to diagnose.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Fair confusion — they can look really similar on the surface, and that's exactly why the course doesn't have us rely on appearance alone to sort them out.\n\nWhat matters more than \"which one is it\" is what you actually observe and how the scalp responds to reasonable care. A few things to look at:\n\n- Is the flaking/redness confined to the scalp, or is it spreading onto the hairline, ears, face?\n- Is there any broken or weeping skin, or significant redness beyond mild irritation?\n- How severe are the symptoms — mild and manageable, or intense discomfort/itching?\n- Does it improve with basic scalp care over a reasonable time, or stay the same/worsen?\n\nIf it's mild, contained to the scalp, and responds to gentle care — you can proceed or modify your service approach. If you're seeing spread beyond the scalp plus redness, broken/weeping skin, severe symptoms, or no improvement despite reasonable care — that's a referral situation, not something to try to identify or treat yourself.\n\nSo rather than trying to name which condition it is, ask: what am I observing, and does it fit the proceed/modify/refer framework? What are you seeing on your client that's making you unsure right now?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "I can't guess between those two — naming a specific condition isn't something I (or you, in the chair) can do based on appearance, and the course doesn't have me making that call either way.\n\nWhat actually matters for your decision is what you can observe: Is the flaking confined to the scalp, or is it showing up elsewhere on the body? Is there redness, broken or weeping skin, or anything severe? Has reasonable care made any difference, or is it unchanged? Those observations tell you whether to proceed, modify your service, or refer out — not a label for what it \"is.\"\n\nWhat are you actually seeing on this client right now?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "live",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "activeCheckpointGuardrailApplied": true,
+      "responseText": "\"Erasing regional variation\" refers to a general documentation error: treating a whole scalp as if it looks uniform everywhere, when in reality different regions can show different amounts of oil, flaking, redness, or density just from normal variation in follicle spacing, sun exposure, styling habits, or sebum distribution. If you only note one general impression instead of comparing region to region, you lose real information that could matter for service adjustment.\n\nSo the guiding question for you: when you compare your two images, what specific differences do you actually see between them, and what would get lost if you described the scalp with only one overall statement instead of naming those differences separately?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "live",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "The course doesn't give a specific margin percentage to target, so I won't hand you a number that isn't actually in the curriculum. Instead, think about it through the decision principle: your margin needs to cover your business's actual sustainability — profit, reinvestment, your own pay beyond just labor time, and cushion for slow weeks — not just \"cost plus a little extra.\" It's also worth checking your margin against your positioning: a premium, high-touch service can carry a different margin structure than a fast, high-volume one, but that's a business-model choice, not a formula. If you want a real target percentage for your specific situation, that's a conversation for a business advisor or accountant who can see your full numbers.",
+      "truncated": false,
+      "error": null
+    }
+  ]
+}

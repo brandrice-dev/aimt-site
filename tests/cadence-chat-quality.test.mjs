@@ -276,7 +276,7 @@ await (async function harnessMirrorsProductionTests() {
 (function gradingUntouchedTests() {
   const registry = getCadenceModelRegistry();
   check('GRADING UNTOUCHED', 'CADENCE_GRADING_MODEL remains APPROVED (claude-sonnet-5, registry v3) -- unchanged by this chat-only task',
-    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.version === 'cadence-model-registry-v3');
+    registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.version === 'cadence-model-registry-v4');
   check('GRADING UNTOUCHED', 'GRADING_MAX_TOKENS is still exactly 4096',
     GRADING_MAX_TOKENS === 4096);
   check('GRADING UNTOUCHED', 'GRADING_EFFORT is still exactly "medium"',
