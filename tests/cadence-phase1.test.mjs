@@ -61,7 +61,18 @@ function check(fixtureName, label, condition, detail) {
 // ─────────────────────────────────────────────────────────────────────────
 (function turnLockUsageStatic() {
   const src = readFileSync(path.join(ROOT, 'functions/api/certification/submit-interview-turn.js'), 'utf8');
-  check('TURN LOCK USAGE', 'Imports isTurnLockActive/claimTurnLock/releaseTurnLock from the shared module', /import\s*\{\s*isTurnLockActive,\s*claimTurnLock,\s*releaseTurnLock\s*\}\s*from\s*['"]\.\.\/\.\.\/_lib\/cadence\/turn-lock\.mjs['"]/.test(src));
+  // Module 12 concurrency hardening (course-audit-build) extended this
+  // import with casPatchSucceeded/jsonLockFieldFilterKey (the atomic
+  // compare-and-swap helpers that closed this file's own documented TOCTOU
+  // gap between the lock-claim read and PATCH) -- match the import line
+  // itself, then require all five shared-module names within it, order-
+  // independent, rather than one frozen literal string.
+  {
+    const importLineMatch = src.match(/import\s*\{([^}]*)\}\s*from\s*['"]\.\.\/\.\.\/_lib\/cadence\/turn-lock\.mjs['"]/);
+    const importedNames = importLineMatch ? importLineMatch[1].split(',').map((s) => s.trim()) : [];
+    const requiredNames = ['isTurnLockActive', 'claimTurnLock', 'releaseTurnLock', 'casPatchSucceeded', 'jsonLockFieldFilterKey'];
+    check('TURN LOCK USAGE', 'Imports isTurnLockActive/claimTurnLock/releaseTurnLock plus the atomic CAS helpers from the shared module', requiredNames.every((name) => importedNames.includes(name)));
+  }
   check('TURN LOCK USAGE', 'No longer defines its own local isLockActive/LOCK_TIMEOUT_MS (would be duplicated logic)', !/function isLockActive/.test(src) && !/const LOCK_TIMEOUT_MS/.test(src));
   check('TURN LOCK USAGE', 'Uses the imported functions at the actual lock check/claim/release points', /isTurnLockActive\(state\.turnInFlightAt\)/.test(src) && /claimTurnLock\(\)/.test(src) && (src.match(/releaseTurnLock\(\)/g) || []).length >= 3);
 })();

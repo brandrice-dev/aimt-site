@@ -21,6 +21,7 @@ import {
   interviewEvaluatorFlagsFromState,
 } from '../../_lib/certification/scoring.mjs';
 import { buildRemediationAssignments, collectWeakCompetencyAreas } from '../../_lib/certification/attempt-ladder.mjs';
+import { casPatchSucceeded } from '../../_lib/cadence/turn-lock.mjs';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -90,8 +91,16 @@ export async function onRequestPost(context) {
   });
 
   const nowIso = new Date().toISOString();
-  const update = await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
+  // Atomically claim the part3_locked -> scored transition: this PATCH only
+  // applies if status still equals what we read above, so two concurrent
+  // finalize-assessment calls for the same attempt (a double-click, a
+  // client retry) can never both "win" -- one commits the decision, the
+  // other's conditional filter matches zero rows and is told to defer to
+  // the winner below, rather than each inserting its own remediation rows.
+  const finalizeParams = new URLSearchParams({ id: `eq.${attemptId}`, status: 'eq.part3_locked' });
+  const update = await supabaseRest(env, `certification_attempts?${finalizeParams}`, {
     method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
     body: JSON.stringify({
       status: 'scored',
       overall_score: decisionResult.overallPercent,
@@ -101,6 +110,22 @@ export async function onRequestPost(context) {
     }),
   });
   if (!update.ok) return json({ error: 'Could not finalize the assessment.' }, 500);
+  if (!casPatchSucceeded(update)) {
+    // A concurrent finalize-assessment call already won this exact
+    // transition between our read above and this write. Both requests
+    // recompute the identical decision from the same already-locked
+    // component data (never trusting a client-submitted score), so there is
+    // nothing to reconcile -- re-read the now-authoritative row instead of
+    // risking a duplicate remediation-assignment insert below.
+    const refetchParams = new URLSearchParams({ select: 'certification_decision,overall_score', id: `eq.${attemptId}`, user_id: `eq.${user.id}`, limit: '1' });
+    const refetch = await supabaseRest(env, `certification_attempts?${refetchParams}`);
+    const row = refetch.ok && Array.isArray(refetch.body) && refetch.body.length ? refetch.body[0] : null;
+    return json({
+      alreadyScored: true,
+      decision: row ? row.certification_decision : decisionResult.decision,
+      overallScore: row ? row.overall_score : decisionResult.overallPercent,
+    });
+  }
 
   if (decisionResult.decision === 'not_yet_passed') {
     // Grouped, competency-level recommended-review areas — never one row per

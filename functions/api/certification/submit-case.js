@@ -23,6 +23,7 @@ import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { scoreCaseSubmission, computeAppliedCasesComponent } from '../../_lib/certification/scoring.mjs';
 import { evaluateStructuredCasePart } from '../../_lib/certification/cadence-grader.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
+import { isTurnLockActive, claimTurnLock, releaseTurnLock, casPatchSucceeded, jsonLockFieldFilterKey } from '../../_lib/cadence/turn-lock.mjs';
 
 // A full attempt only ever submits 4 cases; generous on purpose so a
 // legitimate retry after a network hiccup is never mistaken for abuse.
@@ -66,9 +67,36 @@ export async function onRequestPost(context) {
     return json({ locked: true, alreadySubmitted: true, caseScore: caseState[caseId].score });
   }
 
+  const priorInFlight = (caseState[caseId] && caseState[caseId].evalInFlightAt) || null;
+  if (isTurnLockActive(priorInFlight)) {
+    return json({ error: 'This case is already being evaluated. Please wait a moment.', inFlight: true }, 409);
+  }
+
   const banks = getProductionBanks();
   const caseDef = banks.caseBank.find((c) => c.id === caseId);
   if (!caseDef) return json({ error: 'Assessment content unavailable.' }, 503);
+
+  // Claim the in-flight lock atomically before calling Cadence: the
+  // conditional filter below only applies this PATCH if evalInFlightAt still
+  // equals what we just read, so a near-simultaneous second request for the
+  // SAME case either sees the lock on its own read above, or -- if it raced
+  // past that read -- loses this compare-and-swap, rather than both
+  // requests reaching Cadence and racing to write the result.
+  const claimedCaseEntry = { ...(caseState[caseId] || { submitted: false, responses: {} }), evalInFlightAt: claimTurnLock() };
+  const claimParams = new URLSearchParams({ id: `eq.${attemptId}` });
+  claimParams.set(
+    jsonLockFieldFilterKey('part2_case_state', caseId, 'evalInFlightAt'),
+    priorInFlight ? `eq.${priorInFlight}` : 'is.null'
+  );
+  const claim = await supabaseRest(env, `certification_attempts?${claimParams}`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({ part2_case_state: { ...caseState, [caseId]: claimedCaseEntry } }),
+  });
+  if (!casPatchSucceeded(claim)) {
+    return json({ error: 'This case is already being evaluated. Please wait a moment.', inFlight: true }, 409);
+  }
+  caseState[caseId] = claimedCaseEntry;
 
   const finalResponses = { ...((caseState[caseId] && caseState[caseId].responses) || {}), ...(responses || {}) };
 
@@ -85,8 +113,9 @@ export async function onRequestPost(context) {
       }
     }
   } catch (e) {
-    // Preserve the student's submitted response; do not lock or falsely score on evaluator failure.
-    caseState[caseId] = { submitted: false, responses: finalResponses };
+    // Preserve the student's submitted response and release the lock; do
+    // not lock or falsely score on evaluator failure.
+    caseState[caseId] = { submitted: false, responses: finalResponses, evalInFlightAt: releaseTurnLock() };
     await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
       method: 'PATCH',
       body: JSON.stringify({ part2_case_state: caseState }),
@@ -99,7 +128,7 @@ export async function onRequestPost(context) {
   const lastGradedWith = lastEvaluated
     ? { provider: lastEvaluated.modelInfo.provider, modelName: lastEvaluated.modelInfo.modelName, status: lastEvaluated.modelInfo.status, registryVersion: lastEvaluated.modelInfo.registryVersion, at: new Date().toISOString() }
     : null;
-  caseState[caseId] = { submitted: true, responses: finalResponses, score: scored.percent, evidencePoints: scored.evidencePoints, submittedAt: new Date().toISOString(), lastGradedWith };
+  caseState[caseId] = { submitted: true, responses: finalResponses, score: scored.percent, evidencePoints: scored.evidencePoints, submittedAt: new Date().toISOString(), lastGradedWith, evalInFlightAt: releaseTurnLock() };
 
   const allSelected = attempt.part2_selected_ids || [];
   const allSubmitted = allSelected.every((id) => caseState[id] && caseState[id].submitted);

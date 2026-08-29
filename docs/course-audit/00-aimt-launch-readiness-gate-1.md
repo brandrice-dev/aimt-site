@@ -26,6 +26,17 @@ dedicated follow-up task, per this task's explicit boundaries (see
 > blockers remain as of this update.** This document's own findings and
 > history are left otherwise unmodified.
 
+> **Update (2026-08-29, Step 123):** P1-2 (Module 12 Part II had no
+> in-flight lock), P2-4 (Part III's lock was a non-atomic TOCTOU claim), and
+> P2-5 (`finalize-assessment.js` could insert duplicate remediation rows
+> under a concurrent double-finalize) have all since been closed under a
+> separate, owner-authorized follow-up task (Module 12 Certification
+> Concurrency Hardening). See the "RESOLUTION" notes under Section 4's P1-2
+> finding and this section's P2-4/P2-5 findings below, and
+> `implementation-log.md`'s Step 123 entry for full detail. **No P0 or P1
+> blockers remain from this document's findings as of this update.** This
+> document's own findings and history are left otherwise unmodified.
+
 ---
 
 ## 1. What actually runs in production today — three request paths, verified by reading the live code
@@ -462,6 +473,38 @@ in the codebase.**
   trivially to a second call site; a concurrency test firing two
   `submit-case` requests for the same case and asserting only one
   Anthropic call occurs.
+
+**RESOLUTION (2026-08-29, Step 123, owner-authorized) — P1-2 CLOSED.**
+`submit-case.js` now claims a per-case in-flight lock
+(`part2_case_state[caseId].evalInFlightAt`, same naming convention as
+Part III's `turnInFlightAt`) *before* calling Cadence, exactly as this
+finding's own "recommended smallest fix" specified — but the claim itself
+was hardened beyond a plain copy of Part III's read-then-write pattern:
+`functions/_lib/cadence/turn-lock.mjs` gained two small helpers,
+`jsonLockFieldFilterKey()` and `casPatchSucceeded()`, that turn the claim
+PATCH into a genuine PostgREST conditional filter
+(`part2_case_state->{caseId}->>evalInFlightAt=is.null` or
+`=eq.<the-timestamp-just-read>`) — a real Postgres `UPDATE ... WHERE`
+compare-and-swap, not an in-memory isolate lock. A losing concurrent
+request's conditional PATCH matches zero rows and is rejected `409
+inFlight:true` *before* Cadence is ever called — the race window this
+finding described (spanning the entire evaluation loop) is closed
+entirely, not merely narrowed to one round trip. The lock releases on both
+the success path and the Cadence-failure catch path, so a provider error
+never leaves a case permanently stuck; the pre-existing
+`caseState[caseId].submitted` idempotent-replay check was untouched and
+still handles "the commit succeeded but the client never saw the
+response" for free. No case bank, scoring, rubric, or student-facing UI
+change. Verified by `tests/certification-module12-concurrency.test.mjs`
+(61 assertions): two identical/differing simultaneous submissions produce
+exactly one authoritative result and at most one Cadence call; a retry
+after a committed result is idempotent and Cadence-call-free; a provider
+failure leaves the case unsubmitted with the response preserved and the
+lock released for a legitimate retry. Full detail: `implementation-log.md`
+Step 123.
+
+**P1-2: CLOSED.**
+
 - *Distributed (cross-isolate) rate limiting generally:* classified
   **ACCEPTABLE FOR INITIAL CONTROLLED LAUNCH** — every limiter's real
   ceiling is "N per isolate the traffic happens to land on," not a hard
@@ -541,12 +584,60 @@ expose without a stored procedure — infrastructure work, not a one-line
 patch. Deferred to post-launch hardening alongside P1-2's broader
 rate-limiting story.
 
+**RESOLUTION (2026-08-29, Step 123, owner-authorized) — P2-4 CLOSED.**
+This finding's own premise turned out to be wrong in one specific way,
+worth correcting for the record: PostgREST's JSON-path column filters
+(`?col->key->>field=is.null`) *do* compile to a real, atomic Postgres
+`UPDATE ... WHERE` — no stored procedure is required to get a genuine
+conditional update. `submit-interview-turn.js`'s existing claim PATCH now
+uses exactly that filter (`part3_conversation_state->{interviewId}->>
+turnInFlightAt` compared against the value just read), closing the TOCTOU
+window this finding described: a losing concurrent claim now matches zero
+rows and is rejected before Anthropic is ever called, rather than both
+requests racing to evaluate. This was a two-line diff to the existing
+claim call (add the conditional filter param, check the result via the
+new `casPatchSucceeded()` helper) — no transcript structure, prompt,
+rubric, or grading logic touched. Verified by
+`tests/certification-module12-concurrency.test.mjs`'s Part III race
+tests (items E/F). Full detail: `implementation-log.md` Step 123.
+
+**P2-4: CLOSED.**
+
 **P2-5. `submit-part1.js`/`finalize-assessment.js` have the same
 read-then-blind-write shape as the other certification endpoints, but
 low risk: both paths are deterministic/idempotent, no Anthropic spend, no
 non-idempotent side effect beyond a possible duplicate remediation-
 assignment row on a genuine double-submit race.** Worth a follow-up test,
 not a blocker.
+
+**RESOLUTION (2026-08-29, Step 123, owner-authorized) — P2-5 CLOSED for
+`finalize-assessment.js`; `submit-part1.js` reassessed and confirmed to
+carry no realistic risk requiring a code change.** The concrete risk this
+finding named — a duplicate remediation-assignment row from a concurrent
+double-finalize — was confirmed real by a dedicated concurrency test
+before the fix, then closed by making the `status: 'part3_locked' →
+'scored'` transition PATCH conditional on `status=eq.part3_locked` (a
+plain top-level-column filter, the simplest possible instance of the same
+compare-and-swap technique used for P1-2/P2-4). Only the request that wins
+this atomic transition inserts remediation rows; a losing concurrent call
+re-fetches and returns the now-authoritative `certification_decision`/
+`overall_score` instead. Both requests still compute the identical
+decision — a deterministic function of the same already-locked component
+data, never a client-submitted score — so nothing needs reconciling; the
+fix is about who is allowed to *write*, not about correctness of the
+computation. `submit-part1.js` was re-examined and left unchanged: its
+`status !== 'in_progress'` idempotency check already returns the existing
+score on any re-call, its write is a deterministic function of
+already-stored `part1_responses`, and it has no non-idempotent side effect
+(no remediation insert, no Anthropic spend) — a concurrent double-submit
+produces the same score written twice, functionally identical to a single
+write, so no compare-and-swap was added there per this task's own
+"surgical, not speculative" scope. Verified by
+`tests/certification-module12-concurrency.test.mjs`'s finalize tests
+(items G/H/I/J/K plus a dedicated sequential-idempotency check). Full
+detail: `implementation-log.md` Step 123.
+
+**P2-5: CLOSED.**
 
 ---
 
@@ -683,3 +774,24 @@ and model-binding configuration (tracked since the Cadence launch-sweep
 build contract, Section 20/16), and the still-open P1 items below
 (Module 12 Part II lock, Dashboard exit link + Performance Review copy) —
 all P1, not P0, so none block a deploy, only public course launch.
+
+**Update (2026-08-29, Step 123):** the **Module 12 Certification
+Concurrency Hardening** task (owner-authorized) has closed the remaining
+Module 12 concurrency findings this section anticipated. **P1-2**
+(`submit-case.js` had no in-flight lock at all) is fixed — see the
+RESOLUTION note under Section 4's P1-2 finding. **P2-4** (Part III's lock
+was a non-atomic TOCTOU claim) and **P2-5** (`finalize-assessment.js`
+could insert duplicate remediation rows under a concurrent double-finalize)
+are both fixed too — see their RESOLUTION notes above. All three reuse one
+small, shared primitive (`functions/_lib/cadence/turn-lock.mjs`'s new
+`jsonLockFieldFilterKey()`/`casPatchSucceeded()`), turning a PostgREST
+conditional PATCH into a genuine cross-instance compare-and-swap — no
+schema migration, no Cloudflare KV/Durable Object. **No P0 or P1 blockers
+remain from this document's own findings.** The only items this document
+originally flagged that remain open are **P1-3** (no in-course link back
+to the dashboard) and **P1-4** (a Performance Review dashboard promise
+that doesn't yet exist) — both explicitly reserved for the dedicated
+Dashboard/Resources pass, unaffected by this concurrency-only task — plus
+the non-blocking P2 polish items (P2-1, P2-2, P2-3) and the Cloudflare
+Pages production `ANTHROPIC_API_KEY`/model-binding confirmation, which
+remains a separate owner-side deployment prerequisite.

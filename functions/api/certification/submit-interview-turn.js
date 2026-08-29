@@ -42,7 +42,7 @@ import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { evaluateInterviewTurn } from '../../_lib/certification/cadence-grader.mjs';
 import { scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState } from '../../_lib/certification/scoring.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
-import { isTurnLockActive, claimTurnLock, releaseTurnLock } from '../../_lib/cadence/turn-lock.mjs';
+import { isTurnLockActive, claimTurnLock, releaseTurnLock, casPatchSucceeded, jsonLockFieldFilterKey } from '../../_lib/cadence/turn-lock.mjs';
 
 // A real certification interview turn involves reading a prompt, thinking,
 // and typing a substantive response — nowhere near this pace even across a
@@ -104,16 +104,30 @@ export async function onRequestPost(context) {
     return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
   }
 
-  // Claim the lock before calling Anthropic so a near-simultaneous second
-  // request sees it on its own read and is rejected above, rather than both
-  // requests racing to evaluate and write the result.
+  // Claim the lock atomically before calling Anthropic: the conditional
+  // filter below only applies this PATCH if turnInFlightAt still equals what
+  // we just read, so a near-simultaneous second request either sees the
+  // lock on its own read above, or -- if it raced past that read -- loses
+  // this compare-and-swap, rather than both requests reaching Anthropic and
+  // racing to write the result. (The prior version of this claim was a
+  // read-then-write TOCTOU gap between the read and this PATCH — see
+  // docs/course-audit/00-aimt-launch-readiness-gate-1.md P2-4.)
+  const priorInFlight = state.turnInFlightAt || null;
   const claimedState = { ...state, turnInFlightAt: claimTurnLock() };
   conversationState[interviewId] = claimedState;
-  const claim = await supabaseRest(env, `certification_attempts?id=eq.${attemptId}`, {
+  const claimParams = new URLSearchParams({ id: `eq.${attemptId}` });
+  claimParams.set(
+    jsonLockFieldFilterKey('part3_conversation_state', interviewId, 'turnInFlightAt'),
+    priorInFlight ? `eq.${priorInFlight}` : 'is.null'
+  );
+  const claim = await supabaseRest(env, `certification_attempts?${claimParams}`, {
     method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
     body: JSON.stringify({ part3_conversation_state: conversationState }),
   });
-  if (!claim.ok) return json({ error: 'Could not start evaluation. Please retry.' }, 500);
+  if (!casPatchSucceeded(claim)) {
+    return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
+  }
 
   const banks = getProductionBanks();
   const interviewDef = banks.interviewBank.find((i) => i.id === interviewId);
