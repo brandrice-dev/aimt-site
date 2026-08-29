@@ -246,16 +246,24 @@ await (async function activeCheckpointActivationTests() {
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// G. GROUNDING RULE STRENGTH -- MISSING COURSE FACT != PERMISSION FOR
-//    GENERAL KNOWLEDGE
+// G. GROUNDING RULE STRENGTH -- SUPERSEDED. The "missing course fact is
+//    never permission for general knowledge" rule this section originally
+//    locked was identified, via docs/course-audit/00-cadence-character-
+//    instruction-constitution.md, as the over-correction responsible for
+//    flagging accurate, safe Zone A explanations (chat-01's shedding-
+//    mechanism answer) as failures. It has been deliberately replaced with
+//    a Zone A / Zone B split -- see tests/cadence-chat-zones.test.mjs for
+//    full current coverage. This section keeps a light, historical-
+//    continuity check that the change actually landed and that the
+//    dry-scalp/dandruff example is still not hardcoded.
 // ─────────────────────────────────────────────────────────────────────────
 (function groundingStrengthTests() {
-  check('GROUNDING STRENGTH', 'Explicitly states the general rule: a missing course fact is never permission to use pretrained/general knowledge',
-    /a missing course fact is never permission to complete the answer from pretrained\/general knowledge/.test(BASE));
-  check('GROUNDING STRENGTH', 'Explicitly extends this to ordinary-sounding knowledge questions (a definition, a distinguishing feature, "how do I tell X from Y")',
-    /sound like ordinary knowledge questions/.test(BASE) && /how do I tell X from Y/.test(BASE));
-  check('GROUNDING STRENGTH', 'Instructs answering with the applicable decision principle/framework the module DOES supply, even if less specific',
-    /the applicable decision principle, framework, or judgment the module does supply/.test(BASE) && /less specific answer/.test(BASE));
+  check('GROUNDING STRENGTH', 'The old "missing course fact is never permission" rule is gone',
+    !/a missing course fact is never permission to complete the answer from pretrained\/general knowledge/.test(BASE));
+  check('GROUNDING STRENGTH', 'Zone A now explicitly welcomes ordinary explanatory context instead of requiring a disclaimer for it',
+    /use accurate general knowledge freely/.test(BASE) && /normal, welcome instructor behavior/.test(BASE));
+  check('GROUNDING STRENGTH', 'Zone B still redirects to the decision principle/framework the module DOES supply for genuine high-stakes gaps',
+    /redirect to the decision principle the material above actually teaches/.test(BASE));
   check('GROUNDING STRENGTH', 'Does not hardcode the dry-scalp/dandruff example anywhere in production code -- the rule is general',
     !/dry scalp is generally just flaking|dandruff sits on a spectrum/i.test(BASE));
 })();
@@ -287,8 +295,8 @@ await (async function activeCheckpointActivationTests() {
     /decline the diagnostic guess briefly/.test(BASE) && /proceed\/modify\/refer-style framework/.test(BASE));
   check('CHAT-09/14 PRESERVED', 'Stored-thread-only continuity rule is still present (chat-14\'s correct behavior)',
     /Only reference what is explicitly visible in this conversation/.test(BASE));
-  check('CHAT-09/14 PRESERVED', 'No-fabricated-benchmark rule is still present (the rule that caught chat-14\'s prior "50-65% margin" fabrication)',
-    /industry or market benchmark/.test(BASE));
+  check('CHAT-09/14 PRESERVED', 'No-fabricated-benchmark rule is still present (the rule that caught chat-14\'s prior "50-65% margin" fabrication), now scoped to Zone B\'s exact-benchmark language',
+    /exact business or industry benchmarks presented as authoritative fact/.test(BASE));
   check('CHAT-09/14 PRESERVED', 'Language-fairness rule is still present, untouched by this task',
     /grammar, spelling, spoken phrasing, or non-native English/.test(BASE));
 })();

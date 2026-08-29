@@ -74,36 +74,57 @@ function anthropicTextResponse(text) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// A. CURRICULUM GROUNDING — three-source rule, no gap-filling from general
-//    knowledge
+// A. CURRICULUM GROUNDING — SUPERSEDED by the Zone A / Zone B recalibration
+//    (docs/course-audit/00-cadence-character-instruction-constitution.md;
+//    implemented in the "Align Ask Cadence guardrails with instructor
+//    constitution" task). The closed-corpus "ground every substantive claim
+//    in exactly one of three sources... not even a real, well-known fact
+//    from general knowledge" rule this section originally locked was
+//    IDENTIFIED as the over-correction and has been deliberately replaced.
+//    Full current coverage lives in tests/cadence-chat-zones.test.mjs; this
+//    section now checks only that the old closed-corpus phrasing is
+//    actually gone and the new Zone A allowance is actually present, so
+//    this file keeps a historical trail of the change rather than silently
+//    going stale.
 // ─────────────────────────────────────────────────────────────────────────
 (function groundingTests() {
-  check('CURRICULUM GROUNDING', 'Base guardrail requires grounding in exactly the module guide content, the visible conversation, or safe general reasoning with no new professional claim',
-    /module guide content above/.test(BASE) && /visibly written in this conversation/.test(BASE) && /safe general conversational reasoning/.test(BASE));
-  check('CURRICULUM GROUNDING', 'Explicitly forbids filling a gap from general knowledge even when the fact is real/well-known',
-    /not even a real, well-known fact from general knowledge/.test(BASE));
-  check('CURRICULUM GROUNDING', 'Gives the natural "no specific number" redirect language, not a robotic refusal template',
-    /the course doesn't give us a specific number for that/.test(BASE) && /Say this once, briefly, and move on/.test(BASE));
-  check('CURRICULUM GROUNDING', 'Instructs redirecting to the decision principle the material teaches, not just declining',
+  check('CURRICULUM GROUNDING', 'The old closed-corpus "three sources" framing is gone -- general knowledge is no longer boxed out by construction',
+    !/exactly one of three sources/.test(BASE) && !/not even a real, well-known fact from general knowledge/.test(BASE));
+  check('CURRICULUM GROUNDING', 'Zone A explicitly permits accurate general knowledge for ordinary tutoring (see cadence-chat-zones.test.mjs for full coverage)',
+    /use accurate general knowledge freely/.test(BASE));
+  check('CURRICULUM GROUNDING', 'Zone B still gives the natural "no specific number" redirect language for genuine high-stakes gaps, not a robotic refusal template',
+    /the course doesn't give us a specific number for that/.test(BASE) && /not as a recurring disclaimer/.test(BASE));
+  check('CURRICULUM GROUNDING', 'Still instructs redirecting to the decision principle the material teaches, not just declining',
     /redirect to the decision principle/.test(BASE));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// B. NO UNSUPPORTED NUMBERS / PERCENTAGES / MARKET BENCHMARKS
+// B. NO UNSUPPORTED NUMBERS / BENCHMARKS -- narrowed to Zone B (high-stakes)
+//    material only, per the recalibration. See cadence-chat-zones.test.mjs
+//    for the full Zone A/B distinction this section is now a light,
+//    historical-continuity check for.
 // ─────────────────────────────────────────────────────────────────────────
 (function noUnsupportedNumbersTests() {
-  for (const term of ['statistic', 'timing range', 'percentage', 'industry or market benchmark']) {
-    check('NO UNSUPPORTED NUMBERS', `Base guardrail explicitly prohibits inventing a ${term}`, BASE.includes(term));
-  }
+  check('NO UNSUPPORTED NUMBERS', 'Base guardrail still prohibits exact business/industry benchmarks presented as authoritative fact in Zone B',
+    /exact business or industry benchmarks presented as authoritative fact/.test(BASE));
+  check('NO UNSUPPORTED NUMBERS', 'Base guardrail still prohibits exact clinical thresholds in Zone B',
+    /exact clinical thresholds/.test(BASE));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// C. NO UNSUPPORTED MEDICAL / PHYSIOLOGICAL MECHANISMS
+// C. PHYSIOLOGICAL MECHANISM / MEDICAL EXPLANATION -- now explicitly Zone A
+//    (ALLOWED for ordinary tutoring), not a blanket prohibition. This is
+//    the core of the recalibration: chat-01's mechanism explanation
+//    ("illness pushes follicles into the resting phase...") was the case
+//    that showed the old blanket ban was the over-correction, not the
+//    model. Diagnosis/prescribing/treatment recommendation remain
+//    restricted via the separate, unchanged diagnostic-decline clause.
 // ─────────────────────────────────────────────────────────────────────────
-(function noUnsupportedMedicalTests() {
-  for (const term of ['physiological mechanism', 'medical explanation', 'diagnostic distinction', 'treatment recommendation', 'professional-scope claim', 'product/process claim']) {
-    check('NO UNSUPPORTED MEDICAL', `Base guardrail explicitly prohibits inventing a ${term}`, BASE.includes(term));
-  }
+(function generalKnowledgeNowAllowedTests() {
+  check('ZONE A NOW ALLOWED', 'Base guardrail no longer blanket-prohibits a "physiological mechanism" or "medical explanation" as forbidden categories',
+    !/physiological mechanism, medical explanation/.test(BASE));
+  check('ZONE A NOW ALLOWED', 'Diagnosis/prescribing/treatment-recommendation restrictions remain intact via the separate diagnostic-decline clause',
+    /decline the diagnostic guess briefly/.test(BASE) && /naming or choosing between named medical conditions/.test(BASE));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
