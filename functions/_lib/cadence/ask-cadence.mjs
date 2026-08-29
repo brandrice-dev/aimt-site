@@ -16,6 +16,13 @@
 import { resolveCadenceModel } from './model-config.mjs';
 import { extractAnthropicTextSafe } from './anthropic-response.mjs';
 import { supabaseRest, fetchAttemptSummaries } from '../certification/auth.mjs';
+import {
+  detectActionableZoneBGuidance,
+  verifyScenarioFactsForActionableGuidance,
+  SCENARIO_FACT_REGENERATION_INSTRUCTION,
+  SAFE_SCENARIO_FALLBACK_TEXT,
+  logScenarioGateEvent,
+} from './scenario-fact-gate.mjs';
 
 // Defense-in-depth: present in EVERY Ask Cadence system prompt regardless
 // of whether the client supplied an activeCheckpointId, so the guardrail
@@ -179,6 +186,22 @@ async function callAnthropicForAskCadence(env, { system, messages }) {
   return { text, modelInfo };
 }
 
+// Narrow Zone B scenario-fact gate (see scenario-fact-gate.mjs). Ordinary
+// Zone A tutoring never reaches past detectActionableZoneBGuidance
+// returning false, a few lines below -- one generation, one delivery,
+// exactly as before this gate existed. This machinery engages ONLY when a
+// response contains actionable Zone B practice-authority guidance AND
+// that guidance turns out to rely on a scenario fact nobody actually
+// supplied (docs/course-audit/cadence-sonnet5-chat-final-case13-raw.json
+// -- the live retest that showed the prompt-only scenario-fact rule was
+// not sufficient on its own). At most one regeneration is ever attempted;
+// a still-unsupported regeneration, or any failure of the regeneration
+// call itself, resolves to a fixed, deterministic safe fallback rather
+// than a second regeneration or a raw error.
+function scenarioGateResult(fields) {
+  return { triggered: false, unsupportedFactFound: false, regenerated: false, outcome: 'original', ...fields };
+}
+
 /**
  * Full server-side Ask Cadence turn: builds the final system prompt
  * (client-supplied module guide-system content, the same untrusted-for-
@@ -187,10 +210,67 @@ async function callAnthropicForAskCadence(env, { system, messages }) {
  * guardrail when applicable), calls the CADENCE_CHAT_MODEL role, and
  * returns the reply text. Never decides anything; never touches
  * course_progress.
+ *
+ * Returns { text, modelInfo, scenarioGate }. scenarioGate is internal
+ * observability only (see logScenarioGateEvent) -- never shown to the
+ * student, never persisted anywhere except the diagnostic
+ * grading_metadata column a caller may choose to attach it to.
  */
 export async function askCadenceServerSide(env, { guideSystemPrompt, boundedContext, studentMessage, activeCheckpointGuardrailText }) {
   let system = String(guideSystemPrompt || '') + '\n\n' + ASK_CADENCE_BASE_GUARDRAIL;
   if (activeCheckpointGuardrailText) system += '\n\n' + activeCheckpointGuardrailText;
   const messages = [...(boundedContext || []), { role: 'user', content: studentMessage }];
-  return callAnthropicForAskCadence(env, { system, messages });
+
+  const original = await callAnthropicForAskCadence(env, { system, messages });
+
+  if (!detectActionableZoneBGuidance(original.text)) {
+    const scenarioGate = scenarioGateResult({});
+    logScenarioGateEvent({ zoneBTriggered: false, unsupportedFactFound: false, regenerated: false, outcome: 'original', modelInfo: original.modelInfo });
+    return { ...original, scenarioGate };
+  }
+
+  const execConfig = resolveChatExecutionConfig(original.modelInfo.modelName);
+  const firstVerdict = await verifyScenarioFactsForActionableGuidance(env, {
+    modelInfo: original.modelInfo, execConfig, boundedContext, studentMessage, responseText: original.text,
+  });
+
+  if (firstVerdict.supported === true) {
+    const scenarioGate = scenarioGateResult({ triggered: true });
+    logScenarioGateEvent({ zoneBTriggered: true, unsupportedFactFound: false, regenerated: false, outcome: 'original', modelInfo: original.modelInfo });
+    return { ...original, scenarioGate };
+  }
+
+  // supported === false, or null (verification itself failed) -- fail
+  // closed in both cases, never assume support without confirming it.
+  let regenerated;
+  try {
+    regenerated = await callAnthropicForAskCadence(env, {
+      system: system + '\n\n' + SCENARIO_FACT_REGENERATION_INSTRUCTION,
+      messages,
+    });
+  } catch (_) {
+    const scenarioGate = scenarioGateResult({ triggered: true, unsupportedFactFound: true, outcome: 'safe_fallback' });
+    logScenarioGateEvent({ zoneBTriggered: true, unsupportedFactFound: true, regenerated: false, outcome: 'safe_fallback', modelInfo: original.modelInfo });
+    return { text: SAFE_SCENARIO_FALLBACK_TEXT, modelInfo: original.modelInfo, scenarioGate };
+  }
+
+  if (!detectActionableZoneBGuidance(regenerated.text)) {
+    const scenarioGate = scenarioGateResult({ triggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'regenerated' });
+    logScenarioGateEvent({ zoneBTriggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'regenerated', modelInfo: regenerated.modelInfo });
+    return { ...regenerated, scenarioGate };
+  }
+
+  const regenVerdict = await verifyScenarioFactsForActionableGuidance(env, {
+    modelInfo: regenerated.modelInfo, execConfig, boundedContext, studentMessage, responseText: regenerated.text,
+  });
+
+  if (regenVerdict.supported === true) {
+    const scenarioGate = scenarioGateResult({ triggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'regenerated' });
+    logScenarioGateEvent({ zoneBTriggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'regenerated', modelInfo: regenerated.modelInfo });
+    return { ...regenerated, scenarioGate };
+  }
+
+  const scenarioGate = scenarioGateResult({ triggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'safe_fallback' });
+  logScenarioGateEvent({ zoneBTriggered: true, unsupportedFactFound: true, regenerated: true, outcome: 'safe_fallback', modelInfo: regenerated.modelInfo });
+  return { text: SAFE_SCENARIO_FALLBACK_TEXT, modelInfo: regenerated.modelInfo, scenarioGate };
 }

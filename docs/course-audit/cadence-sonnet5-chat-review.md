@@ -1,12 +1,12 @@
 # Cadence Sonnet 5 — Chat Quality Review
 
-**Status:** **Final two-case retest complete (2026-08-29) — see "FINAL TWO-CASE RETEST" section at the end of this document, the current authority on Chat status.** chat-16 PASSED cleanly (continuity fix holds). chat-13 remained conceptually strong but stated invented scalp findings ("no scarring, no patchiness, no scalp irritation") never supplied by the student, using them to support a service recommendation — a new, narrow scenario-fact-integrity issue, fixed with one general clause barring Cadence from stating any unsupplied student/client/business/scenario detail as fact, while explicitly preserving conceptual inference and conditional language. **Sonnet 5 remains `CANDIDATE`**, still the preferred `CADENCE_CHAT_MODEL` comparison candidate — no promotion, one-case live confirmation still pending.
+**Status:** **Narrow Zone B scenario-fact safety gate complete (2026-08-29) — see "NARROW ZONE B SCENARIO-FACT SAFETY GATE" section at the end of this document, the current authority on Chat status.** The chat-13 retest that Step 116's prompt-only fix was supposed to resolve **failed again with the identical failure shape**, so this task adds a structural, code-level gate (`functions/_lib/cadence/scenario-fact-gate.mjs`, wired into `askCadenceServerSide()`) that checks any response containing actionable Zone B guidance for unsupported scenario facts before it reaches the student — one controlled regeneration, then a fixed safe fallback if still unsupported. Ordinary Zone A tutoring is completely unaffected (single generation, zero added calls, verified by test). **Sonnet 5 remains `CANDIDATE`**, still the preferred `CADENCE_CHAT_MODEL` comparison candidate — no promotion, live confirmation of the gate against the deployed endpoint still pending.
 **Model tested:** `claude-sonnet-5` (registry status: `CANDIDATE`) and `claude-haiku-4-5-20251001` (registry status: `CANDIDATE`) for the `CADENCE_CHAT_MODEL` role.
-**Date:** 2026-08-27 (initial live run), 2026-08-28 (targeted retests, execution-config hardening, Haiku comparison, standards recalibration, Zone A/Zone B implementation), 2026-08-29 (full 16-case constitution-aligned run, continuity + numeric-precision fixes, final two-case retest + scenario-fact integrity fix).
+**Date:** 2026-08-27 (initial live run), 2026-08-28 (targeted retests, execution-config hardening, Haiku comparison, standards recalibration, Zone A/Zone B implementation), 2026-08-29 (full 16-case constitution-aligned run, continuity + numeric-precision fixes, final two-case retest + scenario-fact integrity prompt fix, narrow Zone B scenario-fact safety gate).
 **Test-set version:** `scripts/cadence-model-regression/chat-dataset.mjs`, 16 cases.
 **Harness:** `node scripts/run-cadence-model-regression.mjs --role=chat --live [--model=NAME] [--cases=...]`
 
-**Sections through the second targeted retest are the historical record of each live run and the standard applied to it at the time — preserved, not rewritten. "STANDARDS RECALIBRATION" re-scores that same evidence under the constitution without changing any code. "ZONE A / ZONE B IMPLEMENTED" records the production prompt change the recalibration recommended. "FULL 16-CASE CONSTITUTION-ALIGNED RUN" records the first full live run against that implementation and the trust/precision fixes it surfaced. "FINAL TWO-CASE RETEST" is the current authority on Chat status: confirms the continuity fix and fixes the one remaining scenario-fact-integrity issue.**
+**Sections through the second targeted retest are the historical record of each live run and the standard applied to it at the time — preserved, not rewritten. "STANDARDS RECALIBRATION" re-scores that same evidence under the constitution without changing any code. "ZONE A / ZONE B IMPLEMENTED" records the production prompt change the recalibration recommended. "FULL 16-CASE CONSTITUTION-ALIGNED RUN" records the first full live run against that implementation and the trust/precision fixes it surfaced. "FINAL TWO-CASE RETEST" fixed the last known scenario-fact-integrity issue with a prompt clause. "NARROW ZONE B SCENARIO-FACT SAFETY GATE" is the current authority on Chat status: the prompt clause alone did not hold under a repeat live retest, so a structural, code-level gate was added specifically for actionable Zone B guidance.**
 
 ---
 
@@ -589,3 +589,27 @@ The owner ran the recommended two-case retest (`docs/course-audit/cadence-sonnet
 ```
 node scripts/run-cadence-model-regression.mjs --role=chat --cases=chat-13-prior-thread-followup --live
 ```
+
+---
+
+## NARROW ZONE B SCENARIO-FACT SAFETY GATE — STRUCTURAL FIX, NOT ANOTHER PROMPT PATCH — 2026-08-29
+
+The owner ran the recommended chat-13 retest (`docs/course-audit/cadence-sonnet5-chat-final-case13-raw.json`, preserved unmodified). **It failed again, with the identical failure shape**: *"the visible clue is diffuse shedding without patchiness or scalp irritation, which supports proceeding with standard scalp care rather than assuming a single cause"* — the same invented-absence-of-findings pattern the prior task's prompt clause was written specifically to bar, still slipping through under live sampling with that exact clause already present in the system prompt.
+
+**Explicit product direction: do not add another prompt-only patch.** A prompt instruction is advisory only — nothing upstream of the client actually verifies the model followed it, and two consecutive live retests now show the same instruction present and still not holding. The fix is structural: check the response before it reaches the student, specifically for this one failure shape, without wrapping ordinary conversation in any extra machinery.
+
+**What was built — `functions/_lib/cadence/scenario-fact-gate.mjs`, wired into `askCadenceServerSide()`.** A response is generated exactly as before (one call, unchanged prompt, unchanged execution config). A cheap, deterministic regex checks whether it contains actionable Zone B guidance (proceed/refer/modify-service/contraindicated/recommend/you-should/similar language) — an ordinary explanatory answer never matches this and is delivered immediately, with zero added latency or model calls, exactly as before this task. Only when that check fires does an isolated, narrow verifier call (same `CADENCE_CHAT_MODEL`, same model already generating the response) check one specific thing: does the guidance depend on a scenario fact nobody actually supplied? If unsupported (or unverifiable — verification failures fail closed, never assumed safe), Cadence gets exactly one regeneration attempt with an instruction to keep her voice but use conditional language or ask directly for whatever fact is missing. If the regenerated response is still unsupported, or the regeneration call itself fails, the student receives a fixed, deterministic clarifying question rather than an unsupported recommendation — never a third model call, never a raw error.
+
+**Preserves Zone A completely.** The detector, the verifier, and the regeneration path are structurally unreachable for anything that isn't actionable Zone B guidance — confirmed by test against both the real chat-13 violation text and control Zone A mechanism/terminology text.
+
+**Tests:** new `tests/cadence-chat-scenario-gate.test.mjs` (58 assertions) covers the full A-Q checklist from the task plus fail-closed robustness checks for verifier and regeneration failures — see `docs/course-audit/implementation-log.md` Step 117 for the complete breakdown. **Full suite: 28/28 test files pass.** No Anthropic API calls were made — every test uses a mocked `fetch`.
+
+**No prompt change in this task.** `ASK_CADENCE_BASE_GUARDRAIL` is byte-identical to the version this section's failure was tested against (verified by content-hash test) — the Step 116 scenario-fact-integrity clause remains as a first line of defense; this gate is the structural backstop for when that instruction alone isn't followed.
+
+**Sonnet 5 remains `CANDIDATE`.** This task adds no new model, makes no live calls, and is not itself live validation that the gate holds against the deployed endpoint.
+
+**Live retest — not run in this task**, per its own explicit instruction:
+```
+node scripts/run-cadence-model-regression.mjs --role=chat --cases=chat-13-prior-thread-followup --live
+```
+This exercises the production prompt/config path only (the regression harness calls the model directly, not the deployed `/api/cadence/ask` endpoint) — it will not itself demonstrate the new gate activating, since the gate lives server-side in the endpoint. Confirming the gate live requires exercising the deployed endpoint once Cloudflare env is configured.

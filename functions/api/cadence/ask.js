@@ -126,11 +126,12 @@ export async function onRequestPost(context) {
   });
   if (!studentMsg.ok) return json({ error: 'Could not save your message. Please retry.' }, 500);
 
-  let reply, modelInfo;
+  let reply, modelInfo, scenarioGate;
   try {
     const result = await askCadenceServerSide(env, { guideSystemPrompt, boundedContext, studentMessage: message, activeCheckpointGuardrailText });
     reply = result.text;
     modelInfo = result.modelInfo;
+    scenarioGate = result.scenarioGate;
   } catch (e) {
     // Preserve-on-failure: the student message is already durably saved
     // above; no assistant message is written. A retry with the same
@@ -146,7 +147,7 @@ export async function onRequestPost(context) {
     role: 'assistant',
     mode: 'ask_cadence',
     content: reply,
-    gradingMetadata: { modelInfo }, // diagnostic only, per threads.mjs -- never authoritative
+    gradingMetadata: { modelInfo, scenarioGate }, // diagnostic only, per threads.mjs -- never authoritative
     idempotencyKey: assistantKey,
   });
   if (!assistantMsg.ok) {

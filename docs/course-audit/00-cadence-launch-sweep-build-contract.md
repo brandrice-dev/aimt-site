@@ -556,3 +556,36 @@ the full rescoring and the resulting guardrail-relaxation recommendations
 (not yet implemented; tracked for the next Chat task). This addendum does not
 change any code, any model's lifecycle status, or Module 12/grading in any
 way — it is a standards document and a re-reading of prior evidence only.
+
+## 19. Narrow Zone B scenario-fact safety gate (2026-08-29 addendum)
+
+The Zone A/Zone B split (Section 18, implemented in `ASK_CADENCE_BASE_GUARDRAIL`
+per `implementation-log.md` Step 114) and the scenario-fact-integrity prompt
+clause added afterward (Step 116) both live entirely in the system prompt —
+advisory instructions with nothing upstream of the client actually verifying
+Cadence followed them. Two consecutive live retests of the same case
+(chat-13) showed the identical invented-scenario-fact failure with the
+relevant prompt clause already present, confirming a prompt-only rule is not
+sufficient for this specific failure shape on its own.
+
+`functions/_lib/cadence/scenario-fact-gate.mjs`, wired into
+`askCadenceServerSide()` (`ask-cadence.mjs`), adds a structural backstop —
+not a replacement for the prompt clause, and explicitly not a general
+verifier wrapping every Chat turn. It engages only when a response contains
+actionable Zone B practice-authority guidance (detected deterministically);
+Zone A tutoring is untouched, one generation call, same as before this
+addendum. When it engages, an isolated LLM call (the same `CADENCE_CHAT_MODEL`
+already generating the response) checks specifically whether the guidance
+depends on a scenario fact nobody actually supplied — not general factual
+correctness, not personality, not course-grounding of every sentence. An
+unsupported result allows exactly one regeneration in Cadence's own voice;
+a still-unsupported regeneration (or any failure of the regeneration call
+itself) resolves to a fixed, deterministic clarifying-question fallback,
+never a raw error and never a second regeneration attempt.
+
+This does not change Section 5's authority table (Ask Cadence still has no
+grading/certification authority), does not alter the constitution (Section
+18) in any way, and makes no change to Grading, Module 12, or any checkpoint
+content/rubric — verified by test (`tests/cadence-chat-scenario-gate.test.mjs`).
+See `implementation-log.md` Step 117 and `cadence-sonnet5-chat-review.md`'s
+"NARROW ZONE B SCENARIO-FACT SAFETY GATE" section for full detail.
