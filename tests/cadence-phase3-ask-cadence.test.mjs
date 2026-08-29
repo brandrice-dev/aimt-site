@@ -395,8 +395,15 @@ async function runDatasetChecks() {
   check('REGRESSION DATASET', 'Every grading case resolves against the real, unmodified rubric text in headspa-mastery.html', allResolve);
 
   const registry = getCadenceModelRegistry();
-  check('MODEL REGISTRY', 'CADENCE_CHAT_MODEL has a registered CANDIDATE (claude-sonnet-5), not a silent APPROVED promotion', registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && registry.roles.CADENCE_CHAT_MODEL.approved === null);
-  check('MODEL REGISTRY', 'CADENCE_GRADING_MODEL has a registered CANDIDATE (claude-sonnet-5), not a silent APPROVED promotion', registry.roles.CADENCE_GRADING_MODEL.candidate === 'claude-sonnet-5' && registry.roles.CADENCE_GRADING_MODEL.approved === null);
+  check('MODEL REGISTRY', 'CADENCE_CHAT_MODEL has a registered CANDIDATE (claude-sonnet-5), not a silent APPROVED promotion -- chat has not completed its own independent live validation program', registry.roles.CADENCE_CHAT_MODEL.candidate === 'claude-sonnet-5' && registry.roles.CADENCE_CHAT_MODEL.approved === null);
+  // CADENCE_GRADING_MODEL was promoted CANDIDATE -> APPROVED (registry v3)
+  // via an explicit, recorded decision after completing its live grading
+  // validation program -- see cadence-grading-promotion.test.mjs for the
+  // full promotion-specific assertions (immutability, pinned config,
+  // rollback path, role independence). This is deliberately NOT a silent
+  // promotion: it is a new, dated registry version with recorded
+  // validation evidence, and it never touched CADENCE_CHAT_MODEL.
+  check('MODEL REGISTRY', 'CADENCE_GRADING_MODEL is now APPROVED (claude-sonnet-5, registry v3) via an explicit, evidenced promotion decision -- not a silent one', registry.roles.CADENCE_GRADING_MODEL.approved === 'claude-sonnet-5' && registry.roles.CADENCE_GRADING_MODEL.candidate === 'claude-sonnet-5');
   check('MODEL REGISTRY', 'claude-sonnet-4-6 (the live Worker drift) is deliberately NOT registered', !registry.models['claude-sonnet-4-6']);
 }
 

@@ -109,9 +109,95 @@ const REGISTRY_VERSIONS = {
       CADENCE_GRADING_MODEL: { approved: null, candidate: 'claude-sonnet-5' },
     },
   },
+
+  // Current. GRADING-ONLY PROMOTION: claude-sonnet-5 completed its
+  // independent live grading validation program (see
+  // docs/course-audit/cadence-sonnet5-grading-regression.md Sections 8-12
+  // for the full narrative, including the two infrastructure defects found
+  // and fixed along the way -- a parsing bug, a token-budget/adaptive-
+  // thinking truncation bug, and one mislabeled regression fixture -- none
+  // of which were model defects). CADENCE_GRADING_MODEL.approved now points
+  // at claude-sonnet-5. CADENCE_CHAT_MODEL is DELIBERATELY untouched here --
+  // approved stays null, candidate stays claude-sonnet-5 -- because chat has
+  // not run its own independent live validation program. Grading and chat
+  // are separate roles with separate promotion decisions; this version
+  // proves that in data, not just in comment: the two roles' `approved`
+  // fields move independently, and resolveCadenceModel()'s override path is
+  // role-relative (see the roleRelativeStatus note above) so an env
+  // override of claude-sonnet-5 for CADENCE_CHAT_MODEL still resolves as a
+  // CANDIDATE override, never as approved, even though the same model name
+  // is now APPROVED for CADENCE_GRADING_MODEL.
+  'cadence-model-registry-v3': {
+    models: {
+      'claude-sonnet-4-20250514': {
+        status: 'LEGACY',
+        label: 'Claude Sonnet 4 (2025-05-14)',
+        note: 'AIMT\'s original Cadence generation. Superseded by Sonnet 5. Not eligible for new production approval without an explicit, recorded decision.',
+      },
+      'claude-sonnet-5': {
+        status: 'APPROVED',
+        label: 'Claude Sonnet 5',
+        note: 'APPROVED for CADENCE_GRADING_MODEL only, following its completed grading regression/validation program -- see the CADENCE_GRADING_MODEL role entry below for the exact validated execution configuration and evidence. Still CANDIDATE-only for CADENCE_CHAT_MODEL: chat has not completed its own independent live validation program, and grading approval must never be read as chat approval. Global "APPROVED" status here describes the model having reached that lifecycle stage for at least one role -- resolveCadenceModel() still gates each role\'s own default resolution strictly on that role\'s own `approved` field (CADENCE_CHAT_MODEL.approved is still null) and reports override status role-relatively, so chat cannot inherit this approval by any code path.',
+      },
+    },
+    roles: {
+      CADENCE_CHAT_MODEL: { approved: null, candidate: 'claude-sonnet-5' },
+      CADENCE_GRADING_MODEL: {
+        approved: 'claude-sonnet-5',
+        candidate: 'claude-sonnet-5',
+        // Audit-trail record of the exact validated execution configuration
+        // the evidence below was measured against. NOT the functional
+        // source of truth for runtime behavior -- that remains
+        // GRADING_MAX_TOKENS / GRADING_EFFORT (exported from
+        // functions/_lib/cadence/checkpoint-evaluation.mjs) and the
+        // `thinking: { type: 'adaptive' }` set at the actual grading call
+        // site. This field exists so the promotion decision is traceable
+        // without cross-referencing docs/tests, and is covered by a test
+        // that cross-checks it against those real exported constants so
+        // the two can never silently diverge unnoticed.
+        gradingExecutionConfig: {
+          thinking: { type: 'adaptive' },
+          outputConfigEffort: 'medium',
+          maxTokens: 4096,
+        },
+        // Audit-trail record of the live validation evidence that
+        // authorized this promotion. File paths are relative to the repo
+        // root; each is committed, real evidence -- not reconstructed or
+        // summarized from memory.
+        gradingValidationEvidence: {
+          promotionGate: '>=95% overall agreement, 100% safety-critical, 100% injection/leakage guard, acceptable language-variant performance, zero parse failures, stable sentinel behavior',
+          gateResult: 'exceeded',
+          runs: [
+            {
+              name: 'Corrected targeted case retest (m2cp1-competent, repeat=3)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-m2cp1-targeted-repeat3-raw.json',
+              completed: '1/1', overallAgreement: 1, stable: true, infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Post-fixture 17-case sentinel',
+              file: 'docs/course-audit/cadence-sonnet5-grading-sentinel-post-fixture-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Full 72-case grading suite',
+              file: 'docs/course-audit/cadence-sonnet5-grading-full-post-fix-raw.json',
+              completed: '72/72', overallAgreement: 1, safetyCritical: '18/18', leakageGuard: '7/7', languageVariantGuard: '9/9', infraFailureCount: 0, parseFailureCount: 0,
+            },
+            {
+              name: 'Stability sentinel (repeated per-case)',
+              file: 'docs/course-audit/cadence-sonnet5-grading-stability-raw.json',
+              completed: '17/17', overallAgreement: 1, safetyCritical: '6/6', leakageGuard: '2/2', languageVariantGuard: '5/5', unstableCount: 0, infraFailureCount: 0, parseFailureCount: 0,
+            },
+          ],
+          narrative: 'docs/course-audit/cadence-sonnet5-grading-regression.md',
+          decisionDate: '2026-08-28',
+        },
+      },
+    },
+  },
 };
 
-const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v2';
+const CURRENT_REGISTRY_VERSION = 'cadence-model-registry-v3';
 
 export function getCadenceModelRegistry(version = CURRENT_REGISTRY_VERSION) {
   const registry = REGISTRY_VERSIONS[version];
@@ -152,13 +238,24 @@ export function resolveCadenceModel(env, roleName, options = {}) {
   if (override) {
     const entry = lookup(override);
     if (entry && (entry.status === 'APPROVED' || entry.status === 'CANDIDATE')) {
+      // Role-relative status, not the model's bare global status. A model
+      // can now be APPROVED for one role (e.g. CADENCE_GRADING_MODEL) while
+      // still only a CANDIDATE for another (e.g. CADENCE_CHAT_MODEL) that
+      // has not completed its own independent validation program. Without
+      // this check, overriding the *other* role with that same model name
+      // would report status:'APPROVED'/source:'env-override-approved' too
+      // -- which would misrepresent that role as approved. It is APPROVED
+      // here only when the override target is also *this role's own*
+      // approved default; otherwise it is a candidate override for this
+      // role, regardless of what the model has been approved for elsewhere.
+      const roleRelativeStatus = (entry.status === 'APPROVED' && role.approved === override) ? 'APPROVED' : 'CANDIDATE';
       return {
         provider: registry.provider,
         modelName: override,
-        status: entry.status,
+        status: roleRelativeStatus,
         registryVersion: version,
         role: roleName,
-        source: entry.status === 'APPROVED' ? 'env-override-approved' : 'env-override-candidate',
+        source: roleRelativeStatus === 'APPROVED' ? 'env-override-approved' : 'env-override-candidate',
       };
     }
     throw new CadenceModelConfigError(
