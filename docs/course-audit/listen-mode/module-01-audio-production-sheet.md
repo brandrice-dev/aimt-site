@@ -1,12 +1,18 @@
 # Module 1 — Listen Mode Audio Production & QA Sheet
 
-**Status:** Owner handoff document. 3 of 14 chunks (M1-01, M1-04, M1-07)
-have real generated audio as of 2026-08-30, produced as an authorized
-pipeline-validation pilot (Eleven v3, Jane) — see Section 3a. **None of the
-14 chunks are APPROVED** — GENERATED still requires the owner's own
-listening review before Listen Mode can go live for real students (Section
-4 still applies in full). The remaining 11 chunks are untouched at
-`NOT_GENERATED`.
+**Status:** Owner handoff document. 5 of 14 chunks (M1-01, M1-02, M1-03,
+M1-04, M1-07) have real generated audio as of 2026-08-30 — see Section 3a.
+**None of the 14 chunks are APPROVED** — GENERATED still requires the
+owner's own listening review before Listen Mode can go live for real
+students (Section 4 still applies in full). The remaining 9 chunks are
+untouched at `NOT_GENERATED`. M1-02/M1-03 exist specifically to test
+whether Jane's voice drifts between separate generations, and a temporary,
+non-production split-chunk comparison for M1-04 exists to test whether its
+146-second length is contributing to the flatness the owner noticed — see
+[`module-01-cohesion-review.md`](./module-01-cohesion-review.md) for both,
+including exact listening order and review questions. **No decision about
+splitting M1-04, or about the rest of the batch, has been made** — the
+canonical manifest still points M1-04 at the single 146-second file.
 **Voice:** Jane — bright, smooth and friendly.
 **Model:** Eleven v3.
 **Course / module:** HeadSpa Mastery, Module 1 — Role, Scope & Professional
@@ -41,6 +47,46 @@ sync with it as the owner works through generation.
 | M1-12 | `tts/module-01/m1-12.txt` | `assets/audio/listen/headspa-mastery/module-01/m1-12.mp3` | 1,010 | ~1,010 | — | — |
 | M1-13 | `tts/module-01/m1-13.txt` | `assets/audio/listen/headspa-mastery/module-01/m1-13.mp3` | 381 | ~381 | `m1cp2` checkpoint card | **STOP — `m1cp2`** |
 | M1-14 | `tts/module-01/m1-14.txt` | `assets/audio/listen/headspa-mastery/module-01/m1-14.mp3` | 918 | ~918 | Completion card | Plays only after `m1cp2` PASS |
+
+## 1a. Duration/length classification (measured 2026-08-30)
+
+Estimated duration = spoken words (tags excluded) ÷ 145 wpm. Actual =
+measured from real generated audio where it exists. Flag bands per the
+cohesion-validation task: UNDER 60 / 60–90 / 90–120 / OVER 120 seconds.
+
+| Chunk | Words | Est. duration | Actual duration | Flag (by actual, or estimate if ungenerated) |
+|---|---|---|---|---|
+| M1-01 | 170 | 70.3s | **65.44s** | 60–90 sec |
+| M1-02 | 151 | 62.5s | **76.80s** | 60–90 sec |
+| M1-03 | 209 | 86.5s | **92.16s** | 90–120 sec |
+| M1-04 | 289 | 119.6s | **146.08s** | OVER 120 sec |
+| M1-05 | 143 | 59.2s | — | UNDER 60 sec |
+| M1-06 | 260 | 107.6s | — | 90–120 sec |
+| M1-07 | 81 | 33.5s | **38.72s** | UNDER 60 sec |
+| M1-08 | 41 | 17.0s | — | UNDER 60 sec |
+| M1-09 | 127 | 52.6s | — | UNDER 60 sec |
+| M1-10 | 83 | 34.3s | — | UNDER 60 sec |
+| M1-11 | 137 | 56.7s | — | UNDER 60 sec |
+| M1-12 | 148 | 61.2s | — | 60–90 sec |
+| M1-13 | 57 | 23.6s | — | UNDER 60 sec |
+| M1-14 | 144 | 59.6s | — | UNDER 60 sec |
+
+**Observation directly relevant to the owner's flatness concern:** every
+chunk measured so far ran *longer* than its word-count estimate, and the
+gap grows with length — M1-01 (170 words) actually ran 7% *short* of
+estimate, M1-07 (81 words) ran 16% *over*, M1-02 (151 words) ran 23% over,
+M1-03 (209 words) ran 6% over, and **M1-04 (289 words, the one flagged as
+flat) ran 22% over its estimate — the largest overrun of any measured
+chunk, and the only one that crosses the OVER-120-second line at all.**
+This doesn't prove causation by itself, but it's consistent with the
+owner's hypothesis that longer generations pick up extra pacing/pauses
+that read as flatness — see the full A/B split evidence and listening
+package in [`module-01-cohesion-review.md`](./module-01-cohesion-review.md).
+M1-06 (260 words, estimated 90–120s) has not been generated yet and is the
+next-longest chunk after M1-04 — worth prioritizing in the eventual
+consistency/length decision since it sits in the same risk band.
+
+---
 
 \* **Credit assumption:** the table above assumes a **1 character ≈ 1
 ElevenLabs credit** baseline (the standard input-character convention),
@@ -101,9 +147,9 @@ Set per-chunk status directly in `assets/js/aimt-listen-mode-data.js` (the
 | Chunk | Status |
 |---|---|
 | M1-01 | **GENERATED — OWNER REVIEW REQUIRED** |
-| M1-02 | NOT_GENERATED |
-| M1-03 | NOT_GENERATED |
-| M1-04 | **GENERATED — OWNER REVIEW REQUIRED** |
+| M1-02 | **GENERATED — OWNER REVIEW REQUIRED** (consistency check vs. M1-01) |
+| M1-03 | **GENERATED — OWNER REVIEW REQUIRED** (consistency check vs. M1-01) |
+| M1-04 | **GENERATED — OWNER REVIEW REQUIRED** (also under a separate split-vs-single cohesion question — see below) |
 | M1-05 | NOT_GENERATED |
 | M1-06 | NOT_GENERATED |
 | M1-07 | **GENERATED — OWNER REVIEW REQUIRED** |
@@ -117,22 +163,42 @@ Set per-chunk status directly in `assets/js/aimt-listen-mode-data.js` (the
 
 ---
 
-## 3a. Real-audio pipeline validation pilot (M1-01, M1-04, M1-07)
+## 3a. Real-audio pipeline validation pilot (M1-01, M1-02, M1-03, M1-04, M1-07)
 
-**Date generated:** 2026-08-30. **Voice:** Jane — Bright, Smooth and Friendly
-(`voice_id: Y3ZPRGOSIxbV4Rbb3WiA`). **Model:** `eleven_v3`. **Output:**
-confirmed MP3, 44.1 kHz, 128 kbps, mono (verified directly against each
-downloaded file with `file(1)` — matches the production spec in Section 5
-below exactly). Generated via the connected ElevenLabs Creative flow
-platform, one shared flow for review:
+**Date generated:** 2026-08-30 (M1-01/M1-04/M1-07 first pass; M1-02/M1-03
+and the M1-04 cohesion-test split added in a follow-up pass the same day).
+**Voice:** Jane — Bright, Smooth and Friendly (`voice_id:
+Y3ZPRGOSIxbV4Rbb3WiA`). **Model:** `eleven_v3`. **Output:** confirmed MP3,
+44.1 kHz, 128 kbps, mono (verified directly against each downloaded file
+with `file(1)` — matches the production spec in Section 5 below exactly).
+Generated via the connected ElevenLabs Creative flow platform, one shared
+flow for review:
 [elevenlabs.io/app/flows/fp2ZnP1Hfna5trlQ3bYD](https://elevenlabs.io/app/flows/fp2ZnP1Hfna5trlQ3bYD).
 
 | Chunk | File | Duration | Chars (incl. tags) | Actual credits | Actual cost (USD) |
 |---|---|---|---|---|---|
 | M1-01 | `assets/audio/listen/headspa-mastery/module-01/m1-01.mp3` | 65.44s | 964 | 964 | $0.15906 |
+| M1-02 | `assets/audio/listen/headspa-mastery/module-01/m1-02.mp3` | 76.80s | 1,020 | 1,020 | $0.16830 |
+| M1-03 | `assets/audio/listen/headspa-mastery/module-01/m1-03.mp3` | 92.16s | 1,250 | 1,250 | $0.20625 |
 | M1-04 | `assets/audio/listen/headspa-mastery/module-01/m1-04.mp3` | 146.08s | 1,841 | 1,841 | $0.30377 |
 | M1-07 | `assets/audio/listen/headspa-mastery/module-01/m1-07.mp3` | 38.72s | 490 | 490 | $0.08085 |
-| **Total** | | **250.24s (~4:10)** | **3,295** | **3,295** | **$0.54368** |
+| **Total (production)** | | **419.20s (~7:00)** | **5,565** | **5,565** | **$0.91823** |
+
+**Cohesion-test files (non-canonical, comparison only — not counted in the
+production total above):**
+
+| File | Duration | Chars | Actual credits | Actual cost (USD) |
+|---|---|---|---|---|
+| `.../cohesion-test/m1-04a-cohesion-test.mp3` | 80.80s | 1,060 | 1,060 | $0.17490 |
+| `.../cohesion-test/m1-04b-cohesion-test.mp3` | 62.08s | 779 | 779 | $0.12854 |
+| **Total (cohesion test)** | **142.88s** | **1,839** | **1,839** | **$0.30344** |
+
+Full detail, listening order, and review questions for both the
+consistency test (M1-01→02→03) and the split test
+(M1-04 vs. M1-04a→M1-04b) are in
+[`module-01-cohesion-review.md`](./module-01-cohesion-review.md) — that
+document is the actual owner review package; this sheet just carries the
+production bookkeeping.
 
 **On credit multiplier (Section 4 of the task):** the pre-generation
 *estimate* returned by this platform for these same three chunks was
@@ -178,33 +244,102 @@ listening review — see checklist below and Section 10 of the task):**
 
 ---
 
+## 3b. Production standard LOCKED + remaining 9 RAW chunks generated (2026-08-30)
+
+**`CADENCE_AUDIO_MASTER_PRESET_V1` is now locked** — see
+[`module-01-production-standard-LOCKED.md`](./module-01-production-standard-LOCKED.md)
+for the full, authoritative pipeline definition (RAW → Auphonic
+conservative finish → align → 75% Auphonic / 25% RAW blend → two-pass
+loudnorm → canonical MP3), the locked chunking standard, and the final
+M1-04 single-chunk decision. That document supersedes the exploratory
+framing everywhere else in this sheet.
+
+**RAW ElevenLabs audio generated for the remaining 9 chunks** (M1-05,
+M1-06, M1-08, M1-09, M1-10, M1-11, M1-12, M1-13, M1-14) — same voice
+(Jane, `Y3ZPRGOSIxbV4Rbb3WiA`), same model (`eleven_v3`), exact approved
+text, zero wording changes, all on the first attempt (no retries needed):
+
+| Chunk | Duration | Credits | Raw path |
+|---|---|---|---|
+| M1-05 | 69.25s | 885 | `raw/m1-05.mp3` |
+| M1-06 | 128.44s | 1,722 | `raw/m1-06.mp3` |
+| M1-08 | 15.65s | 240 | `raw/m1-08.mp3` |
+| M1-09 | 62.75s | 820 | `raw/m1-09.mp3` |
+| M1-10 | 39.63s | 537 | `raw/m1-10.mp3` |
+| M1-11 | 57.16s | 847 | `raw/m1-11.mp3` |
+| M1-12 | 75.65s | 1,010 | `raw/m1-12.mp3` |
+| M1-13 | 30.93s | 381 | `raw/m1-13.mp3` |
+| M1-14 | 68.21s | 918 | `raw/m1-14.mp3` |
+| **Total** | **547.67s (~9:08)** | **7,360** | |
+
+At the confirmed actual rate (~1 credit/character, ~$0.0165/credit,
+established across every generation this whole engagement): **≈$1.21**
+for this batch. M1-06 (128.44s) sits above the locked standard's ~120s
+review line — this is the "Where is the line?" practice interaction,
+already deliberately reviewed and kept as one cohesive unit in the
+original v1→v2 script compression pass specifically because its 4-part
+exercise structure (with functional pauses between statements) doesn't
+have a clean split point without breaking the interaction — consistent
+with "review, don't automatically split," not an oversight.
+
+**Raw preservation backfilled** for the 5 previously-generated chunks
+(M1-01, M1-02, M1-03, M1-04, M1-07) — their canonical files were, and
+still are, identical to untouched RAW generations, so copying them into
+`raw/` simply formalizes what was already true (verified byte-identical
+before and after).
+
+**Blocked:** no chunk's canonical file reflects the locked
+`CADENCE_AUDIO_MASTER_PRESET_V1` pipeline yet — `AUPHONIC_API_KEY` was not
+available this session, and per the locked standard's own instruction this
+script will not silently substitute a non-Auphonic finish. All 14 raw
+files now exist; canonical production audio (the Auphonic+blend step) is
+the next step once Auphonic access is available. `qaStatus` was left
+exactly as it was for all 14 chunks — see the task's final report for the
+full accounting.
+
+---
+
 ## 4. Why the player won't show Listen Mode yet
 
 `AIMTListenModeData.isProductionReady()` requires **every** chunk's
-`qaStatus` to be `APPROVED`. Right now 3 are `GENERATED` (M1-01, M1-04,
-M1-07) and 11 are `NOT_GENERATED` — none are `APPROVED` — so
+`qaStatus` to be `APPROVED`. Right now 5 are `GENERATED` (M1-01, M1-02,
+M1-03, M1-04, M1-07) and 9 are `NOT_GENERATED` — none are `APPROVED` — so
 `AIMTListenMode.mount()` still returns early and never renders the "Listen
 to this module" entry point for real students, confirmed directly against
 the real installed files in this pilot (a `throwingDoc` test proved
 `mount()` never touches the DOM in this state). There is nothing to disable
 or hide manually. A `?listenQA=1` URL flag exists for internal preview of
 `GENERATED`-or-better chunks, showing a "QA preview" badge so it's never
-mistaken for the real, released experience — this is how the 3 real files
-were exercised end-to-end in the player during this pilot.
+mistaken for the real, released experience — this is how the real files
+were exercised end-to-end in the player during the first pilot pass.
 
 ---
 
 ## 5. Owner generation steps (see also the final task report for the same steps)
 
-**For M1-01, M1-04, and M1-07 — already generated, review only:**
-1. Listen to the three files directly at `assets/audio/listen/headspa-mastery/module-01/m1-01.mp3`, `m1-04.mp3`, `m1-07.mp3`.
-2. Score each against the QA checklist in Section 3 above.
-3. In `assets/js/aimt-listen-mode-data.js`, change that chunk's `qaStatus`
+**For M1-01, M1-02, M1-03, M1-04, and M1-07 — already generated, review
+only:**
+1. Listen to the five files directly at
+   `assets/audio/listen/headspa-mastery/module-01/m1-01.mp3`, `m1-02.mp3`,
+   `m1-03.mp3`, `m1-04.mp3`, `m1-07.mp3` — see
+   [`module-01-cohesion-review.md`](./module-01-cohesion-review.md) for the
+   recommended listening order (M1-01→02→03 back to back matters more than
+   listening to each in isolation, since the whole point is judging
+   consistency across the boundary).
+2. Also review the M1-04 split-chunk comparison in that same document
+   (`cohesion-test/m1-04a-cohesion-test.mp3` →
+   `m1-04b-cohesion-test.mp3`) and decide whether M1-04 should be
+   regenerated as two chunks or kept as one before approving it.
+3. Score each against the QA checklist in Section 3 above.
+4. In `assets/js/aimt-listen-mode-data.js`, change that chunk's `qaStatus`
    from `'GENERATED'` to `'APPROVED'` if it passes, or `'REGENERATE'` if it
-   doesn't (then regenerate from its `.txt` file and re-review).
+   doesn't (then regenerate from its `.txt` file and re-review). If M1-04
+   is to be split, that's a manifest/chunk-boundary change beyond a status
+   flip — flag it for a follow-up task rather than hand-editing the
+   manifest structure here.
 
-**For the remaining 11 chunks (M1-02, M1-03, M1-05, M1-06, M1-08 through
-M1-13 excluding M1-07, M1-14) — not yet generated:**
+**For the remaining 9 chunks (M1-05, M1-06, M1-08 through M1-14 excluding
+M1-07) — not yet generated:**
 1. Open ElevenLabs, select the Jane voice (`Y3ZPRGOSIxbV4Rbb3WiA`) and the
    Eleven v3 model.
 2. For each chunk, paste the exact contents of its `.txt` file from

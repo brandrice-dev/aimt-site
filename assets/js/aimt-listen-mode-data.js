@@ -84,15 +84,22 @@
   // ── HeadSpa Mastery — Module 1 (pilot) ──
   // Source of truth for wording: docs/course-audit/listen-mode/module-01-listen-script-draft.md (v3).
   // TTS production text: docs/course-audit/listen-mode/tts/module-01/*.txt.
-  // m1-01, m1-04, and m1-07 are GENERATED — real Eleven v3 / Jane audio was
-  // produced for these three as a pipeline-validation pilot (see
+  // m1-01, m1-02, m1-03, m1-04, and m1-07 are GENERATED — real Eleven v3 /
+  // Jane audio was produced for these five (see
   // docs/course-audit/listen-mode/module-01-audio-production-sheet.md
-  // Section 5). GENERATED is not APPROVED — none of the 14 chunks are
-  // APPROVED yet, so isProductionReady() is still false and the player
-  // still won't present Listen Mode to real students. The remaining 11
-  // chunks stay NOT_GENERATED until the owner reviews these three and
-  // authorizes the rest. The owner updates qaStatus as audio is generated
-  // and reviewed (Section 18/10).
+  // Section 5). m1-02/m1-03 exist specifically as a generation-to-generation
+  // voice-consistency check against m1-01, not yet reviewed. GENERATED is
+  // not APPROVED — none of the 14 chunks are APPROVED yet, so
+  // isProductionReady() is still false and the player still won't present
+  // Listen Mode to real students. The remaining 9 chunks stay NOT_GENERATED
+  // until the owner reviews the generated ones and authorizes the rest. The
+  // owner updates qaStatus as audio is generated and reviewed (Section 18/10).
+  // Note: m1-04's real production audio (146s) is under an open cohesion
+  // question — a temporary, non-canonical split-chunk comparison exists at
+  // docs/course-audit/listen-mode/tts/module-01/cohesion-test/ for the
+  // owner to review; this manifest entry deliberately still points at the
+  // single m1-04.mp3 file and must not be changed until the owner decides
+  // whether M1-04 should be split (see the cohesion review package).
   var HEADSPA_MODULE_1 = [
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-01',
@@ -102,11 +109,13 @@
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-02',
-      title: '1.1 What is a head spa?', sourceSection: '1.1'
+      title: '1.1 What is a head spa?', sourceSection: '1.1',
+      duration: 76.8, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-03',
-      title: '1.2 What is a head spa technician?', sourceSection: '1.2'
+      title: '1.2 What is a head spa technician?', sourceSection: '1.2',
+      duration: 92.16, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-04',

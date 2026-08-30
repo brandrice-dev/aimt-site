@@ -177,14 +177,14 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
   // Pipeline-validation pilot generated real audio for exactly 3 chunks
   // (m1-01, m1-04, m1-07) and marked them GENERATED, never APPROVED — the
   // other 11 stay NOT_GENERATED until the owner reviews these three.
-  const GENERATED_PILOT_CHUNKS = ['m1-01', 'm1-04', 'm1-07'];
-  check('M. MISSING AUDIO STATE', 'exactly the 3 pilot chunks (m1-01, m1-04, m1-07) are GENERATED; the rest remain NOT_GENERATED', manifest.every((c) => c.qaStatus === (GENERATED_PILOT_CHUNKS.includes(c.chunkId) ? 'GENERATED' : 'NOT_GENERATED')));
+  const GENERATED_PILOT_CHUNKS = ['m1-01', 'm1-02', 'm1-03', 'm1-04', 'm1-07'];
+  check('M. MISSING AUDIO STATE', 'exactly the 5 generated chunks (m1-01, m1-02, m1-03, m1-04, m1-07) are GENERATED; the rest remain NOT_GENERATED', manifest.every((c) => c.qaStatus === (GENERATED_PILOT_CHUNKS.includes(c.chunkId) ? 'GENERATED' : 'NOT_GENERATED')));
   check('M. MISSING AUDIO STATE', 'no chunk is APPROVED yet — GENERATED is not APPROVED, owner review is still required', !manifest.some((c) => c.qaStatus === 'APPROVED'));
-  check('M. MISSING AUDIO STATE', 'the 3 GENERATED pilot chunks each have a real measured duration recorded', manifest.filter((c) => GENERATED_PILOT_CHUNKS.includes(c.chunkId)).every((c) => typeof c.duration === 'number' && c.duration > 0));
+  check('M. MISSING AUDIO STATE', 'the 5 GENERATED chunks each have a real measured duration recorded', manifest.filter((c) => GENERATED_PILOT_CHUNKS.includes(c.chunkId)).every((c) => typeof c.duration === 'number' && c.duration > 0));
 
-  // On-disk proof, not just manifest metadata: exactly the 3 authorized
+  // On-disk proof, not just manifest metadata: exactly the 5 generated
   // chunks have a real, non-empty MP3 on disk; every other chunk's audio
-  // file is genuinely absent (proves the other 11 were not generated).
+  // file is genuinely absent (proves the other 9 were not generated).
   const AUDIO_DIR = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01');
   manifest.forEach((c) => {
     const filePath = path.join(AUDIO_DIR, c.chunkId + '.mp3');
@@ -229,6 +229,90 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
 
   check('M. MISSING AUDIO STATE', 'player never fabricates a silent/placeholder MP3 URL — no data: or blob: audio src assignment', !/audio\.src\s*=\s*['"](data:|blob:)/.test(playerSrc));
   check('M. MISSING AUDIO STATE', 'per-chunk missing/unapproved audio shows a development-only note rather than pretending to play (static)', /development state/.test(playerSrc) && /isChunkQAAvailable/.test(playerSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// M1-04 COHESION TEST — canonical file untouched; split evidence exists
+// only in a non-production QA location; the split is a lossless,
+// zero-word-change partition of the approved script.
+// ─────────────────────────────────────────────────────────────────────────
+(function m1_04CohesionTest() {
+  const canonicalPath = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3');
+  const cohesionDir = path.join(ROOT, 'docs/course-audit/listen-mode/tts/module-01/cohesion-test');
+
+  check('COHESION TEST', 'canonical m1-04.mp3 still exists', existsSync(canonicalPath));
+  check('COHESION TEST', 'manifest m1-04 chunk still points at the single canonical file (audioSrc unchanged, no split entries)', manifest.find((c) => c.chunkId === 'm1-04').audioSrc === 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3');
+  check('COHESION TEST', 'the 14-chunk manifest has no m1-04a/m1-04b entries — the split is comparison evidence only, not a manifest/architecture change', !manifest.some((c) => c.chunkId === 'm1-04a' || c.chunkId === 'm1-04b'));
+
+  ['m1-04a-cohesion-test', 'm1-04b-cohesion-test'].forEach((name) => {
+    const txtPath = path.join(cohesionDir, name + '.txt');
+    const mp3Path = path.join(cohesionDir, name + '.mp3');
+    check('COHESION TEST', name + '.txt exists in the QA-only cohesion-test directory', existsSync(txtPath));
+    check('COHESION TEST', name + '.mp3 exists in the QA-only cohesion-test directory (not a canonical production path)', existsSync(mp3Path));
+    if (existsSync(mp3Path)) {
+      const header = readFileSync(mp3Path).subarray(0, 3).toString('latin1');
+      check('COHESION TEST', name + '.mp3 has a real MP3/ID3 header', header === 'ID3' || header.charCodeAt(0) === 0xff);
+    }
+  });
+
+  // Lossless-split proof: A + blank-line + B reconstructs the original
+  // m1-04.txt exactly, character for character — zero words added, removed,
+  // or duplicated at the seam.
+  const original = readFileSync(path.join(ROOT, 'docs/course-audit/listen-mode/tts/module-01/m1-04.txt'), 'utf8').replace(/\n$/, '');
+  const a = readFileSync(path.join(cohesionDir, 'm1-04a-cohesion-test.txt'), 'utf8').replace(/\n$/, '');
+  const b = readFileSync(path.join(cohesionDir, 'm1-04b-cohesion-test.txt'), 'utf8').replace(/\n$/, '');
+  check('COHESION TEST', 'A + B reconstructs the original m1-04.txt exactly (zero spoken-word changes, no duplicated sentence at the split)', a + '\n\n' + b === original);
+  check('COHESION TEST', 'the split falls on a paragraph boundary (A ends and B begins on clean sentence/paragraph edges, not mid-sentence)', /\.\s*$|"\s*$/.test(a) && /^[A-Z"]/.test(b));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// AUDIO FINISHING — raw preserved, canonical untouched, script correctness.
+// Does not invoke ffmpeg (not guaranteed present in every environment,
+// matching this suite's no-external-process convention) — verifies the
+// script's structure/preset statically and verifies the actual on-disk
+// evidence this task already produced.
+// ─────────────────────────────────────────────────────────────────────────
+(function audioFinishing() {
+  const scriptPath = path.join(ROOT, 'scripts/cadence-audio-finish.mjs');
+  check('AUDIO FINISHING', 'scripts/cadence-audio-finish.mjs exists', existsSync(scriptPath));
+  const scriptSrc = existsSync(scriptPath) ? readFileSync(scriptPath, 'utf8') : '';
+
+  check('AUDIO FINISHING', 'defines CADENCE_AUDIO_FINISHING_PRESET_V1 by name', /CADENCE_AUDIO_FINISHING_PRESET_V1/.test(scriptSrc));
+  check('AUDIO FINISHING', 'uses the deesser filter with a capped max-deessing ceiling (m) so a consonant can never be fully removed', /deesser=i=\$\{i\}:m=\$\{m\}:f=\$\{f\}/.test(scriptSrc) && /m:\s*0\.4/.test(scriptSrc));
+  check('AUDIO FINISHING', 'uses loudnorm two-pass (a measurement pass feeding measured_I/measured_TP/measured_LRA/measured_thresh into the apply pass), not single-pass', /print_format=json/.test(scriptSrc) && /measured_I=/.test(scriptSrc) && /measured_TP=/.test(scriptSrc) && /measured_LRA=/.test(scriptSrc) && /measured_thresh=/.test(scriptSrc));
+  check('AUDIO FINISHING', 'output spec matches every existing chunk: 44.1kHz, mono, libmp3lame, 128kbps', /sampleRateHz:\s*44100/.test(scriptSrc) && /channels:\s*1/.test(scriptSrc) && /libmp3lame/.test(scriptSrc) && /bitrateKbps:\s*128/.test(scriptSrc));
+  check('AUDIO FINISHING', 'script never modifies its --in path (no write/rename/unlink of the input)', !/(writeFile|renameSync|unlinkSync)\(.*inPath/.test(scriptSrc));
+  check('AUDIO FINISHING', 'no separate compressor/limiter/reverb/gate/exciter filter is chained in (only deesser + loudnorm)', !/acompressor|alimiter|areverb|agate|aexciter/.test(scriptSrc));
+  check('AUDIO FINISHING', 'verifies its own output exists and is non-empty before reporting success', /statSync\(outPath\)\.size === 0/.test(scriptSrc));
+  check('AUDIO FINISHING', 'resolves ffmpeg from system PATH first, falls back to the free imageio-ffmpeg package (no paid dependency)', /'ffmpeg'/.test(scriptSrc) && /imageio_ffmpeg/.test(scriptSrc));
+
+  // On-disk evidence from this task's actual A/B test run.
+  const rawM104 = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01/raw/m1-04.mp3');
+  const canonicalM104 = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3');
+  const finishingDir = path.join(ROOT, 'docs/course-audit/listen-mode/tts/module-01/finishing-test');
+
+  check('AUDIO FINISHING', 'raw/m1-04.mp3 exists (untouched generation preserved)', existsSync(rawM104));
+  check('AUDIO FINISHING', 'canonical m1-04.mp3 still exists', existsSync(canonicalM104));
+  if (existsSync(rawM104) && existsSync(canonicalM104)) {
+    const rawBytes = readFileSync(rawM104);
+    const canonicalBytes = readFileSync(canonicalM104);
+    check('AUDIO FINISHING', 'raw/m1-04.mp3 is byte-identical to the canonical file (a preserved copy, not a re-encode)', Buffer.compare(rawBytes, canonicalBytes) === 0);
+  }
+  check('AUDIO FINISHING', 'm1-04-finished-test.mp3 exists in the QA-only finishing-test directory', existsSync(path.join(finishingDir, 'm1-04-finished-test.mp3')));
+  check('AUDIO FINISHING', 'm1-04-original-reference.mp3 exists alongside it for direct A/B comparison', existsSync(path.join(finishingDir, 'm1-04-original-reference.mp3')));
+  if (existsSync(path.join(finishingDir, 'm1-04-original-reference.mp3')) && existsSync(canonicalM104)) {
+    check('AUDIO FINISHING', 'the "original" reference copy is byte-identical to the untouched canonical file', Buffer.compare(readFileSync(path.join(finishingDir, 'm1-04-original-reference.mp3')), readFileSync(canonicalM104)) === 0);
+  }
+  const finishedPath = path.join(finishingDir, 'm1-04-finished-test.mp3');
+  if (existsSync(finishedPath)) {
+    const stat = statSync(finishedPath);
+    check('AUDIO FINISHING', 'the finished test file is non-zero and a real MP3', stat.size > 0 && readFileSync(finishedPath).subarray(0, 3).toString('latin1').match(/^(ID3|\xff)/) !== null);
+    check('AUDIO FINISHING', 'the finished test file is not byte-identical to the original (processing actually happened)', existsSync(canonicalM104) && Buffer.compare(readFileSync(finishedPath), readFileSync(canonicalM104)) !== 0);
+  }
+
+  // The manifest itself must be untouched by this task for m1-04.
+  const m104Chunk = manifest.find((c) => c.chunkId === 'm1-04');
+  check('AUDIO FINISHING', 'm1-04 manifest entry still points at the single canonical file, still GENERATED not APPROVED, duration unchanged from the original generation', m104Chunk.audioSrc === 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3' && m104Chunk.qaStatus === 'GENERATED' && m104Chunk.duration === 146.08);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -380,18 +464,68 @@ function diffAgainstStart(relPath) {
     'docs/course-audit/listen-mode/module-01-listen-script-draft.md',
     'docs/course-audit/listen-mode/module-01-audio-production-sheet.md',
     'docs/course-audit/listen-mode/module-01-manual-qa-plan.md',
+    'docs/course-audit/listen-mode/module-01-cohesion-review.md',
+    'docs/course-audit/listen-mode/module-01-audio-finishing-review.md',
+    'docs/course-audit/listen-mode/module-01-auphonic-comparison-review.md',
+    'docs/course-audit/listen-mode/module-01-deess-calibration-review.md',
+    'docs/course-audit/listen-mode/module-01-master-v2-review.md',
+    'docs/course-audit/listen-mode/module-01-master-v3-review.md',
+    'docs/course-audit/listen-mode/module-01-parallel-blend-review.md',
+    'scripts/cadence-audio-master-v2.mjs',
+    'scripts/cadence-audio-master-v3.mjs',
     'assets/js/aimt-listen-mode-data.js',
     'assets/js/aimt-listen-mode-player.js',
+    'scripts/cadence-audio-finish.mjs',
+    'scripts/cadence-audio-produce.mjs',
+    'docs/course-audit/listen-mode/module-01-production-standard-LOCKED.md',
     'tests/aimt-listen-mode-module1-pilot.test.mjs'
   ]);
   for (let i = 1; i <= 14; i++) {
     allowlist.add('docs/course-audit/listen-mode/tts/module-01/m1-' + String(i).padStart(2, '0') + '.txt');
   }
-  // Real-audio-generation pilot (M1-01, M1-04, M1-07 only — the 3
-  // representative chunks authorized for real ElevenLabs generation).
-  ['m1-01', 'm1-04', 'm1-07'].forEach((id) => {
+  // Real-audio-generation pilot (M1-01, M1-02, M1-03, M1-04, M1-07 — the
+  // chunks authorized for real ElevenLabs generation across both audio
+  // tasks; M1-04's canonical file is a control, never overwritten).
+  ['m1-01', 'm1-02', 'm1-03', 'm1-04', 'm1-07'].forEach((id) => {
     allowlist.add('assets/audio/listen/headspa-mastery/module-01/' + id + '.mp3');
   });
+  // M1-04 cohesion-test split (comparison evidence only, non-canonical
+  // location — see docs/course-audit/listen-mode/module-01-cohesion-review.md).
+  ['m1-04a-cohesion-test', 'm1-04b-cohesion-test'].forEach((name) => {
+    allowlist.add('docs/course-audit/listen-mode/tts/module-01/cohesion-test/' + name + '.txt');
+    allowlist.add('docs/course-audit/listen-mode/tts/module-01/cohesion-test/' + name + '.mp3');
+  });
+  // Audio-finishing A/B test (raw preservation + QA-only finished/original
+  // comparison files — see module-01-audio-finishing-review.md) and the
+  // sibilance calibration round's Moderate/Stronger variants, both housed
+  // in the same finishing-test/ directory (see
+  // module-01-deess-calibration-review.md).
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/finishing-test/m1-04-finished-test.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/finishing-test/m1-04-original-reference.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/finishing-test/m1-04-finished-moderate-test.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/finishing-test/m1-04-finished-stronger-test.mp3');
+  // Auphonic A/B test (module-01-auphonic-comparison-review.md).
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/auphonic-test/m1-04-auphonic-autoeq-test.mp3');
+  // Cadence Master V2 local dynamic-EQ test (module-01-master-v2-review.md).
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v2-test/m1-04-master-v2-light.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v2-test/m1-04-master-v2-medium.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v2-test/m1-04-master-v2-analysis.png');
+  // Cadence Master V3 three-candidate test (module-01-master-v3-review.md).
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v3-test/m1-04-master-v3-a-dual-band.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v3-test/m1-04-master-v3-b-hybrid.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/master-v3-test/m1-04-master-v3-c-broad-dynamic.mp3');
+  // Auphonic/RAW parallel blend stop-loss test (module-01-parallel-blend-review.md).
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/parallel-blend-test/m1-04-auphonic75-raw25.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/parallel-blend-test/m1-04-auphonic65-raw35.mp3');
+  allowlist.add('docs/course-audit/listen-mode/tts/module-01/parallel-blend-test/m1-04-auphonic55-raw45.mp3');
+  // Locked production standard: every chunk's RAW ElevenLabs generation is
+  // preserved under raw/ before any finishing step (see
+  // module-01-production-standard-LOCKED.md section 4). All 14 chunks now
+  // have a raw file — 5 backfilled from pre-existing canonical audio,
+  // 9 newly generated this phase.
+  for (let i = 1; i <= 14; i++) {
+    allowlist.add('assets/audio/listen/headspa-mastery/module-01/raw/m1-' + String(i).padStart(2, '0') + '.mp3');
+  }
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
@@ -431,6 +565,72 @@ function diffAgainstStart(relPath) {
   // and undermines Media Session reliability, even though it happens to
   // work in some browsers.
   check('WIRING', 'the <audio> element is appended into the player bar (not left detached from the DOM)', /bar\.appendChild\(audio\)/.test(playerSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// Locked production standard phase — the standard doc, the reusable
+// production script, all 14 RAW files, and honest (unfabricated) qaStatus.
+// ─────────────────────────────────────────────────────────────────────────
+(function lockedProductionStandard() {
+  const standardPath = path.join(ROOT, 'docs/course-audit/listen-mode/module-01-production-standard-LOCKED.md');
+  const standardExists = existsSync(standardPath);
+  check('LOCKED STANDARD', 'module-01-production-standard-LOCKED.md exists', standardExists);
+  if (standardExists) {
+    const standardSrc = readFileSync(standardPath, 'utf8');
+    check('LOCKED STANDARD', 'documents the locked chunking standard (45-100s preferred, ~120s ceiling)', /45.?\D?100 seconds/.test(standardSrc) && /120 seconds/.test(standardSrc));
+    check('LOCKED STANDARD', 'documents M1-04 staying one chunk (no split)', /M1-04 stays ONE production chunk/.test(standardSrc));
+    check('LOCKED STANDARD', 'names CADENCE_AUDIO_MASTER_PRESET_V1 and the RAW→Auphonic→align→blend→loudnorm pipeline', /CADENCE_AUDIO_MASTER_PRESET_V1/.test(standardSrc) && /75% Auphonic \/ 25% RAW/.test(standardSrc));
+    check('LOCKED STANDARD', 'reuses the exact approved Auphonic settings block (autoeq, soft compressor, -18 LUFS target)', /"filtermethod": "autoeq"/.test(standardSrc) && /"compressor_speech": "soft"/.test(standardSrc) && /"loudnesstarget": -18/.test(standardSrc));
+    check('LOCKED STANDARD', 'documents raw preservation as universal/locked (every chunk saved to raw/ before finishing)', /Raw preservation \(locked, universal\)/.test(standardSrc));
+    check('LOCKED STANDARD', 'documents qaStatus discipline: Claude never sets APPROVED', /Claude\s*\n?\s*never sets `APPROVED`/.test(standardSrc) || /never sets `APPROVED`/.test(standardSrc));
+    check('LOCKED STANDARD', 'discloses the current AUPHONIC_API_KEY blocker rather than hiding it', /AUPHONIC_API_KEY.{0,40}is not available/i.test(standardSrc));
+  }
+
+  const scriptPath = path.join(ROOT, 'scripts/cadence-audio-produce.mjs');
+  const scriptExists = existsSync(scriptPath);
+  check('PRODUCTION SCRIPT', 'scripts/cadence-audio-produce.mjs exists', scriptExists);
+  if (scriptExists) {
+    const scriptSrc = readFileSync(scriptPath, 'utf8');
+    check('PRODUCTION SCRIPT', 'exports the alignment/blend primitives for independent testing', /export \{ verifyAlignment, crossCorrelate, resolveFfmpeg, ffprobeDuration, decodePcm16Mono, rmsEnvelope, logCenter, blendAndMaster \}/.test(scriptSrc));
+    // The script never edits the manifest at all (prints values for manual/
+    // reviewed application instead — see header comments) — so the real
+    // guarantee is the absence of ANY file write and any qaStatus
+    // assignment, not just an absence of the string 'APPROVED' (which the
+    // script's own disclaimer comments legitimately mention, e.g. "this
+    // script also NEVER writes qaStatus='APPROVED'").
+    check('PRODUCTION SCRIPT', 'contains no writeFileSync call and no qaStatus assignment anywhere (never edits the manifest, so it cannot write APPROVED)', !/writeFileSync/.test(scriptSrc) && !/\.qaStatus\s*=/.test(scriptSrc) && !/qaStatus:\s*['"]APPROVED['"]/.test(scriptSrc));
+    check('PRODUCTION SCRIPT', "explicitly documents (in its own header) that it never sets qaStatus='APPROVED'", /NEVER writes qaStatus='APPROVED'/.test(scriptSrc));
+    check('PRODUCTION SCRIPT', 'stops (does not silently fall back) when AUPHONIC_API_KEY is missing', /AUPHONIC_API_KEY is not set/.test(scriptSrc));
+    check('PRODUCTION SCRIPT', 'uses the locked 75/25 Auphonic/RAW blend weights', /auphonic:\s*0\.75/.test(scriptSrc) && /raw:\s*0\.25/.test(scriptSrc));
+    check('PRODUCTION SCRIPT', 'targets the locked loudness spec (I=-18, LRA=7, TP=-2)', /I:\s*-18/.test(scriptSrc) && /LRA:\s*7/.test(scriptSrc) && /TP:\s*-2/.test(scriptSrc));
+  }
+
+  // All 14 chunks now have a preserved RAW ElevenLabs file — 5 backfilled
+  // from pre-existing canonical audio (byte-identical, verified at the
+  // time), 9 newly generated this phase and independently format-verified.
+  for (let i = 1; i <= 14; i++) {
+    const id = 'm1-' + String(i).padStart(2, '0');
+    const rawPath = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01/raw/' + id + '.mp3');
+    const exists = existsSync(rawPath);
+    check('RAW PRESERVATION', id + ' has a preserved raw/ file', exists);
+    if (exists) {
+      check('RAW PRESERVATION', id + ' raw file is non-empty', statSync(rawPath).size > 0);
+    }
+  }
+
+  // Honesty check: the newly-locked pipeline definition of GENERATED
+  // requires Auphonic processing + verified alignment + blend, none of
+  // which ran this phase (AUPHONIC_API_KEY unavailable) — so qaStatus must
+  // be EXACTLY what it was before this phase: 5 GENERATED, 9 untouched
+  // (defaulting to NOT_GENERATED). No status was fabricated to claim
+  // compliance with a pipeline that never actually ran.
+  const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
+  const generatedIds = manifest.filter((c) => c.qaStatus === 'GENERATED').map((c) => c.chunkId).sort();
+  const expectedGeneratedIds = ['m1-01', 'm1-02', 'm1-03', 'm1-04', 'm1-07'];
+  check('QA STATUS HONESTY', 'exactly the 5 pre-existing chunks are GENERATED (no fabricated status on the 9 new raw-only chunks)', JSON.stringify(generatedIds) === JSON.stringify(expectedGeneratedIds), JSON.stringify(generatedIds));
+  const notGeneratedCount = manifest.filter((c) => c.qaStatus === 'NOT_GENERATED').length;
+  check('QA STATUS HONESTY', 'the remaining 9 chunks are still NOT_GENERATED', notGeneratedCount === 9, 'count=' + notGeneratedCount);
+  check('QA STATUS HONESTY', 'no chunk in the manifest was set to APPROVED', manifest.every((c) => c.qaStatus !== 'APPROVED'));
 })();
 
 // ---- Report ----
