@@ -1,9 +1,12 @@
 # Module 1 — Listen Mode Audio Production & QA Sheet
 
-**Status:** Owner handoff document. No audio has been generated — this task
-made **no ElevenLabs API calls** (per the task's own instruction: audio
-generation is owner-authorized and owner-executed, not run automatically by
-this build). Every row below starts at `NOT GENERATED`.
+**Status:** Owner handoff document. 3 of 14 chunks (M1-01, M1-04, M1-07)
+have real generated audio as of 2026-08-30, produced as an authorized
+pipeline-validation pilot (Eleven v3, Jane) — see Section 3a. **None of the
+14 chunks are APPROVED** — GENERATED still requires the owner's own
+listening review before Listen Mode can go live for real students (Section
+4 still applies in full). The remaining 11 chunks are untouched at
+`NOT_GENERATED`.
 **Voice:** Jane — bright, smooth and friendly.
 **Model:** Eleven v3.
 **Course / module:** HeadSpa Mastery, Module 1 — Role, Scope & Professional
@@ -97,13 +100,13 @@ Set per-chunk status directly in `assets/js/aimt-listen-mode-data.js` (the
 
 | Chunk | Status |
 |---|---|
-| M1-01 | NOT_GENERATED |
+| M1-01 | **GENERATED — OWNER REVIEW REQUIRED** |
 | M1-02 | NOT_GENERATED |
 | M1-03 | NOT_GENERATED |
-| M1-04 | NOT_GENERATED |
+| M1-04 | **GENERATED — OWNER REVIEW REQUIRED** |
 | M1-05 | NOT_GENERATED |
 | M1-06 | NOT_GENERATED |
-| M1-07 | NOT_GENERATED |
+| M1-07 | **GENERATED — OWNER REVIEW REQUIRED** |
 | M1-08 | NOT_GENERATED |
 | M1-09 | NOT_GENERATED |
 | M1-10 | NOT_GENERATED |
@@ -114,31 +117,109 @@ Set per-chunk status directly in `assets/js/aimt-listen-mode-data.js` (the
 
 ---
 
+## 3a. Real-audio pipeline validation pilot (M1-01, M1-04, M1-07)
+
+**Date generated:** 2026-08-30. **Voice:** Jane — Bright, Smooth and Friendly
+(`voice_id: Y3ZPRGOSIxbV4Rbb3WiA`). **Model:** `eleven_v3`. **Output:**
+confirmed MP3, 44.1 kHz, 128 kbps, mono (verified directly against each
+downloaded file with `file(1)` — matches the production spec in Section 5
+below exactly). Generated via the connected ElevenLabs Creative flow
+platform, one shared flow for review:
+[elevenlabs.io/app/flows/fp2ZnP1Hfna5trlQ3bYD](https://elevenlabs.io/app/flows/fp2ZnP1Hfna5trlQ3bYD).
+
+| Chunk | File | Duration | Chars (incl. tags) | Actual credits | Actual cost (USD) |
+|---|---|---|---|---|---|
+| M1-01 | `assets/audio/listen/headspa-mastery/module-01/m1-01.mp3` | 65.44s | 964 | 964 | $0.15906 |
+| M1-04 | `assets/audio/listen/headspa-mastery/module-01/m1-04.mp3` | 146.08s | 1,841 | 1,841 | $0.30377 |
+| M1-07 | `assets/audio/listen/headspa-mastery/module-01/m1-07.mp3` | 38.72s | 490 | 490 | $0.08085 |
+| **Total** | | **250.24s (~4:10)** | **3,295** | **3,295** | **$0.54368** |
+
+**On credit multiplier (Section 4 of the task):** the pre-generation
+*estimate* returned by this platform for these same three chunks was
+~2.2 credits per character (e.g. 1,083.94 credits estimated for M1-07's
+490 characters) — noticeably higher than what was **actually charged**,
+which came out to a flat **1 credit per character** for every chunk
+generated (964 credits for 964 characters, 1,841 for 1,841, 490 for 490,
+each confirmed by `creative_get_flow_run_status` after generation
+completed). In other words: **the estimate overstated the real cost by
+roughly 2.2×** on this platform for Jane + Eleven v3. This does not
+confirm or rule out the ~3× multiplier the owner previously saw on the
+raw ElevenLabs dashboard directly — this platform's "credits" are its own
+internal currency, not a verified 1:1 mirror of ElevenLabs' own billing —
+but it does mean: **trust the post-generation actual price, not the
+pre-generation estimate**, when budgeting the remaining 11 chunks.
+Extrapolating from the actual 1-credit-per-character rate: the remaining
+~9,722 characters (13,017 total − 3,295 already spent) would cost
+approximately **$1.60** at this same rate, for an estimated full-module
+total near **$2.15** — materially cheaper than the original 1:1-credit
+*assumption* documented in Section 1 above implied once ElevenLabs' own
+plan-level cent-per-credit rate is applied (that assumption was about
+credit *count*, not dollar cost; this section supplies the first real
+dollar figures).
+
+**QA verification performed (not a substitute for the owner's own
+listening review — see checklist below and Section 10 of the task):**
+- M1-07 was independently re-transcribed (Eleven Scribe, from a freshly
+  re-uploaded copy of the downloaded file — not the original generation
+  node, to rule out a prompt-echo false pass) and contains **no spoken
+  structural markers** and **no audible bracket tags** — `[short pause]`
+  and `[slowly]` were correctly interpreted as delivery direction, never
+  vocalized. The checkpoint question was transcribed **word-for-word
+  identical** to `M1.questions.m1cp1`.
+- M1-04 was independently re-transcribed the same way. Every safety-critical
+  phrase — the two "Say this" scripts, the four "Never say" phrases, and the
+  full referral-trigger list — transcribed correctly and matches the
+  approved TTS text (transcription differs only in ASR punctuation
+  normalization, not wording).
+- All three files verified as real, playable MP3s locally: mounted in the
+  actual Listen Mode player, played, paused, sought forward/backward, and
+  had their speed changed successfully against the real audio (see the
+  task's final report for the full player-integration results).
+
+---
+
 ## 4. Why the player won't show Listen Mode yet
 
 `AIMTListenModeData.isProductionReady()` requires **every** chunk's
-`qaStatus` to be `APPROVED`. Right now all 14 are `NOT_GENERATED`, so
-`AIMTListenMode.mount()` returns early and never renders the "Listen to this
-module" entry point for real students — there is nothing to disable or
-hide manually. A `?listenQA=1` URL flag exists for internal preview once
-individual chunks reach `GENERATED`, showing a "QA preview" badge so it's
-never mistaken for the real, released experience.
+`qaStatus` to be `APPROVED`. Right now 3 are `GENERATED` (M1-01, M1-04,
+M1-07) and 11 are `NOT_GENERATED` — none are `APPROVED` — so
+`AIMTListenMode.mount()` still returns early and never renders the "Listen
+to this module" entry point for real students, confirmed directly against
+the real installed files in this pilot (a `throwingDoc` test proved
+`mount()` never touches the DOM in this state). There is nothing to disable
+or hide manually. A `?listenQA=1` URL flag exists for internal preview of
+`GENERATED`-or-better chunks, showing a "QA preview" badge so it's never
+mistaken for the real, released experience — this is how the 3 real files
+were exercised end-to-end in the player during this pilot.
 
 ---
 
 ## 5. Owner generation steps (see also the final task report for the same steps)
 
-1. Open ElevenLabs, select the Jane voice and the Eleven v3 model.
-2. For each chunk M1-01 through M1-14, paste the exact contents of its
-   `.txt` file from `tts/module-01/` (nothing else — no headers, no chunk
-   IDs, no metadata).
+**For M1-01, M1-04, and M1-07 — already generated, review only:**
+1. Listen to the three files directly at `assets/audio/listen/headspa-mastery/module-01/m1-01.mp3`, `m1-04.mp3`, `m1-07.mp3`.
+2. Score each against the QA checklist in Section 3 above.
+3. In `assets/js/aimt-listen-mode-data.js`, change that chunk's `qaStatus`
+   from `'GENERATED'` to `'APPROVED'` if it passes, or `'REGENERATE'` if it
+   doesn't (then regenerate from its `.txt` file and re-review).
+
+**For the remaining 11 chunks (M1-02, M1-03, M1-05, M1-06, M1-08 through
+M1-13 excluding M1-07, M1-14) — not yet generated:**
+1. Open ElevenLabs, select the Jane voice (`Y3ZPRGOSIxbV4Rbb3WiA`) and the
+   Eleven v3 model.
+2. For each chunk, paste the exact contents of its `.txt` file from
+   `tts/module-01/` (nothing else — no headers, no chunk IDs, no metadata).
 3. Generate, listen back against the QA checklist above.
-4. Export as MP3 and save to the exact target filename in the table (create
-   the `assets/audio/listen/headspa-mastery/module-01/` folder if it doesn't exist
-   yet — it is not committed by this task, since no audio exists to put in
-   it).
+4. Export as MP3 and save to the exact target filename in the table (the
+   `assets/audio/listen/headspa-mastery/module-01/` folder now exists,
+   created and committed by the pilot).
 5. Update that chunk's `qaStatus` in `assets/js/aimt-listen-mode-data.js`
    to `GENERATED`, then to `APPROVED` once it passes the checklist (or
    `REGENERATE` if it doesn't, and repeat from step 2).
 6. Once all 14 are `APPROVED`, Listen Mode becomes available to real
    students automatically — no other code change is required.
+
+**Note on cost:** budget from the *actual* per-character rate observed in
+Section 3a (1 credit/character for Jane + Eleven v3 on this platform, not
+the higher pre-generation estimate), unless the owner's own ElevenLabs
+account/dashboard reports a different multiplier directly.

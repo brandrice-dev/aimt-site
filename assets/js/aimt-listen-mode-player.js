@@ -303,6 +303,12 @@
     body.appendChild(noteEl);
     bar.appendChild(topRow);
     bar.appendChild(body);
+    // Attached (not just held in a closure) for Media Session reliability
+    // and iOS Safari, which is inconsistent about detached-element
+    // playback. Hidden — the visible transport controls above are what
+    // the student actually interacts with.
+    audio.style.display = 'none';
+    bar.appendChild(audio);
 
     function setNote(text) { noteEl.textContent = text || ''; }
 

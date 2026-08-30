@@ -84,15 +84,21 @@
   // ── HeadSpa Mastery — Module 1 (pilot) ──
   // Source of truth for wording: docs/course-audit/listen-mode/module-01-listen-script-draft.md (v3).
   // TTS production text: docs/course-audit/listen-mode/tts/module-01/*.txt.
-  // All qaStatus values start NOT_GENERATED — no audio has been produced yet
-  // (Section 6 of the Module 1 pilot task: no ElevenLabs calls were made by
-  // this build). The owner updates qaStatus as real audio is generated and
-  // reviewed (Section 18).
+  // m1-01, m1-04, and m1-07 are GENERATED — real Eleven v3 / Jane audio was
+  // produced for these three as a pipeline-validation pilot (see
+  // docs/course-audit/listen-mode/module-01-audio-production-sheet.md
+  // Section 5). GENERATED is not APPROVED — none of the 14 chunks are
+  // APPROVED yet, so isProductionReady() is still false and the player
+  // still won't present Listen Mode to real students. The remaining 11
+  // chunks stay NOT_GENERATED until the owner reviews these three and
+  // authorizes the rest. The owner updates qaStatus as audio is generated
+  // and reviewed (Section 18/10).
   var HEADSPA_MODULE_1 = [
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-01',
       title: 'Module Briefing (spoken)', sourceSection: 'Module Briefing',
-      visualTarget: 'm1WrittenBriefing'
+      visualTarget: 'm1WrittenBriefing',
+      duration: 65.44, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-02',
@@ -105,7 +111,8 @@
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-04',
       title: '1.3 Observation vs. diagnosis', sourceSection: '1.3',
-      visualTarget: 'm1VisualScopeLanguage'
+      visualTarget: 'm1VisualScopeLanguage',
+      duration: 146.08, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-05',
@@ -120,7 +127,8 @@
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-07',
       title: 'Checkpoint 1 — m1cp1', sourceSection: '#m1cp1',
-      visualTarget: 'm1cp1', checkpointId: 'm1cp1', gateType: 'checkpoint-stop'
+      visualTarget: 'm1cp1', checkpointId: 'm1cp1', gateType: 'checkpoint-stop',
+      duration: 38.72, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-08',
