@@ -559,8 +559,14 @@ function diffAgainstStart(relPath) {
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
   // file inside it — treat that as accounted-for only if every allowlisted
   // path it could contain is itself allowlisted (true here by construction).
+  // Each real backup run writes a uniquely-timestamped snapshot manifest
+  // (docs/course-audit/listen-mode/cloud-backup/module-01-snapshot-<UTC
+  // timestamp>.json) -- a fixed filename can't be allowlisted in advance,
+  // so match the pattern instead.
+  const snapshotManifestPattern = /^docs\/course-audit\/listen-mode\/cloud-backup\/module-01-snapshot-.+\.json$/;
   const unexpected = changedPaths.filter((p) => {
     if (allowlist.has(p)) return false;
+    if (snapshotManifestPattern.test(p)) return false;
     if (p.endsWith('/')) return !allowlistArr.some((a) => a.startsWith(p));
     return true;
   });

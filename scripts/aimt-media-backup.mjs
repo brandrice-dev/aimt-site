@@ -23,8 +23,8 @@ import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'no
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import {
-  sha256File, mimeTypeFor, contentAddressedKey,
-  requireR2Config, r2HeadObject, r2PutObject
+  sha256File, sha256Hex, mimeTypeFor, contentAddressedKey,
+  requireR2Config, r2HeadObject, r2PutObject, r2GetObject
 } from './_lib/r2-s3-client.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -157,9 +157,23 @@ function parseArgs(argv) {
 
 // `deps` defaults to the real R2 client calls; tests inject fakes here so
 // the reuse-vs-upload decision logic is verifiable without a live R2
-// connection (which this environment does not currently have -- R2 is not
-// yet enabled on the account, see the backup report).
-async function backupFile(config, entry, deps = { headObject: r2HeadObject, putObject: r2PutObject }) {
+// connection.
+//
+// Reuse decision: existence at a content-addressed key (HEAD 200) is
+// sufficient on its own -- the key IS sha256(bytes), so an object present
+// there is, by construction, the same content (barring an astronomically
+// improbable SHA-256 collision). No separate size check is needed or
+// used: real-world testing against R2 found Cloudflare's edge transparently
+// gzip-encodes compressible content-types (e.g. application/json), which
+// drops the Content-Length header from the HEAD response entirely --
+// gating reuse on a reported size would misfire specifically for JSON/text
+// blobs.
+//
+// Post-upload verification: a real GET + SHA-256 comparison against the
+// already-known local hash, not a HEAD/Content-Length check -- this proves
+// the bytes actually round-tripped correctly through R2, and isn't
+// vulnerable to the same header-based blind spot.
+async function backupFile(config, entry, deps = { headObject: r2HeadObject, putObject: r2PutObject, getObject: r2GetObject }) {
   const absPath = path.join(ROOT, entry.relPath);
   if (!existsSync(absPath)) {
     if (entry.required) {
@@ -175,19 +189,15 @@ async function backupFile(config, entry, deps = { headObject: r2HeadObject, putO
 
   const existing = await deps.headObject(config, key);
   let status;
-  if (existing && existing.size === size) {
+  if (existing) {
     status = 'reused-existing-blob';
-  } else if (existing && existing.size !== size) {
-    // Same hash, different recorded size should never happen (hash
-    // collision territory) -- treat as an integrity problem, not a
-    // silent overwrite.
-    throw new Error(`R2 object at ${key} exists but size mismatch (local ${size} vs remote ${existing.size}) -- refusing to overwrite a content-addressed blob.`);
   } else {
     const bytes = readFileSync(absPath);
     await deps.putObject(config, key, bytes, mimeType);
-    const verify = await deps.headObject(config, key);
-    if (!verify || verify.size !== size) {
-      throw new Error(`Upload verification failed for ${entry.relPath}: HEAD after PUT did not report the expected size.`);
+    const verifyBytes = await deps.getObject(config, key);
+    const verifySha256 = sha256Hex(verifyBytes);
+    if (verifySha256 !== sha256) {
+      throw new Error(`Upload verification failed for ${entry.relPath}: downloaded object's SHA-256 (${verifySha256}) does not match the local file's SHA-256 (${sha256}).`);
     }
     status = 'uploaded';
   }

@@ -73,38 +73,62 @@ await (async function reuseBehavior() {
   if (!existsSync(rawPath)) { check('C. DUPLICATE REUSE', 'm1-01 raw source exists to test against', false); return; }
   const size = statSync(rawPath).size;
 
-  // Case 1: object already exists with matching size -> reused, PUT never called.
+  // Case 1: object already exists at the content-addressed key -> reused,
+  // PUT never called. Existence alone is sufficient (no size check --
+  // real R2 testing found Cloudflare's edge drops Content-Length on HEAD
+  // for gzip-re-encoded compressible content-types like JSON).
   let putCalled = false;
   const reuseDeps = {
     headObject: async () => ({ size, contentType: 'audio/mpeg' }),
-    putObject: async () => { putCalled = true; }
+    putObject: async () => { putCalled = true; },
+    getObject: async () => { throw new Error('should not be called on reuse'); }
   };
   const reuseResult = await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3', role: 'raw-elevenlabs-generation', required: true }, reuseDeps);
-  check('C. DUPLICATE REUSE', 'existing object with matching size is reused, not re-uploaded', reuseResult.status === 'reused-existing-blob');
+  check('C. DUPLICATE REUSE', 'existing object at the content-addressed key is reused, not re-uploaded', reuseResult.status === 'reused-existing-blob');
   check('C. DUPLICATE REUSE', 'putObject is never called when the blob already exists', !putCalled);
 
-  // Case 2: object does not exist -> uploaded, PUT called exactly once.
+  // Case 1b: a HEAD response with size 0 (the real, observed shape when
+  // Cloudflare's edge gzip-encodes a compressible content-type and drops
+  // Content-Length) still counts as "exists" -> reused, not re-uploaded.
+  let putCalledForZeroSize = false;
+  const zeroSizeHeadDeps = {
+    headObject: async () => ({ size: 0, contentType: 'application/json' }),
+    putObject: async () => { putCalledForZeroSize = true; },
+    getObject: async () => { throw new Error('should not be called on reuse'); }
+  };
+  const zeroSizeResult = await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3', role: 'raw-elevenlabs-generation', required: true }, zeroSizeHeadDeps);
+  check('C. DUPLICATE REUSE', 'a HEAD result with an unreliable/zero size (gzip Content-Length loss) still counts as existing, not re-uploaded', zeroSizeResult.status === 'reused-existing-blob' && !putCalledForZeroSize);
+
+  // Case 2: object does not exist -> uploaded, PUT called exactly once,
+  // verified via a real GET + SHA-256 comparison (not a HEAD size check).
   let putCallCount = 0;
+  let uploadedBytes = null;
   const uploadDeps = {
-    headObject: async (config, key) => (putCallCount === 0 ? null : { size, contentType: 'audio/mpeg' }),
-    putObject: async () => { putCallCount++; }
+    headObject: async () => null,
+    putObject: async (config, key, bytes) => { putCallCount++; uploadedBytes = bytes; },
+    getObject: async () => uploadedBytes
   };
   const uploadResult = await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3', role: 'raw-elevenlabs-generation', required: true }, uploadDeps);
   check('C. DUPLICATE REUSE', 'missing object triggers exactly one upload', uploadResult.status === 'uploaded' && putCallCount === 1);
 
-  // Case 3: existing object with a size mismatch is an integrity error, not silently overwritten.
-  const mismatchDeps = { headObject: async () => ({ size: size + 1, contentType: 'audio/mpeg' }), putObject: async () => { throw new Error('should not be called'); } };
-  let threw = false;
+  // Case 3: the post-upload GET returns bytes that don't match the local
+  // SHA-256 (simulated transit corruption) -> hard error, not accepted.
+  const corruptDeps = {
+    headObject: async () => null,
+    putObject: async () => {},
+    getObject: async () => Buffer.from('corrupted, not the real uploaded bytes')
+  };
+  let corruptThrew = false;
   try {
-    await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3', role: 'raw-elevenlabs-generation', required: true }, mismatchDeps);
+    await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3', role: 'raw-elevenlabs-generation', required: true }, corruptDeps);
   } catch (e) {
-    threw = /size mismatch/.test(e.message);
+    corruptThrew = /does not match the local file's SHA-256/.test(e.message);
   }
-  check('C. DUPLICATE REUSE', 'a same-hash-different-size collision is treated as an integrity error, never silently overwritten', threw);
+  check('C. DUPLICATE REUSE', 'a post-upload GET whose SHA-256 does not match the local file is a hard error, never silently accepted', corruptThrew);
 
   // Case 4: a missing required file throws before any network call is attempted.
   let headCalledForMissing = false;
-  const missingDeps = { headObject: async () => { headCalledForMissing = true; return null; }, putObject: async () => {} };
+  const missingDeps = { headObject: async () => { headCalledForMissing = true; return null; }, putObject: async () => {}, getObject: async () => Buffer.alloc(0) };
   let missingThrew = false;
   try {
     await backupFile({ bucket: 'test' }, { relPath: 'assets/audio/listen/headspa-mastery/module-01/raw/does-not-exist.mp3', role: 'raw-elevenlabs-generation', required: true }, missingDeps);
@@ -115,7 +139,7 @@ await (async function reuseBehavior() {
 
   // Case 5: a missing optional file is skipped cleanly, no network call, no throw.
   let headCalledForOptional = false;
-  const optionalDeps = { headObject: async () => { headCalledForOptional = true; return null; }, putObject: async () => {} };
+  const optionalDeps = { headObject: async () => { headCalledForOptional = true; return null; }, putObject: async () => {}, getObject: async () => Buffer.alloc(0) };
   const optionalResult = await backupFile({ bucket: 'test' }, { relPath: 'docs/course-audit/listen-mode/capcut-production/module-01/intake/module-01-capcut-master-processed.flac', role: 'capcut-full-module-processed-export', required: false }, optionalDeps);
   check('C. DUPLICATE REUSE', 'a missing OPTIONAL file is skipped cleanly without a network call', optionalResult.status === 'skipped-not-present' && !headCalledForOptional);
 })();
