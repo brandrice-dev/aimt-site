@@ -1,9 +1,15 @@
 # Module 1 — Full-Module CapCut Master: Preparation Report
 
-**Status:** Preparation only. The full-module master is built and its
-unprocessed dry-run re-split passed. No CapCut processing of the full
-module has happened yet — this document will be updated once the owner
-returns a processed export (see `CAPCUT-MODULE-01-INSTRUCTIONS.md`).
+**Status: HISTORICAL / PRE-LIMIT EVIDENCE.** CapCut refuses Enhance Voice
+on a clip 15:00 or longer, and this full 14-chunk master runs ~16:32 — so
+it cannot be processed as one CapCut pass. **This document and the
+`module-01-capcut-master.wav` it describes remain on disk as valid
+evidence of the build/dry-run work, but are no longer the active
+production path.** Module 1 now uses two CapCut finishing parts split at
+the M1-07/M1-08 checkpoint — see
+`module-01-capcut-production-report-parts.md` for the current approach,
+and `module-01-production-standard-LOCKED.md` Section 4 for the locked
+duration-limit rule.
 
 ---
 
@@ -100,10 +106,10 @@ readability of the log.
 - Did not process the master with CapCut (that's the owner's one pass).
 - Did not commit an install of any chunk.
 
-## 6. Next step
+## 6. Next step (superseded)
 
-Owner runs the one CapCut pass described in
-`CAPCUT-MODULE-01-INSTRUCTIONS.md` using `CADENCE_CAPCUT_FINISH_PRESET_V1`
-(see `module-01-production-standard-LOCKED.md` Section 3) and exports to
-`intake/module-01-capcut-master-processed.flac`. Once that file exists,
-ask Claude to run the real re-split validation against it.
+~~Owner runs the one CapCut pass described in
+`CAPCUT-MODULE-01-INSTRUCTIONS.md`... exports to
+`intake/module-01-capcut-master-processed.flac`~~ — superseded by the
+Part A / Part B split. See `module-01-capcut-production-report-parts.md`
+for the current next step.

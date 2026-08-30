@@ -98,8 +98,8 @@ function readWavHeader(filePath) {
   check('A. PRESET DOC', 'explicitly warns against chaining the old -18 LUFS Auphonic master after CapCut', /do not chain the old Auphonic master/i.test(src));
 
   check('A. PRESET DOC', 'marks CADENCE_AUDIO_MASTER_PRESET_V1 as HISTORICAL / SUPERSEDED, not deleted', /CADENCE_AUDIO_MASTER_PRESET_V1.{0,80}HISTORICAL QA \/ SUPERSEDED|HISTORICAL QA \/ SUPERSEDED.{0,80}CADENCE_AUDIO_MASTER_PRESET_V1|## 6\. `CADENCE_AUDIO_MASTER_PRESET_V1` — HISTORICAL QA \/ SUPERSEDED/.test(src));
-  check('A. PRESET DOC', 'documents the active production flow (ElevenLabs -> raw -> module master -> one CapCut pass -> re-split -> canonical -> qaStatus)', /ONE CapCut pass on the whole module master/.test(src));
-  check('A. PRESET DOC', 'documents the "one CapCut pass per module" workload goal', /approximately ONE CapCut processing\/export action\s*\n?\s*per module/.test(src));
+  check('A. PRESET DOC', 'documents the active production flow (ElevenLabs -> raw -> module master(s) -> CapCut pass(es) -> re-split -> canonical -> qaStatus)', /ONE CapCut pass per part/.test(src));
+  check('A. PRESET DOC', 'documents the "one CapCut pass per part" workload goal (updated for the 15:00 limit -- most modules are still one part)', /approximately ONE CapCut processing\/export action\s*\n?\s*per part/.test(src));
   check('A. PRESET DOC', 'requires position-anchored (not global) boundary matching', /position-anchored/.test(src) && /manifest-predicted position/.test(src));
 })();
 
@@ -334,6 +334,119 @@ await (async function positionAnchoredMatching() {
   const forbidden = ['elevenlabs', 'anthropic.com', 'api.openai', 'auphonic.com'];
   const found = forbidden.filter((token) => src.toLowerCase().includes(token));
   check('J. NO PROVIDER CALLS', 'no ElevenLabs/Anthropic/OpenAI/Auphonic references in the re-split script (pure local ffmpeg tool)', found.length === 0, found.join(', '));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// K. Two-part CapCut split (CapCut's 15:00 Enhance Voice limit): both
+//    masters exist, are valid WAV, and stay safely under the hard limit.
+// ─────────────────────────────────────────────────────────────────────────
+const PART_A_PATH = path.join(ROOT, 'docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-master-part-a.wav');
+const PART_B_PATH = path.join(ROOT, 'docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-master-part-b.wav');
+const PART_A_MANIFEST_PATH = path.join(ROOT, 'docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-a.json');
+const PART_B_MANIFEST_PATH = path.join(ROOT, 'docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-b.json');
+const CAPCUT_HARD_LIMIT_SEC = 15 * 60;
+const CAPCUT_SAFETY_TARGET_SEC = 14 * 60;
+
+(function twoPartMasters() {
+  const aExists = existsSync(PART_A_PATH);
+  const bExists = existsSync(PART_B_PATH);
+  check('K. TWO-PART MASTERS', 'Part A master exists', aExists);
+  check('K. TWO-PART MASTERS', 'Part B master exists', bExists);
+  if (!aExists || !bExists) return;
+
+  const aHeader = readWavHeader(PART_A_PATH);
+  const bHeader = readWavHeader(PART_B_PATH);
+  check('K. TWO-PART MASTERS', 'Part A is 44.1kHz mono 16-bit PCM', aHeader.sampleRate === 44100 && aHeader.channels === 1 && aHeader.bitsPerSample === 16);
+  check('K. TWO-PART MASTERS', 'Part B is 44.1kHz mono 16-bit PCM', bHeader.sampleRate === 44100 && bHeader.channels === 1 && bHeader.bitsPerSample === 16);
+  check('K. TWO-PART MASTERS', 'Part A duration is exactly 628.8s (7 chunks + 6 separators)', Math.abs(aHeader.durationSec - 628.8) < 0.001, String(aHeader.durationSec));
+  check('K. TWO-PART MASTERS', 'Part B duration is exactly 361.68s (7 chunks + 6 separators)', Math.abs(bHeader.durationSec - 361.68) < 0.001, String(bHeader.durationSec));
+  check('K. TWO-PART MASTERS', 'Part A is under the CapCut 15:00 hard limit', aHeader.durationSec < CAPCUT_HARD_LIMIT_SEC);
+  check('K. TWO-PART MASTERS', 'Part B is under the CapCut 15:00 hard limit', bHeader.durationSec < CAPCUT_HARD_LIMIT_SEC);
+  check('K. TWO-PART MASTERS', 'Part A is under the ~14 minute preferred safety target', aHeader.durationSec < CAPCUT_SAFETY_TARGET_SEC);
+  check('K. TWO-PART MASTERS', 'Part B is under the ~14 minute preferred safety target', bHeader.durationSec < CAPCUT_SAFETY_TARGET_SEC);
+
+  const fullMasterExists = existsSync(MASTER_PATH);
+  check('K. TWO-PART MASTERS', 'the original full-module master still exists on disk (historical evidence, not deleted)', fullMasterExists);
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// L. Two-part boundary manifests: correct chunk sets, no leading/trailing
+//    separator, split exactly at the M1-07/M1-08 checkpoint with no
+//    separator connecting the two parts.
+// ─────────────────────────────────────────────────────────────────────────
+(function twoPartManifests() {
+  const aExists = existsSync(PART_A_MANIFEST_PATH);
+  const bExists = existsSync(PART_B_MANIFEST_PATH);
+  check('L. TWO-PART MANIFESTS', 'Part A boundary manifest exists', aExists);
+  check('L. TWO-PART MANIFESTS', 'Part B boundary manifest exists', bExists);
+  if (!aExists || !bExists) return;
+
+  const mA = JSON.parse(readFileSync(PART_A_MANIFEST_PATH, 'utf8'));
+  const mB = JSON.parse(readFileSync(PART_B_MANIFEST_PATH, 'utf8'));
+
+  const chunksA = mA.chunks.filter((c) => !c.separator).map((c) => c.chunkId);
+  const chunksB = mB.chunks.filter((c) => !c.separator).map((c) => c.chunkId);
+  const expectedA = ['m1-01', 'm1-02', 'm1-03', 'm1-04', 'm1-05', 'm1-06', 'm1-07'];
+  const expectedB = ['m1-08', 'm1-09', 'm1-10', 'm1-11', 'm1-12', 'm1-13', 'm1-14'];
+  check('L. TWO-PART MANIFESTS', 'Part A contains exactly M1-01 through M1-07, in order', JSON.stringify(chunksA) === JSON.stringify(expectedA), JSON.stringify(chunksA));
+  check('L. TWO-PART MANIFESTS', 'Part B contains exactly M1-08 through M1-14, in order', JSON.stringify(chunksB) === JSON.stringify(expectedB), JSON.stringify(chunksB));
+
+  const sepsA = mA.chunks.filter((c) => c.separator);
+  const sepsB = mB.chunks.filter((c) => c.separator);
+  check('L. TWO-PART MANIFESTS', 'Part A has exactly 6 separators (7 chunks)', sepsA.length === 6);
+  check('L. TWO-PART MANIFESTS', 'Part B has exactly 6 separators (7 chunks)', sepsB.length === 6);
+
+  check('L. TWO-PART MANIFESTS', 'Part A: no separator before the first chunk or after the last', !mA.chunks[0].separator && mA.chunks[0].chunkId === 'm1-01' && mA.chunks[0].masterStartSec === 0 && !mA.chunks[mA.chunks.length - 1].separator && mA.chunks[mA.chunks.length - 1].chunkId === 'm1-07');
+  check('L. TWO-PART MANIFESTS', 'Part B: no separator before the first chunk or after the last', !mB.chunks[0].separator && mB.chunks[0].chunkId === 'm1-08' && mB.chunks[0].masterStartSec === 0 && !mB.chunks[mB.chunks.length - 1].separator && mB.chunks[mB.chunks.length - 1].chunkId === 'm1-14');
+
+  // The most important invariant: M1-07 and M1-08 belong to different
+  // parts, so no manifest may declare a separator connecting them --
+  // the checkpoint stop itself is the seam, not a synthetic marker.
+  const anySepConnectsAcrossParts =
+    sepsA.some((s) => s.beforeChunk === 'm1-07' && s.afterChunk === 'm1-08') ||
+    sepsB.some((s) => s.beforeChunk === 'm1-07' && s.afterChunk === 'm1-08');
+  check('L. TWO-PART MANIFESTS', 'no separator connects M1-07 to M1-08 across the two parts (the checkpoint stop is the seam)', !anySepConnectsAcrossParts);
+
+  check('L. TWO-PART MANIFESTS', 'Part A totalDuration matches its master (628.8s)', Math.abs(mA.masterTotalDurationSec - 628.8) < 1e-6);
+  check('L. TWO-PART MANIFESTS', 'Part B totalDuration matches its master (361.68s)', Math.abs(mB.masterTotalDurationSec - 361.68) < 1e-6);
+  check('L. TWO-PART MANIFESTS', 'both manifests record the active preset name', mA.preset === 'CADENCE_CAPCUT_FINISH_PRESET_V1' && mB.preset === 'CADENCE_CAPCUT_FINISH_PRESET_V1');
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// M. Locked duration-limit rule documented in the production standard
+// ─────────────────────────────────────────────────────────────────────────
+(function durationLimitDocumented() {
+  const exists = existsSync(STANDARD_PATH);
+  check('M. DURATION LIMIT RULE', 'production standard doc exists', exists);
+  if (!exists) return;
+  const src = readFileSync(STANDARD_PATH, 'utf8');
+  check('M. DURATION LIMIT RULE', 'documents the CapCut 15:00 hard limit', /under\s+\*\*15:00\*\*/.test(src) || /15:00/.test(src));
+  check('M. DURATION LIMIT RULE', 'documents the ~13-14 minute preferred safety target', /13.{0,4}14 minutes/.test(src));
+  check('M. DURATION LIMIT RULE', 'documents split priority: checkpoint boundary first', /checkpoint boundary/i.test(src));
+  check('M. DURATION LIMIT RULE', 'documents never splitting mid-sentence or for equal halves', /mid-sentence/.test(src) && /equal-duration halves/.test(src));
+  check('M. DURATION LIMIT RULE', 'documents the applied Module 1 split at M1-07/M1-08', /M1-07\/M1-08 checkpoint/.test(src));
+  check('M. DURATION LIMIT RULE', 'documents that the semantic chunk set never changes because of this partition', /semantic Listen Mode chunk set/.test(src) && /never changes/.test(src));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// N/O. Historical marking + dry-run evidence for the two-part reports
+// ─────────────────────────────────────────────────────────────────────────
+(function twoPartReports() {
+  const oldReportExists = existsSync(REPORT_PATH);
+  check('N. HISTORICAL MARKING', 'the original full-master report still exists (not deleted)', oldReportExists);
+  if (oldReportExists) {
+    const src = readFileSync(REPORT_PATH, 'utf8');
+    check('N. HISTORICAL MARKING', 'the original full-master report is explicitly marked historical/pre-limit evidence', /HISTORICAL \/ PRE-LIMIT EVIDENCE/.test(src));
+  }
+
+  const partsReportPath = path.join(ROOT, 'docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-production-report-parts.md');
+  const partsExists = existsSync(partsReportPath);
+  check('O. PARTS DRY-RUN EVIDENCE', 'the two-part production report exists', partsExists);
+  if (!partsExists) return;
+  const src = readFileSync(partsReportPath, 'utf8');
+  check('O. PARTS DRY-RUN EVIDENCE', 'records PASS for Part A', /\*\*Part A: PASS\.\*\*/.test(src));
+  check('O. PARTS DRY-RUN EVIDENCE', 'records PASS for Part B', /\*\*Part B: PASS\.\*\*/.test(src));
+  check('O. PARTS DRY-RUN EVIDENCE', 'records the split decision (M1-07/M1-08 checkpoint)', /M1-07\/M1-08 checkpoint/.test(src));
 })();
 
 // ---- Report ----

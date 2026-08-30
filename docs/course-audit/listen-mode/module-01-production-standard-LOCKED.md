@@ -1,6 +1,6 @@
 # Module 1 Listen Mode — LOCKED Production Standard
 
-**Status: LOCKED by owner decision, 2026-08-30 (chunking + `CADENCE_AUDIO_MASTER_PRESET_V1`), updated 2026-08-30 (finishing direction moved to `CADENCE_CAPCUT_FINISH_PRESET_V1`).** This document is the
+**Status: LOCKED by owner decision, 2026-08-30 (chunking + `CADENCE_AUDIO_MASTER_PRESET_V1`), updated 2026-08-30 (finishing direction moved to `CADENCE_CAPCUT_FINISH_PRESET_V1`), updated again 2026-08-30 (CapCut's 15:00 Enhance Voice limit means a module master may need multiple CapCut finishing parts — see Section 4).** This document is the
 single source of truth for how Cadence Listen Mode audio gets produced
 going forward. It supersedes the exploratory framing in every prior
 comparison doc in this directory (cohesion, finishing, de-ess calibration,
@@ -36,8 +36,9 @@ well-chosen chunks is the safer default.
 
 This chunking standard governs semantic granularity only. It is
 independent of the finishing pipeline below — cross-chunk tonal
-consistency is now handled by finishing the whole module in one pass
-(Section 4), not by generating fewer/larger ElevenLabs chunks.
+consistency is now handled by finishing a module's audio in one or more
+CapCut parts (Section 5), not by generating fewer/larger ElevenLabs
+chunks.
 
 ## 2. M1-04 — final decision (locked, unchanged)
 
@@ -56,7 +57,7 @@ decided, not as production candidates.
 **This is the active AIMT Listen Mode finishing direction**, chosen after
 a real CapCut round-trip proof (raw → CapCut Enhance Voice → automatic
 position-anchored re-split) passed technically and the owner preferred the
-result over every Auphonic/FFmpeg alternative tested (see Section 6 for
+result over every Auphonic/FFmpeg alternative tested (see Section 7 for
 why those are now historical).
 
 The exact, owner-approved manual CapCut settings — reused verbatim, not
@@ -89,38 +90,76 @@ Normalize Loudness ON at CapCut's own displayed −23 LUFS target. Applying
 change) after CapCut would change the approved sound and is not part of
 this preset.
 
-## 4. Active production flow (locked 2026-08-30)
+## 4. CapCut master-duration limit (locked 2026-08-30)
+
+**Finding:** CapCut refuses Enhance Voice on a clip 15:00 or longer. The
+full Module 1 master (14 chunks + 13 markers) runs ~16:32 — over the
+limit. This does not retire the CapCut workflow; it means a "module
+master" is a **logical production set** that may need to be split into
+multiple CapCut finishing parts.
+
+- **Hard limit:** every CapCut finishing part must be **under 15:00**.
+- **Preferred safety target:** under **~13–14 minutes** when practical,
+  so normal per-file timing variance never risks the hard limit.
+- **Split priority**, in order:
+  1. An existing **checkpoint boundary** (the student already experiences
+     an intentional interruption there — the most natural seam).
+  2. A **major natural teaching-section boundary**.
+  3. Any other **clean semantic break**.
+- **Never split:** mid-sentence, mid-explanation, or purely to force
+  equal-duration halves. A clean seam always outranks a balanced one.
+- This is a **temporary CapCut production/mastering partition only** —
+  the semantic Listen Mode chunk set (`assets/js/aimt-listen-mode-data.js`)
+  never changes because of it, and no separator is inserted between two
+  chunks that belong to different parts (the checkpoint stop itself is
+  the seam; no synthetic marker is needed there).
+
+**Module 1 split (applied 2026-08-30):** at the M1-07/M1-08 checkpoint —
+Part A = M1-01–M1-07 (10:28.8), Part B = M1-08–M1-14 (6:01.7). Both
+comfortably under the hard limit; see the production report for the
+full measurement and dry-run evidence.
+
+## 5. Active production flow (locked 2026-08-30, updated for multi-part masters)
 
 ```
 approved narration
   → ElevenLabs Jane / eleven_v3 generates semantic raw chunks
-  → preserve every raw chunk (Section 5 — never overwritten)
-  → concatenate ALL of a module's raw chunks into ONE temporary master
-  → insert deterministic 2.0s digital-silence boundary markers between
-    chunks only (none before the first chunk, none after the last)
-  → owner runs ONE CapCut pass on the whole module master, using
-    CADENCE_CAPCUT_FINISH_PRESET_V1 exactly as documented above
-  → owner exports one lossless (FLAC or WAV) processed master
-  → automatic position-anchored boundary detection locates the markers
-    (scripts/cadence-capcut-resplit.mjs — see Section 7)
-  → automatic re-split recovers the original semantic chunks
+  → preserve every raw chunk (Section 6 — never overwritten)
+  → calculate the module's total temporary-master duration
+  → if it fits under the Section 4 safety threshold, ONE CapCut part;
+    otherwise partition at a checkpoint boundary first (Section 4)
+  → within each part, concatenate that part's raw chunks and insert
+    deterministic 2.0s digital-silence boundary markers between chunks
+    only (none before the part's first chunk, none after its last)
+  → owner runs ONE CapCut pass per part, using
+    CADENCE_CAPCUT_FINISH_PRESET_V1 exactly as documented above --
+    identical settings on every part
+  → owner exports one lossless (FLAC or WAV) processed master per part
+  → automatic position-anchored boundary detection locates each part's
+    markers (scripts/cadence-capcut-resplit.mjs — see Section 8)
+  → automatic re-split recovers the original semantic chunks from every
+    part and reassembles the module's full chunk set
   → technical verification (duration/drift/no-speech-loss/no-clipping)
   → install as canonical production MP3s
   → qaStatus = GENERATED
   → owner does final listening QA on the canonical chunks
   → owner explicitly marks APPROVED or REGENERATE (Claude never sets
-    APPROVED — see Section 8)
+    APPROVED — see Section 9)
 ```
 
 **Manual workload goal: approximately ONE CapCut processing/export action
-per module** — not one per chunk. The temporary boundary markers are a
+per part** (most modules will be one part; a module whose total duration
+exceeds the safety threshold needs one action per part, decided by
+Section 4's split priority). The temporary boundary markers are a
 production-only artifact of this pipeline; they never exist in canonical
 student-facing audio, and CapCut processing must never alter checkpoint
 architecture, chunk semantic identity, transcript text, course progress,
 or grading authority (all of that lives in `assets/js/aimt-listen-mode-data.js`
-and the course app, untouched by anything in this pipeline).
+and the course app, untouched by anything in this pipeline). **The
+student/player never knows or cares how many CapCut finishing parts a
+module needed** — that's purely a production-side concern.
 
-## 5. Raw preservation (locked, universal, unchanged)
+## 6. Raw preservation (locked, universal, unchanged)
 
 Every ElevenLabs generation is saved to
 `assets/audio/listen/headspa-mastery/module-01/raw/<chunk>.mp3` **before**
@@ -130,7 +169,7 @@ pipeline, without spending ElevenLabs credits again. Canonical production
 audio lives at `assets/audio/listen/headspa-mastery/module-01/<chunk>.mp3`
 and is derived from — never a substitute for — the raw file.
 
-## 6. `CADENCE_AUDIO_MASTER_PRESET_V1` — HISTORICAL QA / SUPERSEDED (2026-08-30)
+## 7. `CADENCE_AUDIO_MASTER_PRESET_V1` — HISTORICAL QA / SUPERSEDED (2026-08-30)
 
 This preset (RAW → Auphonic conservative Voice AutoEQ → alignment →
 75/25 Auphonic/RAW blend → −18 LUFS loudnorm) was the first locked
@@ -171,7 +210,7 @@ No chunk was ever installed to canonical audio under this preset —
 `AUPHONIC_API_KEY` was unavailable for the entire time it was active, so
 this supersession discards no in-progress production work.
 
-## 7. Boundary recovery must remain position-anchored (locked 2026-08-30)
+## 8. Boundary recovery must remain position-anchored (locked 2026-08-30)
 
 `scripts/cadence-capcut-resplit.mjs` locates each expected separator by
 searching near its **manifest-predicted position** (±10s) for the nearest
@@ -180,12 +219,13 @@ duration-plausible silences globally across the whole file. This is not
 optional: real CapCut Enhance Voice / Reduce Noise processing has been
 observed to push natural mid-speech pauses below the silence-detection
 noise floor at rates that a flat global filter cannot distinguish from
-the deliberate 2.0s markers (confirmed on both the 4-chunk and 14-chunk
-Module 1 masters — see the CapCut production report). A separator with no
+the deliberate 2.0s markers (confirmed on the 4-chunk proof master, the
+original 14-chunk full master, and both Part A / Part B masters — see the
+CapCut production report). A separator with no
 plausible match near its expected position is reported unmatched and the
 script stops rather than guessing.
 
-## 8. `qaStatus` discipline (locked, unchanged)
+## 9. `qaStatus` discipline (locked, unchanged)
 
 `GENERATED` is only set once a chunk has: valid raw, a valid CapCut pass
 under `CADENCE_CAPCUT_FINISH_PRESET_V1`, valid position-anchored

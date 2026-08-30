@@ -554,6 +554,15 @@ function diffAgainstStart(relPath) {
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries.json');
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-master.wav');
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-production-report.md');
+  // Two-part CapCut split (CapCut's 15:00 Enhance Voice limit) -- see
+  // module-01-production-standard-LOCKED.md section 4 and
+  // module-01-capcut-production-report-parts.md. The two new master WAVs
+  // are covered by the existing capcut-production/**/*.wav gitignore rule
+  // and never appear in git status, so only the tracked metadata needs
+  // allowlisting here.
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-a.json');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-b.json');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-production-report-parts.md');
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
