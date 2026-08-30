@@ -106,7 +106,14 @@ body.review-mode-active { padding-top: 34px; }
   background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
   pointer-events: none;
 }
-.brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+.brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 2rem; }
+.brand-identity { display: flex; align-items: center; gap: 12px; }
+.brand-dash-link {
+  font-family: var(--aimt-font-mont); font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none;
+  white-space: nowrap; flex-shrink: 0;
+}
+.brand-dash-link:hover { color: rgba(255,255,255,0.85); }
 .brand-mark {
   width: 36px; height: 36px; border-radius: 0;
   background: none; display: flex; align-items: center; justify-content: center;
@@ -187,6 +194,8 @@ body.review-mode-active { padding-top: 34px; }
 .prog-track { width: 50px; height: 3px; background: var(--surface); border-radius: 2px; }
 .prog-fill { height: 3px; background: #262626; border-radius: 2px; transition: width 0.5s; }
 .ln-pct { font-size: 0.66rem; color: var(--muted); white-space: nowrap; }
+.ln-dash { font-size: 0.72rem; color: var(--muted); text-decoration: none; font-family: var(--aimt-font-sans); white-space: nowrap; flex-shrink: 0; }
+.ln-dash:hover { color: var(--text); }
 
 .lesson-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 8rem; }
 
@@ -2792,6 +2801,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="courseHome" class="view">
   <div class="home-hero">
     <div class="brand-row">
+      <div class="brand-identity">
       <div class="brand-mark">
         <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Outer ring -->
@@ -2826,6 +2836,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="brand-name">Head Spa Certification Course</div>
         <div class="brand-sub">American Institute of Modern Trichology</div>
       </div>
+      </div>
+      <a class="brand-dash-link" href="my-aimt.html">My AIMT</a>
     </div>
     <div class="home-greeting" id="homeGreeting">Welcome back,<br><em id="studentFirstName"></em></div>
     <div class="home-sub" id="homeSubText">Keep building. Your next module is ready.</div>
@@ -2920,6 +2932,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
       <span class="ln-pct" id="progPct">0%</span>
     </div>
+    <a class="ln-dash" href="my-aimt.html" title="Student Dashboard">My AIMT</a>
   </nav>
 
   <div class="lesson-wrap">
@@ -10683,6 +10696,22 @@ function shouldOpenStudentSignIn() {
   return params.get('signin') === '1';
 }
 
+/* My AIMT dashboard's "View certificate" / "View Performance Review" deep
+   link (?cert=1): lands the returning student directly on Module 12 instead
+   of the course home, since Module 12's own render already shows the
+   Performance Review and certificate access together for a finished
+   student. Does not issue a certificate or alter certification state by
+   itself -- it only opens the same Module 12 view a manual module-list
+   click would, where the student takes the explicit "View & Download
+   Certificate" action themselves.
+   Captured once at parse time (not read on demand) because
+   shouldEnterPurchasedCourse() below strips the whole query string via
+   history.replaceState before enterPurchasedCourseHome() ever runs. */
+const CERT_VIEW_REQUESTED_ON_LOAD = new URLSearchParams(window.location.search).get('cert') === '1';
+function shouldOpenCertificateView() {
+  return CERT_VIEW_REQUESTED_ON_LOAD;
+}
+
 function clearStudentSignInParam() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('signin') !== '1') return;
@@ -10773,17 +10802,35 @@ async function hasActiveAuthorizedSession() {
   }
 }
 
-function enterPurchasedCourseHome() {
+async function enterPurchasedCourseHome() {
   const landingPage = document.getElementById('landingPage');
   const introScreen = document.getElementById('introScreen');
+  const openCertificateView = shouldOpenCertificateView();
+  const canSync = !!(window.AIMT_SYNC && window.supabaseClient);
 
   if (landingPage) landingPage.style.display = 'none';
   if (introScreen) introScreen.style.display = 'none';
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('courseHome').classList.add('active');
-  APP_STATE.setCurrentView('home');
-  if (window.AIMT_SYNC && window.supabaseClient) { AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); }
+
+  if (openCertificateView && canSync) {
+    // Hydrate real server progress first so a fresh device's empty local
+    // APP_STATE can't wrongly block an already-certified/attempted student
+    // from the Module 12 deep link below (canAccessModule(12) reads local
+    // state only). Best-effort: a sync failure here must still fall through
+    // to rendering *something* (courseHome, via the canAccessModule check
+    // below), never leave the page blank.
+    try { await AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); } catch (_) {}
+  }
+
+  if (openCertificateView && APP_STATE.canAccessModule(12)) {
+    openModuleById(12);
+  } else {
+    document.getElementById('courseHome').classList.add('active');
+    APP_STATE.setCurrentView('home');
+  }
+
+  if (!openCertificateView && canSync) { AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); }
   renderHomeProgress();
 
   window.history.replaceState({}, document.title, window.location.pathname);

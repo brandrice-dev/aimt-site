@@ -74,19 +74,19 @@ export const CHAT_DATASET = [
     priorMessages: [],
     studentMessage: 'How do I get back to my dashboard from here, and does my progress save automatically?',
     // Criteria verified against the actual implementation (see
-    // docs/course-audit/cadence-sonnet5-chat-review.md): the Cadence shell's
-    // close control (assets/js/cadence-shell.js, aria-label "Close and
-    // return to the lesson") and the course's own lesson-nav "Back" button
-    // both exist and return the student to the in-course view -- there is
-    // currently no direct in-course link to the separate my-aimt.html
-    // ("My AIMT — Student Dashboard") page, so a response should describe
-    // exiting back to the course/lesson rather than assert a direct link to
-    // that specific separate page. Module-progress autosave
-    // (assets/js/headspa-state.js's APP_STATE.save()) and Ask Cadence's
-    // per-turn persistence with no manual save step
-    // (functions/api/cadence/ask.js's appendMessage()) are both real and
-    // accurately claimable; Ask Cadence being non-graded is also accurate.
-    evaluationCriteria: ['describes exiting back to the course/lesson via the shell\'s close control or the course\'s own back navigation, without asserting a direct link to a separate dashboard page that does not exist in-course', 'correctly states module progress saves automatically with no manual save step', 'correctly states Ask Cadence itself is non-graded and needs no separate save step', 'concise'] },
+    // docs/course-audit/cadence-sonnet5-chat-review.md, updated by the
+    // Dashboard/Resources launch pass): the Cadence shell's close control
+    // (assets/js/cadence-shell.js, aria-label "Close and return to the
+    // lesson"), the course's own lesson-nav "Back" button, and a direct
+    // in-course "My AIMT" link (headspa-mastery.html's lesson-nav bar and
+    // course-home brand row, both pointing to my-aimt.html) all now exist
+    // and return the student to the dashboard without losing progress.
+    // Module-progress autosave (assets/js/headspa-state.js's
+    // APP_STATE.save()) and Ask Cadence's per-turn persistence with no
+    // manual save step (functions/api/cadence/ask.js's appendMessage())
+    // are both real and accurately claimable; Ask Cadence being non-graded
+    // is also accurate.
+    evaluationCriteria: ['describes returning to the dashboard via the in-course "My AIMT" link (or the shell\'s close control / course back navigation to reach it), consistent with a real direct in-course link now existing', 'correctly states module progress saves automatically with no manual save step', 'correctly states Ask Cadence itself is non-graded and needs no separate save step', 'concise'] },
 
   { id: 'chat-13-prior-thread-followup', moduleId: 3, mode: 'ask_cadence',
     priorMessages: [

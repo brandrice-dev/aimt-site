@@ -37,6 +37,17 @@ dedicated follow-up task, per this task's explicit boundaries (see
 > blockers remain from this document's findings as of this update.** This
 > document's own findings and history are left otherwise unmodified.
 
+> **Update (2026-08-30, Step 124):** P1-3 (no course → dashboard
+> navigation) and P1-4 (Performance Review dashboard promise unreachable)
+> have both since been closed under a separate, owner-authorized follow-up
+> task (AIMT Dashboard + Resources Launch Pass), along with the related
+> P2-1 (certificate access buried behind several clicks) and P2-2
+> (Resources Library effectively empty). See the "RESOLUTION" notes under
+> Section 4's P1-3, P1-4, P2-1, and P2-2 findings below, and
+> `implementation-log.md`'s Step 124 entry for full detail. **No P0 or P1
+> blockers remain anywhere in this document as of this update.** This
+> document's own findings and history are left otherwise unmodified.
+
 ---
 
 ## 1. What actually runs in production today — three request paths, verified by reading the live code
@@ -532,6 +543,22 @@ Step 123.
 - *Verification to close:* a live-browser click-through once the
   dedicated pass adds the link.
 
+**RESOLUTION (2026-08-30, Step 124) — P1-3 CLOSED.** Two plain-anchor
+links to `my-aimt.html`, styled to match the existing design language, now
+exist in `headspa-mastery.html`: `.ln-dash` ("My AIMT") in the lesson-nav
+bar present on every module including 12, and `.brand-dash-link` ("My
+AIMT") in the course-home brand row (the destination of every existing
+"Back"/"Return to course home" control, so both routes converge on one
+real one-hop-or-fewer path back to the dashboard). Both are plain `<a
+href>` navigations — no `onclick`, no state mutation, verified by test.
+`showHome()`, `closeGuide()`, `closeCert()`, and `redirectToStudentAccess()`
+are all untouched. Verified by `tests/aimt-dashboard-resources-launch.test.mjs`
+fixture A (link presence, plain-anchor shape, target file exists) and
+fixture C (the deep-link handler introduced alongside this fix never calls
+`markModuleComplete`, `showCertificate()`, or Review Mode).
+
+**P1-3: CLOSED.**
+
 **P1-4. Dashboard product copy promises a feature ("Performance Review...
 available from your Student Dashboard") that does not exist on the
 dashboard.**
@@ -552,6 +579,33 @@ dashboard.**
 - *Verification to close:* re-read the copy after the dedicated pass and
   confirm it matches actual dashboard capability.
 
+**RESOLUTION (2026-08-30, Step 124) — P1-4 CLOSED.** Category A per this
+task's own diagnostic framework: Performance Review was already fully
+implemented (`performanceReviewBlock()`, the `/request-review` workflow,
+`GET /api/certification/get-status`, all in
+`assets/js/module12-certification.js`) but genuinely unreachable from the
+dashboard. Nothing about that implementation was touched. Instead,
+`my-aimt.html`'s `loadCertificates()` now also reads the student's own
+`certification_attempts` rows (RLS-scoped to `user_id = auth.uid()`, the
+same trust boundary already used for `completions`/`course_progress`/
+`course_entitlements` — no new Cloudflare Function, no new migration) and,
+for a finalized `not_yet_passed` decision with no active certificate,
+renders a truthful "Assessment not yet passed" card with a "View
+Performance Review" action. That action and the certified card's "View
+certificate" action both deep-link into the course as
+`headspa-mastery.html?enter=1&cert=1` (see P2-1's resolution below) — the
+dashboard never fabricates score/domain data inline; it only routes to the
+one real, unchanged render. The promise is now reachable end-to-end: course
+→ dashboard (P1-3) → dashboard → Performance Review (P1-4), not a half-built
+link to nowhere. Verified by
+`tests/aimt-dashboard-resources-launch.test.mjs` fixtures H/K/L (39
+assertions): a not-yet-passed attempt renders the truthful card and never a
+false "Certified" claim; the real `performanceReviewBlock()`/`/request-
+review`/`/get-status` code is asserted unchanged; the dashboard's own
+markup contains no fabricated score fields.
+
+**P1-4: CLOSED.**
+
 ### P2 — POST-LAUNCH / NON-BLOCKING POLISH
 
 **P2-1. Certificate access from the dashboard requires several clicks
@@ -559,12 +613,72 @@ through the course, despite the button being labeled "View certificate."**
 Real, working, durable flow — just not a direct deep link. Candidate for
 the same dedicated Dashboard pass as P1-3/P1-4.
 
+**RESOLUTION (2026-08-30, Step 124) — P2-1 CLOSED.** Certificate issuance
+logic is completely untouched (`functions/api/issue-certificate.js` still
+requires a service-role key, still gates on `certification_decision:
+eq.pass` read from `certification_attempts`, still checks for an existing
+non-revoked `completions` row before inserting — no client-state issuance,
+no duplicate-issuance regression). What changed is navigation only: the
+dashboard's "View certificate" link now targets
+`headspa-mastery.html?enter=1&cert=1` instead of the bare course entry. A
+new `shouldOpenCertificateView()` in `headspa-mastery.html` (its result
+captured once at script-parse time, before `shouldEnterPurchasedCourse()`'s
+own `history.replaceState` strips the query string) tells
+`enterPurchasedCourseHome()` to open Module 12 directly
+(`openModuleById(12)`, gated on the same `APP_STATE.canAccessModule(12)`
+check a manual module-list click would hit — no bypass) instead of the
+course-home module list, best-effort-hydrating real server progress first
+(`AIMT_SYNC.init()`, wrapped in try/catch so a sync failure falls through to
+courseHome rather than a blank page) so a fresh device's empty local state
+can't wrongly block an eligible student. Landing on Module 12 re-invokes
+the real, unchanged `Module12Cert.render()`, which shows the Performance
+Review block and the existing "View & Download Certificate" button
+together — the student still takes that explicit action themselves; the
+deep link only removes the "browse the module list, find Module 12, scroll"
+steps in between. Verified by
+`tests/aimt-dashboard-resources-launch.test.mjs` fixtures C/I/J (18
+assertions) and a live-browser check (Course Review Mode, localhost):
+directly exercising `enterPurchasedCourseHome()` with the deep-link flag set
+landed on the real Module 12 render with no console errors.
+
+**P2-1: CLOSED.**
+
 **P2-2. The dashboard's "Resources" section is real for its one built item
 (AIMT Service Timer) but the course-downloads "Resources Library" it's
 designed to hold remains empty by design.** Already correctly documented
 elsewhere (`00-aimt-current-course-status.md`'s "Do not begin" list) as
 deliberately deferred, not an oversight — no new finding here, just
 confirmed still accurate.
+
+**RESOLUTION (2026-08-30, Step 124) — P2-2 CLOSED.** Built a small,
+course-scoped resource registry (`assets/js/aimt-course-resources.js`,
+`window.AIMT_COURSE_RESOURCES` keyed by course slug — no framework, no
+CMS) listing the five real course downloads verified actually present on
+disk (Module 8's Core and Extended Service Maps, Module 9's Head Spa
+Enhancement Strategy Guide, Module 10's Between-Client Sanitation & Reset
+Checklist, Module 11's AI Practice Toolkit) plus the pre-existing AIMT
+Service Timer tool entry, unifying what was previously one hardcoded
+Timer-only card into one data-driven list. Nothing was fabricated: the
+previously-deferred, never-created Module 9 "Enhancement Menu & Positioning
+Guide" is correctly absent from the registry. `my-aimt.html`'s
+`loadResources()` now renders this registry filtered to
+`entitledSlugs` — the exact array `loadCourses()` already derived from its
+own RLS-scoped `course_entitlements` read, never a separately-trusted
+client flag — so a non-entitled user cannot obtain the resource-library UI
+by manipulating client state; a slug absent from the registry (or an
+entitled list that is empty) renders the same honest empty state as
+before. The unused, never-wired private-Supabase-Storage-bucket scaffold
+(`RESOURCES` array + `createSignedUrl` loop) was removed as the direct,
+one-for-one replacement this task's own scope covers, not unrelated
+cleanup. No signed-download CDN architecture was built, matching this
+task's explicit scope limit. Verified by
+`tests/aimt-dashboard-resources-launch.test.mjs` fixtures D/E/F/G (33
+assertions): every registry entry's file exists on disk and is non-empty;
+an entitled student sees all six entries; a non-entitled or wrong-course
+student sees only the empty state; `loadResources()` is only ever called
+with `loadCourses()`'s own return value.
+
+**P2-2: CLOSED.**
 
 **P2-3. The three downloadable PDF worksheets (Module 9/10/11) have zero
 access control, not even the client-side check other content gets.**
@@ -795,3 +909,20 @@ Dashboard/Resources pass, unaffected by this concurrency-only task — plus
 the non-blocking P2 polish items (P2-1, P2-2, P2-3) and the Cloudflare
 Pages production `ANTHROPIC_API_KEY`/model-binding confirmation, which
 remains a separate owner-side deployment prerequisite.
+
+**Update (2026-08-30, Step 124):** the **AIMT Dashboard + Resources Launch
+Pass** (owner-authorized) has closed every remaining Gate 1 P1 finding.
+**P1-3** (no course → dashboard navigation) is fixed — see the RESOLUTION
+note under Section 4's P1-3 finding. **P1-4** (Performance Review dashboard
+promise unreachable) is fixed — see the RESOLUTION note under Section 4's
+P1-4 finding. The related **P2-1** (certificate access buried behind
+several clicks) and **P2-2** (Resources Library effectively empty) are
+fixed too — see their RESOLUTION notes above. **No P0 or P1 blockers
+remain anywhere in this document.** The only items this document
+originally flagged that remain open are the non-blocking **P2-3** (static
+PDF worksheets have no access control beyond the dashboard UI gate —
+consistent with, not worse than, this site's flat-HTML architecture) and
+the Cloudflare Pages production `ANTHROPIC_API_KEY`/model-binding
+confirmation, which remains a separate owner-side deployment prerequisite.
+Recommended next launch task: Listen Mode / opening videos / Module 8 media
+— all explicitly out of scope for this pass and deferred to the next gate.

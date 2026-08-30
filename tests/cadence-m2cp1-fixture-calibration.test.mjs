@@ -160,14 +160,17 @@ const answer = m2.studentResponse;
     rubricVersionTag(JSON.stringify(others)) === 'rubric-e1f5005b');
   check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET case count unchanged (16) as of this task -- this file only pins that this specific (grading-fixture) task didn\'t touch it',
     CHAT_DATASET.length === 16);
-  // The content hash was legitimately updated in a later, unrelated task
-  // ("Tighten Cadence continuity and high-stakes precision") that corrected
+  // The content hash was legitimately updated in later, unrelated tasks:
+  // ("Tighten Cadence continuity and high-stakes precision") corrected
   // chat-12's and chat-15's evaluationCriteria text after verifying them
-  // against the real implementation and product review -- that intentional
-  // edit is what this fingerprint now reflects; this check still catches
-  // any OTHER, unintended edit to the dataset.
+  // against the real implementation and product review; the AIMT Dashboard
+  // + Resources launch pass (P1-3) then re-verified chat-12 again after
+  // adding a real in-course "My AIMT" dashboard link, updating its
+  // evaluationCriteria and comment to match the new implementation fact.
+  // Each intentional edit is what this fingerprint now reflects; this
+  // check still catches any OTHER, unintended edit to the dataset.
   check('NO OTHER FIXTURES CHANGED', 'CHAT_DATASET content hash matches the current, intentionally-updated fingerprint',
-    rubricVersionTag(JSON.stringify(CHAT_DATASET)) === 'rubric-6f910215');
+    rubricVersionTag(JSON.stringify(CHAT_DATASET)) === 'rubric-f774cf1a');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

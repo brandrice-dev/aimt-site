@@ -21,11 +21,11 @@
 // (chat-15) acceptance criterion penalized Cadence for agreeing to draft a
 // social caption outside an active checkpoint -- correct per the
 // constitution's Zone A/Zone C distinction, so the criterion was wrong,
-// not the response. And chat-12's navigation criterion was verified
-// against the actual implementation and tightened to describe what
-// exists (shell close + course back-nav; no direct in-course link to the
-// separate My AIMT dashboard page) rather than what the response merely
-// implied.
+// not the response. And chat-12's navigation criterion was re-verified
+// against the actual implementation after the Dashboard/Resources launch
+// pass (P1-3) added a real in-course "My AIMT" link -- the criterion now
+// describes that real link rather than forbidding a claim that was
+// accurate to check against the pre-P1-3 implementation only.
 //
 // This file locks structural/textual guardrail properties and verified
 // implementation facts only -- never exact canned response wording.
@@ -184,10 +184,10 @@ await (async function noFabricatedContinuityEndToEndTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function chat12MatchesRealityTests() {
   const chat12 = CHAT_DATASET.find((c) => c.id === 'chat-12-navigation-support');
-  check('I. CHAT-12 MATCHES REALITY', 'chat-12 criterion no longer asserts an unverified generic "accurate course-navigation answer" -- it names the specific, verified real behavior',
-    chat12.evaluationCriteria.some((c) => /shell's close control or the course's own back navigation/.test(c)));
-  check('I. CHAT-12 MATCHES REALITY', 'chat-12 criterion does not assert a direct link to a separate dashboard page exists in-course (verified false -- see below)',
-    chat12.evaluationCriteria.some((c) => /without asserting a direct link to a separate dashboard page that does not exist in-course/.test(c)));
+  check('I. CHAT-12 MATCHES REALITY', 'chat-12 criterion names the specific, verified real behavior (the in-course "My AIMT" dashboard link)',
+    chat12.evaluationCriteria.some((c) => /"My AIMT" link/.test(c)));
+  check('I. CHAT-12 MATCHES REALITY', 'chat-12 criterion is consistent with a real direct in-course link now existing (Dashboard/Resources launch pass, P1-3)',
+    chat12.evaluationCriteria.some((c) => /a real direct in-course link now existing/.test(c)));
 
   // The underlying implementation facts the corrected criterion is based
   // on, verified directly against the real files, not assumed.
@@ -196,8 +196,8 @@ await (async function noFabricatedContinuityEndToEndTests() {
     /cshell-close/.test(shellSrc) && /Close and return to the lesson/.test(shellSrc));
 
   const courseSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
-  check('I. CHAT-12 MATCHES REALITY', 'Verified: there is no in-course link from headspa-mastery.html to the separate My AIMT dashboard page (my-aimt.html)',
-    !/my-aimt\.html/.test(courseSrc));
+  check('I. CHAT-12 MATCHES REALITY', 'Verified: headspa-mastery.html now has a direct in-course link to the separate My AIMT dashboard page (my-aimt.html) -- P1-3, Dashboard/Resources launch pass',
+    /class="ln-dash" href="my-aimt\.html"/.test(courseSrc) && /class="brand-dash-link" href="my-aimt\.html"/.test(courseSrc));
   check('I. CHAT-12 MATCHES REALITY', 'Verified: the course does have its own in-course "Back" navigation control',
     /class="ln-back"/.test(courseSrc) && /onclick="showHome\(\)"/.test(courseSrc));
 

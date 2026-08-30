@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/aimt-course-resources.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -167,13 +168,6 @@ const COURSES = {
   }
 };
 
-/* Downloadable resources. To activate: create a PRIVATE Supabase Storage
-   bucket named 'course-resources', upload files, and list them here.
-   Empty array = friendly empty state, nothing breaks. */
-const RESOURCES = [
-  /* { course: 'headspa-mastery', name: 'Service Protocol Quick Card', desc: 'Printable 17-step reference', path: 'headspa-mastery/protocol-quick-card.pdf' }, */
-];
-
 /* ── Same per-tab session storage as the rest of the site ── */
 function createSessionAuthStorage() {
   const memoryStore = {};
@@ -205,7 +199,8 @@ async function init() {
   document.getElementById('userEmail').textContent = email;
   document.getElementById('accountEmail').textContent = email;
 
-  await Promise.all([loadCourses(email), loadCertificates(), loadResources()]);
+  const entitledSlugs = await loadCourses(email);
+  await Promise.all([loadCertificates(), loadResources(entitledSlugs)]);
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
@@ -220,7 +215,7 @@ async function loadCourses(email) {
 
   if (error || !ents || !ents.length) {
     area.innerHTML = '<div class="card"><div class="empty">No enrollments yet. Browse our <a href="courses.html" style="color:var(--aimt-color-accent,#a3968d)">certifications</a> to begin.</div></div>';
-    return;
+    return [];
   }
 
   /* progress for all courses in one query */
@@ -250,56 +245,88 @@ async function loadCourses(email) {
       '<a class="btn" href="' + course.entry + '">' + label + '</a>' +
       '</div>';
   }).join('');
+  return slugs;
 }
 
 async function loadCertificates() {
   const area = document.getElementById('certArea');
-  const { data: comps, error } = await supabaseClient
+  const { data: comps } = await supabaseClient
     .from('completions')
     .select('credential_id, course_slug, student_name, completed_at, revoked')
     .eq('user_id', currentUser.id);
 
-  if (error || !comps || !comps.filter(c => !c.revoked).length) {
-    area.innerHTML = '<div class="card"><div class="empty">Your certificate will appear here when you complete a course. Every AIMT credential carries a unique ID your employer can verify.</div></div>';
-    return;
-  }
-
-  area.innerHTML = comps.filter(c => !c.revoked).map(c => {
+  const certifiedSlugs = new Set();
+  const cards = (comps || []).filter(c => !c.revoked).map(c => {
+    certifiedSlugs.add(c.course_slug);
     const course = COURSES[c.course_slug] || { title: c.course_slug, entry: '#' };
     const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     return '<div class="card">' +
       '<h3>' + course.title + ' — Certified</h3>' +
       '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
       '<div class="cred-line">Credential ID: ' + c.credential_id + '</div>' +
-      '<a class="btn" href="' + course.entry + '" style="margin-right:0.6rem">View certificate</a>' +
+      '<a class="btn" href="' + course.entry + '&cert=1" style="margin-right:0.6rem">View certificate</a>' +
       '<a class="btn ghost" href="verify.html">Verification page</a>' +
       '</div>';
-  }).join('');
+  });
+
+  /* Assessment not yet passed: certification_attempts is RLS-scoped to the
+     signed-in student's own rows (see supabase/migrations/20260826_create_
+     certification_assessment.sql), so this read is authoritative — never a
+     locally-computed or client-trusted state. Performance Review itself is
+     rendered inside Module 12 (assets/js/module12-certification.js's
+     performanceReviewBlock(), driven by GET /api/certification/get-status);
+     this only surfaces a truthful entry point to it, never a duplicate of
+     the review content or its scoring. */
+  const { data: attempts } = await supabaseClient
+    .from('certification_attempts')
+    .select('course_slug, certification_decision, attempt_number')
+    .eq('user_id', currentUser.id)
+    .eq('certification_decision', 'not_yet_passed')
+    .order('attempt_number', { ascending: false });
+
+  const latestNotYetPassedBySlug = {};
+  (attempts || []).forEach(a => {
+    if (certifiedSlugs.has(a.course_slug)) return;
+    const existing = latestNotYetPassedBySlug[a.course_slug];
+    if (!existing || a.attempt_number > existing.attempt_number) {
+      latestNotYetPassedBySlug[a.course_slug] = a;
+    }
+  });
+  Object.values(latestNotYetPassedBySlug).forEach(a => {
+    const course = COURSES[a.course_slug] || { title: a.course_slug, entry: '#' };
+    cards.push('<div class="card">' +
+      '<h3>' + course.title + ' — Assessment not yet passed</h3>' +
+      '<div class="meta">Attempt ' + a.attempt_number + ' · your Performance Review shows what to focus on before your next attempt.</div>' +
+      '<a class="btn" href="' + course.entry + '&cert=1">View Performance Review</a>' +
+      '</div>');
+  });
+
+  area.innerHTML = cards.length
+    ? cards.join('')
+    : '<div class="card"><div class="empty">Your certificate will appear here when you complete a course. Every AIMT credential carries a unique ID your employer can verify.</div></div>';
 }
 
-async function loadResources() {
+/* Resources are gated on real entitlement, not client state: entitledSlugs
+   comes from loadCourses()'s RLS-scoped course_entitlements read, so a
+   non-entitled user manipulating client state gains nothing — the registry
+   for a course they aren't in `entitledSlugs` is simply never rendered. */
+async function loadResources(entitledSlugs) {
   const card = document.getElementById('resourcesCard');
-  const timerItem = '<div class="resource-item"><div><div class="r-name">AIMT Service Timer</div>' +
-    '<div class="r-desc">Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion.</div></div>' +
-    '<a href="aimt-service-timer.html">Open</a></div>';
-  if (!RESOURCES.length) {
-    card.innerHTML = timerItem + '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
-    return;
-  }
-  const items = await Promise.all(RESOURCES.map(async r => {
-    try {
-      const { data, error } = await supabaseClient
-        .storage.from('course-resources')
-        .createSignedUrl(r.path, 60 * 60);
-      const href = (!error && data && data.signedUrl) ? data.signedUrl : null;
-      return '<div class="resource-item"><div><div class="r-name">' + r.name + '</div>' +
-        (r.desc ? '<div class="r-desc">' + r.desc + '</div>' : '') + '</div>' +
-        (href ? '<a href="' + href + '" target="_blank" rel="noopener">Download</a>'
-              : '<span class="r-desc">Unavailable</span>') +
-        '</div>';
-    } catch (_) { return ''; }
-  }));
-  card.innerHTML = timerItem + (items.join('') || '<div class="empty">Resources are temporarily unavailable.</div>');
+  const registry = window.AIMT_COURSE_RESOURCES || {};
+  const items = [];
+  (entitledSlugs || []).forEach(slug => {
+    (registry[slug] || []).forEach(r => {
+      const isTool = r.type === 'tool';
+      items.push(
+        '<div class="resource-item"><div><div class="r-name">' + r.title + '</div>' +
+        '<div class="r-desc">' + r.moduleLabel + ' · ' + r.description + '</div></div>' +
+        '<a href="' + r.href + '"' + (isTool ? '' : ' download') + '>' + (isTool ? 'Open' : 'Download') + '</a></div>'
+      );
+    });
+  });
+  card.innerHTML = items.length
+    ? items.join('')
+    : '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
 }
 
 async function signOut() {
