@@ -480,7 +480,12 @@ function diffAgainstStart(relPath) {
     'scripts/cadence-capcut-resplit.mjs',
     'docs/course-audit/listen-mode/module-01-production-standard-LOCKED.md',
     'tests/aimt-listen-mode-module1-pilot.test.mjs',
-    'tests/aimt-listen-mode-capcut-production.test.mjs'
+    'tests/aimt-listen-mode-capcut-production.test.mjs',
+    'scripts/_lib/r2-s3-client.mjs',
+    'scripts/aimt-media-backup.mjs',
+    'scripts/aimt-media-restore.mjs',
+    'tests/aimt-media-backup.test.mjs',
+    'docs/course-audit/listen-mode/cloud-backup/README.md'
   ]);
   for (let i = 1; i <= 14; i++) {
     allowlist.add('docs/course-audit/listen-mode/tts/module-01/m1-' + String(i).padStart(2, '0') + '.txt');
