@@ -1,2 +1,19 @@
 .DS_Store
 scripts/.module12-review-output.html
+
+# CapCut Listen Mode finishing workflow: module masters, round-trip proof
+# exports, and resplit intermediates are reproducible local production
+# artifacts (rebuilt from assets/audio/listen/**/raw/ + one CapCut pass per
+# module), not permanent history -- they'd add ~200MB+ per module if
+# committed. Docs, boundary manifests (.json), scripts, and tests in the
+# same directories stay tracked; only the generated audio is ignored. Does
+# NOT apply to assets/audio/listen/ (canonical student production audio,
+# governed separately).
+docs/course-audit/listen-mode/capcut-test/**/*.wav
+docs/course-audit/listen-mode/capcut-test/**/*.flac
+docs/course-audit/listen-mode/capcut-test/**/*.FLAC
+docs/course-audit/listen-mode/capcut-test/**/*.mp3
+docs/course-audit/listen-mode/capcut-production/**/*.wav
+docs/course-audit/listen-mode/capcut-production/**/*.flac
+docs/course-audit/listen-mode/capcut-production/**/*.FLAC
+docs/course-audit/listen-mode/capcut-production/**/*.mp3

@@ -1,0 +1,244 @@
+{
+  "_purpose": "QA metadata only. Records the exact, sample-accurate construction of module-01-capcut-master.wav (full Module 1, all 14 chunks) so the CapCut export can be automatically position-anchored re-split back into the original semantic chunks. Not consumed by the course app; not the manifest at assets/js/aimt-listen-mode-data.js.",
+  "master": "module-01-capcut-master.wav",
+  "preset": "CADENCE_CAPCUT_FINISH_PRESET_V1",
+  "createdAtUtc": "2026-08-30T20:37:28Z",
+  "sourceFormat": {
+    "sampleRateHz": 44100,
+    "channels": 1,
+    "sampleFormat": "pcm_s16le",
+    "note": "Native format of the raw ElevenLabs decode -- no resampling applied at any stage."
+  },
+  "separator": {
+    "durationSec": 2.0,
+    "type": "digital silence (anullsrc), verified all-zero PCM samples",
+    "sampleCount": 88200,
+    "count": 13,
+    "placement": "between every pair of adjacent chunks only -- none before m1-01, none after m1-14"
+  },
+  "sourceChunkCount": 14,
+  "chunks": [
+    {
+      "chunkId": "m1-01",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3",
+      "originalDurationSec": 65.44,
+      "masterStartSec": 0.0,
+      "masterEndSec": 65.44
+    },
+    {
+      "separator": true,
+      "index": 1,
+      "beforeChunk": "m1-01",
+      "afterChunk": "m1-02",
+      "startSec": 65.44,
+      "endSec": 67.44,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-02",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-02.mp3",
+      "originalDurationSec": 76.8,
+      "masterStartSec": 67.44,
+      "masterEndSec": 144.24
+    },
+    {
+      "separator": true,
+      "index": 2,
+      "beforeChunk": "m1-02",
+      "afterChunk": "m1-03",
+      "startSec": 144.24,
+      "endSec": 146.24,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-03",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-03.mp3",
+      "originalDurationSec": 92.16,
+      "masterStartSec": 146.24,
+      "masterEndSec": 238.4
+    },
+    {
+      "separator": true,
+      "index": 3,
+      "beforeChunk": "m1-03",
+      "afterChunk": "m1-04",
+      "startSec": 238.4,
+      "endSec": 240.4,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-04",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-04.mp3",
+      "originalDurationSec": 146.08,
+      "masterStartSec": 240.4,
+      "masterEndSec": 386.48
+    },
+    {
+      "separator": true,
+      "index": 4,
+      "beforeChunk": "m1-04",
+      "afterChunk": "m1-05",
+      "startSec": 386.48,
+      "endSec": 388.48,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-05",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-05.mp3",
+      "originalDurationSec": 69.2,
+      "masterStartSec": 388.48,
+      "masterEndSec": 457.68
+    },
+    {
+      "separator": true,
+      "index": 5,
+      "beforeChunk": "m1-05",
+      "afterChunk": "m1-06",
+      "startSec": 457.68,
+      "endSec": 459.68,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-06",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-06.mp3",
+      "originalDurationSec": 128.4,
+      "masterStartSec": 459.68,
+      "masterEndSec": 588.08
+    },
+    {
+      "separator": true,
+      "index": 6,
+      "beforeChunk": "m1-06",
+      "afterChunk": "m1-07",
+      "startSec": 588.08,
+      "endSec": 590.08,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-07",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-07.mp3",
+      "originalDurationSec": 38.72,
+      "masterStartSec": 590.08,
+      "masterEndSec": 628.8
+    },
+    {
+      "separator": true,
+      "index": 7,
+      "beforeChunk": "m1-07",
+      "afterChunk": "m1-08",
+      "startSec": 628.8,
+      "endSec": 630.8,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-08",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-08.mp3",
+      "originalDurationSec": 15.6,
+      "masterStartSec": 630.8,
+      "masterEndSec": 646.4
+    },
+    {
+      "separator": true,
+      "index": 8,
+      "beforeChunk": "m1-08",
+      "afterChunk": "m1-09",
+      "startSec": 646.4,
+      "endSec": 648.4,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-09",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-09.mp3",
+      "originalDurationSec": 62.72,
+      "masterStartSec": 648.4,
+      "masterEndSec": 711.12
+    },
+    {
+      "separator": true,
+      "index": 9,
+      "beforeChunk": "m1-09",
+      "afterChunk": "m1-10",
+      "startSec": 711.12,
+      "endSec": 713.12,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-10",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-10.mp3",
+      "originalDurationSec": 39.6,
+      "masterStartSec": 713.12,
+      "masterEndSec": 752.72
+    },
+    {
+      "separator": true,
+      "index": 10,
+      "beforeChunk": "m1-10",
+      "afterChunk": "m1-11",
+      "startSec": 752.72,
+      "endSec": 754.72,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-11",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-11.mp3",
+      "originalDurationSec": 57.12,
+      "masterStartSec": 754.72,
+      "masterEndSec": 811.84
+    },
+    {
+      "separator": true,
+      "index": 11,
+      "beforeChunk": "m1-11",
+      "afterChunk": "m1-12",
+      "startSec": 811.84,
+      "endSec": 813.84,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-12",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-12.mp3",
+      "originalDurationSec": 75.6,
+      "masterStartSec": 813.84,
+      "masterEndSec": 889.44
+    },
+    {
+      "separator": true,
+      "index": 12,
+      "beforeChunk": "m1-12",
+      "afterChunk": "m1-13",
+      "startSec": 889.44,
+      "endSec": 891.44,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-13",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-13.mp3",
+      "originalDurationSec": 30.88,
+      "masterStartSec": 891.44,
+      "masterEndSec": 922.32
+    },
+    {
+      "separator": true,
+      "index": 13,
+      "beforeChunk": "m1-13",
+      "afterChunk": "m1-14",
+      "startSec": 922.32,
+      "endSec": 924.32,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-14",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-14.mp3",
+      "originalDurationSec": 68.16,
+      "masterStartSec": 924.32,
+      "masterEndSec": 992.48
+    }
+  ],
+  "masterTotalDurationSec": 992.48,
+  "verification": {
+    "method": "Byte-for-byte PCM sample comparison of all 14 chunk segments and all 13 separator segments against their decoded source WAVs and a freshly-generated 2.0s all-zero silence reference, performed immediately after building the master.",
+    "allSegmentsAndSeparatorsBitExact": true,
+    "masterFrameCount": 43768368,
+    "masterFrameCountMatchesArithmeticSum": true
+  }
+}

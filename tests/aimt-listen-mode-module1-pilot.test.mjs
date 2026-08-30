@@ -477,8 +477,10 @@ function diffAgainstStart(relPath) {
     'assets/js/aimt-listen-mode-player.js',
     'scripts/cadence-audio-finish.mjs',
     'scripts/cadence-audio-produce.mjs',
+    'scripts/cadence-capcut-resplit.mjs',
     'docs/course-audit/listen-mode/module-01-production-standard-LOCKED.md',
-    'tests/aimt-listen-mode-module1-pilot.test.mjs'
+    'tests/aimt-listen-mode-module1-pilot.test.mjs',
+    'tests/aimt-listen-mode-capcut-production.test.mjs'
   ]);
   for (let i = 1; i <= 14; i++) {
     allowlist.add('docs/course-audit/listen-mode/tts/module-01/m1-' + String(i).padStart(2, '0') + '.txt');
@@ -526,6 +528,27 @@ function diffAgainstStart(relPath) {
   for (let i = 1; i <= 14; i++) {
     allowlist.add('assets/audio/listen/headspa-mastery/module-01/raw/m1-' + String(i).padStart(2, '0') + '.mp3');
   }
+  // CapCut round-trip proof (4-chunk: m1-01..m1-04 -- see
+  // module-01-parallel-blend-review.md's successor decision and the CapCut
+  // proof reports under docs/course-audit/listen-mode/capcut-test/).
+  allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/CAPCUT-PROOF-INSTRUCTIONS.md');
+  allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/intake/README.md');
+  allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/intake/module-01-capcut-proof-processed.flac.FLAC');
+  allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/module-01-capcut-proof-boundaries.json');
+  allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/module-01-capcut-proof-master.wav');
+  ['m1-01', 'm1-02', 'm1-03', 'm1-04'].forEach((id) => {
+    allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/resplit-capcut/' + id + '-capcut-resplit.wav');
+    allowlist.add('docs/course-audit/listen-mode/capcut-test/module-01/resplit-capcut/' + id + '-capcut.mp3');
+  });
+  // Locked CapCut finishing preset + full 14-chunk Module 1 master
+  // (CADENCE_CAPCUT_FINISH_PRESET_V1 -- see
+  // module-01-production-standard-LOCKED.md section 3 and
+  // capcut-production/module-01/module-01-capcut-production-report.md).
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/CAPCUT-MODULE-01-INSTRUCTIONS.md');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/intake/README.md');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries.json');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-master.wav');
+  allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-production-report.md');
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
@@ -579,11 +602,12 @@ function diffAgainstStart(relPath) {
     const standardSrc = readFileSync(standardPath, 'utf8');
     check('LOCKED STANDARD', 'documents the locked chunking standard (45-100s preferred, ~120s ceiling)', /45.?\D?100 seconds/.test(standardSrc) && /120 seconds/.test(standardSrc));
     check('LOCKED STANDARD', 'documents M1-04 staying one chunk (no split)', /M1-04 stays ONE production chunk/.test(standardSrc));
-    check('LOCKED STANDARD', 'names CADENCE_AUDIO_MASTER_PRESET_V1 and the RAW→Auphonic→align→blend→loudnorm pipeline', /CADENCE_AUDIO_MASTER_PRESET_V1/.test(standardSrc) && /75% Auphonic \/ 25% RAW/.test(standardSrc));
-    check('LOCKED STANDARD', 'reuses the exact approved Auphonic settings block (autoeq, soft compressor, -18 LUFS target)', /"filtermethod": "autoeq"/.test(standardSrc) && /"compressor_speech": "soft"/.test(standardSrc) && /"loudnesstarget": -18/.test(standardSrc));
-    check('LOCKED STANDARD', 'documents raw preservation as universal/locked (every chunk saved to raw/ before finishing)', /Raw preservation \(locked, universal\)/.test(standardSrc));
+    check('LOCKED STANDARD', 'still names CADENCE_AUDIO_MASTER_PRESET_V1 and its RAW→Auphonic→align→blend→loudnorm pipeline, now as historical record', /CADENCE_AUDIO_MASTER_PRESET_V1/.test(standardSrc) && /75% Auphonic \/ 25% RAW/.test(standardSrc));
+    check('LOCKED STANDARD', 'preserves the key Auphonic facts (AutoEQ, -18 LUFS) in the historical record, not deleted', /AutoEQ/.test(standardSrc) && /[-−]18 LUFS/.test(standardSrc));
+    check('LOCKED STANDARD', 'documents raw preservation as universal/locked (every chunk saved to raw/ before finishing)', /Raw preservation \(locked, universal/.test(standardSrc));
     check('LOCKED STANDARD', 'documents qaStatus discipline: Claude never sets APPROVED', /Claude\s*\n?\s*never sets `APPROVED`/.test(standardSrc) || /never sets `APPROVED`/.test(standardSrc));
-    check('LOCKED STANDARD', 'discloses the current AUPHONIC_API_KEY blocker rather than hiding it', /AUPHONIC_API_KEY.{0,40}is not available/i.test(standardSrc));
+    check('LOCKED STANDARD', 'CADENCE_AUDIO_MASTER_PRESET_V1 explicitly marked historical/superseded, not the active path', /HISTORICAL QA \/ SUPERSEDED/.test(standardSrc) && /no longer the active production path/.test(standardSrc));
+    check('LOCKED STANDARD', 'CADENCE_CAPCUT_FINISH_PRESET_V1 documented as the active finishing preset', /CADENCE_CAPCUT_FINISH_PRESET_V1.{0,40}ACTIVE finishing preset/s.test(standardSrc));
   }
 
   const scriptPath = path.join(ROOT, 'scripts/cadence-audio-produce.mjs');
