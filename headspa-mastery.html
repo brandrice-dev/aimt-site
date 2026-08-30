@@ -4931,6 +4931,23 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mh-desc">Professionalism begins before the service does—with how you observe, explain, adapt, and stay within scope.</div>
     </div>
 
+    <!-- Written Module Briefing — useful on its own whether or not Listen Mode is opened. -->
+    <div class="protocol-card" id="m1WrittenBriefing">
+      <div class="pc-header">
+        <div class="pc-icon neutral-icon" style="font-size:0.65rem;">→</div>
+        <div><div class="pc-title">In this module, you'll learn to</div></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Define the head spa technician's role — and its limits.</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Separate professional observation from medical diagnosis.</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Understand what depends on your license and local scope.</span></div>
+        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Set honest expectations for what a head spa can support.</span></div>
+        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Recognize when referral is the right professional decision.</span></div>
+      </div>
+    </div>
+    <div class="body-text" style="margin-top:-0.75rem"><strong>Pay attention to:</strong> the language you use when describing what you see. That distinction follows you through the rest of the course.</div>
+    <div id="m1ListenModeMount"></div>
+
     <div class="sec-eyebrow">1.1 — What is a head spa?</div>
     <div class="sec-title">It is not just a shampoo. It is not just a massage. And it is not a medical treatment.</div>
     <div class="body-text">A head spa is a structured, scalp-focused service designed to support scalp hygiene, comfort, and the overall scalp environment — while delivering a deeply relaxing, sensory experience. Those two things coexist. The relaxation is real. So is the structure underneath it.</div>
@@ -4968,7 +4985,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">Recognizing a pattern is not the same as diagnosing a condition.</div>
     <div class="body-text">You may notice oil imbalance, dryness, buildup, flaking patterns, irritation, or early thinning. Recognizing those patterns is part of your role. Diagnosing is not.</div>
 
-    <div class="protocol-card">
+    <div class="protocol-card" id="m1VisualScopeLanguage">
       <div class="pc-header">
         <div class="pc-icon neutral-icon" style="font-size:0.65rem;">✓</div>
         <div><div class="pc-title">Language that keeps you in scope</div></div>
@@ -5007,7 +5024,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">What may be permitted. What this course never authorizes.</div>
     <div class="body-text">Scope is determined by the license or authorization you hold, the laws where you practice, the establishment in which you work, and the specific services and equipment you use. A service that is permitted for one license type or state may be prohibited for another. The mistake is assuming that course certification creates permission it cannot create.</div>
 
-    <div class="protocol-card">
+    <div class="protocol-card" id="m1VisualScopeCards">
       <div class="pc-header">
         <div class="pc-icon neutral-icon">✓</div>
         <div><div class="pc-title">May fall within scope—verify first</div></div>
@@ -5093,7 +5110,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">1.5 — Limitations of a head spa service</div>
     <div class="sec-title">Be honest about what this is. It protects everyone.</div>
 
-    <div class="protocol-card">
+    <div class="protocol-card" id="m1VisualLimitations">
       <div class="pc-header">
         <div class="pc-icon neutral-icon">↑</div>
         <div><div class="pc-title">What a head spa can support</div></div>
@@ -7801,6 +7818,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 <script src="assets/js/headspa-state.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
+<script src="assets/js/aimt-listen-mode-data.js"></script>
+<script src="assets/js/aimt-listen-mode-player.js"></script>
 <script src="assets/js/module12-certification.js"></script>
 <script src="assets/js/cadence-shell.js" defer></script>
 <script src="https://player.vimeo.com/api/player.js"></script>
@@ -9088,6 +9107,7 @@ function updateGuideQuickPrompts(moduleId) {
 let module3HTML = null;
 
 function showHome() {
+  if (window.AIMTListenMode) window.AIMTListenMode.unmount();
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('courseHome').classList.add('active');
   document.getElementById('guideBtn').classList.remove('visible');
@@ -9104,6 +9124,7 @@ function openLesson() { openModuleById(3); }
 
 function openModuleById(id, options = {}) {
   if (!APP_STATE.setCurrentModule(id)) return;
+  if (window.AIMTListenMode) window.AIMTListenMode.unmount();
   const shouldRestoreScroll = options.restoreScroll === true;
   gpHistory = [];
   lessonViewInitializing = true;
@@ -9153,7 +9174,7 @@ function openModuleById(id, options = {}) {
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
+    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE }); },
     7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m8InitMasterclass(); },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },

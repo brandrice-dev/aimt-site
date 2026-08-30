@@ -8,6 +8,8 @@ tightens execution within it. Module 4's draft
 (`module-04-listen-script-draft.md`) is unchanged by this task.
 **Pilot module:** Module 1 — Role of the Head Spa Technician.
 **Date drafted:** 2026-08-30 (v1). **Date compressed:** 2026-08-30 (v2).
+**Date micro-edited:** 2026-08-30 (v3 — four targeted line edits, no
+compression).
 **Branch:** `course-audit-build`. **This is a documentation-only task.** No
 audio was generated, no TTS/ElevenLabs API was called, no course UI,
 curriculum, checkpoint, rubric, or Cadence chat/grading code was touched.
@@ -21,6 +23,38 @@ curriculum, checkpoint, rubric, or Cadence chat/grading code was touched.
 ---
 
 ## Revision history
+
+**v3 (this pass, 2026-08-30):** Four targeted editorial micro-edits, applied
+exactly as specified by the owner-approved production-pilot task — no
+compression, no restructuring, no other wording changes:
+
+- **M1-02** — closing reframe softened. Removed the grandiose "Anyone can
+  make something feel relaxing for a moment. Very few people can deliver a
+  consistent, high-quality experience..." in favor of "Making something feel
+  relaxing is one part of the job. The real skill is delivering that
+  experience consistently, while keeping the service controlled and
+  intentional from beginning to end."
+- **M1-11 opening** — softened from "most of your clients don't actually
+  know what a head spa is" to "a lot of clients won't really know what a
+  head spa is yet. They may have seen one online, had someone recommend it,
+  or simply be curious about their scalp."
+- **M1-12** — two edits. The over-broad "most people speaking outside their
+  scope in a video aren't thinking about consequences" became "what looks
+  confident online isn't automatically safe, compliant, or appropriate for
+  your license." The judgmental "The practitioners who avoid it are usually
+  the ones who end up in situations they could have prevented" became
+  "Avoiding referral can create problems that a timely handoff would have
+  prevented."
+- **M1-13** — closing line de-conflicted. "Think of an actual moment, if you
+  can — a real service, even a hypothetical one, not just a definition"
+  (internally contradictory — "actual" vs. "hypothetical" in the same
+  breath) became "Think in terms of a concrete service moment — one you've
+  experienced, or a realistic hypothetical — not just a definition."
+
+Net word-count effect is negligible (measured at −2 words under this
+document's own counting method — see the recalculated total below); this
+was a substitution pass, not a compression pass. No chunk boundaries,
+checkpoint questions, checkpoint gate behavior, or any other wording changed.
 
 **v1 (2026-08-30):** Initial draft, ~2,880 spoken words / ~19–21 minutes.
 Achieved curriculum coverage largely by narrating nearly every safe-language
@@ -177,7 +211,7 @@ final estimates section for the full accounting.
 >
 > That structure comes from six elements working together: cleansing as the foundation, exfoliation only when it's actually appropriate, massage and relaxation as the sensory core, water therapy, conditioning and treatment driven by what you observe, and the sensory layer wrapped around all of it — temperature, touch, sound, aromatherapy. The exact mix changes with the client. The structure underneath doesn't.
 >
-> Here's the reframe worth keeping: from the client's perspective, this feels like relaxation. From yours, it should feel controlled and intentional. Anyone can make something feel relaxing for a moment. Very few people can deliver a consistent, high-quality experience that holds together from beginning to end.
+> Here's the reframe worth keeping: from the client's perspective, this feels like relaxation. From yours, it should feel controlled and intentional. Making something feel relaxing is one part of the job. The real skill is delivering that experience consistently, while keeping the service controlled and intentional from beginning to end.
 
 **SOURCE TRACEABILITY:** 1.1 title + body-text (4934–4936), six `scalp-card` elements (4939–4944, all six named), Cadence note (4947–4950, quoted near-verbatim).
 **OWNER-REVIEW FLAGS:** None. All six elements are still individually named — only the delivery changed, from six discrete mini-descriptions to one connected sentence.
@@ -376,7 +410,7 @@ final estimates section for the full accounting.
 
 **SPOKEN SCRIPT:**
 
-> Here's something worth knowing early: most of your clients don't actually know what a head spa is. They showed up because it looked relaxing, someone recommended it, or they're just curious about their own scalp. You're shaping what they expect, in real time, whether you mean to or not.
+> Here's something worth knowing early: a lot of clients won't really know what a head spa is yet. They may have seen one online, had someone recommend it, or simply be curious about their scalp. You're shaping what they expect, in real time, whether you mean to or not.
 >
 > If you position yourself as someone who diagnoses or fixes medical conditions, clients will expect results you can't responsibly deliver. If you position yourself as someone who observes carefully, stays in scope, customizes the service to them, and refers out when it's appropriate — you build real trust, without ever overclaiming.
 >
@@ -404,9 +438,9 @@ final estimates section for the full accounting.
 >
 > Treating the role as purely hands-on — miss the consultation and decision-making, and you miss what actually defines the job.
 >
-> Copying what you see online without thinking long-term — most people speaking outside their scope in a video aren't thinking about consequences.
+> Copying what you see online without thinking long-term — what looks confident online isn't automatically safe, compliant, or appropriate for your license.
 >
-> And avoiding referral because it feels uncomfortable. Referral is not failure — it's part of doing the job correctly. The practitioners who avoid it are usually the ones who end up in situations they could have prevented.
+> And avoiding referral because it feels uncomfortable. Referral is not failure — it's part of doing the job correctly. Avoiding referral can create problems that a timely handoff would have prevented.
 >
 > That brings us to your last checkpoint — showing the difference between knowing the steps and actually holding the role.
 
@@ -430,7 +464,7 @@ final estimates section for the full accounting.
 >
 > [CHECKPOINT STOP — PLAYBACK PAUSES]
 >
-> Think of an actual moment, if you can — a real service, even a hypothetical one, not just a definition.
+> Think in terms of a concrete service moment — one you've experienced, or a realistic hypothetical — not just a definition.
 
 **CHECKPOINT/GATE BEHAVIOR:** `[CHECKPOINT STOP — PLAYBACK PAUSES]`. No qualifying answer scripted. Resume only via M1-14, only after an authoritative pass.
 **SOURCE TRACEABILITY:** `cp-q` (line 5184), verified byte-identical to `M1.questions.m1cp2` (line 8422).
@@ -563,9 +597,9 @@ No Module 4 rewrite was performed.
 ## Estimated audio experience (v2 — recalculated, measured directly)
 
 - **Written Module Briefing:** 5 bullets + 1 "Pay attention to" line (unchanged count from v1, now shorter per-item).
-- **Total spoken word count** (script content only, excluding performance tags, headers, and metadata): **2,090 words**, measured directly from the script text.
+- **Total spoken word count** (script content only, excluding performance tags, headers, and metadata): **≈2,088 words** (v2's 2,090, adjusted −2 for the v3 micro-edits above), measured directly from the script text.
 - **Original (v1) word count:** 2,880 words (also measured directly).
-- **Reduction:** 790 words, **≈27.4%**.
+- **Reduction (v1 → v2):** 790 words, **≈27.4%**. v3 made no further compression — its 4 edits were substitutions, not cuts.
 - **Estimated listening duration** at ~140–150 words/minute: **approximately 14–15 minutes**, within the 14–16 minute target, not counting time spent composing the two checkpoint answers.
 - **Narration chunks:** 14 (`M1-01` through `M1-14`), down from 15 — M1-14 and M1-15 merged into one closing chunk.
 - **Performance cues (stylistic — the restrained category targeted at 5–8 total):** **8** — `[WARM]` ×2 (M1-01, M1-14), `[SHORT PAUSE]` ×1 (M1-07), `[SLOW SLIGHTLY]` ×3 (M1-04, M1-07, M1-13), `[EMPHASIZE]` ×1 (M1-04), `[LET THIS LAND]` ×1 (M1-14). Zero `[CURIOUS]` — judged not genuinely necessary anywhere in this version.
