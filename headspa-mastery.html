@@ -328,6 +328,32 @@ body.review-mode-active { padding-top: 34px; }
 .m1o-footer-note{font-size:0.74rem;color:rgba(255,255,255,0.55);font-weight:300;line-height:1.5;margin-top:0.65rem;}
 .m1o-footer-note:empty{display:none;}
 
+/* Course-wide Module Opener primitive (locked, Module 1 reference — see
+   docs/course-audit/listen-mode/module-01-reference-implementation-FROZEN.md).
+   Byte-identical to .m1-opener/.m1o-* above under new, module-agnostic
+   names so Module 1's own frozen rules never need touching again while
+   every other module (0, 2-12) shares one real component instead of 13
+   bespoke ones. Module-specific content changes; this layout doesn't. */
+.mod-opener { background: #0a0a0a; border-radius: 16px; padding: 2rem 1.5rem 1.75rem; color: white; margin-bottom: 2rem; position: relative; overflow: hidden; }
+.mod-opener::after { content: ''; position: absolute; bottom: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); }
+.mo-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
+.mo-title { font-family: var(--aimt-font-mont); font-size: clamp(1.4rem, 5.5vw, 2rem); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px; font-weight: 700; text-transform: uppercase; }
+.mo-tagline { font-family: var(--aimt-font-serif); font-size: 1.05rem; line-height: 1.5; font-style: italic; color: rgba(255,255,255,0.85); margin-bottom: 14px; }
+.mo-desc { font-size: 0.85rem; color: rgba(255,255,255,0.55); font-weight: 300; line-height: 1.7; letter-spacing: 0.01em; margin-bottom: 1.5rem; max-width: 52ch; }
+.mo-section { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.25rem; margin-bottom: 1.25rem; }
+.mo-section-label { font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.85rem; }
+.mo-section-label .mo-plus { color: rgba(255,255,255,0.35); margin-right: 4px; }
+.mo-list { list-style: none; margin: 0; padding: 0; }
+.mo-list li { font-size: 0.82rem; color: rgba(255,255,255,0.82); font-weight: 300; line-height: 1.6; padding: 0.5rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+.mo-list li:last-child { border-bottom: none; }
+.mo-attention { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.25rem; margin-bottom: 1.5rem; }
+.mo-attention-label { font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+.mo-attention-text { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 300; line-height: 1.65; max-width: 56ch; }
+.mo-footer { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.15rem; }
+.mo-footer-note{font-size:0.74rem;color:rgba(255,255,255,0.55);font-weight:300;line-height:1.5;margin-top:0.65rem;}
+.mo-footer-note:empty{display:none;}
+.mo-footer-soon{font-size:0.78rem;color:rgba(255,255,255,0.45);font-weight:300;letter-spacing:0.02em;}
+
 /* Review Mode-only Listen Mode chunk QA panel (Module 1). Never rendered
    into the DOM unless window.ReviewMode.isActive() -- see
    renderM1ReviewQAPanel() -- so students never receive this markup at all,
@@ -3009,10 +3035,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <!-- Hero -->
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 3 · Hair & Scalp Anatomy</div>
-      <div class="mh-title">What you see is only the surface.</div>
-      <div class="mh-desc">This is where the course turns technical. Once you understand the structures and cycles beneath the scalp, buildup, shedding, sensitivity, and product response stop looking random.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 03</div>
+      <div class="mo-title">Hair & Scalp Anatomy</div>
+      <div class="mo-tagline">What you see is only the surface.</div>
+      <div class="mo-desc">This is where the course turns technical. Once you understand the structures and cycles beneath the scalp, buildup, shedding, sensitivity, and product response stop looking random.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Map the scalp and hair structures you're actually working with.</li>
+          <li>Understand the hair-growth cycle — and what disrupts it.</li>
+          <li>Learn how barrier function and surface lipids shape what you see.</li>
+          <li>Connect anatomy to the massage techniques you'll actually use.</li>
+          <li>Turn anatomy into action — not just terminology you memorize.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">Once you can explain why a scalp behaves the way it does, service adaptation stops being guesswork.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <!-- SECTION 3.1 -->
@@ -3505,10 +3552,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <!-- Hero -->
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 5 · Scalp Patterns &amp; Service Adaptation</div>
-      <div class="mh-title">Read the pattern.<br>Adjust the service.</div>
-      <div class="mh-desc">Module 4 taught you how to gather and describe evidence. Now you will turn supported observations, client-reported experience, and regional differences into a cosmetic service plan. The goal is not to assign one permanent scalp type. The goal is to make each step earn its place.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 05</div>
+      <div class="mo-title">Scalp Patterns &amp; Service Adaptation</div>
+      <div class="mo-tagline">Read the pattern.<br>Adjust the service.</div>
+      <div class="mo-desc">Module 4 taught you how to gather and describe evidence. Now you will turn supported observations, client-reported experience, and regional differences into a cosmetic service plan. The goal is not to assign one permanent scalp type. The goal is to make each step earn its place.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Turn evidence and observation into an actual service plan.</li>
+          <li>Learn what you can realistically change in a single appointment.</li>
+          <li>Set priority order when more than one concern is present.</li>
+          <li>Adapt one protocol to more than one client, in real time.</li>
+          <li>Recognize the errors that make a protocol less intelligent, not more.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">A scalp pattern is a starting point, not a permanent label — the plan should adapt as the evidence does.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <!-- 5.1 -->
@@ -4070,10 +4138,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module4Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 4 · Microscopy &amp; Scalp Assessment</div>
-      <div class="mh-title">Stop assuming.<br>Start seeing.</div>
-      <div class="mh-desc">Magnification does not hand you a diagnosis. It gives you a better view. This module teaches a repeatable five-point scan, disciplined observation, and the moment a cosmetic service should be customized, simplified, paused, or referred.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 04</div>
+      <div class="mo-title">Microscopy &amp; Scalp Assessment</div>
+      <div class="mo-tagline">Stop assuming.<br>Start seeing.</div>
+      <div class="mo-desc">Magnification does not hand you a diagnosis. It gives you a better view. This module teaches a repeatable five-point scan, disciplined observation, and the moment a cosmetic service should be customized, simplified, paused, or referred.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Learn a repeatable five-point scalp scan you can use every time.</li>
+          <li>Present magnified findings to a client without overstating what you see.</li>
+          <li>Apply the five observation lenses to real, varied scalp images.</li>
+          <li>Know the moment a service should be customized, simplified, or paused.</li>
+          <li>See the common mistakes new practitioners make when reading images.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">Two scalps can look nearly identical and still call for two different decisions — the image is evidence, not the whole story.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">4.1 — The role of magnification</div>
@@ -4725,10 +4814,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module0Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Welcome Module</div>
-      <div class="mh-title">Clients can feel the difference between a service that is being performed<br>and one that is being led.</div>
-      <div class="mh-desc">Your job is to lead it. Before technique begins, this module establishes how the course works and the professional standard behind every service decision that follows.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 00</div>
+      <div class="mo-title">Welcome</div>
+      <div class="mo-tagline">Clients can feel the difference between a service that is being performed.<br>And one that is being led.</div>
+      <div class="mo-desc">Your job is to lead it. Before technique begins, this module establishes how the course works and the professional standard behind every service decision that follows.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Understand how this certification works, and what to expect from each module.</li>
+          <li>See who this course is built for, and what's expected of you as a practitioner.</li>
+          <li>Learn the professional standard behind every decision you'll make with a client.</li>
+          <li>Recognize what actually separates a great technician from an average one.</li>
+          <li>See the early mistakes new practitioners make most often — before you make them.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">Scope and safety come up in Module 0 for a reason — everything else in this course builds on staying inside it.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 1 checkpoint stop</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">0.1 — Welcome</div>
@@ -5354,10 +5464,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module2Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 2 · Welcoming Your Client</div>
-      <div class="mh-title">The experience begins<br>before your hands do.</div>
-      <div class="mh-desc">The arrival shapes whether a client feels rushed, uncertain, or guided. The goal is a calm, clear transition into the service—before hands-on work begins.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 02</div>
+      <div class="mo-title">Welcoming Your Client</div>
+      <div class="mo-tagline">The experience begins before your hands do.</div>
+      <div class="mo-desc">The arrival shapes whether a client feels rushed, uncertain, or guided. The goal is a calm, clear transition into the service—before hands-on work begins.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Walk through a complete arrival sequence, from greeting to seated.</li>
+          <li>Test your judgment against real, ambiguous arrival scenarios.</li>
+          <li>Find the voice that puts a client at ease without over-explaining.</li>
+          <li>Learn what experienced practitioners notice that new ones miss.</li>
+          <li>See exactly where arrivals go wrong — and how to stay consistent every time.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">The first two minutes decide how confident a client feels for the rest of the appointment.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 1 checkpoint stop</div>
+      </div>
     </div>
 
     <!-- ── ACCESSIBLE ARRIVAL-SEQUENCE ACCORDION ── -->
@@ -5585,10 +5716,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module6Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 6 · Conditions & Disorders</div>
-      <div class="mh-title">Before you treat,<br>you have to interpret correctly.</div>
-      <div class="mh-desc">By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer — conditions that change how those patterns behave. Because if you misread what you're seeing, you will choose the wrong approach with confidence.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 06</div>
+      <div class="mo-title">Conditions &amp; Disorders</div>
+      <div class="mo-tagline">Before you treat,<br>you have to interpret correctly.</div>
+      <div class="mo-desc">By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer — conditions that change how those patterns behave. Because if you misread what you're seeing, you will choose the wrong approach with confidence.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Learn what you can — and cannot — conclude from appearance alone.</li>
+          <li>Understand the most important distinction in scalp condition care.</li>
+          <li>See how a single spectrum runs from Malassezia to seborrheic dermatitis.</li>
+          <li>Know exactly when to pause a service or refer out.</li>
+          <li>Learn what actually makes a condition worse, so you never do it.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">The most dangerous mistake here isn't missing a condition — it's treating a guess like a diagnosis.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">6.1 — Your role here</div>
@@ -6020,10 +6172,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module7Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 7 · Equipment & Room Setup</div>
-      <div class="mh-title">Before the service starts, your setup is already speaking.</div>
-      <div class="mh-desc">By the time your hands touch the client, they've already formed an impression. Not consciously — but they feel whether you're prepared, whether the space is controlled, whether the service will be smooth or interrupted. Your setup is not separate from the service. It is part of it.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 07</div>
+      <div class="mo-title">Equipment &amp; Room Setup</div>
+      <div class="mo-tagline">Before the service starts, your setup is already speaking.</div>
+      <div class="mo-desc">By the time your hands touch the client, they've already formed an impression. Not consciously — but they feel whether you're prepared, whether the space is controlled, whether the service will be smooth or interrupted. Your setup is not separate from the service. It is part of it.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Set up a treatment bed that works for the service, not against it.</li>
+          <li>Know your tools and supplies well enough to prep without thinking twice.</li>
+          <li>Build a repeatable station-prep sequence you can trust under pressure.</li>
+          <li>Position a client for comfort, access, and safety — every time.</li>
+          <li>Practice the judgment calls that come up in real station setup.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">A client can't see your prep, but they can feel it — a controlled setup is part of the service itself.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">7.1 — The treatment bed</div>
@@ -6426,10 +6599,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module8Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 8 · The Head Spa Service</div>
-      <div class="mh-title">Master the flow, not the script.</div>
-      <div class="mh-desc">This module is about understanding how the service moves — from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 08</div>
+      <div class="mo-title">The Head Spa Service</div>
+      <div class="mo-tagline">Master the flow, not the script.</div>
+      <div class="mo-desc">This module is about understanding how the service moves — from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Learn to think in phases, not just a checklist of steps.</li>
+          <li>Understand the difference between Core and Extended service elements.</li>
+          <li>Build a full service map you can adapt on the fly.</li>
+          <li>Master flow, pressure, and transitions between techniques.</li>
+          <li>Take the service into practice with real adaptation scenarios.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">The service is a flow, not a script — losing the flow loses the experience, even if every step still happened.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">Think in phases, not steps</div>
@@ -6839,10 +7033,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module10Wrap" style="display:none;">
   <div class="lesson-wrap m10-scope">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 10 · Sanitation & Reset Systems</div>
-      <div class="mh-title">Build a Sanitation System That Holds Up All Day</div>
-      <div class="mh-desc">Most people treat sanitation and reset as something separate from the service. It's not. Clients may not watch you clean — but they feel freshness, organization, and readiness. And they also feel leftover clutter, damp linens, and signs of the previous client. That's what breaks a premium experience.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 10</div>
+      <div class="mo-title">Sanitation &amp; Reset Systems</div>
+      <div class="mo-tagline">Build a sanitation system that holds up all day.</div>
+      <div class="mo-desc">Most people treat sanitation and reset as something separate from the service. It's not. Clients may not watch you clean — but they feel freshness, organization, and readiness. And they also feel leftover clutter, damp linens, and signs of the previous client. That's what breaks a premium experience.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Use the right sanitation process for the right job — every time.</li>
+          <li>Process each item correctly, not just quickly.</li>
+          <li>Build a reset routine around what genuinely cannot be rushed.</li>
+          <li>Design a system that holds up under pressure, before you're under pressure.</li>
+          <li>Know what to do when a routine reset isn't enough.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">Clients rarely comment on sanitation when it's right — they always notice when it's wrong.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">Building on Your Licensure</div>
@@ -7120,10 +7335,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module9Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 9 · Checkout, Client Closing &amp; Pricing Strategy</div>
-      <div class="mh-title">Close the experience<br>as intentionally as you opened it.</div>
-      <div class="mh-desc">The treatment is done. What happens next — how you close the appointment, and how you price what you do — is its own skill. This module is a Business Decision Lab: less about performing, more about deciding, from real numbers and calm communication.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 09</div>
+      <div class="mo-title">Checkout, Client Closing &amp; Pricing Strategy</div>
+      <div class="mo-tagline">Close the experience<br>as intentionally as you opened it.</div>
+      <div class="mo-desc">The treatment is done. What happens next — how you close the appointment, and how you price what you do — is its own skill. This module is a Business Decision Lab: less about performing, more about deciding, from real numbers and calm communication.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Close the appointment as intentionally as you opened it.</li>
+          <li>Know your real costs — and the difference between margin and markup.</li>
+          <li>Price a service using market context, not copycat pricing.</li>
+          <li>Design a menu and enhancements that actually earn their place.</li>
+          <li>Respond calmly and confidently when a client says the price felt high.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">Pricing conversations go wrong far more often from how they're delivered than from the number itself.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="sec-eyebrow">9.1 — From treatment close to checkout</div>
@@ -7440,10 +7676,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module11Wrap" style="display:none;">
   <div class="lesson-wrap m11-scope">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 11 · AI / Modern Practice Tools</div>
-      <div class="mh-title">Human-led.<br>AI-assisted.</div>
-      <div class="mh-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Module 11</div>
+      <div class="mo-title">AI / Modern Practice Tools</div>
+      <div class="mo-tagline">Human-led.<br>AI-assisted.</div>
+      <div class="mo-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>
+
+      <div class="mo-section">
+        <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
+        <ul class="mo-list">
+          <li>Build real tool literacy — what AI is actually useful for in practice.</li>
+          <li>Learn how better input leads to better, more usable output.</li>
+          <li>Keep human authority over every judgment AI helps inform.</li>
+          <li>Handle client-supplied AI results and scalp analysis responsibly.</li>
+          <li>Protect client privacy and data whenever AI tools are involved.</li>
+        </ul>
+      </div>
+
+      <div class="mo-attention">
+        <div class="mo-attention-label">Pay attention to</div>
+        <div class="mo-attention-text">AI can inform your judgment. It can never replace it — the final call is always yours.</div>
+      </div>
+
+      <div class="mo-footer">
+        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+      </div>
     </div>
 
     <div class="body-text">You've already experienced AIMT's philosophy in action through Cadence. This course was built by human practitioners and professionals; Cadence is an AI learning-support tool built around that curriculum. AI can make education and practice more useful and responsive, but it does not replace the human expertise behind it. Hands-on training, webinars, and clinical/practical education remain human-led.</div>

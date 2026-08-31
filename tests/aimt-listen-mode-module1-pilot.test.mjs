@@ -476,11 +476,16 @@ function diffAgainstStart(relPath) {
   const diff = diffAgainstStart('headspa-mastery.html');
   const lines = diff.split('\n');
   const hunkCount = lines.filter((l) => l.startsWith('@@')).length;
-  // Bound grew from the original pilot's 8 to include this task's black
-  // opener (replacing the original .mod-hero block) and the Review-Mode
-  // QA panel wiring — still a small, fully-accounted-for set, not an
-  // open-ended one.
-  check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'headspa-mastery.html diff against the starting commit is a small, bounded set of hunks (original briefing insert, 3 visual-cue ids, 2 script includes, showHome/openModuleById unmount, STATIC_MODULES[1] mount call, black opener CSS+markup, Review-Mode QA panel CSS+JS+wiring, entry-fix/structural-robustness/false-positive-QA/student-preview rounds, and this round\'s 3 new 1.6/1.7/1.8 visual-target ids + #guideBtn bar-offset coordination + module recap card)', hunkCount > 0 && hunkCount <= 24, 'got ' + hunkCount);
+  // Bound grew from the original pilot's 8 (Module 1 only) to also cover
+  // the owner's course-wide propagation task: the reusable .mod-opener/
+  // .mo-* CSS block (byte-identical to .m1-opener/.m1o-*, added rather
+  // than touching Module 1's own frozen rules) plus one Module Opener
+  // markup swap per module for 0, 2-11 (Module 12 deliberately excluded
+  // this pass — see the owner CapCut worklist / final report). Still a
+  // small, fully-accounted-for, non-open-ended set — just one scoped to
+  // "Module 1 pilot + course-wide opener propagation" rather than Module 1
+  // alone. Headroom included for Module 12's opener once that's safe to add.
+  check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'headspa-mastery.html diff against the starting commit is a small, bounded set of hunks (original Module 1 pilot hunks, plus one .mod-opener CSS hunk + one opener-markup hunk per propagated module)', hunkCount > 0 && hunkCount <= 45, 'got ' + hunkCount);
 
   const addedLines = lines.filter((l) => l.startsWith('+') && !l.startsWith('+++')).map((l) => l.slice(1));
   const removedLines = lines.filter((l) => l.startsWith('-') && !l.startsWith('---')).map((l) => l.slice(1));
@@ -550,7 +555,50 @@ function diffAgainstStart(relPath) {
     // sections — same visible text and position, an attribute added in
     // place, closing the owner's "some sections stop synchronizing" finding.
     '    <div class="sec-eyebrow">1.1 — What is a head spa?</div>',
-    '    <div class="sec-eyebrow">1.2 — What is a head spa technician?</div>'
+    '    <div class="sec-eyebrow">1.2 — What is a head spa technician?</div>',
+    // Course-wide Module Opener propagation (Part C of the owner's
+    // course-wide task): each of Modules 0, 2-11's original .mod-hero
+    // block (mh-eyebrow/mh-title/mh-desc, verbatim real content) was
+    // replaced by a .mod-opener block using the same reusable primitive
+    // as Module 1 -- the module-specific eyebrow/title/tagline/desc text
+    // reappears verbatim inside the new markup (a content carry-over, not
+    // a deletion), plus real "In this module"/"Pay attention to" content
+    // and a footer (Module 12 intentionally excluded this pass --
+    // certification-integrity risk, flagged for the owner rather than
+    // guessed at).
+    '      <div class="mh-eyebrow">Welcome Module</div>',
+    '      <div class="mh-title">Clients can feel the difference between a service that is being performed<br>and one that is being led.</div>',
+    '      <div class="mh-desc">Your job is to lead it. Before technique begins, this module establishes how the course works and the professional standard behind every service decision that follows.</div>',
+    '      <div class="mh-eyebrow">Module 2 · Welcoming Your Client</div>',
+    '      <div class="mh-title">The experience begins<br>before your hands do.</div>',
+    '      <div class="mh-desc">The arrival shapes whether a client feels rushed, uncertain, or guided. The goal is a calm, clear transition into the service—before hands-on work begins.</div>',
+    '      <div class="mh-eyebrow">Module 3 · Hair & Scalp Anatomy</div>',
+    '      <div class="mh-title">What you see is only the surface.</div>',
+    '      <div class="mh-desc">This is where the course turns technical. Once you understand the structures and cycles beneath the scalp, buildup, shedding, sensitivity, and product response stop looking random.</div>',
+    '      <div class="mh-eyebrow">Module 4 · Microscopy &amp; Scalp Assessment</div>',
+    '      <div class="mh-title">Stop assuming.<br>Start seeing.</div>',
+    '      <div class="mh-desc">Magnification does not hand you a diagnosis. It gives you a better view. This module teaches a repeatable five-point scan, disciplined observation, and the moment a cosmetic service should be customized, simplified, paused, or referred.</div>',
+    '      <div class="mh-eyebrow">Module 5 · Scalp Patterns &amp; Service Adaptation</div>',
+    '      <div class="mh-title">Read the pattern.<br>Adjust the service.</div>',
+    '      <div class="mh-desc">Module 4 taught you how to gather and describe evidence. Now you will turn supported observations, client-reported experience, and regional differences into a cosmetic service plan. The goal is not to assign one permanent scalp type. The goal is to make each step earn its place.</div>',
+    '      <div class="mh-eyebrow">Module 6 · Conditions & Disorders</div>',
+    '      <div class="mh-title">Before you treat,<br>you have to interpret correctly.</div>',
+    '      <div class="mh-desc">By this point you know how to observe the scalp and recognize scalp types. Now you\'re adding another layer — conditions that change how those patterns behave. Because if you misread what you\'re seeing, you will choose the wrong approach with confidence.</div>',
+    '      <div class="mh-eyebrow">Module 7 · Equipment & Room Setup</div>',
+    '      <div class="mh-title">Before the service starts, your setup is already speaking.</div>',
+    '      <div class="mh-desc">By the time your hands touch the client, they\'ve already formed an impression. Not consciously — but they feel whether you\'re prepared, whether the space is controlled, whether the service will be smooth or interrupted. Your setup is not separate from the service. It is part of it.</div>',
+    '      <div class="mh-eyebrow">Module 8 · The Head Spa Service</div>',
+    '      <div class="mh-title">Master the flow, not the script.</div>',
+    '      <div class="mh-desc">This module is about understanding how the service moves — from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience.</div>',
+    '      <div class="mh-eyebrow">Module 10 · Sanitation & Reset Systems</div>',
+    '      <div class="mh-title">Build a Sanitation System That Holds Up All Day</div>',
+    '      <div class="mh-desc">Most people treat sanitation and reset as something separate from the service. It\'s not. Clients may not watch you clean — but they feel freshness, organization, and readiness. And they also feel leftover clutter, damp linens, and signs of the previous client. That\'s what breaks a premium experience.</div>',
+    '      <div class="mh-eyebrow">Module 9 · Checkout, Client Closing &amp; Pricing Strategy</div>',
+    '      <div class="mh-title">Close the experience<br>as intentionally as you opened it.</div>',
+    '      <div class="mh-desc">The treatment is done. What happens next — how you close the appointment, and how you price what you do — is its own skill. This module is a Business Decision Lab: less about performing, more about deciding, from real numbers and calm communication.</div>',
+    '      <div class="mh-eyebrow">Module 11 · AI / Modern Practice Tools</div>',
+    '      <div class="mh-title">Human-led.<br>AI-assisted.</div>',
+    '      <div class="mh-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>'
   ]);
   // Pure relocations (see isPureMove above) don't need individual
   // allowlisting either -- #m1cp1's whole block moved this pass (owner-
