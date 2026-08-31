@@ -311,10 +311,22 @@ body.review-mode-active { padding-top: 34px; }
 .m1o-attention { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.25rem; margin-bottom: 1.5rem; }
 .m1o-attention-label { font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
 .m1o-attention-text { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 300; line-height: 1.65; max-width: 56ch; }
-.m1o-footer { display: flex; align-items: center; gap: 10px; border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.15rem; }
-.m1o-mark { width: 20px; height: 20px; flex-shrink: 0; color: rgba(255,255,255,0.5); }
-.m1o-footer-title { font-family: var(--aimt-font-mont); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; color: rgba(255,255,255,0.85); }
-.m1o-footer-meta { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.m1o-footer { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.15rem; }
+/* Baseline styling for the static Listen-with-Cadence button (below) so it
+   reads correctly on first paint, before aimt-listen-mode-player.js has
+   run -- or even if it never loads at all. Mirrors the same rules that
+   file's own ensureStyles() injects once JS is live; harmless if both end
+   up applying (identical rules, not a conflict). */
+.aimt-lm-entry{display:flex;align-items:center;gap:0.85rem;width:100%;text-align:left;background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.16);border-radius:var(--aimt-radius-md,12px);padding:0.85rem 1rem;font-family:var(--aimt-font-sans,sans-serif);cursor:pointer;transition:background 0.2s,border-color 0.2s;}
+.aimt-lm-entry:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.28);}
+.aimt-lm-entry:focus-visible{outline:2px solid rgba(255,255,255,0.65);outline-offset:2px;}
+.aimt-lm-entry:disabled{opacity:0.55;cursor:default;pointer-events:none;}
+.aimt-lm-entry-play{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.3);}
+.aimt-lm-entry-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.aimt-lm-entry-title{font-family:var(--aimt-font-mont,inherit);font-size:0.8rem;font-weight:600;letter-spacing:0.02em;color:#fff;}
+.aimt-lm-entry-meta{font-family:var(--aimt-font-mono,inherit);font-size:0.66rem;letter-spacing:0.03em;color:rgba(255,255,255,0.5);}
+.m1o-footer-note{font-size:0.74rem;color:rgba(255,255,255,0.55);font-weight:300;line-height:1.5;margin-top:0.65rem;}
+.m1o-footer-note:empty{display:none;}
 
 /* Review Mode-only Listen Mode chunk QA panel (Module 1). Never rendered
    into the DOM unless window.ReviewMode.isActive() -- see
@@ -560,12 +572,18 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 
 /* ── CADENCE CHARACTER MARK ── */
 #guideBtn {
-  position: fixed; bottom: 1.5rem; right: 1.25rem; z-index: 200;
+  /* --aimt-lm-bar-offset: the Listen Mode mini-player's own rendered
+     height + gap, kept live by that player (assets/js/aimt-listen-mode-
+     player.js) via a ResizeObserver -- 0px whenever no player is mounted
+     or visible, so this coordinates automatically instead of guessing a
+     fixed offset or hardcoding a per-module override. Same mechanism
+     covers mobile and desktop; nothing here needs a breakpoint. */
+  position: fixed; bottom: calc(1.5rem + var(--aimt-lm-bar-offset, 0px)); right: 1.25rem; z-index: 200;
   height: 46px; padding: 0 18px 0 14px;
   background: var(--hero-bg); border: none; border-radius: 23px;
   cursor: pointer; display: none; align-items: center; gap: 10px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.22), 0 1px 8px rgba(0,0,0,0.14);
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, bottom 0.25s ease;
   overflow: hidden; position: fixed;
 }
 #guideBtn.visible { display: flex; }
@@ -2033,6 +2051,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lc-next { background:rgba(255,255,255,0.055); border:0.5px solid rgba(255,255,255,0.09); border-radius: var(--aimt-radius-md); padding:0.95rem 1rem; margin:0 auto 1.1rem; text-align:left; max-width:25rem; }
 .lc-next-label { font-family:var(--aimt-font-mono); font-size:0.54rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.42); margin-bottom:6px; }
 .lc-next-text { font-size:0.8rem; color:rgba(255,255,255,0.63); font-weight:300; line-height:1.62; }
+/* Visible module recap -- same card treatment as .lc-next, so the spoken
+   closing recap (the "three things to remember" every module's Listen
+   Mode narration lands on) has a matching on-screen counterpart in the
+   same order, not just an audio-only mention. */
+.lc-recap { background:rgba(255,255,255,0.055); border:0.5px solid rgba(255,255,255,0.09); border-radius: var(--aimt-radius-md); padding:0.95rem 1rem; margin:0 auto 1.1rem; text-align:left; max-width:25rem; }
+.lc-recap-list { list-style:none; margin:0.5rem 0 0; padding:0; }
+.lc-recap-list li { font-size:0.8rem; color:rgba(255,255,255,0.63); font-weight:300; line-height:1.55; padding:0.4rem 0 0.4rem 1.1rem; position:relative; }
+.lc-recap-list li::before { content:'·'; position:absolute; left:0.2rem; color:rgba(255,255,255,0.4); }
 .lc-btn { width:100%; background:rgba(255,255,255,0.1); color:white; border:0.5px solid rgba(255,255,255,0.16); border-radius: var(--aimt-radius-md); padding:0.78rem; font-size:0.85rem; font-weight:500; font-family:var(--aimt-font-sans); cursor:pointer; transition:all 0.2s; margin:0 auto 0.45rem; max-width:19rem; }
 .lc-btn:hover { background:rgba(255,255,255,0.2); }
 .lc-btn-ghost { width:100%; background:none; border:none; color:rgba(255,255,255,0.35); font-size:0.78rem; font-family:var(--aimt-font-sans); cursor:pointer; padding:0.4rem; max-width:19rem; margin:0 auto; }
@@ -4997,27 +5023,43 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="m1o-attention-text">The language you use when describing what you see. That distinction follows you through the rest of the course.</div>
       </div>
 
+      <!-- Real, structurally static "Listen with Cadence" control. This
+           button is written directly in this markup -- it is NOT created
+           by JavaScript -- so a script load/init failure (stale-cached
+           JS, a manifest error, a closed production gate) can never make
+           the primary listening affordance disappear the way the old
+           JS-only entry point could. AIMTListenMode.mount() (below, in
+           the page script) looks this exact button up by id and ATTACHES
+           real playback behavior to it; it never creates or removes it.
+           If mount() can't wire real playback for any reason, the button
+           stays visible and clicking it reports a plain "couldn't start"
+           note in the element below rather than doing nothing. The
+           inline script right after the button is a last-resort baseline
+           for that same note, active from first paint even if every
+           other script on the page fails to load. -->
       <div class="m1o-footer">
-        <svg class="m1o-mark" viewBox="0 0 44 44" fill="none">
-          <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.7"/>
-          <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
-          <circle cx="22" cy="22" r="2" fill="currentColor"/>
-          <circle cx="22" cy="2"    r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="36.1" cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="42"   cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="22"   cy="42"   r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="7.9"  cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="2"    cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
-          <circle cx="7.9"  cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
-        </svg>
-        <div>
-          <div class="m1o-footer-title">Listen with Cadence</div>
-          <div class="m1o-footer-meta">~16 min &middot; Includes 2 checkpoint stops</div>
-        </div>
+        <button type="button" id="m1ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. ~16 min · Includes 2 checkpoint stops. Press to start listening.">
+          <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+          <span class="aimt-lm-entry-copy">
+            <span class="aimt-lm-entry-title">Listen with Cadence</span>
+            <span class="aimt-lm-entry-meta">~16 min · Includes 2 checkpoint stops</span>
+          </span>
+        </button>
+        <div class="m1o-footer-note" data-aimt-entry-note aria-live="polite"></div>
+        <script>
+          (function () {
+            var btn = document.getElementById('m1ListenWithCadenceButton');
+            if (!btn) return;
+            var baseline = function () {
+              var note = btn.parentNode && btn.parentNode.querySelector('[data-aimt-entry-note]');
+              if (note) note.textContent = "Audio couldn't start. Try again.";
+            };
+            btn._aimtClickHandler = baseline;
+            btn.addEventListener('click', baseline);
+          })();
+        </script>
       </div>
     </div>
-    <div id="m1ListenModeMount"></div>
 
     <div class="sec-eyebrow">1.1 — What is a head spa?</div>
     <div class="sec-title">It is not just a shampoo. It is not just a massage. And it is not a medical treatment.</div>
@@ -5178,6 +5220,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
+    <div class="checkpoint" id="m1cp1">
+      <div class="cp-head">
+        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="cp-label">Apply the boundary</div>
+      </div>
+      <div class="cp-q">A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.</div>
+      <div class="cp-row">
+        <div class="cp-input-row">
+        <textarea class="cp-input" id="m1cp1In" placeholder="Write the response you would give the client, then explain the next step…" rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp1')"></textarea>
+        <button class="voice-btn" onclick="startVoice('m1cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+        </div>
+        <button class="cp-btn" id="m1cp1Btn" onclick="submitM1CP('m1cp1')" aria-label="Send response to Cadence">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cp-res" id="m1cp1Res" aria-live="polite"></div>
+    </div>
+
+    <hr class="divider">
+
     <div class="sec-eyebrow">1.5 — Limitations of a head spa service</div>
     <div class="sec-title">Be honest about what this is. It protects everyone.</div>
 
@@ -5217,14 +5279,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">1.6 — Licensing</div>
+    <div class="sec-eyebrow" id="m1VisualLicensing">1.6 — Licensing</div>
     <div class="sec-title">Before offering this service, know your local requirements.</div>
     <div class="body-text">Before offering a head spa service, verify what your existing license or authorization permits in the state and location where you practice. Review rules for cleansing and shampooing, scalp and body massage, exfoliation, cosmetic product application, devices, water systems, sanitation, establishment licensing, and the body areas you may legally treat.</div>
     <div class="body-text">Do not assume every head spa service is permitted under every beauty license. The exact combination of services matters. This course provides professional education and best practices; it does not override law, create a license, or expand your legal scope.</div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">1.7 — Practitioner insight</div>
+    <div class="sec-eyebrow" id="m1VisualPractitionerInsight">1.7 — Practitioner insight</div>
     <div class="sec-title">Most clients don't actually know what a head spa is.</div>
     <div class="body-text">Most clients arrive because the service looks relaxing, someone recommended it, or they are curious about their scalp. You are shaping their expectations in real time. If you position yourself as someone who diagnoses or fixes medical conditions, clients will expect results you cannot responsibly promise. If you position yourself as someone who observes carefully, works within scope, customizes the cosmetic service, and refers appropriately, you build trust without overclaiming.</div>
 
@@ -5235,7 +5297,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">1.8 — Mistakes new practitioners make</div>
+    <div class="sec-eyebrow" id="m1VisualMistakes">1.8 — Mistakes new practitioners make</div>
     <div class="sec-title">Five patterns. All avoidable.</div>
 
     <div class="info-card"><div class="ic-title">Blurring observation with diagnosis</div><div class="body-text" style="margin:0">One of the most consequential mistakes is turning a visible finding into a medical conclusion. Recognizing patterns can inform your cosmetic service. Diagnosis does not belong to this role. Know the rules that apply to your license and keep your language on the correct side of that boundary.</div></div>
@@ -5245,24 +5307,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="info-card"><div class="ic-title">Avoiding referral because it feels uncomfortable</div><div class="body-text" style="margin:0">Referral is not failure. It's part of doing the job correctly. The practitioners who avoid it are the ones who end up in uncomfortable situations they could have prevented.</div></div>
 
     <hr class="divider">
-
-    <div class="checkpoint" id="m1cp1">
-      <div class="cp-head">
-        <div class="cp-av"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm0 9V7m0-2V4" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-        <div class="cp-label">Apply the boundary</div>
-      </div>
-      <div class="cp-q">A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.</div>
-      <div class="cp-row">
-        <div class="cp-input-row">
-        <textarea class="cp-input" id="m1cp1In" placeholder="Write the response you would give the client, then explain the next step…" rows="1" oninput="grow(this)" onkeydown="m1cpKey(event,'m1cp1')"></textarea>
-        <button class="voice-btn" onclick="startVoice('m1cp1In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
-        </div>
-        <button class="cp-btn" id="m1cp1Btn" onclick="submitM1CP('m1cp1')" aria-label="Send response to Cadence">
-          <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-      <div class="cp-res" id="m1cp1Res" aria-live="polite"></div>
-    </div>
 
     <div class="checkpoint" id="m1cp2">
       <div class="cp-head">
@@ -5287,6 +5331,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lc-next-label">Module 1 complete</div>
       <div class="lc-title">Professional boundaries demonstrated.</div>
       <div class="lc-sub">You demonstrated observation-first language, scope and referral judgment, and an understanding of the technician's responsibility for the complete client experience.</div>
+      <div class="lc-recap">
+        <div class="lc-next-label">Module recap</div>
+        <ul class="lc-recap-list">
+          <li>Describe what you can actually observe — without turning it into a diagnosis.</li>
+          <li>Treat scope as something you verify, not something this certification hands you.</li>
+          <li>Referral is part of doing the job well, not a failure to do it.</li>
+        </ul>
+      </div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 2</div>
         <div class="lc-next-text">With the professional boundary established, Module 2 moves into the client experience before the scalp service begins: intake, first contact, communication, and the opening moments that establish trust.</div>
@@ -9246,8 +9298,12 @@ function openModuleById(id, options = {}) {
   // owner-only inspection tool.
   function renderM1ReviewQAPanel() {
     if (!(window.ReviewMode && window.ReviewMode.isActive())) return;
-    const mountEl = document.getElementById('m1ListenModeMount');
-    if (!mountEl || !window.AIMTListenModeData) return;
+    // Scoped to the live .lesson-wrap, not a bare document-wide
+    // getElementById -- the hidden #module1Wrap template (the source
+    // wrap.innerHTML is cloned from) contains its own copy of this same
+    // id, and a document-wide lookup would be ambiguous between the two.
+    const entryBtnEl = wrap.querySelector('#m1ListenWithCadenceButton');
+    if (!entryBtnEl || !window.AIMTListenModeData) return;
     const existing = document.getElementById('m1ReviewQAPanel');
     if (existing) existing.remove();
 
@@ -9298,16 +9354,15 @@ function openModuleById(id, options = {}) {
         const engine = window.AIMTListenMode.engine;
         const key = engine.storageKey('headspa-mastery', 1);
         localStorage.setItem(key, engine.serializePosition({ chunkId: chunk.chunkId, timeSec: 0, speed: 1 }));
-        window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE });
-        const entryBtn = mountEl.querySelector('.aimt-lm-entry');
-        if (entryBtn) entryBtn.click();
+        window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryButtonEl: wrap.querySelector('#m1ListenWithCadenceButton'), appState: APP_STATE });
+        entryBtnEl.click();
       });
       row.appendChild(jumpBtn);
 
       panel.appendChild(row);
     });
 
-    mountEl.parentNode.insertBefore(panel, mountEl.nextSibling);
+    entryBtnEl.parentNode.insertBefore(panel, entryBtnEl.nextSibling);
   }
 
   const STATIC_MODULES = {
@@ -9317,7 +9372,7 @@ function openModuleById(id, options = {}) {
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE }); renderM1ReviewQAPanel(); },
+    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryButtonEl: wrap.querySelector('#m1ListenWithCadenceButton'), appState: APP_STATE }); renderM1ReviewQAPanel(); },
     7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m8InitMasterclass(); },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
@@ -10891,6 +10946,23 @@ function showStudentSignInEntry() {
 }
 
 async function shouldEnterPurchasedCourse() {
+  // Student Preview: a hostname-and-flag-gated, localhost-only stand-in
+  // for "this user already purchased AIMT" -- the ONLY fiction it
+  // introduces is entry past this outer landing/purchase gate, purely so
+  // the owner can review the real student experience without a live
+  // Supabase session or a real course_entitlements row. It touches
+  // nothing below this point: no student profile is fabricated (identity
+  // fields simply stay whatever local APP_STATE already has, same as any
+  // other fresh local session), no entitlement row is written, and every
+  // real rule once inside the course shell -- module sequencing,
+  // checkpoints, Cadence, certification -- is completely untouched. See
+  // StudentPreview in headspa-state.js: isStudentPreviewEligibleHost()
+  // allowlists exactly 127.0.0.1/localhost (no staging/pages.dev
+  // exception), so this can never activate on a production or preview
+  // deploy host, and it stays off unless ?studentpreview=1 was literally
+  // in the URL at load.
+  if (window.StudentPreview && window.StudentPreview.isActive()) return true;
+
   // Three admission paths, all required to pass the entitlement check below: the
   // sessionStorage handoff flag set by student-access.html, an explicit
   // ?enter=1 (e.g. the My AIMT dashboard's Continue link), or an active Course
@@ -10997,7 +11069,18 @@ async function enterPurchasedCourseHome() {
   if (!openCertificateView && canSync) { AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); }
   renderHomeProgress();
 
-  window.history.replaceState({}, document.title, window.location.pathname);
+  // Strips one-time entry params (?enter=1, etc.) so a later reload can't
+  // re-trigger the handoff -- but ?studentpreview=1 is not one-time; per
+  // its own design (StudentPreview in headspa-state.js) it must still be
+  // present on any FUTURE reload for StudentPreview.init() to re-detect
+  // it, since that flag is deliberately re-derived from the URL on every
+  // load, never persisted. Without this preservation, the very first
+  // reload after entering the course shell via Student Preview silently
+  // drops back to requiring real entitlement -- Listen Mode's GENERATED-
+  // audio exception depends on this same flag, so that would silently
+  // break too, with no error, on a plain refresh.
+  const preservedSearch = new URLSearchParams(window.location.search).get('studentpreview') === '1' ? '?studentpreview=1' : '';
+  window.history.replaceState({}, document.title, window.location.pathname + preservedSearch);
 }
 
 // ── SIGN IN PANEL ──

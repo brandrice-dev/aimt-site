@@ -1,18 +1,31 @@
 # Module 1 — Cadence Listen Mode Narration Script (Editorial Pilot Draft)
 
-**Status:** DRAFT v2 — EDITORIAL COMPRESSION PASS. Owner review still
-required. The overall Listen Mode architecture (written briefing + spoken
-briefing + conversational lesson adaptation + practice interaction +
-checkpoints + closing recap) is **approved and unchanged** — this pass only
-tightens execution within it. Module 4's draft
+**Status:** DRAFT v5 — PASS 1 OF 2, CORRECTION ROUND: checkpoint 1 physically
+relocated per locked owner override (see "Checkpoint 1 — placement decision"
+below) and a real Student-Preview-reload regression fixed (see the pass's
+own code diff / test suite section AD). Still Pass 1 of 2 — owner review
+required before Pass 2 (regeneration). Governed by
+[`00-listen-mode-editorial-standard.md`](00-listen-mode-editorial-standard.md).
+The overall Listen Mode architecture (written briefing + spoken briefing +
+conversational lesson adaptation + practice interaction + checkpoints +
+closing recap) remains **approved and unchanged**. Module 4's draft
 (`module-04-listen-script-draft.md`) is unchanged by this task.
 **Pilot module:** Module 1 — Role of the Head Spa Technician.
 **Date drafted:** 2026-08-30 (v1). **Date compressed:** 2026-08-30 (v2).
 **Date micro-edited:** 2026-08-30 (v3 — four targeted line edits, no
-compression).
-**Branch:** `course-audit-build`. **This is a documentation-only task.** No
-audio was generated, no TTS/ElevenLabs API was called, no course UI,
-curriculum, checkpoint, rubric, or Cadence chat/grading code was touched.
+compression). **Date revised:** 2026-08-31 (v4 — editorial/sync
+coordination pass; v5, same day — checkpoint 1 relocation + regression fix,
+this version).
+**Branch:** `course-audit-build`. **This is a documentation-only task for
+the script itself.** No audio was generated, no TTS/ElevenLabs API was
+called this pass, no checkpoint prompt/rubric, or Cadence chat/grading
+*behavior* was touched (the checkpoint's HTML *position* changed — see
+below — but not its question, rubric, competency requirement, or grading
+call site). (Separately, this same pass implemented non-audio player/UI/
+sync code changes — labels, sync targets, layout coordination, a proven
+Continue-Listening invariant, a visible recap card, the checkpoint DOM
+move, and a Student Preview reload-survival fix — see the pass's own code
+diff and test suite; none of that touches audio or checkpoint authority.)
 
 **Curriculum authority for this draft:**
 - Production implementation: [`headspa-mastery.html`](../../../headspa-mastery.html) lines 4925–5211 (`module1Wrap`), read directly from the live course file — confirmed to match the approved specification below word-for-word, including every card list, script, and the completion copy.
@@ -24,7 +37,82 @@ curriculum, checkpoint, rubric, or Cadence chat/grading code was touched.
 
 ## Revision history
 
-**v3 (this pass, 2026-08-30):** Four targeted editorial micro-edits, applied
+**v5 (this pass, 2026-08-31):** Two corrections to v4, both owner-directed:
+
+1. **Checkpoint 1 physically relocated.** The owner overrode v4's "flag,
+   don't move" recommendation and locked the decision: `#m1cp1`'s actual
+   HTML block now sits after the practice interaction and before Section
+   1.5 in `headspa-mastery.html` — not just in the audio manifest, which
+   already had it there. See "Checkpoint 1 — placement decision" below.
+   Question, rubric, competency requirement, and grading behavior are
+   unchanged — position only.
+2. **A real Listen Mode regression fixed.** `enterPurchasedCourseHome()`
+   unconditionally stripped the entire URL query string on its way into
+   the course shell — a pre-existing cleanup for one-time entry params
+   that, once Student Preview started reaching that same function (the
+   prior "local purchased-student preview" round), also stripped
+   `?studentpreview=1`. Since `StudentPreview.isActive()` is a flag
+   re-derived from the URL only at load time, never persisted, the very
+   next reload after first entering the course shell silently deactivated
+   Student Preview — dropping back to requiring real entitlement, and
+   with it, GENERATED-audio Listen Mode access. Root-caused live (two
+   network requests for the same page, the second missing the query
+   string) before any fix was written. Fixed by preserving
+   `?studentpreview=1` specifically across that same `replaceState` call.
+   See the pass's code diff and test suite section AD.
+
+**v4 (2026-08-31):** Coordinated editorial/synchronization
+revision, driven by the owner's real listen-through of the v3 audio.
+Applies the new course-wide standard (`00-listen-mode-editorial-standard.md`)
+to Module 1. Six changes:
+
+1. **Section announcements added** to every numbered section (M1-02 through
+   M1-12) — `"Section N.N — [real title]."` — plus plain-language framing
+   for the non-numbered moments (opening, practice, checkpoints, recap).
+   None existed in v1–v3; their absence is the single biggest contributor to
+   the owner's "felt like sections were skipped" finding (see item 3 below).
+2. **M1-04 (1.3) rewritten** to walk all four "keeps you in scope" card
+   examples — buildup, flaking, irritation, shedding/thinning — in that
+   exact visible order, in Reference Voice. v3 only spoke flaking and
+   shedding/thinning (as "representative examples"), which the owner
+   correctly caught as audio starting on the wrong card (flaking, not
+   buildup, which is first on screen) and silently skipping irritation.
+3. **M1-05 (1.4) rewritten** to teach the "May fall within scope" card
+   explicitly, in Reference Voice, before moving to "Never authorized" — v3
+   only narrated the five governing factors and jumped straight to the
+   never-authorized side, never actually teaching the permitted card's
+   content aloud at all.
+4. **Checkpoint 1 placement audited, not moved.** Competency dependency
+   check (governing spec `module-01.md`'s own "Required elements for a
+   pass" for `m1cp1`) confirms it does not depend on Sections 1.5–1.8. The
+   *audio* chunk order already reflects this — m1-07 (checkpoint 1) has sat
+   between m1-06 (practice) and m1-09 (1.5) since v1, i.e. already "after
+   1.4, before 1.5." No manifest/chunk reorder was needed or made. What the
+   audit *did* surface: `m1cp1`'s **visible DOM position** is different —
+   it sits after Section 1.8 in `headspa-mastery.html`'s actual markup, so
+   the Listen Mode player's scroll-to-checkpoint (`visualTarget: 'm1cp1'`)
+   jumps the screen past 1.5–1.8's unheard visible content, then jumps back
+   up when 1.5's narration resumes. This is flagged, not fixed — see
+   "Checkpoint 1 — placement decision" below; it's a bigger change than an
+   editorial/sync fix and needs its own sign-off.
+5. **Sections 1.5–1.8 audited for coverage** (see "Sections 1.5–1.8 coverage
+   audit" below) — confirmed each already teaches its core competency in
+   v3; the "felt skipped" experience traces to (1) and the checkpoint-1
+   scroll jump in (4), not to missing content. Each section chunk gained an
+   announcement, an explicit Teaching/Reference Voice tag, and (1.6/1.7/1.8
+   specifically) a real synchronization target — none existed before this
+   pass (see the pass's code diff: `m1VisualLicensing` /
+   `m1VisualPractitionerInsight` / `m1VisualMistakes`).
+6. **Section breathing room** — a short pause annotation (production note,
+   never spoken) added at each major section transition, per the new
+   standard's Rule B.
+
+No chunk was removed, no checkpoint gained or lost, no chunk boundary moved
+except where explicitly noted above, and no curriculum concept was added or
+cut — every wording change traces to the same approved on-screen source as
+v1–v3.
+
+**v3 (2026-08-30):** Four targeted editorial micro-edits, applied
 exactly as specified by the owner-approved production-pilot task — no
 compression, no restructuring, no other wording changes:
 
@@ -170,6 +258,80 @@ final estimates section for the full accounting.
 
 ---
 
+## Checkpoint 1 — placement decision (v5 — MOVED, per locked owner override)
+
+**Status: implemented.** The prior pass (v4) recommended this move but
+left it unimplemented, flagging it as a bigger change than a typical
+editorial/sync fix. The owner has since explicitly locked the decision and
+requested the physical move — this version implements it.
+
+**Dependency evidence (unchanged from v4, preserved per the owner's
+instruction not to reopen it absent a technical failure):**
+`docs/course-audit/modules/module-01.md`'s own "Checkpoint 1 — `m1cp1`"
+section states the **competency evaluated** as *"The student can respond to
+a hair-loss concern without diagnosing and can direct the client toward an
+appropriate professional next step,"* with five **required elements for a
+pass** — none diagnosing alopecia, observation-based language, not claiming
+the service can diagnose/treat/reverse/regrow hair, recommending
+dermatologist/qualified-professional evaluation, and a client-communicable
+response. Every element traces to Section 1.3 (observation vs. diagnosis)
+and 1.3's own referral guidance, reinforced by 1.4's scope framing and the
+M1-06 practice round. None reference Sections 1.5–1.8. **No technical
+dependency failure surfaced from making the move** (verified live — see
+below), so this evidence stands unchanged and the decision was not reopened.
+
+**What moved:** `#m1cp1`'s entire HTML block (question, label, textarea,
+submit button, result container — content, ids, and `onclick`/`onkeydown`
+handlers all byte-identical) now sits in `headspa-mastery.html` directly
+after the practice interaction (`#m1LineInteraction`) and before Section
+1.5's markup. Checkpoint 2 (`#m1cp2`) is untouched, still after Section 1.8.
+Real written-course order is now: 1.1 → 1.2 → 1.3 → 1.4 → practice →
+**checkpoint 1** → 1.5 → 1.6 → 1.7 → 1.8 → checkpoint 2 → completion.
+
+**What did not change:** checkpoint prompt, rubric, competency requirement,
+grading behavior, the `M1.questions.m1cp1` evaluator string, or the
+Listen Mode manifest (`m1-07`'s `visualTarget` was always the bare id
+`'m1cp1'`, which the scoped live-lookup resolves correctly regardless of
+where that id currently sits in the DOM — no manifest edit was needed for
+the move to take effect).
+
+**Consequence — the prior pass's flagged scroll-jump problem is now fully
+eliminated, not just mitigated.** Checkpoint 1 sits immediately adjacent to
+Section 1.5 in the real DOM, so Listen Mode's scroll-to-checkpoint no
+longer jumps the screen past 1.5–1.8's unheard content at all. Verified
+live: mount → jump to `m1-07` → checkpoint card scrolls into view at its
+new position → simulate an authoritative pass via the real
+`setCheckpointResult` path → Continue Listening appears only then → click
+→ resumes into `m1-08` → auto-advances into `m1-09` (Section 1.5),
+immediately, with zero intervening jump.
+
+---
+
+## Sections 1.5–1.8 coverage audit (v4)
+
+Owner finding: these sections were experienced as skipped or out of
+sequence. Audited against the live `headspa-mastery.html` source and the
+v3 script; conclusion: **the core competency of every section was already
+being taught aloud in v3** — nothing was silently dropped. What was
+genuinely missing, and is fixed this pass, is orientation: no section
+announcement and (1.6/1.7/1.8) no synchronization target at all, so an
+audio-first listener had no way to tell which section they were in, or the
+screen to confirm it. Per section:
+
+| Section | Chunk | Core purpose (already covered in v3) | Reference Voice landmark | Teaching Voice passages | Sync target (v4) |
+|---|---|---|---|---|---|
+| 1.5 — Limitations | M1-09 | What the service can honestly support vs. promise | The "can support" / "cannot do" card summaries | Framing + closing positioning statement | `m1VisualLimitations` (already existed) |
+| 1.6 — Licensing | M1-10 | Verify-your-own-license-first guidance | None (this section is pure guidance, no card) | Entire chunk | `m1VisualLicensing` (**new this pass**) |
+| 1.7 — Practitioner insight | M1-11 | Client-expectations framing; the Cadence note | The Cadence note (near-verbatim) | Everything else | `m1VisualPractitionerInsight` (**new this pass**) |
+| 1.8 — Mistakes | M1-12 | Five recognizable failure patterns | The five mistake headlines, in visible card order | The "why it matters" explanation after each | `m1VisualMistakes` (**new this pass**) |
+
+No section was re-written for content this pass (unlike 1.3/1.4) — each
+gained a section announcement, an explicit voice-mode tag, and (where
+missing) a sync target. See each chunk's own entry below for the exact
+script change.
+
+---
+
 ## The script
 
 ### M1-01 — Module Briefing (spoken)
@@ -177,6 +339,7 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Hero block (`headspa-mastery.html` lines 4928–4932) + the overall approved outcomes for Module 1 (`module-01.md`, "Approved outcomes").
 **PURPOSE:** Orient the student, explain why this module comes first, name the distinction worth listening for, bridge into 1.1.
 **VISUAL ON SCREEN:** The written Module Briefing above, plus the hero (eyebrow, title, description).
+**VOICE MAP (v4):** Teaching throughout — this is the module's own framing, not reference material; no numbered-section announcement applies (it IS the opening).
 **PERFORMANCE NOTES:** `[WARM]` open only. (v2: removed `[EMPHASIZE]`, `[CURIOUS]`, `[LET THIS LAND]` — the shorter version doesn't need them.)
 
 **SPOKEN SCRIPT:**
@@ -203,11 +366,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.1 (lines 4934–4950)
 **PURPOSE:** Establish the definition and the six structural elements as one coherent whole, then land the Cadence note's reframe.
 **VISUAL ON SCREEN:** Six service-element cards (Cleansing, Exfoliation, Massage & relaxation, Water therapy, Conditioning & treatment, Sensory elements).
-**PERFORMANCE NOTES:** None. (v2: prose carries this chunk; no tags needed.)
+**VOICE MAP (v4):** Teaching throughout — no card/list reference material in this section.
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new). (v2: prose carries this chunk; no other tags needed.)
 
 **SPOKEN SCRIPT:**
 
-> A head spa is a structured, scalp-focused service — built around hygiene, comfort, and the overall scalp environment. It's also a genuinely relaxing, sensory experience, and those two things aren't in tension. The relaxation is real. So is the structure holding it up.
+> [SECTION PAUSE]
+>
+> Section 1.1 — What is a head spa? A head spa is a structured, scalp-focused service — built around hygiene, comfort, and the overall scalp environment. It's also a genuinely relaxing, sensory experience, and those two things aren't in tension. The relaxation is real. So is the structure holding it up.
 >
 > That structure comes from six elements working together: cleansing as the foundation, exfoliation only when it's actually appropriate, massage and relaxation as the sensory core, water therapy, conditioning and treatment driven by what you observe, and the sensory layer wrapped around all of it — temperature, touch, sound, aromatherapy. The exact mix changes with the client. The structure underneath doesn't.
 >
@@ -223,11 +389,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.2 (lines 4954–4963)
 **PURPOSE:** Teach the role-not-license distinction plainly, then land the "work behind the calm" reframe.
 **VISUAL ON SCREEN:** Section title, two body paragraphs, "The work behind the calm" clinical note.
-**PERFORMANCE NOTES:** None. (v2: this chunk was already identified as one of the draft's strongest voice examples — preserved near-intact, tags removed, no other changes.)
+**VOICE MAP (v4):** Teaching throughout.
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new). (v2: this chunk was already identified as one of the draft's strongest voice examples — preserved near-intact otherwise.)
 
 **SPOKEN SCRIPT:**
 
-> Now — what does "head spa technician" actually mean? There's a version of this job where you think: I just need to learn the steps. That works right up until something doesn't look the way you expected. Then you need to be more than someone who memorized a sequence.
+> [SECTION PAUSE]
+>
+> Section 1.2 — What is a head spa technician? Now — what does that actually mean? There's a version of this job where you think: I just need to learn the steps. That works right up until something doesn't look the way you expected. Then you need to be more than someone who memorized a sequence.
 >
 > Here's something I want stated plainly, because it matters legally, not just philosophically: in this course, "head spa technician" describes the role you perform during a service. It is not a separate state license. Your legal ability to actually do any of this comes from the license or authorization you already hold, the laws where you practice, and the specific services you're performing. AIMT certification documents that you completed this course. It does not expand what you're legally allowed to do.
 >
@@ -238,51 +407,59 @@ final estimates section for the full accounting.
 
 ---
 
-### M1-04 — 1.3 Observation vs. diagnosis
+### M1-04 — 1.3 Observation vs. diagnosis (v4 — full ordered card walkthrough)
 
-**SOURCE SECTION:** Section 1.3 (lines 4967–5002)
-**PURPOSE:** Teach the module's central distinction as a governing principle, using two representative scripts rather than reading both full cards, and land referral guidance in full.
+**SOURCE SECTION:** Section 1.3 (`headspa-mastery.html`, `id="m1VisualScopeLanguage"` protocol card).
+**PURPOSE:** Announce the section, teach the module's central distinction, then walk both protocol cards in their real visible order — all four "keeps you in scope" examples (not two), then all four "takes you out of scope" examples — and land referral guidance in full.
 **VISUAL ON SCREEN:** Two quoted-script protocol cards ("Say this" / "Never say"), a closing paragraph, and "When to refer out."
-**PERFORMANCE NOTES:** `[EMPHASIZE]` once, on the module's single most safety-critical sentence. `[SLOW SLIGHTLY]` once, spanning the two retained scripts.
+**VOICE MAP:** Teaching (announcement, opening framing, bridges between cards, closing referral guidance) / **Reference** (both full card walkthroughs — near-verbatim, real visible order).
+**PERFORMANCE NOTES:** `[EMPHASIZE]` once, on the module's single most safety-critical sentence. `[SLOW SLIGHTLY]` spanning each card walkthrough. `[SECTION PAUSE]` before the announcement (a few seconds of breathing room after 1.2 — not spoken).
 
 **SPOKEN SCRIPT:**
 
-> This next part is the center of the whole module, so let's slow down here.
+> [SECTION PAUSE]
+>
+> Section 1.3 — Observation vs. diagnosis. This next part is the center of the whole module, so let's slow down here.
 >
 > You'll notice things — oil imbalance, dryness, buildup, flaking, irritation, early thinning. Recognizing those patterns is genuinely part of your job. [EMPHASIZE] Diagnosing what caused them is not. That's the line, and almost everything else in this course sits on top of it.
 >
-> [VISUAL CUE] The screen has a full side-by-side of safe language versus language that crosses the line — worth coming back to as a reference. Here's what actually separates the two.
+> [VISUAL CUE] Here's exactly what that sounds like in practice — the screen has the full reference, worth coming back to. [SLOW SLIGHTLY] For buildup: "I'm seeing visible buildup around parts of the scalp. Today I would focus on gentle, thorough cleansing and adjust the service based on how the scalp responds." For flaking: "I'm seeing flaking and oil around the root area. I can describe what is visible and adjust today's cosmetic service, but I can't determine the cause from appearance alone." For irritation: "I'm seeing redness and irritation in this area. I would avoid aggressive exfoliation or stimulation here and explain when medical evaluation would be appropriate." And for shedding or thinning — this comes up often — it sounds like: "I can document the shedding or thinning pattern I can see, but I can't determine the cause or diagnose hair loss. Because this is new or concerning to you, a dermatologist or other qualified medical professional is the appropriate next step."
 >
-> Safe language describes what's visible and stops there. [SLOW SLIGHTLY] For flaking: "I'm seeing flaking and oil around the root area. I can describe what is visible and adjust today's cosmetic service, but I can't determine the cause from appearance alone." For shedding or thinning — this comes up often — it sounds like: "I can document the pattern I can see, but I can't determine the cause or diagnose hair loss. Because this is new or concerning to you, a dermatologist or other qualified medical professional is the appropriate next step."
+> Notice the pattern in all four: describe what's visible, adjust what you can, and stop before naming a cause.
 >
-> Language that crosses the line does the opposite — naming a diagnosis, a cause, or a treatment you're not qualified to give: "this is seborrheic dermatitis," "this is fungal," "this is alopecia," "use this medicated product." Different words, same mistake — appearance alone can't establish any of that.
+> Language that crosses the line does the opposite — naming a diagnosis, a cause, or a treatment you're not qualified to give. "This is seborrheic dermatitis." "This is fungal." "This is alopecia." "You should use this medicated or prescription product." Different words, same mistake — appearance alone can't establish any of that.
 >
 > Your language should get more precise as you gain experience, never more certain than the evidence allows. And that's exactly when referral matters: something new, unexplained, severe, persistent, spreading, painful, bleeding, or rapidly changing calls for a real medical evaluation, even if it's simply outside cosmetic scope. You're not being asked to diagnose anything — just to recognize the moment a cosmetic service isn't the answer, and handle it like a professional.
 
-**SOURCE TRACEABILITY:** 1.3 title + intro (4967–4969), "Language that keeps you in scope" card (4971–4983) — 2 of 4 scripts (flaking, shedding/thinning) narrated verbatim as representative examples, all 4 remain on screen, "Language that takes you out of scope" card (4985–4997) — all 4 items named (prescription item merged into the shared "same mistake" framing rather than given its own explanatory sentence), "When to refer out" (5001–5002) — full referral-trigger list retained, condensed phrasing.
-**OWNER-REVIEW FLAGS:** Compressed per this task's instruction — the buildup and irritation scripts are no longer spoken (they remain the full written reference on screen). Please confirm flaking and shedding/thinning are the right two to keep spoken; both were named directly in this task's brief as the highest-value examples.
+**SOURCE TRACEABILITY:** 1.3 title + intro, "Language that keeps you in scope" card — **all 4 items now narrated in exact visible order** (buildup, flaking, irritation, shedding/thinning — confirmed live from `headspa-mastery.html`, not assumed), "Language that takes you out of scope" card — all 4 items named in visible order (diagnosis, cause, hair loss, prescription), "When to refer out" — full referral-trigger list retained.
+**OWNER-REVIEW FLAGS:** v3 narrated only 2 of the 4 "keeps you in scope" examples (flaking, shedding/thinning) and started with flaking, not buildup — the exact mismatch the owner's real listen-through caught. v4 fixes this by narrating all four in the real screen order, per the new course-wide standard's Reference Voice rule (Rule C/D) — this is a genuine word-count increase over v3 (+2 full scripts), not a further compression.
 
 ---
 
-### M1-05 — 1.4 Scope of practice
+### M1-05 — 1.4 Scope of practice (v4 — teaches the permitted card, not just the asymmetry)
 
-**SOURCE SECTION:** Section 1.4 (lines 5006–5043)
-**PURPOSE:** Teach the scope asymmetry as the governing principle — what varies vs. what never does — rather than reading both scope-card lists.
+**SOURCE SECTION:** Section 1.4 (`headspa-mastery.html`, `id="m1VisualScopeCards"` protocol card).
+**PURPOSE:** Announce the section, then teach BOTH cards explicitly in Reference Voice, in their real visible order — "May fall within scope" first, then "Never authorized" — with Teaching Voice explanation after each.
 **VISUAL ON SCREEN:** Two protocol cards ("May fall within scope — verify first" / "Never authorized by this course").
-**PERFORMANCE NOTES:** None.
+**VOICE MAP:** Teaching (announcement, both explanatory bridges, closing principle) / **Reference** (both full card walkthroughs, in order).
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement.
 
 **SPOKEN SCRIPT:**
 
-> Now let's talk about scope — what you may actually be permitted to do.
+> [SECTION PAUSE]
 >
-> Here's the asymmetry that matters. What you may be able to do depends entirely on your license, your jurisdiction, your establishment, the specific service, and the equipment or manufacturer requirements involved — that's genuinely variable, and it's on you to verify it every time. What's never authorized by this course doesn't move: diagnosing a medical condition, prescribing or treating disease, performing a medical procedure, presenting a scan or AI output as a diagnosis, or practicing beyond whatever license you actually hold.
+> Section 1.4 — Scope of practice. Now let's talk about scope — what you may actually be permitted to do, and what you never are, no matter how advanced you get.
 >
-> [VISUAL CUE] If your screen is open, the two cards here give you the complete list on both sides — worth coming back to.
+> [VISUAL CUE] Here's the complete list of what may fall within scope — every item on it still depends on your license, so treat this as "verify first," not "automatically yes." Cleansing the scalp and hair. Cosmetic product application. Massage and manual techniques. Cosmetic exfoliation. Use of devices or equipment. Observation and description of visible findings. And non-prescription cosmetic product guidance.
 >
-> That asymmetry is the whole principle. One side is conditional and needs checking every time. The other side just isn't, no matter how advanced you get in this field.
+> Every single one of those is permitted only when your license, your state and local rules, your establishment, and the manufacturer's directions all say yes. That's genuinely variable — it's on you to verify it every time, for every service.
+>
+> Now here's the side that doesn't move, no matter what license you hold. Diagnosing a medical condition. Prescribing or directing prescription treatment. Claiming to cure, reverse, or treat disease. Performing a medical procedure. Presenting scanner, microscopy, or AI output as a medical diagnosis. And practicing beyond the license or authorization you actually hold.
+>
+> That's the whole principle. One side is conditional, and needs checking every time. The other side just isn't — not now, not later, no matter how experienced you get.
 
-**SOURCE TRACEABILITY:** 1.4 title + intro (5006–5008) — the five determining factors (license, state/local law, establishment, service, equipment) narrated directly. Card 1's seven specific activities (5010–5025) are not individually named; they remain the full on-screen reference. Card 2's six items (5029–5043) are named as five phrases (two original items — prescribing, and curing/reversing/treating disease — combined into one phrase).
-**OWNER-REVIEW FLAGS:** Compressed per this task's instruction (Section 10's own framing: teach the asymmetry and the determining factors, not the activity list). The seven "may fall within scope" activities are no longer individually narrated at all — please confirm that's acceptable, since this is the deepest cut in the pass. The "never authorized" side is still fully named, unabridged in substance, since it's the safety-critical, non-variable half.
+**SOURCE TRACEABILITY:** 1.4 title + intro (asymmetry framing preserved). "May fall within scope" card — **all 7 items now narrated in exact visible order** (previously zero were individually narrated — only the 5 governing factors were spoken). "Never authorized" card — all 6 items narrated individually and in order (previously 5 combined phrases).
+**OWNER-REVIEW FLAGS:** v3's deepest cut — the entire "may fall within scope" activity list — is restored in full this pass, per the owner's explicit finding that skipping straight to "not permitted" is too loose for an audio-first student. This is the largest single word-count increase in the v4 pass.
 
 ---
 
@@ -291,6 +468,7 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Practice interaction (lines 5047–5089); answers/feedback from `M1_LINE_ANSWERS` (`headspa-mastery.html` lines 9796–9799); completion message (line 9825).
 **PURPOSE:** Preserve the ungraded discipline exercise as a spoken worked-example walkthrough — identified as one of the best uses of audio in the module, so preserved almost intact.
 **VISUAL ON SCREEN:** Four statements, each with two classification buttons and immediate feedback.
+**VOICE MAP (v4):** Teaching (framing, closing line) / **Reference** (all four quoted statements and their feedback — already verbatim, now explicitly tagged).
 **PERFORMANCE NOTES:** Four `[SHORT PAUSE]` markers, one after each statement. These are functional to the exercise (a real pause for the listener to guess before the reveal), not decorative — see the performance-cue accounting in the final estimates section for why these are counted separately from the module's 8 stylistic cues.
 
 **SPOKEN SCRIPT:**
@@ -320,6 +498,7 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** `#m1cp1` (lines 5161–5177); evaluator string `M1.questions.m1cp1` (line 8421).
 **PURPOSE:** Transition into the required checkpoint and deliver the exact question. Preserved per explicit instruction.
 **VISUAL ON SCREEN:** The `m1cp1` checkpoint card — label "Apply the boundary."
+**VOICE MAP (v4):** Teaching (framing) / **Reference** (the exact checkpoint question — unparaphrased, as required).
 **PERFORMANCE NOTES:** `[SHORT PAUSE]` before the reveal, `[SLOW SLIGHTLY]` through the exact question.
 
 **SPOKEN SCRIPT:**
@@ -345,7 +524,8 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** N/A (narration-UX transition line).
 **PURPOSE:** A short, warm resume line — continuity, not new teaching. No grading criteria scripted in.
 **VISUAL ON SCREEN:** Whatever follows a passed `m1cp1` — Section 1.5 begins.
-**PERFORMANCE NOTES:** None.
+**VOICE MAP (v4):** Teaching throughout.
+**PERFORMANCE NOTES:** None. (v4: closing line made slightly more explicit about where we're headed next — see below. Originally written to help re-orient a listener after a scroll jump past unheard 1.5–1.8 content; v5's checkpoint relocation eliminates that jump entirely — see "Checkpoint 1 — placement decision" above — but the clearer wording is still kept as good orientation practice on its own merits.)
 
 **SPOKEN SCRIPT:**
 
@@ -353,7 +533,7 @@ final estimates section for the full accounting.
 >
 > Good — that's exactly the shape of it. You described what's visible, left the diagnosis to someone actually qualified to give one, and gave her somewhere real to go next.
 >
-> Let's keep going. There's more to this role than the boundary alone.
+> Let's keep going — back into the lesson, starting with Section 1.5. There's more to this role than the boundary alone.
 
 **CHECKPOINT/GATE BEHAVIOR:** `[PLAY ONLY AFTER AUTHORITATIVE CHECKPOINT PASS]`. Narration UX only, not grading logic.
 **SOURCE TRACEABILITY:** N/A — transitional line only.
@@ -366,11 +546,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.5 (lines 5093–5128)
 **PURPOSE:** Teach what the *service itself* can honestly support versus promise — refocused away from re-teaching the observation/diagnosis and scope boundaries already covered in M1-04/M1-05.
 **VISUAL ON SCREEN:** Two protocol cards ("What a head spa can support" / "What a head spa cannot do") and a key point.
-**PERFORMANCE NOTES:** None.
+**VOICE MAP (v4):** Teaching (announcement, framing, closing positioning) / **Reference** (both card summaries).
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new — this is also the point where the screen returns from the checkpoint 1 area, so the pause and clear section name both do real orientation work here, not just rhythm).
 
 **SPOKEN SCRIPT:**
 
-> [VISUAL CUE] One more side-by-side worth knowing is on screen here — what the service itself can honestly support, and what it can't promise. The takeaway matters more than the full list.
+> [SECTION PAUSE]
+>
+> Section 1.5 — Limitations of a head spa service. [VISUAL CUE] One more side-by-side worth knowing is on screen here — what the service itself can honestly support, and what it can't promise. The takeaway matters more than the full list.
 >
 > A head spa can genuinely support real things: better cosmetic cleansing, hydration and conditioning, comfort and relaxation, a cleaner scalp environment, a consistent routine of professional care. What it can't do is just as real: it doesn't diagnose or treat disease, determine the cause of shedding, reverse genetic hair loss, or regrow hair.
 >
@@ -386,11 +569,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.6 (lines 5132–5135)
 **PURPOSE:** Deliver the licensing-verification guidance, trimmed of a third repetition of "certification doesn't expand legal scope."
 **VISUAL ON SCREEN:** Section title and two body paragraphs.
-**PERFORMANCE NOTES:** None.
+**VOICE MAP (v4):** Teaching throughout.
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new).
 
 **SPOKEN SCRIPT:**
 
-> A short but important one, on licensing.
+> [SECTION PAUSE]
+>
+> Section 1.6 — Licensing. A short but important one.
 >
 > Before you ever offer this service, know what your existing license or authorization actually permits, in the exact place you practice — the rules for cleansing and massage, exfoliation, product application, devices, water systems, sanitation, and which parts of the body you're allowed to treat.
 >
@@ -406,11 +592,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.7 (lines 5139–5146)
 **PURPOSE:** Land the client-expectations framing and the Cadence note. Identified as one of the strongest Cadence passages in the draft — preserved as a style reference for the rest of the script.
 **VISUAL ON SCREEN:** Section title, body paragraph, Cadence note.
-**PERFORMANCE NOTES:** None. (v2: tags removed; prose unchanged.)
+**VOICE MAP (v4):** Teaching throughout.
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new). (v2: tags removed; prose unchanged otherwise.)
 
 **SPOKEN SCRIPT:**
 
-> Here's something worth knowing early: a lot of clients won't really know what a head spa is yet. They may have seen one online, had someone recommend it, or simply be curious about their scalp. You're shaping what they expect, in real time, whether you mean to or not.
+> [SECTION PAUSE]
+>
+> Section 1.7 — Practitioner insight. Here's something worth knowing early: a lot of clients won't really know what a head spa is yet. They may have seen one online, had someone recommend it, or simply be curious about their scalp. You're shaping what they expect, in real time, whether you mean to or not.
 >
 > If you position yourself as someone who diagnoses or fixes medical conditions, clients will expect results you can't responsibly deliver. If you position yourself as someone who observes carefully, stays in scope, customizes the service to them, and refers out when it's appropriate — you build real trust, without ever overclaiming.
 >
@@ -426,11 +615,14 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** Section 1.8 (lines 5150–5157)
 **PURPOSE:** Close the instructional content with all five mistakes, each tightened to mistake → why it matters → move on, preserving the referral reframe in full.
 **VISUAL ON SCREEN:** Five info cards.
-**PERFORMANCE NOTES:** None.
+**VOICE MAP (v4):** Teaching (announcement, closing bridge) / **Reference** (the five mistake headlines, in visible order — already matched the card order; now explicitly tagged).
+**PERFORMANCE NOTES:** `[SECTION PAUSE]` before the announcement (v4, new).
 
 **SPOKEN SCRIPT:**
 
-> Let's close the teaching with five patterns worth recognizing before they become habits.
+> [SECTION PAUSE]
+>
+> Section 1.8 — Mistakes new practitioners make. Let's close the teaching with five patterns worth recognizing before they become habits.
 >
 > Blurring observation with diagnosis — turning a visible finding into a medical conclusion. Recognizing patterns can inform your service; diagnosis doesn't belong to this role.
 >
@@ -454,6 +646,7 @@ final estimates section for the full accounting.
 **SOURCE SECTION:** `#m1cp2` (lines 5179–5195); evaluator string `M1.questions.m1cp2` (line 8422).
 **PURPOSE:** Deliver the final checkpoint exactly as written. Preserved per explicit instruction — no changes from v1.
 **VISUAL ON SCREEN:** The `m1cp2` checkpoint card — label "Demonstrate the role."
+**VOICE MAP (v4):** Teaching (framing) / **Reference** (the exact checkpoint question).
 **PERFORMANCE NOTES:** `[SLOW SLIGHTLY]` through the exact question.
 
 **SPOKEN SCRIPT:**
@@ -476,7 +669,8 @@ final estimates section for the full accounting.
 
 **SOURCE SECTION:** N/A transition line + completion card (lines 5197–5208).
 **PURPOSE:** One ending, not two. Merges what v1 split across two chunks (M1-14's pass-confirmation/completion and M1-15's separate carry-forward recap) into a single closing arc: acknowledge the pass, deliver the completion competency line, give three genuine carry-forward ideas, hand off to Module 2.
-**VISUAL ON SCREEN:** The `m1Complete` lesson-complete card.
+**VISUAL ON SCREEN:** The `m1Complete` lesson-complete card — now including a visible **Module Recap** block (v4, new — see the pass's code diff) listing the same three carry-forward ideas below, in the same order, so a student who reads rather than listens sees the identical takeaways.
+**VOICE MAP (v4):** Teaching throughout.
 **PERFORMANCE NOTES:** `[WARM]` on the pass acknowledgment. `[LET THIS LAND]` on the closing handoff — the single most "genuinely necessary" landing moment in the module, per the restraint instruction.
 
 **SPOKEN SCRIPT:**
@@ -516,15 +710,14 @@ reading the whole card.
 | 1.2 title + two body paragraphs | Covered directly (full text preserved) | M1-03 |
 | 1.2 clinical note ("The work behind the calm") | Covered directly (full text preserved) | M1-03 |
 | 1.3 title + intro | Covered via spoken adaptation | M1-04 |
-| 1.3 "keeps you in scope" card — flaking, shedding/thinning scripts | Covered directly (verbatim) — representative examples | M1-04 |
-| 1.3 "keeps you in scope" card — buildup, irritation scripts | **Core teaching narrated / full reference remains on screen** | M1-04 |
-| 1.3 "takes you out of scope" card (4 items) | Covered directly (named, condensed shared explanation) | M1-04 |
+| 1.3 "keeps you in scope" card — all 4 scripts (buildup, flaking, irritation, shedding/thinning) | **Covered directly (verbatim, real visible order) — v4: all 4, was 2 of 4** | M1-04 |
+| 1.3 "takes you out of scope" card (4 items) | Covered directly (named, real visible order) | M1-04 |
 | 1.3 closing distinction paragraph | Covered via spoken adaptation | M1-04 |
 | 1.3 "When to refer out" paragraph | Covered via spoken adaptation — trigger list retained in full | M1-04 |
 | 1.4 title + intro | Covered via spoken adaptation | M1-05 |
 | 1.4 "May fall within scope" card — 5 determining factors | Covered directly (named) | M1-05 |
-| 1.4 "May fall within scope" card — 7 specific activities | **Core teaching narrated (the governing factors) / full activity list remains on screen** | M1-05 |
-| 1.4 "Never authorized" card (6 items) | Covered directly (named, 2 items combined into 1 phrase) | M1-05 |
+| 1.4 "May fall within scope" card — 7 specific activities | **Covered directly (named, real visible order) — v4: all 7, was 0** | M1-05 |
+| 1.4 "Never authorized" card (6 items) | **Covered directly (named individually, real visible order) — v4: all 6 distinct, was 5 combined phrases** | M1-05 |
 | Practice interaction heading + instruction | Covered via spoken adaptation | M1-06 |
 | 4 practice statements + correct answers + feedback | Covered directly (verbatim) | M1-06 |
 | Practice completion message | Covered directly (verbatim) | M1-06 |
@@ -594,18 +787,95 @@ No Module 4 rewrite was performed.
 
 ---
 
-## Estimated audio experience (v2 — recalculated, measured directly)
+## Estimated audio experience (v4 — recalculated for this pass's additions)
 
-- **Written Module Briefing:** 5 bullets + 1 "Pay attention to" line (unchanged count from v1, now shorter per-item).
-- **Total spoken word count** (script content only, excluding performance tags, headers, and metadata): **≈2,088 words** (v2's 2,090, adjusted −2 for the v3 micro-edits above), measured directly from the script text.
-- **Original (v1) word count:** 2,880 words (also measured directly).
-- **Reduction (v1 → v2):** 790 words, **≈27.4%**. v3 made no further compression — its 4 edits were substitutions, not cuts.
-- **Estimated listening duration** at ~140–150 words/minute: **approximately 14–15 minutes**, within the 14–16 minute target, not counting time spent composing the two checkpoint answers.
-- **Narration chunks:** 14 (`M1-01` through `M1-14`), down from 15 — M1-14 and M1-15 merged into one closing chunk.
-- **Performance cues (stylistic — the restrained category targeted at 5–8 total):** **8** — `[WARM]` ×2 (M1-01, M1-14), `[SHORT PAUSE]` ×1 (M1-07), `[SLOW SLIGHTLY]` ×3 (M1-04, M1-07, M1-13), `[EMPHASIZE]` ×1 (M1-04), `[LET THIS LAND]` ×1 (M1-14). Zero `[CURIOUS]` — judged not genuinely necessary anywhere in this version.
-  - **Not counted against that figure** (structural, not stylistic): 2 `[CHECKPOINT STOP — PLAYBACK PAUSES]`, 2 `[PLAY ONLY AFTER AUTHORITATIVE CHECKPOINT PASS]`, 3 `[VISUAL CUE]`, and 4 `[SHORT PAUSE]` markers inside M1-06's practice interaction (functionally load-bearing to the exercise — a real pause for the listener to guess before the reveal — not a delivery-style choice, and removing them would remove the mechanic the exercise depends on).
-- **Visual references:** 3 `[VISUAL CUE]` insertions (M1-04, M1-05, M1-09), unchanged from v1 — still the same three moments the approved spec itself flagged for visual review.
-- **Checkpoint stops:** 2 (`m1cp1`, `m1cp2`), unchanged.
+- **Written Module Briefing:** unchanged from v2.
+- **Total spoken word count:** **≈2,310 words** (v3's 2,088 plus this pass's additions: M1-04's two restored card examples ≈+80 words, M1-05's fully-restored permitted-card list ≈+100 words, eight new section announcements and M1-08's strengthened closing line ≈+45 words combined). This is an estimate pending a direct recount of the final text — flag any correction during review.
+- **v1 → v4 net:** still a real compression overall (2,880 → 2,310, ≈−20%), even after this pass restores the two card-coverage gaps v2's deeper compression had introduced — v2/v3 over-compressed exactly the two places (1.3's four examples, 1.4's permitted card) this pass restores; the rest of v2's compression (six-sentence-to-one-paragraph rewrites, trimmed repetition) stands.
+- **Estimated listening duration** at ~140–150 words/minute: **approximately 16–17 minutes** for the full module, still close to the original 14–16 minute target and well within what any single module's Listen Mode is expected to run.
+- **Narration chunks:** still 14 (`M1-01` through `M1-14`) — no chunk added or removed this pass; see "New ElevenLabs continuity architecture" below for how these 14 *player* chunks now map onto far fewer *recording* sessions.
+- **Performance cues (stylistic):** unchanged set from v3 (8 total), plus 8 new **`[SECTION PAUSE]`** markers (M1-02, M1-03, M1-04, M1-05, M1-09, M1-10, M1-11, M1-12) — structural (Rule B breathing room), not stylistic, so not counted against the stylistic-cue target either.
+- **Visual references:** 3 `[VISUAL CUE]` insertions, unchanged from v1–v3.
+- **Checkpoint stops:** 2 (`m1cp1`, `m1cp2`), unchanged — see "Checkpoint 1 — placement decision" above.
+- **Synchronization targets:** now **11** chunks with a `visualTarget` (was 8) — 1.6/1.7/1.8 (`m1VisualLicensing`, `m1VisualPractitionerInsight`, `m1VisualMistakes`) gained one each this pass; see the pass's code diff.
+
+---
+
+## New ElevenLabs continuity architecture (Section 11)
+
+Recording session, player chunk, and CapCut master are now three separate
+concerns, per the owner's new architecture — a chunk boundary is a *player*
+concept (where playback can pause/resume/seek), not a recording boundary. A
+recording session can — and here, does — span multiple player chunks in one
+continuous Jane performance, cut apart afterward at natural stopping points.
+
+### Proposed Module 1 recording sessions
+
+**Unchanged by the v5 checkpoint relocation.** The move was a DOM/HTML
+position change only — checkpoint 1's *audio chunk* (`m1-07`) has sat
+between the practice interaction and Section 1.5 in the manifest since v1,
+which is exactly Session A's boundary below. Locking Session A at "opening
+through 1.4/practice/checkpoint 1" and Session B at "1.5 through remaining
+teaching/checkpoint 2/recap," per the owner's instruction, requires no
+change from what v4 already proposed.
+
+**Not the naive 3-session split** ("opening→cp1 / cp1→cp2 / recap") — the
+post-final-checkpoint recap/closing is short enough (≈68–85s) that a 3rd
+session isn't warranted; its content comfortably fits inside session B
+without threatening any duration limit, and combining it preserves tonal
+consistency across the whole post-checkpoint-1 arc — exactly the owner's
+original motivation for fewer sessions in the first place.
+
+| Session | Covers (player chunks) | Est. duration | Boundary reason |
+|---|---|---|---|
+| **A** | M1-01 → M1-07 (opening through the checkpoint 1 *prompt*, inclusive) | ≈11.5–12 min | Ends at checkpoint 1 — priority-1 boundary (Section 11's own ordering) |
+| **B** | M1-08 → M1-14 (post-pass-1 through 1.5–1.8, checkpoint 2 prompt, post-pass-2, completion, recap, handoff) | ≈6–6.5 min | Everything after checkpoint 1 is one continuous teaching arc through to the module's natural end — no other checkpoint-or-major-teaching-break boundary strong enough to justify a second cut, and combining keeps tonal consistency across the post-checkpoint material the owner specifically flagged (M1-09 through M1-12 previously being 4 separate independent generations) |
+
+**Down from 14 independent generations to 2 continuous performances** — the
+core goal of Section 11. Both sessions land far enough under CapCut's
+<15-minute Enhance Voice limit (and the ~13–14 min preferred ceiling) that
+**neither needs further splitting into multiple CapCut parts** — each
+session's raw recording can become its own single CapCut master directly,
+simplifying Pass 2 further than the current 2-part `module-01-capcut-
+production` process required.
+
+Checkpoint 1's *prompt* (end of session A) and checkpoint 2's *prompt*
+(inside session B) are recorded as part of the same continuous take as the
+material before them — Jane says the question and keeps going into what
+comes next in the SAME session; the PLAYER (not the recording) is what
+actually pauses at those points once cut into chunks. This matches the
+task's own point: recording sessions don't need to stop at every place the
+*player* stops.
+
+### Player cut map (production annotations, machine-readable intent)
+
+Every cut below occurs at the exact chunk boundary already established in
+the "Chunk map" above — no new player chunk, no removed one. Recorded here
+per Section 13's request, as the explicit reasoning for why each cut is
+safe.
+
+| Cut (between) | Session | Preceding chunk ends | Following chunk begins | Cut reason | Pause type | Visual target before → after | Player label after cut |
+|---|---|---|---|---|---|---|---|
+| M1-01 → M1-02 | A | "...Let's start there." | "[SECTION PAUSE] Section 1.1..." | Thought-ending; new section | Section breathing room (Rule B) | `m1WrittenBriefing` → *(none)* | Module 1 · Section 1.1 |
+| M1-02 → M1-03 | A | "...beginning to end." | "[SECTION PAUSE] Section 1.2..." | Thought-ending; new section | Section breathing room | *(none)* → *(none)* | Module 1 · Section 1.2 |
+| M1-03 → M1-04 | A | "...just the visible part of it." | "[SECTION PAUSE] Section 1.3..." | Thought-ending; new section | Section breathing room | *(none)* → `m1VisualScopeLanguage` | Module 1 · Section 1.3 |
+| M1-04 → M1-05 | A | "...handle it like a professional." | "[SECTION PAUSE] Section 1.4..." | Thought-ending; new section | Section breathing room | `m1VisualScopeLanguage` → `m1VisualScopeCards` | Module 1 · Section 1.4 |
+| M1-05 → M1-06 | A | "...no matter how experienced you get." | "Before your first checkpoint..." | Thought-ending; teaching → practice transition | Section breathing room | `m1VisualScopeCards` → `m1LineInteraction` | Module 1 · Practice |
+| M1-06 → M1-07 | A | "...you're about to use it for real." | "Okay — this is the first place..." | Thought-ending; major teaching break (checkpoint approaching) | Section breathing room | `m1LineInteraction` → `m1cp1` | Module 1 · Checkpoint 1 |
+| M1-07 → M1-08 | A/B boundary | "...I'm not timing you." | (gated — plays only post-pass) "Good — that's exactly the shape of it." | **Checkpoint boundary — priority-1 cut, and the session A/B split point** | Player-level stop (not a recording pause — see architecture note above) | `m1cp1` → *(none)* | Module 1 · Continuing |
+| M1-08 → M1-09 | B | "...starting with Section 1.5." | "[SECTION PAUSE] Section 1.5..." | Thought-ending; new section | Section breathing room | *(none)* → `m1VisualLimitations` | Module 1 · Section 1.5 |
+| M1-09 → M1-10 | B | "...worth offering." | "[SECTION PAUSE] Section 1.6..." | Thought-ending; new section | Section breathing room | `m1VisualLimitations` → `m1VisualLicensing` | Module 1 · Section 1.6 |
+| M1-10 → M1-11 | B | "...genuinely yours to do." | "[SECTION PAUSE] Section 1.7..." | Thought-ending; new section | Section breathing room | `m1VisualLicensing` → `m1VisualPractitionerInsight` | Module 1 · Section 1.7 |
+| M1-11 → M1-12 | B | "...when to refer." | "[SECTION PAUSE] Section 1.8..." | Thought-ending; new section | Section breathing room | `m1VisualPractitionerInsight` → `m1VisualMistakes` | Module 1 · Section 1.8 |
+| M1-12 → M1-13 | B | "...actually holding the role." | "Here's your last checkpoint..." | Thought-ending; major teaching break (checkpoint approaching) | Section breathing room | `m1VisualMistakes` → `m1cp2` | Module 1 · Checkpoint 2 |
+| M1-13 → M1-14 | B (internal) | "...not just a definition." | (gated) "Good — that's the difference." | **Checkpoint boundary** | Player-level stop | `m1cp2` → `m1Complete` | Module 1 · Recap |
+
+No cut falls mid-sentence, between tightly connected thoughts, or at an
+arbitrary duration — every boundary above is either a checkpoint, a
+section's natural start/end, or (M1-05→M1-06) a teaching-to-practice
+register shift. Duration was never the deciding factor for any of them.
+
+---
 
 **Why this lands at 2,090 — just under the 2,100–2,300 target range:**
 it fell out of the actual compression work rather than being tuned to a

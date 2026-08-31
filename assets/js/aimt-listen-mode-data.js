@@ -14,6 +14,10 @@
 //   moduleId          number   — e.g. 1
 //   chunkId           string   — e.g. 'm1-01' (matches the script doc's chunk IDs)
 //   title             string   — internal/editorial label, not shown to students verbatim
+//   studentLabel      string   — the ONLY text the player's title row ever shows a
+//                                student. Real orientation ("Module 1 · Section 1.3 —
+//                                Observation vs. diagnosis"), never an internal chunk
+//                                id/count ("Chunk 4 of 14") — those stay engineering-only.
 //   sourceSection     string   — which on-screen section this chunk narrates
 //   audioSrc          string   — stable, versionable asset path (see Section 5 of the
 //                                Module 1 pilot task: assets/audio/listen/<course>/<module>/<chunkId>.mp3)
@@ -49,7 +53,7 @@
   'use strict';
 
   var CHUNK_FIELDS = [
-    'courseSlug', 'moduleId', 'chunkId', 'title', 'sourceSection', 'audioSrc',
+    'courseSlug', 'moduleId', 'chunkId', 'title', 'studentLabel', 'sourceSection', 'audioSrc',
     'visualTarget', 'checkpointId', 'gateType', 'resumeAfterPass', 'duration',
     'version', 'qaStatus'
   ];
@@ -68,6 +72,7 @@
       moduleId: fields.moduleId,
       chunkId: fields.chunkId,
       title: fields.title,
+      studentLabel: fields.studentLabel || fields.title,
       sourceSection: fields.sourceSection,
       audioSrc: fields.audioSrc || audioPath(fields.courseSlug, fields.moduleId, fields.chunkId),
       visualTarget: fields.visualTarget || null,
@@ -103,80 +108,97 @@
   var HEADSPA_MODULE_1 = [
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-01',
-      title: 'Module Briefing (spoken)', sourceSection: 'Module Briefing',
+      title: 'Module Briefing (spoken)', studentLabel: 'Module 1 · Opening',
+      sourceSection: 'Module Briefing',
       visualTarget: 'm1WrittenBriefing',
       duration: 65.44, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-02',
-      title: '1.1 What is a head spa?', sourceSection: '1.1',
+      title: '1.1 What is a head spa?', studentLabel: 'Module 1 · Section 1.1 — What is a head spa?',
+      sourceSection: '1.1',
       duration: 76.75, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-03',
-      title: '1.2 What is a head spa technician?', sourceSection: '1.2',
+      title: '1.2 What is a head spa technician?', studentLabel: 'Module 1 · Section 1.2 — What is a head spa technician?',
+      sourceSection: '1.2',
       duration: 92.13, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-04',
-      title: '1.3 Observation vs. diagnosis', sourceSection: '1.3',
+      title: '1.3 Observation vs. diagnosis', studentLabel: 'Module 1 · Section 1.3 — Observation vs. diagnosis',
+      sourceSection: '1.3',
       visualTarget: 'm1VisualScopeLanguage',
       duration: 146.02, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-05',
-      title: '1.4 Scope of practice', sourceSection: '1.4',
+      title: '1.4 Scope of practice', studentLabel: 'Module 1 · Section 1.4 — Scope of practice',
+      sourceSection: '1.4',
       visualTarget: 'm1VisualScopeCards',
       duration: 69.19, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-06',
-      title: 'Practice interaction — "Where is the line?"', sourceSection: 'Practice interaction',
+      title: 'Practice interaction — "Where is the line?"', studentLabel: 'Module 1 · Practice — Where is the line?',
+      sourceSection: 'Practice interaction',
       visualTarget: 'm1LineInteraction',
       duration: 128.32, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-07',
-      title: 'Checkpoint 1 — m1cp1', sourceSection: '#m1cp1',
+      title: 'Checkpoint 1 — m1cp1', studentLabel: 'Module 1 · Checkpoint 1 — Apply the boundary',
+      sourceSection: '#m1cp1',
       visualTarget: 'm1cp1', checkpointId: 'm1cp1', gateType: 'checkpoint-stop',
       duration: 38.65, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-08',
-      title: 'Post-pass continuation (m1cp1)', sourceSection: '1.5 transition',
+      title: 'Post-pass continuation (m1cp1)', studentLabel: 'Module 1 · Continuing',
+      sourceSection: '1.5 transition',
       checkpointId: 'm1cp1', gateType: 'post-pass', resumeAfterPass: true,
       duration: 15.6, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-09',
-      title: '1.5 Limitations of a head spa service', sourceSection: '1.5',
+      title: '1.5 Limitations of a head spa service', studentLabel: 'Module 1 · Section 1.5 — Limitations of a head spa service',
+      sourceSection: '1.5',
       visualTarget: 'm1VisualLimitations',
       duration: 62.68, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-10',
-      title: '1.6 Licensing', sourceSection: '1.6',
+      title: '1.6 Licensing', studentLabel: 'Module 1 · Section 1.6 — Licensing',
+      sourceSection: '1.6',
+      visualTarget: 'm1VisualLicensing',
       duration: 39.61, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-11',
-      title: '1.7 Practitioner insight', sourceSection: '1.7',
+      title: '1.7 Practitioner insight', studentLabel: 'Module 1 · Section 1.7 — Practitioner insight',
+      sourceSection: '1.7',
+      visualTarget: 'm1VisualPractitionerInsight',
       duration: 57.05, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-12',
-      title: '1.8 Mistakes new practitioners make', sourceSection: '1.8',
+      title: '1.8 Mistakes new practitioners make', studentLabel: 'Module 1 · Section 1.8 — Mistakes new practitioners make',
+      sourceSection: '1.8',
+      visualTarget: 'm1VisualMistakes',
       duration: 75.49, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-13',
-      title: 'Checkpoint 2 — m1cp2', sourceSection: '#m1cp2',
+      title: 'Checkpoint 2 — m1cp2', studentLabel: 'Module 1 · Checkpoint 2 — Demonstrate the role',
+      sourceSection: '#m1cp2',
       visualTarget: 'm1cp2', checkpointId: 'm1cp2', gateType: 'checkpoint-stop',
       duration: 30.88, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-14',
       title: 'Post-pass continuation (m1cp2) + completion + recap + handoff',
+      studentLabel: 'Module 1 · Recap',
       sourceSection: 'completion card', visualTarget: 'm1Complete',
       checkpointId: 'm1cp2', gateType: 'post-pass', resumeAfterPass: true,
       duration: 68.1, qaStatus: 'GENERATED'

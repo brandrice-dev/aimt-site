@@ -155,6 +155,32 @@
 
     isActive() {
       return this._active === true;
+    },
+
+    // Developer/local-only convenience for retesting the course from a
+    // clean slate -- never exposed as a UI control, never run
+    // automatically. Same hostname gate as the rest of Student Preview
+    // (a no-op everywhere else). Clears local course progress
+    // (levo_app) and every Listen Mode resume-position key
+    // (aimt_listen_position::*) so the next load behaves like a
+    // brand-new student. Call it from the browser console:
+    //   window.StudentPreview.resetLocalProgress()
+    // then reload the page.
+    resetLocalProgress() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+      if (!isStudentPreviewEligibleHost(hostname)) return false;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('aimt_progress_saved_at');
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf('aimt_listen_position::') === 0) toRemove.push(key);
+        }
+        toRemove.forEach((key) => localStorage.removeItem(key));
+      } catch (e) { return false; }
+      return true;
     }
   };
 
