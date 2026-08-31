@@ -369,6 +369,7 @@
     var index = engine.resolveEntryIndex(chunks, appState, engine.readStoredPosition(win, courseSlug, moduleId));
     var awaitingCheckpointId = null;
     var pollTimer = null;
+    var gapTimer = null;
     var destroyed = false;
 
     function readStoredPosition() {
@@ -513,8 +514,25 @@
       // cloned contents are), so it's a safe, stable scoping root.
       var scope = (doc.querySelector && doc.querySelector('.lesson-wrap')) || doc;
       var el = scope.querySelector ? scope.querySelector('[id="' + chunk.visualTarget + '"]') : null;
-      if (el && typeof el.scrollIntoView === 'function') {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!el || typeof el.getBoundingClientRect !== 'function') return;
+      // Center within the space actually visible above the fixed player
+      // bar, not the raw window height -- a naive scrollIntoView({block:
+      // 'center'}) centers against the full viewport and can leave a tall
+      // card's bottom portion resting behind the bar. --aimt-lm-bar-offset
+      // (set by syncBarOffset() above) is the same reusable offset the
+      // #guideBtn pill already coordinates against, so this reads it
+      // rather than re-deriving the bar's height a second way.
+      try {
+        var barOffset = parseFloat(win.getComputedStyle(doc.documentElement).getPropertyValue('--aimt-lm-bar-offset')) || 0;
+        var visibleHeight = Math.max(win.innerHeight - barOffset, win.innerHeight * 0.5);
+        var rect = el.getBoundingClientRect();
+        var elMid = rect.top + rect.height / 2;
+        var delta = elMid - (visibleHeight / 2);
+        if (Math.abs(delta) > 4 && typeof win.scrollBy === 'function') {
+          win.scrollBy({ top: delta, behavior: 'smooth' });
+        }
+      } catch (e) {
+        if (typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
@@ -563,6 +581,33 @@
 
     function stopPolling() {
       if (pollTimer) { win.clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function stopGapTimer() {
+      if (gapTimer) { win.clearTimeout(gapTimer); gapTimer = null; }
+    }
+
+    // Silence-aware auto-advance: when a chunk's 'ended' event resolves to
+    // a natural advance into the next chunk, that next chunk's
+    // transitionGapMs (see aimt-listen-mode-data.js and
+    // docs/course-audit/listen-mode/module-01-section-gap-measurements.md)
+    // is the remaining breathing-room pause to hold before autoplaying it,
+    // on top of whatever natural trailing/leading silence the canonical
+    // audio already carries at that boundary. Only real numbered-section
+    // starts carry a non-zero transitionGapMs; everything else (checkpoint
+    // prompts, practice, recap) advances immediately as before. Manual
+    // navigation (Start Over, Continue Listening, seek, back/forward) never
+    // goes through this function and is never delayed.
+    function advanceAfterGap(nextIndex) {
+      var nextChunk = chunks[nextIndex];
+      var gapMs = (nextChunk && typeof nextChunk.transitionGapMs === 'number') ? nextChunk.transitionGapMs : 0;
+      if (gapMs <= 0) { goToChunk(nextIndex, { autoplay: true }); return; }
+      stopGapTimer();
+      gapTimer = win.setTimeout(function () {
+        gapTimer = null;
+        if (destroyed) return;
+        goToChunk(nextIndex, { autoplay: true });
+      }, gapMs);
     }
 
     // Replaying a module after its checkpoint was already passed (e.g. via
@@ -648,8 +693,12 @@
       // Continue Listening) supersedes whatever the player was previously
       // waiting on — cancel a stray checkpoint-wait poll so it can't fire
       // offerContinue() later and silently rewrite the UI out from under
-      // wherever the student actually navigated to.
+      // wherever the student actually navigated to. Same for a pending
+      // section-gap timer: a student who skips ahead during the silent
+      // breathing-room pause must not have that stale timer fire a second,
+      // conflicting goToChunk afterward.
       stopPolling();
+      stopGapTimer();
       awaitingCheckpointId = null;
       index = i;
       updateTitle(chunk);
@@ -763,7 +812,7 @@
       } else if (decision.type === 'locked') {
         enterLocked(chunks[decision.index]);
       } else if (decision.type === 'advance') {
-        goToChunk(decision.index, { autoplay: true });
+        advanceAfterGap(decision.index);
       } else {
         enterEnded();
       }
@@ -785,6 +834,7 @@
     function destroy() {
       destroyed = true;
       stopPolling();
+      stopGapTimer();
       try { audio.pause(); } catch (e) { /* no-op */ }
       if (barOffsetObserver) { try { barOffsetObserver.disconnect(); } catch (e) {} }
       else { try { win.removeEventListener('resize', syncBarOffset); } catch (e) {} }

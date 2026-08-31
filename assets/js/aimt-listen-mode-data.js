@@ -55,7 +55,7 @@
   var CHUNK_FIELDS = [
     'courseSlug', 'moduleId', 'chunkId', 'title', 'studentLabel', 'sourceSection', 'audioSrc',
     'visualTarget', 'checkpointId', 'gateType', 'resumeAfterPass', 'duration',
-    'version', 'qaStatus'
+    'version', 'qaStatus', 'transitionGapMs'
   ];
 
   var GATE_TYPES = ['normal', 'checkpoint-stop', 'post-pass'];
@@ -81,119 +81,159 @@
       resumeAfterPass: !!fields.resumeAfterPass,
       duration: typeof fields.duration === 'number' ? fields.duration : null,
       version: typeof fields.version === 'number' ? fields.version : 1,
-      qaStatus: fields.qaStatus || 'NOT_GENERATED'
+      qaStatus: fields.qaStatus || 'NOT_GENERATED',
+      // Extra silence (ms) the player inserts before autoplaying THIS chunk
+      // when it's reached via automatic advance from the chunk immediately
+      // before it — i.e. this is a section-opening chunk and the previous
+      // chunk's audio just ended. Only set on true numbered-section-start
+      // chunks (never checkpoints, practice, or recap — those have their
+      // own semantically appropriate timing and use 0/unset). Computed as
+      // (locked ~4s target) minus the real trailing+leading silence already
+      // present in the canonical audio at that boundary (measured via
+      // ffmpeg silencedetect against the actual installed mp3s — see
+      // docs/course-audit/listen-mode/module-01-section-gap-measurements.md),
+      // never a blind flat 4000. Manual navigation (Start Over, Continue
+      // Listening, seek, back/forward) never applies this delay.
+      transitionGapMs: typeof fields.transitionGapMs === 'number' ? fields.transitionGapMs : 0
     };
     return c;
   }
 
-  // ── HeadSpa Mastery — Module 1 (pilot) ──
-  // Source of truth for wording: docs/course-audit/listen-mode/module-01-listen-script-draft.md (v3).
-  // TTS production text: docs/course-audit/listen-mode/tts/module-01/*.txt.
-  // m1-01, m1-02, m1-03, m1-04, and m1-07 are GENERATED — real Eleven v3 /
-  // Jane audio was produced for these five (see
-  // docs/course-audit/listen-mode/module-01-audio-production-sheet.md
-  // Section 5). m1-02/m1-03 exist specifically as a generation-to-generation
-  // voice-consistency check against m1-01, not yet reviewed. GENERATED is
-  // not APPROVED — none of the 14 chunks are APPROVED yet, so
-  // isProductionReady() is still false and the player still won't present
-  // Listen Mode to real students. The remaining 9 chunks stay NOT_GENERATED
-  // until the owner reviews the generated ones and authorizes the rest. The
-  // owner updates qaStatus as audio is generated and reviewed (Section 18/10).
-  // Note: m1-04's real production audio (146s) is under an open cohesion
-  // question — a temporary, non-canonical split-chunk comparison exists at
-  // docs/course-audit/listen-mode/tts/module-01/cohesion-test/ for the
-  // owner to review; this manifest entry deliberately still points at the
-  // single m1-04.mp3 file and must not be changed until the owner decides
-  // whether M1-04 should be split (see the cohesion review package).
+  // ── HeadSpa Mastery — Module 1 ──
+  // Source of truth for wording: docs/course-audit/listen-mode/module-01-listen-script-draft.md (v5).
+  // Pass 2B install: all 14 chunks now point at the continuous-recording-
+  // session master (Section 11 architecture) — two full-length Jane/eleven_v3
+  // performances (Session A: opening through checkpoint 1's prompt; Session
+  // B: post-pass-1 through checkpoint 2's prompt, recap, and handoff), each
+  // CapCut-finished (locked preset — see
+  // docs/course-audit/listen-mode/module-01-production-standard-LOCKED.md)
+  // then cut into these 14 player segments at the owner-approved natural cut
+  // map (docs/course-audit/listen-mode/module-01-listen-script-draft.md
+  // "Player cut map", cross-verified against real silence-detection on the
+  // installed audio — see
+  // docs/course-audit/listen-mode/module-01-pass2-raw-sessions-v2-production-log.md).
+  // `version: 2` marks every chunk whose audio changed in this pass (v1 was
+  // the earlier per-chunk-generation pilot).
+  //
+  // qaStatus: APPROVED — owner listen-through complete, contingent on two
+  // final fixes (section-transition breathing room, full section sync),
+  // both implemented and live-QA-verified this pass (see
+  // module-01-section-gap-measurements.md). Module 1 is now the frozen
+  // AIMT Listen Mode reference implementation — see
+  // module-01-reference-implementation-FROZEN.md. isProductionReady() is
+  // now true; the player will present Listen Mode to real students.
   var HEADSPA_MODULE_1 = [
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-01',
       title: 'Module Briefing (spoken)', studentLabel: 'Module 1 · Opening',
       sourceSection: 'Module Briefing',
       visualTarget: 'm1WrittenBriefing',
-      duration: 65.44, qaStatus: 'GENERATED'
+      duration: 78.74, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-02',
       title: '1.1 What is a head spa?', studentLabel: 'Module 1 · Section 1.1 — What is a head spa?',
       sourceSection: '1.1',
-      duration: 76.75, qaStatus: 'GENERATED'
+      visualTarget: 'm1VisualWhatIsHeadSpa',
+      // Measured: m1-01 trailing 0.345s + m1-02 leading 0.345s = 0.690s
+      // natural gap already present. Target 3.6s (not the full 4.0s — the
+      // owner's live review found this specific transition already reads
+      // as a good pause, "perhaps slightly longer than necessary," so this
+      // is nudged to the low end of the locked 3.5-4.5s range rather than
+      // the 4.0s used elsewhere).
+      transitionGapMs: 2910,
+      duration: 87.32, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-03',
       title: '1.2 What is a head spa technician?', studentLabel: 'Module 1 · Section 1.2 — What is a head spa technician?',
       sourceSection: '1.2',
-      duration: 92.13, qaStatus: 'GENERATED'
+      visualTarget: 'm1VisualWhatIsTechnician',
+      // Measured: m1-02 trailing 0.319s + m1-03 leading 0.319s = 0.638s. Target 4.0s.
+      transitionGapMs: 3362,
+      duration: 98.00, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-04',
       title: '1.3 Observation vs. diagnosis', studentLabel: 'Module 1 · Section 1.3 — Observation vs. diagnosis',
       sourceSection: '1.3',
       visualTarget: 'm1VisualScopeLanguage',
-      duration: 146.02, qaStatus: 'GENERATED'
+      // Measured: m1-03 trailing 0.406s + m1-04 leading 0.406s = 0.812s. Target 4.0s.
+      transitionGapMs: 3188,
+      duration: 178.85, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-05',
       title: '1.4 Scope of practice', studentLabel: 'Module 1 · Section 1.4 — Scope of practice',
       sourceSection: '1.4',
       visualTarget: 'm1VisualScopeCards',
-      duration: 69.19, qaStatus: 'GENERATED'
+      // Measured: m1-04 trailing 0.655s + m1-05 leading 0.649s = 1.304s. Target 4.0s.
+      transitionGapMs: 2696,
+      duration: 93.88, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-06',
       title: 'Practice interaction — "Where is the line?"', studentLabel: 'Module 1 · Practice — Where is the line?',
       sourceSection: 'Practice interaction',
       visualTarget: 'm1LineInteraction',
-      duration: 128.32, qaStatus: 'GENERATED'
+      duration: 136.69, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-07',
       title: 'Checkpoint 1 — m1cp1', studentLabel: 'Module 1 · Checkpoint 1 — Apply the boundary',
       sourceSection: '#m1cp1',
       visualTarget: 'm1cp1', checkpointId: 'm1cp1', gateType: 'checkpoint-stop',
-      duration: 38.65, qaStatus: 'GENERATED'
+      duration: 34.55, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-08',
       title: 'Post-pass continuation (m1cp1)', studentLabel: 'Module 1 · Continuing',
       sourceSection: '1.5 transition',
       checkpointId: 'm1cp1', gateType: 'post-pass', resumeAfterPass: true,
-      duration: 15.6, qaStatus: 'GENERATED'
+      duration: 27.19, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-09',
       title: '1.5 Limitations of a head spa service', studentLabel: 'Module 1 · Section 1.5 — Limitations of a head spa service',
       sourceSection: '1.5',
       visualTarget: 'm1VisualLimitations',
-      duration: 62.68, qaStatus: 'GENERATED'
+      // Measured: m1-08 trailing 0.524s + m1-09 leading 0.518s = 1.042s. Target 4.0s.
+      transitionGapMs: 2958,
+      duration: 74.74, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-10',
       title: '1.6 Licensing', studentLabel: 'Module 1 · Section 1.6 — Licensing',
       sourceSection: '1.6',
       visualTarget: 'm1VisualLicensing',
-      duration: 39.61, qaStatus: 'GENERATED'
+      // Measured: m1-09 trailing 1.117s + m1-10 leading 1.117s = 2.234s. Target 4.0s.
+      transitionGapMs: 1766,
+      duration: 51.55, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-11',
       title: '1.7 Practitioner insight', studentLabel: 'Module 1 · Section 1.7 — Practitioner insight',
       sourceSection: '1.7',
       visualTarget: 'm1VisualPractitionerInsight',
-      duration: 57.05, qaStatus: 'GENERATED'
+      // Measured: m1-10 trailing 0.971s + m1-11 leading 0.971s = 1.942s. Target 4.0s.
+      transitionGapMs: 2058,
+      duration: 76.99, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-12',
       title: '1.8 Mistakes new practitioners make', studentLabel: 'Module 1 · Section 1.8 — Mistakes new practitioners make',
       sourceSection: '1.8',
       visualTarget: 'm1VisualMistakes',
-      duration: 75.49, qaStatus: 'GENERATED'
+      // Measured: m1-11 trailing 0.901s + m1-12 leading 0.901s = 1.802s. Target 4.0s.
+      transitionGapMs: 2198,
+      duration: 89.26, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-13',
       title: 'Checkpoint 2 — m1cp2', studentLabel: 'Module 1 · Checkpoint 2 — Demonstrate the role',
       sourceSection: '#m1cp2',
       visualTarget: 'm1cp2', checkpointId: 'm1cp2', gateType: 'checkpoint-stop',
-      duration: 30.88, qaStatus: 'GENERATED'
+      duration: 32.96, version: 2, qaStatus: 'APPROVED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-14',
@@ -201,7 +241,7 @@
       studentLabel: 'Module 1 · Recap',
       sourceSection: 'completion card', visualTarget: 'm1Complete',
       checkpointId: 'm1cp2', gateType: 'post-pass', resumeAfterPass: true,
-      duration: 68.1, qaStatus: 'GENERATED'
+      duration: 72.86, version: 2, qaStatus: 'APPROVED'
     })
   ];
 

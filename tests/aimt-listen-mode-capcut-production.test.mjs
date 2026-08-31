@@ -309,18 +309,22 @@ await (async function positionAnchoredMatching() {
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// I. qaStatus honestly reflects the real install (all 14 GENERATED, none
-// APPROVED) — see aimt-listen-mode-module1-pilot.test.mjs's QA STATUS
-// HONESTY section for the fuller version of this check; kept here too
-// since this suite specifically covers the CapCut pipeline that earned it.
+// I. qaStatus honestly reflects the real install. Originally all 14
+// GENERATED/none APPROVED; the owner has since completed a real
+// listen-through and explicitly authorized freezing Module 1 as the AIMT
+// Listen Mode reference implementation, upgrading every chunk to APPROVED
+// (see docs/course-audit/listen-mode/module-01-reference-implementation-FROZEN.md).
+// See aimt-listen-mode-module1-pilot.test.mjs's QA STATUS HONESTY section
+// for the fuller version of this check; kept here too since this suite
+// specifically covers the CapCut pipeline that earned it.
 // ─────────────────────────────────────────────────────────────────────────
 (function qaStatusUnchanged() {
   const AIMTListenModeData = require('../assets/js/aimt-listen-mode-data.js');
   const chunks = AIMTListenModeData.getManifest('headspa-mastery', 1);
-  const generatedIds = chunks.filter((c) => c.qaStatus === 'GENERATED').map((c) => c.chunkId).sort();
-  const expectedGeneratedIds = Array.from({ length: 14 }, (_, i) => 'm1-' + String(i + 1).padStart(2, '0'));
-  check('I. QASTATUS UNCHANGED', 'all 14 chunks are GENERATED, matching the real installed CapCut output', JSON.stringify(generatedIds) === JSON.stringify(expectedGeneratedIds), JSON.stringify(generatedIds));
-  check('I. QASTATUS UNCHANGED', 'no chunk is APPROVED (that remains the owner\'s call after listening)', chunks.every((c) => c.qaStatus !== 'APPROVED'));
+  const approvedIds = chunks.filter((c) => c.qaStatus === 'APPROVED').map((c) => c.chunkId).sort();
+  const expectedApprovedIds = Array.from({ length: 14 }, (_, i) => 'm1-' + String(i + 1).padStart(2, '0'));
+  check('I. QASTATUS UNCHANGED', 'all 14 chunks are APPROVED, matching the owner\'s explicit Module 1 freeze authorization', JSON.stringify(approvedIds) === JSON.stringify(expectedApprovedIds), JSON.stringify(approvedIds));
+  check('I. QASTATUS UNCHANGED', 'no chunk is left at GENERATED', chunks.every((c) => c.qaStatus !== 'GENERATED'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

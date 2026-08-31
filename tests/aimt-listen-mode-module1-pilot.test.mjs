@@ -176,14 +176,18 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
 // ─────────────────────────────────────────────────────────────────────────
 (function missingAudioState() {
   // Following the real CapCut round-trip (both parts validated, all 14
-  // chunks installed as canonical production MP3s), every chunk is now
-  // GENERATED — never APPROVED, which remains the owner's call after
-  // listening. This section's name predates that install; the "missing
-  // audio" contract it verifies (mount()/isProductionReady() must never
-  // treat GENERATED as APPROVED, must never fabricate audio) is unchanged
-  // and still fully exercised below.
-  check('M. MISSING AUDIO STATE', 'all 14 chunks are GENERATED following the real CapCut install', manifest.every((c) => c.qaStatus === 'GENERATED'));
-  check('M. MISSING AUDIO STATE', 'no chunk is APPROVED yet — GENERATED is not APPROVED, owner review is still required', !manifest.some((c) => c.qaStatus === 'APPROVED'));
+  // chunks installed as canonical production MP3s) and the owner's real
+  // listen-through approving Module 1 as the frozen reference
+  // implementation (see module-01-reference-implementation-FROZEN.md),
+  // every chunk is now APPROVED. This section's name predates that
+  // install/approval; the "missing audio" contract it verifies
+  // (mount()/isProductionReady() must never treat GENERATED as APPROVED,
+  // must never fabricate audio, must never self-approve without an
+  // explicit owner authorization) is unchanged and still fully exercised
+  // below, using synthetic non-approved data where the real manifest can
+  // no longer stand in for "not yet approved."
+  check('M. MISSING AUDIO STATE', 'all 14 chunks are APPROVED following the owner\'s real listen-through and Module 1 freeze', manifest.every((c) => c.qaStatus === 'APPROVED'));
+  check('M. MISSING AUDIO STATE', 'no chunk is left at GENERATED — the freeze pass upgraded every one', !manifest.some((c) => c.qaStatus === 'GENERATED'));
   check('M. MISSING AUDIO STATE', 'every chunk has a real measured duration recorded', manifest.every((c) => typeof c.duration === 'number' && c.duration > 0));
 
   // On-disk proof, not just manifest metadata: every chunk has a real,
@@ -200,28 +204,40 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
       check('M. MISSING AUDIO STATE', c.chunkId + '.mp3 has a real MP3/ID3 header, not an empty or placeholder file', header === 'ID3' || header.charCodeAt(0) === 0xff);
     }
   });
-  check('M. MISSING AUDIO STATE', 'isProductionReady() is false while any chunk is not APPROVED', AIMTListenModeData.isProductionReady(manifest) === false);
-  check('M. MISSING AUDIO STATE', 'isProductionReady() is true only when every chunk is APPROVED', AIMTListenModeData.isProductionReady(manifest.map((c) => Object.assign({}, c, { qaStatus: 'APPROVED' }))) === true);
-  check('M. MISSING AUDIO STATE', 'a single non-approved chunk is enough to keep the whole module unavailable', AIMTListenModeData.isProductionReady(manifest.map((c, i) => Object.assign({}, c, { qaStatus: i === 0 ? 'GENERATED' : 'APPROVED' }))) === false);
+  check('M. MISSING AUDIO STATE', 'isProductionReady() is true now that every real Module 1 chunk is APPROVED', AIMTListenModeData.isProductionReady(manifest) === true);
+  check('M. MISSING AUDIO STATE', 'isProductionReady() is false while any chunk is not APPROVED (synthetic: reverting one chunk to GENERATED)', AIMTListenModeData.isProductionReady(manifest.map((c, i) => Object.assign({}, c, { qaStatus: i === 0 ? 'GENERATED' : 'APPROVED' }))) === false);
+  check('M. MISSING AUDIO STATE', 'a single non-approved chunk is enough to keep the whole module unavailable (synthetic: reverting the whole manifest to GENERATED)', AIMTListenModeData.isProductionReady(manifest.map((c) => Object.assign({}, c, { qaStatus: 'GENERATED' }))) === false);
 
   // mount() must refuse to build any DOM at all (not just hide a button)
   // when the module isn't production-ready and QA mode isn't engaged --
   // proven by handing it a `doc` that throws if createElement is ever
-  // called.
+  // called. Now that the real Module 1 manifest is APPROVED, this needs a
+  // synthetic not-ready manifest (a fake AIMTListenModeData on `win`) to
+  // actually exercise the isProductionReady gate, rather than relying on
+  // Module 1 itself being unapproved.
   const throwingDoc = {
     createElement() { throw new Error('mount() should not build DOM when not production-ready'); },
     getElementById() { return null; },
     head: {}
   };
+  const notReadyManifest = manifest.map((c) => Object.assign({}, c, { qaStatus: 'GENERATED' }));
+  const notReadyWin = {
+    location: { search: '' },
+    AIMTListenModeData: {
+      getManifest: () => notReadyManifest,
+      validateManifest: () => AIMTListenModeData.validateManifest(notReadyManifest),
+      isProductionReady: () => false
+    }
+  };
   let threw = false;
   let mountResult;
   try {
     mountResult = AIMTListenMode.mount({
-      courseSlug: 'headspa-mastery', moduleId: 1, doc: throwingDoc, win: { location: { search: '' } },
+      courseSlug: 'headspa-mastery', moduleId: 1, doc: throwingDoc, win: notReadyWin,
       appState: fakeAppState({ 1: [] }), entryMountId: 'm1ListenModeMount'
     });
   } catch (e) { threw = true; }
-  check('M. MISSING AUDIO STATE', 'mount() returns null without touching the DOM when Module 1 audio is not yet APPROVED and QA mode is off', !threw && mountResult === null);
+  check('M. MISSING AUDIO STATE', 'mount() returns null without touching the DOM when audio is not yet APPROVED and QA mode is off (synthetic not-ready manifest)', !threw && mountResult === null);
 
   check('M. MISSING AUDIO STATE', 'production gate check happens before any DOM/audio work in mount() (static: isProductionReady check precedes entryMount lookup)', (() => {
     const gateIdx = playerSrc.indexOf('isProductionReady');
@@ -319,14 +335,15 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
     check('AUDIO FINISHING', 'the finished test file is non-zero and a real MP3', stat.size > 0 && readFileSync(finishedPath).subarray(0, 3).toString('latin1').match(/^(ID3|\xff)/) !== null);
   }
 
-  // The manifest's m1-04 entry now reflects the real, installed CapCut
-  // output: same canonical path, GENERATED (never APPROVED), and the
-  // real recovered duration (146.02s, not the original raw generation's
-  // 146.08s -- a few small near-silent trims at chunk boundaries, all
-  // independently verified as non-speech during the real CapCut re-split
-  // validation).
+  // The manifest's m1-04 entry now reflects the Pass 2B continuous-session
+  // install (docs/course-audit/listen-mode/
+  // module-01-pass2-raw-sessions-v2-production-log.md): same canonical
+  // path, APPROVED following the owner's real listen-through and Module 1
+  // freeze, and the real installed duration (178.85s -- v5 script content
+  // growth plus a genuinely longer natural cut window than the old
+  // single-chunk generation, not a defect).
   const m104Chunk = manifest.find((c) => c.chunkId === 'm1-04');
-  check('AUDIO FINISHING', 'm1-04 manifest entry points at the canonical file, is GENERATED not APPROVED, and carries the real installed-CapCut-output duration', m104Chunk.audioSrc === 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3' && m104Chunk.qaStatus === 'GENERATED' && m104Chunk.duration === 146.02);
+  check('AUDIO FINISHING', 'm1-04 manifest entry points at the canonical file, is APPROVED, and carries the real installed-CapCut-output duration', m104Chunk.audioSrc === 'assets/audio/listen/headspa-mastery/module-01/m1-04.mp3' && m104Chunk.qaStatus === 'APPROVED' && m104Chunk.duration === 178.85);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -355,7 +372,7 @@ const module1Wrap = module1WrapMatch ? module1WrapMatch[0] : '';
   // (structural-robustness fix: a stale/failed player script can no longer
   // make the whole control disappear, only the owner-reported bug this
   // fixed).
-  check('A. WRITTEN BRIEFING', 'the footer holds a real, static <button id="m1ListenWithCadenceButton"> with the Listen with Cadence copy baked in, not a JS-only mount point', /<div class="m1o-footer">\s*<button type="button" id="m1ListenWithCadenceButton" class="aimt-lm-entry"[\s\S]*?Listen with Cadence[\s\S]*?~16 min · Includes 2 checkpoint stops[\s\S]*?<\/button>/.test(module1Wrap));
+  check('A. WRITTEN BRIEFING', 'the footer holds a real, static <button id="m1ListenWithCadenceButton"> with the Listen with Cadence copy baked in, not a JS-only mount point', /<div class="m1o-footer">\s*<button type="button" id="m1ListenWithCadenceButton" class="aimt-lm-entry"[\s\S]*?Listen with Cadence[\s\S]*?~19 min · Includes 2 checkpoint stops[\s\S]*?<\/button>/.test(module1Wrap));
   check('A. WRITTEN BRIEFING', 'the opener reuses the design system\'s existing font tokens (mont/mono/serif), not invented fonts', /var\(--aimt-font-mont\)/.test(courseSrc.slice(courseSrc.indexOf('.m1-opener'), courseSrc.indexOf('.m1-opener') + 3000)) && /var\(--aimt-font-mono\)/.test(courseSrc.slice(courseSrc.indexOf('.m1-opener'), courseSrc.indexOf('.m1-opener') + 3000)));
   // The AIMT ring/dot mark was deliberately replaced in the entry control
   // specifically, per explicit owner direction ("Do not rely on the
@@ -371,7 +388,7 @@ const module1Wrap = module1WrapMatch ? module1WrapMatch[0] : '';
 // ─────────────────────────────────────────────────────────────────────────
 (function visualTargetsResolve() {
   const chunksWithVisual = manifest.filter((c) => c.visualTarget);
-  check('N. VISUAL TARGETS RESOLVE', 'exactly 11 chunks declare a visualTarget (the 3 approved visual cues, the briefing/practice/2 checkpoints/completion anchors, plus 1.6/1.7/1.8 gained a sync target this pass — Section AC)', chunksWithVisual.length === 11, chunksWithVisual.map((c) => c.chunkId).join(','));
+  check('N. VISUAL TARGETS RESOLVE', 'exactly 13 chunks declare a visualTarget — every numbered section/practice/checkpoint/completion landmark now has one (1.1 and 1.2 gained a sync target this pass, closing the "some sections stop synchronizing" gap; only m1-08, the post-pass continuation transition chunk into 1.5 and not itself a listed landmark, is intentionally left without one)', chunksWithVisual.length === 13, chunksWithVisual.map((c) => c.chunkId).join(','));
   const threeCueChunks = manifest.filter((c) => ['m1-04', 'm1-05', 'm1-09'].includes(c.chunkId));
   check('N. VISUAL TARGETS RESOLVE', 'the 3 approved visual-cue chunks (m1-04, m1-05, m1-09) each declare a visualTarget', threeCueChunks.every((c) => !!c.visualTarget));
   manifest.forEach((c) => {
@@ -379,6 +396,56 @@ const module1Wrap = module1WrapMatch ? module1WrapMatch[0] : '';
     const idPattern = new RegExp('id="' + c.visualTarget + '"');
     check('N. VISUAL TARGETS RESOLVE', c.chunkId + ' visualTarget "' + c.visualTarget + '" exists as a real element id in module1Wrap', idPattern.test(module1Wrap));
   });
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// AG. SECTION TRANSITION GAP — owner's first Module 1 freeze condition:
+// ~4s (3.5-4.5s acceptable) perceived breathing room between numbered
+// sections, computed as (target - measured natural silence already in the
+// canonical audio), never a blind flat 4000ms. See
+// docs/course-audit/listen-mode/module-01-section-gap-measurements.md for
+// the ffmpeg silencedetect methodology and full measurement table.
+// ─────────────────────────────────────────────────────────────────────────
+(function sectionTransitionGap() {
+  const EXPECTED_GAPS = {
+    'm1-02': 2910, // Opening -> 1.1 (nudged to a 3.6s final gap per the owner's "slightly longer than necessary" finding on this specific transition)
+    'm1-03': 3362, // 1.1 -> 1.2
+    'm1-04': 3188, // 1.2 -> 1.3
+    'm1-05': 2696, // 1.3 -> 1.4
+    'm1-09': 2958, // post-checkpoint-1 -> 1.5
+    'm1-10': 1766, // 1.5 -> 1.6
+    'm1-11': 2058, // 1.6 -> 1.7
+    'm1-12': 2198  // 1.7 -> 1.8
+  };
+  Object.keys(EXPECTED_GAPS).forEach((id) => {
+    const c = manifest.find((x) => x.chunkId === id);
+    check('AG. SECTION TRANSITION GAP', id + ' carries the measured transitionGapMs (' + EXPECTED_GAPS[id] + 'ms)', c && c.transitionGapMs === EXPECTED_GAPS[id]);
+  });
+  const flagged = new Set(Object.keys(EXPECTED_GAPS));
+  const unflagged = manifest.filter((c) => !flagged.has(c.chunkId));
+  check('AG. SECTION TRANSITION GAP', 'every other chunk (opening, practice, checkpoints, post-pass continuations, recap) has transitionGapMs 0 — never a blind flat delay outside the 8 flagged numbered-section starts', unflagged.every((c) => c.transitionGapMs === 0), unflagged.filter((c) => c.transitionGapMs !== 0).map((c) => c.chunkId).join(','));
+  // Every added gap keeps the FINAL perceived gap (added delay + real
+  // measured natural silence at that boundary) inside the locked 3.5-4.5s
+  // range -- re-derived here from the same measurements documented in
+  // module-01-section-gap-measurements.md rather than re-trusting the
+  // authored constants above, so a future edit to one side without the
+  // other still fails this check.
+  const NATURAL_GAP_SEC = { 'm1-02': 0.690, 'm1-03': 0.638, 'm1-04': 0.812, 'm1-05': 1.304, 'm1-09': 1.042, 'm1-10': 2.234, 'm1-11': 1.942, 'm1-12': 1.802 };
+  Object.keys(EXPECTED_GAPS).forEach((id) => {
+    const finalGapSec = (EXPECTED_GAPS[id] / 1000) + NATURAL_GAP_SEC[id];
+    check('AG. SECTION TRANSITION GAP', id + ' final perceived gap (' + finalGapSec.toFixed(3) + 's) is within the locked 3.5-4.5s acceptable range', finalGapSec >= 3.5 && finalGapSec <= 4.5);
+  });
+
+  // Player-side mechanism: a real setTimeout-based delay, not a fixed
+  // per-chunk constant, gated on the chunk actually being reached via a
+  // natural 'ended' -> 'advance' decision (never on Start Over, Continue
+  // Listening, seek, or skip).
+  check('AG. SECTION TRANSITION GAP', 'player defines advanceAfterGap() and reads transitionGapMs off the chunk being advanced into', /function advanceAfterGap\(nextIndex\)/.test(playerSrc) && /nextChunk\.transitionGapMs/.test(playerSrc));
+  check('AG. SECTION TRANSITION GAP', "the 'ended' handler's advance branch calls advanceAfterGap, not a direct goToChunk (so the delay actually sits between chunks, not just documented)", /decision\.type === 'advance'\) \{\s*\n\s*advanceAfterGap\(decision\.index\);/.test(playerSrc));
+  check('AG. SECTION TRANSITION GAP', 'a zero/absent transitionGapMs still advances immediately (no gap mechanism regression for practice/checkpoint/recap transitions)', /if \(gapMs <= 0\) \{ goToChunk\(nextIndex, \{ autoplay: true \}\); return; \}/.test(playerSrc));
+  check('AG. SECTION TRANSITION GAP', 'the gap timer is tracked in a variable the player can cancel (gapTimer), not a bare untracked setTimeout', /var gapTimer = null;/.test(playerSrc) && /function stopGapTimer\(\)/.test(playerSrc));
+  check('AG. SECTION TRANSITION GAP', 'destroy() cancels a pending gap timer (closing/navigating away mid-pause can never fire a stray goToChunk after unmount)', /function destroy\(\) \{[\s\S]{0,80}stopPolling\(\);\s*\n\s*stopGapTimer\(\);/.test(playerSrc));
+  check('AG. SECTION TRANSITION GAP', 'the gap timer callback checks destroyed before calling goToChunk (a pause that outlives the player instance is a safe no-op)', /gapTimer = win\.setTimeout\(function \(\) \{\s*\n\s*gapTimer = null;\s*\n\s*if \(destroyed\) return;\s*\n\s*goToChunk\(nextIndex, \{ autoplay: true \}\);/.test(playerSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -476,7 +543,14 @@ function diffAgainstStart(relPath) {
     // Student Preview reload-survival fix (section AD): the unconditional
     // replaceState in enterPurchasedCourseHome() is genuinely gone,
     // replaced by one that preserves ?studentpreview=1 specifically.
-    '  window.history.replaceState({}, document.title, window.location.pathname);'
+    '  window.history.replaceState({}, document.title, window.location.pathname);',
+    // Sync-fix pass: Sections 1.1 and 1.2 gained a stable id on their
+    // existing .sec-eyebrow line (mirroring the 1.6/1.7/1.8 precedent from
+    // Section AC) so Listen Mode can finally scroll-sync those two
+    // sections — same visible text and position, an attribute added in
+    // place, closing the owner's "some sections stop synchronizing" finding.
+    '    <div class="sec-eyebrow">1.1 — What is a head spa?</div>',
+    '    <div class="sec-eyebrow">1.2 — What is a head spa technician?</div>'
   ]);
   // Pure relocations (see isPureMove above) don't need individual
   // allowlisting either -- #m1cp1's whole block moved this pass (owner-
@@ -546,6 +620,7 @@ function diffAgainstStart(relPath) {
   }
   const changedPaths = statusLines.map((l) => l.replace(/^[AMD?!\s]+/, '').trim());
   const allowlist = new Set([
+    '.gitignore',
     'headspa-mastery.html',
     'docs/course-audit/listen-mode/module-01-listen-script-draft.md',
     'docs/course-audit/listen-mode/module-01-audio-production-sheet.md',
@@ -574,7 +649,20 @@ function diffAgainstStart(relPath) {
     'scripts/aimt-media-backup.mjs',
     'scripts/aimt-media-restore.mjs',
     'tests/aimt-media-backup.test.mjs',
-    'docs/course-audit/listen-mode/cloud-backup/README.md'
+    'docs/course-audit/listen-mode/cloud-backup/README.md',
+    // Pass 2 continuous-recording-session model (Section 11): raw sessions,
+    // CapCut masters, and CapCut-processed FLACs are gitignored (see
+    // .gitignore) and never appear in git status; only this production log
+    // is tracked. The raw-sessions-v2/ directory itself may still appear as
+    // a line if it contains any non-ignored file (none currently) -- the
+    // startsWith() check below handles that case generically.
+    'docs/course-audit/listen-mode/module-01-pass2-raw-sessions-v2-production-log.md',
+    // Section-gap + sync-fix pass (owner's two Module 1 freeze conditions):
+    // measured-silence methodology + the computed transitionGapMs table.
+    'docs/course-audit/listen-mode/module-01-section-gap-measurements.md',
+    // Module 1 freeze: locks Module 1 as the AIMT Listen Mode reference
+    // implementation V1 for Modules 0-12 to inherit.
+    'docs/course-audit/listen-mode/module-01-reference-implementation-FROZEN.md'
   ]);
   for (let i = 1; i <= 14; i++) {
     allowlist.add('docs/course-audit/listen-mode/tts/module-01/m1-' + String(i).padStart(2, '0') + '.txt');
@@ -770,13 +858,18 @@ function diffAgainstStart(relPath) {
   // residue, no clipping/corruption, correct order — see
   // module-01-capcut-production-report-parts.md), and all 14 chunks were
   // genuinely installed as canonical production MP3s from that real,
-  // verified output — so all 14 are honestly GENERATED now, not a
-  // fabrication. APPROVED remains the owner's call after listening.
+  // verified output. The owner then completed a real listen-through
+  // (Module 1 finalize + freeze pass) and explicitly authorized upgrading
+  // every chunk to APPROVED — see
+  // module-01-reference-implementation-FROZEN.md. This is the one
+  // legitimate path to APPROVED: an explicit owner authorization, not
+  // Claude self-approving. No script (scripts/cadence-audio-produce.mjs,
+  // etc.) ever writes APPROVED itself -- see 'PRODUCTION SCRIPT' above.
   const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
-  const generatedIds = manifest.filter((c) => c.qaStatus === 'GENERATED').map((c) => c.chunkId).sort();
-  const expectedGeneratedIds = Array.from({ length: 14 }, (_, i) => 'm1-' + String(i + 1).padStart(2, '0'));
-  check('QA STATUS HONESTY', 'all 14 chunks are GENERATED, matching the real, verified CapCut install (not fabricated)', JSON.stringify(generatedIds) === JSON.stringify(expectedGeneratedIds), JSON.stringify(generatedIds));
-  check('QA STATUS HONESTY', 'no chunk in the manifest was set to APPROVED (that remains the owner\'s call)', manifest.every((c) => c.qaStatus !== 'APPROVED'));
+  const approvedIds = manifest.filter((c) => c.qaStatus === 'APPROVED').map((c) => c.chunkId).sort();
+  const expectedApprovedIds = Array.from({ length: 14 }, (_, i) => 'm1-' + String(i + 1).padStart(2, '0'));
+  check('QA STATUS HONESTY', 'all 14 chunks are APPROVED, matching the owner\'s explicit Module 1 freeze authorization', JSON.stringify(approvedIds) === JSON.stringify(expectedApprovedIds), JSON.stringify(approvedIds));
+  check('QA STATUS HONESTY', 'no chunk is left at GENERATED (the freeze pass upgraded every one, none skipped)', manifest.every((c) => c.qaStatus !== 'GENERATED'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -943,7 +1036,7 @@ function runStudentPreviewInit(hostname, search) {
   check('X. ENTRY FIX', 'buildEntryButton() (legacy fallback path) also creates a native <button type="button">', /var btn = doc\.createElement\('button'\);\s*\n\s*btn\.type = 'button';/.test(playerSrc));
   check('X. ENTRY FIX', 'the static button has a play-triangle-in-circle icon baked directly into the markup (not just the ambiguous ring/dot mark)', /id="m1ListenWithCadenceButton"[\s\S]{0,400}M13 10\.5 L22 16 L13 21\.5 Z/.test(courseSrc));
   check('X. ENTRY FIX', 'buildEntryButton() (legacy path) also has the same play icon', /aimt-lm-entry-play/.test(playerSrc) && /M13 10\.5 L22 16 L13 21\.5 Z/.test(playerSrc));
-  check('X. ENTRY FIX', 'the static button ships with a descriptive aria-label baked in (title + duration/checkpoint meta + call to action), not a bare generic label', /id="m1ListenWithCadenceButton"[\s\S]{0,200}aria-label="Listen with Cadence\. ~16 min · Includes 2 checkpoint stops\. Press to start listening\."/.test(courseSrc));
+  check('X. ENTRY FIX', 'the static button ships with a descriptive aria-label baked in (title + duration/checkpoint meta + call to action), not a bare generic label', /id="m1ListenWithCadenceButton"[\s\S]{0,200}aria-label="Listen with Cadence\. ~19 min · Includes 2 checkpoint stops\. Press to start listening\."/.test(courseSrc));
   check('X. ENTRY FIX', 'mount() defensively refreshes that aria-label from the real computed manifest summary on every mount (can\'t silently drift) — now driven by entryLabelForState(entryState) rather than a hardcoded "Listen with Cadence" string (see AF. ENTRY LABELS WIRED for the restart/replay entry-state fix)', /entryBtn\.setAttribute\('aria-label', labels\.title \+ '\. ' \+ meta \+ '\. ' \+ labels\.verb\);/.test(playerSrc));
   check('X. ENTRY FIX', 'a visible focus-visible outline for .aimt-lm-entry is defined both in the page\'s own static CSS and the player\'s injected CSS (works even before/without JS)', /\.aimt-lm-entry:focus-visible\{outline:/.test(courseSrc) && /\.aimt-lm-entry:focus-visible\{outline:/.test(playerSrc));
   check('X. ENTRY FIX', 'a disabled/loading visual state for .aimt-lm-entry is defined both statically and in the injected CSS', /\.aimt-lm-entry:disabled\{opacity:/.test(courseSrc) && /\.aimt-lm-entry:disabled\{opacity:/.test(playerSrc));
@@ -955,8 +1048,8 @@ function runStudentPreviewInit(hostname, search) {
   (function () {
     const chunks = AIMTListenModeData.getManifest('headspa-mastery', 1);
     const summary = AIMTListenMode.computeEntrySummary(chunks);
-    check('X. ENTRY FIX', 'computed summary matches the real Module 1 manifest: ~16 minutes, 2 checkpoint stops', summary.minutes === 16 && summary.checkpointCount === 2, JSON.stringify(summary));
-    check('X. ENTRY FIX', 'entryMetaText() formats it as "~16 min · Includes 2 checkpoint stops" (matches the owner-approved copy exactly, and the static markup\'s hand-typed starting text)', AIMTListenMode.entryMetaText(summary) === '~16 min · Includes 2 checkpoint stops');
+    check('X. ENTRY FIX', 'computed summary matches the real Module 1 manifest: ~19 minutes, 2 checkpoint stops', summary.minutes === 19 && summary.checkpointCount === 2, JSON.stringify(summary));
+    check('X. ENTRY FIX', 'entryMetaText() formats it as "~19 min · Includes 2 checkpoint stops" (matches the Pass 2B installed-audio total, and the static markup\'s hand-typed starting text)', AIMTListenMode.entryMetaText(summary) === '~19 min · Includes 2 checkpoint stops');
     const singular = AIMTListenMode.entryMetaText({ minutes: 5, checkpointCount: 1 });
     check('X. ENTRY FIX', 'entryMetaText() pluralizes correctly for a single checkpoint stop', singular === '~5 min · Includes 1 checkpoint stop');
   })();
@@ -1004,8 +1097,8 @@ function runStudentPreviewInit(hostname, search) {
   // (re-verified here in the context of this exact fix, alongside the
   // fuller V/W coverage above).
   const chunks2 = AIMTListenModeData.getManifest('headspa-mastery', 1);
-  check('X. ENTRY FIX', 'qaStatus remains exactly GENERATED for all 14 chunks (this fix never touches it)', chunks2.every((c) => c.qaStatus === 'GENERATED') && chunks2.length === 14);
-  check('X. ENTRY FIX', 'no chunk is APPROVED', chunks2.every((c) => c.qaStatus !== 'APPROVED'));
+  check('X. ENTRY FIX', 'qaStatus remains exactly APPROVED for all 14 chunks (this fix never touches it)', chunks2.every((c) => c.qaStatus === 'APPROVED') && chunks2.length === 14);
+  check('X. ENTRY FIX', 'no chunk is left at GENERATED', chunks2.every((c) => c.qaStatus !== 'GENERATED'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1028,7 +1121,7 @@ function runStudentPreviewInit(hostname, search) {
   // 1. The button is real, static markup -- present with zero JavaScript
   // ever having run.
   check('Y. STRUCTURAL ROBUSTNESS', 'the static button exists directly in module1Wrap (not injected)', /<button type="button" id="m1ListenWithCadenceButton" class="aimt-lm-entry"/.test(module1Wrap));
-  check('Y. STRUCTURAL ROBUSTNESS', 'the static button\'s title/meta copy is present as real text nodes, not placeholders JS must fill in', module1Wrap.includes('<span class="aimt-lm-entry-title">Listen with Cadence</span>') && module1Wrap.includes('<span class="aimt-lm-entry-meta">~16 min · Includes 2 checkpoint stops</span>'));
+  check('Y. STRUCTURAL ROBUSTNESS', 'the static button\'s title/meta copy is present as real text nodes, not placeholders JS must fill in', module1Wrap.includes('<span class="aimt-lm-entry-title">Listen with Cadence</span>') && module1Wrap.includes('<span class="aimt-lm-entry-meta">~19 min · Includes 2 checkpoint stops</span>'));
   check('Y. STRUCTURAL ROBUSTNESS', 'a dedicated, empty-by-default note element sits next to the button for failure messaging, addressed via a generic data-hook (not a Module-1-specific id, so the player library stays module-agnostic)', /<div class="m1o-footer-note" data-aimt-entry-note aria-live="polite"><\/div>/.test(module1Wrap));
 
   // 2. The button's essential visual CSS is defined directly in the
@@ -1267,7 +1360,7 @@ function runStudentPreviewInit(hostname, search) {
   // all remain completely untouched by this change (re-verified directly
   // here, on top of the file-level diff-accounting in O/Q/S above).
   const chunksAB = AIMTListenModeData.getManifest('headspa-mastery', 1);
-  check('AB. LOCAL PURCHASED-STUDENT PREVIEW', 'qaStatus remains exactly GENERATED for all 14 chunks -- this feature never touches it', chunksAB.every((c) => c.qaStatus === 'GENERATED') && chunksAB.length === 14);
+  check('AB. LOCAL PURCHASED-STUDENT PREVIEW', 'qaStatus remains exactly APPROVED for all 14 chunks -- this feature never touches it', chunksAB.every((c) => c.qaStatus === 'APPROVED') && chunksAB.length === 14);
   check('AB. LOCAL PURCHASED-STUDENT PREVIEW', 'APP_STATE.canAccessModule / markModuleComplete / checkpoint machinery in headspa-state.js is untouched by this change (the only new code there is StudentPreview.resetLocalProgress, an opt-in dev helper)', !/canAccessModule[\s\S]{0,200}StudentPreview/.test(readFileSync(path.join(ROOT, 'assets/js/headspa-state.js'), 'utf8')));
 
   // 5. resetLocalProgress(): hostname-gated, never automatic, never a UI
@@ -1548,7 +1641,7 @@ function runStudentPreviewInit(hostname, search) {
   })();
 
   // -- goToChunk cancels any stray checkpoint-wait poll on explicit navigation --
-  check('AF. STRAY POLL CANCELLED', 'goToChunk stops any pending checkpoint poll before navigating (Start Over / Jump / Continue Listening can never be undermined by a late offerContinue() firing)', /function goToChunk\(i, playOpts\) \{[\s\S]{0,600}stopPolling\(\);\s*\n\s*awaitingCheckpointId = null;\s*\n\s*index = i;/.test(playerSrc));
+  check('AF. STRAY POLL CANCELLED', 'goToChunk stops any pending checkpoint poll (and, since the section-gap pass, any pending section-transition-gap timer) before navigating (Start Over / Jump / Continue Listening can never be undermined by a late offerContinue() or delayed auto-advance firing)', /function goToChunk\(i, playOpts\) \{[\s\S]{0,900}stopPolling\(\);\s*\n\s*stopGapTimer\(\);\s*\n\s*awaitingCheckpointId = null;\s*\n\s*index = i;/.test(playerSrc));
 })();
 
 // ---- Report ----
