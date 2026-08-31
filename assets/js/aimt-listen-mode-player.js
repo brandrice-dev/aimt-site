@@ -138,6 +138,11 @@
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
 
+  // Engineering/QA inspection mode -- drives the "QA preview" badge and
+  // anything else that should look visibly different from the real
+  // student experience. Deliberately does NOT include Student Preview
+  // (below): the owner's product-review experience must render exactly
+  // like normal student UI, badge included.
   function inQAMode() {
     try {
       if (root.AIMT_LISTEN_MODE_QA_FORCE === true) return true;
@@ -148,6 +153,22 @@
       if (root.ReviewMode && typeof root.ReviewMode.isActive === 'function' && root.ReviewMode.isActive()) return true;
       var search = (root.location && root.location.search) || '';
       return /[?&]listenQA=1\b/.test(search);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Whether GENERATED (not yet APPROVED) audio may be treated as playable
+  // at all -- true for genuine QA/Review inspection (inQAMode()) AND for
+  // the owner's localhost-only Student Preview (headspa-state.js
+  // StudentPreview, hostname-allowlisted to 127.0.0.1/localhost). This is
+  // the ONLY thing Student Preview relaxes; it must never affect the QA
+  // badge (inQAMode() alone still drives that) or anything else.
+  function canUseUnapprovedAudio() {
+    try {
+      if (inQAMode()) return true;
+      if (root.StudentPreview && typeof root.StudentPreview.isActive === 'function' && root.StudentPreview.isActive()) return true;
+      return false;
     } catch (e) {
       return false;
     }
@@ -421,7 +442,7 @@
     }
 
     function isChunkQAAvailable(chunk) {
-      if (inQAMode()) return chunk.qaStatus === 'GENERATED' || chunk.qaStatus === 'APPROVED';
+      if (canUseUnapprovedAudio()) return chunk.qaStatus === 'GENERATED' || chunk.qaStatus === 'APPROVED';
       return chunk.qaStatus === 'APPROVED';
     }
 
@@ -574,7 +595,7 @@
     }
 
     var productionReady = data.isProductionReady(chunks);
-    if (!productionReady && !inQAMode()) return null; // Section 21: never present as available until every chunk is APPROVED.
+    if (!productionReady && !canUseUnapprovedAudio()) return null; // Section 21: never present as available until every chunk is APPROVED.
 
     var entryMount = opts.entryMountEl || (opts.entryMountId ? doc.getElementById(opts.entryMountId) : null);
     if (!entryMount) return null;
@@ -633,7 +654,8 @@
     engine: engine,
     mount: mount,
     unmount: unmount,
-    inQAMode: inQAMode
+    inQAMode: inQAMode,
+    canUseUnapprovedAudio: canUseUnapprovedAudio
   };
 
   root.AIMTListenMode = api;

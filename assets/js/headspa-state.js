@@ -108,6 +108,59 @@
   ReviewMode.init();
   window.ReviewMode = ReviewMode;
 
+  /* ══════════════════════════════════════════════════════
+     STUDENT PREVIEW — localhost-only, owner product review.
+     Lets the owner experience not-yet-APPROVED Listen Mode audio through
+     the real, unmodified student interface (no QA panel, no badges, no
+     chunk ids) instead of Review Mode's engineering-inspection UI.
+     Hostname-gated by ALLOWLIST (127.0.0.1 / localhost only -- no
+     .local or .pages.dev exceptions the way Review Mode has), which is
+     structurally safer than a blocklist: anything not exactly one of
+     these two hostnames is automatically excluded, with no host list to
+     keep in sync. Session-only, no persistence -- active only while
+     ?studentpreview=1 is literally present in the URL, which is fine
+     since this SPA never full-page-reloads during normal in-course
+     navigation. See assets/js/aimt-listen-mode-player.js for the one
+     narrow thing this is allowed to relax (GENERATED audio playability)
+     -- it never touches qaStatus, entitlement, authentication, module
+     sequencing, checkpoint gates, Cadence grading, or any other
+     authoritative state.
+     ══════════════════════════════════════════════════════ */
+  const STUDENT_PREVIEW_ALLOWED_HOSTS = ['127.0.0.1', 'localhost'];
+
+  function isStudentPreviewEligibleHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    return STUDENT_PREVIEW_ALLOWED_HOSTS.indexOf(h) !== -1;
+  }
+
+  const StudentPreview = {
+    _active: false,
+
+    init() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+
+      if (!isStudentPreviewEligibleHost(hostname)) {
+        this._active = false;
+        return;
+      }
+
+      let requested = false;
+      try {
+        requested = new URLSearchParams(window.location.search).get('studentpreview') === '1';
+      } catch (e) {}
+
+      this._active = requested;
+    },
+
+    isActive() {
+      return this._active === true;
+    }
+  };
+
+  StudentPreview.init();
+  window.StudentPreview = StudentPreview;
+
   function createCheckpointMeta() {
     return {
       status: '',

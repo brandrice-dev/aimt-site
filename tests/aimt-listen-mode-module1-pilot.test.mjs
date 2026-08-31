@@ -14,6 +14,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';import path from 'node:path';
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
+import vm from 'node:vm';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -513,6 +514,7 @@ function diffAgainstStart(relPath) {
     'scripts/cadence-audio-master-v3.mjs',
     'assets/js/aimt-listen-mode-data.js',
     'assets/js/aimt-listen-mode-player.js',
+    'assets/js/headspa-state.js',
     'scripts/cadence-audio-finish.mjs',
     'scripts/cadence-audio-produce.mjs',
     'scripts/cadence-capcut-resplit.mjs',
@@ -764,6 +766,88 @@ function diffAgainstStart(relPath) {
   check('U. REVIEW QA PANEL', 'each row includes a Jump control that reuses the real engine storageKey/serializePosition + mount(), not a bespoke mechanism', /engine\.storageKey\('headspa-mastery', 1\)/.test(fnSrc) && /engine\.serializePosition/.test(fnSrc) && /AIMTListenMode\.mount\(/.test(fnSrc));
   check('U. REVIEW QA PANEL', 'STATIC_MODULES[1] calls renderM1ReviewQAPanel() after mounting the player', /renderM1ReviewQAPanel\(\);\s*\},/.test(courseSrc));
   check('U. REVIEW QA PANEL', 'the panel CSS is scoped under a dedicated .m1-qa-panel class, not reusing/overloading a student-facing class', /\.m1-qa-panel\s*\{/.test(courseSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// V. Student Preview — localhost-only real-student-UI preview of
+// GENERATED audio. ABSOLUTE SAFETY BOUNDARY: real behavioral execution
+// (node:vm, not just static regex) of the actual StudentPreview.init()
+// logic extracted from headspa-state.js, against every combination the
+// task calls out -- localhost/127.0.0.1 recognized, production and
+// arbitrary hostnames ignored, no param means inactive even on an
+// eligible host.
+// ─────────────────────────────────────────────────────────────────────────
+function runStudentPreviewInit(hostname, search) {
+  const stateSrc = readFileSync(path.join(ROOT, 'assets/js/headspa-state.js'), 'utf8');
+  const startMarker = 'const STUDENT_PREVIEW_ALLOWED_HOSTS';
+  const endMarker = 'window.StudentPreview = StudentPreview;';
+  const start = stateSrc.indexOf(startMarker);
+  const end = stateSrc.indexOf(endMarker);
+  if (start === -1 || end === -1) throw new Error('Could not locate StudentPreview extraction boundaries in headspa-state.js -- markers moved');
+  const source = stateSrc.slice(start, end + endMarker.length);
+  const sandbox = { window: { location: { hostname, search }, StudentPreview: null }, URLSearchParams };
+  vm.runInContext(source, vm.createContext(sandbox), { filename: 'headspa-state-student-preview.js' });
+  return sandbox.window.StudentPreview;
+}
+
+(function studentPreviewSafetyBoundary() {
+  const cases = [
+    { hostname: 'localhost', search: '?studentpreview=1', expected: true, label: 'localhost + studentpreview=1 => recognized' },
+    { hostname: '127.0.0.1', search: '?studentpreview=1', expected: true, label: '127.0.0.1 + studentpreview=1 => recognized' },
+    { hostname: 'LOCALHOST', search: '?studentpreview=1', expected: true, label: 'hostname match is case-insensitive (LOCALHOST)' },
+    { hostname: 'localhost', search: '?foo=1&studentpreview=1', expected: true, label: 'param recognized alongside other query params' },
+    { hostname: 'aimtrichology.com', search: '?studentpreview=1', expected: false, label: 'production hostname (aimtrichology.com) + studentpreview=1 => ignored' },
+    { hostname: 'www.aimtrichology.com', search: '?studentpreview=1', expected: false, label: 'production hostname (www.aimtrichology.com) + studentpreview=1 => ignored' },
+    { hostname: 'aimt-site.pages.dev', search: '?studentpreview=1', expected: false, label: 'production hostname (aimt-site.pages.dev) + studentpreview=1 => ignored' },
+    { hostname: 'example.com', search: '?studentpreview=1', expected: false, label: 'arbitrary hostname (example.com) + studentpreview=1 => ignored' },
+    { hostname: 'evil-preview.example.com', search: '?studentpreview=1', expected: false, label: 'arbitrary hostname crafted to look local => ignored' },
+    { hostname: 'my-machine.local', search: '?studentpreview=1', expected: false, label: '.local hostname (eligible for Review Mode) is NOT eligible for Student Preview -- intentionally stricter allowlist' },
+    { hostname: 'preview-branch.aimt-site.pages.dev', search: '?studentpreview=1', expected: false, label: 'Pages branch-preview subdomain (eligible for Review Mode) is NOT eligible for Student Preview' },
+    { hostname: 'localhost', search: '', expected: false, label: 'localhost with no studentpreview param => inactive' },
+    { hostname: 'localhost', search: '?studentpreview=0', expected: false, label: 'studentpreview=0 (not exactly "1") => inactive' },
+    { hostname: '', search: '?studentpreview=1', expected: false, label: 'empty hostname => ignored' }
+  ];
+  for (const c of cases) {
+    let sp;
+    let threw = false;
+    try {
+      sp = runStudentPreviewInit(c.hostname, c.search);
+    } catch (e) {
+      threw = true;
+    }
+    check('V. STUDENT PREVIEW SAFETY', c.label, !threw && sp && sp.isActive() === c.expected, threw ? 'threw' : JSON.stringify(sp && sp.isActive()));
+  }
+
+  // The allowlist itself must be exactly these two hosts -- no wildcard,
+  // no regex, nothing that could accidentally widen eligibility later.
+  const stateSrc = readFileSync(path.join(ROOT, 'assets/js/headspa-state.js'), 'utf8');
+  check('V. STUDENT PREVIEW SAFETY', 'the allowed-hosts list is exactly [\'127.0.0.1\', \'localhost\'] (strict allowlist, not a blocklist)', /const STUDENT_PREVIEW_ALLOWED_HOSTS = \['127\.0\.0\.1', 'localhost'\];/.test(stateSrc));
+  check('V. STUDENT PREVIEW SAFETY', 'no persistence (sessionStorage/localStorage) for Student Preview -- active only while the param is literally present', (() => {
+    const start = stateSrc.indexOf('const STUDENT_PREVIEW_ALLOWED_HOSTS');
+    const end = stateSrc.indexOf('window.StudentPreview = StudentPreview;');
+    const block = stateSrc.slice(start, end);
+    return !/sessionStorage|localStorage/.test(block);
+  })());
+  check('V. STUDENT PREVIEW SAFETY', 'window.StudentPreview is exposed globally, same pattern as window.ReviewMode', /window\.StudentPreview = StudentPreview;/.test(stateSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// W. Student Preview only relaxes Listen Mode audio playability -- never
+// the QA badge, never Review Mode UI, never qaStatus, never any
+// authoritative state. Static regression guards (the live end-to-end
+// behavioral proof was run in the browser this task).
+// ─────────────────────────────────────────────────────────────────────────
+(function studentPreviewScope() {
+  check('W. STUDENT PREVIEW SCOPE', 'canUseUnapprovedAudio() checks StudentPreview.isActive() in addition to inQAMode()', /if \(root\.StudentPreview && typeof root\.StudentPreview\.isActive === 'function' && root\.StudentPreview\.isActive\(\)\) return true;/.test(playerSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'the mount() production-ready gate uses canUseUnapprovedAudio(), not bare inQAMode() (Student Preview must be able to unlock playback)', /if \(!productionReady && !canUseUnapprovedAudio\(\)\) return null;/.test(playerSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'isChunkQAAvailable() uses canUseUnapprovedAudio(), consistent with the mount() gate', /function isChunkQAAvailable\(chunk\) \{\s*\n\s*if \(canUseUnapprovedAudio\(\)\)/.test(playerSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'the "QA preview" badge is still gated on inQAMode() ALONE, not the combined check -- Student Preview must never show it', /if \(inQAMode\(\) && !productionReady\) \{\s*\n\s*var badge/.test(playerSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'the Review Mode QA chunk-list panel is gated only on window.ReviewMode.isActive(), never StudentPreview (Student Preview gets the real student UI, not the QA panel)', /function renderM1ReviewQAPanel\(\) \{\s*\n\s*if \(!\(window\.ReviewMode && window\.ReviewMode\.isActive\(\)\)\) return;/.test(courseSrc) && !/renderM1ReviewQAPanel[\s\S]{0,400}StudentPreview/.test(courseSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'no code path sets qaStatus to APPROVED anywhere in the player or course file (Student Preview never mutates it)', !/qaStatus\s*=\s*['"]APPROVED['"]/.test(playerSrc) && !/qaStatus\s*[:=]\s*['"]APPROVED['"]/.test(courseSrc));
+  check('W. STUDENT PREVIEW SCOPE', 'StudentPreview is referenced only in headspa-state.js and the player\'s canUseUnapprovedAudio() -- not in checkpoint, grading, entitlement, or certification code', ['functions/_lib/cadence/ask-cadence.mjs', 'functions/_lib/cadence/checkpoint-evaluation.mjs', 'assets/js/cadence-shell.js', 'functions/api/claim-course-access.js', 'functions/api/stripe-webhook.js', 'functions/api/create-checkout-session.js'].every((rel) => {
+    const p = path.join(ROOT, rel);
+    return !existsSync(p) || !/StudentPreview/.test(readFileSync(p, 'utf8'));
+  }));
 })();
 
 // ---- Report ----
