@@ -282,8 +282,14 @@ await (async function restoreBehavior() {
     check('I. REPO HYGIENE', 'git status is readable', false, String(e));
     return;
   }
-  const trackedLargeMediaLines = statusOut.split('\n').filter((l) => /\.(wav|flac|FLAC|mp3)$/.test(l.trim()) && /^[AM]/.test(l.trim()));
-  check('I. REPO HYGIENE', 'no .wav/.flac/.mp3 file is staged/added by this task', trackedLargeMediaLines.length === 0, trackedLargeMediaLines.join(' | '));
+  // Scoped to CapCut intermediates specifically (capcut-test/,
+  // capcut-production/) -- NOT assets/audio/listen/, where canonical
+  // student-facing production MP3s are legitimately, always Git-tracked
+  // (CLAUDE.md: code/docs/manifests stay in Git; only the CapCut
+  // masters/round-trip evidence under docs/course-audit/... are meant to
+  // stay untracked/ignored).
+  const trackedCapcutIntermediateLines = statusOut.split('\n').filter((l) => /capcut-(test|production)\/.*\.(wav|flac|FLAC|mp3)$/.test(l.trim()) && /^[AM]/.test(l.trim()));
+  check('I. REPO HYGIENE', 'no CapCut intermediate .wav/.flac/.mp3 file (under capcut-test/ or capcut-production/) is staged/added by this task', trackedCapcutIntermediateLines.length === 0, trackedCapcutIntermediateLines.join(' | '));
 
   const ignoreCheck = (rel) => {
     try {

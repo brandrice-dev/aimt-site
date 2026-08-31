@@ -141,6 +141,11 @@
   function inQAMode() {
     try {
       if (root.AIMT_LISTEN_MODE_QA_FORCE === true) return true;
+      // The app's general owner Review Mode (?review=1, headspa-state.js
+      // ReviewMode, hard-blocked on production) also unlocks GENERATED
+      // (not yet APPROVED) Listen Mode audio for review-listening --
+      // normal student sessions stay gated on isProductionReady() below.
+      if (root.ReviewMode && typeof root.ReviewMode.isActive === 'function' && root.ReviewMode.isActive()) return true;
       var search = (root.location && root.location.search) || '';
       return /[?&]listenQA=1\b/.test(search);
     } catch (e) {
@@ -161,7 +166,8 @@
       '.aimt-lm-entry .aimt-lm-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2,#4d403a);}',
       '.aimt-lm-bar{position:fixed;left:0;right:0;bottom:0;z-index:2400;background:var(--bg,#faf8f5);',
       'border-top:0.5px solid var(--border2,rgba(0,0,0,0.09));box-shadow:0 -6px 24px rgba(0,0,0,0.06);',
-      'font-family:var(--aimt-font-sans,sans-serif);padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.55rem;}',
+      'font-family:var(--aimt-font-sans,sans-serif);display:flex;flex-direction:column;gap:0.55rem;',
+      'padding:0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom,0px)) 1rem;}',
       '.aimt-lm-bar.aimt-lm-collapsed .aimt-lm-body{display:none;}',
       '.aimt-lm-row{display:flex;align-items:center;gap:0.6rem;}',
       '.aimt-lm-title{font-size:0.72rem;letter-spacing:0.02em;color:var(--muted,#a3968d);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
@@ -574,6 +580,19 @@
     if (!entryMount) return null;
     ensureStyles(doc);
     entryMount.innerHTML = '';
+
+    // destroy() (above) only removes the previous instance's bar from
+    // its own host div, not the host div itself from document.body --
+    // remounting (e.g. re-opening a module already visited this session)
+    // would otherwise accumulate orphaned, permanently-hidden
+    // #aimtListenModePlayerHost elements, and any later
+    // getElementById('aimtListenModePlayerHost') call (including a fresh
+    // mount's own bar) could resolve to a stale one instead of the live
+    // instance. Remove every existing match before creating the new one.
+    var staleHosts = doc.querySelectorAll ? doc.querySelectorAll('#aimtListenModePlayerHost') : [];
+    for (var si = 0; si < staleHosts.length; si++) {
+      if (staleHosts[si].parentNode) staleHosts[si].parentNode.removeChild(staleHosts[si]);
+    }
 
     var playerHost = doc.createElement('div');
     playerHost.id = 'aimtListenModePlayerHost';

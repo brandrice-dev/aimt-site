@@ -291,6 +291,50 @@ body.review-mode-active { padding-top: 34px; }
 .mh-title { font-family: var(--aimt-font-mont); font-size: clamp(1.4rem, 5.5vw, 2rem); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; font-weight: 700; text-transform: uppercase; }
 .mh-desc { font-size: 0.85rem; color: rgba(255,255,255,0.55); font-weight: 300; line-height: 1.7; letter-spacing: 0.01em; }
 
+/* Module opener (black) — Module 1's orientation card, replacing the
+   lighter .mod-hero + .protocol-card written-briefing pairing used by
+   every other module with one darker, self-contained treatment. Reuses
+   the same type scale (mont/mono/serif) as .mod-hero/.protocol-card,
+   just on a near-black surface, per design-system convention. */
+.m1-opener { background: #0a0a0a; border-radius: 16px; padding: 2rem 1.5rem 1.75rem; color: white; margin-bottom: 2rem; position: relative; overflow: hidden; }
+.m1-opener::after { content: ''; position: absolute; bottom: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); }
+.m1o-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
+.m1o-title { font-family: var(--aimt-font-mont); font-size: clamp(1.4rem, 5.5vw, 2rem); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px; font-weight: 700; text-transform: uppercase; }
+.m1o-tagline { font-family: var(--aimt-font-serif); font-size: 1.05rem; line-height: 1.5; font-style: italic; color: rgba(255,255,255,0.85); margin-bottom: 14px; }
+.m1o-desc { font-size: 0.85rem; color: rgba(255,255,255,0.55); font-weight: 300; line-height: 1.7; letter-spacing: 0.01em; margin-bottom: 1.5rem; max-width: 52ch; }
+.m1o-section { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.25rem; margin-bottom: 1.25rem; }
+.m1o-section-label { font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.85rem; }
+.m1o-section-label .m1o-plus { color: rgba(255,255,255,0.35); margin-right: 4px; }
+.m1o-list { list-style: none; margin: 0; padding: 0; }
+.m1o-list li { font-size: 0.82rem; color: rgba(255,255,255,0.82); font-weight: 300; line-height: 1.6; padding: 0.5rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+.m1o-list li:last-child { border-bottom: none; }
+.m1o-attention { border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.25rem; margin-bottom: 1.5rem; }
+.m1o-attention-label { font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+.m1o-attention-text { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 300; line-height: 1.65; max-width: 56ch; }
+.m1o-footer { display: flex; align-items: center; gap: 10px; border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 1.15rem; }
+.m1o-mark { width: 20px; height: 20px; flex-shrink: 0; color: rgba(255,255,255,0.5); }
+.m1o-footer-title { font-family: var(--aimt-font-mont); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; color: rgba(255,255,255,0.85); }
+.m1o-footer-meta { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+/* Review Mode-only Listen Mode chunk QA panel (Module 1). Never rendered
+   into the DOM unless window.ReviewMode.isActive() -- see
+   renderM1ReviewQAPanel() -- so students never receive this markup at all,
+   not just a hidden copy of it. */
+.m1-qa-panel { border: 1px dashed var(--border2); border-radius: 12px; padding: 1rem 1.1rem; margin: 1.5rem 0; background: var(--warn-light); }
+.m1-qa-panel-title { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+.m1-qa-row { display: grid; grid-template-columns: 3.2em 4em 6em 1fr auto; gap: 0.6rem; align-items: center; padding: 0.4rem 0; border-bottom: 0.5px solid var(--border); font-size: 0.76rem; }
+.m1-qa-row:last-child { border-bottom: none; }
+.m1-qa-id { font-family: var(--aimt-font-mono); color: var(--text); }
+.m1-qa-dur { font-family: var(--aimt-font-mono); color: var(--muted); }
+.m1-qa-status { font-family: var(--aimt-font-mono); font-size: 0.66rem; letter-spacing: 0.04em; padding: 0.15rem 0.4rem; border-radius: 4px; text-align: center; }
+.m1-qa-status-generated { background: var(--aimt-warning-light); color: var(--aimt-warning); }
+.m1-qa-status-approved { background: var(--aimt-success-light); color: var(--aimt-success); }
+.m1-qa-status-not_generated { background: var(--aimt-error-light); color: var(--aimt-error); }
+.m1-qa-audio { height: 28px; max-width: 100%; }
+.m1-qa-jump { font-family: var(--aimt-font-sans); font-size: 0.7rem; background: var(--white); border: 0.5px solid var(--border2); border-radius: 6px; padding: 0.3rem 0.6rem; cursor: pointer; white-space: nowrap; }
+.m1-qa-jump:hover { background: var(--surface); }
+@media (max-width: 620px) { .m1-qa-row { grid-template-columns: 1fr; gap: 0.3rem; } }
+
 /* Typography */
 .sec-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a8078; margin-bottom: 6px; }
 .sec-title { font-family: var(--aimt-font-mont); font-size: clamp(1.08rem, 3.8vw, 1.32rem); letter-spacing: -0.018em; line-height: 1.24; margin-bottom: 0.95rem; font-weight: 600; max-width: 18ch; }
@@ -2154,6 +2198,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .home-greeting { font-size: 1.65rem; }
   .lesson-wrap { padding: 1.5rem 1.1rem 7rem; }
   .mod-hero { padding: 1.5rem 1.25rem; }
+  .m1-opener { padding: 1.5rem 1.25rem; }
   .lp-headline { font-size: clamp(1.9rem, 8vw, 2.75rem); line-height: 0.98; max-width: 10.4ch; }
   .lp-subhead { font-size: 0.92rem; line-height: 1.68; }
   .lp-pricing-card { padding: 1.05rem; }
@@ -4925,27 +4970,53 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <div id="module1Wrap" style="display:none;">
   <div class="lesson-wrap">
 
-    <div class="mod-hero">
-      <div class="mh-eyebrow">Module 1 · Role, Scope & Professional Boundaries</div>
-      <div class="mh-title">Know what you are.<br>Know what you are not.</div>
-      <div class="mh-desc">Professionalism begins before the service does—with how you observe, explain, adapt, and stay within scope.</div>
-    </div>
+    <!-- Module opener (black) — replaces the old separate .mod-hero +
+         written-briefing-card pairing with one dark orientation card.
+         id="m1WrittenBriefing" is preserved on the "In this module" list
+         (not the whole card) so chunk m1-01's visualTarget scroll-sync in
+         aimt-listen-mode-player.js keeps working without a manifest change. -->
+    <div class="m1-opener">
+      <div class="m1o-eyebrow">Module 01</div>
+      <div class="m1o-title">Role, Scope &amp; Professional Boundaries</div>
+      <div class="m1o-tagline">Know what you are.<br>Know what you are not.</div>
+      <div class="m1o-desc">Professionalism begins before the service does—with how you observe, explain, adapt, and stay within scope.</div>
 
-    <!-- Written Module Briefing — useful on its own whether or not Listen Mode is opened. -->
-    <div class="protocol-card" id="m1WrittenBriefing">
-      <div class="pc-header">
-        <div class="pc-icon neutral-icon" style="font-size:0.65rem;">→</div>
-        <div><div class="pc-title">In this module, you'll learn to</div></div>
+      <div class="m1o-section" id="m1WrittenBriefing">
+        <div class="m1o-section-label"><span class="m1o-plus">+</span>In this module</div>
+        <ul class="m1o-list">
+          <li>Define the head spa technician's role — and its limits.</li>
+          <li>Separate professional observation from medical diagnosis.</li>
+          <li>Understand what depends on your license and local scope.</li>
+          <li>Set honest expectations for what a head spa can support.</li>
+          <li>Recognize when referral is the right professional decision.</li>
+        </ul>
       </div>
-      <div class="pc-body">
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Define the head spa technician's role — and its limits.</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Separate professional observation from medical diagnosis.</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Understand what depends on your license and local scope.</span></div>
-        <div class="pc-row"><span class="pc-label"></span><span class="pc-val">Set honest expectations for what a head spa can support.</span></div>
-        <div class="pc-row" style="border:none"><span class="pc-label"></span><span class="pc-val">Recognize when referral is the right professional decision.</span></div>
+
+      <div class="m1o-attention">
+        <div class="m1o-attention-label">Pay attention to</div>
+        <div class="m1o-attention-text">The language you use when describing what you see. That distinction follows you through the rest of the course.</div>
+      </div>
+
+      <div class="m1o-footer">
+        <svg class="m1o-mark" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.7"/>
+          <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
+          <circle cx="22" cy="22" r="2" fill="currentColor"/>
+          <circle cx="22" cy="2"    r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="36.1" cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="42"   cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="22"   cy="42"   r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="7.9"  cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="2"    cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
+          <circle cx="7.9"  cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <div>
+          <div class="m1o-footer-title">Listen with Cadence</div>
+          <div class="m1o-footer-meta">~16 min &middot; Includes 2 checkpoint stops</div>
+        </div>
       </div>
     </div>
-    <div class="body-text" style="margin-top:-0.75rem"><strong>Pay attention to:</strong> the language you use when describing what you see. That distinction follows you through the rest of the course.</div>
     <div id="m1ListenModeMount"></div>
 
     <div class="sec-eyebrow">1.1 — What is a head spa?</div>
@@ -9167,6 +9238,78 @@ function openModuleById(id, options = {}) {
   // Route to correct content
   const wrap = document.querySelector('.lesson-wrap');
 
+  // Review-Mode-only Module 1 Listen Mode chunk QA list (M1-01..M1-14:
+  // duration, qaStatus, play, jump). Only ever built/inserted when
+  // ReviewMode.isActive() -- students never receive this markup, not even
+  // as a hidden element -- so it can't leak qaStatus or internal chunk
+  // structure via page source. Not the student-facing player; a separate,
+  // owner-only inspection tool.
+  function renderM1ReviewQAPanel() {
+    if (!(window.ReviewMode && window.ReviewMode.isActive())) return;
+    const mountEl = document.getElementById('m1ListenModeMount');
+    if (!mountEl || !window.AIMTListenModeData) return;
+    const existing = document.getElementById('m1ReviewQAPanel');
+    if (existing) existing.remove();
+
+    const chunks = window.AIMTListenModeData.getManifest('headspa-mastery', 1);
+    if (!chunks || !chunks.length) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'm1ReviewQAPanel';
+    panel.className = 'm1-qa-panel';
+
+    const title = document.createElement('div');
+    title.className = 'm1-qa-panel-title';
+    title.textContent = 'Review Mode — Listen Mode chunk QA (M1-01–M1-14)';
+    panel.appendChild(title);
+
+    chunks.forEach((chunk, idx) => {
+      const row = document.createElement('div');
+      row.className = 'm1-qa-row';
+
+      const idEl = document.createElement('span');
+      idEl.className = 'm1-qa-id';
+      idEl.textContent = chunk.chunkId;
+      row.appendChild(idEl);
+
+      const durEl = document.createElement('span');
+      durEl.className = 'm1-qa-dur';
+      durEl.textContent = typeof chunk.duration === 'number' ? chunk.duration.toFixed(2) + 's' : '—';
+      row.appendChild(durEl);
+
+      const statusEl = document.createElement('span');
+      statusEl.className = 'm1-qa-status m1-qa-status-' + String(chunk.qaStatus).toLowerCase();
+      statusEl.textContent = chunk.qaStatus;
+      row.appendChild(statusEl);
+
+      const audioEl = document.createElement('audio');
+      audioEl.className = 'm1-qa-audio';
+      audioEl.controls = true;
+      audioEl.preload = 'none';
+      audioEl.src = chunk.audioSrc;
+      row.appendChild(audioEl);
+
+      const jumpBtn = document.createElement('button');
+      jumpBtn.type = 'button';
+      jumpBtn.className = 'm1-qa-jump';
+      jumpBtn.textContent = 'Jump';
+      jumpBtn.addEventListener('click', () => {
+        if (!window.AIMTListenMode) return;
+        const engine = window.AIMTListenMode.engine;
+        const key = engine.storageKey('headspa-mastery', 1);
+        localStorage.setItem(key, engine.serializePosition({ chunkId: chunk.chunkId, timeSec: 0, speed: 1 }));
+        window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE });
+        const entryBtn = mountEl.querySelector('.aimt-lm-entry');
+        if (entryBtn) entryBtn.click();
+      });
+      row.appendChild(jumpBtn);
+
+      panel.appendChild(row);
+    });
+
+    mountEl.parentNode.insertBefore(panel, mountEl.nextSibling);
+  }
+
   const STATIC_MODULES = {
     3: () => { if (wrap && module3HTML) wrap.innerHTML = module3HTML; },
     2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
@@ -9174,7 +9317,7 @@ function openModuleById(id, options = {}) {
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE }); },
+    1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryMountId: 'm1ListenModeMount', appState: APP_STATE }); renderM1ReviewQAPanel(); },
     7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m8InitMasterclass(); },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },

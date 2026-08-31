@@ -285,42 +285,42 @@ await (async function positionAnchoredMatching() {
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// H. Raw and canonical audio untouched by this preparation task
+// H. Raw preserved forever; canonical audio reflects the real, verified
+// CapCut install once it actually happened (this suite predates that —
+// see K/L/M/N/O above and the finish-module-1 report for the real
+// validation evidence this install is based on).
 // ─────────────────────────────────────────────────────────────────────────
 (function preservationUntouched() {
   let rawDiff = null;
-  let canonicalDiff = null;
   try {
     rawDiff = execSync('git diff --stat HEAD -- assets/audio/listen/headspa-mastery/module-01/raw/', { cwd: ROOT, encoding: 'utf8' }).trim();
   } catch (e) {
     rawDiff = 'ERROR: ' + e.message;
   }
-  try {
-    canonicalDiff = execSync('git diff --stat HEAD -- assets/audio/listen/headspa-mastery/module-01/m1-01.mp3 assets/audio/listen/headspa-mastery/module-01/m1-02.mp3 assets/audio/listen/headspa-mastery/module-01/m1-03.mp3 assets/audio/listen/headspa-mastery/module-01/m1-04.mp3 assets/audio/listen/headspa-mastery/module-01/m1-07.mp3', { cwd: ROOT, encoding: 'utf8' }).trim();
-  } catch (e) {
-    canonicalDiff = 'ERROR: ' + e.message;
+  check('H. PRESERVATION', 'raw/ directory has no diff vs HEAD (raw is preserved forever, remastering never touches it)', rawDiff === '', rawDiff);
+
+  const canonicalDir = path.join(ROOT, 'assets/audio/listen/headspa-mastery/module-01');
+  for (let i = 1; i <= 14; i++) {
+    const id = 'm1-' + String(i).padStart(2, '0');
+    const p = path.join(canonicalDir, id + '.mp3');
+    check('H. PRESERVATION', id + '.mp3 canonical file exists (installed from the real, verified CapCut round-trip)', existsSync(p));
+    if (existsSync(p)) check('H. PRESERVATION', id + '.mp3 is non-empty', statSync(p).size > 0);
   }
-  check('H. PRESERVATION', 'raw/ directory has no diff vs HEAD (untouched by this task)', rawDiff === '', rawDiff);
-  check('H. PRESERVATION', 'canonical production mp3s have no diff vs HEAD (untouched by this task)', canonicalDiff === '', canonicalDiff);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// I. qaStatus not mutated during preparation
+// I. qaStatus honestly reflects the real install (all 14 GENERATED, none
+// APPROVED) — see aimt-listen-mode-module1-pilot.test.mjs's QA STATUS
+// HONESTY section for the fuller version of this check; kept here too
+// since this suite specifically covers the CapCut pipeline that earned it.
 // ─────────────────────────────────────────────────────────────────────────
 (function qaStatusUnchanged() {
   const AIMTListenModeData = require('../assets/js/aimt-listen-mode-data.js');
   const chunks = AIMTListenModeData.getManifest('headspa-mastery', 1);
   const generatedIds = chunks.filter((c) => c.qaStatus === 'GENERATED').map((c) => c.chunkId).sort();
-  const expectedGeneratedIds = ['m1-01', 'm1-02', 'm1-03', 'm1-04', 'm1-07'];
-  check('I. QASTATUS UNCHANGED', 'still exactly the same 5 chunks GENERATED, no new status set during preparation', JSON.stringify(generatedIds) === JSON.stringify(expectedGeneratedIds), JSON.stringify(generatedIds));
-  check('I. QASTATUS UNCHANGED', 'no chunk is APPROVED (preparation never sets this)', chunks.every((c) => c.qaStatus !== 'APPROVED'));
-  let dataJsDiff = null;
-  try {
-    dataJsDiff = execSync('git diff --stat HEAD -- assets/js/aimt-listen-mode-data.js', { cwd: ROOT, encoding: 'utf8' }).trim();
-  } catch (e) {
-    dataJsDiff = 'ERROR: ' + e.message;
-  }
-  check('I. QASTATUS UNCHANGED', 'assets/js/aimt-listen-mode-data.js has no diff vs HEAD', dataJsDiff === '', dataJsDiff);
+  const expectedGeneratedIds = Array.from({ length: 14 }, (_, i) => 'm1-' + String(i + 1).padStart(2, '0'));
+  check('I. QASTATUS UNCHANGED', 'all 14 chunks are GENERATED, matching the real installed CapCut output', JSON.stringify(generatedIds) === JSON.stringify(expectedGeneratedIds), JSON.stringify(generatedIds));
+  check('I. QASTATUS UNCHANGED', 'no chunk is APPROVED (that remains the owner\'s call after listening)', chunks.every((c) => c.qaStatus !== 'APPROVED'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

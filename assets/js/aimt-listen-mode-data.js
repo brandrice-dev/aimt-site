@@ -110,67 +110,76 @@
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-02',
       title: '1.1 What is a head spa?', sourceSection: '1.1',
-      duration: 76.8, qaStatus: 'GENERATED'
+      duration: 76.75, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-03',
       title: '1.2 What is a head spa technician?', sourceSection: '1.2',
-      duration: 92.16, qaStatus: 'GENERATED'
+      duration: 92.13, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-04',
       title: '1.3 Observation vs. diagnosis', sourceSection: '1.3',
       visualTarget: 'm1VisualScopeLanguage',
-      duration: 146.08, qaStatus: 'GENERATED'
+      duration: 146.02, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-05',
       title: '1.4 Scope of practice', sourceSection: '1.4',
-      visualTarget: 'm1VisualScopeCards'
+      visualTarget: 'm1VisualScopeCards',
+      duration: 69.19, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-06',
       title: 'Practice interaction — "Where is the line?"', sourceSection: 'Practice interaction',
-      visualTarget: 'm1LineInteraction'
+      visualTarget: 'm1LineInteraction',
+      duration: 128.32, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-07',
       title: 'Checkpoint 1 — m1cp1', sourceSection: '#m1cp1',
       visualTarget: 'm1cp1', checkpointId: 'm1cp1', gateType: 'checkpoint-stop',
-      duration: 38.72, qaStatus: 'GENERATED'
+      duration: 38.65, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-08',
       title: 'Post-pass continuation (m1cp1)', sourceSection: '1.5 transition',
-      checkpointId: 'm1cp1', gateType: 'post-pass', resumeAfterPass: true
+      checkpointId: 'm1cp1', gateType: 'post-pass', resumeAfterPass: true,
+      duration: 15.6, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-09',
       title: '1.5 Limitations of a head spa service', sourceSection: '1.5',
-      visualTarget: 'm1VisualLimitations'
+      visualTarget: 'm1VisualLimitations',
+      duration: 62.68, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-10',
-      title: '1.6 Licensing', sourceSection: '1.6'
+      title: '1.6 Licensing', sourceSection: '1.6',
+      duration: 39.61, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-11',
-      title: '1.7 Practitioner insight', sourceSection: '1.7'
+      title: '1.7 Practitioner insight', sourceSection: '1.7',
+      duration: 57.05, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-12',
-      title: '1.8 Mistakes new practitioners make', sourceSection: '1.8'
+      title: '1.8 Mistakes new practitioners make', sourceSection: '1.8',
+      duration: 75.49, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-13',
       title: 'Checkpoint 2 — m1cp2', sourceSection: '#m1cp2',
-      visualTarget: 'm1cp2', checkpointId: 'm1cp2', gateType: 'checkpoint-stop'
+      visualTarget: 'm1cp2', checkpointId: 'm1cp2', gateType: 'checkpoint-stop',
+      duration: 30.88, qaStatus: 'GENERATED'
     }),
     chunk({
       courseSlug: 'headspa-mastery', moduleId: 1, chunkId: 'm1-14',
       title: 'Post-pass continuation (m1cp2) + completion + recap + handoff',
       sourceSection: 'completion card', visualTarget: 'm1Complete',
-      checkpointId: 'm1cp2', gateType: 'post-pass', resumeAfterPass: true
+      checkpointId: 'm1cp2', gateType: 'post-pass', resumeAfterPass: true,
+      duration: 68.1, qaStatus: 'GENERATED'
     })
   ];
 
