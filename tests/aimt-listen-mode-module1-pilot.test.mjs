@@ -790,6 +790,26 @@ function diffAgainstStart(relPath) {
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-a.json');
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-boundaries-part-b.json');
   allowlist.add('docs/course-audit/listen-mode/capcut-production/module-01/module-01-capcut-production-report-parts.md');
+  // Course-wide Listen Mode propagation (Modules 0, 2-12) -- the
+  // production phase following Module 1's freeze. One running production
+  // log, one script doc per new module, per-module TTS prompt-text
+  // archives for the modules where exact prompt text was saved, the new
+  // course-wide cut-map tool, and the surgical Module 12 pre-exam
+  // orientation wiring in module12-certification.js (see
+  // docs/course-audit/listen-mode/module-12-listen-script.md's "Special
+  // handling" section for why that file, specifically, is in scope here).
+  allowlist.add('assets/js/module12-certification.js');
+  allowlist.add('scripts/aimt-listen-cut-finder.mjs');
+  allowlist.add('docs/course-audit/listen-mode/course-wide-production-log.md');
+  ['00', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].forEach((n) => {
+    allowlist.add('docs/course-audit/listen-mode/module-' + n + '-listen-script.md');
+  });
+  ['m0-a1', 'm0-a2', 'm0-a3', 'm0-a4', 'm0-b1'].forEach((name) => {
+    allowlist.add('docs/course-audit/listen-mode/tts/module-00/' + name + '.txt');
+  });
+  ['m2-a1', 'm2-a2', 'm2-a3', 'm2-a4', 'm2-b1'].forEach((name) => {
+    allowlist.add('docs/course-audit/listen-mode/tts/module-02/' + name + '.txt');
+  });
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every

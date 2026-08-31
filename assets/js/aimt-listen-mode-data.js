@@ -245,9 +245,32 @@
     })
   ];
 
+  // ── HeadSpa Mastery — Module 12 ──
+  // Source of truth: docs/course-audit/listen-mode/module-12-listen-script.md.
+  // Module 12's real content is a scored, server-authoritative certification
+  // exam (assets/js/module12-certification.js + functions/api/certification/
+  // *.js) — this manifest intentionally covers ONLY the pre-exam "State A"
+  // orientation screen (how the assessment works, passing requirements,
+  // integrity notice), which is the one screen in that flow that isn't
+  // scored and doesn't reveal any exam content. Single chunk, no checkpoint,
+  // no gate — nothing to wait on. module12-certification.js's onStartExam()
+  // unmounts Listen Mode before an attempt is ever created, so this can
+  // never overlap with or narrate scored content. qaStatus stays GENERATED
+  // until the owner's CapCut pass + listen-through approve it, exactly like
+  // every other new module in this pass.
+  var HEADSPA_MODULE_12 = [
+    chunk({
+      courseSlug: 'headspa-mastery', moduleId: 12, chunkId: 'm12-01',
+      title: 'State A orientation (spoken)', studentLabel: 'Module 12 · Before you begin',
+      sourceSection: 'COPY.stateA', visualTarget: null,
+      version: 1, qaStatus: 'GENERATED'
+    })
+  ];
+
   var manifests = {
     'headspa-mastery': {
-      1: HEADSPA_MODULE_1
+      1: HEADSPA_MODULE_1,
+      12: HEADSPA_MODULE_12
     }
   };
 

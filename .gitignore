@@ -34,3 +34,13 @@ assets/audio/listen/**/raw-sessions-v2/**/*.wav
 assets/audio/listen/**/raw-sessions-v2/**/*.flac
 assets/audio/listen/**/raw-sessions-v2/**/*.FLAC
 assets/audio/listen/**/raw-sessions-v2/**/*.mp3
+
+# Course-wide Listen Mode production batch (Modules 0, 2-12): same
+# reproducible-local-artifact treatment as raw-sessions-v2/ above, applied
+# per module under raw-pieces/ (individual ElevenLabs generations before
+# concatenation) and capcut-masters/ (CapCut-ready PCM WAVs awaiting the
+# owner's CapCut pass). Never contains canonical student audio -- that only
+# ever lives directly under assets/audio/listen/<course>/module-XX/*.mp3
+# once installed post-CapCut.
+assets/audio/listen/**/raw-pieces/**
+assets/audio/listen/**/capcut-masters/**

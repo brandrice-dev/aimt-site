@@ -753,6 +753,23 @@
     // A. Hero -- keep the short opening visible; no paragraph wall before hierarchy is established.
     html += c.opening.map(function (p) { return '<p class="body-text">' + esc(p) + '</p>'; }).join('');
 
+    // A2. Listen with Cadence -- narrates this orientation screen only (see
+    // docs/course-audit/listen-mode/module-12-listen-script.md). Deliberately
+    // placed in renderStateA() alone, never in any scored-state renderer:
+    // this is the one screen in the Module 12 flow that isn't server-
+    // authoritative and reveals no exam content. AIMTListenMode.mount()
+    // itself refuses to attach real playback until every chunk in the
+    // manifest is qaStatus 'APPROVED' (see aimt-listen-mode-player.js's
+    // isProductionReady() gate) unless Student Preview/QA mode is active, so
+    // this real button is already safe to ship while the audio is GENERATED.
+    html += '<div class="mo-footer" style="margin:1.1rem 0 0.4rem;">';
+    html += '<button type="button" id="m12ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. Before you begin. Press to start listening.">';
+    html += '<span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>';
+    html += '<span class="aimt-lm-entry-copy"><span class="aimt-lm-entry-title">Listen with Cadence</span><span class="aimt-lm-entry-meta">Before you begin · ~4 min</span></span>';
+    html += '</button>';
+    html += '<div class="mo-footer-note" data-aimt-entry-note aria-live="polite"></div>';
+    html += '</div>';
+
     // B. Three-part overview -- one cohesive component, concise by default,
     // full approved copy available per part via "What to expect".
     html += '<h2 class="sec-title" style="margin-top:1.5rem;">' + esc(c.howItWorksTitle) + '</h2>';
@@ -789,9 +806,17 @@
     container.innerHTML = frame(html);
     var btn = document.getElementById('m12StartBtn');
     if (btn) btn.addEventListener('click', function () { onStartExam(container); });
+    var listenBtn = document.getElementById('m12ListenWithCadenceButton');
+    if (listenBtn && window.AIMTListenMode && window.AIMTListenModeData) {
+      window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 12, entryButtonEl: listenBtn, appState: window.APP_STATE });
+    }
   }
 
   async function onStartExam(container) {
+    // Listen Mode is scoped to the pre-exam orientation screen only (see
+    // renderStateA above) -- tear it down before an attempt exists so no
+    // player state or audio can survive into scored content.
+    if (window.AIMTListenMode) window.AIMTListenMode.unmount();
     if (isReview()) { setReviewFixtureKey('part1'); return renderFromStatus(container, fixtureStatusFor('part1')); }
     container.innerHTML = frame('<p class="body-text">Starting your assessment…</p>');
     var res = await apiPost('/start-attempt', {});
