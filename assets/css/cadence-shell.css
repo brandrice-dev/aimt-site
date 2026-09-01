@@ -34,7 +34,10 @@
   background: rgba(20, 18, 15, 0.42);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.22s ease;
+  /* Slowed + eased for a more graceful arrival (Cadence polish pass, item
+     3) -- was 0.22s ease, felt like an abrupt swap coming off the
+     checkpoint card's own (also-slowed) entering transition. */
+  transition: opacity 0.4s ease;
   z-index: 2490;
 }
 .cshell-overlay.show { opacity: 1; visibility: visible; }
@@ -50,10 +53,12 @@
   background: var(--bg, #faf8f5);
   display: flex;
   flex-direction: column;
-  transform: translateY(12px);
+  transform: translateY(16px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  /* Slowed + eased for a more graceful arrival (Cadence polish pass, item
+     3) -- was 0.22s ease/ease for both properties. */
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   /* Dynamic viewport height keeps the shell correctly sized on mobile
      browsers whose chrome resizes on scroll, and shrinks to make room
      for the review-mode banner (see getPageChromeOffsetTop()) and an
@@ -124,31 +129,23 @@
   border-bottom: 0.5px solid var(--border, rgba(0,0,0,0.06));
   background: var(--white, #fff);
 }
+/* Cadence identity badge (Cadence polish pass; reference-correction
+   follow-up). .cshell-id used to be its own dark rounded chip (36x36,
+   background: hero-bg, border-radius: 18px) with the badge floating
+   inside it -- a second shape behind the badge that read as an old
+   black crescent/orb around the new mark once the badge itself was big
+   enough to actually see. .cshell-id is now just a plain flex wrapper
+   (no shape, no fill) so .cadence-badge -- the same core+tech-ring
+   symbol used on the Cadence Check card and the #guideBtn pill -- IS
+   the entire icon, floating directly on .cshell-head's own white
+   background. The old wordmark span (.cshell-id-label) is gone too: it
+   never fit inside the 36px chip in the first place (its text visibly
+   overflowed the box) and the approved layout doesn't call for a
+   separate "Cadence" label next to the module title/status anyway. */
 .cshell-id {
-  width: 36px; height: 36px; border-radius: 18px;
-  background: var(--hero-bg, #262626);
-  display: flex; align-items: center; gap: 7px; padding: 0 10px;
-  flex-shrink: 0;
+  display: flex; align-items: center; flex-shrink: 0;
 }
-/* CADENCE_AVATAR_ASSET integration point: the real approved Cadence
-   avatar image is not yet in the repository. This breathing-dot +
-   wordmark treatment is the deliberate temporary identity mark (matches
-   the guide panel's .gp-av-dot / .gp-av-label). When the real asset is
-   supplied, swap the contents of .cshell-id-dot / .cshell-id-label for
-   an <img> here — nothing else in this shell needs to change. */
-.cshell-id-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--teal, #a3968d);
-  animation: cshellBreathe 2.4s ease-in-out infinite;
-  flex-shrink: 0;
-}
-@media (prefers-reduced-motion: reduce) { .cshell-id-dot { animation: none; } }
-@keyframes cshellBreathe { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
-.cshell-id-label {
-  font-family: var(--aimt-font-mono);
-  font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #fff; white-space: nowrap;
-}
+.cshell-id .cadence-badge { width: 52px; height: 52px; }
 .cshell-titles { min-width: 0; flex: 1; }
 .cshell-module {
   font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 500;
@@ -250,12 +247,16 @@
 .cshell-msg.assistant { align-self: flex-start; }
 .cshell-msg.user { align-self: flex-end; flex-direction: row-reverse; }
 .cshell-msg-av {
-  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; align-self: flex-end;
+  width: 24px; height: 24px; flex-shrink: 0; align-self: flex-end;
   display: flex; align-items: center; justify-content: center;
 }
-.cshell-msg.assistant .cshell-msg-av { background: var(--hero-bg, #262626); }
-.cshell-msg.assistant .cshell-msg-av span { width: 5px; height: 5px; border-radius: 50%; background: var(--teal, #a3968d); }
-.cshell-msg.user .cshell-msg-av { background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
+/* Same reference correction as .cshell-id above: the dark background
+   circle behind the assistant avatar was the old crescent/orb shape --
+   .cadence-badge already draws its own circle, so the wrapper stays
+   shapeless for the assistant case. User messages keep their own
+   circular "You" chip (unrelated to the Cadence identity). */
+.cshell-msg.assistant .cshell-msg-av .cadence-badge { width: 24px; height: 24px; }
+.cshell-msg.user .cshell-msg-av { border-radius: 50%; background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
 .cshell-bub {
   padding: 0.7rem 0.95rem;
   border-radius: 16px;

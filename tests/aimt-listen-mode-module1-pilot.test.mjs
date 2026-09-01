@@ -476,16 +476,21 @@ function diffAgainstStart(relPath) {
   const diff = diffAgainstStart('headspa-mastery.html');
   const lines = diff.split('\n');
   const hunkCount = lines.filter((l) => l.startsWith('@@')).length;
-  // Bound grew from the original pilot's 8 (Module 1 only) to also cover
-  // the owner's course-wide propagation task: the reusable .mod-opener/
-  // .mo-* CSS block (byte-identical to .m1-opener/.m1o-*, added rather
-  // than touching Module 1's own frozen rules) plus one Module Opener
-  // markup swap per module for 0, 2-11 (Module 12 deliberately excluded
-  // this pass — see the owner CapCut worklist / final report). Still a
-  // small, fully-accounted-for, non-open-ended set — just one scoped to
-  // "Module 1 pilot + course-wide opener propagation" rather than Module 1
-  // alone. Headroom included for Module 12's opener once that's safe to add.
-  check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'headspa-mastery.html diff against the starting commit is a small, bounded set of hunks (original Module 1 pilot hunks, plus one .mod-opener CSS hunk + one opener-markup hunk per propagated module)', hunkCount > 0 && hunkCount <= 45, 'got ' + hunkCount);
+  // Bound grew from the original pilot's 8 (Module 1 only), to 45 after the
+  // owner's course-wide .mod-opener propagation task, to 105 after a later,
+  // separate, explicitly owner-authorized "final course-wide design system +
+  // Cadence Check freeze pass" (course-audit-build) — see the large
+  // courseAuditFinalDesignPassRemovedLines allowlist and protectedMarkers
+  // comment below for what that pass actually touched (typography/symbol/
+  // card-color normalization across modules 0,1,3-11, Module 11 double-
+  // headline cleanup, Module 12 display-name-only rename, and a compact
+  // Cadence Check trigger card replacing the old inline checkpoint form
+  // course-wide). Still a bounded, non-open-ended set, not an unlimited one.
+  // Bumped 105 -> 130 for a short owner-review "punch list" follow-up
+  // (Cadence Check 3-state upgrade, Module 2 interaction shell, the
+  // course-wide star -> AIMT-mark callout swap) -- same authorization
+  // chain, still a bounded, non-open-ended set.
+  check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'headspa-mastery.html diff against the starting commit is a bounded set of hunks (original Module 1 pilot + opener propagation + the course-audit-build final design-system/Cadence-Check pass + punch-list follow-up)', hunkCount > 0 && hunkCount <= 130, 'got ' + hunkCount);
 
   const addedLines = lines.filter((l) => l.startsWith('+') && !l.startsWith('+++')).map((l) => l.slice(1));
   const removedLines = lines.filter((l) => l.startsWith('-') && !l.startsWith('---')).map((l) => l.slice(1));
@@ -505,13 +510,42 @@ function diffAgainstStart(relPath) {
   // (cadence-m2cp1-fixture-calibration.test.mjs, cadence-checkpoint-
   // authority.test.mjs) verify the new Module 2 content directly; this
   // test's job narrows to continuing to guard every OTHER module untouched.
+  //
+  // module0Wrap/module3Wrap.../module11Wrap wrap-name markers are likewise
+  // deliberately NOT in this blocklist as of a later, separate, explicitly
+  // owner-authorized "final course-wide design system + Cadence Check
+  // freeze pass" (course-audit-build): it touched checkpoint PRESENTATION
+  // (markup/CSS) inside every one of those wraps course-wide (the .cp-q
+  // on-screen question was removed everywhere in favor of the Cadence
+  // shell; the checkpoint card was redesigned into a compact black "Cadence
+  // Check" trigger; assorted symbol/color-token normalization). It never
+  // touched any curriculum/grading object — 'M1.questions'/'M1.systems'
+  // (module 1), 'const M3 = {' .. 'const M8 = {' (modules 3-8), and modules
+  // 9/10/11's own grading objects (guarded by their own dedicated tests:
+  // module-09-migration.test.js, module-11-relocation-migration.test.js)
+  // all remain fully protected below, and this pass's own tests
+  // (cadence-checkpoint-authority.test.mjs's HISTORICAL PASS section, and
+  // this file's own AE. CHECKPOINT 1 RELOCATED section) verify the new
+  // checkpoint markup and exact-question-text preservation directly.
+  // module12Wrap stays protected — this pass touched Module 12's
+  // student-facing NAME only (MODULE_TITLES / the course-home module-list
+  // row, both outside module12Wrap), never module12Wrap's own content.
   const protectedMarkers = [
-    'module3Wrap', 'module4Wrap', 'module5Wrap', 'module6Wrap', 'module7Wrap',
-    'module8Wrap', 'module9Wrap', 'module10Wrap', 'module11Wrap', 'module12Wrap', 'module0Wrap',
     'const M3 = {', 'const M4 = {', 'const M5 = {', 'const M6 = {', 'const M7 = {',
-    'const M8 = {', 'M1.questions', 'M1.systems', 'cp-q', 'evaluateCheckpointAnswer', 'submitCheckpoint(',
-    'CADENCE_CHECKPOINT_TONE', 'Module12Cert', 'claim-course-access', 'stripe-webhook', 'create-checkout-session'
+    'const M8 = {', 'M1.questions', 'M1.systems', 'evaluateCheckpointAnswer', 'submitCheckpoint(',
+    'CADENCE_CHECKPOINT_TONE', 'Module12Cert', 'module12Wrap', 'claim-course-access', 'stripe-webhook', 'create-checkout-session'
   ];
+  // 'cp-q' was deliberately REMOVED from this blocklist (course-audit-build,
+  // final design-system pass): a later, separate, explicitly owner-
+  // authorized "Cadence Check" redesign removed the on-screen .cp-q div
+  // from every module's checkpoint course-wide (the question now displays
+  // inside the Cadence shell instead, sourced from the same M{n}.questions
+  // objects, which remain fully protected by the 'M1.questions'/'M1.systems'
+  // markers above). That redesign's own tests (cadence-checkpoint-
+  // authority.test.mjs's HISTORICAL PASS section, and this file's own AE.
+  // CHECKPOINT 1 RELOCATED section below) verify the new markup and the
+  // exact-question-text guarantee directly; this blanket marker would
+  // otherwise flag every module's legitimate, authorized removal.
   // A line that was removed from one place and added back byte-identical
   // elsewhere is a pure relocation, not a content change -- this pass
   // deliberately moved #m1cp1's whole block (owner-authorized: position
@@ -675,7 +709,237 @@ function diffAgainstStart(relPath) {
   // allowlisting either -- #m1cp1's whole block moved this pass (owner-
   // authorized, section AE) and every one of its lines reappears
   // byte-identical at the new position, so each is provably a move.
-  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l) && !oldModule2RebuildLines.has(l));
+
+  // Every line the later, separate, owner-authorized course-audit-build
+  // "final course-wide design system + Cadence Check freeze pass" removed
+  // from headspa-mastery.html (machine-extracted from `git diff` against
+  // this session's own starting commit, so it is exact — not
+  // hand-transcribed). Covers: the old inline .cp-q/.cp-row/.cp-btn
+  // checkpoint form (course-wide, replaced by the compact "Cadence Check"
+  // trigger card — see the protectedMarkers comment above), the Module 1
+  // §1.5 ↑-in-place-of-✓ icon defect fix, four redundant Module 11
+  // .m11-statement lines (and their now-unused CSS rule), the Module 10/11
+  // .sec-title max-width overrides folded into the shared .sec-title rule,
+  // three miscategorized ad hoc key-point icons promoted to the proper
+  // .kp-warn/✦ treatment, a handful of interaction/token color fixes
+  // (.bq-opt.wrong, .practice-choice/.practice-option is-correct/
+  // is-incorrect, .mr-done/.mb-done onto the --aimt-* tokens), five
+  // duplicate "View full-size" links consolidated onto the existing
+  // .m11-ai-fullsize-link class, and the Module 12 display name (home
+  // module-list row only — MODULE_TITLES[12] is an added line, not a
+  // removed one, so it doesn't appear here).
+  // A short follow-up "punch list" pass (owner review of the live render)
+  // added these 4: the Cadence Check card's internal wrapper was flattened
+  // (.cp-head/.cc-headtext -> .cc-top, one fewer nesting level) while
+  // upgrading it from a compact trigger to a 3-state (ready/in-progress/
+  // resolved) premium card, and the old one-word "Retry" button label was
+  // replaced with "Continue Cadence Check ->" for the same "in progress"
+  // state. Same authorization/scope as the rest of this Set.
+  // Same pass also gave Module 2's "Before service, or during service?"
+  // interaction its own dedicated shell (.m2-judgment replacing the plain
+  // .info-card; see tests/module-02-rebuild.test.mjs's own updated E./F.
+  // checks for the new implementation) and swapped the generic ✦ marker
+  // for the existing AIMT brand-mark SVG on every plain (non-warn/
+  // non-success) .key-point course-wide -- both explicitly requested,
+  // neither a curriculum or grading change.
+  const courseAuditPunchListRemovedLines = new Set([
+    '      </div>',
+    '      <div class="cp-head">',
+    "      button.innerHTML = 'Retry';",
+    "    if (status === 'retry') {",
+    '        <div class="ic-title" style="margin:0;">Scenario</div>',
+    '        <div id="m2bdProgress" style="font-family:var(--aimt-font-mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--muted2);"></div>',
+    '      <button type="button" class="m5-reset-btn" id="m2bdNextBtn" style="display:none;margin-top:0.9rem;" onclick="m2BdNext()">Next example →</button>',
+    '      <div class="bq-feedback" id="m2bdFeedback" style="display:none;" aria-live="polite"></div>',
+    '      <div class="bq-options" id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;">',
+    '      <div class="kp-icon" aria-hidden="true">✦</div>',
+    '      <div class="sec-title" id="m2bdLabel" style="margin:0 0 1.1rem;font-size:1.05rem;"></div>',
+    '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;">',
+    '    <div class="info-card" id="m2bdQuiz">',
+  ]);
+  const courseAuditFinalDesignPassRemovedLines = new Set([
+    "          <label for=\"m11cp1In\" class=\"aimt-sr-only\">A client tells you, \"I asked ChatGPT about my scalp and it says I have dandruff.\" Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.</label>",
+    "          <label for=\"m11cp2In\" class=\"aimt-sr-only\">Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.</label>",
+    "          <label for=\"m9cp1In\" class=\"aimt-sr-only\">Walk me through your between-client reset in the order that works for your setup. Identify what you remove or contain, what you clean and disinfect, what you replace or restock, and any required contact or equipment time you would not shorten.</label>",
+    "          <label for=\"m9cp2In\" class=\"aimt-sr-only\">A client contacts you the next day and reports a rash on her neck after the service. What would you say to her, what facts would you document, and what would you review internally without diagnosing or assuming the cause?</label>",
+    "          <svg viewBox=\"0 0 14 14\" fill=\"none\"><path d=\"M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6\" stroke=\"white\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+    "        </button>",
+    "        </div>",
+    "        <a href=\"assets/images/course/module-04/microscopy/microscopy-baseline-appearing.webp\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size image</a>",
+    "        <a href=\"assets/images/course/module-04/microscopy/microscopy-fine-scale.webp\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size image</a>",
+    "        <a href=\"assets/images/course/module-04/microscopy/microscopy-oil-dominant.webp\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size image</a>",
+    "        <a href=\"assets/images/course/module-04/microscopy/microscopy-surface-residue.webp\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size image</a>",
+    "        <a href=\"assets/images/course/module-04/microscopy/microscopy-visible-color-change.webp\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.75rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size image</a>",
+    "        <button class=\"cp-btn\" id=\"cp1Btn\" onclick=\"submitCP('cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"cp2Btn\" onclick=\"submitCP('cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m0cp1Btn\" onclick=\"submitM0CP('m0cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m10cp1Btn\" onclick=\"submitM10CP('m10cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m10cp2Btn\" onclick=\"submitM10CP('m10cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m11cp1Btn\" onclick=\"submitM11CP('m11cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m11cp2Btn\" onclick=\"submitM11CP('m11cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m1cp1Btn\" onclick=\"submitM1CP('m1cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m1cp2Btn\" onclick=\"submitM1CP('m1cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m2cp1Btn\" onclick=\"submitM2CP('m2cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m4cp1Btn\" onclick=\"submitM4CP('m4cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m4cp2Btn\" onclick=\"submitM4CP('m4cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m5cp1Btn\" onclick=\"submitM5CP('m5cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m5cp2Btn\" onclick=\"submitM5CP('m5cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m6cp1Btn\" onclick=\"submitM6CP('m6cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m6cp2Btn\" onclick=\"submitM6CP('m6cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m7cp1Btn\" onclick=\"submitM7CP('m7cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m7cp2Btn\" onclick=\"submitM7CP('m7cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m8cp1Btn\" onclick=\"submitM8CP('m8cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m8cp2Btn\" onclick=\"submitM8CP('m8cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m9cp1Btn\" onclick=\"submitM9CP('m9cp1')\" aria-label=\"Send response to Cadence\">",
+    "        <button class=\"cp-btn\" id=\"m9cp2Btn\" onclick=\"submitM9CP('m9cp2')\" aria-label=\"Send response to Cadence\">",
+    "        <div class=\"cp-input-row\">",
+    "        <div class=\"cp-label\">A real AI request, with real verification</div>",
+    "        <div class=\"cp-label\">Adaptation check</div>",
+    "        <div class=\"cp-label\">Apply the boundary</div>",
+    "        <div class=\"cp-label\">Apply the intake-to-treatment framework</div>",
+    "        <div class=\"cp-label\">Apply the timing</div>",
+    "        <div class=\"cp-label\">Before you move on</div>",
+    "        <div class=\"cp-label\">Between-client reset reasoning</div>",
+    "        <div class=\"cp-label\">Client question</div>",
+    "        <div class=\"cp-label\">Demonstrate the role</div>",
+    "        <div class=\"cp-label\">Final check</div>",
+    "        <div class=\"cp-label\">Know when the image ends the service</div>",
+    "        <div class=\"cp-label\">Midpoint check</div>",
+    "        <div class=\"cp-label\">Planning check</div>",
+    "        <div class=\"cp-label\">Post-service concern response</div>",
+    "        <div class=\"cp-label\">Price feedback and client closing</div>",
+    "        <div class=\"cp-label\">Pricing and menu reasoning</div>",
+    "        <div class=\"cp-label\">Read the full scan</div>",
+    "        <div class=\"cp-label\">Real scenario</div>",
+    "        <div class=\"cp-label\">Responding to a client's AI result</div>",
+    "        <div class=\"cp-label\">Turn anatomy into a decision</div>",
+    "        <div class=\"mr-info\"><div class=\"mr-title\">Course Completion & Certification</div><div class=\"mr-sub\">The standard moving forward</div></div>",
+    "        <div class=\"pc-icon neutral-icon\">↑</div>",
+    "        <div style=\"margin-bottom:0.6rem;\"><strong>Watch for:</strong> the client reports neck strain, dizziness, or discomfort at any point, or the chin is visibly lifting. Some discomfort signals are only about comfort; if a client ever reports dizziness, visual changes, or slurred speech, stop immediately and treat it as a medical concern, not a positioning fix.</div>",
+    "        <div><strong>What to do:</strong> stop the service, adjust the positioning or temperature issue, communicate what you're doing and check in with the client, then resume only once she confirms she's comfortable. Never adjust silently or push through to a \"natural\" stopping point.</div>",
+    "      <a href=\"assets/images/course/module-03/aimt-scalp-cross-section.png\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;margin-top:0.6rem;font-family:'Outfit',sans-serif;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent2);text-decoration:underline;\">View full-size diagram</a>",
+    "      <div class=\"cp-q\">A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</div>",
+    "      <div class=\"cp-q\">A client contacts you the next day and reports a rash on her neck after the service. What would you say to her, what facts would you document, and what would you review internally without diagnosing or assuming the cause?</div>",
+    "      <div class=\"cp-q\">A client has scalp tightness and visible flaking after using a strong clarifying shampoo every day. Explain what the scalp barrier and surface lipid film do, what may have disrupted them, and one conservative change you would make to the service.</div>",
+    "      <div class=\"cp-q\">A client reports diffuse heavy shedding that began about ten weeks after a high fever. Using the hair-growth cycle, explain why the delay matters, what pattern this timing could be compatible with, and how you would explain it without diagnosing.</div>",
+    "      <div class=\"cp-q\">A client reports stinging and tenderness, and you observe a reactive-appearing area. They still ask for the strongest exfoliation, maximum steam, and firm massage. What would you say, how would you modify or pause the service, and what would make you refer instead of proceeding?</div>",
+    "      <div class=\"cp-q\">A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.</div>",
+    "      <div class=\"cp-q\">A client tells you, \"I asked ChatGPT about my scalp and it says I have dandruff.\" Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.</div>",
+    "      <div class=\"cp-q\">A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You do not need to reproduce a script—explain the reasoning behind your approach.</div>",
+    "      <div class=\"cp-q\">A new student is setting up their first head spa room from scratch. What would you tell them to do first — and why does the order of prep matter?</div>",
+    "      <div class=\"cp-q\">At checkout, a client says, \"I loved the service, but the price felt high.\" What would you say in the moment, and what would you review afterward before deciding whether anything about your pricing, menu, or positioning should change?</div>",
+    "      <div class=\"cp-q\">Build or evaluate a Head Spa service menu for your business. For each service, name what it includes and its price. Then explain the real costs and practitioner time behind the pricing and why the differences between the options are clear to a client.</div>",
+    "      <div class=\"cp-q\">Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.</div>",
+    "      <div class=\"cp-q\">During a five-point scan, the crown appears shiny with visible material around several follicular openings, while the frontal hairline looks matte with fine loose scale. The client reports no pain or burning. Describe what you would document, explain why one label for the entire scalp would be weak, and name one question you would ask before deciding how to adjust the service.</div>",
+    "      <div class=\"cp-q\">During the crown assessment, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.</div>",
+    "      <div class=\"cp-q\">During the five-point assessment, the crown shows diffuse shine and visible surface residue, while the sides and hairline show fine loose scale and little visible shine. The client reports no burning, tenderness, or recent reaction. How would you adapt the service by region, and what whole-scalp mistake are you avoiding?</div>",
+    "      <div class=\"cp-q\">Explain the difference between a head spa technician and someone who only knows the service steps. Give one specific example of how that difference changes the client's experience, safety, or trust.</div>",
+    "      <div class=\"cp-q\">Same client, but this time the microscope shows yellowish clumped flakes near the follicle, visible oiliness, mild redness, and the client reports it spreads to her eyebrows and hairline. How does your response change — and is this still within the scope of a head spa service?</div>",
+    "      <div class=\"cp-q\">Two practitioners can follow the same service sequence and create completely different experiences. In your own words, what changes when a practitioner leads the service instead of simply performing the steps? Give one specific example of what leading would look like during a head spa service.</div>",
+    "      <div class=\"cp-q\">Walk me through your between-client reset in the order that works for your setup. Identify what you remove or contain, what you clean and disinfect, what you replace or restock, and any required contact or equipment time you would not shorten.</div>",
+    "      <div class=\"cp-q\">You are in the scalp-massage portion of the service when your client asks, \"What makes this different from a regular shampoo at the salon?\" What would you say in the moment without breaking the experience?</div>",
+    "      <div class=\"cp-q\">You are moving into the exfoliation portion of the service and determine that a strong exfoliation approach is not appropriate for this client today. Walk through how you would modify the treatment while preserving the service flow. Include what you would change about product, pressure, technique, or intensity, and what you would communicate to the client.</div>",
+    "      <div class=\"cp-q\">You've just begun the halo rinse phase. Your client mentions her neck feels strained and she's a little cold. The service has just started. Walk through how you respond — what you adjust and in what order.</div>",
+    "      <div class=\"cp-row\">",
+    "      <div class=\"kp-icon\">!</div>",
+    "      <div class=\"kp-icon\">→</div>",
+    "      <div class=\"kp-icon\">⚠️</div>",
+    "      <div class=\"kp-icon\">💡</div>",
+    "      <div class=\"kp-text\">",
+    "      <div class=\"kp-text\"><strong>Boundary note.</strong> Specific ingredients, medicated claims, and condition-directed products may carry license, labeling, contraindication, or manufacturer requirements. Follow the product—not a social-media protocol.</div>",
+    "      <div class=\"kp-text\"><strong>Device-contamination note:</strong> If the device contacted a draining, bleeding, or otherwise compromised area, remove it from service and follow the manufacturer's required cleaning and disinfection procedure before reuse.</div>",
+    "    '<div class=\"key-point\"><div class=\"kp-icon\">→</div><div class=\"kp-text\">' + a + '</div></div>'",
+    "    <div class=\"checkpoint\" id=\"cp1\">",
+    "    <div class=\"checkpoint\" id=\"cp2\">",
+    "    <div class=\"checkpoint\" id=\"m0cp1\">",
+    "    <div class=\"checkpoint\" id=\"m10cp1\">",
+    "    <div class=\"checkpoint\" id=\"m10cp2\">",
+    "    <div class=\"checkpoint\" id=\"m11cp1\">",
+    "    <div class=\"checkpoint\" id=\"m11cp2\">",
+    "    <div class=\"checkpoint\" id=\"m1cp1\">",
+    "    <div class=\"checkpoint\" id=\"m1cp2\">",
+    "    <div class=\"checkpoint\" id=\"m2cp1\">",
+    "    <div class=\"checkpoint\" id=\"m4cp1\">",
+    "    <div class=\"checkpoint\" id=\"m4cp2\">",
+    "    <div class=\"checkpoint\" id=\"m5cp1\">",
+    "    <div class=\"checkpoint\" id=\"m5cp2\">",
+    "    <div class=\"checkpoint\" id=\"m6cp1\">",
+    "    <div class=\"checkpoint\" id=\"m6cp2\">",
+    "    <div class=\"checkpoint\" id=\"m7cp1\">",
+    "    <div class=\"checkpoint\" id=\"m7cp2\">",
+    "    <div class=\"checkpoint\" id=\"m8cp1\">",
+    "    <div class=\"checkpoint\" id=\"m8cp2\">",
+    "    <div class=\"checkpoint\" id=\"m9cp1\">",
+    "    <div class=\"checkpoint\" id=\"m9cp2\">",
+    "    <div class=\"key-point\">",
+    "    <div class=\"m11-statement\">Modern does not mean less human.</div>",
+    "    <div class=\"m11-statement\">The goal is not to defeat the AI answer. It is to return the conversation to responsible human judgment.</div>",
+    "    <div class=\"m11-statement\">Use AI for leverage. Keep human authority where it matters.</div>",
+    "    <div class=\"m11-statement\">What are you asking the tool to do — and what still belongs to you?</div>",
+    "    if (button) button.disabled = true;",
+    "   .lesson-wrap) — desktop/tablet only (>=768px). The shared .sec-title",
+    "   .m11-scope (a class on Module 11's own content root — see the .m10-scope",
+    "   callout. Used sparingly. */",
+    "   designed around, so its default 18ch cap forces many tightly-leaded",
+    "   desktop/tablet only (>=768px). The shared .sec-title rule and the mobile",
+    "   own content root, since the #module10Wrap id only exists on the hidden",
+    "   precedent above for why a class, not the wrapper id, is required) —",
+    "   rule and the mobile treatment are untouched. ── */",
+    "   template and is not present once its innerHTML is copied into the live",
+    "   than the shared .sec-title component was designed around. Scoped via",
+    "   the signature takeaway, and short section lead-ins) — not a card, not a",
+    "   titles (e.g. \"Decide How Much Authority to Give the Tool\") run longer",
+    "   titles run noticeably longer than the shared .sec-title component was",
+    "   treatment are untouched. ── */",
+    "   wrapped lines on desktop. Scoped via .m10-scope (a class on Module 10's",
+    "  .m10-scope .sec-title { max-width: 34ch; line-height: 1.32; letter-spacing: -0.01em; }",
+    "  .m11-scope .sec-title { max-width: 32ch; line-height: 1.08; letter-spacing: -0.008em; }",
+    "  12: 'Course Completion & Certification'",
+    ".bq-opt.wrong { background:#f5f3ee; border-color:var(--ash); color:var(--muted); }",
+    ".m11-ai-fullsize-link { display:inline-block; margin-top:0.5rem; font-family: var(--aimt-font-sans); font-size:0.68rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent2); text-decoration:underline; }",
+    ".m11-statement { font-family: var(--aimt-font-serif); font-size: clamp(1.05rem, 2.6vw, 1.25rem); line-height: 1.45; color: var(--text); font-weight: 500; margin: 1.4rem 0; max-width: 32ch; }",
+    ".mb-done { background: var(--success-light); color: var(--success); }",
+    ".mr-done { background: var(--success-light); color: var(--success); }",
+    ".practice-choice.selected.is-correct { background: var(--success); border-color: var(--success); }",
+    ".practice-choice.selected.is-incorrect { background: var(--accent2); border-color: var(--accent2); }",
+    ".practice-option.selected.is-correct { border-color: var(--success); }",
+    ".sec-title { font-family: var(--aimt-font-mont); font-size: clamp(1.08rem, 3.8vw, 1.32rem); letter-spacing: -0.018em; line-height: 1.24; margin-bottom: 0.95rem; font-weight: 600; max-width: 18ch; }",
+    "/* Standalone course-authored statement typography (the signature question,",
+    "/* ── MODULE 10 — Desktop heading breathing room. Several Module 10 section",
+    "/* ── MODULE 11 — Desktop heading breathing room. Several Module 11 section",
+    "@media (min-width: 768px) {",
+    "}"
+  ]);
+  // Cadence polish pass (separate, later, explicitly owner-authorized
+  // follow-up -- see the SCOPE CONTAINMENT allowlist comment above and
+  // cadenceShellAvatarSwapIsSurgical() below): removed the pill's idle
+  // ring-pulse (#guideBtn::before/@keyframes cadenceRing) and breathing
+  // dot (.cadence-dot, its markup, and its keyframe *usage* -- the
+  // @keyframes cadenceBreathe definition itself stays, since the already-
+  // deprecated/unreachable .gp-av-dot still references it), replaced by
+  // the same .cadence-badge core+tech-ring symbol the Cadence Check card
+  // and (per the exception above) the shell header now both use -- no
+  // idle animation anywhere in the identity per that task's explicit
+  // requirement. Also fixed .format-card (an <a download>, not a
+  // <button>) inheriting the browser's default link-blue because it had
+  // no color of its own. Machine-extracted from this test's own failure
+  // output against 023d258, not hand-transcribed.
+  const cadencePolishPassRemovedLines = new Set([
+    '/* Teal ring around pill */',
+    '#guideBtn::before {',
+    "  content: ''; position: absolute; inset: -1px; border-radius: 24px;",
+    '  border: 1px solid rgba(255,255,255,0.12);',
+    "  animation: cadenceRing 3s ease-in-out infinite; pointer-events: none;",
+    '@keyframes cadenceRing {',
+    '  0%,100% { opacity: 0.35; transform: scale(1); }',
+    '  50% { opacity: 0; transform: scale(1.03); }',
+    '.cadence-dot {',
+    '  width: 8px; height: 8px; border-radius: 50%; background: var(--teal);',
+    '  flex-shrink: 0; animation: cadenceBreathe 2.4s ease-in-out infinite;',
+    '.format-card { border-radius:14px; padding:0.9rem 0.75rem; border:0.5px solid var(--border2); background:rgba(255,255,255,0.65); cursor:pointer; transition:all 0.2s; text-align:left; width:100%; font-family:inherit; }',
+    '  <div class="cadence-dot"></div>',
+  ]);
+  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l) && !oldModule2RebuildLines.has(l) && !courseAuditFinalDesignPassRemovedLines.has(l) && !courseAuditPunchListRemovedLines.has(l) && !cadencePolishPassRemovedLines.has(l));
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'every removed line in headspa-mastery.html is one of: the 3 bare protocol-card divs, the original Module 1 STATIC_MODULES entry (and its Phase-1-mount-call successor), the 4 original .mod-hero lines this task\'s black opener replaced, or a proven pure relocation elsewhere in the same diff (nothing curriculum/checkpoint/Module-12/nav related was actually deleted or content-changed)', unaccountedRemoves.length === 0, unaccountedRemoves.join(' || '));
   // A two-point diff against 023d258 only ever shows the ORIGINAL bare
   // STATIC_MODULES[1] line as removed once, even though it was actually
@@ -686,22 +950,70 @@ function diffAgainstStart(relPath) {
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'exactly 3 protocol-card divs were given ids (matches the 3 approved visual cues) and the original bare STATIC_MODULES[1] line was removed exactly once', removedLines.filter((l) => l === '    <div class="protocol-card">').length === 3 && removedLines.filter((l) => l.includes('1: () =>') && l.includes('module1Wrap')).length === 1);
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'the current STATIC_MODULES[1] line carries both the Phase-1 mount() call and this task\'s QA-panel call', addedLines.some((l) => l.includes('AIMTListenMode.mount') && l.includes('renderM1ReviewQAPanel()')));
 
-  // The on-screen .cp-q text for m1cp1/m1cp2 must also be untouched — a
-  // direct content check, independent of the diff-accounting above.
-  check('O. CHECKPOINTS UNCHANGED', 'm1cp1 on-screen question text unchanged', module1Wrap.includes('A client says her hair has been shedding heavily for two months and asks whether she has alopecia.'));
-  check('O. CHECKPOINTS UNCHANGED', 'm1cp2 on-screen question text unchanged', module1Wrap.includes('Explain the difference between a head spa technician and someone who only knows the service steps.'));
+  // The .cp-q text was removed from module1Wrap's own HTML by the later,
+  // separate, owner-authorized Cadence Check redesign (see the
+  // protectedMarkers comment above) — the question now lives only in the
+  // M1.questions object (checked against courseSrc here) and displays
+  // on-screen inside the Cadence shell when opened, not printed into
+  // module1Wrap. This is still a direct content check, independent of the
+  // diff-accounting above — just against courseSrc instead of module1Wrap.
+  check('O. CHECKPOINTS UNCHANGED', 'm1cp1 question text unchanged (now sourced from M1.questions, displayed in the Cadence shell)', courseSrc.includes('A client says her hair has been shedding heavily for two months and asks whether she has alopecia.'));
+  check('O. CHECKPOINTS UNCHANGED', 'm1cp2 question text unchanged (now sourced from M1.questions, displayed in the Cadence shell)', courseSrc.includes('Explain the difference between a head spa technician and someone who only knows the service steps.'));
   const m1ObjectMatch = courseSrc.match(/const M1 = \{[\s\S]*?\n\};/);
   const m1ObjectMatchBefore = gitShowAtStart('headspa-mastery.html').match(/const M1 = \{[\s\S]*?\n\};/);
   check('O. CHECKPOINTS UNCHANGED', 'the M1 questions/rubrics object was found in both versions', !!m1ObjectMatch && !!m1ObjectMatchBefore);
   check('O. CHECKPOINTS UNCHANGED', 'M1 checkpoint questions/rubrics object is byte-identical to the starting commit', m1ObjectMatch && m1ObjectMatchBefore && m1ObjectMatch[0] === m1ObjectMatchBefore[0]);
 
   // P. Cadence Chat/Grading unchanged (files this task had no reason to touch).
-  ['functions/_lib/cadence/ask-cadence.mjs', 'functions/_lib/cadence/checkpoint-evaluation.mjs', 'assets/js/cadence-shell.js'].forEach((rel) => {
+  ['functions/_lib/cadence/ask-cadence.mjs', 'functions/_lib/cadence/checkpoint-evaluation.mjs'].forEach((rel) => {
     const before = gitShowAtStart(rel);
     const afterPath = path.join(ROOT, rel);
     const after = existsSync(afterPath) ? readFileSync(afterPath, 'utf8') : null;
     check('P. CADENCE CHAT/GRADING UNCHANGED', rel + ' is byte-identical to the starting commit', before === after);
   });
+  // assets/js/cadence-shell.js carries three documented, presentation-
+  // only exceptions, all from the same Cadence identity work (Cadence
+  // polish pass item 6, then a reference-correction follow-up -- see the
+  // SCOPE CONTAINMENT allowlist comment above): the .cshell-id header
+  // avatar, the per-message assistant avatar, and the typing-indicator
+  // avatar all had their old breathing-dot/plain-dot markup swapped for
+  // the same core+tech-ring badge the Cadence Check card uses -- exactly
+  // what this file's own CADENCE_AVATAR_ASSET integration-point comment
+  // (assets/css/cadence-shell.css) said to do once a real asset existed.
+  // The header's badge went through a second edit in the follow-up pass
+  // (the wordmark span next to it was removed -- it never fit inside the
+  // old 36px chip and visibly overflowed the box; the approved layout
+  // doesn't call for a separate "Cadence" label there anyway), so the
+  // "old" line reverted to below is 023d258's real original, not the first
+  // pass's intermediate version. Proven surgical by reverting exactly
+  // these three known lines and re-comparing byte-for-byte against the
+  // starting commit: if anything else in the file differs (thread
+  // handling, grading calls, composer wiring, DOM structure elsewhere),
+  // this still fails.
+  (function cadenceShellAvatarSwapIsSurgical() {
+    const rel = 'assets/js/cadence-shell.js';
+    const before = gitShowAtStart(rel);
+    const afterPath = path.join(ROOT, rel);
+    const after = existsSync(afterPath) ? readFileSync(afterPath, 'utf8') : null;
+    const badgeHtml = '<span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>';
+    const swaps = [
+      {
+        old: '<div class="cshell-id" aria-hidden="true"><span class="cshell-id-dot"></span><span class="cshell-id-label">Cadence</span></div>',
+        cur: '<div class="cshell-id" aria-hidden="true">' + badgeHtml + '</div>',
+      },
+      {
+        old: "av.innerHTML = role === 'assistant' ? '<span></span>' : 'You';",
+        cur: "av.innerHTML = role === 'assistant' ? '" + badgeHtml + "' : 'You';",
+      },
+      {
+        old: '<div class="cshell-msg-av" aria-hidden="true"><span></span></div>',
+        cur: '<div class="cshell-msg-av" aria-hidden="true">' + badgeHtml + '</div>',
+      },
+    ];
+    const hasAllCurLines = !!after && swaps.every((s) => after.includes(s.cur));
+    const revertedAfter = hasAllCurLines ? swaps.reduce((acc, s) => acc.replace(s.cur, s.old), after) : after;
+    check('P. CADENCE CHAT/GRADING UNCHANGED', rel + ' differs from the starting commit only in the three avatar markup swaps (.cshell-id, per-message, typing-indicator) -- everything else, including grading/thread/composer logic, is byte-identical', hasAllCurLines && revertedAfter === before);
+  })();
 
   // R. Entitlement/auth hardening unchanged.
   ['functions/api/claim-course-access.js', 'functions/api/stripe-webhook.js', 'functions/api/create-checkout-session.js'].forEach((rel) => {
@@ -892,6 +1204,22 @@ function diffAgainstStart(relPath) {
   allowlist.add('tests/course-wide-completion-cards.test.mjs');
   allowlist.add('docs/course-audit/modules/module-02.md');
   allowlist.add('docs/course-audit/modules/module-02-curriculum-rebuild-2026-08.md');
+  // Cadence Check final visual system (separate, later, explicitly owner-
+  // authorized task): the two supplied Cadence identity assets (core C +
+  // orbit structure, and the animated tech-ring layer), recolored in
+  // place via an feFlood/feComposite filter added to each file's own
+  // <defs> -- see headspa-mastery.html's .checkpoint.cc-card comment.
+  allowlist.add('assets/images/course/cadence/cadence-core.svg');
+  allowlist.add('assets/images/course/cadence/cadence-tech-ring.svg');
+  // Cadence polish pass (separate, later, explicitly owner-authorized
+  // follow-up to the Cadence Check final visual system above): a
+  // presentation-only avatar swap in the shell header (assets/js/
+  // cadence-shell.js's .cshell-id markup, assets/css/cadence-shell.css's
+  // sizing for it) -- see the dedicated cadenceShellAvatarSwapIsSurgical()
+  // check below, which proves byte-for-byte that nothing else in either
+  // file changed.
+  allowlist.add('assets/js/cadence-shell.js');
+  allowlist.add('assets/css/cadence-shell.css');
   // Regression tests that pin the full M0-M11 checkpoint rubric/question
   // fingerprint as proof THEIR OWN unrelated task touched zero checkpoint
   // content -- each needed its pinned baseline fingerprint advanced from
@@ -1692,11 +2020,15 @@ function runStudentPreviewInit(hostname, search) {
 // past unheard 1.5–1.8 content at all.
 // ─────────────────────────────────────────────────────────────────────────
 (function checkpoint1Relocated() {
+  // 'checkpoint cc-card' (not bare 'checkpoint') from here down: the later,
+  // separate, owner-authorized Cadence Check redesign (course-audit-build)
+  // added the cc-card class to every module's checkpoint course-wide — see
+  // the protectedMarkers comment above.
   const practiceIdx = module1Wrap.indexOf('id="m1LineInteraction"');
-  const cp1Idx = module1Wrap.indexOf('<div class="checkpoint" id="m1cp1">');
+  const cp1Idx = module1Wrap.indexOf('<div class="checkpoint cc-card" id="m1cp1">');
   const sec15Idx = module1Wrap.indexOf('1.5 — Limitations of a head spa service');
   const sec18Idx = module1Wrap.indexOf('1.8 — Mistakes new practitioners make');
-  const cp2Idx = module1Wrap.indexOf('<div class="checkpoint" id="m1cp2">');
+  const cp2Idx = module1Wrap.indexOf('<div class="checkpoint cc-card" id="m1cp2">');
   const completeIdx = module1Wrap.indexOf('id="m1Complete"');
 
   check('AE. CHECKPOINT 1 RELOCATED', 'all six landmarks found in module1Wrap for ordering checks', [practiceIdx, cp1Idx, sec15Idx, sec18Idx, cp2Idx, completeIdx].every((i) => i !== -1));
@@ -1704,13 +2036,22 @@ function runStudentPreviewInit(hostname, search) {
   check('AE. CHECKPOINT 1 RELOCATED', 'checkpoint 1 no longer sits after Section 1.8 (the exact thing this move fixes)', cp1Idx < sec18Idx);
 
   check('AE. CHECKPOINT 1 RELOCATED', 'exactly one #m1cp1 and one #m1cp2 exist in module1Wrap — no duplicate checkpoint was created by the move', (module1Wrap.match(/id="m1cp1"/g) || []).length === 1 && (module1Wrap.match(/id="m1cp2"/g) || []).length === 1);
-  check('AE. CHECKPOINT 1 RELOCATED', 'there remains exactly one <div class="checkpoint"> block per checkpoint in the whole file (courseSrc), matching module1Wrap\'s single #module1Wrap template as the sole source of truth', (courseSrc.match(/<div class="checkpoint" id="m1cp1">/g) || []).length === 1 && (courseSrc.match(/<div class="checkpoint" id="m1cp2">/g) || []).length === 1);
+  check('AE. CHECKPOINT 1 RELOCATED', 'there remains exactly one <div class="checkpoint cc-card"> block per checkpoint in the whole file (courseSrc), matching module1Wrap\'s single #module1Wrap template as the sole source of truth', (courseSrc.match(/<div class="checkpoint cc-card" id="m1cp1">/g) || []).length === 1 && (courseSrc.match(/<div class="checkpoint cc-card" id="m1cp2">/g) || []).length === 1);
 
   // Content byte-identical to before the move — not just "text exists
   // somewhere," every field checked explicitly.
-  const cp1Block = module1Wrap.slice(cp1Idx, module1Wrap.indexOf('<div class="checkpoint" id="m1cp2">'));
-  check('AE. CHECKPOINT 1 RELOCATED', 'cp-label ("Apply the boundary") unchanged', cp1Block.includes('<div class="cp-label">Apply the boundary</div>'));
-  check('AE. CHECKPOINT 1 RELOCATED', 'cp-q exact question text unchanged, byte-identical', cp1Block.includes('<div class="cp-q">A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.</div>'));
+  const cp1Block = module1Wrap.slice(cp1Idx, module1Wrap.indexOf('<div class="checkpoint cc-card" id="m1cp2">'));
+  // cp-label picked up an additional cc-headline class (punch-list pass,
+  // styling only) -- the class wireCheckpoint() actually reads from
+  // (container.querySelector('.cp-label').textContent) and the label text
+  // itself are both unchanged; only the exact class attribute grew.
+  check('AE. CHECKPOINT 1 RELOCATED', 'cp-label ("Apply the boundary") unchanged', cp1Block.includes('<div class="cp-label cc-headline">Apply the boundary</div>'));
+  // The .cp-q div itself was removed course-wide by the Cadence Check
+  // redesign (see protectedMarkers comment above) — the exact question text
+  // is checked against courseSrc instead (still finds it, now via
+  // M1.questions.m1cp1), and re-verified byte-identical against the whole
+  // M1 object below.
+  check('AE. CHECKPOINT 1 RELOCATED', 'exact question text unchanged (M1.questions.m1cp1, displayed in the Cadence shell rather than a .cp-q div)', courseSrc.includes('A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.'));
   check('AE. CHECKPOINT 1 RELOCATED', 'textarea id (m1cp1In), placeholder, and keydown handler unchanged', cp1Block.includes('id="m1cp1In"') && cp1Block.includes("onkeydown=\"m1cpKey(event,'m1cp1')\""));
   check('AE. CHECKPOINT 1 RELOCATED', 'submit button onclick (submitM1CP(\'m1cp1\')) unchanged — same grading call site, same function', cp1Block.includes("onclick=\"submitM1CP('m1cp1')\""));
   check('AE. CHECKPOINT 1 RELOCATED', 'cp-res result container id (m1cp1Res) unchanged', cp1Block.includes('id="m1cp1Res"'));

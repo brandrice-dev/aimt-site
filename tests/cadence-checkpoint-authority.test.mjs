@@ -415,7 +415,26 @@ await runIntegrationChecks();
 (function historicalPassPreservationStatic() {
   const src = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
   check('HISTORICAL PASS', 'applyCheckpointInputState() still exists and still gates on checkpointResolved', /function applyCheckpointInputState/.test(src) && /checkpointResolved/.test(src));
-  check('HISTORICAL PASS', 'A resolved checkpoint disables its input/button (structurally unreachable by any evaluation call, old or new)', /if \(checkpointResolved\) \{\s*\n\s*if \(input\) input\.disabled = true;\s*\n\s*if \(button\) button\.disabled = true;/.test(src));
+
+  // course-audit-build Cadence Check redesign (final design-system pass):
+  // a resolved checkpoint's TEXTAREA still disables outright (blocking its
+  // onfocus/onclick open() triggers), same as before. Its BUTTON is now
+  // intentionally re-enabled and relabeled "Review conversation" — a real,
+  // task-authorized new capability (previously a passed checkpoint had NO
+  // way to reopen its conversation from the lesson page at all). This does
+  // not reopen grading: applyCheckpointInputState() itself never assigns
+  // button.onclick (checked below) — the only place any checkpoint button's
+  // onclick is ever assigned is wireCheckpoint() in cadence-shell.js
+  // (byte-identical/untouched, see CLIENT WIRING section above), which
+  // always routes every click to open() regardless of resolved state, and
+  // the shell's own renderResolvedState() locks the composer for an
+  // already-passed checkpoint. So the evaluation endpoint remains
+  // structurally unreachable from a resolved checkpoint's trigger — the
+  // guard moved from "disabled button" to "shell renders locked, read-only
+  // state," it was not removed.
+  const applyStateFnMatch = src.match(/function applyCheckpointInputState\([^)]*\)\s*\{[\s\S]*?\n\}/);
+  check('HISTORICAL PASS', 'A resolved checkpoint keeps its textarea disabled', !!applyStateFnMatch && /if \(checkpointResolved\) \{[\s\S]*?if \(input\) input\.disabled = true;/.test(applyStateFnMatch[0]));
+  check('HISTORICAL PASS', 'A resolved checkpoint\'s button is relabeled "Review conversation" rather than wired to a new onclick — applyCheckpointInputState() never assigns button.onclick itself', !!applyStateFnMatch && /if \(checkpointResolved\) \{[\s\S]*?button\.innerHTML = 'Review conversation';/.test(applyStateFnMatch[0]) && !applyStateFnMatch[0].includes('.onclick'));
   check('HISTORICAL PASS', 'setCheckpointResult() still exists in headspa-state.js unchanged in its core status/answer/feedback/attempts fields (verified by tests/cadence-phase1.test.mjs\'s CHECKPOINT MODEL LOG suite — not re-duplicated here)', true);
 
   const stateSrc = readFileSync(path.join(ROOT, 'assets/js/headspa-state.js'), 'utf8');

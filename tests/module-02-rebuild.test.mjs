@@ -109,7 +109,14 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   const m2ObjectMatch = courseSrc.match(/const M2 = \{[\s\S]*?\n\};/);
   check('D. CHECKPOINT', 'the M2 questions/rubric object is found', !!m2ObjectMatch);
   const newQuestion = 'A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You do not need to reproduce a script—explain the reasoning behind your approach.';
-  check('D. CHECKPOINT', 'the on-screen .cp-q text matches the new question exactly', module2Wrap.includes('<div class="cp-q">' + newQuestion + '</div>'));
+  // The on-screen .cp-q div was removed course-wide by a later, separate,
+  // owner-authorized Cadence Check redesign (course-audit-build, final
+  // design-system pass) — the giant question no longer prints into the
+  // lesson card; it displays inside the Cadence shell instead, sourced from
+  // the same M2.questions object checked on the next line. Displayed/
+  // evaluated parity is therefore verified via the shell's own tests
+  // (cadence-checkpoint-authority.test.mjs) rather than a .cp-q div here.
+  check('D. CHECKPOINT', 'the lesson-page checkpoint no longer prints the full question inline (compact Cadence Check trigger card only)', !module2Wrap.includes('<div class="cp-q">') && module2Wrap.includes('class="checkpoint cc-card" id="m2cp1"'));
   check('D. CHECKPOINT', 'M2.questions.m2cp1 matches the same new question exactly (displayed/evaluated parity)', m2ObjectMatch[0].includes(newQuestion));
   check('D. CHECKPOINT', 'checkpoint id m2cp1 is unchanged (element id, submit handler, key binding)', module2Wrap.includes('id="m2cp1"') && module2Wrap.includes("submitM2CP('m2cp1')") && module2Wrap.includes("m2cpKey(event,'m2cp1')"));
   check('D. CHECKPOINT', 'MODULE_CHECKPOINTS still lists exactly one checkpoint for module 2: m2cp1 (persistence/gating keys unchanged)', /'2': \['m2cp1'\]/.test(courseSrc));
@@ -180,9 +187,16 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('E. INTERACTION', 'the old arrival-sequence accordion is gone from module2Wrap', !module2Wrap.includes('class="timeline-wrap"') && !/onclick="openStep\(/.test(module2Wrap));
   check('E. INTERACTION', 'the old "what breaks the moment?" quiz is gone from module2Wrap', !module2Wrap.includes('id="breakQuiz"'));
 
-  check('E. SHELL', 'the interaction now has a real contained shell -- the established .info-card component, not a bare .m5-decision-block sitting directly on the page', /<div class="info-card" id="m2bdQuiz">/.test(module2Wrap) && !module2Wrap.includes('class="m5-decision-block" id="m2bdQuiz"'));
+  // A later, separate, owner-authorized "post-design-pass punch list" gave
+  // this interaction its own dedicated premium shell (.m2-judgment,
+  // scoped to #m2bdQuiz) in place of the plain, shared .info-card -- a
+  // real, more substantial contained shell, not a step backward to a bare
+  // element. See the #m2bdQuiz.m2-judgment CSS block for the full design
+  // (card surface/shadow, header, progress bar, 2-column choice grid).
+  check('E. SHELL', 'the interaction has a real, dedicated contained shell (.m2-judgment on #m2bdQuiz), not a bare .m5-decision-block sitting directly on the page', /<div class="m2-judgment" id="m2bdQuiz">/.test(module2Wrap) && !module2Wrap.includes('class="m5-decision-block" id="m2bdQuiz"'));
   check('E. SHELL', 'the progress indicator uses a compact "01 / 06" mono-numeral treatment', /String\(m2BdIndex \+ 1\)\.padStart\(2, '0'\) \+ ' \/ ' \+ String\(M2_BD_ITEMS\.length\)\.padStart\(2, '0'\)/.test(courseSrc));
-  check('E. SHELL', 'the progress indicator uses the existing mono font token (same treatment as .rst-num elsewhere)', /id="m2bdProgress" style="font-family:var\(--aimt-font-mono\)/.test(module2Wrap));
+  check('E. SHELL', 'the progress indicator uses the mono font token (moved from an inline style to the scoped .m2j-eyebrow class, same token as before)', /#m2bdQuiz \.m2j-eyebrow \{ font-family: var\(--aimt-font-mono\)/.test(courseSrc) && module2Wrap.includes('<div class="m2j-eyebrow">Scenario <span id="m2bdProgress"></span></div>'));
+  check('E. SHELL', 'a decorative progress-fill bar exists and is driven by the same index/length the "01 / 06" text uses (no separate progress-tracking state)', /if \(progressFill\) progressFill\.style\.width = \(\(\(m2BdIndex \+ 1\) \/ M2_BD_ITEMS\.length\) \* 100\) \+ '%';/.test(courseSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -193,7 +207,11 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('F. LAYOUT', 'grid-3col (new, minimal 3-column extension of the same grid pattern) renders 3 equal columns on desktop', /\.grid-3col\s*\{\s*display:grid;\s*grid-template-columns:1fr 1fr 1fr;/.test(courseSrc));
   check('F. LAYOUT', 'grid-3col has a mobile single-column override', /@media\(max-width:720px\)\{\s*\.grid-3col\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
   check('F. LAYOUT', 'the 2.5 communication-concept cards use grid-3col (one horizontal row of 3 on desktop), not the old 2-column concept-grid', /Three concepts make this possible:<\/div>\s*\n\s*<div class="grid-3col">/.test(module2Wrap));
-  check('F. LAYOUT', 'the one-at-a-time interaction uses flex-wrap so its two option buttons never force horizontal overflow on narrow screens', module2Wrap.includes('id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;"'));
+  // Post-design-pass punch list moved this from an inline flex-wrap style to
+  // a proper 2-column CSS grid (#m2bdQuiz .m2j-choices) with its own
+  // single-column mobile override -- still never forces horizontal
+  // overflow on narrow screens, just via a cleaner mechanism.
+  check('F. LAYOUT', 'the one-at-a-time interaction\'s two option buttons use a 2-column grid with a single-column mobile override (never forces horizontal overflow on narrow screens)', module2Wrap.includes('class="bq-options m2j-choices" id="m2bdOptions"') && /#m2bdQuiz \.m2j-choices \{ display: grid; grid-template-columns: 1fr 1fr;/.test(courseSrc) && /@media \(max-width: 480px\) \{ #m2bdQuiz \.m2j-choices \{ grid-template-columns: 1fr; \} \}/.test(courseSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -251,7 +269,7 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('I. MODULE 0', 'does not display "Module 0" anywhere in the new orientation text (Welcome Module naming preserved)', !/Before you begin[\s\S]{0,1800}?Module 0(?!Wrap)/.test(module0Wrap.slice(module0Wrap.indexOf('Before you begin'), module0Wrap.indexOf('0.1 — Welcome'))));
   check('I. MODULE 0', 'the module opener title is still "Welcome" (Welcome Module naming preserved)', /<div class="mo-title">Welcome<\/div>/.test(module0Wrap));
 
-  check('I. NO NEW GATE', 'module0Wrap still has exactly one checkpoint (m0cp1) -- the orientation added no new completion gate', (module0Wrap.match(/class="checkpoint" id="/g) || []).length === 1 && module0Wrap.includes('id="m0cp1"'));
+  check('I. NO NEW GATE', 'module0Wrap still has exactly one checkpoint (m0cp1) -- the orientation added no new completion gate', (module0Wrap.match(/class="checkpoint(?: cc-card)?" id="/g) || []).length === 1 && module0Wrap.includes('id="m0cp1"'));
   check('I. NO NEW GATE', 'MODULE_CHECKPOINTS still lists exactly one checkpoint for module 0: m0cp1', /'0': \['m0cp1'\]/.test(courseSrc));
   check('I. NO NEW GATE', 'm0Complete completion card is still the only completion element', (module0Wrap.match(/class="lesson-complete" id="/g) || []).length === 1 && module0Wrap.includes('id="m0Complete"'));
 
