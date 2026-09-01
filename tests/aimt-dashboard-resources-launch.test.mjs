@@ -119,30 +119,41 @@ const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
   // Execute the real, unmodified loadResources() against a mocked document,
   // once with a real entitlement and once with none -- proves the gate is
   // the entitledSlugs input, not any assumption baked into the registry.
+  // The dashboard now splits `type: 'tool'` registry entries (Practitioner
+  // Tools, e.g. the Service Timer) from plain downloads (Your Resources)
+  // into two separate containers -- both are captured here.
   function runLoadResources(entitledSlugs) {
-    let renderedHtml = '';
-    const fakeCard = { set innerHTML(v) { renderedHtml = v; }, get innerHTML() { return renderedHtml; } };
-    const fakeDocument = { getElementById: (id) => (id === 'resourcesCard' ? fakeCard : null) };
+    let toolsHtml = '';
+    let resourcesHtml = '';
+    const fakeToolsArea = { set innerHTML(v) { toolsHtml = v; }, get innerHTML() { return toolsHtml; } };
+    const fakeResourcesCard = { set innerHTML(v) { resourcesHtml = v; }, get innerHTML() { return resourcesHtml; } };
+    const fakeDocument = {
+      getElementById: (id) => {
+        if (id === 'toolsArea') return fakeToolsArea;
+        if (id === 'resourcesCard') return fakeResourcesCard;
+        return null;
+      },
+    };
     const sandbox = { document: fakeDocument, window: { AIMT_COURSE_RESOURCES: REGISTRY } };
     const fn = new Function('document', 'window', `return (${loadResourcesFn});`)(sandbox.document, sandbox.window);
-    return fn(entitledSlugs).then(() => renderedHtml);
+    return fn(entitledSlugs).then(() => ({ toolsHtml, resourcesHtml, combinedHtml: toolsHtml + resourcesHtml }));
   }
 
   return Promise.all([
     runLoadResources(['headspa-mastery']),
     runLoadResources([]),
     runLoadResources(['some-other-course-not-owned']),
-  ]).then(([entitledHtml, noneHtml, wrongCourseHtml]) => {
+  ]).then(([entitled, none, wrongCourse]) => {
     check('D. ENTITLED SEES RESOURCES', 'An entitled student (headspa-mastery in entitledSlugs) sees the real Module 9/10/11 downloads',
-      /Head Spa Enhancement Strategy Guide/.test(entitledHtml) &&
-      /Between-Client Sanitation/.test(entitledHtml) &&
-      /AIMT AI Practice Toolkit/.test(entitledHtml));
-    check('D. ENTITLED SEES RESOURCES', 'An entitled student also sees the AIMT Service Timer tool entry',
-      /AIMT Service Timer/.test(entitledHtml));
-    check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A student with zero entitled slugs sees the empty state, not any resource item',
-      /will appear here as they're released/.test(noneHtml) && !/Enhancement Strategy Guide/.test(noneHtml));
+      /Head Spa Enhancement Strategy Guide/.test(entitled.resourcesHtml) &&
+      /Between-Client Sanitation/.test(entitled.resourcesHtml) &&
+      /AIMT AI Practice Toolkit/.test(entitled.resourcesHtml));
+    check('D. ENTITLED SEES RESOURCES', 'An entitled student also sees the AIMT Service Timer tool entry (now in the separate Practitioner Tools area)',
+      /AIMT Service Timer/.test(entitled.toolsHtml));
+    check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A student with zero entitled slugs sees the empty state in both areas, not any resource item',
+      /will appear here/.test(none.combinedHtml) && !/Enhancement Strategy Guide/.test(none.combinedHtml));
     check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A slug not present in the registry renders the empty state, not a crash or fabricated content',
-      /will appear here as they're released/.test(wrongCourseHtml));
+      /will appear here/.test(wrongCourse.combinedHtml));
     check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'loadResources() is only ever called with loadCourses()\'s own return value in my-aimt.html (the RLS-scoped course_entitlements read), never a separately-trusted client flag',
       /const entitledSlugs = await loadCourses\(email\);/.test(dashboardSrc) &&
       /loadResources\(entitledSlugs\)/.test(dashboardSrc));
@@ -227,15 +238,15 @@ const certificateStateTestsDone = (function certificateStateTests() {
     }),
   ]).then(([inProgressHtml, notYetPassedHtml, certifiedHtml, revokedHtml]) => {
     check('H. NO CERT FOR NON-PASS', 'Course in progress (no completions, no finalized attempt) shows the honest generic empty state, no certificate, no Performance Review claim',
-      /will appear here when you complete a course/.test(inProgressHtml) &&
-      !/Certified/.test(inProgressHtml) && !/Performance Review/.test(inProgressHtml));
-    check('H. NO CERT FOR NON-PASS', 'A finalized not_yet_passed attempt shows "Assessment not yet passed" with a Performance Review entry point, never a "Certified" claim or a fabricated credential ID',
-      /Assessment not yet passed/.test(notYetPassedHtml) && /View Performance Review/.test(notYetPassedHtml) &&
-      !/Certified/.test(notYetPassedHtml) && !/Credential ID/.test(notYetPassedHtml));
+      /certification path is in progress/i.test(inProgressHtml) &&
+      !/AIMT Certified/.test(inProgressHtml) && !/Performance Review/.test(inProgressHtml));
+    check('H. NO CERT FOR NON-PASS', 'A finalized not_yet_passed attempt shows a not-yet-issued state with a Performance Review entry point, never a "Certified" claim or a fabricated credential ID',
+      /Certification Not Yet Issued/.test(notYetPassedHtml) && /Review Next Steps/.test(notYetPassedHtml) &&
+      !/AIMT Certified/.test(notYetPassedHtml) && !/Credential ID/.test(notYetPassedHtml));
     check('H. NO CERT FOR NON-PASS', 'A revoked completions row is excluded entirely (falls back to the honest empty state)',
-      /will appear here when you complete a course/.test(revokedHtml) && !/Certified/.test(revokedHtml));
-    check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders "Certified" with the real credential ID and student name',
-      /Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
+      /certification path is in progress/i.test(revokedHtml) && !/AIMT Certified/.test(revokedHtml));
+    check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders "AIMT Certified" with the real credential ID and student name',
+      /AIMT Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
     check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View certificate" link deep-links into the course with &cert=1 (direct Module 12 access, not just the course entry)',
       /href="headspa-mastery\.html\?enter=1&cert=1"/.test(certifiedHtml));
     check('I. CERT ACCESS FOR PASS', 'The certified card still links to the independent verify.html verification page',

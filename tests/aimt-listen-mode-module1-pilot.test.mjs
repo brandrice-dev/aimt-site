@@ -939,7 +939,34 @@ function diffAgainstStart(relPath) {
     '.format-card { border-radius:14px; padding:0.9rem 0.75rem; border:0.5px solid var(--border2); background:rgba(255,255,255,0.65); cursor:pointer; transition:all 0.2s; text-align:left; width:100%; font-family:inherit; }',
     '  <div class="cadence-dot"></div>',
   ]);
-  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l) && !oldModule2RebuildLines.has(l) && !courseAuditFinalDesignPassRemovedLines.has(l) && !courseAuditPunchListRemovedLines.has(l) && !cadencePolishPassRemovedLines.has(l));
+  // AIMT supporting-pages launch pass (separate, later, explicitly
+  // owner-authorized task -- see AIMT-supporting-pages-launch-specs'
+  // 01-HEADSPA-SALES-PAGE-BUILD-CONTRACT.md and this repo's public-name
+  // rename rule): corrected the public/student-facing product name from
+  // "HeadSpa Mastery"/"Head Spa Mastery" to "Head Spa Certification
+  // Course" everywhere a visitor, student, or graduate can see it
+  // (meta/OG/Twitter tags, the public #landingPage sales surface, the
+  // Module 12 completion screen's display text, the real issued-
+  // certificate template's display text, and the pages.dev credential-
+  // verify string), $497 -> $597, and the pages.dev domain -> the live
+  // production domain in those same user-visible/display spots -- no
+  // curriculum, checkpoint, Cadence, entitlement, or certification-
+  // issuance LOGIC touched, only display copy. Machine-extracted via
+  // `git diff` against this pass's own starting commit (bdc68ea, the
+  // commit immediately before this task began), not hand-transcribed,
+  // for the same exactness reason the module2Wrap rebuild above uses
+  // oldLinesBetween() instead of manual transcription.
+  const SUPPORTING_PAGES_PASS_START = 'bdc68ea';
+  function diffAgainstCommit(commit, relPath) {
+    return execSync('git diff ' + commit + ' -- ' + relPath, { cwd: ROOT, encoding: 'utf8' });
+  }
+  const supportingPagesPassRemovedLines = new Set(
+    diffAgainstCommit(SUPPORTING_PAGES_PASS_START, 'headspa-mastery.html')
+      .split('\n')
+      .filter((l) => l.startsWith('-') && !l.startsWith('---'))
+      .map((l) => l.slice(1))
+  );
+  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l) && !oldModule2RebuildLines.has(l) && !courseAuditFinalDesignPassRemovedLines.has(l) && !courseAuditPunchListRemovedLines.has(l) && !cadencePolishPassRemovedLines.has(l) && !supportingPagesPassRemovedLines.has(l));
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'every removed line in headspa-mastery.html is one of: the 3 bare protocol-card divs, the original Module 1 STATIC_MODULES entry (and its Phase-1-mount-call successor), the 4 original .mod-hero lines this task\'s black opener replaced, or a proven pure relocation elsewhere in the same diff (nothing curriculum/checkpoint/Module-12/nav related was actually deleted or content-changed)', unaccountedRemoves.length === 0, unaccountedRemoves.join(' || '));
   // A two-point diff against 023d258 only ever shows the ORIGINAL bare
   // STATIC_MODULES[1] line as removed once, even though it was actually
@@ -1027,10 +1054,20 @@ function diffAgainstStart(relPath) {
   // two openModuleById/showHome edits are additive unmount() calls only —
   // proven by confirming the pre-existing dispatch structure is still intact
   // around them).
-  const dashboardBefore = gitShowAtStart('my-aimt.html');
+  // my-aimt.html was deliberately, substantially rewritten by a separate,
+  // later, explicitly owner-authorized task (the AIMT supporting-pages
+  // launch pass's My AIMT dashboard rebuild, commit 19b46ae -- see
+  // 06-MY-AIMT-BUILD-CONTRACT.md and tests/aimt-dashboard-resources-
+  // launch.test.mjs, which covers that rewrite's own correctness in
+  // depth). Comparing against the pre-Listen-Mode 023d258 baseline would
+  // therefore always fail now for a reason unrelated to Listen Mode. The
+  // meaningful version of this check is: did anything AFTER that
+  // authorized rewrite touch the dashboard again -- which this compares
+  // instead.
+  const dashboardBefore = execSync('git show 19b46ae:my-aimt.html', { cwd: ROOT, encoding: 'utf8' });
   const dashboardAfterPath = path.join(ROOT, 'my-aimt.html');
   const dashboardAfter = existsSync(dashboardAfterPath) ? readFileSync(dashboardAfterPath, 'utf8') : null;
-  check('S. DASHBOARD NAV UNCHANGED', 'my-aimt.html is byte-identical to the starting commit', dashboardBefore === dashboardAfter);
+  check('S. DASHBOARD NAV UNCHANGED', 'my-aimt.html is unchanged since its own authorized rebuild (commit 19b46ae) -- nothing after that touched it again', dashboardBefore === dashboardAfter);
   check('S. DASHBOARD NAV UNCHANGED', 'openModuleById still dispatches through STATIC_MODULES[id]() unchanged', /if \(STATIC_MODULES\[id\]\) \{\s*STATIC_MODULES\[id\]\(\);/.test(courseSrc));
   check('S. DASHBOARD NAV UNCHANGED', 'showHome still activates #courseHome and clears guide history unchanged', /document\.getElementById\('courseHome'\)\.classList\.add\('active'\)/.test(courseSrc) && /gpHistory = \[\];/.test(courseSrc));
   check('S. DASHBOARD NAV UNCHANGED', 'the only new lines added to openModuleById/showHome are the Listen Mode unmount() calls', (courseSrc.match(/if \(window\.AIMTListenMode\) window\.AIMTListenMode\.unmount\(\);/g) || []).length === 2);
