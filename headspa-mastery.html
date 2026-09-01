@@ -433,6 +433,8 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 @media(max-width:600px){ .concept-card[style*="grid-column"] { grid-column: span 1 !important; } }
 @media(max-width:600px){ .grid-2col { grid-template-columns: 1fr !important; } }
 .grid-2col { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:1.5rem 0; }
+@media(max-width:720px){ .grid-3col { grid-template-columns: 1fr !important; } }
+.grid-3col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:1.5rem 0; }
 .concept-card { background: var(--white); border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.1rem; }
 .cc-icon { font-size: 1.2rem; margin-bottom: 6px; }
 .cc-term { font-size: 0.88rem; font-weight: 500; margin-bottom: 3px; }
@@ -5641,7 +5643,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
-    <div class="body-text">If intake established a fragrance-free service, follow that plan rather than presenting irrelevant scent options. If scent is included, use the Module 8-approved communication cue:</div>
+    <div class="body-text">If intake established a fragrance-free service, follow that plan rather than presenting irrelevant scent options. If scent is included, use a simple, consistent introduction:</div>
 
     <div class="info-card">
       <div class="body-text" style="margin:0;font-style:italic;">"I have three scent options for you today. Take a moment with each and tell me which one you're most drawn to."</div>
@@ -5661,9 +5663,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="body-text" style="margin:0;">Interrupts flow. Creates unnecessary mental work for the client. Can make the practitioner appear uncertain. Conflicts with the purpose of doing a strong intake beforehand.</div>
     </div>
 
-    <div class="body-text">Use the same three communication concepts Module 8 teaches:</div>
+    <div class="body-text">Three concepts make this possible:</div>
 
-    <div class="concept-grid">
+    <div class="grid-3col">
       <div class="concept-card">
         <div class="cc-term">Communication cue</div>
         <div class="cc-sub">Say this proactively</div>
@@ -5703,106 +5705,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow" style="margin-top:1.5rem;">Practitioner judgment</div>
     <div class="sec-title">Before service, or during service?</div>
-    <div class="body-text">Twelve real examples. For each one, decide when it belongs — established beforehand, or handled live once the service is underway. Ungraded and retryable.</div>
+    <div class="body-text">Six real examples, one at a time. For each one, decide when it belongs — established beforehand, or handled live once the service is underway. Ungraded and retryable.</div>
 
-    <div id="m2bdQuiz">
-      <div class="m5-decision-block" id="m2bdItem0">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Fragrance sensitivity</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(0,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(0,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
+    <div class="m5-decision-block" id="m2bdQuiz">
+      <div class="body-text" id="m2bdProgress" style="margin:0 0 0.6rem;font-size:0.72rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);"></div>
+      <div class="sec-title" id="m2bdLabel" style="margin:0 0 0.9rem;"></div>
+      <div class="bq-options" id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;">
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer('before',this)">Before service</button>
+        <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer('during',this)">During service</button>
       </div>
-      <div class="m5-decision-block" id="m2bdItem1">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Water temperature</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(1,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(1,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem2">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Expected touch areas</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(2,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(2,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem3">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Pressure response</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(3,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(3,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem4">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Planned omissions</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(4,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(4,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem5">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Immediate discomfort</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(5,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(5,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem6">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Product sensitivities</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(6,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(6,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem7">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Unexpected reaction</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(7,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(7,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem8">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Service format</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(8,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(8,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem9">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Necessary repositioning</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(9,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(9,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem10">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Known positioning needs</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(10,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(10,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="m5-decision-block" id="m2bdItem11">
-        <div class="body-text" style="margin:0 0 0.5rem;font-weight:500;">Client question</div>
-        <div class="bq-options" style="flex-direction:row;flex-wrap:wrap;">
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(11,'before',this)">Before service</button>
-          <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer(11,'during',this)">During service</button>
-        </div>
-        <div class="bq-feedback" style="display:none;" aria-live="polite"></div>
-      </div>
-      <div class="bq-feedback" id="m2bdComplete" aria-live="polite" style="display:none;"></div>
+      <div class="bq-feedback" id="m2bdFeedback" style="display:none;" aria-live="polite"></div>
+      <button type="button" class="m5-reset-btn" id="m2bdNextBtn" style="display:none;" onclick="m2BdNext()">Next example →</button>
     </div>
 
     <hr class="divider">
@@ -5842,23 +5755,19 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cp-res" id="m2cp1Res" aria-live="polite"></div>
     </div>
 
-    <div class="sec-eyebrow" style="margin-top:1.5rem;">Module recap</div>
-    <div class="sec-title">A strong Head Spa service does not become quiet because the practitioner stops communicating.</div>
-    <div class="body-text">It becomes quiet because the practitioner communicates earlier and better.</div>
-    <div class="body-text">Review the intake before the appointment. Remove preventable uncertainty during the arrival. Establish the service plan before treatment. Begin hands-on work intentionally. Then protect the flow—speaking when comfort, safety, a real transition, or the client actually requires it.</div>
-
-    <div class="key-point">
-      <div class="kp-icon" aria-hidden="true">✦</div>
-      <div class="kp-body">
-        <div class="kp-text">Prepare first. Lead second. Stay attentive throughout.</div>
-      </div>
-    </div>
-
     <div class="lesson-complete" id="m2Complete" style="display:none;">
       <div class="lc-gold">✦</div>
       <div class="lc-next-label">Module 2 complete</div>
       <div class="lc-title">The plan is set before the service begins.</div>
-      <div class="lc-sub">You demonstrated how to use intake and preparation to establish the service plan, remove preventable uncertainty, begin the hands-on experience intentionally, and protect a relaxation-first service without sacrificing attentiveness or professional judgment.</div>
+      <div class="lc-sub">A strong Head Spa service does not become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better.</div>
+      <div class="lc-recap">
+        <div class="lc-next-label">Module recap</div>
+        <ul class="lc-recap-list">
+          <li>Review the intake before the appointment — remove preventable uncertainty during the arrival.</li>
+          <li>Establish the service plan before treatment, then begin hands-on work intentionally.</li>
+          <li>Protect the flow — speak when comfort, safety, a real transition, or the client actually requires it.</li>
+        </ul>
+      </div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 3</div>
         <div class="lc-next-text">Module 3 moves beneath the experience into the science of the hair and scalp. The goal is to understand what you are observing so later service decisions have a clear professional reason behind them.</div>
@@ -9792,7 +9701,7 @@ function openModuleById(id, options = {}) {
 
   const STATIC_MODULES = {
     3: () => { if (wrap && module3HTML) wrap.innerHTML = module3HTML; },
-    2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
+    2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m2BdReset(); },
     4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; },
     5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
@@ -9863,52 +9772,63 @@ function openModuleById(id, options = {}) {
 
 // ── MODULE 2 ──
 // "Before service, or during service?" — ungraded, retryable practitioner-
-// judgment classifier. Replaces the old arrival-sequence accordion
-// (openStep), "what breaks the moment?" quiz (breakAnswer), and
-// scent-script-builder interactions, all built around the pre-rebuild
-// arrival sequence the curriculum rebuild supersedes. Does not touch
-// APP_STATE, progress, checkpoints, or completion.
+// judgment classifier, one contained scenario at a time. Replaces the old
+// arrival-sequence accordion (openStep), "what breaks the moment?" quiz
+// (breakAnswer), and scent-script-builder interactions, all built around
+// the pre-rebuild arrival sequence the curriculum rebuild supersedes.
+// Does not touch APP_STATE, progress, checkpoints, or completion.
 const M2_BD_ITEMS = [
   { label: 'Fragrance sensitivity', answer: 'before' },
   { label: 'Water temperature', answer: 'during' },
-  { label: 'Expected touch areas', answer: 'before' },
-  { label: 'Pressure response', answer: 'during' },
   { label: 'Planned omissions', answer: 'before' },
   { label: 'Immediate discomfort', answer: 'during' },
-  { label: 'Product sensitivities', answer: 'before' },
-  { label: 'Unexpected reaction', answer: 'during' },
-  { label: 'Service format', answer: 'before' },
-  { label: 'Necessary repositioning', answer: 'during' },
   { label: 'Known positioning needs', answer: 'before' },
   { label: 'Client question', answer: 'during' }
 ];
-let _m2BdAnswered = new Set();
-function m2BdAnswer(idx, choice, btn) {
-  const item = M2_BD_ITEMS[idx];
-  const block = getActiveElementById('m2bdItem' + idx);
-  if (!item || !block) return;
-  const fb = block.querySelector('.bq-feedback');
+let m2BdIndex = 0;
+function m2BdRender() {
+  const item = M2_BD_ITEMS[m2BdIndex];
+  const progress = getActiveElementById('m2bdProgress');
+  const label = getActiveElementById('m2bdLabel');
+  const opts = getActiveElementById('m2bdOptions');
+  const fb = getActiveElementById('m2bdFeedback');
+  const nextBtn = getActiveElementById('m2bdNextBtn');
+  if (!item || !progress || !label || !opts || !fb || !nextBtn) return;
+  progress.textContent = 'Example ' + (m2BdIndex + 1) + ' of ' + M2_BD_ITEMS.length;
+  label.textContent = item.label;
+  opts.querySelectorAll('.bq-opt').forEach((o) => { o.classList.remove('correct', 'wrong'); o.setAttribute('aria-pressed', 'false'); });
+  fb.style.display = 'none';
+  fb.textContent = '';
+  nextBtn.style.display = 'none';
+  nextBtn.textContent = 'Next example →';
+}
+function m2BdReset() { m2BdIndex = 0; m2BdRender(); }
+function m2BdAnswer(choice, btn) {
+  const item = M2_BD_ITEMS[m2BdIndex];
+  const opts = getActiveElementById('m2bdOptions');
+  const fb = getActiveElementById('m2bdFeedback');
+  const nextBtn = getActiveElementById('m2bdNextBtn');
+  if (!item || !opts || !fb || !nextBtn) return;
   const isCorrect = choice === item.answer;
 
-  block.querySelectorAll('.bq-opt').forEach((o) => {
+  opts.querySelectorAll('.bq-opt').forEach((o) => {
     o.setAttribute('aria-pressed', o === btn ? 'true' : 'false');
     o.classList.remove('correct', 'wrong');
   });
   btn.classList.add(isCorrect ? 'correct' : 'wrong');
 
-  if (fb) {
-    fb.style.display = 'block';
-    fb.textContent = isCorrect
-      ? '"' + item.label + '" belongs ' + (item.answer === 'before' ? 'before the service — intake and preparation should already have it resolved.' : 'during the service — it\'s a dynamic moment preparation can\'t predict in advance.')
-      : 'Not quite. "' + item.label + '" actually belongs ' + (item.answer === 'before' ? 'before the service, established through intake and preparation.' : 'during the service, as part of staying attentive once the plan is set.');
-  }
+  fb.style.display = 'block';
+  fb.textContent = isCorrect
+    ? '"' + item.label + '" belongs ' + (item.answer === 'before' ? 'before the service — intake and preparation should already have it resolved.' : 'during the service — it\'s a dynamic moment preparation can\'t predict in advance.')
+    : 'Not quite. "' + item.label + '" actually belongs ' + (item.answer === 'before' ? 'before the service, established through intake and preparation.' : 'during the service, as part of staying attentive once the plan is set.');
 
-  _m2BdAnswered.add(idx);
-  const complete = getActiveElementById('m2bdComplete');
-  if (_m2BdAnswered.size === M2_BD_ITEMS.length && complete) {
-    complete.style.display = 'block';
-    complete.textContent = 'Planning moves upstream so relaxation can move downstream.';
-  }
+  const isLast = m2BdIndex === M2_BD_ITEMS.length - 1;
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = isLast ? 'Start over ↺' : 'Next example →';
+}
+function m2BdNext() {
+  m2BdIndex = (m2BdIndex === M2_BD_ITEMS.length - 1) ? 0 : m2BdIndex + 1;
+  m2BdRender();
 }
 
 // Aromatherapy script builder — retired from Module 2's UI by the

@@ -118,31 +118,59 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// E. NEW "BEFORE SERVICE, OR DURING SERVICE?" INTERACTION
+// D2. COMPLETION CARD — RECAP FOLDED IN, MODULE 1 PATTERN REUSED
+// ─────────────────────────────────────────────────────────────────────────
+(function completionCardTests() {
+  check('D2. COMPLETION', 'there is no standalone white "Module recap" section (sec-eyebrow/sec-title) outside the black completion card', !/class="sec-eyebrow"[^>]*>Module recap</.test(module2Wrap) && !/class="sec-title"[^>]*>[^<]*Module recap/.test(module2Wrap));
+  const completeMatch = module2Wrap.match(/<div class="lesson-complete" id="m2Complete"[\s\S]*?\n {4}<\/div>/);
+  check('D2. COMPLETION', 'the m2Complete card is found', !!completeMatch);
+  const completeHtml = completeMatch ? completeMatch[0] : '';
+  check('D2. COMPLETION', 'the recap now lives inside the black completion card, reusing the exact m1Complete pattern (.lc-recap > .lc-next-label "Module recap" + .lc-recap-list)', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(completeHtml));
+  check('D2. COMPLETION', 'the recap list preserves the core recap substance (intake/uncertainty, plan-before-treatment, protect the flow)', /Review the intake before the appointment/.test(completeHtml) && /Establish the service plan before treatment/.test(completeHtml) && /Protect the flow/.test(completeHtml));
+  check('D2. COMPLETION', 'the m1Complete card (frozen reference) uses the identical .lc-recap/.lc-recap-list structure -- confirms this is a reuse, not a new pattern', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(extractWrap(courseSrc, 'module1Wrap') || ''));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// E. NEW "BEFORE SERVICE, OR DURING SERVICE?" INTERACTION (one-at-a-time, 6 items)
 // ─────────────────────────────────────────────────────────────────────────
 (function interactionTests() {
-  const fnMatch = courseSrc.match(/function m2BdAnswer\([^)]*\) \{[\s\S]*?\n\}/);
-  check('E. INTERACTION', 'm2BdAnswer() is defined', !!fnMatch);
-  check('E. INTERACTION', 'M2_BD_ITEMS has exactly 12 items', (courseSrc.match(/const M2_BD_ITEMS = \[[\s\S]*?\n\];/) || [''])[0].split(/\{ label:/).length - 1 === 12);
+  const answerFnMatch = courseSrc.match(/function m2BdAnswer\([^)]*\) \{[\s\S]*?\n\}/);
+  const renderFnMatch = courseSrc.match(/function m2BdRender\(\) \{[\s\S]*?\n\}/);
+  const nextFnMatch = courseSrc.match(/function m2BdNext\(\) \{[\s\S]*?\n\}/);
+  check('E. INTERACTION', 'm2BdAnswer(), m2BdRender(), and m2BdNext() are all defined', !!answerFnMatch && !!renderFnMatch && !!nextFnMatch);
+  check('E. INTERACTION', 'M2_BD_ITEMS has exactly 6 items (reduced from 12)', (courseSrc.match(/const M2_BD_ITEMS = \[[\s\S]*?\n\];/) || [''])[0].split(/\{ label:/).length - 1 === 6);
   const beforeCount = (courseSrc.match(/answer: 'before'/g) || []).length;
   const duringCount = (courseSrc.match(/answer: 'during'/g) || []).length;
-  check('E. INTERACTION', 'exactly 6 items answer "before" and 6 answer "during" (matches the task\'s 6-and-6 example set)', beforeCount === 6 && duringCount === 6);
-  check('E. INTERACTION', 'the interaction never touches APP_STATE, progress, or completion (ungraded, no progress write)', fnMatch && !/APP_STATE/.test(fnMatch[0]) && !/\.save\(\)/.test(fnMatch[0]));
-  check('E. INTERACTION', 'the interaction is retryable (re-clicking always re-evaluates, no disabling of buttons)', fnMatch && !/\.disabled\s*=\s*true/.test(fnMatch[0]));
-  check('E. INTERACTION', 'all 24 option buttons (12 items x 2 choices) carry aria-pressed for accessibility', (module2Wrap.match(/aria-pressed="false" onclick="m2BdAnswer/g) || []).length === 24);
-  check('E. INTERACTION', 'all 12 feedback regions are aria-live for accessibility', (module2Wrap.match(/class="bq-feedback" style="display:none;" aria-live="polite"><\/div>/g) || []).length >= 12);
+  check('E. INTERACTION', 'exactly 3 items answer "before" and 3 answer "during" (balanced 6-item set)', beforeCount === 3 && duringCount === 3);
+  check('E. INTERACTION', 'only one scenario is rendered in the live markup at a time (a single options block, not 6 repeated blocks)', (module2Wrap.match(/id="m2bdOptions"/g) || []).length === 1 && (module2Wrap.match(/onclick="m2BdAnswer\(/g) || []).length === 2);
+  check('E. INTERACTION', 'a Next control exists and advances the index (wraps back to 0 after the last item)', /m2BdIndex = \(m2BdIndex === M2_BD_ITEMS\.length - 1\) \? 0 : m2BdIndex \+ 1;/.test(courseSrc));
+  check('E. INTERACTION', 'feedback text is concise (a single sentence, not a paragraph)', answerFnMatch && !/[.!?]\s+[A-Z][^.!?]*[.!?]\s+[A-Z]/.test(answerFnMatch[0].match(/fb\.textContent = ([\s\S]*?);/)[1]));
+  check('E. INTERACTION', 'the interaction never touches APP_STATE, progress, or completion (ungraded, no progress write)', answerFnMatch && renderFnMatch && !/APP_STATE/.test(answerFnMatch[0] + renderFnMatch[0]) && !/\.save\(\)/.test(answerFnMatch[0] + renderFnMatch[0]));
+  check('E. INTERACTION', 'the interaction is retryable (re-clicking always re-evaluates, no disabling of buttons; Next wraps back to item 1 for a full restart)', answerFnMatch && !/\.disabled\s*=\s*true/.test(answerFnMatch[0]));
+  check('E. INTERACTION', 'the reset hook (m2BdReset) is wired into STATIC_MODULES[2] so each visit starts at item 1', /2: \(\) => \{ const w = document\.getElementById\('module2Wrap'\); if \(w && wrap\) wrap\.innerHTML = w\.innerHTML; m2BdReset\(\); \}/.test(courseSrc));
+  check('E. INTERACTION', 'the two option buttons carry aria-pressed for accessibility', (module2Wrap.match(/aria-pressed="false" onclick="m2BdAnswer/g) || []).length === 2);
+  check('E. INTERACTION', 'the feedback region is aria-live for accessibility', module2Wrap.includes('id="m2bdFeedback" style="display:none;" aria-live="polite"'));
   check('E. INTERACTION', 'the old scent-script-builder UI entry point is gone from module2Wrap (evaluateScript() is retired, not deleted -- see its own comment)', !module2Wrap.includes('onclick="evaluateScript()"'));
   check('E. INTERACTION', 'the old arrival-sequence accordion is gone from module2Wrap', !module2Wrap.includes('class="timeline-wrap"') && !/onclick="openStep\(/.test(module2Wrap));
   check('E. INTERACTION', 'the old "what breaks the moment?" quiz is gone from module2Wrap', !module2Wrap.includes('id="breakQuiz"'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// F. MOBILE OVERFLOW (reused generic components, not new CSS)
+// F. MOBILE OVERFLOW + DESKTOP LAYOUT (reused/extended generic components)
 // ─────────────────────────────────────────────────────────────────────────
 (function mobileTests() {
-  check('F. MOBILE', 'grid-2col (used for the Before/During comparison) has a mobile single-column override', /@media\(max-width:600px\)\{\s*\.grid-2col\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
-  check('F. MOBILE', 'concept-grid (used for the 2.5 communication-concept cards) has a mobile single-column override', /@media\(max-width:600px\)\{\s*\.concept-grid\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
-  check('F. MOBILE', 'the 12-item interaction uses flex-wrap so its two option buttons never force horizontal overflow on narrow screens', (module2Wrap.match(/class="bq-options" style="flex-direction:row;flex-wrap:wrap;"/g) || []).length === 12);
+  check('F. LAYOUT', 'grid-2col (used for the Before/During comparison) has a mobile single-column override', /@media\(max-width:600px\)\{\s*\.grid-2col\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
+  check('F. LAYOUT', 'grid-3col (new, minimal 3-column extension of the same grid pattern) renders 3 equal columns on desktop', /\.grid-3col\s*\{\s*display:grid;\s*grid-template-columns:1fr 1fr 1fr;/.test(courseSrc));
+  check('F. LAYOUT', 'grid-3col has a mobile single-column override', /@media\(max-width:720px\)\{\s*\.grid-3col\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
+  check('F. LAYOUT', 'the 2.5 communication-concept cards use grid-3col (one horizontal row of 3 on desktop), not the old 2-column concept-grid', /Three concepts make this possible:<\/div>\s*\n\s*<div class="grid-3col">/.test(module2Wrap));
+  check('F. LAYOUT', 'the one-at-a-time interaction uses flex-wrap so its two option buttons never force horizontal overflow on narrow screens', module2Wrap.includes('id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;"'));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// F2. NO FORWARD REFERENCES TO MODULE 8 (Module 2 comes before it)
+// ─────────────────────────────────────────────────────────────────────────
+(function noForwardReferenceTests() {
+  check('F2. NO FORWARD REF', 'module2Wrap no longer names "Module 8" anywhere (it taught the concepts as its own, not borrowed from a module the student has not reached yet)', !module2Wrap.includes('Module 8'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

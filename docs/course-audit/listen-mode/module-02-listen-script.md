@@ -1,45 +1,68 @@
-# Module 2 — Listen Mode Script (v2, rebuilt curriculum)
+# Module 2 — Listen Mode Script (v3 draft, curriculum/UX polish — NOT generated)
 
-**Status:** Ready for generation. Written against the fully rebuilt live
-`#module2Wrap` (course-audit-build, "AIMT — MODULE 2 CURRICULUM REBUILD"
-task, 2026-08-31). **The prior v1 script and audio are obsolete and are
-not reused** — the old curriculum (repeated permission-asking, arrival-
-sequence accordion, scent-script-builder) directly conflicted with the
-doctrine Module 8 later established and was fully replaced. Follows the
-frozen Module 1 Listen Mode architecture; qaStatus stays `GENERATED`,
-never `APPROVED`, pending the owner's CapCut pass and listen-through.
+**Status:** Draft only, updated to match the live page after the owner's
+visual/interaction correction pass (course-audit-build, "MODULE 2 +
+MODULE 0 — OWNER APPROVAL GATE BEFORE ANY AUDIO PRODUCTION" task,
+2026-08-31). **No audio exists for this version and none was generated
+this pass — this task is a hard stop on ElevenLabs spend pending owner
+approval of the rendered Module 0/2 student experience.** The v1 curriculum (repeated permission-asking, arrival-sequence
+accordion, scent-script-builder) is obsolete and not reused, exactly as
+before. This v3 draft is fully rewritten to match the current markup; it
+supersedes the earlier v2 text but not any v2 audio, since no v2 audio
+was ever produced either.
+Follows the frozen Module 1 Listen Mode architecture; once approved and
+generated, qaStatus stays `GENERATED`, never `APPROVED`, pending the
+owner's separate CapCut pass and listen-through.
 
-**Permanent narration rules applied in this script:** Cadence speaks in
-first person (I/me/my/I'll), never third person about herself. "AIMT" is
-spelled out letter-by-letter in TTS text (`A-I-M-T`) wherever it appears,
-so Jane pronounces the letters rather than a word.
+**Permanent narration rules to apply at generation time:** Cadence speaks
+in first person (I/me/my/I'll), never third person about herself. "AIMT"
+is spelled out letter-by-letter in TTS text (`A-I-M-T`) wherever it
+appears, so Jane pronounces the letters rather than a word.
 
 **Curriculum authority:** the rebuilt `#module2Wrap` in full — the
 governing-principle intro, Sections 2.1–2.7, the "Head Spa Intake +
-Service Plan" downloadable, one 12-item "Before service, or during
-service?" practitioner-judgment interaction, one checkpoint (`m2cp1`,
-preserved id and passed state), one Module Recap block, one completion
-card.
+Service Plan" downloadable, one **6-item, one-scenario-at-a-time**
+"Before service, or during service?" practitioner-judgment interaction
+(reduced from 12, per the owner's visual-correction pass), one checkpoint
+(`m2cp1`, preserved id and passed state), one completion card whose
+`.lc-recap` now carries the module-recap substance (the recap is no
+longer a separate white section — see the "Completion" note below).
 
-**Interactive classifier (2.6):** narrated as framing only — the twelve
-items and their correct answers are the student's own ungraded, retryable
-exercise on screen, not narratable content with a single correct reading
-order.
+**Interactive classifier (2.6):** narrated as framing only — the six
+items and their correct answers are the student's own ungraded, retryable,
+one-at-a-time exercise on screen, not narratable content with a single
+correct reading order.
 
-**Player segments (12):** Opening (briefing) → governing principle → 2.1
+**No forward references to Module 8:** the owner's correction pass
+removed "from Module 8" / "Module 8 teaches" attribution from 2.4 and 2.5
+— Module 2 comes before Module 8 in the course, so crediting a module the
+student hasn't reached yet was a genuine sequencing error, not just a
+style note. This script never names "Module 8" either; the shoulder-
+contact script and the three communication concepts are narrated as
+Module 2's own teaching.
+
+**Completion / recap placement:** the recap that used to sit in its own
+white "Module recap" section (between the checkpoint and the black
+completion card) now lives inside the black completion card itself
+(`.lc-recap`/`.lc-recap-list`, the same pattern the frozen Module 1
+reference implementation already uses for `#m1Complete`). Since that card
+only reveals post-pass, the recap's narration moves into the post-pass
+completion chunk too — it's no longer narrated before the checkpoint.
+
+**Player segments (11):** Opening (briefing) → governing principle → 2.1
 → 2.2 → 2.3 + before/during → downloadable → 2.4 First Touch → 2.5
 Protect the Quiet → 2.6 When Something Changes + interaction framing →
-2.7 Consistency + Module Recap → Checkpoint (`m2cp1`) → post-pass
-completion/handoff.
+2.7 Consistency → Checkpoint (`m2cp1`) → post-pass completion + recap +
+handoff.
 
 **Reference Voice landmarks:** the full "remove preventable uncertainty"
 list (2.2); the full before-service/during-service lists (2.3); the
 downloadable's description and disclaimer (near-verbatim); the shoulder-
-contact "why it matters" list + "not this" prohibition + the Module
-8-approved scent-introduction line (2.4, near-verbatim); the three
+contact "why it matters" list + "not this" prohibition + the scent-
+introduction line (2.4, near-verbatim); the three
 communication concepts (Communication cue / Keep the flow quiet / If
-they ask, near-verbatim from Module 8) (2.5); the five consistency
-checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
+they ask) (2.5); the five consistency checkpoints (2.7); the completion
+card's recap lines (near-verbatim).
 
 ---
 
@@ -112,7 +135,7 @@ checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 > There's a practitioner resource on screen here — the Head Spa Intake and Service Plan. It's a two-part fillable form: gather the information that affects service planning, then convert it into a clear practitioner plan before hands-on treatment begins. Make it your own — use it as-is, or adapt the layout and add your own branding while keeping the professional purpose behind it. And to be clear: this is a service-planning tool, not a medical-history form, a diagnosis form, or a legal waiver. You're still responsible for whatever consent, privacy, licensing, or legal documentation your own jurisdiction and business require.
 
 ### M2-07 — 2.4 First Touch
-**SOURCE:** the "why it matters" list, the "not this" prohibition, and the Module 8-approved scent line, all near-verbatim. **VOICE:** Reference throughout.
+**SOURCE:** the "why it matters" list, the "not this" prohibition, and the scent line, all near-verbatim. **VOICE:** Reference throughout.
 
 > Section 2.4 — First touch. The first touch should feel intentional.
 >
@@ -122,10 +145,10 @@ checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 >
 > [firmly] Not this: it is deliberate service choreography — not a technique for subconsciously creating trust, regulating the nervous system, forcing relaxation, or guaranteeing a psychological response.
 >
-> If intake established a fragrance-free service, follow that plan rather than presenting irrelevant scent options. If scent is included, use the communication cue from Module 8: "I have three scent options for you today. Take a moment with each and tell me which one you're most drawn to." Present the options evenly. Don't instruct the client to close their eyes — if they naturally want to, that's fine. Remain attentive to actual hesitation or discomfort and adjust when necessary.
+> If intake established a fragrance-free service, follow that plan rather than presenting irrelevant scent options. If scent is included, use a simple, consistent introduction: "I have three scent options for you today. Take a moment with each and tell me which one you're most drawn to." Present the options evenly. Don't instruct the client to close their eyes — if they naturally want to, that's fine. Remain attentive to actual hesitation or discomfort and adjust when necessary.
 
 ### M2-08 — 2.5 Protect the Quiet
-**SOURCE:** the three communication concepts, near-verbatim from Module 8. **VOICE:** Reference throughout.
+**SOURCE:** the three communication concepts, near-verbatim. **VOICE:** Reference throughout.
 
 > Section 2.5 — Protect the quiet. Explain intentionally, not continuously.
 >
@@ -133,7 +156,7 @@ checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 >
 > Repeatedly re-deciding the service interrupts flow, creates unnecessary mental work for the client, can make you appear uncertain, and conflicts with the entire purpose of doing a strong intake beforehand.
 >
-> The same three communication concepts from Module 8 apply here. Communication cue: say this proactively, when the client genuinely needs information — positioning, temperature, pressure, an unfamiliar sensation, or an important transition. Keep the flow quiet: no narration needed by default — perform the step confidently and let the service continue. And if they ask: you already know how to answer a likely client question — answer briefly and accurately, then return your attention to the service.
+> Three concepts make this possible. Communication cue: say this proactively, when the client genuinely needs information — positioning, temperature, pressure, an unfamiliar sensation, or an important transition. Keep the flow quiet: no narration needed by default — perform the step confidently and let the service continue. And if they ask: you already know how to answer a likely client question — answer briefly and accurately, then return your attention to the service.
 >
 > [warmly] Prepared practitioners can stay quiet because they already know what they'd say if the client needs them.
 
@@ -146,20 +169,16 @@ checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 >
 > [firmly] Don't interrupt the service to solve decisions that should have been handled beforehand. Do interrupt the service when the client or situation in front of you gives you a real reason to.
 >
-> There's a practitioner-judgment exercise on screen — twelve real examples, and for each one you decide whether it belongs before the service or during it. It's ungraded and retryable, so take your time with it before moving on.
+> There's a practitioner-judgment exercise on screen — six real examples, one at a time. For each one you decide whether it belongs before the service or during it, then move to the next. It's ungraded and retryable, so take your time with it before moving on.
 
-### M2-10 — 2.7 Consistency + Module Recap
-**SOURCE:** the five consistency checkpoints + the recap's closing lines, near-verbatim. **VOICE:** Reference throughout.
+### M2-10 — 2.7 Consistency
+**SOURCE:** the five consistency checkpoints, near-verbatim. **VOICE:** Reference throughout.
 
 > Section 2.7 — Consistency. Build a framework you don't have to reinvent.
 >
 > Consistency doesn't mean every client receives an identical experience. It means your process reliably addresses the same important questions. Before they arrive: have I reviewed what could affect the service? When they arrive: do they understand what they need to do and what happens next? Before hands-on treatment: have relevant choices, adaptations, expectations, and logistics been established? At first touch: am I beginning deliberately rather than awkwardly searching for the next step? During treatment: am I protecting the flow while staying attentive enough to respond when something actually changes?
 >
 > [slowly] That's what makes the service repeatable without making it robotic.
->
-> Before your checkpoint, here's the module recap. A strong Head Spa service doesn't become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better. Review the intake before the appointment. Remove preventable uncertainty during the arrival. Establish the service plan before treatment. Begin hands-on work intentionally. Then protect the flow — speaking when comfort, safety, a real transition, or the client actually requires it.
->
-> [warmly] Prepare first. Lead second. Stay attentive throughout.
 
 ### M2-11 — Checkpoint (`m2cp1`)
 **SOURCE:** the checkpoint prompt only — never the grading rubric. **VOICE:** Teaching. Ends the player audio; the checkpoint stop is structural (`gateType: 'checkpoint-stop'`).
@@ -169,39 +188,48 @@ checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 > Take your time, and answer above.
 
 ### M2-12 — Post-pass continuation: completion + recap + handoff
-**VOICE:** Teaching. `gateType: 'post-pass'`, `resumeAfterPass: true`.
+**SOURCE:** the `#m2Complete` completion card, including its `.lc-recap` block (moved here from the old standalone Module Recap section — see the header note above). **VOICE:** Teaching, Reference for the recap list. `gateType: 'post-pass'`, `resumeAfterPass: true`.
 
-> Module complete. The plan is set before the service begins. You demonstrated how to use intake and preparation to establish the service plan, remove preventable uncertainty, begin the hands-on experience intentionally, and protect a relaxation-first service without sacrificing attentiveness or professional judgment.
+> Module complete. The plan is set before the service begins. A strong Head Spa service doesn't become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better.
+>
+> Quick recap. Review the intake before the appointment — remove preventable uncertainty during the arrival. Establish the service plan before treatment, then begin hands-on work intentionally. Protect the flow — speak when comfort, safety, a real transition, or the client actually requires it.
 >
 > Up next, Module 3: moving beneath the experience into the science of the hair and scalp. The goal is to understand what you're observing, so later service decisions have a clear professional reason behind them.
 
 ---
 
-## Editorial QA (pre-generation checklist)
+## Editorial QA (pre-generation checklist — NOT yet cleared for generation)
 
 Parity against the rebuilt curriculum confirmed line-for-line (governing
 principle, all 7 numbered sections, the downloadable, the interaction
-framing, the recap, the checkpoint). Reference completeness: the 10-item
-uncertainty list, both before/during lists, the shoulder-contact why-it-
-matters list, the "not this" prohibition, all 3 communication concepts,
-the 5 consistency checkpoints — all present in full, visible order. No
-invented physiological/psychological claims (the "not this" prohibition
-against subconscious trust/nervous-system/guaranteed-relaxation carried
-forward verbatim in spirit). No repeated-permission-asking language
-anywhere in Teaching Voice framing (would directly contradict 2.5's own
-teaching). Correct single checkpoint location (`m2cp1`, matching its
-real end-of-module position, preserved id). "AIMT" spelled `A-I-M-T`
-wherever it appears (one occurrence, Section 2.4). Cadence speaks in
-first person throughout. Estimated ~13 min total.
+framing, the checkpoint, the completion card's recap). Reference
+completeness: the 10-item uncertainty list, both before/during lists,
+the shoulder-contact why-it-matters list, the "not this" prohibition,
+all 3 communication concepts, the 5 consistency checkpoints — all
+present in full, visible order. No invented physiological/psychological
+claims (the "not this" prohibition against subconscious trust/nervous-
+system/guaranteed-relaxation carried forward verbatim in spirit). No
+repeated-permission-asking language anywhere in Teaching Voice framing
+(would directly contradict 2.5's own teaching). No forward references to
+"Module 8" anywhere in this script (matches the live page after the
+owner's correction). Correct single checkpoint location (`m2cp1`,
+matching its real end-of-module position, preserved id). "AIMT" spelled
+`A-I-M-T` wherever it appears (one occurrence, Section 2.4). Cadence
+speaks in first person throughout. Estimated ~12 min total.
 
-## ElevenLabs generation plan
+**This checklist being clear does not authorize generation.** Per the
+locked approval sequence, ElevenLabs generation for Module 2 (and
+Module 0) waits for explicit owner approval of the rendered student
+experience.
+
+## ElevenLabs generation plan (draft only — hold until owner approval)
 
 | Piece | Chunks | Approx. chars |
 |---|---|---:|
 | A1 | briefing → governing principle → 2.1 | ~2,150 |
 | A2 | 2.2 → 2.3 + before/during | ~2,500 |
 | A3 | downloadable → 2.4 → 2.5 | ~3,000 |
-| A4 | 2.6 → 2.7 + recap → checkpoint | ~2,800 |
-| B1 | post-pass recap/handoff | ~500 |
+| A4 | 2.6 → 2.7 → checkpoint | ~2,550 |
+| B1 | post-pass completion + recap + handoff | ~750 |
 
 5 generations, `Y3ZPRGOSIxbV4Rbb3WiA` / `eleven_v3`.
