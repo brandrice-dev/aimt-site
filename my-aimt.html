@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My AIMT — Student Dashboard</title>
-<meta name="description" content="Your AIMT student home: course progress, certificates, and resources.">
+<meta name="description" content="Your AIMT student home for course progress, practitioner tools, resources and certification.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,127 +22,161 @@
     font-weight: 300;
     min-height: 100vh;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.5rem 4rem; }
-  .topbar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3rem; gap: 1rem; flex-wrap: wrap; }
-  .brand {
-    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.1rem 0; margin-bottom: 2.5rem;
+    border-bottom: 0.5px solid rgba(255,255,255,0.07);
   }
-  .brand a { color: inherit; text-decoration: none; }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .topbar-brand svg { width: 22px; height: 22px; color: rgba(255,255,255,0.5); }
+  .topbar-brand span {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
+    color: rgba(255,255,255,0.72);
+  }
+  .topbar-right { display: flex; align-items: center; gap: 1.2rem; }
+  .topbar-email { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.8rem; }
   .signout {
     background: none; border: none; cursor: pointer;
     color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
     font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em;
   }
   .signout:hover { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); }
+
   h1 {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-weight: 500; font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 0.4rem;
-  }
-  .welcome-email { color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); font-size: 0.9rem; margin-bottom: 2.8rem; }
-  .section-label {
     font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    margin: 2.6rem 0 1rem;
+    font-weight: 700; letter-spacing: -0.02em;
+    font-size: clamp(1.7rem, 3.4vw, 2.4rem); margin-bottom: 0.5rem;
   }
-  .card {
-    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
-    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
-    border-radius: var(--aimt-radius-md); padding: 1.6rem 1.7rem; margin-bottom: 1rem;
-  }
-  .card h3 {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-weight: 500; font-size: 1.25rem; margin-bottom: 0.35rem;
-  }
-  .card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); font-size: 0.88rem; line-height: 1.6; }
-  .progress-row { display: flex; align-items: center; gap: 1rem; margin: 1.1rem 0 1.2rem; }
-  .progress-track {
-    flex: 1; height: 4px; border-radius: 2px;
-    background: var(--aimt-surface-4, rgba(255,255,255,0.045));
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; width: 0%;
-    background: var(--aimt-color-accent, #a3968d);
-    border-radius: 2px; transition: width 0.6s ease;
-  }
-  .progress-pct {
+  .greeting-sub { color: var(--aimt-color-text-muted, rgba(255,255,255,0.5)); font-size: 0.94rem; line-height: 1.7; max-width: 56ch; margin-bottom: 2.75rem; }
+
+  .section-label {
     font-family: var(--aimt-font-mono, monospace);
-    font-size: 0.78rem; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    min-width: 3.2em; text-align: right;
+    font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--aimt-color-accent, #a3968d);
+    margin: 3rem 0 1.1rem;
+    display: block;
   }
+  .section-label:first-of-type { margin-top: 0; }
+
+  /* Primary course hero */
+  .course-hero {
+    background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%);
+    border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.08));
+    border-radius: var(--aimt-radius-panel, 16px);
+    padding: 2rem 2.25rem;
+  }
+  .course-hero-eyebrow {
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(163,150,141,0.6); margin-bottom: 0.85rem; display: block;
+  }
+  .course-hero h2 {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-weight: 700; font-size: clamp(1.4rem, 2.6vw, 1.9rem); letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+  }
+  .course-hero-meta { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.82rem; margin-bottom: 1.1rem; }
+  .course-hero-position { color: var(--aimt-color-text-body, rgba(255,255,255,0.56)); font-size: 0.9rem; margin-bottom: 1.2rem; }
+  .progress-row { display: flex; align-items: center; gap: 1rem; margin: 0 0 1.4rem; }
+  .progress-track { flex: 1; height: 4px; border-radius: 2px; background: var(--aimt-surface-4, rgba(255,255,255,0.06)); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--aimt-color-accent, #a3968d); border-radius: 2px; transition: width 0.6s ease; }
+  .progress-pct { font-family: var(--aimt-font-mono, monospace); font-size: 0.78rem; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); min-width: 3.2em; text-align: right; }
+  .course-hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+
   .btn {
-    display: inline-block; background: var(--aimt-color-accent, #a3968d);
-    color: #1a1814; text-decoration: none; border: none; cursor: pointer;
-    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
-    font-size: 0.88rem; font-weight: 500; letter-spacing: 0.04em;
-    padding: 0.7rem 1.5rem; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    background: #fff; color: #1a1814; text-decoration: none; border: none; cursor: pointer;
+    padding: 0.85rem 1.3rem; border-radius: var(--aimt-radius-pill, 980px);
+    min-height: 44px;
   }
   .btn.ghost {
-    background: transparent;
-    border: 1px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
-    color: var(--aimt-color-accent, #a3968d);
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
+    color: rgba(255,255,255,0.72);
   }
-  .cred-line {
-    font-family: var(--aimt-font-mono, monospace);
-    font-size: 0.82rem; letter-spacing: 0.06em;
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    margin: 0.7rem 0 1rem; word-break: break-all;
+
+  .card {
+    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
+    border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    border-radius: var(--aimt-radius-md); padding: 1.5rem 1.6rem; margin-bottom: 0.85rem;
   }
-  .empty {
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    font-size: 0.9rem; line-height: 1.6;
+  .card h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; margin-bottom: 0.4rem; }
+  .card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); font-size: 0.86rem; line-height: 1.6; }
+  .cred-line { font-family: var(--aimt-font-mono, monospace); font-size: 0.8rem; letter-spacing: 0.04em; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); margin: 0.75rem 0 1rem; word-break: break-all; }
+  .empty { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; line-height: 1.6; }
+  .cert-status-label {
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(163,150,141,0.6); margin-bottom: 0.6rem; display: block;
   }
-  .resource-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0.85rem 0; gap: 1rem;
-    border-bottom: 1px solid var(--aimt-border-soft, rgba(255,255,255,0.06));
-  }
+
+  /* Practitioner tools */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; }
+  .tool-card { background: var(--aimt-surface-3, rgba(255,255,255,0.035)); border: 0.5px solid var(--aimt-border-strong, rgba(255,255,255,0.09)); border-radius: var(--aimt-radius-md); padding: 1.4rem 1.5rem; }
+  .tool-card h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 0.98rem; margin-bottom: 0.5rem; }
+  .tool-card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.5)); font-size: 0.84rem; line-height: 1.6; margin-bottom: 1rem; }
+
+  /* Resource rows */
+  .resource-list { background: var(--aimt-surface-2, rgba(255,255,255,0.03)); border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.07)); border-radius: var(--aimt-radius-md); padding: 0.3rem 1.5rem; }
+  .resource-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; gap: 1rem; border-bottom: 0.5px solid var(--aimt-border-soft, rgba(255,255,255,0.06)); }
   .resource-item:last-child { border-bottom: none; }
+  .resource-item .r-label { font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(163,150,141,0.5); margin-bottom: 0.25rem; }
   .resource-item .r-name { font-size: 0.92rem; }
-  .resource-item .r-desc { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.78rem; margin-top: 0.15rem; }
-  .resource-item a {
-    color: var(--aimt-color-accent, #a3968d); text-decoration: none;
-    font-size: 0.84rem; white-space: nowrap;
-  }
+  .resource-item .r-desc { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.78rem; margin-top: 0.2rem; max-width: 56ch; }
+  .resource-item a { color: var(--aimt-color-accent, #a3968d); text-decoration: none; font-size: 0.84rem; white-space: nowrap; }
+
   .account-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .loading { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; padding: 2rem 0; }
-  footer {
-    text-align: center; padding: 2.5rem 1.5rem;
-    color: var(--aimt-color-text-micro, rgba(255,255,255,0.28)); font-size: 0.78rem;
-  }
+  .loading { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; padding: 3rem 0; }
+  footer { text-align: center; padding: 2.5rem 1.5rem; color: var(--aimt-color-text-micro, rgba(255,255,255,0.28)); font-size: 0.78rem; }
   footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.55rem; }
+
+  @media (max-width: 700px) {
+    .wrap { padding: 0 1.1rem 3rem; }
+    .course-hero { padding: 1.6rem 1.4rem; }
+    .course-hero-actions .btn { width: 100%; }
+    .tools-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <div class="brand"><a href="index.html">American Institute of Modern Trichology</a></div>
-    <button class="signout" onclick="signOut()">Sign out</button>
+    <a href="index.html" class="topbar-brand">
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="2" fill="currentColor"/></svg>
+      <span>My AIMT</span>
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email" id="userEmail"></span>
+      <button class="signout" onclick="signOut()">Sign out</button>
+    </div>
   </div>
 
-  <h1>My AIMT</h1>
-  <div class="welcome-email" id="userEmail"></div>
+  <h1 id="greetingTitle">Welcome back.</h1>
+  <p class="greeting-sub">Pick up where you left off, access your practitioner tools, or review your certification progress.</p>
 
   <div id="loading" class="loading">Loading your studies…</div>
 
   <div id="dashboard" style="display:none">
-    <div class="section-label">Your Courses</div>
+    <span class="section-label">Continue Learning</span>
     <div id="coursesArea"></div>
 
-    <div class="section-label">Certification</div>
+    <span class="section-label">Certification</span>
     <div id="certArea"></div>
 
-    <div class="section-label">Resources</div>
-    <div class="card" id="resourcesCard"></div>
+    <span class="section-label">Practitioner Tools</span>
+    <div class="tools-grid" id="toolsArea"></div>
 
-    <div class="section-label">Account</div>
+    <span class="section-label">Your Resources</span>
+    <div class="resource-list" id="resourcesCard"></div>
+
+    <span class="section-label">Account</span>
     <div class="card">
       <div class="account-row">
         <div class="meta">Signed in as <span id="accountEmail"></span></div>
-        <a class="btn ghost" href="student-access.html#reset">Change password</a>
+        <a class="btn ghost" href="student-access.html#reset">Change Password</a>
       </div>
     </div>
   </div>
@@ -161,11 +195,30 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const COURSES = {
   'headspa-mastery': {
-    title: 'HeadSpa Mastery',
-    subtitle: 'Head Spa Practitioner Certification · 12 modules',
+    title: 'Head Spa Certification Course',
+    subtitle: 'AIMT · Certification 01',
     entry: 'headspa-mastery.html?enter=1',
     totalModules: 12
   }
+};
+
+/* Display-only module title map for the "current position" label below the
+   course hero — mirrors the real module sequence used inside the course
+   shell. Purely cosmetic; does not affect progress calculation. */
+const MODULE_TITLES = {
+  0: 'Welcome Module',
+  1: 'Role of the Head Spa Technician',
+  2: 'Welcoming Your Client',
+  3: 'Hair & Scalp Anatomy',
+  4: 'Microscopy & Scalp Assessment',
+  5: 'Scalp Types & Protocol Adaptation',
+  6: 'Conditions & Disorders',
+  7: 'Equipment & Room Setup',
+  8: 'The Head Spa Service',
+  9: 'Checkout, Client Closing & Pricing Strategy',
+  10: 'Sanitation & Reset Systems',
+  11: 'AI / Modern Practice Tools',
+  12: 'Final Certification Assessment'
 };
 
 /* ── Same per-tab session storage as the rest of the site ── */
@@ -199,8 +252,18 @@ async function init() {
   document.getElementById('userEmail').textContent = email;
   document.getElementById('accountEmail').textContent = email;
 
+  const firstName = currentUser.user_metadata && currentUser.user_metadata.first_name;
+  document.getElementById('greetingTitle').textContent = firstName ? `Welcome back, ${firstName}.` : 'Welcome back.';
+
   const entitledSlugs = await loadCourses(email);
   await Promise.all([loadCertificates(), loadResources(entitledSlugs)]);
+
+  if (!entitledSlugs || !entitledSlugs.length) {
+    document.getElementById('coursesArea').innerHTML =
+      '<div class="card"><h3>No AIMT programs are connected to this account yet.</h3>' +
+      '<p class="meta">If you enrolled using a different email, sign out and use that account. Otherwise, explore current AIMT certifications.</p>' +
+      '<div style="margin-top:1rem"><a class="btn" href="courses.html">View Certifications →</a></div></div>';
+  }
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
@@ -214,7 +277,7 @@ async function loadCourses(email) {
     .or('user_id.eq.' + currentUser.id + ',purchaser_email.eq.' + email);
 
   if (error || !ents || !ents.length) {
-    area.innerHTML = '<div class="card"><div class="empty">No enrollments yet. Browse our <a href="courses.html" style="color:var(--aimt-color-accent,#a3968d)">certifications</a> to begin.</div></div>';
+    area.innerHTML = '';
     return [];
   }
 
@@ -230,19 +293,35 @@ async function loadCourses(email) {
   area.innerHTML = slugs.map(slug => {
     const course = COURSES[slug] || { title: slug, subtitle: '', entry: '#', totalModules: 12 };
     let done = 0;
+    let highestModuleTouched = 0;
     const state = progBySlug[slug];
     try {
       const progress = (state && state.progress) || {};
-      Object.keys(progress).forEach(k => { if (progress[k] && progress[k].complete) done++; });
+      Object.keys(progress).forEach(k => {
+        if (progress[k] && progress[k].complete) done++;
+        const moduleNum = parseInt(k, 10);
+        if (!Number.isNaN(moduleNum) && moduleNum > highestModuleTouched) highestModuleTouched = moduleNum;
+      });
     } catch (_) {}
     const pct = Math.min(100, Math.round((done / course.totalModules) * 100));
-    const label = done === 0 ? 'Begin course' : (pct >= 100 ? 'Revisit course' : 'Continue');
-    return '<div class="card">' +
-      '<h3>' + course.title + '</h3>' +
-      '<div class="meta">' + course.subtitle + '</div>' +
+
+    let ctaLabel = 'Begin Certification →';
+    if (done > 0 && pct < 100) ctaLabel = 'Continue Course →';
+    else if (pct >= 100) ctaLabel = 'Revisit Course →';
+
+    const positionLabel = MODULE_TITLES[highestModuleTouched] || (done === 0 ? MODULE_TITLES[0] : `Module ${highestModuleTouched}`);
+    const positionText = done === 0
+      ? `Next up · ${MODULE_TITLES[0]}`
+      : `Module ${highestModuleTouched} · ${positionLabel}`;
+
+    return '<div class="course-hero">' +
+      '<span class="course-hero-eyebrow">Continue Learning</span>' +
+      '<h2>' + course.title + '</h2>' +
+      '<div class="course-hero-meta">' + course.subtitle + '</div>' +
+      '<div class="course-hero-position">' + positionText + '</div>' +
       '<div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
       '<div class="progress-pct">' + pct + '%</div></div>' +
-      '<a class="btn" href="' + course.entry + '">' + label + '</a>' +
+      '<div class="course-hero-actions"><a class="btn" href="' + course.entry + '">' + ctaLabel + '</a></div>' +
       '</div>';
   }).join('');
   return slugs;
@@ -261,11 +340,12 @@ async function loadCertificates() {
     const course = COURSES[c.course_slug] || { title: c.course_slug, entry: '#' };
     const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     return '<div class="card">' +
-      '<h3>' + course.title + ' — Certified</h3>' +
+      '<span class="cert-status-label">AIMT Certified</span>' +
+      '<h3>' + course.title + '</h3>' +
       '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
-      '<div class="cred-line">Credential ID: ' + c.credential_id + '</div>' +
-      '<a class="btn" href="' + course.entry + '&cert=1" style="margin-right:0.6rem">View certificate</a>' +
-      '<a class="btn ghost" href="verify.html">Verification page</a>' +
+      '<div class="cred-line">Credential ID · ' + c.credential_id + '</div>' +
+      '<a class="btn" href="' + course.entry + '&cert=1" style="margin-right:0.6rem">View &amp; Download Certificate →</a>' +
+      '<a class="btn ghost" href="verify.html">Verify Credential →</a>' +
       '</div>';
   });
 
@@ -295,38 +375,53 @@ async function loadCertificates() {
   Object.values(latestNotYetPassedBySlug).forEach(a => {
     const course = COURSES[a.course_slug] || { title: a.course_slug, entry: '#' };
     cards.push('<div class="card">' +
-      '<h3>' + course.title + ' — Assessment not yet passed</h3>' +
-      '<div class="meta">Attempt ' + a.attempt_number + ' · your Performance Review shows what to focus on before your next attempt.</div>' +
-      '<a class="btn" href="' + course.entry + '&cert=1">View Performance Review</a>' +
+      '<span class="cert-status-label">Certification Not Yet Issued</span>' +
+      '<h3>' + course.title + '</h3>' +
+      '<div class="meta">Attempt ' + a.attempt_number + ' · your latest assessment has been reviewed. Return to the course to follow your recommended review and remediation path.</div>' +
+      '<div style="margin-top:1rem"><a class="btn" href="' + course.entry + '&cert=1">Review Next Steps →</a></div>' +
       '</div>');
   });
 
   area.innerHTML = cards.length
     ? cards.join('')
-    : '<div class="card"><div class="empty">Your certificate will appear here when you complete a course. Every AIMT credential carries a unique ID your employer can verify.</div></div>';
+    : '<div class="card"><span class="cert-status-label">Certification</span><h3>Your certification path is in progress.</h3><p class="meta">Complete the required course work to reach the Final Certification Assessment.</p></div>';
 }
 
 /* Resources are gated on real entitlement, not client state: entitledSlugs
    comes from loadCourses()'s RLS-scoped course_entitlements read, so a
    non-entitled user manipulating client state gains nothing — the registry
-   for a course they aren't in `entitledSlugs` is simply never rendered. */
+   for a course they aren't in `entitledSlugs` is simply never rendered.
+   Tool-type entries (e.g. the Service Timer) render in Practitioner Tools;
+   everything else renders as a resource download row. */
 async function loadResources(entitledSlugs) {
+  const toolsArea = document.getElementById('toolsArea');
   const card = document.getElementById('resourcesCard');
   const registry = window.AIMT_COURSE_RESOURCES || {};
-  const items = [];
+  const toolItems = [];
+  const downloadItems = [];
   (entitledSlugs || []).forEach(slug => {
     (registry[slug] || []).forEach(r => {
-      const isTool = r.type === 'tool';
-      items.push(
-        '<div class="resource-item"><div><div class="r-name">' + r.title + '</div>' +
-        '<div class="r-desc">' + r.moduleLabel + ' · ' + r.description + '</div></div>' +
-        '<a href="' + r.href + '"' + (isTool ? '' : ' download') + '>' + (isTool ? 'Open' : 'Download') + '</a></div>'
-      );
+      if (r.type === 'tool') {
+        toolItems.push(
+          '<div class="tool-card"><h3>' + r.title + '</h3>' +
+          '<div class="meta">' + r.description + '</div>' +
+          '<a class="btn ghost" href="' + r.href + '">Open Timer →</a></div>'
+        );
+      } else {
+        downloadItems.push(
+          '<div class="resource-item"><div><div class="r-label">' + r.moduleLabel + '</div><div class="r-name">' + r.title + '</div>' +
+          '<div class="r-desc">' + r.description + '</div></div>' +
+          '<a href="' + r.href + '" download>Download</a></div>'
+        );
+      }
     });
   });
-  card.innerHTML = items.length
-    ? items.join('')
-    : '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
+  toolsArea.innerHTML = toolItems.length
+    ? toolItems.join('')
+    : '<div class="tool-card"><div class="empty">Tools designed to stay useful after the lesson ends will appear here as they unlock.</div></div>';
+  card.innerHTML = downloadItems.length
+    ? downloadItems.join('')
+    : '<div class="resource-item"><div class="empty">Course references and working documents will appear here as they unlock.</div></div>';
 }
 
 async function signOut() {
