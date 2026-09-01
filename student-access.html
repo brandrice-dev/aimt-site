@@ -897,7 +897,7 @@ body {
               return;
             }
             if (!(await ensureSessionReady(created.user.id))) {
-              showNotice('Staff account created. Your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+              showNotice('Staff account created. Your session is still initializing. Tap "Continue Your Training →" once more.');
               existingAuthorizedSession = created.user;
               return;
             }
@@ -922,7 +922,7 @@ body {
         }
 
         if (!(await ensureSessionReady(data.user.id))) {
-          showNotice('You are signed in, but your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+          showNotice('You are signed in, but your session is still initializing. Tap "Continue Your Training →" once more.');
           existingAuthorizedSession = data.user;
           return;
         }
