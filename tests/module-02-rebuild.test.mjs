@@ -118,16 +118,40 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// D2. COMPLETION CARD — RECAP FOLDED IN, MODULE 1 PATTERN REUSED
+// D2. COMPLETION CARD — MATCHES THE DOMINANT .lc-check/.lc-body COURSE
+// STANDARD (Modules 7/8/9/10/11), not a Module-2-specific design, with the
+// recap folded in via the .lc-recap pattern m1Complete already established.
 // ─────────────────────────────────────────────────────────────────────────
 (function completionCardTests() {
   check('D2. COMPLETION', 'there is no standalone white "Module recap" section (sec-eyebrow/sec-title) outside the black completion card', !/class="sec-eyebrow"[^>]*>Module recap</.test(module2Wrap) && !/class="sec-title"[^>]*>[^<]*Module recap/.test(module2Wrap));
   const completeMatch = module2Wrap.match(/<div class="lesson-complete" id="m2Complete"[\s\S]*?\n {4}<\/div>/);
   check('D2. COMPLETION', 'the m2Complete card is found', !!completeMatch);
   const completeHtml = completeMatch ? completeMatch[0] : '';
-  check('D2. COMPLETION', 'the recap now lives inside the black completion card, reusing the exact m1Complete pattern (.lc-recap > .lc-next-label "Module recap" + .lc-recap-list)', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(completeHtml));
-  check('D2. COMPLETION', 'the recap list preserves the core recap substance (intake/uncertainty, plan-before-treatment, protect the flow)', /Review the intake before the appointment/.test(completeHtml) && /Establish the service plan before treatment/.test(completeHtml) && /Protect the flow/.test(completeHtml));
+  check('D2. COMPLETION', 'uses .lc-check + checkmark icon, not a custom icon treatment', /<div class="lc-check">✓<\/div>/.test(completeHtml));
+  check('D2. COMPLETION', 'title is the standard literal "Module complete." -- not a custom serif headline', /<div class="lc-title">Module complete\.<\/div>/.test(completeHtml));
+  check('D2. COMPLETION', 'competency statement uses .lc-body (the class Modules 7-11 use), not .lc-sub', /<div class="lc-body">/.test(completeHtml));
+  check('D2. COMPLETION', 'the recap lives inside the black completion card, reusing the exact m1Complete pattern (.lc-recap > .lc-next-label "Module recap" + .lc-recap-list)', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(completeHtml));
+  check('D2. COMPLETION', 'the recap list preserves the four required doctrine bullets', /Intake determines the plan\./.test(completeHtml) && /Preparation removes preventable uncertainty\./.test(completeHtml) && /Begin hands-on service intentionally\./.test(completeHtml) && /Protect the quiet while responding when something genuinely changes\./.test(completeHtml));
+  check('D2. COMPLETION', 'the final takeaway line is present', /Prepare first\. Lead second\. Stay attentive throughout\./.test(completeHtml));
   check('D2. COMPLETION', 'the m1Complete card (frozen reference) uses the identical .lc-recap/.lc-recap-list structure -- confirms this is a reuse, not a new pattern', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(extractWrap(courseSrc, 'module1Wrap') || ''));
+  const m8CompleteHtml = extractWrap(courseSrc, 'module8Wrap') || '';
+  check('D2. COMPLETION', 'Module 8 (a dominant-pattern module) also uses .lc-check + "Module complete." + .lc-body -- confirms m2Complete now matches the real course standard, not just one other module', /<div class="lc-check">✓<\/div>\s*\n\s*<div class="lc-title">Module complete\.<\/div>\s*\n\s*<div class="lc-body">/.test(m8CompleteHtml));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// D3. UNCERTAINTY CARD + BEFORE/DURING COMPARISON — REUSED CARD PATTERNS,
+// NOT A LOOSE PARAGRAPH OR TWO DISCONNECTED BOXES
+// ─────────────────────────────────────────────────────────────────────────
+(function referenceCardTests() {
+  check('D3. UNCERTAINTY CARD', 'the 10-item list is a single .info-card (one contained card, not ten separate cards)', (module2Wrap.match(/Relaxation begins with certainty\.[\s\S]{0,250}<div class="info-card">/) || []).length === 1);
+  check('D3. UNCERTAINTY CARD', 'uses the new .ref-list divider-list component (a light-theme sibling of the opener\'s own .mo-list pattern), not a <br>-separated paragraph', (module2Wrap.match(/<ul class="ref-list">/g) || []).length >= 2);
+  check('D3. UNCERTAINTY CARD', 'splits into a balanced two-column layout on desktop via the existing .grid-2col primitive', /Relaxation begins with certainty\.[\s\S]{0,400}<div class="grid-2col"/.test(module2Wrap));
+  check('D3. UNCERTAINTY CARD', 'all 10 original items are still present (no content dropped), just restructured', ['What they should change into', 'What they may leave on', 'Where their belongings go', 'How they will remain appropriately covered', 'Where to go or wait once ready', 'Whether you return or meet them elsewhere', "What happens right after they're ready", 'The general shape of the appointment', 'Roughly how the service will flow', 'How to communicate a needed change'].every((item) => module2Wrap.includes(item)));
+
+  check('D3. COMPARISON', 'the before/during comparison is now ONE outer .info-card with two internal columns, not two separate .info-cards', !/<div class="grid-2col">\s*\n\s*<div class="info-card"/.test(module2Wrap));
+  check('D3. COMPARISON', 'both column labels are present inside that one card', /Establish before service vs\. during service|Establish before service/.test(module2Wrap) && module2Wrap.includes('Manage during service'));
+  check('D3. COMPARISON', 'both columns use the tightened copy (no orphan-prone long phrasing like "Fragrance tolerance / fragrance-free plan")', !module2Wrap.includes('Fragrance tolerance / fragrance-free plan') && module2Wrap.includes('Fragrance plan'));
+  check('D3. COMPARISON', 'the during-service column includes the changed-preference item using the tightened wording', module2Wrap.includes('Changed preference or new information'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -153,6 +177,10 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('E. INTERACTION', 'the old scent-script-builder UI entry point is gone from module2Wrap (evaluateScript() is retired, not deleted -- see its own comment)', !module2Wrap.includes('onclick="evaluateScript()"'));
   check('E. INTERACTION', 'the old arrival-sequence accordion is gone from module2Wrap', !module2Wrap.includes('class="timeline-wrap"') && !/onclick="openStep\(/.test(module2Wrap));
   check('E. INTERACTION', 'the old "what breaks the moment?" quiz is gone from module2Wrap', !module2Wrap.includes('id="breakQuiz"'));
+
+  check('E. SHELL', 'the interaction now has a real contained shell -- the established .info-card component, not a bare .m5-decision-block sitting directly on the page', /<div class="info-card" id="m2bdQuiz">/.test(module2Wrap) && !module2Wrap.includes('class="m5-decision-block" id="m2bdQuiz"'));
+  check('E. SHELL', 'the progress indicator uses a compact "01 / 06" mono-numeral treatment', /String\(m2BdIndex \+ 1\)\.padStart\(2, '0'\) \+ ' \/ ' \+ String\(M2_BD_ITEMS\.length\)\.padStart\(2, '0'\)/.test(courseSrc));
+  check('E. SHELL', 'the progress indicator uses the existing mono font token (same treatment as .rst-num elsewhere)', /id="m2bdProgress" style="font-family:var\(--aimt-font-mono\)/.test(module2Wrap));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

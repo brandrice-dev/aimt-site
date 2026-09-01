@@ -391,6 +391,13 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 /* Info card */
 .info-card { background: rgba(255,255,255,0.65); backdrop-filter: blur(10px); border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.25rem 1.4rem; margin: 1.5rem 0; }
 .ic-title { font-size: 0.78rem; font-weight: 500; margin-bottom: 10px; letter-spacing: 0.02em; }
+/* Light-theme sibling of .mo-list (the opener's own divider-list pattern,
+   used in every module opener's "In this module" list) -- same list-style/
+   divider structure, expressed in the light-content-area token set so it
+   can sit inside .info-card instead of the dark .mod-opener. */
+.ref-list { list-style: none; margin: 0; padding: 0; }
+.ref-list li { font-size: 0.82rem; color: var(--text); font-weight: 300; line-height: 1.5; padding: 0.55rem 0; border-bottom: 0.5px solid var(--border2); }
+.ref-list li:last-child { border-bottom: none; }
 
 /* Ungraded practice interaction (predict-then-reveal) */
 .practice-interaction { margin: 1.25rem 0; }
@@ -5574,7 +5581,23 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">Before the client is expected to relax, make sure they know:</div>
 
     <div class="info-card">
-      <div style="font-size:.85rem;font-weight:300;line-height:1.9;color:var(--text);">What they should change into<br>What they may leave on<br>Where their belongings go<br>How they will remain appropriately covered<br>Where they should go or wait once they are ready<br>Whether the practitioner will return to the room or meet them elsewhere<br>What happens immediately after they are changed and ready<br>The general shape of the appointment they are about to experience<br>Roughly how the service will flow without narrating every technique<br>How to communicate if temperature, pressure, positioning, or comfort needs to change</div>
+      <div class="ic-title">What to establish before the client relaxes</div>
+      <div class="grid-2col" style="margin:0.6rem 0 0;">
+        <ul class="ref-list">
+          <li>What they should change into</li>
+          <li>What they may leave on</li>
+          <li>Where their belongings go</li>
+          <li>How they will remain appropriately covered</li>
+          <li>Where to go or wait once ready</li>
+        </ul>
+        <ul class="ref-list">
+          <li>Whether you return or meet them elsewhere</li>
+          <li>What happens right after they're ready</li>
+          <li>The general shape of the appointment</li>
+          <li>Roughly how the service will flow</li>
+          <li>How to communicate a needed change</li>
+        </ul>
+      </div>
     </div>
 
     <div class="body-text">The goal is to answer the predictable questions before the client has to carry them. The more uncertainty that can be removed appropriately at the beginning of the appointment, the less mental work the client has to do once the service starts.</div>
@@ -5595,15 +5618,35 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="body-text">Before hands-on treatment begins, the client should know enough to settle into the experience without wondering what they are supposed to do. Depending on the service and intake, establish or confirm: the service format, the standard areas included, relevant areas to modify or avoid, fragrance sensitivity or fragrance-free plan, product sensitivities, positioning and support needs, general pressure preference where useful, and how to communicate if something needs to change.</div>
     <div class="body-text">Do not turn this into a ten-minute protocol briefing. The purpose is to resolve predictable decisions now so they do not repeatedly interrupt treatment later.</div>
 
-    <div class="sec-eyebrow" style="margin-top:1.5rem;">Before service vs. during service</div>
-    <div class="grid-2col">
-      <div class="info-card" style="margin:0;">
-        <div class="ic-title">Establish before service</div>
-        <div style="font-size:.82rem;font-weight:300;line-height:1.8;color:var(--text);">Fragrance tolerance / fragrance-free plan<br>Standard areas included in the booked service<br>Known adaptations or omissions<br>Product sensitivities<br>Positioning considerations<br>General service expectations<br>Relevant touch expectations<br>Planned service format</div>
-      </div>
-      <div class="info-card" style="margin:0;">
-        <div class="ic-title">Manage during service</div>
-        <div style="font-size:.82rem;font-weight:300;line-height:1.8;color:var(--text);">Water temperature<br>Pressure when it genuinely needs adjustment<br>Immediate discomfort<br>Necessary repositioning<br>Unexpected reaction<br>New safety concern<br>A real transition that benefits from orientation<br>A question the client asks<br>A client changing their mind or communicating new information</div>
+    <div class="info-card">
+      <div class="grid-2col">
+        <div>
+          <div class="ic-title">Establish before service</div>
+          <ul class="ref-list">
+            <li>Fragrance plan</li>
+            <li>Areas included in the booked service</li>
+            <li>Planned adaptations or omissions</li>
+            <li>Product sensitivities</li>
+            <li>Positioning needs</li>
+            <li>General service expectations</li>
+            <li>Touch expectations</li>
+            <li>Service format</li>
+          </ul>
+        </div>
+        <div>
+          <div class="ic-title">Manage during service</div>
+          <ul class="ref-list">
+            <li>Water temperature</li>
+            <li>Pressure or comfort adjustment</li>
+            <li>Immediate discomfort</li>
+            <li>Repositioning</li>
+            <li>Unexpected reaction</li>
+            <li>New safety concern</li>
+            <li>Meaningful transition</li>
+            <li>Client question</li>
+            <li>Changed preference or new information</li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -5707,15 +5750,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-title">Before service, or during service?</div>
     <div class="body-text">Six real examples, one at a time. For each one, decide when it belongs — established beforehand, or handled live once the service is underway. Ungraded and retryable.</div>
 
-    <div class="m5-decision-block" id="m2bdQuiz">
-      <div class="body-text" id="m2bdProgress" style="margin:0 0 0.6rem;font-size:0.72rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);"></div>
-      <div class="sec-title" id="m2bdLabel" style="margin:0 0 0.9rem;"></div>
+    <div class="info-card" id="m2bdQuiz">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem;">
+        <div class="ic-title" style="margin:0;">Scenario</div>
+        <div id="m2bdProgress" style="font-family:var(--aimt-font-mono);font-size:0.68rem;letter-spacing:0.06em;color:var(--muted2);"></div>
+      </div>
+      <div class="sec-title" id="m2bdLabel" style="margin:0 0 1.1rem;font-size:1.05rem;"></div>
       <div class="bq-options" id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;">
         <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer('before',this)">Before service</button>
         <button type="button" class="bq-opt" aria-pressed="false" onclick="m2BdAnswer('during',this)">During service</button>
       </div>
       <div class="bq-feedback" id="m2bdFeedback" style="display:none;" aria-live="polite"></div>
-      <button type="button" class="m5-reset-btn" id="m2bdNextBtn" style="display:none;" onclick="m2BdNext()">Next example →</button>
+      <button type="button" class="m5-reset-btn" id="m2bdNextBtn" style="display:none;margin-top:0.9rem;" onclick="m2BdNext()">Next example →</button>
     </div>
 
     <hr class="divider">
@@ -5756,17 +5802,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <div class="lesson-complete" id="m2Complete" style="display:none;">
-      <div class="lc-gold">✦</div>
-      <div class="lc-next-label">Module 2 complete</div>
-      <div class="lc-title">The plan is set before the service begins.</div>
-      <div class="lc-sub">A strong Head Spa service does not become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better.</div>
+      <div class="lc-check">✓</div>
+      <div class="lc-title">Module complete.</div>
+      <div class="lc-body">You can use intake and preparation to establish the service plan, remove preventable uncertainty, begin hands-on work intentionally, and protect a relaxation-first service while staying attentive to real client needs.</div>
       <div class="lc-recap">
         <div class="lc-next-label">Module recap</div>
         <ul class="lc-recap-list">
-          <li>Review the intake before the appointment — remove preventable uncertainty during the arrival.</li>
-          <li>Establish the service plan before treatment, then begin hands-on work intentionally.</li>
-          <li>Protect the flow — speak when comfort, safety, a real transition, or the client actually requires it.</li>
+          <li>Intake determines the plan.</li>
+          <li>Preparation removes preventable uncertainty.</li>
+          <li>Begin hands-on service intentionally.</li>
+          <li>Protect the quiet while responding when something genuinely changes.</li>
         </ul>
+        <div style="margin-top:0.6rem;font-size:0.8rem;color:rgba(255,255,255,0.63);font-weight:300;line-height:1.55;">Prepare first. Lead second. Stay attentive throughout.</div>
       </div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 3</div>
@@ -9794,7 +9841,7 @@ function m2BdRender() {
   const fb = getActiveElementById('m2bdFeedback');
   const nextBtn = getActiveElementById('m2bdNextBtn');
   if (!item || !progress || !label || !opts || !fb || !nextBtn) return;
-  progress.textContent = 'Example ' + (m2BdIndex + 1) + ' of ' + M2_BD_ITEMS.length;
+  progress.textContent = String(m2BdIndex + 1).padStart(2, '0') + ' / ' + String(M2_BD_ITEMS.length).padStart(2, '0');
   label.textContent = item.label;
   opts.querySelectorAll('.bq-opt').forEach((o) => { o.classList.remove('correct', 'wrong'); o.setAttribute('aria-pressed', 'false'); });
   fb.style.display = 'none';
