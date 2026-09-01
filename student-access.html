@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Student Access — AIMT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="description" content="Sign in to your AIMT student account to access your courses, progress, and certificates.">
+<meta name="description" content="Sign in to your AIMT student account to access courses, progress, resources and credentials.">
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,20 +32,42 @@ body {
   overflow-x: hidden;
 }
 .wrap {
-  min-height: 100dvh;
+  min-height: calc(100dvh - 56px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
 }
 .card {
-  width: min(100%, 760px);
+  width: min(100%, 980px);
+  display: grid;
+  grid-template-columns: 0.85fr 1fr;
+  align-items: stretch;
+  gap: 0;
   background: var(--panel);
   border: 0.5px solid var(--panel-border);
   border-radius: 18px;
-  padding: clamp(2rem, 4vw, 3.1rem);
+  overflow: hidden;
   box-shadow: 0 16px 42px rgba(0,0,0,0.18);
   backdrop-filter: blur(14px);
+}
+.card-identity {
+  padding: clamp(2rem, 4vw, 3.1rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card-form-col {
+  padding: clamp(2rem, 4vw, 3.1rem);
+  background: rgba(255,255,255,0.02);
+  border-left: 0.5px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 860px) {
+  .card { grid-template-columns: 1fr; }
+  .card-form-col { border-left: none; border-top: 0.5px solid rgba(255,255,255,0.06); }
 }
 .eyebrow {
   font-family: var(--aimt-font-mono);
@@ -86,6 +109,7 @@ body {
   padding-top: 2rem;
   border-top: 0.5px solid rgba(255,255,255,0.08);
 }
+.card-form-col > .setup:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 .setup-label {
   font-family: var(--aimt-font-mono);
   font-size: 0.58rem;
@@ -259,19 +283,25 @@ body {
 </style>
 </head>
 <body>
+  <header class="aimt-legal-header">
+    <a href="index.html" class="aimt-legal-header-brand">AIMT</a>
+    <nav class="aimt-legal-header-links">
+      <a href="courses.html">Certifications</a>
+    </nav>
+  </header>
   <main class="wrap">
     <section class="card">
-      <div class="eyebrow">Student Access</div>
-      <h1 class="headline">
-        <em>AIMT · HeadSpa Mastery</em>
-        Sign in to your course.
-      </h1>
-      <p class="lead">Use your AIMT account to enter HeadSpa Mastery. If your purchase access is still syncing, this page will retry that connection automatically when possible. If you just purchased, finish account creation on your confirmation page first.</p>
+      <div class="card-identity">
+        <div class="eyebrow">Student Access</div>
+        <h1 class="headline">Welcome back.</h1>
+        <p class="lead">Continue your AIMT training. Sign in with the email connected to your AIMT account.</p>
+      </div>
 
+      <div class="card-form-col">
       <div class="setup">
-        <div class="setup-label">Account access</div>
-        <div class="setup-title">Enter HeadSpa Mastery.</div>
-        <p class="setup-copy">Sign in with the email tied to your enrollment. Returning students start here. New purchases should complete account creation on the confirmation page first, then return here for future access.</p>
+        <div class="setup-label">Enter My AIMT</div>
+        <div class="setup-title">Sign in to continue.</div>
+        <p class="setup-copy">Returning students start here. New purchases should complete account creation on the confirmation page first, then return here for future access.</p>
 
         <form id="signInForm" novalidate>
           <div class="form-grid">
@@ -292,17 +322,17 @@ body {
           <div class="notice" id="notice"></div>
 
           <div class="actions">
-            <button type="submit" class="btn btn-primary" id="submitBtn">Enter HeadSpa Mastery</button>
-            <a href="courses.html" class="btn btn-secondary">View Certifications</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Continue Your Training →</button>
+            <a href="courses.html" class="btn btn-secondary">View AIMT Certifications →</a>
           </div>
 
-          <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span><br>If you just enrolled and have not created your AIMT account yet, return to your confirmation page to finish setup first.</div>
+          <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span><br>Just enrolled and still need to create your account? Return to your enrollment confirmation page to finish setup.</div>
         </form>
 
         <div class="setup" id="recoveryPanel" style="display:none; margin-top:1.25rem;">
-          <div class="setup-label">Password recovery</div>
+          <div class="setup-label">Password Recovery</div>
           <div class="setup-title">Set a new password.</div>
-          <p class="setup-copy">Choose a new password for your AIMT account, then sign in again from Student Access.</p>
+          <p class="setup-copy">Choose a new password for your AIMT account. After it updates, you can continue your training normally.</p>
           <div class="form-grid">
             <div class="field">
               <label class="field-label" for="recoveryPassword">New password</label>
@@ -322,9 +352,10 @@ body {
             </div>
           </div>
           <div class="actions" style="margin-top:1rem;">
-            <button type="button" class="btn btn-primary" id="recoverySubmitBtn">Update password</button>
+            <button type="button" class="btn btn-primary" id="recoverySubmitBtn">Update Password →</button>
           </div>
         </div>
+      </div>
       </div>
     </section>
   </main>
@@ -520,13 +551,13 @@ body {
 
     function setLoading(isLoading, label) {
       submitBtn.disabled = isLoading;
-      submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Enter HeadSpa Mastery';
+      submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Continue Your Training →';
     }
 
     function setRecoveryLoading(isLoading, label) {
       if (!recoverySubmitBtn) return;
       recoverySubmitBtn.disabled = isLoading;
-      recoverySubmitBtn.textContent = isLoading ? (label || 'Updating password...') : 'Update password';
+      recoverySubmitBtn.textContent = isLoading ? (label || 'Updating password...') : 'Update Password →';
     }
 
     function parseRecoveryParams() {
@@ -801,14 +832,14 @@ body {
 
         if (await canAccessCourse(data.session.user)) {
           existingAuthorizedSession = data.session.user;
-          showNotice('You already have an active AIMT session. Click "Enter HeadSpa Mastery" to continue through the access gate.');
+          showNotice('You already have an active AIMT session. Click "Continue Your Training →" to continue.');
           return;
         }
 
         await supabaseClient.auth.signOut();
         showNotice(getPendingCheckoutSessionId()
           ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
-          : 'This account does not currently have access to HeadSpa Mastery.');
+          : 'This account does not currently have access to the Head Spa Certification Course.');
       } catch (_) {
         showNotice('Unable to verify access right now. Please try again in a moment.');
       } finally {
@@ -886,7 +917,7 @@ body {
           await supabaseClient.auth.signOut();
           showNotice(getPendingCheckoutSessionId()
             ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
-            : 'This account does not currently have access to HeadSpa Mastery.');
+            : 'This account does not currently have access to the Head Spa Certification Course.');
           return;
         }
 

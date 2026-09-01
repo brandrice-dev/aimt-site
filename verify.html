@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify a Credential — AIMT</title>
+<title>Verify an AIMT Credential | American Institute of Modern Trichology</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="description" content="Verify the authenticity of an AIMT certification credential. Every AIMT certificate carries a unique, independently verifiable credential ID.">
-<link rel="canonical" href="https://aimt-site.pages.dev/verify.html">
+<meta name="description" content="Verify an AIMT certification credential by ID. Confirm the credential holder, course and completion date through AIMT's public verification system.">
+<link rel="canonical" href="https://aimtrichology.com/verify.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -24,32 +25,31 @@
   }
   .wrap {
     width: 100%;
-    max-width: 640px;
+    max-width: 700px;
     margin: 0 auto;
     padding: 4rem 1.5rem 3rem;
     flex: 1;
   }
-  .brand {
-    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.72rem;
-    letter-spacing: 0.32em;
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    text-transform: uppercase;
-    margin-bottom: 3rem;
-  }
-  .brand a { color: inherit; text-decoration: none; }
   h1 {
     font-family: var(--aimt-font-serif, 'Playfair Display', serif);
     font-weight: 500;
     font-size: clamp(1.7rem, 4vw, 2.3rem);
     line-height: 1.2;
-    margin-bottom: 0.9rem;
+    margin: 1rem 0 0.9rem;
   }
   .sub {
     color: var(--aimt-color-text-body, rgba(255,255,255,0.52));
     font-size: 0.98rem;
     line-height: 1.65;
     margin-bottom: 2.4rem;
+    max-width: 58ch;
+  }
+  .field-label {
+    display: block;
+    font-family: var(--aimt-font-sans);
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.56);
+    margin-bottom: 0.5rem;
   }
   .lookup {
     display: flex;
@@ -60,29 +60,33 @@
     flex: 1;
     background: var(--aimt-surface-2, rgba(255,255,255,0.03));
     border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
     font-family: var(--aimt-font-mono, monospace);
-    font-size: 0.95rem;
+    font-size: 16px;
     letter-spacing: 0.06em;
+    min-height: 44px;
     padding: 0.85rem 1rem;
     outline: none;
     text-transform: uppercase;
   }
-  .lookup input:focus { border-color: var(--aimt-border-accent-strong, rgba(163,150,141,0.24)); }
+  .lookup input:focus-visible { border-color: rgba(163,150,141,0.5); outline: 2px solid #a3968d; outline-offset: 1px; }
   .lookup button {
     background: var(--aimt-color-accent, #a3968d);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #1a1814;
-    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
-    font-size: 0.9rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    min-height: 44px;
     padding: 0 1.5rem;
     cursor: pointer;
   }
   .lookup button:disabled { opacity: 0.5; cursor: default; }
+  .lookup button:focus-visible { outline: 2px solid #a3968d; outline-offset: 2px; }
   .hint {
     color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
     font-size: 0.8rem;
@@ -124,40 +128,50 @@
     margin-top: 1rem;
     letter-spacing: 0.06em;
   }
-  footer {
-    text-align: center;
-    padding: 2rem 1.5rem;
-    color: var(--aimt-color-text-micro, rgba(255,255,255,0.28));
+  .scope-note {
+    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
     font-size: 0.78rem;
+    line-height: 1.6;
+    margin-top: 1.5rem;
+    max-width: 58ch;
   }
-  footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.6rem; }
 </style>
 </head>
 <body>
+  <header class="aimt-legal-header">
+    <a href="index.html" class="aimt-legal-header-brand">AIMT</a>
+    <nav class="aimt-legal-header-links">
+      <a href="courses.html">Certifications</a>
+      <a href="student-access.html">Student Access</a>
+    </nav>
+  </header>
+
   <div class="wrap">
-    <div class="brand"><a href="index.html">American Institute of Modern Trichology</a></div>
-    <h1>Verify a credential</h1>
-    <p class="sub">Every certificate issued by AIMT carries a unique credential ID, recorded at the moment of completion. Enter an ID below to confirm its authenticity.</p>
+    <span class="aimt-sp-eyebrow">AIMT Credential Verification</span>
+    <h1>Verify an AIMT credential.</h1>
+    <p class="sub">AIMT credentials issued after successful certification carry a unique credential ID. Enter the ID below to confirm that the credential is recorded and currently active.</p>
 
+    <label class="field-label" for="credInput">Credential ID</label>
     <div class="lookup">
-      <input id="credInput" placeholder="AIMT-HSM-2026-XXXXXX" autocomplete="off" spellcheck="false">
-      <button id="credBtn" onclick="verify()">Verify</button>
+      <input id="credInput" placeholder="AIMT-HSM-2026-XXXXXX" autocomplete="off" spellcheck="false" aria-describedby="credHint">
+      <button id="credBtn" type="button" onclick="verify()">Verify Credential</button>
     </div>
-    <div class="hint">The credential ID appears at the bottom of every AIMT certificate.</div>
+    <div class="hint" id="credHint">The credential ID appears on the issued AIMT certificate.</div>
 
-    <div class="result" id="result">
+    <div class="result" id="result" role="status" aria-live="polite">
       <div class="status" id="resStatus"></div>
       <div class="name" id="resName"></div>
       <div class="detail" id="resDetail"></div>
       <div class="cred" id="resCred"></div>
     </div>
+
+    <p class="scope-note">This record confirms an active AIMT education credential. AIMT certification does not replace or expand state licensure.</p>
   </div>
 
-  <footer>
-    <a href="index.html">AIMT</a> ·
-    <a href="courses.html">Certifications</a> ·
-    <a href="terms.html">Terms</a> ·
-    <a href="privacy.html">Privacy</a>
+  <footer class="aimt-footer">
+    <div class="aimt-footer-bottom" style="text-align:center; border-top:none; margin-top:0;">
+      <a href="index.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">AIMT</a> · <a href="courses.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Certifications</a> · <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms</a> · <a href="privacy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy</a>
+    </div>
   </footer>
 
 <script>
@@ -178,35 +192,40 @@ async function verify() {
 
     if (data.valid) {
       box.classList.add('valid');
-      document.getElementById('resStatus').textContent = 'Verified · Authentic';
+      document.getElementById('resStatus').textContent = 'Verified · Active';
       document.getElementById('resName').textContent = data.student_name;
       const date = new Date(data.completed_at).toLocaleDateString('en-US',
         { month: 'long', day: 'numeric', year: 'numeric' });
       document.getElementById('resDetail').textContent =
         'Completed ' + data.course + ' on ' + date + '.';
-      document.getElementById('resCred').textContent = data.credential_id;
+      document.getElementById('resCred').textContent = 'Credential ID · ' + data.credential_id;
     } else {
       box.classList.add('invalid');
       document.getElementById('resStatus').textContent =
-        data.reason === 'revoked' ? 'Revoked' : 'Not Found';
+        data.reason === 'revoked' ? 'Credential Revoked' : 'Credential Not Found';
       document.getElementById('resName').textContent = '';
       document.getElementById('resDetail').textContent =
         data.reason === 'revoked'
-          ? 'This credential was issued but has since been revoked. Contact AIMT for details.'
-          : 'No credential matches this ID. Check the ID for typos — every character matters.';
+          ? 'This credential was previously issued but is no longer active. Contact AIMT for additional information.'
+          : 'No active AIMT credential matches this ID. Check every character and try again.';
       document.getElementById('resCred').textContent = id;
     }
   } catch (e) {
     box.classList.add('show', 'invalid');
-    document.getElementById('resStatus').textContent = 'Error';
-    document.getElementById('resDetail').textContent = 'Could not reach the verification service. Please try again.';
+    document.getElementById('resStatus').textContent = 'Verification Unavailable';
+    document.getElementById('resDetail').textContent = 'The credential service could not be reached. Please try again.';
   }
   btn.disabled = false;
-  btn.textContent = 'Verify';
+  btn.textContent = 'Verify Credential';
 }
 document.getElementById('credInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') verify();
 });
+(function prefillFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id) document.getElementById('credInput').value = id.trim().toUpperCase();
+})();
 </script>
 </body>
 </html>
