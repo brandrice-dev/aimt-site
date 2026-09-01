@@ -40,7 +40,7 @@ rash-response info card, both near-verbatim (10.5).
 
 > You already know sanitation fundamentals. This module teaches you how to apply them to the specific realities of a head spa — the sanitation and disinfection education you already completed for your license, applied to wet systems, halo equipment, reusable tools, service surfaces, linens, product handling, room reset, and workflow when the schedule is tight.
 >
-> [firmly] Your current state or local requirements, your disinfectant and product labels, and your equipment manufacturer's instructions remain controlling wherever they're more specific than this module. AIMT teaches how those requirements apply inside a head spa — this course doesn't replace them.
+> [firmly] Your current state or local requirements, your disinfectant and product labels, and your equipment manufacturer's instructions remain controlling wherever they're more specific than this module. A-I-M-T teaches how those requirements apply inside a head spa — this course doesn't replace them.
 >
 > Section 10.1 — Use the right process for the job. Five words. Five different actions.
 >
@@ -59,7 +59,7 @@ rash-response info card, both near-verbatim (10.5).
 >
 > Periodic, manufacturer-directed: the halo, basin, water system, and equipment. Follow your specific equipment manufacturer's cleaning, disinfection, and maintenance instructions, plus any applicable regulatory requirements. Your bed or halo system's own manual is the actual authority here — not a generic routine.
 >
-> [slowly] Instructor tip: in AIMT's own head spa, a whirlpool or jet-system cleaner has worked especially well for periodic cleaning of the halo and water lines. If you choose to use one, confirm first that it's compatible with your specific bed or halo system, and follow both the cleaner's label and your equipment manufacturer's instructions. This is a maintenance tip, not a required procedure — it doesn't replace any disinfection step your system actually requires.
+> [slowly] Instructor tip: in A-I-M-T's own head spa, a whirlpool or jet-system cleaner has worked especially well for periodic cleaning of the halo and water lines. If you choose to use one, confirm first that it's compatible with your specific bed or halo system, and follow both the cleaner's label and your equipment manufacturer's instructions. This is a maintenance tip, not a required procedure — it doesn't replace any disinfection step your system actually requires.
 
 ### M10-04 — 10.3 Build a reset around what cannot be rushed + Reset Under Pressure
 **SOURCE:** the full 5-step reset sequence + practitioner note + the 5-option interaction. **VOICE:** Reference for both.

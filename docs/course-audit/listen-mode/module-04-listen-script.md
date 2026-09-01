@@ -83,7 +83,7 @@ compressed prose, not dropped); the 5-question comparison list (4.6); all
 ### M4-04 — 4.4 Five-point scan + 4.5 Five observation lenses + Observation discipline
 **SOURCE:** Section 4.4 (5 stations), 4.5 (5 lenses), the classification exercise (framing, choice left to student). **VOICE:** Reference for both 5-item lists, Teaching for framing.
 
-> Section 4.4 — The five-point scalp scan. The scalp isn't uniform — AIMT's baseline scan uses the same five assessment points, in the same order, every time, so one dramatic image never gets to represent the entire head. The memory line: front, top, crown, side, back.
+> Section 4.4 — The five-point scalp scan. The scalp isn't uniform — A-I-M-T's baseline scan uses the same five assessment points, in the same order, every time, so one dramatic image never gets to represent the entire head. The memory line: front, top, crown, side, back.
 >
 > On screen there's a reference photo for each of the five stations — frontal hairline, top parting, crown and vertex, temporal area, and occipital, the back of the head. The frontal hairline is where styling products, tension, and scale are often easiest to notice. The top parting gives you a consistent central view of follicular openings and hair distribution. The crown gets compared against the parting and hairline rather than assumed to match. The temporal area lets you compare a lateral region against the center — check the opposite side if asymmetry or a localized concern comes up. And the occipital, the hidden back of the head, may look different from the areas the client sees and styles most often — position the hair securely so the lens stays steady.
 >

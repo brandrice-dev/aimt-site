@@ -37,7 +37,7 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 
 > Welcome to Module 8 — the head spa service itself. This module is about understanding how the service moves, from one technique to the next, why each part belongs, and how to adapt in real time without losing the experience.
 >
-> You'll learn to think in phases, not just a checklist of steps. You'll understand the difference between AIMT's Core and Extended reference protocols, build a full service map you can adapt on the fly, master flow, pressure, and transitions between techniques, and take the service into practice with real adaptation scenarios.
+> You'll learn to think in phases, not just a checklist of steps. You'll understand the difference between A-I-M-T's Core and Extended reference protocols, build a full service map you can adapt on the fly, master flow, pressure, and transitions between techniques, and take the service into practice with real adaptation scenarios.
 >
 > [warmly] Pay attention to this: the service is a flow, not a script. Losing the flow loses the experience, even if every step still technically happened.
 
@@ -63,13 +63,13 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 ### M8-03 — 8.1 Core and Extended
 **VOICE:** Teaching, Reference for both format summaries.
 
-> Section 8.1 — Core and Extended. Two AIMT reference protocols, one foundation.
+> Section 8.1 — Core and Extended. Two A-I-M-T reference protocols, one foundation.
 >
 > Core and Extended show how a complete service contracts or expands within a deliberately designed structure — not just two numbers on a menu. The difference is service structure, not simply less time versus more time.
 >
 > Core is a 60-minute reference: the complete condensed version, essential service flow preserved, scalable massage, bodywork, and sensory portions run tighter, and no hand-and-forearm massage. Extended is a 90-minute reference: a more expansive version where added time is directed intentionally toward selected massage, bodywork, and treatment portions — not spread evenly across every step — and includes hand-and-forearm massage.
 >
-> [firmly] Core and Extended are AIMT's current reference formats, each built as its own service structure, not a formula for simply speeding up or stretching every step. A shorter service needs deliberate decisions about which components belong. A longer service should expand only where the extra time genuinely improves the experience. The goal is deciding where time adds value — not forcing the protocol to fit a number.
+> [firmly] Core and Extended are A-I-M-T's current reference formats, each built as its own service structure, not a formula for simply speeding up or stretching every step. A shorter service needs deliberate decisions about which components belong. A longer service should expand only where the extra time genuinely improves the experience. The goal is deciding where time adds value — not forcing the protocol to fit a number.
 
 ### M8-04 — 8.2 The service map, chapters 1–5
 **SOURCE:** `M8_CHAPTERS[0..4]` — why + communication scripts, by name; no attempt to narrate physical technique. **VOICE:** Teaching for framing, Reference for each chapter's why/script.
@@ -99,7 +99,7 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 >
 > And chapter nine, Final Rinse and Halo Massage: this phase clears the conditioning portion while intentionally transitioning the client toward the close — the final halo work should feel controlled and unhurried. The cooling spray creates a deliberate temperature contrast after an extended warm-water experience, and it's worth preparing the client for that shift rather than offering to skip it mid-service. Then: wrap the hair, help the client sit up slowly — they've been horizontal for up to two hours — and deliver a specific, personalized closing observation. That's one of the strongest ways to make a service feel complete rather than rushed.
 >
-> Once you know this service, you shouldn't have to reopen this lesson to run it. On screen there's the AIMT Service Timer — a real treatment-room companion, included with your certification, that runs the full Core and Extended sequences, open to close, so you can train pacing and rehearse before a client without reopening the course.
+> Once you know this service, you shouldn't have to reopen this lesson to run it. On screen there's the A-I-M-T Service Timer — a real treatment-room companion, included with your certification, that runs the full Core and Extended sequences, open to close, so you can train pacing and rehearse before a client without reopening the course.
 
 ### M8-06 — 8.3 Flow, pressure, and transitions
 **SOURCE:** all 4 principles + the pressure-test question set. **VOICE:** Reference for all 4.

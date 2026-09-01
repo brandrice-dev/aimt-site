@@ -187,12 +187,10 @@ card's recap lines (near-verbatim).
 >
 > Take your time, and answer above.
 
-### M2-12 — Post-pass continuation: completion + recap + handoff
-**SOURCE:** the `#m2Complete` completion card, including its `.lc-recap` block (moved here from the old standalone Module Recap section — see the header note above). **VOICE:** Teaching, Reference for the recap list. `gateType: 'post-pass'`, `resumeAfterPass: true`.
+### M2-12 — Post-pass continuation: completion + handoff
+**SOURCE:** the `#m2Complete` completion card. **v4 update (course-wide completion-card standardization task):** Module 2's card no longer has a `.lc-recap` block — every Module 0-11 completion card converged on one shared `.lc-check`/"Module complete."/`.lc-body`/`.lc-next` architecture (see `tests/course-wide-completion-cards.test.mjs`), so this chunk's narration is trimmed to match: no separate "quick recap" list, one consolidated closing statement instead. **VOICE:** Teaching. `gateType: 'post-pass'`, `resumeAfterPass: true`.
 
-> Module complete. The plan is set before the service begins. A strong Head Spa service doesn't become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better.
->
-> Quick recap. Review the intake before the appointment — remove preventable uncertainty during the arrival. Establish the service plan before treatment, then begin hands-on work intentionally. Protect the flow — speak when comfort, safety, a real transition, or the client actually requires it.
+> Module complete. You can use intake and preparation to remove preventable uncertainty, establish the service plan before treatment, and protect a quiet Head Spa experience while staying attentive to real client needs.
 >
 > Up next, Module 3: moving beneath the experience into the science of the hair and scalp. The goal is to understand what you're observing, so later service decisions have a clear professional reason behind them.
 

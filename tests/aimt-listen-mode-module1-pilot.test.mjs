@@ -618,7 +618,33 @@ function diffAgainstStart(relPath) {
     '      <div class="mh-desc">The treatment is done. What happens next — how you close the appointment, and how you price what you do — is its own skill. This module is a Business Decision Lab: less about performing, more about deciding, from real numbers and calm communication.</div>',
     '      <div class="mh-eyebrow">Module 11 · AI / Modern Practice Tools</div>',
     '      <div class="mh-title">Human-led.<br>AI-assisted.</div>',
-    '      <div class="mh-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>'
+    '      <div class="mh-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>',
+    // Course-wide completion-card standardization (separate, later,
+    // explicitly owner-authorized task -- see
+    // tests/course-wide-completion-cards.test.mjs): every Module 0-11
+    // .lesson-complete card converged on one shared .lc-check/"Module
+    // complete."/.lc-body/.lc-next architecture. These are the exact
+    // legacy lines (custom icons, custom headlines, redundant pre-title
+    // labels, stacked .lc-sub paragraphs, the old .lc-recap) that
+    // genuinely no longer exist anywhere in the file -- not content
+    // changes to curriculum, checkpoints, or Module 12.
+    '      <div class="lc-next-label">Module 3 complete</div>',
+    '      <div class="lc-title">You can now see beneath the surface.</div>',
+    '      <div class="lc-sub">You connected scalp layers, follicle biology, hair-cycle timing, barrier function, and massage claims to real service decisions.</div>',
+    '      <div class="lc-sub">Assessment becomes skill when it changes the service responsibly.</div>',
+    '      <div class="lc-sub">You can translate regional observations and client feedback into a cosmetic service plan without forcing the scalp into one label.</div>',
+    '      <div class="lc-sub">You can identify the safest limit, choose the current priority, adapt the five service levers by region, explain a modified plan, and recognize when to avoid, pause, or refer.</div>',
+    '      <div class="lc-next-label">Module 4 complete</div>',
+    '      <div class="lc-title">You can collect evidence before making a decision.</div>',
+    '      <div class="lc-sub">You demonstrated a standardized five-point scan, disciplined observation language, regional comparison, image-consent awareness, and pause/referral judgment.</div>',
+    '      <div class="lc-next-label">Welcome Module complete</div>',
+    '      <div class="lc-title">The standard is established.</div>',
+    '      <div class="lc-sub">You demonstrated the difference between following a sequence and leading the full client experience. Competencies shown: course expectations, service leadership, professional boundaries.</div>',
+    '      <div class="lc-next-label">Module 1 complete</div>',
+    '      <div class="lc-title">Professional boundaries demonstrated.</div>',
+    '      <div class="lc-sub">You demonstrated observation-first language, scope and referral judgment, and an understanding of the technician\'s responsibility for the complete client experience.</div>',
+    '      <div class="lc-sub">You can now read the difference between dry scalp and dandruff, understand the Malassezia spectrum, and explain it to a client in plain language.</div>',
+    '      <div class="lc-check">✦</div>',
   ]);
   // Module 2 curriculum rebuild (see the protectedMarkers comment above):
   // rather than hand-retyping the ~150 removed lines of the old module2Wrap
@@ -863,6 +889,7 @@ function diffAgainstStart(relPath) {
   allowlist.add('scripts/cadence-model-regression/grading-dataset.mjs');
   allowlist.add('tests/cadence-checkpoint-authority.test.mjs');
   allowlist.add('tests/module-02-rebuild.test.mjs');
+  allowlist.add('tests/course-wide-completion-cards.test.mjs');
   allowlist.add('docs/course-audit/modules/module-02.md');
   allowlist.add('docs/course-audit/modules/module-02-curriculum-rebuild-2026-08.md');
   // Regression tests that pin the full M0-M11 checkpoint rubric/question
@@ -1587,19 +1614,28 @@ function runStudentPreviewInit(hostname, search) {
   })());
   check('AC. COORDINATED REVISION PASS', 'Listen Mode\'s own Continue-Listening gate (enterAwaitingCheckpoint) polls isCheckpointPassed() and only then calls offerContinue() — never on submit/attempt, only on the poll detecting an authoritative pass (or, for a checkpoint already passed at entry — a replay — an equivalent synchronous read before the poll even starts; see AF. PASSED CHECKPOINT REPLAY)', /if \(engine\.isCheckpointPassed\(appState, moduleId, awaitingCheckpointId\)\) \{\s*\n\s*stopPolling\(\);\s*\n\s*offerContinue\(false\);/.test(playerSrc));
 
-  // 5. Visible Module Recap matches the spoken recap in substance and
-  // order, sourced from the existing approved narration (no fabricated
-  // curriculum).
+  // 5. Visible completion body matches the spoken recap in substance,
+  // sourced from the existing approved narration (no fabricated
+  // curriculum). Course-wide completion-card standardization (a later,
+  // separate, explicitly owner-authorized task -- see
+  // tests/course-wide-completion-cards.test.mjs) consolidated the old
+  // bulleted .lc-recap/.lc-recap-list into one .lc-body sentence covering
+  // the same three approved-narration ideas; card *architecture* changed,
+  // the underlying M1-14 audio/script and its substance did not.
   const completionStart = courseSrc.indexOf('id="m1Complete"');
   const completionEnd = courseSrc.indexOf('</div>\n\n', completionStart);
   const completionBlock = courseSrc.slice(completionStart, completionEnd);
-  check('AC. COORDINATED REVISION PASS', 'the m1Complete completion card contains a visible "Module recap" block', /Module recap/.test(completionBlock));
-  check('AC. COORDINATED REVISION PASS', 'the visible recap lists exactly 3 items, in the same order as the approved M1-14 spoken recap (observe-not-diagnose, verify scope, referral)', (() => {
-    const items = (completionBlock.match(/<li>([^<]*)<\/li>/g) || []).map((m) => m.replace(/<\/?li>/g, ''));
-    return items.length === 3
-      && /observe/i.test(items[0]) && /diagnosis/i.test(items[0])
-      && /scope/i.test(items[1]) && /verify/i.test(items[1])
-      && /[Rr]eferral/.test(items[2]) && /job well/i.test(items[2]);
+  check('AC. COORDINATED REVISION PASS', 'the m1Complete completion card uses the course-wide standard .lc-body (not a bespoke .lc-recap) for its visible completion statement', completionBlock.includes('class="lc-body"') && !completionBlock.includes('lc-recap'));
+  check('AC. COORDINATED REVISION PASS', 'the .lc-body still covers the same three approved-narration ideas, in the same order (observe-not-diagnose, verify scope, referral)', (() => {
+    const m = completionBlock.match(/<div class="lc-body">([\s\S]*?)<\/div>/);
+    if (!m) return false;
+    const body = m[1];
+    const observeIdx = body.search(/observe/i);
+    const scopeIdx = body.search(/verify scope|scope instead of assuming/i);
+    const referralIdx = body.search(/referral/i);
+    return observeIdx !== -1 && scopeIdx !== -1 && referralIdx !== -1
+      && observeIdx < scopeIdx && scopeIdx < referralIdx
+      && /diagnosis/i.test(body) && /job well/i.test(body);
   })());
 })();
 

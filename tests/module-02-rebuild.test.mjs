@@ -118,9 +118,13 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// D2. COMPLETION CARD — MATCHES THE DOMINANT .lc-check/.lc-body COURSE
-// STANDARD (Modules 7/8/9/10/11), not a Module-2-specific design, with the
-// recap folded in via the .lc-recap pattern m1Complete already established.
+// D2. COMPLETION CARD — MATCHES THE CANONICAL COURSE-WIDE STANDARD, NO
+// MODULE-2-SPECIFIC RECAP TREATMENT OF ANY KIND. This section intentionally
+// stays light: the detailed cross-module structural contract (exactly one
+// .lc-check/.lc-title/.lc-body/.lc-next, no .lc-gold/.lc-sub/.lc-recap
+// anywhere) is owned and enforced by tests/course-wide-completion-cards.test.mjs
+// for every module, 0-11; this just confirms Module 2 specifically carries
+// no leftover special-case recap design from its own rebuild history.
 // ─────────────────────────────────────────────────────────────────────────
 (function completionCardTests() {
   check('D2. COMPLETION', 'there is no standalone white "Module recap" section (sec-eyebrow/sec-title) outside the black completion card', !/class="sec-eyebrow"[^>]*>Module recap</.test(module2Wrap) && !/class="sec-title"[^>]*>[^<]*Module recap/.test(module2Wrap));
@@ -130,12 +134,10 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('D2. COMPLETION', 'uses .lc-check + checkmark icon, not a custom icon treatment', /<div class="lc-check">✓<\/div>/.test(completeHtml));
   check('D2. COMPLETION', 'title is the standard literal "Module complete." -- not a custom serif headline', /<div class="lc-title">Module complete\.<\/div>/.test(completeHtml));
   check('D2. COMPLETION', 'competency statement uses .lc-body (the class Modules 7-11 use), not .lc-sub', /<div class="lc-body">/.test(completeHtml));
-  check('D2. COMPLETION', 'the recap lives inside the black completion card, reusing the exact m1Complete pattern (.lc-recap > .lc-next-label "Module recap" + .lc-recap-list)', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(completeHtml));
-  check('D2. COMPLETION', 'the recap list preserves the four required doctrine bullets', /Intake determines the plan\./.test(completeHtml) && /Preparation removes preventable uncertainty\./.test(completeHtml) && /Begin hands-on service intentionally\./.test(completeHtml) && /Protect the quiet while responding when something genuinely changes\./.test(completeHtml));
-  check('D2. COMPLETION', 'the final takeaway line is present', /Prepare first\. Lead second\. Stay attentive throughout\./.test(completeHtml));
-  check('D2. COMPLETION', 'the m1Complete card (frozen reference) uses the identical .lc-recap/.lc-recap-list structure -- confirms this is a reuse, not a new pattern', /<div class="lc-recap">\s*\n\s*<div class="lc-next-label">Module recap<\/div>\s*\n\s*<ul class="lc-recap-list">/.test(extractWrap(courseSrc, 'module1Wrap') || ''));
+  check('D2. COMPLETION', 'no .lc-recap of any kind remains -- Module 2 no longer has a special-case recap treatment', !completeHtml.includes('lc-recap'));
+  check('D2. COMPLETION', 'the .lc-body still captures the module\'s core doctrine in one concise statement (intake/uncertainty/plan/quiet)', /intake/i.test(completeHtml) && /uncertainty/i.test(completeHtml) && /service plan/i.test(completeHtml));
   const m8CompleteHtml = extractWrap(courseSrc, 'module8Wrap') || '';
-  check('D2. COMPLETION', 'Module 8 (a dominant-pattern module) also uses .lc-check + "Module complete." + .lc-body -- confirms m2Complete now matches the real course standard, not just one other module', /<div class="lc-check">✓<\/div>\s*\n\s*<div class="lc-title">Module complete\.<\/div>\s*\n\s*<div class="lc-body">/.test(m8CompleteHtml));
+  check('D2. COMPLETION', 'Module 8 (a dominant-pattern module) also uses .lc-check + "Module complete." + .lc-body -- confirms m2Complete matches the real course standard, not just one other module', /<div class="lc-check">✓<\/div>\s*\n\s*<div class="lc-title">Module complete\.<\/div>\s*\n\s*<div class="lc-body">/.test(m8CompleteHtml));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

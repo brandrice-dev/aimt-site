@@ -48,9 +48,9 @@ statements (11.8).
 ### M11-02 — Intro + AIMT position + 11.1 Tool literacy
 **SOURCE:** the AIMT-position key point + all 4 tool-literacy categories. **VOICE:** Reference for both.
 
-> You've already experienced AIMT's philosophy in action through Cadence. This course was built by human practitioners and professionals; Cadence is an AI learning-support tool built around that curriculum. AI can make education and practice more useful and responsive, but it does not replace the human expertise behind it. Hands-on training, webinars, and clinical or practical education remain human-led.
+> You've already experienced A-I-M-T's philosophy in action through me. This course was built by human practitioners and professionals; I'm an AI learning-support tool built around that curriculum. AI can make education and practice more useful and responsive, but I don't replace the human expertise behind me. Hands-on training, webinars, and clinical or practical education remain human-led.
 >
-> [firmly] AIMT's position: if you're going to use AI, learn to use it well.
+> [firmly] A-I-M-T's position: if you're going to use AI, learn to use it well.
 >
 > Section 11.1 — Tool literacy. What AI is actually good at.
 >
@@ -122,7 +122,7 @@ statements (11.8).
 >
 > [warmly] Use technology to become more capable, not less present. Protect the parts of professional practice whose value comes from being human: trust, touch, empathy, observation, judgment, accountability, hands-on skill, and the practitioner-client relationship.
 >
-> There's also a downloadable AIMT AI Practice Toolkit on screen — a practical reference including the B-R-I-E-F prompt framework, an AI-use and verification matrix, the client-brings-AI response framework, privacy and data checks, and ready-to-customize practice prompts.
+> There's also a downloadable A-I-M-T AI Practice Toolkit on screen — a practical reference including the B-R-I-E-F prompt framework, an AI-use and verification matrix, the client-brings-AI response framework, privacy and data checks, and ready-to-customize practice prompts.
 >
 > Here's your second, final checkpoint. Choose one real task in your practice where AI could help. Write the request you would give the AI with enough context and direction to make the result useful, then explain what you would review or verify before using the output.
 >

@@ -71,7 +71,7 @@ reframe pair (9.9).
 ### M9-04 — 9.4 Price your service + 9.5 Market context
 **VOICE:** Teaching.
 
-> Section 9.4 — Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned — enter your own product cost, overhead, practitioner time, and target margin, and it solves for the selling price that hits your target. It's a planning tool — a real business may also need to account for taxes, payroll burden, payment processing, insurance, and other costs depending on your structure and jurisdiction. AIMT doesn't prescribe state-specific tax treatment or business structure.
+> Section 9.4 — Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned — enter your own product cost, overhead, practitioner time, and target margin, and it solves for the selling price that hits your target. It's a planning tool — a real business may also need to account for taxes, payroll burden, payment processing, insurance, and other costs depending on your structure and jurisdiction. A-I-M-T doesn't prescribe state-specific tax treatment or business structure.
 >
 > Section 9.5 — Market context, not copycat pricing. Look at the market after you know your own numbers, not instead of them.
 >
@@ -82,7 +82,7 @@ reframe pair (9.9).
 
 > Section 9.6 — Design your menu. Make it easy to understand. A concise menu is generally easier to navigate — two or three clearly differentiated options can be useful, but the number should follow your actual business, not a universal rule.
 >
-> Require meaningful differentiation: different menu options should change something real — time, bodywork, processing, enhancements, scope — never an artificial "premium" difference just to create an anchor. And remember: Core and Extended are AIMT's own teaching labels from Module 8, not required client-facing menu names. Your business can package its services however it wants.
+> Require meaningful differentiation: different menu options should change something real — time, bodywork, processing, enhancements, scope — never an artificial "premium" difference just to create an anchor. And remember: Core and Extended are A-I-M-T's own teaching labels from Module 8, not required client-facing menu names. Your business can package its services however it wants.
 >
 > Section 9.7 — Enhancements that earn their place. A genuine enhancement has a distinct purpose, a real service difference, a cost effect, and clear positioning — based on the established plan, the client's goals, your observation within scope, and the time you actually have.
 >
