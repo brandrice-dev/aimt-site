@@ -19,6 +19,14 @@
 window.AIMT_COURSE_RESOURCES = {
   'headspa-mastery': [
     {
+      module: 2,
+      moduleLabel: 'Module 2 — Welcoming Your Client',
+      title: 'Head Spa Intake + Service Plan',
+      description: 'A two-part form for gathering what affects service planning, then converting it into a clear practitioner plan before hands-on treatment begins.',
+      type: 'download',
+      href: 'assets/images/course/module-02/module-02-head-spa-intake-service-plan-fillable.pdf'
+    },
+    {
       module: 8,
       moduleLabel: 'Module 8 — The Head Spa Service',
       title: 'AIMT Service Timer',

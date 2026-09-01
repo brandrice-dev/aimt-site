@@ -310,7 +310,7 @@ const registry = getCadenceModelRegistry(CURRENT_VERSION);
 (function noCollateralChangeTests() {
   const rubrics = loadCheckpointRubrics();
   check('NO COLLATERAL CHANGE', 'The full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint -- promoting the registry touched zero checkpoint content',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-f6f22d2b');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
 
   check('NO COLLATERAL CHANGE', 'GRADING_DATASET case count unchanged (72)',
     GRADING_DATASET.length === 72);

@@ -248,7 +248,7 @@ await (async function cliOutFileTests() {
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
   check('14. CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-f6f22d2b');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
 })();
 
 // ---- Report ----

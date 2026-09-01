@@ -243,7 +243,7 @@ await (async function sonnetExecConfigEndToEndTests() {
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
   check('M. CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-f6f22d2b');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
 })();
 
 // ---- Report ----

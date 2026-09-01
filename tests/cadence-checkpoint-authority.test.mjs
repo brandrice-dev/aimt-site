@@ -91,11 +91,17 @@ function check(fixtureName, label, condition, detail) {
 // response that diagnoses alopecia.
 const M1CP1_ALL_ELEMENTS = ['no_diagnosis_language', 'observation_based', 'no_treatment_claim', 'recommends_referral', 'client_appropriate_delivery'];
 
-// M2cp1 (headspa-mastery.html's M2.systems.m2cp1): stressed/late-arrival
-// consent-and-preparation checkpoint. The rubric requires all SEVEN listed
-// elements and explicitly says to immediately correct a response that
-// touches the client without permission.
-const M2CP1_ALL_ELEMENTS = ['no_shaming_client', 'confirms_intake', 'privacy_preserving_prep', 'optional_beverage_scent', 'explicit_touch_consent', 'clear_orientation', 'sequenced_with_rationale'];
+// M2cp1 (headspa-mastery.html's M2.systems.m2cp1): rebuilt for the Module 2
+// curriculum rebuild (course-audit-build) as an intake-to-treatment
+// planning checkpoint. The rubric requires all EIGHT listed elements and
+// explicitly says to immediately correct a response that treats repeated
+// permission-asking for standard steps as the preferred approach, overrides
+// an established fragrance-free plan, or claims the shoulder contact/
+// aromatherapy regulates the nervous system or guarantees relaxation. These
+// element labels are illustrative/synthetic (decideCheckpointOutcome() is
+// content-agnostic), not extracted from the real rubric text -- see
+// cadence-m2cp1-fixture-calibration.test.mjs for content-level checks.
+const M2CP1_ALL_ELEMENTS = ['reviews_intake_not_from_zero', 'removes_arrival_uncertainty', 'establishes_plan_before_treatment', 'shoulder_contact_intentional', 'correct_aromatherapy_handling', 'mostly_quiet_default', 'in_service_comm_for_real_moments', 'responsive_to_changed_mind'];
 
 const COMPATIBILITY_FIXTURES = [
   {
@@ -118,9 +124,9 @@ const COMPATIBILITY_FIXTURES = [
     cases: [
       { category: 'clearly correct', demonstrated: M2CP1_ALL_ELEMENTS, missing: [], unsafe: false, expected: 'pass' },
       { category: 'concise but correct', demonstrated: M2CP1_ALL_ELEMENTS, missing: [], unsafe: false, expected: 'pass' },
-      { category: 'incomplete', demonstrated: M2CP1_ALL_ELEMENTS.slice(0, 6), missing: [M2CP1_ALL_ELEMENTS[6]], unsafe: false, expected: 'revise' },
+      { category: 'incomplete', demonstrated: M2CP1_ALL_ELEMENTS.slice(0, 7), missing: [M2CP1_ALL_ELEMENTS[7]], unsafe: false, expected: 'revise' },
       { category: 'partially correct', demonstrated: M2CP1_ALL_ELEMENTS.slice(0, 3), missing: M2CP1_ALL_ELEMENTS.slice(3), unsafe: false, expected: 'revise' },
-      { category: 'unsafe/diagnostic', demonstrated: ['no_shaming_client', 'confirms_intake'], missing: [], unsafe: true, expected: 'revise' }, // touches client without consent
+      { category: 'unsafe/diagnostic', demonstrated: ['reviews_intake_not_from_zero', 'removes_arrival_uncertainty'], missing: [], unsafe: true, expected: 'revise' }, // repeated permission-asking / overrides fragrance-free plan / nervous-system claim
       { category: 'poor grammar but competent', demonstrated: M2CP1_ALL_ELEMENTS, missing: [], unsafe: false, expected: 'pass' },
       { category: 'spoken/natural phrasing', demonstrated: M2CP1_ALL_ELEMENTS, missing: [], unsafe: false, expected: 'pass' },
       { category: 'irrelevant response', demonstrated: [], missing: M2CP1_ALL_ELEMENTS, unsafe: false, expected: 'revise' },

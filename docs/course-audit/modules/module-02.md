@@ -1,5 +1,13 @@
 # Module 2 — Approved Audit Specification
 
+> **⚠ Partially superseded (2026-08-31).** Module 8 later established the
+> course's real governing service doctrine — intake determines the plan,
+> preparation removes uncertainty, the service executes the plan — which
+> conflicted with this document's repeated-permission-before-touch
+> framing. Module 2 was rebuilt to align with it. See
+> `module-02-curriculum-rebuild-2026-08.md` for what changed and exactly
+> which sections below are superseded vs. still accurate.
+
 **Course:** AIMT Head Spa Certification Course  
 **Module:** 2  
 **Approved module title:** Welcoming Your Client  

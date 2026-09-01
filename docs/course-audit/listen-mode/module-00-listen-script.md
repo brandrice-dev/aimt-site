@@ -6,15 +6,36 @@ Follows `module-01-reference-implementation-FROZEN.md` and
 `00-listen-mode-editorial-standard.md` — no exploratory revision passes;
 the standard is locked, this is a direct production script.
 
-**Curriculum authority:** `headspa-mastery.html` `#module0Wrap`, read in
-full 2026-08-31. Sections 0.1–0.11 (11 numbered), one ungraded practice
-interaction (Practitioner A vs. B), one checkpoint (`m0cp1`), one
-completion card. No content in Module 0 was judged screen-required/
-video-required or unsafe to convert to audio.
+**v2 update (Module 2 curriculum rebuild task, 2026-08-31):** the owner
+added a new, permanent "Before you begin" Listen Mode orientation block to
+the live page, placed right after the module opener and before Section
+0.1 — a small addition, not a Module 0 rewrite. This script gains one new
+chunk (M0-01b) for that content. Per the task's explicit instruction ("do
+not regenerate unnecessarily unrelated clean pieces if the existing
+generation structure permits a safe partial replacement"), only
+generation piece **A1** is regenerated — it already covered the module
+briefing through Section 0.3, comfortably has headroom under the 5,000-
+char cap, and is the only piece whose real narration boundary now sits
+in the middle of it. Pieces A2/A3/A4/B1 are untouched, still
+`qaStatus: 'GENERATED'` from the prior pass, not regenerated. A1 also
+picks up this task's new permanent rule while it's already being
+touched: "AIMT" is spelled out letter-by-letter in TTS text (`A-I-M-T`)
+wherever it appears, so Jane pronounces the letters instead of a word —
+the one existing "AIMT" occurrence in this script (Section 0.2, inside
+A1) is corrected in the same pass. No other Module 0 piece contains the
+word "AIMT," so no other piece needs touching for this rule.
 
-**Player segments (14, mirroring Module 1's pattern):** Opening (module
-briefing) → 0.1 → 0.2 → 0.3 → 0.4 → 0.5 → Practice → 0.6 → 0.7 → 0.8 → 0.9
-→ 0.10 → 0.11 → Checkpoint (`m0cp1`) → post-pass recap/handoff.
+**Curriculum authority:** `headspa-mastery.html` `#module0Wrap`, read in
+full 2026-08-31 (original pass) and again for the "Before you begin"
+addition. Sections 0.1–0.11 (11 numbered), the new orientation block, one
+ungraded practice interaction (Practitioner A vs. B), one checkpoint
+(`m0cp1`), one completion card. No content in Module 0 was judged
+screen-required/video-required or unsafe to convert to audio.
+
+**Player segments (15, mirroring Module 1's pattern):** Opening (module
+briefing) → Before you begin (Listen Mode orientation) → 0.1 → 0.2 → 0.3
+→ 0.4 → 0.5 → Practice → 0.6 → 0.7 → 0.8 → 0.9 → 0.10 → 0.11 → Checkpoint
+(`m0cp1`) → post-pass recap/handoff.
 
 **Reference Voice landmarks (verbatim/near-verbatim, visible order):**
 0.6's five numbered principles; 0.7's five technician-behavior cards (Hold
@@ -39,6 +60,17 @@ attention to").
 >
 > [warmly] One thing to pay attention to as you go: scope and safety come up here in Module 0 for a reason. Everything else in this course builds on staying inside it.
 
+### M0-01b — Before you begin (Listen Mode orientation)
+**SOURCE:** the new "Before you begin" block, placed live on the page right after the module opener. **VOICE:** Teaching.
+
+> Before you begin — a quick note on how to use this course. Every module here can be worked through on screen, or you can select Listen with Cadence at the bottom of the module opener for the guided audio edition. I'll teach the module out loud while the page moves with the audio, bringing important cards and frameworks into view as I get to them.
+>
+> A few things worth knowing about how listening works. It's manual — it never starts on its own. You can pause and resume anytime, and you can leave a module and come back to exactly where you stopped. A required checkpoint stops the audio and waits — you still have to complete that checkpoint yourself, in your own words. Listening never grants competency or checkpoint credit. Once I've authoritatively confirmed you passed, Continue Listening becomes available. And once a module finishes, Listen Again starts the narration over from the opening.
+>
+> One more distinction worth making: this — Listen with Cadence — is the narrated course experience. Ask Cadence is separate. Use that one when you want to ask a question, clarify something, or work through a concept on your own.
+>
+> [slowly] Read, listen, or move between both. The curriculum is the same.
+
 ### M0-02 — 0.1 Welcome
 **SOURCE:** Section 0.1.
 **VOICE:** Teaching.
@@ -61,7 +93,7 @@ attention to").
 >
 > Two things worth stating precisely here. What this course is not: this is not the only way to perform a head spa. Rigid systems create fragile practitioners. The goal is understanding, not imitation — so you can adapt based on your space, your tools, your client, and your scope.
 >
-> And what your certificate represents: completing AIMT's Head Spa Certification Course means you've worked through the required curriculum and demonstrated the course competencies. Your certificate documents that achievement. It is not a state license, a medical credential, or permission to work beyond what your existing license and local laws allow. Your licensing authority, your local regulations, and your professional scope remain the standard you follow — always.
+> And what your certificate represents: completing A-I-M-T's Head Spa Certification Course means you've worked through the required curriculum and demonstrated the course competencies. Your certificate documents that achievement. It is not a state license, a medical credential, or permission to work beyond what your existing license and local laws allow. Your licensing authority, your local regulations, and your professional scope remain the standard you follow — always.
 
 ### M0-04 — 0.3 Who this is for
 **SOURCE:** Section 0.3.
@@ -244,13 +276,14 @@ breaks approaching, not exceeding, the 5,000-char cap:
 
 | Piece | Chunks | Approx. chars |
 |---|---|---:|
-| A1 | M0-01 briefing → 0.1 → 0.2 → 0.3 | ~3,650 |
-| A2 | 0.4 → 0.5 → Practice → 0.6 | ~3,950 |
-| A3 | 0.7 → 0.8 → 0.9 | ~3,150 |
-| A4 | 0.10 → 0.11 → checkpoint prompt | ~2,600 |
-| B1 | post-pass recap/handoff | ~950 |
+| A1 (v2 — regenerated this pass) | M0-01 briefing → M0-01b Before you begin → 0.1 → 0.2 → 0.3 | ~4,550 |
+| A2 (untouched, still v1) | 0.4 → 0.5 → Practice → 0.6 | ~3,950 |
+| A3 (untouched, still v1) | 0.7 → 0.8 → 0.9 | ~3,150 |
+| A4 (untouched, still v1) | 0.10 → 0.11 → checkpoint prompt | ~2,600 |
+| B1 (untouched, still v1) | post-pass recap/handoff | ~950 |
 
-5 generations total, same voice/model as Module 1 (`Y3ZPRGOSIxbV4Rbb3WiA`,
-`eleven_v3`), one continuous performance per piece, cut into the 15
-player segments above at natural pauses after generation (silencedetect,
-same method as Module 1).
+Only A1 is regenerated this pass (1 generation); A2–B1 keep their original
+audio from the prior pass. Same voice/model as Module 1
+(`Y3ZPRGOSIxbV4Rbb3WiA`, `eleven_v3`), one continuous performance per
+piece, cut into the 16 player segments above at natural pauses after
+generation (silencedetect, same method as Module 1).

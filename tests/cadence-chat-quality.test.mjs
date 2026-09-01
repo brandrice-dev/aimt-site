@@ -335,7 +335,7 @@ await (async function harnessMirrorsProductionTests() {
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
   check('CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint -- this task touched zero checkpoint content',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-f6f22d2b');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
   check('CHECKPOINT CONTENT UNCHANGED', 'CHAT_DATASET case count is unchanged (16) -- the fixture set itself was not edited, only the harness\'s system-prompt assembly',
     CHAT_DATASET.length === 16);
 })();

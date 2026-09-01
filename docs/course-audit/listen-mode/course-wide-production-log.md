@@ -46,25 +46,64 @@ Player segments (14, per script's chunk map): to be finalized post-CapCut
 once the owner's processed audio is back and real cut points are
 confirmed against it (Module 1 precedent).
 
-## Module 2 — Welcoming Your Client
+### Module 0 — v2 update (2026-08-31): "Before you begin" Listen Mode orientation
 
-Script: `module-02-listen-script.md`. 5 ElevenLabs generations, 1 flow
-(`dkAS5dmJDA0Q3tnn3qOq`).
+A new, permanent Listen Mode orientation block was added to the live page
+right after the module opener. Per the task's "safe partial replacement"
+instruction, only piece **A1** was regenerated — it already covered the
+briefing through Section 0.3 and had headroom under the char cap; A2–B1
+are untouched, still their original v1 audio. See
+`module-00-listen-script.md`'s v2 update note for the full rationale
+(including the "AIMT" → `A-I-M-T` pronunciation fix applied to A1's one
+existing occurrence in the same pass).
 
-| Piece | Chars | Duration | Credits | Cost | Generation ID |
-|---|---:|---:|---:|---:|---|
-| A1 (briefing→2.1→2.2) | 3,046 | 181.36s | 2,373 | $0.392 | `lNpXJG8G4LBKdWo8uRzb` |
-| A2 (2.3→2.4→2.5→quiz) | 2,845 | 189.84s | 2,440 | $0.403 | `Pzn1tIMcQ25rMwCUslAc` |
-| A3 (Your voice→insight→2.6) | 3,299 | 215.12s | 2,959 | $0.488 | `87tWONcZqftYMy4OYG86` |
-| A4 (2.7→checkpoint) | 1,647 | 104.16s | 1,362 | $0.225 | `Pj2Y5lAnKpPSDtce0lOr` |
-| B1 (post-pass recap) | 749 | 44.56s | 636 | $0.105 | `FkX9ROqMQz23ElEL445d` |
-| **Total** | **11,586** | **735.04s (12:15)** | **9,770** | **$1.61** | |
+| Piece | Duration | Credits | Cost | Generation ID |
+|---|---:|---:|---:|---|
+| A1 (v2, regenerated) | 375.52s | 4,829 | $0.797 | `daIoIomPoLDJB1ReFMuC` |
 
-**CapCut masters** (`assets/audio/listen/headspa-mastery/module-02/capcut-masters/`):
-- `module-02-part-1-capcut.wav` — 11:30 — Opening → checkpoint prompt (A1+A2+A3+A4)
-- `module-02-part-2-capcut.wav` — 0:44 — post-pass recap/handoff (B1)
+**New CapCut master** (FLAC, per this delivery's explicit instruction —
+`assets/audio/listen/headspa-mastery/module-00/capcut-masters/`):
+- `module-00-part-1-capcut-v2.flac` — 10:45 — Opening → Before you begin → 0.1 → 0.2 → 0.3 → 0.4 → 0.5 → Practice → 0.6 (A1-v2 + A2)
 
-Player segments (8, per script's chunk map): finalized post-CapCut.
+This **replaces** the old `module-00-part-1-capcut.wav` (same content
+range, old A1 wording) as the file the owner should process going
+forward. `module-00-part-2-capcut.wav` and `module-00-part-3-capcut.wav`
+are unaffected and unchanged.
+
+## Module 2 — Welcoming Your Client — SUPERSEDED, see v2 below
+
+~~Script: `module-02-listen-script.md` (v1). 5 ElevenLabs generations, 1
+flow (`dkAS5dmJDA0Q3tnn3qOq`). $1.61.~~ **Obsolete.** The Module 2
+curriculum was rebuilt 2026-08-31 (see
+`docs/course-audit/modules/module-02-curriculum-rebuild-2026-08.md`) to
+align with Module 8's relaxation-first doctrine — the old arrival-
+sequence/repeated-permission-asking curriculum this v1 audio narrated no
+longer exists on the live page. Not reused; no longer installed as
+canonical audio at any point. See "Module 2 — Welcoming Your Client (v2,
+rebuilt curriculum)" below for the current, real production entry.
+
+## Module 2 — Welcoming Your Client (v2, rebuilt curriculum)
+
+Script: `module-02-listen-script.md` (v2, fully rewritten). 5 ElevenLabs
+generations, 1 flow (`BCNqRhmSqozvNehdafeZ`).
+
+| Piece | Duration | Credits | Cost | Generation ID |
+|---|---:|---:|---:|---|
+| A1 (briefing→governing principle→2.1) | 171.36s | 2,535 | $0.418 | `VqJewsrhKJfIcbfUniLc` |
+| A2 (2.2→2.3+before/during) | 232.40s | 2,801 | $0.462 | `DixFKvOTKpdq0fSmsWar` |
+| A3 (downloadable→2.4→2.5) | 250.80s | 3,390 | $0.559 | `eH5rjn1AfFkxEn9aem4u` |
+| A4 (2.6→2.7+recap→checkpoint) | 207.92s | 2,981 | $0.492 | `QnYp3Dj4oNe3b1uAruKB` |
+| B1 (post-pass recap) | 36.64s | 529 | $0.087 | `visngDyBaLUotB0uJkQd` |
+| **Total** | **899.12s (14:59)** | **12,236** | **$2.02** | |
+
+**CapCut masters** (FLAC, per this delivery's explicit instruction —
+`assets/audio/listen/headspa-mastery/module-02/capcut-masters/`):
+- `module-02-part-1-capcut.flac` — 6:44 — Opening → end of 2.3/before-during (A1+A2)
+- `module-02-part-2-capcut.flac` — 7:39 — downloadable → checkpoint prompt (A3+A4)
+- `module-02-part-3-capcut.flac` — 0:37 — post-pass recap/handoff (B1)
+
+Player segments (12, per script's chunk map): finalized post-CapCut,
+same as every other new module this pass.
 
 ## Module 3 — Hair & Scalp Anatomy
 
@@ -236,13 +275,18 @@ generation, 1 flow (`xyHEzSdteG7sA0Ug0BFC`).
 
 ---
 
-**Running total so far:** 30 generations logged with full detail this
-pass (Modules 6, 8, 9, 10, 11, 12) — **$9.29** — plus Modules 0 and 2
-logged earlier ($3.69) and Modules 3, 4, 5, 7 produced and CapCut-mastered
-but not individually cost-logged (see their sections above). **10 of 11
-new modules (0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11) plus the Module 12
-pre-exam orientation are audio-produced through CapCut-master stage** —
-raw audio generated, CapCut masters built locally — none owner-processed
-or canonical-installed yet. All new-module manifest/qaStatus wiring
-stays `GENERATED`, never `APPROVED`, until the owner's CapCut pass and
-real listen-through (Module 1's own precedent).
+**Running total so far:** 30 generations logged with full detail in the
+prior pass (Modules 6, 8, 9, 10, 11, 12) — $9.29 — plus the original
+Module 0 and v1 Module 2 passes ($3.69, Module 2's now superseded) and
+Modules 3, 4, 5, 7 produced and CapCut-mastered but not individually
+cost-logged. **This pass** (Module 2 curriculum rebuild + Module 0
+orientation) adds 6 more generations — Module 0's A1 regeneration
+($0.797) and Module 2's full 5-piece v2 re-production ($2.02) — **$2.82**,
+bringing the running total to **$15.80** across all Listen Mode
+production this session. **10 of 11 new modules (0, 2, 3, 4, 5, 6, 7, 8,
+9, 10, 11) plus the Module 12 pre-exam orientation are audio-produced
+through CapCut-master stage** — raw audio generated, CapCut masters
+built locally — none owner-processed or canonical-installed yet. All
+new-module manifest/qaStatus wiring stays `GENERATED`, never `APPROVED`,
+until the owner's CapCut pass and real listen-through (Module 1's own
+precedent).

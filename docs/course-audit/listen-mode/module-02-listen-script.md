@@ -1,172 +1,207 @@
-# Module 2 — Listen Mode Script (v1, locked-standard production)
+# Module 2 — Listen Mode Script (v2, rebuilt curriculum)
 
-**Status:** Ready for generation. Written directly against the live
-`headspa-mastery.html` (`#module2Wrap`), 2026-08-31.
+**Status:** Ready for generation. Written against the fully rebuilt live
+`#module2Wrap` (course-audit-build, "AIMT — MODULE 2 CURRICULUM REBUILD"
+task, 2026-08-31). **The prior v1 script and audio are obsolete and are
+not reused** — the old curriculum (repeated permission-asking, arrival-
+sequence accordion, scent-script-builder) directly conflicted with the
+doctrine Module 8 later established and was fully replaced. Follows the
+frozen Module 1 Listen Mode architecture; qaStatus stays `GENERATED`,
+never `APPROVED`, pending the owner's CapCut pass and listen-through.
 
-**Curriculum authority:** `#module2Wrap`. One numbered-sequence: 5-step
-arrival accordion (2.1–2.5, unnumbered on the section-eyebrow level but
-individually numbered as `tl-num` inside the accordion), plus unnumbered
-sections "Test your judgment" (interactive quiz), "Your voice" (script
-builder), "Practitioner insight" (comparison cards), numbered 2.6 "What
-goes wrong," numbered 2.7 "Consistency," one checkpoint (`m2cp1`), one
-completion card.
+**Permanent narration rules applied in this script:** Cadence speaks in
+first person (I/me/my/I'll), never third person about herself. "AIMT" is
+spelled out letter-by-letter in TTS text (`A-I-M-T`) wherever it appears,
+so Jane pronounces the letters rather than a word.
 
-**Interactive elements — handled as narration + return-to-screen, never
-as a Listen-driven exercise:** the "Test your judgment" quiz (4 options,
-1 correct) is framed and both real distractor logic and the correct
-answer's *reasoning* are narrated, but the actual choice is left to the
-student on screen, matching the Practice-interaction precedent from
-Modules 0/1. The "Your voice" script-builder is narrated as the reference
-script plus the writing prompt — Cadence does not write the student's
-answer for them.
+**Curriculum authority:** the rebuilt `#module2Wrap` in full — the
+governing-principle intro, Sections 2.1–2.7, the "Head Spa Intake +
+Service Plan" downloadable, one 12-item "Before service, or during
+service?" practitioner-judgment interaction, one checkpoint (`m2cp1`,
+preserved id and passed state), one Module Recap block, one completion
+card.
 
-**Player segments (8):** Opening (briefing) → 2.1–2.2 → 2.3–2.4 → 2.5 +
-Test your judgment → Your voice + Practitioner insight → 2.6 What goes
-wrong → 2.7 Consistency + checkpoint prompt → post-pass recap/handoff.
+**Interactive classifier (2.6):** narrated as framing only — the twelve
+items and their correct answers are the student's own ungraded, retryable
+exercise on screen, not narratable content with a single correct reading
+order.
 
-**Reference Voice landmarks:** all 5 accordion steps (2.1–2.5, exact
-purpose-language preserved — "preparation, privacy, choice, consent, a
-clear transition"); the reference scent-introduction script (verbatim,
-quoted); the two comparison cards ("Rushed and unclear" / "Guided and
-consent-based"); all 5 "what goes wrong" mistake cards, in order; the
-weak/strong response example (verbatim, since it's a direct client-facing
-script comparison).
+**Player segments (12):** Opening (briefing) → governing principle → 2.1
+→ 2.2 → 2.3 + before/during → downloadable → 2.4 First Touch → 2.5
+Protect the Quiet → 2.6 When Something Changes + interaction framing →
+2.7 Consistency + Module Recap → Checkpoint (`m2cp1`) → post-pass
+completion/handoff.
+
+**Reference Voice landmarks:** the full "remove preventable uncertainty"
+list (2.2); the full before-service/during-service lists (2.3); the
+downloadable's description and disclaimer (near-verbatim); the shoulder-
+contact "why it matters" list + "not this" prohibition + the Module
+8-approved scent-introduction line (2.4, near-verbatim); the three
+communication concepts (Communication cue / Keep the flow quiet / If
+they ask, near-verbatim from Module 8) (2.5); the five consistency
+checkpoints (2.7); the Module Recap's own closing lines (near-verbatim).
 
 ---
 
 ## The script
 
 ### M2-01 — Module Briefing (spoken)
-**SOURCE:** `.mod-opener`.
 **VOICE:** Teaching.
 
-> Welcome back. In this module, we're staying with the client experience — but moving it earlier. Before your hands ever touch the client, the arrival has already started shaping how the whole appointment feels.
+> Welcome to Module 2. The experience begins before your hands do.
 >
-> You'll walk through a complete arrival sequence, from greeting to seated. You'll test your judgment against real, ambiguous arrival scenarios, and find the voice that puts a client at ease without over-explaining. You'll see what experienced practitioners notice that new ones miss — and exactly where arrivals go wrong.
+> A Head Spa should not require a running conversation to feel attentive. Your job is to do the important thinking early: understand the client, establish the service plan, set expectations, prepare the environment, and resolve the predictable questions that could otherwise interrupt the experience later.
 >
-> [warmly] Pay attention to this: the first two minutes decide how confident a client feels for the rest of the appointment. Everything in this module is really about protecting those two minutes.
+> You'll use intake to build the service plan before the client arrives, remove preventable uncertainty during the arrival, set expectations without over-explaining the protocol, understand why the shoulder contact matters as intentional first touch, and know what belongs before service versus during service.
+>
+> [warmly] Pay attention to this: the goal is not to ask fewer questions by guessing. It is to ask the right questions at the right time.
 
-### M2-02 — Arrival sequence, steps 2.1–2.2
-**SOURCE:** accordion steps 2.1 and 2.2, including the "intake should
-guide, never override" highlight and the robe/comfort-item note.
-**VOICE:** Teaching for framing, Reference for the two highlighted callouts (near-verbatim, deliberately precise).
+### M2-02 — The governing principle
+**SOURCE:** the intro block between the opener and 2.1. **VOICE:** Reference for both principle lines.
 
-> The arrival sequence: five moments, one adaptable framework. Each one protects something specific — preparation, privacy, choice, consent, and a clear transition into the service.
+> Here's the principle that governs this module, and really this entire course from here forward: intake determines the plan. Preparation removes uncertainty. The service executes the plan.
 >
-> Step one: review before they arrive, confirm before you begin. The intake form is preparation, not a substitute for conversation. Review it before the client enters the treatment space, so you can identify sensitivities, discomfort, relevant history, and anything that might change your approach. Then, at the appointment, briefly confirm whether anything's changed, and clarify anything that affects safety, products, positioning, scent, or touch. A prepared practitioner isn't guessing in front of the client — but is still willing to ask.
+> A second important principle: relaxation begins with certainty. Before asking a client to settle into a quiet, hands-on service, remove as much preventable uncertainty as reasonably possible. Answer predictable logistical questions before the client has to carry them mentally. That doesn't mean giving a long speech or narrating every future technique.
 >
-> [firmly] Intake information should guide a professional conversation. It should never be used to diagnose a condition, or to override what the client actually tells you in person.
->
-> Step two: explain what's necessary, and preserve choice and coverage. Preparation depends on the service, your legal scope, and the client's comfort. Explain what clothing or jewelry may interfere, what they may leave on, how they'll stay covered, and where their belongings go. Ask the client to remove only what's necessary. Give them privacy while they change, and offer an alternative when they'd rather keep a garment on. A client should never feel pressured to expose more of the body than the service actually requires.
->
-> A robe, a wrap, slippers — a comfort item like that can make the transition feel considered. But the item itself isn't the standard. The standard is that it's clean, appropriate, clearly explained, and optional.
+> [slowly] The goal: prepare thoroughly, orient clearly, then let the service speak for itself.
 
-### M2-03 — Arrival sequence, steps 2.3–2.4
-**SOURCE:** accordion steps 2.3 and 2.4, including the reference consent
-script and the "calm first touch" highlight.
-**VOICE:** Teaching for framing, Reference for the quoted consent script (verbatim — this is exact client-facing language) and the calm-touch principle.
+### M2-03 — 2.1 Intake Before Arrival
+**VOICE:** Teaching, Reference for the closing key-point.
 
-> Step three: create a pause, without making a health claim. An optional beverage creates a natural pause between arrival and service — tea, water, whatever fits the setting. Offer it as a choice, not as treatment. Give ingredient information for anything herbal, account for allergies, offer a no-beverage option, and serve anything hot at a safe temperature. The purpose is hospitality and pacing — not a promise to regulate the body or treat stress.
+> Section 2.1 — Intake before arrival. The intake should do work for you.
 >
-> Step four: choice first, consent before touch. Scent can be offered as an optional sensory element — but review sensitivities first, and make the fragrance-free option just as easy to choose as any scented one. And before you touch the client at all, explain what you'd like to do, and ask permission.
+> A good intake is not paperwork you glance at while the client waits. Review it before the appointment whenever possible. By the time the client arrives, you should already understand information that could materially affect the service — sensitivities, fragrance tolerance or a fragrance-free plan, positioning needs, areas of concern, known product issues, service preferences, relevant areas to modify or avoid, and anything requiring adaptation within your professional scope.
 >
-> [slowly] Here's what that actually sounds like: "I can offer a few scent options, or we can keep your service fragrance-free. Would you like to sample them? You're welcome to close your eyes while I guide you through each one, but you don't have to. Would it be okay if I rest a hand lightly on your shoulder while you choose?"
+> The intake is also part of expectation-setting. The client should understand the type of service they booked, and that it's a hands-on service.
 >
-> A calm first touch begins with permission. Don't use touch as a technique for creating subconscious trust.
+> At arrival, don't restart the entire intake interview from zero. Confirm what genuinely needs confirming. Clarify an answer when it affects safety or the plan. Ask if something important has changed. Then move forward.
+>
+> [firmly] The point isn't to eliminate communication. It's to avoid discovering basic service decisions one step at a time while the client is trying to relax.
 
-### M2-04 — 2.5 + Test your judgment
-**SOURCE:** accordion step 2.5, plus the "What breaks the moment?" quiz framing (correct answer's reasoning narrated, choice left to the student).
-**VOICE:** Teaching.
+### M2-04 — 2.2 Remove Preventable Uncertainty
+**SOURCE:** the full ten-item list. **VOICE:** Reference for the list.
 
-> Step five: guide the client, without briefing them on every step. They should know what they need to do, what happens next, and how to tell you if something's uncomfortable or they've changed their mind. They don't need a full explanation of the entire protocol. One clear line is often enough: "I'll guide you as we go. You can let me know at any point if you want the pressure, temperature, position, scent, or any part of the service adjusted."
+> Section 2.2 — Remove preventable uncertainty. Relaxation begins with certainty.
 >
-> Now — test your judgment. What actually breaks the moment at the start of a service? On screen you'll see four options: the tea taking an extra minute, the slippers you normally offer being unavailable, rushing the client through changing because the last appointment ran long, or the client declining every scent option. Look at the four choices and pick the one that does the most real damage to trust.
+> Before the client is expected to relax, make sure they know: what they should change into, what they may leave on, where their belongings go, how they'll remain appropriately covered, where they should go or wait once they're ready, whether you'll return to the room or meet them elsewhere, what happens immediately after they're changed and ready, the general shape of the appointment they're about to experience, roughly how the service will flow without narrating every technique, and how to communicate if temperature, pressure, positioning, or comfort needs to change.
 >
-> [firmly] Here's the reasoning once you've chosen: schedule pressure belongs to the business, not the client. The other three are minor and recoverable — a missing amenity, a declined option, a small delay. Rushing someone through changing transfers your time pressure directly onto them, at the exact moment they're supposed to feel taken care of. That's the one that actually costs you trust.
+> The goal is to answer the predictable questions before the client has to carry them. The more uncertainty you remove appropriately at the beginning of the appointment, the less mental work the client has to do once the service starts.
+>
+> We're not making a medical claim that this guarantees relaxation. We're teaching that clear preparation reduces preventable logistical uncertainty and lets the client spend less time wondering what happens next.
+>
+> [slowly] Prepare thoroughly. Orient clearly. Then let the service speak for itself.
 
-### M2-05 — Your voice + Practitioner insight
-**SOURCE:** the reference scent-introduction script (verbatim) + the write-your-own prompt + the two comparison cards.
-**VOICE:** Reference for the quoted script and both comparison cards, Teaching for the connective framing.
+### M2-05 — 2.3 Set the Plan Before the Quiet + Before/During
+**SOURCE:** both full lists. **VOICE:** Reference for both.
 
-> Your voice: introduce scent without assuming consent. Here's the reference version: "Before we begin, I can offer a few scent options, or we can keep the service fragrance-free. Would you like to sample them? You may close your eyes while I guide you through each one, but you do not have to. Before I touch your shoulder, I'll ask your permission."
+> Section 2.3 — Set the plan before the quiet. Resolve important choices first.
 >
-> On screen, you'll write your own version of that same introduction, in your own voice — as long as it preserves the choice, the fragrance-free option, and permission before touch. Cadence will give you feedback on what you write.
+> Before hands-on treatment begins, the client should know enough to settle into the experience without wondering what they're supposed to do. Depending on the service and intake, establish or confirm: the service format, the standard areas included, relevant areas to modify or avoid, fragrance sensitivity or a fragrance-free plan, product sensitivities, positioning and support needs, general pressure preference where useful, and how to communicate if something needs to change.
 >
-> Same service. Different beginning. The technique can be identical, and the arrival can still change how organized, safe, and personal the whole thing feels.
+> Don't turn this into a ten-minute protocol briefing. The purpose is to resolve predictable decisions now so they don't repeatedly interrupt treatment later.
 >
-> Rushed and unclear: the client gets incomplete changing instructions, senses the practitioner is behind schedule, and is touched before expectations or consent are even clear. They start the service managing uncertainty the practitioner created.
+> Before service versus during service. Establish before service: fragrance tolerance or a fragrance-free plan, standard areas included in the booked service, known adaptations or omissions, product sensitivities, positioning considerations, general service expectations, relevant touch expectations, and planned service format.
 >
-> Guided and consent-based: the practitioner reviews what matters, explains the transition, protects privacy, offers real choices, asks before touch, and gives one clear orientation. The client knows what's happening, and how to speak up if something's wrong.
+> Manage during service: water temperature, pressure when it genuinely needs adjustment, immediate discomfort, necessary repositioning, unexpected reaction, a new safety concern, a real transition that benefits from orientation, a question the client asks, and a client changing their mind or communicating new information.
 >
-> The goal isn't to manufacture a reaction. It's to remove preventable uncertainty.
+> [firmly] Client choice remains ongoing. Prepared service delivery never means ignoring hesitation, discomfort, or a changed decision. It means you don't repeatedly reopen decisions that have already been established unless something changes.
 
-### M2-06 — 2.6 What goes wrong
-**SOURCE:** all 5 mistake cards + the weak/strong response example.
-**VOICE:** Reference for all 5 cards and the quoted example, in order.
+### M2-06 — Practitioner resource: Head Spa Intake + Service Plan
+**VOICE:** Reference (near-verbatim description and disclaimer).
 
-> Section 2.6 — What goes wrong. Mistakes that weaken the beginning — all of them show up when a practitioner treats the arrival as informal instead of intentional.
->
-> Rushing the beginning: schedule pressure belongs to the business, not the client. Rushing changing, intake confirmation, or consent can make the service feel transactional, and may compromise professional boundaries.
->
-> Giving unclear instructions: when a client doesn't know where to go, what to remove, what stays covered, or what happens next, they're managing uncertainty that clear guidance could have prevented.
->
-> Assuming consent: a prior visit, a signed intake form, closed eyes, or silence — none of that replaces permission for a new touch or service choice. Explain, and ask.
->
-> Treating optional rituals as mandatory: tea, fragrance, changing, shoulder contact — all of it has to adapt to allergies, comfort, accessibility, scope, and preference. Consistency doesn't mean forcing the same ritual on every client.
->
-> And over-explaining: clients should feel informed, not briefed on every technical step. Give them what they need to participate, consent, and relax into the experience.
->
-> Here's what this looks like in practice. A client walks in and isn't sure where to go. The weak response: "Go ahead and change. You can put your things anywhere." The strong response: "I'll give you privacy to change. Remove only the items we discussed, and you may keep anything on that makes you more comfortable. Place your belongings here, and I'll be right outside when you're ready."
->
-> Clarity protects comfort and professional boundaries before the service even begins.
+> There's a practitioner resource on screen here — the Head Spa Intake and Service Plan. It's a two-part fillable form: gather the information that affects service planning, then convert it into a clear practitioner plan before hands-on treatment begins. Make it your own — use it as-is, or adapt the layout and add your own branding while keeping the professional purpose behind it. And to be clear: this is a service-planning tool, not a medical-history form, a diagnosis form, or a legal waiver. You're still responsible for whatever consent, privacy, licensing, or legal documentation your own jurisdiction and business require.
 
-### M2-07 — 2.7 Consistency + checkpoint prompt
-**SOURCE:** Section 2.7 + the checkpoint prompt only.
-**VOICE:** Teaching for 2.7, ends on the checkpoint prompt.
+### M2-07 — 2.4 First Touch
+**SOURCE:** the "why it matters" list, the "not this" prohibition, and the Module 8-approved scent line, all near-verbatim. **VOICE:** Reference throughout.
 
-> Section 2.7 — Consistency. Repeat the standard. Adapt the ritual.
+> Section 2.4 — First touch. The first touch should feel intentional.
 >
-> A high-level arrival should be repeatable without becoming rigid. Every client should receive preparation, privacy, clear communication, meaningful choice, consent before touch, and a calm transition into the service. The tea, the fragrance, the exact changing instructions, the first-contact method — all of that can vary. The framework stays consistent while the experience adapts to the client, the service, and your legal scope.
+> In the A-I-M-T Head Spa service, the hand at the shoulder is not an accidental gesture before the treatment begins. It's the beginning of hands-on service. Touch expectations should already have been appropriately established through the service description, intake, and pre-service conversation. As the aromatherapy opening begins, you place a hand gently at the shoulder before presenting the first scent, and maintain light contact through the selection.
 >
-> The question to ask after every service: did this client receive the same standard of clarity, privacy, choice, consent, and professional guidance as the client before them? If not, identify which standard slipped. Don't judge consistency by whether every client accepted the same ritual.
+> Why the shoulder contact matters: it marks the transition from appointment interaction into hands-on service. It anchors the beginning of the experience. It creates continuity through the scent-selection opening. It should feel confident, calm, intentional, and attentive.
 >
-> Here's the checkpoint for this module. A new client arrives visibly stressed after rushing, and apologizes for being two minutes late. Walk through the first five minutes in the order you'd handle them. Explain how you'd avoid transferring your time pressure onto the client, what you'd confirm from the intake, how you'd protect privacy and choice during preparation, how you'd introduce any optional beverage or scent, when you'd ask permission for first touch, and what you're trying to accomplish before the hands-on service begins.
+> [firmly] Not this: it is deliberate service choreography — not a technique for subconsciously creating trust, regulating the nervous system, forcing relaxation, or guaranteeing a psychological response.
+>
+> If intake established a fragrance-free service, follow that plan rather than presenting irrelevant scent options. If scent is included, use the communication cue from Module 8: "I have three scent options for you today. Take a moment with each and tell me which one you're most drawn to." Present the options evenly. Don't instruct the client to close their eyes — if they naturally want to, that's fine. Remain attentive to actual hesitation or discomfort and adjust when necessary.
+
+### M2-08 — 2.5 Protect the Quiet
+**SOURCE:** the three communication concepts, near-verbatim from Module 8. **VOICE:** Reference throughout.
+
+> Section 2.5 — Protect the quiet. Explain intentionally, not continuously.
+>
+> The Head Spa service is relaxation-first. Most hands-on treatment should remain quiet by default. You shouldn't be repeatedly asking things like "Is this okay?", "Do you want me to do this part?", "Can I move to the next step?", "Would you like me to include this?", or "Is it okay if I touch here?" when those are already-established, standard parts of the service.
+>
+> Repeatedly re-deciding the service interrupts flow, creates unnecessary mental work for the client, can make you appear uncertain, and conflicts with the entire purpose of doing a strong intake beforehand.
+>
+> The same three communication concepts from Module 8 apply here. Communication cue: say this proactively, when the client genuinely needs information — positioning, temperature, pressure, an unfamiliar sensation, or an important transition. Keep the flow quiet: no narration needed by default — perform the step confidently and let the service continue. And if they ask: you already know how to answer a likely client question — answer briefly and accurately, then return your attention to the service.
+>
+> [warmly] Prepared practitioners can stay quiet because they already know what they'd say if the client needs them.
+
+### M2-09 — 2.6 When Something Changes + interaction framing
+**VOICE:** Teaching, Reference for the key-point.
+
+> Section 2.6 — When something changes. The plan is established. Your attention stays active.
+>
+> A quiet service is not an inflexible service. If the client becomes uncomfortable, pulls away, reports pain, reacts unexpectedly, needs different support, changes their mind, gives new information, or presents a reason the service should be modified, paused, or stopped — respond. Pause when appropriate. Adjust within scope. Clarify when clarification is genuinely needed. Stop or refer when the service shouldn't responsibly continue.
+>
+> [firmly] Don't interrupt the service to solve decisions that should have been handled beforehand. Do interrupt the service when the client or situation in front of you gives you a real reason to.
+>
+> There's a practitioner-judgment exercise on screen — twelve real examples, and for each one you decide whether it belongs before the service or during it. It's ungraded and retryable, so take your time with it before moving on.
+
+### M2-10 — 2.7 Consistency + Module Recap
+**SOURCE:** the five consistency checkpoints + the recap's closing lines, near-verbatim. **VOICE:** Reference throughout.
+
+> Section 2.7 — Consistency. Build a framework you don't have to reinvent.
+>
+> Consistency doesn't mean every client receives an identical experience. It means your process reliably addresses the same important questions. Before they arrive: have I reviewed what could affect the service? When they arrive: do they understand what they need to do and what happens next? Before hands-on treatment: have relevant choices, adaptations, expectations, and logistics been established? At first touch: am I beginning deliberately rather than awkwardly searching for the next step? During treatment: am I protecting the flow while staying attentive enough to respond when something actually changes?
+>
+> [slowly] That's what makes the service repeatable without making it robotic.
+>
+> Before your checkpoint, here's the module recap. A strong Head Spa service doesn't become quiet because the practitioner stops communicating. It becomes quiet because the practitioner communicates earlier and better. Review the intake before the appointment. Remove preventable uncertainty during the arrival. Establish the service plan before treatment. Begin hands-on work intentionally. Then protect the flow — speaking when comfort, safety, a real transition, or the client actually requires it.
+>
+> [warmly] Prepare first. Lead second. Stay attentive throughout.
+
+### M2-11 — Checkpoint (`m2cp1`)
+**SOURCE:** the checkpoint prompt only — never the grading rubric. **VOICE:** Teaching. Ends the player audio; the checkpoint stop is structural (`gateType: 'checkpoint-stop'`).
+
+> Here's your checkpoint for this module. A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You don't need to reproduce a script — explain the reasoning behind your approach.
 >
 > Take your time, and answer above.
 
-### M2-08 — Post-pass continuation: completion + recap + handoff
-**SOURCE:** `#m2Complete`.
+### M2-12 — Post-pass continuation: completion + recap + handoff
 **VOICE:** Teaching. `gateType: 'post-pass'`, `resumeAfterPass: true`.
 
-> The arrival framework is yours.
+> Module complete. The plan is set before the service begins. You demonstrated how to use intake and preparation to establish the service plan, remove preventable uncertainty, begin the hands-on experience intentionally, and protect a relaxation-first service without sacrificing attentiveness or professional judgment.
 >
-> You demonstrated an organized pre-service sequence, grounded in preparation, privacy, client choice, consent, and calm guidance under real time pressure. Quickly, before you move on — this module was really about one idea: the service starts before your hands do, and the first two minutes either build trust or create uncertainty you'll spend the rest of the appointment managing.
->
-> Up next, Module 3: we move beneath the experience into the actual science of the hair and scalp. The goal is to understand what you're observing, so every later service decision has a clear professional reason behind it.
+> Up next, Module 3: moving beneath the experience into the science of the hair and scalp. The goal is to understand what you're observing, so later service decisions have a clear professional reason behind them.
 
 ---
 
 ## Editorial QA (pre-generation checklist)
 
-1. **Curriculum parity** — all 5 accordion steps, the quiz, the script builder, both comparison cards, all 5 mistake cards, 2.7, and the checkpoint are covered. ✓
-2. **Reference Voice completeness** — 5 accordion steps, reference consent script (2×, matches source in both 2.4 and Your Voice), 2 comparison cards, 5 mistake cards, weak/strong example — all present, in order. ✓
-3. **Natural Teaching Voice** — framing/connective language paraphrases; direct client-facing scripts kept verbatim (that's the point of a "reference script"). ✓
-4. **No invented claims** — no new claims beyond the page. ✓
-5. **No diagnostic expansion** — n/a, no diagnostic content in this module; scope language (tea/scent as hospitality, not treatment) preserved. ✓
-6. **No skipped critical cards/lists** — confirmed against #2. ✓
-7. **No unnecessary repetition** — the consent script appears twice on the real page (once in 2.4, once as "Your voice"'s reference); both appearances are narrated since they serve different purposes (2.4 = teaching the moment, Your Voice = the exercise's reference standard) — matches the real page's own repetition, not an invented one. ✓
-8. **Correct checkpoint stop location** — `m2cp1` is Module 2's only checkpoint, narrated at the real end-of-module position, after 2.7. ✓
-9. **Correct section announcement order** — accordion (2.1–2.5, spoken descriptively since the page doesn't label them with "Section" numbering at the eyebrow level) → 2.6 → 2.7, matching real page order. Per the editorial standard, "2.1–2.5" are not announced as "Section 2.1" etc. since the page itself doesn't present them as top-level numbered sections (only 2.6/2.7 use the `sec-eyebrow` "2.N —" pattern) — narrated instead as "step one," "step two," etc., mirroring the page's own `tl-num` labels. 2.6 and 2.7 ARE announced as "Section 2.6"/"Section 2.7" since those are real on-screen section numbers. ✓
-10. **Reasonable spoken pacing** — estimated ~11 min total; longest single chunk (M2-06) is ~1.5 min. ✓
+Parity against the rebuilt curriculum confirmed line-for-line (governing
+principle, all 7 numbered sections, the downloadable, the interaction
+framing, the recap, the checkpoint). Reference completeness: the 10-item
+uncertainty list, both before/during lists, the shoulder-contact why-it-
+matters list, the "not this" prohibition, all 3 communication concepts,
+the 5 consistency checkpoints — all present in full, visible order. No
+invented physiological/psychological claims (the "not this" prohibition
+against subconscious trust/nervous-system/guaranteed-relaxation carried
+forward verbatim in spirit). No repeated-permission-asking language
+anywhere in Teaching Voice framing (would directly contradict 2.5's own
+teaching). Correct single checkpoint location (`m2cp1`, matching its
+real end-of-module position, preserved id). "AIMT" spelled `A-I-M-T`
+wherever it appears (one occurrence, Section 2.4). Cadence speaks in
+first person throughout. Estimated ~13 min total.
 
 ## ElevenLabs generation plan
 
 | Piece | Chunks | Approx. chars |
 |---|---|---:|
-| A1 | M2-01 briefing → 2.1–2.2 | ~3,050 |
-| A2 | 2.3–2.4 → 2.5 + quiz | ~2,850 |
-| A3 | Your voice + insight → 2.6 | ~3,300 |
-| A4 | 2.7 + checkpoint prompt | ~1,650 |
-| B1 | post-pass recap/handoff | ~750 |
+| A1 | briefing → governing principle → 2.1 | ~2,150 |
+| A2 | 2.2 → 2.3 + before/during | ~2,500 |
+| A3 | downloadable → 2.4 → 2.5 | ~3,000 |
+| A4 | 2.6 → 2.7 + recap → checkpoint | ~2,800 |
+| B1 | post-pass recap/handoff | ~500 |
 
-5 generations, `Y3ZPRGOSIxbV4Rbb3WiA` / `eleven_v3`, same as Module 0.
+5 generations, `Y3ZPRGOSIxbV4Rbb3WiA` / `eleven_v3`.

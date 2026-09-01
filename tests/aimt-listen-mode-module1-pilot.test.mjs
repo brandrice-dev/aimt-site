@@ -495,10 +495,20 @@ function diffAgainstStart(relPath) {
   // never touches anything that identifies protected content — other
   // modules' wraps, the checkpoint objects, curriculum/rubric internals,
   // or Cadence/auth logic. Any hit here means scope was exceeded.
+  //
+  // module2Wrap and 'const M2 = {' are deliberately NOT in this blocklist:
+  // a later, separate, explicitly owner-authorized task ("AIMT — MODULE 2
+  // CURRICULUM REBUILD + MODULE 0 LISTEN MODE ORIENTATION") rebuilt Module
+  // 2's curriculum and its m2cp1 checkpoint to align with Module 8's
+  // relaxation-first doctrine — a real, intentional content change, not a
+  // Listen Mode scope violation. That task's own dedicated tests
+  // (cadence-m2cp1-fixture-calibration.test.mjs, cadence-checkpoint-
+  // authority.test.mjs) verify the new Module 2 content directly; this
+  // test's job narrows to continuing to guard every OTHER module untouched.
   const protectedMarkers = [
-    'module2Wrap', 'module3Wrap', 'module4Wrap', 'module5Wrap', 'module6Wrap', 'module7Wrap',
+    'module3Wrap', 'module4Wrap', 'module5Wrap', 'module6Wrap', 'module7Wrap',
     'module8Wrap', 'module9Wrap', 'module10Wrap', 'module11Wrap', 'module12Wrap', 'module0Wrap',
-    'const M2 = {', 'const M3 = {', 'const M4 = {', 'const M5 = {', 'const M6 = {', 'const M7 = {',
+    'const M3 = {', 'const M4 = {', 'const M5 = {', 'const M6 = {', 'const M7 = {',
     'const M8 = {', 'M1.questions', 'M1.systems', 'cp-q', 'evaluateCheckpointAnswer', 'submitCheckpoint(',
     'CADENCE_CHECKPOINT_TONE', 'Module12Cert', 'claim-course-access', 'stripe-webhook', 'create-checkout-session'
   ];
@@ -517,7 +527,17 @@ function diffAgainstStart(relPath) {
   function isPureMove(line) {
     return (addedCounts.get(line) || 0) > 0 && (removedCounts.get(line) || 0) > 0;
   }
-  const touchedProtected = addedLines.concat(removedLines).filter((l) => protectedMarkers.some((m) => l.includes(m)) && !isPureMove(l));
+  // The 'cp-q' marker is a blanket, wrap-name-independent guard on every
+  // module's on-screen checkpoint question text — it correctly still flags
+  // m2cp1's line even though module2Wrap/M2 are no longer blocked above.
+  // Its old/new text is the Module 2 rebuild's own authorized, documented
+  // checkpoint-question change (see M2.questions.m2cp1's comment) — allow
+  // exactly this one known pair, nothing else.
+  const knownAuthorizedProtectedLines = new Set([
+    '      <div class="cp-q">A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You do not need to reproduce a script—explain the reasoning behind your approach.</div>',
+    '      <div class="cp-q">A new client arrives visibly stressed after rushing and apologizes for being two minutes late. Walk through the first five minutes in the order you would handle them. Explain how you would avoid transferring time pressure to the client, what you would confirm from the intake, how you would protect privacy and choice during preparation, how you would introduce any optional beverage or scent, when you would ask permission for first touch, and what you are trying to accomplish before the hands-on service begins.</div>',
+  ]);
+  const touchedProtected = addedLines.concat(removedLines).filter((l) => protectedMarkers.some((m) => l.includes(m)) && !isPureMove(l) && !knownAuthorizedProtectedLines.has(l));
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'no changed line in headspa-mastery.html touches another module, the checkpoint objects, or Cadence/auth logic (a line removed from one place and re-added byte-identical elsewhere is a proven relocation, not a content change)', touchedProtected.length === 0, touchedProtected.slice(0, 5).join(' || '));
 
   const allowedRemovedExact = new Set([
@@ -600,11 +620,36 @@ function diffAgainstStart(relPath) {
     '      <div class="mh-title">Human-led.<br>AI-assisted.</div>',
     '      <div class="mh-desc">AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.</div>'
   ]);
+  // Module 2 curriculum rebuild (see the protectedMarkers comment above):
+  // rather than hand-retyping the ~150 removed lines of the old module2Wrap
+  // body and its old openStep/breakAnswer/MODULE_GUIDE_SYSTEMS[2]/
+  // MODULE_QUICK_PROMPTS[2] JS into allowedRemovedExact one by one (fragile
+  // and easy to silently miss a real unauthorized removal inside), pull
+  // those exact historical regions from the starting commit itself and
+  // treat any removed line found inside one of them as accounted for. This
+  // still catches a genuinely unauthorized removal anywhere else in the
+  // file -- it only widens the net around the specific regions this task
+  // was actually authorized to rebuild.
+  function oldLinesBetween(startMarker, endMarker) {
+    const src = gitShowAtStart('headspa-mastery.html');
+    const start = src.indexOf(startMarker);
+    if (start === -1) return [];
+    const end = src.indexOf(endMarker, start);
+    if (end === -1) return [];
+    return src.slice(start, end).split('\n');
+  }
+  const oldModule2RebuildLines = new Set([
+    ...oldLinesBetween('<div id="module2Wrap"', '<!-- ══ MODULE 6 CONTENT ══ -->'),
+    ...oldLinesBetween('// ── MODULE 2 ──', 'async function evaluateScript'),
+    ...oldLinesBetween('const M2 = {', '// ── MODULE 3 ──'),
+    "  2: 'You are Cadence, AIMT\\'s curriculum-grounded guide for the Head Spa Certification Course. Your guidance was built from the instructor\\'s nearly two decades of hands-on experience; you do not claim that experience as your own or present yourself as a human practitioner. The student is in Module 2: intake review, private preparation, optional hospitality, scent preference, consent before touch, concise orientation, and a repeatable but adaptable arrival framework. Keep guidance grounded in professional client experience rather than unsupported physiological or psychological claims. Do not say that tea, scent, or touch regulates the nervous system, creates subconscious trust, treats stress, guarantees relaxation, or causes rebooking. Reinforce client choice, privacy, fragrance-free options, legal scope, and explicit permission before touch. Use 3–5 concise sentences and no bullet points.',",
+    "  2: ['How do I ask permission before first touch?', 'What should changing instructions include?', 'How do I keep the arrival consistent without making it rigid?'],",
+  ]);
   // Pure relocations (see isPureMove above) don't need individual
   // allowlisting either -- #m1cp1's whole block moved this pass (owner-
   // authorized, section AE) and every one of its lines reappears
   // byte-identical at the new position, so each is provably a move.
-  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l));
+  const unaccountedRemoves = removedLines.filter((l) => !allowedRemovedExact.has(l) && !isPureMove(l) && !oldModule2RebuildLines.has(l));
   check('O/Q/S. FULL DIFF ACCOUNTED FOR', 'every removed line in headspa-mastery.html is one of: the 3 bare protocol-card divs, the original Module 1 STATIC_MODULES entry (and its Phase-1-mount-call successor), the 4 original .mod-hero lines this task\'s black opener replaced, or a proven pure relocation elsewhere in the same diff (nothing curriculum/checkpoint/Module-12/nav related was actually deleted or content-changed)', unaccountedRemoves.length === 0, unaccountedRemoves.join(' || '));
   // A two-point diff against 023d258 only ever shows the ORIGINAL bare
   // STATIC_MODULES[1] line as removed once, even though it was actually
@@ -810,6 +855,30 @@ function diffAgainstStart(relPath) {
   ['m2-a1', 'm2-a2', 'm2-a3', 'm2-a4', 'm2-b1'].forEach((name) => {
     allowlist.add('docs/course-audit/listen-mode/tts/module-02/' + name + '.txt');
   });
+  // Module 2 curriculum rebuild (separate, later, explicitly owner-
+  // authorized task -- see the protectedMarkers comment above): its new
+  // downloadable and Resource Library registration.
+  allowlist.add('assets/js/aimt-course-resources.js');
+  allowlist.add('assets/images/course/module-02/module-02-head-spa-intake-service-plan-fillable.pdf');
+  allowlist.add('scripts/cadence-model-regression/grading-dataset.mjs');
+  allowlist.add('tests/cadence-checkpoint-authority.test.mjs');
+  allowlist.add('tests/module-02-rebuild.test.mjs');
+  allowlist.add('docs/course-audit/modules/module-02.md');
+  allowlist.add('docs/course-audit/modules/module-02-curriculum-rebuild-2026-08.md');
+  // Regression tests that pin the full M0-M11 checkpoint rubric/question
+  // fingerprint as proof THEIR OWN unrelated task touched zero checkpoint
+  // content -- each needed its pinned baseline fingerprint advanced from
+  // rubric-f6f22d2b to rubric-922199df (m2cp1's real, intentional new
+  // fingerprint) so they keep verifying "no OTHER checkpoint changed"
+  // rather than falsely flagging this task's own authorized change.
+  [
+    'tests/aimt-dashboard-resources-launch.test.mjs', 'tests/cadence-chat-promotion.test.mjs',
+    'tests/cadence-chat-quality.test.mjs', 'tests/cadence-chat-scenario-gate.test.mjs',
+    'tests/cadence-chat-scenario-integrity.test.mjs', 'tests/cadence-chat-trust-precision.test.mjs',
+    'tests/cadence-chat-zones.test.mjs', 'tests/cadence-grading-promotion.test.mjs',
+    'tests/cadence-haiku-candidate.test.mjs', 'tests/cadence-production-path-qa-harness.test.mjs',
+    'tests/cadence-m2cp1-fixture-calibration.test.mjs',
+  ].forEach((p) => allowlist.add(p));
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
