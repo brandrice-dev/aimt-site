@@ -17,7 +17,14 @@ html { scroll-behavior: smooth; }
 body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-primary); color: white; min-height: 100dvh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 /* ── Hero ── */
-.cat-hero { padding: calc(var(--aimt-nav-height) + 6.5rem) 2rem 4rem; max-width: 1100px; margin: 0 auto; }
+.cat-hero-band { position: relative; overflow: hidden; }
+.cat-hero-band::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 15% 0%, rgba(163,150,141,0.08), transparent 42%);
+  pointer-events: none;
+}
+.cat-hero { position: relative; padding: calc(var(--aimt-nav-height) + 6.5rem) 2rem 4rem; max-width: 1100px; margin: 0 auto; }
 .cat-hero-copy { max-width: 680px; }
 .cat-hero h1 { font-family: var(--aimt-font-mont); font-size: clamp(2.3rem, 5vw, 3.6rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; text-transform: uppercase; color: white; margin: 1rem 0 1.5rem; }
 .cat-hero-lead { font-family: var(--aimt-font-sans); font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.54); line-height: 1.8; max-width: 62ch; margin-bottom: 0.75rem; }
@@ -38,7 +45,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
 .principle-item:nth-child(2) { padding-left: 2.5rem; }
 .principle-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(163,150,141,0.55); margin-bottom: 1rem; display: block; }
 .principle-title { font-family: var(--aimt-font-serif); font-size: 1.08rem; font-style: italic; font-weight: 400; color: white; line-height: 1.42; margin-bottom: 0.85rem; }
-.principle-body { font-family: var(--aimt-font-sans); font-size: 0.82rem; font-weight: 300; color: rgba(255,255,255,0.42); line-height: 1.78; max-width: 34ch; }
+.principle-body { font-family: var(--aimt-font-sans); font-size: 0.82rem; font-weight: 300; color: rgba(255,255,255,0.56); line-height: 1.78; max-width: 34ch; }
 
 /* ── Live flagship ── */
 .flagship-wrap { background: #faf8f5; }
@@ -161,6 +168,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
   <a href="headspa-mastery.html" class="aimt-nav-mobile-link">Explore Head Spa Certification →</a>
 </div>
 
+<div class="cat-hero-band">
 <div class="cat-hero">
   <div class="cat-hero-copy">
     <span class="aimt-sp-eyebrow">AIMT Education</span>
@@ -173,6 +181,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
     </div>
     <div class="page-status" id="pageStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
   </div>
+</div>
 </div>
 
 <div class="principles" id="why-aimt">
@@ -214,6 +223,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
       <div class="flagship-proof">
         <span>Welcome Module + 12 numbered modules</span>
         <span>Cadence-guided learning</span>
+        <span>Listen Mode</span>
         <span>Full head spa service training</span>
         <span>AIMT Service Timer</span>
         <span>Practitioner resource library</span>
@@ -249,7 +259,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
         <p class="proof-item-body">Ask, explain, reconsider, and demonstrate understanding inside the learning environment.</p>
       </div>
       <div>
-        <div class="proof-item-media pending"><span>Practitioner Tools</span></div>
+        <div class="proof-item-media"><img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step" loading="lazy"></div>
         <div class="proof-item-title">Practitioner Tools</div>
         <p class="proof-item-body">Use the Service Timer and course resources after the lesson ends.</p>
       </div>
@@ -292,11 +302,6 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
       </div>
       <div class="future-item">
         <span class="future-item-status">In Development</span>
-        <div class="future-item-title">Scalp Assessment Intensive</div>
-        <p class="future-item-body">A concentrated program in microscopy, assessment structure, documentation, and consultation judgment.</p>
-      </div>
-      <div class="future-item">
-        <span class="future-item-status">In Development</span>
         <div class="future-item-title">Price Like a Pro</div>
         <p class="future-item-body">Service economics, pricing logic, menu architecture, and value communication for beauty professionals.</p>
       </div>
@@ -311,6 +316,7 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
     <p class="close-body">AIMT is being built as an education home for professionals who want to stay current, think more clearly, and keep developing beyond a single certification.</p>
     <div class="close-ctas">
       <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark">Explore Head Spa Certification →</a>
+      <a href="head-spa-readiness.html" class="close-secondary">Get Your AIMT Head Spa Readiness Score →</a>
       <a href="student-access.html" class="close-secondary">Student Access</a>
     </div>
   </div>
