@@ -1328,6 +1328,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   padding: 0 0 0 2.6em;
 }
 .lp-curr-panel.is-open { max-height: 200px; padding-bottom: 1.1rem; }
+
+/* ── Is AIMT For You list ── */
+.lp-fit-list { margin-top: 1.25rem; display: grid; gap: 0.75rem; }
+.lp-fit-list li {
+  font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 300; line-height: 1.6; color: rgba(255,255,255,0.68);
+  list-style: none; padding-left: 1.4em; position: relative;
+}
+.lp-fit-list li::before { content: '✓'; position: absolute; left: 0; color: #a3968d; }
 .lp-cert {
   width: 100%;
   margin-bottom: 0;
@@ -3308,6 +3316,22 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
     </div>
+    <!-- IS AIMT FOR YOU -->
+    <div class="lp-section-band" style="background:rgba(255,255,255,0.02);">
+      <div class="lp-band-inner" style="max-width:760px;">
+        <div class="lp-proof-eyebrow">Is AIMT For You?</div>
+        <div class="lp-proof-title">A Good Fit For Practitioners Who Are...</div>
+        <ul class="lp-fit-list">
+          <li>Exploring head spa and want a stronger foundation before offering it</li>
+          <li>Preparing to launch a head spa service</li>
+          <li>Already offering head spa and want more structure and consistency</li>
+          <li>Refining an established service and looking to sharpen judgment and pricing</li>
+        </ul>
+        <p class="lp-proof-body" style="margin-top:1.5rem;">AIMT is not built for someone looking only for passive attendance, an instant certificate, medical diagnostic authority, or a quick technique library with no underlying professional education.</p>
+        <p class="lp-proof-body">Ready to enroll? Use the enrollment button above. <a href="head-spa-readiness.html" style="color:inherit;text-decoration:underline;">Want to know where you stand first? Get your AIMT Head Spa Readiness Score →</a></p>
+      </div>
+    </div>
+
     <div class="lp-section-band lp-band-mastery">
       <div class="lp-band-inner">
         <div class="lp-mastery-shell">
@@ -3362,6 +3386,37 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
     </div>
+    <!-- FAQ -->
+    <div class="lp-section-band">
+      <div class="lp-band-inner" style="max-width:760px;">
+        <div class="lp-proof-eyebrow">Questions</div>
+        <div class="lp-proof-title" style="margin-bottom:1.5rem;">Frequently Asked Questions</div>
+        <div class="lp-faq" id="lpFaq">
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">Who is this course for?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">Beauty professionals exploring, launching, offering, or refining a head spa service — cosmetologists, estheticians, and trichologists building a stronger scalp-care practice.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">I haven't launched a head spa service yet — is this still for me?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">Yes. AIMT is built to work for practitioners who are exploring or preparing to launch, not only for those already offering the service.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">Does this replace my license or scope of practice?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">No. AIMT certification does not replace or expand state licensure, and it is not a medical or diagnostic credential. It documents completed professional education within your existing scope.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">Is the course fully online and self-paced?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">Yes. The full curriculum, Cadence, Listen Mode, and the Final Certification Assessment are all completed online, at your own pace, with lifetime access.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What is Cadence, and is it graded?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">Cadence is AIMT's built-in learning companion. Ask-Cadence conversations inside a module are not graded; required module checkpoints and the Final Certification Assessment's Part III conversation are evaluated against what that module or assessment actually teaches.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What is Listen Mode?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">A manual opt-in narrated version of each module with a persistent, compact player. It pauses for required checkpoints and visuals, and you resume with an explicit tap — it is a second way to move through the same curriculum, not an audio-only shortcut.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">How is the credential earned?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">By completing all required modules and passing the Final Certification Assessment (Knowledge, Applied Cases, and a Cadence conversation). The credential is earned, not automatic on enrollment.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What if I don't pass the Final Certification Assessment the first time?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">You follow a structured review and remediation path back through the specific areas that need more work, then retake the relevant portion — you are not starting the course over.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What practitioner resources and tools are included?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">The AIMT Service Timer, Core and Extended service maps, the Head Spa Enhancement Strategy Guide, the sanitation reset checklist, the AI Practice Toolkit, and the Module 2 intake and service plan — all included with enrollment.</div>
+          <button type="button" class="lp-curr-row" style="padding:1.3rem 0;" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What's the refund policy?</span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel" style="padding-left:0;">See the current <a href="refunds.html" style="color:inherit;">Refund Policy</a> for eligibility windows and terms.</div>
+        </div>
+        <p class="lp-proof-body" style="margin-top:2rem;">Still deciding? <a href="head-spa-readiness.html" style="color:inherit;text-decoration:underline;">Get your AIMT Head Spa Readiness Score →</a></p>
+      </div>
+    </div>
+
     <div class="lp-final-close">
       <div class="lp-final-close-label">Final Step</div>
       <div class="lp-final-close-title">Whether You&rsquo;re Building Or Refining, This Is The Next Step.</div>
@@ -3412,9 +3467,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   });
 })();
 
-/* Curriculum explorer accordion — presentational only. */
-(function () {
-  const wrap = document.getElementById('lpCurriculum');
+/* Curriculum explorer + FAQ accordions — presentational only. */
+['lpCurriculum', 'lpFaq'].forEach((id) => {
+  const wrap = document.getElementById(id);
   if (!wrap) return;
   wrap.querySelectorAll('.lp-curr-row').forEach((row) => {
     row.addEventListener('click', () => {
@@ -3424,7 +3479,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       if (panel) panel.classList.toggle('is-open', !open);
     });
   });
-})();
+});
 </script>
 
 <!-- ══ CINEMATIC INTRO ══ -->
