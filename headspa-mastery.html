@@ -1280,6 +1280,54 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   line-height: 1.6;
   color: rgba(255,255,255,0.56);
 }
+.lp-mastery-item.featured { background: #33291f; border-color: rgba(163,150,141,0.35); }
+.lp-mastery-item.featured .lp-mastery-item-title { color: #d8c9ba; }
+@media (min-width: 780px) {
+  .lp-mastery-grid:has(.lp-mastery-item.featured) { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Product tour (compact tabbed proof) ── */
+.lp-tour { margin-top: 2rem; }
+.lp-tour-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+.lp-tour-tab {
+  font-family: var(--aimt-font-mont); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);
+  border-radius: 980px; padding: 0.65rem 1.1rem; cursor: pointer; min-height: 40px;
+}
+.lp-tour-tab.is-active { background: #fff; color: #1a1814; border-color: #fff; }
+.lp-tour-panel { display: none; }
+.lp-tour-panel.is-active { display: block; }
+.lp-tour-caption { font-family: var(--aimt-font-sans); font-size: 0.86rem; font-weight: 300; line-height: 1.65; color: rgba(255,255,255,0.62); margin-top: 1rem; max-width: 620px; }
+.lp-tour-caption strong { color: rgba(255,255,255,0.88); font-weight: 500; }
+.lp-tour-textcard {
+  background: #2a2520; border: 0.5px solid rgba(255,255,255,0.11); border-radius: var(--aimt-radius-panel);
+  padding: 2rem clamp(1.25rem,4vw,2.5rem); max-width: 620px;
+}
+.lp-tour-textcard p { font-family: var(--aimt-font-sans); font-size: 0.92rem; font-weight: 300; line-height: 1.72; color: rgba(255,255,255,0.68); margin-bottom: 1rem; }
+.lp-tour-textcard p:last-child { margin-bottom: 0; }
+@media (max-width: 700px) {
+  .lp-tour-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .lp-tour-tab { flex-shrink: 0; }
+}
+
+/* ── Curriculum explorer (accordion) ── */
+.lp-curriculum { border-top: 0.5px solid rgba(255,255,255,0.08); margin-top: 1.5rem; }
+.lp-curr-row {
+  width: 100%; display: flex; align-items: center; gap: 1rem;
+  background: none; border: none; border-bottom: 0.5px solid rgba(255,255,255,0.08); cursor: pointer;
+  padding: 1.1rem 0; text-align: left; color: inherit; min-height: 44px;
+}
+.lp-curr-num { font-family: var(--aimt-font-mono); font-size: 0.72rem; color: rgba(163,150,141,0.7); width: 1.6em; flex-shrink: 0; }
+.lp-curr-title { flex: 1; font-family: var(--aimt-font-sans); font-size: 0.92rem; color: rgba(255,255,255,0.86); display: flex; flex-direction: column; gap: 2px; }
+.lp-curr-sub { font-family: var(--aimt-font-sans); font-size: 0.76rem; font-weight: 300; color: rgba(255,255,255,0.4); }
+.lp-curr-chev { font-family: var(--aimt-font-mont); font-size: 1rem; color: rgba(255,255,255,0.4); flex-shrink: 0; transition: transform 0.2s ease; }
+.lp-curr-row[aria-expanded="true"] .lp-curr-chev { transform: rotate(45deg); }
+.lp-curr-panel {
+  max-height: 0; overflow: hidden; transition: max-height 0.25s ease, padding 0.25s ease;
+  font-family: var(--aimt-font-sans); font-size: 0.84rem; font-weight: 300; line-height: 1.65; color: rgba(255,255,255,0.56);
+  padding: 0 0 0 2.6em;
+}
+.lp-curr-panel.is-open { max-height: 200px; padding-bottom: 1.1rem; }
 .lp-cert {
   width: 100%;
   margin-bottom: 0;
@@ -2667,14 +2715,20 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     bottom: 0;
     z-index: 250;
     display: block;
-    padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom, 0));
+    padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom, 0));
     background: rgba(10,8,8,0.92);
     backdrop-filter: blur(16px);
     border-top: 0.5px solid rgba(255,255,255,0.08);
+    transform: translateY(0);
+    transition: transform 0.2s ease;
   }
+  .lp-mobile-sticky-cta.lp-sticky-hide { transform: translateY(100%); }
   .lp-mobile-sticky-cta .lp-enroll-btn {
     max-width: 680px;
     margin: 0 auto;
+    min-height: 42px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 
@@ -3038,9 +3092,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-fit-pills">
           <span class="lp-fit-pill">Welcome Module + 12 modules</span>
           <span class="lp-fit-pill">Cadence-guided</span>
+          <span class="lp-fit-pill">Listen Mode</span>
           <span class="lp-fit-pill">Self-paced</span>
           <span class="lp-fit-pill">Lifetime access</span>
-          <span class="lp-fit-pill">Verifiable credential</span>
+          <span class="lp-fit-pill">Verifiable credential — earned, not automatic</span>
         </div>
       </div>
       <div class="lp-pricing-card lp-purchase-top">
@@ -3051,7 +3106,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-price">$597</div>
           <div class="lp-price-detail">
             <div class="lp-price-label">One-time tuition</div>
-            <div class="lp-price-sub">Lifetime course access · AIMT credential included</div>
+            <div class="lp-price-sub">Lifetime course access · Final Certification Assessment included</div>
           </div>
         </div>
         <p class="lp-purchase-note">Includes the full Welcome Module + 12-module curriculum, Cadence-guided checkpoints, and an earned credential issued after the Final Certification Assessment — designed to support trust in real client-facing practice.</p>
@@ -3075,6 +3130,142 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
     <div class="lp-divider"></div>
+
+    <!-- PROTOCOL GAP -->
+    <div class="lp-section-band">
+      <div class="lp-band-inner" style="max-width:760px;">
+        <div class="lp-proof-eyebrow">The Gap Most Courses Leave Behind</div>
+        <div class="lp-proof-title">Learning The Steps Is The Easy Part.</div>
+        <p class="lp-proof-body">A protocol tells you what to do when everything goes the way the demonstration showed it. It doesn't teach you what to notice when it doesn't, when to adapt the plan mid-service, what to actually say to the client in that moment, where your scope ends, or what to do when the client in front of you doesn't match the lesson.</p>
+        <p class="lp-proof-body">That is the gap between learning a protocol and becoming a practitioner. AIMT was built for that gap.</p>
+      </div>
+    </div>
+
+    <!-- BUILT FROM PRACTICE -->
+    <div class="lp-section-band">
+      <div class="lp-band-inner" style="max-width:760px;">
+        <div class="lp-proof-eyebrow">Built From Practice</div>
+        <div class="lp-proof-title">Education Should Survive Contact With A Real Client.</div>
+        <p class="lp-proof-body">AIMT's curriculum is developed with cosmetologists, estheticians, and trichologists in active practice — organized around the decisions a practitioner actually has to make, not just the steps of a ritual.</p>
+      </div>
+    </div>
+
+    <!-- CATEGORY CONTRAST -->
+    <div class="lp-section-band" style="background:rgba(255,255,255,0.02);">
+      <div class="lp-band-inner">
+        <div class="lp-proof-eyebrow">Where AIMT Fits</div>
+        <div class="lp-proof-title">You Shouldn&rsquo;t Have To Choose Between Serious Education And A Better Way To Learn.</div>
+        <div class="lp-mastery-grid" style="margin-top:2rem;">
+          <div class="lp-mastery-item">
+            <div class="lp-mastery-item-title">Traditional Professional Education</div>
+            <div class="lp-mastery-item-body">Often serious information delivered in a way that can be difficult to apply.</div>
+          </div>
+          <div class="lp-mastery-item">
+            <div class="lp-mastery-item-title">Lightweight Online Courses</div>
+            <div class="lp-mastery-item-body">Easy to move through, but often stop at the steps.</div>
+          </div>
+          <div class="lp-mastery-item featured">
+            <div class="lp-mastery-item-title">AIMT</div>
+            <div class="lp-mastery-item-body">Serious education, modern delivery, and support designed to help you actually use what you learn.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT TOUR -->
+    <div class="lp-section-band lp-band-proof" id="productTour">
+      <div class="lp-band-inner">
+        <div class="lp-proof-head">
+          <div class="lp-proof-eyebrow">See The Course</div>
+          <div class="lp-proof-title">Do Not Take Our Word For It.</div>
+          <p class="lp-proof-body">One real AIMT product, five parts of the same system. Real screens throughout — nothing here is a mockup.</p>
+        </div>
+        <div class="lp-tour" id="lpTour">
+          <div class="lp-tour-tabs" role="tablist" aria-label="AIMT product tour">
+            <button type="button" class="lp-tour-tab is-active" data-tour="course" role="tab" aria-selected="true">Course</button>
+            <button type="button" class="lp-tour-tab" data-tour="cadence" role="tab" aria-selected="false">Cadence</button>
+            <button type="button" class="lp-tour-tab" data-tour="listen" role="tab" aria-selected="false">Listen Mode</button>
+            <button type="button" class="lp-tour-tab" data-tour="timer" role="tab" aria-selected="false">Service Timer</button>
+            <button type="button" class="lp-tour-tab" data-tour="assessment" role="tab" aria-selected="false">Final Assessment</button>
+          </div>
+          <div class="lp-tour-stage">
+            <div class="lp-tour-panel is-active" data-tour-panel="course">
+              <div class="lp-proof-item-frame"><img src="assets/images/marketing/head-spa-certification-course-ui.webp" alt="AIMT Head Spa Certification Course lesson interface" loading="lazy"></div>
+              <p class="lp-tour-caption"><strong>The Course.</strong> Structured curriculum built around the decisions that change real service outcomes — not a static video library.</p>
+            </div>
+            <div class="lp-tour-panel" data-tour-panel="cadence">
+              <div class="lp-proof-item-frame"><img src="assets/images/marketing/cadence-conversation.webp" alt="Cadence learning conversation inside AIMT Head Spa Certification Course" loading="lazy"></div>
+              <p class="lp-tour-caption"><strong>Cadence.</strong> A video cannot tell when you misunderstood something. Cadence follows up when your checkpoint answer is incomplete, and asks you to work back through it.</p>
+            </div>
+            <div class="lp-tour-panel" data-tour-panel="listen">
+              <div class="lp-tour-textcard">
+                <p><strong>Listen With Cadence.</strong> Every module can be read on screen, or listened to. Listening is manual opt-in — it never starts on its own — with a persistent, compact player and continuous audio through a module.</p>
+                <p>Required checkpoints still pause playback for a visual or an interaction; you continue with an explicit tap once you've cleared it. Not an audio-only course — a second way to move through the same curriculum.</p>
+              </div>
+            </div>
+            <div class="lp-tour-panel" data-tour-panel="timer">
+              <div class="lp-proof-item-frame"><img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step" loading="lazy"></div>
+              <p class="lp-tour-caption"><strong>AIMT Service Timer.</strong> Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion included with enrollment, not a separate purchase.</p>
+            </div>
+            <div class="lp-tour-panel" data-tour-panel="assessment">
+              <div class="lp-proof-item-frame"><img src="assets/images/marketing/final-certification-assessment.webp" alt="AIMT Final Certification Assessment overview" loading="lazy"></div>
+              <p class="lp-tour-caption"><strong>Final Certification Assessment.</strong> Part I Knowledge, Part II Applied Cases, Part III a Cadence conversation — completed before a credential is issued.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 8 SERVICE TRAINING -->
+    <div class="lp-section-band" style="background:rgba(255,255,255,0.02);">
+      <div class="lp-band-inner">
+        <div class="lp-proof-head">
+          <div class="lp-proof-eyebrow">Module 8 · The Head Spa Service</div>
+          <div class="lp-proof-title">Yes — AIMT Actually Teaches The Service.</div>
+          <p class="lp-proof-body">Full step-by-step service training, start to reset: positioning, sensory opening, treatment, bodywork, cleanse, and finish — not a technique summary.</p>
+        </div>
+        <div class="lp-proof-item-frame" style="max-width:760px;margin:0 auto;"><img src="assets/images/marketing/module-08-service-training.webp" alt="AIMT Module 8 head spa service training interface" loading="lazy"></div>
+      </div>
+    </div>
+
+    <!-- CURRICULUM EXPLORER -->
+    <div class="lp-section-band">
+      <div class="lp-band-inner">
+        <div class="lp-proof-head">
+          <div class="lp-proof-eyebrow">The Full Curriculum</div>
+          <div class="lp-proof-title">Welcome Module + 12 Numbered Modules.</div>
+        </div>
+        <div class="lp-curriculum" id="lpCurriculum">
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">0</span><span class="lp-curr-title">Welcome Module<span class="lp-curr-sub">How the course works, what certification means</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">How the course works, what certification means, and the standard ahead.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">1</span><span class="lp-curr-title">Role of the Head Spa Technician<span class="lp-curr-sub">Scope of practice, limitations, licensing</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Professional role, scope, limitations, and licensing.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">2</span><span class="lp-curr-title">Welcoming Your Client<span class="lp-curr-sub">Intake, rituals, first contact</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Arrival, consent, comfort, and first contact.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">3</span><span class="lp-curr-title">Hair &amp; Scalp Anatomy<span class="lp-curr-sub">The biology behind every service decision</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">The structures and cycles behind what you see.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">4</span><span class="lp-curr-title">Microscopy &amp; Scalp Assessment<span class="lp-curr-sub">Assessment as a service tool</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">A repeatable system for collecting and interpreting visible evidence.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">5</span><span class="lp-curr-title">Scalp Types &amp; Protocol Adaptation<span class="lp-curr-sub">Treatment frameworks for each type</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Translate regional findings into cosmetic service decisions.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">6</span><span class="lp-curr-title">Conditions &amp; Disorders<span class="lp-curr-sub">Recognition and scope boundaries</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Dandruff, Malassezia, seborrheic dermatitis.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">7</span><span class="lp-curr-title">Equipment &amp; Room Setup<span class="lp-curr-sub">Tools, layout, setup systems</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Tools, bed setup, station prep.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">8</span><span class="lp-curr-title">The Head Spa Service<span class="lp-curr-sub">Full service execution</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Step-by-step service map, Core and Extended.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">9</span><span class="lp-curr-title">Checkout, Client Closing &amp; Pricing Strategy<span class="lp-curr-sub">Positioning and menu architecture</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Closing the appointment, menu design, real-cost pricing.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">10</span><span class="lp-curr-title">Sanitation &amp; Reset Systems<span class="lp-curr-sub">Between-client protocols</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Cleaning, maintenance, troubleshooting.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">11</span><span class="lp-curr-title">AI / Modern Practice Tools<span class="lp-curr-sub">Human-led. AI-assisted modern practice.</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Using modern tools with skill, judgment, and clear professional boundaries.</div>
+          <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-num">12</span><span class="lp-curr-title">Final Certification Assessment<span class="lp-curr-sub">Demonstrate competency and earn certification</span></span><span class="lp-curr-chev">+</span></button>
+          <div class="lp-curr-panel">Knowledge, applied cases, and a Cadence conversation — before certification is issued.</div>
+        </div>
+      </div>
+    </div>
+
     <div class="lp-section-band lp-band-proof">
       <div class="lp-band-inner">
         <div class="lp-proof-head">
@@ -3107,11 +3298,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
               <p class="lp-outcomes-intro">This is the operating standard you step into when you want to move from uneven execution to consistent, defensible service quality.</p>
             </div>
             <div class="lp-outcomes-grid">
-              <div class="lp-outcome-item featured"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>Decide with stronger clinical reasoning</strong>When protocol choices feel case-by-case, this framework gives you a repeatable model grounded in anatomy, growth cycles, and barrier logic.</div></div>
-              <div class="lp-outcome-item featured"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>Assess and adapt with greater professional clarity</strong>Replace uncertain assessment habits with a structured method for microscopy interpretation, treatment adaptation, and scope communication.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>Execute a service standard clients can feel</strong>Run intake, ritual flow, execution, and closeout with repeatable quality that strengthens trust, retention, and referrals.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Position and price from professional confidence</strong>Build a defensible menu and communicate value in language that supports healthy margins without discount pressure.</div></div>
-              <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Operate at a clearer safety and scope standard</strong>Apply a consistent documentation, communication, and referral approach so your practice stays ethical, compliant, and trusted.</div></div>
+              <div class="lp-outcome-item featured"><div class="lp-outcome-num">01</div><div class="lp-outcome-text"><strong>Assess with greater structure</strong>When protocol choices feel case-by-case, this framework gives you a repeatable model grounded in anatomy, growth cycles, and barrier logic.</div></div>
+              <div class="lp-outcome-item featured"><div class="lp-outcome-num">02</div><div class="lp-outcome-text"><strong>Adapt with clearer service reasoning</strong>Replace uncertain assessment habits with a structured method for microscopy interpretation, treatment adaptation, and scope communication.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">03</div><div class="lp-outcome-text"><strong>Execute a repeatable head spa workflow</strong>Run intake, ritual flow, execution, and closeout with repeatable quality that strengthens trust, retention, and referrals.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">04</div><div class="lp-outcome-text"><strong>Communicate and price with greater confidence</strong>Build a defensible menu and communicate value in language that supports sound service economics without discount pressure.</div></div>
+              <div class="lp-outcome-item"><div class="lp-outcome-num">05</div><div class="lp-outcome-text"><strong>Work within clearer safety and scope boundaries</strong>Apply a consistent documentation, communication, and referral approach so your practice stays ethical, compliant, and trusted.</div></div>
             </div>
           </div>
         </div>
@@ -3127,7 +3318,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           </div>
           <div class="lp-mastery-grid">
             <div class="lp-mastery-item">
-              <div class="lp-mastery-item-title">Clinical Foundations</div>
+              <div class="lp-mastery-item-title">Scalp Science Foundations</div>
               <div class="lp-mastery-item-body">Build the biological and trichology base that improves treatment reasoning in real client decisions.</div>
             </div>
             <div class="lp-mastery-item">
@@ -3163,9 +3354,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
             </div>
             <div class="lp-cert-stage">
               <div class="lp-cert-image-wrap">
-                <img src="assets/aimt-certificate-preview.png" alt="AIMT Head Spa Certification Course certificate preview" class="lp-cert-image" loading="lazy" />
+                <img src="assets/images/marketing/aimt-head-spa-certificate.webp" alt="AIMT Head Spa Certification Course certificate" class="lp-cert-image" loading="lazy" />
               </div>
-              <p style="font-family:'SF Mono','Fira Code',monospace;font-size:0.6rem;letter-spacing:0.06em;color:rgba(255,255,255,0.3);margin-top:0.75rem;">Certificate preview shown for illustration. <a href="verify.html" style="color:inherit;">See Credential Verification →</a></p>
+              <p style="font-family:'SF Mono','Fira Code',monospace;font-size:0.6rem;letter-spacing:0.06em;color:rgba(255,255,255,0.3);margin-top:0.75rem;">Demo credential shown for a test account. <a href="verify.html" style="color:inherit;">See Credential Verification →</a></p>
             </div>
           </div>
         </div>
@@ -3173,8 +3364,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
     <div class="lp-final-close">
       <div class="lp-final-close-label">Final Step</div>
-      <div class="lp-final-close-title">If You&rsquo;re Ready To Refine How You Work, This Is The Next Step.</div>
-      <div class="lp-final-close-text">Head Spa Certification Course gives you a clear framework to assess with confidence, execute with consistency, and lead services at a higher professional standard. If this is the level you want to operate at, enrollment is the next step.</div>
+      <div class="lp-final-close-title">Whether You&rsquo;re Building Or Refining, This Is The Next Step.</div>
+      <div class="lp-final-close-text">Head Spa Certification Course gives you a clear framework to assess with confidence, execute with consistency, and lead services at a higher professional standard — whether you're preparing to launch your first head spa service or refining one you already offer.</div>
       <div class="lp-final-close-anchor">$597 · one-time tuition · lifetime course access</div>
       <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
         <div class="lp-enter-btn-dot"></div>
@@ -3183,13 +3374,58 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <p style="font-family:'Outfit',sans-serif;font-size:0.76rem;color:rgba(255,255,255,0.4);margin-top:0.85rem;">Already enrolled? <a href="student-access.html" style="color:inherit;text-decoration:underline;">Student Access</a></p>
     </div>
   </div>
-  <div class="lp-mobile-sticky-cta">
-    <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">
-      <div class="lp-enter-btn-dot"></div>
-      Enroll — $597
-    </button>
+  <div class="lp-mobile-sticky-cta" id="lpMobileStickyCta">
+    <button class="lp-enroll-btn lp-enroll-primary" onclick="startCheckout()">Enroll · $597</button>
   </div>
 </div>
+<script>
+/* Hide the mobile sticky enroll bar while a primary enrollment CTA
+   (hero pricing card or final close) is already on screen, so the
+   student never sees two enroll prompts at once. Presentation-only —
+   does not touch startCheckout() or any purchase logic. */
+(function () {
+  const bar = document.getElementById('lpMobileStickyCta');
+  if (!bar || !('IntersectionObserver' in window)) return;
+  const primaryCtas = document.querySelectorAll('.lp-purchase-top .lp-enroll-btn, .lp-final-close .lp-enroll-btn');
+  if (!primaryCtas.length) return;
+  const visible = new Set();
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) visible.add(entry.target); else visible.delete(entry.target);
+    });
+    bar.classList.toggle('lp-sticky-hide', visible.size > 0);
+  }, { threshold: 0.2 });
+  primaryCtas.forEach((el) => obs.observe(el));
+})();
+
+/* Product tour tab switcher — presentational only. */
+(function () {
+  const tour = document.getElementById('lpTour');
+  if (!tour) return;
+  const tabs = tour.querySelectorAll('.lp-tour-tab');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.tour;
+      tabs.forEach((t) => { t.classList.toggle('is-active', t === tab); t.setAttribute('aria-selected', t === tab ? 'true' : 'false'); });
+      tour.querySelectorAll('.lp-tour-panel').forEach((p) => p.classList.toggle('is-active', p.dataset.tourPanel === key));
+    });
+  });
+})();
+
+/* Curriculum explorer accordion — presentational only. */
+(function () {
+  const wrap = document.getElementById('lpCurriculum');
+  if (!wrap) return;
+  wrap.querySelectorAll('.lp-curr-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      const panel = row.nextElementSibling;
+      const open = row.getAttribute('aria-expanded') === 'true';
+      row.setAttribute('aria-expanded', open ? 'false' : 'true');
+      if (panel) panel.classList.toggle('is-open', !open);
+    });
+  });
+})();
+</script>
 
 <!-- ══ CINEMATIC INTRO ══ -->
 <div id="introScreen">
