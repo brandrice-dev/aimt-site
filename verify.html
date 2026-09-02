@@ -15,7 +15,6 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: var(--aimt-color-bg-primary, #1a1814);
     color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
     font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
     font-weight: 300;
@@ -23,43 +22,47 @@
     display: flex;
     flex-direction: column;
   }
-  .wrap {
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 4rem 1.5rem 3rem;
+  .stage {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem 1.5rem;
+  }
+  .wrap { width: 100%; max-width: 620px; }
+  .eyebrow-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.1rem; }
+  .seal {
+    width: 30px; height: 30px; flex-shrink: 0; color: rgba(163,150,141,0.7);
   }
   h1 {
     font-family: var(--aimt-font-serif, 'Playfair Display', serif);
     font-weight: 500;
-    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
     line-height: 1.2;
-    margin: 1rem 0 0.9rem;
+    margin: 0 0 0.9rem;
   }
   .sub {
-    color: var(--aimt-color-text-body, rgba(255,255,255,0.52));
+    color: rgba(255,255,255,0.62);
     font-size: 0.98rem;
     line-height: 1.65;
-    margin-bottom: 2.4rem;
+    margin-bottom: 2.2rem;
     max-width: 58ch;
+  }
+  .panel {
+    padding: 1.9rem clamp(1.4rem, 4vw, 2.2rem) 2.1rem;
   }
   .field-label {
     display: block;
     font-family: var(--aimt-font-sans);
     font-size: 0.78rem;
-    color: rgba(255,255,255,0.56);
+    color: rgba(255,255,255,0.6);
     margin-bottom: 0.5rem;
   }
-  .lookup {
-    display: flex;
-    gap: 0.6rem;
-    margin-bottom: 1.4rem;
-  }
+  .lookup { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
   .lookup input {
     flex: 1;
-    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
-    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 10px;
     color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
     font-family: var(--aimt-font-mono, monospace);
@@ -82,62 +85,92 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     min-height: 44px;
-    padding: 0 1.5rem;
+    padding: 0 1.4rem;
     cursor: pointer;
+    white-space: nowrap;
   }
   .lookup button:disabled { opacity: 0.5; cursor: default; }
   .lookup button:focus-visible { outline: 2px solid #a3968d; outline-offset: 2px; }
-  .hint {
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    font-size: 0.8rem;
-    margin-bottom: 2.6rem;
-  }
-  .result {
-    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
-    border-radius: var(--aimt-radius-md);
-    padding: 1.8rem;
-    display: none;
-  }
+  .hint { color: rgba(255,255,255,0.44); font-size: 0.8rem; }
+
+  /* ---- Result states ---- */
+  .result { margin-top: 1.6rem; border-radius: var(--aimt-radius-md, 12px); padding: 1.6rem 1.7rem; display: none; border: 0.5px solid rgba(255,255,255,0.08); }
   .result.show { display: block; }
-  .result.valid { border-color: rgba(140, 180, 140, 0.35); }
-  .result.invalid { border-color: rgba(200, 130, 120, 0.35); }
-  .result .status {
+
+  .result.loading { background: rgba(255,255,255,0.025); }
+  .loading-row { display: flex; align-items: center; gap: 0.7rem; color: rgba(255,255,255,0.5); font-size: 0.88rem; }
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.18); border-top-color: rgba(163,150,141,0.9); animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result.valid { background: rgba(140,180,140,0.06); border-color: rgba(140,180,140,0.28); }
+  .result.notfound { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); }
+  .result.revoked { background: rgba(207,145,80,0.06); border-color: rgba(207,145,80,0.28); }
+  .result.unavailable { background: rgba(207,145,80,0.04); border-color: rgba(207,145,80,0.22); }
+
+  .status-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.2rem; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .result.valid .status-dot { background: #9fc39f; }
+  .result.notfound .status-dot { background: rgba(255,255,255,0.3); }
+  .result.revoked .status-dot { background: #d9a568; }
+  .result.unavailable .status-dot { background: #d9a568; }
+  .status {
     font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.7rem;
-    letter-spacing: 0.28em;
+    font-size: 0.66rem;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
-    margin-bottom: 1.1rem;
   }
   .result.valid .status { color: #9fc39f; }
-  .result.invalid .status { color: #cf9187; }
-  .result .name {
+  .result.notfound .status { color: rgba(255,255,255,0.5); }
+  .result.revoked .status,
+  .result.unavailable .status { color: #d9a568; }
+
+  .cred-name {
     font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 500;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
   }
-  .result .detail {
-    color: var(--aimt-color-text-body, rgba(255,255,255,0.52));
-    font-size: 0.92rem;
-    line-height: 1.7;
+  .cred-course { color: rgba(255,255,255,0.66); font-size: 0.96rem; margin-bottom: 1.3rem; }
+  .cred-rows { border-top: 0.5px solid rgba(255,255,255,0.08); padding-top: 1rem; display: grid; gap: 0.65rem; }
+  .cred-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.86rem; }
+  .cred-row .k { color: rgba(255,255,255,0.44); }
+  .cred-row .v { color: rgba(255,255,255,0.85); font-family: var(--aimt-font-mono, monospace); letter-spacing: 0.03em; text-align: right; }
+
+  .detail { color: rgba(255,255,255,0.62); font-size: 0.92rem; line-height: 1.7; }
+  .retry-btn {
+    margin-top: 1.1rem;
+    background: rgba(255,255,255,0.07);
+    border: 0.5px solid rgba(255,255,255,0.16);
+    border-radius: var(--aimt-radius-pill, 980px);
+    color: rgba(255,255,255,0.8);
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 40px;
+    padding: 0 1.2rem;
+    cursor: pointer;
   }
-  .result .cred {
-    font-family: var(--aimt-font-mono, monospace);
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    font-size: 0.82rem;
-    margin-top: 1rem;
-    letter-spacing: 0.06em;
-  }
+  .retry-btn:hover, .retry-btn:focus-visible { border-color: rgba(255,255,255,0.32); color: #fff; }
+
   .scope-note {
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    color: rgba(255,255,255,0.4);
     font-size: 0.78rem;
     line-height: 1.6;
-    margin-top: 1.5rem;
+    margin-top: 1.8rem;
     max-width: 58ch;
+  }
+
+  @media (max-width: 560px) {
+    .stage { padding: 2.5rem 1.25rem; }
+    .lookup { flex-direction: column; }
+    .lookup button { width: 100%; }
+    .panel { padding: 1.6rem 1.25rem 1.8rem; }
   }
 </style>
 </head>
-<body>
+<body class="aimt-sp-depth-primary">
   <header class="aimt-legal-header">
     <a href="index.html" class="aimt-legal-header-brand">AIMT</a>
     <nav class="aimt-legal-header-links">
@@ -146,26 +179,30 @@
     </nav>
   </header>
 
-  <div class="wrap">
-    <span class="aimt-sp-eyebrow">AIMT Credential Verification</span>
-    <h1>Verify an AIMT credential.</h1>
-    <p class="sub">AIMT credentials issued after successful certification carry a unique credential ID. Enter the ID below to confirm that the credential is recorded and currently active.</p>
+  <div class="stage">
+    <div class="wrap">
+      <div class="eyebrow-row">
+        <svg class="seal" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="14" stroke="currentColor" stroke-width="0.5" opacity="0.4"/><circle cx="22" cy="22" r="2" fill="currentColor"/></svg>
+        <span class="aimt-sp-eyebrow">AIMT Credential Verification</span>
+      </div>
+      <h1>Verify an AIMT credential.</h1>
+      <p class="sub">AIMT credentials issued after successful certification carry a unique credential ID. Enter the ID below to confirm its current record and status.</p>
 
-    <label class="field-label" for="credInput">Credential ID</label>
-    <div class="lookup">
-      <input id="credInput" placeholder="AIMT-HSM-2026-XXXXXX" autocomplete="off" spellcheck="false" aria-describedby="credHint">
-      <button id="credBtn" type="button" onclick="verify()">Verify Credential</button>
+      <div class="aimt-sp-surface panel">
+        <label class="field-label" for="credInput">Credential ID</label>
+        <div class="lookup">
+          <input id="credInput" placeholder="AIMT-HS-2026-XXXXXX" autocomplete="off" spellcheck="false" aria-describedby="credHint">
+          <button id="credBtn" type="button" onclick="verify()">Verify Credential →</button>
+        </div>
+        <div class="hint" id="credHint">The credential ID appears on the issued AIMT certificate.</div>
+
+        <div class="result" id="result" role="status" aria-live="polite">
+          <!-- populated by renderState() -->
+        </div>
+      </div>
+
+      <p class="scope-note">AIMT certification does not replace or expand state licensure. This record confirms an AIMT education credential only.</p>
     </div>
-    <div class="hint" id="credHint">The credential ID appears on the issued AIMT certificate.</div>
-
-    <div class="result" id="result" role="status" aria-live="polite">
-      <div class="status" id="resStatus"></div>
-      <div class="name" id="resName"></div>
-      <div class="detail" id="resDetail"></div>
-      <div class="cred" id="resCred"></div>
-    </div>
-
-    <p class="scope-note">This record confirms an active AIMT education credential. AIMT certification does not replace or expand state licensure.</p>
   </div>
 
   <footer class="aimt-footer">
@@ -175,48 +212,102 @@
   </footer>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   Local-only QA fixture — mirrors the ReviewMode/StudentPreview
+   pattern in assets/js/headspa-state.js: hostname-allowlisted to
+   127.0.0.1/localhost/.local only, hard-unreachable on any real
+   deploy host regardless of query string. Renders the exact same
+   result markup via renderState() with a synthetic record so every
+   visual state can be exercised without touching Supabase or issuing
+   a real credential. Never calls the real endpoint when active.
+   ═══════════════════════════════════════════════════════════════ */
+function isQAFixtureEligibleHost() {
+  const h = (window.location.hostname || '').toLowerCase();
+  return h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local');
+}
+const QA_FIXTURES = {
+  verified: { valid: true, credential_id: 'AIMT-HS-2026-DEMO01', course: 'Head Spa Certification Course', student_name: 'Alexandra M. Renfield (DEMO)', completed_at: '2026-08-14T00:00:00Z' },
+  notfound: { valid: false, reason: 'not_found' },
+  revoked: { valid: false, reason: 'revoked' },
+  unavailable: '__throw__'
+};
+
+function renderState(kind, data) {
+  const box = document.getElementById('result');
+  box.className = 'result show ' + kind;
+
+  if (kind === 'loading') {
+    box.innerHTML = '<div class="loading-row"><div class="spinner"></div><span>Checking the AIMT credential record…</span></div>';
+    return;
+  }
+
+  if (kind === 'valid') {
+    const date = new Date(data.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    box.innerHTML =
+      '<div class="status-row"><span class="status-dot"></span><span class="status">Verified · Active</span></div>' +
+      '<div class="cred-name">' + data.student_name + '</div>' +
+      '<div class="cred-course">' + data.course + '</div>' +
+      '<div class="cred-rows">' +
+        '<div class="cred-row"><span class="k">Issued</span><span class="v">' + date + '</span></div>' +
+        '<div class="cred-row"><span class="k">Credential ID</span><span class="v">' + data.credential_id + '</span></div>' +
+        '<div class="cred-row"><span class="k">Status</span><span class="v">Active</span></div>' +
+      '</div>';
+    return;
+  }
+
+  if (kind === 'revoked') {
+    box.innerHTML =
+      '<div class="status-row"><span class="status-dot"></span><span class="status">Credential Not Active</span></div>' +
+      '<div class="detail">This credential was previously issued but is not currently active. If you believe this is an error, contact AIMT with the credential ID for review.</div>';
+    return;
+  }
+
+  if (kind === 'unavailable') {
+    box.innerHTML =
+      '<div class="status-row"><span class="status-dot"></span><span class="status">Verification Unavailable</span></div>' +
+      '<div class="detail">The credential service could not be reached. This does not mean the credential is invalid — please try again in a moment.</div>' +
+      '<button type="button" class="retry-btn" onclick="verify()">Try Again</button>';
+    return;
+  }
+
+  // notfound
+  box.innerHTML =
+    '<div class="status-row"><span class="status-dot"></span><span class="status">Credential Not Found</span></div>' +
+    '<div class="detail">No active AIMT credential was found for that ID. Double-check every character — a typo or an outdated ID are the most common causes.</div>';
+}
+
 async function verify() {
   const input = document.getElementById('credInput');
   const btn = document.getElementById('credBtn');
-  const box = document.getElementById('result');
   const id = (input.value || '').trim().toUpperCase();
   if (!id) return;
 
   btn.disabled = true;
-  btn.textContent = '…';
+  renderState('loading');
+
   try {
-    const r = await fetch('/api/verify-credential?id=' + encodeURIComponent(id));
-    const data = await r.json();
-    box.classList.add('show');
-    box.classList.remove('valid', 'invalid');
+    let data;
+    const qaKey = isQAFixtureEligibleHost() ? new URLSearchParams(window.location.search).get('qafixture') : null;
+    if (qaKey && QA_FIXTURES[qaKey]) {
+      await new Promise((r) => setTimeout(r, 400));
+      if (QA_FIXTURES[qaKey] === '__throw__') throw new Error('QA fixture: simulated service failure');
+      data = QA_FIXTURES[qaKey];
+    } else {
+      const r = await fetch('/api/verify-credential?id=' + encodeURIComponent(id));
+      data = await r.json();
+    }
 
     if (data.valid) {
-      box.classList.add('valid');
-      document.getElementById('resStatus').textContent = 'Verified · Active';
-      document.getElementById('resName').textContent = data.student_name;
-      const date = new Date(data.completed_at).toLocaleDateString('en-US',
-        { month: 'long', day: 'numeric', year: 'numeric' });
-      document.getElementById('resDetail').textContent =
-        'Completed ' + data.course + ' on ' + date + '.';
-      document.getElementById('resCred').textContent = 'Credential ID · ' + data.credential_id;
+      renderState('valid', data);
+    } else if (data.reason === 'revoked') {
+      renderState('revoked');
     } else {
-      box.classList.add('invalid');
-      document.getElementById('resStatus').textContent =
-        data.reason === 'revoked' ? 'Credential Revoked' : 'Credential Not Found';
-      document.getElementById('resName').textContent = '';
-      document.getElementById('resDetail').textContent =
-        data.reason === 'revoked'
-          ? 'This credential was previously issued but is no longer active. Contact AIMT for additional information.'
-          : 'No active AIMT credential matches this ID. Check every character and try again.';
-      document.getElementById('resCred').textContent = id;
+      renderState('notfound');
     }
   } catch (e) {
-    box.classList.add('show', 'invalid');
-    document.getElementById('resStatus').textContent = 'Verification Unavailable';
-    document.getElementById('resDetail').textContent = 'The credential service could not be reached. Please try again.';
+    renderState('unavailable');
   }
   btn.disabled = false;
-  btn.textContent = 'Verify Credential';
 }
 document.getElementById('credInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') verify();
