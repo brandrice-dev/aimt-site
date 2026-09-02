@@ -22,6 +22,7 @@
 <meta name="twitter:image" content="https://aimtrichology.com/assets/aimt-social-share.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -173,6 +174,49 @@ nav {
 .hero-sub strong { font-style: normal; font-weight: 500; color: rgba(255,255,255,0.9); }
 .hero-signal { font-family: var(--aimt-font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.6); display: inline-block; margin-top: 1.3rem; padding-top: 1.4rem; border-top: 0.5px solid rgba(255,255,255,0.09); }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 2rem; }
+
+/* ── Product-led hero (replaces the full-bleed clinical-authority photo) ── */
+#hero.hero-product {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(163,150,141,0.1), transparent 45%),
+    linear-gradient(160deg, #1e1b17 0%, #14110d 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  padding: calc(56px + 3rem) clamp(1.5rem, 5vw, 4rem) 3.5rem;
+}
+.hero-content-product {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 34rem;
+  margin: 0; text-shadow: none;
+}
+.hero-product-media {
+  position: relative; z-index: 1;
+  justify-self: center;
+  width: 100%; max-width: 480px;
+  aspect-ratio: 4 / 3.6;
+}
+.hero-product-laptop {
+  position: absolute; top: 0; left: 0;
+  width: 100%; border-radius: 14px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+}
+.hero-product-phone {
+  position: absolute; bottom: 0; right: -4%;
+  width: 34%; border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+@media (max-width: 980px) {
+  #hero.hero-product { grid-template-columns: 1fr; text-align: left; padding-top: calc(56px + 2rem); }
+  .hero-product-media { max-width: 380px; justify-self: start; margin-top: 1rem; }
+}
+@media (max-width: 700px) {
+  #hero.hero-product { min-height: auto; padding: calc(56px + 1.5rem) 1.1rem 2.5rem; display: flex; flex-direction: column; align-items: flex-start; }
+  .hero-content-product { text-align: left; }
+  .hero-product-media { max-width: 260px; margin-top: 2rem; align-self: center; }
+}
 
 @media(max-width:700px){
   #hero {
@@ -727,17 +771,13 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 </div>
 
 <!-- HERO -->
-<section id="hero">
-  <picture class="hero-image-wrap">
-    <source media="(max-width: 700px)" srcset="assets/hero-mobile.jpg">
-    <img src="assets/hero-desktop.jpg" alt="Head spa professional holding an AIMT certification" class="hero-image">
-  </picture>
+<section id="hero" class="hero-product">
   <div class="hero-overlay" aria-hidden="true"></div>
-  <div class="hero-content">
+  <div class="hero-content hero-content-product">
     <h1 class="hero-headline">
       <em>American Institute of Modern Trichology</em>
       <span class="hero-lead">A new standard in</span>
-      <span class="hero-payoff">Head&nbsp;Spa<br>Certification</span>
+      <span class="hero-payoff">Head&nbsp;Spa<br>Education</span>
     </h1>
     <p class="hero-sub">Train beyond technique. Build the judgment, confidence, and professional presence that distinguish serious head spa practitioners from those who simply completed a course.</p>
     <div class="hero-signal">Structured &nbsp;&middot;&nbsp; Any device &nbsp;&middot;&nbsp; For serious professionals</div>
@@ -745,6 +785,10 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <a href="headspa-mastery.html" class="cta-primary">Explore the certification →</a>
       <a href="#institute" class="cta-ghost">Why AIMT →</a>
     </div>
+  </div>
+  <div class="hero-product-media" aria-hidden="true">
+    <img src="assets/images/marketing/course-module-4-editorial.webp" alt="" class="hero-product-laptop" loading="eager" fetchpriority="high">
+    <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="" class="hero-product-phone" loading="eager">
   </div>
 </section>
 
@@ -763,10 +807,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
         </div>
         <div class="c01-body">
           <div class="c01-price">$597 &middot; Lifetime access</div>
-          <div class="c01-math">
-            <span class="eyebrow c01-roi-label">The math</span>
-            <div class="c01-price-note">A head spa service commonly ranges from $150–$300. The $597 course investment is comparable to the gross service revenue from approximately two to four appointments — for illustration only, not a profit or earnings claim.</div>
-          </div>
           <div class="c01-includes">
             <div class="c01-includes-title">What's included</div>
             <div class="c01-include-item">Welcome Module + 12 numbered modules</div>
@@ -820,39 +860,13 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <span class="eyebrow reveal">Included with enrollment</span>
       <h2 class="section-title reveal reveal-delay-1" style="color:white;">Take the course into the<br>treatment room.</h2>
       <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Timer with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
-      <p class="section-sub reveal reveal-delay-2">For a new practitioner, it removes the pressure of trying to remember every step with a client in front of you. The Timer stays beside you from your first appointment onward, helping you deliver the service with structure until the flow becomes second nature.</p>
+      <p class="section-sub reveal reveal-delay-2">Core and Extended are AIMT's two reference protocols — 60- and 90-minute service structures built so a new practitioner can deliver the service with structure from the first appointment onward, until the flow becomes second nature.</p>
     </div>
-    <div class="protocol-timer-demo reveal reveal-delay-2" aria-hidden="true">
-      <div class="ptd-content" id="ptdContent">
-        <div class="ptd-top-row">
-          <span class="ptd-service-label">60-Min Service</span>
-          <span class="ptd-phase-label">Treatment</span>
-        </div>
-        <div class="ptd-progress-track"><div class="ptd-progress-fill" style="width:22%;"></div></div>
-        <div class="ptd-time-row"><span class="ptd-elapsed">13:00 Elapsed</span> · <span class="ptd-remaining">47:00 Remaining</span></div>
-        <div class="ptd-timer-block">
-          <svg class="ptd-ring" viewBox="0 0 56 56" width="56" height="56">
-            <circle class="ptd-ring-track" cx="28" cy="28" r="26" fill="none"/>
-            <circle class="ptd-ring-fill" cx="28" cy="28" r="26" fill="none"/>
-          </svg>
-          <div class="ptd-timer-meta">
-            <div class="ptd-countdown">0:12</div>
-            <div class="ptd-step-count">Step 04 of 12</div>
-          </div>
-        </div>
-        <div class="ptd-step-label"><span class="ptd-step-dash"></span>Step 04</div>
-        <div class="ptd-step-title">Exfoliant<br>Application</div>
-        <p class="ptd-desc">Load brush from bowl — no dripping. Part cleanly. Apply along parting in a controlled line. Quadrant by quadrant: frontal → temporal L → temporal R → crown → occipital.</p>
-        <div class="ptd-note">
-          <div class="ptd-note-label">Note</div>
-          <p class="ptd-note-text">Clean partings. Product stays on scalp — not spread through hair.</p>
-        </div>
-        <div class="ptd-next">
-          <span class="ptd-next-label">Next</span>
-          <span class="ptd-next-title">Scalp Massage</span>
-        </div>
+    <div class="reveal reveal-delay-2" style="max-width:420px;">
+      <div class="aimt-sp-proof-frame">
+        <img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step in the treatment room" loading="lazy" width="1600" height="2133">
       </div>
-      <button type="button" class="ptd-next-btn" id="ptdNextBtn" tabindex="-1" hidden>Next Step →</button>
+      <p class="aimt-sp-proof-caption">The real AIMT Service Timer, in use during a Core Format service.</p>
     </div>
   </div>
 </section>
@@ -865,24 +879,23 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1rem;">AIMT is built on a different standard. We believe knowledge is only useful when you can articulate it, apply it, and make sound decisions with a real client in front of you.</p>
     <p class="section-sub reveal reveal-delay-2">Our curriculum is developed by practicing cosmetologists, estheticians, and trichologists with decades of combined experience and thousands of client services behind them. It is shaped by what happens in the treatment room—not by theory alone.</p>
     <div class="diff-grid">
-      <div class="diff-card reveal"><div class="diff-num">01</div><div><div class="diff-title">Prepared to perform—not simply pass.</div><div class="diff-body">The program is organized into twelve progressive modules, sequenced to reflect how professional practice actually develops: scope and safety, client experience, anatomy, assessment, treatment execution, sanitation, pricing, and beyond. <strong>Each module builds on the one before it, and advancement requires genuine completion—not simply moving through content.</strong></div></div></div>
-      <div class="diff-card reveal reveal-delay-1"><div class="diff-num">02</div><div><div class="diff-title">Understanding must be demonstrated.</div><div class="diff-body">Rather than relying on multiple-choice quizzes, each module concludes with a checkpoint that asks you to explain key concepts in your own words. Recognition can show that you remember an answer. <strong>Explanation reveals whether you understand it—and that deeper comprehension is what carries into client care and real-time decision-making.</strong></div></div></div>
-      <div class="diff-card reveal reveal-delay-2"><div class="diff-num">03</div><div><div class="diff-title">Modern tools, guided by professional judgment.</div><div class="diff-body">Every part of the AIMT curriculum is authored by experienced practitioners. You'll also learn to work fluently with modern tools like AI—using them to sharpen your practice while remaining responsible for the judgment behind every decision. The knowledge remains human-built. <strong>The decisions remain yours.</strong></div></div></div>
-      <div class="diff-card reveal reveal-delay-3"><div class="diff-num">04</div><div><div class="diff-title">Fluent in the tools. Clear on the boundaries.</div><div class="diff-body">AIMT addresses an area most certification programs overlook: how to use AI responsibly within professional practice. You will learn where AI can support your work—documentation, education, client communication, and business—and where the boundary must remain, without crossing into diagnosis or working beyond your scope.</div></div></div>
+      <div class="diff-card reveal"><div class="diff-num">01</div><div><div class="diff-title">Built from practice.</div><div class="diff-body">Education should survive contact with a real client. AIMT's curriculum is organized around the decisions practitioners actually have to make — not just the steps of a ritual.</div></div></div>
+      <div class="diff-card reveal reveal-delay-1"><div class="diff-num">02</div><div><div class="diff-title">Built for modern learning.</div><div class="diff-body">Feedback, tools, flexible learning, and interaction should make knowledge easier to use. Cadence, checkpoints, and Listen Mode exist to serve that, not as novelty.</div></div></div>
+      <div class="diff-card reveal reveal-delay-2"><div class="diff-num">03</div><div><div class="diff-title">Built around competency.</div><div class="diff-body">The credential represents demonstrated learning. Advancement requires genuine completion, and certification is earned through a Final Certification Assessment — not automatic.</div></div></div>
     </div>
   </div>
 </section>
 
-<!-- COMMUNITY -->
+<!-- BUILT FROM PRACTICE -->
 <section id="community">
   <div class="section-inner">
     <span class="eyebrow reveal">Scalp care professionals</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Real professionals.<br>Real connections.</h2>
+    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Built from practice.</h2>
     <p class="community-intro reveal reveal-delay-2"><em>AI can sharpen how you learn.</em> The people doing the work sharpen how you practice.</p>
     <div class="community-grid">
-      <div class="comm-card reveal"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.25"/><path d="M4.5 16.5c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">Learn from active practitioners</div><div class="comm-body">AIMT is built with professionals currently doing the work — not just educators. Coursework is developed with practitioners in active salons, and the certification is paired with hands-on, in-person clinical training led by working practitioners.</div></div>
-      <div class="comm-card reveal reveal-delay-1"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="7.5" cy="8" r="3" stroke="currentColor" stroke-width="1.25"/><circle cx="13" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.25" opacity="0.6"/></svg></div><div class="comm-title">Join the community</div><div class="comm-body">Students and graduates share a growing community — a place to ask real questions and compare what's working, whether you're new to the industry or ten years in.</div></div>
-      <div class="comm-card reveal reveal-delay-2" style="grid-column: 1 / -1;"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="15" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="10" cy="9" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="16" cy="5" r="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M5.3 13.7L8.7 10.3M11.3 7.7L14.7 6.3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">As the community grows</div><div class="comm-body">We're building toward graduate-to-graduate mentorship and referrals, and connections to employers looking for certified practitioners — the network grows as the institute does.</div></div>
+      <div class="comm-card reveal"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.25"/><path d="M4.5 16.5c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">Built by active practitioners</div><div class="comm-body">AIMT curriculum is developed with professionals currently doing the work — cosmetologists, estheticians, and trichologists in active practice — not by educators alone. What you learn is shaped by what actually happens in the treatment room.</div></div>
+      <div class="comm-card reveal reveal-delay-1"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="7.5" cy="8" r="3" stroke="currentColor" stroke-width="1.25"/><circle cx="13" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.25" opacity="0.6"/></svg></div><div class="comm-title">Education that survives contact with a real client</div><div class="comm-body">Every module is built around the decisions a practitioner actually has to make — what to notice, how to adapt, what to say, and where scope ends — not just the steps of a ritual.</div></div>
+      <div class="comm-card reveal reveal-delay-2" style="grid-column: 1 / -1;"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="15" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="10" cy="9" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="16" cy="5" r="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M5.3 13.7L8.7 10.3M11.3 7.7L14.7 6.3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">A growing AIMT education ecosystem</div><div class="comm-body">Head Spa Certification Course is the first program in a wider institute — built to expand as more programs and practitioner resources come online.</div></div>
     </div>
   </div>
 </section>
@@ -903,6 +916,16 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <div class="human-strip-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.67 3.67 4 4.5 4h11c.83 0 1.5.67 1.5 1.5v6c0 .83-.67 1.5-1.5 1.5H9.5L6 15v-2H4.5C3.67 13 3 12.33 3 11.5v-6z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg></div>
       <div class="human-strip-text"><strong>The curriculum remains human. The responsibility remains yours.</strong> Cadence makes the learning process more responsive, but it does not replace instruction, professional judgment, or practical experience. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
     </div>
+  </div>
+</section>
+
+<!-- LISTEN MODE -->
+<section id="listen-mode">
+  <div class="section-inner">
+    <span class="eyebrow-light reveal">Listen With Cadence</span>
+    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Keep learning when your<br>eyes are somewhere else.</h2>
+    <p class="institute-intro reveal reveal-delay-2"><em>Every module can be read on screen, or listened to with Cadence.</em> Listening is manual — it never starts on its own — and supports continuous audio through a module with a persistent, compact player.</p>
+    <p class="section-sub reveal reveal-delay-2">Required checkpoints still pause playback for a visual or an interaction, and you continue listening with an explicit tap once you've cleared it. AIMT is not an audio-only course — Listen Mode is a way to move through the same curriculum, not a shortcut around it.</p>
   </div>
 </section>
 
@@ -954,16 +977,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
   </div>
 </section>
-
-<!-- MID CTA -->
-<div class="mid-cta">
-  <span class="eyebrow">The head spa standard</span>
-  <h2 class="section-title" style="color:white;">For practitioners who want<br>their work to feel different.</h2>
-  <p class="section-sub" style="margin:0 auto 1.25rem;">Not louder. Not trendier. More informed, more intentional, and more prepared. AIMT was built for practitioners who want the structure, judgment, and professional depth behind a head spa service—not just the sequence of steps.</p>
-  <div class="mid-cta-actions">
-    <a href="headspa-mastery.html" class="cta-primary">Explore the curriculum →</a>
-  </div>
-</div>
 
 <!-- CERTIFICATE SHOWCASE -->
 <section id="certificate">
@@ -1027,6 +1040,17 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <div class="cert-detail-row">
       <div class="cert-detail-text"><strong>Built for professional use</strong>Designed to support your credibility as you present your education to clients, employers, collaborators, or future opportunities.</div>
     </div>
+  </div>
+</section>
+
+<!-- READINESS SCORE TEASER -->
+<section id="readiness-teaser" style="background:#faf8f5; padding: 4.5rem 2rem;">
+  <div class="section-inner" style="text-align:center; max-width:640px;">
+    <span class="aimt-sp-eyebrow" style="color:#a3968d;">AIMT Head Spa Readiness Score</span>
+    <h2 class="section-title" style="color:#262626; margin:1rem 0 1.1rem;">See how ready you are for a stronger head spa practice.</h2>
+    <p style="font-family:var(--aimt-font-sans); font-size:0.92rem; font-weight:300; color:#7a6e66; line-height:1.8; margin-bottom:1.5rem;">Whether you're exploring the service, preparing to launch, already taking clients, or refining an established practice, answer 15 practical questions and get your AIMT Head Spa Readiness Score.</p>
+    <a href="head-spa-readiness.html" class="aimt-cta aimt-cta-primary-light">Get My Readiness Score →</a>
+    <p style="font-family:var(--aimt-font-mono); font-size:0.68rem; letter-spacing:0.06em; color:#a3968d; margin-top:1rem;">3 minutes · Free · Personalized results</p>
   </div>
 </section>
 
@@ -1173,9 +1197,9 @@ if (c01Toggle && c01Grid) {
   render();
 })();
 
-// Protocol timer demo: real-time countdown, chains 04 -> 05 -> 06, pauses off-screen
+// Protocol timer demo: retired — replaced with a real Service Timer capture (see #protocol markup)
 (function() {
-  const root = document.querySelector('.protocol-timer-demo');
+  const root = null;
   if (!root) return;
   const content = document.getElementById('ptdContent');
   const nextBtn = document.getElementById('ptdNextBtn');
