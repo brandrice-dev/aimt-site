@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Head Spa Practice Readiness Audit | AIMT</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="Take AIMT's free 3-minute Head Spa Practice Readiness Score and get a personalized profile across assessment, service flow, communication, scope and business systems.">
+<link rel="canonical" href="https://aimtrichology.com/head-spa-readiness.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-brand.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-primary); color: white; min-height: 100dvh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+
+.ra-stage { padding: calc(var(--aimt-nav-height) + 4.5rem) 2rem 5rem; }
+.ra-stage.light { background: #faf8f5; color: #262626; }
+.ra-inner { max-width: 720px; margin: 0 auto; }
+.ra-inner.wide { max-width: 900px; }
+
+/* Hero */
+.ra-hero h1 { font-family: var(--aimt-font-mont); font-weight: 700; letter-spacing: -0.02em; font-size: clamp(2rem, 4.6vw, 3rem); line-height: 1.05; margin: 1rem 0 1.25rem; text-transform: uppercase; }
+.ra-hero-lead { font-family: var(--aimt-font-sans); font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.68); line-height: 1.75; max-width: 60ch; margin-bottom: 1rem; }
+.ra-hero-proof { font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(163,150,141,0.75); text-transform: uppercase; margin-bottom: 2rem; }
+
+/* Stage selector */
+.ra-stage-select { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.ra-stage-btn {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.1); border-radius: var(--aimt-radius-md);
+  color: #fff; font-family: var(--aimt-font-sans); font-size: 0.98rem; padding: 1.1rem 1.3rem; min-height: 56px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ra-stage-btn:hover, .ra-stage-btn:focus-visible { border-color: rgba(163,150,141,0.5); background: rgba(255,255,255,0.05); }
+
+/* Question flow */
+.ra-progress { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.7); margin-bottom: 0.6rem; }
+.ra-progress-track { height: 2px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-bottom: 2rem; }
+.ra-progress-fill { height: 100%; background: #a3968d; transition: width 0.3s ease; }
+.ra-pillar-label { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(163,150,141,0.7); margin-bottom: 0.9rem; }
+.ra-question { font-family: var(--aimt-font-serif); font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 500; line-height: 1.35; margin-bottom: 2rem; }
+.ra-answers { display: grid; gap: 0.75rem; margin-bottom: 2rem; }
+.ra-answer-btn {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.1); border-radius: var(--aimt-radius-md);
+  color: #fff; padding: 1rem 1.25rem; min-height: 56px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ra-answer-btn:hover, .ra-answer-btn:focus-visible { border-color: rgba(163,150,141,0.5); }
+.ra-answer-btn.is-selected { border-color: #a3968d; background: rgba(163,150,141,0.12); }
+.ra-answer-title { font-family: var(--aimt-font-sans); font-size: 0.96rem; }
+.ra-answer-sub { font-family: var(--aimt-font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.42); }
+.ra-nav-row { display: flex; justify-content: space-between; align-items: center; }
+.ra-back-btn { background: none; border: none; color: rgba(255,255,255,0.4); font-family: var(--aimt-font-sans); font-size: 0.84rem; cursor: pointer; min-height: 44px; }
+.ra-back-btn:hover { color: #fff; }
+.ra-back-btn[hidden] { visibility: hidden; }
+.ra-next-btn {
+  font-family: var(--aimt-font-mont); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  background: #fff; color: #1a1814; border: none; border-radius: var(--aimt-radius-pill); padding: 0 1.5rem; min-height: 48px; cursor: pointer;
+}
+.ra-next-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* Score reveal (Oura-style dial) */
+.ra-score-wrap { text-align: center; }
+.ra-score-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 1.5rem; }
+.ra-dial { position: relative; width: 220px; height: 220px; margin: 0 auto 1.5rem; }
+.ra-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ra-dial-track { stroke: rgba(255,255,255,0.08); }
+.ra-dial-fill { stroke: #a3968d; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+.ra-dial-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ra-dial-num { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 2.6rem; line-height: 1; }
+.ra-dial-max { font-family: var(--aimt-font-mono); font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.ra-band-name { font-family: var(--aimt-font-mont); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 0.75rem; }
+.ra-band-copy { font-family: var(--aimt-font-sans); font-size: 0.94rem; color: rgba(255,255,255,0.62); line-height: 1.7; max-width: 52ch; margin: 0 auto; }
+
+/* Email gate */
+.ra-gate-card { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.1); border-radius: var(--aimt-radius-panel); padding: clamp(1.5rem,4vw,2.5rem); margin-top: 2.5rem; }
+.ra-field { margin-bottom: 1.1rem; }
+.ra-field label { display: block; font-family: var(--aimt-font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-bottom: 0.4rem; }
+.ra-field input[type="text"], .ra-field input[type="email"] {
+  width: 100%; min-height: 46px; border-radius: var(--aimt-radius-sm); border: 0.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04); color: #fff; font-family: var(--aimt-font-sans); font-size: 16px; padding: 0 1rem; outline: none;
+}
+.ra-field input:focus-visible { border-color: rgba(163,150,141,0.6); outline: 2px solid #a3968d; outline-offset: 1px; }
+.ra-consent { display: flex; align-items: flex-start; gap: 0.6rem; margin: 1rem 0 1.3rem; }
+.ra-consent input { margin-top: 3px; }
+.ra-consent label { font-family: var(--aimt-font-sans); font-size: 0.8rem; color: rgba(255,255,255,0.55); line-height: 1.55; }
+.ra-submit-btn {
+  width: 100%; font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  background: #fff; color: #1a1814; border: none; border-radius: var(--aimt-radius-pill); min-height: 50px; cursor: pointer;
+}
+.ra-submit-btn:disabled { opacity: 0.5; cursor: default; }
+.ra-gate-note { font-family: var(--aimt-font-sans); font-size: 0.74rem; color: rgba(255,255,255,0.34); margin-top: 0.9rem; text-align: center; }
+.ra-back-link { display: block; text-align: center; margin-top: 1rem; font-family: var(--aimt-font-sans); font-size: 0.82rem; color: rgba(255,255,255,0.44); background: none; border: none; cursor: pointer; }
+
+/* Full result */
+.ra-pillar-rows { display: grid; gap: 1.1rem; margin: 2rem 0 2.5rem; }
+.ra-pillar-row-head { display: flex; justify-content: space-between; font-family: var(--aimt-font-sans); font-size: 0.88rem; color: rgba(255,255,255,0.75); margin-bottom: 0.4rem; }
+.ra-pillar-row-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.ra-pillar-row-fill { height: 100%; background: #a3968d; border-radius: 2px; }
+.ra-priority-card { background: #2a2520; border: 0.5px solid rgba(163,150,141,0.3); border-radius: var(--aimt-radius-panel); padding: clamp(1.5rem,4vw,2.25rem); margin-bottom: 2rem; }
+.ra-priority-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.6rem; }
+.ra-priority-title { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 1.3rem; margin-bottom: 0.9rem; }
+.ra-priority-list { display: grid; gap: 0.5rem; margin: 1rem 0; padding-left: 1.2em; }
+.ra-priority-list li { font-family: var(--aimt-font-sans); font-size: 0.9rem; color: rgba(255,255,255,0.66); line-height: 1.6; }
+
+/* Bridge (dark close) */
+.ra-bridge { background: var(--aimt-color-bg-primary); text-align: center; }
+.ra-bridge h2 { font-family: var(--aimt-font-mont); font-weight: 700; font-size: clamp(1.6rem, 3.2vw, 2.2rem); margin: 1rem 0 1rem; }
+.ra-bridge p { font-family: var(--aimt-font-sans); font-size: 0.92rem; color: rgba(255,255,255,0.6); line-height: 1.75; max-width: 56ch; margin: 0 auto 1.75rem; }
+.ra-bridge-ctas { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+
+.ra-panel { display: none; }
+.ra-panel.is-active { display: block; }
+
+@media (max-width: 700px) {
+  .ra-stage { padding: calc(var(--aimt-nav-height) + 3rem) 1.25rem 3.5rem; }
+  .ra-dial { width: 180px; height: 180px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="aimt-nav">
+  <a href="index.html" class="aimt-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="2" fill="currentColor"/></svg>
+  </a>
+  <a href="index.html" class="aimt-nav-wordmark">
+    <span class="aimt-nav-name">AIMT</span>
+    <span class="aimt-nav-sub">American Institute of Modern Trichology</span>
+  </a>
+  <div class="aimt-nav-right">
+    <a href="student-access.html" class="aimt-nav-link" style="margin-right:1rem;">Student Access</a>
+  </div>
+</nav>
+
+<!-- HERO + STAGE SELECT -->
+<section class="ra-stage ra-panel is-active" id="raHero">
+  <div class="ra-inner ra-hero">
+    <span class="aimt-sp-eyebrow">Free · 3-Minute Professional Audit</span>
+    <h1>AIMT Head Spa Readiness Score</h1>
+    <p class="ra-hero-lead">See how ready you are for a stronger head spa practice. Whether you're exploring the service, preparing to launch, already taking clients, or refining an established practice, answer 15 practical questions and get your AIMT Head Spa Readiness Score across the five areas that most often separate a memorized protocol from a professional service system.</p>
+    <div class="ra-hero-proof">5 pillars · Personalized result · No pass/fail</div>
+
+    <div class="ra-progress" style="margin-bottom:0.75rem;">Where are you with head spa?</div>
+    <div class="ra-stage-select">
+      <button type="button" class="ra-stage-btn" data-stage="exploring">Exploring it</button>
+      <button type="button" class="ra-stage-btn" data-stage="preparing">Preparing to launch</button>
+      <button type="button" class="ra-stage-btn" data-stage="offering">Already offering it</button>
+      <button type="button" class="ra-stage-btn" data-stage="refining">Refining or expanding</button>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT MEASURES -->
+<section class="ra-stage light ra-panel" id="raWhatPanel">
+  <div class="ra-inner">
+    <span class="aimt-sp-eyebrow" style="color:#a3968d;">Your Five-Part Readiness Profile</span>
+    <h2 style="font-family:var(--aimt-font-mont);font-weight:700;font-size:clamp(1.5rem,3vw,2rem);margin:1rem 0 1.5rem;color:#262626;">What the score measures.</h2>
+    <div style="display:grid;gap:1.1rem;margin-bottom:2rem;">
+      <div style="padding:1rem 0;border-bottom:0.5px solid rgba(38,38,38,0.1);font-family:var(--aimt-font-sans);color:#262626;">1. Professional Foundation &amp; Scope</div>
+      <div style="padding:1rem 0;border-bottom:0.5px solid rgba(38,38,38,0.1);font-family:var(--aimt-font-sans);color:#262626;">2. Scalp Observation &amp; Assessment</div>
+      <div style="padding:1rem 0;border-bottom:0.5px solid rgba(38,38,38,0.1);font-family:var(--aimt-font-sans);color:#262626;">3. Service Flow &amp; Adaptation</div>
+      <div style="padding:1rem 0;border-bottom:0.5px solid rgba(38,38,38,0.1);font-family:var(--aimt-font-sans);color:#262626;">4. Client Communication &amp; Experience</div>
+      <div style="padding:1rem 0;font-family:var(--aimt-font-sans);color:#262626;">5. Operations &amp; Business Systems</div>
+    </div>
+    <p style="font-family:var(--aimt-font-sans);font-size:0.9rem;color:#7a6e66;line-height:1.75;margin-bottom:2rem;">The score does not determine licensure or certify competency. It is a professional self-assessment designed to help you identify where your current head spa system feels strongest — and where more structure could save you time, uncertainty, or avoidable trial and error.</p>
+    <button type="button" class="ra-next-btn" id="raStartBtn" style="background:#262626;color:#fff;">Start the Free Score →</button>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section class="ra-stage ra-panel" id="raQuestionsPanel">
+  <div class="ra-inner">
+    <div class="ra-progress" id="raProgressLabel">Question 01 of 15</div>
+    <div class="ra-progress-track"><div class="ra-progress-fill" id="raProgressFill" style="width:6.6%;"></div></div>
+    <div class="ra-pillar-label" id="raPillarLabel">Professional Foundation &amp; Scope</div>
+    <div class="ra-question" id="raQuestionText"></div>
+    <div class="ra-answers" id="raAnswers" role="radiogroup"></div>
+    <div class="ra-nav-row">
+      <button type="button" class="ra-back-btn" id="raBackBtn">← Back</button>
+      <button type="button" class="ra-next-btn" id="raNextBtn" disabled>Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- SCORE REVEAL -->
+<section class="ra-stage ra-panel" id="raScorePanel">
+  <div class="ra-inner ra-score-wrap">
+    <div class="ra-score-eyebrow">Your AIMT Readiness Score</div>
+    <div class="ra-dial">
+      <svg viewBox="0 0 200 200">
+        <circle class="ra-dial-track" cx="100" cy="100" r="88" fill="none" stroke-width="10"/>
+        <circle class="ra-dial-fill" id="raDialFill" cx="100" cy="100" r="88" fill="none" stroke-width="10" stroke-dasharray="553" stroke-dashoffset="553"/>
+      </svg>
+      <div class="ra-dial-value">
+        <div class="ra-dial-num" id="raScoreNum">0</div>
+        <div class="ra-dial-max">/ 100</div>
+      </div>
+    </div>
+    <div class="ra-band-name" id="raBandName">—</div>
+    <p class="ra-band-copy" id="raBandCopy"></p>
+
+    <div class="ra-gate-card">
+      <div style="font-family:var(--aimt-font-mont);font-weight:700;font-size:1.05rem;margin-bottom:0.5rem;">Unlock your five-part breakdown and personalized action plan.</div>
+      <p style="font-family:var(--aimt-font-sans);font-size:0.86rem;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:1.3rem;">Enter your email to see exactly which of the five areas is your first priority, with practical next steps.</p>
+      <form id="raGateForm">
+        <div class="ra-field"><label for="raFirstName">First name</label><input type="text" id="raFirstName" required autocomplete="given-name"></div>
+        <div class="ra-field"><label for="raEmail">Email</label><input type="email" id="raEmail" required autocomplete="email"></div>
+        <div class="ra-consent">
+          <input type="checkbox" id="raConsent">
+          <label for="raConsent">Send me AIMT practitioner education, resources, and certification updates. I can unsubscribe at any time. (Optional — your report unlocks either way.)</label>
+        </div>
+        <button type="submit" class="ra-submit-btn" id="raSubmitBtn">Send My Full Report →</button>
+        <p class="ra-gate-note">No account created. See our <a href="privacy.html" style="text-decoration:underline;">Privacy Policy</a>.</p>
+      </form>
+      <button type="button" class="ra-back-link" id="raBackToAnswers">← Back to my answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- FULL RESULT -->
+<section class="ra-stage ra-panel" id="raResultPanel">
+  <div class="ra-inner">
+    <div class="ra-score-eyebrow">Your AIMT Readiness Profile</div>
+    <h2 style="font-family:var(--aimt-font-mont);font-weight:800;font-size:clamp(1.6rem,3.4vw,2.2rem);margin-bottom:1.75rem;" id="raResultBandTitle">—</h2>
+
+    <div class="ra-pillar-rows" id="raPillarRows"></div>
+
+    <div class="ra-priority-card">
+      <div class="ra-priority-eyebrow">Your First Priority</div>
+      <div class="ra-priority-title" id="raPriorityTitle">—</div>
+      <p style="font-family:var(--aimt-font-sans);font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.7;" id="raPriorityAffects"></p>
+      <ul class="ra-priority-list" id="raPriorityActions"></ul>
+      <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark" id="raPriorityCta" style="margin-top:0.5rem;">See How AIMT Builds This Skill →</a>
+    </div>
+
+    <div style="text-align:center;">
+      <div style="font-family:var(--aimt-font-mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(163,150,141,0.7);margin-bottom:1rem;">Your Strongest Area</div>
+      <p style="font-family:var(--aimt-font-sans);font-size:0.92rem;color:rgba(255,255,255,0.62);margin-bottom:2rem;" id="raStrongestText"></p>
+    </div>
+  </div>
+</section>
+
+<!-- COURSE BRIDGE -->
+<section class="ra-stage ra-bridge ra-panel" id="raBridgePanel">
+  <div class="ra-inner">
+    <span class="aimt-sp-eyebrow">When You're Ready To Go Deeper</span>
+    <h2>AIMT Head Spa Certification Course is built around these same professional gaps.</h2>
+    <p>The course takes the five areas you just assessed and develops them through structured curriculum, real service training, Cadence feedback, Listen Mode, practitioner tools, and competency-based certification.</p>
+    <div class="ra-bridge-ctas">
+      <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark">Explore Head Spa Certification Course →</a>
+      <button type="button" class="ra-back-link" id="raReturnToReport" style="color:rgba(255,255,255,0.5);">Return to My Readiness Report</button>
+    </div>
+  </div>
+</section>
+
+<footer class="aimt-footer">
+  <div class="aimt-footer-bottom" style="text-align:center; border-top:none; margin-top:0;">
+    <a href="index.html">AIMT</a> · <a href="headspa-mastery.html">Head Spa Certification</a> · <a href="privacy.html">Privacy</a> · <a href="student-access.html">Student Access</a>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   AIMT Head Spa Readiness Score
+   ---------------------------------------------------------------
+   Front-end complete, client-side scored. Lead submission below is
+   a MOCK/LOCAL simulation only — no network call, no real ESP, no
+   production lead storage. Real delivery (support email, ESP, lead
+   endpoint) is a separate launch-activation task; see the owner
+   report. Do not wire this to a live endpoint without that in place.
+   ═══════════════════════════════════════════════════════════════ */
+const PILLARS = [
+  { key: 'scope', name: 'Professional Foundation & Scope' },
+  { key: 'assessment', name: 'Scalp Observation & Assessment' },
+  { key: 'service', name: 'Service Flow & Adaptation' },
+  { key: 'communication', name: 'Client Communication & Experience' },
+  { key: 'business', name: 'Operations & Business Systems' }
+];
+
+const QUESTIONS = [
+  { pillar: 0, text: 'I can clearly explain the difference between observing a scalp presentation and diagnosing a condition.' },
+  { pillar: 0, text: 'I know when a client concern should change, pause, or stop the cosmetic service and when referral is the better next step.' },
+  { pillar: 0, text: 'I have verified how the services, products, equipment, and techniques in my head spa offering fit within the rules that apply to my license and location.' },
+  { pillar: 1, text: 'My consultation and scalp assessment follow a repeatable structure rather than changing completely from client to client.' },
+  { pillar: 1, text: 'When I use microscopy or close visual observation, I know what the finding allows me to say — and what it does not.' },
+  { pillar: 1, text: 'I can recognize when a client’s scalp presentation is mixed or does not fit neatly into one simple category.' },
+  { pillar: 2, text: 'I can explain the purpose of each major part of my head spa service, not only the sequence.' },
+  { pillar: 2, text: 'If a client needs the service adjusted, I can change intensity, product, pacing, or technique without making the service feel improvised.' },
+  { pillar: 2, text: 'I have a repeatable pacing system that protects the client experience without relying on perfect memory.' },
+  { pillar: 3, text: 'I know what I need to proactively communicate during a head spa service and what is better left quiet unless the client asks.' },
+  { pillar: 3, text: 'I can answer common scalp/client questions briefly and confidently without making claims outside my role.' },
+  { pillar: 3, text: 'My consultation, service transitions, and closing feel like one intentional experience rather than separate steps.' },
+  { pillar: 4, text: 'My pricing is based on my real service economics — not only what nearby businesses charge.' },
+  { pillar: 4, text: 'I have a repeatable sanitation/reset system designed for the wet head spa environment and the equipment I actually use.' },
+  { pillar: 4, text: 'I can explain what makes my head spa service professionally different and worth its price without relying on discounts or vague luxury language.' }
+];
+
+const ANSWER_OPTIONS = [
+  { value: 0, title: 'Not yet', sub: 'I do not currently have a reliable system for this.' },
+  { value: 1, title: 'Sometimes', sub: 'I understand it or do it, but it is not yet consistent.' },
+  { value: 2, title: 'Confidently & consistently', sub: 'I have a repeatable system and can explain why I use it.' }
+];
+
+const PRIORITY_CONTENT = {
+  scope: {
+    affects: 'Unclear scope boundaries put both your clients and your practice at risk, and make it harder to communicate confidently when a service should pause or a referral is the better call.',
+    actions: [
+      'Write down, in your own words, the line between what you observe and what you diagnose.',
+      'List the specific situations where you would pause or stop a service and what you say in that moment.',
+      'Confirm how your current head spa offering fits your license and local rules, in writing.'
+    ]
+  },
+  assessment: {
+    affects: 'Without a repeatable assessment structure, service decisions vary by client and are harder to explain or defend.',
+    actions: [
+      'Build a fixed sequence of what you check, in what order, every single client.',
+      'Write down what a microscopy or visual finding does and does not tell you.',
+      'Practice describing a mixed or ambiguous presentation out loud, in plain language.'
+    ]
+  },
+  service: {
+    affects: 'When adaptation feels improvised, both pacing and client confidence suffer.',
+    actions: [
+      'Write the purpose of each phase of your service, not just the steps.',
+      'Define your go-to adjustments for a shorter appointment, a sensitive scalp, and a rushed client.',
+      'Build one pacing reference you can return to instead of relying on memory.'
+    ]
+  },
+  communication: {
+    affects: 'Inconsistent communication makes the service feel less intentional, even when the technique is strong.',
+    actions: [
+      'List what you proactively say during each phase of the service, and what you leave quiet.',
+      'Draft short, confident answers to your 5 most common client questions.',
+      'Map your consultation, transitions, and closing as one continuous experience.'
+    ]
+  },
+  business: {
+    affects: 'Pricing and systems built on guesswork make it harder to sustain the service or explain its value.',
+    actions: [
+      'Calculate your real per-service cost and time before setting price.',
+      'Write your sanitation/reset checklist for the exact equipment you use.',
+      'Draft one paragraph explaining what makes your service worth its price.'
+    ]
+  }
+};
+
+const state = {
+  headSpaStage: null,
+  answers: new Array(15).fill(null),
+  currentQuestion: 0,
+  pillarScores: [0, 0, 0, 0, 0],
+  totalRaw: 0,
+  totalPct: 0
+};
+
+function showPanel(id) {
+  document.querySelectorAll('.ra-panel').forEach((p) => p.classList.remove('is-active'));
+  document.getElementById(id).classList.add('is-active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.ra-stage-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    state.headSpaStage = btn.dataset.stage;
+    showPanel('raWhatPanel');
+  });
+});
+
+document.getElementById('raStartBtn').addEventListener('click', () => {
+  state.currentQuestion = 0;
+  showPanel('raQuestionsPanel');
+  renderQuestion();
+});
+
+function renderQuestion() {
+  const i = state.currentQuestion;
+  const q = QUESTIONS[i];
+  document.getElementById('raProgressLabel').textContent = 'Question ' + String(i + 1).padStart(2, '0') + ' of 15';
+  document.getElementById('raProgressFill').style.width = (((i + 1) / 15) * 100) + '%';
+  document.getElementById('raPillarLabel').textContent = PILLARS[q.pillar].name;
+  document.getElementById('raQuestionText').textContent = q.text;
+  document.getElementById('raBackBtn').hidden = i === 0;
+
+  const answersEl = document.getElementById('raAnswers');
+  answersEl.innerHTML = '';
+  ANSWER_OPTIONS.forEach((opt) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ra-answer-btn' + (state.answers[i] === opt.value ? ' is-selected' : '');
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', state.answers[i] === opt.value ? 'true' : 'false');
+    btn.innerHTML = '<span class="ra-answer-title">' + opt.title + '</span><span class="ra-answer-sub">' + opt.sub + '</span>';
+    btn.addEventListener('click', () => {
+      state.answers[i] = opt.value;
+      renderQuestion();
+    });
+    answersEl.appendChild(btn);
+  });
+
+  const nextBtn = document.getElementById('raNextBtn');
+  nextBtn.disabled = state.answers[i] === null;
+  nextBtn.textContent = i === 14 ? 'See My Score →' : 'Next →';
+}
+
+document.getElementById('raBackBtn').addEventListener('click', () => {
+  if (state.currentQuestion === 0) return;
+  state.currentQuestion -= 1;
+  renderQuestion();
+});
+
+document.getElementById('raNextBtn').addEventListener('click', () => {
+  if (state.answers[state.currentQuestion] === null) return;
+  if (state.currentQuestion < 14) {
+    state.currentQuestion += 1;
+    renderQuestion();
+  } else {
+    computeScore();
+    showPanel('raScorePanel');
+    revealScore();
+  }
+});
+
+function computeScore() {
+  const pillarScores = [0, 0, 0, 0, 0];
+  state.answers.forEach((val, i) => { pillarScores[QUESTIONS[i].pillar] += val; });
+  const totalRaw = pillarScores.reduce((a, b) => a + b, 0);
+  state.pillarScores = pillarScores;
+  state.totalRaw = totalRaw;
+  state.totalPct = Math.round((totalRaw / 30) * 100);
+}
+
+function bandFor(pct) {
+  if (pct >= 85) return { name: 'Refinement Stage', copy: 'Your foundation is strong. Your biggest gains from here are likely to come from tightening the areas that are still inconsistent and deepening your assessment judgment.' };
+  if (pct >= 70) return { name: 'Strong Foundation', copy: 'You have meaningful systems in place. A few specific areas are worth sharpening to make the whole practice easier to repeat.' };
+  if (pct >= 50) return { name: 'Developing System', copy: 'You have the pieces. They are not all working as one system yet — specific decisions still depend on memory, improvisation, or confidence that changes from client to client.' };
+  return { name: 'Foundation Building', copy: 'Your strongest next move is not adding more equipment or techniques. It is building the professional foundation that makes the service safer, clearer, and easier to explain.' };
+}
+
+function revealScore() {
+  const band = bandFor(state.totalPct);
+  document.getElementById('raBandName').textContent = band.name;
+  document.getElementById('raBandCopy').textContent = band.copy;
+  document.getElementById('raScoreNum').textContent = '0';
+  const circumference = 553;
+  const fill = document.getElementById('raDialFill');
+  fill.style.strokeDashoffset = circumference;
+  requestAnimationFrame(() => {
+    fill.style.strokeDashoffset = String(circumference - (circumference * state.totalPct / 100));
+  });
+  let n = 0;
+  const step = Math.max(1, Math.round(state.totalPct / 30));
+  const timer = setInterval(() => {
+    n = Math.min(state.totalPct, n + step);
+    document.getElementById('raScoreNum').textContent = String(n);
+    if (n >= state.totalPct) clearInterval(timer);
+  }, 25);
+}
+
+document.getElementById('raBackToAnswers').addEventListener('click', () => {
+  state.currentQuestion = 14;
+  showPanel('raQuestionsPanel');
+  renderQuestion();
+});
+
+document.getElementById('raGateForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('raSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  /* MOCK submission — see file header. No network call, no real
+     lead storage. Simulated delay only, for local/branch QA of the
+     full result flow. */
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = 'Send My Full Report →';
+    renderFullResult();
+  }, 500);
+});
+
+function renderFullResult() {
+  const band = bandFor(state.totalPct);
+  document.getElementById('raResultBandTitle').textContent = state.totalPct + ' / 100 · ' + band.name;
+
+  const rows = document.getElementById('raPillarRows');
+  rows.innerHTML = '';
+  let lowestIdx = 0, highestIdx = 0;
+  PILLARS.forEach((p, i) => {
+    if (state.pillarScores[i] < state.pillarScores[lowestIdx]) lowestIdx = i;
+    if (state.pillarScores[i] > state.pillarScores[highestIdx]) highestIdx = i;
+    const row = document.createElement('div');
+    row.innerHTML = '<div class="ra-pillar-row-head"><span>' + p.name + '</span><span>' + state.pillarScores[i] + ' / 6</span></div><div class="ra-pillar-row-track"><div class="ra-pillar-row-fill" style="width:' + (state.pillarScores[i] / 6 * 100) + '%;"></div></div>';
+    rows.appendChild(row);
+  });
+
+  const lowestPillar = PILLARS[lowestIdx];
+  const highestPillar = PILLARS[highestIdx];
+  const content = PRIORITY_CONTENT[lowestPillar.key];
+  document.getElementById('raPriorityTitle').textContent = lowestPillar.name;
+  document.getElementById('raPriorityAffects').textContent = content.affects;
+  const actionsEl = document.getElementById('raPriorityActions');
+  actionsEl.innerHTML = '';
+  content.actions.forEach((a) => {
+    const li = document.createElement('li');
+    li.textContent = a;
+    actionsEl.appendChild(li);
+  });
+  document.getElementById('raStrongestText').textContent = highestPillar.name + ' is currently your strongest area (' + state.pillarScores[highestIdx] + ' / 6).';
+
+  // Result and bridge render together as one continuous report.
+  document.querySelectorAll('.ra-panel').forEach((p) => p.classList.remove('is-active'));
+  document.getElementById('raResultPanel').classList.add('is-active');
+  document.getElementById('raBridgePanel').classList.add('is-active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('raReturnToReport').addEventListener('click', () => {
+  document.getElementById('raResultPanel').scrollIntoView({ behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
