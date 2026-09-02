@@ -11,12 +11,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/aimt-course-resources.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: var(--aimt-color-bg-primary, #1a1814);
     color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
     font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
     font-weight: 300;
@@ -27,6 +27,7 @@
     display: flex; justify-content: space-between; align-items: center;
     padding: 1.1rem 0; margin-bottom: 2.5rem;
     border-bottom: 0.5px solid rgba(255,255,255,0.07);
+    position: relative;
   }
   .topbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .topbar-brand svg { width: 22px; height: 22px; color: rgba(255,255,255,0.5); }
@@ -35,21 +36,57 @@
     font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
     color: rgba(255,255,255,0.72);
   }
+
+  /* Desktop account cluster (email + sign out), hidden on mobile */
   .topbar-right { display: flex; align-items: center; gap: 1.2rem; }
-  .topbar-email { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.8rem; }
+  .topbar-email { color: rgba(255,255,255,0.46); font-size: 0.8rem; }
   .signout {
     background: none; border: none; cursor: pointer;
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
+    color: rgba(255,255,255,0.46);
     font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em;
   }
-  .signout:hover { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); }
+  .signout:hover { color: #fff; }
+
+  /* Mobile account menu, hidden on desktop */
+  .account-menu { display: none; position: relative; }
+  .account-menu-btn {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.75);
+    cursor: pointer;
+  }
+  .account-menu-panel {
+    display: none;
+    position: absolute; top: calc(100% + 10px); right: 0;
+    min-width: 220px;
+    background: #201d18;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: var(--aimt-radius-md, 12px);
+    box-shadow: 0 16px 42px rgba(0,0,0,0.4);
+    padding: 0.9rem 1rem;
+    z-index: 40;
+  }
+  .account-menu-panel.open { display: block; }
+  .account-menu-email { font-size: 0.8rem; color: rgba(255,255,255,0.7); word-break: break-all; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .account-menu-panel a, .account-menu-panel button {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--aimt-font-sans); font-size: 0.86rem;
+    color: rgba(255,255,255,0.75); text-decoration: none;
+    padding: 0.6rem 0;
+  }
+  .account-menu-panel a:hover, .account-menu-panel button:hover { color: #fff; }
 
   h1 {
     font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
     font-weight: 700; letter-spacing: -0.02em;
     font-size: clamp(1.7rem, 3.4vw, 2.4rem); margin-bottom: 0.5rem;
   }
-  .greeting-sub { color: var(--aimt-color-text-muted, rgba(255,255,255,0.5)); font-size: 0.94rem; line-height: 1.7; max-width: 56ch; margin-bottom: 2.75rem; }
+  .greeting-sub { color: rgba(255,255,255,0.6); font-size: 0.94rem; line-height: 1.7; max-width: 56ch; margin-bottom: 2.75rem; }
 
   .section-label {
     font-family: var(--aimt-font-mono, monospace);
@@ -60,29 +97,41 @@
   }
   .section-label:first-of-type { margin-top: 0; }
 
-  /* Primary course hero */
+  /* Primary course hero — dominant dimensional focal surface */
+  .course-hero-wrap { position: relative; }
+  .course-hero-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -18px -18px auto -18px;
+    height: 140%;
+    background: radial-gradient(ellipse at top left, rgba(163,150,141,0.14), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
   .course-hero {
-    background: linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.02) 100%);
-    border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.08));
+    position: relative; z-index: 1;
+    background: linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.025) 100%);
+    border: 0.5px solid rgba(255,255,255,0.1);
     border-radius: var(--aimt-radius-panel, 16px);
     padding: 2rem 2.25rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.28);
   }
   .course-hero-eyebrow {
     font-family: var(--aimt-font-mono, monospace);
     font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(163,150,141,0.6); margin-bottom: 0.85rem; display: block;
+    color: rgba(163,150,141,0.7); margin-bottom: 0.85rem; display: block;
   }
   .course-hero h2 {
     font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
     font-weight: 700; font-size: clamp(1.4rem, 2.6vw, 1.9rem); letter-spacing: -0.02em;
     margin-bottom: 0.3rem;
   }
-  .course-hero-meta { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.82rem; margin-bottom: 1.1rem; }
-  .course-hero-position { color: var(--aimt-color-text-body, rgba(255,255,255,0.56)); font-size: 0.9rem; margin-bottom: 1.2rem; }
+  .course-hero-meta { color: rgba(255,255,255,0.5); font-size: 0.82rem; margin-bottom: 1.1rem; }
+  .course-hero-position { color: rgba(255,255,255,0.68); font-size: 0.9rem; margin-bottom: 1.2rem; }
   .progress-row { display: flex; align-items: center; gap: 1rem; margin: 0 0 1.4rem; }
   .progress-track { flex: 1; height: 4px; border-radius: 2px; background: var(--aimt-surface-4, rgba(255,255,255,0.06)); overflow: hidden; }
   .progress-fill { height: 100%; width: 0%; background: var(--aimt-color-accent, #a3968d); border-radius: 2px; transition: width 0.6s ease; }
-  .progress-pct { font-family: var(--aimt-font-mono, monospace); font-size: 0.78rem; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); min-width: 3.2em; text-align: right; }
+  .progress-pct { font-family: var(--aimt-font-mono, monospace); font-size: 0.78rem; color: rgba(255,255,255,0.55); min-width: 3.2em; text-align: right; }
   .course-hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
 
   .btn {
@@ -96,52 +145,77 @@
   .btn.ghost {
     background: rgba(255,255,255,0.06);
     border: 0.5px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
-    color: rgba(255,255,255,0.72);
+    color: rgba(255,255,255,0.75);
   }
+  .btn.text-link {
+    background: none; padding: 0; min-height: auto;
+    color: rgba(255,255,255,0.5); text-transform: none; font-family: var(--aimt-font-sans); font-weight: 400; font-size: 0.84rem; letter-spacing: normal;
+  }
+  .btn.text-link:hover { color: #fff; }
 
+  /* Certification: moderate depth, one step below Continue Learning */
   .card {
-    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
-    border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.07));
+    background: rgba(255,255,255,0.035);
+    border: 0.5px solid rgba(255,255,255,0.08);
     border-radius: var(--aimt-radius-md); padding: 1.5rem 1.6rem; margin-bottom: 0.85rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.16);
   }
   .card h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; margin-bottom: 0.4rem; }
-  .card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); font-size: 0.86rem; line-height: 1.6; }
-  .cred-line { font-family: var(--aimt-font-mono, monospace); font-size: 0.8rem; letter-spacing: 0.04em; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); margin: 0.75rem 0 1rem; word-break: break-all; }
-  .empty { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; line-height: 1.6; }
+  .card .meta { color: rgba(255,255,255,0.62); font-size: 0.86rem; line-height: 1.6; }
+  .cred-line { font-family: var(--aimt-font-mono, monospace); font-size: 0.8rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.55); margin: 0.75rem 0 1rem; word-break: break-all; }
+  .empty { color: rgba(255,255,255,0.44); font-size: 0.9rem; line-height: 1.6; }
   .cert-status-label {
     font-family: var(--aimt-font-mono, monospace); font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(163,150,141,0.6); margin-bottom: 0.6rem; display: block;
+    color: rgba(163,150,141,0.75); margin-bottom: 0.6rem; display: block;
   }
+  .cert-status-label.is-active { color: #9fc39f; }
+  .cert-status-label.is-attention { color: #d9a568; }
 
-  /* Practitioner tools */
+  /* Practitioner tools + resources: quieter than certification */
   .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; }
-  .tool-card { background: var(--aimt-surface-3, rgba(255,255,255,0.035)); border: 0.5px solid var(--aimt-border-strong, rgba(255,255,255,0.09)); border-radius: var(--aimt-radius-md); padding: 1.4rem 1.5rem; }
+  .tool-card { background: rgba(255,255,255,0.025); border: 0.5px solid rgba(255,255,255,0.07); border-radius: var(--aimt-radius-md); padding: 1.4rem 1.5rem; }
   .tool-card h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 0.98rem; margin-bottom: 0.5rem; }
-  .tool-card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.5)); font-size: 0.84rem; line-height: 1.6; margin-bottom: 1rem; }
+  .tool-card .meta { color: rgba(255,255,255,0.6); font-size: 0.84rem; line-height: 1.6; margin-bottom: 1rem; }
 
   /* Resource rows */
-  .resource-list { background: var(--aimt-surface-2, rgba(255,255,255,0.03)); border: 0.5px solid var(--aimt-border-default, rgba(255,255,255,0.07)); border-radius: var(--aimt-radius-md); padding: 0.3rem 1.5rem; }
-  .resource-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; gap: 1rem; border-bottom: 0.5px solid var(--aimt-border-soft, rgba(255,255,255,0.06)); }
+  .resource-list { background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.06); border-radius: var(--aimt-radius-md); padding: 0.3rem 1.5rem; }
+  .resource-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; gap: 1rem; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
   .resource-item:last-child { border-bottom: none; }
-  .resource-item .r-label { font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(163,150,141,0.5); margin-bottom: 0.25rem; }
+  .resource-item .r-label { font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(163,150,141,0.6); margin-bottom: 0.25rem; }
   .resource-item .r-name { font-size: 0.92rem; }
-  .resource-item .r-desc { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.78rem; margin-top: 0.2rem; max-width: 56ch; }
-  .resource-item a { color: var(--aimt-color-accent, #a3968d); text-decoration: none; font-size: 0.84rem; white-space: nowrap; }
+  .resource-item .r-desc { color: rgba(255,255,255,0.46); font-size: 0.78rem; margin-top: 0.2rem; max-width: 56ch; }
+  .resource-item a.dl {
+    color: var(--aimt-color-accent, #a3968d); text-decoration: none; font-size: 0.82rem; white-space: nowrap;
+    flex-shrink: 0;
+    border: 0.5px solid rgba(163,150,141,0.3); border-radius: var(--aimt-radius-pill, 980px);
+    padding: 0.5rem 1rem;
+  }
+  .resource-item a.dl:hover { border-color: rgba(163,150,141,0.6); color: #fff; }
 
   .account-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .loading { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; padding: 3rem 0; }
-  footer { text-align: center; padding: 2.5rem 1.5rem; color: var(--aimt-color-text-micro, rgba(255,255,255,0.28)); font-size: 0.78rem; }
-  footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.55rem; }
+  .loading { color: rgba(255,255,255,0.44); font-size: 0.9rem; padding: 3rem 0; }
+  footer { text-align: center; padding: 2.5rem 1.5rem; color: rgba(255,255,255,0.38); font-size: 0.78rem; }
+  footer a { color: rgba(255,255,255,0.46); text-decoration: none; margin: 0 0.55rem; }
+  footer a:hover { color: #fff; }
 
   @media (max-width: 700px) {
     .wrap { padding: 0 1.1rem 3rem; }
     .course-hero { padding: 1.6rem 1.4rem; }
     .course-hero-actions .btn { width: 100%; }
     .tools-grid { grid-template-columns: 1fr; }
+
+    /* Mobile header: brand + single account control only */
+    .topbar-right { display: none; }
+    .account-menu { display: block; }
+    .account-menu-btn { display: flex; }
+
+    /* Resource rows: stack action under copy, keep it compact */
+    .resource-item { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+    .resource-item a.dl { align-self: flex-start; }
   }
 </style>
 </head>
-<body>
+<body class="aimt-sp-depth-primary">
 <div class="wrap">
   <div class="topbar">
     <a href="index.html" class="topbar-brand">
@@ -152,6 +226,16 @@
       <span class="topbar-email" id="userEmail"></span>
       <button class="signout" onclick="signOut()">Sign out</button>
     </div>
+    <div class="account-menu">
+      <button type="button" class="account-menu-btn" id="accountMenuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12" cy="7.5" r="3.5" stroke="currentColor" stroke-width="1.4"/></svg>
+      </button>
+      <div class="account-menu-panel" id="accountMenuPanel">
+        <div class="account-menu-email" id="mobileUserEmail"></div>
+        <a href="student-access.html#reset">Change Password</a>
+        <button type="button" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
   </div>
 
   <h1 id="greetingTitle">Welcome back.</h1>
@@ -161,7 +245,7 @@
 
   <div id="dashboard" style="display:none">
     <span class="section-label">Continue Learning</span>
-    <div id="coursesArea"></div>
+    <div class="course-hero-wrap" id="coursesArea"></div>
 
     <span class="section-label">Certification</span>
     <div id="certArea"></div>
@@ -177,6 +261,9 @@
       <div class="account-row">
         <div class="meta">Signed in as <span id="accountEmail"></span></div>
         <a class="btn ghost" href="student-access.html#reset">Change Password</a>
+      </div>
+      <div style="margin-top:0.9rem">
+        <button type="button" class="btn text-link" onclick="signOut()">Sign out</button>
       </div>
     </div>
   </div>
@@ -221,6 +308,15 @@ const MODULE_TITLES = {
   12: 'Final Certification Assessment'
 };
 
+/* Presentation-only name formatting — capitalizes what the account already
+   stores (e.g. "brandon" -> "Brandon"). Never rewrites the stored value. */
+function toDisplayName(name) {
+  if (!name) return '';
+  return String(name).trim().split(/\s+/).map(function (w) {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+}
+
 /* ── Same per-tab session storage as the rest of the site ── */
 function createSessionAuthStorage() {
   const memoryStore = {};
@@ -240,6 +336,12 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 });
 
 let currentUser = null;
+/* Populated by loadCourses() with each slug's already-computed completion
+   percentage, purely so loadCertificates() can distinguish "still working
+   through required modules" from "finished the modules, assessment ready"
+   in its default (no completion row yet) bucket — without any additional
+   query. Both facts already come from data each function already reads. */
+const progressPctBySlug = {};
 
 async function init() {
   const { data } = await supabaseClient.auth.getUser();
@@ -251,8 +353,10 @@ async function init() {
   const email = (currentUser.email || '').toLowerCase();
   document.getElementById('userEmail').textContent = email;
   document.getElementById('accountEmail').textContent = email;
+  document.getElementById('mobileUserEmail').textContent = email;
 
-  const firstName = currentUser.user_metadata && currentUser.user_metadata.first_name;
+  const rawFirstName = currentUser.user_metadata && currentUser.user_metadata.first_name;
+  const firstName = toDisplayName(rawFirstName);
   document.getElementById('greetingTitle').textContent = firstName ? `Welcome back, ${firstName}.` : 'Welcome back.';
 
   const entitledSlugs = await loadCourses(email);
@@ -304,6 +408,7 @@ async function loadCourses(email) {
       });
     } catch (_) {}
     const pct = Math.min(100, Math.round((done / course.totalModules) * 100));
+    progressPctBySlug[slug] = pct;
 
     let ctaLabel = 'Begin Certification →';
     if (done > 0 && pct < 100) ctaLabel = 'Continue Course →';
@@ -340,7 +445,7 @@ async function loadCertificates() {
     const course = COURSES[c.course_slug] || { title: c.course_slug, entry: '#' };
     const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     return '<div class="card">' +
-      '<span class="cert-status-label">AIMT Certified</span>' +
+      '<span class="cert-status-label is-active">Certified</span>' +
       '<h3>' + course.title + '</h3>' +
       '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
       '<div class="cred-line">Credential ID · ' + c.credential_id + '</div>' +
@@ -372,19 +477,33 @@ async function loadCertificates() {
       latestNotYetPassedBySlug[a.course_slug] = a;
     }
   });
+  const remediationSlugs = new Set(Object.keys(latestNotYetPassedBySlug));
   Object.values(latestNotYetPassedBySlug).forEach(a => {
     const course = COURSES[a.course_slug] || { title: a.course_slug, entry: '#' };
     cards.push('<div class="card">' +
-      '<span class="cert-status-label">Certification Not Yet Issued</span>' +
+      '<span class="cert-status-label is-attention">Remediation</span>' +
       '<h3>' + course.title + '</h3>' +
       '<div class="meta">Attempt ' + a.attempt_number + ' · your latest assessment has been reviewed. Return to the course to follow your recommended review and remediation path.</div>' +
       '<div style="margin-top:1rem"><a class="btn" href="' + course.entry + '&cert=1">Review Next Steps →</a></div>' +
       '</div>');
   });
 
-  area.innerHTML = cards.length
-    ? cards.join('')
-    : '<div class="card"><span class="cert-status-label">Certification</span><h3>Your certification path is in progress.</h3><p class="meta">Complete the required course work to reach the Final Certification Assessment.</p></div>';
+  /* Default bucket (no completion row, no remediation attempt on record):
+     distinguish "still working through required modules" from "modules
+     finished, ready for the Final Certification Assessment" using the pct
+     loadCourses() already computed for this slug — no new query. */
+  if (!cards.length) {
+    const slugsWithProgress = Object.keys(progressPctBySlug);
+    const slug = slugsWithProgress.find(s => !certifiedSlugs.has(s) && !remediationSlugs.has(s));
+    const pct = slug ? progressPctBySlug[slug] : 0;
+    if (slug && pct >= 100) {
+      cards.push('<div class="card"><span class="cert-status-label is-attention">Assessment Ready</span><h3>The Final Certification Assessment is ready.</h3><p class="meta">Required coursework is complete. Enter the course to begin Part I of the Final Certification Assessment.</p></div>');
+    } else {
+      cards.push('<div class="card"><span class="cert-status-label">In Progress</span><h3>Your certification path is in progress.</h3><p class="meta">Complete the required course work to reach the Final Certification Assessment.</p></div>');
+    }
+  }
+
+  area.innerHTML = cards.join('');
 }
 
 /* Resources are gated on real entitlement, not client state: entitledSlugs
@@ -411,7 +530,7 @@ async function loadResources(entitledSlugs) {
         downloadItems.push(
           '<div class="resource-item"><div><div class="r-label">' + r.moduleLabel + '</div><div class="r-name">' + r.title + '</div>' +
           '<div class="r-desc">' + r.description + '</div></div>' +
-          '<a href="' + r.href + '" download>Download</a></div>'
+          '<a class="dl" href="' + r.href + '" download>Download</a></div>'
         );
       }
     });
@@ -428,6 +547,22 @@ async function signOut() {
   try { await supabaseClient.auth.signOut(); } catch (_) {}
   window.location.href = 'index.html';
 }
+
+(function setupAccountMenu() {
+  const btn = document.getElementById('accountMenuBtn');
+  const panel = document.getElementById('accountMenuPanel');
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e) => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || btn.contains(e.target)) return;
+    panel.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  });
+})();
 
 init();
 </script>
