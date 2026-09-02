@@ -259,6 +259,46 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+/* ---------- Ambient depth (Student Access reference system) ----------
+   "Dark does not mean flat": warm-black base, a restrained radial tonal
+   lift behind the important content, foreground surfaces 1-2 luminance
+   steps above background, hairline borders, soft falloff rather than
+   drop shadows. Intensity follows content hierarchy:
+   primary (product/action) > secondary (supporting) > minimal (legal). */
+.aimt-sp-depth-primary {
+  background:
+    radial-gradient(circle at top left, rgba(163,150,141,0.09), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(163,150,141,0.05), transparent 42%),
+    linear-gradient(180deg, #1a1814 0%, #14110d 100%);
+}
+.aimt-sp-depth-secondary {
+  background:
+    radial-gradient(circle at top left, rgba(163,150,141,0.055), transparent 38%),
+    linear-gradient(180deg, #1a1814 0%, #16130f 100%);
+}
+.aimt-sp-depth-minimal { background: #1a1814; }
+
+.aimt-sp-surface {
+  background: rgba(255,255,255,0.035);
+  border: var(--aimt-border-hairline, 0.5px) solid var(--aimt-border-default, rgba(255,255,255,0.08));
+  border-radius: var(--aimt-radius-panel, 16px);
+  box-shadow: 0 16px 42px rgba(0,0,0,0.18);
+}
+.aimt-sp-surface-2 { background: rgba(255,255,255,0.02); }
+.aimt-sp-surface-quiet {
+  background: rgba(255,255,255,0.02);
+  border: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.06);
+  border-radius: var(--aimt-radius-md, 12px);
+  box-shadow: none;
+}
+
+/* ---------- Higher-contrast secondary text (new tokens, additive only —
+   do not repoint existing --aimt-color-text-* tokens, which the
+   protected course/module/Cadence experience also reads) ---------- */
+.aimt-sp-text-body { color: rgba(255,255,255,0.66); }
+.aimt-sp-text-muted { color: rgba(255,255,255,0.56); }
+.aimt-sp-text-subtle { color: rgba(255,255,255,0.44); }
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .aimt-nav-mobile-menu,
