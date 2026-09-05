@@ -1072,6 +1072,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
    see the header markup below for the funnel-variant content (brand +
    single CTA only). */
 .aimt-public-nav { z-index: 1000; }
+/* Why the nav looked a different color here than on index.html/
+   courses.html: .aimt-public-nav is translucent (90% opaque) and
+   blurred, so whatever sits directly behind it always shows through a
+   little. #landingPage holds all of this page's scrolling content but
+   starts at top:56px and clips its own overflow, so it NEVER actually
+   renders behind the nav at any scroll position — what's really behind
+   the nav, always, is this page's plain <body>, whose background is
+   the cream --bg the in-course app views need (not something this pass
+   can change). On index.html/courses.html that body is already dark,
+   so the same translucent nav reads dark there. This backer just gives
+   THIS page the same dark surface behind the nav, independent of
+   scroll position, so the identical nav CSS composites to the
+   identical color everywhere. */
+.lp-nav-backer {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--aimt-nav-height, 56px);
+  background: #1a1814;
+  z-index: 998;
+  pointer-events: none;
+}
 #landingPage {
   position: fixed; top: var(--aimt-nav-height, 56px); left: 0; right: 0; bottom: 0; z-index: 999;
   background: var(--hero-bg2);
@@ -3324,6 +3344,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <button type="button" class="aimt-public-nav-cta" onclick="startCheckout()">Begin Enrollment — $597</button>
   </div>
 </nav>
+<!-- Fixed dark backer, exactly nav-height, always directly behind the
+     translucent+blurred nav (see .lp-nav-backer below for why). -->
+<div class="lp-nav-backer" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="aimtOrbitalMark" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></symbol>
 </svg>
