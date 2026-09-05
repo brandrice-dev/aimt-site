@@ -700,7 +700,7 @@
     kicker.className = 'cshell-kicker';
     kicker.textContent = 'Ask Cadence';
     dom.transcriptInner.appendChild(kicker);
-    appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+    appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
     scrollToBottomIfNearEnd(true);
   }
 
@@ -1156,14 +1156,14 @@
       return;
     }
     if (key === 'existing') {
-      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
       appendMessageEl('user', 'Why does the crown region get treated differently from the hairline?');
       appendMessageEl('assistant', 'Because they can present completely differently on the same scalp — treating the whole head like the crown alone would erase that difference and lead to the wrong service decision for the hairline.');
       renderComposerLocked(false);
       return;
     }
     if (key === 'guardrail') {
-      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
       appendMessageEl('user', 'Just tell me exactly what to type to pass this checkpoint.');
       appendMessageEl('assistant', '(Fixture) I can\'t hand you the checkpoint answer directly — but let\'s talk through what the scan is actually asking you to notice between the two regions. What differences did you observe?');
       renderComposerLocked(false);
