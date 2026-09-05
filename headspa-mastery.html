@@ -1068,33 +1068,40 @@ textarea#gpInput::placeholder { color: var(--muted2); }
    a #landingPage to conflict with, so this override stays page-local. */
 .aimt-nav { z-index: 1000; }
 
-/* Sales-page funnel header (Owner Correction Pass, item 1): same AIMT
-   header shell (56px, hairline, backdrop blur) as the shared public nav
-   in assets/css/aimt-supporting-pages.css, but this page swaps the shared
-   nav's flat 1.5rem/1rem edge padding for an inner wrapper that resolves
-   to the same 1100px/2rem-desktop/1.25rem-mobile marketing container every
-   section on this page uses below, so the brand mark aligns with the
-   content grid instead of hugging the viewport edge. Kept entirely local
-   to this page — assets/css/aimt-supporting-pages.css and every other page
-   that consumes it (index/courses/terms/privacy/refunds/verify) are
+/* Sales-page funnel header (Owner Correction Pass round 2, item 1):
+   the homepage nav (index.html, bare `nav` selector) is the literal
+   visual source of truth — SAME flat edge padding and breakpoints, not
+   centered inside the 1100px marketing grid. No inner wrapper element:
+   this page's .aimt-nav classes already match the homepage nav's
+   metrics (56px height, 28px mark, 12px gap, same typography); the only
+   override needed is padding (homepage uses 1.5rem/1rem/0.85rem, the
+   shared aimt-supporting-pages.css default is 1.5rem/1rem@560px — close
+   but not identical breakpoints) and keeping the CTA visible with no
+   hamburger fallback. Kept entirely local to this page —
+   assets/css/aimt-supporting-pages.css and every other page that
+   consumes it (index/courses/terms/privacy/refunds/verify) are
    untouched. */
-.lp-funnel-nav { padding: 0; }
-.lp-funnel-nav-inner {
-  width: 100%;
-  max-width: var(--aimt-container-max, 1100px);
-  margin: 0 auto;
-  padding-inline: var(--aimt-container-pad-desktop, 2rem);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.lp-funnel-nav .aimt-nav-right { margin-left: auto; }
+.lp-funnel-nav { padding: 0 1.5rem; }
+@media (max-width: 700px) { .lp-funnel-nav { padding: 0 1rem; } }
+@media (max-width: 480px) { .lp-funnel-nav { padding: 0 0.85rem; } }
 /* No hamburger fallback exists on this header (no outbound nav links to
    collapse into one) so the enrollment CTA must stay visible at every
    width — overrides the shared nav's "hide nav-right CTA under 860px"
    rule via higher selector specificity (aimt-supporting-pages.css:90-91). */
 .lp-funnel-nav .aimt-nav-right .aimt-cta { display: inline-flex; }
-@media (max-width: 700px) { .lp-funnel-nav-inner { padding-inline: var(--aimt-container-pad-mobile, 1.25rem); } }
+/* CTA button: copied verbatim from the homepage nav's own .cta-primary
+   (index.html) — solid white pill, not the shared ghost .aimt-cta-nav
+   style, per "reproduce its button styling" (item 1). */
+.lp-funnel-cta {
+  background: white; color: #262626; border: 0.5px solid rgba(255,255,255,0.16);
+  border-radius: 980px; padding: 0.86rem 1.15rem;
+  font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.2s; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.lp-funnel-cta:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+@media (max-width: 700px) { .lp-funnel-cta { font-size: 0.62rem; padding: 0.7rem 1.15rem; white-space: nowrap; } }
 #landingPage {
   position: fixed; top: var(--aimt-nav-height, 56px); left: 0; right: 0; bottom: 0; z-index: 999;
   background: var(--hero-bg2);
@@ -1188,6 +1195,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   opacity: 0;
   animation: lpFadeUp 0.8s ease forwards;
 }
+/* First post-hero section only (Owner Correction Pass round 2, item 4):
+   88px top padding on top of the hero's own bottom margin reads as an
+   empty extra section before "WHY AIMT GOES BEYOND THE PROTOCOL" even
+   begins. Tightened here only — every other section keeps its normal
+   88px/56px rhythm (top AND bottom), this is bottom-only left alone. */
+.lp-band-first { padding-top: 4.25rem; }
+@media (max-width: 600px) { .lp-band-first { padding-top: 3rem; } }
 .lp-band-inner {
   width: 100%;
   max-width: var(--aimt-container-max, 1100px);
@@ -1225,7 +1239,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-band-proof .lp-tour-textcard { background: #ffffff; border-color: rgba(30,26,22,0.1); }
 .lp-band-proof .lp-tour-textcard p { color: rgba(30,26,22,0.68); }
 .lp-proof-head { max-width: 640px; margin: 0 0 2.25rem; text-align: left; }
-.lp-section-intro { max-width: 640px; margin: 0 0 2.25rem; text-align: left; }
+/* Centered narrative block (Owner Correction Pass round 2, item 2B): a
+   headline+paragraph section with nothing wide beneath it reads as
+   left-heavy if merely inset — center the BLOCK inside the page grid
+   while keeping the editorial type left-aligned within it. */
+.lp-section-intro { max-width: 900px; margin: 0 auto 2.25rem; text-align: left; }
 .lp-proof-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(163,150,141,0.62); margin-bottom: 12px; }
 .lp-proof-title { font-family: var(--aimt-font-mont); font-size: clamp(1.34rem, 2.7vw, 2rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.06; color: rgba(255,255,255,0.95); margin-bottom: 14px; }
 .lp-proof-body { font-family: var(--aimt-font-sans); font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.5); }
@@ -1547,7 +1565,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 /* ── Modern Practice: two-column editorial recompose (text-only variant
    used while no approved image asset exists — see HTML comment above) ── */
 .lp-modern-recompose { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 58%); gap: 48px; align-items: center; }
-.lp-modern-recompose--textonly { grid-template-columns: 1fr; max-width: 640px; }
+.lp-modern-recompose--textonly { grid-template-columns: 1fr; max-width: 900px; margin: 0 auto; }
 .lp-modern-media { border-radius: var(--aimt-radius-panel); overflow: hidden; }
 .lp-modern-media img { display: block; width: 100%; height: auto; }
 @media (max-width: 860px) {
@@ -3306,27 +3324,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <button type="button" class="rmb-exit" onclick="ReviewMode.exit()">Exit Review Mode</button>
 </div>
 
-<!-- ══ SALES-PAGE FUNNEL HEADER (Owner Correction Pass, item 1) ══
-     Same AIMT header shell as the shared public nav (56px, warm-black,
-     hairline, backdrop blur — assets/css/aimt-supporting-pages.css), but a
-     funnel variant: no outbound site navigation and no hamburger, so the
+<!-- ══ SALES-PAGE FUNNEL HEADER (Owner Correction Pass round 2, item 1) ══
+     The homepage nav (index.html <nav>) is the literal visual source of
+     truth: same flat markup shape, same padding/breakpoints, no inner
+     wrapper, no recentering inside the 1100px marketing grid. Funnel
+     variant: no outbound site navigation and no hamburger, so the
      enrollment CTA is the only way to leave this header. Brand mark +
      wordmark are non-clickable identity (not links) so they can't carry a
-     visitor back to the homepage mid-funnel. The CTA reuses the same
-     startCheckout() every other enrollment button on this page already
-     calls — no new checkout logic. ══ -->
+     visitor back to the homepage mid-funnel — and match the homepage's
+     single-line "AIMT" wordmark (no subtitle line). The CTA reuses the
+     same startCheckout() every other enrollment button on this page
+     already calls — no new checkout logic. ══ -->
 <nav class="aimt-nav lp-funnel-nav">
-  <div class="lp-funnel-nav-inner">
-    <div class="aimt-nav-mark" aria-hidden="true">
-      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
-    </div>
-    <div class="aimt-nav-wordmark">
-      <span class="aimt-nav-name">AIMT</span>
-      <span class="aimt-nav-sub">American Institute of Modern Trichology</span>
-    </div>
-    <div class="aimt-nav-right">
-      <button type="button" class="aimt-cta aimt-cta-nav" onclick="startCheckout()">Begin Enrollment — $597</button>
-    </div>
+  <div class="aimt-nav-mark" aria-hidden="true">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
+  </div>
+  <div class="aimt-nav-wordmark">
+    <span class="aimt-nav-name">AIMT</span>
+  </div>
+  <div class="aimt-nav-right">
+    <button type="button" class="lp-funnel-cta" onclick="startCheckout()">Begin Enrollment — $597</button>
   </div>
 </nav>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -3369,7 +3386,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     </div>
 
     <!-- 02 CORE GAP -->
-    <div class="lp-section-band">
+    <div class="lp-section-band lp-band-first">
       <div class="lp-band-inner">
         <div class="lp-section-intro" style="margin-bottom:0;">
           <div class="lp-proof-eyebrow">Why AIMT Goes Beyond The Protocol</div>
@@ -3435,7 +3452,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-tour-stage">
             <div class="lp-tour-panel is-active" data-tour-panel="course">
               <div class="lp-proof-item-frame"><img src="assets/images/marketing/approved-module08-screenshot1.png" alt="AIMT course interface: Module 8 video chapter, Halo Activation + Wet Massage, with practitioner and communication cues" loading="lazy" width="2880" height="1448"></div>
-              <p class="lp-tour-caption"><strong>The Course.</strong> A real Module 8 video chapter — instruction, practitioner cues, and client-communication guidance together.</p>
+              <p class="lp-tour-caption"><strong>Structured learning built around the complete service.</strong> Move through the Welcome Module and 12 numbered modules covering the service from client intake and scalp assessment through treatment execution, sanitation, pricing, and modern practice. The curriculum is designed to connect what you learn to the decisions you will actually make in the treatment room.</p>
               <button type="button" class="lp-tour-viewbtn" data-lightbox-img="assets/images/marketing/approved-module08-screenshot1.png" data-lightbox-title="The Course" data-lightbox-desc="A real Module 8 video chapter — instruction, practitioner cues, and client-communication guidance together.">View Details →</button>
             </div>
             <div class="lp-tour-panel" data-tour-panel="cadence">
@@ -3501,7 +3518,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                 </div>
               </div>
               <p class="lp-cadence-example-tag">Example Cadence conversation — illustrative, not a captured student session</p>
-              <p class="lp-tour-caption"><strong>Cadence.</strong> Curriculum-grounded follow-up, shown here as a worked example inside the real Cadence window.</p>
+              <p class="lp-tour-caption"><strong>A tutor built directly into the learning experience.</strong> Ask questions without leaving the course, work through uncertainty, or have a concept explained from another angle. Cadence carries relevant learning context forward as you progress so the experience feels connected instead of like starting a new blank chat every time.</p>
             </div>
             <div class="lp-tour-panel" data-tour-panel="listen">
               <div class="lp-listen-mock" aria-hidden="false">
@@ -3520,11 +3537,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                 </div>
                 <span class="lp-listen-mock-tag">Static preview — not an active player</span>
               </div>
-              <p class="lp-tour-caption"><strong>Listen Mode.</strong> The same persistent player bar used inside the course. Manual playback — required checkpoints pause narration until you continue.</p>
+              <p class="lp-tour-caption"><strong>A different way to move through supported lessons.</strong> Listen to supported course content with Cadence while keeping the full learning structure intact. Playback pauses when a visual, video, interaction, or checkpoint needs your attention, then continues when you choose—so audio supports the course rather than replacing it.</p>
             </div>
             <div class="lp-tour-panel" data-tour-panel="timer">
               <div class="lp-proof-item-frame"><img src="assets/images/marketing/approved-service-timer-live.png" alt="The real AIMT Service Timer running Core Format, Step 03 — Dry Brushing and Hair Play, with elapsed time, practitioner cue, and communication cue" loading="lazy" width="2880" height="1800"></div>
-              <p class="lp-tour-caption"><strong>AIMT Service Timer.</strong> Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion included with enrollment, not a separate purchase.</p>
+              <p class="lp-tour-caption"><strong>Take the service structure into the treatment room.</strong> The AIMT Service Timer is a pacing companion for the Core 60-minute and Extended 90-minute service formats. It keeps the current step, remaining time, phase, upcoming transition, and practitioner cues visible while you work.</p>
               <button type="button" class="lp-tour-viewbtn" data-lightbox-img="assets/images/marketing/approved-service-timer-live.png" data-lightbox-title="AIMT Service Timer" data-lightbox-desc="Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion included with enrollment, not a separate purchase.">View Details →</button>
             </div>
             <div class="lp-tour-panel" data-tour-panel="assessment">
@@ -3573,7 +3590,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                   <p class="lp-m12-example-tag">Example Performance Review</p>
                 </div>
               </div>
-              <p class="lp-tour-caption"><strong>Final Certification Assessment.</strong> Part I Knowledge, Part II Applied Cases, Part III a Cadence conversation — completed before a credential is issued.</p>
+              <p class="lp-tour-caption"><strong>Certification is evaluated, not automatically unlocked.</strong> The Final Certification Assessment evaluates knowledge and retention, applied practitioner cases, and practitioner reasoning with Cadence. Students must meet the certification standards before the AIMT credential is issued.</p>
             </div>
           </div>
         </div>
@@ -3784,7 +3801,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <div class="lp-proof-eyebrow">Questions</div>
           <div class="lp-proof-title" style="margin-bottom:0;">Frequently Asked Questions</div>
         </div>
-        <div class="lp-faq" id="lpFaq" style="max-width:760px;">
+        <div class="lp-faq" id="lpFaq" style="max-width:900px;margin:0 auto;">
           <div class="lp-faq-group-label">Head Spa Training &amp; Certification</div>
           <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">Can you complete head spa certification online?</span><span class="lp-curr-chev">+</span></button>
           <div class="lp-curr-panel" style="padding-left:0;">Yes. AIMT's Head Spa Certification Course is delivered online and is self-paced. The program includes structured course instruction, Cadence-guided learning, Listen Mode, applied checkpoints, the AIMT Service Timer, practitioner resources, and the Final Certification Assessment.</div>
