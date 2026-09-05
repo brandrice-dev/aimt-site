@@ -23,6 +23,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
+<!-- Same stylesheet the real in-course Cadence shell uses (headspa-mastery.html)
+     — loaded so the static Cadence conversation surface in #cadence renders
+     with the actual product's visual language instead of a re-approximation.
+     This page never loads assets/js/cadence-shell.js: the surface below is a
+     fixed, static presentation, not the real (modal) runtime. -->
+<link rel="stylesheet" href="assets/css/cadence-shell.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -87,54 +94,12 @@ body {
   color: var(--muted); margin-bottom: 10px; display: block;
 }
 
-/* ── NAV ── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  height: 56px; background: rgba(26,24,20,0.9); backdrop-filter: blur(20px);
-  border-bottom: 0.5px solid rgba(255,255,255,0.07);
-  display: flex; align-items: center; padding: 0 1.5rem; gap: 12px;
-}
-.nav-mark { width: 28px; height: 28px; color: rgba(255,255,255,0.75); flex-shrink: 0; }
-.nav-mark svg { width: 28px; height: 28px; }
-.nav-wordmark { display: flex; flex-direction: column; gap: 1px; }
-.nav-name { font-family: var(--aimt-font-mont); font-size: 0.68rem; letter-spacing: 0.38em; text-transform: uppercase; font-weight: 700; color: white; line-height: 1; }
-.nav-sub { font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.46); line-height: 1; }
-.nav-links { display: flex; align-items: center; gap: var(--aimt-space-lg); }
-.nav-link { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; white-space: nowrap; }
-.nav-link:hover { color: white; }
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--aimt-space-lg); }
-.nav-sep { width: 0.5px; height: 14px; background: var(--aimt-border-default); flex-shrink: 0; }
-.nav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-.nav-btn { font-family: var(--aimt-font-sans); font-size: 0.74rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 980px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-.nav-btn-ghost { background: none; border: 0.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
-.nav-btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: white; }
-.nav-btn-primary { background: white; border: none; color: #262626; }
-.nav-btn-primary:hover { background: rgba(255,255,255,0.88); }
-.nav-hamburger { display: none; }
-.nav-mobile-menu { display: none; }
-@media(max-width:700px){
-  .nav-hamburger {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-    width: 44px; height: 44px; flex-shrink: 0; margin-left: 12px;
-    background: none; border: none; padding: 0; cursor: pointer;
-  }
-  .nav-hamburger-line { width: 20px; height: 1px; background: var(--bg); transition: transform 0.2s ease, opacity 0.2s ease; }
-  .nav-hamburger[aria-expanded="true"] .nav-hamburger-line:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-  .nav-hamburger[aria-expanded="true"] .nav-hamburger-line:nth-child(2) { opacity: 0; }
-  .nav-hamburger[aria-expanded="true"] .nav-hamburger-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-  .nav-right > .nav-link { display: none; }
-  .nav-mobile-menu {
-    display: block;
-    position: fixed; top: 56px; left: 0; right: 0; z-index: 199;
-    background: rgba(26,24,20,0.98);
-    border-bottom: 0.5px solid rgba(255,255,255,0.07);
-    max-height: 0; overflow: hidden; visibility: hidden;
-    transition: max-height 0.2s ease, visibility 0s linear 0.2s;
-  }
-  .nav-mobile-menu[aria-hidden="false"] { max-height: 400px; visibility: visible; transition: max-height 0.2s ease, visibility 0s linear 0s; }
-  .nav-mobile-link { display: flex; align-items: center; min-height: 44px; padding: 0 var(--aimt-align); font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.75); text-decoration: none; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
-  .nav-mobile-link:last-child { border-bottom: none; }
-}
+/* ── NAV ──
+   Moved to the shared assets/css/aimt-public-nav.css (Owner Correction
+   Pass — "one AIMT nav" system fix). This page is the canonical visual
+   reference that file was extracted from; .cta-primary/.cta-ghost below
+   stay page-local since they're also used outside the nav (hero CTAs,
+   etc.). */
 
 /* ── HERO ── */
 #hero {
@@ -178,44 +143,81 @@ nav {
 /* ── Product-led hero (replaces the full-bleed clinical-authority photo) ── */
 #hero.hero-product {
   background:
-    radial-gradient(circle at 20% 15%, rgba(163,150,141,0.1), transparent 45%),
+    radial-gradient(circle at 38% 45%, rgba(163,150,141,0.14), transparent 55%),
     linear-gradient(160deg, #1e1b17 0%, #14110d 100%);
   display: grid;
-  grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1.5fr);
   align-items: center;
-  gap: clamp(2rem, 5vw, 5rem);
-  padding: calc(56px + 3rem) clamp(1.5rem, 5vw, 4rem) 3.5rem;
+  /* Tighter than the left inset below on purpose — the image keeps reaching
+     toward the copy across a narrow seam instead of two rigid columns. */
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  /* Left inset is deliberately larger than the right — a shared boundary the
+     copy sits inside, rather than hugging the viewport edge. Narrowing the
+     text track and the gap frees back the space this adds, so the image
+     keeps its full intended size instead of being squeezed by it. */
+  padding: calc(56px + 2.75rem) clamp(1.25rem, 4vw, 3.5rem) 3.5rem clamp(3rem, 10vw, 8rem);
 }
 .hero-content-product {
   position: relative; z-index: 2;
-  width: 100%; max-width: 34rem;
+  width: 100%; max-width: 22rem;
   margin: 0; text-shadow: none;
 }
+/* Media system: sized and framed for a big, editorial primary image with room
+   for one overlapping secondary device — built for the real photography this
+   will be swapped for, not tuned to the current placeholder crop. Pulled in
+   close to the copy (tight gap + a wide glow bleeding into the seam) so the
+   two halves read as one composed scene rather than a text box and an image
+   box side by side. */
 .hero-product-media {
   position: relative; z-index: 1;
-  justify-self: center;
-  width: 100%; max-width: 480px;
-  aspect-ratio: 4 / 3.6;
+  justify-self: end;
+  width: 100%; max-width: 720px;
+  aspect-ratio: 4 / 3.4;
 }
+.hero-product-media::before {
+  content: '';
+  position: absolute; inset: -14% -8% -14% -22%;
+  background: radial-gradient(ellipse at 40% 45%, rgba(163,150,141,0.22), transparent 70%);
+  filter: blur(24px);
+  z-index: -1;
+}
+.hero-product-frame-mark { position: absolute; z-index: 2; width: 22px; height: 22px; pointer-events: none; }
+.hero-product-frame-mark.tl { top: -12px; left: -12px; border-top: 1px solid rgba(163,150,141,0.55); border-left: 1px solid rgba(163,150,141,0.55); }
+.hero-product-frame-mark.br { bottom: -12px; right: -12px; border-bottom: 1px solid rgba(163,150,141,0.55); border-right: 1px solid rgba(163,150,141,0.55); }
 .hero-product-laptop {
   position: absolute; top: 0; left: 0;
   width: 100%; border-radius: 14px;
   box-shadow: 0 30px 70px rgba(0,0,0,0.45);
 }
 .hero-product-phone {
-  position: absolute; bottom: 0; right: -4%;
-  width: 34%; border-radius: 14px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  position: absolute; bottom: -8%; right: -9%;
+  width: 37%; border-radius: 14px;
+  box-shadow: 0 24px 54px rgba(0,0,0,0.5);
   border: 2px solid rgba(255,255,255,0.06);
+  transform: rotate(-2.5deg);
 }
+.hero-product-tag {
+  position: absolute; z-index: 3; top: -0.9rem; left: -1.6rem;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(20,17,13,0.92); backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(255,255,255,0.14);
+  border-radius: 980px; padding: 0.5rem 0.95rem 0.5rem 0.75rem;
+  font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.8); white-space: nowrap;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+}
+.hero-product-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #a3968d; flex-shrink: 0; }
 @media (max-width: 980px) {
-  #hero.hero-product { grid-template-columns: 1fr; text-align: left; padding-top: calc(56px + 2rem); }
-  .hero-product-media { max-width: 380px; justify-self: start; margin-top: 1rem; }
+  #hero.hero-product { grid-template-columns: 1fr; text-align: left; padding-top: calc(56px + 2rem); padding-left: clamp(1.25rem, 4vw, 3.5rem); }
+  .hero-product-media { max-width: 420px; justify-self: start; margin-top: 2rem; }
+  .hero-product-tag { left: 0.5rem; }
 }
 @media (max-width: 700px) {
-  #hero.hero-product { min-height: auto; padding: calc(56px + 1.5rem) 1.1rem 2.5rem; display: flex; flex-direction: column; align-items: flex-start; }
+  #hero.hero-product { min-height: auto; padding: calc(56px + 1.25rem) 1.1rem 2.25rem; display: flex; flex-direction: column; align-items: flex-start; }
   .hero-content-product { text-align: left; }
-  .hero-product-media { max-width: 260px; margin-top: 2rem; align-self: center; }
+  .hero-product-media { max-width: 300px; margin-top: 1.75rem; align-self: center; }
+  .hero-product-tag { display: none; }
+  .hero-product-frame-mark { display: none; }
 }
 
 @media(max-width:700px){
@@ -254,12 +256,6 @@ nav {
   .hero-signal { font-size: 0.62rem; margin-top: 1.15rem; padding-top: 1rem; white-space: normal; }
   .hero-ctas { flex-direction: column; align-items: stretch; justify-content: center; }
   .cta-primary, .cta-ghost { text-align: center; }
-  nav { padding: 0 1rem; }
-  .nav-btn-ghost { display: inline-flex; font-size: 0.7rem; padding: 1rem 0.75rem; white-space: nowrap; }
-  .nav-links { display: none; }
-  .nav-sep { display: none; }
-  nav .cta-primary { font-size: 0.62rem; padding: 0.7rem 1.15rem; white-space: nowrap; position: relative; }
-  nav .cta-primary::after { content: ''; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px; }
 }
 .hero-image {
   width: 100%;
@@ -292,11 +288,6 @@ nav {
 }
 .hero-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #a3968d; animation: breathe 2.4s ease-in-out infinite; }
 @keyframes breathe { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
-/* Nav stacked wordmark */
-.nav-name-stack { display: flex; flex-direction: column; gap: 1px; }
-.nav-name-top { font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 700; color: white; line-height: 1.1; letter-spacing: 0.38em; text-transform: uppercase; }
-.nav-name-bottom { font-family: var(--aimt-font-mono); font-size: 0.48rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.45); line-height: 1; }
-
 .cta-primary { background: white; color: #262626; border: 0.5px solid rgba(255,255,255,0.16); border-radius: 980px; padding: 0.86rem 1.15rem; font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .cta-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
 .cta-ghost { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.48); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 980px; padding: 0.86rem 1.05rem; font-family: var(--aimt-font-mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
@@ -372,118 +363,133 @@ nav {
 .c01-enter-ghost { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: rgba(255,255,255,0.5); font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 400; text-decoration: none; padding: 0.5rem 0; transition: color 0.2s; cursor: pointer; width: 100%; }
 .c01-enter-ghost:hover { color: rgba(255,255,255,0.85); }
 @media(max-width:700px){ .c01-enter-ghost { padding: 0.95rem 0; } }
-/* Desktop: vertical tabs / master-detail. Mobile reverts to an accordion (see breakpoint below). */
-.c01-bottom { padding: 1.5rem 0; display: grid; grid-template-columns: minmax(0,280px) 1fr; grid-auto-rows: 44px; column-gap: 2rem; max-height: 3000px; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
+/* A single, tidy accordion at every width — a wide master-detail split read as
+   a curriculum dump once opened, so mobile's compact pattern is now the only
+   pattern. One row open at a time; the checkpoint unfolds directly beneath it. */
+.c01-bottom { padding: 0.75rem 0 1.5rem; max-height: 3000px; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
 .c01-bottom.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
-.c01-module { grid-column: 1; min-width: 0; background: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); box-shadow: inset 2px 0 0 0 transparent; padding: 0.65rem var(--aimt-align); display: flex; align-items: center; gap: 10px; }
-.c01-module-expandable { cursor: pointer; }
-.c01-module-expandable[aria-selected="true"] { background: rgba(255,255,255,0.05); box-shadow: inset 2px 0 0 0 #a3968d; }
+.c01-module { min-width: 0; background: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 0.8rem var(--aimt-align); display: flex; align-items: center; gap: 10px; }
+.c01-module-expandable { cursor: pointer; transition: background 0.2s ease; }
+.c01-module-expandable:hover { background: rgba(255,255,255,0.03); }
+.c01-module-expandable[aria-expanded="true"] { background: rgba(255,255,255,0.05); }
 .c01-mod-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; font-family: var(--aimt-font-mono); font-size: 0.5rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
 .c01-mod-title { font-size: 0.76rem; font-weight: 400; color: rgba(255,255,255,0.55); line-height: 1.3; }
 .c01-mod-sub { font-size: 0.64rem; color: rgba(255,255,255,0.46); font-weight: 300; margin-top: 1px; }
-.c01-mod-chevron { display: none; width: 14px; height: 14px; color: rgba(255,255,255,0.28); flex-shrink: 0; margin-left: auto; transition: transform 0.25s ease; }
+.c01-mod-chevron { width: 14px; height: 14px; color: rgba(255,255,255,0.28); flex-shrink: 0; margin-left: auto; transition: transform 0.25s ease; }
 .c01-module-expandable[aria-expanded="true"] .c01-mod-chevron { transform: rotate(180deg); }
 
 .c01-mod-panel {
-  grid-column: 2; grid-row: 1 / -1; align-self: start;
-  min-width: 0;
-  position: sticky; top: 76px;
-  max-width: min(46em, 100%);
-  min-height: 240px;
-  background: rgba(255,255,255,0.08);
-  border: 0.5px solid rgba(255,255,255,0.24);
-  border-radius: 12px;
-  padding: 1.75rem 2rem;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+  min-width: 0; max-width: none;
+  background: rgba(255,255,255,0.03);
+  border: none; border-bottom: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 0;
+  padding: 0 var(--aimt-align);
+  max-height: 0; overflow: hidden;
+  opacity: 1; visibility: hidden;
+  transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0.25s;
 }
-.c01-mod-panel[aria-hidden="false"] { opacity: 1; visibility: visible; transition: opacity 0.2s ease, visibility 0s linear 0s; }
+.c01-mod-panel[aria-hidden="false"] {
+  padding: 1.1rem var(--aimt-align) 1.3rem;
+  visibility: visible;
+  transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0s;
+}
 .c01-mod-question-label { display: block; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.49); margin-bottom: 0.4rem; }
-.c01-mod-question { font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 300; font-style: italic; line-height: 1.6; }
-.c01-mod-panel-footer { margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid rgba(255,255,255,0.08); font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.49); }
+.c01-mod-question { font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 300; font-style: italic; line-height: 1.6; max-width: 52em; }
+.c01-mod-panel-footer { margin-top: 1.1rem; padding-top: 0.9rem; border-top: 0.5px solid rgba(255,255,255,0.08); font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.49); }
 @media(max-width:700px){
-  .c01-bottom { grid-auto-rows: auto; }
-  .c01-bottom { grid-template-columns: 1fr; }
-  .c01-module { box-shadow: none; padding: 0.85rem var(--aimt-align); }
-  .c01-module-expandable[aria-selected="true"] { background: none; box-shadow: none; }
-  .c01-mod-chevron { display: block; }
-  .c01-mod-panel {
-    grid-column: 1; grid-row: auto; align-self: auto;
-    position: static; top: auto; max-width: none; min-height: 0;
-    background: rgba(255,255,255,0.03);
-    border: none; border-top: 0.5px solid rgba(255,255,255,0.06);
-    border-radius: 0;
-    padding: 0 var(--aimt-align);
-    max-height: 0; overflow: hidden;
-    opacity: 1; visibility: hidden;
-    transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0.25s;
-  }
-  .c01-mod-panel[aria-hidden="false"] {
-    padding: 0.9rem var(--aimt-align);
-    visibility: visible;
-    transition: max-height 0.25s ease, padding 0.25s ease, visibility 0s linear 0s;
-  }
+  .c01-module { padding: 0.85rem var(--aimt-align); }
+  .c01-mod-panel[aria-hidden="false"] { padding: 0.9rem var(--aimt-align) 1.1rem; }
 }
 
 /* ── SERVICE PROTOCOL ── */
 #protocol { background: #0f0d0b; padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
-#protocol .section-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 3rem; max-width: 960px; }
+/* align-items: stretch (the grid default) rather than start — the left
+   column's own content (copy + Timer preview) is what actually determines
+   the row height; stretch just lets the image column, which has no
+   intrinsic height opinion of its own once flexed below, grow to match it
+   instead of stopping short at its native aspect ratio. */
+#protocol .section-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 3rem; max-width: 960px; }
 @media(max-width:700px){ #protocol .section-inner { grid-template-columns: 1fr; } }
 #protocol .eyebrow { padding-left: var(--aimt-align); }
 #protocol .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); margin-top: 1.75rem; }
 
-/* Service Protocol timer recreation — tokens are scoped to this component only
-   (--ptd-*) so they never leak into the page's cream palette. */
-.protocol-timer-demo {
-  --ptd-bg: #0f0d0b;
-  --ptd-surface: #1a1814;
-  --ptd-accent: #a3968d;
-  --ptd-white: #faf8f5;
-  max-width: 420px;
-  min-height: 520px;
-  margin: 0;
-  background: var(--ptd-surface);
-  border: 0.5px solid rgba(250,248,245,0.18);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  border-radius: 18px;
-  padding: 20px;
+/* Media column: a flex column so the photo frame (not the caption below it)
+   is the part that absorbs the stretched height from the grid row — the
+   frame grows to reach roughly the bottom of the Timer preview opposite it,
+   and object-fit:cover + a right/lower-biased object-position keeps the
+   physical iPad running the Timer and the service tray in frame as the
+   sides crop in, rather than stretching or squashing the photo. Reset back
+   to a normal, unstretched image below 700px (see media query) — mobile
+   stacks the column in normal flow, so there's no sibling height to match. */
+.protocol-media-col { max-width: 420px; display: flex; flex-direction: column; }
+#protocol .aimt-sp-proof-frame { flex: 1 1 auto; min-height: 0; }
+#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 74% 58%; }
+
+/* Live mini-demo: a product-proof element sitting under the explanatory
+   copy — not on the treatment-room photograph, which already shows the real
+   Timer in use on the physical device. The sibling text elements each carry
+   their own padding-left: var(--aimt-align) (see #protocol rules above), so
+   this needs a matching margin-left — without it, the card's edge sits at
+   the column's true x0, short of where the text glyphs actually start,
+   reading as detached from the copy above it.
+
+   Structure, proportions, typography, and copy are pulled directly from the
+   real AIMT Service Timer (aimt-service-timer.html: .step-clock-card, its
+   own ≤600px compact breakpoint values, .timer-brand, .step-eyebrow, and
+   the real Core-format Step 05 data) rather than an invented "inspired by"
+   mockup — same ring/time/phase-pill component the real product renders,
+   at the same compact scale the real product itself uses on a narrow
+   screen. --timer-surface (#1a1814) is the real product's own card-on-dark
+   surface color, one step lighter than this section's own #0f0d0b, which
+   is itself already the real product's exact --timer-bg. */
+.protocol-mini-demo {
+  /* Same content axis as the copy above it: matching left AND right margins
+     (instead of the old bare margin-left + a fixed max-width) makes this
+     stretch to the exact width of .community-intro/.section-sub's own
+     padding-inset content box, rather than floating as a narrower card. */
+  margin: 1.75rem var(--aimt-align) 0 var(--aimt-align);
+  background: #1a1814;
+  border: 1px solid rgba(250,248,245,0.1);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
 }
-.ptd-content { opacity: 1; transform: translateY(0); transition: opacity 175ms ease, transform 175ms ease; }
-.ptd-content.ptd-fade-out { opacity: 0; transform: translateY(-6px); }
-.ptd-content.ptd-fade-in { opacity: 0; transform: translateY(8px); }
-.ptd-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.ptd-service-label, .ptd-phase-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; text-transform: uppercase; color: var(--ptd-accent); }
-.ptd-service-label { letter-spacing: 0.28em; }
-.ptd-phase-label { letter-spacing: 0.2em; }
-.ptd-progress-track { height: 2px; background: rgba(250,248,245,0.08); margin-bottom: 10px; overflow: hidden; }
-.ptd-progress-fill { height: 100%; background: var(--ptd-accent); }
-.ptd-progress-fill.ptd-indicator-advancing { transition: width 450ms ease; }
-.ptd-time-row { font-family: var(--aimt-font-sans); font-size: 10px; font-weight: 400; color: rgba(250,248,245,0.47); margin-bottom: 18px; }
-.ptd-time-row .ptd-remaining { color: var(--ptd-accent); }
-.ptd-timer-block { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-.ptd-ring { flex-shrink: 0; transform: rotate(-90deg); }
-.ptd-ring-track { stroke: rgba(250,248,245,0.08); stroke-width: 4; }
-.ptd-ring-fill { stroke: var(--ptd-accent); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 163.36; stroke-dashoffset: 60; }
-.ptd-ring-fill.ptd-indicator-advancing { transition: stroke-dashoffset 450ms ease; }
-.ptd-countdown { font-family: var(--aimt-font-mont); font-weight: 900; font-size: 40px; line-height: 1; color: var(--ptd-white); }
-.ptd-step-count { font-family: var(--aimt-font-sans); font-size: 11px; font-weight: 400; color: rgba(250,248,245,0.47); margin-top: 4px; }
-.ptd-step-label { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ptd-accent); margin-bottom: 12px; }
-.ptd-step-dash { display: inline-block; width: 16px; height: 1px; background: var(--ptd-accent); }
-.ptd-step-title { font-family: var(--aimt-font-mont); font-weight: 900; font-size: 34px; text-transform: uppercase; line-height: 0.95; color: var(--ptd-white); margin-bottom: 16px; }
-.ptd-desc { font-family: var(--aimt-font-sans); font-weight: 300; font-size: 14px; line-height: 1.65; color: rgba(250,248,245,0.65); margin-bottom: 16px; }
-.ptd-note { background: rgba(163,150,141,0.10); border: 0.5px solid var(--ptd-accent); border-left: 3px solid var(--ptd-accent); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 16px; }
-.ptd-note-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ptd-accent); margin-bottom: 6px; }
-.ptd-note-text { font-family: var(--aimt-font-sans); font-weight: 400; font-style: italic; font-size: 12px; line-height: 1.6; color: rgba(250,248,245,0.88); }
-.ptd-next { display: flex; align-items: center; gap: 8px; opacity: 0.65; }
-.ptd-next-label { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ptd-accent); }
-.ptd-next-title { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ptd-white); }
-.ptd-next-btn { display: block; width: 100%; margin-top: 16px; padding: 12px 16px; background: transparent; border: 0.5px solid rgba(250,248,245,0.18); border-radius: 980px; font-family: var(--aimt-font-mont); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ptd-white); text-align: center; cursor: pointer; }
-.ptd-next-btn[hidden] { display: none; }
-@media(max-width:700px){ .ptd-next-btn { padding: 16px; } }
-@media(max-width:700px){ .protocol-timer-demo { max-width: none; width: 100%; } }
+.plc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.plc-brand { font-family: var(--aimt-font-mont); font-size: 8px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; }
+.plc-format { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(250,248,245,0.48); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 980px; padding: 3px 8px; white-space: nowrap; }
+.plc-service-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.plc-service-label { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); }
+.plc-service-time { font-family: var(--aimt-font-mont); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: #faf8f5; }
+.plc-track { height: 3px; background: rgba(250,248,245,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+.plc-track-fill { height: 100%; width: 35%; background: #a3968d; border-radius: 99px; transition: width 1s linear; }
+.plc-clock-card { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 11px; background: rgba(250,248,245,0.03); border: 0.5px solid rgba(250,248,245,0.07); border-radius: 12px; padding: 10px 11px; }
+.plc-ring { width: 56px; height: 56px; transform: rotate(-90deg); flex-shrink: 0; }
+.plc-ring-bg { fill: none; stroke: rgba(250,248,245,0.08); stroke-width: 4; }
+.plc-ring-fill { fill: none; stroke: #a3968d; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear; }
+.plc-clock-text { min-width: 0; }
+.plc-time { font-family: var(--aimt-font-mont); font-size: 26px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: #faf8f5; white-space: nowrap; }
+.plc-meta { font-size: 8px; color: rgba(250,248,245,0.48); margin-top: 4px; line-height: 1.4; }
+.plc-meta strong { color: #a3968d; font-weight: 600; }
+.plc-phase { font-size: 7px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #a3968d; text-align: right; align-self: start; padding-top: 3px; max-width: 70px; line-height: 1.3; }
+.plc-step-eyebrow { display: flex; align-items: center; gap: 9px; font-family: var(--aimt-font-mont); font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #a3968d; margin-top: 13px; }
+.plc-step-eyebrow::before { content: ''; width: 14px; height: 1px; background: rgba(163,150,141,0.36); flex-shrink: 0; }
+.plc-step-title { font-family: var(--aimt-font-mont); font-size: 15px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase; line-height: 1.15; color: #faf8f5; margin-top: 6px; }
+.plc-cue { margin-top: 12px; padding: 9px 11px; background: rgba(163,150,141,0.1); border: 0.5px solid rgba(163,150,141,0.32); border-left: 2px solid #a3968d; border-radius: 0 8px 8px 0; }
+.plc-cue-label { display: block; font-family: var(--aimt-font-mont); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 4px; }
+.plc-cue-text { font-size: 10.5px; line-height: 1.5; color: rgba(250,248,245,0.78); font-weight: 300; }
+@media(max-width:700px){
+  #protocol .section-inner { gap: 2.25rem; }
+  /* No sibling column to match on mobile (single-column stack), so the
+     desktop height-matching flex is reset — a fixed, deliberately tighter
+     aspect-ratio crop replaces it instead of either the raw tall original
+     photo or a fragile attempt at height-matching in normal document flow. */
+  .protocol-media-col { max-width: none; display: block; }
+  #protocol .aimt-sp-proof-frame { flex: none; aspect-ratio: 1 / 1; }
+  #protocol .aimt-sp-proof-frame img { height: 100%; }
+  .protocol-mini-demo { max-width: none; margin-top: 1.5rem; }
+}
 
 /* ── DIFFERENT ── */
 #institute { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
@@ -496,34 +502,140 @@ nav {
 
 /* ── CADENCE ── */
 #cadence { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
-.cadence-intro { font-family: var(--aimt-font-serif); font-style: italic; font-size: clamp(1.15rem,4vw,1.5rem); color: rgba(255,255,255,0.58); line-height: 1.62; margin-bottom: 1.15rem; max-width: 38ch; }
-.cadence-intro em { font-style: normal; color: white; }
-.cadence-summary { max-width: 58ch; font-size: 0.86rem; color: rgba(255,255,255,0.46); font-weight: 300; line-height: 1.78; margin-bottom: 1.4rem; }
-.cadence-features { margin-top: 1.3rem; display: flex; flex-direction: column; gap: 10px; max-width: 980px; }
+.cadence-features { margin: 0.5rem auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 620px; }
 @media(max-width:700px){ .cadence-features { grid-template-columns: 1fr; } }
-.cadence-feature { background: rgba(255,255,255,0.035); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1.4rem; display: flex; gap: 14px; align-items: flex-start; }
-.cf-num { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.46); flex-shrink: 0; padding-top: 3px; min-width: 20px; }
-.cf-title { font-family: var(--aimt-font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(220,210,200,0.82); margin-bottom: 0.62rem; }
-.cf-body { font-size: 0.9rem; color: rgba(255,255,255,0.68); font-weight: 300; line-height: 1.74; }
+.cadence-feature { background: rgba(255,255,255,0.035); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1.15rem; display: flex; gap: 12px; align-items: flex-start; }
+.cf-num { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.46); flex-shrink: 0; padding-top: 3px; min-width: 18px; }
+.cf-title { font-family: var(--aimt-font-mont); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: white; margin-bottom: 0.4rem; line-height: 1.25; }
+.cf-body { font-size: 0.78rem; color: rgba(255,255,255,0.5); font-weight: 300; line-height: 1.58; }
 .cf-body strong { color: rgba(255,255,255,0.7); font-weight: 400; }
 #cadence .eyebrow { padding-left: var(--aimt-align); }
 #cadence .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
-#cadence .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+#cadence .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); max-width: none; }
 #cadence .section-sub { max-width: none; padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #cadence .section-sub strong { color: rgba(255,255,255,0.95); }
 
-/* ── PROOF ── */
-#proof { background: var(--bg); padding: 5.5rem 1.5rem; border-top: 0.5px solid var(--border); }
-.proof-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; margin-top: 2rem; padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
-@media(max-width:700px){ .proof-grid { grid-template-columns: 1fr; } }
-.proof-item { display: flex; flex-direction: column; gap: 0.9rem; }
-/* #proof .section-sub below outranks the plain .proof-item .section-sub reset (ID beats 2 classes),
-   so the reset must carry the #proof prefix too or captions get double-padded. */
-#proof .proof-item .section-sub { padding-left: 0; padding-right: 0; }
-.proof-image { width: 100%; height: auto; display: block; border-radius: 14px; border: 0.5px solid var(--border2); }
-#proof .eyebrow-light { padding-left: var(--aimt-align); }
-#proof .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
-#proof .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+/* Cadence demo: the real chat screenshot, framed like a floating product card.
+   The phone photo sits alongside it to make the multi-device point — larger,
+   level, and anchored to the corner rather than tilted, so it reads as a
+   deliberate second device instead of a decorative accent. */
+.cadence-demo { position: relative; max-width: 620px; margin: 1.75rem auto 1.5rem; }
+.cadence-demo-primary { border-radius: 16px; overflow: hidden; border: 0.5px solid rgba(255,255,255,0.14); box-shadow: 0 24px 56px rgba(0,0,0,0.4); background: #1a1814; }
+.cadence-demo-primary img { display: block; width: 100%; height: auto; }
+.cadence-demo-secondary { position: absolute; z-index: 2; left: -1.5rem; bottom: -1.75rem; width: 32%; min-width: 112px; max-width: 168px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.09); box-shadow: 0 18px 36px rgba(0,0,0,0.55); }
+.cadence-demo-secondary img { display: block; width: 100%; height: auto; }
+.cadence-demo-tag { position: absolute; z-index: 2; top: 0.85rem; right: 0.85rem; background: rgba(20,17,13,0.85); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.14); border-radius: 980px; padding: 0.4rem 0.8rem; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.72); }
+@media(max-width:700px){
+  .cadence-demo { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+  .cadence-demo-secondary { left: -0.75rem; bottom: -1.25rem; }
+}
+
+/* Cadence identity badge — the exact rule from headspa-mastery.html's own
+   <style> (it doesn't live in the shared cadence-shell.css), copied
+   verbatim so the icon used in the static conversation surface below
+   matches the real product mark exactly. */
+.cadence-badge { position: relative; border-radius: 50%; background: #fff; flex-shrink: 0; display: block; }
+.cadence-badge img { position: absolute; top: 50%; left: 50%; width: 82%; height: 82%; transform: translate(-50%, -50%); display: block; pointer-events: none; user-select: none; }
+
+/* Listen Mode: a centered callout, benefit-led, with a light "course
+   surface" player card that deliberately breaks against the dark Cadence
+   background — visual language pulled from the real in-course player
+   (aimt-listen-mode-player.js: cream bar, dark square play button, hairline
+   3px progress, mono time, bordered speed control), not invented. Preview
+   is decorative only — no real audio, no course-state connection. */
+.cadence-listen {
+  max-width: 620px; margin: 2.5rem auto 2.75rem;
+  background: #f0ede8; border: 0.5px solid rgba(0,0,0,0.07);
+  border-radius: 20px; padding: 2.25rem 2.5rem 2rem;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.4);
+  text-align: center;
+}
+.cl-eyebrow { display: block; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.7rem; }
+.cl-heading { font-family: var(--aimt-font-mont); font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; color: var(--text); line-height: 1.2; font-size: clamp(1.1rem, 2.6vw, 1.45rem); margin: 0 0 0.75rem; }
+.cl-copy { font-size: 0.86rem; color: #7a706a; font-weight: 300; line-height: 1.62; margin: 0 auto; max-width: 46ch; }
+.cl-player { max-width: 420px; margin: 1.5rem auto 0; padding-top: 1.3rem; border-top: 0.5px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 0.65rem; text-align: left; }
+.cl-player-row { display: flex; align-items: center; gap: 10px; }
+.cl-player-title { font-family: var(--aimt-font-sans); font-size: 0.72rem; letter-spacing: 0.02em; color: #a3968d; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl-play { flex-shrink: 0; width: 34px; height: 34px; border-radius: 6px; background: #262626; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.15s ease; }
+.cl-play:hover { opacity: 0.85; }
+.cl-progress { flex: 1; height: 3px; background: rgba(0,0,0,0.09); border-radius: 2px; position: relative; overflow: hidden; }
+.cl-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 29%; background: #4d403a; border-radius: 2px; transition: width 0.6s linear; }
+.cl-time { font-family: var(--aimt-font-mono); font-size: 0.64rem; color: #a3968d; flex-shrink: 0; min-width: 6.2em; text-align: right; }
+.cl-speed { flex-shrink: 0; background: transparent; border: 0.5px solid rgba(0,0,0,0.09); border-radius: 6px; color: #262626; font-family: var(--aimt-font-sans); font-size: 0.68rem; padding: 0.3rem 0.55rem; cursor: pointer; transition: border-color 0.2s ease; }
+.cl-speed:hover { border-color: rgba(0,0,0,0.22); }
+.cl-footnote { font-size: 0.72rem; color: #a3968d; font-weight: 300; margin: 0.9rem 0 0; }
+@media(max-width:700px){
+  .cadence-listen { margin-top: 2rem; margin-bottom: 2.25rem; padding: 1.6rem 1.4rem 1.4rem; }
+}
+
+/* Checkpoint proof, folded into the Cadence story as evidence of the guidance
+   above rather than a separate pillar — hence a sub-head, not a section-title.
+   Centered on the section's shared 620px axis, same as the visual/Listen
+   card/conversation surface around it, rather than the left-aligned inset
+   the rest of the section's body copy uses. */
+.cadence-subhead { max-width: 620px; margin: 0 auto 1.5rem; padding-top: 2.25rem; border-top: 0.5px solid rgba(255,255,255,0.08); text-align: center; }
+.cadence-subhead-eyebrow { display: block; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.8); margin-bottom: 0.6rem; }
+.cadence-subhead-title { font-family: var(--aimt-font-mont); font-size: clamp(1.15rem, 3.4vw, 1.4rem); font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: white; line-height: 1.15; margin-bottom: 0.65rem; }
+.cadence-subhead-body { font-size: 0.85rem; color: rgba(255,255,255,0.48); font-weight: 300; line-height: 1.68; max-width: 48ch; margin: 0 auto; }
+
+/* Real Cadence conversation surface — a supporting product demo, not the
+   dominant object in the section. Static: no click, no modal, no dimming,
+   no shell-open animation — just cadence-shell.css's real classes
+   (.cshell-head/-id/-titles/-module/-status, .cshell-msg/-msg-av/-bub,
+   .cshell-kicker, .cshell-pass-banner) rendered inline as a floating
+   product window. Sized to the real shell's own desktop "device stage"
+   width (cadence-shell.css's `width: min(440px, 92vw)`) rather than the
+   section's wider 620px axis — restraint over uniformity here, since this
+   is meant to read as a compact, authentic reproduction of the actual
+   Cadence window, not another full-width card. --muted2 is scoped back to
+   the real shell's value for the same reason noted where it's used
+   elsewhere on this page (this page's own :root value differs). */
+.cadence-static-shell {
+  --muted2: #c4bdb5;
+  max-width: 440px; margin: 0 auto 2rem;
+  /* Real "device stage" height (cadence-shell.css's own desktop rule:
+     height: min(860px, 88vh)) — a genuine phone-height silhouette, not an
+     invented figure, capped by viewport height so it still fits a shorter
+     laptop window. Because the shell now has a real height instead of
+     sizing to its content, .cshell-transcript's own flex:1 1 0;min-height:0;
+     overflow-y:auto (cadence-shell.css) is left completely alone below —
+     the transcript fills the remaining space and scrolls internally
+     exactly like the real modal, instead of being overridden to static
+     block sizing. */
+  height: min(860px, 88vh);
+  background: var(--bg, #faf8f5);
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 28px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.cadence-static-shell .cshell-head { padding-top: 0.85rem; }
+/* Deterministic staged reveal (see the "Cadence checkpoint demo" script).
+   display:none (not just opacity:0) is load-bearing: an opacity-only hide
+   still reserves the message's full layout height, which made the
+   transcript's scrollHeight constant (its final, fully-revealed value) from
+   the very first tick — so "scroll to bottom" jumped straight to that
+   final position immediately, well past whatever had actually been
+   revealed so far, and the reader could open on a message already
+   scrolled to its own tail end. Un-hiding now happens in two steps (JS
+   adds .cs-mounted to bring the element into flow — growing scrollHeight
+   by exactly that message's own height, right when it should — then, a
+   frame later, adds .show to fade/slide it in), so "scroll to bottom"
+   always lands on the message that was just actually added. */
+.cs-hidden-msg { display: none; }
+.cs-hidden-msg.cs-mounted { display: flex; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.cs-hidden-msg.cs-mounted.show { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .cs-hidden-msg.cs-mounted { transition: none; } }
+@media(max-width:700px){
+  /* Smaller than the desktop "device stage" figure on purpose — a full
+     860px silhouette would swallow most of a phone's own viewport. Still
+     tall enough to read as a contained conversation surface, and still
+     capped by vh so it never forces the section itself to scroll oddly
+     tall on a short device. */
+  .cadence-static-shell { height: min(640px, 74vh); border-radius: 20px; margin-bottom: 1.75rem; }
+}
 
 /* ── CTA ── */
 /* ── CERTIFICATE SHOWCASE ── */
@@ -548,7 +660,7 @@ nav {
   box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
   position: relative;
   overflow: hidden;
-  font-family: 'Georgia', 'Palatino', serif;
+  font-family: var(--aimt-font-serif);
 }
 .cert-card::before {
   content: '';
@@ -566,12 +678,12 @@ nav {
 .cert-subtitle { font-family: var(--aimt-font-mono); font-size: 0.48em; letter-spacing: 0.14em; text-transform: uppercase; color: #80715d; }
 .cert-body { text-align: center; margin: 1rem 0; }
 .cert-awarded-to { font-family: var(--aimt-font-mono); font-size: 0.44em; letter-spacing: 0.18em; text-transform: uppercase; color: #7d7266; margin-bottom: 0.4rem; }
-.cert-recipient { font-family: 'Palatino Linotype', 'Book Antiqua', 'Palatino', serif; font-size: 1.4rem; font-style: italic; color: #2a2018; margin-bottom: 0.15rem; }
+.cert-recipient { font-family: var(--aimt-font-serif); font-size: 1.4rem; font-style: italic; color: #2a2018; margin-bottom: 0.15rem; }
 .cert-program-line { font-size: 0.7rem; color: #7a6a55; line-height: 1.5; }
 .cert-program-line em { font-style: normal; font-weight: bold; color: #4a3c28; }
 .cert-footer { margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
 .cert-sig-col { text-align: center; }
-.cert-sig { font-family: 'Palatino Linotype', 'Book Antiqua', 'Palatino', serif; font-size: 1rem; font-style: italic; color: #4a3c28; line-height: 1; margin-bottom: 3px; }
+.cert-sig { font-family: var(--aimt-font-serif); font-size: 1rem; font-style: italic; color: #4a3c28; line-height: 1; margin-bottom: 3px; }
 .cert-sig-line { width: 80px; height: 0.5px; background: #c8b89a; margin: 0 auto 3px; }
 .cert-sig-label { font-family: var(--aimt-font-mono); font-size: 0.4em; letter-spacing: 0.12em; text-transform: uppercase; color: #7d7266; }
 .cert-credential-line { font-family: var(--aimt-font-mono); font-size: 0.4em; letter-spacing: 0.12em; text-transform: uppercase; color: #7d7266; text-align: center; white-space: nowrap; margin-top: 1rem; }
@@ -597,21 +709,24 @@ nav {
 .cta-divider-label { font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.22); }
 .cta-secondary { margin-top: 2.25rem; opacity: 0.72; }
 
-/* ── COMMUNITY ── */
-#community { background: var(--hero-bg2); padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.06); }
-.community-intro { font-family: var(--aimt-font-serif); font-style: italic; font-size: clamp(1.1rem,3.8vw,1.45rem); color: rgba(255,255,255,0.62); line-height: 1.6; margin-bottom: 2rem; }
-.community-intro em { font-style: normal; color: white; }
-#community .eyebrow { padding-left: var(--aimt-align); }
+/* ── COMMUNITY ──
+   Light, not dark: this used to repeat #cadence's near-black tone directly
+   below it, so two full-weight dark chapters sat back to back. A deeper
+   cream (var(--surface), one step past #institute's var(--bg)) keeps it in
+   the light run — a quieter sub-chapter closing out "the institute" story —
+   so Cadence lands as the page's one dark centerpiece, not just the next
+   dark block in a row. */
+#community { background: var(--surface); padding: 3.5rem 1.5rem 4.5rem; border-top: 0.5px solid var(--border); }
+#community .eyebrow-light { padding-left: var(--aimt-align); }
 #community .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
-#community .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
-.community-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 2rem; }
-@media(max-width:560px){ .community-grid { grid-template-columns: 1fr; } }
-.comm-card { background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.4rem; }
-.comm-icon { font-size: 1.1rem; margin-bottom: 10px; }
-#community .cert-detail-icon { width: 28px; height: 28px; flex: none; }
-.comm-title { font-family: var(--aimt-font-mont); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: white; margin-bottom: 6px; }
-.comm-body { font-size: 0.8rem; line-height: 1.72; color: rgba(255,255,255,0.46); font-weight: 300; }
-.comm-body strong { color: rgba(255,255,255,0.72); font-weight: 500; }
+/* A divided list instead of a card grid — tighter, less "another boxed
+   section," reads more like an editorial credits list. */
+.practice-list { display: flex; flex-direction: column; padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+.practice-row { display: flex; gap: 18px; padding: 1.15rem 0; border-top: 0.5px solid var(--border2); align-items: flex-start; }
+.practice-row:last-child { border-bottom: 0.5px solid var(--border2); }
+.practice-num { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.08em; color: var(--muted2); padding-top: 3px; min-width: 22px; flex-shrink: 0; }
+.practice-title { font-family: var(--aimt-font-mont); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text); margin-bottom: 5px; }
+.practice-body { font-size: 0.82rem; line-height: 1.72; color: var(--muted); font-weight: 300; max-width: 58ch; }
 .human-strip { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 1.25rem 1.4rem; display: flex; gap: 14px; align-items: center; margin-top: 1rem; }
 .human-strip-icon { font-size: 1.3rem; flex-shrink: 0; }
 .human-strip-text { font-size: 0.85rem; line-height: 1.65; color: rgba(255,255,255,0.55); font-weight: 300; }
@@ -622,16 +737,20 @@ nav {
 .mid-cta-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 @media(max-width:700px){
   .section-sub,
-  .community-intro,
-  .cadence-intro { max-width: 100%; }
+  .community-intro { max-width: 100%; }
+  #protocol,
   #course01,
   #institute,
   #community,
   #cadence,
   #certificate,
-  #cta { padding: 4.5rem 1.25rem; }
+  #cta { padding: 3.75rem 1.25rem; }
   .human-strip { flex-direction: column; align-items: flex-start; padding: 1.15rem 1.2rem; }
   .mid-cta { padding: 2rem 1.25rem; }
+  .institute-intro,
+  .community-intro { margin-bottom: 1rem; }
+  .section-title { margin-bottom: 0.6rem; }
+  footer { flex-direction: column; align-items: flex-start; gap: 0.9rem; padding: 2.5rem 1.25rem; }
   .mid-cta-actions { flex-direction: column; align-items: stretch; }
   .c01-photo { min-height: 160px; padding: 1.4rem var(--aimt-align) 1.2rem; }
   .c01-tag { font-size: 0.46rem; letter-spacing: 0.12em; }
@@ -649,15 +768,11 @@ nav {
 }
 
 @media(max-width:480px){
-  nav { padding: 0 0.85rem; }
-  .nav-sub { display: none; }
-  .nav-name { font-size: 0.62rem; letter-spacing: 0.25em; }
   .hero-content { width: min(100%, 18.5rem); }
   .hero-sub { font-size: 0.82rem; line-height: 1.58; }
   .section-title { font-size: clamp(1.45rem, 8.6vw, 2.05rem); line-height: 1.08; }
-  .diff-card,
-  .cadence-feature,
-  .comm-card { padding: 1.15rem; }
+  .diff-card { padding: 1.15rem; }
+  .practice-row { padding: 0.95rem 0; gap: 12px; }
   .cert-watermark { font-size: 3.2rem; }
   .cert-org { font-size: 0.44em; letter-spacing: 0.15em; }
   .cert-title-main { font-size: 0.92rem; }
@@ -682,92 +797,49 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 .reveal-delay-3 { transition-delay: 0.24s; }
 .reveal-delay-4 { transition-delay: 0.32s; }
 
-/* Status pills — still used by #proof's live checkpoint thread */
-.ui-frag-pill { display: flex; align-items: center; gap: 6px; width: fit-content; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.65rem; border-radius: 980px; }
-.ui-frag-pill-muted { background: var(--surface); color: var(--muted); border: 0.5px solid var(--border2); }
-.ui-frag-pill-bright { background: rgba(163,150,141,0.16); color: var(--text); border: 0.5px solid rgba(163,150,141,0.32); }
-.ui-frag-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.65; flex-shrink: 0; }
-
-/* ── PROOF: LIVE CHECKPOINT THREAD ── */
-.proof-live { max-width: 620px; margin: 2rem var(--aimt-align) 0; background: white; border: 0.5px solid var(--border2); border-radius: 14px; padding: 1.75rem 1.75rem 2rem; }
-.proof-live-label { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.4rem; }
-.proof-live-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--muted); color: white; font-family: var(--aimt-font-serif); font-size: 0.7rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.proof-live-scenario { font-family: var(--aimt-font-serif); font-style: normal; font-size: clamp(1rem, 2.4vw, 1.15rem); line-height: 1.55; color: var(--text); margin-bottom: 1.75rem; }
-/* Thread: every message's final text is always in the DOM (opacity 0 until its turn),
-   so the card is already at its final height on first paint — nothing reflows as
-   messages and pills reveal. Typing dots are absolutely positioned inside the bubble
-   so they don't add to its box size either. */
-.proof-thread { display: flex; flex-direction: column; gap: 1.75rem; }
-.proof-turn { display: flex; flex-direction: column; gap: 0.6rem; }
-.proof-msg { display: flex; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
-.proof-msg.show { opacity: 1; transform: translateY(0); }
-.proof-msg-student { justify-content: flex-end; }
-.proof-msg-cadence { justify-content: flex-start; }
-.proof-bubble { position: relative; max-width: 85%; padding: 0.85rem 1.1rem; border-radius: 14px; }
-.proof-bubble-student { background: white; border: 0.5px solid var(--border2); border-bottom-right-radius: 4px; }
-.proof-bubble-cadence { background: var(--stone); border-bottom-left-radius: 4px; }
-.proof-msg-text { font-family: var(--aimt-font-sans); font-size: 0.85rem; color: var(--text); line-height: 1.65; opacity: 0; transition: opacity 0.4s ease; }
-.proof-bubble.text-shown .proof-msg-text { opacity: 1; }
-.proof-typing { position: absolute; left: 1.1rem; top: 1rem; display: flex; gap: 4px; opacity: 1; transition: opacity 0.25s ease; }
-.proof-bubble.text-shown .proof-typing { opacity: 0; }
-.proof-typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); opacity: 0.35; animation: proofTypingDot 1.1s ease-in-out infinite; }
-.proof-typing span:nth-child(2) { animation-delay: 0.15s; }
-.proof-typing span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes proofTypingDot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 0.9; transform: translateY(-3px); } }
-.proof-pill-row { display: flex; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
-.proof-pill-row.show { opacity: 1; transform: translateY(0); }
-.proof-pill-row-student { justify-content: flex-end; }
-@media(max-width:700px){
-  .proof-live { padding: 1.4rem 1.25rem 1.6rem; margin-left: var(--aimt-align); margin-right: var(--aimt-align); }
-  .proof-bubble { max-width: 88%; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .proof-msg, .proof-msg-text, .proof-typing, .proof-pill-row { transition: none; }
-  .proof-typing span { animation: none; }
-  .ptd-content { transition: none; }
-  .ptd-ring-fill.ptd-indicator-advancing, .ptd-progress-fill.ptd-indicator-advancing { transition: none; }
   .c01-mod-panel, .c01-mod-chevron { transition: none; }
-  .nav-mobile-menu, .nav-hamburger-line { transition: none; }
+  .plc-ring-fill, .plc-track-fill, .cl-progress-fill { transition: none; }
 }
 
 /* ── LIGHT-SECTION CONTRAST OVERRIDE (var(--muted) fails on cream) ── */
 #institute .section-sub, #course01 .section-sub, #certificate .section-sub,
 .institute-intro, .eyebrow-light, .diff-body, .cert-detail-text,
-.proof-live-label, .ui-frag-pill-muted { color: #7a706a; }
+.practice-body { color: #7a706a; }
 
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
-  <div class="nav-wordmark">
-    <div class="nav-name-stack">
-      <div class="nav-name-top">AIMT</div>
+<!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css) ══
+     This page is the visual source of truth that stylesheet was
+     extracted from. ══ -->
+<nav class="aimt-public-nav aimt-public-nav--fixed">
+  <a href="index.html" class="aimt-public-nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></a>
+  <a href="index.html" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <div class="aimt-public-nav-links">
+      <a href="headspa-mastery.html" class="aimt-public-nav-link">Head Spa Certification</a>
+      <a href="courses.html" class="aimt-public-nav-link">All Certifications</a>
+      <a href="#institute" class="aimt-public-nav-link">The Institute</a>
     </div>
-  </div>
-  <div class="nav-right">
-    <div class="nav-links">
-      <a href="headspa-mastery.html" class="nav-link">Head Spa Certification</a>
-      <a href="courses.html" class="nav-link">All Certifications</a>
-      <a href="#institute" class="nav-link">The Institute</a>
-    </div>
-    <span class="nav-sep"></span>
-    <a href="student-access.html" class="nav-link">Student Access</a>
-    <a href="headspa-mastery.html" class="cta-primary">Enroll →</a>
-    <button type="button" class="nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
-      <span class="nav-hamburger-line"></span>
-      <span class="nav-hamburger-line"></span>
-      <span class="nav-hamburger-line"></span>
+    <span class="aimt-public-nav-sep"></span>
+    <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
+    <a href="headspa-mastery.html" class="aimt-public-nav-cta">Enroll →</a>
+    <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+      <span class="aimt-public-nav-hamburger-line"></span>
+      <span class="aimt-public-nav-hamburger-line"></span>
+      <span class="aimt-public-nav-hamburger-line"></span>
     </button>
   </div>
 </nav>
-<div class="nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
-  <a href="headspa-mastery.html" class="nav-mobile-link">Head Spa Certification</a>
-  <a href="courses.html" class="nav-mobile-link">All Certifications</a>
-  <a href="#institute" class="nav-mobile-link">The Institute</a>
-  <a href="student-access.html" class="nav-mobile-link">Student Access</a>
+<div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="headspa-mastery.html" class="aimt-public-nav-mobile-link">Head Spa Certification</a>
+  <a href="courses.html" class="aimt-public-nav-mobile-link">All Certifications</a>
+  <a href="#institute" class="aimt-public-nav-mobile-link">The Institute</a>
+  <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
 </div>
 
 <!-- HERO -->
@@ -787,6 +859,9 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
   </div>
   <div class="hero-product-media" aria-hidden="true">
+    <span class="hero-product-tag"><span class="hero-product-tag-dot"></span>Inside the course</span>
+    <span class="hero-product-frame-mark tl"></span>
+    <span class="hero-product-frame-mark br"></span>
     <img src="assets/images/marketing/course-module-4-editorial.webp" alt="" class="hero-product-laptop" loading="eager" fetchpriority="high">
     <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="" class="hero-product-phone" loading="eager">
   </div>
@@ -861,8 +936,36 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <h2 class="section-title reveal reveal-delay-1" style="color:white;">Take the course into the<br>treatment room.</h2>
       <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Timer with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
       <p class="section-sub reveal reveal-delay-2">Core and Extended are AIMT's two reference protocols — 60- and 90-minute service structures built so a new practitioner can deliver the service with structure from the first appointment onward, until the flow becomes second nature.</p>
+      <div class="protocol-mini-demo reveal reveal-delay-2" id="protocolLiveCard" aria-hidden="true">
+        <div class="plc-top">
+          <div class="plc-brand">AIMT &middot; Service Timer</div>
+          <div class="plc-format">Core Format</div>
+        </div>
+        <div class="plc-service-row">
+          <span class="plc-service-label">Service remaining</span>
+          <span class="plc-service-time" id="plcServiceRemaining">38:42</span>
+        </div>
+        <div class="plc-track"><div class="plc-track-fill" id="plcTrackFill"></div></div>
+        <div class="plc-clock-card">
+          <svg class="plc-ring" viewBox="0 0 72 72" aria-hidden="true">
+            <circle class="plc-ring-bg" cx="36" cy="36" r="30"/>
+            <circle class="plc-ring-fill" id="plcRingFill" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="62.2"/>
+          </svg>
+          <div class="plc-clock-text">
+            <div class="plc-time" id="plcCountdown">6:42</div>
+            <div class="plc-meta">next landmark &middot; <strong id="plcLandmark">6:42</strong> remaining</div>
+          </div>
+          <div class="plc-phase">Treatment</div>
+        </div>
+        <div class="plc-step-eyebrow">Step 05 &middot; Treatment</div>
+        <div class="plc-step-title">Exfoliation + Scalp Massage + Rinse</div>
+        <div class="plc-cue">
+          <span class="plc-cue-label">Practitioner cue</span>
+          <p class="plc-cue-text">Adapt exfoliation to intake, assessment and product directions. Keep pressure controlled, then rinse thoroughly before the next block.</p>
+        </div>
+      </div>
     </div>
-    <div class="reveal reveal-delay-2" style="max-width:420px;">
+    <div class="reveal reveal-delay-2 protocol-media-col">
       <div class="aimt-sp-proof-frame">
         <img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step in the treatment room" loading="lazy" width="1600" height="2133">
       </div>
@@ -889,13 +992,13 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 <!-- BUILT FROM PRACTICE -->
 <section id="community">
   <div class="section-inner">
-    <span class="eyebrow reveal">Scalp care professionals</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:white;">Built from practice.</h2>
-    <p class="community-intro reveal reveal-delay-2"><em>AI can sharpen how you learn.</em> The people doing the work sharpen how you practice.</p>
-    <div class="community-grid">
-      <div class="comm-card reveal"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3" stroke="currentColor" stroke-width="1.25"/><path d="M4.5 16.5c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">Built by active practitioners</div><div class="comm-body">AIMT curriculum is developed with professionals currently doing the work — cosmetologists, estheticians, and trichologists in active practice — not by educators alone. What you learn is shaped by what actually happens in the treatment room.</div></div>
-      <div class="comm-card reveal reveal-delay-1"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="7.5" cy="8" r="3" stroke="currentColor" stroke-width="1.25"/><circle cx="13" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.25" opacity="0.6"/></svg></div><div class="comm-title">Education that survives contact with a real client</div><div class="comm-body">Every module is built around the decisions a practitioner actually has to make — what to notice, how to adapt, what to say, and where scope ends — not just the steps of a ritual.</div></div>
-      <div class="comm-card reveal reveal-delay-2" style="grid-column: 1 / -1;"><div class="comm-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="15" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="10" cy="9" r="1.5" stroke="currentColor" stroke-width="1.25"/><circle cx="16" cy="5" r="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M5.3 13.7L8.7 10.3M11.3 7.7L14.7 6.3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg></div><div class="comm-title">A growing AIMT education ecosystem</div><div class="comm-body">Head Spa Certification Course is the first program in a wider institute — built to expand as more programs and practitioner resources come online.</div></div>
+    <span class="eyebrow-light reveal">Scalp care professionals</span>
+    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Built from practice.</h2>
+    <p class="institute-intro reveal reveal-delay-2"><em>AI can sharpen how you learn.</em> The people doing the work sharpen how you practice.</p>
+    <div class="practice-list">
+      <div class="practice-row reveal"><span class="practice-num">01</span><div><div class="practice-title">Built by active practitioners</div><div class="practice-body">Developed with professionals currently doing the work — cosmetologists, estheticians, and trichologists in active practice — not by educators alone.</div></div></div>
+      <div class="practice-row reveal reveal-delay-1"><span class="practice-num">02</span><div><div class="practice-title">Survives contact with a real client</div><div class="practice-body">Every module is built around the decisions a practitioner actually has to make — what to notice, how to adapt, what to say, and where scope ends.</div></div></div>
+      <div class="practice-row reveal reveal-delay-2"><span class="practice-num">03</span><div><div class="practice-title">A growing AIMT education ecosystem</div><div class="practice-body">Head Spa Certification Course is the first program in a wider institute — built to expand as more programs and practitioner resources come online.</div></div></div>
     </div>
   </div>
 </section>
@@ -905,75 +1008,106 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="section-inner">
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your built-in learning companion,<br>inside every module.</h2>
-    <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Ask questions, work through difficult concepts, and receive focused feedback on written checkpoints as you progress.</p>
-    <p class="section-sub reveal reveal-delay-2" style="margin-bottom:1.75rem;">Unlike a standard course chatbot, Cadence is built around AIMT's curriculum and evaluates responses against what each module actually teaches. The role is practical: clarify the material, identify what is still missing, and guide you back to the lesson without giving away the answer.</p>
-    <div class="cadence-features reveal reveal-delay-3">
-      <div class="cadence-feature"><div class="cf-num">01</div><div><div class="cf-title">Built around the curriculum.</div><div class="cf-body">Cadence works from the concepts taught inside AIMT, so the guidance stays relevant to the course and the standard established in each module.</div></div></div>
-      <div class="cadence-feature"><div class="cf-num">02</div><div><div class="cf-title">Feedback that requires real understanding.</div><div class="cf-body">Written checkpoints are evaluated for completeness and accuracy. Vague or partial responses are returned for revision, with focused direction on what needs another look.</div></div></div>
-      <div class="cadence-feature"><div class="cf-num">03</div><div><div class="cf-title">Support that continues as you progress.</div><div class="cf-body">Relevant context from your background and completed work can carry forward, allowing the guidance to build on what you have already demonstrated rather than starting from zero each time.</div></div></div>
-    </div>
-    <div class="human-strip reveal reveal-delay-3">
-      <div class="human-strip-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.67 3.67 4 4.5 4h11c.83 0 1.5.67 1.5 1.5v6c0 .83-.67 1.5-1.5 1.5H9.5L6 15v-2H4.5C3.67 13 3 12.33 3 11.5v-6z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg></div>
-      <div class="human-strip-text"><strong>The curriculum remains human. The responsibility remains yours.</strong> Cadence makes the learning process more responsive, but it does not replace instruction, professional judgment, or practical experience. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
-    </div>
-  </div>
-</section>
+    <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Unlike a standard course chatbot, it's built around AIMT's curriculum and evaluates checkpoints against what each module actually teaches — on your laptop, phone, or tablet.</p>
 
-<!-- LISTEN MODE -->
-<section id="listen-mode">
-  <div class="section-inner">
-    <span class="eyebrow-light reveal">Listen With Cadence</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">Keep learning when your<br>eyes are somewhere else.</h2>
-    <p class="institute-intro reveal reveal-delay-2"><em>Every module can be read on screen, or listened to with Cadence.</em> Listening is manual — it never starts on its own — and supports continuous audio through a module with a persistent, compact player.</p>
-    <p class="section-sub reveal reveal-delay-2">Required checkpoints still pause playback for a visual or an interaction, and you continue listening with an explicit tap once you've cleared it. AIMT is not an audio-only course — Listen Mode is a way to move through the same curriculum, not a shortcut around it.</p>
-  </div>
-</section>
+    <div class="cadence-demo reveal reveal-delay-2">
+      <div class="cadence-demo-primary">
+        <img src="assets/images/marketing/cadence-conversation.webp" alt="The real Cadence chat panel, open inside a course module and answering a student's question" loading="lazy" width="760" height="540">
+      </div>
+      <div class="cadence-demo-secondary">
+        <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="A student asking Cadence a question from their phone" loading="lazy" width="1122" height="1402">
+      </div>
+      <span class="cadence-demo-tag">Real Cadence, real module</span>
+    </div>
 
-<!-- PROOF -->
-<section id="proof">
-  <div class="section-inner">
-    <span class="eyebrow-light reveal">How the certification works</span>
-    <h2 class="section-title reveal reveal-delay-1" style="color:var(--text);">The test adapts.<br>The standard doesn't.</h2>
-    <p class="institute-intro reveal reveal-delay-2"><em>A real checkpoint from Module 6.</em> Students can revise as many times as needed, and the guidance adapts to each response—but the standard doesn't move. Instead of choosing from a list of answers, the student has to interpret the evidence, explain the reasoning, and respond within professional scope.</p>
-    <div class="proof-live reveal reveal-delay-2" id="proofLive">
-      <div class="proof-live-label" aria-hidden="true"><span class="proof-live-icon">i</span>Real scenario</div>
-      <p class="proof-live-scenario">A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</p>
-      <div class="proof-thread" id="proofThread" aria-hidden="true">
-        <div class="proof-turn">
-          <div class="proof-msg proof-msg-student" id="proofMsg1">
-            <div class="proof-bubble proof-bubble-student">
-              <span class="proof-typing"><span></span><span></span><span></span></span>
-              <p class="proof-msg-text">Im not really sure . . .</p>
-            </div>
-          </div>
-          <div class="proof-pill-row proof-pill-row-student" id="proofPillRow1">
-            <div class="ui-frag-pill ui-frag-pill-muted"><span class="ui-frag-dot"></span>Needs revision</div>
-          </div>
+    <div class="cadence-listen reveal reveal-delay-2">
+      <span class="cl-eyebrow">Listen With Cadence</span>
+      <h3 class="cl-heading">Built to fit around your day.</h3>
+      <p class="cl-copy">Listen through supported modules when sitting down to read isn't practical. Cadence keeps the lesson moving and brings you back to the screen when it matters.</p>
+
+      <div class="cl-player" id="cadenceListen">
+        <div class="cl-player-row">
+          <span class="cl-player-title">Module 8 — The Head Spa Service</span>
         </div>
-        <div class="proof-msg proof-msg-cadence" id="proofMsg2">
-          <div class="proof-bubble proof-bubble-cadence">
-            <span class="proof-typing"><span></span><span></span><span></span></span>
-            <p class="proof-msg-text">No worries — let's work through it. Start with what the microscopy is telling you: fine white powdery flakes, minimal oil, matte surface. Does that picture match dandruff, or something else? Once you identify what's actually going on, the conversation with the client and your next steps will follow naturally. Take a shot at it.</p>
-          </div>
-        </div>
-        <div class="proof-turn">
-          <div class="proof-msg proof-msg-student" id="proofMsg3">
-            <div class="proof-bubble proof-bubble-student">
-              <span class="proof-typing"><span></span><span></span><span></span></span>
-              <p class="proof-msg-text">Fine white flakes with minimal oil and a matte surface reads more like a dry, over-cleansed scalp than a fungal dandruff pattern. I'd describe what I'm seeing rather than label it, suggest that the client ease off of the zinc, and focus on restoring moisture.</p>
-            </div>
-          </div>
-          <div class="proof-pill-row proof-pill-row-student" id="proofPillRow2">
-            <div class="ui-frag-pill ui-frag-pill-bright"><span class="ui-frag-dot"></span>Accepted</div>
-          </div>
-        </div>
-        <div class="proof-msg proof-msg-cadence" id="proofMsg4">
-          <div class="proof-bubble proof-bubble-cadence">
-            <span class="proof-typing"><span></span><span></span><span></span></span>
-            <p class="proof-msg-text">Solid read. You tied the matte surface and minimal oil to barrier disruption rather than Malassezia activity — and your scope framing around describing what you see is exactly right. That distinction matters when a client has been self-treating for months and is expecting a diagnosis. Clean checkpoint.</p>
-          </div>
+        <div class="cl-player-row">
+          <button type="button" class="cl-play" id="clPlayBtn" aria-label="Preview Listen Mode audio">
+            <svg id="clPlayIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 1.8v10.4c0 .7.77 1.13 1.36.76l8.2-5.2a.9.9 0 000-1.52l-8.2-5.2C3.77.67 3 1.1 3 1.8z" fill="currentColor"/></svg>
+            <svg id="clPauseIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" hidden><rect x="2.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/><rect x="8.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/></svg>
+          </button>
+          <div class="cl-progress"><div class="cl-progress-fill" id="clProgressFill"></div></div>
+          <span class="cl-time" id="clTime">4:12 / 14:20</span>
+          <button type="button" class="cl-speed" id="clSpeedBtn">1&times;</button>
         </div>
       </div>
+      <p class="cl-footnote">Start, pause, resume, or change speed anytime.</p>
+    </div>
+
+    <div class="cadence-features reveal reveal-delay-3">
+      <div class="cadence-feature"><div class="cf-num">01</div><div><div class="cf-title">Built around the curriculum.</div><div class="cf-body">Works from what each module actually teaches, so guidance never drifts off-course.</div></div></div>
+      <div class="cadence-feature"><div class="cf-num">02</div><div><div class="cf-title">Requires real understanding.</div><div class="cf-body">Vague or partial checkpoint answers come back with direction, not a pass.</div></div></div>
+      <div class="cadence-feature"><div class="cf-num">03</div><div><div class="cf-title">Builds as you progress.</div><div class="cf-body">Context from completed work carries forward instead of starting from zero.</div></div></div>
+    </div>
+
+    <div class="cadence-subhead reveal reveal-delay-4">
+      <span class="cadence-subhead-eyebrow">How checkpoints work</span>
+      <h3 class="cadence-subhead-title">The feedback adapts. The standard doesn't.</h3>
+      <p class="cadence-subhead-body">A real checkpoint from Module 6. The competency required to pass stays fixed — but Cadence responds to what the student actually submits, and a partial answer comes back with focused direction to revise, not an automatic pass.</p>
+    </div>
+    <!-- Static presentation of the real Cadence shell (assets/css/cadence-shell.css
+         classes, unmodified) — not the modal: no click to open, no dimming, no
+         shell-open animation, no backend/thread/auth. Fixed local transcript
+         showing the same Module 6 checkpoint scenario referenced above,
+         restaged as attempt → guidance → revision → acceptance. Messages after
+         the opening prompt start hidden (.cs-hidden-msg) and are revealed in
+         sequence by the script below (see "Cadence checkpoint demo" script) —
+         a deterministic, one-time staged reveal, not a real conversation. -->
+    <div class="cadence-static-shell reveal reveal-delay-4" id="cadenceStaticShell">
+      <div class="cshell-head">
+        <div class="cshell-id" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+        <div class="cshell-titles">
+          <div class="cshell-module">Module 6 — Conditions &amp; Disorders</div>
+          <div class="cshell-status">Checkpoint · revision shown</div>
+        </div>
+      </div>
+      <div class="cshell-transcript" id="csTranscript">
+        <div class="cshell-transcript-inner">
+          <div class="cshell-kicker">Checkpoint</div>
+          <div class="cshell-msg assistant">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-bub" role="group" aria-label="Cadence"><p>A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</p></div>
+          </div>
+          <div class="cshell-msg user cs-hidden-msg" id="csUser1">
+            <div class="cshell-msg-av" aria-hidden="true">You</div>
+            <div class="cshell-bub" role="group" aria-label="You"><p>I'm not really sure . . .</p></div>
+          </div>
+          <div class="cshell-msg assistant cs-hidden-msg" id="csTyping1">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
+          </div>
+          <div class="cshell-msg assistant cs-hidden-msg" id="csGuidance">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-bub" role="group" aria-label="Cadence"><p>No worries — let's work through it. Start with what the microscopy is telling you: fine white powdery flakes, minimal oil, matte surface. Does that picture match dandruff, or something else? Once you identify what's actually going on, the conversation with the client and your next steps will follow naturally. Take a shot at it.</p></div>
+          </div>
+          <div class="cshell-msg user cs-hidden-msg" id="csUser2">
+            <div class="cshell-msg-av" aria-hidden="true">You</div>
+            <div class="cshell-bub" role="group" aria-label="You"><p>Fine white flakes with minimal oil and a matte surface reads more like a dry, over-cleansed scalp than a fungal dandruff pattern. I'd describe what I'm seeing rather than label it, suggest that the client ease off of the zinc, and focus on restoring moisture.</p></div>
+          </div>
+          <div class="cshell-msg assistant cs-hidden-msg" id="csTyping2">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
+          </div>
+          <div class="cshell-msg assistant cs-hidden-msg" id="csAccept">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-bub" role="group" aria-label="Cadence"><p>Solid read. You tied the matte surface and minimal oil to barrier disruption rather than Malassezia activity — and your scope framing around describing what you see is exactly right. That distinction matters when a client has been self-treating for months and is expecting a diagnosis. Clean checkpoint.</p></div>
+          </div>
+          <div class="cshell-pass-banner cs-hidden-msg" id="csPassBanner"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Checkpoint complete</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="human-strip reveal reveal-delay-4">
+      <div class="human-strip-icon"><svg class="cert-detail-icon" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.67 3.67 4 4.5 4h11c.83 0 1.5.67 1.5 1.5v6c0 .83-.67 1.5-1.5 1.5H9.5L6 15v-2H4.5C3.67 13 3 12.33 3 11.5v-6z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg></div>
+      <div class="human-strip-text"><strong>The curriculum remains human. The responsibility remains yours.</strong> Cadence makes the learning process more responsive, but it does not replace instruction, professional judgment, or practical experience. When you need a real answer from someone who has worked in that treatment room, AIMT's network is there.</div>
     </div>
   </div>
 </section>
@@ -1044,7 +1178,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 </section>
 
 <!-- READINESS SCORE TEASER -->
-<section id="readiness-teaser" style="background:#faf8f5; padding: 4.5rem 2rem;">
+<section id="readiness-teaser" style="background:#faf8f5; padding: clamp(3.25rem, 8vw, 4.5rem) clamp(1.25rem, 5vw, 2rem);">
   <div class="section-inner" style="text-align:center; max-width:640px;">
     <span class="aimt-sp-eyebrow" style="color:#a3968d;">AIMT Head Spa Readiness Score</span>
     <h2 class="section-title" style="color:#262626; margin:1rem 0 1.1rem;">See how ready you are for a stronger head spa practice.</h2>
@@ -1070,33 +1204,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   <div class="footer-brand"><div class="footer-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div><span class="footer-name">AIMT</span></div>
   <div class="footer-legal"><a href="headspa-mastery.html">Head Spa Certification</a><a href="courses.html">All Certifications</a><a href="student-access.html">Student Access</a></div>
   <div class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Refunds</a></div>
-  <div class="footer-copy">© 2026 American Institute of Modern Trichology · Private Certification Institute</div>
+  <div class="footer-copy">© 2026 American Institute of Modern Trichology</div>
 </footer>
 
+<script src="assets/js/aimt-public-nav.js"></script>
 <script>
-// Mobile nav menu
-(function() {
-  const btn = document.getElementById('navHamburger');
-  const menu = document.getElementById('navMobileMenu');
-  if (!btn || !menu) return;
-  let open = false;
-
-  function setOpen(next) {
-    open = next;
-    btn.setAttribute('aria-expanded', String(open));
-    menu.setAttribute('aria-hidden', String(!open));
-    document.body.style.overflow = open ? 'hidden' : '';
-  }
-
-  btn.addEventListener('click', () => setOpen(!open));
-  menu.querySelectorAll('.nav-mobile-link').forEach(link => {
-    link.addEventListener('click', () => setOpen(false));
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && open) setOpen(false);
-  });
-})();
-
 // Scroll reveal
 const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('visible'); }), { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
@@ -1136,8 +1248,7 @@ if (c01Toggle && c01Grid) {
   });
 }
 
-// Module checkpoint panels — desktop: vertical tabs (one always selected).
-// Mobile (<=700px): accordion (zero or one open). Same DOM, same data, ARIA pattern switches with viewport.
+// Module checkpoint panels — a single accordion at every width (zero or one open).
 (function() {
   const list = document.getElementById('c01ModuleGrid');
   if (!list) return;
@@ -1147,267 +1258,240 @@ if (c01Toggle && c01Grid) {
   })).filter(pair => pair.panel);
   if (!pairs.length) return;
 
-  const mq = window.matchMedia('(max-width:700px)');
-  let desktopSelected = 0;
-  let mobileOpen = null;
+  let openIndex = null;
 
   function render() {
-    if (mq.matches) {
-      list.removeAttribute('role');
-      pairs.forEach((pair, i) => {
-        const open = i === mobileOpen;
-        pair.row.setAttribute('role', 'button');
-        pair.row.setAttribute('aria-expanded', String(open));
-        pair.row.removeAttribute('aria-selected');
-        pair.panel.removeAttribute('role');
-        pair.panel.setAttribute('aria-hidden', String(!open));
-        pair.panel.style.maxHeight = open ? pair.panel.scrollHeight + 'px' : '0px';
-      });
-    } else {
-      list.setAttribute('role', 'tablist');
-      pairs.forEach((pair, i) => {
-        const active = i === desktopSelected;
-        pair.row.setAttribute('role', 'tab');
-        pair.row.setAttribute('aria-selected', String(active));
-        pair.row.removeAttribute('aria-expanded');
-        pair.panel.setAttribute('role', 'tabpanel');
-        pair.panel.setAttribute('aria-hidden', String(!active));
-        pair.panel.style.maxHeight = '';
-      });
-    }
+    pairs.forEach((pair, i) => {
+      const open = i === openIndex;
+      pair.row.setAttribute('aria-expanded', String(open));
+      pair.panel.setAttribute('aria-hidden', String(!open));
+      pair.panel.style.maxHeight = open ? pair.panel.scrollHeight + 'px' : '0px';
+    });
   }
 
   function select(i) {
-    if (mq.matches) {
-      mobileOpen = (mobileOpen === i) ? null : i;
-    } else {
-      desktopSelected = i;
-    }
+    openIndex = (openIndex === i) ? null : i;
     render();
   }
 
   pairs.forEach((pair, i) => {
+    pair.row.setAttribute('role', 'button');
     pair.row.addEventListener('click', () => select(i));
     pair.row.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(i); }
     });
   });
 
-  mq.addEventListener('change', render);
   render();
 })();
 
-// Protocol timer demo: retired — replaced with a real Service Timer capture (see #protocol markup)
+// Timer section: floating live-read card. A single ticking countdown, purely
+// decorative — not connected to the real Service Timer's logic — restrained
+// on purpose so it reads as "believably alive," not a homepage gadget.
+// Ring math and the overall/step relationship mirror the real Timer's own
+// (aimt-service-timer.html): the ring drains — stroke-dashoffset goes from
+// 0 (full) toward the circumference (empty) as the step's remaining time
+// runs out — rather than filling, and the overall "Service remaining" clock
+// counts down in lockstep with the current step, exactly as one 60:00 Core
+// service actually would (15:00 + 3:00 elapsed before this step, 3:18
+// elapsed into this step's own 10:00 block = 38:42 left overall).
 (function() {
-  const root = null;
-  if (!root) return;
-  const content = document.getElementById('ptdContent');
-  const nextBtn = document.getElementById('ptdNextBtn');
-  const els = {
-    phase: root.querySelector('.ptd-phase-label'),
-    progressFill: root.querySelector('.ptd-progress-fill'),
-    elapsed: root.querySelector('.ptd-elapsed'),
-    remaining: root.querySelector('.ptd-remaining'),
-    countdown: root.querySelector('.ptd-countdown'),
-    ringFill: root.querySelector('.ptd-ring-fill'),
-    stepCount: root.querySelector('.ptd-step-count'),
-    stepLabel: root.querySelector('.ptd-step-label'),
-    stepTitle: root.querySelector('.ptd-step-title'),
-    desc: root.querySelector('.ptd-desc'),
-    noteText: root.querySelector('.ptd-note-text'),
-    nextTitle: root.querySelector('.ptd-next-title')
-  };
+  const card = document.getElementById('protocolLiveCard');
+  if (!card) return;
+  const countdownEl = document.getElementById('plcCountdown');
+  const landmarkEl = document.getElementById('plcLandmark');
+  const serviceEl = document.getElementById('plcServiceRemaining');
+  const trackFill = document.getElementById('plcTrackFill');
+  const ring = document.getElementById('plcRingFill');
+  const CIRC = 188.5; // 2 * PI * 30 — matches the real timer's own ring radius
+  const STEP_DURATION = 600;   // Step 05 runs 10:00
+  const SERVICE_TOTAL = 3600;  // Core Format is a 60:00 treatment clock
+  const START_STEP_REMAINING = 402;    // 6:42 left in the step
+  const START_SERVICE_REMAINING = 2322; // 38:42 left overall, at the same moment
+  let stepRemaining = START_STEP_REMAINING;
+  let serviceRemaining = START_SERVICE_REMAINING;
 
-  const RING_CIRC = 163.36;
-  const RING_IDLE_OFFSET = 60; // resting fill so the track stays visible before a step's clock starts
-  const RED = '#e05c5c';
-  const GREEN = '#4caf7d';
-  const STEPS = [
-    {
-      num: '04', phase: 'Treatment', titleHtml: 'Exfoliant<br>Application',
-      duration: '0:05', elapsed: '13:00', remaining: '47:00', overall: 22,
-      desc: 'Load brush from bowl — no dripping. Part cleanly. Apply along parting in a controlled line. Quadrant by quadrant: frontal → temporal L → temporal R → crown → occipital.',
-      note: 'Clean partings. Product stays on scalp — not spread through hair.',
-      next: 'Scalp Massage'
-    },
-    {
-      num: '05', phase: 'Treatment', titleHtml: 'Scalp<br>Massage',
-      duration: '10:00', elapsed: '18:00', remaining: '42:00', overall: 30,
-      desc: 'Thumbs at occipital ridge — press and hold 2 seconds before circular movement. Full coverage: occipital → nape → temporal → crown → frontal and back. Hands stay in contact the entire time. No air gaps.',
-      note: 'Deepest pressure at occipital. Lighter at temples. Broad palm at crown. This is why they rebook.',
-      next: 'First Rinse'
-    },
-    {
-      num: '06', phase: 'Wet Phase', titleHtml: 'First<br>Rinse',
-      duration: '3:00', elapsed: '28:00', remaining: '32:00', overall: 47,
-      desc: 'Temperature check again — identical to Step 03. Angled flow, not direct overhead. Work methodically. Exfoliant should be fully clearing.',
-      note: 'Recheck temperature every rinse. Every time.',
-      next: 'Neck & Shoulder Massage'
-    }
-  ];
-
-  function parseDuration(str) {
-    const parts = str.split(':');
-    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-  }
-  function formatTime(totalSeconds) {
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
+  function fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  const totalSecondsByStep = STEPS.map(step => parseDuration(step.duration));
-
-  let currentIndex = 0;
-  let secondsRemaining = totalSecondsByStep[0];
-  let intervalId = null;
-  let pendingAdvance = null;
-  let isVisible = false;
-  let started = false;
-
-  function render(index, remaining, ringOffsetOverride) {
-    const step = STEPS[index];
-    const total = totalSecondsByStep[index];
-    const elapsedInStep = total - remaining;
-    const overallStart = index > 0 ? STEPS[index - 1].overall : step.overall;
-    const overallNow = overallStart + (step.overall - overallStart) * (elapsedInStep / total);
-    const elapsedBase = parseDuration(step.elapsed);
-    const remainingBase = parseDuration(step.remaining);
-    els.phase.textContent = step.phase;
-    els.progressFill.style.width = overallNow + '%';
-    els.elapsed.textContent = formatTime(elapsedBase + elapsedInStep) + ' Elapsed';
-    els.remaining.textContent = formatTime(Math.max(0, remainingBase - elapsedInStep)) + ' Remaining';
-    els.countdown.textContent = formatTime(remaining);
-    els.countdown.style.color = remaining === 0 ? GREEN : (remaining <= 30 ? RED : '');
-    els.ringFill.style.strokeDashoffset = ringOffsetOverride != null ? ringOffsetOverride : RING_CIRC * (1 - remaining / total);
-    els.stepCount.textContent = 'Step ' + step.num + ' of 12';
-    els.stepLabel.innerHTML = '<span class="ptd-step-dash"></span>Step ' + step.num;
-    els.stepTitle.innerHTML = step.titleHtml;
-    els.desc.textContent = step.desc;
-    els.noteText.textContent = step.note;
-    els.nextTitle.textContent = step.next;
-    if (nextBtn) nextBtn.hidden = (index === 0 || index >= STEPS.length - 1);
+  function paint() {
+    countdownEl.textContent = fmt(stepRemaining);
+    landmarkEl.textContent = fmt(stepRemaining);
+    serviceEl.textContent = fmt(serviceRemaining);
+    ring.style.strokeDashoffset = CIRC * (1 - stepRemaining / STEP_DURATION);
+    trackFill.style.width = ((SERVICE_TOTAL - serviceRemaining) / SERVICE_TOTAL * 100) + '%';
   }
+  paint();
 
-  // Initial paint: step 04, untouched, idle ring so both ring colors read while it waits to start
-  render(0, secondsRemaining, RING_IDLE_OFFSET);
-
-  function stopInterval() {
-    if (intervalId) { clearInterval(intervalId); intervalId = null; }
-  }
-  function startInterval() {
-    if (intervalId || !isVisible) return;
-    intervalId = setInterval(tick, 1000);
-  }
-
+  let timer = null;
   function tick() {
-    secondsRemaining = Math.max(0, secondsRemaining - 1);
-    render(currentIndex, secondsRemaining);
-    if (secondsRemaining === 0) {
-      stopInterval();
-      if (currentIndex < STEPS.length - 1) {
-        pendingAdvance = setTimeout(() => { pendingAdvance = null; goToStep(currentIndex + 1); }, 800);
-      }
+    stepRemaining -= 1;
+    serviceRemaining -= 1;
+    if (stepRemaining < 0) {
+      stepRemaining = START_STEP_REMAINING;
+      serviceRemaining = START_SERVICE_REMAINING;
     }
+    paint();
   }
+  function start() { if (!timer) timer = setInterval(tick, 1000); }
+  function stop() { clearInterval(timer); timer = null; }
 
-  function goToStep(index) {
-    if (pendingAdvance) { clearTimeout(pendingAdvance); pendingAdvance = null; }
-    stopInterval();
-    content.classList.add('ptd-fade-out');
-    setTimeout(() => {
-      currentIndex = index;
-      secondsRemaining = totalSecondsByStep[index];
-      els.ringFill.classList.add('ptd-indicator-advancing');
-      els.progressFill.classList.add('ptd-indicator-advancing');
-      render(currentIndex, secondsRemaining);
-      content.classList.remove('ptd-fade-out');
-      content.classList.add('ptd-fade-in');
-      void content.offsetWidth;
-      content.classList.remove('ptd-fade-in');
-      startInterval();
-      setTimeout(() => {
-        els.ringFill.classList.remove('ptd-indicator-advancing');
-        els.progressFill.classList.remove('ptd-indicator-advancing');
-      }, 470);
-    }, 175);
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      if (currentIndex >= STEPS.length - 1) return;
-      goToStep(currentIndex + 1);
-    });
-  }
-
-  const ptdObs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      isVisible = entry.isIntersecting;
-      if (isVisible) {
-        if (!started) { started = true; render(currentIndex, secondsRemaining); }
-        startInterval();
-      } else {
-        stopInterval();
-      }
-    });
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => { entry.isIntersecting ? start() : stop(); });
   }, { threshold: 0.4 });
-  ptdObs.observe(root);
+  obs.observe(card);
 })();
 
-// Proof: live checkpoint thread
+// Listen Mode preview: play/pause advances a decorative progress + elapsed
+// time only — no real audio, no course-state connection. Speed control is
+// cosmetic (label cycles; nothing is actually played back at that rate).
 (function() {
-  const card = document.getElementById('proofLive');
-  const thread = document.getElementById('proofThread');
-  if (!card || !thread) return;
-  const messages = ['proofMsg1', 'proofMsg2', 'proofMsg3', 'proofMsg4'].map(id => document.getElementById(id));
-  const pillRows = ['proofPillRow1', 'proofPillRow2'].map(id => document.getElementById(id));
+  const player = document.getElementById('cadenceListen');
+  const btn = document.getElementById('clPlayBtn');
+  if (!player || !btn) return;
+  const playIcon = document.getElementById('clPlayIcon');
+  const pauseIcon = document.getElementById('clPauseIcon');
+  const fill = document.getElementById('clProgressFill');
+  const timeEl = document.getElementById('clTime');
+  const speedBtn = document.getElementById('clSpeedBtn');
+
+  const TOTAL = 860; // 14:20
+  let elapsed = 252; // 4:12, matching the resting display
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+  function paint() {
+    timeEl.textContent = fmt(elapsed) + ' / ' + fmt(TOTAL);
+    fill.style.width = (elapsed / TOTAL * 100) + '%';
+  }
+
+  let timer = null;
+  function stop() {
+    clearInterval(timer);
+    timer = null;
+    playIcon.hidden = false;
+    pauseIcon.hidden = true;
+    btn.setAttribute('aria-label', 'Preview Listen Mode audio');
+  }
+  function start() {
+    if (reducedMotion) return;
+    playIcon.hidden = true;
+    pauseIcon.hidden = false;
+    btn.setAttribute('aria-label', 'Pause Listen Mode preview');
+    timer = setInterval(() => {
+      elapsed += 1;
+      if (elapsed >= TOTAL) elapsed = 252;
+      paint();
+    }, 1000);
+  }
+
+  btn.addEventListener('click', () => { timer ? stop() : start(); });
+
+  const SPEEDS = ['0.75×', '1×', '1.25×', '1.5×'];
+  let speedIndex = 1;
+  speedBtn.addEventListener('click', () => {
+    speedIndex = (speedIndex + 1) % SPEEDS.length;
+    speedBtn.textContent = SPEEDS[speedIndex];
+  });
+
+  paint();
+})();
+
+// Cadence checkpoint demo: a deterministic, one-time staged reveal of the
+// fixed Module 6 transcript (see the .cadence-static-shell markup above).
+// No backend calls, no randomness, no real Cadence/course state — every
+// message and the typing-indicator markup are already in the DOM
+// (assets/css/cadence-shell.css's real .cshell-typing dots), this just
+// times which ones are visible. Runs once when the surface first enters
+// the viewport; prefers-reduced-motion shows the finished transcript
+// immediately with no staging at all.
+(function() {
+  const shell = document.getElementById('cadenceStaticShell');
+  const transcript = document.getElementById('csTranscript');
+  if (!shell || !transcript) return;
+
+  // Paced like an actual back-and-forth, not a UI demo racing to finish —
+  // full run lands around 12s. Each `wait` is the pause BEFORE that step's
+  // reveal (matching the owner's turn-by-turn spec: prompt already up →
+  // ~1.8s → learner's uncertain answer → ~1.5s hold → typing (~2s) →
+  // guidance → ~2.8s reading room before the learner acts again → revised
+  // answer → ~1.8s → typing (~1.8s) → acceptance → banner right behind it.
+  const sequence = [
+    { id: 'csUser1', wait: 1800 },
+    { id: 'csTyping1', wait: 1500 },
+    { id: 'csGuidance', wait: 2000, hide: 'csTyping1' },
+    { id: 'csUser2', wait: 2800 },
+    { id: 'csTyping2', wait: 1800 },
+    { id: 'csAccept', wait: 1800, hide: 'csTyping2' },
+    { id: 'csPassBanner', wait: 400 }
+  ];
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  function showTyping(msg) { msg.classList.add('show'); }
-  function showText(msg) { msg.querySelector('.proof-bubble').classList.add('text-shown'); }
-  function showPill(row) { row.classList.add('show'); }
+  function scrollToBottom() { transcript.scrollTo({ top: transcript.scrollHeight, behavior: 'smooth' }); }
+  // "Stick to bottom" only while the visitor hasn't deliberately scrolled
+  // away — checked right before each reveal, not continuously. A visitor
+  // who scrolls up to reread something keeps that position through later
+  // turns; auto-scroll only resumes once they've scrolled back near the
+  // bottom themselves. Same rule real chat UIs (Slack, Discord, iMessage
+  // web) use so new messages never fight a reader's own scrolling.
+  function isNearBottom() {
+    return transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight < 48;
+  }
 
-  function renderFinalState() {
-    messages.forEach(showTyping);
-    messages.forEach(showText);
-    pillRows.forEach(showPill);
+  // Bring an element into the flow (display:none -> flex) first, so it
+  // actually grows the transcript's scrollHeight right now instead of
+  // having always occupied that space — then, a frame later, fade/slide it
+  // in. The rAF gap is what lets the opacity/transform transition actually
+  // play instead of starting already-visible.
+  function reveal(el) {
+    if (!el) return;
+    el.classList.add('cs-mounted');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  }
+  function unmount(el) {
+    if (!el) return;
+    el.classList.remove('show', 'cs-mounted');
+  }
+
+  function showAll() {
+    sequence.forEach(step => {
+      const el = document.getElementById(step.id);
+      if (el && step.id !== 'csTyping1' && step.id !== 'csTyping2') {
+        el.classList.add('cs-mounted', 'show');
+      }
+    });
   }
 
   async function runSequence() {
-    await sleep(1700);                 // beat before the student "responds"
-    showTyping(messages[0]);
-    await sleep(1150);                 // student typing indicator
-    showText(messages[0]);
-    await sleep(1000);                 // pause before delivery pill
-    showPill(pillRows[0]);
-    await sleep(1300);                 // pause before Cadence starts typing
-    showTyping(messages[1]);
-    await sleep(2000);                 // Cadence typing indicator — longer reply
-    showText(messages[1]);
-    await sleep(2800);                 // real hold, as though the student is thinking
-    showTyping(messages[2]);
-    await sleep(1400);                 // student typing indicator
-    showText(messages[2]);
-    await sleep(1000);                 // pause before delivery pill
-    showPill(pillRows[1]);
-    await sleep(1300);                 // pause before Cadence starts typing
-    showTyping(messages[3]);
-    await sleep(2000);                 // Cadence typing indicator
-    showText(messages[3]);
+    for (const step of sequence) {
+      await sleep(step.wait);
+      const shouldStick = isNearBottom(); // read scroll position BEFORE mounting new content
+      if (step.hide) unmount(document.getElementById(step.hide));
+      reveal(document.getElementById(step.id));
+      if (shouldStick) scrollToBottom();
+    }
   }
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    renderFinalState();
+    showAll();
   } else {
-    const proofObs = new IntersectionObserver((entries, observer) => {
+    const obs = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           runSequence();
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.4 });
-    proofObs.observe(card);
+    }, { threshold: 0.35 });
+    obs.observe(shell);
   }
 })();
 

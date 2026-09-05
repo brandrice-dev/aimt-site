@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════
    AIMT Supporting Pages — shared primitives
    ---------------------------------------------------------------
-   Reusable, supporting-page-only components: public nav, public
-   footer, legal/utility header, CTA variants, eyebrow, section
-   container, form baseline, product-proof frame, reduced motion.
+   Reusable, supporting-page-only components: public footer, CTA
+   variants, eyebrow, section container, form baseline, product-proof
+   frame, reduced motion. The public nav lives in the separate
+   assets/css/aimt-public-nav.css instead (one canonical header
+   component, not bundled in here).
 
    Consumed by: index.html, courses.html, terms.html, privacy.html,
    refunds.html, verify.html, and the public #landingPage surface of
@@ -18,82 +20,10 @@
    file first.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ---------- Public nav ---------- */
-.aimt-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 200;
-  height: var(--aimt-nav-height, 56px);
-  background: rgba(26,24,20,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: var(--aimt-border-hairline, 0.5px) solid var(--aimt-border-default, rgba(255,255,255,0.07));
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  gap: 12px;
-}
-.aimt-nav-mark { width: 28px; height: 28px; color: rgba(255,255,255,0.75); flex-shrink: 0; text-decoration: none; display: flex; }
-.aimt-nav-mark svg { width: 28px; height: 28px; }
-.aimt-nav-wordmark { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
-.aimt-nav-name { font-family: var(--aimt-font-mont); font-size: 0.68rem; letter-spacing: 0.38em; text-transform: uppercase; font-weight: 700; color: #fff; line-height: 1; }
-.aimt-nav-sub { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.3); line-height: 1; }
-
-.aimt-nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.aimt-nav-links { display: flex; align-items: center; gap: 1.5rem; margin-right: 0.5rem; }
-.aimt-nav-link { font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 400; color: rgba(255,255,255,0.56); text-decoration: none; transition: color 0.2s ease; white-space: nowrap; }
-.aimt-nav-link:hover, .aimt-nav-link:focus-visible { color: #fff; }
-.aimt-nav-sep { width: 0.5px; height: 18px; background: rgba(255,255,255,0.12); margin: 0 0.25rem; flex-shrink: 0; }
-
-.aimt-nav-hamburger {
-  display: none;
-  width: 44px; height: 44px;
-  flex-shrink: 0;
-  border: none; background: none; cursor: pointer;
-  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-}
-.aimt-nav-hamburger-line { width: 18px; height: 1px; background: rgba(255,255,255,0.75); transition: transform 0.2s ease, opacity 0.2s ease; }
-.aimt-nav-hamburger[aria-expanded="true"] .aimt-nav-hamburger-line:nth-child(1) { transform: translateY(5px) rotate(45deg); }
-.aimt-nav-hamburger[aria-expanded="true"] .aimt-nav-hamburger-line:nth-child(2) { opacity: 0; }
-.aimt-nav-hamburger[aria-expanded="true"] .aimt-nav-hamburger-line:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-
-.aimt-nav-mobile-menu {
-  position: fixed;
-  top: var(--aimt-nav-height, 56px); left: 0; right: 0;
-  z-index: 199;
-  background: rgba(20,18,15,0.98);
-  backdrop-filter: blur(20px);
-  border-bottom: var(--aimt-border-hairline, 0.5px) solid var(--aimt-border-default, rgba(255,255,255,0.07));
-  display: flex; flex-direction: column;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease;
-}
-.aimt-nav-mobile-menu.is-open { max-height: 80vh; overflow-y: auto; }
-.aimt-nav-mobile-link {
-  font-family: var(--aimt-font-sans);
-  font-size: 0.92rem;
-  color: rgba(255,255,255,0.72);
-  text-decoration: none;
-  padding: 0.95rem 1.5rem;
-  min-height: 44px;
-  display: flex; align-items: center;
-  border-bottom: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.05);
-}
-.aimt-nav-mobile-link:last-child { border-bottom: none; }
-.aimt-nav-mobile-link:hover, .aimt-nav-mobile-link:focus-visible { color: #fff; }
-
-@media (max-width: 860px) {
-  .aimt-nav-links { display: none; }
-  .aimt-nav-sep { display: none; }
-  .aimt-nav-hamburger { display: flex; }
-  .aimt-nav-right .aimt-cta-nav,
-  .aimt-nav-right .aimt-cta { display: none; }
-}
-@media (max-width: 560px) {
-  .aimt-nav { padding: 0 1rem; }
-  .aimt-nav-sub { display: none; }
-}
+/* ---------- Public nav ----------
+   Moved to the shared assets/css/aimt-public-nav.css (Owner Correction
+   Pass — "one AIMT nav" system fix). Every page that used to define its
+   header here now renders .aimt-public-nav instead. */
 
 /* ---------- CTA buttons ---------- */
 .aimt-cta {
@@ -120,20 +50,6 @@
 .aimt-cta-ghost:hover, .aimt-cta-ghost:focus-visible { border-color: rgba(255,255,255,0.3); color: #fff; }
 .aimt-cta-ghost-light { background: transparent; border: 0.5px solid rgba(38,38,38,0.22); color: #262626; }
 .aimt-cta-ghost-light:hover, .aimt-cta-ghost-light:focus-visible { border-color: rgba(38,38,38,0.4); }
-.aimt-cta-nav {
-  font-family: var(--aimt-font-sans);
-  font-size: 0.74rem;
-  font-weight: 500;
-  min-height: 36px;
-  padding: 0 1rem;
-  border-radius: var(--aimt-radius-pill, 980px);
-  text-decoration: none;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  transition: background 0.2s ease;
-}
-.aimt-cta-nav:hover, .aimt-cta-nav:focus-visible { background: rgba(255,255,255,0.16); }
 
 /* ---------- Eyebrow ---------- */
 .aimt-sp-eyebrow {
@@ -172,21 +88,11 @@
 }
 
 /* ---------- Legal / utility page template ---------- */
+/* Header moved to the shared assets/css/aimt-public-nav.css (Owner
+   Correction Pass — "one AIMT nav" system fix): every legal/utility page
+   now renders .aimt-public-nav.aimt-public-nav--sticky instead of this
+   file owning its own header rules. */
 .aimt-legal-body { background: #1a1814; color: rgba(255,255,255,0.95); font-family: var(--aimt-font-sans); font-weight: 300; }
-.aimt-legal-header {
-  position: sticky; top: 0; z-index: 50;
-  height: var(--aimt-nav-height, 56px);
-  display: flex; align-items: center; gap: 1.5rem;
-  padding: 0 1.5rem;
-  background: rgba(26,24,20,0.92);
-  backdrop-filter: blur(20px);
-  border-bottom: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.07);
-}
-.aimt-legal-header-brand { font-family: var(--aimt-font-mont); font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; font-weight: 700; color: rgba(255,255,255,0.8); text-decoration: none; }
-.aimt-legal-header-links { margin-left: auto; display: flex; gap: 1.5rem; }
-.aimt-legal-header-links a { font-family: var(--aimt-font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.5); text-decoration: none; }
-.aimt-legal-header-links a:hover, .aimt-legal-header-links a:focus-visible { color: #fff; }
-@media (max-width: 560px) { .aimt-legal-header-links { gap: 1rem; } .aimt-legal-header-links a:not(:last-child) { display: none; } }
 
 .aimt-legal-wrap { max-width: 1100px; margin: 0 auto; padding: 3.5rem 1.5rem 5rem; display: grid; grid-template-columns: 200px minmax(0,760px); gap: 3rem; }
 .aimt-legal-toc { position: sticky; top: calc(var(--aimt-nav-height, 56px) + 2rem); align-self: start; }
@@ -301,10 +207,10 @@ button:focus-visible {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .aimt-nav-mobile-menu,
-  .aimt-nav-hamburger-line,
+  .aimt-public-nav-mobile-menu,
+  .aimt-public-nav-hamburger-line,
   .aimt-cta,
-  .aimt-nav-link,
+  .aimt-public-nav-link,
   .aimt-footer-col a {
     transition: none !important;
   }

@@ -11,304 +11,518 @@
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/aimt-brand.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-primary); color: white; min-height: 100dvh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: calc(var(--aimt-nav-height) + 1rem); }
 
-/* ── Hero ── */
-.cat-hero-band { position: relative; overflow: hidden; }
-.cat-hero-band::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(circle at 15% 0%, rgba(163,150,141,0.08), transparent 42%);
-  pointer-events: none;
+/* ── Hero ──
+   Desktop: full-bleed background photo, band height clamped to ~68vh so the
+   catalog begins on the same first screen. Mobile: NOT an overlay — the band
+   is clamped to just the photo's own height (--mobile-hero-photo-h) and the
+   copy's margin-top matches it via inherited custom property, so text always
+   renders below the photo on the plain page background. This guarantees text
+   never sits over her face, independent of crop tuning. */
+.cat-hero-band {
+  position: relative;
+  min-height: clamp(520px, 68vh, 760px);
+  padding-top: var(--aimt-nav-height);
+  display: flex;
+  align-items: center;
+  background-image:
+    linear-gradient(92deg, rgba(18,15,12,0.96) 0%, rgba(18,15,12,0.88) 26%, rgba(18,15,12,0.56) 46%, rgba(18,15,12,0.18) 64%, rgba(18,15,12,0) 78%),
+    url('assets/programs-hero-desktop.jpg');
+  background-size: cover;
+  background-position: right 44%;
+  background-repeat: no-repeat;
 }
-.cat-hero { position: relative; padding: calc(var(--aimt-nav-height) + 6.5rem) 2rem 4rem; max-width: 1100px; margin: 0 auto; }
-.cat-hero-copy { max-width: 680px; }
-.cat-hero h1 { font-family: var(--aimt-font-mont); font-size: clamp(2.3rem, 5vw, 3.6rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; text-transform: uppercase; color: white; margin: 1rem 0 1.5rem; }
-.cat-hero-lead { font-family: var(--aimt-font-sans); font-size: 1rem; font-weight: 300; color: rgba(255,255,255,0.54); line-height: 1.8; max-width: 62ch; margin-bottom: 0.75rem; }
-.cat-hero-support { font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.06em; color: rgba(163,150,141,0.6); margin-bottom: 2rem; }
+.cat-hero { position: relative; width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cat-hero-copy { max-width: 540px; }
+.cat-hero h1 { font-family: var(--aimt-font-mont); font-size: clamp(2.1rem, 4.6vw, 3.15rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.06; text-transform: uppercase; color: white; margin: 0.65rem 0 0.85rem; }
+.cat-hero-lead { font-family: var(--aimt-font-sans); font-size: 0.95rem; font-weight: 300; color: rgba(255,255,255,0.68); line-height: 1.68; max-width: 46ch; margin-bottom: 1.4rem; }
 .cat-hero-ctas { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
-.cat-hero-secondary { font-family: var(--aimt-font-sans); font-size: 0.82rem; color: rgba(255,255,255,0.5); text-decoration: none; }
+.cat-hero-secondary { font-family: var(--aimt-font-sans); font-size: 0.82rem; color: rgba(255,255,255,0.62); text-decoration: none; }
 .cat-hero-secondary:hover { color: white; }
-.page-status { display: none; margin-top: 1.75rem; max-width: 640px; border: 0.5px solid rgba(163,150,141,0.24); background: rgba(163,150,141,0.08); border-radius: 16px; padding: 0.95rem 1rem; font-size: 0.84rem; line-height: 1.68; color: rgba(255,255,255,0.76); }
+.page-status { display: none; margin-top: 1.4rem; max-width: 480px; border: 0.5px solid rgba(163,150,141,0.28); background: rgba(20,17,13,0.72); backdrop-filter: blur(6px); border-radius: 16px; padding: 0.95rem 1rem; font-size: 0.84rem; line-height: 1.68; color: rgba(255,255,255,0.82); }
 
-/* ── Principles band ── */
-.principles { background: rgba(255,255,255,0.03); border-top: 0.5px solid rgba(255,255,255,0.07); border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 4.5rem 2rem; }
-.principles-inner { max-width: 1100px; margin: 0 auto; }
-.principles-head { margin-bottom: 2.75rem; }
-.principles-head h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600; letter-spacing: -0.02em; color: white; margin-top: 0.75rem; max-width: 20ch; }
-.principles-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-.principle-item { padding: 0 2.5rem 0 0; border-right: 0.5px solid rgba(255,255,255,0.07); }
-.principle-item:last-child { border-right: none; padding-right: 0; padding-left: 2.5rem; }
-.principle-item:nth-child(2) { padding-left: 2.5rem; }
-.principle-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(163,150,141,0.55); margin-bottom: 1rem; display: block; }
-.principle-title { font-family: var(--aimt-font-serif); font-size: 1.08rem; font-style: italic; font-weight: 400; color: white; line-height: 1.42; margin-bottom: 0.85rem; }
-.principle-body { font-family: var(--aimt-font-sans); font-size: 0.82rem; font-weight: 300; color: rgba(255,255,255,0.56); line-height: 1.78; max-width: 34ch; }
+@media (max-width: 980px) {
+  .cat-hero-band { background-position: 68% 44%; }
+}
+@media (max-width: 700px) {
+  .cat-hero-band {
+    /* padding-top (not the child's margin-top) carries the photo height, so
+       it can never collapse through and silently push the whole band down.
+       The photo itself lives on ::before, sized to exactly this height —
+       a background-image on the band itself would "cover" against the
+       band's FULL height (photo zone + all the copy below it), scaling
+       far too tight and zooming into just her face. */
+    --mobile-hero-photo-h: clamp(300px, 44vh, 380px);
+    height: auto;
+    min-height: 0;
+    padding-top: var(--mobile-hero-photo-h);
+    display: block;
+    background: none;
+  }
+  /* TODO(owner): swap in assets/programs-hero-mobile.jpg once supplied — this is a controlled crop of the desktop asset in the meantime. */
+  .cat-hero-band::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: var(--mobile-hero-photo-h);
+    background-image:
+      linear-gradient(180deg, rgba(15,13,10,0) 55%, rgba(15,13,10,0.55) 85%, rgba(15,13,10,0.92) 100%),
+      url('assets/programs-hero-desktop.jpg');
+    background-size: cover;
+    background-position: 68% center;
+    background-repeat: no-repeat;
+  }
+  .cat-hero { position: relative; z-index: 1; padding: 1.5rem 1.25rem 2rem; }
+  .cat-hero-copy { max-width: none; }
+  .cat-hero-lead { max-width: none; margin-bottom: 1.15rem; }
+}
 
-/* ── Live flagship ── */
-.flagship-wrap { background: #faf8f5; }
-.flagship { max-width: 1100px; margin: 0 auto; padding: 5.5rem 1.5rem; display: grid; grid-template-columns: 55% 1fr; gap: 3.5rem; align-items: center; }
-.flagship-media { border-radius: var(--aimt-radius-panel); overflow: hidden; border: 0.5px solid rgba(0,0,0,0.08); box-shadow: 0 20px 50px rgba(0,0,0,0.16); }
-.flagship-media img { display: block; width: 100%; height: auto; }
-.flagship-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; margin-bottom: 1rem; display: block; }
-.flagship h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.9rem, 3.4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; color: #262626; margin-bottom: 0.75rem; line-height: 1.02; }
-.flagship-subhead { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1.05rem; color: #4d403a; margin-bottom: 1.1rem; line-height: 1.45; }
-.flagship-body { font-family: var(--aimt-font-sans); font-size: 0.88rem; font-weight: 300; color: #7a6e66; line-height: 1.78; margin-bottom: 1.5rem; max-width: 48ch; }
-.flagship-proof { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.75rem; }
-.flagship-proof span { font-family: var(--aimt-font-sans); font-size: 0.68rem; color: #4d403a; background: rgba(38,38,38,0.05); border: 0.5px solid rgba(38,38,38,0.1); border-radius: 980px; padding: 0.3rem 0.7rem; }
-.flagship-price-row { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1.5rem; }
-.flagship-price { font-family: var(--aimt-font-mont); font-size: 1.9rem; font-weight: 700; color: #262626; letter-spacing: -0.02em; }
+/* ── Programs intro ── */
+.programs-intro { background: var(--aimt-color-bg-primary); padding: 5rem 2rem 0; }
+.programs-intro-inner { max-width: 1100px; margin: 0 auto; }
+.programs-intro h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.75rem, 3.2vw, 2.35rem); font-weight: 600; letter-spacing: -0.02em; color: white; margin: 0.85rem 0 0.9rem; max-width: 22ch; }
+.programs-intro p { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.75; max-width: 56ch; }
+
+/* ── Flagship (Available Now) ── */
+.flagship-wrap { background: #faf8f5; margin-top: 3rem; }
+.flagship { max-width: 1100px; margin: 0 auto; padding: 5rem 2rem; display: grid; grid-template-columns: minmax(0,1.15fr) minmax(360px, 440px); gap: 2.75rem; align-items: stretch; }
+.flagship-media { position: relative; min-height: 480px; border-radius: var(--aimt-radius-lg); overflow: hidden; box-shadow: 0 26px 64px rgba(0,0,0,0.22); }
+.flagship-media img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.flagship-card { background: #fff; border-radius: var(--aimt-radius-lg); border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 28px 64px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.05); padding: clamp(2rem, 3vw, 2.75rem); display: flex; flex-direction: column; gap: 1.4rem; }
+.flagship-card-head { display: flex; flex-direction: column; }
+.flagship-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.9rem; display: block; }
+.flagship-card-head h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.7rem, 2.6vw, 2.15rem); font-weight: 600; letter-spacing: -0.03em; color: #262626; margin-bottom: 0.65rem; line-height: 1.05; }
+.flagship-subhead { font-family: var(--aimt-font-serif); font-style: italic; font-size: 0.98rem; color: #4d403a; line-height: 1.45; }
+.flagship-body { font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 300; color: #7a6e66; line-height: 1.76; }
+.flagship-meta-row { display: flex; flex-wrap: wrap; gap: 1.4rem; padding: 1.1rem 0; border-top: 0.5px solid rgba(38,38,38,0.08); border-bottom: 0.5px solid rgba(38,38,38,0.08); }
+.flagship-meta-item span { display: block; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.3rem; }
+.flagship-meta-item strong { font-family: var(--aimt-font-sans); font-size: 0.82rem; font-weight: 500; color: #262626; }
+.flagship-proof { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.flagship-proof span { font-family: var(--aimt-font-sans); font-size: 0.66rem; color: #4d403a; background: rgba(38,38,38,0.05); border: 0.5px solid rgba(38,38,38,0.1); border-radius: 980px; padding: 0.3rem 0.68rem; }
+.flagship-card-foot { display: flex; flex-direction: column; gap: 1rem; padding-top: 0.25rem; }
+.flagship-price-row { display: flex; align-items: baseline; gap: 0.6rem; }
+.flagship-price { font-family: var(--aimt-font-mont); font-size: 1.8rem; font-weight: 700; color: #262626; letter-spacing: -0.02em; }
 .flagship-price-label { font-family: var(--aimt-font-sans); font-size: 0.76rem; color: #a3968d; }
 .flagship-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
 .flagship-micro { font-family: var(--aimt-font-sans); font-size: 0.76rem; color: #a3968d; text-decoration: none; }
 .flagship-micro:hover { color: #262626; }
-.flagship-risk { font-family: var(--aimt-font-sans); font-size: 0.74rem; color: #a3968d; margin-top: 0.85rem; }
+.flagship-risk { font-family: var(--aimt-font-sans); font-size: 0.74rem; color: #a3968d; }
 .flagship-risk a { color: inherit; }
 
-/* ── Proof strip ── */
-.proof-strip-wrap { background: #faf8f5; border-top: 0.5px solid rgba(0,0,0,0.06); }
-.proof-strip { max-width: 1100px; margin: 0 auto; padding: 3.5rem 1.5rem 5.5rem; }
-.proof-strip-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; margin-bottom: 2rem; display: block; }
-.proof-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-.proof-item-media { border-radius: var(--aimt-radius-media); overflow: hidden; border: 0.5px solid rgba(0,0,0,0.08); box-shadow: 0 10px 28px rgba(0,0,0,0.12); aspect-ratio: 4/3; background: linear-gradient(135deg, #221f1b 0%, #1a1714 100%); }
-.proof-item-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.proof-item-media.pending { display: flex; align-items: center; justify-content: center; }
-.proof-item-media.pending span { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.3); }
-.proof-item-title { font-family: var(--aimt-font-mont); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: #262626; margin: 0.9rem 0 0.4rem; }
-.proof-item-body { font-family: var(--aimt-font-sans); font-size: 0.76rem; font-weight: 300; color: #7a6e66; line-height: 1.65; }
+/* ── Coming Next ── */
+.upcoming-wrap { background: var(--aimt-color-bg-primary); padding: 4.5rem 2rem 5rem; }
+.upcoming-card { max-width: 1100px; margin: 0 auto; position: relative; overflow: hidden; border-radius: var(--aimt-radius-panel); border: 0.5px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, rgba(163,150,141,0.07), rgba(255,255,255,0.015)); padding: 2.75rem clamp(1.5rem, 4vw, 3rem); }
+.upcoming-mark { position: absolute; top: -54px; right: -54px; width: 230px; height: 230px; opacity: 0.055; pointer-events: none; color: #a3968d; }
+.upcoming-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(163,150,141,0.65); margin-bottom: 1rem; display: block; }
+.upcoming-card h3 { font-family: var(--aimt-font-mont); font-size: clamp(1.3rem, 2.4vw, 1.7rem); font-weight: 700; letter-spacing: -0.015em; text-transform: uppercase; color: rgba(255,255,255,0.94); margin-bottom: 0.9rem; max-width: 20ch; position: relative; }
+.upcoming-card p { font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.78; max-width: 54ch; margin-bottom: 1.1rem; position: relative; }
+.upcoming-meta { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); position: relative; }
 
-/* ── Category / status ── */
-.status-band { background: var(--aimt-color-bg-primary); padding: 5.5rem 2rem; text-align: center; }
-.status-inner { max-width: 720px; margin: 0 auto; }
-.status-band h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 600; letter-spacing: -0.025em; color: white; margin: 1rem 0 1.25rem; }
-.status-body { font-family: var(--aimt-font-sans); font-size: 0.92rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.8; margin-bottom: 1.75rem; }
-.status-identity { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1.05rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem; }
+/* ── The AIMT Learning System ── */
+.learning-wrap { background: var(--aimt-color-bg-primary); border-top: 0.5px solid rgba(255,255,255,0.07); padding: 5rem 2rem; }
+.learning-inner { max-width: 1100px; margin: 0 auto; }
+.learning-head { max-width: 680px; margin-bottom: 2.5rem; }
+.learning-head h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.8rem, 3.8vw, 2.6rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; text-transform: uppercase; color: white; margin: 0.85rem 0 0.9rem; }
+.learning-head p { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 300; color: rgba(255,255,255,0.52); line-height: 1.8; max-width: 62ch; }
+.pillars-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; margin: 2.5rem 0 1.75rem; }
+.pillar { background: #1e1c18; padding: 1.75rem 1.4rem; }
+.pillar-num { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.14em; color: rgba(163,150,141,0.55); margin-bottom: 0.9rem; display: block; }
+.pillar-word { font-family: var(--aimt-font-mont); font-size: 1.02rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: white; margin-bottom: 0.5rem; }
+.pillar-action { font-family: var(--aimt-font-serif); font-style: italic; font-size: 0.84rem; color: rgba(255,255,255,0.62); margin-bottom: 0.75rem; }
+.pillar-body { font-family: var(--aimt-font-sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.44); line-height: 1.62; }
+.learning-ambition { font-family: var(--aimt-font-serif); font-style: italic; font-size: 0.94rem; color: rgba(255,255,255,0.58); max-width: 58ch; }
 
-/* ── Future catalog ── */
-.future-wrap { background: rgba(163,150,141,0.05); border-top: 0.5px solid rgba(163,150,141,0.12); }
-.future { max-width: 1100px; margin: 0 auto; padding: 5.5rem 1.5rem; }
-.future-head { max-width: 620px; margin-bottom: 3rem; }
-.future-head h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600; letter-spacing: -0.02em; color: white; margin: 1rem 0 1rem; }
-.future-head p { font-family: var(--aimt-font-sans); font-size: 0.88rem; font-weight: 300; color: rgba(255,255,255,0.46); line-height: 1.8; }
-.future-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
-.future-item { background: #1e1c18; padding: 1.75rem; }
-.future-item-status { font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.24); margin-bottom: 0.75rem; display: block; }
-.future-item-title { font-family: var(--aimt-font-mont); font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.72); margin-bottom: 0.6rem; }
-.future-item-body { font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 300; color: rgba(255,255,255,0.34); line-height: 1.7; }
+.ai-block { margin-top: 3rem; padding-top: 3rem; border-top: 0.5px solid rgba(255,255,255,0.07); display: grid; grid-template-columns: minmax(0,0.85fr) minmax(0,1.4fr); gap: 2.5rem; align-items: start; }
+.ai-block-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(163,150,141,0.55); margin-bottom: 0.9rem; display: block; }
+.ai-block h3 { font-family: var(--aimt-font-mont); font-size: clamp(1.25rem, 2.3vw, 1.6rem); font-weight: 700; letter-spacing: -0.015em; text-transform: uppercase; color: white; line-height: 1.2; }
+.ai-block p { font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.8; max-width: 62ch; }
+.ai-block p + p { margin-top: 0.9rem; }
 
-/* ── Institute close ── */
-.close-band { background: var(--aimt-color-bg-primary); border-top: 0.5px solid rgba(255,255,255,0.07); padding: 5.5rem 2rem; text-align: center; }
+/* ── Inside AIMT ── */
+.inside-wrap { background: #faf8f5; border-top: 0.5px solid rgba(0,0,0,0.06); padding: 5rem 2rem; }
+.inside-inner { max-width: 1100px; margin: 0 auto; }
+.inside-head { max-width: 620px; margin-bottom: 2.75rem; }
+.inside-head .aimt-sp-eyebrow { color: #a3968d; }
+.inside-head h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.75rem, 3.2vw, 2.35rem); font-weight: 600; letter-spacing: -0.02em; color: #262626; margin: 0.85rem 0 0.9rem; }
+.inside-head p { font-family: var(--aimt-font-sans); font-size: 0.86rem; font-weight: 300; color: #7a6e66; line-height: 1.72; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.75rem 1.5rem; }
+.gallery-trigger { display: block; width: 100%; border: none; padding: 0; background: none; cursor: zoom-in; border-radius: var(--aimt-radius-media); overflow: hidden; border: 0.5px solid rgba(0,0,0,0.08); box-shadow: 0 10px 28px rgba(0,0,0,0.12); aspect-ratio: 4/3; }
+.gallery-trigger img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; }
+.gallery-trigger:hover img, .gallery-trigger:focus-visible img { transform: scale(1.035); }
+.gallery-trigger:focus-visible { outline: 2px solid #a3968d; outline-offset: 2px; }
+.gallery-card-title { font-family: var(--aimt-font-mont); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: #262626; margin: 0.9rem 0 0.4rem; }
+.gallery-card-body { font-family: var(--aimt-font-sans); font-size: 0.76rem; font-weight: 300; color: #7a6e66; line-height: 1.62; }
+
+.gallery-lightbox { position: fixed; inset: 0; z-index: 500; background: rgba(10,9,7,0.96); display: none; overflow-y: auto; padding: 4.5rem 1.5rem 3rem; }
+.gallery-lightbox.is-open { display: flex; }
+.gallery-lightbox-inner { width: 100%; max-width: 760px; margin: auto; display: flex; flex-direction: column; align-items: center; }
+.gallery-lightbox-inner img { display: block; max-width: 100%; max-height: 66vh; width: auto; height: auto; border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+.gallery-lightbox-caption { width: 100%; margin-top: 1.5rem; text-align: left; border-top: 0.5px solid rgba(255,255,255,0.1); padding-top: 1.25rem; }
+.gallery-lightbox-caption-title { font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.85); margin-bottom: 0.6rem; }
+.gallery-lightbox-caption-body { font-family: var(--aimt-font-sans); font-size: 0.86rem; font-weight: 300; color: rgba(255,255,255,0.66); line-height: 1.72; max-width: 62ch; }
+.gallery-lightbox-caption-body p { margin-bottom: 0.9rem; }
+.gallery-lightbox-caption-body p:last-child { margin-bottom: 0; }
+.gallery-lightbox-caption-body strong { color: rgba(255,255,255,0.88); font-weight: 500; }
+.gallery-detail-list { list-style: none; margin: 0 0 0.9rem; padding: 0; display: grid; gap: 0.4rem; }
+.gallery-detail-list li { position: relative; padding-left: 1rem; }
+.gallery-detail-list li::before { content: '—'; position: absolute; left: 0; color: rgba(163,150,141,0.7); }
+.gallery-lightbox-close { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 501; width: 44px; height: 44px; border-radius: 50%; border: 0.5px solid rgba(255,255,255,0.2); background: rgba(20,17,13,0.7); backdrop-filter: blur(8px); color: white; font-size: 1.1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.gallery-lightbox-close:hover, .gallery-lightbox-close:focus-visible { background: rgba(255,255,255,0.16); }
+
+/* ── Compressed AIMT Model ── */
+.model-wrap { background: rgba(255,255,255,0.03); border-top: 0.5px solid rgba(255,255,255,0.07); border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 4rem 2rem; }
+.model-inner { max-width: 1100px; margin: 0 auto; }
+.model-lead { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.68); margin-bottom: 2rem; max-width: 44ch; }
+.model-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.model-item { padding: 0 2rem 0 0; border-right: 0.5px solid rgba(255,255,255,0.07); }
+.model-item:last-child { border-right: none; padding-right: 0; padding-left: 2rem; }
+.model-item:nth-child(2) { padding-left: 2rem; }
+.model-item-title { font-family: var(--aimt-font-mont); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem; }
+.model-item-body { font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 300; color: rgba(255,255,255,0.46); line-height: 1.62; }
+
+/* ── Final CTA ── */
+.close-band { background: var(--aimt-color-bg-primary); padding: 5rem 2rem; text-align: center; }
 .close-inner { max-width: 640px; margin: 0 auto; }
-.close-band h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 600; letter-spacing: -0.025em; color: white; margin: 1rem 0 1.25rem; }
+.close-band h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.75rem, 3.2vw, 2.35rem); font-weight: 600; letter-spacing: -0.02em; color: white; margin: 0.85rem 0 0.9rem; }
 .close-body { font-family: var(--aimt-font-sans); font-size: 0.92rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.8; margin-bottom: 2rem; }
 .close-ctas { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; }
 .close-secondary { font-family: var(--aimt-font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.5); text-decoration: none; }
 .close-secondary:hover { color: white; }
 
 @media (max-width: 860px) {
-  .flagship { grid-template-columns: 1fr; gap: 2rem; }
-  .principles-grid { grid-template-columns: 1fr; }
-  .principle-item { border-right: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 1.75rem 0 !important; }
-  .principle-item:first-child { padding-top: 0 !important; }
-  .principle-item:last-child { border-bottom: none; }
-  .proof-grid { grid-template-columns: repeat(2, 1fr); }
-  .future-grid { grid-template-columns: 1fr; }
+  .flagship { grid-template-columns: 1fr; gap: 1.75rem; }
+  .flagship-media { min-height: 0; aspect-ratio: 4 / 3; }
+  .flagship-media img { object-position: 50% 22%; }
+  .pillars-grid { grid-template-columns: repeat(2, 1fr); }
+  .ai-block { grid-template-columns: 1fr; gap: 1.25rem; }
+  .model-grid { grid-template-columns: 1fr; }
+  .model-item { border-right: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 1.5rem 0 !important; }
+  .model-item:first-child { padding-top: 0 !important; }
+  .model-item:last-child { border-bottom: none; }
+}
+@media (max-width: 720px) {
+  .gallery-grid { grid-template-columns: 1fr; gap: 2rem; }
 }
 @media (max-width: 700px) {
-  .cat-hero { padding-top: calc(var(--aimt-nav-height) + 3.5rem); padding-bottom: 3rem; }
-  .principles, .status-band, .close-band { padding: 3.5rem 1.25rem; }
-  .flagship, .proof-strip, .future { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .programs-intro, .learning-wrap, .close-band { padding: 2.75rem 1.25rem; }
+  .programs-intro { padding-bottom: 0; }
+  .flagship-wrap { margin-top: 1.5rem; }
+  .flagship, .inside-wrap, .upcoming-wrap { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .flagship { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+  .flagship-card { padding: 1.5rem; gap: 1.1rem; }
+  .upcoming-wrap { padding-top: 2.25rem; padding-bottom: 2.75rem; }
+  .upcoming-card { padding: 1.75rem 1.25rem; }
+  .learning-head { margin-bottom: 1.75rem; }
+  .pillars-grid { grid-template-columns: 1fr; gap: 1px; margin: 1.75rem 0 1.5rem; }
+  .pillar { padding: 1.3rem 1.15rem; }
+  .ai-block { margin-top: 2rem; padding-top: 2rem; }
+  .inside-wrap { padding-top: 2.75rem; padding-bottom: 2.75rem; }
+  .inside-head { margin-bottom: 1.75rem; }
+  .model-wrap { padding: 2.5rem 1.25rem; }
+  .model-lead { margin-bottom: 1.5rem; }
+  .flagship-meta-row { gap: 1.1rem; }
+  .gallery-lightbox { padding: 3.75rem 1.25rem 2.25rem; }
+  .gallery-lightbox-inner img { max-height: 36vh; }
+  .gallery-lightbox-caption-body { font-size: 0.82rem; }
+  .gallery-lightbox-close { top: 0.85rem; right: 0.85rem; }
 }
 
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .gallery-trigger img { transition: none; } }
 </style>
 </head>
 <body>
 
-<nav class="aimt-nav">
-  <a href="index.html" class="aimt-nav-mark">
-    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
-      <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-      <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
-      <circle cx="22" cy="22" r="2" fill="currentColor"/>
-      <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
-      <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
-    </svg>
+<!-- ══ CANONICAL AIMT BRAND MARK ══
+     Single source of truth for the orbital circular mark + surrounding dots.
+     Every AIMT mark on this page (nav, footer, decorative reuse) renders via
+     <use href="#aimtOrbitalMark"> against this one definition — never a
+     re-drawn or simplified copy. When paired with the "AIMT" wordmark next
+     to it, this is the complete canonical public-facing lockup; reuse this
+     exact <symbol> + <use> pattern on future supporting pages instead of
+     recreating the mark inline. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+
+<!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css,
+     visual source of truth: index.html) ══ -->
+<nav class="aimt-public-nav aimt-public-nav--fixed">
+  <a href="index.html" class="aimt-public-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
   </a>
-  <a href="index.html" class="aimt-nav-wordmark">
-    <span class="aimt-nav-name">AIMT</span>
-    <span class="aimt-nav-sub">American Institute of Modern Trichology</span>
+  <a href="index.html" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
   </a>
-  <div class="aimt-nav-right">
-    <div class="aimt-nav-links">
-      <a href="#why-aimt" class="aimt-nav-link">Why AIMT</a>
-      <a href="#certifications" class="aimt-nav-link">Certifications</a>
-      <a href="student-access.html" class="aimt-nav-link">Student Access</a>
+  <div class="aimt-public-nav-right">
+    <div class="aimt-public-nav-links">
+      <a href="#programs" class="aimt-public-nav-link">Programs</a>
+      <a href="#learning-system" class="aimt-public-nav-link">Learning System</a>
+      <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
     </div>
-    <span class="aimt-nav-sep"></span>
-    <a href="headspa-mastery.html" class="aimt-cta aimt-cta-nav">Explore Head Spa Certification →</a>
-    <button type="button" class="aimt-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
-      <span class="aimt-nav-hamburger-line"></span><span class="aimt-nav-hamburger-line"></span><span class="aimt-nav-hamburger-line"></span>
+    <span class="aimt-public-nav-sep"></span>
+    <a href="headspa-mastery.html" class="aimt-public-nav-cta">Explore Head Spa Certification →</a>
+    <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+      <span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span>
     </button>
   </div>
 </nav>
-<div class="aimt-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
-  <a href="#why-aimt" class="aimt-nav-mobile-link">Why AIMT</a>
-  <a href="#certifications" class="aimt-nav-mobile-link">Certifications</a>
-  <a href="student-access.html" class="aimt-nav-mobile-link">Student Access</a>
-  <a href="headspa-mastery.html" class="aimt-nav-mobile-link">Explore Head Spa Certification →</a>
+<div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="#programs" class="aimt-public-nav-mobile-link">Programs</a>
+  <a href="#learning-system" class="aimt-public-nav-mobile-link">Learning System</a>
+  <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
+  <a href="headspa-mastery.html" class="aimt-public-nav-mobile-link">Explore Head Spa Certification →</a>
 </div>
 
+<!-- ══ HERO ══ -->
 <div class="cat-hero-band">
 <div class="cat-hero">
   <div class="cat-hero-copy">
     <span class="aimt-sp-eyebrow">AIMT Education</span>
     <h1>Education for the practitioner you are becoming.</h1>
-    <p class="cat-hero-lead">AIMT builds professional education around the decisions that matter after the lesson ends — what you notice, how you adapt, what you say, what you use, and how confidently you can apply what you learned.</p>
-    <p class="cat-hero-support">Serious curriculum. Modern learning. Competency-based credentials.</p>
+    <p class="cat-hero-lead">AIMT builds modern professional education for practitioners who want real depth — and a learning experience built for how they actually study, practice, and work.</p>
     <div class="cat-hero-ctas">
-      <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark">Explore Head Spa Certification →</a>
-      <a href="#why-aimt" class="cat-hero-secondary">See the AIMT Model ↓</a>
+      <a href="#programs" class="aimt-cta aimt-cta-primary-dark">See AIMT Programs ↓</a>
+      <a href="#learning-system" class="cat-hero-secondary">How AIMT Teaches ↓</a>
     </div>
     <div class="page-status" id="pageStatus">Checkout was canceled. Review the certification and resume enrollment whenever you're ready.</div>
   </div>
 </div>
 </div>
 
-<div class="principles" id="why-aimt">
-  <div class="principles-inner">
-    <div class="principles-head">
-      <span class="aimt-sp-eyebrow">The AIMT Model</span>
-      <h2>Not more content. Better preparation.</h2>
-    </div>
-    <div class="principles-grid">
-      <div class="principle-item">
-        <span class="principle-eyebrow">Built from practice</span>
-        <div class="principle-title">Education should survive contact with a real client, a real schedule, and a real business.</div>
-        <p class="principle-body">AIMT programs are designed around professional decisions, practical constraints, and the places where practitioners commonly lose confidence after the textbook answer runs out.</p>
-      </div>
-      <div class="principle-item">
-        <span class="principle-eyebrow">Built for modern learning</span>
-        <div class="principle-title">Information is only useful when you can move it into action.</div>
-        <p class="principle-body">AIMT uses structured interaction, product tools, and Cadence-supported learning where those mechanisms genuinely improve understanding — not as novelty.</p>
-      </div>
-      <div class="principle-item">
-        <span class="principle-eyebrow">Built around competency</span>
-        <div class="principle-title">A credential should represent more than attendance.</div>
-        <p class="principle-body">Where certification is offered, AIMT ties the credential to demonstrated learning and defined course requirements.</p>
-      </div>
-    </div>
+<!-- ══ AIMT PROGRAMS ══ -->
+<div class="programs-intro" id="programs">
+  <div class="programs-intro-inner">
+    <span class="aimt-sp-eyebrow">AIMT Programs</span>
+    <h2>What you can study — and what's coming next.</h2>
+    <p>One certification available today, built inside a catalog designed to grow. Every AIMT program will follow the same standard: real curriculum, modern learning, and a credential that means something.</p>
   </div>
 </div>
 
-<div class="flagship-wrap" id="certifications">
+<!-- Available Now -->
+<div class="flagship-wrap">
   <div class="flagship">
     <div class="flagship-media">
-      <img src="assets/images/marketing/head-spa-certification-course-ui.webp" alt="AIMT Head Spa Certification Course lesson interface" width="1600" height="1000" fetchpriority="high">
+      <img src="assets/images/marketing/head-spa-service-rinse.webp" alt="An AIMT-trained practitioner performing a head spa water-ring rinse on a client in a real treatment room" width="1054" height="1492" loading="lazy">
     </div>
-    <div>
-      <span class="flagship-eyebrow">Available Now · Certification 01</span>
-      <h2>Head Spa Certification Course</h2>
-      <p class="flagship-subhead">A complete practitioner education system for beauty professionals building or refining professional head spa services.</p>
-      <p class="flagship-body">Move beyond memorizing a ritual. Build the scalp-science foundation, assessment discipline, service execution, communication, safety judgment, pricing logic, sanitation systems, and modern-practice skills that support stronger real-world decisions.</p>
+    <div class="flagship-card">
+      <div class="flagship-card-head">
+        <span class="flagship-eyebrow">Available Now · Certification 01</span>
+        <h2>Head Spa Certification Course</h2>
+        <p class="flagship-subhead">A complete practitioner education system for beauty professionals building or refining professional head spa services.</p>
+      </div>
+      <p class="flagship-body">Move beyond memorizing a ritual. Build the scalp-science foundation, assessment discipline, service execution, communication, safety judgment, pricing logic, and sanitation systems that support stronger decisions with a real client in the chair. Certification isn't automatic — it's earned through a Final Certification Assessment that evaluates whether you can actually apply what you learned.</p>
+      <div class="flagship-meta-row">
+        <div class="flagship-meta-item"><span>Format</span><strong>Online · Self-Paced</strong></div>
+        <div class="flagship-meta-item"><span>Credential</span><strong>AIMT Certification, Earned</strong></div>
+        <div class="flagship-meta-item"><span>Access</span><strong>Lifetime</strong></div>
+      </div>
       <div class="flagship-proof">
         <span>Welcome Module + 12 numbered modules</span>
         <span>Cadence-guided learning</span>
         <span>Listen Mode</span>
-        <span>Full head spa service training</span>
         <span>AIMT Service Timer</span>
         <span>Practitioner resource library</span>
         <span>Final Certification Assessment</span>
         <span>Verifiable AIMT credential</span>
-        <span>Lifetime course access</span>
       </div>
-      <div class="flagship-price-row">
-        <span class="flagship-price">$597</span>
-        <span class="flagship-price-label">One-time tuition</span>
-      </div>
-      <div class="flagship-ctas">
-        <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-light">Explore Head Spa Certification →</a>
-        <a href="student-access.html" class="flagship-micro">Student Access →</a>
-      </div>
-      <div class="flagship-risk"><a href="refunds.html">Review Refund Policy</a></div>
-    </div>
-  </div>
-</div>
-
-<div class="proof-strip-wrap">
-  <div class="proof-strip">
-    <span class="proof-strip-eyebrow">More Than a Course Library</span>
-    <div class="proof-grid">
-      <div>
-        <div class="proof-item-media"><img src="assets/images/marketing/head-spa-certification-course-ui.webp" alt="AIMT Head Spa Certification Course lesson interface" loading="lazy"></div>
-        <div class="proof-item-title">The Course</div>
-        <p class="proof-item-body">Structured professional curriculum built to move from concept into application.</p>
-      </div>
-      <div>
-        <div class="proof-item-media"><img src="assets/images/marketing/cadence-conversation.webp" alt="Cadence learning conversation inside AIMT Head Spa Certification Course" loading="lazy"></div>
-        <div class="proof-item-title">Cadence</div>
-        <p class="proof-item-body">Ask, explain, reconsider, and demonstrate understanding inside the learning environment.</p>
-      </div>
-      <div>
-        <div class="proof-item-media"><img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step" loading="lazy"></div>
-        <div class="proof-item-title">Practitioner Tools</div>
-        <p class="proof-item-body">Use the Service Timer and course resources after the lesson ends.</p>
-      </div>
-      <div>
-        <div class="proof-item-media"><img src="assets/images/marketing/final-certification-assessment.webp" alt="AIMT Final Certification Assessment overview" loading="lazy"></div>
-        <div class="proof-item-title">Certification</div>
-        <p class="proof-item-body">Knowledge, applied cases, and professional conversation before the credential is issued.</p>
+      <div class="flagship-card-foot">
+        <div class="flagship-price-row">
+          <span class="flagship-price">$597</span>
+          <span class="flagship-price-label">One-time tuition</span>
+        </div>
+        <div class="flagship-ctas">
+          <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-light">Explore Head Spa Certification →</a>
+          <a href="student-access.html" class="flagship-micro">Student Access →</a>
+        </div>
+        <div class="flagship-risk"><a href="refunds.html">Review Refund Policy</a></div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="status-band">
-  <div class="status-inner">
-    <span class="aimt-sp-eyebrow">Why AIMT Feels Different</span>
-    <h2>A modern service deserves modern training.</h2>
-    <p class="status-body">Professional education should not make you choose between depth and usability. AIMT is being built for practitioners who want both: serious subject matter and a learning experience designed for the way professionals work now.</p>
-    <p class="status-identity">For practitioners who care how they are trained.</p>
-    <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark">See Head Spa Certification →</a>
+<!-- Coming Next -->
+<div class="upcoming-wrap">
+  <div class="upcoming-card">
+    <svg class="upcoming-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="#aimtOrbitalMark"/></svg>
+    <span class="upcoming-eyebrow">Coming Next · Advanced Training</span>
+    <h3>Advanced Head Spa Training</h3>
+    <p>A future hands-on, advanced training experience for practitioners who want to go further after certification. Format, timing, and requirements are still being finalized — the Head Spa Certification Course remains the place to start.</p>
+    <span class="upcoming-meta">Details to be announced</span>
   </div>
 </div>
 
-<div class="future-wrap">
-  <div class="future">
-    <div class="future-head">
-      <span class="aimt-sp-eyebrow">The AIMT Catalog Is Growing</span>
-      <h2>One institute. A deeper professional path.</h2>
-      <p>Head Spa Certification Course is the first major program in a growing AIMT education ecosystem. Future programs will let practitioners deepen specific skills without rebuilding their education from zero.</p>
+<!-- ══ THE AIMT LEARNING SYSTEM ══ -->
+<div class="learning-wrap" id="learning-system">
+  <div class="learning-inner">
+    <div class="learning-head">
+      <span class="aimt-sp-eyebrow">The AIMT Learning System</span>
+      <h2>From information to usable judgment.</h2>
+      <p>Traditional online education often stops at content delivery. AIMT is designed around what happens next: understanding a concept, reasoning through it, demonstrating it, and being able to use it when a real client is in front of you.</p>
     </div>
-    <div class="future-grid">
-      <div class="future-item">
-        <span class="future-item-status">In Development</span>
-        <div class="future-item-title">Microscopy &amp; Scalp Analysis</div>
-        <p class="future-item-body">Deeper visual assessment, documentation, pattern recognition, and client-facing communication for practitioners who want to strengthen what they see and how they respond.</p>
+    <div class="pillars-grid">
+      <div class="pillar">
+        <span class="pillar-num">01 — Learn</span>
+        <div class="pillar-word">Learn</div>
+        <div class="pillar-action">Take in the concept.</div>
+        <p class="pillar-body">Structured instruction, visuals, video, and Listen Mode built for how professionals actually study.</p>
       </div>
-      <div class="future-item">
-        <span class="future-item-status">In Development</span>
-        <div class="future-item-title">Scalp Science Foundations</div>
-        <p class="future-item-body">A focused anatomy, biology, and scalp-science foundation for practitioners building deeper technical knowledge.</p>
+      <div class="pillar">
+        <span class="pillar-num">02 — Reason</span>
+        <div class="pillar-word">Reason</div>
+        <div class="pillar-action">Work through it.</div>
+        <p class="pillar-body">Ask Cadence, question your own thinking, reframe it, and work through uncertainty before you're tested on it.</p>
       </div>
-      <div class="future-item">
-        <span class="future-item-status">In Development</span>
-        <div class="future-item-title">Price Like a Pro</div>
-        <p class="future-item-body">Service economics, pricing logic, menu architecture, and value communication for beauty professionals.</p>
+      <div class="pillar">
+        <span class="pillar-num">03 — Demonstrate</span>
+        <div class="pillar-word">Demonstrate</div>
+        <div class="pillar-action">Show you understand it.</div>
+        <p class="pillar-body">Applied checkpoints and a competency-focused Final Certification Assessment, not just a completed video log.</p>
+      </div>
+      <div class="pillar">
+        <span class="pillar-num">04 — Apply</span>
+        <div class="pillar-word">Apply</div>
+        <div class="pillar-action">Use it in practice.</div>
+        <p class="pillar-body">The Service Timer and AIMT's practitioner resources carry the training into real treatment-room execution.</p>
+      </div>
+    </div>
+    <p class="learning-ambition">AIMT continually looks for a clearer, more efficient path from concept to usable skill.</p>
+
+    <div class="ai-block">
+      <div>
+        <span class="ai-block-eyebrow">Modern Practice</span>
+        <h3>Built for the profession that exists now.</h3>
+      </div>
+      <div>
+        <p>Clients increasingly arrive with AI-generated opinions about their scalp, their hair, or the service they think they need. AIMT teaches practitioners how to use AI thoughtfully as a professional tool, how to hold onto their own clinical judgment, and how to handle a conversation when a client's research and a practitioner's assessment don't agree.</p>
+        <p>Not by avoiding AI, and not by treating it as a threat. AIMT prepares practitioners for the environment they are actually working in — one where professional judgment still has to lead.</p>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ══ INSIDE AIMT ══ -->
+<div class="inside-wrap">
+  <div class="inside-inner">
+    <div class="inside-head">
+      <span class="aimt-sp-eyebrow">Inside AIMT</span>
+      <h2>What the learning environment actually looks like.</h2>
+      <p>Real product. Real screens throughout — nothing here is a mockup. Select any image to view it full size.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-card">
+        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/course-module-4-editorial.webp" data-alt="A real AIMT course module, Microscopy &amp; Scalp Assessment, open on a laptop" data-title="The Course">
+          <img src="assets/images/marketing/course-module-4-editorial.webp" alt="A real AIMT course module, Microscopy &amp; Scalp Assessment, open on a laptop" width="1448" height="1086" loading="lazy">
+        </button>
+        <div class="gallery-card-title">The Course</div>
+        <p class="gallery-card-body">Structured instruction is only the beginning.</p>
+        <template class="gallery-detail-template">
+          <p><strong>Structured instruction is only the beginning.</strong> The Head Spa Certification Course is organized as a Welcome Module plus 12 numbered modules. The curriculum moves through assessment, service execution, communication, business decisions, sanitation, modern practice tools, and final certification assessment.</p>
+          <p>AIMT is deliberately designed so progress is more than passive page consumption. Required checkpoints are built into the learning sequence, and students advance through the course in order rather than simply jumping ahead.</p>
+          <p>Listen Mode provides another way to move through supported course material without replacing the visual, interactive, or assessment portions of the lesson.</p>
+        </template>
+      </div>
+      <div class="gallery-card">
+        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/cadence-conversation.webp" data-alt="The real Cadence chat panel, open inside a course module and answering a student's question" data-title="Cadence">
+          <img src="assets/images/marketing/cadence-conversation.webp" alt="The real Cadence chat panel, open inside a course module and answering a student's question" width="760" height="540" loading="lazy">
+        </button>
+        <div class="gallery-card-title">Cadence</div>
+        <p class="gallery-card-body">A learning companion built into the curriculum.</p>
+        <template class="gallery-detail-template">
+          <p><strong>A learning companion built into the curriculum.</strong> Cadence lives inside the AIMT learning environment rather than sending the student away to search for answers somewhere else.</p>
+          <p>Students can ask questions about the module they are studying, work through uncertainty, reconsider an idea, and receive guidance tied to the AIMT curriculum.</p>
+          <p>Cadence also supports required checkpoints. When an answer is incomplete, the student can receive focused guidance, revise the response, and demonstrate understanding rather than simply being shown a correct answer.</p>
+          <p>Cadence maintains structured learner continuity across the course, including relevant strengths, focus areas, and prior checkpoint context, so the learning experience does not always begin from zero.</p>
+        </template>
+      </div>
+      <div class="gallery-card">
+        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/service-timer-interface.webp" data-alt="The actual AIMT Service Timer interface, mid-service, showing a live pacing step" data-title="Service Timer">
+          <img src="assets/images/marketing/service-timer-interface.webp" alt="The actual AIMT Service Timer interface, mid-service, showing a live pacing step" width="543" height="457" loading="lazy">
+        </button>
+        <div class="gallery-card-title">Service Timer</div>
+        <p class="gallery-card-body">The protocol leaves the course and enters the treatment room.</p>
+        <template class="gallery-detail-template">
+          <p><strong>The protocol leaves the course and enters the treatment room.</strong> The AIMT Service Timer is a treatment-room pacing companion built around AIMT's two reference service formats:</p>
+          <ul class="gallery-detail-list">
+            <li>Core Format — 60 minutes</li>
+            <li>Extended Format — 90 minutes</li>
+          </ul>
+          <p>It provides:</p>
+          <ul class="gallery-detail-list">
+            <li>Service-remaining time</li>
+            <li>Current-step timing</li>
+            <li>Step progress</li>
+            <li>Phase and step identification</li>
+            <li>Upcoming pacing landmarks</li>
+            <li>Practitioner cues</li>
+            <li>Structured progression through the service</li>
+          </ul>
+          <p>The Timer is designed around the service, not arbitrary clock compression. AIMT does not treat shorter or longer appointment lengths as simply stretched or compressed versions of the same protocol.</p>
+        </template>
+      </div>
+      <div class="gallery-card">
+        <button type="button" class="gallery-trigger gallery-trigger-credential" data-full="assets/images/marketing/aimt-verifiable-credential.svg" data-alt="AIMT verifiable credential — earned, independently verifiable, and issued with a unique credential ID" data-title="Certification">
+          <img src="assets/images/marketing/aimt-verifiable-credential.svg" alt="AIMT verifiable credential — earned, independently verifiable, and issued with a unique credential ID" width="400" height="300" loading="lazy">
+        </button>
+        <div class="gallery-card-title">Certification</div>
+        <p class="gallery-card-body">The credential represents demonstrated learning.</p>
+        <template class="gallery-detail-template">
+          <p><strong>The credential represents demonstrated learning.</strong> The Head Spa Certification Course culminates in a Final Certification Assessment. Certification is not issued simply because someone enrolled, watched content, or reached the bottom of the course.</p>
+          <p>The current certification standard evaluates:</p>
+          <ul class="gallery-detail-list">
+            <li>Knowledge</li>
+            <li>Applied cases</li>
+            <li>Professional interview/conversation</li>
+            <li>Critical professional domains</li>
+          </ul>
+          <p>AIMT credentials receive a unique credential ID that can be independently checked through AIMT's verification system.</p>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPRESSED AIMT MODEL ══ -->
+<div class="model-wrap" id="model">
+  <div class="model-inner">
+    <span class="aimt-sp-eyebrow">The AIMT Model</span>
+    <p class="model-lead">A modern service deserves modern training.</p>
+    <div class="model-grid">
+      <div class="model-item">
+        <div class="model-item-title">Built from Practice</div>
+        <p class="model-item-body">Programs are designed around real professional decisions, not just the steps of a ritual.</p>
+      </div>
+      <div class="model-item">
+        <div class="model-item-title">Built for Modern Learning</div>
+        <p class="model-item-body">Structured interaction, practitioner tools, and Cadence-supported learning where they genuinely improve understanding.</p>
+      </div>
+      <div class="model-item">
+        <div class="model-item-title">Built Around Competency</div>
+        <p class="model-item-body">Where certification is offered, the credential is tied to demonstrated learning — not attendance.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FINAL CTA ══ -->
 <div class="close-band">
   <div class="close-inner">
     <span class="aimt-sp-eyebrow">American Institute of Modern Trichology</span>
@@ -326,15 +540,15 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
   <div class="aimt-footer-inner">
     <div class="aimt-footer-brand">
       <div class="aimt-footer-mark">
-        <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="2" fill="currentColor"/></svg>
+        <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
         <span>AIMT</span>
       </div>
-      <p class="aimt-footer-tagline">American Institute of Modern Trichology — private certification institute.</p>
+      <p class="aimt-footer-tagline">American Institute of Modern Trichology — professional education for modern practitioners.</p>
     </div>
     <div class="aimt-footer-col">
       <span class="aimt-footer-col-title">Education</span>
       <a href="headspa-mastery.html">Head Spa Certification</a>
-      <a href="courses.html">All Certifications</a>
+      <a href="courses.html">AIMT Programs</a>
     </div>
     <div class="aimt-footer-col">
       <span class="aimt-footer-col-title">Student</span>
@@ -352,9 +566,22 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
       <a href="index.html">Home</a>
     </div>
   </div>
-  <div class="aimt-footer-bottom" style="text-align:center;">&copy; 2026 American Institute of Modern Trichology · Private Certification Institute</div>
+  <div class="aimt-footer-bottom" style="text-align:center;">&copy; 2026 American Institute of Modern Trichology.</div>
 </footer>
 
+<!-- Inside AIMT — full-size viewer (no backend interaction) -->
+<div class="gallery-lightbox" id="galleryLightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product image viewer">
+  <button type="button" class="gallery-lightbox-close" id="galleryLightboxClose" aria-label="Close image viewer">✕</button>
+  <div class="gallery-lightbox-inner">
+    <img src="" alt="" id="galleryLightboxImg">
+    <div class="gallery-lightbox-caption">
+      <div class="gallery-lightbox-caption-title" id="galleryLightboxTitle"></div>
+      <div class="gallery-lightbox-caption-body" id="galleryLightboxDetail"></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/aimt-public-nav.js"></script>
 <script>
   (function() {
     const status = document.getElementById('pageStatus');
@@ -369,26 +596,46 @@ body { font-family: var(--aimt-font-sans); background: var(--aimt-color-bg-prima
   })();
 
   (function() {
-    const btn = document.getElementById('navHamburger');
-    const menu = document.getElementById('navMobileMenu');
-    if (!btn || !menu) return;
-    function closeMenu() {
-      btn.setAttribute('aria-expanded', 'false');
-      menu.setAttribute('aria-hidden', 'true');
-      menu.classList.remove('is-open');
-      document.body.style.overflow = '';
-    }
-    function openMenu() {
-      btn.setAttribute('aria-expanded', 'true');
-      menu.setAttribute('aria-hidden', 'false');
-      menu.classList.add('is-open');
+    const lightbox = document.getElementById('galleryLightbox');
+    const lightboxImg = document.getElementById('galleryLightboxImg');
+    const lightboxTitle = document.getElementById('galleryLightboxTitle');
+    const lightboxDetail = document.getElementById('galleryLightboxDetail');
+    const closeBtn = document.getElementById('galleryLightboxClose');
+    const triggers = document.querySelectorAll('.gallery-trigger');
+    if (!lightbox || !lightboxImg || !closeBtn || !triggers.length) return;
+    let lastTrigger = null;
+
+    function open(trigger) {
+      lastTrigger = trigger;
+      lightboxImg.src = trigger.dataset.full;
+      lightboxImg.alt = trigger.dataset.alt || '';
+      if (lightboxTitle) lightboxTitle.textContent = trigger.dataset.title || '';
+      if (lightboxDetail) {
+        lightboxDetail.innerHTML = '';
+        const card = trigger.closest('.gallery-card');
+        const template = card && card.querySelector('.gallery-detail-template');
+        if (template) lightboxDetail.appendChild(template.content.cloneNode(true));
+      }
+      lightbox.classList.add('is-open');
+      lightbox.scrollTop = 0;
+      lightbox.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      closeBtn.focus();
     }
-    btn.addEventListener('click', () => {
-      if (btn.getAttribute('aria-expanded') === 'true') closeMenu(); else openMenu();
+    function close() {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxImg.src = '';
+      document.body.style.overflow = '';
+      if (lastTrigger) lastTrigger.focus();
+    }
+
+    triggers.forEach(t => t.addEventListener('click', () => open(t)));
+    closeBtn.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('is-open')) close();
     });
-    menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
   })();
 </script>
 </body>

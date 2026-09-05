@@ -40,6 +40,7 @@
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/aimt-brand.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 <link rel="stylesheet" href="assets/css/cadence-shell.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1063,45 +1064,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 /* ══════════════════════════════
    LANDING PAGE
 ══════════════════════════════ */
-/* Shared header needs to sit above #landingPage's own high stacking
+/* Shared nav needs to sit above #landingPage's own high stacking
    context on this page specifically — index.html/courses.html don't have
-   a #landingPage to conflict with, so this override stays page-local. */
-.aimt-nav { z-index: 1000; }
-
-/* Sales-page funnel header (Owner Correction Pass round 2, item 1):
-   the homepage nav (index.html, bare `nav` selector) is the literal
-   visual source of truth — SAME flat edge padding and breakpoints, not
-   centered inside the 1100px marketing grid. No inner wrapper element:
-   this page's .aimt-nav classes already match the homepage nav's
-   metrics (56px height, 28px mark, 12px gap, same typography); the only
-   override needed is padding (homepage uses 1.5rem/1rem/0.85rem, the
-   shared aimt-supporting-pages.css default is 1.5rem/1rem@560px — close
-   but not identical breakpoints) and keeping the CTA visible with no
-   hamburger fallback. Kept entirely local to this page —
-   assets/css/aimt-supporting-pages.css and every other page that
-   consumes it (index/courses/terms/privacy/refunds/verify) are
-   untouched. */
-.lp-funnel-nav { padding: 0 1.5rem; }
-@media (max-width: 700px) { .lp-funnel-nav { padding: 0 1rem; } }
-@media (max-width: 480px) { .lp-funnel-nav { padding: 0 0.85rem; } }
-/* No hamburger fallback exists on this header (no outbound nav links to
-   collapse into one) so the enrollment CTA must stay visible at every
-   width — overrides the shared nav's "hide nav-right CTA under 860px"
-   rule via higher selector specificity (aimt-supporting-pages.css:90-91). */
-.lp-funnel-nav .aimt-nav-right .aimt-cta { display: inline-flex; }
-/* CTA button: copied verbatim from the homepage nav's own .cta-primary
-   (index.html) — solid white pill, not the shared ghost .aimt-cta-nav
-   style, per "reproduce its button styling" (item 1). */
-.lp-funnel-cta {
-  background: white; color: #262626; border: 0.5px solid rgba(255,255,255,0.16);
-  border-radius: 980px; padding: 0.86rem 1.15rem;
-  font-family: var(--aimt-font-mont); font-size: 0.68rem; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-  transition: all 0.2s; text-decoration: none;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.lp-funnel-cta:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
-@media (max-width: 700px) { .lp-funnel-cta { font-size: 0.62rem; padding: 0.7rem 1.15rem; white-space: nowrap; } }
+   a #landingPage to conflict with, so this override stays page-local.
+   The sales header itself is now the canonical .aimt-public-nav
+   (assets/css/aimt-public-nav.css) with no page-local visual overrides —
+   see the header markup below for the funnel-variant content (brand +
+   single CTA only). */
+.aimt-public-nav { z-index: 1000; }
 #landingPage {
   position: fixed; top: var(--aimt-nav-height, 56px); left: 0; right: 0; bottom: 0; z-index: 999;
   background: var(--hero-bg2);
@@ -3324,26 +3294,24 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <button type="button" class="rmb-exit" onclick="ReviewMode.exit()">Exit Review Mode</button>
 </div>
 
-<!-- ══ SALES-PAGE FUNNEL HEADER (Owner Correction Pass round 2, item 1) ══
-     The homepage nav (index.html <nav>) is the literal visual source of
-     truth: same flat markup shape, same padding/breakpoints, no inner
-     wrapper, no recentering inside the 1100px marketing grid. Funnel
-     variant: no outbound site navigation and no hamburger, so the
-     enrollment CTA is the only way to leave this header. Brand mark +
-     wordmark are non-clickable identity (not links) so they can't carry a
-     visitor back to the homepage mid-funnel — and match the homepage's
-     single-line "AIMT" wordmark (no subtitle line). The CTA reuses the
-     same startCheckout() every other enrollment button on this page
-     already calls — no new checkout logic. ══ -->
-<nav class="aimt-nav lp-funnel-nav">
-  <div class="aimt-nav-mark" aria-hidden="true">
+<!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css,
+     visual source of truth: index.html) — funnel variant. Same shell as
+     every other public page; -right holds ONLY the enrollment CTA — no
+     outbound nav links, no hamburger, so the CTA is the only way to
+     leave this header. Brand mark + wordmark are non-clickable identity
+     (not links) so they can't carry a visitor back to the homepage
+     mid-funnel. The CTA reuses the same startCheckout() every other
+     enrollment button on this page already calls — no new checkout
+     logic. ══ -->
+<nav class="aimt-public-nav aimt-public-nav--fixed">
+  <div class="aimt-public-nav-mark" aria-hidden="true">
     <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
   </div>
-  <div class="aimt-nav-wordmark">
-    <span class="aimt-nav-name">AIMT</span>
+  <div class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
   </div>
-  <div class="aimt-nav-right">
-    <button type="button" class="lp-funnel-cta" onclick="startCheckout()">Begin Enrollment — $597</button>
+  <div class="aimt-public-nav-right">
+    <button type="button" class="aimt-public-nav-cta" onclick="startCheckout()">Begin Enrollment — $597</button>
   </div>
 </nav>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -3361,7 +3329,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <img src="assets/images/marketing/head-spa-service-rinse.webp" alt="Real AIMT head spa rinse treatment in progress" loading="eager" width="1054" height="1492">
       </div>
       <div class="lp-hero-inner">
-        <a href="courses.html" style="display:inline-flex; align-items:center; gap:6px; font-family:'Outfit',sans-serif; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.28); text-decoration:none; margin-bottom:2rem; transition:color 0.2s;" onmouseover="this.style.color='rgba(255,255,255,0.55)'" onmouseout="this.style.color='rgba(255,255,255,0.28)'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg> All Courses</a>
         <div class="lp-brand">
           <svg class="lp-brand-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg>
           <span class="lp-brand-name">AIMT &middot; Head Spa Certification Course</span>

@@ -12,16 +12,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 </head>
 <body class="aimt-legal-body">
 
-<header class="aimt-legal-header">
-  <a href="index.html" class="aimt-legal-header-brand">AIMT</a>
-  <nav class="aimt-legal-header-links">
-    <a href="courses.html">Certifications</a>
-    <a href="student-access.html">Student Access</a>
-  </nav>
-</header>
+<!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css,
+     visual source of truth: index.html). position:sticky (not the fixed
+     modifier the marketing pages use) so this page's content keeps
+     flowing normally beneath it — same rendered result, no content
+     offset needed. ══ -->
+<nav class="aimt-public-nav aimt-public-nav--sticky">
+  <a href="index.html" class="aimt-public-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg>
+  </a>
+  <a href="index.html" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <div class="aimt-public-nav-links">
+      <a href="courses.html" class="aimt-public-nav-link">Certifications</a>
+      <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
+    </div>
+    <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+      <span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span>
+    </button>
+  </div>
+</nav>
+<div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="courses.html" class="aimt-public-nav-mobile-link">Certifications</a>
+  <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
+</div>
 
 <div class="aimt-legal-wrap">
   <aside class="aimt-legal-toc">
@@ -71,5 +91,6 @@
     <a href="index.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">AIMT</a> · <a href="courses.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Certifications</a> · <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms</a> · <a href="privacy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy</a> · <a href="refunds.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Refunds</a> · <a href="verify.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Verify a Credential</a>
   </div>
 </footer>
+<script src="assets/js/aimt-public-nav.js"></script>
 </body>
 </html>
