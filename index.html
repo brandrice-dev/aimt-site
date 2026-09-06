@@ -467,7 +467,14 @@ body {
 .plc-clock-card { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 11px; background: rgba(250,248,245,0.03); border: 0.5px solid rgba(250,248,245,0.07); border-radius: 12px; padding: 10px 11px; }
 .plc-ring { width: 56px; height: 56px; transform: rotate(-90deg); flex-shrink: 0; }
 .plc-ring-bg { fill: none; stroke: rgba(250,248,245,0.08); stroke-width: 4; }
-.plc-ring-fill { fill: none; stroke: #a3968d; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear; }
+.plc-ring-fill {
+  fill: none; stroke: #a3968d; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear;
+  /* Active-arc glow — shared tokens (assets/css/aimt-design-system.css),
+     never applied to .plc-ring-bg. */
+  filter:
+    drop-shadow(var(--aimt-ring-glow-tight, 0 0 4px rgba(255,255,255,0.35)))
+    drop-shadow(var(--aimt-ring-glow-soft, 0 0 10px rgba(255,255,255,0.15)));
+}
 .plc-clock-text { min-width: 0; }
 .plc-time { font-family: var(--aimt-font-mont); font-size: 26px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: #faf8f5; white-space: nowrap; }
 .plc-meta { font-size: 8px; color: rgba(250,248,245,0.48); margin-top: 4px; line-height: 1.4; }
@@ -815,7 +822,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
      This page is the visual source of truth that stylesheet was
      extracted from. ══ -->
 <nav class="aimt-public-nav aimt-public-nav--fixed">
-  <a href="index.html" class="aimt-public-nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></a>
+  <a href="index.html" class="aimt-public-nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></a>
   <a href="index.html" class="aimt-public-nav-wordmark">
     <span class="aimt-public-nav-name">AIMT</span>
   </a>

@@ -6,339 +6,427 @@
 <meta name="theme-color" content="#0f0d0b">
 <title>AIMT Service Timer</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --ink:#141210;
-  --paper:#f3efe9;
-  --paper-2:#ebe5dc;
-  --line:#d6cec2;
-  --muted:#6f685f;
+  --bg:#0f0d0b;
+  --surface-1:#141210;
+  --surface-2:#1a1814;
+  --surface-3:#262626;
+  --paper:#faf8f5;
   --warm:#a3968d;
   --warm-dark:#786d65;
-  --timer-bg:#0f0d0b;
-  --timer-surface:#1a1814;
-  --timer-s2:#242019;
-  --timer-s3:#2e2921;
-  --white:#faf8f5;
+  --w94:rgba(250,248,245,.94);
   --w90:rgba(250,248,245,.90);
   --w68:rgba(250,248,245,.68);
   --w48:rgba(250,248,245,.48);
-  --w28:rgba(250,248,245,.28);
+  --w32:rgba(250,248,245,.32);
+  --w20:rgba(250,248,245,.20);
   --w16:rgba(250,248,245,.16);
+  --w12:rgba(250,248,245,.12);
   --w08:rgba(250,248,245,.08);
   --a12:rgba(163,150,141,.12);
   --a20:rgba(163,150,141,.20);
   --a36:rgba(163,150,141,.36);
-  --good:#8ea892;
-  --pad:clamp(20px,5vw,72px);
+  --font-mont:'Montserrat',Arial,sans-serif;
+  --font-sans:'Outfit',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'SF Mono','Fira Code',monospace;
+  --pad:clamp(18px,4.5vw,56px);
+  /* Single tuning point for the immersive timer's dominant step ring and
+     the completion-screen decorative ring: a soft white/ivory instrument
+     glow (correction pass — an earlier taupe-tinted glow read as a warm
+     haze rather than energized illumination). The ring stroke itself
+     uses --paper (a warm off-white, not stark white); the glow falloff
+     is ivory so it reads as light, not tint. Distinct from the quieter
+     white halo used by assets/css/aimt-metric-ring.css elsewhere on the
+     site. Kept local: this page loads no shared stylesheet. */
+  --ring-glow:
+    drop-shadow(0 0 6px rgba(255,248,240,.34))
+    drop-shadow(0 0 16px rgba(255,248,240,.16))
+    drop-shadow(0 0 28px rgba(255,248,240,.08));
+  /* Final-10-seconds urgency state for the live step ring only — a
+     refined warning red, not neon. Swaps in for --ring-glow/--paper on
+     .step-ring-wrap.urgent (toggled by JS from the live stepRemaining
+     value); the ring keeps moving clockwise exactly as before, just
+     recolored. No pulsing/flashing — color + the countdown itself is
+     the motion. */
+  --timer-urgent: #d96a63;
+  --ring-glow-urgent:
+    drop-shadow(0 0 6px rgba(217,106,99,.48))
+    drop-shadow(0 0 16px rgba(217,106,99,.22))
+    drop-shadow(0 0 28px rgba(217,106,99,.10));
 }
-html{scroll-behavior:smooth;background:var(--paper);color:var(--ink)}
-body{font-family:'Outfit',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--paper);color:var(--ink);min-width:0}
+html{scroll-behavior:smooth;background:var(--bg);color:var(--paper)}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--w90);min-width:0}
 button,a{font:inherit}
 button{cursor:pointer}
-button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--warm);outline-offset:3px}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 
-/* RESOURCE PAGE */
-.resource-page{min-height:100vh;overflow-x:hidden}
-.sitebar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px var(--pad);border-bottom:1px solid var(--line);background:rgba(243,239,233,.96);position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
-.sitebrand{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}
-.sitecontext{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;text-align:right}
-.hero{padding:clamp(54px,9vw,110px) var(--pad) clamp(52px,8vw,96px);border-bottom:1px solid var(--line)}
-.hero-inner{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:clamp(36px,7vw,96px);align-items:end}
-.eyebrow{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--warm-dark);margin-bottom:18px}
-.hero h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(56px,9vw,126px);font-weight:400;line-height:.82;letter-spacing:-.055em;max-width:820px}
-.hero h1 span{display:block;font-family:'Montserrat',sans-serif;font-size:.16em;font-weight:700;letter-spacing:.28em;text-transform:uppercase;line-height:1.3;margin-top:22px}
-.hero-side{padding-bottom:6px}
-.hero-lead{font-size:clamp(17px,2vw,22px);line-height:1.52;font-weight:300;margin-bottom:18px}
-.hero-note{font-size:14px;line-height:1.65;color:var(--muted);margin-bottom:24px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
-.btn-primary,.btn-ghost{min-height:50px;border-radius:999px;padding:0 22px;font-weight:600;font-size:12px;letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
-.btn-primary{background:var(--ink);color:var(--paper)}
-.btn-ghost{background:transparent;color:var(--ink)}
+/* TOOL HOME (resource page) */
+.resource-page{min-height:100vh;overflow-x:hidden;background:var(--bg)}
+.tool-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px var(--pad);border-bottom:1px solid var(--w08);background:rgba(15,13,11,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+.tool-id{display:flex;align-items:center;gap:12px;min-width:0}
+.tool-mark{width:28px;height:28px;color:var(--warm);flex-shrink:0}
+.tool-wordmark{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.tool-name{font-family:var(--font-mont);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--w94)}
+.tool-product{font-family:var(--font-mont);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--warm)}
+.tool-context{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--w48);white-space:nowrap}
 
-.section{padding:clamp(58px,8vw,100px) var(--pad);border-bottom:1px solid var(--line)}
-.section-inner{max-width:1180px;margin:0 auto}
-.section-head{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:clamp(28px,7vw,90px);margin-bottom:42px;align-items:start}
-.section-num{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm-dark)}
-.section-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(38px,6vw,72px);font-weight:400;line-height:.98;letter-spacing:-.035em;margin-bottom:16px}
-.section-copy{font-size:clamp(16px,1.8vw,20px);font-weight:300;line-height:1.65;max-width:820px;color:#39342f}
+.hero{padding:clamp(48px,8vw,88px) var(--pad) clamp(40px,6vw,64px);border-bottom:1px solid var(--w08)}
+.hero-inner{max-width:1100px;margin:0 auto}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--warm);margin-bottom:18px}
+.hero h1{font-family:var(--font-mont);font-weight:800;font-size:clamp(2.1rem,5vw,3.4rem);letter-spacing:-.02em;line-height:1.06;text-transform:uppercase;color:var(--w94);max-width:780px;margin-bottom:26px}
+.hero-copy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,4vw,48px);max-width:980px}
+.hero-lead{font-size:clamp(1rem,1.4vw,1.15rem);line-height:1.55;font-weight:400;color:var(--w90)}
+.hero-note{font-size:.92rem;line-height:1.65;color:var(--w68)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.btn-primary,.btn-ghost{min-height:48px;border-radius:999px;padding:0 22px;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-family:var(--font-mont)}
+.btn-primary{background:var(--paper);color:var(--bg);border:1px solid var(--paper)}
+.btn-ghost{background:transparent;color:var(--w90);border:1px solid var(--w20)}
+.btn-primary:hover{background:var(--warm);border-color:var(--warm)}
+.btn-ghost:hover{border-color:var(--w32);color:var(--paper)}
 
-.format-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:30px}
-.format-card{border:1px solid var(--line);border-radius:22px;padding:clamp(24px,4vw,38px);background:rgba(255,255,255,.34)}
-.format-card .format-kicker{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm-dark);margin-bottom:14px}
-.format-card h3{font-family:'Montserrat',sans-serif;font-size:clamp(28px,4vw,46px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.95;margin-bottom:12px}
-.format-card .format-time{font-family:'Playfair Display',Georgia,serif;font-size:clamp(48px,7vw,88px);line-height:.9;margin:18px 0 12px}
-.format-card p{font-size:15px;line-height:1.65;color:var(--muted);max-width:520px}
+.section{padding:clamp(44px,7vw,80px) var(--pad);border-bottom:1px solid var(--w08)}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-head{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;max-width:760px}
+.section-num{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--warm)}
+.section-title{font-family:var(--font-mont);font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:-.01em;color:var(--w94);text-transform:uppercase}
+.section-copy{font-size:.95rem;line-height:1.65;color:var(--w68)}
 
-.logic-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:20px;align-items:stretch}
-.table-card,.principle-card{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.28);overflow:hidden}
-.table-card{padding:10px 0}
-.compare-table{width:100%;border-collapse:collapse;font-size:14px}
-.compare-table th,.compare-table td{padding:14px 18px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.compare-table th{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
-.compare-table tr:last-child td{border-bottom:0}
-.compare-table td:nth-child(2),.compare-table td:nth-child(3){font-family:'Montserrat',sans-serif;font-weight:700;white-space:nowrap}
-.behavior{font-size:12px;color:var(--muted)}
-.principle-card{padding:28px}
-.principle-card h4{font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
-.principle-card p{font-size:15px;line-height:1.65;color:#403a35;margin-bottom:16px}
-.principle-card p:last-child{margin-bottom:0}
-.callout{margin-top:24px;border-left:3px solid var(--warm-dark);padding:4px 0 4px 18px;font-size:15px;line-height:1.65;color:#413b36}
-.callout strong{font-weight:600}
+.protocol-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.protocol-card{position:relative;overflow:hidden;border:1px solid var(--w08);border-radius:20px;background:var(--surface-1);padding:clamp(24px,3.5vw,34px);display:flex;flex-direction:column;transition:border-color .2s,background .2s,box-shadow .2s}
+.protocol-card:hover,.protocol-card:focus-within{border-color:var(--a36);background:var(--surface-2);box-shadow:0 0 0 1px rgba(163,150,141,.12),0 0 32px rgba(163,150,141,.08)}
+.protocol-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--w48);margin-bottom:14px}
+.protocol-name{font-family:var(--font-mont);font-size:clamp(1.3rem,2.4vw,1.7rem);font-weight:800;letter-spacing:-.01em;text-transform:uppercase;color:var(--w94)}
+.protocol-minutes{position:relative;display:inline-flex;align-items:baseline;font-family:var(--font-mont);font-weight:800;font-size:clamp(3rem,7vw,4.6rem);letter-spacing:-.03em;line-height:.9;color:var(--warm);margin:14px 0}
+.protocol-minutes::before,.protocol-minutes::after{content:'';position:absolute;left:18%;top:50%;border-radius:50%;border:1px solid rgba(163,150,141,.14);pointer-events:none;z-index:-1;transform:translate(-50%,-50%)}
+.protocol-minutes::before{width:150%;height:150%}
+.protocol-minutes::after{width:220%;height:220%;border-color:rgba(163,150,141,.08)}
+.protocol-minutes span{font-size:.3em;font-weight:700;letter-spacing:.14em;margin-left:.25em;color:var(--w48);text-transform:uppercase}
+.protocol-card p{font-size:.88rem;line-height:1.6;color:var(--w68);max-width:440px;margin-bottom:22px;position:relative;z-index:1}
+.protocol-card button{margin-top:auto;min-height:48px;border-radius:999px;border:1px solid var(--w20);background:transparent;color:var(--w94);font-family:var(--font-mont);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 18px;position:relative;z-index:1;transition:background .2s,border-color .2s,color .2s}
+.protocol-card button:hover{background:var(--paper);color:var(--bg);border-color:var(--paper)}
 
-.read-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:clamp(28px,6vw,72px);align-items:center}
-.demo-shell{background:var(--timer-bg);border-radius:24px;padding:18px;color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.demo-top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--w08);padding:4px 2px 12px;margin-bottom:16px}
-.demo-brand{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm)}
-.demo-service{font-size:10px;color:var(--w48)}
-.demo-progress-labels{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:8px}
-.demo-remaining span,.demo-elapsed span{display:block;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--w48);margin-bottom:3px}
-.demo-remaining strong{font-family:'Montserrat',sans-serif;font-size:26px;letter-spacing:-.04em}
-.demo-elapsed{text-align:right;color:var(--w68);font-size:12px}
-.demo-track{height:5px;background:var(--w08);border-radius:99px;position:relative;margin-bottom:18px}
-.demo-track::before{content:'';position:absolute;left:0;top:0;bottom:0;width:17%;border-radius:99px;background:var(--warm)}
-.demo-card{display:grid;grid-template-columns:78px 1fr auto;gap:14px;align-items:center;background:var(--timer-surface);border:1px solid var(--w08);border-radius:14px;padding:14px;margin-bottom:15px}
-.demo-ring{width:68px;height:68px;border-radius:50%;border:5px solid var(--warm);display:grid;place-items:center;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800}
-.demo-step small,.demo-phase{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--warm)}
-.demo-step strong{display:block;font-family:'Montserrat',sans-serif;font-size:18px;line-height:1.05;text-transform:uppercase;margin-top:5px}
-.demo-phase{text-align:right;align-self:start;padding-top:4px}
-.demo-next{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--w08);padding-top:12px;font-size:10px;color:var(--w48)}
-.demo-next strong{color:var(--w90);font-family:'Montserrat',sans-serif;text-transform:uppercase;font-size:10px}
-.demo-comm{margin-top:12px;padding:10px 11px;border:1px solid var(--w08);border-radius:9px;background:var(--timer-surface);font-size:10px;line-height:1.5;color:var(--w68)}
-.demo-comm strong{display:block;font-family:'Montserrat',sans-serif;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--warm);margin-bottom:3px}
-.read-list{display:grid;gap:0}
-.read-item{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:17px 0;border-bottom:1px solid var(--line)}
-.read-item:last-child{border-bottom:0}
-.read-index{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;color:var(--warm-dark);padding-top:3px}
-.read-item h4{font-family:'Montserrat',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
-.read-item p{font-size:14px;line-height:1.55;color:var(--muted)}
-.pacing-note{margin-top:26px;padding:20px 22px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.28)}
-.pacing-note strong{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:7px}
-.pacing-note p{font-size:14px;line-height:1.6;color:#403a35}
-
-.launch-section{background:var(--ink);color:var(--paper);border-bottom:0}
-.launch-section .section-num{color:var(--warm)}
-.launch-section .section-title{color:var(--paper)}
-.launch-section .section-copy{color:rgba(243,239,233,.7)}
-.launch-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.launch-card{border:1px solid rgba(243,239,233,.14);border-radius:22px;background:rgba(255,255,255,.035);padding:clamp(24px,4vw,38px);display:flex;flex-direction:column;min-height:330px}
-.launch-card .tag{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);margin-bottom:16px}
-.launch-card h3{font-family:'Montserrat',sans-serif;font-size:clamp(32px,4vw,48px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.95;margin-bottom:10px}
-.launch-card .minutes{font-family:'Playfair Display',Georgia,serif;font-size:clamp(58px,8vw,92px);line-height:.9;margin:18px 0 16px}
-.launch-card p{font-size:14px;line-height:1.6;color:rgba(243,239,233,.64);max-width:520px;margin-bottom:24px}
-.launch-card button{margin-top:auto;min-height:54px;border:1px solid var(--paper);border-radius:999px;background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 20px}
-.resume-bar{display:none;margin-top:18px;border:1px solid rgba(243,239,233,.18);border-radius:16px;padding:16px 18px;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.04)}
+.resume-bar{display:none;margin-top:20px;border:1px solid var(--a20);border-radius:16px;padding:16px 20px;align-items:center;justify-content:space-between;gap:16px;background:var(--a12)}
 .resume-bar.show{display:flex}
-.resume-copy strong{display:block;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.resume-copy span{font-size:13px;color:rgba(243,239,233,.62)}
+.resume-copy strong{display:block;font-family:var(--font-mont);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--w94);margin-bottom:4px}
+.resume-copy span{font-size:13px;color:var(--w68)}
 .resume-actions{display:flex;gap:8px;flex-wrap:wrap}
-.resume-actions button{min-height:42px;border-radius:999px;padding:0 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(243,239,233,.25);color:var(--paper);background:transparent}
-.resume-actions .resume-primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}
-.resource-foot{padding:24px var(--pad);background:var(--ink);color:rgba(243,239,233,.48);border-top:1px solid rgba(243,239,233,.08);font-size:11px;text-align:center}
+.resume-actions button{min-height:44px;border-radius:999px;padding:0 16px;font-family:var(--font-mont);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--w20);color:var(--w90);background:transparent}
+.resume-actions .resume-primary{background:var(--paper);color:var(--bg);border-color:var(--paper)}
+
+.read-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.85fr);gap:clamp(24px,5vw,56px);align-items:start}
+.demo-shell{background:var(--surface-2);border:1px solid var(--w08);border-radius:18px;padding:18px;color:var(--paper)}
+.demo-top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--w08);padding:4px 2px 12px;margin-bottom:16px}
+.demo-brand{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--warm)}
+.demo-service{font-family:var(--font-mono);font-size:10px;color:var(--w48)}
+.demo-progress-labels{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:8px}
+.demo-remaining span,.demo-elapsed span{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--w48);margin-bottom:3px}
+.demo-remaining strong{font-family:var(--font-mont);font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--w94)}
+.demo-elapsed{text-align:right;color:var(--w68);font-size:12px}
+.demo-track{height:4px;background:var(--w08);border-radius:99px;position:relative;margin-bottom:18px}
+.demo-track::before{content:'';position:absolute;left:0;top:0;bottom:0;width:17%;border-radius:99px;background:var(--warm)}
+.demo-card{display:grid;grid-template-columns:78px 1fr auto;gap:14px;align-items:center;background:var(--surface-1);border:1px solid var(--w08);border-radius:14px;padding:14px;margin-bottom:15px}
+.demo-ring{width:68px;height:68px;border-radius:50%;border:3px solid var(--warm);display:grid;place-items:center;font-family:var(--font-mont);font-size:16px;font-weight:700;color:var(--w94)}
+.demo-step small,.demo-phase{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm)}
+.demo-step strong{display:block;font-family:var(--font-mont);font-size:17px;line-height:1.1;text-transform:uppercase;margin-top:5px;color:var(--w94);font-weight:700}
+.demo-phase{text-align:right;align-self:start;padding-top:4px}
+.demo-next{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--w08);padding-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--w48)}
+.demo-next strong{color:var(--w90);font-family:var(--font-mont);text-transform:uppercase;font-size:10px}
+.demo-comm{margin-top:12px;padding:11px 12px;border:1px solid var(--w08);border-radius:9px;background:var(--surface-1);font-size:11px;line-height:1.5;color:var(--w68)}
+.demo-comm strong{display:block;font-family:var(--font-mont);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);margin-bottom:3px}
+.read-list{display:grid;gap:0}
+.read-item{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--w08)}
+.read-item:last-child{border-bottom:0}
+.read-index{font-family:var(--font-mono);font-size:10px;color:var(--warm);padding-top:2px}
+.read-item h4{font-family:var(--font-mont);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--w94);margin-bottom:4px}
+.read-item p{font-size:.82rem;line-height:1.55;color:var(--w68)}
+.pacing-note{margin-top:20px;padding:16px 18px;border:1px solid var(--w08);border-radius:14px;background:var(--surface-1)}
+.pacing-note strong{font-family:var(--font-mont);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);display:block;margin-bottom:6px}
+.pacing-note p{font-size:.82rem;line-height:1.6;color:var(--w68)}
+
+.spec-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,.6fr);gap:18px;align-items:stretch}
+.spec-table-card{border:1px solid var(--w08);border-radius:16px;background:var(--surface-1);overflow:hidden}
+.spec-table{width:100%;border-collapse:collapse;font-size:13px}
+.spec-table th,.spec-table td{padding:12px 16px;border-bottom:1px solid var(--w08);text-align:left;vertical-align:top;color:var(--w68)}
+.spec-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--w48);font-weight:600}
+.spec-table tr:last-child td{border-bottom:0}
+.spec-table td:nth-child(2),.spec-table td:nth-child(3){font-family:var(--font-mont);font-weight:700;color:var(--w94);white-space:nowrap}
+.spec-behavior{font-family:var(--font-mono);font-size:11px;color:var(--w48)}
+.principle-card{border:1px solid var(--w08);border-radius:16px;background:var(--surface-1);padding:24px}
+.principle-card h4{font-family:var(--font-mont);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);margin-bottom:14px}
+.principle-card p{font-size:.85rem;line-height:1.6;color:var(--w68);margin-bottom:14px}
+.principle-card p:last-child{margin-bottom:0}
+.callout{margin-top:20px;border-left:2px solid var(--warm);padding:2px 0 2px 16px;font-size:.85rem;line-height:1.6;color:var(--w68)}
+.callout strong{color:var(--w94);font-weight:600}
+
+.resource-foot{padding:22px var(--pad);background:var(--bg);color:var(--w32);border-top:1px solid var(--w08);font-size:10px;letter-spacing:.04em;text-align:center;font-family:var(--font-mono);text-transform:uppercase}
 
 /* IMMERSIVE TIMER */
 body.timer-open{overflow:hidden}
-.timer-app{position:fixed;inset:0;z-index:1000;background:var(--timer-bg);color:var(--white);display:none;flex-direction:column;overflow:hidden;font-family:'Outfit',system-ui,sans-serif}
+.timer-app{position:fixed;inset:0;z-index:1000;background:var(--bg);color:var(--paper);display:none;flex-direction:column;overflow:hidden;font-family:var(--font-sans)}
 .timer-app.active{display:flex}
-.timer-top{flex-shrink:0;padding:10px clamp(14px,3vw,32px) 9px;border-bottom:1px solid var(--w08);background:var(--timer-bg)}
-.timer-top-row{display:flex;align-items:center;gap:10px;min-width:0}
-.timer-brand{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer-format{font-size:9px;color:var(--w48);white-space:nowrap;margin-left:auto}
-.timer-top button{min-height:38px;border-radius:8px;padding:0 12px;border:1px solid var(--w16);background:transparent;color:var(--w68);font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
-.timer-top button:disabled{opacity:.3;cursor:not-allowed}
-.timer-service-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-top:9px}
-.service-remaining span,.service-elapsed span{display:block;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--w48);margin-bottom:2px}
-.service-remaining strong{font-family:'Montserrat',sans-serif;font-size:clamp(15px,3vw,22px);letter-spacing:-.03em;white-space:nowrap}
-.service-elapsed{text-align:right;font-size:10px;color:var(--w68);white-space:nowrap}
-.timer-track{height:5px;background:var(--w08);border-radius:99px;position:relative;overflow:visible}
+
+.timer-top{flex-shrink:0;padding:10px clamp(14px,3vw,32px);border-bottom:1px solid var(--w08);background:var(--bg)}
+.timer-top-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;min-width:0}
+.timer-id{display:flex;align-items:center;gap:10px;min-width:0}
+.timer-mark{width:22px;height:22px;color:var(--warm);flex-shrink:0}
+.timer-brand{font-family:var(--font-mont);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--w94);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-format{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);text-align:center;white-space:nowrap}
+.timer-controls{display:flex;justify-content:flex-end;gap:8px}
+.timer-controls button{min-height:44px;border-radius:8px;padding:0 14px;border:1px solid var(--w16);background:transparent;color:var(--w68);font-family:var(--font-mont);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.timer-controls button:disabled{opacity:.3;cursor:not-allowed}
+.timer-controls button:hover:not(:disabled){border-color:var(--w32);color:var(--w94)}
+
+.timer-main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:clamp(16px,2.6vw,32px) clamp(18px,5vw,64px) 20px;-webkit-overflow-scrolling:touch}
+.timer-inner{max-width:1280px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+/* status-banner sits OUTSIDE the ring/guidance split and carries its own
+   margin only while .show is present — a conditional grid row still
+   reserves its row-gap even at zero height, which was quietly pushing
+   the whole timer down whenever there was no status to show. A plain
+   flex child with margin only in the .show state truly costs nothing
+   when hidden. */
+.status-banner{display:none;margin-bottom:0;padding:11px 16px;border:1px solid var(--a20);background:var(--a12);border-radius:10px;font-size:13px;line-height:1.5;color:var(--w90)}
+.status-banner.show{display:block;margin-bottom:clamp(16px,2.4vw,24px)}
+
+.timer-body{display:flex;flex-direction:column;gap:clamp(22px,3.6vw,32px)}
+@media (min-width:860px){
+  .timer-body{flex-direction:row;align-items:flex-start;gap:clamp(36px,4.5vw,60px)}
+  .ring-panel{flex:0 0 clamp(280px,34%,380px)}
+  .guidance-panel{flex:1 1 0%;min-width:0}
+}
+/* .guidance-panel is a single flex column for step meta/title/purpose/cue/
+   comm/next — replacing the old per-element CSS-Grid rows. Grid row-gap
+   applies between every declared row regardless of whether its content
+   is display:none, so an absent Client Communication block was still
+   costing a full row-gap; flex gap only ever applies between elements
+   that are actually rendered, so an empty comm-box now costs nothing. */
+.guidance-panel{display:flex;flex-direction:column;gap:clamp(18px,2.8vw,26px)}
+
+.ring-panel{position:relative;display:flex;flex-direction:column;align-items:center;gap:24px;padding:8px 0 4px}
+.step-ring-wrap{position:relative;z-index:1;width:clamp(200px,26vw,288px);height:clamp(200px,26vw,288px);display:flex;align-items:center;justify-content:center}
+/* Ambient halo lives INSIDE the ring's own wrapper, sized by a % inset
+   of that box — it always scales and re-centers with the ring itself
+   (including under the short-viewport override below) instead of being
+   a separately-sized block that can drift out of alignment. border-
+   radius:50% is a hard backstop against the box ever reading as a
+   square panel; radial-gradient's "closest-side" sizing plus stops that
+   finish well inside that circle is the actual fix — it guarantees full
+   transparency before any edge, so there is nothing for a box shape to
+   clip into a visible edge. */
+.ring-ambient{position:absolute;inset:-15%;border-radius:50%;background:radial-gradient(circle closest-side,rgba(255,248,240,.14) 0%,rgba(255,248,240,.05) 55%,transparent 78%);filter:blur(10px);pointer-events:none;z-index:0}
+/* overflow:visible is the actual fix for the ring "glow" reading square:
+   <svg> clips to its own box by default, so the drop-shadow glow on
+   .ring-fill (which needs room beyond the stroke to bloom) was getting
+   cut off exactly at the SVG's square bounding box. Letting it paint
+   outside that box is what makes the glow read as light coming off a
+   circle instead of a lit panel with square corners. */
+.step-ring-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);z-index:1;overflow:visible}
+.ring-bg{fill:none;stroke:var(--w08);stroke-width:2.4}
+.ring-fill{fill:none;stroke:var(--paper);stroke-width:2.4;stroke-linecap:round;transition:stroke-dashoffset .3s linear;filter:var(--ring-glow)}
+.step-clock-text{position:relative;z-index:1;text-align:center;padding:0 16px}
+.step-time{font-family:var(--font-mont);font-weight:800;font-size:clamp(46px,7.6vw,72px);letter-spacing:-.03em;line-height:1;color:var(--paper);white-space:nowrap}
+.step-time.pre{font-size:clamp(32px,5.8vw,46px)}
+.step-time-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--w48);margin-top:12px}
+/* Final-10-seconds urgency: recolors only the live number and the
+   active ring stroke/glow. No animation added here — the .urgent class
+   itself is toggled every tick from stepRemaining, so color simply
+   tracks the countdown; the track (.ring-bg) and the label stay
+   neutral so the state reads as "urgent" rather than "alarm". */
+.step-ring-wrap.urgent .step-time{color:var(--timer-urgent)}
+.step-ring-wrap.urgent .ring-fill{stroke:var(--timer-urgent);filter:var(--ring-glow-urgent)}
+
+/* Service Remaining / Elapsed now live directly under the ring (inside
+   .ring-panel, not a separate grid row) — the ring is the first thing
+   the eye meets, these are the next-most-important live numbers right
+   beneath it. */
+.metrics-panel{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px}
+.metrics-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.service-remaining span,.service-elapsed span{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--w48);margin-bottom:5px}
+.service-remaining strong{font-family:var(--font-mont);font-weight:700;font-size:clamp(24px,3.2vw,32px);letter-spacing:-.02em;color:var(--w94);white-space:nowrap}
+.service-elapsed{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.service-elapsed strong{font-family:var(--font-mont);font-weight:600;font-size:clamp(17px,2vw,21px);color:var(--w68);white-space:nowrap}
+.timer-track{height:4px;background:var(--w08);border-radius:99px;position:relative;overflow:visible}
 .timer-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--warm);border-radius:99px}
-.timer-marker{position:absolute;left:0;top:50%;width:10px;height:10px;border-radius:50%;background:var(--white);border:2px solid var(--timer-bg);transform:translate(-50%,-50%)}
+.timer-marker{position:absolute;left:0;top:50%;width:9px;height:9px;border-radius:50%;background:var(--paper);border:2px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 0 0 1px var(--a36)}
 
-.timer-main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:clamp(14px,2.8vw,28px) clamp(14px,4vw,44px) 16px;-webkit-overflow-scrolling:touch}
-.timer-inner{max-width:1050px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-.status-banner{display:none;padding:10px 13px;border-left:3px solid var(--warm);background:var(--a12);border-radius:0 9px 9px 0;margin-bottom:12px;font-size:11px;line-height:1.45;color:var(--w90)}
-.status-banner.show{display:block}
-.step-clock-card{display:grid;grid-template-columns:74px minmax(0,1fr) auto;align-items:center;gap:15px;padding:14px 16px;background:var(--timer-surface);border:1px solid var(--w08);border-radius:14px;margin-bottom:15px}
-.step-ring-svg{width:72px;height:72px;transform:rotate(-90deg);flex-shrink:0}
-.ring-bg{fill:none;stroke:var(--w08);stroke-width:4}
-.ring-fill{fill:none;stroke:var(--warm);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
-.step-clock-text{min-width:0}
-.step-time{font-family:'Montserrat',sans-serif;font-size:clamp(30px,6vw,50px);font-weight:900;letter-spacing:-.05em;line-height:1;white-space:nowrap}
-.step-time.pre{font-size:clamp(24px,5vw,40px)}
-.step-meta{font-size:9px;color:var(--w48);margin-top:4px;line-height:1.4}
-.step-meta strong{color:var(--warm);font-weight:600}
-.phase-pill{font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--warm);text-align:right;align-self:start;padding-top:5px;max-width:120px;line-height:1.3}
-.step-eyebrow{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm);margin-bottom:8px;display:flex;align-items:center;gap:9px}
+/* Secondary ring detail (next landmark / reference allocation) — moved
+   OUT of the ring's own text so the ring center stays to one number and
+   one label. Left-aligned under the service-progress line like a
+   compact metric readout rather than a centered caption; quietest tone
+   in the column; collapses to nothing (no stray gap) when empty. */
+.ring-support{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.03em;color:var(--w32);line-height:1.5;text-align:left;width:100%;max-width:280px}
+.ring-support:empty{display:none}
+.ring-support strong{color:var(--w48);font-weight:600}
+
+.step-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.step-eyebrow{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--w90);display:flex;align-items:center;gap:9px}
 .step-eyebrow::before{content:'';width:16px;height:1px;background:var(--a36)}
-.step-title{font-family:'Montserrat',sans-serif;font-size:clamp(27px,6vw,58px);font-weight:900;letter-spacing:-.04em;line-height:.95;text-transform:uppercase;margin-bottom:12px;overflow-wrap:anywhere}
-.step-purpose{font-size:clamp(14px,2vw,18px);line-height:1.6;color:var(--w68);font-weight:300;max-width:880px;margin-bottom:13px}
-.guide-box{padding:13px 15px;border-left:3px solid var(--warm);border-top:1px solid var(--a20);border-right:1px solid var(--a20);border-bottom:1px solid var(--a20);border-radius:0 10px 10px 0;background:var(--a12);margin-bottom:11px;max-width:900px}
-.guide-label{font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--warm);display:block;margin-bottom:5px}
-.guide-text{font-size:clamp(13px,1.8vw,16px);line-height:1.52;color:var(--w90)}
-.comm-box{display:none;padding:11px 13px;border:1px solid var(--w08);border-radius:10px;background:var(--timer-surface);max-width:900px;margin-bottom:11px}
+.phase-pill{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--warm);padding:3px 10px;border:1px solid var(--a20);border-radius:999px;background:var(--a12)}
+
+.step-title{font-family:var(--font-mont);font-weight:800;font-size:clamp(28px,4.2vw,42px);letter-spacing:-.02em;line-height:1.04;text-transform:uppercase;color:var(--w94);overflow-wrap:anywhere}
+.step-purpose{font-size:clamp(15px,1.6vw,18px);line-height:1.6;color:var(--w68);font-weight:400;max-width:760px}
+
+/* Practitioner Cue reads as an information field, not a bordered card:
+   a single slim accent bar on the left plus a wash that fades to
+   nothing (no boxed edge on the other three sides). */
+.guide-box{position:relative;padding:18px 26px 18px 28px;border-radius:4px;background:linear-gradient(90deg,rgba(255,248,240,.05),rgba(255,248,240,.015) 65%,transparent);max-width:820px}
+.guide-box::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;border-radius:2px;background:var(--warm)}
+.guide-label{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--warm);display:block;margin-bottom:10px}
+.guide-text{font-family:var(--font-sans);font-size:clamp(16px,1.7vw,19px);line-height:1.6;color:var(--w94)}
+
+/* Client Communication: readability correction pass — label, row labels
+   and body copy all sized up from the original draft, which read far
+   too small from treatment-room distance. One quiet top hairline still
+   separates it from the cue above; no per-row dividers and no filled
+   panel, so it stays structured text rather than a table or a card. */
+.comm-box{display:none;padding-top:16px;border-top:1px solid var(--w08);max-width:820px}
 .comm-box.show{display:block}
-.comm-head{font-family:'Montserrat',sans-serif;font-size:7px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--w48);margin-bottom:8px}
-.comm-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;padding:7px 0;border-top:1px solid var(--w08);align-items:start}
-.comm-row:first-of-type{border-top:0;padding-top:0}
+.comm-head{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--w48);margin-bottom:14px}
+.comm-row{display:grid;grid-template-columns:122px minmax(0,1fr);gap:16px;padding:13px 0;align-items:start}
+.comm-row:first-of-type{padding-top:0}
 .comm-row:last-child{padding-bottom:0}
-.comm-label{font-family:'Montserrat',sans-serif;font-size:7px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);padding-top:2px}
-.comm-copy{font-size:12px;line-height:1.5;color:var(--w68)}
-.next-strip{margin-top:auto;padding-top:13px;border-top:1px solid var(--w08);display:flex;justify-content:space-between;align-items:flex-start;gap:15px;color:var(--w48);font-size:9px}
-.next-strip strong{font-family:'Montserrat',sans-serif;text-transform:uppercase;font-size:10px;color:var(--w90);text-align:right;line-height:1.35}
+.comm-label{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w90);padding-top:3px}
+.comm-copy{font-size:clamp(14.5px,1.7vw,16px);line-height:1.6;color:var(--w90)}
 
-.timer-bottom{flex-shrink:0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px clamp(14px,3vw,32px) max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--w08);background:var(--timer-bg)}
-.timer-bottom button{height:50px;border-radius:10px;border:1px solid var(--w16);background:transparent;color:var(--w68);padding:0 18px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+.next-strip{padding-top:16px;border-top:1px solid var(--w08);display:flex;justify-content:space-between;align-items:baseline;gap:15px;color:var(--w48);font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.next-strip span{flex-shrink:0;white-space:nowrap}
+.next-strip strong{font-family:var(--font-mont);text-transform:none;letter-spacing:0;font-size:14px;color:var(--w90);text-align:right;line-height:1.3;font-weight:600}
+
+.timer-bottom{flex-shrink:0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:12px clamp(14px,3vw,32px) max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--w08);background:var(--bg)}
+.timer-bottom button{height:50px;border-radius:10px;border:1px solid var(--w16);background:transparent;color:var(--w68);padding:0 18px;font-family:var(--font-mont);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
 .timer-bottom button:disabled{opacity:.22;cursor:not-allowed}
-.timer-bottom .next-btn{background:var(--white);color:var(--timer-surface);border-color:var(--white);min-width:128px}
-.bottom-hint{text-align:center;font-size:8px;line-height:1.35;color:var(--w28);letter-spacing:.05em;text-transform:uppercase}
+.timer-bottom button:hover:not(:disabled){border-color:var(--w32)}
+.timer-bottom .next-btn{background:var(--paper);color:var(--surface-2);border-color:var(--paper)}
+.timer-bottom .next-btn:hover:not(:disabled){background:var(--warm);border-color:var(--warm);color:var(--bg)}
+.bottom-hint{text-align:center;font-family:var(--font-mono);font-size:9px;line-height:1.35;color:var(--w32);letter-spacing:.06em;text-transform:uppercase}
 
-.pause-overlay,.exit-dialog,.complete-screen{position:absolute;inset:0;z-index:30;background:rgba(15,13,11,.95);display:none;align-items:center;justify-content:center;text-align:center;padding:28px}
+.pause-overlay,.exit-dialog,.complete-screen{position:absolute;inset:0;z-index:30;background:rgba(15,13,11,.92);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;text-align:center;padding:28px}
 .pause-overlay.show,.exit-dialog.show,.complete-screen.show{display:flex}
-.overlay-card{width:min(470px,100%)}
-.overlay-kicker{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--warm);margin-bottom:12px}
-.overlay-title{font-family:'Montserrat',sans-serif;font-size:clamp(36px,9vw,64px);font-weight:900;letter-spacing:-.05em;line-height:.92;text-transform:uppercase;margin-bottom:14px}
-.overlay-copy{font-size:14px;line-height:1.6;color:var(--w68);max-width:420px;margin:0 auto 22px}
-.overlay-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px}
-.overlay-actions button{min-height:50px;border-radius:999px;padding:0 20px;border:1px solid var(--w16);background:transparent;color:var(--w90);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.overlay-actions .primary{background:var(--white);color:var(--timer-bg);border-color:var(--white)}
-.complete-time{font-family:'Montserrat',sans-serif;font-size:14px;color:var(--warm);letter-spacing:.08em;margin-bottom:10px}
-.transition-toast{position:absolute;left:50%;bottom:76px;z-index:15;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--timer-s3);border:1px solid var(--a20);border-radius:999px;padding:9px 15px;font-size:10px;color:var(--w90);white-space:nowrap;transition:opacity .2s,transform .2s;max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
+.overlay-card{width:min(460px,100%)}
+.overlay-kicker{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);margin-bottom:14px}
+.overlay-title{font-family:var(--font-mont);font-size:clamp(34px,8vw,58px);font-weight:800;letter-spacing:-.02em;line-height:.98;text-transform:uppercase;color:var(--w94);margin-bottom:16px}
+.overlay-copy{font-size:14px;line-height:1.6;color:var(--w68);max-width:400px;margin:0 auto 24px}
+.overlay-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+.overlay-actions button{min-height:48px;border-radius:999px;padding:0 22px;border:1px solid var(--w16);background:transparent;color:var(--w90);font-family:var(--font-mont);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.overlay-actions button:hover:not(.primary){border-color:var(--w32);color:var(--paper)}
+.overlay-actions .primary{background:var(--paper);color:var(--bg);border-color:var(--paper)}
+.overlay-actions .primary:hover{background:var(--warm);border-color:var(--warm)}
+.complete-time{font-family:var(--font-mono);font-size:13px;color:var(--warm);letter-spacing:.06em;margin-bottom:14px;text-transform:uppercase}
+.complete-ring{width:96px;height:96px;margin:0 auto 20px;display:block;transform:rotate(-90deg);overflow:visible}
+.complete-ring-track{fill:none;stroke:var(--w08);stroke-width:3}
+.complete-ring-fill{fill:none;stroke:var(--paper);stroke-width:3;stroke-linecap:round;stroke-dasharray:188.5;stroke-dashoffset:0;filter:var(--ring-glow)}
+
+.transition-toast{position:absolute;left:50%;bottom:82px;z-index:15;transform:translateX(-50%) translateY(8px);opacity:0;pointer-events:none;background:var(--surface-3);border:1px solid var(--a20);border-radius:999px;padding:10px 16px;font-family:var(--font-mont);font-size:11px;font-weight:600;color:var(--w94);white-space:nowrap;transition:opacity .2s,transform .2s;max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
 .transition-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @media (max-width:820px){
-  .hero-inner,.section-head,.read-grid,.logic-wrap{grid-template-columns:1fr}
-  .hero h1{max-width:700px}
-  .section-head{gap:16px}
-  .format-grid,.launch-grid{grid-template-columns:1fr}
-  .logic-wrap{gap:14px}
+  .protocol-grid,.spec-grid,.read-grid{grid-template-columns:1fr}
 }
 @media (max-width:600px){
-  .sitebar{padding:14px 18px}.sitecontext{display:none}
+  .tool-bar{padding:14px 18px}
   .hero,.section{padding-left:18px;padding-right:18px}
-  .hero{padding-top:48px}
-  .hero h1{font-size:clamp(48px,18vw,76px)}
-  .hero h1 span{font-size:.14em;margin-top:17px;letter-spacing:.22em}
-  .format-card,.launch-card{border-radius:18px}
-  .table-card{overflow-x:auto}
-  .compare-table{min-width:650px}
-  .demo-shell{border-radius:18px;padding:14px}
-  .demo-card{grid-template-columns:64px 1fr}.demo-phase{display:none}.demo-ring{width:58px;height:58px;font-size:14px}
-  .resume-bar{align-items:flex-start;flex-direction:column}
-  .timer-top{padding-left:12px;padding-right:12px}
+  .hero-copy{grid-template-columns:1fr}
+  .spec-table-card{overflow-x:auto}
+  .spec-table{min-width:600px}
+  .timer-top-row{grid-template-columns:1fr auto}
   .timer-format{display:none}
-  .timer-top button{padding:0 10px}
-  .timer-service-row{gap:8px;grid-template-columns:auto 1fr auto}
-  .step-clock-card{grid-template-columns:58px minmax(0,1fr) auto;padding:12px;gap:11px}
-  .step-ring-svg{width:56px;height:56px}
-  .phase-pill{max-width:86px;font-size:7px}
-  .timer-bottom{grid-template-columns:1fr 1fr;padding-left:12px;padding-right:12px}
+  .timer-controls button{padding:0 10px}
+  .timer-bottom{grid-template-columns:1fr 1fr}
   .timer-bottom button{width:100%;padding:0 10px}
   .bottom-hint{grid-column:1/-1;grid-row:2}
-  .comm-row{grid-template-columns:1fr;gap:3px}
+  .comm-row{grid-template-columns:1fr;gap:6px;padding:11px 0}
 }
 @media (max-width:360px){
   .service-elapsed span{display:none}
-  .service-remaining strong{font-size:14px}
-  .step-clock-card{grid-template-columns:52px 1fr;gap:10px}.step-ring-svg{width:50px;height:50px}.phase-pill{grid-column:2;text-align:left;padding-top:0}
-  .timer-bottom button{font-size:9px}
+  .step-time{font-size:clamp(30px,10vw,40px)}
+}
+@media (max-height:740px){
+  .timer-main{padding-top:10px;padding-bottom:10px}
+  .timer-body{gap:clamp(14px,2.2vh,22px)}
+  .guidance-panel{gap:clamp(12px,1.8vh,18px)}
+  .ring-panel{gap:14px}
+  .step-ring-wrap{width:clamp(150px,22vh,210px);height:clamp(150px,22vh,210px)}
+  .step-time{font-size:clamp(32px,6.5vh,52px)}
+  .step-time-label{font-size:9px;letter-spacing:.08em;margin-top:8px}
+  .guide-box{padding:12px 16px 12px 18px}
+  .guide-text{font-size:clamp(14px,1.8vh,17px)}
+  .comm-row{padding:9px 0}
 }
 @media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}.ring-fill,.transition-toast{transition:none!important}
+  html{scroll-behavior:auto}
+  .ring-fill,.transition-toast,.protocol-card,.timer-controls button,.timer-bottom button,.overlay-actions button{transition:none!important}
 }
-.access-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:13px;letter-spacing:.05em;color:var(--muted)}
+.access-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--w48);background:var(--bg)}
 </style>
 </head>
 <body>
 <div class="access-gate" id="accessGate">Checking your AIMT access…</div>
 <div class="resource-page" id="resource-page" style="display:none">
-  <header class="sitebar">
-    <div class="sitebrand">AIMT · Service Timer</div>
-    <div class="sitecontext">Module 8 · Practitioner Resource</div>
+  <header class="tool-bar">
+    <div class="tool-id">
+      <svg class="tool-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
+      <div class="tool-wordmark"><span class="tool-name">AIMT</span><span class="tool-product">Service Timer</span></div>
+    </div>
+    <div class="tool-context">Module 8 · Practitioner Tool</div>
   </header>
 
   <main>
     <section class="hero">
       <div class="hero-inner">
-        <div>
-          <div class="eyebrow">American Institute of Modern Trichology</div>
-          <h1>Service Timer<span>Head Spa Pacing Companion</span></h1>
+        <div class="eyebrow">AIMT · Service Timer</div>
+        <h1>Your Service,<br>In Real Time.</h1>
+        <div class="hero-copy">
+          <p class="hero-lead">A live pacing companion for the AIMT Core and Extended head spa protocols.</p>
+          <p class="hero-note">Follow each phase, timing landmark, practitioner cue, and transition while the service is in progress.</p>
         </div>
-        <div class="hero-side">
-          <p class="hero-lead">Use the AIMT reference formats to understand how a complete Head Spa service contracts and expands without simply speeding every technique up or stretching every step equally.</p>
-          <p class="hero-note">The reference timing is designed to support practitioner judgment, service flow and client comfort. Your business can name and package its services however it chooses.</p>
-          <div class="hero-actions">
-            <a class="btn-primary" href="#formats">Understand the formats</a>
-            <a class="btn-ghost" href="#launch">Open the timer</a>
-          </div>
+        <div class="hero-actions">
+          <a class="btn-primary" href="#launch">Open a Protocol</a>
+          <a class="btn-ghost" href="#read-timer">How to Read the Timer</a>
         </div>
       </div>
     </section>
 
-    <section class="section" id="formats">
+    <section class="section" id="launch">
       <div class="section-inner">
         <div class="section-head">
-          <div class="section-num">01 · Understand the service</div>
-          <div>
-            <h2 class="section-title">The clock follows the protocol.</h2>
-            <p class="section-copy">Core and Extended describe how the same service framework contracts or expands. They are not menu names, and they are not universal industry appointment lengths. In this Timer, AIMT uses two concrete reference protocols so students can learn pacing from a real service structure.</p>
-          </div>
+          <div class="section-num">01 · Choose the Reference Format</div>
+          <h2 class="section-title">Two premium operating modes.</h2>
+          <p class="section-copy">Starting a service enters an immersive Timer-only mode. The tool interface disappears so the clock, current step and next transition are the only things competing for your attention.</p>
         </div>
 
-        <div class="format-grid">
-          <article class="format-card">
-            <div class="format-kicker">AIMT Reference Protocol</div>
-            <h3>Core Format</h3>
-            <div class="format-time">60 min</div>
-            <p>The condensed complete reference. It preserves the essential service flow while keeping expandable massage, sensory and bodywork portions tighter.</p>
+        <div class="protocol-grid">
+          <article class="protocol-card">
+            <div class="protocol-tag">AIMT Reference Protocol</div>
+            <h3 class="protocol-name">Core Format</h3>
+            <div class="protocol-minutes">60<span>min</span></div>
+            <p>A complete condensed service flow. The treatment clock begins after the pre-timer opening and runs from 60:00 to 0:00.</p>
+            <button type="button" data-start-format="core">Open Core Timer →</button>
           </article>
-          <article class="format-card">
-            <div class="format-kicker">AIMT Reference Protocol</div>
-            <h3>Extended Format</h3>
-            <div class="format-time">90 min</div>
-            <p>The more expansive reference. Additional time is directed intentionally toward selected massage, bodywork, sensory and treatment portions rather than distributed proportionally across every step.</p>
+          <article class="protocol-card">
+            <div class="protocol-tag">AIMT Reference Protocol</div>
+            <h3 class="protocol-name">Extended Format</h3>
+            <div class="protocol-minutes">90<span>min</span></div>
+            <p>A more expansive service flow with additional time directed toward selected massage, bodywork and treatment portions.</p>
+            <button type="button" data-start-format="extended">Open Extended Timer →</button>
           </article>
         </div>
 
-        <div class="logic-wrap">
-          <div class="table-card" aria-label="Core and Extended timing comparison">
-            <table class="compare-table">
-              <thead><tr><th>Protocol block</th><th>Core</th><th>Extended</th><th>What the comparison teaches</th></tr></thead>
-              <tbody>
-                <tr><td>Dry opening</td><td>15 min</td><td>15 min</td><td class="behavior">Fixed reference anchor</td></tr>
-                <tr><td>Halo + wet massage</td><td>3 min</td><td>5 min</td><td class="behavior">Small scalable range</td></tr>
-                <tr><td>Exfoliation + massage + rinse</td><td>10 min</td><td>10 min</td><td class="behavior">Fixed reference anchor</td></tr>
-                <tr><td>Treatment massage / bodywork</td><td>12 min</td><td>30 min</td><td class="behavior">Primary expansion zone</td></tr>
-                <tr><td>Rinse + cleanse preparation</td><td>5 min</td><td>3 min</td><td class="behavior">Operational / constrained transition</td></tr>
-                <tr><td>Shampoo + rinse</td><td>5 min</td><td>7 min</td><td class="behavior">Slightly scalable</td></tr>
-                <tr><td>Conditioning portion</td><td>8 min</td><td>10 min</td><td class="behavior">Scalable; Extended adds bodywork</td></tr>
-                <tr><td>Final rinse + Halo massage</td><td>—</td><td>8 min</td><td class="behavior">Extended-format component</td></tr>
-                <tr><td>Cooling drops + hot towel finish</td><td>2 min</td><td>2 min</td><td class="behavior">Fixed reference anchor</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <aside class="principle-card">
-            <h4>Why this matters</h4>
-            <p><strong>More time does not mean more time everywhere.</strong> The 90-minute reference earns its additional time primarily through expandable experience-building portions.</p>
-            <p>Some transitions, rinses and product requirements are constrained by what the service actually needs. They should not be stretched merely to fill time.</p>
-            <p>At the other end, a service cannot be compressed indefinitely. Once important components must be removed rather than shortened, it becomes a deliberately different protocol.</p>
-          </aside>
+        <div class="resume-bar" id="resume-bar">
+          <div class="resume-copy"><strong id="resume-title">Active service paused</strong><span id="resume-detail"></span></div>
+          <div class="resume-actions"><button type="button" id="discard-session">Discard</button><button type="button" class="resume-primary" id="resume-session">Resume Timer →</button></div>
         </div>
-
-        <div class="callout"><strong>Current AIMT Timer scope:</strong> the Core (60) and Extended (90) reference protocols. A different service length needs its own deliberately designed pacing map, not a compressed or stretched version of this one — for now, this Timer runs Core and Extended.</div>
       </div>
     </section>
 
     <section class="section" id="read-timer">
       <div class="section-inner">
         <div class="section-head">
-          <div class="section-num">02 · Read the timer</div>
-          <div>
-            <h2 class="section-title">Use landmarks, not pressure.</h2>
-            <p class="section-copy">The Timer is a pacing companion. It helps you see where you are in the complete service, what you are doing now, and what transition is coming next. It is not a pass/fail stopwatch and should never override client comfort, safety, product directions or practitioner judgment.</p>
-          </div>
+          <div class="section-num">02 · Read the Timer</div>
+          <h2 class="section-title">Use landmarks, not pressure.</h2>
+          <p class="section-copy">The Timer is a pacing companion. It helps you see where you are in the complete service, what you are doing now, and what transition is coming next. It is not a pass/fail stopwatch and should never override client comfort, safety, product directions or practitioner judgment.</p>
         </div>
 
         <div class="read-grid">
@@ -373,37 +461,40 @@ body.timer-open{overflow:hidden}
       </div>
     </section>
 
-    <section class="section launch-section" id="launch">
+    <section class="section" id="specification">
       <div class="section-inner">
         <div class="section-head">
-          <div class="section-num">03 · Start the service</div>
-          <div>
-            <h2 class="section-title">Choose the reference format.</h2>
-            <p class="section-copy">Starting a service enters an immersive Timer-only mode. The education page disappears so the clock, current step and next transition are the only things competing for your attention.</p>
+          <div class="section-num">03 · Protocol Specification</div>
+          <h2 class="section-title">The clock follows the protocol.</h2>
+          <p class="section-copy">Core and Extended describe how the same service framework contracts or expands. They are not menu names, and they are not universal industry appointment lengths. In this Timer, AIMT uses two concrete reference protocols so students can learn pacing from a real service structure.</p>
+        </div>
+
+        <div class="spec-grid">
+          <div class="spec-table-card" aria-label="Core and Extended timing comparison">
+            <table class="spec-table">
+              <thead><tr><th>Protocol block</th><th>Core</th><th>Extended</th><th>What the comparison teaches</th></tr></thead>
+              <tbody>
+                <tr><td>Dry opening</td><td>15 min</td><td>15 min</td><td class="spec-behavior">Fixed reference anchor</td></tr>
+                <tr><td>Halo + wet massage</td><td>3 min</td><td>5 min</td><td class="spec-behavior">Small scalable range</td></tr>
+                <tr><td>Exfoliation + massage + rinse</td><td>10 min</td><td>10 min</td><td class="spec-behavior">Fixed reference anchor</td></tr>
+                <tr><td>Treatment massage / bodywork</td><td>12 min</td><td>30 min</td><td class="spec-behavior">Primary expansion zone</td></tr>
+                <tr><td>Rinse + cleanse preparation</td><td>5 min</td><td>3 min</td><td class="spec-behavior">Operational / constrained transition</td></tr>
+                <tr><td>Shampoo + rinse</td><td>5 min</td><td>7 min</td><td class="spec-behavior">Slightly scalable</td></tr>
+                <tr><td>Conditioning portion</td><td>8 min</td><td>10 min</td><td class="spec-behavior">Scalable; Extended adds bodywork</td></tr>
+                <tr><td>Final rinse + Halo massage</td><td>—</td><td>8 min</td><td class="spec-behavior">Extended-format component</td></tr>
+                <tr><td>Cooling drops + hot towel finish</td><td>2 min</td><td>2 min</td><td class="spec-behavior">Fixed reference anchor</td></tr>
+              </tbody>
+            </table>
           </div>
+          <aside class="principle-card">
+            <h4>Why this matters</h4>
+            <p><strong>More time does not mean more time everywhere.</strong> The 90-minute reference earns its additional time primarily through expandable experience-building portions.</p>
+            <p>Some transitions, rinses and product requirements are constrained by what the service actually needs. They should not be stretched merely to fill time.</p>
+            <p>At the other end, a service cannot be compressed indefinitely. Once important components must be removed rather than shortened, it becomes a deliberately different protocol.</p>
+          </aside>
         </div>
 
-        <div class="launch-grid">
-          <article class="launch-card">
-            <div class="tag">Reference Protocol</div>
-            <h3>Core Format</h3>
-            <div class="minutes">60</div>
-            <p>A complete condensed service flow. The treatment clock begins after the pre-timer opening and runs from 60:00 to 0:00.</p>
-            <button type="button" data-start-format="core">Open Core Timer →</button>
-          </article>
-          <article class="launch-card">
-            <div class="tag">Reference Protocol</div>
-            <h3>Extended Format</h3>
-            <div class="minutes">90</div>
-            <p>A more expansive service flow with additional time directed toward selected massage, bodywork and treatment portions.</p>
-            <button type="button" data-start-format="extended">Open Extended Timer →</button>
-          </article>
-        </div>
-
-        <div class="resume-bar" id="resume-bar">
-          <div class="resume-copy"><strong id="resume-title">Active service paused</strong><span id="resume-detail"></span></div>
-          <div class="resume-actions"><button type="button" id="discard-session">Discard</button><button type="button" class="resume-primary" id="resume-session">Resume Timer →</button></div>
-        </div>
+        <div class="callout"><strong>Current AIMT Timer scope:</strong> the Core (60) and Extended (90) reference protocols. A different service length needs its own deliberately designed pacing map, not a compressed or stretched version of this one — for now, this Timer runs Core and Extended.</div>
       </div>
     </section>
   </main>
@@ -415,41 +506,61 @@ body.timer-open{overflow:hidden}
 <div class="timer-app" id="timer-app" aria-hidden="true">
   <div class="timer-top">
     <div class="timer-top-row">
-      <div class="timer-brand" id="timer-brand">AIMT · Service Timer</div>
-      <div class="timer-format" id="timer-format"></div>
-      <button type="button" id="pause-btn" disabled aria-pressed="false">Pause</button>
-      <button type="button" id="exit-btn">Exit Timer</button>
-    </div>
-    <div class="timer-service-row">
-      <div class="service-remaining"><span id="service-label">Service remaining</span><strong id="service-remaining">PRE-TIMER</strong></div>
-      <div class="timer-track" id="timer-track" role="progressbar" aria-label="Overall treatment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-        <div class="timer-fill" id="timer-fill"></div><div class="timer-marker" id="timer-marker"></div>
+      <div class="timer-id">
+        <svg class="timer-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
+        <div class="timer-brand" id="timer-brand">AIMT · Service Timer</div>
       </div>
-      <div class="service-elapsed"><span>Elapsed</span><strong id="service-elapsed">0:00</strong></div>
+      <div class="timer-format" id="timer-format"></div>
+      <div class="timer-controls">
+        <button type="button" id="pause-btn" disabled aria-pressed="false">Pause</button>
+        <button type="button" id="exit-btn">Exit</button>
+      </div>
     </div>
   </div>
 
   <div class="timer-main" id="timer-main" tabindex="-1">
     <div class="timer-inner">
       <div class="status-banner" id="status-banner"></div>
-      <div class="step-clock-card">
-        <svg class="step-ring-svg" viewBox="0 0 72 72" aria-hidden="true">
-          <circle class="ring-bg" cx="36" cy="36" r="30"></circle>
-          <circle class="ring-fill" id="ring-fill" cx="36" cy="36" r="30"></circle>
-        </svg>
-        <div class="step-clock-text">
-          <div class="step-time pre" id="step-time">PRE</div>
-          <div class="step-meta" id="step-meta">Treatment clock not running</div>
-        </div>
-        <div class="phase-pill" id="phase-pill">Pre-Timer Opening</div>
-      </div>
 
-      <div class="step-eyebrow" id="step-eyebrow">Step 01 · Pre-Timer Opening</div>
-      <h2 class="step-title" id="step-title">Aromatherapy</h2>
-      <p class="step-purpose" id="step-purpose"></p>
-      <div class="guide-box"><span class="guide-label">Practitioner cue</span><div class="guide-text" id="guide-text"></div></div>
-      <div class="comm-box" id="comm-box"></div>
-      <div class="next-strip" id="next-strip"><span>Up next →</span><strong id="up-next"></strong></div>
+      <div class="timer-body">
+        <div class="ring-panel">
+          <div class="step-ring-wrap" id="step-ring-wrap">
+            <div class="ring-ambient" aria-hidden="true"></div>
+            <svg class="step-ring-svg" viewBox="0 0 72 72" overflow="visible" aria-hidden="true">
+              <circle class="ring-bg" cx="36" cy="36" r="30"></circle>
+              <circle class="ring-fill" id="ring-fill" cx="36" cy="36" r="30"></circle>
+            </svg>
+            <div class="step-clock-text">
+              <div class="step-time pre" id="step-time">PRE</div>
+              <div class="step-time-label" id="step-time-label">Treatment clock not running</div>
+            </div>
+          </div>
+
+          <div class="metrics-panel">
+            <div class="metrics-row">
+              <div class="service-remaining"><span id="service-label">Service remaining</span><strong id="service-remaining">PRE-TIMER</strong></div>
+              <div class="service-elapsed"><span>Elapsed</span><strong id="service-elapsed">0:00</strong></div>
+            </div>
+            <div class="timer-track" id="timer-track" role="progressbar" aria-label="Overall treatment progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="timer-fill" id="timer-fill"></div><div class="timer-marker" id="timer-marker"></div>
+            </div>
+          </div>
+
+          <div class="ring-support" id="step-meta"></div>
+        </div>
+
+        <div class="guidance-panel">
+          <div class="step-meta-row">
+            <div class="step-eyebrow" id="step-eyebrow">Step 01 · Pre-Timer Opening</div>
+            <div class="phase-pill" id="phase-pill">Pre-Timer Opening</div>
+          </div>
+          <h2 class="step-title" id="step-title">Aromatherapy</h2>
+          <p class="step-purpose" id="step-purpose"></p>
+          <div class="guide-box"><span class="guide-label">Practitioner cue</span><div class="guide-text" id="guide-text"></div></div>
+          <div class="comm-box" id="comm-box"></div>
+          <div class="next-strip" id="next-strip"><span>Up next</span><strong id="up-next"></strong></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -464,14 +575,14 @@ body.timer-open{overflow:hidden}
       <div class="overlay-kicker">Service clock paused</div>
       <div class="overlay-title" id="pause-title">Paused</div>
       <div class="overlay-copy">Both the overall treatment clock and the current-step clock are stopped. Resume when you are ready to continue.</div>
-      <div class="overlay-actions"><button type="button" class="primary" id="resume-overlay-btn">Resume Timer</button></div>
+      <div class="overlay-actions"><button type="button" class="primary" id="resume-overlay-btn">Resume Service</button></div>
     </div>
   </div>
 
   <div class="exit-dialog" id="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title">
     <div class="overlay-card">
       <div class="overlay-kicker">Exit immersive mode</div>
-      <div class="overlay-title" id="exit-title">Leave Timer?</div>
+      <div class="overlay-title" id="exit-title">Exit Timer?</div>
       <div class="overlay-copy" id="exit-copy">Your active service will remain paused and can be resumed from this page.</div>
       <div class="overlay-actions"><button type="button" id="cancel-exit">Stay in Timer</button><button type="button" class="primary" id="confirm-exit">Exit Timer</button></div>
     </div>
@@ -479,8 +590,9 @@ body.timer-open{overflow:hidden}
 
   <div class="complete-screen" id="complete-screen" role="dialog" aria-modal="true" aria-labelledby="complete-title">
     <div class="overlay-card">
+      <svg class="complete-ring" viewBox="0 0 72 72" overflow="visible" aria-hidden="true"><circle class="complete-ring-track" cx="36" cy="36" r="30"></circle><circle class="complete-ring-fill" cx="36" cy="36" r="30"></circle></svg>
       <div class="overlay-kicker">AIMT Service Timer</div>
-      <div class="overlay-title" id="complete-title">Treatment Complete</div>
+      <div class="overlay-title" id="complete-title">Service Complete</div>
       <div class="complete-time" id="complete-time"></div>
       <div class="overlay-copy">The timed treatment is complete. The Timer ends here; checkout, client closing and pricing strategy belong outside this protocol companion.</div>
       <div class="overlay-actions"><button type="button" id="new-service-btn">Start New Service</button><button type="button" class="primary" id="complete-exit-btn">Exit Timer</button></div>
@@ -653,8 +765,8 @@ const ALL = {
   pauseBtn:document.getElementById('pause-btn'), exitBtn:document.getElementById('exit-btn'),
   serviceLabel:document.getElementById('service-label'), serviceRemaining:document.getElementById('service-remaining'), serviceElapsed:document.getElementById('service-elapsed'),
   track:document.getElementById('timer-track'), fill:document.getElementById('timer-fill'), marker:document.getElementById('timer-marker'),
-  main:document.getElementById('timer-main'), status:document.getElementById('status-banner'), ringFill:document.getElementById('ring-fill'),
-  stepTime:document.getElementById('step-time'), stepMeta:document.getElementById('step-meta'), phase:document.getElementById('phase-pill'),
+  main:document.getElementById('timer-main'), status:document.getElementById('status-banner'), ringFill:document.getElementById('ring-fill'), ringWrap:document.getElementById('step-ring-wrap'),
+  stepTime:document.getElementById('step-time'), stepTimeLabel:document.getElementById('step-time-label'), stepMeta:document.getElementById('step-meta'), phase:document.getElementById('phase-pill'),
   eyebrow:document.getElementById('step-eyebrow'), title:document.getElementById('step-title'), purpose:document.getElementById('step-purpose'),
   guide:document.getElementById('guide-text'), comm:document.getElementById('comm-box'), upNext:document.getElementById('up-next'), nextStrip:document.getElementById('next-strip'),
   back:document.getElementById('back-btn'), next:document.getElementById('next-btn'), hint:document.getElementById('bottom-hint'),
@@ -685,7 +797,13 @@ function makeSession(key){
     pauseStartMs:null,
     pausedAccumMs:0,
     completed:false,
-    exited:false
+    exited:false,
+    // Presentational only — the ring's stable visual denominator for the
+    // current timed step (see captureRingBaseline). Never read by any
+    // timing/state calculation; safe to ignore for backward-compat if a
+    // future persistence layer ever serializes session state without it.
+    ringBaselineIndex:null,
+    ringBaselineSeconds:0
   };
 }
 
@@ -786,6 +904,37 @@ function landmarkRemainingAfterStep(globalIndex){
   return Math.max(0,session.protocol.totalSeconds-cumulativeEndSeconds(timedIndex));
 }
 
+/*
+  Ring visual baseline — presentational only, never fed back into any
+  timing/state calculation.
+
+  Root cause this exists to fix: the ring's fill fraction used to be
+  computed as stepRemaining / max(plannedDuration, stepRemaining) every
+  tick. When a step is entered EARLY (the AIMT pacing rule: unused time
+  from a skipped/shortened block carries forward, service landmarks do
+  not move), stepRemaining can exceed that step's own nominal
+  plannedDuration for a while. Recomputing the denominator from that
+  same shrinking stepRemaining value every tick made it track the
+  numerator 1:1 — pct stayed pinned at 1 (ring visually frozen full)
+  until stepRemaining finally dropped below plannedDuration, at which
+  point the ring would suddenly jump instead of depleting smoothly the
+  whole time.
+
+  Fix: capture the actual time available in a step ONCE, at the moment
+  it becomes the current active step, and hold that value stable for as
+  long as the practitioner stays on that step. The service clock, the
+  displayed Step Remaining number, and the reference landmarks are
+  completely unaffected — this only changes what the RING divides by.
+*/
+function captureRingBaseline(){
+  if(!session || session.currentIndex<timedOffset()) return;
+  const available = session.treatmentStarted
+    ? stepRemainingForGlobalIndex(session.currentIndex)
+    : plannedDurationForGlobalIndex(session.currentIndex);
+  session.ringBaselineIndex=session.currentIndex;
+  session.ringBaselineSeconds=Math.max(available,1);
+}
+
 function tick(){
   if(!session || !session.treatmentStarted || session.paused || session.completed) return;
   const elapsed=getElapsed();
@@ -794,6 +943,7 @@ function tick(){
   const scheduled=scheduledGlobalIndex();
   if(scheduled>session.currentIndex){
     session.currentIndex=scheduled;
+    captureRingBaseline();
     renderStep(true);
     showToast(`Up next · ${stepsFor()[scheduled].title}`);
     announce(`Advanced to ${stepsFor()[scheduled].title}.`);
@@ -803,8 +953,8 @@ function tick(){
 
 function render(){
   if(!session) return;
-  ALL.timerBrand.textContent=`AIMT · ${session.protocol.label}`;
-  ALL.timerFormat.textContent=session.protocol.description;
+  ALL.timerBrand.textContent='AIMT · Service Timer';
+  ALL.timerFormat.textContent=`${session.protocol.key.toUpperCase()} · ${Math.round(session.protocol.totalSeconds/60)} MIN`;
   ALL.complete.classList.toggle('show',session.completed);
   ALL.pauseOverlay.classList.toggle('show',session.paused && !session.exited && !ALL.exitDialog.classList.contains('show'));
   renderStep(false);
@@ -829,7 +979,7 @@ function renderStep(fromAuto=false){
     const rows=[];
     if(step.communication.proactive) rows.push(`<div class="comm-row"><div class="comm-label">Say when needed</div><div class="comm-copy">${escapeHTML(step.communication.proactive)}</div></div>`);
     if(step.communication.ifAsked) rows.push(`<div class="comm-row"><div class="comm-label">If they ask</div><div class="comm-copy">${escapeHTML(step.communication.ifAsked)}</div></div>`);
-    ALL.comm.innerHTML=`<div class="comm-head">Communication cue · explain intentionally, not continuously</div>${rows.join('')}`;
+    ALL.comm.innerHTML=`<div class="comm-head">Client Communication</div>${rows.join('')}`;
     ALL.comm.classList.toggle('show',rows.length>0);
   } else { ALL.comm.textContent=''; }
 
@@ -845,8 +995,10 @@ function renderStep(fromAuto=false){
     ALL.pauseBtn.disabled=true;
     ALL.hint.textContent='Pre-timer opening · no treatment time running';
     ALL.stepTime.textContent='PRE';
-    ALL.stepMeta.textContent='Treatment clock not running';
+    ALL.stepTimeLabel.textContent='Treatment clock not running';
+    ALL.stepMeta.textContent='';
     ALL.ringFill.style.strokeDashoffset='0';
+    ALL.ringWrap.classList.remove('urgent');
   } else if(!session.treatmentStarted){
     ALL.back.disabled=false;
     ALL.next.disabled=false;
@@ -857,8 +1009,10 @@ function renderStep(fromAuto=false){
     ALL.status.classList.add('show');
     const planned=plannedDurationForGlobalIndex(session.currentIndex);
     ALL.stepTime.textContent=fmt(planned);
-    ALL.stepMeta.innerHTML=`reference allocation · <strong>${fmt(planned)}</strong>`;
+    ALL.stepTimeLabel.textContent='Step allocation';
+    ALL.stepMeta.textContent='';
     ALL.ringFill.style.strokeDashoffset='0';
+    ALL.ringWrap.classList.remove('urgent');
   } else {
     ALL.pauseBtn.disabled=false;
     ALL.next.disabled=session.currentIndex>=steps.length-1;
@@ -869,7 +1023,7 @@ function renderStep(fromAuto=false){
       ALL.status.textContent='This reference landmark has already passed. The overall service clock is still running.';
       ALL.status.classList.add('show');
     } else if(session.currentIndex>scheduled){
-      ALL.status.textContent='You advanced before the reference transition. The extra time remains available inside this next block; the overall service landmarks have not moved.';
+      ALL.status.textContent='Ahead of the reference transition. Extra time is available in this block; service landmarks haven’t moved.';
       ALL.status.classList.add('show');
     }
   }
@@ -886,6 +1040,7 @@ function updateClocks(){
     setProgress(0);
     ALL.pauseBtn.textContent='Pause';
     ALL.pauseBtn.setAttribute('aria-pressed','false');
+    ALL.ringWrap.classList.remove('urgent');
     return;
   }
 
@@ -901,10 +1056,22 @@ function updateClocks(){
     const stepRemaining=stepRemainingForGlobalIndex(session.currentIndex);
     const targetLandmark=landmarkRemainingAfterStep(session.currentIndex);
     ALL.stepTime.textContent=fmt(stepRemaining);
-    ALL.stepMeta.innerHTML=`next landmark · <strong>${fmt(targetLandmark)} remaining</strong> · reference ${fmt(planned)}`;
-    const denominator=Math.max(planned,stepRemaining,1);
-    const pct=Math.min(1,Math.max(0,stepRemaining/denominator));
-    ALL.ringFill.style.strokeDashoffset=String(CIRC*(1-pct));
+    ALL.stepTimeLabel.textContent='Step remaining';
+    ALL.stepMeta.innerHTML=`Next landmark · <strong>${fmt(targetLandmark)} remaining</strong> · reference ${fmt(planned)}`;
+    // Defensive fallback: every real step-change path already calls
+    // captureRingBaseline() explicitly, so this is normally a no-op —
+    // it only self-heals a baseline that's missing or stale for the
+    // current step (e.g. an unanticipated entry path).
+    if(session.ringBaselineIndex!==session.currentIndex) captureRingBaseline();
+    const pct=Math.min(1,Math.max(0,stepRemaining/session.ringBaselineSeconds));
+    // Negative dashoffset (rather than the positive CIRC*(1-pct) used
+    // before) is the actual direction fix: it moves the painted arc to
+    // the END of the circle's path instead of the start, so the
+    // depleting edge sweeps CLOCKWISE away from 12 o'clock as pct
+    // shrinks, instead of counterclockwise. Nothing else about the
+    // ring/SVG/text changes.
+    ALL.ringFill.style.strokeDashoffset=String(-(CIRC*(1-pct)));
+    ALL.ringWrap.classList.toggle('urgent', stepRemaining<=10 && stepRemaining>0);
   }
   ALL.pauseBtn.textContent=session.paused?'Resume':'Pause';
   ALL.pauseBtn.setAttribute('aria-pressed',session.paused?'true':'false');
@@ -922,6 +1089,7 @@ function startTreatment(){
   session.serviceStartMs=Date.now();
   session.paused=false; session.pausedAccumMs=0; session.pauseStartMs=null;
   ALL.pauseBtn.disabled=false;
+  captureRingBaseline();
   renderStep(false); updateClocks(); startTicker();
   announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
 }
@@ -933,6 +1101,7 @@ function manualNext(){
   if(!session.treatmentStarted && !isPre){ startTreatment(); return; }
   if(session.currentIndex>=steps.length-1) return;
   session.currentIndex++;
+  captureRingBaseline();
   renderStep(false); updateClocks();
   announce(`${steps[session.currentIndex].title}.`);
 }
@@ -948,6 +1117,7 @@ function manualBack(){
     }
   }
   session.currentIndex--;
+  captureRingBaseline();
   renderStep(false); updateClocks();
   announce(`${stepsFor()[session.currentIndex].title}.`);
 }

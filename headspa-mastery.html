@@ -2509,7 +2509,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .m8rt-timer-block { display:flex; align-items:center; gap:14px; padding:12px 14px; background:var(--rt-surface); border:0.5px solid var(--rt-w08); border-radius:12px; margin-bottom:16px; }
 .m8rt-ring { width:48px; height:48px; transform:rotate(-90deg); flex-shrink:0; }
 .m8rt-ring-bg { fill:none; stroke:var(--rt-w08); stroke-width:4; }
-.m8rt-ring-fill { fill:none; stroke:var(--rt-accent); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.m8rt-ring-fill {
+  fill:none; stroke:var(--rt-accent); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s linear;
+  /* Active-arc glow — shared tokens (assets/css/aimt-design-system.css),
+     never applied to .m8rt-ring-bg. */
+  filter:
+    drop-shadow(var(--aimt-ring-glow-tight, 0 0 4px rgba(255,255,255,0.35)))
+    drop-shadow(var(--aimt-ring-glow-soft, 0 0 10px rgba(255,255,255,0.15)));
+}
 .m8rt-time-nums { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
 .m8rt-time { font-family:'Montserrat',var(--aimt-font-mont); font-size:clamp(24px,7vw,32px); font-weight:900; letter-spacing:-0.03em; color:var(--rt-white); line-height:1; font-variant-numeric:tabular-nums; }
 .m8rt-time.urgent { color:var(--rt-red); }
@@ -12764,12 +12771,25 @@ async function hasActiveAuthorizedSession() {
   }
 }
 
+/* The actual course is an immersive product environment, not the public
+   marketing site -- once a student is inside it, the public funnel nav
+   (brand + "Begin Enrollment" CTA) and its fixed dark backer must drop
+   out, since #courseHome renders its own in-course identity/header. Both
+   real course-entry paths (straight to home, or via the intro) call this. */
+function hidePublicNav() {
+  const nav = document.querySelector('.aimt-public-nav');
+  if (nav) nav.style.display = 'none';
+  const backer = document.querySelector('.lp-nav-backer');
+  if (backer) backer.style.display = 'none';
+}
+
 async function enterPurchasedCourseHome() {
   const landingPage = document.getElementById('landingPage');
   const introScreen = document.getElementById('introScreen');
   const openCertificateView = shouldOpenCertificateView();
   const canSync = !!(window.AIMT_SYNC && window.supabaseClient);
 
+  hidePublicNav();
   if (landingPage) landingPage.style.display = 'none';
   if (introScreen) introScreen.style.display = 'none';
 
@@ -13037,6 +13057,7 @@ function hideIntro() {
 }
 
 function showCourse() {
+  hidePublicNav();
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('courseHome').classList.add('active');
   APP_STATE.setCurrentView('home');

@@ -11,9 +11,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
-<link rel="stylesheet" href="assets/css/aimt-brand.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
+<link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
+<script src="assets/js/aimt-metric-ring.js"></script>
+<script src="assets/js/aimt-readiness-config.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -67,21 +69,23 @@ a { color: inherit; }
 }
 .ra-next-btn:disabled { opacity: 0.35; cursor: default; }
 
-/* Score reveal (Oura-style dial) */
+/* Score reveal — one dominant shared AIMT metric ring (see
+   assets/css/aimt-metric-ring.css / assets/js/aimt-metric-ring.js),
+   not a page-local dial. */
 .ra-score-wrap { text-align: center; }
 .ra-score-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 1.5rem; }
-.ra-dial { position: relative; width: 220px; height: 220px; margin: 0 auto 1.5rem; }
-.ra-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ra-dial-track { stroke: rgba(255,255,255,0.08); }
-.ra-dial-fill { stroke: #a3968d; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
-.ra-dial-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ra-dial-num { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 2.6rem; line-height: 1; }
-.ra-dial-max { font-family: var(--aimt-font-mono); font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.ra-ring-area { display: flex; justify-content: center; margin-bottom: 1.75rem; }
 .ra-band-name { font-family: var(--aimt-font-mont); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 0.75rem; }
 .ra-band-copy { font-family: var(--aimt-font-sans); font-size: 0.94rem; color: rgba(255,255,255,0.62); line-height: 1.7; max-width: 52ch; margin: 0 auto; }
 
+/* Transition into the email gate — "your full profile is ready" */
+.ra-profile-ready { margin: 2.75rem 0 0; }
+.ra-profile-ready-copy { font-family: var(--aimt-font-sans); font-size: 0.92rem; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 54ch; margin: 0.65rem auto 0; }
+
 /* Email gate */
-.ra-gate-card { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.1); border-radius: var(--aimt-radius-panel); padding: clamp(1.5rem,4vw,2.5rem); margin-top: 2.5rem; }
+.ra-gate-card { background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.1); border-radius: var(--aimt-radius-panel); padding: clamp(1.5rem,4vw,2.5rem); margin-top: 1.75rem; }
+.ra-gate-headline { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.55rem; }
+.ra-gate-body { font-family: var(--aimt-font-sans); font-size: 0.86rem; color: rgba(255,255,255,0.52); line-height: 1.65; margin-bottom: 1.4rem; }
 .ra-field { margin-bottom: 1.1rem; }
 .ra-field label { display: block; font-family: var(--aimt-font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-bottom: 0.4rem; }
 .ra-field input[type="text"], .ra-field input[type="email"] {
@@ -100,29 +104,11 @@ a { color: inherit; }
 .ra-gate-note { font-family: var(--aimt-font-sans); font-size: 0.74rem; color: rgba(255,255,255,0.34); margin-top: 0.9rem; text-align: center; }
 .ra-back-link { display: block; text-align: center; margin-top: 1rem; font-family: var(--aimt-font-sans); font-size: 0.82rem; color: rgba(255,255,255,0.44); background: none; border: none; cursor: pointer; }
 
-/* Full result */
-.ra-pillar-rows { display: grid; gap: 1.1rem; margin: 2rem 0 2.5rem; }
-.ra-pillar-row-head { display: flex; justify-content: space-between; font-family: var(--aimt-font-sans); font-size: 0.88rem; color: rgba(255,255,255,0.75); margin-bottom: 0.4rem; }
-.ra-pillar-row-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-.ra-pillar-row-fill { height: 100%; background: #a3968d; border-radius: 2px; }
-.ra-priority-card { background: #2a2520; border: 0.5px solid rgba(163,150,141,0.3); border-radius: var(--aimt-radius-panel); padding: clamp(1.5rem,4vw,2.25rem); margin-bottom: 2rem; }
-.ra-priority-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.6rem; }
-.ra-priority-title { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 1.3rem; margin-bottom: 0.9rem; }
-.ra-priority-list { display: grid; gap: 0.5rem; margin: 1rem 0; padding-left: 1.2em; }
-.ra-priority-list li { font-family: var(--aimt-font-sans); font-size: 0.9rem; color: rgba(255,255,255,0.66); line-height: 1.6; }
-
-/* Bridge (dark close) */
-.ra-bridge { background: var(--aimt-color-bg-primary); text-align: center; }
-.ra-bridge h2 { font-family: var(--aimt-font-mont); font-weight: 700; font-size: clamp(1.6rem, 3.2vw, 2.2rem); margin: 1rem 0 1rem; }
-.ra-bridge p { font-family: var(--aimt-font-sans); font-size: 0.92rem; color: rgba(255,255,255,0.6); line-height: 1.75; max-width: 56ch; margin: 0 auto 1.75rem; }
-.ra-bridge-ctas { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
-
 .ra-panel { display: none; }
 .ra-panel.is-active { display: block; }
 
 @media (max-width: 700px) {
   .ra-stage { padding: calc(var(--aimt-nav-height) + 3rem) 1.25rem 3.5rem; }
-  .ra-dial { width: 180px; height: 180px; }
 }
 </style>
 </head>
@@ -132,7 +118,7 @@ a { color: inherit; }
      visual source of truth: index.html) ══ -->
 <nav class="aimt-public-nav aimt-public-nav--fixed">
   <a href="index.html" class="aimt-public-nav-mark">
-    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg>
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
   </a>
   <a href="index.html" class="aimt-public-nav-wordmark">
     <span class="aimt-public-nav-name">AIMT</span>
@@ -196,69 +182,29 @@ a { color: inherit; }
 <section class="ra-stage ra-panel" id="raScorePanel">
   <div class="ra-inner ra-score-wrap">
     <div class="ra-score-eyebrow">Your AIMT Readiness Score</div>
-    <div class="ra-dial">
-      <svg viewBox="0 0 200 200">
-        <circle class="ra-dial-track" cx="100" cy="100" r="88" fill="none" stroke-width="10"/>
-        <circle class="ra-dial-fill" id="raDialFill" cx="100" cy="100" r="88" fill="none" stroke-width="10" stroke-dasharray="553" stroke-dashoffset="553"/>
-      </svg>
-      <div class="ra-dial-value">
-        <div class="ra-dial-num" id="raScoreNum">0</div>
-        <div class="ra-dial-max">/ 100</div>
-      </div>
-    </div>
+    <div class="ra-ring-area" id="raRingArea"></div>
     <div class="ra-band-name" id="raBandName">—</div>
     <p class="ra-band-copy" id="raBandCopy"></p>
 
+    <div class="ra-profile-ready">
+      <div class="ra-score-eyebrow">Your Full Profile Is Ready</div>
+      <p class="ra-profile-ready-copy">See your five-part breakdown, strongest area, first priority, and personalized next steps — then keep the profile inside a preview of My AIMT.</p>
+    </div>
+
     <div class="ra-gate-card">
-      <div style="font-family:var(--aimt-font-mont);font-weight:700;font-size:1.05rem;margin-bottom:0.5rem;">Unlock your five-part breakdown and personalized action plan.</div>
-      <p style="font-family:var(--aimt-font-sans);font-size:0.86rem;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:1.3rem;">Enter your email to see exactly which of the five areas is your first priority, with practical next steps.</p>
+      <div class="ra-gate-headline">Your full Readiness Profile is ready.</div>
+      <p class="ra-gate-body">Enter your details to open your personalized profile in My AIMT. We’ll also send a copy of your results to your inbox.</p>
       <form id="raGateForm">
         <div class="ra-field"><label for="raFirstName">First name</label><input type="text" id="raFirstName" required autocomplete="given-name"></div>
         <div class="ra-field"><label for="raEmail">Email</label><input type="email" id="raEmail" required autocomplete="email"></div>
         <div class="ra-consent">
           <input type="checkbox" id="raConsent">
-          <label for="raConsent">Send me AIMT practitioner education, resources, and certification updates. I can unsubscribe at any time. (Optional — your report unlocks either way.)</label>
+          <label for="raConsent">Send me occasional AIMT practitioner education, resources, and certification updates.</label>
         </div>
-        <button type="submit" class="ra-submit-btn" id="raSubmitBtn">Send My Full Report →</button>
-        <p class="ra-gate-note">No account created. See our <a href="privacy.html" style="text-decoration:underline;">Privacy Policy</a>.</p>
+        <button type="submit" class="ra-submit-btn" id="raSubmitBtn">View My Full Profile →</button>
+        <p class="ra-gate-note">No account is created yet. Your preview is saved on this browser. See our <a href="privacy.html" style="text-decoration:underline;">Privacy Policy</a>.</p>
       </form>
       <button type="button" class="ra-back-link" id="raBackToAnswers">← Back to my answers</button>
-    </div>
-  </div>
-</section>
-
-<!-- FULL RESULT -->
-<section class="ra-stage ra-panel" id="raResultPanel">
-  <div class="ra-inner">
-    <div class="ra-score-eyebrow">Your AIMT Readiness Profile</div>
-    <h2 style="font-family:var(--aimt-font-mont);font-weight:800;font-size:clamp(1.6rem,3.4vw,2.2rem);margin-bottom:1.75rem;" id="raResultBandTitle">—</h2>
-
-    <div class="ra-pillar-rows" id="raPillarRows"></div>
-
-    <div class="ra-priority-card">
-      <div class="ra-priority-eyebrow">Your First Priority</div>
-      <div class="ra-priority-title" id="raPriorityTitle">—</div>
-      <p style="font-family:var(--aimt-font-sans);font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.7;" id="raPriorityAffects"></p>
-      <ul class="ra-priority-list" id="raPriorityActions"></ul>
-      <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark" id="raPriorityCta" style="margin-top:0.5rem;">See How AIMT Builds This Skill →</a>
-    </div>
-
-    <div style="text-align:center;">
-      <div style="font-family:var(--aimt-font-mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(163,150,141,0.7);margin-bottom:1rem;">Your Strongest Area</div>
-      <p style="font-family:var(--aimt-font-sans);font-size:0.92rem;color:rgba(255,255,255,0.62);margin-bottom:2rem;" id="raStrongestText"></p>
-    </div>
-  </div>
-</section>
-
-<!-- COURSE BRIDGE -->
-<section class="ra-stage ra-bridge ra-panel" id="raBridgePanel">
-  <div class="ra-inner">
-    <span class="aimt-sp-eyebrow">When You're Ready To Go Deeper</span>
-    <h2>AIMT Head Spa Certification Course is built around these same professional gaps.</h2>
-    <p>The course takes the five areas you just assessed and develops them through structured curriculum, real service training, Cadence feedback, Listen Mode, practitioner tools, and competency-based certification.</p>
-    <div class="ra-bridge-ctas">
-      <a href="headspa-mastery.html" class="aimt-cta aimt-cta-primary-dark">Explore Head Spa Certification Course →</a>
-      <button type="button" class="ra-back-link" id="raReturnToReport" style="color:rgba(255,255,255,0.5);">Return to My Readiness Report</button>
     </div>
   </div>
 </section>
@@ -273,11 +219,14 @@ a { color: inherit; }
 /* ══════════════════════════════════════════════════════
    AIMT Head Spa Readiness Score
    ---------------------------------------------------------------
-   Front-end complete, client-side scored. Lead submission below is
-   a MOCK/LOCAL simulation only — no network call, no real ESP, no
-   production lead storage. Real delivery (support email, ESP, lead
-   endpoint) is a separate launch-activation task; see the owner
-   report. Do not wire this to a live endpoint without that in place.
+   Front-end complete, client-side scored. On gate submission this
+   saves a versioned local profile (see READINESS_PROFILE_KEY below)
+   and hands the prospect into my-aimt.html?preview=readiness — see
+   submitReadinessProfile() near the bottom of this script for the
+   one email-delivery seam (reads window.AIMT_READINESS_CONFIG from
+   assets/js/aimt-readiness-config.js). Delivery is inert until that
+   config is set at launch; local profile + preview handoff work fully
+   either way. See the owner report for what remains to wire up.
    ═══════════════════════════════════════════════════════════════ */
 const PILLARS = [
   { key: 'scope', name: 'Professional Foundation & Scope' },
@@ -288,7 +237,7 @@ const PILLARS = [
 ];
 
 const QUESTIONS = [
-  { pillar: 0, text: 'I can clearly explain the difference between observing a scalp presentation and diagnosing a condition.' },
+  { pillar: 0, text: 'I can describe what I observe on the scalp in clear, non-diagnostic language and recognize when a concern is outside my professional scope.' },
   { pillar: 0, text: 'I know when a client concern should change, pause, or stop the cosmetic service and when referral is the better next step.' },
   { pillar: 0, text: 'I have verified how the services, products, equipment, and techniques in my head spa offering fit within the rules that apply to my license and location.' },
   { pillar: 1, text: 'My consultation and scalp assessment follow a repeatable structure rather than changing completely from client to client.' },
@@ -315,7 +264,7 @@ const PRIORITY_CONTENT = {
   scope: {
     affects: 'Unclear scope boundaries put both your clients and your practice at risk, and make it harder to communicate confidently when a service should pause or a referral is the better call.',
     actions: [
-      'Write down, in your own words, the line between what you observe and what you diagnose.',
+      'Practice describing scalp observations in clear, non-diagnostic language and identify when referral is the appropriate next step.',
       'List the specific situations where you would pause or stop a service and what you say in that moment.',
       'Confirm how your current head spa offering fits your license and local rules, in writing.'
     ]
@@ -446,24 +395,31 @@ function bandFor(pct) {
   return { name: 'Foundation Building', copy: 'Your strongest next move is not adding more equipment or techniques. It is building the professional foundation that makes the service safer, clearer, and easier to explain.' };
 }
 
+/* Deterministic tie-break: iterates pillars in fixed PILLARS order and
+   only updates on a strict inequality, so on a tie (including the
+   all-zero / all-equal case) the earliest pillar in that order always
+   wins for both strongest and priority. Used by buildReadinessPayload()
+   below — the free score reveal itself never shows pillar detail. */
+function resolvePillarExtremes() {
+  let lowestIdx = 0, highestIdx = 0;
+  PILLARS.forEach((p, i) => {
+    if (state.pillarScores[i] < state.pillarScores[lowestIdx]) lowestIdx = i;
+    if (state.pillarScores[i] > state.pillarScores[highestIdx]) highestIdx = i;
+  });
+  return { lowestIdx, highestIdx };
+}
+
 function revealScore() {
   const band = bandFor(state.totalPct);
   document.getElementById('raBandName').textContent = band.name;
   document.getElementById('raBandCopy').textContent = band.copy;
-  document.getElementById('raScoreNum').textContent = '0';
-  const circumference = 553;
-  const fill = document.getElementById('raDialFill');
-  fill.style.strokeDashoffset = circumference;
-  requestAnimationFrame(() => {
-    fill.style.strokeDashoffset = String(circumference - (circumference * state.totalPct / 100));
+  document.getElementById('raRingArea').innerHTML = window.AIMTMetricRing.render({
+    value: state.totalPct,
+    display: state.totalPct + '<span class="aimt-metric-ring-max">/100</span>',
+    label: 'Readiness',
+    size: 'lg',
+    accessibleText: 'AIMT Readiness score: ' + state.totalPct + ' out of 100, ' + band.name + '.'
   });
-  let n = 0;
-  const step = Math.max(1, Math.round(state.totalPct / 30));
-  const timer = setInterval(() => {
-    n = Math.min(state.totalPct, n + step);
-    document.getElementById('raScoreNum').textContent = String(n);
-    if (n >= state.totalPct) clearInterval(timer);
-  }, 25);
 }
 
 document.getElementById('raBackToAnswers').addEventListener('click', () => {
@@ -472,59 +428,100 @@ document.getElementById('raBackToAnswers').addEventListener('click', () => {
   renderQuestion();
 });
 
+/* ── Readiness Profile payload + local browser profile ──────────────
+   READINESS_PROFILE_KEY is the one versioned localStorage key My AIMT's
+   Readiness Preview mode (my-aimt.html?preview=readiness) reads. Bump
+   the version suffix if the stored shape ever changes incompatibly. */
+const READINESS_PROFILE_KEY = 'aimt_readiness_profile_v1';
+const READINESS_PROFILE_VERSION = 1;
+
+function buildReadinessPayload({ firstName, email, marketingConsent }) {
+  const band = bandFor(state.totalPct);
+  const { lowestIdx, highestIdx } = resolvePillarExtremes();
+  const priorityPillar = PILLARS[lowestIdx];
+  const strongestPillar = PILLARS[highestIdx];
+  const content = PRIORITY_CONTENT[priorityPillar.key];
+  const pillarScores = {};
+  PILLARS.forEach((p, i) => { pillarScores[p.key] = state.pillarScores[i]; });
+
+  return {
+    version: READINESS_PROFILE_VERSION,
+    source: 'head-spa-readiness',
+    completed_at: new Date().toISOString(),
+    first_name: firstName,
+    email: email,
+    marketing_consent: !!marketingConsent,
+    head_spa_stage: state.headSpaStage,
+    score: state.totalPct,
+    band: band.name,
+    pillar_scores: pillarScores,
+    strongest_pillar: strongestPillar.key,
+    priority_pillar: priorityPillar.key,
+    priority_explanation: content.affects,
+    priority_actions: content.actions
+  };
+}
+
+/* Local browser profile deliberately omits email (owner rule: don't
+   persist the prospect's email locally — it's only transmitted to the
+   future delivery endpoint at submission time, never retained here). */
+function saveLocalReadinessProfile(payload) {
+  const localProfile = {
+    version: payload.version,
+    source: payload.source,
+    completed_at: payload.completed_at,
+    first_name: payload.first_name,
+    score: payload.score,
+    band: payload.band,
+    pillar_scores: payload.pillar_scores,
+    strongest_pillar: payload.strongest_pillar,
+    priority_pillar: payload.priority_pillar,
+    priority_explanation: payload.priority_explanation,
+    priority_actions: payload.priority_actions
+  };
+  try {
+    window.localStorage.setItem(READINESS_PROFILE_KEY, JSON.stringify(localProfile));
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/* Centralized delivery seam — the ONE place that would call a real
+   endpoint. window.AIMT_READINESS_CONFIG (assets/js/aimt-readiness-config.js)
+   is null until launch; this stays a no-op until then, fires the
+   request with keepalive so it survives the immediate navigation below,
+   and never blocks or fakes a confirmation either way. */
+async function submitReadinessProfile(payload) {
+  const endpoint = window.AIMT_READINESS_CONFIG && window.AIMT_READINESS_CONFIG.READINESS_DELIVERY_ENDPOINT;
+  if (!endpoint) return { delivered: false, configured: false };
+  try {
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    return { delivered: true, configured: true };
+  } catch (_) {
+    return { delivered: false, configured: true };
+  }
+}
+
 document.getElementById('raGateForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const btn = document.getElementById('raSubmitBtn');
   btn.disabled = true;
-  btn.textContent = 'Sending…';
-  /* MOCK submission — see file header. No network call, no real
-     lead storage. Simulated delay only, for local/branch QA of the
-     full result flow. */
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = 'Send My Full Report →';
-    renderFullResult();
-  }, 500);
-});
+  btn.textContent = 'Opening your profile…';
 
-function renderFullResult() {
-  const band = bandFor(state.totalPct);
-  document.getElementById('raResultBandTitle').textContent = state.totalPct + ' / 100 · ' + band.name;
+  const firstName = document.getElementById('raFirstName').value.trim();
+  const email = document.getElementById('raEmail').value.trim();
+  const marketingConsent = document.getElementById('raConsent').checked;
+  const payload = buildReadinessPayload({ firstName, email, marketingConsent });
 
-  const rows = document.getElementById('raPillarRows');
-  rows.innerHTML = '';
-  let lowestIdx = 0, highestIdx = 0;
-  PILLARS.forEach((p, i) => {
-    if (state.pillarScores[i] < state.pillarScores[lowestIdx]) lowestIdx = i;
-    if (state.pillarScores[i] > state.pillarScores[highestIdx]) highestIdx = i;
-    const row = document.createElement('div');
-    row.innerHTML = '<div class="ra-pillar-row-head"><span>' + p.name + '</span><span>' + state.pillarScores[i] + ' / 6</span></div><div class="ra-pillar-row-track"><div class="ra-pillar-row-fill" style="width:' + (state.pillarScores[i] / 6 * 100) + '%;"></div></div>';
-    rows.appendChild(row);
-  });
-
-  const lowestPillar = PILLARS[lowestIdx];
-  const highestPillar = PILLARS[highestIdx];
-  const content = PRIORITY_CONTENT[lowestPillar.key];
-  document.getElementById('raPriorityTitle').textContent = lowestPillar.name;
-  document.getElementById('raPriorityAffects').textContent = content.affects;
-  const actionsEl = document.getElementById('raPriorityActions');
-  actionsEl.innerHTML = '';
-  content.actions.forEach((a) => {
-    const li = document.createElement('li');
-    li.textContent = a;
-    actionsEl.appendChild(li);
-  });
-  document.getElementById('raStrongestText').textContent = highestPillar.name + ' is currently your strongest area (' + state.pillarScores[highestIdx] + ' / 6).';
-
-  // Result and bridge render together as one continuous report.
-  document.querySelectorAll('.ra-panel').forEach((p) => p.classList.remove('is-active'));
-  document.getElementById('raResultPanel').classList.add('is-active');
-  document.getElementById('raBridgePanel').classList.add('is-active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-document.getElementById('raReturnToReport').addEventListener('click', () => {
-  document.getElementById('raResultPanel').scrollIntoView({ behavior: 'smooth' });
+  saveLocalReadinessProfile(payload);
+  submitReadinessProfile(payload); // fire-and-forget; never blocks the handoff below
+  window.location.href = 'my-aimt.html?preview=readiness';
 });
 </script>
 </body>

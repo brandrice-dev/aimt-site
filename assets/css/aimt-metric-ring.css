@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════════════════════
+   AIMT Metric Ring — reusable score/percentage ring primitive
+   ---------------------------------------------------------------
+   Visual language: Oura's information clarity (circular progress,
+   immediate numeric hierarchy, one clean status label) translated
+   into AIMT's own institutional register — warm near-black, ivory,
+   taupe, extremely fine strokes, Montserrat/mono type, Aman-level
+   restraint. Not a copy of Oura's layout, icons, colors, arcs, or
+   typography — geometry and palette are entirely AIMT's own tokens.
+
+   Use wherever AIMT shows a meaningful percentage or score in place
+   of a generic horizontal progress bar. Do not convert every number
+   into a ring — reserve it for the one dominant metric a surface is
+   built around.
+
+   Markup contract (generate via assets/js/aimt-metric-ring.js's
+   AIMTMetricRing.render(), do not hand-roll):
+
+     <div class="aimt-metric-ring" role="img" aria-label="…one sentence…">
+       <svg class="aimt-metric-ring-svg" aria-hidden="true" viewBox="0 0 120 120">
+         <circle class="aimt-metric-ring-track" cx="60" cy="60" r="52"/>
+         <circle class="aimt-metric-ring-fill" cx="60" cy="60" r="52"/>
+       </svg>
+       <div class="aimt-metric-ring-center" aria-hidden="true">
+         <div class="aimt-metric-ring-value">58%</div>
+         <div class="aimt-metric-ring-label">Coursework</div>
+       </div>
+     </div>
+     <div class="aimt-metric-ring-status" aria-hidden="true">…optional…</div>
+
+   The wrapper carries the single accessible sentence via role="img"
+   + aria-label; the SVG and all inner text are aria-hidden so
+   assistive tech gets one clean announcement, never duplicated
+   numeric noise from the visual pieces underneath it.
+
+   The active arc (.aimt-metric-ring-fill only, never the track) carries
+   a white glow via --aimt-ring-glow-tight / --aimt-ring-glow-soft,
+   defined once in assets/css/aimt-design-system.css so every circular
+   progress indicator on the site — this ring, index.html's Service
+   Timer marketing demo, the in-course Module 8 timer, and the
+   standalone AIMT Service Timer tool — tunes from one place. See
+   .aimt-metric-ring--on-light for the reduced variant used on light
+   surfaces.
+
+   Current use: My AIMT's Coursework Progress (Continue Learning), the
+   Head Spa Readiness score reveal, and the My AIMT Readiness Preview
+   hero.
+
+   Future reuse (not implemented yet — this file just needs to already
+   support it without redesign):
+   - Module 12 Performance Review: one dominant OVERALL ring (88%,
+     status "Certification Standard Met"); the component scores
+     (Knowledge & Retention, Applied Practitioner Cases, Practitioner
+     Conversation) stay quieter inline numbers, and Critical
+     Competencies renders as a text status — never four competing
+     equal-sized gauges.
+
+   Depends on tokens in assets/css/aimt-design-system.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+.aimt-metric-ring {
+  position: relative;
+  width: 128px; height: 128px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.aimt-metric-ring-svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  transform: rotate(-90deg);
+}
+.aimt-metric-ring-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 4; }
+.aimt-metric-ring-fill {
+  fill: none; stroke: var(--aimt-color-accent, #a3968d); stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.55s ease;
+  /* Active-arc glow — tokens live in assets/css/aimt-design-system.css
+     (--aimt-ring-glow-tight / -soft) so every ring on the site tunes
+     from one place. White, so it reads as a distinct highlight rather
+     than blending into the taupe stroke. Never applied to
+     .aimt-metric-ring-track. */
+  filter:
+    drop-shadow(var(--aimt-ring-glow-tight, 0 0 4px rgba(255,255,255,0.35)))
+    drop-shadow(var(--aimt-ring-glow-soft, 0 0 10px rgba(255,255,255,0.15)));
+}
+.aimt-metric-ring-center {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  text-align: center;
+}
+.aimt-metric-ring-value {
+  font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+  font-weight: 600; font-size: 1.7rem; letter-spacing: -0.02em;
+  color: rgba(255,255,255,0.94); line-height: 1;
+}
+.aimt-metric-ring-label {
+  font-family: var(--aimt-font-mono, monospace);
+  font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+}
+.aimt-metric-ring-status {
+  margin-top: 0.6rem;
+  font-family: var(--aimt-font-mono, monospace);
+  font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(163,150,141,0.78);
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .aimt-metric-ring { width: 104px; height: 104px; }
+  .aimt-metric-ring-value { font-size: 1.4rem; }
+}
+
+/* Large modifier — a bigger presentation of the exact same ring, for a
+   surface built around one dominant score (Readiness Score reveal,
+   My AIMT Readiness Preview hero). Not a second ring system: same SVG,
+   same tokens, only the footprint and center type scale up. Pair with
+   AIMTMetricRing.render({ size: 'lg', ... }). */
+.aimt-metric-ring--lg { width: 208px; height: 208px; }
+.aimt-metric-ring--lg .aimt-metric-ring-value { font-size: 2.75rem; }
+.aimt-metric-ring--lg .aimt-metric-ring-label { font-size: 0.62rem; }
+@media (max-width: 700px) {
+  .aimt-metric-ring--lg { width: 168px; height: 168px; }
+  .aimt-metric-ring--lg .aimt-metric-ring-value { font-size: 2.2rem; }
+}
+
+/* Optional "/100"-style suffix inside the value line, e.g. "78/100" —
+   used by the Readiness ring's display string. Kept as a plain inline
+   span so callers that don't need it never pay for it. */
+.aimt-metric-ring-max {
+  font-size: 0.55em; font-weight: 500; letter-spacing: 0;
+  color: rgba(255,255,255,0.4); margin-left: 0.15em;
+}
+
+/* On-light modifier — for a future placement on a light surface (none
+   today; all three current uses sit on dark surfaces). The default
+   glow's opacity is tuned for dark backgrounds and reads muddy on
+   light ones, so this variant only turns the same two knobs down
+   rather than changing hue. Pair with AIMTMetricRing.render({ onLight:
+   true, ... }), or add the class directly. */
+.aimt-metric-ring--on-light {
+  --aimt-ring-glow-tight: var(--aimt-ring-glow-tight-light, 0 0 3px rgba(255,255,255,0.18));
+  --aimt-ring-glow-soft: var(--aimt-ring-glow-soft-light, 0 0 6px rgba(255,255,255,0.08));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aimt-metric-ring-fill { transition: none; }
+}

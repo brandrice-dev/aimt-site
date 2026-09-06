@@ -78,6 +78,12 @@
 .aimt-footer-col a { display: block; font-family: var(--aimt-font-sans); font-size: 0.8rem; color: rgba(255,255,255,0.56); text-decoration: none; margin-bottom: 0.65rem; transition: color 0.2s ease; }
 .aimt-footer-col a:hover, .aimt-footer-col a:focus-visible { color: #fff; }
 .aimt-footer-bottom { max-width: var(--aimt-container-max, 1100px); margin: 2.5rem auto 0; padding-top: 1.5rem; border-top: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.06); font-family: var(--aimt-font-sans); font-size: 0.7rem; color: rgba(255,255,255,0.36); }
+.aimt-footer-bottom a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s ease; }
+.aimt-footer-bottom a:hover, .aimt-footer-bottom a:focus-visible { color: #fff; }
+/* Standalone variant: used by pages that render only the bottom link row
+   (no .aimt-footer-inner brand/columns grid above it) — terms, privacy,
+   refunds, verify. Replaces a page-repeated inline style. */
+.aimt-footer-bottom.is-standalone { text-align: center; border-top: none; margin-top: 0; }
 @media (max-width: 860px) {
   .aimt-footer-inner { grid-template-columns: repeat(2, 1fr); gap: 2rem 1.5rem; }
   .aimt-footer-brand { grid-column: 1 / -1; }
@@ -94,7 +100,7 @@
    file owning its own header rules. */
 .aimt-legal-body { background: #1a1814; color: rgba(255,255,255,0.95); font-family: var(--aimt-font-sans); font-weight: 300; }
 
-.aimt-legal-wrap { max-width: 1100px; margin: 0 auto; padding: 3.5rem 1.5rem 5rem; display: grid; grid-template-columns: 200px minmax(0,760px); gap: 3rem; }
+.aimt-legal-wrap { max-width: 1100px; margin: 0 auto; padding: 3.5rem 2rem 5rem; display: grid; grid-template-columns: 200px minmax(0,760px); gap: 3rem; }
 .aimt-legal-toc { position: sticky; top: calc(var(--aimt-nav-height, 56px) + 2rem); align-self: start; }
 .aimt-legal-toc-label { font-family: var(--aimt-font-mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(163,150,141,0.5); margin-bottom: 0.9rem; display: block; }
 .aimt-legal-toc a { display: block; font-family: var(--aimt-font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.52); text-decoration: none; padding: 0.4rem 0; line-height: 1.4; transition: color 0.2s ease; }
@@ -121,6 +127,9 @@
   .aimt-legal-toc { position: static; padding-bottom: 1rem; border-bottom: 0.5px solid rgba(255,255,255,0.07); margin-bottom: 0.5rem; }
   .aimt-legal-toc-inner { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
   .aimt-legal-toc a { padding: 0.25rem 0; }
+}
+@media (max-width: 700px) {
+  .aimt-legal-wrap { padding-inline: 1.25rem; }
 }
 
 /* ---------- Form baseline ---------- */

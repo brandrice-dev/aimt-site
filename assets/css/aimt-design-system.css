@@ -9,9 +9,13 @@
     hero/headline treatment. Each page's headline size is scaled to its own
     role (homepage hero vs. marketing headline vs. utility form headline)
     and intentionally NOT unified to one clamp() value.
-  - Tier 2 — institutional pages (verify, terms, privacy, refunds,
-    my-aimt): quiet serif Playfair Display (--aimt-font-serif) h1/h2,
-    normalized to one shared size: h1 clamp(1.7rem, 4vw, 2.3rem), h2 1.25rem.
+  - Tier 2 — institutional pages (verify, terms, privacy, refunds):
+    quiet serif Playfair Display (--aimt-font-serif) h1/h2, normalized to
+    one shared size: h1 clamp(1.7rem, 4vw, 2.3rem), h2 1.25rem.
+  - my-aimt: product/account surface, not a legal document — uses the
+    Tier 1 Montserrat/Outfit system instead of Tier 2's Playfair (Owner
+    Refinement Pass). Playfair stays loaded sitewide but is not this
+    page's heading system.
   All pages load the same Google Fonts request (Montserrat + Playfair
   Display + Outfit) and this stylesheet, regardless of tier.
 */
@@ -74,6 +78,23 @@
   --aimt-shadow-card-featured: 0 16px 42px rgba(0,0,0,0.18);
   --aimt-shadow-card-future: 0 14px 36px rgba(0,0,0,0.2);
   --aimt-shadow-media: 0 18px 42px rgba(0,0,0,0.24);
+
+  /* Progress-ring/arc active-stroke glow — single tuning point for every
+     circular progress indicator on the site (assets/css/aimt-metric-ring.css,
+     index.html's Service Timer marketing demo, the in-course Module 8
+     timer, the standalone AIMT Service Timer tool). Two stacked
+     drop-shadows: a tight near-stroke halo and a softer, lower-opacity
+     falloff. Applies to the active arc only, never the inactive track.
+     White (not the taupe accent) so the glow reads as a distinct
+     luminous highlight against AIMT's warm-near-black surfaces rather
+     than blending into the stroke's own color. All four current ring
+     surfaces are dark; --aimt-ring-glow-tight-light / -soft-light stay
+     available as a dimmed pair for a future placement on a light
+     surface. */
+  --aimt-ring-glow-tight: 0 0 4px rgba(255,255,255,0.35);
+  --aimt-ring-glow-soft: 0 0 10px rgba(255,255,255,0.15);
+  --aimt-ring-glow-tight-light: 0 0 3px rgba(255,255,255,0.18);
+  --aimt-ring-glow-soft-light: 0 0 6px rgba(255,255,255,0.08);
 
   /* Spacing scale (from /courses rhythm) */
   --aimt-space-xxs: 0.35rem;

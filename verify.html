@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://aimtrichology.com/verify.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
@@ -36,10 +36,11 @@
     width: 30px; height: 30px; flex-shrink: 0; color: rgba(163,150,141,0.7);
   }
   h1 {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-weight: 500;
-    font-size: clamp(1.8rem, 4vw, 2.4rem);
-    line-height: 1.2;
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+    line-height: 1.15;
     margin: 0 0 0.9rem;
   }
   .sub {
@@ -115,9 +116,9 @@
   .result.revoked .status-dot { background: #d9a568; }
   .result.unavailable .status-dot { background: #d9a568; }
   .status {
-    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-family: var(--aimt-font-mono, monospace);
     font-size: 0.66rem;
-    letter-spacing: 0.26em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
   .result.valid .status { color: #9fc39f; }
@@ -126,15 +127,16 @@
   .result.unavailable .status { color: #d9a568; }
 
   .cred-name {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-size: 1.6rem;
-    font-weight: 500;
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     margin-bottom: 0.25rem;
   }
   .cred-course { color: rgba(255,255,255,0.66); font-size: 0.96rem; margin-bottom: 1.3rem; }
   .cred-rows { border-top: 0.5px solid rgba(255,255,255,0.08); padding-top: 1rem; display: grid; gap: 0.65rem; }
   .cred-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.86rem; }
-  .cred-row .k { color: rgba(255,255,255,0.44); }
+  .cred-row .k { color: rgba(255,255,255,0.44); font-family: var(--aimt-font-mono, monospace); font-size: 0.76rem; letter-spacing: 0.04em; text-transform: uppercase; }
   .cred-row .v { color: rgba(255,255,255,0.85); font-family: var(--aimt-font-mono, monospace); letter-spacing: 0.03em; text-align: right; }
 
   .detail { color: rgba(255,255,255,0.62); font-size: 0.92rem; line-height: 1.7; }
@@ -168,6 +170,8 @@
     .lookup { flex-direction: column; }
     .lookup button { width: 100%; }
     .panel { padding: 1.6rem 1.25rem 1.8rem; }
+    .cred-row { flex-direction: column; gap: 0.2rem; }
+    .cred-row .v { text-align: left; }
   }
 </style>
 </head>
@@ -179,14 +183,14 @@
        content offset needed. ══ -->
   <nav class="aimt-public-nav aimt-public-nav--sticky">
     <a href="index.html" class="aimt-public-nav-mark">
-      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg>
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
     </a>
     <a href="index.html" class="aimt-public-nav-wordmark">
       <span class="aimt-public-nav-name">AIMT</span>
     </a>
     <div class="aimt-public-nav-right">
       <div class="aimt-public-nav-links">
-        <a href="courses.html" class="aimt-public-nav-link">Certifications</a>
+        <a href="headspa-mastery.html" class="aimt-public-nav-link">Head Spa Certification</a>
         <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
       </div>
       <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
@@ -195,7 +199,7 @@
     </div>
   </nav>
   <div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
-    <a href="courses.html" class="aimt-public-nav-mobile-link">Certifications</a>
+    <a href="headspa-mastery.html" class="aimt-public-nav-mobile-link">Head Spa Certification</a>
     <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
   </div>
 
@@ -226,8 +230,8 @@
   </div>
 
   <footer class="aimt-footer">
-    <div class="aimt-footer-bottom" style="text-align:center; border-top:none; margin-top:0;">
-      <a href="index.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">AIMT</a> · <a href="courses.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Certifications</a> · <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms</a> · <a href="privacy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy</a>
+    <div class="aimt-footer-bottom is-standalone">
+      <a href="index.html">AIMT</a> · <a href="headspa-mastery.html">Head Spa Certification</a> · <a href="student-access.html">Student Access</a> · <a href="verify.html">Verify Credential</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="refunds.html">Refunds</a>
     </div>
   </footer>
 
@@ -268,9 +272,9 @@ function renderState(kind, data) {
       '<div class="cred-name">' + data.student_name + '</div>' +
       '<div class="cred-course">' + data.course + '</div>' +
       '<div class="cred-rows">' +
-        '<div class="cred-row"><span class="k">Issued</span><span class="v">' + date + '</span></div>' +
         '<div class="cred-row"><span class="k">Credential ID</span><span class="v">' + data.credential_id + '</span></div>' +
-        '<div class="cred-row"><span class="k">Status</span><span class="v">Active</span></div>' +
+        '<div class="cred-row"><span class="k">Completion Date</span><span class="v">' + date + '</span></div>' +
+        '<div class="cred-row"><span class="k">Current Status</span><span class="v">Active</span></div>' +
       '</div>';
     return;
   }
