@@ -1,0 +1,500 @@
+/* ═══════════════════════════════════════════════════════════════
+   AIMT Cadence Intro — presentation styles
+   ---------------------------------------------------------------
+   Styles for the reusable Cadence pre-course introduction component
+   (assets/js/aimt-cadence-intro.js). This is the ONLY copy of these
+   rules -- both cadence-intro-preview.html (standalone owner review)
+   and headspa-mastery.html (the real course) load this same file, so a
+   fade/pacing/typography change made once is inherited by both. Do not
+   fork or duplicate these rules into either host page.
+
+   Depends on the shared design-system tokens from
+   assets/css/aimt-design-system.css (--aimt-font-mont/-sans/-mono,
+   --aimt-radius-sm) and the Montserrat/Playfair/Outfit Google Fonts
+   request every AIMT page already loads -- both hosts of this component
+   must load those before this file. Otherwise self-contained: no other
+   page selector depends on anything in here, and nothing in here
+   depends on any other page selector.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* One smooth, symmetrical easing used throughout the Cadence intro's
+   motion -- entry, exit, the gate, and every thought. Neither end
+   accelerates or drops suddenly; nothing should read as an "animation
+   event."
+   --cadence-gap is the ONE repeated spacing value between every major
+   region (identity -> context -> question -> response zone) -- a
+   single repeatable rhythm rather than several different hand-tuned
+   gaps that drift out of sync with each other.
+   --cadence-scene-top pushes the WHOLE composition frame down into the
+   viewport's middle band. This is the ONLY positioning mechanism for
+   "bring it down/keep it centered" -- every region below it (identity,
+   captured context, the speaking field, the response zone) is plain
+   normal document flow, never independently pinned to a viewport
+   coordinate. A PRIOR version of this file pinned .intro-inner (the
+   speaking field + response zone) to `position:fixed` at a `top` value
+   ALGEBRAICALLY DERIVED from an assumed max captured-context height.
+   That derivation used SHORT test answers to size the reserve; a real
+   student's answer can run up to 140 characters (see safeDisplay() in
+   aimt-cadence-intro.js) and wrap to 2-3 lines per context item, well
+   past what was reserved -- so real answers made captured context grow
+   taller than the fixed anchor accounted for, and it collided with the
+   speaking field above it. Fixed/absolute positioning between regions
+   whose height depends on runtime content (student-entered text) is
+   exactly the failure mode: only normal flow, where each region's own
+   rendered height pushes the next one down, is guaranteed collision-
+   free regardless of content length. --cadence-scene-top is the one
+   value both desktop and mobile share for "how far down does the frame
+   start" -- content-independent (vh-based), so it never recenters when
+   a composer, more context, or a response appears beneath it. */
+:root {
+  --cadence-ease: cubic-bezier(0.37, 0, 0.63, 1);
+  --cadence-gap: 2rem;
+  --cadence-scene-top: clamp(7rem, 20vh, 12rem);
+  /* The one shared gap between an active zone (a question, a
+     synthesized response) and the divider/composer or CTA that follows
+     it -- replaces --cadence-gap in exactly those spots. --cadence-gap
+     (2rem, both sides of the divider) was originally sized as a
+     generic "one repeated rhythm" value; in practice the divider
+     carries it on BOTH margins at once (top and bottom), so two
+     regions separated by the divider ended up 64px apart -- plus
+     whatever slack the thought-field's min-height (below) left after
+     short text -- well past a natural conversational beat. This is a
+     spacing-only value: it does not change --cadence-scene-top, the
+     normal-flow architecture, or where the identity/composition sits. */
+  --cadence-zone-gap: 1.25rem;
+}
+
+/* Top padding IS --cadence-scene-top -- viewport-height-based (not
+   content-height-based), so the identity and everything that follows it
+   in normal flow sit together in the viewport's middle band rather than
+   the identity being top-mounted above content that lives further down.
+   Depends only on vh, never on how tall the active content currently
+   is, so it moves the WHOLE scene down without reintroducing any
+   content-height-driven recentering -- and it's the ONE such value:
+   desktop and mobile both just use it as a starting point for the same
+   normal-flow column, no separate desktop positioning system. */
+#introScreen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: #0a0808; display: none; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: var(--cadence-scene-top) 2rem 5rem;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  transition: opacity 1400ms var(--cadence-ease);
+}
+/* The whole environment gently settles onto the screen rather than
+   snapping to visible -- see beginCadenceIntro()/mount() in
+   aimt-cadence-intro.js, which adds this right after the root is
+   created. */
+#introScreen.is-visible { opacity: 1; }
+#introScreen.fade-out { opacity: 0; pointer-events: none; }
+/* Safe-area bottom padding for notched phones. */
+#introScreen { padding-bottom: max(5rem, env(safe-area-inset-bottom, 5rem)); }
+
+/* One persistent column: the identity lockup (.intro-mark, below) sits
+   at the top and never moves for the rest of the intro's life. Beneath
+   it, .intro-gate (just the one button) and .intro-inner (everything
+   after activation) occupy the same slot -- only one visible at a time,
+   crossfaded in place; see beginCadenceIntro()/runOrbitalActivation() in
+   aimt-cadence-intro.js.
+   Deliberately NOT margin:auto -- a flex item centered that way
+   recalculates its top offset whenever ITS OWN rendered height changes,
+   and .intro-gate/.intro-inner's heights change constantly (a question
+   settling in, the composer revealing, gate collapsing away). That
+   recalculation would silently shift the persistent mark above it by
+   real, measurable pixels exactly when content below it changes --
+   confirmed via getBoundingClientRect() instrumentation during this
+   fix. Pinning to the parent's own top-aligned flow (#introScreen's
+   padding, below) keeps the mark's position dependent on nothing but
+   fixed padding/margin, never on sibling content height. */
+.intro-stage {
+  width: 100%; max-width: 580px; display: flex; flex-direction: column;
+  align-items: flex-start; gap: 0;
+  padding: 1.5rem 0;
+}
+
+/* ── Cadence gate: the sparse first-paint screen with one control ──
+   Fades away in place on activation (.is-deactivating) -- it never
+   relocates or resizes the mark above it, and never becomes a separate
+   screen. The click "Begin Head Spa Certification" requires also
+   doubles as the user-gesture seam future Cadence voice playback will
+   need. Centered (not left-aligned like .intro-inner below it) to match
+   the centered identity above it -- one cohesive, centered opening
+   screen. No padding-top of its own: the identity's own margin-bottom
+   is the ONE source of the gap above it, so the two never stack into a
+   mechanically doubled gap. */
+.intro-gate {
+  display: none; justify-content: center; width: 100%;
+  opacity: 1; transition: opacity 700ms var(--cadence-ease);
+}
+.intro-gate.is-deactivating { opacity: 0; pointer-events: none; }
+
+.intro-inner {
+  width: 100%; display: none; flex-direction: column;
+  align-items: flex-start; gap: 0;
+  opacity: 0; transition: opacity 1300ms var(--cadence-ease);
+}
+.intro-inner.is-active { opacity: 1; }
+
+/* ── Cadence identity: orbital mark + name + AIMT label ──
+   A large, vertically-stacked, centered lockup -- the visual anchor of
+   the whole intro, not a small header. align-self:center overrides
+   .intro-stage's own left-aligned flow just for this one element; the
+   gate/active content beneath it stays left-aligned as before. */
+.intro-mark {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 1rem; margin-bottom: var(--cadence-gap); align-self: center;
+  opacity: 0; transition: opacity 1200ms var(--cadence-ease);
+}
+.intro-mark.show { opacity: 1; }
+.intro-mark-icon-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+/* The mark breathes WITH the current thought rather than pulsing on its
+   own -- .is-speaking is added/removed by the component in exact sync
+   with the thought text's own .is-visible (see setSpeakingIntensity()
+   and createThoughtField() in aimt-cadence-intro.js), using the SAME
+   fade-in/fade-out durations, so the halo brightens and settles on
+   precisely the same envelope as the words themselves. Resting (no
+   thought present) sits at a barely-there 0.06; present tops out
+   around 0.14 -- both ends deliberately restrained so this never reads
+   as a pulse or an "activation." --cadence-speak-intensity is a 0-1
+   value setSpeakingIntensity() writes; the CSS reads it continuously so
+   a later real amplitude reading can drive it directly without touching
+   this rule. */
+.intro-mark-icon {
+  width: 52px; height: 52px; color: rgba(255,255,255,0.55); position: relative; z-index: 1;
+  /* rotate's duration is the one-time activation turn's duration -- see
+     ORBITAL_TURN_MS in aimt-cadence-intro.js; keep the two in sync. */
+  transition: color 2100ms var(--cadence-ease), rotate 2600ms var(--cadence-ease);
+}
+.intro-mark.is-speaking .intro-mark-icon { color: rgba(255,255,255,0.85); transition: color 2200ms var(--cadence-ease), rotate 2600ms var(--cadence-ease); }
+.intro-halo {
+  position: absolute; inset: -20px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9), transparent 72%);
+  opacity: 0.06; pointer-events: none; transition: opacity 2100ms var(--cadence-ease);
+}
+.intro-mark.is-speaking .intro-halo {
+  opacity: calc(0.06 + var(--cadence-speak-intensity, 1) * 0.08);
+  transition: opacity 2200ms var(--cadence-ease);
+}
+.intro-mark-text { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.intro-mark-title {
+  font-family: var(--aimt-font-mont); font-size: 1.15rem; font-weight: 600;
+  letter-spacing: 0.32em; text-transform: uppercase; color: rgba(255,255,255,0.85);
+}
+.intro-mark-sub {
+  font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.28);
+}
+
+.intro-begin-gate-btn {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: 0.5px solid rgba(255,255,255,0.2);
+  border-radius: 980px; padding: 0.85rem 1.75rem; cursor: pointer;
+  font-family: var(--aimt-font-mont); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.68);
+  opacity: 0;
+  transition: opacity 1000ms var(--cadence-ease), border-color 0.3s, color 0.3s, background 0.3s;
+}
+.intro-begin-gate-btn.show { opacity: 1; }
+.intro-begin-gate-btn:hover, .intro-begin-gate-btn:focus-visible {
+  border-color: rgba(163,150,141,0.55); color: #fff; background: rgba(255,255,255,0.04); outline: none;
+}
+
+/* ── The orbital mark's activation turn ────────────────────────────────
+   One clockwise 360° turn, exactly where the mark already sits -- see
+   runOrbitalActivation() in aimt-cadence-intro.js. Only the icon itself
+   rotates (transform-origin defaults to its own center); the wrapper
+   below never moves, resizes, or reparents -- this is a plain rotation,
+   not a FLIP. A soft bloom rises through the back half of the turn and
+   settles again as it lands. */
+.intro-mark-icon-wrap.is-blooming .intro-halo { opacity: 0.4; transition: opacity 550ms var(--cadence-ease); }
+.intro-mark-icon-wrap.is-blooming .intro-mark-icon { color: rgba(255,255,255,0.95); transition: color 550ms var(--cadence-ease), rotate 2600ms var(--cadence-ease); }
+
+/* ── The orbital mark's "thinking" turns, during synthesis ─────────────
+   Same icon, same stationary wrapper, same bloom mechanism as the
+   activation turn above -- just far slower and separately paced, so it
+   reads as contemplative rather than a repeat of the activation event.
+   .is-thinking (added/removed by runThinkingTurns() in
+   aimt-cadence-intro.js only around the synthesis rotation, never during
+   activation) overrides just the rotate duration; the two bloom overrides
+   below win over the activation-speed bloom rules above on specificity
+   (three classes vs two), so a thinking-turn's glow rises and settles at
+   its own slower pace too. */
+.intro-mark-icon-wrap.is-thinking .intro-mark-icon {
+  transition: color 2100ms var(--cadence-ease), rotate 5200ms var(--cadence-ease);
+}
+.intro-mark-icon-wrap.is-blooming.is-thinking .intro-halo { transition: opacity 900ms var(--cadence-ease); }
+.intro-mark-icon-wrap.is-blooming.is-thinking .intro-mark-icon {
+  color: rgba(255,255,255,0.95); transition: color 900ms var(--cadence-ease), rotate 5200ms var(--cadence-ease);
+}
+
+/* ── Captured-context stack: quiet running record of what Cadence knows ──
+   A sibling of .intro-gate/.intro-inner within .intro-stage (see
+   templateHtml() in aimt-cadence-intro.js), not a child of .intro-inner
+   -- its own zone in the SAME normal-flow column, between the identity
+   and the speaking field, with its own real rendered height (each item
+   stacks normally; a long answer just makes this zone taller, which
+   simply pushes the speaking field further down in flow -- never an
+   overlap, regardless of answer length). margin-bottom only applies
+   once the stack actually holds an item --
+   otherwise (the monologue, or the instant before Q1 is answered) an
+   empty stack would still add its own gap on top of .intro-mark's,
+   doubling the space above the question for no reason. Once real content
+   exists, that margin becomes the ONE gap between context and question,
+   matching --cadence-gap everywhere else. */
+.intro-context-stack { display: flex; flex-direction: column; gap: 0.7rem; width: 100%; }
+.intro-context-stack:has(.intro-context-item) { margin-bottom: var(--cadence-gap); }
+.intro-context-item {
+  display: flex; flex-direction: column; gap: 3px; padding-bottom: 0.7rem;
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
+  /* Pure opacity -- no slide, no scale, so an existing item never
+     visibly moves while a new one resolves beside it. */
+  opacity: 0; animation: introContextIn 1.1s var(--cadence-ease) forwards;
+}
+.intro-context-item:last-child { border-bottom: none; padding-bottom: 0; }
+@keyframes introContextIn { to { opacity: 1; } }
+.intro-context-label {
+  font-family: var(--aimt-font-mono); font-size: 0.56rem; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3);
+}
+.intro-context-value {
+  font-family: var(--aimt-font-sans); font-size: 0.85rem; font-weight: 300;
+  color: rgba(255,255,255,0.68); line-height: 1.55;
+}
+
+/* ── The thought field: quiet captioned thoughts ──────────────────────
+   ONE fixed position, occupied by TWO stacked text elements (see
+   createThoughtField() in aimt-cadence-intro.js) so a thought can
+   genuinely cross-dissolve into the next -- the outgoing thought fading
+   out WHILE the incoming one fades in, rather than a sequential fade-
+   out-then-gap-then-fade-in. .intro-thought-field is a CSS grid with
+   both .intro-thought children assigned the SAME cell (grid-area 1/1):
+   this is the "grid stack" technique -- unlike position:absolute, a
+   grid track's auto height still considers every item sharing that
+   cell, so the field's rendered height always fits whichever of the two
+   thoughts is currently taller, and never needs position:absolute
+   (which would remove a long thought from the height calculation
+   entirely and risk exactly the collision-with-content-below bug this
+   file's :root comment describes at length). Pure opacity -- no blur,
+   no transform, no slide. --cadence-fade-in/--cadence-fade-out are
+   written per element, per segment, by JS (ENTRY_FADE_IN_MS/
+   CROSS_DISSOLVE_MS in aimt-cadence-intro.js) -- the defaults below only
+   matter before JS has set them. */
+.intro-text-wrap {
+  width: 100%;
+  display: flex; flex-direction: column; justify-content: flex-start;
+}
+/* Once Q3 is answered, no further thought will ever occupy this field
+   again -- collapsed right before synthesis begins (see runFlow() in
+   aimt-cadence-intro.js) so the response doesn't sit behind a tall dead
+   gap where a thought used to breathe. */
+.intro-text-wrap.is-done .intro-thought-field { min-height: 0; max-height: 0; overflow: hidden; }
+/* A floor for short thoughts only (the one-line monologue beats) -- the
+   real Q1/Q3 questions run long enough to wrap to 2+ lines on their
+   own and rarely touch this floor, so it no longer forces 30+px of
+   dead space beneath a question that's already tall enough. */
+.intro-thought-field {
+  display: grid; width: 100%; min-height: clamp(56px, 8vh, 72px);
+  transition: min-height 700ms var(--cadence-ease), max-height 700ms var(--cadence-ease);
+}
+.intro-thought {
+  grid-area: 1 / 1 / 2 / 2; min-width: 0;
+  font-family: var(--aimt-font-sans);
+  color: rgba(255,255,255,0.92); line-height: 1.68; margin: 0;
+  font-size: clamp(1.05rem, 3vw, 1.28rem); font-weight: 400; letter-spacing: 0.006em;
+  opacity: 0;
+  transition: opacity var(--cadence-fade-out, 320ms) var(--cadence-ease);
+}
+.intro-thought.is-visible { opacity: 1; transition: opacity var(--cadence-fade-in, 300ms) var(--cadence-ease); }
+.intro-thought em { font-style: normal; color: #a3968d; }
+
+/* The composer that appears after a question finishes (shared by Q1 & Q3).
+   The divider carries the ONE gap on both sides of itself (top AND
+   bottom margin, both --cadence-gap) -- it's always present in the DOM
+   (only its opacity toggles, for Q1/Q3 vs Q2), so this gives every
+   question the same reserved space before its response zone regardless
+   of whether the line itself is visible. .intro-input-wrap therefore
+   needs no padding-top of its own -- that would double the gap. */
+.intro-divider {
+  width: 100%; height: 0.5px; background: rgba(255,255,255,0.08);
+  margin: var(--cadence-zone-gap) 0; opacity: 0; transition: opacity 0.8s ease, margin 700ms var(--cadence-ease);
+}
+.intro-divider.show { opacity: 1; }
+/* Once the thought field has collapsed for synthesis (see
+   .intro-text-wrap.is-done above), the divider's own reserved margin
+   is the last remaining piece of Q1/Q3 composer chrome still taking up
+   flow space -- nothing below it needs that reserved gap anymore, so
+   it collapses the same way the thought field already does, rather
+   than leaving a second, state-specific gap between captured context
+   and the synthesized response. */
+.intro-text-wrap.is-done + .intro-divider { margin: 0; }
+.intro-input-wrap {
+  width: 100%; padding-top: 0; opacity: 0; display: none;
+  transition: opacity 750ms var(--cadence-ease); pointer-events: none;
+}
+.intro-input-wrap.show { opacity: 1; pointer-events: all; }
+.intro-input-label {
+  font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-bottom: 0.75rem; display: block;
+}
+.intro-input {
+  width: 100%; background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.12); border-radius: var(--aimt-radius-sm);
+  padding: 1rem 1.25rem; font-family: 'Outfit', sans-serif;
+  font-size: 0.975rem; font-weight: 300; color: rgba(255,255,255,0.88); resize: none;
+  outline: none; line-height: 1.7; min-height: 58px; max-height: 160px;
+  transition: border-color 0.3s, background 0.3s; caret-color: #a3968d;
+}
+.intro-input::placeholder { color: rgba(255,255,255,0.2); font-style: italic; }
+.intro-input:focus { border-color: rgba(163,150,141,0.45); background: rgba(255,255,255,0.07); outline: none; }
+.intro-send {
+  display: flex; align-items: center; gap: 9px; margin-top: 1.1rem;
+  background: none; border: 0.5px solid rgba(255,255,255,0.13);
+  border-radius: 980px; padding: 0.6rem 1.25rem; cursor: pointer;
+  font-family: 'Outfit', sans-serif; font-size: 0.7rem; font-weight: 400;
+  letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45);
+  transition: all 0.25s;
+}
+.intro-send:hover { border-color: rgba(163,150,141,0.5); color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.03); }
+.intro-send-dot { width: 5px; height: 5px; border-radius: 50%; background: #a3968d; flex-shrink: 0; }
+
+/* Intro composer's mic button + row (used only here) */
+.intro-input-row { position: relative; }
+.intro-input-row .voice-btn-dark { position: absolute; bottom: 0.75rem; right: 0.75rem; }
+.voice-btn-dark {
+  background: none; border: none; cursor: pointer;
+  padding: 0.35rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+  color: rgba(255,255,255,0.3);
+}
+.voice-btn-dark:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+.voice-btn-dark.listening { color: #e74c3c; animation: introVoicePulse 1s ease-in-out infinite; }
+.voice-btn-dark svg { width: 16px; height: 16px; }
+@keyframes introVoicePulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.92); }
+}
+
+/* Q2 — quiet selectable stage choices, not quiz cards. Asymmetric
+   in/out, same technique as .intro-thought: the base rule is the
+   fade-OUT duration (CHOICE_FADE_OUT_MS in aimt-cadence-intro.js), the
+   .show rule is the fade-IN duration (CHOICE_FADE_IN_MS) -- kept in sync
+   with those JS constants, which also gate exactly when it's safe to
+   switch this to display:none. No padding-top: the divider above
+   already carries the one gap before it. */
+.intro-choice-wrap {
+  width: 100%; padding-top: 0; opacity: 0; display: none;
+  transition: opacity 1000ms var(--cadence-ease); pointer-events: none; flex-direction: column;
+}
+.intro-choice-wrap.show { opacity: 1; transition: opacity 1300ms var(--cadence-ease); pointer-events: all; }
+.intro-choice {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; text-align: left; background: none; appearance: none;
+  border: none; border-bottom: 0.5px solid rgba(255,255,255,0.1);
+  padding: 0.95rem 0.1rem; cursor: pointer;
+  font-family: var(--aimt-font-sans); font-size: 0.92rem; font-weight: 300;
+  color: rgba(255,255,255,0.62); transition: color 0.2s, border-color 0.2s;
+}
+.intro-choice:last-child { border-bottom: none; }
+.intro-choice:hover, .intro-choice:focus-visible {
+  color: rgba(255,255,255,0.96); border-color: rgba(163,150,141,0.4); outline: none;
+}
+.intro-choice:disabled { cursor: default; }
+/* The clicked option illuminates in place (same box, same border width --
+   no geometry change) and holds visibly before Cadence advances -- see
+   CHOICE_SELECTED_HOLD_MS in aimt-cadence-intro.js. */
+.intro-choice.is-selected { color: rgba(255,255,255,0.96); border-color: rgba(163,150,141,0.4); }
+.intro-choice-arrow { opacity: 0; transition: opacity 0.2s; font-size: 0.85rem; color: #a3968d; flex-shrink: 0; margin-left: 1rem; }
+.intro-choice:hover .intro-choice-arrow, .intro-choice:focus-visible .intro-choice-arrow, .intro-choice.is-selected .intro-choice-arrow { opacity: 1; }
+
+/* Cadence response inside intro — synthesis state + personalized reply.
+   Synthesis is the one place still allowed to feel deliberate (a real
+   state change, not ordinary speech); the response/closing lines below
+   it use the same quick, quiet-captioned-thought pace as everything
+   else -- see breatheInWithAudio() in aimt-cadence-intro.js, which
+   writes --cadence-fade-in per element before adding .show. */
+.intro-synth-wrap { width: 100%; display: none; }
+.intro-synth-state {
+  display: none; align-items: center; gap: 10px; padding: 0.4rem 0 1.1rem;
+  font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 400;
+  letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+  opacity: 0; transition: opacity 550ms var(--cadence-ease);
+}
+.intro-synth-state.show { opacity: 1; transition: opacity 500ms var(--cadence-ease); }
+.intro-cadence-response { width: 100%; margin-top: 0.5rem; }
+.intro-response-text {
+  max-width: 34rem;
+  font-family: var(--aimt-font-sans);
+  color: rgba(255,255,255,0.84);
+  line-height: 1.82;
+  font-size: clamp(0.98rem, 2.5vw, 1.1rem);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  margin: 0.35rem 0 1.1rem;
+  opacity: 0;
+  transition: opacity var(--cadence-fade-in, 320ms) var(--cadence-ease);
+}
+.intro-response-text.show { opacity: 1; }
+.intro-response-text p { margin-bottom: 0.8rem; }
+.intro-response-text p:last-child { margin-bottom: 0; }
+
+/* The final "Let's begin." line and the Welcome Module CTA fade
+   independently -- the line resolves first (quick captioned-thought
+   entry, same as any other spoken line), and only once it has settled
+   does the CTA fade in on its own (see runSynthesis() in
+   aimt-cadence-intro.js) -- never as one popped-in unit. */
+.intro-final-wrap {
+  display: none; flex-direction: column; align-items: flex-start; gap: 1rem;
+}
+.intro-final-line {
+  font-family: var(--aimt-font-mont); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255,255,255,0.5);
+  opacity: 0;
+  transition: opacity var(--cadence-fade-out, 320ms) var(--cadence-ease);
+}
+.intro-final-line.is-visible { opacity: 1; transition: opacity var(--cadence-fade-in, 300ms) var(--cadence-ease); }
+.intro-begin-btn {
+  display: flex; align-items: center; gap: 9px;
+  background: none; border: 0.5px solid rgba(255,255,255,0.2);
+  border-radius: 980px; padding: 0.7rem 1.5rem; cursor: pointer;
+  font-family: var(--aimt-font-mont); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  opacity: 0;
+  transition: opacity 500ms var(--cadence-ease), border-color 0.25s, color 0.25s, background 0.25s;
+}
+.intro-begin-btn.show { opacity: 1; }
+.intro-begin-btn:hover, .intro-begin-btn:focus-visible { border-color: rgba(163,150,141,0.5); color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.04); outline: none; }
+/* Skip / show-full links */
+.intro-skip {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1001;
+  font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.1); background: none; border: none;
+  cursor: pointer; transition: color 0.2s; padding: 0; display: none;
+}
+.intro-skip:hover { color: rgba(255,255,255,0.3); }
+.intro-showfull {
+  position: fixed; bottom: 1.5rem; right: 5.5rem; z-index: 1001;
+  font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.1); background: none; border: none;
+  cursor: pointer; transition: color 0.2s; padding: 0; display: none;
+}
+.intro-showfull:hover { color: rgba(255,255,255,0.3); }
+@media (prefers-reduced-motion: reduce) {
+  .intro-context-item { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .intro-thought, .intro-thought.is-visible, .intro-response-text, .intro-synth-state, .intro-synth-state.show,
+  .intro-final-line, .intro-final-line.is-visible, .intro-begin-btn, .intro-begin-btn.show {
+    transition: opacity 150ms linear !important;
+  }
+  .intro-mark-icon, .intro-halo {
+    transition: none !important;
+  }
+  .intro-gate, .intro-inner, .intro-mark, .intro-begin-gate-btn, .intro-input-wrap, .intro-choice-wrap, .intro-final-wrap, #introScreen {
+    transition: none !important;
+  }
+  .intro-text-wrap, .intro-thought-field { transition: none !important; }
+}

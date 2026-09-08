@@ -140,86 +140,6 @@ body {
 .hero-signal { font-family: var(--aimt-font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.6); display: inline-block; margin-top: 1.3rem; padding-top: 1.4rem; border-top: 0.5px solid rgba(255,255,255,0.09); }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 2rem; }
 
-/* ── Product-led hero (replaces the full-bleed clinical-authority photo) ── */
-#hero.hero-product {
-  background:
-    radial-gradient(circle at 38% 45%, rgba(163,150,141,0.14), transparent 55%),
-    linear-gradient(160deg, #1e1b17 0%, #14110d 100%);
-  display: grid;
-  grid-template-columns: minmax(0, 22rem) minmax(0, 1.5fr);
-  align-items: center;
-  /* Tighter than the left inset below on purpose — the image keeps reaching
-     toward the copy across a narrow seam instead of two rigid columns. */
-  gap: clamp(0.5rem, 1.5vw, 1rem);
-  /* Left inset is deliberately larger than the right — a shared boundary the
-     copy sits inside, rather than hugging the viewport edge. Narrowing the
-     text track and the gap frees back the space this adds, so the image
-     keeps its full intended size instead of being squeezed by it. */
-  padding: calc(56px + 2.75rem) clamp(1.25rem, 4vw, 3.5rem) 3.5rem clamp(3rem, 10vw, 8rem);
-}
-.hero-content-product {
-  position: relative; z-index: 2;
-  width: 100%; max-width: 22rem;
-  margin: 0; text-shadow: none;
-}
-/* Media system: sized and framed for a big, editorial primary image with room
-   for one overlapping secondary device — built for the real photography this
-   will be swapped for, not tuned to the current placeholder crop. Pulled in
-   close to the copy (tight gap + a wide glow bleeding into the seam) so the
-   two halves read as one composed scene rather than a text box and an image
-   box side by side. */
-.hero-product-media {
-  position: relative; z-index: 1;
-  justify-self: end;
-  width: 100%; max-width: 720px;
-  aspect-ratio: 4 / 3.4;
-}
-.hero-product-media::before {
-  content: '';
-  position: absolute; inset: -14% -8% -14% -22%;
-  background: radial-gradient(ellipse at 40% 45%, rgba(163,150,141,0.22), transparent 70%);
-  filter: blur(24px);
-  z-index: -1;
-}
-.hero-product-frame-mark { position: absolute; z-index: 2; width: 22px; height: 22px; pointer-events: none; }
-.hero-product-frame-mark.tl { top: -12px; left: -12px; border-top: 1px solid rgba(163,150,141,0.55); border-left: 1px solid rgba(163,150,141,0.55); }
-.hero-product-frame-mark.br { bottom: -12px; right: -12px; border-bottom: 1px solid rgba(163,150,141,0.55); border-right: 1px solid rgba(163,150,141,0.55); }
-.hero-product-laptop {
-  position: absolute; top: 0; left: 0;
-  width: 100%; border-radius: 14px;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.45);
-}
-.hero-product-phone {
-  position: absolute; bottom: -8%; right: -9%;
-  width: 37%; border-radius: 14px;
-  box-shadow: 0 24px 54px rgba(0,0,0,0.5);
-  border: 2px solid rgba(255,255,255,0.06);
-  transform: rotate(-2.5deg);
-}
-.hero-product-tag {
-  position: absolute; z-index: 3; top: -0.9rem; left: -1.6rem;
-  display: inline-flex; align-items: center; gap: 7px;
-  background: rgba(20,17,13,0.92); backdrop-filter: blur(8px);
-  border: 0.5px solid rgba(255,255,255,0.14);
-  border-radius: 980px; padding: 0.5rem 0.95rem 0.5rem 0.75rem;
-  font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.12em;
-  text-transform: uppercase; color: rgba(255,255,255,0.8); white-space: nowrap;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.4);
-}
-.hero-product-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #a3968d; flex-shrink: 0; }
-@media (max-width: 980px) {
-  #hero.hero-product { grid-template-columns: 1fr; text-align: left; padding-top: calc(56px + 2rem); padding-left: clamp(1.25rem, 4vw, 3.5rem); }
-  .hero-product-media { max-width: 420px; justify-self: start; margin-top: 2rem; }
-  .hero-product-tag { left: 0.5rem; }
-}
-@media (max-width: 700px) {
-  #hero.hero-product { min-height: auto; padding: calc(56px + 1.25rem) 1.1rem 2.25rem; display: flex; flex-direction: column; align-items: flex-start; }
-  .hero-content-product { text-align: left; }
-  .hero-product-media { max-width: 300px; margin-top: 1.75rem; align-self: center; }
-  .hero-product-tag { display: none; }
-  .hero-product-frame-mark { display: none; }
-}
-
 @media(max-width:700px){
   #hero {
     min-height: 100dvh;
@@ -657,51 +577,13 @@ body {
 .cert-detail-icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.4; margin-top: 1px; }
 .cert-detail-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
 .cert-detail-text strong { color: var(--text); font-weight: 500; display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.1em; }
-/* The certificate card itself */
-.cert-card {
-  font-size: 1.75rem;
-  background: #fdfaf5;
-  border: 1px solid #d8cfc0;
+/* The approved certificate image */
+.cert-image {
+  display: block;
+  width: 100%;
+  height: auto;
   border-radius: 4px;
-  padding: 2rem 2rem 1.75rem;
   box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
-  position: relative;
-  overflow: hidden;
-  font-family: var(--aimt-font-serif);
-}
-.cert-card::before {
-  content: '';
-  position: absolute; inset: 6px;
-  border: 0.5px solid rgba(150,130,100,0.25);
-  border-radius: 2px;
-  pointer-events: none;
-}
-.cert-header { text-align: center; margin-bottom: 1.25rem; }
-.cert-logo-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.6rem; }
-.cert-aimt-mark { width: 22px; height: 22px; opacity: 0.7; }
-.cert-org { font-family: var(--aimt-font-mono); font-size: 0.5em; letter-spacing: 0.22em; text-transform: uppercase; color: #83705b; line-height: 1.4; text-align: left; }
-.cert-divider { width: 40px; height: 0.5px; background: #c8b89a; margin: 0 auto 0.9rem; }
-.cert-title-main { font-size: 1.05rem; font-weight: normal; color: #2a2018; letter-spacing: 0.02em; line-height: 1.3; margin-bottom: 0.25rem; }
-.cert-subtitle { font-family: var(--aimt-font-mono); font-size: 0.48em; letter-spacing: 0.14em; text-transform: uppercase; color: #80715d; }
-.cert-body { text-align: center; margin: 1rem 0; }
-.cert-awarded-to { font-family: var(--aimt-font-mono); font-size: 0.44em; letter-spacing: 0.18em; text-transform: uppercase; color: #7d7266; margin-bottom: 0.4rem; }
-.cert-recipient { font-family: var(--aimt-font-serif); font-size: 1.4rem; font-style: italic; color: #2a2018; margin-bottom: 0.15rem; }
-.cert-program-line { font-size: 0.7rem; color: #7a6a55; line-height: 1.5; }
-.cert-program-line em { font-style: normal; font-weight: bold; color: #4a3c28; }
-.cert-footer { margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
-.cert-sig-col { text-align: center; }
-.cert-sig { font-family: var(--aimt-font-serif); font-size: 1rem; font-style: italic; color: #4a3c28; line-height: 1; margin-bottom: 3px; }
-.cert-sig-line { width: 80px; height: 0.5px; background: #c8b89a; margin: 0 auto 3px; }
-.cert-sig-label { font-family: var(--aimt-font-mono); font-size: 0.4em; letter-spacing: 0.12em; text-transform: uppercase; color: #7d7266; }
-.cert-credential-line { font-family: var(--aimt-font-mono); font-size: 0.4em; letter-spacing: 0.12em; text-transform: uppercase; color: #7d7266; text-align: center; white-space: nowrap; margin-top: 1rem; }
-.cert-seal { width: 44px; height: 44px; opacity: 0.55; }
-.cert-date-col { text-align: center; }
-.cert-date-val { font-family: var(--aimt-font-mono); font-size: 0.5em; letter-spacing: 0.1em; color: #83705b; margin-bottom: 3px; }
-.cert-watermark {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  font-family: var(--aimt-font-mont); font-size: 4.5rem; font-weight: 900;
-  letter-spacing: 0.1em; color: rgba(180,160,120,0.05);
-  text-transform: uppercase; pointer-events: none; white-space: nowrap;
 }
 
 #cta { background: #262626; padding: 5.5rem 1.5rem; position: relative; overflow: hidden; }
@@ -763,11 +645,6 @@ body {
   .c01-tag { font-size: 0.46rem; letter-spacing: 0.12em; }
   .c01-desc { font-size: 0.82rem; }
   .c01-enter { font-size: 0.8rem; }
-  .cert-card { padding: 1.35rem 1.2rem 1.2rem; }
-  .cert-recipient { font-size: clamp(1.12rem, 7.2vw, 1.35rem); line-height: 1.2; }
-  .cert-program-line { font-size: 0.7rem; line-height: 1.52; }
-  .cert-footer { flex-wrap: wrap; justify-content: center; gap: 0.9rem 1.1rem; }
-  .cert-sig-line { width: 62px; }
   .section-title,
   .c01-enter,
   .cta-primary,
@@ -780,9 +657,6 @@ body {
   .section-title { font-size: clamp(1.45rem, 8.6vw, 2.05rem); line-height: 1.08; }
   .diff-card { padding: 1.15rem; }
   .practice-row { padding: 0.95rem 0; gap: 12px; }
-  .cert-watermark { font-size: 3.2rem; }
-  .cert-org { font-size: 0.44em; letter-spacing: 0.15em; }
-  .cert-title-main { font-size: 0.92rem; }
 }
 
 /* ── FOOTER ── */
@@ -850,9 +724,13 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 </div>
 
 <!-- HERO -->
-<section id="hero" class="hero-product">
+<section id="hero">
+  <picture class="hero-image-wrap">
+    <source media="(max-width: 700px)" srcset="assets/hero-mobile.jpg">
+    <img src="assets/hero-desktop.jpg" alt="Head spa professional holding an AIMT certification" class="hero-image">
+  </picture>
   <div class="hero-overlay" aria-hidden="true"></div>
-  <div class="hero-content hero-content-product">
+  <div class="hero-content">
     <h1 class="hero-headline">
       <em>American Institute of Modern Trichology</em>
       <span class="hero-lead">A new standard in</span>
@@ -864,13 +742,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <a href="headspa-mastery.html" class="cta-primary">Explore the certification →</a>
       <a href="#institute" class="cta-ghost">Why AIMT →</a>
     </div>
-  </div>
-  <div class="hero-product-media" aria-hidden="true">
-    <span class="hero-product-tag"><span class="hero-product-tag-dot"></span>Inside the course</span>
-    <span class="hero-product-frame-mark tl"></span>
-    <span class="hero-product-frame-mark br"></span>
-    <img src="assets/images/marketing/course-module-4-editorial.webp" alt="" class="hero-product-laptop" loading="eager" fetchpriority="high">
-    <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="" class="hero-product-phone" loading="eager">
   </div>
 </section>
 
@@ -1131,41 +1002,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
     <!-- Certificate card -->
     <div class="cert-card-wrap reveal">
-      <div class="cert-card">
-        <div class="cert-watermark">AIMT</div>
-        <div class="cert-header">
-          <div class="cert-logo-row">
-            <svg class="cert-aimt-mark" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="20" stroke="#8a7660" stroke-width="0.75"/><circle cx="22" cy="22" r="13.5" stroke="#8a7660" stroke-width="0.5" opacity="0.6"/><circle cx="22" cy="22" r="7" stroke="#8a7660" stroke-width="0.5" opacity="0.4"/><circle cx="22" cy="22" r="2" fill="#8a7660"/><circle cx="22" cy="2" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="36.1" cy="7.9" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="42" cy="22" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="36.1" cy="36.1" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="22" cy="42" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="7.9" cy="36.1" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="2" cy="22" r="1.5" fill="#8a7660" opacity="0.6"/><circle cx="7.9" cy="7.9" r="1.5" fill="#8a7660" opacity="0.6"/></svg>
-            <div class="cert-org">AIMT<br>American Institute of<br>Modern Trichology</div>
-          </div>
-          <div class="cert-divider"></div>
-          <h3 class="cert-title-main">AIMT Certified</h3>
-          <p class="cert-subtitle">Certification 01 · Head Spa Certification Course</p>
-        </div>
-        <div class="cert-body">
-          <p class="cert-awarded-to">Presented to</p>
-          <p class="cert-recipient">Alexandra M. Renfield</p>
-          <p class="cert-program-line">For meeting the AIMT certification standard for the <em>Head Spa Certification Course</em>, including required course progression and the Final Certification Assessment.</p>
-        </div>
-        <div class="cert-footer">
-          <div class="cert-sig-col">
-            <p class="cert-sig">AIMT</p>
-            <div class="cert-sig-line"></div>
-            <p class="cert-sig-label">Office of the Registrar</p>
-          </div>
-          <div class="cert-date-col">
-            <!-- Seal -->
-            <img src="assets/brand/aimt-badge-240.png" alt="AIMT head spa certification credential" class="cert-seal" style="width:44px;height:44px;opacity:0.9;">
-          </div>
-          <div class="cert-date-col">
-            <p class="cert-sig-label" style="margin-bottom:3px;">Date Issued</p>
-            <p class="cert-date-val">July 2026</p>
-            <div class="cert-sig-line" style="margin-top:3px;"></div>
-            <p class="cert-sig-label">AIMT</p>
-          </div>
-        </div>
-        <p class="cert-credential-line">Credential ID · AIMT-HS-2026-XXXXXX</p>
-      </div>
+      <img src="assets/images/marketing/approved-certification-image.png" alt="AIMT Head Spa Certification credential" class="cert-image">
     </div>
   </div>
   <div class="cert-details">
