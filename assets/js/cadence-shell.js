@@ -149,7 +149,7 @@
       '<div class="cshell-overlay" id="cshellOverlay"></div>' +
       '<div class="cshell" id="cshell" role="dialog" aria-modal="true" aria-label="Cadence conversation">' +
         '<div class="cshell-head">' +
-          '<div class="cshell-id" aria-hidden="true"><span class="cshell-id-dot"></span><span class="cshell-id-label">Cadence</span></div>' +
+          '<div class="cshell-id" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>' +
           '<div class="cshell-titles">' +
             '<div class="cshell-module" id="cshellModule"></div>' +
             '<div class="cshell-status" id="cshellStatusLine"></div>' +
@@ -700,7 +700,7 @@
     kicker.className = 'cshell-kicker';
     kicker.textContent = 'Ask Cadence';
     dom.transcriptInner.appendChild(kicker);
-    appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+    appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
     scrollToBottomIfNearEnd(true);
   }
 
@@ -776,7 +776,7 @@
     const av = document.createElement('div');
     av.className = 'cshell-msg-av';
     av.setAttribute('aria-hidden', 'true');
-    av.innerHTML = role === 'assistant' ? '<span></span>' : 'You';
+    av.innerHTML = role === 'assistant' ? '<span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>' : 'You';
     const bub = document.createElement('div');
     bub.className = 'cshell-bub';
     bub.setAttribute('role', 'group');
@@ -846,7 +846,7 @@
       el = document.createElement('div');
       el.id = 'cshellTypingRow';
       el.className = 'cshell-msg assistant';
-      el.innerHTML = '<div class="cshell-msg-av" aria-hidden="true"><span></span></div>' +
+      el.innerHTML = '<div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>' +
         '<div class="cshell-bub"><div class="cshell-typing" role="status" aria-label="' + escapeHtml(label || 'Cadence is thinking') + '"><span></span><span></span><span></span></div></div>';
       dom.transcriptInner.appendChild(el);
     }
@@ -1156,14 +1156,14 @@
       return;
     }
     if (key === 'existing') {
-      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
       appendMessageEl('user', 'Why does the crown region get treated differently from the hairline?');
       appendMessageEl('assistant', 'Because they can present completely differently on the same scalp — treating the whole head like the crown alone would erase that difference and lead to the wrong service decision for the hairline.');
       renderComposerLocked(false);
       return;
     }
     if (key === 'guardrail') {
-      appendMessageEl('assistant', 'Ask me anything about this module — this is just between us, nothing here is graded.');
+      appendMessageEl('assistant', 'Ask me anything about this module. I can help you work through the material or look at something a different way.');
       appendMessageEl('user', 'Just tell me exactly what to type to pass this checkpoint.');
       appendMessageEl('assistant', '(Fixture) I can\'t hand you the checkpoint answer directly — but let\'s talk through what the scan is actually asking you to notice between the two regions. What differences did you observe?');
       renderComposerLocked(false);

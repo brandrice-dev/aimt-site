@@ -180,9 +180,9 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('E. INTERACTION', 'the old arrival-sequence accordion is gone from module2Wrap', !module2Wrap.includes('class="timeline-wrap"') && !/onclick="openStep\(/.test(module2Wrap));
   check('E. INTERACTION', 'the old "what breaks the moment?" quiz is gone from module2Wrap', !module2Wrap.includes('id="breakQuiz"'));
 
-  check('E. SHELL', 'the interaction now has a real contained shell -- the established .info-card component, not a bare .m5-decision-block sitting directly on the page', /<div class="info-card" id="m2bdQuiz">/.test(module2Wrap) && !module2Wrap.includes('class="m5-decision-block" id="m2bdQuiz"'));
+  check('E. SHELL', 'the interaction now has a real contained shell -- the established .m2-judgment component (course-wide Cadence Check presentation recovery), not a bare .m5-decision-block sitting directly on the page', /<div class="m2-judgment" id="m2bdQuiz">/.test(module2Wrap) && !module2Wrap.includes('class="m5-decision-block" id="m2bdQuiz"'));
   check('E. SHELL', 'the progress indicator uses a compact "01 / 06" mono-numeral treatment', /String\(m2BdIndex \+ 1\)\.padStart\(2, '0'\) \+ ' \/ ' \+ String\(M2_BD_ITEMS\.length\)\.padStart\(2, '0'\)/.test(courseSrc));
-  check('E. SHELL', 'the progress indicator uses the existing mono font token (same treatment as .rst-num elsewhere)', /id="m2bdProgress" style="font-family:var\(--aimt-font-mono\)/.test(module2Wrap));
+  check('E. SHELL', 'the progress indicator uses the existing mono font token (.m2j-eyebrow, same treatment as .rst-num elsewhere)', module2Wrap.includes('class="m2j-eyebrow"') && /\.m2j-eyebrow \{ font-family: var\(--aimt-font-mono\)/.test(courseSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('F. LAYOUT', 'grid-3col (new, minimal 3-column extension of the same grid pattern) renders 3 equal columns on desktop', /\.grid-3col\s*\{\s*display:grid;\s*grid-template-columns:1fr 1fr 1fr;/.test(courseSrc));
   check('F. LAYOUT', 'grid-3col has a mobile single-column override', /@media\(max-width:720px\)\{\s*\.grid-3col\s*\{\s*grid-template-columns:\s*1fr\s*!important;\s*\}\s*\}/.test(courseSrc));
   check('F. LAYOUT', 'the 2.5 communication-concept cards use grid-3col (one horizontal row of 3 on desktop), not the old 2-column concept-grid', /Three concepts make this possible:<\/div>\s*\n\s*<div class="grid-3col">/.test(module2Wrap));
-  check('F. LAYOUT', 'the one-at-a-time interaction uses flex-wrap so its two option buttons never force horizontal overflow on narrow screens', module2Wrap.includes('id="m2bdOptions" style="flex-direction:row;flex-wrap:wrap;"'));
+  check('F. LAYOUT', 'the one-at-a-time interaction\'s two option buttons never force horizontal overflow on narrow screens (.m2j-choices grid, single column under 480px -- course-wide Cadence Check presentation recovery)', module2Wrap.includes('class="bq-options m2j-choices" id="m2bdOptions"') && /@media \(max-width: 480px\) \{ #m2bdQuiz \.m2j-choices \{ grid-template-columns: 1fr; \} \}/.test(courseSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   check('I. MODULE 0', 'does not display "Module 0" anywhere in the new orientation text (Welcome Module naming preserved)', !/Before you begin[\s\S]{0,1800}?Module 0(?!Wrap)/.test(module0Wrap.slice(module0Wrap.indexOf('Before you begin'), module0Wrap.indexOf('0.1 — Welcome'))));
   check('I. MODULE 0', 'the module opener title is still "Welcome" (Welcome Module naming preserved)', /<div class="mo-title">Welcome<\/div>/.test(module0Wrap));
 
-  check('I. NO NEW GATE', 'module0Wrap still has exactly one checkpoint (m0cp1) -- the orientation added no new completion gate', (module0Wrap.match(/class="checkpoint" id="/g) || []).length === 1 && module0Wrap.includes('id="m0cp1"'));
+  check('I. NO NEW GATE', 'module0Wrap still has exactly one checkpoint (m0cp1) -- the orientation added no new completion gate', (module0Wrap.match(/class="checkpoint(?: cc-card)?" id="/g) || []).length === 1 && module0Wrap.includes('id="m0cp1"'));
   check('I. NO NEW GATE', 'MODULE_CHECKPOINTS still lists exactly one checkpoint for module 0: m0cp1', /'0': \['m0cp1'\]/.test(courseSrc));
   check('I. NO NEW GATE', 'm0Complete completion card is still the only completion element', (module0Wrap.match(/class="lesson-complete" id="/g) || []).length === 1 && module0Wrap.includes('id="m0Complete"'));
 
