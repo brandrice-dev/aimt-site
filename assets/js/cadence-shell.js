@@ -149,7 +149,7 @@
       '<div class="cshell-overlay" id="cshellOverlay"></div>' +
       '<div class="cshell" id="cshell" role="dialog" aria-modal="true" aria-label="Cadence conversation">' +
         '<div class="cshell-head">' +
-          '<div class="cshell-id" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>' +
+          '<div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" id="cshellHeaderMark"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>' +
           '<div class="cshell-titles">' +
             '<div class="cshell-module" id="cshellModule"></div>' +
             '<div class="cshell-status" id="cshellStatusLine"></div>' +
@@ -392,6 +392,10 @@
     dom.overlay.classList.add('show');
     dom.shell.classList.add('open');
     updateViewportHeight();
+    // Cadence "has entered" the panel -- same one-time turn+glow the
+    // intro itself uses (assets/js/cadence-identity.js), never a
+    // continuous spin.
+    if (window.CadenceIdentity) window.CadenceIdentity.activate(document.getElementById('cshellHeaderMark'));
 
     if (isReview) {
       renderFixtureBar();
@@ -451,6 +455,10 @@
     dom.overlay.classList.add('show');
     dom.shell.classList.add('open');
     updateViewportHeight();
+    // Cadence "has entered" the panel -- same one-time turn+glow the
+    // intro itself uses (assets/js/cadence-identity.js), never a
+    // continuous spin.
+    if (window.CadenceIdentity) window.CadenceIdentity.activate(document.getElementById('cshellHeaderMark'));
 
     if (isReview) {
       renderAskFixtureBar();
@@ -776,7 +784,7 @@
     const av = document.createElement('div');
     av.className = 'cshell-msg-av';
     av.setAttribute('aria-hidden', 'true');
-    av.innerHTML = role === 'assistant' ? '<span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>' : 'You';
+    av.innerHTML = role === 'assistant' ? '<span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span>' : 'You';
     const bub = document.createElement('div');
     bub.className = 'cshell-bub';
     bub.setAttribute('role', 'group');
@@ -846,7 +854,7 @@
       el = document.createElement('div');
       el.id = 'cshellTypingRow';
       el.className = 'cshell-msg assistant';
-      el.innerHTML = '<div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>' +
+      el.innerHTML = '<div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>' +
         '<div class="cshell-bub"><div class="cshell-typing" role="status" aria-label="' + escapeHtml(label || 'Cadence is thinking') + '"><span></span><span></span><span></span></div></div>';
       dom.transcriptInner.appendChild(el);
     }

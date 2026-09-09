@@ -42,6 +42,10 @@
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 <link rel="stylesheet" href="assets/css/cadence-shell.css">
+<!-- Cadence's unified identity mark/animation primitive -- shared by
+     Cadence Checks, the Ask Cadence panel, and the #guideBtn pill below,
+     so all three read as the same product as the intro. -->
+<link rel="stylesheet" href="assets/css/cadence-identity.css">
 <!-- Cadence pre-course intro: shared with cadence-intro-preview.html, the
      standalone owner-review page. One source of truth -- see that file's
      header comment and assets/js/aimt-cadence-intro.js. -->
@@ -630,34 +634,28 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .cp-res { margin-top: 0.85rem; padding: 0.95rem 1rem; background: rgba(255,255,255,0.82); border: 0.5px solid rgba(0,0,0,0.04); border-radius: var(--aimt-radius-md); font-size: 0.86rem; line-height: 1.76; color: var(--text); font-weight: 300; display: none; max-width: 60ch; }
 .cp-res.show { display: block; }
 
-/* ── Cadence Check — final approved white-card visual system (course-
-   audit-build). Retires the dark/espresso card entirely: white surface,
-   AIMT Charcoal primary text, AIMT Walnut secondary/context text, AIMT
-   Oxblood reserved for the tech-ring layer only. Same ids/classes as
-   before (#{cpId}, #{cpId}In, #{cpId}Btn, #{cpId}Res, .cc-rail/.cc-divider/
+/* ── Cadence Check — unified with the Cadence intro's visual identity
+   (Cadence visual-system unification pass). Same ids/classes as before
+   (#{cpId}, #{cpId}In, #{cpId}Btn, #{cpId}Res, .cc-rail/.cc-divider/
    .cc-eyebrow-N/.cc-title-N/.cc-line-N, .cc-inprogress/.cc-resolved) --
    this pass is a re-skin, not a state-machine change: wireCheckpoint()
    (assets/js/cadence-shell.js) and applyCheckpointInputState()/
    restoreLessonState() (this file) are untouched, and the exact same
-   ready/in-progress/resolved copy from the prior pass already matched
-   this brief's copy verbatim, so none of that needed to change. What
-   changed here: the palette, the card surface (white/floating instead of
-   dark), and the Cadence mark itself -- .cadence-mark (a single inline
-   SVG) is replaced by .cadence-symbol, two stacked <img>s pointing at
-   assets/images/course/cadence/cadence-core.svg (charcoal, baked in via
-   an feFlood/feComposite recolor filter added to that source file's own
-   <defs>) and cadence-tech-ring.svg (oxblood, same technique). Both
-   source SVGs share the exact same viewBox (0 0 750 749.999995), so two
-   absolutely-positioned, identically-sized <img>s center on each other
-   with no manual offset math. They're referenced as external files
-   rather than inlined -- the tech-ring source file alone is ~875KB, and
-   this markup repeats across 22 checkpoints, so inlining would add
-   ~19MB to this page. Rail-positioning technique (position:absolute
-   rail+divider at 768px+, not CSS Grid) is unchanged from the prior
-   pass -- see that rationale preserved below. ── */
+   ready/in-progress/resolved copy already matches this brief's copy
+   verbatim, so none of that needed to change.
+   What changed: the card returns to a dark/charcoal premium surface
+   (explicitly approved -- background var(--hero-bg2), stone/white text);
+   the mark is now .cadence-id (assets/css/cadence-identity.css), the
+   same orbital mark used everywhere else Cadence appears, replacing
+   .cadence-symbol's old core+tech-ring <img> pair; and the entry
+   animation is now a real, wired activation -- assets/js/cadence-
+   identity.js's CadenceIdentity.activate(), triggered on the "Open
+   Cadence Check"/"Ask Cadence" click (see the click-handler script near
+   the bottom of this file) -- replacing cadenceRingSpinIn, which was
+   dead CSS: nothing ever added the .cc-ring-spin class it targeted. */
 .checkpoint.cc-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(43,43,43,0.08);
+  background: var(--hero-bg2, #1a1814);
+  border: 1px solid rgba(250,248,245,0.08);
   border-radius: var(--aimt-radius-lg);
   /* Resets the base .checkpoint rule's own padding -- this card handles
      all its spacing itself, via .cc-rail's padding and each content
@@ -669,10 +667,10 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
      approach. */
   padding: 0;
   margin: 1.85rem 0 2.15rem;
-  color: var(--aimt-charcoal);
+  color: #faf8f5;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 44px -18px rgba(43,29,23,0.28), 0 3px 10px rgba(43,29,23,0.07);
+  box-shadow: 0 20px 44px -18px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.25);
   --cc-top-gap: 0.9rem;
 }
 .checkpoint.cc-card .cc-rail {
@@ -684,41 +682,20 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   padding-left: 1.65rem; padding-right: 1.65rem; position: relative; z-index: 1;
 }
 
-/* Cadence symbol -- two independently addressable layers, core (charcoal,
-   stationary) and tech-ring (oxblood, the only oxblood in the identity),
-   centered on each other via matching viewBox + identical absolute
-   sizing. The ring rotates on .cc-ring-spin (see keyframes + JS trigger
-   in wireCadenceEntryAnimation() below); the core never moves. */
-.cadence-symbol {
-  width: 96px; height: 96px; position: relative; flex-shrink: 0; display: block;
-}
+/* Rail mark: the unified Cadence identity, sized to the exact footprint
+   .cadence-symbol used to occupy (96px mobile / 140px desktop). Bare
+   .cadence-id (no chip) -- the card is dark now, so the mark's own
+   white-on-transparent treatment already has full contrast, same as it
+   does in the intro itself. */
+.cc-rail .cadence-id { --cadence-id-size: 96px; }
 @media (min-width: 768px) {
-  .cadence-symbol { width: 140px; height: 140px; }
-}
-.cadence-symbol img {
-  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
-  pointer-events: none; user-select: none;
-}
-.cadence-core-img { z-index: 1; }
-.cadence-ring-img {
-  z-index: 2; transform-origin: 50% 50%; will-change: transform;
-}
-@keyframes cadenceRingSpinIn {
-  from { transform: rotate(0deg) scale(1); }
-  to   { transform: rotate(230deg) scale(1.015); }
-}
-.cadence-ring-img.cc-ring-spin {
-  animation: cadenceRingSpinIn 1250ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .cadence-ring-img.cc-ring-spin { animation: none !important; }
+  .cc-rail .cadence-id { --cadence-id-size: 140px; }
 }
 
-/* Checkpoint content settles back and softens while Cadence activates
-   (course-audit-build, Cadence polish pass, item 3) -- reuses the
-   existing .cc-entering class (set by wireCadenceEntryAnimation() for
-   the exact duration of the ring spin) rather than adding a second
-   trigger, so this can never fire out of sync with the ring. */
+/* Checkpoint content settles back and softens while Cadence activates --
+   .cc-entering is added/removed by the click-handler script alongside
+   CadenceIdentity.activate(), for the same 2600ms turn duration, so this
+   can never fire out of sync with the mark. */
 .checkpoint.cc-card > *:not(.cc-rail):not(.cc-divider) {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
@@ -731,7 +708,7 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 
 .checkpoint.cc-card .cc-eyebrow {
   font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 500;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--aimt-walnut);
+  letter-spacing: 0.14em; text-transform: uppercase; color: #a3968d;
   display: none; margin-top: var(--cc-top-gap);
 }
 .checkpoint.cc-card .cc-eyebrow-ready { display: block; }
@@ -739,20 +716,20 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .checkpoint.cc-card.cc-inprogress .cc-eyebrow-progress { display: block; }
 .checkpoint.cc-card.cc-resolved .cc-eyebrow-ready { display: none; }
 /* Completion is a checkmark + text, never a color signal by itself --
-   kept to charcoal (primary) rather than walnut/oxblood so the resolved
-   state reads as a settled, primary-weight state, not an accent color. */
-.checkpoint.cc-card.cc-resolved .cc-eyebrow-done { display: block; color: var(--aimt-charcoal); }
+   kept to a bright stone (primary weight) rather than the muted accent,
+   so the resolved state reads as settled, not an accent callout. */
+.checkpoint.cc-card.cc-resolved .cc-eyebrow-done { display: block; color: #faf8f5; }
 
 .checkpoint.cc-card .cp-label.cc-headline {
   font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--aimt-walnut);
+  letter-spacing: 0.1em; text-transform: uppercase; color: #a3968d;
   margin-top: 0.65rem; margin-bottom: 0.6rem;
 }
 
 .checkpoint.cc-card .cc-title {
   font-family: var(--aimt-font-serif); font-size: clamp(1.18rem, 3.2vw, 1.38rem);
   font-weight: 500; letter-spacing: -0.01em; line-height: 1.28;
-  color: var(--aimt-charcoal); margin-bottom: 0.6rem; display: none;
+  color: #faf8f5; margin-bottom: 0.6rem; display: none;
 }
 .checkpoint.cc-card .cc-title-ready { display: block; }
 .checkpoint.cc-card.cc-inprogress .cc-title-ready { display: none; }
@@ -761,7 +738,7 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .checkpoint.cc-card.cc-resolved .cc-title-done { display: block; }
 
 .checkpoint.cc-card .cc-line {
-  font-size: 0.86rem; font-weight: 400; line-height: 1.62; color: var(--aimt-walnut);
+  font-size: 0.86rem; font-weight: 400; line-height: 1.62; color: rgba(250,248,245,0.68);
   max-width: 46ch; margin-bottom: 1.5rem; display: none;
 }
 .checkpoint.cc-card .cc-line-ready { display: block; }
@@ -788,14 +765,14 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
      `overflow: hidden`. Card-level padding removes the whole class of
      bug: every child, button included, just fills its container.) */
   width: 100%; height: auto; border-radius: var(--aimt-radius-md);
-  background: var(--aimt-charcoal); border: none; color: #FFFFFF;
+  background: #faf8f5; border: none; color: #1a1814;
   font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 600;
   padding: 0.9rem 1.3rem; display: flex; align-items: center; justify-content: center;
   margin-bottom: 1.65rem; transition: opacity 0.15s;
 }
 .checkpoint.cc-card .cp-btn:hover { opacity: 0.86; }
-.checkpoint.cc-card .cp-btn:disabled { background: rgba(43,43,43,0.25); color: rgba(255,255,255,0.7); cursor: not-allowed; }
-.checkpoint.cc-card .cp-btn:focus-visible { outline: 2px solid var(--aimt-oxblood); outline-offset: 2px; }
+.checkpoint.cc-card .cp-btn:disabled { background: rgba(250,248,245,0.15); color: rgba(250,248,245,0.5); cursor: not-allowed; }
+.checkpoint.cc-card .cp-btn:focus-visible { outline: 2px solid #a3968d; outline-offset: 2px; }
 
 /* Resolved state: quieter than the primary ready-state CTA -- outline
    control, no fill, on the passed card. The "Review conversation" text
@@ -803,13 +780,13 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    by cadence-checkpoint-authority.test.mjs, so the arrow is appended here
    in CSS rather than touching that JS string. */
 .checkpoint.cc-card.cc-resolved .cp-btn {
-  width: auto; background: transparent; color: var(--aimt-charcoal);
-  border: 1px solid rgba(43,43,43,0.22); padding: 1.2rem 2.25rem;
+  width: auto; background: transparent; color: #faf8f5;
+  border: 1px solid rgba(250,248,245,0.22); padding: 1.2rem 2.25rem;
   font-size: 0.82rem; font-weight: 500; display: inline-flex;
 }
 .checkpoint.cc-card.cc-resolved .cp-btn::after { content: ' →'; }
 .checkpoint.cc-card.cc-resolved .cp-btn:hover {
-  opacity: 1; border-color: rgba(43,43,43,0.4); background: rgba(43,43,43,0.04);
+  opacity: 1; border-color: rgba(250,248,245,0.4); background: rgba(250,248,245,0.06);
 }
 @media (min-width: 768px) {
   /* Rail is absolutely positioned (not a grid column) so it always spans
@@ -847,7 +824,7 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   }
   .checkpoint.cc-card .cc-divider {
     display: block; position: absolute; top: 14%; bottom: 14%; left: 28%; width: 1px;
-    background: linear-gradient(to bottom, transparent, rgba(43,43,43,0.12) 12%, rgba(43,43,43,0.12) 88%, transparent);
+    background: linear-gradient(to bottom, transparent, rgba(250,248,245,0.14) 12%, rgba(250,248,245,0.14) 88%, transparent);
   }
   /* The card's own padding-left/right above now does this job; each
      child's mobile-only padding-left/right: 1.65rem (base rule, further
@@ -927,21 +904,14 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   50% { opacity: 0.45; transform: scale(0.7); }
 }
 
-/* Shared Cadence identity badge -- the same core+tech-ring symbol used on
-   the Cadence Check card (.cadence-symbol), scaled down with a light
-   circular backing so the charcoal core and oxblood ring keep their
-   contrast when the badge sits on a dark surface (Cadence polish pass,
-   items 6/7). Static only -- no idle animation anywhere; entry
-   animation is exclusively .cadence-ring-img.cc-ring-spin, triggered
-   only from a checkpoint's own Cadence Check CTA. */
-.cadence-badge {
-  position: relative; border-radius: 50%; background: #FFFFFF; flex-shrink: 0; display: block;
-}
-.cadence-badge img {
-  position: absolute; top: 50%; left: 50%; width: 82%; height: 82%;
-  transform: translate(-50%, -50%); display: block; pointer-events: none; user-select: none;
-}
-#guideBtn .cadence-badge { width: 30px; height: 30px; }
+/* Floating entry: the unified Cadence identity mark (assets/css/cadence-
+   identity.css), bare (no chip) -- #guideBtn's own background is already
+   dark (var(--hero-bg)), so the mark's white-on-transparent treatment has
+   full contrast without a backing circle. Static resting state only, no
+   idle animation, no constant rotation -- this is an entry point, not an
+   active conversation; the turn+glow plays once the panel actually opens
+   (assets/js/cadence-shell.js openCheckpoint()/openAskCadence()). */
+#guideBtn .cadence-id { --cadence-id-size: 30px; }
 
 .cadence-label {
   font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
@@ -3327,7 +3297,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                    captured student transcript — labeled as such below. -->
               <div class="lp-cadence-demo" id="lpCadenceDemo">
                 <div class="cshell-head">
-                  <div class="cshell-id" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                  <div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                   <div class="cshell-titles">
                     <div class="cshell-module">Module 5 — Scalp Patterns &amp; Service Adaptation</div>
                     <div class="cshell-status">Optional · not graded</div>
@@ -3337,7 +3307,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                   <div class="cshell-transcript-inner">
                     <div class="cshell-kicker">Ask Cadence</div>
                     <div class="cshell-msg assistant">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><p>Ask me anything about this module. I can help you work through the material or look at something a different way.</p></div>
                     </div>
                     <div class="cshell-msg user cs-hidden-msg" id="lpCsUser1">
@@ -3345,11 +3315,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                       <div class="cshell-bub" role="group" aria-label="You"><p>If the crown looks oily but the hairline looks dry, am I supposed to choose one scalp type?</p></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsTyping1">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsA1">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><p>No. AIMT teaches you to plan from current findings by region, not force the whole scalp into one label. The crown may support more targeted cleansing while the hairline calls for a gentler approach.</p></div>
                     </div>
                     <div class="cshell-msg user cs-hidden-msg" id="lpCsUser2">
@@ -3357,11 +3327,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                       <div class="cshell-bub" role="group" aria-label="You"><p>So the service can change within the same appointment?</p></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsTyping2">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsA2">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><p>Yes. Keep the overall service cohesive, but adjust the levers that matter — cleansing, exfoliation, water and steam, pressure and tempo, and product placement — only where your assessment gives you a reason to.</p></div>
                     </div>
                     <div class="cshell-msg user cs-hidden-msg" id="lpCsUser3">
@@ -3369,11 +3339,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                       <div class="cshell-bub" role="group" aria-label="You"><p>That makes more sense. I thought I had to pick one protocol.</p></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsTyping3">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
                     </div>
                     <div class="cshell-msg assistant cs-hidden-msg" id="lpCsA3">
-                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+                      <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
                       <div class="cshell-bub" role="group" aria-label="Cadence"><p>Think of the protocol as a framework, not a script. Preserve what does not need changing, modify what the evidence supports, and keep the client experience feeling like one intentional service.</p></div>
                     </div>
                   </div>
@@ -4340,7 +4310,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- CHECKPOINT 1 (midpoint) -->
     <div class="checkpoint cc-card" id="cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -4503,7 +4473,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- CHECKPOINT 2 -->
     <div class="checkpoint cc-card" id="cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -4541,7 +4511,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 <!-- ── FLOATING GUIDE ── -->
 <button id="guideBtn" onclick="toggleGuide()">
-  <span class="cadence-badge" aria-hidden="true"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>
+  <span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span>
   <span class="cadence-label">Cadence</span>
   <span class="cadence-context">· Ask me anything</span>
 </button>
@@ -4893,7 +4863,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- CHECKPOINT 1 (midpoint) -->
     <div class="checkpoint cc-card" id="m5cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -5134,7 +5104,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- CHECKPOINT 2 (final) -->
     <div class="checkpoint cc-card" id="m5cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -5491,7 +5461,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m4cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -5819,7 +5789,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m4cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -6152,7 +6122,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- CHECKPOINT -->
     <div class="checkpoint cc-card" id="m0cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -6416,7 +6386,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m1cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -6507,7 +6477,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m1cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -6818,7 +6788,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- ── CHECKPOINT ── -->
     <div class="checkpoint cc-card" id="m2cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -7101,7 +7071,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- ── MIDPOINT CHECKPOINT ── -->
     <div class="checkpoint cc-card" id="m6cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -7279,7 +7249,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <!-- ── FINAL CHECKPOINT ── -->
     <div class="checkpoint cc-card" id="m6cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -7693,7 +7663,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m7cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -7716,7 +7686,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m7cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8031,7 +8001,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m8cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8054,7 +8024,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m8cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8439,7 +8409,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m9cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8462,7 +8432,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m9cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8736,7 +8706,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m10cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -8808,7 +8778,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m10cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -9107,7 +9077,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m11cp1">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -9217,7 +9187,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="checkpoint cc-card" id="m11cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-symbol"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
       <div class="cc-divider" aria-hidden="true"></div>
       <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
       <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
@@ -9371,7 +9341,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <script src="assets/js/aimt-listen-mode-data.js"></script>
 <script src="assets/js/aimt-listen-mode-player.js"></script>
 <script src="assets/js/module12-certification.js"></script>
+<script src="assets/js/cadence-identity.js"></script>
 <script src="assets/js/cadence-shell.js" defer></script>
+<!-- Cadence Check entry animation: wires the intro-style turn+glow to the
+     moment a student actually opens a checkpoint, purely as a visual
+     side effect on the card's own .cadence-id mark -- does not touch
+     submitCP/submitCheckpoint or any grading/gating logic below. -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.checkpoint.cc-card .cp-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.checkpoint.cc-card');
+      if (!card) return;
+      var mark = card.querySelector('.cc-rail .cadence-id');
+      if (window.CadenceIdentity && mark) window.CadenceIdentity.activate(mark);
+      card.classList.add('cc-entering');
+      setTimeout(function () { card.classList.remove('cc-entering'); }, 2600);
+    });
+  });
+});
+</script>
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // ══════════════════════════════════════════════════════

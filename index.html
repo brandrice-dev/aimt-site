@@ -30,6 +30,10 @@
      This page never loads assets/js/cadence-shell.js: the surface below is a
      fixed, static presentation, not the real (modal) runtime. -->
 <link rel="stylesheet" href="assets/css/cadence-shell.css">
+<!-- Cadence's unified identity mark (the same orbital mark the intro
+     uses) — renders the static #cadenceStaticShell demo's avatars below
+     with the current product identity instead of the old core/ring mark. -->
+<link rel="stylesheet" href="assets/css/cadence-identity.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -514,13 +518,6 @@ body {
   .cadence-demo { margin-top: 1.5rem; margin-bottom: 1.5rem; }
   .cadence-demo-secondary { left: -0.75rem; bottom: -1.25rem; }
 }
-
-/* Cadence identity badge — the exact rule from headspa-mastery.html's own
-   <style> (it doesn't live in the shared cadence-shell.css), copied
-   verbatim so the icon used in the static conversation surface below
-   matches the real product mark exactly. */
-.cadence-badge { position: relative; border-radius: 50%; background: #fff; flex-shrink: 0; display: block; }
-.cadence-badge img { position: absolute; top: 50%; left: 50%; width: 82%; height: 82%; transform: translate(-50%, -50%); display: block; pointer-events: none; user-select: none; }
 
 /* This player now carries Cadence's real homepage welcome message (a
    generated MP3 — see the audio element in the markup below), replacing
@@ -1071,7 +1068,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
          a deterministic, one-time staged reveal, not a real conversation. -->
     <div class="cadence-static-shell reveal reveal-delay-4" id="cadenceStaticShell">
       <div class="cshell-head">
-        <div class="cshell-id" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+        <div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
         <div class="cshell-titles">
           <div class="cshell-module">Module 6 — Conditions &amp; Disorders</div>
           <div class="cshell-status">Checkpoint · revision shown</div>
@@ -1081,7 +1078,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
         <div class="cshell-transcript-inner">
           <div class="cshell-kicker">Checkpoint</div>
           <div class="cshell-msg assistant">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</p></div>
           </div>
           <div class="cshell-msg user cs-hidden-msg" id="csUser1">
@@ -1089,11 +1086,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
             <div class="cshell-bub" role="group" aria-label="You"><p>I'm not really sure . . .</p></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csTyping1">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csGuidance">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>No worries — let's work through it. Start with what the microscopy is telling you: fine white powdery flakes, minimal oil, matte surface. Does that picture match dandruff, or something else? Once you identify what's actually going on, the conversation with the client and your next steps will follow naturally. Take a shot at it.</p></div>
           </div>
           <div class="cshell-msg user cs-hidden-msg" id="csUser2">
@@ -1101,11 +1098,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
             <div class="cshell-bub" role="group" aria-label="You"><p>Fine white flakes with minimal oil and a matte surface reads more like a dry, over-cleansed scalp than a fungal dandruff pattern. I'd describe what I'm seeing rather than label it, suggest that the client ease off of the zinc, and focus on restoring moisture.</p></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csTyping2">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csAccept">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-badge"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>Solid read. You tied the matte surface and minimal oil to barrier disruption rather than Malassezia activity — and your scope framing around describing what you see is exactly right. That distinction matters when a client has been self-treating for months and is expecting a diagnosis. Clean checkpoint.</p></div>
           </div>
           <div class="cshell-pass-banner cs-hidden-msg" id="csPassBanner"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Checkpoint complete</div>

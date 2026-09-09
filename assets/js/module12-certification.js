@@ -369,13 +369,15 @@
     lastBridgeUsed[poolKey] = choice;
     return choice;
   }
-  // PLACEHOLDER Cadence identity anchor -- see the m12x-cadence-id CSS
-  // comment above for why (owner-confirmed asset not yet located; reuses
-  // the site's real, already-approved guide-panel identity mark verbatim,
-  // not a new design). Rendered once per conversation screen, not per
-  // message, per the "avoid excessive avatar repetition" direction.
+  // Cadence identity anchor -- the unified mark (assets/css/cadence-
+  // identity.css), the same one the intro/Ask Cadence/Cadence Checks use;
+  // this is the swap point the prior placeholder-dot comment called for.
+  // Rendered once per conversation screen, not per message, per the
+  // "avoid excessive avatar repetition" direction. Static only -- no
+  // activation trigger here, consistent with the rest of this pass
+  // leaving Module 12's own content/flow untouched.
   function cadenceIdentityHtml() {
-    return '<div class="m12x-cadence-id"><span class="m12x-cadence-dot" aria-hidden="true"></span><span class="m12x-cadence-id-label">Cadence</span></div>';
+    return '<div class="m12x-cadence-id"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span><span class="m12x-cadence-id-label">Cadence</span></div>';
   }
   // A single answer-choice control shared by Part I and every Part II
   // choice-based part type. Renders as a premium AIMT control (custom
@@ -552,20 +554,16 @@
          on one open surface instead of card-on-card. */
       '.m12x .m12x-cadence-env { background:rgba(0,0,0,0.015); border-radius:20px; padding:0.2rem 0.1rem 1.1rem; margin-top:0.4rem; }',
       '.m12x .m12x-cadence-progress { font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:#8a8078; margin-bottom:0.9rem; }',
-      /* Identity anchor -- PLACEHOLDER pending the real Cadence avatar asset
-         (owner confirmed one exists but could not locate the file at task
-         time; explicitly approved to ship a placeholder meanwhile). Reuses
-         the site's own existing, already-approved Cadence identity mark
-         verbatim -- the breathing-dot + wordmark badge from the persistent
-         guide panel (.gp-av/.gp-av-dot/.gp-av-label, headspa-mastery.html)
-         -- rather than inventing a new mark or an emoji/generic-AI icon.
-         Swap point: once a real image asset lands, replace m12x-cadence-id's
-         inner .m12x-cadence-dot span with an <img>; no other markup needs
-         to change. */
+      /* Identity anchor -- the unified Cadence mark (assets/css/cadence-
+         identity.css), replacing the earlier placeholder breathing dot
+         now that the real asset (the site's own orbital mark) is
+         identified and used everywhere else Cadence appears. Bare
+         .cadence-id (no chip): this pill's own background is already
+         dark (var(--hero-bg)), same treatment as the #guideBtn pill in
+         headspa-mastery.html. */
       '.m12x .m12x-cadence-id { display:inline-flex; align-items:center; gap:7px; background:var(--hero-bg,#262626); border-radius:980px; padding:0 12px; height:30px; margin-bottom:0.9rem; }',
-      '.m12x .m12x-cadence-dot { width:6px; height:6px; border-radius:50%; background:var(--teal,#4a9b8e); animation:cadenceBreathe 2.4s ease-in-out infinite; flex-shrink:0; }',
+      '.m12x .m12x-cadence-id .cadence-id { --cadence-id-size: 18px; }',
       '.m12x .m12x-cadence-id-label { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:#fff; }',
-      '@keyframes cadenceBreathe { 0%,100% { opacity:0.45; } 50% { opacity:1; } }',
       '.m12x .m12x-chat { display:flex; flex-direction:column; gap:0.85rem; margin-bottom:1.1rem; }',
       '.m12x .m12x-msg { max-width:82%; padding:0.75rem 1rem; border-radius:16px; font-size:0.89rem; line-height:1.62; font-family:var(--aimt-font-sans); }',
       '.m12x .m12x-msg.assistant { background:#fff; align-self:flex-start; border-bottom-left-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }',

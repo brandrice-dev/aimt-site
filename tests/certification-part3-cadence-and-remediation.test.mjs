@@ -67,8 +67,9 @@ function fnBody(src, name) {
 // ============================================================
 (function cadencePresentationStatic() {
   check('CADENCE PRESENTATION', 'No new avatar image referenced anywhere in the client bundle (no <img>, no new .png/.jpg/.svg path)', !/<img\b|\.(png|jpe?g|svg|webp)['"]/i.test(clientCode));
-  check('CADENCE PRESENTATION', 'Identity badge reuses the site\'s existing guide-panel tokens (--hero-bg / --teal), not invented colors', /m12x-cadence-id[\s\S]{0,400}var\(--hero-bg/.test(clientSrc) && /m12x-cadence-dot[\s\S]{0,200}var\(--teal/.test(clientSrc));
-  check('CADENCE PRESENTATION', 'Identity badge is documented as a PLACEHOLDER pending the real asset (not silently presented as final)', /PLACEHOLDER pending the real Cadence avatar/.test(clientSrc));
+  check('CADENCE PRESENTATION', 'Identity badge pill reuses the site\'s existing guide-panel token (--hero-bg), not an invented color', /m12x-cadence-id[\s\S]{0,400}var\(--hero-bg/.test(clientSrc));
+  check('CADENCE PRESENTATION', 'Identity badge renders the site\'s unified Cadence mark (the canonical orbital mark, not an invented/one-off asset)', /cadenceIdentityHtml[\s\S]{0,400}aimt-orbital-mark\.svg#aimtOrbitalMark/.test(clientSrc));
+  check('CADENCE PRESENTATION', 'Identity badge is no longer documented as a placeholder (Cadence visual-system unification pass resolved it to the real, approved mark)', !/PLACEHOLDER pending the real Cadence avatar/.test(clientSrc));
   check('CADENCE PRESENTATION', 'cadenceIdentityHtml() renders once per screen (called from renderPartIII\'s draw, not per-message in the transcript loop)', (function () {
     const renderPartIII = fnBody(clientSrc, 'renderPartIII');
     const draw = renderPartIII ? fnBody(renderPartIII, 'draw') : null;
