@@ -68,7 +68,15 @@ function fnBody(src, name) {
 (function cadencePresentationStatic() {
   check('CADENCE PRESENTATION', 'No new avatar image referenced anywhere in the client bundle (no <img>, no new .png/.jpg/.svg path)', !/<img\b|\.(png|jpe?g|svg|webp)['"]/i.test(clientCode));
   check('CADENCE PRESENTATION', 'Identity badge pill reuses the site\'s existing guide-panel token (--hero-bg), not an invented color', /m12x-cadence-id[\s\S]{0,400}var\(--hero-bg/.test(clientSrc));
-  check('CADENCE PRESENTATION', 'Identity badge renders the site\'s unified Cadence mark (the canonical orbital mark, not an invented/one-off asset)', /cadenceIdentityHtml[\s\S]{0,400}aimt-orbital-mark\.svg#aimtOrbitalMark/.test(clientSrc));
+  // Local same-document reference (#cadence-mark), not the old cross-
+  // document `aimt-orbital-mark.svg#aimtOrbitalMark` -- an external-file
+  // SVG <use> silently renders nothing in this site's target browsers
+  // (confirmed by isolated test, course-audit-build Cadence/AIMT identity
+  // fix), which is why the mark had gone invisible everywhere it was used
+  // that way. Every page now inlines a local <symbol id="cadence-mark">
+  // (Cadence's OWN geometry, separate from AIMT's #aimtOrbitalMark) and
+  // references it same-document instead.
+  check('CADENCE PRESENTATION', 'Identity badge renders the site\'s unified Cadence mark (the canonical orbital mark, not an invented/one-off asset)', /cadenceIdentityHtml[\s\S]{0,400}#cadence-mark/.test(clientSrc));
   check('CADENCE PRESENTATION', 'Identity badge is no longer documented as a placeholder (Cadence visual-system unification pass resolved it to the real, approved mark)', !/PLACEHOLDER pending the real Cadence avatar/.test(clientSrc));
   check('CADENCE PRESENTATION', 'cadenceIdentityHtml() renders once per screen (called from renderPartIII\'s draw, not per-message in the transcript loop)', (function () {
     const renderPartIII = fnBody(clientSrc, 'renderPartIII');

@@ -69,7 +69,7 @@ const shellSrc = readFileSync(path.join(ROOT, 'assets/js/cadence-shell.js'), 'ut
 // ─────────────────────────────────────────────────────────────────────────
 (function activationMarkupShape() {
   check('ACTIVATION MARKUP', 'CADENCE_ACTIVATION_SVG constant is present', /var CADENCE_ACTIVATION_SVG =/.test(identitySrc));
-  const eightDistinctDelays = ['120ms', '205ms', '290ms', '375ms', '460ms', '545ms', '630ms', '715ms'].every((d) => identitySrc.includes(d));
+  const eightDistinctDelays = ['173ms', '295ms', '417ms', '539ms', '661ms', '784ms', '906ms', '1028ms'].every((d) => identitySrc.includes(d));
   check('ACTIVATION MARKUP', 'All 8 nodes have distinct, staggered animation-delays (a traveling signal around the ring, not a uniform spin)', eightDistinctDelays);
   check('ACTIVATION MARKUP', 'A traveling comet-arc (dasharray/dashoffset sweep) exists, independent of the node pulses', /cdact-trace/.test(identitySrc) && /stroke-dasharray/.test(identitySrc) && /stroke-dashoffset/.test(identitySrc));
   check('ACTIVATION MARKUP', 'A bloom pulse (blurred, scaling glow) exists, separate from the ring/node motion', /cdact-bloom/.test(identitySrc) && /feGaussianBlur/.test(identitySrc) && /cdact-bloomPulse/.test(identitySrc));
@@ -180,7 +180,7 @@ function loadCadenceIdentity(reducedMotion, useRealTimers) {
   check('ACTIVATE SWAP', 'The resting icon is replaced by a NEW element (fresh DOM node, not a class toggle) -- this is what guarantees the animation restarts from 0% on every repeat entry', swappedIcon !== null && swappedIcon.classList.contains('cadence-id-icon-activation'));
   check('ACTIVATE SWAP', 'The injected element carries the actual designer activation markup (cdact- namespaced layers), not an approximation', /cdact-outerSystem/.test(swappedIcon.outerHTML) && /cdact-trace/.test(swappedIcon.outerHTML) && /cdact-bloom/.test(swappedIcon.outerHTML));
   check('ACTIVATE SWAP', 'Exactly one timer is scheduled (the resolve delay) -- the animation itself plays via the injected markup\'s own CSS, not JS-driven timers', timers.length === 1);
-  check('ACTIVATE SWAP', 'The resolve timer matches ACTIVATION_MS (1600ms, the activation asset\'s own authored duration)', timers[0] && timers[0].ms === 1600, `got ${timers[0] && timers[0].ms}ms`);
+  check('ACTIVATE SWAP', 'The resolve timer matches ACTIVATION_MS (2300ms -- stretched from the activation asset\'s original 1600ms per owner QA: the activation read as too fast)', timers[0] && timers[0].ms === 2300, `got ${timers[0] && timers[0].ms}ms`);
 
   CadenceIdentity.restoreResting(mark);
   const restoredIcon = mark.querySelector('.cadence-id-icon');
@@ -191,7 +191,7 @@ await (async function activateActuallyDeferred() {
   // Real timers, real elapsed wall-clock time -- proves the resolution is
   // genuinely asynchronous and delayed, not a disguised synchronous
   // resolve. Reduced-motion path (short, deterministic ~350ms pause) for
-  // test speed -- the full-motion path's own real duration (1600ms) is
+  // test speed -- the full-motion path's own real duration (2300ms) is
   // already verified structurally above via the captured timer value.
   const { CadenceIdentity } = loadCadenceIdentity(true, true);
   const mark = makeMarkEl();

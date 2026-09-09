@@ -377,7 +377,7 @@
   // activation trigger here, consistent with the rest of this pass
   // leaving Module 12's own content/flow untouched.
   function cadenceIdentityHtml() {
-    return '<div class="m12x-cadence-id"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span><span class="m12x-cadence-id-label">Cadence</span></div>';
+    return '<div class="m12x-cadence-id"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span><span class="m12x-cadence-id-label">Cadence</span></div>';
   }
   // A single answer-choice control shared by Part I and every Part II
   // choice-based part type. Renders as a premium AIMT control (custom

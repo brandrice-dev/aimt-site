@@ -27,11 +27,14 @@
        ring once, fading in and out as it travels
      - the center core scales up and a separate blurred .cdact-bloom
        circle pulses outward -- the glow/bloom moment
-   Total authored duration: 1600ms (ACTIVATION_MS below) -- everything
+   Total authored duration: 2300ms (ACTIVATION_MS below) -- everything
    above is fully resolved by then (the last ~30% of each element's own
-   1600ms local timeline, after staggered delays, is just a static hold,
+   2300ms local timeline, after staggered delays, is just a static hold,
    confirmed by reading the source keyframes directly rather than
-   assuming).
+   assuming). Stretched up from an original 1600ms (owner QA: wanted the
+   activation to read as ~2-3 deliberate seconds, not a fast flash) --
+   every duration/delay below is scaled by the same ratio, so the
+   choreography's proportions are unchanged, only its pace.
 
    Every class/keyframe/filter name from the source file is prefixed
    `cdact-` here (SVG <style> blocks are NOT scoped to their own
@@ -57,36 +60,46 @@
    intentional moment rather than an instant jump.
    ═══════════════════════════════════════════════════════════════ */
 (function () {
-  var ACTIVATION_MS = 1600;
+  // Duration bumped from the original 1600ms to 2300ms (owner QA: "spins
+  // too fast" / "do not make it a fast flash" -- wanted an activation
+  // that reads as ~2-3 seconds of deliberate Cadence focusing, not a
+  // loading-spinner blip). Every per-element animation-duration below and
+  // every node's animation-delay is scaled by the same 2300/1600 ratio
+  // (x1.4375) so the choreography (orbit -> node signal travel -> core
+  // bloom -> settle) keeps its original proportions, just stretched.
+  var ACTIVATION_MS = 2300;
   var REDUCED_MOTION_PAUSE_MS = 350;
 
   var CADENCE_ACTIVATION_SVG =
     '<svg class="cadence-id-icon cadence-id-icon-activation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-hidden="true" style="color:#F2EEE6">' +
       '<defs>' +
         '<filter id="cdact-bloom-filter" x="-120%" y="-120%" width="340%" height="340%" color-interpolation-filters="sRGB">' +
-          '<feGaussianBlur stdDeviation="4.2"/>' +
+          '<feGaussianBlur stdDeviation="4.6"/>' +
         '</filter>' +
       '</defs>' +
       '<style>' +
         '.cdact-ring{fill:none;stroke:currentColor;vector-effect:non-scaling-stroke}' +
         '.cdact-outer{stroke-width:1.6;opacity:.94}' +
-        '.cdact-middle{stroke-width:1.3;opacity:.60;animation:cdact-innerFocus 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-inner{stroke-width:1.15;opacity:.40;animation:cdact-innerFocus 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-node{fill:currentColor;opacity:.92;transform-box:fill-box;transform-origin:center;animation:cdact-nodeSignal 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-core{fill:currentColor;opacity:.98;transform-origin:50px 50px;animation:cdact-coreFocus 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-outerSystem{transform-origin:50px 50px;animation:cdact-outerOrbit 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-trace{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:13 214;opacity:0;vector-effect:non-scaling-stroke;animation:cdact-tracePass 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-bloom{fill:currentColor;opacity:0;filter:url(#cdact-bloom-filter);transform-origin:50px 50px;animation:cdact-bloomPulse 1600ms cubic-bezier(.22,.61,.36,1) both}' +
-        '.cdact-n1{animation-delay:120ms}.cdact-n2{animation-delay:205ms}.cdact-n3{animation-delay:290ms}.cdact-n4{animation-delay:375ms}.cdact-n5{animation-delay:460ms}.cdact-n6{animation-delay:545ms}.cdact-n7{animation-delay:630ms}.cdact-n8{animation-delay:715ms}' +
+        '.cdact-middle{stroke-width:1.3;opacity:.60;animation:cdact-innerFocus 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-inner{stroke-width:1.15;opacity:.40;animation:cdact-innerFocus 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-node{fill:currentColor;opacity:.92;transform-box:fill-box;transform-origin:center;animation:cdact-nodeSignal 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-core{fill:currentColor;opacity:.98;transform-origin:50px 50px;animation:cdact-coreFocus 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-outerSystem{transform-origin:50px 50px;animation:cdact-outerOrbit 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-trace{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:13 214;opacity:0;vector-effect:non-scaling-stroke;animation:cdact-tracePass 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-bloom{fill:currentColor;opacity:0;filter:url(#cdact-bloom-filter);transform-origin:50px 50px;animation:cdact-bloomPulse 2300ms cubic-bezier(.22,.61,.36,1) both}' +
+        '.cdact-n1{animation-delay:173ms}.cdact-n2{animation-delay:295ms}.cdact-n3{animation-delay:417ms}.cdact-n4{animation-delay:539ms}.cdact-n5{animation-delay:661ms}.cdact-n6{animation-delay:784ms}.cdact-n7{animation-delay:906ms}.cdact-n8{animation-delay:1028ms}' +
         '@keyframes cdact-outerOrbit{0%,8%{transform:rotate(0deg)}68%{transform:rotate(360deg)}100%{transform:rotate(360deg)}}' +
         '@keyframes cdact-tracePass{0%,9%{opacity:0;stroke-dashoffset:0}16%{opacity:.72}64%{opacity:.25;stroke-dashoffset:-212}72%,100%{opacity:0;stroke-dashoffset:-212}}' +
         '@keyframes cdact-nodeSignal{0%,12%,78%,100%{opacity:.92;transform:scale(1)}30%{opacity:1;transform:scale(1.24)}42%{opacity:.92;transform:scale(1)}}' +
         '@keyframes cdact-innerFocus{0%,38%,100%{opacity:var(--cdact-rest,.60)}62%{opacity:.88}}' +
         '@keyframes cdact-coreFocus{0%,36%,100%{transform:scale(1);opacity:.98}60%{transform:scale(1.20);opacity:1}72%{transform:scale(1.04);opacity:1}}' +
-        '@keyframes cdact-bloomPulse{0%,42%,100%{opacity:0;transform:scale(.65)}59%{opacity:.16;transform:scale(1.15)}76%{opacity:.05;transform:scale(1.55)}}' +
+        /* Bloom peak roughly doubled (.16 -> .32, .05 -> .12) -- owner QA:
+           "little/no visible premium glow" against the original's fairly
+           faint pulse. Still a soft blurred wash, not a neon ring. */
+        '@keyframes cdact-bloomPulse{0%,42%,100%{opacity:0;transform:scale(.65)}59%{opacity:.32;transform:scale(1.15)}76%{opacity:.12;transform:scale(1.55)}}' +
         '@media (prefers-reduced-motion:reduce){.cdact-outerSystem,.cdact-trace,.cdact-node,.cdact-core,.cdact-middle,.cdact-inner,.cdact-bloom{animation:none!important}}' +
       '</style>' +
-      '<circle class="cdact-bloom" cx="50" cy="50" r="12"/>' +
+      '<circle class="cdact-bloom" cx="50" cy="50" r="13"/>' +
       '<circle class="cdact-ring cdact-middle" style="--cdact-rest:.60" cx="50" cy="50" r="24.5"/>' +
       '<circle class="cdact-ring cdact-inner" style="--cdact-rest:.40" cx="50" cy="50" r="13.5"/>' +
       '<circle class="cdact-core" cx="50" cy="50" r="4.2"/>' +

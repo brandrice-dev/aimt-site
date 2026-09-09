@@ -134,10 +134,16 @@ body {
   width: min(100%, 33rem);
   margin-left: auto;
   margin-right: 5rem;
-  /* Raised so the text block's own top (the institute eyebrow line)
-     sits closer to the badge's top rather than reading as vertically
-     centered lower than it -- was 3rem. */
-  margin-top: 1.1rem;
+  /* Raised further (owner QA: still read as noticeably lower than the
+     badge's own top) so the text block's own top -- the institute
+     eyebrow line -- lands close to the badge's top rather than
+     vertically centered below it. #hero centers this column via flex
+     align-items:center, so each 1px of margin-top only moves the
+     rendered position ~0.5px (confirmed via getBoundingClientRect at
+     1440x900: badge top ~108px, text top was 231px at the old 1.1rem;
+     -6.5rem lands text top ~170px, roughly half the old gap). Was 1.1rem,
+     before that 3rem. */
+  margin-top: -6.5rem;
   padding: 0;
   text-shadow: 0 2px 20px rgba(0,0,0,0.28);
 }
@@ -216,9 +222,12 @@ body {
    unscoped placement (pre-existing, unrelated to this change) already
    silently wins over at every width due to source order. object-
    fit:cover guarantees full-bleed coverage at any object-position
-   percentage, so this cannot introduce edge gaps. Was 35% center. */
+   percentage, so this cannot introduce edge gaps. Was 35% center, then
+   40% 58% -- nudged slightly further right/down again per the same
+   review, confirmed live (1440x900) that the badge stays fully framed
+   with no edge gap at 42% 60%. */
 @media (min-width: 701px) {
-  .hero-image { object-position: 40% 58%; }
+  .hero-image { object-position: 42% 60%; }
 }
 .hero-overlay {
   position: absolute;
@@ -385,13 +394,27 @@ body {
    media-col's own flex height), which crops far more horizontally than
    vertically (confirmed via getBoundingClientRect(): ~420x1025 frame
    against the source's 840x1493, zero vertical crop, ~157px horizontal
-   overflow) -- 66% was still losing the tablet's own right edge/text
-   (owner review: "too much of the tablet/screen is cut off"). Shifted
-   to 85%, measured against the source photo's actual tablet position
-   (screen spans roughly x:590-840 of 840) so the full readable Service
-   Timer screen stays in frame while the practitioner's hand/arm on the
-   left (the room-context half of the shot) is still visible. */
-#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 85% 46%; }
+   overflow). object-position alone (66%, then 85%) only ever panned
+   that horizontal window -- it could never make the tablet itself
+   bigger, because the frame's own extreme tall/narrow shape (a grid
+   `align-items:stretch` match to the text column's height -- see the
+   comment above -- which must stay intact) always shows the photo's
+   FULL height, so the tablet (a real, fixed-size detail low in the
+   frame, isolated via a local-contrast scan of the source photo:
+   roughly x:560-800/840, y:640-1080/1493) only ever occupied a small
+   fraction of that tall strip regardless of horizontal pan (owner
+   review, still current: "too much of the tablet/screen is cut off").
+   Fix: object-position keeps selecting the same horizontal window as
+   before (85% 46%), then a transform:scale zooms that already-selected,
+   already-cropped picture in on the tablet's own position within it
+   (79%/57% of the frame, from the same scan) -- .aimt-sp-proof-frame's
+   own overflow:hidden (assets/css/aimt-supporting-pages.css) clips the
+   excess, so this only tightens the crop already in place, it can't
+   reveal new edges or introduce a gap. 1.35x roughly doubles the
+   tablet's share of the frame (~39% of frame width to ~53%) while
+   keeping the client and practitioner's hand in frame around it --
+   short of a tight device-only shot. */
+#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 85% 46%; transform: scale(1.35); transform-origin: 79% 57%; }
 
 /* Live mini-demo: a product-proof element sitting under the explanatory
    copy — not on the treatment-room photograph, which already shows the real
@@ -518,7 +541,12 @@ body {
      photo or a fragile attempt at height-matching in normal document flow. */
   .protocol-media-col { max-width: none; display: block; }
   #protocol .aimt-sp-proof-frame { flex: none; aspect-ratio: 1 / 1; }
-  #protocol .aimt-sp-proof-frame img { height: 100%; object-position: 62% 58%; }
+  /* Same tablet-zoom fix as the desktop rule above, re-derived for this
+     square frame's own crop math (scale is width-constrained here, so
+     the visible natural-pixel window is x:0-840/840 (full width), y:~379-
+     1219/1493 at 58% -- the tablet at roughly x:560-800,y:640-1080 sits
+     ~81% across / ~57% down inside that window). */
+  #protocol .aimt-sp-proof-frame img { height: 100%; object-position: 62% 58%; transform: scale(1.3); transform-origin: 81% 57%; }
   .protocol-mini-demo { max-width: none; margin-top: 1.5rem; }
 }
 
@@ -812,12 +840,61 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 </style>
 </head>
 <body>
+<!-- ══ CANONICAL AIMT BRAND MARK ══
+     Single source of truth for the orbital circular mark + surrounding dots.
+     Every AIMT mark on this page (nav, footer, decorative reuse) renders via
+     <use href="#aimtOrbitalMark"> against this one definition — never a
+     re-drawn or simplified copy, and never assets/brand/aimt-orbital-mark.svg
+     via a cross-document <use> (unsupported in this browser environment --
+     confirmed via isolated test: an external-file+fragment <use> silently
+     renders nothing, which is why the nav mark and Cadence marks had gone
+     invisible). AIMT identity and Cadence identity are two DIFFERENT marks
+     now living in two different local <symbol>s (see cadence-mark below,
+     where present) -- they must never share one definition again. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+  <!-- Cadence identity mark -- separate geometry/id from aimtOrbitalMark
+       above (owner designer pack: assets/brand/cadence/cadence-mark.svg),
+       intentionally NOT sharing a definition with the AIMT institute mark
+       so the two identities can never regress into one shared file again.
+       currentColor-driven, same as aimtOrbitalMark, so the existing
+       .cadence-id / .cadence-id-chip CSS (assets/css/cadence-identity.css)
+       keeps controlling light/dark treatment with no other change. -->
+  <symbol id="cadence-mark" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="36" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.92" vector-effect="non-scaling-stroke"/>
+    <circle cx="50" cy="50" r="24.5" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.58" vector-effect="non-scaling-stroke"/>
+    <circle cx="50" cy="50" r="13.5" fill="none" stroke="currentColor" stroke-width="1.15" opacity="0.38" vector-effect="non-scaling-stroke"/>
+    <circle cx="50" cy="50" r="4.2" fill="currentColor" opacity="0.96"/>
+    <circle cx="50" cy="14" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="75.456" cy="24.544" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="86" cy="50" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="75.456" cy="75.456" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="50" cy="86" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="24.544" cy="75.456" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="14" cy="50" r="3" fill="currentColor" opacity="0.90"/>
+    <circle cx="24.544" cy="24.544" r="3" fill="currentColor" opacity="0.90"/>
+  </symbol>
+</svg>
+
 
 <!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css) ══
      This page is the visual source of truth that stylesheet was
      extracted from. ══ -->
 <nav class="aimt-public-nav aimt-public-nav--fixed">
-  <a href="index.html" class="aimt-public-nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></a>
+  <a href="index.html" class="aimt-public-nav-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"></use></svg></a>
   <a href="index.html" class="aimt-public-nav-wordmark">
     <span class="aimt-public-nav-name">AIMT</span>
   </a>
@@ -938,7 +1015,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <div class="protocol-mini-demo reveal reveal-delay-2" id="protocolLiveCard" aria-hidden="true">
         <div class="plc-top">
           <div class="plc-id">
-            <svg class="plc-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
+            <svg class="plc-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
             <span class="plc-brand">AIMT &middot; Service Timer</span>
           </div>
           <span class="plc-format">Core Format</span>
@@ -1110,7 +1187,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
          a deterministic, one-time staged reveal, not a real conversation. -->
     <div class="cadence-static-shell reveal reveal-delay-4" id="cadenceStaticShell">
       <div class="cshell-head">
-        <div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+        <div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
         <div class="cshell-titles">
           <div class="cshell-module">Module 6 — Conditions &amp; Disorders</div>
           <div class="cshell-status">Checkpoint · revision shown</div>
@@ -1120,7 +1197,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
         <div class="cshell-transcript-inner">
           <div class="cshell-kicker">Checkpoint</div>
           <div class="cshell-msg assistant">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>A client comes in with visible flaking and says she's been using a zinc-based anti-dandruff shampoo for three months but it keeps getting worse. Under the microscope you see fine white powdery flakes, minimal oil, and a matte scalp surface. What's happening — and what do you tell her?</p></div>
           </div>
           <div class="cshell-msg user cs-hidden-msg" id="csUser1">
@@ -1128,11 +1205,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
             <div class="cshell-bub" role="group" aria-label="You"><p>I'm not really sure . . .</p></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csTyping1">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csGuidance">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>No worries — let's work through it. Start with what the microscopy is telling you: fine white powdery flakes, minimal oil, matte surface. Does that picture match dandruff, or something else? Once you identify what's actually going on, the conversation with the client and your next steps will follow naturally. Take a shot at it.</p></div>
           </div>
           <div class="cshell-msg user cs-hidden-msg" id="csUser2">
@@ -1140,11 +1217,11 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
             <div class="cshell-bub" role="group" aria-label="You"><p>Fine white flakes with minimal oil and a matte surface reads more like a dry, over-cleansed scalp than a fungal dandruff pattern. I'd describe what I'm seeing rather than label it, suggest that the client ease off of the zinc, and focus on restoring moisture.</p></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csTyping2">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><div class="cshell-typing" role="status" aria-label="Cadence is typing"><span></span><span></span><span></span></div></div>
           </div>
           <div class="cshell-msg assistant cs-hidden-msg" id="csAccept">
-            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg></span></div>
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
             <div class="cshell-bub" role="group" aria-label="Cadence"><p>Solid read. You tied the matte surface and minimal oil to barrier disruption rather than Malassezia activity — and your scope framing around describing what you see is exactly right. That distinction matters when a client has been self-treating for months and is expecting a diagnosis. Clean checkpoint.</p></div>
           </div>
           <div class="cshell-pass-banner cs-hidden-msg" id="csPassBanner"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5L6.5 12L13 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Checkpoint complete</div>
