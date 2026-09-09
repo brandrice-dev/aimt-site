@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Enrollment Confirmed — AIMT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="description" content="Enrollment confirmed — create your AIMT student account and begin your course.">
+<meta name="description" content="Complete your AIMT account setup after enrollment.">
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
@@ -37,13 +37,73 @@ body {
   padding: 2rem;
 }
 .card {
-  width: min(100%, 860px);
+  width: min(100%, 960px);
+  display: grid;
+  grid-template-columns: 0.72fr 1fr;
   background: var(--panel);
   border: 0.5px solid var(--panel-border);
-  border-radius: 26px;
-  padding: clamp(2rem, 4vw, 3.25rem);
+  border-radius: 22px;
+  overflow: hidden;
   box-shadow: 0 30px 90px rgba(0,0,0,0.32);
   backdrop-filter: blur(14px);
+}
+.card-intro-col {
+  padding: clamp(2rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card-setup-col {
+  padding: clamp(2rem, 4vw, 3rem);
+  background: rgba(255,255,255,0.02);
+  border-left: 0.5px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card-setup-col > .setup { margin-top: 0; padding-top: 0; border-top: none; }
+@media (max-width: 860px) {
+  .card { grid-template-columns: 1fr; }
+  .card-setup-col { border-left: none; border-top: 0.5px solid rgba(255,255,255,0.08); }
+}
+.confirm-line {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(163,150,141,0.7);
+  margin-bottom: 2rem;
+}
+.progress-strip { display: flex; flex-direction: column; gap: 0; margin-top: 0.5rem; }
+.progress-step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.07);
+}
+.progress-step:last-child { border-bottom: none; }
+.progress-step-num {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.66rem;
+  color: rgba(163,150,141,0.5);
+  flex-shrink: 0;
+  width: 2.4em;
+}
+.progress-step.is-current .progress-step-num { color: #a3968d; }
+.progress-step-body { display: flex; flex-direction: column; gap: 0.15rem; }
+.progress-step-label {
+  font-family: var(--aimt-font-mont);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+}
+.progress-step.is-current .progress-step-label,
+.progress-step.is-complete .progress-step-label { color: rgba(255,255,255,0.92); }
+.progress-step-sub {
+  font-family: var(--aimt-font-sans);
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: rgba(255,255,255,0.36);
 }
 .eyebrow {
   font-family: var(--aimt-font-mono);
@@ -80,31 +140,6 @@ body {
   line-height: 1.8;
   color: var(--muted);
   margin-bottom: 0.2rem;
-}
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin: 2rem 0 1.6rem;
-}
-.detail {
-  background: rgba(255,255,255,0.035);
-  border: 0.5px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  padding: 1rem 1.05rem;
-}
-.detail-label {
-  font-family: var(--aimt-font-mono);
-  font-size: 0.52rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(163,150,141,0.52);
-  margin-bottom: 0.45rem;
-}
-.detail-value {
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: rgba(255,255,255,0.82);
 }
 .note {
   margin-top: 1.35rem;
@@ -308,7 +343,6 @@ body {
   .headline { line-height: 1; }
   .lead,
   .setup-copy { font-size: 0.9rem; line-height: 1.7; }
-  .detail-grid,
   .form-grid { grid-template-columns: 1fr; }
   .actions { flex-direction: column; }
   .btn {
@@ -321,34 +355,42 @@ body {
 <body>
   <main class="wrap">
     <section class="card">
-      <div class="eyebrow">Enrollment confirmed</div>
-      <h1 class="headline">
-        <em>AIMT · Certification 01</em>
-        You're enrolled in HeadSpa Mastery.
-      </h1>
-      <p class="lead">Your payment has been received and your place in the certification is confirmed. The next step is account creation and course access setup for the AIMT environment.</p>
-
-      <div class="detail-grid">
-        <div class="detail">
-          <div class="detail-label">Program</div>
-          <div class="detail-value">HeadSpa Mastery</div>
-        </div>
-        <div class="detail">
-          <div class="detail-label">Enrollment</div>
-          <div class="detail-value">One-time payment · lifetime access</div>
-        </div>
-        <div class="detail">
-          <div class="detail-label">Credential</div>
-          <div class="detail-value">AIMT certificate included upon completion</div>
+      <div class="card-intro-col">
+        <div class="eyebrow">Enrollment Confirmed</div>
+        <h1 class="headline">You're in.</h1>
+        <p class="lead" style="font-size:1.05rem; color:rgba(255,255,255,0.7); margin-bottom:1rem;">Head Spa Certification Course</p>
+        <p class="lead">Your enrollment is confirmed. Create your AIMT account below and we'll connect your purchase to your student dashboard, course progress, resources, and certification path.</p>
+        <div class="confirm-line">Payment received · Lifetime course access</div>
+        <div class="progress-strip">
+          <div class="progress-step is-complete">
+            <span class="progress-step-num">01</span>
+            <div class="progress-step-body">
+              <span class="progress-step-label">Enrollment</span>
+              <span class="progress-step-sub">Complete ✓</span>
+            </div>
+          </div>
+          <div class="progress-step is-current" id="progressStep02">
+            <span class="progress-step-num">02</span>
+            <div class="progress-step-body">
+              <span class="progress-step-label">AIMT Account</span>
+              <span class="progress-step-sub">Create your login</span>
+            </div>
+          </div>
+          <div class="progress-step" id="progressStep03">
+            <span class="progress-step-num">03</span>
+            <div class="progress-step-body">
+              <span class="progress-step-label">Enter AIMT</span>
+              <span class="progress-step-sub">Begin your training</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <p class="note">Your payment was successful. Create your account to access HeadSpa Mastery.</p>
-
+      <div class="card-setup-col">
       <div class="setup">
-        <div class="setup-label">Create your account</div>
-        <div class="setup-title">Set up your AIMT login.</div>
-        <p class="setup-copy">Use the same email you want associated with your enrollment. Once your AIMT session is active, we’ll hand you directly into the course area.</p>
+        <div class="setup-label">Step 2 of 3</div>
+        <div class="setup-title">Create your AIMT account.</div>
+        <p class="setup-copy">Use the email you want connected to your enrollment, progress, resources, and certification record.</p>
 
         <form id="accountForm" novalidate>
           <div class="form-grid">
@@ -386,13 +428,13 @@ body {
           <div class="form-message" id="formMessage"></div>
 
           <div class="actions">
-            <button type="submit" class="btn btn-primary" id="submitBtn">Create AIMT account</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Create My AIMT Account →</button>
             <a href="student-access.html" class="btn btn-secondary">Back to Student Access</a>
           </div>
 
           <div class="success-panel" id="successPanel">
             <div class="success-panel-title" id="successPanelTitle">Account created.</div>
-            <div class="success-panel-copy" id="successPanelCopy">Your AIMT account is ready. We’re taking you into the HeadSpa Mastery access flow now.</div>
+            <div class="success-panel-copy" id="successPanelCopy">Your AIMT account is ready. We're taking you into the Head Spa Certification Course access flow now.</div>
           </div>
 
           <div class="success-panel next-step-panel" id="nextStepPanel">
@@ -403,6 +445,7 @@ body {
             </div>
           </div>
         </form>
+      </div>
       </div>
     </section>
   </main>
@@ -695,7 +738,14 @@ body {
 
     function setLoading(isLoading) {
       submitBtn.disabled = isLoading;
-      submitBtn.textContent = isLoading ? 'Creating account...' : 'Create AIMT account';
+      submitBtn.textContent = isLoading ? 'Creating account…' : 'Create My AIMT Account →';
+    }
+
+    function markAccountStepComplete() {
+      const step2 = document.getElementById('progressStep02');
+      const step3 = document.getElementById('progressStep03');
+      if (step2) { step2.classList.remove('is-current'); step2.classList.add('is-complete'); const sub = step2.querySelector('.progress-step-sub'); if (sub) sub.textContent = 'Complete ✓'; }
+      if (step3) { step3.classList.add('is-current'); }
     }
 
     function setSubmitState(label, disabled) {
@@ -718,7 +768,7 @@ body {
           hideSuccessPanel();
           showMessage('Your AIMT session is active, but this page is missing checkout confirmation details. Continue through Student Access.');
           showNextStep('Missing checkout confirmation?', 'Use Student Access to continue into your course with your existing account.', COURSE_SIGNIN_URL, 'Go to Student Access');
-          setSubmitState('Create AIMT account', false);
+          setSubmitState('Create My AIMT Account →', false);
           return;
         }
 
@@ -729,16 +779,17 @@ body {
           hideSuccessPanel();
           showMessage('Your AIMT session is active, but course access is still syncing. Continue through Student Access and this browser will retry the entitlement handoff there.');
           showNextStep('Access still syncing?', 'Use Student Access with this same email to complete course entry once the entitlement handoff finishes.', COURSE_SIGNIN_URL, 'Go to Student Access');
-          setSubmitState('Create AIMT account', false);
+          setSubmitState('Create My AIMT Account →', false);
           return;
         }
 
         clearNotices();
         hideNextStep();
-        showSuccessPanel('Account ready.', 'You already have an active AIMT session. We’re taking you into HeadSpa Mastery now.');
+        markAccountStepComplete();
+        showSuccessPanel('Account ready.', 'You already have an active AIMT session. We’re taking you into the Head Spa Certification Course now.');
         showMessage('You are already signed in. Continuing into your course access flow now.');
-        showNextStep('Already signed in?', 'If the redirect does not happen automatically, continue into HeadSpa Mastery here.', COURSE_ENTRY_URL, 'Enter HeadSpa Mastery');
-        setSubmitState('Continuing to course...', true);
+        showNextStep('Already signed in?', 'If the redirect does not happen automatically, continue into the course here.', COURSE_ENTRY_URL, 'Enter My AIMT →');
+        setSubmitState('Continuing to course…', true);
         redirectToCourse(900);
       } catch (_) {}
     }
@@ -833,7 +884,8 @@ body {
 
         clearNotices();
         hideNextStep();
-        showSuccessPanel('Account created.', 'Your AIMT account is ready and your AIMT session is active. We’re taking you into the HeadSpa Mastery access flow now.');
+        markAccountStepComplete();
+        showSuccessPanel('Account connected.', 'Head Spa Certification Course is now available inside My AIMT. Your progress, resources, and future credential will remain connected to this account.');
 
         redirectToCourse(1200);
       } catch (_) {

@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════
    Verify Credential — public lookup for employers/boards
-   GET /api/verify-credential?id=AIMT-HSM-2026-XXXXXX
+   GET /api/verify-credential?id=AIMT-HS-2026-XXXXXX
    Returns validity + course + student name + completion date.
    No auth required (that's the point), but only exposes what a
    paper certificate would show anyway.
    ═══════════════════════════════════════════════════════════════ */
 
 const COURSE_NAMES = {
-  'headspa-mastery': 'HeadSpa Mastery — Head Spa Practitioner Certification'
+  'headspa-mastery': 'Head Spa Certification Course'
 };
 
 function json(data, status = 200) {

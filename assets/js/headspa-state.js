@@ -136,34 +136,63 @@
   const StudentPreview = {
     _active: false,
 
+    // True only when BOTH: this host passes isStudentPreviewEligibleHost()
+    // AND ?freshintro=1 is present alongside ?studentpreview=1. Read by
+    // headspa-mastery.html's shouldShowIntro() BEFORE any introComplete /
+    // legacy-migration check runs (see that function for why), so it
+    // always forces the Cadence pre-course intro open on this load --
+    // regardless of local progress, the legacy levo4_profile key, or any
+    // previously completed intro. This flag is a pure read-time decision
+    // override: it never writes to localStorage and never modifies
+    // persisted student, course, or Supabase state. Production hostnames
+    // never see it set, because isStudentPreviewEligibleHost() gates it
+    // exactly like the rest of Student Preview.
+    forceFreshIntro: false,
+
     init() {
       let hostname = '';
       try { hostname = window.location.hostname; } catch (e) {}
 
       if (!isStudentPreviewEligibleHost(hostname)) {
         this._active = false;
+        this.forceFreshIntro = false;
         return;
       }
 
       let requested = false;
+      let freshRequested = false;
       try {
-        requested = new URLSearchParams(window.location.search).get('studentpreview') === '1';
+        const params = new URLSearchParams(window.location.search);
+        requested = params.get('studentpreview') === '1';
+        freshRequested = params.get('freshintro') === '1';
       } catch (e) {}
 
       this._active = requested;
+      this.forceFreshIntro = requested && freshRequested;
     },
 
     isActive() {
       return this._active === true;
     },
 
-    // Developer/local-only convenience for retesting the course from a
-    // clean slate -- never exposed as a UI control, never run
-    // automatically. Same hostname gate as the rest of Student Preview
-    // (a no-op everywhere else). Clears local course progress
-    // (levo_app) and every Listen Mode resume-position key
-    // (aimt_listen_position::*) so the next load behaves like a
-    // brand-new student. Call it from the browser console:
+    // Developer/local-only convenience for clearing local course
+    // progress -- never exposed as a UI control, never run automatically.
+    // Same hostname gate as the rest of Student Preview (a no-op
+    // everywhere else). Clears levo_app (STORAGE_KEY) and every Listen
+    // Mode resume-position key (aimt_listen_position::*).
+    //
+    // This does NOT clear the legacy levo4_profile key, and therefore
+    // does NOT reliably make the next load "look like a brand-new
+    // student": APP_STATE._migrate() reads levo4_profile on every load
+    // and can restore fields such as introComplete from it independent
+    // of whatever levo_app holds. To force the Cadence pre-course intro
+    // open regardless of any locally stored or migrated completion
+    // state, use the forceFreshIntro flag above (set automatically from
+    // ?studentpreview=1&freshintro=1) instead -- it is not solved by
+    // deleting more storage here.
+    //
+    // Call this function itself from the browser console when you
+    // actually want to clear local course progress:
     //   window.StudentPreview.resetLocalProgress()
     // then reload the page.
     resetLocalProgress() {
