@@ -355,15 +355,18 @@ body {
    the column's true x0, short of where the text glyphs actually start,
    reading as detached from the copy above it.
 
-   Structure, proportions, typography, and copy are pulled directly from the
-   real AIMT Service Timer (aimt-service-timer.html: .step-clock-card, its
-   own ≤600px compact breakpoint values, .timer-brand, .step-eyebrow, and
-   the real Core-format Step 05 data) rather than an invented "inspired by"
-   mockup — same ring/time/phase-pill component the real product renders,
-   at the same compact scale the real product itself uses on a narrow
-   screen. --timer-surface (#1a1814) is the real product's own card-on-dark
-   surface color, one step lighter than this section's own #0f0d0b, which
-   is itself already the real product's exact --timer-bg. */
+   Rebuilt from the real AIMT Service Timer's own DOM/CSS
+   (aimt-service-timer.html: .timer-top, .step-ring-wrap, .metrics-panel,
+   .ring-support, .guidance-panel, .guide-box, .comm-box, .next-strip,
+   .timer-bottom), not approximated — same element order, same color
+   tokens (--warm #a3968d, --paper #faf8f5, --w* opacities), same font
+   stack (Montserrat/Outfit/SF Mono, matched 1:1 by this site's own
+   --aimt-font-mont/-sans/-mono), same ring glow, same guide-box gradient
+   treatment, same pill/border/radius language — scaled down for a bounded
+   homepage card instead of a fixed full-viewport app. --timer-surface
+   (#1a1814) is the real product's own card-on-dark surface color, one
+   step lighter than this section's own #0f0d0b, which is itself already
+   the real product's exact --timer-bg. */
 .protocol-mini-demo {
   /* Same content axis as the copy above it: matching left AND right margins
      (instead of the old bare margin-left + a fixed max-width) makes this
@@ -373,46 +376,94 @@ body {
   background: #1a1814;
   border: 1px solid rgba(250,248,245,0.1);
   border-radius: 14px;
-  padding: 14px 16px 16px;
+  padding: 16px 18px 16px;
   box-shadow: 0 18px 44px rgba(0,0,0,0.5);
 }
-.plc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.plc-brand { font-family: var(--aimt-font-mont); font-size: 8px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d; }
-.plc-format { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(250,248,245,0.48); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 980px; padding: 3px 8px; white-space: nowrap; }
-.plc-service-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-.plc-metric-elapsed { text-align: right; }
-.plc-service-label, .plc-elapsed-label { font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); display: block; }
-.plc-service-time { font-family: var(--aimt-font-mont); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: #faf8f5; }
-.plc-elapsed-time { font-family: var(--aimt-font-mont); font-size: 11px; font-weight: 600; letter-spacing: -0.01em; color: rgba(250,248,245,0.72); }
-.plc-track { height: 3px; background: rgba(250,248,245,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
-.plc-track-fill { height: 100%; width: 35%; background: #a3968d; border-radius: 99px; transition: width 1s linear; }
-.plc-clock-card { display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 11px; background: rgba(250,248,245,0.03); border: 0.5px solid rgba(250,248,245,0.07); border-radius: 12px; padding: 10px 11px; }
-.plc-ring { width: 56px; height: 56px; transform: rotate(-90deg); flex-shrink: 0; }
-.plc-ring-bg { fill: none; stroke: rgba(250,248,245,0.08); stroke-width: 4; }
+/* Top bar — mirrors .timer-top/.timer-top-row/.timer-id/.timer-brand/
+   .timer-format/.timer-controls exactly, incl. the real timer-format
+   (plain centered mono text, no pill) and the same brand mark asset this
+   site's own nav already uses. */
+.plc-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-bottom: 18px; }
+.plc-id { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.plc-mark { width: 14px; height: 14px; color: #a3968d; flex-shrink: 0; }
+.plc-brand { font-family: var(--aimt-font-mont); font-size: 8px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,248,245,0.94); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plc-format { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: #a3968d; text-align: center; white-space: nowrap; }
+.plc-controls { display: flex; justify-content: flex-end; gap: 5px; }
+.plc-ctrl { font-family: var(--aimt-font-mont); font-size: 6.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(250,248,245,0.68); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 5px; padding: 3px 6px; }
+
+/* Ring panel — mirrors .ring-panel/.step-ring-wrap/.ring-ambient/
+   .step-ring-svg/.ring-bg/.ring-fill/.step-clock-text/.step-time/
+   .step-time-label/.metrics-panel/.metrics-row/.service-remaining/
+   .service-elapsed/.timer-track/.timer-fill/.timer-marker/.ring-support,
+   stacked vertically — the same order the real timer's own DOM uses, and
+   the same layout the real product itself falls back to on a narrow
+   screen (ring-panel and guidance-panel are flex-row siblings only past
+   860px; this card never reaches that width). */
+.plc-ring-panel { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.plc-ring-wrap { position: relative; width: 128px; height: 128px; display: flex; align-items: center; justify-content: center; }
+.plc-ring-ambient { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle closest-side, rgba(255,248,240,0.14) 0%, rgba(255,248,240,0.05) 55%, transparent 78%); filter: blur(6px); pointer-events: none; z-index: 0; }
+.plc-ring-svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); z-index: 1; overflow: visible; }
+.plc-ring-bg { fill: none; stroke: rgba(250,248,245,0.08); stroke-width: 2.4; }
 .plc-ring-fill {
-  fill: none; stroke: #a3968d; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear;
-  /* Active-arc glow — shared tokens (assets/css/aimt-design-system.css),
-     never applied to .plc-ring-bg. */
+  fill: none; stroke: #faf8f5; stroke-width: 2.4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear;
+  /* Exact triple-layer ivory glow from aimt-service-timer.html's own
+     --ring-glow (that page loads no shared stylesheet, so the value is
+     copied here rather than referenced). */
   filter:
-    drop-shadow(var(--aimt-ring-glow-tight, 0 0 4px rgba(255,255,255,0.35)))
-    drop-shadow(var(--aimt-ring-glow-soft, 0 0 10px rgba(255,255,255,0.15)));
+    drop-shadow(0 0 6px rgba(255,248,240,0.34))
+    drop-shadow(0 0 16px rgba(255,248,240,0.16))
+    drop-shadow(0 0 28px rgba(255,248,240,0.08));
 }
-.plc-clock-text { min-width: 0; }
-.plc-time { font-family: var(--aimt-font-mont); font-size: 26px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: #faf8f5; white-space: nowrap; }
-.plc-meta { font-size: 8px; color: rgba(250,248,245,0.48); margin-top: 4px; line-height: 1.4; }
-.plc-meta strong { color: #a3968d; font-weight: 600; }
-.plc-phase { font-size: 7px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #a3968d; text-align: right; align-self: start; padding-top: 3px; max-width: 70px; line-height: 1.3; }
-.plc-step-eyebrow { display: flex; align-items: center; gap: 9px; font-family: var(--aimt-font-mont); font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #a3968d; margin-top: 13px; }
-.plc-step-eyebrow::before { content: ''; width: 14px; height: 1px; background: rgba(163,150,141,0.36); flex-shrink: 0; }
-.plc-step-title { font-family: var(--aimt-font-mont); font-size: 15px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase; line-height: 1.15; color: #faf8f5; margin-top: 6px; }
-.plc-cue { margin-top: 12px; padding: 9px 11px; background: rgba(163,150,141,0.1); border: 0.5px solid rgba(163,150,141,0.32); border-left: 2px solid #a3968d; border-radius: 0 8px 8px 0; }
-.plc-cue-label { display: block; font-family: var(--aimt-font-mont); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 4px; }
-.plc-cue-text { font-size: 10.5px; line-height: 1.5; color: rgba(250,248,245,0.78); font-weight: 300; }
-.plc-comm { margin-top: 10px; }
-.plc-comm-label { display: block; font-family: var(--aimt-font-mont); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,248,245,0.44); margin-bottom: 4px; }
-.plc-comm-text { font-size: 10.5px; line-height: 1.5; color: rgba(250,248,245,0.66); font-weight: 300; font-style: italic; }
-.plc-next { margin-top: 11px; padding-top: 9px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.4); }
-.plc-next strong { font-family: var(--aimt-font-sans); font-size: 9.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #a3968d; }
+.plc-clock-text { position: relative; z-index: 1; text-align: center; }
+.plc-time { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 32px; letter-spacing: -0.03em; line-height: 1; color: #faf8f5; white-space: nowrap; }
+.plc-time-label { font-family: var(--aimt-font-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); margin-top: 7px; }
+
+.plc-metrics { width: 100%; max-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+.plc-service-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.plc-metric-elapsed { text-align: right; }
+.plc-service-label, .plc-elapsed-label { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); display: block; margin-bottom: 3px; }
+.plc-service-time { font-family: var(--aimt-font-mont); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: #faf8f5; white-space: nowrap; }
+.plc-elapsed-time { font-family: var(--aimt-font-mont); font-size: 13px; font-weight: 600; color: rgba(250,248,245,0.68); white-space: nowrap; }
+.plc-track { height: 4px; background: rgba(250,248,245,0.08); border-radius: 99px; position: relative; overflow: visible; }
+.plc-track-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #a3968d; border-radius: 99px; transition: width 1s linear; }
+.plc-track-marker { position: absolute; left: 30%; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: #faf8f5; border: 2px solid #1a1814; transform: translate(-50%,-50%); }
+
+.plc-ring-support { width: 100%; max-width: 240px; font-family: var(--aimt-font-mono); font-size: 8px; letter-spacing: 0.03em; color: rgba(250,248,245,0.32); line-height: 1.5; text-align: left; }
+.plc-ring-support strong { color: rgba(250,248,245,0.48); font-weight: 600; }
+
+/* Guidance panel — mirrors .guidance-panel/.step-meta-row/.step-eyebrow/
+   .phase-pill/.step-title/.guide-box/.guide-label/.guide-text/.comm-box/
+   .comm-head/.comm-row/.comm-label/.comm-copy/.next-strip. The real
+   guide-box is a left-accent gradient fade, not a filled/bordered card —
+   and comm-row stacks label-over-copy on a narrow screen exactly as the
+   real timer's own ≤600px .comm-row rule does. */
+.plc-guidance { margin-top: 4px; padding-top: 16px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; flex-direction: column; gap: 12px; }
+.plc-step-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.plc-step-eyebrow { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(250,248,245,0.9); }
+.plc-step-eyebrow::before { content: ''; width: 13px; height: 1px; background: rgba(163,150,141,0.36); flex-shrink: 0; }
+.plc-phase { font-family: var(--aimt-font-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: #a3968d; padding: 3px 8px; border: 0.5px solid rgba(163,150,141,0.2); border-radius: 999px; background: rgba(163,150,141,0.12); }
+.plc-step-title { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 17px; letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase; color: #faf8f5; }
+
+.plc-cue { position: relative; padding: 10px 13px 10px 15px; border-radius: 4px; background: linear-gradient(90deg, rgba(255,248,240,0.05), rgba(255,248,240,0.015) 65%, transparent); }
+.plc-cue::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 2px; background: #a3968d; }
+.plc-cue-label { display: block; font-family: var(--aimt-font-mono); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 6px; }
+.plc-cue-text { font-family: var(--aimt-font-sans); font-size: 11px; line-height: 1.55; color: rgba(250,248,245,0.94); }
+
+.plc-comm { padding-top: 12px; border-top: 0.5px solid rgba(250,248,245,0.08); }
+.plc-comm-head { font-family: var(--aimt-font-mono); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,248,245,0.48); margin-bottom: 8px; }
+.plc-comm-row { display: flex; flex-direction: column; gap: 4px; }
+.plc-comm-tag { font-family: var(--aimt-font-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(250,248,245,0.9); }
+.plc-comm-copy { font-family: var(--aimt-font-sans); font-size: 11px; line-height: 1.55; color: rgba(250,248,245,0.9); }
+
+.plc-next { padding-top: 11px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(250,248,245,0.48); }
+.plc-next strong { font-family: var(--aimt-font-mont); text-transform: none; letter-spacing: 0; font-size: 10.5px; color: rgba(250,248,245,0.9); text-align: right; font-weight: 600; }
+
+/* Bottom nav — mirrors .timer-bottom/back-btn/.next-btn (ghost + filled
+   paper pill). Decorative spans, not buttons: the whole card is already
+   aria-hidden and non-interactive. */
+.plc-bottom { margin-top: 2px; padding-top: 13px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.plc-nav-btn { font-family: var(--aimt-font-mont); font-size: 7.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(250,248,245,0.68); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 6px; padding: 6px 11px; }
+.plc-nav-btn-next { background: #faf8f5; color: #1a1814; border-color: #faf8f5; }
 @media(max-width:700px){
   #protocol .section-inner { gap: 2.25rem; }
   /* No sibling column to match on mobile (single-column stack), so the
@@ -449,11 +500,6 @@ body {
 #cadence .section-sub { max-width: none; padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #cadence .section-sub strong { color: rgba(255,255,255,0.95); }
 
-/* Cadence's homepage sample lives inside .cadence-listen's existing player
-   system below (a second .cl-player instance, not a separate card) so she
-   reads as part of the learning experience rather than another marketing
-   block. See .cl-player-cadence and friends near .cl-player's own rules. */
-
 /* Cadence demo: the real chat screenshot, framed like a floating product card.
    The phone photo sits alongside it to make the multi-device point — larger,
    level, and anchored to the corner rather than tilted, so it reads as a
@@ -476,12 +522,14 @@ body {
 .cadence-badge { position: relative; border-radius: 50%; background: #fff; flex-shrink: 0; display: block; }
 .cadence-badge img { position: absolute; top: 50%; left: 50%; width: 82%; height: 82%; transform: translate(-50%, -50%); display: block; pointer-events: none; user-select: none; }
 
-/* Listen Mode: a centered callout, benefit-led, with a light "course
-   surface" player card that deliberately breaks against the dark Cadence
-   background — visual language pulled from the real in-course player
-   (aimt-listen-mode-player.js: cream bar, dark square play button, hairline
-   3px progress, mono time, bordered speed control), not invented. Preview
-   is decorative only — no real audio, no course-state connection. */
+/* This player now carries Cadence's real homepage welcome message (a
+   generated MP3 — see the audio element in the markup below), replacing
+   its earlier decorative-only Listen Mode preview. Visual language is
+   still pulled from the real in-course player (aimt-listen-mode-player.js:
+   cream bar, dark square play button, hairline 3px progress, mono time,
+   bordered speed control), not invented — only the JS now drives it with
+   a real HTMLAudioElement instead of a fake timer. One player only: no
+   second player/card lives anywhere else in this section. */
 .cadence-listen {
   max-width: 620px; margin: 2.5rem auto 2.75rem;
   background: #f0ede8; border: 0.5px solid rgba(0,0,0,0.07);
@@ -503,16 +551,6 @@ body {
 .cl-speed { flex-shrink: 0; background: transparent; border: 0.5px solid rgba(0,0,0,0.09); border-radius: 6px; color: #262626; font-family: var(--aimt-font-sans); font-size: 0.68rem; padding: 0.3rem 0.55rem; cursor: pointer; transition: border-color 0.2s ease; }
 .cl-speed:hover { border-color: rgba(0,0,0,0.22); }
 .cl-footnote { font-size: 0.72rem; color: #a3968d; font-weight: 300; margin: 0.9rem 0 0; }
-/* Cadence's own sample: a second .cl-player instance (same box, spacing,
-   and top-divider as the Listen Mode player above), differentiated only by
-   the shared .cadence-badge mark and an italic quote line -- no new visual
-   style invented for it. */
-.cl-cadence-mark { width: 22px; height: 22px; flex-shrink: 0; }
-.cl-cadence-quote { font-size: 0.78rem; line-height: 1.62; color: #7a706a; font-weight: 300; font-style: italic; margin: 0; }
-.cl-player-cadence .cl-time { min-width: auto; }
-.cl-cadence-pulse { animation: clCadencePulse 0.9s ease-in-out; }
-@keyframes clCadencePulse { 0%,100% { filter: none; } 50% { filter: drop-shadow(0 0 5px rgba(163,150,141,0.75)); } }
-@media (prefers-reduced-motion: reduce) { .cl-cadence-pulse { animation: none; } }
 @media(max-width:700px){
   .cadence-listen { margin-top: 2rem; margin-bottom: 2.25rem; padding: 1.6rem 1.4rem 1.4rem; }
 }
@@ -844,42 +882,68 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <p class="section-sub reveal reveal-delay-2">Core and Extended are AIMT's two reference protocols — 60- and 90-minute service structures built so a new practitioner can deliver the service with structure from the first appointment onward, until the flow becomes second nature.</p>
       <div class="protocol-mini-demo reveal reveal-delay-2" id="protocolLiveCard" aria-hidden="true">
         <div class="plc-top">
-          <div class="plc-brand">AIMT &middot; Service Timer</div>
-          <div class="plc-format">Core Format</div>
-        </div>
-        <div class="plc-service-row">
-          <div class="plc-metric-service">
-            <span class="plc-service-label">Service remaining</span>
-            <span class="plc-service-time" id="plcServiceRemaining">38:42</span>
+          <div class="plc-id">
+            <svg class="plc-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>
+            <span class="plc-brand">AIMT &middot; Service Timer</span>
           </div>
-          <div class="plc-metric-elapsed">
-            <span class="plc-elapsed-label">Elapsed</span>
-            <span class="plc-elapsed-time" id="plcElapsed">21:18</span>
+          <span class="plc-format">Core Format</span>
+          <div class="plc-controls"><span class="plc-ctrl">Pause</span><span class="plc-ctrl">Exit</span></div>
+        </div>
+
+        <div class="plc-ring-panel">
+          <div class="plc-ring-wrap">
+            <div class="plc-ring-ambient" aria-hidden="true"></div>
+            <svg class="plc-ring-svg" viewBox="0 0 72 72" overflow="visible" aria-hidden="true">
+              <circle class="plc-ring-bg" cx="36" cy="36" r="30"/>
+              <circle class="plc-ring-fill" id="plcRingFill" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="62.2"/>
+            </svg>
+            <div class="plc-clock-text">
+              <div class="plc-time" id="plcCountdown">6:42</div>
+              <div class="plc-time-label">Step remaining</div>
+            </div>
           </div>
-        </div>
-        <div class="plc-track"><div class="plc-track-fill" id="plcTrackFill"></div></div>
-        <div class="plc-clock-card">
-          <svg class="plc-ring" viewBox="0 0 72 72" aria-hidden="true">
-            <circle class="plc-ring-bg" cx="36" cy="36" r="30"/>
-            <circle class="plc-ring-fill" id="plcRingFill" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="62.2"/>
-          </svg>
-          <div class="plc-clock-text">
-            <div class="plc-time" id="plcCountdown">6:42</div>
-            <div class="plc-meta">next landmark &middot; <strong id="plcLandmark">6:42</strong> remaining</div>
+
+          <div class="plc-metrics">
+            <div class="plc-service-row">
+              <div class="plc-metric-service">
+                <span class="plc-service-label">Service remaining</span>
+                <span class="plc-service-time" id="plcServiceRemaining">38:42</span>
+              </div>
+              <div class="plc-metric-elapsed">
+                <span class="plc-elapsed-label">Elapsed</span>
+                <span class="plc-elapsed-time" id="plcElapsed">21:18</span>
+              </div>
+            </div>
+            <div class="plc-track"><div class="plc-track-fill" id="plcTrackFill"></div><div class="plc-track-marker" aria-hidden="true"></div></div>
           </div>
-          <div class="plc-phase">Treatment</div>
+
+          <div class="plc-ring-support">Next landmark &middot; <strong id="plcLandmark">6:42</strong> remaining &middot; reference 3:00</div>
         </div>
-        <div class="plc-step-eyebrow">Step 05 &middot; Treatment</div>
-        <div class="plc-step-title">Exfoliation + Scalp Massage + Rinse</div>
-        <div class="plc-cue">
-          <span class="plc-cue-label">Practitioner cue</span>
-          <p class="plc-cue-text">Adapt exfoliation to intake, assessment and product directions. Keep pressure controlled, then rinse thoroughly before the next block.</p>
+
+        <div class="plc-guidance">
+          <div class="plc-step-meta-row">
+            <div class="plc-step-eyebrow">Step 05 &middot; Treatment</div>
+            <div class="plc-phase">Treatment</div>
+          </div>
+          <div class="plc-step-title">Exfoliation + Scalp Massage + Rinse</div>
+          <div class="plc-cue">
+            <span class="plc-cue-label">Practitioner cue</span>
+            <p class="plc-cue-text">Adapt exfoliation to intake, assessment and product directions. Keep pressure controlled, then rinse thoroughly before the next block.</p>
+          </div>
+          <div class="plc-comm">
+            <div class="plc-comm-head">Client communication</div>
+            <div class="plc-comm-row">
+              <span class="plc-comm-tag">If they ask</span>
+              <p class="plc-comm-copy">&ldquo;It&rsquo;s a scalp exfoliant. I&rsquo;m adjusting the product, pressure, and technique based on what I&rsquo;m seeing and how your scalp feels today.&rdquo;</p>
+            </div>
+          </div>
+          <div class="plc-next"><span>Up next</span><strong>Scalp, Neck + Shoulders</strong></div>
         </div>
-        <div class="plc-comm">
-          <span class="plc-comm-label">Client communication</span>
-          <p class="plc-comm-text">&ldquo;It&rsquo;s a scalp exfoliant. I&rsquo;m adjusting the product, pressure, and technique based on what I&rsquo;m seeing and how your scalp feels today.&rdquo;</p>
+
+        <div class="plc-bottom">
+          <span class="plc-nav-btn">&larr; Back</span>
+          <span class="plc-nav-btn plc-nav-btn-next">Next &rarr;</span>
         </div>
-        <div class="plc-next"><span>Up next</span><strong>Scalp, Neck + Shoulders</strong></div>
       </div>
     </div>
     <div class="reveal reveal-delay-2 protocol-media-col">
@@ -940,47 +1004,30 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <div class="cadence-listen reveal reveal-delay-2">
       <span class="cl-eyebrow">Listen With Cadence</span>
       <h3 class="cl-heading">Built to fit around your day.</h3>
-      <p class="cl-copy">Listen through supported modules when sitting down to read isn't practical. Cadence keeps the lesson moving and brings you back to the screen when it matters.</p>
+      <p class="cl-copy">A short welcome message from Cadence, ready whenever it works for you — introducing how she works alongside the course before you ever begin.</p>
 
+      <!-- This player now carries Cadence's real homepage welcome message
+           (assets/audio/cadence-marketing/homepage-teaser.mp3, generated
+           via ElevenLabs — isolated from the frozen in-course intro at
+           assets/js/aimt-cadence-intro.js, unmodified). One player only:
+           the separate "A message from Cadence" card from an earlier pass
+           was removed rather than kept alongside this one. -->
       <div class="cl-player" id="cadenceListen">
         <div class="cl-player-row">
-          <span class="cl-player-title">Module 8 — The Head Spa Service</span>
+          <span class="cl-player-title">Welcome message from Cadence</span>
         </div>
         <div class="cl-player-row">
-          <button type="button" class="cl-play" id="clPlayBtn" aria-label="Preview Listen Mode audio">
+          <button type="button" class="cl-play" id="clPlayBtn" aria-label="Play the welcome message from Cadence">
             <svg id="clPlayIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 1.8v10.4c0 .7.77 1.13 1.36.76l8.2-5.2a.9.9 0 000-1.52l-8.2-5.2C3.77.67 3 1.1 3 1.8z" fill="currentColor"/></svg>
             <svg id="clPauseIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" hidden><rect x="2.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/><rect x="8.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/></svg>
           </button>
           <div class="cl-progress"><div class="cl-progress-fill" id="clProgressFill"></div></div>
-          <span class="cl-time" id="clTime">4:12 / 14:20</span>
+          <span class="cl-time" id="clTime">0:00 / 0:00</span>
           <button type="button" class="cl-speed" id="clSpeedBtn">1&times;</button>
         </div>
+        <audio id="clAudio" preload="metadata" src="assets/audio/cadence-marketing/homepage-teaser.mp3"></audio>
       </div>
       <p class="cl-footnote">Start, pause, resume, or change speed anytime.</p>
-
-      <!-- Cadence's own homepage sample, integrated into the same player
-           system as Listen Mode above rather than a separate marketing
-           card. Real audio hook: assets/audio/cadence-marketing/
-           homepage-teaser.mp3, isolated from the frozen in-course intro
-           (assets/js/aimt-cadence-intro.js, unmodified) and from Listen
-           Mode's own decorative preview. Empty/absent until that file
-           exists -- see cadenceSamplePlayer JS below for the fallback. -->
-      <div class="cl-player cl-player-cadence" id="cadenceSamplePlayer">
-        <div class="cl-player-row">
-          <span class="cadence-badge cl-cadence-mark" aria-hidden="true"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>
-          <span class="cl-player-title">A message from Cadence</span>
-        </div>
-        <p class="cl-cadence-quote">&ldquo;Hi, I&rsquo;m Cadence, the built-in learning companion here at AIMT. You&rsquo;ll get to know me a lot more once you&rsquo;re enrolled, but here&rsquo;s what I do: I stay with you throughout the course to help you work through the material, answer questions, and guide your Cadence Checks. AIMT isn&rsquo;t built around simply watching videos and memorizing steps&mdash;it&rsquo;s designed to help you understand why you&rsquo;re doing what you&rsquo;re doing, and I&rsquo;m here to help make that learning more useful in the treatment room. That&rsquo;s part of what makes AIMT different. I&rsquo;ll see you inside the course.&rdquo;</p>
-        <div class="cl-player-row">
-          <button type="button" class="cl-play" id="cadenceSamplePlayBtn" aria-label="Play a message from Cadence">
-            <svg id="cadenceSamplePlayIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 1.8v10.4c0 .7.77 1.13 1.36.76l8.2-5.2a.9.9 0 000-1.52l-8.2-5.2C3.77.67 3 1.1 3 1.8z" fill="currentColor"/></svg>
-            <svg id="cadenceSamplePauseIcon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" hidden><rect x="2.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/><rect x="8.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/></svg>
-          </button>
-          <div class="cl-progress"><div class="cl-progress-fill" id="cadenceSampleProgressFill"></div></div>
-          <span class="cl-time" id="cadenceSampleTime">Sample coming soon</span>
-        </div>
-        <audio id="cadenceSampleAudio" preload="none" src="assets/audio/cadence-marketing/homepage-teaser.mp3"></audio>
-      </div>
     </div>
 
     <div class="cadence-features reveal reveal-delay-3">
@@ -1255,126 +1302,57 @@ if (c01Toggle && c01Grid) {
   obs.observe(card);
 })();
 
-// Cadence's homepage sample player, inside .cadence-listen's existing
-// player system. Wired to the expected real-clip path
-// (assets/audio/cadence-marketing/homepage-teaser.mp3, isolated from the
-// frozen in-course intro at assets/js/aimt-cadence-intro.js, unmodified,
-// and from Listen Mode's own decorative preview below). Real playback with
-// live progress/time once that file exists; until then, the first click
-// fails to load, is caught, and falls back to a quiet one-time badge pulse
-// rather than a dead control.
-(function() {
-  const player = document.getElementById('cadenceSamplePlayer');
-  const btn = document.getElementById('cadenceSamplePlayBtn');
-  const audio = document.getElementById('cadenceSampleAudio');
-  if (!player || !btn || !audio) return;
-  const mark = player.querySelector('.cl-cadence-mark');
-  const playIcon = document.getElementById('cadenceSamplePlayIcon');
-  const pauseIcon = document.getElementById('cadenceSamplePauseIcon');
-  const progressFill = document.getElementById('cadenceSampleProgressFill');
-  const timeEl = document.getElementById('cadenceSampleTime');
-  let ready = false;
-  let failed = false;
-
-  function fmt(sec) {
-    if (!isFinite(sec)) return '0:00';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ':' + String(s).padStart(2, '0');
-  }
-
-  function setPlayingUI(isPlaying) {
-    playIcon.hidden = isPlaying;
-    pauseIcon.hidden = !isPlaying;
-    btn.setAttribute('aria-label', isPlaying ? 'Pause the message from Cadence' : 'Play a message from Cadence');
-  }
-
-  audio.addEventListener('loadedmetadata', () => {
-    ready = true;
-    timeEl.textContent = fmt(0) + ' / ' + fmt(audio.duration);
-  });
-  audio.addEventListener('timeupdate', () => {
-    if (!ready || !audio.duration) return;
-    progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
-    timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
-  });
-  audio.addEventListener('ended', () => setPlayingUI(false));
-
-  btn.addEventListener('click', function() {
-    if (failed) return;
-    if (ready) {
-      if (audio.paused) { audio.play(); setPlayingUI(true); }
-      else { audio.pause(); setPlayingUI(false); }
-      return;
-    }
-    const attempt = audio.play();
-    if (attempt && attempt.catch) {
-      attempt.then(() => setPlayingUI(true)).catch(() => {
-        failed = true;
-        timeEl.textContent = 'Sample coming soon';
-        if (mark) {
-          mark.classList.add('cl-cadence-pulse');
-          setTimeout(() => mark.classList.remove('cl-cadence-pulse'), 900);
-        }
-      });
-    }
-  });
-})();
-
-// Listen Mode preview: play/pause advances a decorative progress + elapsed
-// time only — no real audio, no course-state connection. Speed control is
-// cosmetic (label cycles; nothing is actually played back at that rate).
+// Cadence's homepage welcome-message player. One player, real audio
+// (assets/audio/cadence-marketing/homepage-teaser.mp3, generated via
+// ElevenLabs — isolated from the frozen in-course intro at
+// assets/js/aimt-cadence-intro.js, unmodified). Play/pause/resume, live
+// progress and current-time/duration, and a real playbackRate-driven speed
+// toggle — no decorative/fake timer, no autoplay (no autoplay attribute,
+// nothing calls .play() before a click).
 (function() {
   const player = document.getElementById('cadenceListen');
   const btn = document.getElementById('clPlayBtn');
-  if (!player || !btn) return;
+  const audio = document.getElementById('clAudio');
+  if (!player || !btn || !audio) return;
   const playIcon = document.getElementById('clPlayIcon');
   const pauseIcon = document.getElementById('clPauseIcon');
   const fill = document.getElementById('clProgressFill');
   const timeEl = document.getElementById('clTime');
   const speedBtn = document.getElementById('clSpeedBtn');
 
-  const TOTAL = 860; // 14:20
-  let elapsed = 252; // 4:12, matching the resting display
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   function fmt(sec) {
+    if (!isFinite(sec) || sec < 0) return '0:00';
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
     return m + ':' + String(s).padStart(2, '0');
   }
   function paint() {
-    timeEl.textContent = fmt(elapsed) + ' / ' + fmt(TOTAL);
-    fill.style.width = (elapsed / TOTAL * 100) + '%';
+    const dur = audio.duration;
+    timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(dur);
+    fill.style.width = (dur ? (audio.currentTime / dur * 100) : 0) + '%';
+  }
+  function setPlayingUI(isPlaying) {
+    playIcon.hidden = isPlaying;
+    pauseIcon.hidden = !isPlaying;
+    btn.setAttribute('aria-label', isPlaying ? 'Pause the welcome message from Cadence' : 'Play the welcome message from Cadence');
   }
 
-  let timer = null;
-  function stop() {
-    clearInterval(timer);
-    timer = null;
-    playIcon.hidden = false;
-    pauseIcon.hidden = true;
-    btn.setAttribute('aria-label', 'Preview Listen Mode audio');
-  }
-  function start() {
-    if (reducedMotion) return;
-    playIcon.hidden = true;
-    pauseIcon.hidden = false;
-    btn.setAttribute('aria-label', 'Pause Listen Mode preview');
-    timer = setInterval(() => {
-      elapsed += 1;
-      if (elapsed >= TOTAL) elapsed = 252;
-      paint();
-    }, 1000);
-  }
+  audio.addEventListener('loadedmetadata', paint);
+  audio.addEventListener('timeupdate', paint);
+  audio.addEventListener('play', () => setPlayingUI(true));
+  audio.addEventListener('pause', () => setPlayingUI(false));
+  audio.addEventListener('ended', () => setPlayingUI(false));
 
-  btn.addEventListener('click', () => { timer ? stop() : start(); });
+  btn.addEventListener('click', () => {
+    if (audio.paused) audio.play(); else audio.pause();
+  });
 
-  const SPEEDS = ['0.75×', '1×', '1.25×', '1.5×'];
+  const SPEEDS = [0.75, 1, 1.25, 1.5];
   let speedIndex = 1;
   speedBtn.addEventListener('click', () => {
     speedIndex = (speedIndex + 1) % SPEEDS.length;
-    speedBtn.textContent = SPEEDS[speedIndex];
+    audio.playbackRate = SPEEDS[speedIndex];
+    speedBtn.textContent = SPEEDS[speedIndex] + '×';
   });
 
   paint();
