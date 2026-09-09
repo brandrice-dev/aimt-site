@@ -392,10 +392,12 @@
     dom.overlay.classList.add('show');
     dom.shell.classList.add('open');
     updateViewportHeight();
-    // Cadence "has entered" the panel -- same one-time turn+glow the
-    // intro itself uses (assets/js/cadence-identity.js), never a
-    // continuous spin.
-    if (window.CadenceIdentity) window.CadenceIdentity.activate(document.getElementById('cshellHeaderMark'));
+    // The turn+glow already played on the checkpoint card's own large
+    // .cadence-id mark (headspa-mastery.html's click-handler script, on
+    // the "Open Cadence Check" click that led here) -- the small header
+    // mark inside this shell (#cshellHeaderMark) stays static, per
+    // owner visual review: the animation belongs to the large mark
+    // only, never the small chat/panel marks.
 
     if (isReview) {
       renderFixtureBar();
@@ -455,10 +457,10 @@
     dom.overlay.classList.add('show');
     dom.shell.classList.add('open');
     updateViewportHeight();
-    // Cadence "has entered" the panel -- same one-time turn+glow the
-    // intro itself uses (assets/js/cadence-identity.js), never a
-    // continuous spin.
-    if (window.CadenceIdentity) window.CadenceIdentity.activate(document.getElementById('cshellHeaderMark'));
+    // Ask Cadence has no large checkpoint-card mark to animate on entry
+    // -- per owner visual review, the intro-style turn+glow is reserved
+    // for the large Cadence Check symbol only. This panel's own marks
+    // (#cshellHeaderMark, message/typing avatars) stay static/resting.
 
     if (isReview) {
       renderAskFixtureBar();

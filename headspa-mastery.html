@@ -682,14 +682,16 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   padding-left: 1.65rem; padding-right: 1.65rem; position: relative; z-index: 1;
 }
 
-/* Rail mark: the unified Cadence identity, sized to the exact footprint
-   .cadence-symbol used to occupy (96px mobile / 140px desktop). Bare
+/* Rail mark: the unified Cadence identity. Originally sized to
+   .cadence-symbol's old footprint (96px mobile / 140px desktop); owner
+   visual review found that too dominant, so both are reduced ~17%
+   (80px / 116px) for a more restrained, premium presence. Bare
    .cadence-id (no chip) -- the card is dark now, so the mark's own
    white-on-transparent treatment already has full contrast, same as it
    does in the intro itself. */
-.cc-rail .cadence-id { --cadence-id-size: 96px; }
+.cc-rail .cadence-id { --cadence-id-size: 80px; }
 @media (min-width: 768px) {
-  .cc-rail .cadence-id { --cadence-id-size: 140px; }
+  .cc-rail .cadence-id { --cadence-id-size: 116px; }
 }
 
 /* Checkpoint content settles back and softens while Cadence activates --

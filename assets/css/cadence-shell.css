@@ -131,11 +131,14 @@
 }
 /* Cadence identity badge. .cshell-id is a plain flex wrapper (no shape,
    no fill) around the unified .cadence-id mark (assets/css/cadence-
-   identity.css) -- .cadence-id-chip supplies its own small dark circle
-   so the mark reads on .cshell-head's own light background. The old
-   wordmark span (.cshell-id-label) is gone too: it never fit inside a
-   36px chip in the first place and the approved layout doesn't call for
-   a separate "Cadence" label next to the module title/status anyway. */
+   identity.css) -- .cadence-id-chip recolors the mark to a clean black
+   line/dot treatment (no backing shape) so it reads on .cshell-head's
+   own light background. The old wordmark span (.cshell-id-label) is
+   gone too: it never fit inside the header in the first place and the
+   approved layout doesn't call for a separate "Cadence" label next to
+   the module title/status anyway. Static/resting only -- see cadence-
+   shell.js's openCheckpoint()/openAskCadence() for why this header mark
+   is never animated (the large Cadence Check card mark owns that). */
 .cshell-id {
   display: flex; align-items: center; flex-shrink: 0;
 }
@@ -244,10 +247,11 @@
   width: 24px; height: 24px; flex-shrink: 0; align-self: flex-end;
   display: flex; align-items: center; justify-content: center;
 }
-/* Same as .cshell-id above: .cadence-id-chip already draws its own
-   circle, so the wrapper stays shapeless for the assistant case. User
-   messages keep their own circular "You" chip (unrelated to the
-   Cadence identity). */
+/* Same as .cshell-id above: .cadence-id-chip is a shapeless black-line
+   mark, so the wrapper stays shapeless for the assistant case too.
+   Static, never animated -- the large Cadence Check card mark is the
+   one animated surface. User messages keep their own circular "You"
+   chip (unrelated to the Cadence identity). */
 .cshell-msg.assistant .cshell-msg-av .cadence-id { --cadence-id-size: 24px; }
 .cshell-msg.user .cshell-msg-av { border-radius: 50%; background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
 .cshell-bub {

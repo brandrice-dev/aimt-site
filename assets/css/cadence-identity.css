@@ -26,9 +26,11 @@
       CadenceIdentity.activate(), then automatically settles back to
       static. Never loops/spins continuously.
 
-   A dark surface (chat header/avatars, sitting on the light .cshell
-   panel) gets .cadence-id-chip: a small filled circle so the mark still
-   reads on a light background, without inventing a second mark design.
+   A light surface (chat header/avatars, sitting on the .cshell panel's
+   white/--bg background) gets .cadence-id-chip: the same mark rendered
+   as clean black line/dot artwork on a transparent background -- no
+   filled disc behind it (a filled dark circle here read as a bullseye,
+   per owner visual review) -- without inventing a second mark design.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -64,16 +66,16 @@
 .cadence-id.is-blooming .cadence-id-halo { opacity: 0.4; transition: opacity 550ms var(--cadence-id-ease); }
 .cadence-id.is-blooming .cadence-id-icon { color: rgba(255,255,255,0.95); transition: color 550ms var(--cadence-id-ease), rotate 2600ms var(--cadence-id-ease); }
 
-/* Small filled-circle variant for a mark that has to sit on a light
-   surface (e.g. the Ask Cadence chat panel, which is --bg:#faf8f5) --
-   same mark/halo/bloom mechanics, just with a dark backdrop behind them
-   so the white-stroke mark keeps contrast. */
+/* Black-line variant for a mark that has to sit on a light surface
+   (e.g. the Ask Cadence chat panel, which is --bg:#faf8f5, and the
+   .cshell-head header, which is --white:#fff) -- same mark/halo/bloom
+   mechanics, just recolored to the site's own ink (#262626, matching
+   .cshell-bub's text color) instead of white, with no backing shape. */
 .cadence-id-chip {
-  background: #1a1814;
-  border-radius: 50%;
+  background: none;
 }
-.cadence-id-chip .cadence-id-icon { color: rgba(255,255,255,0.82); }
-.cadence-id-chip.is-blooming .cadence-id-icon { color: rgba(255,255,255,0.98); }
+.cadence-id-chip .cadence-id-icon { color: rgba(38,38,38,0.82); }
+.cadence-id-chip.is-blooming .cadence-id-icon { color: rgba(38,38,38,0.98); }
 
 @media (prefers-reduced-motion: reduce) {
   /* No rotation, no unnecessary movement -- the mark simply sits in its
