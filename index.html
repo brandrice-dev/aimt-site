@@ -345,7 +345,7 @@ body {
    stacks the column in normal flow, so there's no sibling height to match. */
 .protocol-media-col { max-width: 420px; display: flex; flex-direction: column; }
 #protocol .aimt-sp-proof-frame { flex: 1 1 auto; min-height: 0; }
-#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 74% 58%; }
+#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 72% 52%; }
 
 /* Live mini-demo: a product-proof element sitting under the explanatory
    copy — not on the treatment-room photograph, which already shows the real
@@ -441,6 +441,26 @@ body {
 #cadence .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); max-width: none; }
 #cadence .section-sub { max-width: none; padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #cadence .section-sub strong { color: rgba(255,255,255,0.95); }
+
+/* Cadence homepage teaser -- quiet, single-bubble sample greeting. Sits on
+   the section's own dark background (no separate card fill), so it reads
+   as Cadence speaking directly rather than another boxed demo stacked on
+   top of .cadence-demo/.cadence-listen below it. */
+.cadence-teaser {
+  max-width: 560px; margin: 1.75rem auto 2.25rem;
+  display: flex; align-items: flex-start; gap: 0.9rem;
+  text-align: left;
+}
+.ct-badge { width: 34px; height: 34px; margin-top: 0.15rem; flex-shrink: 0; }
+.ct-body { flex: 1; min-width: 0; }
+.ct-eyebrow { display: block; font-family: var(--aimt-font-mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 0.55rem; }
+.ct-message { font-family: var(--aimt-font-serif); font-style: italic; font-size: 0.98rem; line-height: 1.68; color: rgba(255,255,255,0.86); margin: 0 0 0.9rem; }
+.ct-play { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0.5px solid rgba(255,255,255,0.22); border-radius: 980px; padding: 0.5rem 1rem; cursor: pointer; color: rgba(255,255,255,0.72); font-family: var(--aimt-font-sans); font-size: 0.72rem; letter-spacing: 0.02em; transition: border-color 0.2s ease, color 0.2s ease; }
+.ct-play:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+.ct-badge-pulse { animation: ctBadgePulse 0.9s ease-in-out infinite; }
+@keyframes ctBadgePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .ct-badge-pulse { animation: none; } }
+@media (max-width: 600px) { .cadence-teaser { gap: 0.75rem; } }
 
 /* Cadence demo: the real chat screenshot, framed like a floating product card.
    The phone photo sits alongside it to make the multi-device point — larger,
@@ -577,6 +597,12 @@ body {
 .cert-detail-icon { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.4; margin-top: 1px; }
 .cert-detail-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
 .cert-detail-text strong { color: var(--text); font-weight: 500; display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.1em; }
+/* Small downward nudge for better visual balance against the text column,
+   which starts higher (its eyebrow label sits above the certificate's own
+   top edge) -- positioning only, no size/design change. */
+.cert-card-wrap { margin-top: 1.75rem; }
+@media (max-width: 700px) { .cert-card-wrap { margin-top: 0.75rem; } }
+
 /* The approved certificate image */
 .cert-image {
   display: block;
@@ -845,7 +871,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     </div>
     <div class="reveal reveal-delay-2 protocol-media-col">
       <div class="aimt-sp-proof-frame">
-        <img src="assets/images/marketing/service-timer-treatment-room.webp" alt="AIMT Service Timer showing a head spa service pacing step in the treatment room" loading="lazy" width="1600" height="2133">
+        <img src="assets/images/marketing/approved-service-timer2.webp" alt="AIMT Service Timer running on a tablet at treatment-room side, showing the live step timer and instructions" loading="lazy" width="840" height="1493">
       </div>
       <p class="aimt-sp-proof-caption">The real AIMT Service Timer, in use during a Core Format service.</p>
     </div>
@@ -887,6 +913,28 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <span class="eyebrow reveal">Meet Cadence</span>
     <h2 class="section-title reveal reveal-delay-1" style="color:white;">Your built-in learning companion,<br>inside every module.</h2>
     <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Unlike a standard course chatbot, it's built around AIMT's curriculum and evaluates checkpoints against what each module actually teaches — on your laptop, phone, or tablet.</p>
+
+    <!-- Homepage-only Cadence teaser -- a short sample greeting, not the
+         real gated intro (assets/js/aimt-cadence-intro.js, unmodified) and
+         not the real in-course chat shell. Self-contained: its own markup,
+         CSS, and JS below, reusing only the already-shared .cadence-badge
+         mark. No course access, no backend call, no frozen-intro logic. -->
+    <div class="cadence-teaser reveal reveal-delay-2" id="cadenceTeaser">
+      <span class="cadence-badge ct-badge" aria-hidden="true"><img class="cadence-core-img" src="assets/images/course/cadence/cadence-core.svg" alt="" draggable="false"><img class="cadence-ring-img" src="assets/images/course/cadence/cadence-tech-ring.svg" alt="" draggable="false"></span>
+      <div class="ct-body">
+        <span class="ct-eyebrow">A sample from Cadence</span>
+        <p class="ct-message">&ldquo;Hi, I&rsquo;m Cadence. Inside AIMT, I help guide your learning, support your checkpoints, and keep the course experience clear and structured. Explore the training to see how I work alongside your education.&rdquo;</p>
+        <button type="button" class="ct-play" id="ctPlayBtn" aria-label="Play a short Cadence voice sample">
+          <svg id="ctPlayIcon" width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 1.8v10.4c0 .7.77 1.13 1.36.76l8.2-5.2a.9.9 0 000-1.52l-8.2-5.2C3.77.67 3 1.1 3 1.8z" fill="currentColor"/></svg>
+          <svg id="ctPauseIcon" width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true" hidden><rect x="2.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/><rect x="8.5" y="1.5" width="3" height="11" rx="0.75" fill="currentColor"/></svg>
+          <span id="ctPlayLabel">Play voice sample</span>
+        </button>
+        <!-- Isolated hook: drop an approved short teaser clip's path into
+             this src to make the button above play it for real -- no other
+             markup/JS change required. Empty until one exists. -->
+        <audio id="cadenceTeaserAudio" preload="none"></audio>
+      </div>
+    </div>
 
     <div class="cadence-demo reveal reveal-delay-2">
       <div class="cadence-demo-primary">
@@ -1188,6 +1236,47 @@ if (c01Toggle && c01Grid) {
     entries.forEach(entry => { entry.isIntersecting ? start() : stop(); });
   }, { threshold: 0.4 });
   obs.observe(card);
+})();
+
+// Cadence homepage teaser: plays the isolated <audio id="cadenceTeaserAudio">
+// hook once an approved short clip's src is set there. Until then, clicking
+// gives a quiet visual acknowledgment (a badge pulse) rather than doing
+// nothing -- no real audio, no course state, no connection to the frozen
+// in-course intro (assets/js/aimt-cadence-intro.js).
+(function() {
+  const btn = document.getElementById('ctPlayBtn');
+  const audio = document.getElementById('cadenceTeaserAudio');
+  if (!btn || !audio) return;
+  const badge = document.querySelector('#cadenceTeaser .ct-badge');
+  const playIcon = document.getElementById('ctPlayIcon');
+  const pauseIcon = document.getElementById('ctPauseIcon');
+  const label = document.getElementById('ctPlayLabel');
+  let pulsing = false;
+
+  function setPlayingUI(isPlaying) {
+    playIcon.hidden = isPlaying;
+    pauseIcon.hidden = !isPlaying;
+    label.textContent = isPlaying ? 'Playing…' : 'Play voice sample';
+    btn.setAttribute('aria-label', isPlaying ? 'Pause Cadence voice sample' : 'Play a short Cadence voice sample');
+  }
+
+  btn.addEventListener('click', function() {
+    if (audio.currentSrc) {
+      if (audio.paused) { audio.play(); setPlayingUI(true); }
+      else { audio.pause(); setPlayingUI(false); }
+      return;
+    }
+    if (pulsing) return;
+    pulsing = true;
+    badge.classList.add('ct-badge-pulse');
+    label.textContent = 'Voice sample coming soon';
+    setTimeout(() => {
+      badge.classList.remove('ct-badge-pulse');
+      label.textContent = 'Play voice sample';
+      pulsing = false;
+    }, 1800);
+  });
+  audio.addEventListener('ended', () => setPlayingUI(false));
 })();
 
 // Listen Mode preview: play/pause advances a decorative progress + elapsed
