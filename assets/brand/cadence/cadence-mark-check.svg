@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-label="Cadence orbital mark, Cadence Check treatment" style="color:#F2EEE6">
+  <defs>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+    <filter id="microGlow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+  <circle cx="50" cy="50" r="11" fill="currentColor" opacity=".09" filter="url(#softGlow)"/>
+  <circle cx="50" cy="50" r="36" stroke="currentColor" stroke-width="1.6" opacity=".14" filter="url(#microGlow)" vector-effect="non-scaling-stroke"/>
+  <circle cx="50" cy="50" r="36" stroke="currentColor" stroke-width="1.6" opacity=".94" vector-effect="non-scaling-stroke"/>
+  <circle cx="50" cy="50" r="24.5" stroke="currentColor" stroke-width="1.3" opacity=".60" vector-effect="non-scaling-stroke"/>
+  <circle cx="50" cy="50" r="13.5" stroke="currentColor" stroke-width="1.15" opacity=".40" vector-effect="non-scaling-stroke"/>
+  <circle cx="50" cy="50" r="4.2" fill="currentColor" opacity=".98"/>
+  <g fill="currentColor" opacity=".92">
+    <circle cx="50" cy="14" r="3"/><circle cx="75.456" cy="24.544" r="3"/>
+    <circle cx="86" cy="50" r="3"/><circle cx="75.456" cy="75.456" r="3"/>
+    <circle cx="50" cy="86" r="3"/><circle cx="24.544" cy="75.456" r="3"/>
+    <circle cx="14" cy="50" r="3"/><circle cx="24.544" cy="24.544" r="3"/>
+  </g>
+</svg>

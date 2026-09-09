@@ -566,6 +566,12 @@
       container.classList.add('cc-entering');
       window.CadenceIdentity.activate(mark).then(function () {
         container.classList.add('cc-leaving');
+        // The card is now fading to opacity:0 (CARD_LEAVE_MS below) --
+        // swap the mark back to its plain resting <use> here, not after
+        // the shell opens, so the swap itself is hidden inside that
+        // fade rather than risking a visible snap. Ready for a clean
+        // replay the next time this checkpoint is entered.
+        if (window.CadenceIdentity.restoreResting) window.CadenceIdentity.restoreResting(mark);
         return new Promise(function (resolve) { setTimeout(resolve, CARD_LEAVE_MS); });
       }).then(function () {
         container.classList.remove('cc-entering', 'cc-leaving');

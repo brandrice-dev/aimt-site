@@ -1,28 +1,46 @@
 <!-- AIMT canonical orbital mark — normal site/navigation identity.
      NOT the burgundy credential badge (that mark represents an EARNED
-     credential only; see assets/brand/aimt-badge-*.png). Geometry copied
-     verbatim from the owner-approved homepage nav (index.html) as it
-     existed immediately before the shared-nav extraction, commit d720ab5.
-     Reference this file's #aimtOrbitalMark fragment from the universal
-     public nav instead of re-approximating the mark per page:
+     credential only; see assets/brand/aimt-badge-*.png).
+
+     Geometry refined from the owner-supplied designer pack
+     (assets/brand/cadence/cadence-mark.svg), rescaled 100x100 -> this
+     file's existing 44x44 viewBox (a uniform x0.44) so every existing
+     `<use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark">`
+     call site across the site keeps working unchanged -- this was a
+     content-only repoint, not a path/id rename. vector-effect=
+     "non-scaling-stroke" is new here (the designer pack's own choice):
+     ring strokes now stay a constant, crisp width regardless of how
+     large the referencing element renders the mark (24px chat avatar
+     vs 116px Cadence Check mark), rather than scaling proportionally
+     thicker at large sizes as before.
+
+     Deliberately NOT applied to the frozen Cadence intro
+     (assets/js/aimt-cadence-intro.js's own hardcoded ORBITAL_MARK_PATHS,
+     assets/css/aimt-cadence-intro.css) -- those files are motion/visual
+     authority and stay untouched here; the intro keeps its own slightly
+     less-refined proportions rather than risk touching frozen behavior
+     for a cosmetic-only change.
+
+     Reference this file's #aimtOrbitalMark fragment instead of
+     re-approximating the mark per page:
        <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
          <use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use>
        </svg>
      Circles use currentColor, so the referencing element's CSS `color`
-     still controls the rendered color exactly as it did inline. -->
+     still controls the rendered color exactly as it did before. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
   <g id="aimtOrbitalMark">
-    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
-    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
-    <circle cx="22" cy="22" r="2" fill="currentColor"/>
-    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
-    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="22" r="15.84" stroke="currentColor" stroke-width="0.7" opacity="0.92" vector-effect="non-scaling-stroke"/>
+    <circle cx="22" cy="22" r="10.78" stroke="currentColor" stroke-width="0.57" opacity="0.58" vector-effect="non-scaling-stroke"/>
+    <circle cx="22" cy="22" r="5.94" stroke="currentColor" stroke-width="0.51" opacity="0.38" vector-effect="non-scaling-stroke"/>
+    <circle cx="22" cy="22" r="1.85" fill="currentColor" opacity="0.96"/>
+    <circle cx="22" cy="6.16" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="33.2" cy="10.8" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="37.84" cy="22" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="33.2" cy="33.2" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="22" cy="37.84" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="10.8" cy="33.2" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="6.16" cy="22" r="1.32" fill="currentColor" opacity="0.9"/>
+    <circle cx="10.8" cy="10.8" r="1.32" fill="currentColor" opacity="0.9"/>
   </g>
 </svg>
