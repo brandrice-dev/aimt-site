@@ -701,6 +701,26 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   .cc-rail .cadence-id { --cadence-id-size: 116px; }
 }
 
+/* The card's own overflow:hidden (needed to clip its rounded corners)
+   was ALSO silently clipping .cadence-id-halo's soft bleed against the
+   card's left edge -- confirmed via getBoundingClientRect() (~3px top/
+   left at the 80px mobile size, ~16px left at the 116px desktop size,
+   where .cc-rail becomes an edge-to-edge absolutely-positioned strip).
+   The intro's own halo has no clipping ancestor anywhere up to the
+   fixed full-viewport #introScreen, so its full soft glow always
+   renders -- this nudge gives the Check's halo the same real estate,
+   without changing the halo's own size/opacity math (which stays
+   exactly the intro's ratio) or the approved mark size. */
+.cc-rail .cadence-id { margin: 5px 0 0 5px; }
+@media (min-width: 768px) {
+  /* .cc-rail is justify-content:center, so a margin-left on the
+     centered item only shifts it right by HALF the margin value (the
+     other half is absorbed back into the recalculated centering gap) --
+     32px here is the measured amount needed to actually clear the 116px
+     mark's halo, confirmed via getBoundingClientRect(). */
+  .cc-rail .cadence-id { margin-left: 32px; }
+}
+
 /* Checkpoint content settles back and softens while Cadence activates --
    .cc-entering is added/removed by wireCheckpoint()'s open() sequence
    (assets/js/cadence-shell.js), which awaits CadenceIdentity.activate()

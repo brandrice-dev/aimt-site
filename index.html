@@ -203,6 +203,16 @@ body {
   object-position: 35% center;
   display: block;
 }
+/* Desktop-only nudge (owner visual review: the image/badge read as
+   slightly too far left/up) -- scoped to min-width so it can never
+   touch the mobile object-position above, which this rule's own
+   unscoped placement (pre-existing, unrelated to this change) already
+   silently wins over at every width due to source order. object-
+   fit:cover guarantees full-bleed coverage at any object-position
+   percentage, so this cannot introduce edge gaps. Was 35% center. */
+@media (min-width: 701px) {
+  .hero-image { object-position: 40% 58%; }
+}
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -1021,7 +1031,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 
     <div class="cadence-demo reveal reveal-delay-2">
       <div class="cadence-demo-primary">
-        <img src="assets/images/marketing/cadence-conversation.webp" alt="The real Cadence chat panel, open inside a course module and answering a student's question" loading="lazy" width="760" height="540">
+        <img src="assets/images/marketing/cadence-conversation.webp" alt="The Ask Cadence panel open over a dimmed course module, phone-like and centered" loading="lazy" width="1600" height="1240">
       </div>
       <div class="cadence-demo-secondary">
         <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="A student asking Cadence a question from their phone" loading="lazy" width="1122" height="1402">
