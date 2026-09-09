@@ -539,8 +539,39 @@
     if (container) container.tabIndex = -1;
 
     const label = safeGet(() => container && container.querySelector('.cp-label').textContent.trim(), '');
+    // The large card mark's turn+glow (activate(), below) must fully
+    // play out and the card must visibly fade before the shell opens --
+    // openCheckpoint() itself is a synchronous full-screen takeover
+    // (hidePageChrome() + .cshell.open in the same tick), so calling it
+    // in the same synchronous turn as activate() gave the browser no
+    // paint frame in which to ever show the mark mid-turn: the shell
+    // was already covering it by the first frame anyone could see. This
+    // `open` closure fixes that by making the whole entry a real,
+    // awaited sequence -- activate() now returns a Promise that only
+    // resolves once its visible turn+glow has actually played out
+    // (cadence-identity.js), and only THEN does the card fade out and
+    // openCheckpoint() get called, on a later tick with its own paint
+    // frames in between. `transitioning` blocks re-entry (double-click
+    // / refocus) for the duration of that sequence.
+    const mark = safeGet(() => container && container.querySelector('.cc-rail .cadence-id'), null);
+    let transitioning = false;
+    const CARD_LEAVE_MS = 360; // matches .checkpoint.cc-card's own opacity transition (headspa-mastery.html)
     const open = function () {
-      openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
+      if (transitioning) return;
+      if (!mark || !window.CadenceIdentity) {
+        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
+        return;
+      }
+      transitioning = true;
+      container.classList.add('cc-entering');
+      window.CadenceIdentity.activate(mark).then(function () {
+        container.classList.add('cc-leaving');
+        return new Promise(function (resolve) { setTimeout(resolve, CARD_LEAVE_MS); });
+      }).then(function () {
+        container.classList.remove('cc-entering', 'cc-leaving');
+        transitioning = false;
+        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
+      });
     };
 
     input.readOnly = true;

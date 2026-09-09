@@ -672,7 +672,14 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   overflow: hidden;
   box-shadow: 0 20px 44px -18px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.25);
   --cc-top-gap: 0.9rem;
+  transition: opacity 0.36s ease;
 }
+/* Final step of the entry sequence (assets/js/cadence-shell.js's
+   wireCheckpoint()): once the large mark's turn+glow has visibly
+   played out, the whole card (mark included) fades away before the
+   checkpoint shell opens underneath it -- CARD_LEAVE_MS there matches
+   this transition's duration. */
+.checkpoint.cc-card.cc-leaving { opacity: 0; pointer-events: none; }
 .checkpoint.cc-card .cc-rail {
   display: flex; align-items: center; justify-content: flex-start;
   padding: 1.6rem 1.65rem 0.15rem; position: relative; z-index: 1;
@@ -695,16 +702,20 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 }
 
 /* Checkpoint content settles back and softens while Cadence activates --
-   .cc-entering is added/removed by the click-handler script alongside
-   CadenceIdentity.activate(), for the same 2600ms turn duration, so this
-   can never fire out of sync with the mark. */
+   .cc-entering is added/removed by wireCheckpoint()'s open() sequence
+   (assets/js/cadence-shell.js), which awaits CadenceIdentity.activate()
+   itself rather than a duplicated timer, so this can never fire out of
+   sync with the mark. Not clickable while dimmed -- belt-and-suspenders
+   alongside open()'s own `transitioning` guard against a second click
+   restarting the sequence mid-turn. */
 .checkpoint.cc-card > *:not(.cc-rail):not(.cc-divider) {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .checkpoint.cc-card.cc-entering > *:not(.cc-rail):not(.cc-divider) {
-  opacity: 0.55; transform: translateY(5px);
+  opacity: 0.55; transform: translateY(5px); pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
+  .checkpoint.cc-card { transition: none; }
   .checkpoint.cc-card > *:not(.cc-rail):not(.cc-divider) { transition: none; }
 }
 
@@ -9345,24 +9356,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <script src="assets/js/module12-certification.js"></script>
 <script src="assets/js/cadence-identity.js"></script>
 <script src="assets/js/cadence-shell.js" defer></script>
-<!-- Cadence Check entry animation: wires the intro-style turn+glow to the
-     moment a student actually opens a checkpoint, purely as a visual
-     side effect on the card's own .cadence-id mark -- does not touch
-     submitCP/submitCheckpoint or any grading/gating logic below. -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.checkpoint.cc-card .cp-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var card = btn.closest('.checkpoint.cc-card');
-      if (!card) return;
-      var mark = card.querySelector('.cc-rail .cadence-id');
-      if (window.CadenceIdentity && mark) window.CadenceIdentity.activate(mark);
-      card.classList.add('cc-entering');
-      setTimeout(function () { card.classList.remove('cc-entering'); }, 2600);
-    });
-  });
-});
-</script>
+<!-- Cadence Check entry animation now lives entirely in wireCheckpoint()'s
+     open() closure (assets/js/cadence-shell.js) -- a standalone
+     DOMContentLoaded click listener used to live here too, firing
+     alongside wireCheckpoint()'s own btn.onclick with no coordination
+     between them, which is exactly why the turn+glow never had a chance
+     to visibly play before the shell's synchronous full-screen takeover
+     covered the card: both handlers ran in the same synchronous click
+     dispatch, so the browser never painted a frame in between. Removed;
+     see wireCheckpoint()'s comment for the real sequencing fix. -->
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
