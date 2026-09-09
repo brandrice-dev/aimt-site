@@ -22,6 +22,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="assets/css/cadence-shell.css">
+<!-- Cadence pre-course intro: shared with cadence-intro-preview.html, the
+     standalone owner-review page. One source of truth -- see that file's
+     header comment and assets/js/aimt-cadence-intro.js. -->
+<link rel="stylesheet" href="assets/css/aimt-cadence-intro.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1260,149 +1264,10 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 
 @keyframes lpFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-#introScreen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: #0a0808; display: none; flex-direction: column;
-  align-items: center; justify-content: flex-start;
-  padding: 3rem 2rem 5rem;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  transition: opacity 1s ease;
-}
-#introScreen.fade-out { opacity: 0; pointer-events: none; }
-
-.intro-inner {
-  width: 100%; max-width: 580px; display: flex; flex-direction: column;
-  align-items: flex-start; gap: 0;
-  margin: auto; padding: 1.5rem 0;
-}
-
-/* The brand mark that fades in first */
-.intro-mark {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 3rem;
-  opacity: 0; transition: opacity 1.2s ease;
-}
-.intro-mark.show { opacity: 1; }
-.intro-mark-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: #a3968d;
-  animation: introBreathe 3s ease-in-out infinite;
-}
-@keyframes introBreathe {
-  0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)}
-}
-.intro-mark-name {
-  font-family: var(--aimt-font-mont); font-size: 0.6rem; font-weight: 400;
-  letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.28);
-}
-
-/* The typing text container */
-.intro-text-wrap {
-  width: 100%; min-height: 200px;
-  display: flex; flex-direction: column; justify-content: flex-start;
-}
-
-.intro-line {
-  font-family: 'Playfair Display', Georgia, serif;
-  color: white; line-height: 1.5; margin-bottom: 0;
-  font-size: clamp(1.3rem, 4vw, 1.75rem); letter-spacing: -0.01em;
-}
-.intro-line em { font-style: italic; color: #a3968d; }
-
-/* Cursor that blinks while typing */
-.intro-cursor {
-  display: inline-block; width: 2px; height: 0.85em;
-  background: #a3968d; margin-left: 3px; vertical-align: middle;
-  border-radius: 1px; animation: introCursor 0.8s infinite;
-}
-@keyframes introCursor { 0%,45%{opacity:1} 55%,100%{opacity:0} }
-
-/* Pause beat — brief blank between sections */
-.intro-pause { display: none; }
-
-/* The input that appears at the end */
-.intro-divider {
-  width: 100%; height: 0.5px; background: rgba(255,255,255,0.08);
-  margin: 2.5rem 0 0; opacity: 0; transition: opacity 0.8s ease;
-}
-.intro-divider.show { opacity: 1; }
-.intro-input-wrap {
-  width: 100%; padding-top: 2rem; opacity: 0;
-  transition: opacity 1s ease; pointer-events: none;
-}
-.intro-input-wrap.show { opacity: 1; pointer-events: all; }
-.intro-input-label {
-  font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 400;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(255,255,255,0.3); margin-bottom: 0.75rem; display: block;
-}
-.intro-input {
-  width: 100%; background: rgba(255,255,255,0.04);
-  border: 0.5px solid rgba(255,255,255,0.12); border-radius: var(--aimt-radius-sm);
-  padding: 1rem 1.25rem; font-family: 'Outfit', sans-serif;
-  font-size: 0.975rem; font-weight: 300; color: rgba(255,255,255,0.88); resize: none;
-  outline: none; line-height: 1.7; min-height: 58px; max-height: 160px;
-  transition: border-color 0.3s, background 0.3s; caret-color: #a3968d;
-}
-.intro-input::placeholder { color: rgba(255,255,255,0.2); font-style: italic; }
-.intro-input:focus { border-color: rgba(163,150,141,0.45); background: rgba(255,255,255,0.07); outline: none; }
-.intro-send {
-  display: flex; align-items: center; gap: 9px; margin-top: 1.1rem;
-  background: none; border: 0.5px solid rgba(255,255,255,0.13);
-  border-radius: 980px; padding: 0.6rem 1.25rem; cursor: pointer;
-  font-family: 'Outfit', sans-serif; font-size: 0.7rem; font-weight: 400;
-  letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45);
-  transition: all 0.25s;
-}
-.intro-send:hover { border-color: rgba(163,150,141,0.5); color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.03); }
-.intro-send-dot { width: 5px; height: 5px; border-radius: 50%; background: #a3968d; flex-shrink: 0; }
-/* Cadence response inside intro */
-.intro-cadence-response { width: 100%; margin-top: 0.5rem; }
-.intro-response-text {
-  max-width: 34rem;
-  font-family: var(--aimt-font-serif);
-  color: rgba(255,255,255,0.84);
-  line-height: 1.82;
-  font-size: clamp(0.98rem, 2.5vw, 1.1rem);
-  font-weight: 400;
-  font-style: normal;
-  letter-spacing: 0.005em;
-  margin: 0.35rem 0 1.85rem;
-}
-.intro-response-text p { margin-bottom: 0.8rem; }
-.intro-response-text p:last-child { margin-bottom: 0; }
-.cwc-thinking { display: flex; gap: 5px; align-items: center; padding: 0.5rem 0; }
-.cwc-thinking span { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3); animation: cpThink 1.2s ease-in-out infinite; }
-.cwc-thinking span:nth-child(2) { animation-delay: 0.2s; }
-.cwc-thinking span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes cpThink { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
-.intro-begin-btn {
-  display: flex; align-items: center; gap: 9px;
-  background: none; border: 0.5px solid rgba(255,255,255,0.2);
-  border-radius: 980px; padding: 0.65rem 1.4rem; cursor: pointer;
-  font-family: 'Outfit', sans-serif; font-size: 0.72rem; font-weight: 400;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255,255,255,0.55); transition: all 0.25s;
-}
-.intro-begin-btn:hover { border-color: rgba(163,150,141,0.5); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.04); }
-/* Skip link */
-.intro-skip {
-  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1001;
-  font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: rgba(255,255,255,0.1); background: none; border: none;
-  cursor: pointer; transition: color 0.2s; padding: 0; display: none;
-}
-.intro-skip:hover { color: rgba(255,255,255,0.3); }
-.intro-showfull {
-  position: fixed; bottom: 1.5rem; right: 5.5rem; z-index: 1001;
-  font-family: 'Outfit', sans-serif; font-size: 0.62rem; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: rgba(255,255,255,0.1); background: none; border: none;
-  cursor: pointer; transition: color 0.2s; padding: 0; display: none;
-}
-.intro-showfull:hover { color: rgba(255,255,255,0.3); }
-@media (prefers-reduced-motion: reduce) {
-  .intro-cursor { animation: none !important; }
-}
+/* Cadence pre-course intro styles moved to assets/css/aimt-cadence-intro.css
+   (shared, one source of truth, with cadence-intro-preview.html — see
+   assets/js/aimt-cadence-intro.js's header comment). Do not re-add
+   .intro-*/#introScreen rules here. */
 
 
 /* ── MODULE 2 INTERACTIVE STYLES ── */
@@ -2425,7 +2290,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 }
 
 /* ── Intro screen — safe area bottom padding for notched phones ── */
-#introScreen { padding-bottom: max(5rem, env(safe-area-inset-bottom, 5rem)); }
 
 /* ── Landing page — safe area ── */
 #landingPage { padding-bottom: env(safe-area-inset-bottom, 0); }
@@ -2850,55 +2714,14 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   </div>
 </div>
 
-<!-- ══ CINEMATIC INTRO ══ -->
-<div id="introScreen">
-  <div class="intro-inner">
-    <div class="intro-mark" id="introMark">
-      <svg viewBox="0 0 44 44" fill="none" style="width:16px;height:16px;flex-shrink:0;color:rgba(255,255,255,0.55)">
-        <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.7"/>
-        <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
-        <circle cx="22" cy="22" r="2" fill="currentColor"/>
-        <circle cx="22" cy="2"    r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="36.1" cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="42"   cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="22"   cy="42"   r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="7.9"  cy="36.1" r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="2"    cy="22"   r="1.5" fill="currentColor" opacity="0.7"/>
-        <circle cx="7.9"  cy="7.9"  r="1.5" fill="currentColor" opacity="0.7"/>
-      </svg>
-      <span class="intro-mark-name">AIMT &middot; Head Spa Certification Course</span>
-    </div>
-    <div class="intro-text-wrap" id="introTextWrap">
-      <div class="intro-line" id="introLine"></div>
-    </div>
-    <div class="intro-divider" id="introDivider"></div>
-    <div class="intro-input-wrap" id="introInputWrap">
-      <span class="intro-input-label">Tell Cadence where you're starting</span>
-      <div class="intro-input-row">
-        <textarea class="intro-input" id="introInput"
-          placeholder="Your license or professional role, your experience, what you want to build, and anything you feel unsure about&#8230;" rows="3"
-          oninput="introGrow(this)"
-          onkeydown="introKey(event)"></textarea>
-        <button class="voice-btn-dark" onclick="startVoice('introInput',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
-      </div>
-      <button class="intro-send" id="introSendBtn" onclick="submitIntro()">
-        <div class="intro-send-dot"></div>
-        Continue
-      </button>
-      
-      <div class="intro-response-text" id="introCadenceText">
-        <div class="cwc-thinking"><span></span><span></span><span></span></div>
-      </div>
-      <button class="intro-begin-btn" id="introBeginBtn" style="display:none;" onclick="introProceed()">
-        <div class="intro-send-dot"></div>
-        Begin the course
-      </button>
-    </div>
-  </div>
-</div>
-<button class="intro-skip" id="introSkip" onclick="skipIntro()">Skip</button>
-<button class="intro-showfull" id="introShowFull" onclick="showFullIntro()">Show full intro</button>
+<!-- ══ CADENCE PRE-COURSE INTRO ══
+     No static markup here anymore -- the reusable AimtCadenceIntro
+     component (assets/js/aimt-cadence-intro.js, styled by
+     assets/css/aimt-cadence-intro.css) builds and injects its own
+     #introScreen into document.body on demand. See mountCadenceIntro()
+     in the INTRO SEQUENCE script below for the callback wiring, and
+     cadence-intro-preview.html for the standalone owner-review page
+     that mounts this exact same component. -->
 
 
 
@@ -8287,6 +8110,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 
 <script src="assets/js/headspa-state.js"></script>
+<script src="assets/js/aimt-cadence-intro.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
 <script src="assets/js/aimt-listen-mode-data.js"></script>
 <script src="assets/js/aimt-listen-mode-player.js"></script>
@@ -11456,89 +11280,32 @@ function showSignInPanel() {
 // INTRO SEQUENCE
 // ══════════════════════════════════════════════════════
 
-const INTRO_SCRIPT = [
-  { text: 'Hi.', pause: 1200 },
-  { text: " I'm Cadence.", pause: 1600 },
-  { text: 'NEWLINE', pause: 900 },
-  { text: "I'm the voice of nearly two decades of hands-on experience in the head spa space —", pause: 1800 },
-  { text: ' distilled into a course that meets you exactly where you are.', pause: 2000 },
-  { text: 'NEWLINE', pause: 1000 },
-  { text: "Think of me as a mentor, not a manual.", pause: 1800 },
-  { text: ' I guide you through the science, the technique, the client experience,', pause: 1600 },
-  { text: ' and the business of building something real.', pause: 2200 },
-  { text: 'NEWLINE', pause: 1000 },
-  { text: "The more you share with me as we go,", pause: 1600 },
-  { text: ' the more I can tailor what I teach to where you are headed.', pause: 2200 },
-  { text: 'NEWLINE', pause: 1200 },
-  { text: "Before we begin —", pause: 1400 },
-  { text: 'INPUT', pause: 0 }
-];
 
-let introSkipped = false;
-let introCurrentText = '';
+// ══════════════════════════════════════════════
+// INTRO SEQUENCE — mounts the shared AimtCadenceIntro component
+// ══════════════════════════════════════════════
+//
+// The Cadence pre-course intro's presentation/pacing/copy now lives in
+// assets/js/aimt-cadence-intro.js + assets/css/aimt-cadence-intro.css --
+// the SAME files cadence-intro-preview.html (the standalone owner-
+// review page) loads, so a fade/pacing change made there is inherited
+// here automatically. This file owns only the course-specific wiring
+// the component deliberately does not: whether to show it at all, the
+// real AIMT-curriculum system prompt + endpoint call, the existing
+// approved persistence path, and course entry/skip routing. See that
+// module's header comment for the full callback contract.
 
 function shouldShowIntro() {
+  // Owner preview override, checked BEFORE normal completion logic:
+  // StudentPreview.forceFreshIntro (localhost-only, set from
+  // ?studentpreview=1&freshintro=1 -- see assets/js/headspa-state.js)
+  // always forces the Cadence intro open, regardless of
+  // student.introComplete or what APP_STATE._migrate() restored from the
+  // legacy levo4_profile key. It never modifies student/course state
+  // itself -- it only changes this decision.
+  if (window.StudentPreview && window.StudentPreview.forceFreshIntro === true) return true;
   const student = APP_STATE.data && APP_STATE.data.student;
   return !student || !student.introComplete;
-}
-
-function startIntro() {
-  if (!shouldShowIntro()) { hideIntro(); return; }
-  introSkipped = false;
-  introCurrentText = '';
-  const line = document.getElementById('introLine');
-  if (line) line.innerHTML = '';
-  document.getElementById('introScreen').style.display = 'flex';
-  document.getElementById('introSkip').style.display = 'block';
-  const showFullBtn = document.getElementById('introShowFull');
-  if (showFullBtn) showFullBtn.style.display = 'block';
-  buildIntroScript();
-  const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  if (prefersReducedMotion) {
-    document.getElementById('introMark').classList.add('show');
-    showFullIntro();
-    return;
-  }
-  setTimeout(() => {
-    document.getElementById('introMark').classList.add('show');
-    setTimeout(() => runIntroScript(), 1200);
-  }, 500);
-}
-
-// Reduced-motion users and anyone who taps "Show full intro" get the
-// complete text immediately, with no character-by-character animation.
-function showFullIntro() {
-  introSkipped = true;
-  const script = window._activeIntroScript || INTRO_SCRIPT;
-  let full = '';
-  for (let i = 0; i < script.length; i++) {
-    const seg = script[i];
-    if (seg.text === 'INPUT') break;
-    full += seg.text === 'NEWLINE' ? '<br><br>' : seg.text;
-  }
-  introCurrentText = full;
-  showIntroInput();
-}
-
-function buildIntroScript() {
-  const firstName = getStudentFirstName();
-  const greeting = firstName ? 'Hi, ' + firstName + '.' : 'Hi.';
-  window._activeIntroScript = [
-    { text: greeting, pause: 1300 },
-    { text: " I'm Cadence.", pause: 1600 },
-    { text: 'NEWLINE', pause: 900 },
-    { text: "I'm your guide through AIMT's Head Spa Certification Course.", pause: 1800 },
-    { text: 'NEWLINE', pause: 1000 },
-    { text: "My guidance was built from nearly two decades of hands-on work across cosmetology, esthetics, client experience, service design, and scalp-focused care.", pause: 2000 },
-    { text: 'NEWLINE', pause: 1000 },
-    { text: "I'll help you understand the science, technique, client experience,", pause: 1600 },
-    { text: " and business decisions behind a professional head spa service—not simply memorize a sequence.", pause: 2200 },
-    { text: 'NEWLINE', pause: 1000 },
-    { text: "Your answers help me tailor examples and feedback to where you are starting and what you are working toward.", pause: 2000 },
-    { text: 'NEWLINE', pause: 1200 },
-    { text: "Before we begin—tell me where you are starting.", pause: 1400 },
-    { text: 'INPUT', pause: 0 }
-  ];
 }
 
 async function persistCadenceWelcomeComplete(extraData) {
@@ -11552,128 +11319,99 @@ async function persistCadenceWelcomeComplete(extraData) {
   } catch (_) {}
 }
 
-async function runIntroScript() {
-  const line = document.getElementById('introLine');
-  const script = window._activeIntroScript || INTRO_SCRIPT;
-  for (let i = 0; i < script.length; i++) {
-    if (introSkipped) return;
-    const seg = script[i];
-    if (seg.text === 'INPUT') { showIntroInput(); return; }
-    if (seg.text === 'NEWLINE') {
-      introCurrentText += '<br><br>';
-      line.innerHTML = introCurrentText + '<span class="intro-cursor"></span>';
-      await sleep(seg.pause); continue;
+let cadenceIntroController = null;
+
+// Course-specific glue for the shared component. None of this lives
+// inside aimt-cadence-intro.js itself -- that module owns only the
+// presentation (gate, phrase materialization, questions, response UI);
+// this function supplies the real AIMT-curriculum system prompt + real
+// endpoint call, the existing approved intro-complete persistence path,
+// and real course-entry/skip routing.
+function mountCadenceIntro() {
+  if (cadenceIntroController) return cadenceIntroController;
+  cadenceIntroController = window.AimtCadenceIntro.mount(document.body, {
+    firstName: getStudentFirstName(),
+
+    synthesize(context) {
+      const nameHint = context.name ? ' Their name is ' + context.name + '.' : '';
+      const ctx = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance is grounded in AIMT\'s curriculum and the instructor\'s applied experience.' +
+        '\n\nA student just completed the pre-course introduction with three separate answers:' +
+        '\n\nProfessional context: "' + context.professional.replace(/"/g, "'") + '"' +
+        '\nHead spa stage: "' + context.stage.replace(/"/g, "'") + '"' +
+        '\nGoal / uncertainty: "' + context.focus.replace(/"/g, "'") + '"' + nameHint +
+        '\n\nRespond in 2-3 concise sentences. Reference at least one specific detail the student actually shared, and a second detail when it is naturally useful. Acknowledge where the student is starting without generic praise -- do not say "great job" and do not over-celebrate. Do not grade or diagnose, and do not invent experience, goals, confidence, or weaknesses the student did not state. Identify one or two specific AIMT modules or areas that are especially relevant to what they described. Do not sound therapeutic. Speak directly to the student in second person. Refer to yourself only in first person -- I, me, my -- and never in third person as "Cadence." If a name is given above, use it at most once, and only where it reads naturally -- do not force it in if it would feel inserted. Always write "AIMT" as the plain word AIMT, never spelled out or hyphenated.' +
+        '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
+      return callCadenceFormative('/api/cadence/submit-intro', ctx, context.combinedContext).then(({ text }) => text);
+    },
+
+    // Audio Wiring phase: the real server-side Jane TTS path -- POSTs the
+    // exact already-canonical `text` (never re-generated, never a
+    // template) to the new runtime endpoint and resolves the raw MP3
+    // bytes. Called for exactly the three runtime segment ids
+    // (cadence_intro_01, cadence_synthesis_response,
+    // cadence_closing_meet); AIMT pronunciation normalization happens
+    // server-side in that endpoint, never here. Requires the same
+    // Supabase bearer token pattern callCadenceFormative already uses --
+    // deliberately NOT routed through callCadenceFormative itself since
+    // this endpoint returns audio/mpeg, not JSON. A rejection here is
+    // caught by the component itself (visual-only continuation, per its
+    // audio-failure rule) -- this function only needs to surface the
+    // real error, never substitute a fallback clip or word.
+    async requestRuntimeAudio(segmentId, text) {
+      let accessToken = '';
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        accessToken = data?.session?.access_token || '';
+      } catch (_) {}
+      const r = await fetch('/api/cadence/tts-intro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {})
+        },
+        body: JSON.stringify({ segmentId, text })
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        throw new Error(e.error || 'Cadence audio request failed');
+      }
+      return r.arrayBuffer();
+    },
+
+    // The existing approved persistence path -- unchanged in behavior
+    // from before this extraction (see functions/api/cadence/submit-
+    // intro.js's header for the full "unlock before the API call"
+    // authority trace), just fed by the component's context object
+    // instead of building the combined string inline. Fires
+    // unconditionally, before synthesize() above resolves.
+    onSubmitContext(context) {
+      const existingName = (APP_STATE.data.student && APP_STATE.data.student.name) || '';
+      APP_STATE.setStudent({
+        name: context.detectedName || existingName,
+        background: context.combinedContext,
+        introResponse: context.combinedContext,
+        introComplete: true,
+        joined: APP_STATE.data.student.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        responses: [context.combinedContext]
+      });
+      APP_STATE.updateCadenceMemoryFromIntro(context.combinedContext);
+      persistCadenceWelcomeComplete(context.detectedName ? { first_name: context.detectedName } : null);
+    },
+
+    onEnterCourse() { showCourse(); },
+    onSkip() {
+      APP_STATE.setStudent({ introComplete: true });
+      persistCadenceWelcomeComplete();
+      showCourse();
     }
-    for (let j = 0; j < seg.text.length; j++) {
-      if (introSkipped) return;
-      introCurrentText += seg.text[j];
-      line.innerHTML = introCurrentText + '<span class="intro-cursor"></span>';
-      const ch = seg.text[j];
-      const d = ['.', '!', '?'].includes(ch) ? 110 : ch === ',' ? 80 : ch === ' ' ? 55 : 38 + Math.random() * 28;
-      await sleep(d);
-    }
-    if (seg.pause > 0) await sleep(seg.pause);
-  }
-}
-
-function showIntroInput() {
-  document.getElementById('introLine').innerHTML = introCurrentText;
-  const showFullBtn = document.getElementById('introShowFull');
-  if (showFullBtn) showFullBtn.style.display = 'none';
-  setTimeout(() => {
-    const d = document.getElementById('introDivider');
-    if (d) d.classList.add('show');
-    const w = document.getElementById('introInputWrap');
-    w.classList.add('show');
-    setTimeout(() => document.getElementById('introInput').focus(), 500);
-  }, 400);
-}
-
-async function submitIntro() {
-  const input = document.getElementById('introInput');
-  const sendBtn = document.getElementById('introSendBtn');
-  const text = input.value.trim();
-  if (!text) { input.focus(); return; }
-
-  input.disabled = true;
-  if (sendBtn) sendBtn.style.display = 'none';
-
-  const existingName = (APP_STATE.data.student && APP_STATE.data.student.name) || '';
-  let detectedName = '';
-  const nm = text.match(/(?:i'm|i am|my name is|call me|name's)\s+([A-Z][a-z]+)/i);
-  if (nm) detectedName = nm[1];
-
-  APP_STATE.setStudent({
-    name: detectedName || existingName,
-    background: text,
-    introResponse: text,
-    introComplete: true,
-    joined: APP_STATE.data.student.joined || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-    responses: [text]
   });
-  APP_STATE.updateCadenceMemoryFromIntro(text);
-  persistCadenceWelcomeComplete(detectedName ? { first_name: detectedName } : null);
-
-  const name = detectedName || existingName;
-
-  const responseArea = document.getElementById('introCadenceResponse');
-  if (responseArea) {
-    responseArea.style.display = 'block';
-    setTimeout(() => responseArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-  }
-
-  const nameHint = name ? ' Their name is ' + name + '.' : '';
-  const ctx = 'You are Cadence, AIMT\'s curriculum-grounded guide for the Head Spa Certification Course. You do not claim personal work experience or present yourself as a human instructor. Your guidance was built from the instructor\'s nearly two decades of hands-on experience across cosmetology, esthetics, client experience, service design, and scalp-focused care.' +
-    '\n\nA student submitted this introduction: "' + text.replace(/"/g, "'") + '".' + nameHint +
-    '\n\nRespond in 2–3 concise sentences. Reference one specific detail the student actually shared. Connect that detail only to the head spa curriculum, professional service delivery, scalp wellness, client experience, or the business of building a head spa service. Do not invent facts about the student. Do not use generic praise, excessive enthusiasm, or therapy-like language.' +
-    '\n\nEnd by naming one useful area of the course that appears especially relevant to what the student shared. Do not evaluate or grade the introduction.' +
-    '\n\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR;
-
-  callCadenceFormative('/api/cadence/submit-intro', ctx, text)
-    .then(({ text: r }) => {
-      const textEl = document.getElementById('introCadenceText');
-      if (textEl) textEl.innerHTML = r.split('\n').filter(l => l.trim()).map(l => '<p>' + l + '</p>').join('');
-      const beginBtn = document.getElementById('introBeginBtn');
-      if (beginBtn) { beginBtn.style.display = 'flex'; setTimeout(() => beginBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100); }
-    })
-    .catch(() => {
-      const textEl = document.getElementById('introCadenceText');
-      const fallbackName = getStudentFirstName();
-      const fallback = fallbackName
-        ? fallbackName + ", your introduction has been saved. You can begin the course now, and Cadence will be available inside each module."
-        : "Your introduction has been saved. You can begin the course now, and Cadence will be available inside each module.";
-      if (textEl) textEl.innerHTML = '<p>' + fallback + '</p>';
-      const beginBtn = document.getElementById('introBeginBtn');
-      if (beginBtn) beginBtn.style.display = 'flex';
-    });
+  return cadenceIntroController;
 }
 
-async function introProceed() {
-  document.getElementById('introScreen').classList.add('fade-out');
-  const sk = document.getElementById('introSkip');
-  if (sk) sk.style.display = 'none';
-  const sf = document.getElementById('introShowFull');
-  if (sf) sf.style.display = 'none';
-  await sleep(1000);
-  hideIntro();
-  showCourse();
+function startIntro() {
+  if (!shouldShowIntro()) return;
+  mountCadenceIntro();
 }
-
-function skipIntro() {
-  introSkipped = true;
-  APP_STATE.setStudent({ introComplete: true });
-  persistCadenceWelcomeComplete();
-  document.getElementById('introScreen').classList.add('fade-out');
-  const sk = document.getElementById('introSkip'); if (sk) sk.style.display = 'none';
-  const sf = document.getElementById('introShowFull'); if (sf) sf.style.display = 'none';
-  setTimeout(() => { hideIntro(); showCourse(); }, 900);
-}
-
-function hideIntro() {
-  const el = document.getElementById('introScreen'); if (el) el.style.display = 'none';
-  const sk = document.getElementById('introSkip'); if (sk) sk.style.display = 'none';
-}
-
 function showCourse() {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('courseHome').classList.add('active');
@@ -11700,14 +11438,12 @@ async function showApp() {
     return;
   }
   document.getElementById('landingPage').style.display = 'flex';
-  document.getElementById('introScreen').style.display = 'none';
+  const introScreenEl = document.getElementById('introScreen');
+  if (introScreenEl) introScreenEl.style.display = 'none';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   setAppReady();
 }
 
-// Intro input helpers
-function introGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
-function introKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitIntro(); } }
 
 // ── DOMContentLoaded ──
 document.addEventListener('DOMContentLoaded', () => {

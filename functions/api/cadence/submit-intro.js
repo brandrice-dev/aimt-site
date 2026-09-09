@@ -8,8 +8,12 @@
    Migrated off cadence-worker/worker.js (the legacy headspa-proxy Worker)
    per docs/course-audit/00-aimt-launch-readiness-gate-1.md Finding P0-1 --
    the second of the two remaining student-facing features with no Pages
-   Function counterpart. headspa-mastery.html's submitIntro() (the
-   new-student onboarding welcome-response generator) unlocks the course
+   Function counterpart. headspa-mastery.html's mountCadenceIntro()
+   (specifically, the `onSubmitContext` callback it passes to the shared
+   AimtCadenceIntro component -- see assets/js/aimt-cadence-intro.js --
+   which fires once the pre-course introduction's three sequential
+   questions are all answered, before the `synthesize` callback below is
+   ever called) unlocks the course
    (APP_STATE.setStudent({introComplete: true, ...}), the local save() that
    aimt-progress-sync.js syncs to course_progress, and
    persistCadenceWelcomeComplete()'s Supabase auth user_metadata write) --
@@ -29,9 +33,11 @@
    CADENCE_CHAT_MODEL authority every other Chat-role call site uses.
 
    `system` is the client-supplied, per-submission welcome-response
-   instruction string (headspa-mastery.html's submitIntro(), unchanged,
-   including the student's own name/background already interpolated into
-   it client-side) -- the same "client supplies content, server supplies
+   instruction string (headspa-mastery.html's mountCadenceIntro()'s
+   `synthesize` callback, including the student's own name and all three
+   intro answers -- professional context, head spa stage, goal/
+   uncertainty -- already interpolated into it client-side) -- the same
+   "client supplies content, server supplies
    authority" trust boundary functions/api/cadence/ask.js and
    evaluate-checkpoint.js already document and rely on, since this
    flat-HTML site has no server-importable copy of that content
