@@ -1565,6 +1565,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 @media (max-width: 700px) {
   .lp-tour-stage .lp-proof-item-frame { height: clamp(260px, 70vw, 380px); }
 }
+/* Service Timer panel only: the shared cover + top-center crop above was
+   cutting Client Communication and the bottom nav off the real timer
+   screenshot at common widths (a dashboard, not an editorial photo — cover
+   crops assumed for the course/assessment panels don't apply here).
+   Contain, on the timer's own dark surface with a little breathing room,
+   keeps the whole interface readable at a slightly smaller max size. */
+.lp-tour-stage [data-tour-panel="timer"] .lp-proof-item-frame { height: clamp(260px, 30vw, 400px); background: #0f0d0b; padding: 16px; }
+.lp-tour-stage [data-tour-panel="timer"] .lp-proof-item-frame img { object-fit: contain; object-position: center; }
+@media (max-width: 700px) {
+  .lp-tour-stage [data-tour-panel="timer"] .lp-proof-item-frame { height: clamp(220px, 58vw, 320px); padding: 12px; }
+}
 
 /* ── Modern Practice: two-column editorial recompose (text-only variant
    used while no approved image asset exists — see HTML comment above) ── */
