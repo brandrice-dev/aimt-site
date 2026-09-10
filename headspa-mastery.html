@@ -2866,14 +2866,25 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 @media (max-width: 600px) {
   #landingPage { padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 5.5rem)); }
-  /* Hero vertical rhythm, tightened ~12-20% across the stack (owner QA:
-     "too much vertical space", "content rhythm feels stretched") --
-     mobile-only, a measured tightening of clearly excessive gaps, not a
-     new layout: same clamp() shape, same content, same order, just
-     smaller numbers. .lp-hero-full/.lp-hero-inner had no mobile-
-     specific override before this (only a shared <=1020px tablet one),
-     so real phones were still carrying that tablet-sized reserve. */
-  .lp-hero-full { min-height: clamp(460px, 64vh, 660px); margin-bottom: 1.85rem; }
+  /* Hero vertical rhythm (owner QA: "too much vertical space", "content
+     rhythm feels stretched"). A prior pass tightened the padding/margins
+     BETWEEN elements here (still in place below) but kept a vh-based
+     min-height (clamp(460px, 64vh, 660px)) -- on a 390x844 viewport that
+     clamps to a flat 540px, while .lp-hero-inner's actual content only
+     needs ~330-430px. .lp-hero-full is `align-items: flex-end` (base
+     rule), so that leftover ~110-200px doesn't distribute around the
+     content -- it collects entirely ABOVE it, between the nav and the
+     eyebrow. The vh min-height was the real bug: this box was being
+     forced to fill a chunk of the viewport rather than sizing to its
+     own content, on every phone regardless of how tall its actual text
+     stack is. min-height: 0 removes that forcing -- the flex container
+     (one child, no other height source) now sizes to exactly
+     .lp-hero-inner's own content + padding, so the "gap" above the
+     eyebrow is just that padding, and the gap below the CTA before the
+     next section is just this padding-bottom + .lp-hero-full's own
+     margin-bottom, both real, both intentional, no more leftover void
+     on either side. */
+  .lp-hero-full { min-height: 0; margin-bottom: 1.85rem; }
   .lp-hero-inner { padding: clamp(1.7rem, 6.5vw, 2.5rem) 0 1.85rem; }
   .lp-hero-editorial { margin: 0.15rem 0 0.9rem; }
   .lp-hero-facts { margin: 0 0 1.1rem; }
