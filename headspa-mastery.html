@@ -715,8 +715,16 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    checkpoint shell opens underneath it -- CARD_LEAVE_MS there matches
    this transition's duration. */
 .checkpoint.cc-card.cc-leaving { opacity: 0; pointer-events: none; }
+/* Mobile (below the 768px desktop override further down): the whole
+   card reads as intentionally centered -- mark, eyebrow, state label,
+   headline, body copy, CTA -- rather than left-aligned text sitting
+   next to a rail. justify-content:center here matches what the
+   desktop override already does to this same rail (see the 768px+
+   block), so this is really just extending that centering down to
+   mobile instead of leaving mobile as the one left-aligned case. */
+.checkpoint.cc-card { text-align: center; }
 .checkpoint.cc-card .cc-rail {
-  display: flex; align-items: center; justify-content: flex-start;
+  display: flex; align-items: center; justify-content: center;
   padding: 1.6rem 1.65rem 0.15rem; position: relative; z-index: 1;
 }
 .checkpoint.cc-card .cc-divider { display: none; }
@@ -736,25 +744,46 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   .cc-rail .cadence-id { --cadence-id-size: 116px; }
 }
 
-/* The card's own overflow:hidden (needed to clip its rounded corners)
-   was ALSO silently clipping .cadence-id-halo's soft bleed against the
-   card's left edge -- confirmed via getBoundingClientRect() (~3px top/
-   left at the 80px mobile size, ~16px left at the 116px desktop size,
-   where .cc-rail becomes an edge-to-edge absolutely-positioned strip).
-   The intro's own halo has no clipping ancestor anywhere up to the
-   fixed full-viewport #introScreen, so its full soft glow always
-   renders -- this nudge gives the Check's halo the same real estate,
-   without changing the halo's own size/opacity math (which stays
-   exactly the intro's ratio) or the approved mark size. */
-.cc-rail .cadence-id { margin: 5px 0 0 5px; }
-@media (min-width: 768px) {
-  /* .cc-rail is justify-content:center, so a margin-left on the
-     centered item only shifts it right by HALF the margin value (the
-     other half is absorbed back into the recalculated centering gap) --
-     32px here is the measured amount needed to actually clear the 116px
-     mark's halo, confirmed via getBoundingClientRect(). */
-  .cc-rail .cadence-id { margin-left: 32px; }
+/* Activation bloom, toned down for this presentation specifically --
+   scoped to .cc-rail rather than editing assets/css/cadence-identity.
+   css's shared .is-blooming rule, so the frozen intro (a completely
+   separate class namespace, .intro-mark-icon-wrap.is-blooming in
+   aimt-cadence-intro.css -- untouched either way) and any other current
+   or future .cadence-id surface keep the base glow untouched; only the
+   Check card's own large mark gets the reduction (owner QA: the bloom
+   read as too strong -- "less halo spread, less opacity/intensity,
+   restrained premium bloom, still visibly activates"). Opacity down
+   from the base 0.4 to 0.2 (resting is 0.06, so the bloom is still a
+   clear ~3x brighter pulse, just not an overpowering one), and the
+   halo's own spread down from the base -38.46% inset (a 1.77x-of-mark-
+   size glow box) to -22% (a 1.44x box) -- same mechanism, same timing,
+   tighter and quieter. Mechanism/timing/mark/turn are all otherwise
+   completely unchanged. */
+.cc-rail .cadence-id.is-blooming .cadence-id-halo {
+  opacity: 0.2;
+  inset: calc(var(--cadence-id-size) * -0.22);
 }
+
+/* A prior pass added a margin-left hack here (5px base, 32px more at
+   desktop) to keep the mark's halo bleed from clipping against the
+   card's own overflow:hidden left edge. Measured against the actual
+   render (getBoundingClientRect, 552px-wide card): that push moved the
+   mark's own center 16px right of the rail's true geometric center --
+   exactly the "still sitting too far right" the owner is now flagging
+   -- and the halo (a 205px box at the 116px desktop size, since it
+   bleeds calc(size * -0.3846) on every side) is wider than the entire
+   28% rail regardless of where the mark sits, so the hack never fully
+   solved the clipping it was added for either (still ~9px short at its
+   shifted position). Removed both margins -- .cc-rail's own
+   `justify-content:center`/`align-items:center` (base .cc-rail rule)
+   now centers the mark for real, structurally, matching the owner's
+   explicit ask rather than a translate/margin correction on top of it.
+   The halo's radial-gradient is fully transparent past 72% of its own
+   radius, though -- its actually-visible glow is a ~148px circle, not
+   the full 205px box, and a true-centered 148px glow clears this card's
+   left edge with room to spare, so this isn't trading a visible glow
+   clip for correct centering; there was never a visible one to begin
+   with, only an invisible box overhang. */
 
 /* Checkpoint content settles back and softens while Cadence activates --
    .cc-entering is added/removed by wireCheckpoint()'s open() sequence
@@ -807,7 +836,14 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 
 .checkpoint.cc-card .cc-line {
   font-size: 0.86rem; font-weight: 400; line-height: 1.62; color: rgba(250,248,245,0.68);
-  max-width: 46ch; margin-bottom: 1.5rem; display: none;
+  /* margin-left/right:auto -- needed on mobile now that the card is
+     centered (see .checkpoint.cc-card text-align:center above): a
+     max-width narrower than the card's own content column caps this
+     block's width but doesn't by itself center the block, only the
+     text inside it, so without this it would still hug the left edge.
+     Reset to 0 in the desktop override below, where the card goes back
+     to left-aligned. */
+  max-width: 46ch; margin: 0 auto 1.5rem; display: none;
 }
 .checkpoint.cc-card .cc-line-ready { display: block; }
 .checkpoint.cc-card.cc-inprogress .cc-line-ready { display: none; }
@@ -819,20 +855,16 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .checkpoint.cc-card .cc-hidden-anchor { display: none; }
 
 .checkpoint.cc-card .cp-btn {
-  /* width: 100% resolves against this button's own containing block --
-     at 768px+ that's .checkpoint.cc-card's *content box*, which the
-     desktop override below already insets (via the card's own
-     padding-left) to clear .cc-rail + .cc-divider. So this one width
-     naturally fills exactly the content column at both breakpoints, no
-     per-element calc() needed. (An earlier version pushed the rail-
-     clearing offset onto each content child individually via
-     margin-left, which needed a *second*, separately-maintained calc()
-     here to match -- a <button>, unlike a plain div, doesn't auto-fill
-     the space remaining after its own margin, so the two calcs drifted
-     out of sync and silently truncated the button against the card's own
-     `overflow: hidden`. Card-level padding removes the whole class of
-     bug: every child, button included, just fills its container.) */
-  width: 100%; height: auto; border-radius: var(--aimt-radius-md);
+  /* Mobile: a comfortable, centered touch target rather than a full-
+     width slab spanning the entire card (owner QA) -- max-width caps it
+     to a sane button size, margin:auto centers it to match the rest of
+     the now-centered mobile card. width: 100% (the desktop behavior)
+     comes back in the 768px+ override below, where the button sits in
+     its own right-hand content column next to the rail rather than
+     centered under the mark, and DOES need to fill that column -- see
+     that rule's own comment for why 100% is correct there specifically. */
+  width: 100%; max-width: 340px; margin-left: auto; margin-right: auto;
+  height: auto; border-radius: var(--aimt-radius-md);
   background: #faf8f5; border: none; color: #1a1814;
   font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 600;
   padding: 0.9rem 1.3rem; display: flex; align-items: center; justify-content: center;
@@ -867,6 +899,10 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
      silently collapsed the rail to its first row's height only. */
   .checkpoint.cc-card {
     --cc-top-gap: 2rem;
+    /* Centering is a mobile-only treatment (see the base .checkpoint.cc-
+       card text-align:center rule and its comment) -- desktop keeps its
+       existing left-aligned text next to the rail. */
+    text-align: left;
     /* Structural fix (Cadence micro-fixes pass): the content column's
        left inset now lives here, on the card itself, instead of as a
        margin-left repeated on every individual content child. .cc-rail
@@ -898,7 +934,13 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
      child's mobile-only padding-left/right: 1.65rem (base rule, further
      up) would otherwise double up on top of it. */
   .checkpoint.cc-card > *:not(.cc-rail):not(.cc-divider) { padding-left: 0; padding-right: 0; }
-  .checkpoint.cc-card .cp-btn { margin-bottom: 2rem; }
+  /* Undo the mobile-only centering treatment: .cc-line goes back to a
+     plain left-aligned block (no max-width centering margin needed once
+     it's already flush with the rest of the left-aligned column), and
+     .cp-btn goes back to filling its column (see that rule's own
+     comment for why 100%/no max-width is what's correct here). */
+  .checkpoint.cc-card .cc-line { margin-left: 0; margin-right: 0; }
+  .checkpoint.cc-card .cp-btn { max-width: none; margin-left: 0; margin-right: 0; margin-bottom: 2rem; }
   /* The wildcard reset directly above zeroes every content child's own
      padding-left/right (same selector, same specificity, so source order
      decides) -- restore the resolved button's own horizontal padding
@@ -2824,13 +2866,24 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 @media (max-width: 600px) {
   #landingPage { padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 5.5rem)); }
+  /* Hero vertical rhythm, tightened ~12-20% across the stack (owner QA:
+     "too much vertical space", "content rhythm feels stretched") --
+     mobile-only, a measured tightening of clearly excessive gaps, not a
+     new layout: same clamp() shape, same content, same order, just
+     smaller numbers. .lp-hero-full/.lp-hero-inner had no mobile-
+     specific override before this (only a shared <=1020px tablet one),
+     so real phones were still carrying that tablet-sized reserve. */
+  .lp-hero-full { min-height: clamp(460px, 64vh, 660px); margin-bottom: 1.85rem; }
+  .lp-hero-inner { padding: clamp(1.7rem, 6.5vw, 2.5rem) 0 1.85rem; }
+  .lp-hero-editorial { margin: 0.15rem 0 0.9rem; }
+  .lp-hero-facts { margin: 0 0 1.1rem; }
   .lp-inner {
     width: min(1200px, calc(100% - 48px));
     padding: 0;
   }
   .lp-section-band { padding: 56px 0; }
   .lp-brand { margin-bottom: 1.35rem; }
-  .lp-headline { margin-bottom: 0.85rem; }
+  .lp-headline { margin-bottom: 0.7rem; }
   .lp-subhead { margin-bottom: 0.72rem; font-size: 0.94rem; line-height: 1.62; }
   .lp-hero-note { font-size: 0.8rem; line-height: 1.58; margin-bottom: 0.85rem; }
   .lp-fit { font-size: 0.58rem; margin-bottom: 0.66rem; line-height: 1.52; letter-spacing: 0.14em; }

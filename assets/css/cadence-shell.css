@@ -244,7 +244,7 @@
 .cshell-msg.assistant { align-self: flex-start; }
 .cshell-msg.user { align-self: flex-end; flex-direction: row-reverse; }
 .cshell-msg-av {
-  width: 40px; height: 40px; flex-shrink: 0; align-self: flex-end;
+  width: 34px; height: 34px; flex-shrink: 0; align-self: flex-end;
   display: flex; align-items: center; justify-content: center;
 }
 /* Same as .cshell-id above: .cadence-id-chip is a shapeless black-line
@@ -260,8 +260,15 @@
    -- still read as borderline/blob-like; 40px is where the ring of 8
    dots reliably reads as distinct from the outer ring rather than
    merging into it (verified against an isolated render, same geometry,
-   at 24/32/36/40/52px side by side). */
-.cshell-msg.assistant .cshell-msg-av .cadence-id { --cadence-id-size: 40px; }
+   at 24/32/36/40/52px side by side). A later pass found 40px slightly
+   too large relative to the message text beside it (owner QA) -- 34px
+   (re-verified against the same isolated render) is the modest
+   reduction that still keeps every node legible; this is the floor for
+   this context, not a return to the 24-32px range that read as a
+   bullseye. #guideBtn's floating-pill mark and .cshell-id's header mark
+   are separate contexts/sizes and are intentionally left at their own
+   already-verified sizes (40px / 52px). */
+.cshell-msg.assistant .cshell-msg-av .cadence-id { --cadence-id-size: 34px; }
 .cshell-msg.user .cshell-msg-av { border-radius: 50%; background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
 .cshell-bub {
   padding: 0.7rem 0.95rem;

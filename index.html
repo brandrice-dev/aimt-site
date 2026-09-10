@@ -368,13 +368,37 @@ body {
 
 /* ── SERVICE PROTOCOL ── */
 #protocol { background: #0f0d0b; padding: 5.5rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); }
-/* align-items: stretch (the grid default) rather than start — the left
-   column's own content (copy + Timer preview) is what actually determines
-   the row height; stretch just lets the image column, which has no
-   intrinsic height opinion of its own once flexed below, grow to match it
-   instead of stopping short at its native aspect ratio. */
-#protocol .section-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 3rem; max-width: 960px; }
-@media(max-width:700px){ #protocol .section-inner { grid-template-columns: 1fr; } }
+/* Desktop: two equal top-row columns (copy left, lifestyle photo right),
+   then the live Timer mock as its own full-width row underneath both --
+   explicit grid placement on all three children (not DOM order) is what
+   makes this differ from mobile's stacked order below without needing
+   two copies of the markup. align-items:start (not the old stretch) --
+   now that .protocol-media-col sizes itself by its own aspect-ratio
+   rather than being stretched to match a sibling's height (see that
+   rule's own comment), stretch had nothing left to do here. */
+#protocol .section-inner { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 2.5rem 3rem; max-width: 960px; }
+.protocol-text-col { grid-column: 1; grid-row: 1; }
+.protocol-media-col { grid-column: 2; grid-row: 1; }
+.protocol-mini-demo { grid-column: 1 / -1; grid-row: 2; }
+@media(max-width:700px){
+  #protocol .section-inner { grid-template-columns: 1fr; }
+  /* Mobile keeps the original, approved stacked order -- copy, then the
+     Timer mock, then the lifestyle photo -- which used to come for free
+     from the mini-demo being nested inside .protocol-text-col in the
+     DOM. Restored via `order` now that all three are siblings (moved so
+     the mini-demo could become its own full-width row on desktop).
+     grid-column/grid-row must be reset to auto here too -- the desktop
+     rules above place these explicitly (column 1/2/1-span, row 1/1/2),
+     and an explicit grid-column on a child forces the grid to
+     IMPLICITLY generate however many column tracks that placement
+     needs even when the container itself only declares one (1fr) --
+     that implicit second, auto-sized track (sized to the photo's own
+     intrinsic/aspect-ratio width) is what was squeezing the photo into
+     a narrow side-by-side thumbnail instead of stacking it full-width. */
+  .protocol-text-col { order: 1; grid-column: auto; grid-row: auto; }
+  .protocol-mini-demo { order: 2; grid-column: auto; grid-row: auto; }
+  .protocol-media-col { order: 3; grid-column: auto; grid-row: auto; }
+}
 #protocol .eyebrow { padding-left: var(--aimt-align); }
 #protocol .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
@@ -420,11 +444,16 @@ body {
 
 /* Live mini-demo: a product-proof element sitting under the explanatory
    copy — not on the treatment-room photograph, which already shows the real
-   Timer in use on the physical device. The sibling text elements each carry
-   their own padding-left: var(--aimt-align) (see #protocol rules above), so
-   this needs a matching margin-left — without it, the card's edge sits at
-   the column's true x0, short of where the text glyphs actually start,
-   reading as detached from the copy above it.
+   Timer in use on the physical device. On mobile this sits directly below
+   the copy as a single narrower column, so it carries the same
+   padding-left: var(--aimt-align) inset as the text above it (see the
+   base margin rule and its own comment). On desktop it's promoted to its
+   own full-width row spanning BOTH top-row columns (grid-column: 1/-1,
+   set in the #protocol .section-inner rules above) -- a boxed card
+   filling that full row edge-to-edge reads as a deliberate section of
+   its own rather than something still trying to align with one column's
+   text inset, so the desktop override below removes the side margins
+   entirely instead of stretching them to match.
 
    Rebuilt from the real AIMT Service Timer's own DOM/CSS
    (aimt-service-timer.html: .timer-top, .step-ring-wrap, .metrics-panel,
@@ -535,6 +564,47 @@ body {
 .plc-bottom { margin-top: 2px; padding-top: 13px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .plc-nav-btn { font-family: var(--aimt-font-mont); font-size: 7.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(250,248,245,0.68); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 6px; padding: 6px 11px; }
 .plc-nav-btn-next { background: #faf8f5; color: #1a1814; border-color: #faf8f5; }
+
+/* Desktop: the mock is now its own full-width row beneath the top row
+   (see #protocol .section-inner above), so its own internal layout is
+   rebuilt from a tall/narrow portrait stack into the SAME landscape
+   split the real product already uses at its own desktop breakpoint
+   (aimt-service-timer.html: .timer-body{flex-direction:row} with
+   .ring-panel a fixed-ish left column and .guidance-panel filling the
+   rest) -- reusing that existing real-Timer visual language rather than
+   inventing a new wide-screen arrangement. .plc-top and .plc-bottom
+   stay full-width bars above/below the split, exactly like the real
+   product's .timer-top/.timer-bottom. */
+@media (min-width: 701px) {
+  .protocol-mini-demo {
+    margin: 2.5rem 0 0 0;
+    padding: 26px 32px 28px;
+    display: grid;
+    grid-template-columns: minmax(200px, 30%) 1fr;
+    column-gap: 44px;
+    align-items: start;
+  }
+  .plc-top { grid-column: 1 / -1; margin-bottom: 26px; }
+  .plc-ring-panel { grid-column: 1; }
+  .plc-bottom { grid-column: 1 / -1; margin-top: 26px; }
+  /* Same guidance content, re-anchored as the right column instead of a
+     block stacked below the ring -- the divider moves from a top border
+     to a left border accordingly (still the same 0.5px hairline, just
+     rotated to match the new landscape split). */
+  .plc-guidance {
+    grid-column: 2;
+    margin-top: 0; padding-top: 0; border-top: none;
+    padding-left: 40px; border-left: 0.5px solid rgba(250,248,245,0.08);
+    justify-content: center;
+  }
+  /* Modest scale-up for real desktop/laptop-screen presence -- still the
+     same proportions and element order, not a redesigned or oversized
+     device frame. */
+  .plc-ring-wrap { width: 168px; height: 168px; }
+  .plc-time { font-size: 42px; }
+  .plc-metrics, .plc-ring-support { max-width: none; }
+  .plc-step-title { font-size: 21px; }
+}
 @media(max-width:700px){
   #protocol .section-inner { gap: 2.25rem; }
   /* No sibling column to match on mobile (single-column stack), so the
@@ -607,6 +677,14 @@ body {
 @media(max-width:700px){
   .cadence-demo { margin-top: 1.5rem; margin-bottom: 1.5rem; }
   .cadence-demo-secondary { left: -0.75rem; bottom: -1.25rem; }
+  /* Centered as its own row on mobile instead of right-aligned -- still
+     the same non-overlapping normal-flow position above the mock (see
+     the base rule's own comment), just recentered so it reads as a
+     clearly separate labeled row rather than a corner badge, which
+     reads better once it's no longer pinned to a corner of anything.
+     Verified with zero overlap and zero horizontal overflow at 320,
+     390, and 430px. */
+  .cadence-demo-tag { align-self: center; }
 }
 
 /* This player now carries Cadence's real homepage welcome message (a
@@ -1032,7 +1110,14 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
       <h2 class="section-title reveal reveal-delay-1" style="color:white;">Take the course into the<br>treatment room.</h2>
       <p class="community-intro reveal reveal-delay-2"><em>Every student receives the AIMT Service Timer with course enrollment.</em> Open it from any device and follow the complete head spa service in real time, with step-by-step guidance, professional notes, exact timing, and a working timer that moves through the service with you.</p>
       <p class="section-sub reveal reveal-delay-2">Core and Extended are AIMT's two reference protocols — 60- and 90-minute service structures built so a new practitioner can deliver the service with structure from the first appointment onward, until the flow becomes second nature.</p>
-      <div class="protocol-mini-demo reveal reveal-delay-2" id="protocolLiveCard" aria-hidden="true">
+    </div>
+    <div class="reveal reveal-delay-2 protocol-media-col">
+      <div class="aimt-sp-proof-frame">
+        <img src="assets/images/marketing/approved-service-timer1.webp" alt="A practitioner performing a head spa treatment at the wash station, with the AIMT Service Timer visible on a tablet at treatment-room side" loading="lazy" width="840" height="1493">
+      </div>
+      <p class="aimt-sp-proof-caption">The real AIMT Service Timer, in use during a Core Format service.</p>
+    </div>
+    <div class="protocol-mini-demo reveal reveal-delay-2" id="protocolLiveCard" aria-hidden="true">
         <div class="plc-top">
           <div class="plc-id">
             <svg class="plc-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
@@ -1096,13 +1181,6 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
           <span class="plc-nav-btn">&larr; Back</span>
           <span class="plc-nav-btn plc-nav-btn-next">Next &rarr;</span>
         </div>
-      </div>
-    </div>
-    <div class="reveal reveal-delay-2 protocol-media-col">
-      <div class="aimt-sp-proof-frame">
-        <img src="assets/images/marketing/approved-service-timer1.webp" alt="A practitioner performing a head spa treatment at the wash station, with the AIMT Service Timer visible on a tablet at treatment-room side" loading="lazy" width="840" height="1493">
-      </div>
-      <p class="aimt-sp-proof-caption">The real AIMT Service Timer, in use during a Core Format service.</p>
     </div>
   </div>
 </section>
