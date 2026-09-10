@@ -171,7 +171,7 @@ body.review-mode-active { padding-top: 34px; }
 .course-hero {
   position: relative; z-index: 1; overflow: hidden;
   display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.25rem;
-  border: 0.5px solid rgba(255,255,255,0.1);
+  border: 0.5px solid rgba(255,255,255,0.14);
   border-radius: var(--aimt-radius-panel, 16px);
   padding: 2.15rem 2.25rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
@@ -181,17 +181,21 @@ body.review-mode-active { padding-top: 34px; }
   background-image: url('assets/images/marketing/my-aimt-course-texture.png');
   background-size: cover; background-position: 62% 42%;
 }
+/* Owner contrast pass: darkened the mid-band wash (was 0.4/0.5, letting the
+   photo's bright foam highlights compete with the chero-* text) and the
+   base scrim (0.32 -> 0.42) so text reads clearly across the whole card,
+   not just at the darkest edges. Texture stays visible, just quieter. */
 .course-hero::after {
   content: ''; position: absolute; inset: 0; z-index: 0;
   background:
-    linear-gradient(90deg, rgba(20,17,13,0.86) 0%, rgba(20,17,13,0.4) 38%, rgba(20,17,13,0.5) 62%, rgba(20,17,13,0.86) 100%),
-    rgba(20,17,13,0.32);
+    linear-gradient(90deg, rgba(20,17,13,0.9) 0%, rgba(20,17,13,0.58) 38%, rgba(20,17,13,0.66) 62%, rgba(20,17,13,0.9) 100%),
+    rgba(20,17,13,0.42);
 }
 .chero-left, .chero-right { position: relative; z-index: 1; }
 .chero-left { flex: 1 1 300px; min-width: 0; }
 .chero-tag {
   font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(163,150,141,0.75); margin-bottom: 0.8rem; display: block;
+  color: rgba(163,150,141,0.82); margin-bottom: 0.8rem; display: block;
 }
 .chero-left h2 {
   font-family: var(--aimt-font-mont); font-weight: 700; font-size: clamp(1.55rem, 2.8vw, 2rem); letter-spacing: -0.02em;
@@ -201,7 +205,7 @@ body.review-mode-active { padding-top: 34px; }
 .chero-next + .chero-next { margin-top: 0.9rem; }
 .chero-next-label {
   font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.55);
 }
 .chero-next-value {
   font-family: var(--aimt-font-mont); font-weight: 500; font-size: 1.05rem; letter-spacing: -0.01em;
@@ -232,42 +236,42 @@ body.review-mode-active { padding-top: 34px; }
 
 .module-row {
   display: flex; align-items: center; gap: 14px; padding: 1.05rem 0.6rem; margin: 0 -0.6rem;
-  border-bottom: 0.5px solid rgba(255,255,255,0.07); border-radius: 10px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px;
   cursor: pointer; transition: background 0.2s ease;
 }
 .module-row:last-child { border-bottom: none; }
-.module-row:hover { background: rgba(255,255,255,0.03); }
-.module-row.locked { opacity: 0.45; cursor: default; pointer-events: none; }
+.module-row:hover { background: rgba(255,255,255,0.045); }
+.module-row.locked { opacity: 0.55; cursor: default; pointer-events: none; }
 .module-row.locked:hover { background: none; }
 .module-row.is-current {
-  background: rgba(163,150,141,0.09); border-bottom-color: transparent;
+  background: rgba(163,150,141,0.11); border-bottom-color: transparent;
   box-shadow: inset 3px 0 0 var(--aimt-color-accent, #a3968d);
 }
-.module-row.is-current:hover { background: rgba(163,150,141,0.13); }
-.module-row.is-complete .mr-title { color: rgba(255,255,255,0.6); }
-.module-row.is-complete .mr-sub { color: rgba(255,255,255,0.3); }
+.module-row.is-current:hover { background: rgba(163,150,141,0.15); }
+.module-row.is-complete .mr-title { color: rgba(255,255,255,0.68); }
+.module-row.is-complete .mr-sub { color: rgba(255,255,255,0.4); }
 
 .mr-num {
   width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
   justify-content: center; font-size: 0.78rem; font-weight: 500; flex-shrink: 0;
 }
-.mr-done { background: rgba(163,150,141,0.14); color: rgba(255,255,255,0.55); }
+.mr-done { background: rgba(163,150,141,0.16); color: rgba(255,255,255,0.68); }
 .mr-active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
-.mr-locked { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.28); font-size: 0.7rem; }
+.mr-locked { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.34); font-size: 0.7rem; }
 .module-row.is-current .mr-num { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
 
 .mr-info { flex: 1; min-width: 0; }
 .mr-title { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 400; color: rgba(255,255,255,0.92); margin-bottom: 2px; }
 .module-row.is-current .mr-title { font-weight: 500; color: #fff; }
-.mr-sub { font-size: 0.74rem; color: rgba(255,255,255,0.42); font-weight: 300; }
+.mr-sub { font-size: 0.74rem; color: rgba(255,255,255,0.52); font-weight: 300; }
 
 .mr-badge {
   font-family: var(--aimt-font-mont); font-size: 0.6rem; letter-spacing: 0.06em; font-weight: 500;
   padding: 5px 11px; border-radius: 980px; flex-shrink: 0; white-space: nowrap;
 }
-.mb-done { background: transparent; color: rgba(163,150,141,0.7); }
-.mb-active { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
-.mb-locked { background: transparent; color: rgba(255,255,255,0.28); }
+.mb-done { background: transparent; color: rgba(163,150,141,0.78); }
+.mb-active { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.68); }
+.mb-locked { background: transparent; color: rgba(255,255,255,0.36); }
 .module-row.is-current .mr-badge { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
 
 @media (max-width: 700px) {
@@ -9640,6 +9644,18 @@ const PROXY_URL = 'https://headspa-proxy.brandrice.workers.dev/';
 // ── MODULE METADATA ──
 const TOTAL_MODULES = 13; // 0 through 12 (Module 11 → 12 structural relocation)
 
+// "Coursework" unit count shown on Course Home's progress ring/line --
+// deliberately 12, not TOTAL_MODULES (13). Mirrors My AIMT's own
+// REQUIRED_MODULE_COUNT (my-aimt.html): Welcome Module (0) + Modules 1-11.
+// Module 12 is the Final Certification Assessment, not a coursework unit,
+// and is intentionally excluded from this count there -- same reasoning
+// applies here so the two cards show the identical percentage instead of
+// silently drifting (13-based here vs. 12-based on the dashboard). Only
+// feeds the two display values below (module-count text + ring); does not
+// touch APP_STATE.getOverallPct()/getCompletedCount(), gating, or resume
+// logic, which still operate over all 13 modules as before.
+const COURSEWORK_MODULE_COUNT = 12;
+
 const MODULE_CHECKPOINTS = {
   '0': ['m0cp1'],
   '1': ['m1cp1', 'm1cp2'],
@@ -9712,7 +9728,6 @@ const MODULE_TITLES = {
 // ══════════════════════════════════════════════════════
 
 function renderHomeProgress() {
-  const pct = APP_STATE.getOverallPct();
   const done = APP_STATE.getCompletedCount();
   const resumeModule = APP_STATE.getResumeModuleId();
 
@@ -9722,8 +9737,19 @@ function renderHomeProgress() {
   const currentPosEl = document.getElementById('currentPositionValue');
   const ringArea = document.getElementById('chRing');
 
-  if (doneEl) doneEl.textContent = done + ' of ' + TOTAL_MODULES + ' modules complete';
-  if (pctEl) pctEl.textContent = pct + '%';
+  // Coursework done/pct shown here (module-count text + ring) is computed
+  // the same way as My AIMT's dashboard card -- COURSEWORK_MODULE_COUNT
+  // (12) units, not TOTAL_MODULES (13) -- so the two cards always agree.
+  // `done` above (APP_STATE.getCompletedCount(), all 13 modules) is left
+  // untouched for the resume-button/badge text below.
+  let courseworkDone = 0;
+  for (let i = 0; i < COURSEWORK_MODULE_COUNT; i++) {
+    if (APP_STATE.isModuleComplete(i)) courseworkDone++;
+  }
+  const courseworkPct = Math.round((courseworkDone / COURSEWORK_MODULE_COUNT) * 100);
+
+  if (doneEl) doneEl.textContent = courseworkDone + ' of ' + COURSEWORK_MODULE_COUNT + ' modules complete';
+  if (pctEl) pctEl.textContent = courseworkPct + '%';
 
   const next = APP_STATE.getNextIncompleteModule();
   const resumeModuleLabel = resumeModule === 0 ? 'Welcome Module' : 'Module ' + resumeModule;
@@ -9734,14 +9760,14 @@ function renderHomeProgress() {
   if (currentPosEl) currentPosEl.textContent = resumeModuleLabel;
 
   // Same AIMTMetricRing component as My AIMT's course-hero card
-  // (assets/js/aimt-metric-ring.js) -- presentation only, reads the
-  // exact pct/done already computed above.
+  // (assets/js/aimt-metric-ring.js), fed the same coursework value as
+  // that card so the ring fill and displayed percent always match it.
   if (ringArea && window.AIMTMetricRing) {
     ringArea.innerHTML = window.AIMTMetricRing.render({
-      value: pct,
-      display: pct + '%',
+      value: courseworkPct,
+      display: courseworkPct + '%',
       label: 'Modules',
-      accessibleText: 'Course progress: ' + pct + ' percent, ' + done + ' of ' + TOTAL_MODULES + ' modules complete.'
+      accessibleText: 'Course progress: ' + courseworkPct + ' percent, ' + courseworkDone + ' of ' + COURSEWORK_MODULE_COUNT + ' modules complete.'
     });
   }
 
