@@ -41,6 +41,11 @@
 <link rel="stylesheet" href="assets/css/aimt-brand.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
+<!-- Metric ring primitive shared with My AIMT (assets/js/aimt-metric-ring.js)
+     -- Course Home's expanded course card reuses it so the progress
+     indicator is the exact same component as the dashboard card. -->
+<link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
+<script src="assets/js/aimt-metric-ring.js"></script>
 <link rel="stylesheet" href="assets/css/cadence-shell.css">
 <!-- Cadence's unified identity mark/animation primitive -- shared by
      Cadence Checks, the Ask Cadence panel, and the #guideBtn pill below,
@@ -124,25 +129,22 @@ body.review-mode-active { padding-top: 34px; }
 @keyframes viewFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 /* Animate the inner wrap, not the view — avoids stacking context trapping fixed elements */
 #lessonView.active .lesson-wrap { animation: viewFadeIn 0.32s ease forwards; }
-#courseHome.active .home-hero { animation: viewFadeIn 0.32s ease forwards; }
-#courseHome.active .home-modules { animation: viewFadeIn 0.38s ease 0.05s forwards; opacity: 0; }
+#courseHome.active .course-hero { animation: viewFadeIn 0.32s ease forwards; }
+#courseHome.active .ch-modules { animation: viewFadeIn 0.38s ease 0.05s forwards; opacity: 0; }
 
 /* ══════════════════════════════
    COURSE HOME
+   Reuses My AIMT's .course-hero card system verbatim (same surface,
+   photo texture, chero-* type scale, metric ring, .btn) so this page
+   reads as that dashboard card's own expanded state -- see my-aimt.html
+   for the canonical version of this card. Tokens from
+   assets/css/aimt-design-system.css (already loaded above).
 ══════════════════════════════ */
-#courseHome { min-height: 100dvh; background: var(--bg); }
+#courseHome { min-height: 100dvh; background: var(--aimt-color-bg-primary, #1a1814); }
 
-.home-hero {
-  background: var(--hero-bg);
-  padding: 3rem 1.5rem 2.5rem; color: white; position: relative; overflow: hidden;
-}
-.home-hero::after {
-  content: ''; position: absolute; top: -80px; right: -80px;
-  width: 280px; height: 280px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
-  pointer-events: none;
-}
-.brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 2rem; }
+.ch-shell { max-width: var(--aimt-container-max, 1100px); margin-inline: auto; padding: 2rem 1.5rem 4rem; }
+
+.ch-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 1.75rem; }
 .brand-identity { display: flex; align-items: center; gap: 12px; }
 .brand-dash-link {
   font-family: var(--aimt-font-mont); font-size: 0.62rem; letter-spacing: 0.14em;
@@ -151,67 +153,130 @@ body.review-mode-active { padding-top: 34px; }
 }
 .brand-dash-link:hover { color: rgba(255,255,255,0.85); }
 .brand-mark {
-  width: 36px; height: 36px; border-radius: 0;
-  background: none; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: rgba(255,255,255,0.85);
 }
-.brand-mark svg { width: 36px; height: 36px; }
-.brand-wordmark {
-  display: flex; flex-direction: column; gap: 1px;
-}
+.brand-mark svg { width: 32px; height: 32px; }
+.brand-wordmark { display: flex; flex-direction: column; gap: 1px; }
 .brand-name {
-  font-family: var(--aimt-font-mont); font-size: 0.7rem; color: white;
-  letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
-  line-height: 1;
+  font-family: var(--aimt-font-mont); font-size: 0.68rem; color: white;
+  letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; line-height: 1;
 }
 .brand-sub {
-  font-family: var(--aimt-font-mono); font-size: 0.55rem; color: rgba(255,255,255,0.35);
-  letter-spacing: 0.18em; text-transform: uppercase; line-height: 1;
+  font-family: var(--aimt-font-mono); font-size: 0.52rem; color: rgba(255,255,255,0.35);
+  letter-spacing: 0.16em; text-transform: uppercase; line-height: 1;
 }
-.home-greeting { font-family: var(--aimt-font-mont); font-size: 2rem; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; }
-.home-greeting em { font-style: normal; font-weight: 300; color: rgba(255,255,255,0.7); display: block; font-size: 1.1rem; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
-.home-sub { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 300; line-height: 1.6; max-width: 340px; }
 
-.home-progress-card {
-  background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.12);
-  border-radius: 16px; padding: 1.25rem; margin-top: 1.5rem;
+/* -- Expanded course card (verbatim from my-aimt.html's .course-hero) -- */
+.course-hero {
+  position: relative; z-index: 1; overflow: hidden;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.25rem;
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: var(--aimt-radius-panel, 16px);
+  padding: 2.15rem 2.25rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
-.hpc-label { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
-.hpc-title { font-family: var(--aimt-font-mont); font-size: 0.95rem; color: white; margin-bottom: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
-.hpc-bar { background: rgba(255,255,255,0.15); border-radius: 980px; height: 4px; margin-bottom: 6px; }
-.hpc-fill { background: #a3968d; border-radius: 980px; height: 4px; transition: width 0.6s; }
-.hpc-stats { display: flex; justify-content: space-between; font-size: 0.72rem; color: rgba(255,255,255,0.55); }
-.hpc-resume {
-  margin-top: 1rem; width: 100%; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); border: none;
-  border-radius: var(--aimt-radius-sm); padding: 0.7rem; font-size: 0.85rem; font-weight: 500;
-  font-family: var(--aimt-font-sans); cursor: pointer; transition: opacity 0.2s;
+.course-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background-image: url('assets/images/marketing/my-aimt-course-texture.png');
+  background-size: cover; background-position: 62% 42%;
 }
-.hpc-resume:hover { opacity: 0.88; }
+.course-hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(20,17,13,0.86) 0%, rgba(20,17,13,0.4) 38%, rgba(20,17,13,0.5) 62%, rgba(20,17,13,0.86) 100%),
+    rgba(20,17,13,0.32);
+}
+.chero-left, .chero-right { position: relative; z-index: 1; }
+.chero-left { flex: 1 1 300px; min-width: 0; }
+.chero-tag {
+  font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(163,150,141,0.75); margin-bottom: 0.8rem; display: block;
+}
+.chero-left h2 {
+  font-family: var(--aimt-font-mont); font-weight: 700; font-size: clamp(1.55rem, 2.8vw, 2rem); letter-spacing: -0.02em;
+  color: #fff; text-transform: none;
+}
+.chero-next { margin-top: 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.chero-next + .chero-next { margin-top: 0.9rem; }
+.chero-next-label {
+  font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+.chero-next-value {
+  font-family: var(--aimt-font-mont); font-weight: 500; font-size: 1.05rem; letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.94);
+}
+.chero-next-value .chero-dot { color: rgba(255,255,255,0.35); }
 
-.home-modules { padding: 1.5rem; }
-.hm-title { font-family: var(--aimt-font-serif); font-size: 1.3rem; letter-spacing: -0.01em; margin-bottom: 1rem; }
+.chero-right { flex: 0 1 220px; min-width: 200px; display: flex; flex-direction: column; align-items: center; gap: 0.9rem; }
+.chero-right .btn { width: 100%; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--aimt-font-mont); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  background: #fff; color: #1a1814; text-decoration: none; border: none; cursor: pointer;
+  padding: 0.85rem 1.3rem; border-radius: var(--aimt-radius-pill, 980px);
+  min-height: 44px; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.9; }
+
+/* -- Module list: quiet rows on the same dark surface as the card above,
+   same register as My AIMT's tool-row/resource-item primitives, not a
+   separate boxed panel. -- */
+.ch-modules { margin-top: 2.75rem; }
+.hm-title {
+  font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--aimt-color-accent, #a3968d); margin-bottom: 1.1rem;
+}
 
 .module-row {
-  display: flex; align-items: center; gap: 12px; padding: 1rem 0;
-  border-bottom: 0.5px solid var(--border); cursor: pointer; transition: opacity 0.2s;
+  display: flex; align-items: center; gap: 14px; padding: 1.05rem 0.6rem; margin: 0 -0.6rem;
+  border-bottom: 0.5px solid rgba(255,255,255,0.07); border-radius: 10px;
+  cursor: pointer; transition: background 0.2s ease;
 }
 .module-row:last-child { border-bottom: none; }
-.module-row:hover { opacity: 0.75; }
-.module-row.locked { opacity: 0.4; cursor: default; pointer-events: none; }
+.module-row:hover { background: rgba(255,255,255,0.03); }
+.module-row.locked { opacity: 0.45; cursor: default; pointer-events: none; }
+.module-row.locked:hover { background: none; }
+.module-row.is-current {
+  background: rgba(163,150,141,0.09); border-bottom-color: transparent;
+  box-shadow: inset 3px 0 0 var(--aimt-color-accent, #a3968d);
+}
+.module-row.is-current:hover { background: rgba(163,150,141,0.13); }
+.module-row.is-complete .mr-title { color: rgba(255,255,255,0.6); }
+.module-row.is-complete .mr-sub { color: rgba(255,255,255,0.3); }
+
 .mr-num {
   width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
   justify-content: center; font-size: 0.78rem; font-weight: 500; flex-shrink: 0;
 }
-.mr-done { background: var(--aimt-success-light); color: var(--aimt-success); }
-.mr-active { background: #ede9e3; color: #262626; }
-.mr-locked { background: var(--surface); color: var(--muted2); }
-.mr-info { flex: 1; }
-.mr-title { font-size: 0.875rem; font-weight: 500; margin-bottom: 1px; }
-.mr-sub { font-size: 0.72rem; color: var(--muted); font-weight: 300; }
-.mr-badge { font-size: 0.62rem; padding: 2px 8px; border-radius: 980px; flex-shrink: 0; }
-.mb-done { background: var(--aimt-success-light); color: var(--aimt-success); }
-.mb-active { background: #262626; color: rgba(255,255,255,0.85); font-weight: 500; }
-.mb-locked { background: var(--surface); color: var(--muted2); }
+.mr-done { background: rgba(163,150,141,0.14); color: rgba(255,255,255,0.55); }
+.mr-active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+.mr-locked { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.28); font-size: 0.7rem; }
+.module-row.is-current .mr-num { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
+
+.mr-info { flex: 1; min-width: 0; }
+.mr-title { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 400; color: rgba(255,255,255,0.92); margin-bottom: 2px; }
+.module-row.is-current .mr-title { font-weight: 500; color: #fff; }
+.mr-sub { font-size: 0.74rem; color: rgba(255,255,255,0.42); font-weight: 300; }
+
+.mr-badge {
+  font-family: var(--aimt-font-mont); font-size: 0.6rem; letter-spacing: 0.06em; font-weight: 500;
+  padding: 5px 11px; border-radius: 980px; flex-shrink: 0; white-space: nowrap;
+}
+.mb-done { background: transparent; color: rgba(163,150,141,0.7); }
+.mb-active { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.mb-locked { background: transparent; color: rgba(255,255,255,0.28); }
+.module-row.is-current .mr-badge { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
+
+@media (max-width: 700px) {
+  .ch-shell { padding: 1.5rem 1.25rem 3rem; }
+  .course-hero { padding: 1.6rem 1.4rem; flex-direction: column; }
+  .chero-left, .chero-right { flex-basis: auto; }
+  .chero-right { width: 100%; }
+  .chero-right .btn { order: -1; }
+}
 
 /* ══════════════════════════════
    LESSON VIEW
@@ -2860,7 +2925,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 /* ── Small phones (< 390px) ── */
 @media (max-width: 390px) {
-  .home-greeting { font-size: 1.65rem; }
   .lesson-wrap { padding: 1.5rem 1.1rem 7rem; }
   .mod-hero { padding: 1.5rem 1.25rem; }
   .m1-opener { padding: 1.5rem 1.25rem; }
@@ -3032,7 +3096,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 /* ── Tablet and up (> 768px) ── */
 @media (min-width: 768px) {
-  .home-hero { padding: 3.5rem 2.5rem 3rem; }
   .lesson-wrap { padding: 2.5rem 2rem 8rem; }
   .intro-inner { padding: 2rem 0; }
   .cert-sheet { padding: 4rem 4rem 3.5rem; }
@@ -4087,10 +4150,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 
 
-<!-- ══ COURSE HOME ══ -->
+<!-- ══ COURSE HOME ══
+     Reuses My AIMT's .course-hero card verbatim (see my-aimt.html) so
+     this page reads as that dashboard card's own expanded state
+     rather than a separate portal -- Owner Design Pass. -->
 <div id="courseHome" class="view">
-  <div class="home-hero">
-    <div class="brand-row">
+  <div class="ch-shell">
+    <div class="ch-topbar">
       <div class="brand-identity">
       <div class="brand-mark">
         <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -4129,20 +4195,29 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
       <a class="brand-dash-link" href="my-aimt.html">My AIMT</a>
     </div>
-    <div class="home-greeting" id="homeGreeting">Welcome back,<br><em id="studentFirstName"></em></div>
-    <div class="home-sub" id="homeSubText">Keep building. Your next module is ready.</div>
-    <div class="home-progress-card">
-      <div class="hpc-label">Certification progress</div>
-      <div class="hpc-title">Head Spa Certification Course</div>
-      <div class="hpc-bar"><div class="hpc-fill" id="overallFill" style="width:0%"></div></div>
-      <div class="hpc-stats"><span id="overallDone">0 of 12 modules complete</span><span id="overallPct">0%</span></div>
-      <button class="hpc-resume" id="resumeBtn" onclick="resumeCourse()">Begin — Welcome Module</button>
-    </div>
-  </div>
 
-  <div class="home-modules">
-    <div class="hm-title">Course modules</div>
-    <div id="moduleList">
+    <div class="course-hero">
+      <div class="chero-left">
+        <span class="chero-tag">AIMT · Certification 01</span>
+        <h2>Head Spa Certification Course</h2>
+        <div class="chero-next">
+          <span class="chero-next-label">Student progress</span>
+          <span class="chero-next-value"><span id="overallDone">0 of 13 modules complete</span><span class="chero-dot"> · </span><span id="overallPct">0%</span></span>
+        </div>
+        <div class="chero-next">
+          <span class="chero-next-label">Current position</span>
+          <span class="chero-next-value" id="currentPositionValue">Welcome Module</span>
+        </div>
+      </div>
+      <div class="chero-right">
+        <div id="chRing"></div>
+        <button class="btn" id="resumeBtn" onclick="resumeCourse()">Begin — Welcome Module</button>
+      </div>
+    </div>
+
+    <div class="ch-modules">
+      <div class="hm-title">Course Modules</div>
+      <div id="moduleList">
       <!-- Rendered by renderHomeModules() -->
       <div class="module-row" data-module-id="0" onclick="openModuleById(0)">
         <div class="mr-num mr-active" id="mnum-0">0</div>
@@ -4208,6 +4283,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="mr-num mr-active" id="mnum-12">12</div>
         <div class="mr-info"><div class="mr-title">Module 12 — Final Exam & Certification</div><div class="mr-sub">Demonstrate competency and earn certification</div></div>
         <span class="mr-badge mb-active" id="mbadge-12">Finish</span>
+      </div>
       </div>
     </div>
   </div>
@@ -9640,13 +9716,12 @@ function renderHomeProgress() {
   const done = APP_STATE.getCompletedCount();
   const resumeModule = APP_STATE.getResumeModuleId();
 
-  const fill = document.getElementById('overallFill');
   const doneEl = document.getElementById('overallDone');
   const pctEl = document.getElementById('overallPct');
   const resumeBtn = document.getElementById('resumeBtn');
-  const subText = document.getElementById('homeSubText');
+  const currentPosEl = document.getElementById('currentPositionValue');
+  const ringArea = document.getElementById('chRing');
 
-  if (fill) fill.style.width = pct + '%';
   if (doneEl) doneEl.textContent = done + ' of ' + TOTAL_MODULES + ' modules complete';
   if (pctEl) pctEl.textContent = pct + '%';
 
@@ -9656,8 +9731,18 @@ function renderHomeProgress() {
     resumeBtn.textContent = done === 0 ? 'Begin — Welcome Module' : 'Continue — ' + resumeModuleLabel;
     resumeBtn.onclick = () => resumeCourse();
   }
-  if (subText && done > 0) {
-    subText.textContent = 'Resume ' + (resumeModule === 0 ? 'the Welcome Module' : resumeModuleLabel) + ' where you left off.';
+  if (currentPosEl) currentPosEl.textContent = resumeModuleLabel;
+
+  // Same AIMTMetricRing component as My AIMT's course-hero card
+  // (assets/js/aimt-metric-ring.js) -- presentation only, reads the
+  // exact pct/done already computed above.
+  if (ringArea && window.AIMTMetricRing) {
+    ringArea.innerHTML = window.AIMTMetricRing.render({
+      value: pct,
+      display: pct + '%',
+      label: 'Modules',
+      accessibleText: 'Course progress: ' + pct + ' percent, ' + done + ' of ' + TOTAL_MODULES + ' modules complete.'
+    });
   }
 
   // Update each module row
@@ -9673,7 +9758,11 @@ function renderHomeProgress() {
     const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
     const reviewOnlyAccess = reviewModeActive && APP_STATE.wouldBeLockedWithoutReview(i);
 
-    if (rowEl) rowEl.classList.toggle('locked', !canAccess);
+    if (rowEl) {
+      rowEl.classList.toggle('locked', !canAccess);
+      rowEl.classList.toggle('is-current', isNext);
+      rowEl.classList.toggle('is-complete', complete);
+    }
 
     if (complete) {
       numEl.className = 'mr-num mr-done';
@@ -9687,7 +9776,7 @@ function renderHomeProgress() {
       badgeEl.textContent = 'Review';
     } else if (!canAccess) {
       numEl.className = 'mr-num mr-locked';
-      numEl.textContent = String(i);
+      numEl.textContent = '🔒';
       badgeEl.className = 'mr-badge mb-locked';
       badgeEl.textContent = 'Locked';
     } else if (isNext) {
@@ -9700,20 +9789,6 @@ function renderHomeProgress() {
       numEl.textContent = String(i);
       badgeEl.className = 'mr-badge mb-active';
       badgeEl.textContent = 'Open';
-    }
-  }
-
-  // Update name
-  const nameEl = document.getElementById('studentFirstName');
-  const greetingEl = document.getElementById('homeGreeting');
-  const studentName = APP_STATE.data.student.name || '';
-  const isReturning = APP_STATE.getCompletedCount() > 0;
-  if (nameEl) nameEl.textContent = studentName ? studentName + '.' : '';
-  if (greetingEl) {
-    if (isReturning) {
-      greetingEl.innerHTML = 'Welcome back,' + (studentName ? '<br><em id="studentFirstName">' + studentName + '.</em>' : '');
-    } else {
-      greetingEl.innerHTML = 'Welcome' + (studentName ? ', <em id="studentFirstName">' + studentName + '.</em>' : '.');
     }
   }
 }
