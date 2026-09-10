@@ -1964,7 +1964,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 @media (max-width: 1020px) {
   .lp-hero-full { min-height: clamp(520px, 72vh, 760px); margin-bottom: 2.25rem; }
-  .lp-hero-inner { padding: clamp(2rem, 8vw, 3rem) 0 2.25rem; }
+  /* padding-block only (was the `padding: TOP 0 BOTTOM` shorthand,
+     which explicitly zeroed padding-left/right -- that silently
+     cancelled the deliberate padding-inline: var(--aimt-container-pad-
+     mobile) rule at 700px above it, since a physical padding-left/
+     right set here comes later in the cascade than that earlier
+     logical padding-inline at equal specificity, so 0 always won. Not
+     touching padding-inline at all here lets that mobile inset apply
+     again, and vertical values (top/bottom) are unchanged.) */
+  .lp-hero-inner { padding-block: clamp(2rem, 8vw, 3rem) 2.25rem; }
   .lp-cert-showcase { grid-template-columns: 1fr; gap: 24px; }
   .lp-cert-copy { max-width: none; order: 2; }
   .lp-cert-stage { order: 1; }
@@ -2885,7 +2893,17 @@ textarea#gpInput::placeholder { color: var(--muted2); }
      margin-bottom, both real, both intentional, no more leftover void
      on either side. */
   .lp-hero-full { min-height: 0; margin-bottom: 1.85rem; }
-  .lp-hero-inner { padding: clamp(1.7rem, 6.5vw, 2.5rem) 0 1.85rem; }
+  /* padding-block only -- was the `padding: TOP 0 BOTTOM` shorthand,
+     which (like the equivalent <=1020px rule above) explicitly zeroed
+     padding-left/right and silently cancelled the deliberate
+     padding-inline: var(--aimt-container-pad-mobile) (1.25rem/20px)
+     rule at 700px, since a physical padding-left/right set here comes
+     later in the cascade at equal specificity. That's the actual cause
+     of hero content sitting flush against the left/right edges (owner
+     QA) -- not a missing padding rule, an existing correct one being
+     overridden. Not touching padding-inline here lets it apply again;
+     vertical values (top/bottom) are unchanged from the prior pass. */
+  .lp-hero-inner { padding-block: clamp(1.7rem, 6.5vw, 2.5rem) 1.85rem; }
   .lp-hero-editorial { margin: 0.15rem 0 0.9rem; }
   .lp-hero-facts { margin: 0 0 1.1rem; }
   .lp-inner {
