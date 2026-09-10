@@ -140,9 +140,16 @@ body.review-mode-active { padding-top: 34px; }
    for the canonical version of this card. Tokens from
    assets/css/aimt-design-system.css (already loaded above).
 ══════════════════════════════ */
-#courseHome { min-height: 100dvh; background: var(--aimt-color-bg-primary, #1a1814); }
+/* Light bg here is the base -- the same warm ivory (--bg) the actual
+   lesson pages use below. .ch-dark punches the dark dashboard region in
+   on top of it, ending cleanly after the certification card so the page
+   itself already reads as "light" once that dark block ends -- no
+   separate light wrapper needed for .ch-modules. */
+#courseHome { min-height: 100dvh; background: var(--bg); }
 
-.ch-shell { max-width: var(--aimt-container-max, 1100px); margin-inline: auto; padding: 2rem 1.5rem 4rem; }
+.ch-dark { background: var(--aimt-color-bg-primary, #1a1814); }
+
+.ch-shell { max-width: var(--aimt-container-max, 1100px); margin-inline: auto; padding: 2rem 1.5rem 2.5rem; }
 
 .ch-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 1.75rem; }
 .brand-identity { display: flex; align-items: center; gap: 12px; }
@@ -225,57 +232,75 @@ body.review-mode-active { padding-top: 34px; }
 }
 .btn:hover { opacity: 0.9; }
 
-/* -- Module list: quiet rows on the same dark surface as the card above,
-   same register as My AIMT's tool-row/resource-item primitives, not a
-   separate boxed panel. -- */
-.ch-modules { margin-top: 2.75rem; }
+/* -- Module list: the dark dashboard hands off into the SAME warm-ivory
+   course environment #lessonView uses below (--bg/--text/--muted/
+   --border/--surface/--aimt-success* tokens, defined in this file's own
+   :root above) -- not a new palette. Full-bleed .ch-modules carries the
+   light background edge-to-edge; .ch-modules-inner re-applies the same
+   max-width/gutter as .ch-shell above so the list still lines up under
+   the card. Row layout/gating classes (locked/is-current/is-complete)
+   are unchanged from before -- only their colors move from the dark
+   dashboard register to this light course one. */
+.ch-modules { background: var(--bg); padding: 2.75rem 0 4rem; }
+.ch-modules-inner { max-width: var(--aimt-container-max, 1100px); margin-inline: auto; padding-inline: 1.5rem; }
 .hm-title {
   font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--aimt-color-accent, #a3968d); margin-bottom: 1.1rem;
+  color: #8a8078; margin-bottom: 1.1rem;
 }
 
 .module-row {
   display: flex; align-items: center; gap: 14px; padding: 1.05rem 0.6rem; margin: 0 -0.6rem;
-  border-bottom: 0.5px solid rgba(255,255,255,0.1); border-radius: 10px;
-  cursor: pointer; transition: background 0.2s ease;
+  border-bottom: 0.5px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .module-row:last-child { border-bottom: none; }
-.module-row:hover { background: rgba(255,255,255,0.045); }
-.module-row.locked { opacity: 0.55; cursor: default; pointer-events: none; }
+.module-row:hover { background: rgba(38,38,38,0.035); }
+/* Locked: quieter per-element colors rather than a blanket row opacity --
+   opacity would fade the "Locked" badge text toward the page background
+   just as fast as it fades everything else, leaving it too low-contrast
+   to scan (the one thing the badge still needs to do). */
+.module-row.locked { cursor: default; pointer-events: none; }
 .module-row.locked:hover { background: none; }
+.module-row.locked .mr-title { color: rgba(38,38,38,0.5); }
+.module-row.locked .mr-sub { color: rgba(38,38,38,0.34); }
+/* Current-row treatment mirrors the course's own "current step" idiom
+   (.fc-step.current / .m8mc-list-btn.current elsewhere in this file):
+   a lifted white card with a dark hairline border, not a filled block. */
 .module-row.is-current {
-  background: rgba(163,150,141,0.11); border-bottom-color: transparent;
-  box-shadow: inset 3px 0 0 var(--aimt-color-accent, #a3968d);
+  background: #fff; border: 0.5px solid var(--text); border-bottom-color: var(--text);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
 }
-.module-row.is-current:hover { background: rgba(163,150,141,0.15); }
-.module-row.is-complete .mr-title { color: rgba(255,255,255,0.68); }
-.module-row.is-complete .mr-sub { color: rgba(255,255,255,0.4); }
+.module-row.is-current:hover { background: #fff; }
+.module-row.is-complete .mr-title { color: rgba(38,38,38,0.62); }
+.module-row.is-complete .mr-sub { color: rgba(38,38,38,0.42); }
 
 .mr-num {
   width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
   justify-content: center; font-size: 0.78rem; font-weight: 500; flex-shrink: 0;
 }
-.mr-done { background: rgba(163,150,141,0.16); color: rgba(255,255,255,0.68); }
-.mr-active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
-.mr-locked { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.34); font-size: 0.7rem; }
-.module-row.is-current .mr-num { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
+.mr-done { background: var(--aimt-success-light); color: var(--aimt-success); }
+.mr-active { background: #ede9e3; color: var(--text); }
+.mr-locked { background: var(--surface); color: var(--muted); font-size: 0.7rem; }
+.module-row.is-current .mr-num { background: var(--text); color: #fff; font-weight: 600; }
 
 .mr-info { flex: 1; min-width: 0; }
-.mr-title { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 400; color: rgba(255,255,255,0.92); margin-bottom: 2px; }
-.module-row.is-current .mr-title { font-weight: 500; color: #fff; }
-.mr-sub { font-size: 0.74rem; color: rgba(255,255,255,0.52); font-weight: 300; }
+.mr-title { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 400; color: var(--text); margin-bottom: 2px; }
+.module-row.is-current .mr-title { font-weight: 600; }
+.mr-sub { font-size: 0.74rem; color: var(--muted); font-weight: 300; }
 
 .mr-badge {
   font-family: var(--aimt-font-mont); font-size: 0.6rem; letter-spacing: 0.06em; font-weight: 500;
   padding: 5px 11px; border-radius: 980px; flex-shrink: 0; white-space: nowrap;
 }
-.mb-done { background: transparent; color: rgba(163,150,141,0.78); }
-.mb-active { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.68); }
-.mb-locked { background: transparent; color: rgba(255,255,255,0.36); }
-.module-row.is-current .mr-badge { background: var(--aimt-color-accent, #a3968d); color: #1a1814; font-weight: 600; }
+.mb-done { background: var(--aimt-success-light); color: var(--aimt-success); }
+.mb-active { background: var(--surface); color: var(--accent2); }
+.mb-locked { background: transparent; color: var(--muted); }
+.module-row.is-current .mr-badge { background: var(--text); color: rgba(255,255,255,0.92); font-weight: 600; }
 
 @media (max-width: 700px) {
-  .ch-shell { padding: 1.5rem 1.25rem 3rem; }
+  .ch-shell { padding: 1.5rem 1.25rem 2rem; }
+  .ch-modules { padding: 2.25rem 0 3rem; }
+  .ch-modules-inner { padding-inline: 1.25rem; }
   .course-hero { padding: 1.6rem 1.4rem; flex-direction: column; }
   .chero-left, .chero-right { flex-basis: auto; }
   .chero-right { width: 100%; }
@@ -4157,8 +4182,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <!-- ══ COURSE HOME ══
      Reuses My AIMT's .course-hero card verbatim (see my-aimt.html) so
      this page reads as that dashboard card's own expanded state
-     rather than a separate portal -- Owner Design Pass. -->
+     rather than a separate portal -- Owner Design Pass. Below the card,
+     .ch-modules deliberately breaks into the SAME warm-ivory palette as
+     the real lesson pages (#lessonView's --bg/--text/--muted tokens) --
+     the dark dashboard region hands off into the actual course
+     environment once the student reaches the module list. -->
 <div id="courseHome" class="view">
+  <div class="ch-dark">
   <div class="ch-shell">
     <div class="ch-topbar">
       <div class="brand-identity">
@@ -4218,8 +4248,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <button class="btn" id="resumeBtn" onclick="resumeCourse()">Begin — Welcome Module</button>
       </div>
     </div>
+  </div>
+  </div>
 
-    <div class="ch-modules">
+  <div class="ch-modules">
+    <div class="ch-modules-inner">
       <div class="hm-title">Course Modules</div>
       <div id="moduleList">
       <!-- Rendered by renderHomeModules() -->
