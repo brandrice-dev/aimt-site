@@ -11,38 +11,56 @@
 // activate()'s Promise (resolves only once the activation has actually
 // played) to resolve, THEN fade the card, THEN open the shell.
 //
-// A second root cause, found in a later pass: a PLAIN rotate(360deg) on
-// the canonical orbital mark is nearly imperceptible on its own, because
-// the mark has 8-fold rotational symmetry (nodes every 45°) -- the same
-// symmetry the frozen intro's own mark has, so reproducing that exact
-// mechanism more faithfully would not have made it more visible.
-// CadenceIdentity.activate() now instead injects the owner-supplied
-// designer activation asset (assets/brand/cadence/cadence-mark-
-// activation.svg, embedded as CADENCE_ACTIVATION_SVG), which uses real
-// asymmetric motion -- staggered per-node pulses, a traveling comet-arc,
-// a bloom pulse -- instead of a symmetry-doomed spin.
+// A second root cause, found in a later pass, then UNDONE in a pass
+// after that (explicit owner direction: "copy the same motion inputs
+// used in the Cadence intro. Do not invent a substitute"): an earlier
+// version of CadenceIdentity.activate() swapped the resting mark for a
+// completely different, more elaborate injected SVG (staggered per-node
+// pulses, a comet-trace arc, a separate blurred bloom shape), reasoning
+// that a bare rotation is "nearly imperceptible" on an 8-fold-symmetric
+// mark. That reasoning was backwards -- the intro's own mark has the
+// identical symmetry and uses a bare turn anyway, because the turn was
+// never the visible part; the color/glow brightening during it is. The
+// swapped-in animation was an invented substitute for the intro's actual
+// motion language, not a reproduction of it, and this file's own
+// assertions (checking for the swapped SVG's cdact- markup) were
+// guarding the WRONG mechanism.
+//
+// CadenceIdentity.activate() now reuses the intro's exact recipe (see
+// runOrbitalActivation()/runThinkingTurns() in
+// assets/js/aimt-cadence-intro.js): the SAME resting icon element turns
+// via the CSS `rotate` property (already defined with a 2600ms
+// transition on .cadence-id-icon in cadence-identity.css, copied
+// verbatim from the intro's own .intro-mark-icon rule), rotation
+// ACCUMULATES by +360deg per activation (never resets to 0, which is
+// what guarantees the transition actually fires on every repeat entry),
+// and `.is-blooming` (also already defined in cadence-identity.css) is
+// toggled on/off at the intro's own ORBITAL_BLOOM_DELAY_MS/
+// ORBITAL_TURN_MS. No element is ever swapped or replaced.
 //
 // This file verifies the mechanism itself, not just that classes/calls
 // exist somewhere in the source:
-//  1. The embedded activation markup actually contains the asymmetric,
-//     staggered motion (not just "some animation") -- distinct node
-//     delays, a traveling trace arc, a bloom pulse -- and respects
-//     prefers-reduced-motion.
-//  2. CadenceIdentity.activate() is executed for real (a minimal but
+//  1. The old swapped-SVG approach (CADENCE_ACTIVATION_SVG, cdact-
+//     namespaced markup) is gone -- reintroducing it would be exactly
+//     the "invented substitute" the owner explicitly rejected.
+//  2. The intro's own timing constants (2600ms turn, 1330ms bloom delay,
+//     350ms settle) are used verbatim, not re-derived or approximated.
+//  3. CadenceIdentity.activate() is executed for real (a minimal but
 //     faithful fake DOM, not a full jsdom dependency) and proven to: (a)
-//     actually replace the resting icon element with fresh activation
-//     markup -- new nodes, not a class toggle, which is what guarantees
-//     a clean replay on every repeat entry -- and (b) resolve only after
-//     a real elapsed delay matching the activation's authored duration,
-//     both with and without prefers-reduced-motion.
-//  3. restoreResting() puts the exact original resting markup back.
-//  4. wireCheckpoint()'s open() closure in cadence-shell.js is proven,
+//     rotate the SAME icon element (identity-checked, never replaced),
+//     (b) ACCUMULATE rotation across repeat activations (360deg, then
+//     720deg, never resetting to 360 again -- the actual mechanism that
+//     makes repeat entries animate at all), (c) toggle `is-blooming` at
+//     the correct scheduled delays, and (d) resolve only after a real
+//     elapsed delay matching the intro's own authored duration, both
+//     with and without prefers-reduced-motion.
+//  4. restoreResting() never touches markup (nothing was ever swapped),
+//     only defensively clears `is-blooming`.
+//  5. wireCheckpoint()'s open() closure in cadence-shell.js is proven,
 //     by source position, to call openCheckpoint() only INSIDE the
-//     .then() continuation chained off CadenceIdentity.activate(mark),
-//     with restoreResting() happening in between (while the card is
-//     already fading, not visibly) -- never in the same synchronous
-//     scope as activate()/`cc-entering`.
-//  5. A double-click / refocus during the transition is guarded
+//     .then() continuation chained off CadenceIdentity.activate(mark) --
+//     never in the same synchronous scope as activate()/`cc-entering`.
+//  6. A double-click / refocus during the transition is guarded
 //     (`transitioning`) so it cannot restart or double-fire the sequence.
 //
 // Run: node tests/cadence-check-entry-sequencing.test.mjs
@@ -64,73 +82,36 @@ const identitySrc = readFileSync(path.join(ROOT, 'assets/js/cadence-identity.js'
 const shellSrc = readFileSync(path.join(ROOT, 'assets/js/cadence-shell.js'), 'utf8');
 
 // ─────────────────────────────────────────────────────────────────────────
-// 1. The embedded activation markup has genuine asymmetric motion, not
-//    just "an animation" -- static source check against the constant.
+// 1. The old swapped-SVG approach is gone; the intro's own timing
+//    constants are used verbatim -- static source checks.
 // ─────────────────────────────────────────────────────────────────────────
-(function activationMarkupShape() {
-  check('ACTIVATION MARKUP', 'CADENCE_ACTIVATION_SVG constant is present', /var CADENCE_ACTIVATION_SVG =/.test(identitySrc));
-  const eightDistinctDelays = ['173ms', '295ms', '417ms', '539ms', '661ms', '784ms', '906ms', '1028ms'].every((d) => identitySrc.includes(d));
-  check('ACTIVATION MARKUP', 'All 8 nodes have distinct, staggered animation-delays (a traveling signal around the ring, not a uniform spin)', eightDistinctDelays);
-  check('ACTIVATION MARKUP', 'A traveling comet-arc (dasharray/dashoffset sweep) exists, independent of the node pulses', /cdact-trace/.test(identitySrc) && /stroke-dasharray/.test(identitySrc) && /stroke-dashoffset/.test(identitySrc));
-  check('ACTIVATION MARKUP', 'A bloom pulse (blurred, scaling glow) exists, separate from the ring/node motion', /cdact-bloom/.test(identitySrc) && /feGaussianBlur/.test(identitySrc) && /cdact-bloomPulse/.test(identitySrc));
-  check('ACTIVATION MARKUP', 'The outer ring + all 8 nodes rotate together as one system (the base turn)', /cdact-outerSystem/.test(identitySrc) && /cdact-outerOrbit/.test(identitySrc) && /rotate\(360deg\)/.test(identitySrc));
-  check('ACTIVATION MARKUP', 'prefers-reduced-motion disables every animated layer', /prefers-reduced-motion:reduce\)\{\.cdact-outerSystem,\.cdact-trace,\.cdact-node,\.cdact-core,\.cdact-middle,\.cdact-inner,\.cdact-bloom\{animation:none!important\}/.test(identitySrc.replace(/\s+/g, '')));
-  check('ACTIVATION MARKUP', 'Every class/keyframe/filter-id is namespaced (cdact-) -- inline <style> in an injected SVG is NOT scoped to the fragment, so bare names like .core/.node/.ring risk colliding with unrelated page CSS', !/[^-]\.ring\{/.test(identitySrc) && /\.cdact-ring\{/.test(identitySrc));
+(function activationMechanismShape() {
+  check('ACTIVATION MECHANISM', 'The old swapped-in activation SVG constant is gone (CADENCE_ACTIVATION_SVG) -- reintroducing a separate injected animation would be exactly the "invented substitute" the owner explicitly rejected', !/CADENCE_ACTIVATION_SVG/.test(identitySrc));
+  check('ACTIVATION MECHANISM', 'No cdact- namespaced markup remains', !/cdact-/.test(identitySrc));
+  check('ACTIVATION MECHANISM', "Rotation is read back and accumulated (+360deg), never reset to a fixed value -- the actual mechanism that makes the CSS `rotate` transition fire again on every repeat entry", /\.rotate\s*\|\|/.test(identitySrc) && /\+\s*360/.test(identitySrc));
+  check('ACTIVATION MECHANISM', 'ORBITAL_TURN_MS is the intro\'s own 2600ms (aimt-cadence-intro.js ORBITAL_TURN_MS), not a re-derived value', /ORBITAL_TURN_MS\s*=\s*2600/.test(identitySrc));
+  check('ACTIVATION MECHANISM', 'ORBITAL_BLOOM_DELAY_MS is the intro\'s own 1330ms', /ORBITAL_BLOOM_DELAY_MS\s*=\s*1330/.test(identitySrc));
+  check('ACTIVATION MECHANISM', 'ORBITAL_SETTLE_MS is the intro\'s own 350ms', /ORBITAL_SETTLE_MS\s*=\s*350/.test(identitySrc));
+  check('ACTIVATION MECHANISM', "activate() toggles the SAME `.is-blooming` class the intro's own .is-blooming CSS rules use (cadence-identity.css) -- not a new/separate glow mechanism", /classList\.add\('is-blooming'\)/.test(identitySrc) && /classList\.remove\('is-blooming'\)/.test(identitySrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
 // 2 & 3. CadenceIdentity.activate()/restoreResting() actually executed --
-//    a minimal, purpose-built fake DOM (createElement/innerHTML/
-//    outerHTML/replaceWith/classList/attributes), not a full jsdom
-//    dependency, sufficient to exercise the real element-swap logic.
+//    a minimal, purpose-built fake DOM (createElement/classList/style/
+//    querySelector), not a full jsdom dependency, sufficient to exercise
+//    the real rotate-accumulate + class-toggle logic.
 // ─────────────────────────────────────────────────────────────────────────
 function makeFakeElement(tag) {
-  const attrs = {};
   const classes = new Set();
-  let parentSlot = null; // { get, set } -- lets replaceWith reach back into whichever slot holds this element
   const el = {
     tagName: tag,
+    style: {},
     classList: {
       add: (c) => classes.add(c),
       remove: (c) => classes.delete(c),
       contains: (c) => classes.has(c),
     },
-    hasAttribute: (n) => Object.prototype.hasOwnProperty.call(attrs, n),
-    getAttribute: (n) => (Object.prototype.hasOwnProperty.call(attrs, n) ? attrs[n] : null),
-    setAttribute: (n, v) => { attrs[n] = String(v); },
     _children: [],
-    get firstElementChild() { return el._children[0] || null; },
-    set innerHTML(html) {
-      // Just enough parsing for this file's own markup shape: a single
-      // top-level element, class attribute extracted via regex. Not a
-      // general HTML parser -- deliberately scoped to what activate()/
-      // restoreResting() actually inject (one root <svg ...> each time).
-      const tagMatch = html.match(/^<(\w+)/);
-      const childTag = tagMatch ? tagMatch[1] : 'svg';
-      const classMatch = html.match(/\bclass="([^"]*)"/);
-      const child = makeFakeElement(childTag);
-      (classMatch ? classMatch[1].split(/\s+/) : []).forEach((c) => child.classList.add(c));
-      child._rawHtml = html;
-      el._children = [child];
-      child._setParentSlot({
-        get: () => el._children[0],
-        set: (v) => { el._children[0] = v; },
-      });
-    },
-    get outerHTML() {
-      if (el._rawHtml) return el._rawHtml;
-      return '<' + tag + ' class="' + Array.from(classes).join(' ') + '"></' + tag + '>';
-    },
-    _setParentSlot(slot) { parentSlot = slot; },
-    replaceWith(newEl) {
-      // Mirrors real DOM behavior: newEl takes oldEl's exact position,
-      // including for whatever future replaceWith() is called on newEl
-      // itself (restoreResting() replaces the element activate() swapped
-      // in, so that swapped-in element's OWN parent slot must point at
-      // the real parent -- markEl -- not the throwaway wrapper div it
-      // was born under during innerHTML parsing).
-      if (parentSlot) { parentSlot.set(newEl); newEl._setParentSlot(parentSlot); }
-    },
     querySelector(sel) {
       const cls = sel.replace('.', '');
       if (classes.has(cls)) return el;
@@ -146,9 +127,7 @@ function makeMarkEl() {
   markEl.classList.add('cadence-id');
   const icon = makeFakeElement('svg');
   icon.classList.add('cadence-id-icon');
-  icon._rawHtml = '<svg class="cadence-id-icon" viewBox="0 0 44 44"><use href="assets/brand/aimt-orbital-mark.svg#aimtOrbitalMark"></use></svg>';
   markEl._children = [icon];
-  icon._setParentSlot({ get: () => markEl._children[0], set: (v) => { markEl._children[0] = v; } });
   return markEl;
 }
 
@@ -156,7 +135,10 @@ function loadCadenceIdentity(reducedMotion, useRealTimers) {
   const sandboxTimers = [];
   const sandbox = {
     window: { matchMedia: () => ({ matches: reducedMotion }) },
-    document: { createElement: () => makeFakeElement('div') },
+    // getComputedStyle is only consulted as a fallback when icon.style.rotate
+    // is unset -- the fake element never has it set independently, so an
+    // empty rotate here is enough to exercise the real fallback branch.
+    getComputedStyle: () => ({ rotate: '0deg' }),
     setTimeout: useRealTimers ? setTimeout : (fn, ms) => { sandboxTimers.push({ fn, ms }); return sandboxTimers.length; },
     clearTimeout,
     console,
@@ -166,36 +148,49 @@ function loadCadenceIdentity(reducedMotion, useRealTimers) {
   return { CadenceIdentity: sandbox.window.CadenceIdentity, timers: sandboxTimers };
 }
 
-(function activateSwapsInRealMarkup() {
+(function activateRotatesInPlace() {
   const { CadenceIdentity, timers } = loadCadenceIdentity(false, false);
-  check('ACTIVATE SWAP', 'window.CadenceIdentity.activate is exposed', typeof CadenceIdentity?.activate === 'function');
-  check('ACTIVATE SWAP', 'window.CadenceIdentity.restoreResting is exposed', typeof CadenceIdentity?.restoreResting === 'function');
+  check('ACTIVATE MECHANISM', 'window.CadenceIdentity.activate is exposed', typeof CadenceIdentity?.activate === 'function');
+  check('ACTIVATE MECHANISM', 'window.CadenceIdentity.restoreResting is exposed', typeof CadenceIdentity?.restoreResting === 'function');
 
   const mark = makeMarkEl();
-  const originalIconHtml = mark.querySelector('.cadence-id-icon').outerHTML;
+  const icon = mark.querySelector('.cadence-id-icon');
   const ret = CadenceIdentity.activate(mark);
-  check('ACTIVATE SWAP', 'activate() returns a real thenable (a Promise)', !!ret && typeof ret.then === 'function');
+  check('ACTIVATE MECHANISM', 'activate() returns a real thenable (a Promise)', !!ret && typeof ret.then === 'function');
+  check('ACTIVATE MECHANISM', 'The SAME icon element is rotated in place -- no element is ever swapped or replaced', mark.querySelector('.cadence-id-icon') === icon);
+  check('ACTIVATE MECHANISM', 'The icon is rotated a full 360deg via the CSS `rotate` property (relies on cadence-identity.css\'s own 2600ms rotate transition to animate it)', icon.style.rotate === '360deg', `got ${icon.style.rotate}`);
+  check('ACTIVATE MECHANISM', 'Exactly 3 timers are scheduled per activation: add is-blooming, remove is-blooming, resolve -- the turn itself plays via the CSS transition, not a JS-driven timer', timers.length === 3, `got ${timers.length}`);
+  check('ACTIVATE MECHANISM', 'is-blooming is scheduled to be added at ORBITAL_BLOOM_DELAY_MS (1330ms, just past halfway through the turn)', timers.some((t) => t.ms === 1330));
+  check('ACTIVATE MECHANISM', 'is-blooming is scheduled to be removed at ORBITAL_TURN_MS (2600ms, as the turn completes)', timers.some((t) => t.ms === 2600));
+  check('ACTIVATE MECHANISM', 'The resolve timer fires at ORBITAL_TURN_MS + ORBITAL_SETTLE_MS (2950ms) -- a brief quiet beat after the turn/glow finish', timers.some((t) => t.ms === 2950));
 
-  const swappedIcon = mark.querySelector('.cadence-id-icon');
-  check('ACTIVATE SWAP', 'The resting icon is replaced by a NEW element (fresh DOM node, not a class toggle) -- this is what guarantees the animation restarts from 0% on every repeat entry', swappedIcon !== null && swappedIcon.classList.contains('cadence-id-icon-activation'));
-  check('ACTIVATE SWAP', 'The injected element carries the actual designer activation markup (cdact- namespaced layers), not an approximation', /cdact-outerSystem/.test(swappedIcon.outerHTML) && /cdact-trace/.test(swappedIcon.outerHTML) && /cdact-bloom/.test(swappedIcon.outerHTML));
-  check('ACTIVATE SWAP', 'Exactly one timer is scheduled (the resolve delay) -- the animation itself plays via the injected markup\'s own CSS, not JS-driven timers', timers.length === 1);
-  check('ACTIVATE SWAP', 'The resolve timer matches ACTIVATION_MS (2300ms -- stretched from the activation asset\'s original 1600ms per owner QA: the activation read as too fast)', timers[0] && timers[0].ms === 2300, `got ${timers[0] && timers[0].ms}ms`);
+  // Actually run the scheduled bloom callbacks (fake timers just queue
+  // them) to prove the class toggle really happens, not merely that a
+  // timer with the right ms value was requested.
+  timers.find((t) => t.ms === 1330).fn();
+  check('ACTIVATE MECHANISM', "is-blooming is actually added when its scheduled callback runs", mark.classList.contains('is-blooming'));
+  timers.find((t) => t.ms === 2600).fn();
+  check('ACTIVATE MECHANISM', 'is-blooming is actually removed when its scheduled callback runs', !mark.classList.contains('is-blooming'));
+
+  // A second activation (as happens on a repeat checkpoint entry) must
+  // ACCUMULATE rotation rather than reset to 360deg again -- setting the
+  // same value twice is a CSS no-op and would silently kill the replay.
+  CadenceIdentity.activate(mark);
+  check('ACTIVATE MECHANISM', 'A second activation accumulates to 720deg (not reset to 360deg) -- this is what guarantees the rotate transition fires again on repeat entries', icon.style.rotate === '720deg', `got ${icon.style.rotate}`);
 
   CadenceIdentity.restoreResting(mark);
-  const restoredIcon = mark.querySelector('.cadence-id-icon');
-  check('ACTIVATE SWAP', 'restoreResting() puts the exact original resting markup back (byte-identical outerHTML), ready for a clean replay next entry', restoredIcon.outerHTML === originalIconHtml);
+  check('ACTIVATE MECHANISM', 'restoreResting() never touches markup (nothing was ever swapped) -- rotation is left accumulated, only is-blooming is defensively cleared', mark.querySelector('.cadence-id-icon') === icon && !mark.classList.contains('is-blooming'));
 })();
 
 await (async function activateActuallyDeferred() {
   // Real timers, real elapsed wall-clock time -- proves the resolution is
   // genuinely asynchronous and delayed, not a disguised synchronous
   // resolve. Reduced-motion path (short, deterministic ~350ms pause) for
-  // test speed -- the full-motion path's own real duration (2300ms) is
-  // already verified structurally above via the captured timer value.
+  // test speed -- the full-motion path's own real duration (2950ms) is
+  // already verified structurally above via the captured timer values.
   const { CadenceIdentity } = loadCadenceIdentity(true, true);
   const mark = makeMarkEl();
-  const originalIconHtml = mark.querySelector('.cadence-id-icon').outerHTML;
+  const icon = mark.querySelector('.cadence-id-icon');
   const start = Date.now();
   let resolvedAt = null;
   const p = CadenceIdentity.activate(mark).then(() => { resolvedAt = Date.now(); });
@@ -206,7 +201,7 @@ await (async function activateActuallyDeferred() {
   await p;
   const elapsed = resolvedAt - start;
   check('ACTIVATE TIMING', 'activate() eventually resolves after a real, deliberate pause (300-700ms window) rather than never or near-instantly', elapsed >= 300 && elapsed <= 700, `elapsed=${elapsed}ms`);
-  check('ACTIVATE TIMING', 'Reduced motion never touches the icon markup (no injected activation SVG, no rotation) -- resting mark is byte-identical before and after', mark.querySelector('.cadence-id-icon').outerHTML === originalIconHtml);
+  check('ACTIVATE TIMING', 'Reduced motion never touches the icon at all -- no rotation, no is-blooming, resting mark stays exactly as it was', icon.style.rotate === undefined && !mark.classList.contains('is-blooming'));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

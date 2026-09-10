@@ -4,10 +4,15 @@
    ONE reusable Cadence mark for every non-intro surface (Ask Cadence
    chat, Cadence Checks, floating entry pill, public/course badges,
    Module 12), so they all read as the same product identity instead of
-   several slightly-different Cadence widgets. Renders the site's
-   canonical orbital mark (assets/brand/aimt-orbital-mark.svg) via
-   currentColor, exactly as assets/js/aimt-cadence-intro.js's own
-   identityMarkHtml()/orbitalSvg() does for the pre-course intro.
+   several slightly-different Cadence widgets. Renders Cadence's OWN
+   mark (a local `<symbol id="cadence-mark">`, one per page -- see
+   headspa-mastery.html/index.html/etc. -- sourced from the owner
+   designer pack at assets/brand/cadence/cadence-mark.svg; deliberately
+   NOT assets/brand/aimt-orbital-mark.svg, which is the separate AIMT
+   institute mark) via currentColor -- the same currentColor approach
+   assets/js/aimt-cadence-intro.js's own identityMarkHtml()/orbitalSvg()
+   uses for the pre-course intro's mark (a different mark/geometry, kept
+   deliberately frozen and unchanged there).
 
    Geometry, colors, timings, and easing below are copied VERBATIM from
    assets/css/aimt-cadence-intro.css's .intro-mark-icon/.intro-halo/

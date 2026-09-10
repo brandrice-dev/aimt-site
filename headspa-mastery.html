@@ -676,22 +676,26 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   color: #faf8f5;
   position: relative;
   overflow: hidden;
-  /* Layered stack (owner review: the card read as flat/cheap) -- same
-     depth LANGUAGE as student-access.html's .card and my-aimt.html's
-     .course-hero (dark panel, thin light border, soft ambient shadow),
-     extended with what those single-shadow treatments don't have: an
-     inset top rim-light (the card catching light along its own upper
-     edge, the way a real raised surface would) and a tight contact
-     shadow underneath the broader ambient one, so the card reads as
-     sitting a real, specific distance off the page rather than just
-     "shadow = far away." No glow/neon color introduced -- every layer
-     is still black or the existing off-white rim tone. */
+  /* Same depth LANGUAGE as student-access.html's .card and my-aimt.html's
+     .course-hero: dark panel, one thin light border, soft ambient
+     shadow -- NOT a heavier, separately-invented treatment. A prior
+     version added a hard `0 0 0 1px rgba(0,0,0,0.3)` spread shadow on
+     top of the real border, which rendered as a second, darker outline
+     sitting just outside the card's own edge -- a visible double-ring
+     that read as a clunky floating frame rather than a raised surface
+     (owner QA), unlike either reference card, which uses exactly one
+     border and one shadow. Removed that ring and the redundant extra
+     shadow layers -- back down to the reference cards' own restrained
+     shape: one soft inset top rim-light (catching light along the top
+     edge, the one addition neither reference card needed since they
+     aren't asking anyone to notice a mark on their own upper-left rail)
+     plus one real ambient shadow, split into a near/far pair purely so
+     the card reads as sitting a specific distance off the page rather
+     than "shadow = far away," not to add extra visual weight. */
   box-shadow:
-    inset 0 1px 0 rgba(250,248,245,0.07),
-    0 0 0 1px rgba(0,0,0,0.3),
-    0 10px 20px -12px rgba(0,0,0,0.5),
-    0 32px 60px -22px rgba(0,0,0,0.6),
-    0 3px 10px rgba(0,0,0,0.25);
+    inset 0 1px 0 rgba(250,248,245,0.06),
+    0 8px 20px -10px rgba(0,0,0,0.4),
+    0 22px 48px -18px rgba(0,0,0,0.5);
   --cc-top-gap: 0.9rem;
   transition: opacity 0.36s ease;
 }
@@ -975,7 +979,12 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    idle animation, no constant rotation -- this is an entry point, not an
    active conversation; the turn+glow plays once the panel actually opens
    (assets/js/cadence-shell.js openCheckpoint()/openAskCadence()). */
-#guideBtn .cadence-id { --cadence-id-size: 30px; }
+/* 30px let the mark's dots/inner rings fall below reliable render size,
+   reading as a plain ring+dot bullseye rather than "Cadence" (owner QA)
+   -- see the same fix/reasoning (and the same 40px threshold, verified
+   against an isolated render) on .cshell-msg-av in cadence-shell.css.
+   40px comfortably fits inside this button's existing 46px height. */
+#guideBtn .cadence-id { --cadence-id-size: 40px; }
 
 .cadence-label {
   font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.14em;

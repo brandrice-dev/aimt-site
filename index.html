@@ -380,41 +380,43 @@ body {
 #protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
 #protocol .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); margin-top: 1.75rem; }
 
-/* Media column: a flex column so the photo frame (not the caption below it)
-   is the part that absorbs the stretched height from the grid row — the
-   frame grows to reach roughly the bottom of the Timer preview opposite it,
-   and object-fit:cover + a right/lower-biased object-position keeps the
-   physical iPad running the Timer and the service tray in frame as the
-   sides crop in, rather than stretching or squashing the photo. Reset back
-   to a normal, unstretched image below 700px (see media query) — mobile
-   stacks the column in normal flow, so there's no sibling height to match. */
+/* Media column: a flex column, the photo frame sized by its own aspect
+   ratio rather than stretched to match the text column's height (see
+   below for why the earlier stretch-to-match approach was replaced).
+   Reset to a normal, unstretched image below 700px (see media query) —
+   mobile stacks the column in normal flow regardless. */
 .protocol-media-col { max-width: 420px; display: flex; flex-direction: column; }
-#protocol .aimt-sp-proof-frame { flex: 1 1 auto; min-height: 0; }
-/* This column matches height to its tall/narrow sibling (.protocol-
-   media-col's own flex height), which crops far more horizontally than
-   vertically (confirmed via getBoundingClientRect(): ~420x1025 frame
-   against the source's 840x1493, zero vertical crop, ~157px horizontal
-   overflow). object-position alone (66%, then 85%) only ever panned
-   that horizontal window -- it could never make the tablet itself
-   bigger, because the frame's own extreme tall/narrow shape (a grid
-   `align-items:stretch` match to the text column's height -- see the
-   comment above -- which must stay intact) always shows the photo's
-   FULL height, so the tablet (a real, fixed-size detail low in the
-   frame, isolated via a local-contrast scan of the source photo:
-   roughly x:560-800/840, y:640-1080/1493) only ever occupied a small
-   fraction of that tall strip regardless of horizontal pan (owner
-   review, still current: "too much of the tablet/screen is cut off").
-   Fix: object-position keeps selecting the same horizontal window as
-   before (85% 46%), then a transform:scale zooms that already-selected,
-   already-cropped picture in on the tablet's own position within it
-   (79%/57% of the frame, from the same scan) -- .aimt-sp-proof-frame's
-   own overflow:hidden (assets/css/aimt-supporting-pages.css) clips the
-   excess, so this only tightens the crop already in place, it can't
-   reveal new edges or introduce a gap. 1.35x roughly doubles the
-   tablet's share of the frame (~39% of frame width to ~53%) while
-   keeping the client and practitioner's hand in frame around it --
-   short of a tight device-only shot. */
-#protocol .aimt-sp-proof-frame img { height: 100%; object-fit: cover; object-position: 85% 46%; transform: scale(1.35); transform-origin: 79% 57%; }
+/* Previously flex:1 1 auto, stretching this frame to match the text
+   column's full height via the grid's align-items:stretch. That always
+   showed the source photo's FULL height (840x1493 in an ~420-wide,
+   ~1025-tall strip is height-constrained under object-fit:cover, so
+   object-position's vertical axis had zero slack to work with) -- the
+   tablet, a fixed-size detail low in the frame (isolated via a local-
+   contrast scan of the source photo: roughly x:560-800/840, y:640-
+   1080/1493), was always a small fraction of that tall strip no matter
+   how the horizontal pan was tuned (owner review: "too much of the
+   tablet/screen is cut off"). A transform:scale zoom fixed the tablet's
+   size but overcorrected the other way (owner review: "zoomed in", "just
+   a tablet close-up", lost the room/service context).
+   Fix here is the frame's own shape, not a zoom on top of it: a fixed
+   3:4 aspect ratio is wide enough relative to the source's 840:1493 that
+   object-fit:cover becomes WIDTH-constrained instead of height-
+   constrained -- the full natural width always shows (no horizontal
+   crop at all, so nothing needs "pulling left", the practitioner's hand
+   on the left edge is simply always in frame) and object-position's
+   vertical axis gets real slack to choose a shorter, better-composed
+   vertical slice instead of the entire tall photo. This column no
+   longer fills the grid row's full stretched height -- confirmed
+   visually against the text column beside it; the shorter frame plus
+   its caption reads as intentional, not as a layout bug. */
+#protocol .aimt-sp-proof-frame { aspect-ratio: 3 / 4; }
+/* object-position: 50% 27% -- vertical-only (no horizontal crop at this
+   aspect, see above) -- selects natural y ~100-1220 of 1493: keeps a
+   strip of the curtain/wall for room context at top, then the client's
+   head, the practitioner's hand, the wash basin, AND the full tablet
+   screen together in one balanced frame. Verified against an isolated
+   render at production width before landing this value. */
+#protocol .aimt-sp-proof-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 27%; }
 
 /* Live mini-demo: a product-proof element sitting under the explanatory
    copy — not on the treatment-room photograph, which already shows the real
@@ -541,12 +543,16 @@ body {
      photo or a fragile attempt at height-matching in normal document flow. */
   .protocol-media-col { max-width: none; display: block; }
   #protocol .aimt-sp-proof-frame { flex: none; aspect-ratio: 1 / 1; }
-  /* Same tablet-zoom fix as the desktop rule above, re-derived for this
-     square frame's own crop math (scale is width-constrained here, so
-     the visible natural-pixel window is x:0-840/840 (full width), y:~379-
-     1219/1493 at 58% -- the tablet at roughly x:560-800,y:640-1080 sits
-     ~81% across / ~57% down inside that window). */
-  #protocol .aimt-sp-proof-frame img { height: 100%; object-position: 62% 58%; transform: scale(1.3); transform-origin: 81% 57%; }
+  /* Square is already wide enough relative to the source (840:1493) to be
+     width-constrained under cover, same reasoning as the desktop 3:4 rule
+     above -- full natural width always shown, only object-position's
+     vertical axis matters. 50% 48% keeps the client, the practitioner's
+     hand, and the full tablet in one frame; room context is necessarily
+     tighter than desktop's 3:4 (a square has less vertical room to spare
+     for the curtain/wall strip), an accepted tradeoff for the smaller
+     viewport. No transform/scale -- the aspect ratio alone does the
+     framing, so this can never read as "zoomed in" on the tablet. */
+  #protocol .aimt-sp-proof-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 48%; }
   .protocol-mini-demo { max-width: none; margin-top: 1.5rem; }
 }
 
@@ -578,12 +584,26 @@ body {
    The phone photo sits alongside it to make the multi-device point — larger,
    level, and anchored to the corner rather than tilted, so it reads as a
    deliberate second device instead of a decorative accent. */
-.cadence-demo { position: relative; max-width: 620px; margin: 1.75rem auto 1.5rem; }
+.cadence-demo { position: relative; max-width: 620px; margin: 1.75rem auto 1.5rem; display: flex; flex-direction: column; }
 .cadence-demo-primary { border-radius: 16px; overflow: hidden; border: 0.5px solid rgba(255,255,255,0.14); box-shadow: 0 24px 56px rgba(0,0,0,0.4); background: #1a1814; }
 .cadence-demo-primary img { display: block; width: 100%; height: auto; }
 .cadence-demo-secondary { position: absolute; z-index: 2; left: -1.5rem; bottom: -1.75rem; width: 32%; min-width: 112px; max-width: 168px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.09); box-shadow: 0 18px 36px rgba(0,0,0,0.55); }
 .cadence-demo-secondary img { display: block; width: 100%; height: auto; }
-.cadence-demo-tag { position: absolute; z-index: 2; top: 0.85rem; right: 0.85rem; background: rgba(20,17,13,0.85); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.14); border-radius: 980px; padding: 0.4rem 0.8rem; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.72); }
+/* Was absolute, top:0.85rem/right:0.85rem, layered directly on top of
+   the primary screenshot -- the screenshot's own baked-in UI chrome (a
+   "×" close control top-right of the mock panel) sits at almost exactly
+   that same spot (confirmed via getBoundingClientRect against the
+   image's own rendered box), so the tag visually collided with it and
+   with the panel's own rounded corner, cutting into the composition
+   right where the mock's header reads "Cadence" (owner QA). The dark
+   margin beside the panel at that corner is only ~112px wide at this
+   container's max size -- not enough room to just nudge the tag
+   sideways into it (the tag itself is ~167px wide). Moved out of the
+   image entirely instead: a normal (non-absolute) flex child, right-
+   aligned above the screenshot, in the actual gap between the intro
+   copy and the demo block -- it can never overlap baked-in image
+   content again regardless of viewport width. */
+.cadence-demo-tag { align-self: flex-end; margin-bottom: 0.65rem; background: rgba(20,17,13,0.85); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.14); border-radius: 980px; padding: 0.4rem 0.8rem; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.72); }
 @media(max-width:700px){
   .cadence-demo { margin-top: 1.5rem; margin-bottom: 1.5rem; }
   .cadence-demo-secondary { left: -0.75rem; bottom: -1.25rem; }
@@ -1124,13 +1144,13 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
     <p class="community-intro reveal reveal-delay-2"><em>Cadence works alongside each module to help you understand the material, not simply move through it.</em> Unlike a standard course chatbot, it's built around AIMT's curriculum and evaluates checkpoints against what each module actually teaches — on your laptop, phone, or tablet.</p>
 
     <div class="cadence-demo reveal reveal-delay-2">
+      <span class="cadence-demo-tag">Real Cadence, real module</span>
       <div class="cadence-demo-primary">
         <img src="assets/images/marketing/cadence-conversation.webp" alt="The Ask Cadence panel open over a dimmed course module, phone-like and centered" loading="lazy" width="1600" height="1240">
       </div>
       <div class="cadence-demo-secondary">
         <img src="assets/images/marketing/cadence-phone-editorial.webp" alt="A student asking Cadence a question from their phone" loading="lazy" width="1122" height="1402">
       </div>
-      <span class="cadence-demo-tag">Real Cadence, real module</span>
     </div>
 
     <div class="cadence-listen reveal reveal-delay-2">

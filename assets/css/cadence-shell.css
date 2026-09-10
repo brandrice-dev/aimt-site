@@ -244,15 +244,24 @@
 .cshell-msg.assistant { align-self: flex-start; }
 .cshell-msg.user { align-self: flex-end; flex-direction: row-reverse; }
 .cshell-msg-av {
-  width: 24px; height: 24px; flex-shrink: 0; align-self: flex-end;
+  width: 40px; height: 40px; flex-shrink: 0; align-self: flex-end;
   display: flex; align-items: center; justify-content: center;
 }
 /* Same as .cshell-id above: .cadence-id-chip is a shapeless black-line
    mark, so the wrapper stays shapeless for the assistant case too.
    Static, never animated -- the large Cadence Check card mark is the
    one animated surface. User messages keep their own circular "You"
-   chip (unrelated to the Cadence identity). */
-.cshell-msg.assistant .cshell-msg-av .cadence-id { --cadence-id-size: 24px; }
+   chip (unrelated to the Cadence identity).
+   24px (matching the wrapper's old size) rendered the mark's 3 rings +
+   8 orbiting dots as a plain 1-2 concentric-circle blob -- the dots and
+   inner rings are sub-pixel at that size and disappear under
+   antialiasing, so all that's left to see is an outer ring + center
+   dot: a bullseye/target, not "Cadence" (owner QA). Checked at 32px too
+   -- still read as borderline/blob-like; 40px is where the ring of 8
+   dots reliably reads as distinct from the outer ring rather than
+   merging into it (verified against an isolated render, same geometry,
+   at 24/32/36/40/52px side by side). */
+.cshell-msg.assistant .cshell-msg-av .cadence-id { --cadence-id-size: 40px; }
 .cshell-msg.user .cshell-msg-av { border-radius: 50%; background: var(--surface, #f0ede8); color: var(--muted, #a3968d); font-size: 0.6rem; font-weight: 500; font-family: var(--aimt-font-sans); }
 .cshell-bub {
   padding: 0.7rem 0.95rem;
