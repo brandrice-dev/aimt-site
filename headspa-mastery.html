@@ -2893,6 +2893,29 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     padding: 0;
   }
   .lp-section-band { padding: 56px 0; }
+  /* ACTUAL root cause of the "very large empty dark block after Explore
+     The Curriculum" (owner QA, still visible after the min-height fix):
+     .lp-band-first already had its OWN, deliberate, smaller mobile
+     padding-top (3rem/48px, "Owner Correction Pass round 2, item 4" --
+     see that rule, defined earlier in this file at the shared base/1020px
+     rules) specifically so this first post-hero section doesn't stack
+     its own top padding on top of the hero's own trailing space. The
+     `.lp-section-band { padding: 56px 0; }` line directly above (this
+     mobile-spacing pass) has EQUAL selector specificity and comes LATER
+     in the cascade, so it silently overwrote that 48px exception back
+     up to 56px -- .lp-band-first was rendering with the SAME top padding
+     as every other section band, not its own smaller one. Combined with
+     the hero's own ~59px trailing space (min-height fix, prior commit),
+     the actual rendered gap between "Explore The Curriculum" and this
+     eyebrow was ~115px (measured directly off the two text elements'
+     getBoundingClientRect at 390px), not the ~59px previously reported
+     (which only measured the hero's own contribution, not this
+     section's). Restoring .lp-band-first's exception here -- after the
+     general rule, so it wins the cascade again -- and tightening it
+     further (0 instead of 48px) since the hero's own trailing space
+     alone now already sits mid-range of the ~48-64px target; every
+     OTHER section band keeps the normal 56px top padding untouched. */
+  .lp-band-first { padding-top: 0; }
   .lp-brand { margin-bottom: 1.35rem; }
   .lp-headline { margin-bottom: 0.7rem; }
   .lp-subhead { margin-bottom: 0.72rem; font-size: 0.94rem; line-height: 1.62; }
