@@ -543,10 +543,25 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .ref-list li:last-child { border-bottom: none; }
 
 /* How AIMT Works — one-time orientation (see headspa-mastery.html's
-   #howAimtWorksView). Reuses .info-card/.concept-grid/.key-point etc.
-   verbatim; these two rules are the only new visual pattern the
-   orientation needed. */
+   #howAimtWorksView). This is a PLATFORM WALKTHROUGH: every UI preview
+   below reuses the real, already-shipped classes for that exact
+   component (.module-row/.mr-*, .aimt-lm-entry, .lp-listen-mock*,
+   .cshell-*, .checkpoint.cc-card, .practice-option, .cadence-id,
+   .lesson-complete) rather than inventing illustrations — .lp-listen-mock*
+   is the same "inert static mock, real tokens" pattern the sales page's
+   Product Explorer already uses for this identical purpose (see that
+   section's own comment). Every preview block is aria-hidden="true" as a
+   whole (never exposed to assistive tech as if it were a real, working
+   control) with the same explanation always present as ordinary text
+   beside it. The handful of classes below are the only genuinely NEW
+   visual pattern this page needed. */
 .haw-cadence-card { display: flex; align-items: center; gap: 14px; }
+/* .lesson-complete defaults to display:none (every real instance reveals
+   it via an inline style once that module is actually complete, e.g.
+   #m4Complete) -- this compound selector (higher specificity than the
+   bare .lesson-complete rule, so it wins regardless of source order)
+   is this preview's equivalent reveal. */
+.lesson-complete.haw-complete-mock { display: block; }
 .haw-cta { text-align: center; margin: 2.75rem 0 1rem; }
 .haw-cta-btn {
   background: var(--hero-bg); color: #fff; border: none; border-radius: 980px;
@@ -555,6 +570,60 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 }
 .haw-cta-btn:hover { opacity: 0.88; }
 .haw-cta-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+/* Small mono "step" label used above each lettered/lettered sub-section
+   (A. Where to find it, B. What happens..., etc.) -- same visual weight
+   as .kp-eyebrow (already used inside .key-point), used here outside
+   one so a callout can introduce a preview without needing a full
+   key-point card around it. */
+.haw-step-label {
+  font-family: var(--aimt-font-mono); font-size: 0.62rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--aimt-neutral);
+  margin: 1.5rem 0 0.6rem;
+}
+.haw-step-label:first-child { margin-top: 0; }
+
+/* 01 — the My AIMT -> Course -> Course Index -> Module journey line. */
+.haw-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.5rem; margin: 1.25rem 0 1.5rem; }
+.haw-flow-step {
+  font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 500; color: var(--text);
+  background: var(--white); border: 0.5px solid var(--border2); border-radius: 980px; padding: 0.4rem 0.85rem;
+}
+.haw-flow-arrow { color: var(--muted); font-size: 0.8rem; }
+
+/* Bordered frame for an inert cluster of real .module-row previews (01)
+   -- same border/radius language as .concept-card, just sized to hold
+   full-width rows with their own internal dividers instead of a grid. */
+.haw-index-mock { border: 0.5px solid var(--border2); border-radius: 14px; overflow: hidden; background: var(--white); margin: 1.25rem 0; }
+.haw-index-mock .module-row { padding-left: 1.1rem; padding-right: 1.1rem; }
+
+/* Dark card wrapper for previews of components that assume the module
+   opener's dark surface (.aimt-lm-entry is styled for exactly that
+   background, white-on-dark, everywhere it actually appears) -- letting
+   this preview sit correctly without duplicating .mod-opener's own
+   decorative ::after glow. */
+.haw-dark-mock { background: var(--hero-bg); border-radius: 14px; padding: 1.1rem; margin: 1.25rem 0; }
+
+/* Minimized Listen Mode state: same .lp-listen-mock shell, second
+   control row + tag hidden so only the slim title row remains -- exactly
+   what .aimt-lm-collapsed does to the real player (assets/js/aimt-listen-
+   mode-player.js), reproduced here as a second static frame rather than
+   an animated toggle. */
+.lp-listen-mock.is-collapsed .lp-listen-mock-row + .lp-listen-mock-row,
+.lp-listen-mock.is-collapsed .lp-listen-mock-tag { display: none; }
+
+/* 03 — launcher preview: reproduces #guideBtn's real dark pill (desktop)
+   and its <600px compact-circle state (see that button's own CSS) side
+   by side, as static, non-fixed elements the student can compare against
+   the real corner control. */
+.haw-launcher-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin: 1.25rem 0; }
+.haw-launcher-preview {
+  display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px 0 14px;
+  background: var(--hero-bg); border-radius: 23px; box-shadow: 0 4px 24px rgba(0,0,0,0.22), 0 1px 8px rgba(0,0,0,0.14);
+}
+.haw-launcher-preview .cadence-id { --cadence-id-size: 40px; }
+.haw-launcher-preview.is-compact { width: 46px; padding: 0; justify-content: center; }
+.haw-launcher-caption { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 0.5rem; }
 
 /* Ungraded practice interaction (predict-then-reveal) */
 .practice-interaction { margin: 1.25rem 0; }
@@ -4394,80 +4463,284 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mo-desc">AIMT is designed to move with you as you learn. You can read or listen, use Cadence when you need help, practice without pressure, and demonstrate what you've learned through Cadence Checks. Your practitioner tools and resources stay close by in My AIMT.</div>
     </div>
 
-    <div class="sec-eyebrow">01 — Learn your way</div>
-    <h2 class="sec-title">Read it, or listen with Cadence.</h2>
-    <div class="body-text">Every module can be worked through on screen. When Listen with Cadence is available, Cadence can guide you through the lesson out loud while the page moves with the audio, bringing important cards and frameworks into view as you reach them.</div>
+    <div class="sec-eyebrow">01 — Find your way around AIMT</div>
+    <h2 class="sec-title">Your course has a home.</h2>
+    <div class="body-text">Everything starts from <strong>My AIMT</strong>, your account dashboard. From there, Head Spa Certification Course opens the Course Index — every module in the certification, in order.</div>
+
+    <div class="haw-flow" aria-hidden="true">
+      <span class="haw-flow-step">My AIMT</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">Head Spa Certification Course</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">Course Index</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">A module</span>
+    </div>
+
+    <div class="body-text">The Course Index shows every module and exactly where you stand. Each row looks like this:</div>
+
+    <div class="haw-index-mock" aria-hidden="true">
+      <div class="module-row is-complete">
+        <div class="mr-num mr-done">✓</div>
+        <div class="mr-info"><div class="mr-title">Welcome Module</div><div class="mr-sub">How the course works, what certification means, and the standard ahead</div></div>
+        <span class="mr-badge mb-done">Complete</span>
+      </div>
+      <div class="module-row is-current">
+        <div class="mr-num mr-active">1</div>
+        <div class="mr-info"><div class="mr-title">Module 1 — Role of the Head Spa Technician</div><div class="mr-sub">Professional role, scope, limitations, and licensing</div></div>
+        <span class="mr-badge mb-active">Continue</span>
+      </div>
+      <div class="module-row locked">
+        <div class="mr-num mr-locked">🔒</div>
+        <div class="mr-info"><div class="mr-title">Module 2 — Welcoming Your Client</div><div class="mr-sub">Arrival, consent, comfort, and first contact</div></div>
+        <span class="mr-badge mb-locked">Locked</span>
+      </div>
+    </div>
+    <p class="lp-listen-mock-tag">Static preview — illustrative module states, not your real progress</p>
 
     <div class="concept-grid">
       <div class="concept-card">
-        <div class="cc-term">Resume Listening</div>
-        <div class="cc-def">Pick up where you stopped.</div>
+        <div class="cc-term">✓ Complete</div>
+        <div class="cc-def">Finished, and still open any time you want to review it.</div>
       </div>
       <div class="concept-card">
-        <div class="cc-term">Start Over</div>
-        <div class="cc-def">Return to the beginning.</div>
+        <div class="cc-term">Current</div>
+        <div class="cc-def">Where you are now. Continue takes you back in.</div>
       </div>
       <div class="concept-card">
-        <div class="cc-term">Continue Listening</div>
-        <div class="cc-def">Continue after completing a required checkpoint.</div>
-      </div>
-      <div class="concept-card">
-        <div class="cc-term">Listen Again</div>
-        <div class="cc-def">Replay a completed module from the beginning.</div>
+        <div class="cc-term">🔒 Locked</div>
+        <div class="cc-def">Opens once the module before it is complete.</div>
       </div>
     </div>
 
     <div class="key-point">
       <div class="kp-icon" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor" opacity="1"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
       <div class="kp-body">
-        <div class="kp-text">Listening supports the learning experience, but it does not complete the work for you. If a module includes a required Cadence Check, Listen Mode pauses there so you can complete it yourself, in your own words.</div>
+        <div class="kp-eyebrow">Where you'll find it</div>
+        <div class="kp-text">Inside a module, <strong>Back to Course</strong> (top left) returns you to the Course Index. From the Course Index, <strong>My AIMT</strong> (top right) returns you to your dashboard.</div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">02 — Ask Cadence</div>
-    <h2 class="sec-title">Help is built into the course.</h2>
-    <div class="body-text">You'll see Cadence throughout AIMT in a few different ways. Listen with Cadence guides you through the lesson. Ask Cadence is there when you want to stop and explore something more closely.</div>
-    <div class="body-text">Use Ask Cadence to clarify a concept, ask a follow-up, or work through something another way. Asking questions is always optional and is never graded.</div>
+    <div class="sec-eyebrow">02 — Read or listen with Cadence</div>
+    <h2 class="sec-title">Choose how you move through a lesson.</h2>
+    <div class="body-text">Every lesson can be read on screen. When Listen with Cadence is available in a module, Cadence narrates it out loud while the page moves with the audio, bringing important cards and frameworks into view as she reaches them.</div>
 
-    <div class="info-card haw-cadence-card">
-      <span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span>
-      <div class="body-text" style="margin:0;">Open Ask Cadence from the <strong>Cadence</strong> control in the corner of any module.</div>
+    <div class="haw-step-label">A. Where to find it</div>
+    <div class="body-text">Look for the Listen with Cadence entry near the top of a module, just below the "In this module" summary:</div>
+
+    <div class="haw-dark-mock">
+      <div class="aimt-lm-entry" aria-hidden="true" style="cursor:default;">
+        <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+        <span class="aimt-lm-entry-copy">
+          <span class="aimt-lm-entry-title">Listen with Cadence</span>
+          <span class="aimt-lm-entry-meta">~19 min · Includes 2 checkpoint stops</span>
+        </span>
+      </div>
     </div>
+    <p class="lp-listen-mock-tag">Static preview — not an active control</p>
 
-    <hr class="divider">
+    <div class="haw-step-label">B. What happens when you open it</div>
+    <div class="body-text">A player appears and stays fixed at the bottom of the screen while you read along:</div>
 
-    <div class="sec-eyebrow">03 — Practice + Cadence Checks</div>
-    <h2 class="sec-title">Not every interaction is an assessment.</h2>
-    <div class="body-text">You'll encounter two kinds of interactive moments throughout the course. They look different intentionally, so you'll always know what is expected.</div>
+    <div class="lp-listen-mock" aria-hidden="true">
+      <div class="lp-listen-mock-row">
+        <span class="lp-listen-mock-title">Module 1 · Opening</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">↺</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">–</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">×</span>
+      </div>
+      <div class="lp-listen-mock-row">
+        <span class="lp-listen-mock-btn" aria-hidden="true">«</span>
+        <span class="lp-listen-mock-btn" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 14 14" fill="none"><path d="M3 1.8v10.4c0 .7.77 1.13 1.36.76l8.2-5.2a.9.9 0 000-1.52l-8.2-5.2C3.77.67 3 1.1 3 1.8z" fill="currentColor"/></svg></span>
+        <span class="lp-listen-mock-btn" aria-hidden="true">»</span>
+        <div class="lp-listen-mock-progress"><div class="lp-listen-mock-progress-fill"></div></div>
+        <span class="lp-listen-mock-time">4:12 / 19:00</span>
+        <span class="lp-listen-mock-speed">1&times;</span>
+      </div>
+      <span class="lp-listen-mock-tag">Static preview — not an active player</span>
+    </div>
 
     <div class="concept-grid">
-      <div class="concept-card">
-        <div class="cc-term">Practice — Ungraded</div>
-        <div class="cc-def">A chance to apply or reinforce what you just learned. Explore, reconsider, and try again freely. Practice does not count toward module completion.</div>
+      <div class="concept-card"><div class="cc-term">« / »</div><div class="cc-def">Back or forward 12 seconds.</div></div>
+      <div class="concept-card"><div class="cc-term">Play / Pause</div><div class="cc-def">Start or stop the narration.</div></div>
+      <div class="concept-card"><div class="cc-term">Progress + time</div><div class="cc-def">Where you are in this module's narration.</div></div>
+      <div class="concept-card"><div class="cc-term">1×</div><div class="cc-def">Tap to change playback speed.</div></div>
+      <div class="concept-card"><div class="cc-term">↺ Start over</div><div class="cc-def">Restart this module's narration from the beginning.</div></div>
+      <div class="concept-card"><div class="cc-term">× Close</div><div class="cc-def">Exit the player. Your place is saved.</div></div>
+    </div>
+
+    <div class="haw-step-label">C. Minimizing the player</div>
+    <div class="body-text">The <strong>—</strong> button shrinks the player down to a slim bar with just the title, so it stays out of the way while you keep reading:</div>
+
+    <div class="lp-listen-mock is-collapsed" aria-hidden="true">
+      <div class="lp-listen-mock-row">
+        <span class="lp-listen-mock-title">Module 1 · Opening</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">↺</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">–</span>
+        <span class="lp-listen-mock-ghostbtn" aria-hidden="true">×</span>
       </div>
-      <div class="concept-card">
-        <div class="cc-term">Cadence Check — Required</div>
-        <div class="cc-def">A competency check used when a module requires you to demonstrate understanding. You'll explain your reasoning in your own words, and the check must be passed to complete that module.</div>
+      <span class="lp-listen-mock-tag">Minimized — not an active player</span>
+    </div>
+    <div class="body-text">It stays fixed at the bottom of the screen either way. Press <strong>—</strong> again to bring the full controls back.</div>
+
+    <div class="haw-step-label">D. Checkpoint stops</div>
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor" opacity="1"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
+      <div class="kp-body">
+        <div class="kp-text">When narration reaches a required Cadence Check, it pauses and waits. Complete the check yourself, in your own words — once you pass, <strong>Continue Listening</strong> appears so you can pick the narration back up. Listening alone never passes a competency check.</div>
       </div>
     </div>
 
-    <hr class="divider">
-
-    <div class="sec-eyebrow">04 — Progress + completion</div>
-    <h2 class="sec-title">You'll always know what comes next.</h2>
-    <div class="body-text">Each module shows you what is required before you move forward. Optional practice helps you learn but does not complete the module. Where a Cadence Check is required, it must be passed before that module is complete.</div>
-    <div class="body-text">Once the required work is finished, the next module unlocks.</div>
-    <div class="body-text">Completed modules remain available whenever you want to return and review them.</div>
+    <div class="body-text" style="font-size:0.82rem;color:var(--muted);margin-top:1.25rem;">The Welcome Module's own Listen with Cadence is coming soon. When Listen with Cadence is available in a module, this is how it works.</div>
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">05 — Resources + tools</div>
-    <h2 class="sec-title">Your practitioner tools live in My AIMT.</h2>
+    <div class="sec-eyebrow">03 — Cadence is with you throughout AIMT</div>
+    <h2 class="sec-title">Cadence is always within reach.</h2>
+    <div class="body-text">Cadence shows up in a few different ways depending on what you're doing — narrating a lesson through Listen with Cadence, answering a question through Ask Cadence, or evaluating your reasoning at a Cadence Check. All three are the same guide, reached differently.</div>
+
+    <div class="haw-step-label">A. The launcher</div>
+    <div class="body-text">Look for the <strong>Cadence</strong> control in the corner of a module. On a wider screen it reads:</div>
+
+    <div class="haw-launcher-row" aria-hidden="true">
+      <span class="haw-launcher-preview">
+        <span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span>
+        <span class="cadence-label">Cadence</span>
+        <span class="cadence-context">· Ask me anything</span>
+      </span>
+      <span class="haw-launcher-preview is-compact">
+        <span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span>
+      </span>
+    </div>
+    <p class="haw-launcher-caption">Desktop pill and compact mobile mark — both open the same Ask Cadence panel</p>
+
+    <div class="body-text">On a narrower screen it shrinks to just the mark. Either way, it stays fixed in the corner as you scroll.</div>
+
+    <div class="haw-step-label">B. Opening Ask Cadence</div>
+    <div class="body-text">Tapping it opens a panel over the lesson:</div>
+
+    <div class="lp-cadence-demo" aria-hidden="true">
+      <div class="cshell-head">
+        <div class="cshell-id" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
+        <div class="cshell-titles">
+          <div class="cshell-module">Module 1 — Role of the Head Spa Technician</div>
+          <div class="cshell-status">Optional · not graded</div>
+        </div>
+      </div>
+      <div class="cshell-transcript">
+        <div class="cshell-transcript-inner">
+          <div class="cshell-msg assistant">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
+            <div class="cshell-bub"><p>Ask me anything about this module.</p></div>
+          </div>
+          <div class="cshell-msg user">
+            <div class="cshell-msg-av" aria-hidden="true">You</div>
+            <div class="cshell-bub"><p>What's the difference between scope and diagnosis?</p></div>
+          </div>
+          <div class="cshell-msg assistant">
+            <div class="cshell-msg-av" aria-hidden="true"><span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
+            <div class="cshell-bub"><p>Scope is what you're trained and licensed to do. Diagnosis is a medical determination — that stays outside it, no matter how confident you feel.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="cshell-composer">
+        <div class="cshell-composer-inner">
+          <textarea class="cshell-input" rows="1" placeholder="Type your response…" disabled></textarea>
+          <button type="button" class="voice-btn" disabled tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+          <button type="button" class="cshell-send" disabled tabindex="-1"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5V12.5M7 1.5L2.5 6M7 1.5L11.5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <p class="lp-cadence-example-tag">Example conversation — illustrative, not a captured student session</p>
+
+    <div class="body-text">Type your question — or tap the microphone to speak it — and send it. Cadence answers with the current module in mind. Ask a follow-up, or close the panel to return to exactly where you left off. Ask Cadence is optional and is never graded.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">04 — Practice + Cadence Checks</div>
+    <h2 class="sec-title">Know when you're practicing — and when you're demonstrating competency.</h2>
+    <div class="body-text">You'll encounter two kinds of interactive moments throughout the course. They're built to look different on purpose, so you always know what's expected.</div>
+
+    <div class="haw-step-label">Practice — Ungraded</div>
+    <div class="practice-interaction" aria-hidden="true">
+      <div class="practice-option">
+        <div class="practice-option-label">Option A</div>
+        <div class="practice-option-text">Explore an approach — see what happens when you choose it.</div>
+      </div>
+      <div class="practice-option">
+        <div class="practice-option-label">Option B</div>
+        <div class="practice-option-text">Explore the alternative — compare the reasoning behind each.</div>
+      </div>
+    </div>
+    <p class="lp-listen-mock-tag">Static preview — the real version responds when you choose</p>
+    <div class="body-text">A chance to apply what you just learned. Choose an option and Cadence explains why it works or doesn't — change your mind and choose again as many times as you like. Practice never writes completion progress; it's there to reinforce, not to test.</div>
+
+    <div class="haw-step-label">Cadence Check — Required</div>
+    <div class="checkpoint cc-card" aria-hidden="true">
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
+      <div class="cc-divider" aria-hidden="true"></div>
+      <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
+      <div class="cc-title cc-title-ready">Apply what you just learned.</div>
+      <div class="cc-line cc-line-ready">Use Cadence to explain your reasoning and demonstrate this competency.</div>
+      <div class="cp-btn" aria-hidden="true">Open Cadence Check →</div>
+    </div>
+    <p class="lp-listen-mock-tag">Static preview — where a module requires one</p>
+    <div class="body-text">A required competency check, only where a module includes one. Opening it brings up the same kind of panel as Ask Cadence — this time you explain your reasoning in your own words (typed or spoken) and send it. Cadence evaluates the response: if something's missing, it asks a focused follow-up rather than starting you over; once it's satisfied, the check is marked passed and stays that way. Passing contributes to that module's completion requirement.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">05 — Completion, progress + unlocking</div>
+    <h2 class="sec-title">You'll always know where you stand.</h2>
+    <div class="body-text">Every module follows the same sequence:</div>
+
+    <ol class="ref-list">
+      <li>1. Work through the module — read or listen.</li>
+      <li>2. Complete any required Cadence Checks along the way.</li>
+      <li>3. Once the required work is satisfied, the module becomes <strong>Complete</strong>.</li>
+      <li>4. The next module unlocks.</li>
+      <li>5. Completed modules stay available any time you want to revisit them.</li>
+    </ol>
+
+    <div class="lesson-complete haw-complete-mock" aria-hidden="true">
+      <div class="lc-check">✓</div>
+      <div class="lc-title">Module complete.</div>
+      <div class="lc-body">You'll see this card once a module's required work is satisfied, naming what you demonstrated.</div>
+    </div>
+    <p class="lp-listen-mock-tag" style="text-align:center;">Static preview — real completion cards name the actual competency</p>
+
+    <div class="body-text">Optional practice does not complete a module by itself. Listening does not complete a module by itself. A required Cadence Check does — that's the one piece of required work Cadence actually checks for.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">06 — Your tools + resources</div>
+    <h2 class="sec-title">Your training stays useful after the lesson.</h2>
     <div class="body-text">The course teaches you the system. <strong>My AIMT</strong> keeps the tools you'll use alongside it.</div>
     <div class="body-text">That's where you'll find Practitioner Tools such as the AIMT Service Timer, along with the Resource Library and downloadable materials connected to your training.</div>
+
+    <div class="haw-flow" aria-hidden="true">
+      <span class="haw-flow-step">A module</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">Back to Course</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">My AIMT</span>
+      <span class="haw-flow-arrow">→</span>
+      <span class="haw-flow-step">Practitioner Tools / Resource Library</span>
+    </div>
+
     <div class="body-text">You can return to My AIMT anytime as you move through the course.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">07 — Returning + reviewing</div>
+    <h2 class="sec-title">Nothing closes behind you.</h2>
+    <div class="body-text">A completed module stays open — select it from the Course Index any time to read back through it. Where Listen with Cadence is available, Listen Again starts that module's narration over from the beginning.</div>
+    <div class="body-text">My AIMT is always one link away, from inside a module or from the Course Index.</div>
+
+    <hr class="divider">
+
+    <div class="body-text" style="text-align:center;max-width:52ch;margin-inline:auto;">You do not need to memorize any of this. AIMT will show you what is available and what is required as you move through the course.</div>
 
     <div class="haw-cta">
       <button type="button" class="haw-cta-btn" onclick="completeOrientationAndEnterWelcome()">Continue to Welcome Module →</button>
