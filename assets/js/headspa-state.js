@@ -329,6 +329,14 @@
         name: '',
         introResponse: '',
         introComplete: false,
+        // One-time "How AIMT Works" course orientation, shown once between
+        // the Cadence intro and the Welcome Module. Additive field, same
+        // pattern as introComplete above -- see sanitizeState() below and
+        // enterCourseHomeOrOrientation() in headspa-mastery.html. Never
+        // migrated/backfilled from progress: a missing/false value always
+        // means "show it," including for pre-existing students who never
+        // had this field.
+        orientationComplete: false,
         joined: '',
         responses: [],
         background: '',
@@ -795,6 +803,7 @@
         name: sanitizeString(raw.student && raw.student.name, ''),
         introResponse: sanitizeString(raw.student && raw.student.introResponse, ''),
         introComplete: sanitizeBoolean(raw.student && raw.student.introComplete, false),
+        orientationComplete: sanitizeBoolean(raw.student && raw.student.orientationComplete, false),
         joined: sanitizeString(raw.student && raw.student.joined, ''),
         responses: sanitizeResponses(raw.student && raw.student.responses),
         background: sanitizeString(raw.student && raw.student.background, ''),

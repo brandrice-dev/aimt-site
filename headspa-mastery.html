@@ -327,7 +327,7 @@ body.review-mode-active { padding-top: 34px; }
 .ln-dash { font-size: 0.72rem; color: var(--muted); text-decoration: none; font-family: var(--aimt-font-sans); white-space: nowrap; flex-shrink: 0; }
 .ln-dash:hover { color: var(--text); }
 
-.lesson-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 8rem; }
+.lesson-wrap, .haw-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem 8rem; }
 
 /* ── VIDEO BLOCK ── */
 .video-block { margin-bottom: 2rem; }
@@ -541,6 +541,20 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .ref-list { list-style: none; margin: 0; padding: 0; }
 .ref-list li { font-size: 0.82rem; color: var(--text); font-weight: 300; line-height: 1.5; padding: 0.55rem 0; border-bottom: 0.5px solid var(--border2); }
 .ref-list li:last-child { border-bottom: none; }
+
+/* How AIMT Works — one-time orientation (see headspa-mastery.html's
+   #howAimtWorksView). Reuses .info-card/.concept-grid/.key-point etc.
+   verbatim; these two rules are the only new visual pattern the
+   orientation needed. */
+.haw-cadence-card { display: flex; align-items: center; gap: 14px; }
+.haw-cta { text-align: center; margin: 2.75rem 0 1rem; }
+.haw-cta-btn {
+  background: var(--hero-bg); color: #fff; border: none; border-radius: 980px;
+  padding: 0.85rem 1.75rem; font-size: 0.88rem; font-weight: 500;
+  font-family: var(--aimt-font-sans); cursor: pointer; transition: opacity 0.2s;
+}
+.haw-cta-btn:hover { opacity: 0.88; }
+.haw-cta-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 
 /* Ungraded practice interaction (predict-then-reveal) */
 .practice-interaction { margin: 1.25rem 0; }
@@ -1121,6 +1135,26 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    against an isolated render) on .cshell-msg-av in cadence-shell.css.
    40px comfortably fits inside this button's existing 46px height. */
 #guideBtn .cadence-id { --cadence-id-size: 40px; }
+
+/* Narrow/mobile: the full text pill (mark + "Cadence" + "· Ask me
+   anything") is wide enough to sit over lesson headings, practice
+   prompts, and Cadence Check labels as the page scrolls underneath it
+   -- scroll-padding alone can't fix that, since it only protects
+   content at the very bottom of a module, not whatever happens to pass
+   through this fixed on-screen zone mid-scroll. Below 600px (matching
+   this file's other mobile breakpoints) the pill collapses to a
+   compact circle -- mark only, no visible text -- so its footprint is
+   materially smaller. The accessible name (aria-label="Ask Cadence" on
+   the button itself, see its markup) does not depend on the now-hidden
+   text, so nothing here changes what the control is called for
+   assistive tech, only what's visually shown. Height/width both stay
+   at 46px -- already a comfortable touch target -- and desktop
+   (>600px) is completely untouched. */
+@media (max-width: 600px) {
+  #guideBtn { width: 46px; padding: 0; gap: 0; justify-content: center; }
+  #guideBtn .cadence-label,
+  #guideBtn .cadence-context { display: none; }
+}
 
 .cadence-label {
   font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.14em;
@@ -2954,7 +2988,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 /* ── Small phones (< 390px) ── */
 @media (max-width: 390px) {
-  .lesson-wrap { padding: 1.5rem 1.1rem 7rem; }
+  .lesson-wrap, .haw-wrap { padding: 1.5rem 1.1rem 7rem; }
   .mod-hero { padding: 1.5rem 1.25rem; }
   .m1-opener { padding: 1.5rem 1.25rem; }
   .lp-headline { font-size: clamp(1.9rem, 8vw, 2.75rem); line-height: 0.98; max-width: 10.4ch; }
@@ -3125,7 +3159,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 /* ── Tablet and up (> 768px) ── */
 @media (min-width: 768px) {
-  .lesson-wrap { padding: 2.5rem 2rem 8rem; }
+  .lesson-wrap, .haw-wrap { padding: 2.5rem 2rem 8rem; }
   .intro-inner { padding: 2rem 0; }
   .cert-sheet { padding: 4rem 4rem 3.5rem; }
   .lp-bottom-cta {
@@ -4326,6 +4360,117 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   </div>
 </div>
 
+<!-- ══ HOW AIMT WORKS — one-time course orientation ══
+     Shown once, between the Cadence intro and the Welcome Module, to a
+     student with introComplete=true but not yet orientationComplete
+     (see enterCourseHomeOrOrientation()/shouldShowOrientation() in the
+     script below). Not a module: MODULE_CHECKPOINTS has no entry for
+     it, it writes no progress or checkpoint state, and
+     completeOrientationAndEnterWelcome() only ever touches the
+     additive student.orientationComplete field. The Listen Mode
+     explainer below was MOVED here from Module 0's own markup (not
+     duplicated) -- Module 0 keeps only its own "Listen with Cadence —
+     coming soon" status note, since that one is specific to that
+     module's own audio state. -->
+<div id="howAimtWorksView" class="view">
+  <nav class="lesson-nav">
+    <span class="ln-title">How AIMT Works</span>
+    <a class="ln-dash" href="my-aimt.html" title="Student Dashboard">My AIMT</a>
+  </nav>
+
+  <!-- .haw-wrap, not .lesson-wrap: openModuleById()/DOMContentLoaded's
+       module-3 capture all do document.querySelector('.lesson-wrap'),
+       which assumes exactly one match (the real one, inside
+       #lessonView). Reusing that class here would make this view's own
+       wrap the FIRST DOM match and silently steal every module's
+       content swap. .haw-wrap shares .lesson-wrap's layout rules (see
+       that selector's own CSS) without being a second .lesson-wrap. -->
+  <div class="haw-wrap">
+
+    <div class="mod-opener">
+      <div class="mo-eyebrow">Before you begin</div>
+      <h1 class="mo-title">How AIMT Works</h1>
+      <div class="mo-tagline">A short orientation before the Welcome Module.</div>
+      <div class="mo-desc">Five things worth knowing before you start: how to read or listen, when Ask Cadence helps, what's graded, how completion works, and where your practitioner tools live.</div>
+    </div>
+
+    <div class="sec-eyebrow">01 — Learn your way</div>
+    <h2 class="sec-title">Read it, or listen with Cadence.</h2>
+    <div class="body-text">Every module can be worked through on screen. When Listen with Cadence is available in a module, it provides a narrated audio edition — Cadence teaches the module out loud while the page moves with the audio, bringing important cards and frameworks into view as she gets to them.</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-term">Resume Listening</div>
+        <div class="cc-def">Continue where you stopped.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-term">Start Over</div>
+        <div class="cc-def">Return to the beginning.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-term">Continue Listening</div>
+        <div class="cc-def">Appears after a required checkpoint is passed.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-term">Listen Again</div>
+        <div class="cc-def">Replay a completed module from the beginning.</div>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <div class="kp-icon" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor" opacity="1"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
+      <div class="kp-body">
+        <div class="kp-text">Listening alone does not grant completion or demonstrate competency. A required checkpoint still stops the audio and waits — you complete it yourself, in your own words.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">02 — Ask Cadence</div>
+    <h2 class="sec-title">Optional support, any time.</h2>
+    <div class="body-text">Ask Cadence is separate from Listen with Cadence. Use it when you want to clarify a concept, ask a follow-up, or work through something another way. Ask Cadence itself is not graded.</div>
+
+    <div class="info-card haw-cadence-card">
+      <span class="cadence-id cadence-id-chip" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span>
+      <div class="body-text" style="margin:0;">Open Ask Cadence any time from the <strong>Cadence</strong> control in the corner of a module.</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">03 — Practice vs. Cadence Checks</div>
+    <h2 class="sec-title">Two different kinds of moments.</h2>
+    <div class="body-text">Modules mix two kinds of interaction. They're built to look different on purpose, so you always know which one you're in.</div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="cc-term">Practice — Ungraded</div>
+        <div class="cc-def">Reinforces what you just learned. Revisit or explore freely. Does not write completion progress.</div>
+      </div>
+      <div class="concept-card">
+        <div class="cc-term">Cadence Check — Required</div>
+        <div class="cc-def">A competency check, where a module includes one. Explain your reasoning in your own words — it must be passed to complete that module.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">04 — Progress + completion</div>
+    <h2 class="sec-title">What actually completes a module.</h2>
+    <div class="body-text">Each module shows you what's required. Optional practice does not complete a module on its own — required Cadence Checks must be satisfied where a module includes them. Once a module's required work is done, the next module unlocks. Completed modules stay available any time you want to revisit them.</div>
+
+    <hr class="divider">
+
+    <div class="sec-eyebrow">05 — Resources + tools</div>
+    <h2 class="sec-title">Your practitioner tools live in My AIMT.</h2>
+    <div class="body-text">Outside the lessons themselves, <strong>My AIMT</strong> is where you'll find your Practitioner Tools — including the AIMT Service Timer — and the Resource Library, with downloadable guides tied to specific modules. Course learning happens here, in the modules; the tools and downloads that support real client work live in My AIMT.</div>
+
+    <div class="haw-cta">
+      <button type="button" class="haw-cta-btn" onclick="completeOrientationAndEnterWelcome()">Continue to Welcome Module →</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══ LESSON VIEW ══ -->
 <div id="lessonView" class="view">
   <nav class="lesson-nav">
@@ -4822,7 +4967,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 </div><!-- /lessonView -->
 
 <!-- ── FLOATING GUIDE ── -->
-<button id="guideBtn" onclick="toggleGuide()">
+<button id="guideBtn" onclick="toggleGuide()" aria-label="Ask Cadence">
   <span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span>
   <span class="cadence-label">Cadence</span>
   <span class="cadence-context">· Ask me anything</span>
@@ -6166,45 +6311,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 1 checkpoint stop</div>
       </div>
     </div>
-
-    <div class="sec-eyebrow">Before you begin</div>
-    <div class="sec-title">Read it. Or listen with Cadence.</div>
-    <div class="body-text">Every module in this course can be worked through on screen, or you can select Listen with Cadence at the bottom of the module opener for the guided audio edition. I'll teach the module out loud while the page moves with the audio, bringing important cards and frameworks into view as I get to them.</div>
-
-    <div class="info-card">
-      <div class="ic-title">How listening works</div>
-      <div class="body-text" style="margin:0;">Listening is manual — it never starts on its own. You can pause and resume anytime, and you can leave a module and come back to where you stopped. A required checkpoint stops the audio and waits; you still have to complete that checkpoint yourself, in your own words — listening never grants competency or checkpoint credit. Once I've authoritatively confirmed you passed, Continue Listening becomes available. After a module finishes, Listen Again starts the narration over from the opening.</div>
-    </div>
-
-    <div class="concept-grid">
-      <div class="concept-card">
-        <div class="cc-term">Resume Listening</div>
-        <div class="cc-def">Continue where you stopped.</div>
-      </div>
-      <div class="concept-card">
-        <div class="cc-term">Start Over</div>
-        <div class="cc-def">Return to the beginning.</div>
-      </div>
-      <div class="concept-card">
-        <div class="cc-term">Continue Listening</div>
-        <div class="cc-def">Appears after a required checkpoint is passed.</div>
-      </div>
-      <div class="concept-card">
-        <div class="cc-term">Listen Again</div>
-        <div class="cc-def">Replay a completed module from the beginning.</div>
-      </div>
-    </div>
-
-    <div class="body-text">Listen with Cadence is the narrated course experience. Ask Cadence is separate — use it when you want to ask a question, clarify something, or work through a concept.</div>
-
-    <div class="key-point">
-      <div class="kp-icon" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor" opacity="1"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div>
-      <div class="kp-body">
-        <div class="kp-text">Read, listen, or move between both. The curriculum is the same.</div>
-      </div>
-    </div>
-
-    <hr class="divider">
 
     <div class="sec-eyebrow">0.1 — Welcome</div>
     <div class="sec-title">Why this course exists.</div>
@@ -12824,8 +12930,16 @@ async function enterPurchasedCourseHome() {
     try { await AIMT_SYNC.init(supabaseClient, 'headspa-mastery'); } catch (_) {}
   }
 
+  // Orientation check added here (not just in showCourse()'s intro
+  // handoff): this is the boot path a RETURNING already-introComplete
+  // student hits on every subsequent page load, so it's the only place
+  // an existing student who has no orientationComplete field yet
+  // actually gets shown "How AIMT Works" once, per the state-safety
+  // requirement that a missing field is treated as "not yet oriented."
   if (openCertificateView && APP_STATE.canAccessModule(12)) {
     openModuleById(12);
+  } else if (shouldShowOrientation()) {
+    showHowAimtWorks();
   } else {
     document.getElementById('courseHome').classList.add('active');
     APP_STATE.setCurrentView('home');
@@ -12992,9 +13106,51 @@ function startIntro() {
 function showCourse() {
   hidePublicNav();
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  enterCourseHomeOrOrientation();
+}
+
+// ══════════════════════════════════════════════
+// HOW AIMT WORKS — one-time course orientation
+// ══════════════════════════════════════════════
+// Sits between the frozen Cadence intro and the Welcome Module without
+// modifying the intro itself: the intro's own onSkip/onEnterCourse
+// callbacks (mountCadenceIntro() above) still call showCourse()
+// unchanged -- this function is where showCourse() now decides what
+// "entering the course" actually shows. Also called from
+// enterPurchasedCourseHome() below (the returning-student boot path),
+// so a student who already has introComplete but not yet
+// orientationComplete -- including an existing pre-launch test student
+// who has never had this field -- sees the orientation exactly once, on
+// whichever of the two paths they hit next, not only immediately after
+// a fresh intro.
+function shouldShowOrientation() {
+  return !(APP_STATE.data.student && APP_STATE.data.student.orientationComplete === true);
+}
+
+function enterCourseHomeOrOrientation() {
+  if (shouldShowOrientation()) {
+    showHowAimtWorks();
+    return;
+  }
   document.getElementById('courseHome').classList.add('active');
   APP_STATE.setCurrentView('home');
   renderHomeProgress();
+}
+
+function showHowAimtWorks() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('howAimtWorksView');
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// CTA handler for How AIMT Works. Persists orientationComplete (additive
+// student field only -- no progress, checkpoint, or entitlement write)
+// and opens the Welcome Module directly, per spec: the student is never
+// routed back through the Course Index first.
+function completeOrientationAndEnterWelcome() {
+  APP_STATE.setStudent({ orientationComplete: true });
+  openModuleById(0);
 }
 
 async function showApp() {
