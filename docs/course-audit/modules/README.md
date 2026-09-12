@@ -94,16 +94,41 @@ testing, and real touch-device verification.
 | Current completion requirement | Both checkpoints must be graded `passed` (no read-percentage minimum) |
 | Guided completion structure | Recorded in `module-01.md` — position: foundation block, immediately after the Welcome Module |
 | Listen Mode notes | Recorded in `module-01.md` — narration approved as a strong candidate, ~8–10 minutes |
-| **Status** | **Implemented — manual QA approved** |
+| **Status** | **Implemented — launch regressions fixed; awaiting fresh manual QA** |
 
-Manual QA confirmed correct behavior and appearance for the module
-identity/hero, the license-dependent scope framing, the "Where is the
-line?" four-scenario interaction, both checkpoints (`m1cp1`, `m1cp2`), and
-the completion card — across desktop and phone layouts. See Step 28 in
-`implementation-log.md`. Deferred, not resolved by this pass: live-model
-grading behavior, screen-reader testing, physical-keyboard activation
-testing, and real touch-device verification (touch-target sizing in
-particular was never measured against a specific minimum).
+Manual QA (Step 28, `implementation-log.md`) originally confirmed correct
+behavior and appearance for the module identity/hero, the
+license-dependent scope framing, the "Where is the line?" four-scenario
+interaction, both checkpoints (`m1cp1`, `m1cp2`), and the completion card —
+across desktop and phone layouts.
+
+**Regression found and fixed (Module 1 launch-fix task, after Step 28).** A
+later, unrelated course-wide completion-card standardization pass
+overwrote this module's approved completion-card copy (eyebrow/title/
+competency line) with the generic pattern every module now shares —
+Step 28's manual approval of "the completion card" therefore no longer
+described what was on screen; the Listen Mode audio (chunk `m1-14`) still
+narrated the original approved competency line the whole time, so audio
+and visual had drifted apart at the module's final moment. A separate
+launch-fix pass restored `module-01.md` Section P's exact eyebrow/title/
+competency-line copy for Module 1 specifically (this module is now a
+documented exception to the course-wide standardization — see
+`tests/course-wide-completion-cards.test.mjs`), and, while addressing that,
+also fixed: a Listen Mode lifecycle bug where closing the player
+permanently broke "Resume Listening" within the same page view; the
+checkpoint network-error message falling back to the shared shell's
+generic text instead of this module's approved exact copy; missing
+live-region semantics on the shared Cadence shell's transcript/error
+feedback; stale "HeadSpa Mastery" branding in the Listen Mode player's
+Media Session (lock-screen) metadata; and a missing accessible name on the
+Listen Mode speed control. All six fixes were verified via the automated
+test suite (including a new executed, not just source-pattern,
+Close→Resume regression test) and this session's own local Review-Mode
+browser QA — not a fresh owner manual QA pass. Deferred, not resolved by
+either pass: live-model grading behavior, screen-reader testing,
+physical-keyboard activation testing, real touch-device verification
+(touch-target sizing in particular was never measured against a specific
+minimum), and branch-preview/hosted QA.
 
 ## Module 2 — Welcoming Your Client
 

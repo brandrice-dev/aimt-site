@@ -152,8 +152,15 @@ const REQUIRED_ELEMENT_LABELS = [
     /does not need to address every one of these eight points/i.test(m2cp1System));
   check('REBUILT RUBRIC', 'm2cp1 checkpoint question text matches the rebuilt curriculum\'s new scenario (intake-to-treatment transition, not the old late-arrival scenario)',
     rubrics.M2.questions.m2cp1 === 'A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You do not need to reproduce a script—explain the reasoning behind your approach.');
-  check('REBUILT RUBRIC', 'The full extracted M0..M11 rubric/question object set hashes to the post-rebuild fingerprint (rubric-922199df) -- only m2cp1 changed, every other checkpoint is untouched',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
+  // Fingerprint advanced again from rubric-922199df to rubric-efe55590 by a
+  // later, separate Module 1 launch-fix task's addition of an M1
+  // `errorMessages` block (module-01.md's approved checkpoint network-error
+  // copy) -- an intentional, task-authorized checkpoint-adjacent addition,
+  // not a change to any question or rubric. This assertion still proves
+  // nothing else drifted: m2cp1's own question/rubric checks above are
+  // unaffected, and the fingerprint is re-pinned rather than removed.
+  check('REBUILT RUBRIC', 'The full extracted M0..M11 rubric/question object set hashes to the current fingerprint -- only m2cp1\'s content and (later) M1\'s errorMessages addition changed it; every other checkpoint is untouched',
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

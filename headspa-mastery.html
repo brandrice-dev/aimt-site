@@ -7291,8 +7291,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="lesson-complete" id="m1Complete" style="display:none;">
       <div class="lc-check">✓</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You can describe what you actually observe without turning it into a diagnosis, verify scope instead of assuming it, and treat referral as part of doing the job well.</div>
+      <div class="lc-next-label">Module 1 complete</div>
+      <div class="lc-title">Professional boundaries demonstrated.</div>
+      <div class="lc-body">You demonstrated observation-first language, scope and referral judgment, and an understanding of the technician's responsibility for the complete client experience.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 2</div>
         <div class="lc-next-text">With the professional boundary established, Module 2 moves into the client experience before the scalp service begins: intake, first contact, communication, and the opening moments that establish trust.</div>
@@ -10783,6 +10784,13 @@ const M1 = {
     m1cp1: 'A client says her hair has been shedding heavily for two months and asks whether she has alopecia. Explain exactly how you would respond. Include what you can safely say, what you must avoid saying, and the professional next step you would recommend.',
     m1cp2: 'Explain the difference between a head spa technician and someone who only knows the service steps. Give one specific example of how that difference changes the client\'s experience, safety, or trust.'
   },
+  // Approved exact network-error copy (module-01.md Sections N/O) — surfaced
+  // by cadence-shell.js's renderRetryAffordance() in place of the shell's
+  // generic message, for these two checkpoints only.
+  errorMessages: {
+    m1cp1: 'Cadence couldn\'t evaluate your response. Check your connection and try again.',
+    m1cp2: 'Cadence couldn\'t evaluate your response. Check your connection and try again.'
+  },
   // Module-1-specific evaluator configuration (one rubric per checkpoint),
   // combined with the shared tone/format rules inside evaluateCheckpointAnswer().
   systems: {
@@ -11243,7 +11251,8 @@ function getCadenceCheckpointDefinition(moduleId, cpId) {
   const reviewSystem = systemBase +
     '\n' + CADENCE_RESPONSE_CONSISTENCY_ANCHOR +
     '\n' + CADENCE_SELECTIVE_MEMORY_INSTRUCTION;
-  return { moduleId, cpId, question, system, reviewSystem };
+  const errorMessage = (src.errorMessages && src.errorMessages[cpId]) || null;
+  return { moduleId, cpId, question, system, reviewSystem, errorMessage };
 }
 window.getCadenceCheckpointDefinition = getCadenceCheckpointDefinition;
 

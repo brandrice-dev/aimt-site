@@ -81,7 +81,7 @@ Do not merge or deploy yet.
 | Module | Status |
 |---|---|
 | Welcome Module / technical Module 0 | Implemented — manual QA approved |
-| Module 1 | Implemented — manual QA approved |
+| Module 1 | Implemented — launch regressions fixed; awaiting fresh manual QA (see `modules/README.md` and `implementation-log.md` Step 125) |
 | Module 2 | Implemented — manual QA approved |
 | Module 3 | Implemented — manual QA approved |
 | Module 4 | Implemented — manual QA approved |

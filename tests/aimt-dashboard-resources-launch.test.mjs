@@ -294,7 +294,7 @@ const certificateStateTestsDone = (function certificateStateTests() {
   check('N. HISTORICAL PASS UNCHANGED', 'A passed checkpoint\'s input-lock guard (status === \'passed\') is untouched',
     /status === 'passed'/.test(readFileSync(path.join(ROOT, 'assets/js/cadence-shell.js'), 'utf8')));
   check('N. HISTORICAL PASS UNCHANGED', 'The 22-checkpoint rubric/question extraction from headspa-mastery.html hashes to the exact pre-task fingerprint -- no checkpoint content anywhere was touched',
-    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-922199df');
+    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-efe55590');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -309,7 +309,7 @@ const certificateStateTestsDone = (function certificateStateTests() {
     /resolveCadenceModel\(env, 'CADENCE_GRADING_MODEL'\)/.test(readFileSync(path.join(ROOT, 'functions/_lib/certification/cadence-grader.mjs'), 'utf8')));
 
   check('P. 22 CHECKPOINT GATE MAP UNCHANGED', 'Full extracted rubric/question set still hashes to the pre-task fingerprint',
-    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-922199df');
+    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-efe55590');
   const rubrics = loadCheckpointRubrics();
   const moduleKeys = Object.keys(rubrics);
   const checkpointCount = moduleKeys.reduce((n, k) => n + Object.keys(rubrics[k].questions || {}).length, 0);

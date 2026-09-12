@@ -453,6 +453,7 @@
     timeEl.className = 'aimt-lm-time';
     var speedBtn = doc.createElement('button');
     speedBtn.type = 'button'; speedBtn.className = 'aimt-lm-speed'; speedBtn.textContent = '1×';
+    speedBtn.setAttribute('aria-label', 'Playback speed, currently 1×. Press to change.');
 
     controlRow.appendChild(backBtn);
     controlRow.appendChild(playBtn);
@@ -554,6 +555,7 @@
     function setSpeed(rate) {
       audio.playbackRate = rate;
       speedBtn.textContent = rate + '×';
+      speedBtn.setAttribute('aria-label', 'Playback speed, currently ' + rate + '×. Press to change.');
     }
 
     function cycleSpeed() {
@@ -570,7 +572,7 @@
         navigator.mediaSession.metadata = new MediaMetadata({
           title: chunk ? (chunk.studentLabel || chunk.title) : 'Listen Mode',
           artist: 'Cadence — AIMT',
-          album: 'HeadSpa Mastery · Module ' + moduleId
+          album: 'AIMT · Module ' + moduleId
         });
         navigator.mediaSession.setActionHandler('play', function () { play(); });
         navigator.mediaSession.setActionHandler('pause', function () { pause(); });
@@ -832,6 +834,11 @@
     goToChunk(index, { autoplay: false, persist: false });
 
     function destroy() {
+      // Idempotency guard: destroy() must be safe to call more than once
+      // (mount()'s own top-of-function cleanup calls it unconditionally on
+      // whatever the previous activeInstance was) without ever firing
+      // opts.onClose twice.
+      if (destroyed) return;
       destroyed = true;
       stopPolling();
       stopGapTimer();
@@ -840,6 +847,11 @@
       else { try { win.removeEventListener('resize', syncBarOffset); } catch (e) {} }
       try { doc.documentElement.style.setProperty('--aimt-lm-bar-offset', '0px'); } catch (e) {}
       if (bar.parentNode) bar.parentNode.removeChild(bar);
+      // Notifies mount() (if this instance was created through it) that the
+      // player is now genuinely gone, so its host can be left in a valid
+      // closed state instead of a stale "still open" one -- see mount()'s
+      // createFreshInstance()/realHandler() for the other half of this fix.
+      if (typeof opts.onClose === 'function') opts.onClose();
     }
 
     // Starts the currently-resolved chunk (first-time listener: M1-01;
@@ -962,33 +974,61 @@
     (doc.body || staticBtn || entryMount).appendChild(playerHost);
 
     var appState = opts.appState || win.APP_STATE;
-    // Resolved once, here, from Listen Mode's own stored position — never
-    // from course/module completion — and reused for both the button
-    // label below and (inside createPlayerInstance) the actual starting
-    // chunk, so the two can never disagree about what state this session
-    // opens in.
-    var storedPosition = engine.readStoredPosition(win, opts.courseSlug, opts.moduleId);
-    var entryState = engine.resolveEntryState(chunks, storedPosition);
-    var instance = createPlayerInstance({
-      doc: doc, win: win, courseSlug: opts.courseSlug, moduleId: opts.moduleId,
-      chunks: chunks, appState: appState, mountEl: playerHost
-    });
-    activeInstance = instance;
-
     var entryBtn = staticBtn;
-    if (entryBtn) {
-      // Reusing the pre-rendered static button — refresh its text
-      // defensively so it can't drift out of sync with the manifest, and
-      // clear anything a previous mount (or the pre-JS baseline handler)
-      // left behind.
+    var instance = null;
+
+    // Refreshes the entry control's visible label + accessible name from
+    // Listen Mode's own current stored position. Called once at initial
+    // mount and again whenever the player instance closes (see
+    // createFreshInstance()'s onClose below), so a student who closes
+    // mid-narration sees "Resume Listening" on the same page view without
+    // needing to leave and re-enter the module.
+    function refreshEntryLabel() {
+      if (!entryBtn) return;
+      var pos = engine.readStoredPosition(win, opts.courseSlug, opts.moduleId);
+      var state = engine.resolveEntryState(chunks, pos);
       var summary = computeEntrySummary(chunks);
       var meta = entryMetaText(summary);
-      var labels = entryLabelForState(entryState);
+      var labels = entryLabelForState(state);
       entryBtn.setAttribute('aria-label', labels.title + '. ' + meta + '. ' + labels.verb);
       var titleEl = entryBtn.querySelector('.aimt-lm-entry-title');
       if (titleEl) titleEl.textContent = labels.title;
       var metaEl = entryBtn.querySelector('.aimt-lm-entry-meta');
       if (metaEl) metaEl.textContent = meta;
+    }
+
+    // Builds a brand-new player instance attached to the (still-live)
+    // playerHost -- called once at initial mount, and again by realHandler()
+    // below whenever the previous instance was closed. This is the fix for
+    // the Close -> dead-button bug: destroying a player no longer leaves a
+    // stale "still open" host behind, because onClose here is the single
+    // place that resets playerHost visibility, drops the now-destroyed
+    // instance reference, and refreshes the entry label -- so the very next
+    // click on the entry control correctly builds a fresh, functional
+    // instance instead of operating on a dead one.
+    function createFreshInstance() {
+      instance = createPlayerInstance({
+        doc: doc, win: win, courseSlug: opts.courseSlug, moduleId: opts.moduleId,
+        chunks: chunks, appState: appState, mountEl: playerHost,
+        onClose: function () {
+          playerHost.style.display = 'none';
+          instance = null;
+          activeInstance = null;
+          refreshEntryLabel();
+        }
+      });
+      activeInstance = instance;
+      return instance;
+    }
+
+    createFreshInstance();
+
+    if (entryBtn) {
+      // Reusing the pre-rendered static button — refresh its text
+      // defensively so it can't drift out of sync with the manifest, and
+      // clear anything a previous mount (or the pre-JS baseline handler)
+      // left behind.
+      refreshEntryLabel();
       var existingBadge = entryBtn.querySelector('.aimt-lm-qa-badge');
       if (existingBadge && existingBadge.parentNode) existingBadge.parentNode.removeChild(existingBadge);
       var existingNote = entryBtn.parentNode && entryBtn.parentNode.querySelector('[data-aimt-entry-note]');
@@ -1007,15 +1047,24 @@
     // error) -- goToChunk's own enterLocked()/isChunkQAAvailable()/audio
     // 'error' paths each already set an appropriate student-facing note
     // inside the bar itself, which would be invisible if we hid it again.
+    //
+    // `instance` (not just playerHost.style.display) now gates the
+    // hide-vs-open decision: display alone can't distinguish "open" from
+    // "just closed, host not yet reset," which was the root cause of the
+    // entry control going permanently dead after a real Close. When the
+    // previous instance was closed, `instance` is already null (via
+    // onClose above) by the time this runs, so a fresh one is created
+    // before playback resumes.
     var activating = false;
     function realHandler() {
       if (activating) return;
-      if (playerHost.style.display !== 'none') {
+      if (instance && playerHost.style.display !== 'none') {
         playerHost.style.display = 'none';
         return;
       }
       activating = true;
       entryBtn.disabled = true;
+      if (!instance) createFreshInstance();
       playerHost.style.display = '';
       try {
         instance.playCurrent();
@@ -1034,7 +1083,8 @@
       entryBtn.addEventListener('click', realHandler);
     } else {
       entryMount.innerHTML = '';
-      entryBtn = buildEntryButton(doc, chunks, realHandler, entryState);
+      var initialState = engine.resolveEntryState(chunks, engine.readStoredPosition(win, opts.courseSlug, opts.moduleId));
+      entryBtn = buildEntryButton(doc, chunks, realHandler, initialState);
       entryMount.appendChild(entryBtn);
     }
 

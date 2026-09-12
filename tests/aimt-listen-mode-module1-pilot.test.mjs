@@ -444,7 +444,12 @@ const module1Wrap = module1WrapMatch ? module1WrapMatch[0] : '';
   check('AG. SECTION TRANSITION GAP', "the 'ended' handler's advance branch calls advanceAfterGap, not a direct goToChunk (so the delay actually sits between chunks, not just documented)", /decision\.type === 'advance'\) \{\s*\n\s*advanceAfterGap\(decision\.index\);/.test(playerSrc));
   check('AG. SECTION TRANSITION GAP', 'a zero/absent transitionGapMs still advances immediately (no gap mechanism regression for practice/checkpoint/recap transitions)', /if \(gapMs <= 0\) \{ goToChunk\(nextIndex, \{ autoplay: true \}\); return; \}/.test(playerSrc));
   check('AG. SECTION TRANSITION GAP', 'the gap timer is tracked in a variable the player can cancel (gapTimer), not a bare untracked setTimeout', /var gapTimer = null;/.test(playerSrc) && /function stopGapTimer\(\)/.test(playerSrc));
-  check('AG. SECTION TRANSITION GAP', 'destroy() cancels a pending gap timer (closing/navigating away mid-pause can never fire a stray goToChunk after unmount)', /function destroy\(\) \{[\s\S]{0,80}stopPolling\(\);\s*\n\s*stopGapTimer\(\);/.test(playerSrc));
+  // Close/Resume lifecycle fix added an idempotency guard (destroy() must
+  // be safe to call more than once without firing onClose twice) directly
+  // above these two calls -- widened from a bare proximity check to an
+  // exact match of the new structure, still requiring stopPolling()/
+  // stopGapTimer() to run unconditionally on every real destroy().
+  check('AG. SECTION TRANSITION GAP', 'destroy() cancels a pending gap timer (closing/navigating away mid-pause can never fire a stray goToChunk after unmount)', /function destroy\(\) \{[\s\S]*?if \(destroyed\) return;\s*\n\s*destroyed = true;\s*\n\s*stopPolling\(\);\s*\n\s*stopGapTimer\(\);/.test(playerSrc));
   check('AG. SECTION TRANSITION GAP', 'the gap timer callback checks destroyed before calling goToChunk (a pause that outlives the player instance is a safe no-op)', /gapTimer = win\.setTimeout\(function \(\) \{\s*\n\s*gapTimer = null;\s*\n\s*if \(destroyed\) return;\s*\n\s*goToChunk\(nextIndex, \{ autoplay: true \}\);/.test(playerSrc));
 })();
 
@@ -693,7 +698,13 @@ function diffAgainstStart(relPath) {
   const m1ObjectMatch = courseSrc.match(/const M1 = \{[\s\S]*?\n\};/);
   const m1ObjectMatchBefore = gitShowAtStart('headspa-mastery.html').match(/const M1 = \{[\s\S]*?\n\};/);
   check('O. CHECKPOINTS UNCHANGED', 'the M1 questions/rubrics object was found in both versions', !!m1ObjectMatch && !!m1ObjectMatchBefore);
-  check('O. CHECKPOINTS UNCHANGED', 'M1 checkpoint questions/rubrics object is byte-identical to the starting commit', m1ObjectMatch && m1ObjectMatchBefore && m1ObjectMatch[0] === m1ObjectMatchBefore[0]);
+  // A Module 1 launch-fix task subsequently added an `errorMessages` block
+  // to M1 (module-01.md Sections N/O's approved network-error copy,
+  // surfaced by cadence-shell.js instead of its generic message) -- an
+  // explicitly task-authorized additive change. Stripped out here so this
+  // guard still catches any OTHER, unauthorized edit to questions/systems.
+  const stripErrorMessagesBlock = (s) => s ? s.replace(/\n  \/\/ Approved exact network-error copy[\s\S]*?\n  \},\n(?=  \/\/ Module-1-specific evaluator configuration)/, '\n') : s;
+  check('O. CHECKPOINTS UNCHANGED', 'M1 checkpoint questions/rubrics object is unchanged from the starting commit, aside from the task-authorized addition of an errorMessages block', m1ObjectMatch && m1ObjectMatchBefore && stripErrorMessagesBlock(m1ObjectMatch[0]) === m1ObjectMatchBefore[0]);
 
   // P. Cadence Chat/Grading unchanged (files this task had no reason to touch).
   ['functions/_lib/cadence/ask-cadence.mjs', 'functions/_lib/cadence/checkpoint-evaluation.mjs', 'assets/js/cadence-shell.js'].forEach((rel) => {
@@ -906,6 +917,23 @@ function diffAgainstStart(relPath) {
     'tests/cadence-haiku-candidate.test.mjs', 'tests/cadence-production-path-qa-harness.test.mjs',
     'tests/cadence-m2cp1-fixture-calibration.test.mjs',
   ].forEach((p) => allowlist.add(p));
+  // Module 1 launch-fix pass (separate, later, explicitly owner-authorized
+  // task): fixed the Listen Mode Close/Resume lifecycle bug, restored
+  // module-01.md's approved completion-card copy, restored its approved
+  // checkpoint network-error text (routed through the shared Cadence
+  // shell, hence this file), and added restrained live-region semantics to
+  // that same shared shell. The two test files were updated only where
+  // this task's intentional source changes broke a literal-string/regex
+  // premise from an earlier task (see each edit's own comment).
+  allowlist.add('assets/js/cadence-shell.js');
+  allowlist.add('tests/cadence-check-entry-sequencing.test.mjs');
+  allowlist.add('tests/cadence-phase2-shell.test.mjs');
+  // Same task: doc updates recording the regression this task found and
+  // fixed (module-01.md's own copy is unchanged; only its implementation
+  // status/history is corrected).
+  allowlist.add('docs/course-audit/modules/README.md');
+  allowlist.add('docs/course-audit/implementation-log.md');
+  allowlist.add('docs/course-audit/00-aimt-current-course-status.md');
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
@@ -952,7 +980,7 @@ function diffAgainstStart(relPath) {
   check('WIRING', "playerHost is set to display:none before the entry button's click handler is wired (so the first click opens+plays, not hides)", (() => {
     const hostIdx = playerSrc.indexOf("playerHost.id = 'aimtListenModePlayerHost'");
     const hiddenIdx = playerSrc.indexOf("playerHost.style.display = 'none'");
-    const handlerIdx = playerSrc.indexOf("if (playerHost.style.display !== 'none')");
+    const handlerIdx = playerSrc.indexOf("if (instance && playerHost.style.display !== 'none')");
     return hostIdx !== -1 && hiddenIdx !== -1 && handlerIdx !== -1 && hostIdx < hiddenIdx && hiddenIdx < handlerIdx;
   })());
   // Regression guard (found during real-audio integration testing): the
@@ -1245,8 +1273,13 @@ function runStudentPreviewInit(hostname, search) {
   // same persistent static button).
   check('X. ENTRY FIX', 'an `activating` guard exists and the click handler returns immediately if already activating', /var activating = false;/.test(playerSrc) && /if \(activating\) return;/.test(playerSrc));
   check('X. ENTRY FIX', 'the entry button is disabled during the activation window and re-enabled after a short delay (not left permanently disabled)', /entryBtn\.disabled = true;/.test(playerSrc) && /win\.setTimeout\(function \(\) \{ activating = false; entryBtn\.disabled = false; \}, 400\);/.test(playerSrc));
+  // Close/Resume lifecycle fix: the hide-toggle branch now also requires a
+  // live `instance` (not just playerHost.style.display), since display
+  // alone can't distinguish "open" from "just closed, host not yet reset" --
+  // that ambiguity was the root cause of the entry button going
+  // permanently dead after a real Close. See createFreshInstance()/onClose.
   check('X. ENTRY FIX', 'a later click while the bar is already open is a visibility convenience toggle, never a second playback start (no second playCurrent call in that branch)', (() => {
-    const m = playerSrc.match(/if \(playerHost\.style\.display !== 'none'\) \{\s*\n\s*playerHost\.style\.display = 'none';\s*\n\s*return;\s*\n\s*\}/);
+    const m = playerSrc.match(/if \(instance && playerHost\.style\.display !== 'none'\) \{\s*\n\s*playerHost\.style\.display = 'none';\s*\n\s*return;\s*\n\s*\}/);
     return !!m;
   })());
   check('X. ENTRY FIX', 'mount() removes any previously-attached click handler from the static button before attaching a new one, tracked via a stable _aimtClickHandler property (re-opening the module can\'t stack a second listener on the persistent button)', /if \(entryBtn\._aimtClickHandler\) entryBtn\.removeEventListener\('click', entryBtn\._aimtClickHandler\);/.test(playerSrc));
@@ -1614,28 +1647,28 @@ function runStudentPreviewInit(hostname, search) {
   })());
   check('AC. COORDINATED REVISION PASS', 'Listen Mode\'s own Continue-Listening gate (enterAwaitingCheckpoint) polls isCheckpointPassed() and only then calls offerContinue() — never on submit/attempt, only on the poll detecting an authoritative pass (or, for a checkpoint already passed at entry — a replay — an equivalent synchronous read before the poll even starts; see AF. PASSED CHECKPOINT REPLAY)', /if \(engine\.isCheckpointPassed\(appState, moduleId, awaitingCheckpointId\)\) \{\s*\n\s*stopPolling\(\);\s*\n\s*offerContinue\(false\);/.test(playerSrc));
 
-  // 5. Visible completion body matches the spoken recap in substance,
-  // sourced from the existing approved narration (no fabricated
-  // curriculum). Course-wide completion-card standardization (a later,
-  // separate, explicitly owner-authorized task -- see
-  // tests/course-wide-completion-cards.test.mjs) consolidated the old
-  // bulleted .lc-recap/.lc-recap-list into one .lc-body sentence covering
-  // the same three approved-narration ideas; card *architecture* changed,
-  // the underlying M1-14 audio/script and its substance did not.
+  // 5. Visible completion copy matches module-01.md Section P byte-for-byte.
+  // Course-wide completion-card standardization (a later, separate,
+  // explicitly owner-authorized task -- see
+  // tests/course-wide-completion-cards.test.mjs) briefly overwrote Module
+  // 1's approved eyebrow/title/competency-line with the generic pattern
+  // every other module uses. A subsequent Module 1 launch-fix pass restored
+  // the exact approved copy (module-01.md's own audit authority takes
+  // precedence over the generic standardization for Module 1 specifically)
+  // so the on-screen card matches what the already-recorded m1-14 Listen
+  // Mode narration actually says, word for word. Card architecture (which
+  // CSS classes render it) may still differ from other modules; the
+  // student-facing text must not.
   const completionStart = courseSrc.indexOf('id="m1Complete"');
   const completionEnd = courseSrc.indexOf('</div>\n\n', completionStart);
   const completionBlock = courseSrc.slice(completionStart, completionEnd);
   check('AC. COORDINATED REVISION PASS', 'the m1Complete completion card uses the course-wide standard .lc-body (not a bespoke .lc-recap) for its visible completion statement', completionBlock.includes('class="lc-body"') && !completionBlock.includes('lc-recap'));
-  check('AC. COORDINATED REVISION PASS', 'the .lc-body still covers the same three approved-narration ideas, in the same order (observe-not-diagnose, verify scope, referral)', (() => {
+  check('AC. COORDINATED REVISION PASS', 'the eyebrow reads the approved "Module 1 complete" (module-01.md Section P)', /<div class="lc-next-label">Module 1 complete<\/div>/.test(completionBlock));
+  check('AC. COORDINATED REVISION PASS', 'the title reads the approved "Professional boundaries demonstrated." (module-01.md Section P)', /<div class="lc-title">Professional boundaries demonstrated\.<\/div>/.test(completionBlock));
+  check('AC. COORDINATED REVISION PASS', 'the .lc-body is the exact approved competency line (module-01.md Section P), matching the m1-14 Listen Mode narration word for word', (() => {
     const m = completionBlock.match(/<div class="lc-body">([\s\S]*?)<\/div>/);
     if (!m) return false;
-    const body = m[1];
-    const observeIdx = body.search(/observe/i);
-    const scopeIdx = body.search(/verify scope|scope instead of assuming/i);
-    const referralIdx = body.search(/referral/i);
-    return observeIdx !== -1 && scopeIdx !== -1 && referralIdx !== -1
-      && observeIdx < scopeIdx && scopeIdx < referralIdx
-      && /diagnosis/i.test(body) && /job well/i.test(body);
+    return m[1] === 'You demonstrated observation-first language, scope and referral judgment, and an understanding of the technician\'s responsibility for the complete client experience.';
   })());
 })();
 
@@ -1774,7 +1807,13 @@ function runStudentPreviewInit(hostname, search) {
 
   // -- mount() actually applies the resolved label to the static button's title span, not just aria-label --
   check('AF. ENTRY LABELS WIRED', 'mount() sets the static button .aimt-lm-entry-title from entryLabelForState(entryState), not a hardcoded string', /titleEl\.textContent = labels\.title/.test(playerSrc));
-  check('AF. ENTRY LABELS WIRED', 'mount() resolves entryState from engine.readStoredPosition/resolveEntryState BEFORE constructing the player instance, so the label and the actual start index can never disagree', /var storedPosition = engine\.readStoredPosition\(win, opts\.courseSlug, opts\.moduleId\);[\s\S]{0,40}var entryState = engine\.resolveEntryState\(chunks, storedPosition\);/.test(playerSrc));
+  // Close/Resume lifecycle fix: label resolution was factored into
+  // refreshEntryLabel(), called once at initial mount AND again from
+  // createFreshInstance()'s onClose (below) -- so the label can never
+  // disagree with the actual start index, and can never go stale after a
+  // real Close the way the pre-fix code did (see createFreshInstance()).
+  check('AF. ENTRY LABELS WIRED', 'refreshEntryLabel() resolves entryState from engine.readStoredPosition/resolveEntryState, independently of instance construction, so the label and the actual start index read the same source of truth', /function refreshEntryLabel\(\) \{[\s\S]{0,300}var pos = engine\.readStoredPosition\(win, opts\.courseSlug, opts\.moduleId\);[\s\S]{0,40}var state = engine\.resolveEntryState\(chunks, pos\);/.test(playerSrc));
+  check('AF. ENTRY LABELS WIRED', 'refreshEntryLabel() is invoked again when the player instance closes (onClose), so the entry label updates to "Resume Listening" without requiring the student to leave and re-enter the module', /onClose: function \(\) \{[\s\S]{0,150}refreshEntryLabel\(\);/.test(playerSrc));
 
   // -- Mount-time UI preload must never itself flip a persisted finished:true back to false --
   check('AF. PRELOAD DOES NOT CLOBBER FINISH STATE', 'the silent mount-time preload call passes persist:false', /goToChunk\(index, \{ autoplay: false, persist: false \}\);/.test(playerSrc));
@@ -1815,6 +1854,227 @@ function runStudentPreviewInit(hostname, search) {
 
   // -- goToChunk cancels any stray checkpoint-wait poll on explicit navigation --
   check('AF. STRAY POLL CANCELLED', 'goToChunk stops any pending checkpoint poll (and, since the section-gap pass, any pending section-transition-gap timer) before navigating (Start Over / Jump / Continue Listening can never be undermined by a late offerContinue() or delayed auto-advance firing)', /function goToChunk\(i, playOpts\) \{[\s\S]{0,900}stopPolling\(\);\s*\n\s*stopGapTimer\(\);\s*\n\s*awaitingCheckpointId = null;\s*\n\s*index = i;/.test(playerSrc));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// AH. Close -> Resume lifecycle — real execution against a minimal fake
+// DOM (not a full jsdom dependency), not just a source-pattern check.
+//
+// Root cause this guards against: destroy() (fired by the player's own
+// Close button) removed the player bar from the DOM but never reset
+// playerHost.style.display, and the entry button's click handler used that
+// display value as its only signal for "is a session open" — so after a
+// real Close, the entry control's very next click just re-hid the already-
+// empty host and silently did nothing, permanently (within that page view)
+// killing "Resume Listening." Fixed via createFreshInstance()'s onClose
+// (assets/js/aimt-listen-mode-player.js), which resets playerHost's
+// visibility, drops the dead instance, and refreshes the entry label —
+// this test proves that fix by actually mounting a real player instance,
+// clicking its real Close button, and clicking the real entry control
+// again, twice, checking the DOM after each step.
+// ─────────────────────────────────────────────────────────────────────────
+await (async function closeResumeLifecycle() {
+  // realHandler()'s `activating` guard (assets/js/aimt-listen-mode-player.js)
+  // blocks a rapid double-click for 400ms after opening -- a real student
+  // clicking Close then Resume seconds later never notices, but this
+  // synchronous test's clicks are otherwise instantaneous, so each click on
+  // the entry control needs to wait that window out first.
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  function makeElement(tag) {
+    const el = {
+      tagName: tag,
+      style: {},
+      disabled: false,
+      textContent: '',
+      innerHTML: '',
+      id: '',
+      children: [],
+      parentNode: null,
+      _classes: new Set(),
+      _attrs: {},
+      _listeners: {},
+      classList: {
+        add(c) { el._classes.add(c); },
+        remove(c) { el._classes.delete(c); },
+        toggle(c) { if (el._classes.has(c)) { el._classes.delete(c); return false; } el._classes.add(c); return true; },
+        contains(c) { return el._classes.has(c); }
+      },
+      setAttribute(k, v) { el._attrs[k] = v; },
+      getAttribute(k) { return Object.prototype.hasOwnProperty.call(el._attrs, k) ? el._attrs[k] : null; },
+      appendChild(child) { child.parentNode = el; el.children.push(child); return child; },
+      removeChild(child) {
+        const i = el.children.indexOf(child);
+        if (i !== -1) el.children.splice(i, 1);
+        child.parentNode = null;
+        return child;
+      },
+      addEventListener(type, fn) { (el._listeners[type] = el._listeners[type] || []).push(fn); },
+      removeEventListener(type, fn) {
+        if (!el._listeners[type]) return;
+        el._listeners[type] = el._listeners[type].filter((f) => f !== fn);
+      },
+      dispatch(type) { (el._listeners[type] || []).slice().forEach((fn) => fn({})); },
+      offsetHeight: 0
+    };
+    return el;
+  }
+
+  function deepFind(root, pred) {
+    const stack = [root];
+    while (stack.length) {
+      const n = stack.shift();
+      if (!n) continue;
+      if (pred(n)) return n;
+      if (n.children && n.children.length) stack.unshift(...n.children);
+    }
+    return null;
+  }
+
+  function makeFakeDoc() {
+    const head = makeElement('head');
+    const body = makeElement('body');
+    const documentElement = makeElement('html');
+    documentElement.style.setProperty = () => {};
+    const allRoots = [head, body];
+    const doc = {
+      head,
+      body,
+      documentElement,
+      createElement(tag) {
+        const el = makeElement(tag);
+        if (tag === 'audio') {
+          el.paused = true;
+          el.currentTime = 0;
+          el.duration = 0;
+          el.playbackRate = 1;
+          el.play = function () { el.paused = false; return Promise.resolve(); };
+          el.pause = function () { el.paused = true; };
+        }
+        return el;
+      },
+      getElementById(id) {
+        for (const root of allRoots) { const found = deepFind(root, (n) => n.id === id); if (found) return found; }
+        return null;
+      },
+      querySelectorAll(sel) {
+        if (sel !== '#aimtListenModePlayerHost') return [];
+        const found = doc.getElementById('aimtListenModePlayerHost');
+        return found ? [found] : [];
+      }
+    };
+    return doc;
+  }
+
+  function makeFakeLocalStorage() {
+    const store = {};
+    return {
+      getItem: (k) => (Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null),
+      setItem: (k, v) => { store[k] = String(v); },
+      removeItem: (k) => { delete store[k]; }
+    };
+  }
+
+  function makeFakeWin() {
+    return {
+      location: { search: '' },
+      AIMTListenModeData,
+      localStorage: makeFakeLocalStorage(),
+      console,
+      innerHeight: 800,
+      setTimeout: (...a) => setTimeout(...a),
+      clearTimeout: (...a) => clearTimeout(...a),
+      setInterval: (...a) => setInterval(...a),
+      clearInterval: (...a) => clearInterval(...a),
+      addEventListener() {},
+      removeEventListener() {},
+      scrollBy() {},
+      getComputedStyle() { return { getPropertyValue: () => '' }; },
+      confirm: () => true
+      // No ResizeObserver on purpose — exercises the addEventListener('resize', ...) fallback path.
+    };
+  }
+
+  function makeEntryButton() {
+    const btn = makeElement('button');
+    const titleEl = makeElement('span'); titleEl.classList.add('aimt-lm-entry-title');
+    const metaEl = makeElement('span'); metaEl.classList.add('aimt-lm-entry-meta');
+    btn.appendChild(titleEl);
+    btn.appendChild(metaEl);
+    btn.querySelector = (sel) => {
+      if (sel === '.aimt-lm-entry-title') return titleEl;
+      if (sel === '.aimt-lm-entry-meta') return metaEl;
+      return null;
+    };
+    return btn;
+  }
+
+  const fakeDoc = makeFakeDoc();
+  const fakeWin = makeFakeWin();
+  const entryBtn = makeEntryButton();
+  const appState = fakeAppState({ 1: [] });
+
+  let threw = false;
+  let mountResult;
+  try {
+    mountResult = AIMTListenMode.mount({
+      courseSlug: 'headspa-mastery', moduleId: 1,
+      doc: fakeDoc, win: fakeWin, appState, entryButtonEl: entryBtn
+    });
+  } catch (e) { threw = true; check('AH. CLOSE -> RESUME LIFECYCLE', 'mount() threw', false, String(e && e.stack || e)); }
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'mount() succeeds against the real Module 1 manifest with a minimal fake DOM', !threw && !!mountResult);
+  if (threw || !mountResult) return;
+
+  const playerHost = fakeDoc.getElementById('aimtListenModePlayerHost');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'playerHost exists and starts hidden', !!playerHost && playerHost.style.display === 'none');
+
+  function currentBar() { return playerHost.children[0] || null; }
+  function findCloseBtn(bar) { return bar && deepFind(bar, (n) => n.getAttribute && n.getAttribute('aria-label') === 'Close player'); }
+  function entryTitleText() { return entryBtn.querySelector('.aimt-lm-entry-title').textContent; }
+
+  // -- Cycle 1: open, then Close --
+  entryBtn.dispatch('click');
+  await sleep(450);
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'first entry click reveals the host and mounts exactly one player bar', playerHost.style.display !== 'none' && playerHost.children.length === 1);
+  let closeBtn = findCloseBtn(currentBar());
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'the mounted bar has a real Close button', !!closeBtn);
+  closeBtn.dispatch('click');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'after Close, the host is hidden again and the bar is genuinely removed (not just covered)', playerHost.style.display === 'none' && playerHost.children.length === 0);
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'after Close, the entry label refreshes to "Resume Listening" without leaving the module', entryTitleText() === 'Resume Listening');
+
+  // -- Cycle 2: the actual regression — click the entry control again after a real Close --
+  entryBtn.dispatch('click');
+  await sleep(450);
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'clicking the entry control again after Close reopens a real, functional player (the bug: this used to silently no-op)', playerHost.style.display !== 'none' && playerHost.children.length === 1);
+  closeBtn = findCloseBtn(currentBar());
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'the reopened bar has its own real Close button (a genuinely new instance, not a stale reference)', !!closeBtn);
+
+  // -- Repeat at least once more: no dead button, no duplicate/stacked player --
+  closeBtn.dispatch('click');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'second Close also leaves a valid closed state', playerHost.style.display === 'none' && playerHost.children.length === 0);
+  entryBtn.dispatch('click');
+  await sleep(450);
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'a second Close -> Resume cycle also works, and never stacks a second bar', playerHost.style.display !== 'none' && playerHost.children.length === 1);
+
+  // -- Minimize / Restore still work, and Close still works after restoring --
+  const bar = currentBar();
+  const minimizeBtn = deepFind(bar, (n) => n.getAttribute && n.getAttribute('aria-label') === 'Minimize player');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'the reopened bar has a real Minimize button', !!minimizeBtn);
+  minimizeBtn.dispatch('click');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'Minimize collapses the bar', bar.classList.contains('aimt-lm-collapsed'));
+  minimizeBtn.dispatch('click');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'clicking Minimize again restores it', !bar.classList.contains('aimt-lm-collapsed'));
+  closeBtn = findCloseBtn(bar);
+  closeBtn.dispatch('click');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'Close still works correctly after a restore (not just on a freshly-opened bar)', playerHost.style.display === 'none' && playerHost.children.length === 0);
+
+  // -- Start Over still returns to the beginning and does not itself break the lifecycle --
+  entryBtn.dispatch('click');
+  await sleep(450);
+  const startOverBtn = deepFind(currentBar(), (n) => n.getAttribute && n.getAttribute('aria-label') === 'Start over from the beginning');
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'the reopened bar has a real Start Over control', !!startOverBtn);
+  startOverBtn.dispatch('click'); // gated on win.confirm(), stubbed to auto-accept in makeFakeWin()
+  check('AH. CLOSE -> RESUME LIFECYCLE', 'Start Over does not itself remove the bar or break the host (still exactly one bar, still visible)', playerHost.style.display !== 'none' && playerHost.children.length === 1);
 })();
 
 // ---- Report ----

@@ -89,7 +89,17 @@ for (const [moduleId, elementId] of Object.entries(STANDARD_MODULE_COMPLETION_ID
 
   check('A. CANONICAL STRUCTURE', label + ': exactly one .lc-check', (card.match(/class="lc-check"/g) || []).length === 1);
   check('A. CANONICAL STRUCTURE', label + ': checkmark is literally ✓ (not ✦ or any other icon)', /<div class="lc-check">✓<\/div>/.test(card));
-  check('A. CANONICAL STRUCTURE', label + ': exactly one .lc-title, text is literally "Module complete."', (card.match(/class="lc-title"/g) || []).length === 1 && /<div class="lc-title">Module complete\.<\/div>/.test(card));
+  if (moduleId === '1') {
+    // Module 1 launch-fix task (separate, later, explicitly owner-
+    // authorized): module-01.md's own approved, competency-specific
+    // completion title/eyebrow (Section P) takes precedence over this
+    // course-wide standardization for Module 1 specifically -- restored
+    // after a prior pass had overwritten it with the generic title. See
+    // the matching exception in B below for its approved eyebrow.
+    check('A. CANONICAL STRUCTURE', label + ': exactly one .lc-title, text is the module-01.md-approved "Professional boundaries demonstrated." (Module 1\'s documented exception to the generic title)', (card.match(/class="lc-title"/g) || []).length === 1 && /<div class="lc-title">Professional boundaries demonstrated\.<\/div>/.test(card));
+  } else {
+    check('A. CANONICAL STRUCTURE', label + ': exactly one .lc-title, text is literally "Module complete."', (card.match(/class="lc-title"/g) || []).length === 1 && /<div class="lc-title">Module complete\.<\/div>/.test(card));
+  }
   check('A. CANONICAL STRUCTURE', label + ': exactly one .lc-body (a single concise completion statement)', (card.match(/class="lc-body"/g) || []).length === 1);
   check('A. CANONICAL STRUCTURE', label + ': .lc-body is 1-2 sentences (at most 2 terminal punctuation marks before the closing </div>, excluding ellipses/decimals)', (() => {
     const m = card.match(/<div class="lc-body">([\s\S]*?)<\/div>/);
@@ -113,7 +123,11 @@ for (const [moduleId, elementId] of Object.entries(STANDARD_MODULE_COMPLETION_ID
   check('B. NO LEGACY ELEMENTS', label + ': no .lc-sub', !card.includes('class="lc-sub"'));
   check('B. NO LEGACY ELEMENTS', label + ': no .lc-recap', !card.includes('lc-recap'));
   check('B. NO LEGACY ELEMENTS', label + ': no .lc-recap-list', !card.includes('lc-recap-list'));
-  check('B. NO LEGACY ELEMENTS', label + ': no redundant "Module N complete" label before the title (old pre-title eyebrow pattern)', !/lc-next-label">[^<]*complete<\/div>\s*\n\s*<div class="lc-title"/.test(card));
+  if (moduleId === '1') {
+    check('B. NO LEGACY ELEMENTS', label + ': the "Module 1 complete" eyebrow before the title is module-01.md\'s approved documented exception (Section P), not a leftover legacy element', /<div class="lc-next-label">Module 1 complete<\/div>\s*\n\s*<div class="lc-title">/.test(card));
+  } else {
+    check('B. NO LEGACY ELEMENTS', label + ': no redundant "Module N complete" label before the title (old pre-title eyebrow pattern)', !/lc-next-label">[^<]*complete<\/div>\s*\n\s*<div class="lc-title"/.test(card));
+  }
   check('B. NO LEGACY ELEMENTS', label + ': no multiple stacked body-summary blocks (only one .lc-body, checked in section A, and zero leftover .lc-sub siblings)', (card.match(/class="lc-(body|sub)"/g) || []).length === 1);
 }
 

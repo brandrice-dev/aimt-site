@@ -221,7 +221,7 @@ await (async function activateActuallyDeferred() {
   const activateIdx = body.indexOf('window.CadenceIdentity.activate(mark)');
   const thenIdx = body.indexOf('.then(function ()', activateIdx);
   const restoreIdx = body.indexOf('restoreResting', thenIdx);
-  const openInThenIdx = body.indexOf("openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });", thenIdx);
+  const openInThenIdx = body.indexOf("openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, errorMessage: def.errorMessage, returnFocusEl: container });", thenIdx);
   check('SEQUENCING ORDER', 'CadenceIdentity.activate(mark) is called', activateIdx !== -1);
   check('SEQUENCING ORDER', 'A .then() continuation immediately follows the activate() call', thenIdx !== -1 && thenIdx > activateIdx && thenIdx - activateIdx < 40, `activateIdx=${activateIdx} thenIdx=${thenIdx}`);
   check('SEQUENCING ORDER', 'openCheckpoint() for the animated entry path appears AFTER (inside) that .then() chain, not before/alongside activate() in the same synchronous scope -- the actual fix for the invisible-animation bug', openInThenIdx !== -1 && openInThenIdx > thenIdx, `thenIdx=${thenIdx} openInThenIdx=${openInThenIdx}`);

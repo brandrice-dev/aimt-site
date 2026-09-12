@@ -276,7 +276,7 @@ await (async function identicalPromptAcrossModelsTests() {
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
   check('CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-922199df');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
 })();
 
 // ---- Report ----

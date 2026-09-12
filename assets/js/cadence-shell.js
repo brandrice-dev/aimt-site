@@ -161,7 +161,7 @@
         '<div class="cshell-transcript" id="cshellTranscript"><div class="cshell-transcript-inner" id="cshellTranscriptInner"></div></div>' +
         '<div class="cshell-composer" id="cshellComposer">' +
           '<div class="cshell-error-row" id="cshellErrorRow" style="display:none">' +
-            '<span class="cshell-error-text" id="cshellErrorText"></span>' +
+            '<span class="cshell-error-text" id="cshellErrorText" role="alert"></span>' +
             '<button type="button" class="cshell-retry-btn" id="cshellRetryBtn">Try again</button>' +
           '</div>' +
           '<div class="cshell-composer-inner" id="cshellComposerInner">' +
@@ -373,6 +373,11 @@
       system: config.system,
       reviewSystem: config.reviewSystem,
       label: config.label || '',
+      // Module-specific approved network-error copy (e.g. module-01.md
+      // Sections N/O), when the checkpoint definition supplies one — see
+      // renderRetryAffordance(). Falls back to the shell's generic message
+      // for any checkpoint that doesn't provide this.
+      errorMessage: config.errorMessage || null,
       review: isReview,
       busy: false,
       activeFixture: null,
@@ -559,7 +564,7 @@
     const open = function () {
       if (transitioning) return;
       if (!mark || !window.CadenceIdentity) {
-        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
+        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, errorMessage: def.errorMessage, returnFocusEl: container });
         return;
       }
       transitioning = true;
@@ -576,7 +581,7 @@
       }).then(function () {
         container.classList.remove('cc-entering', 'cc-leaving');
         transitioning = false;
-        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, returnFocusEl: container });
+        openCheckpoint({ moduleId, cpId, question: def.question, system: def.system, reviewSystem: def.reviewSystem, label, errorMessage: def.errorMessage, returnFocusEl: container });
       });
     };
 
@@ -820,6 +825,13 @@
   function appendMessageEl(role, text) {
     const row = document.createElement('div');
     row.className = 'cshell-msg ' + role;
+    // Each new Cadence message is its own small polite live region (matching
+    // the existing "thinking" indicator's role="status" pattern below) --
+    // announced once, on insertion, without making the whole transcript live
+    // and re-announcing prior messages whenever it's rebuilt (e.g. switching
+    // Review Mode fixtures). The student's own messages are not marked live;
+    // they just typed and sent them.
+    if (role === 'assistant') row.setAttribute('role', 'status');
     const av = document.createElement('div');
     av.className = 'cshell-msg-av';
     av.setAttribute('aria-hidden', 'true');
@@ -920,7 +932,13 @@
   }
 
   function renderRetryAffordance(textToRetry, onRetry) {
-    setErrorVisible(true, 'Cadence is having trouble responding right now. Your answer is saved.');
+    // A required checkpoint with its own approved network-error copy (see
+    // openCheckpoint()/session.errorMessage) uses that exact text instead of
+    // the shell's generic message. Ask Cadence and any checkpoint without
+    // one keep the generic message unchanged.
+    const genericMessage = 'Cadence is having trouble responding right now. Your answer is saved.';
+    const message = (session && session.mode === 'required_checkpoint' && session.errorMessage) || genericMessage;
+    setErrorVisible(true, message);
     dom.retryBtn.onclick = function () {
       setErrorVisible(false);
       if (onRetry) { onRetry(); return; }
