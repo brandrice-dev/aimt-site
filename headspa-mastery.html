@@ -561,7 +561,7 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    #m4Complete) -- this compound selector (higher specificity than the
    bare .lesson-complete rule, so it wins regardless of source order)
    is this preview's equivalent reveal. */
-.lesson-complete.haw-complete-mock { display: block; }
+.lesson-complete.haw-complete-mock { display: block; margin-bottom: 1.75rem; }
 .haw-cta { text-align: center; margin: 2.75rem 0 1rem; }
 .haw-cta-btn {
   background: var(--hero-bg); color: #fff; border: none; border-radius: 980px;
@@ -623,7 +623,7 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 }
 .haw-launcher-preview .cadence-id { --cadence-id-size: 40px; }
 .haw-launcher-preview.is-compact { width: 46px; padding: 0; justify-content: center; }
-.haw-launcher-caption { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 0.5rem; }
+.haw-launcher-caption { font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0.5rem 0 1.25rem; }
 
 /* One subtle, student-facing note near the top of the orientation
    (owner polish pass) replaces the earlier per-example "STATIC PREVIEW"
@@ -631,8 +631,53 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
    previews that still benefit from a short label use .haw-eg-tag
    ("Example — ...") instead; most no longer need one at all now that
    this note covers the general case. */
-.haw-preview-note { font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.02em; color: var(--muted); line-height: 1.6; margin: -0.5rem 0 2rem; max-width: 60ch; }
+.haw-preview-note { font-family: var(--aimt-font-mono); font-size: 0.68rem; letter-spacing: 0.02em; color: var(--muted); line-height: 1.6; max-width: 60ch; }
 .haw-eg-tag { display: inline-block; margin-top: 0.6rem; font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+/* ── Vertical rhythm (owner spacing pass) ──────────────────────────
+   Scoped to .haw-wrap: several classes below (hr.divider, .mod-opener,
+   .lp-listen-mock, .lp-cadence-example-tag) are shared with every real
+   module and keep their own base rules everywhere else -- these rules
+   only retune this page's own pacing, never the shared base.
+
+   Tokens, not per-instance margins: every major section transition on
+   this page (the dividers between 01-07) now reads from the same two
+   values, and every large preview/caption that sits directly above an
+   explanatory paragraph gets the same trailing space -- so a caption
+   can never end up touching the copy after it purely because both
+   happened to default to a 0px margin on the touching side (this was
+   true above four different previews before this pass: the minimized
+   player, the Ask Cadence launcher caption, the Ask Cadence example
+   tag, and the completion-card preview -- the last of those gets its
+   own slightly larger amount just below, as the section's visual
+   centerpiece rather than a small caption). */
+.haw-wrap {
+  --haw-rhythm-section-top: 2.25rem;    /* 36px: space above a divider */
+  --haw-rhythm-section-bottom: 1.75rem; /* 28px: space below a divider, before the next eyebrow (36+28=64px total desktop, within a 56-72px target) */
+  --haw-rhythm-preview-gap: 1.25rem;    /* 20px: a preview/caption's own trailing space, so it never touches the explanation that follows */
+}
+@media (max-width: 600px) {
+  .haw-wrap {
+    --haw-rhythm-section-top: 1.5rem;     /* 24px */
+    --haw-rhythm-section-bottom: 1.25rem; /* 20px (24+20=44px total narrow, within a 40-56px target) */
+  }
+}
+.haw-wrap hr.divider { margin: var(--haw-rhythm-section-top) 0 var(--haw-rhythm-section-bottom); }
+
+/* Opening hero -> preview note -> Section 01: the note now reads as
+   attached to the hero's own closing thought (a tight gap right below
+   .mod-opener) with the real breathing room placed below the note
+   instead, exactly where Section 01 actually begins -- so the page's
+   very first transition behaves like every later section transition
+   rather than stranding the note as its own floating paragraph
+   in between. */
+.haw-wrap .mod-opener { margin-bottom: 0.75rem; }
+.haw-wrap .haw-preview-note { margin-bottom: var(--haw-rhythm-section-top); }
+
+.haw-wrap .lp-listen-mock,
+.haw-wrap .lp-cadence-example-tag {
+  margin-bottom: var(--haw-rhythm-preview-gap);
+}
 
 /* 06 — My AIMT tools/resources preview: reproduces my-aimt.html's real
    .tool-row / .resource-group / .resource-item verbatim (those classes
