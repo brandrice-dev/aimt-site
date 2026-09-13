@@ -6,6 +6,24 @@ Follows `module-01-reference-implementation-FROZEN.md` and
 `00-listen-mode-editorial-standard.md` — no exploratory revision passes;
 the standard is locked, this is a direct production script.
 
+**v3 update (final pre-Listen-Mode video integration pass, 2026-09-13) —
+narration start boundary, video excluded.** The owner added a real opening
+video (Vimeo ID `1226441055`) to the live page, placed as the first
+element inside `.mod-opener` — above `.mo-eyebrow`/`.mo-title` ("WELCOME"),
+i.e. above everything **M0-01** below narrates. **The video is explicitly
+NOT part of Listen Mode**: no audio track is generated for it, it is never
+made a Listen Mode chunk, and Listen Mode narration is not to be timed or
+cued to start until after a student has seen (or skipped) it. **M0-01's
+own narration source and text are unchanged by this** — it still begins
+"Welcome. I'm Cadence —..." narrating `.mod-opener`'s eyebrow/title/
+tagline/desc/list/attention/footer content exactly as scripted below; the
+video sits above that source content in the DOM but is simply skipped
+over, not narrated around or introduced. No new chunk, no new
+`visualTarget`, and no change to M0-01's `sourceSection`/text are needed
+for the video itself — this note exists only so a future generation pass
+does not mistakenly try to narrate or describe the video before continuing
+into the scripted opening.
+
 **v2 update (Module 2 curriculum rebuild task, 2026-08-31):** the owner
 added a new, permanent "Before you begin" Listen Mode orientation block to
 the live page, placed right after the module opener and before Section

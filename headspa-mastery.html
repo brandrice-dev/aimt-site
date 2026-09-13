@@ -466,6 +466,7 @@ body.review-mode-active { padding-top: 34px; }
    bespoke ones. Module-specific content changes; this layout doesn't. */
 .mod-opener { background: #0a0a0a; border-radius: 16px; padding: 2rem 1.5rem 1.75rem; color: white; margin-bottom: 2rem; position: relative; overflow: hidden; }
 .mod-opener::after { content: ''; position: absolute; bottom: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); }
+.mo-opener-video { position: relative; margin-bottom: 1.5rem; }
 .mo-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
 .mo-title { font-family: var(--aimt-font-mont); font-size: clamp(1.4rem, 5.5vw, 2rem); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px; font-weight: 700; text-transform: uppercase; }
 .mo-tagline { font-family: var(--aimt-font-serif); font-size: 1.05rem; line-height: 1.5; font-style: italic; color: rgba(255,255,255,0.85); margin-bottom: 14px; }
@@ -6670,6 +6671,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   <div class="lesson-wrap">
 
     <div class="mod-opener">
+      <!-- Welcome Module opening video (owner-supplied, September 2026).
+           Plain, always-visible embed reusing Module 8's exact real-video
+           iframe pattern (same embed params, same width:100%/aspect-
+           ratio:16/9 responsive technique) -- no autoplay, no chapter/
+           completion-tracking JS, since this is orientation content, not a
+           gated masterclass video. Deliberately NOT part of Cadence Listen
+           Mode narration -- see the Welcome Module Listen Mode source notes
+           for the exact narration start boundary (begins at the 0.1 —
+           Welcome section below, after this video). -->
+      <div class="mo-opener-video">
+        <iframe src="https://player.vimeo.com/video/1226441055?color=a3968d&amp;title=0&amp;byline=0&amp;portrait=0" title="AIMT Head Spa Certification — Welcome Module opening video" style="width:100%;aspect-ratio:16/9;border:none;display:block;border-radius:12px;" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
       <div class="mo-eyebrow">Module 00</div>
       <div class="mo-title">Welcome</div>
       <div class="mo-tagline">Clients can feel the difference between a service that is being performed.<br>And one that is being led.</div>
@@ -8564,7 +8577,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="concept-card">
         <div class="cc-icon">①</div>
         <div class="cc-term">Entry & Regulation</div>
-        <div class="cc-sub">Aromatherapy + dry work</div>
+        <div class="cc-sub">Opening rituals, microscopy + dry work</div>
         <div class="cc-def">Settle the client. Establish rhythm. Begin connection. If you feel rushed here, the rest of the service will feel rushed too.</div>
       </div>
       <div class="concept-card">
@@ -8658,7 +8671,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="sms-head" id="m8mcHead">
           <div class="sms-num" id="m8mcNum">01</div>
           <div class="sms-info">
-            <div class="sms-title" id="m8mcTitle">Aromatherapy selection</div>
+            <div class="sms-title" id="m8mcTitle">Opening Rituals + Microscopy</div>
             <div class="sms-timing" id="m8mcTiming"></div>
           </div>
         </div>
@@ -13851,12 +13864,13 @@ function startVoice(inputId, btn) {
 // ══ MODULE 8 STEP VIDEOS ══
 // Owner-authoritative final sequence (reconciled from the earlier 12-slot
 // working structure to the real finished footage) — 9 instructional video
-// chapters. Video 01 (Aromatherapy) has no finished footage yet and stays
-// null/placeholder; do not simulate its completion. Replace null with a
-// Vimeo video ID (the number from the Vimeo URL) only once real footage
-// exists — e.g. https://vimeo.com/123456789 → use '123456789'.
+// chapters. All 9 now have real footage; Video 01 (Opening Rituals +
+// Microscopy) was the last to arrive (September 2026), replacing its prior
+// null/placeholder. Replace null with a Vimeo video ID (the number from the
+// Vimeo URL) only once real footage exists — e.g. https://vimeo.com/123456789
+// → use '123456789'.
 const STEP_VIDEO_IDS = [
-  null,           // Video 01 — Aromatherapy (placeholder — real footage not yet delivered)
+  '1226438466',   // Video 01 — Opening Rituals + Microscopy
   '1214280975',   // Video 02 — Client Positioning & Comfort
   '1213974160',   // Video 03 — Dry Brushing and Hair Play
   '1213975936',   // Video 04 — Halo Activation & Wet Massage
@@ -13877,24 +13891,35 @@ const STEP_VIDEO_IDS = [
 // example and every adaptation cue, not just one. Titles are the owner's
 // exact authoritative titles — do not rename.
 const M8_CHAPTERS = [
-  // Corrected per owner instruction: aromatherapy is an intentional,
-  // meaningful part of this service, not a casual mid-service discovery.
-  // Fragrance sensitivity/intolerance/preference is established at intake,
-  // before Step 01 — the practitioner already knows which options to
-  // present (or that a fragrance-free path applies) by the time this
-  // chapter begins. Touch expectations for this first-contact moment are
-  // likewise established beforehand rather than re-asked from scratch here.
-  { num:'01', title:'Aromatherapy', label:'Video 01 — Aromatherapy', preTimer:true,
-    watchFor:'how a pre-identified fragrance choice is presented with confidence — this is a considered moment of the service, not an open-ended decision made on the spot.',
-    guidance:['Fragrance sensitivity, known intolerance, strong preference, or a reason to adapt or omit aromatherapy should already be identified at intake — not discovered here. By the time this chapter begins, you should already know which options are appropriate to present, or that a predetermined fragrance-free path applies.',
-      'Offer the three essential oil blends with equal weight — or, if fragrance-free was already established, follow that plan rather than presenting scent choices that don\'t apply. Rest a hand at the shoulder as an already-understood part of this moment, staying attentive and ready to adjust if the client seems hesitant. If a client wants to close their eyes while they sample, that\'s their choice to offer, never an instruction.'],
-    why:['Aromatherapy creates a deliberate sensory opening to the service. It helps shift the client from ordinary appointment interaction into the Head Spa experience before the hands-on treatment begins, and contributes to the tone and identity of the service.'],
+  // Video 01 replaced with real footage (owner-supplied, September 2026) —
+  // now covers the full opening sequence (changing/arrival, intake
+  // completion, scalp microscopy, and the aromatherapy ritual), not
+  // aromatherapy alone. Title updated to the video's own real title,
+  // "Opening Rituals + Microscopy." Fragrance sensitivity/intolerance/
+  // contraindication is still established at intake before this chapter
+  // begins (unchanged principle) — but the video's own approved script
+  // treats which SPECIFIC blend the client prefers as a live, in-the-
+  // moment sampling ritual, not a predetermined reveal, so guidance below
+  // reflects that. Touch expectations for this first-contact moment are
+  // still established beforehand and covered in depth in Module 2 — this
+  // is where that understanding is put into practice, not re-asked from
+  // scratch here.
+  { num:'01', title:'Opening Rituals + Microscopy', label:'Video 01 — Opening Rituals & Microscopy', preTimer:true,
+    watchFor:'the shift from changing-room logistics into scalp microscopy, and how a shoulder-anchored touch carries through the full aromatherapy selection before the hands-on treatment begins.',
+    guidance:['Help the client change into the spa wrap, robe, comfortable socks, and a place for jewelry — tell them exactly where to meet you when they\'re ready rather than leaving them to guess. If your space allows, offer a caffeine-free tea or beverage while you consult.',
+      'If the intake form hasn\'t already been completed, have the client complete it now so you can review allergies, sensitivities, contraindications, and preferences before beginning.',
+      'Move into scalp microscopy. Move slowly and deliberately, holding the microscope still when you find an area you want the client to observe. Explain what you\'re seeing in simple, client-friendly language — even a healthy scalp deserves at least a couple of meaningful observations. Connect every observation to the treatment plan using three parts: what you observed, what you\'re going to do or use, and why.',
+      'Move into the aromatherapy ritual — your first intentional physical connection with the client. Place one hand firmly and confidently on the shoulder and keep it there throughout the selection, providing a point of security while the client\'s eyes are closed. Introduce the three blends one at a time without revealing them, pausing between each; once all three are sampled, ask which they prefer and reveal the blend they selected.',
+      'Once the opening rituals are complete, let the client relax with their beverage while you prepare the treatment room — prefill the basin and wrap the faucet securely in a towel to weigh it down, keep it in place, and minimize noise later. Then bring the client in to begin the hands-on portion of the service.'],
+    why:['The opening rituals make the client feel comfortable, establish trust, and set the slower pace for the service before anything hands-on begins. A microscopy observation only becomes useful to the client when it\'s connected to the treatment plan — what you saw, what you\'re going to do, and why — never presented as an isolated finding. The sustained shoulder contact through aromatherapy is the deliberate bridge from no touch into hands-on treatment, and letting the client sample and choose their own blend turns the moment into genuine participation rather than a decision made for them.'],
     teach:[
-      { label:'Communication cue', text:'"I have three scent options for you today. Take a moment with each and tell me which one you\'re most drawn to."' },
-      { label:'If they ask', text:'"Aromatherapy is part of the sensory opening of the service. It helps establish the tone of the experience before we move into the hands-on treatment."' }
+      { label:'Communication cue (changing room)', text:'"You\'ll find fuzzy socks on top if you\'d like to take your shoes off and get comfortable. Those are yours to take home. Underneath is your spa wrap. You\'ll remove your shirt and bra, and the wrap goes straight across your chest like a strapless dress. Your robe is underneath to keep you comfortable during the consultation. I recommend removing necklaces so we have full access to the neck and shoulders during your massage."' },
+      { label:'Example (microscopy observation, connected to the plan)', text:'"I\'m seeing some sebum buildup around the follicles, so today we\'ll use a gentle exfoliation step with steam to help loosen that buildup, followed by a balancing hair bath to help regulate sebum production, and a strengthening mask through your ends to help alleviate further breakage."' },
+      { label:'Communication cue (aromatherapy)', text:'"I\'m going to have you sample three essential oil blends. Whichever one you\'re most drawn to is the blend we\'ll use throughout your service today. I\'m going to have you close your eyes so you can focus completely on the scent."' }
     ],
     notes:['Touch expectations for this first-contact moment are established at intake and covered in depth in Module 2 — this is where you put that understanding into practice with genuine attentiveness, not where you ask for it from scratch.'],
-    adapt:[], continuity:'Client positioning and comfort come next — getting fully settled before the rest of the service begins.' },
+    adapt:['If intake has already identified a fragrance sensitivity, intolerance, or an established fragrance-free requirement, skip the live blend-sampling ritual and follow that plan instead rather than presenting scent choices that don\'t apply.'],
+    continuity:'Client positioning and comfort come next — getting fully settled before the rest of the service begins.' },
   { num:'02', title:'Client Positioning + Comfort', label:'Video 02 — Client Positioning & Comfort', preTimer:true,
     watchFor:'how the client is settled into position — physical comfort, support, and consent checked before anything else begins.',
     guidance:['Help the client get fully settled and supported on the treatment bed — head, neck, and shoulders comfortably aligned — before the service continues. Confirm comfort directly rather than assuming it; this is the moment to adjust support, draping, or positioning before momentum makes that harder to do smoothly.'],
@@ -14158,9 +14183,11 @@ function m8RenderChapter(idx) {
     m8LoadRealVideo(idx);
   } else {
     // Premium "not yet filmed" placeholder — never claims playability and
-    // never simulates completion in normal student mode. Currently only
-    // reachable for Video 01 (Aromatherapy), the one chapter still awaiting
-    // real footage.
+    // never simulates completion in normal student mode. All 9 Module 8
+    // chapters now have real footage (Video 01, Opening Rituals +
+    // Microscopy, was the last to arrive), so this branch is currently
+    // unreached in normal operation — kept as the defensive path for any
+    // future chapter awaiting footage.
     thumb.classList.remove('loaded');
     thumb.setAttribute('aria-label', ch.label + ' — instructional video in production, available soon');
     thumb.innerHTML = '<div class="sms-video-play"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>' +

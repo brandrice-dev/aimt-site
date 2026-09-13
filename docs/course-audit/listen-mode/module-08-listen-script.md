@@ -4,6 +4,21 @@
 the `M8_CHAPTERS` JS data array (headspa-mastery.html ~line 11864),
 2026-08-31.
 
+**v2 update (final pre-Listen-Mode video integration pass, 2026-09-13):**
+Video 01 (`STEP_VIDEO_IDS[0]`, previously `null`) is now real footage —
+"Opening Rituals + Microscopy," Vimeo ID `1226438466` — the last of the 9
+chapters to arrive; the "video rollout... still in progress" caveat below
+no longer applies to any chapter. **M8-04**'s chapter-one paragraph is
+rewritten to match the real, reconciled Chapter 1 teaching (the opening
+sequence now covers changing/arrival, intake completion, scalp
+microscopy, and the aromatherapy ritual — not aromatherapy alone), and
+**M8-02**'s phase-one label is updated to match the live page's own
+`.cc-sub` text. Chapter 9 ("Final Rinse + Halo Massage") and its
+already-updated closing-sequence teaching are unchanged by this pass — that
+reconciliation happened separately, in commit `04faf79` ("Align Module 8
+Chapter 9 with updated service video"), against `headspa-mastery.html`
+directly.
+
 **Curriculum authority:** the 7-phase overview, Sections 8.1–8.3, the
 9-chapter video masterclass (`M8_CHAPTERS`), a 3-scenario "Protect the
 Flow" signature interaction, two checkpoints, the AIMT Service Timer
@@ -12,8 +27,8 @@ feature, one completion card.
 **Screen/video-required content — narrated by reference, not
 substitution:** the 9 masterclass chapters are built around real
 instructional video demonstrating hands-on technique (`STEP_VIDEO_IDS` —
-per CLAUDE.md, this video rollout is itself still in progress and is
-explicitly out of scope for this pass to finish). Listen Mode narrates
+all 9 now real footage as of the 2026-09-13 video integration pass).
+Listen Mode narrates
 each chapter's **why** (the real non-visual reasoning) and its **client
 communication script** where one exists (real audio-appropriate content),
 but does not attempt to verbally describe hand technique, massage
@@ -46,7 +61,7 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 
 > Think in phases, not steps. If you think in steps, you become rigid — focused on what's next rather than what's happening now. If you think in phases, you stay aware of the full arc of the service: where you are, what the client is feeling, and what's coming, without losing presence.
 >
-> Seven phases. One: Entry and Regulation — aromatherapy and dry work. Settle the client, establish rhythm, begin connection. If you feel rushed here, the rest of the service will feel rushed too.
+> Seven phases. One: Entry and Regulation — opening rituals, microscopy, and dry work. Settle the client, establish rhythm, begin connection. If you feel rushed here, the rest of the service will feel rushed too.
 >
 > Two: Immersion — water and initial stimulation. Introduce water, deepen relaxation. Temperature inconsistency or hesitation here breaks trust immediately.
 >
@@ -78,7 +93,7 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 >
 > Each chapter is labeled one of three ways: "Communication cue" — say this proactively — "Keep the flow quiet" — no narration needed by default — or "If they ask" — your prepared answer. This service is relaxation-first; most of it stays quiet, not narrated step by step. And the protocol itself gets explained to the client at intake, where adaptations and preferences are identified — during treatment, communication manages comfort, pressure, temperature, and real transitions, not repeated step-by-step permission.
 >
-> Chapter one, Aromatherapy: a deliberate sensory opening, not a casual mid-service discovery — fragrance sensitivity or preference is already identified at intake, so you already know what to present by the time this chapter begins. It helps shift the client from ordinary appointment interaction into the head spa experience before hands-on treatment starts.
+> Chapter one, Opening Rituals and Microscopy: this chapter now covers the full opening sequence, not aromatherapy alone. Help the client change into their wrap, robe, socks, and a place for jewelry, and complete intake now if it isn't already done — reviewing allergies, sensitivities, contraindications, and preferences before anything begins. From there, move into scalp microscopy: observe slowly and deliberately, and connect every observation to the treatment plan using three parts — what you saw, what you're going to do, and why. The aromatherapy ritual that follows is your first intentional physical connection with the client — one hand rests firmly on the shoulder and stays there through the whole scent selection, anchoring the client before hands-on treatment begins.
 >
 > Chapter two, Client Positioning and Comfort: the physical foundation for everything that follows. A fully supported client can stay settled instead of repeatedly readjusting, which protects continuity for the rest of the service.
 >
