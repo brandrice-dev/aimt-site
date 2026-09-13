@@ -591,6 +591,49 @@
       '.m12x .m12x-domain-row.cleared { color:var(--aimt-success); }',
       '.m12x .m12x-domain-row.uncleared { color:var(--aimt-warning); }',
 
+      /* Results hero -- the one dominant metric (overall ring) on a dark,
+         technical/report-style surface, matching AIMT's existing
+         Oura-inspired metric-ring language (assets/css/aimt-metric-ring.css)
+         rather than a card-on-card exam-form treatment. Pass/not-yet-passed
+         is a restrained inset top accent, never a red/error color and never
+         the whole surface recoloring. */
+      '.m12x .m12x-result-hero { background:var(--hero-bg,#262626); border-radius:var(--aimt-radius-card,18px); padding:1.7rem 1.8rem 1.5rem; margin:1.2rem 0 1.4rem; }',
+      '.m12x .m12x-result-hero.m12x-pass-banner { box-shadow:inset 0 3px 0 0 var(--aimt-success); }',
+      '.m12x .m12x-result-hero.m12x-notyet-banner { box-shadow:inset 0 3px 0 0 var(--aimt-warning); }',
+      '.m12x .m12x-result-hero-top { display:flex; align-items:center; gap:1.7rem; flex-wrap:wrap; }',
+      '.m12x .m12x-result-ring-fallback { text-align:center; }',
+      '.m12x .m12x-result-ring-fallback-value { font-family:var(--aimt-font-mont); font-size:2.2rem; font-weight:600; color:#fff; line-height:1; }',
+      '.m12x .m12x-result-ring-fallback-label { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-top:0.3rem; }',
+      '.m12x .m12x-result-ring-fallback-status { font-family:var(--aimt-font-mono); font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(163,150,141,0.85); margin-top:0.5rem; }',
+      '.m12x .m12x-result-summary { flex:1 1 220px; min-width:200px; }',
+      '.m12x .m12x-result-eyebrow { font-family:var(--aimt-font-mono); font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:0.5rem; }',
+      '.m12x .m12x-result-title { font-family:var(--aimt-font-serif); font-size:1.4rem; font-weight:500; color:#fff; line-height:1.28; margin-bottom:0.6rem; }',
+      '.m12x .m12x-result-hero .body-text { color:rgba(255,255,255,0.76); font-size:0.86rem; }',
+      '.m12x .m12x-result-standard { font-size:0.76rem; color:rgba(255,255,255,0.58); margin-top:0.9rem; line-height:1.5; max-width:46ch; }',
+      '.m12x .m12x-result-meta { font-family:var(--aimt-font-mono); font-size:0.64rem; letter-spacing:0.06em; color:rgba(255,255,255,0.4); margin-top:0.55rem; }',
+
+      /* Domain breakdown -- three quiet, equal-weight data cards (never
+         hero-sized rings; the overall ring stays the one dominant metric).
+         Score + a real minimum threshold + a thin fill bar with a
+         threshold tick + a text status word, so pass/fail is never
+         color-only. */
+      '.m12x .m12x-domain-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:0.8rem; margin:1.1rem 0; }',
+      '@media (max-width:720px) { .m12x .m12x-domain-grid { grid-template-columns:1fr; } }',
+      '.m12x .m12x-domain-card { border:0.5px solid var(--border2); border-radius:14px; padding:0.95rem 1.05rem 1rem; background:rgba(255,255,255,0.55); }',
+      '.m12x .m12x-domain-card-label { font-family:var(--aimt-font-mont); font-size:0.72rem; font-weight:600; color:var(--text); line-height:1.3; margin-bottom:0.55rem; min-height:1.9em; }',
+      '.m12x .m12x-domain-card-score { font-family:var(--aimt-font-mont); font-size:1.4rem; font-weight:600; color:var(--text); line-height:1; margin-bottom:0.6rem; }',
+      '.m12x .m12x-domain-card-bar { position:relative; height:4px; background:rgba(0,0,0,0.08); border-radius:2px; margin-bottom:0.55rem; }',
+      '.m12x .m12x-domain-card-bar-fill { height:100%; border-radius:2px; background:var(--aimt-warning); transition:width 0.5s ease; }',
+      '.m12x .m12x-domain-card.meets .m12x-domain-card-bar-fill { background:var(--aimt-success); }',
+      '.m12x .m12x-domain-card-bar-tick { position:absolute; top:-2px; width:2px; height:8px; background:var(--text); opacity:0.32; }',
+      '.m12x .m12x-domain-card-threshold { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.03em; color:#8a8078; margin-bottom:0.45rem; }',
+      '.m12x .m12x-domain-card-status { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.07em; text-transform:uppercase; font-weight:600; }',
+      '.m12x .m12x-domain-card.meets .m12x-domain-card-status { color:var(--aimt-success); }',
+      '.m12x .m12x-domain-card.review .m12x-domain-card-status { color:var(--aimt-warning); }',
+
+      '.m12x .m12x-critical-block { border:0.5px solid var(--border2); border-radius:14px; padding:1rem 1.1rem; margin-bottom:1.2rem; background:rgba(255,255,255,0.55); }',
+      '.m12x .m12x-critical-label { font-family:var(--aimt-font-mono); font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:#8a8078; margin-bottom:0.3rem; }',
+
       /* Required Remediation -- semantic caution/review treatment, never red/failed styling */
       '.m12x .m12x-remediation-meta { display:flex; align-items:center; gap:0.5rem; margin-top:0.4rem; flex-wrap:wrap; }',
       '.m12x .m12x-remediation-badge { font-family:var(--aimt-font-mono); font-size:0.6rem; letter-spacing:0.08em; text-transform:uppercase; padding:3px 9px; border-radius:980px; background:var(--warn-light); color:var(--aimt-warning); }',
@@ -602,7 +645,7 @@
       '.m12x .m12x-review-fixtures { display: flex; flex-wrap: wrap; gap: 6px; padding: 0.6rem; border: 1px dashed rgba(0,0,0,0.25); border-radius: 8px; margin-bottom: 1rem; }',
       '.m12x .m12x-review-fixtures button { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }',
 
-      '@media (prefers-reduced-motion: reduce) { .m12x .m12x-progress-fill, .m12x .m12x-btn, .m12x .m12x-choice, .m12x .m12x-chip { transition: none; } }'
+      '@media (prefers-reduced-motion: reduce) { .m12x .m12x-progress-fill, .m12x .m12x-btn, .m12x .m12x-choice, .m12x .m12x-chip, .m12x .m12x-domain-card-bar-fill { transition: none; } }'
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -701,6 +744,12 @@
       return {
         attemptId: 'fixture', attemptNumber: 1, decision: decision, overallScore: decision === 'pass' ? 0.88 : 0.68,
         componentScores: { knowledge: 0.8, appliedCases: 0.78, interview: decision === 'pass' ? 0.9 : 0.7 },
+        // Matches the real, current HEAD_SPA_ASSESSMENT_CONFIG_V1 values
+        // (functions/_lib/certification/assessment-config.mjs) -- duplicated
+        // here, not imported, because this file has no server-side module
+        // access (same reason COPY.stateA.passingMetrics below already
+        // hardcodes these same numbers for the Exam Ready screen).
+        thresholds: { weights: { knowledge: 0.5, appliedCases: 0.3, interview: 0.2 }, minimums: { knowledge: 0.75, appliedCases: 0.75, interview: 0.8, overall: 0.8 } },
         criticalDomainResults: domains, decisionAt: new Date().toISOString()
       };
     };
@@ -1308,34 +1357,96 @@
     Module12Cert.render(container);
   }
 
-  function performanceReviewBlock(review) {
+  // Real, versioned thresholds only -- never a hardcoded/decorative
+  // fallback. get-status.js resolves these against the SPECIFIC
+  // assessment_version the attempt being shown was actually scored under
+  // (functions/api/certification/get-status.js); the Review Mode fixture
+  // and local QA harness mirror the same real config (see
+  // fixtureStatusFor()'s perfReview() and scripts/review-module12-bank.mjs).
+  // A missing/legacy record with no thresholds attached falls back to the
+  // current config rather than rendering blank -- still real data, just the
+  // best available approximation for a record predating this field.
+  var FALLBACK_THRESHOLDS = { weights: { knowledge: 0.5, appliedCases: 0.3, interview: 0.2 }, minimums: { knowledge: 0.75, appliedCases: 0.75, interview: 0.8, overall: 0.8 } };
+  var COMPONENT_LABELS = { knowledge: 'Knowledge & Retention', appliedCases: 'Applied Practitioner Cases', interview: 'Practitioner Conversation' };
+
+  function meetsStandard(score, minimum) { return (score || 0) >= minimum; }
+
+  // One compact "data card" per weighted component -- score, the real
+  // required minimum, a thin fill bar with a threshold tick, and a text
+  // status (never color-only: .m12x-domain-card-status always carries the
+  // word "Meets"/"Review", the bar's color is a reinforcing signal, not the
+  // only one). Deliberately not a second ring -- see aimt-metric-ring.css's
+  // own "never four competing equal-sized gauges" guidance; the overall
+  // ring stays the one dominant metric on this surface.
+  function domainCardHtml(key, score, minimum) {
+    var ok = meetsStandard(score, minimum);
+    var fillPct = Math.max(0, Math.min(100, Math.round((score || 0) * 100)));
+    var threshPct = Math.max(0, Math.min(100, Math.round(minimum * 100)));
+    var statusWord = ok ? 'Meets Standard' : 'Review Required';
+    return '<div class="m12x-domain-card' + (ok ? ' meets' : ' review') + '">' +
+      '<div class="m12x-domain-card-label">' + esc(COMPONENT_LABELS[key]) + '</div>' +
+      '<div class="m12x-domain-card-score">' + pct(score) + '</div>' +
+      '<div class="m12x-domain-card-bar" aria-hidden="true"><div class="m12x-domain-card-bar-fill" style="width:' + fillPct + '%;"></div><div class="m12x-domain-card-bar-tick" style="left:' + threshPct + '%;"></div></div>' +
+      '<div class="m12x-domain-card-threshold">Minimum ' + Math.round(minimum * 100) + '%</div>' +
+      '<div class="m12x-domain-card-status">' + esc(statusWord) + '</div>' +
+      '<span class="m12x-sr-only">' + esc(COMPONENT_LABELS[key]) + ': ' + pct(score) + '. Minimum required: ' + Math.round(minimum * 100) + ' percent. ' + esc(statusWord) + '.</span></div>';
+  }
+
+  // eyebrow/title/bodyHtml are the real, unchanged COPY.passed/notYetPassed
+  // strings (still authored exactly as approved) -- folded into this one
+  // hero card instead of sitting in a separate banner stacked above it, so
+  // the ring and the real result copy read as one moment, matching the
+  // task's own "hero" layout direction rather than two competing headers.
+  function performanceReviewBlock(review, eyebrow, title, bodyHtml, bannerClass) {
     if (!review) return '';
-    var html = '<div class="m12x-perf-card">';
-    html += '<div class="m12x-perf-head"><div><div class="m12x-perf-title">AIMT Head Spa Certification</div><div class="m12x-tile-meta" style="margin-bottom:0;">Certification Performance Review · Attempt ' + review.attemptNumber + (review.decisionAt ? ' · ' + new Date(review.decisionAt).toLocaleDateString() : '') + '</div></div>';
-    html += '<div class="m12x-perf-score">' + pct(review.overallScore) + '</div></div>';
-    html += '<div class="m12x-domain-row"><span>Knowledge & Retention</span><span>' + pct(review.componentScores.knowledge) + '</span></div>';
-    html += '<div class="m12x-domain-row"><span>Applied Practitioner Cases</span><span>' + pct(review.componentScores.appliedCases) + '</span></div>';
-    html += '<div class="m12x-domain-row"><span>Practitioner Conversation</span><span>' + pct(review.componentScores.interview) + '</span></div>';
-    html += '<div style="margin-top:0.8rem;"><strong style="font-size:0.85rem;">Critical Competency Areas</strong>';
+    var t = review.thresholds || FALLBACK_THRESHOLDS;
+    var overallPct100 = Math.max(0, Math.min(100, Math.round((review.overallScore || 0) * 100)));
+    var overallOk = review.decision === 'pass';
+    var statusText = overallOk ? 'Certification Standard Met' : 'Standard Not Yet Met';
+    var ringAccessible = 'Overall score: ' + pct(review.overallScore) + '. Certification requires ' + Math.round(t.minimums.overall * 100) + ' percent or higher overall, plus every component and critical competency area. ' + statusText + '.';
+
+    var html = '<div class="m12x-result-hero ' + esc(bannerClass) + '">';
+    html += '<div class="m12x-result-hero-top">';
+    // Defensive: the ring primitive (assets/js/aimt-metric-ring.js) is a
+    // separate script load on the real page and isn't present in every
+    // harness/offline context. Degrade to a plain accessible text
+    // equivalent rather than throwing and blanking the whole results
+    // screen if it's ever missing.
+    if (window.AIMTMetricRing && typeof window.AIMTMetricRing.render === 'function') {
+      html += window.AIMTMetricRing.render({ value: overallPct100, display: pct(review.overallScore), label: 'Overall', statusText: statusText, size: 'lg', accessibleText: ringAccessible });
+    } else {
+      html += '<div class="m12x-result-ring-fallback" role="img" aria-label="' + esc(ringAccessible) + '"><div class="m12x-result-ring-fallback-value">' + pct(review.overallScore) + '</div><div class="m12x-result-ring-fallback-label">Overall</div><div class="m12x-result-ring-fallback-status">' + esc(statusText) + '</div></div>';
+    }
+    html += '<div class="m12x-result-summary">';
+    html += '<div class="m12x-result-eyebrow">' + esc(eyebrow) + '</div>';
+    html += '<h1 class="m12x-result-title">' + esc(title) + '</h1>';
+    html += bodyHtml;
+    html += '<div class="m12x-result-standard">Certification standard: ' + Math.round(t.minimums.overall * 100) + '% overall, every component minimum, and all critical competency areas.</div>';
+    html += '<div class="m12x-result-meta">Attempt ' + esc(String(review.attemptNumber)) + (review.decisionAt ? ' · ' + esc(new Date(review.decisionAt).toLocaleDateString()) : '') + '</div>';
+    html += '</div></div></div>';
+
+    html += '<div class="m12x-domain-grid">';
+    html += domainCardHtml('knowledge', review.componentScores.knowledge, t.minimums.knowledge);
+    html += domainCardHtml('appliedCases', review.componentScores.appliedCases, t.minimums.appliedCases);
+    html += domainCardHtml('interview', review.componentScores.interview, t.minimums.interview);
+    html += '</div>';
+
+    html += '<div class="m12x-critical-block">';
+    html += '<div class="m12x-critical-label">Critical Competency Areas</div>';
     var allCleared = (review.criticalDomainResults || []).every(function (d) { return d.cleared; });
     if (allCleared) {
-      html += '<div class="m12x-domain-row cleared"><span>All Cleared</span><span>✓</span></div>';
+      html += '<div class="m12x-domain-row cleared"><span>All Cleared</span><span aria-hidden="true">✓</span></div>';
     } else {
       (review.criticalDomainResults || []).forEach(function (d) {
         if (!d.cleared) html += '<div class="m12x-domain-row uncleared"><span>' + esc(DOMAIN_LABELS[d.domainId] || d.domainId) + '</span><span>Needs review</span></div>';
       });
     }
-    html += '</div></div>';
+    html += '</div>';
     return html;
   }
 
   function renderStateC(container, status) {
-    var html = '<div class="m12x-pass-banner">';
-    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.passed.eyebrow) + '</div>';
-    html += '<h1 class="sec-title">' + esc(COPY.passed.title) + '</h1>';
-    html += paras(COPY.passed.body);
-    html += '</div>';
-    html += performanceReviewBlock(status.performanceReview);
+    var html = performanceReviewBlock(status.performanceReview, COPY.passed.eyebrow, COPY.passed.title, paras(COPY.passed.body), 'm12x-pass-banner');
     var existing = document.getElementById('module12Wrap');
     if (existing) html += existing.innerHTML;
     html += '<h2 class="sec-title" style="margin-top:1.3rem;">' + esc(COPY.passed.courseCloseTitle) + '</h2>' + paras(COPY.passed.courseCloseBody);
@@ -1343,12 +1454,7 @@
   }
 
   function renderStateD(container, status) {
-    var html = '<div class="m12x-notyet-banner">';
-    html += '<div class="mh-eyebrow" style="color:#8a8078;">' + esc(COPY.notYetPassed.eyebrow) + '</div>';
-    html += '<h1 class="sec-title">' + esc(COPY.notYetPassed.title) + '</h1>';
-    html += paras(COPY.notYetPassed.body);
-    html += '</div>';
-    html += performanceReviewBlock(status.performanceReview);
+    var html = performanceReviewBlock(status.performanceReview, COPY.notYetPassed.eyebrow, COPY.notYetPassed.title, paras(COPY.notYetPassed.body), 'm12x-notyet-banner');
 
     var hasUnclearedCritical = status.performanceReview && (status.performanceReview.criticalDomainResults || []).some(function (d) { return !d.cleared; });
     if (hasUnclearedCritical) {

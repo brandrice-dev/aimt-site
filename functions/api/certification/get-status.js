@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
+import { getAssessmentConfig, getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
 
 export async function onRequestGet(context) {
@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
   const attemptsRes = await supabaseRest(
     env,
     `certification_attempts?${new URLSearchParams({
-      select: 'id,attempt_number,status,certification_decision,critical_domain_results,knowledge_score,applied_cases_score,interview_score,overall_score,decision_at,started_at',
+      select: 'id,attempt_number,status,certification_decision,critical_domain_results,knowledge_score,applied_cases_score,interview_score,overall_score,decision_at,started_at,assessment_version',
       user_id: `eq.${user.id}`,
       course_slug: `eq.${COURSE_SLUG}`,
       order: 'attempt_number.asc',
@@ -104,6 +104,17 @@ export async function onRequestGet(context) {
             appliedCases: latestFinalized.applied_cases_score,
             interview: latestFinalized.interview_score,
           },
+          // Resolved against the SPECIFIC version this attempt was actually
+          // scored under (never "whatever's current"), per the versioned-
+          // config architecture in assessment-config.mjs -- a future
+          // threshold revision must never silently reinterpret what an
+          // earlier attempt was actually held to. Added so the results UI
+          // can show "you needed X%, you got Y%" from real data instead of
+          // a client-side hardcoded duplicate.
+          thresholds: (function () {
+            var cfg = getAssessmentConfig(latestFinalized.assessment_version);
+            return { weights: cfg.weights, minimums: cfg.minimums };
+          })(),
           criticalDomainResults: latestFinalized.critical_domain_results,
           decisionAt: latestFinalized.decision_at,
         }

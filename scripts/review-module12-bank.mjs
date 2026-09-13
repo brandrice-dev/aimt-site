@@ -367,7 +367,7 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
 
     const decision = determineCertificationDecision({ knowledgePercent, appliedCasesPercent, interviewPercent, criticalDomainResults, config });
     session.finalized = true;
-    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesPercent, interview: interviewPercent }, criticalDomainResults, attemptNumber: session.attemptNumber, decisionAt: new Date().toISOString() };
+    session.result = { decision: decision.decision, overallScore: decision.overallPercent, componentScores: { knowledge: knowledgePercent, appliedCases: appliedCasesPercent, interview: interviewPercent }, thresholds: { weights: config.weights, minimums: config.minimums }, criticalDomainResults, attemptNumber: session.attemptNumber, decisionAt: new Date().toISOString() };
 
     attemptHistory.push({ attemptNumber: session.attemptNumber, decision: decision.decision, criticalDomainResults });
 
@@ -425,6 +425,8 @@ async function runBrowserServer({ ROOT, ENGINE, seed, port }) {
     return `<!doctype html><html><head><meta charset="utf-8"><title>Module 12 — Local Visual QA</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-metric-ring.css">
+<script src="/assets/js/aimt-metric-ring.js"></script>
 ${siteStyle}
 <style>
   #m12qa-banner { position: sticky; top: 0; z-index: 999; background: #1a1a1a; color: #fff; padding: 10px 16px; font-family: monospace; font-size: 12px; line-height: 1.5; }

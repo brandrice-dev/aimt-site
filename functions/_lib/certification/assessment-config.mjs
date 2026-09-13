@@ -43,7 +43,15 @@ const HEAD_SPA_ASSESSMENT_CONFIG_V1 = Object.freeze({
   courseSlug: 'headspa-mastery',
   assessmentVersion: ASSESSMENT_VERSION_V1,
   standardVersion: STANDARD_VERSION_V1,
-  bankVersion: BANK_VERSION_PENDING,
+  // Kept in sync with content-bank.mjs's own `bankVersion` export by hand,
+  // not by import -- content-bank.mjs already imports BANK_VERSION_PENDING
+  // from *this* file, so importing back would be circular. This literal
+  // went stale after real content installed (content-bank.mjs's bankVersion
+  // was updated to 'headspa-fe-bank-v1-2026-08-26'; this field was not),
+  // causing every new attempt's persisted `bank_version` column to
+  // incorrectly claim content was still pending. Found and fixed in the
+  // Module 12 final audit pass -- see implementation-log.md.
+  bankVersion: 'headspa-fe-bank-v1-2026-08-26',
   criticalDomainConfigVersion: CRITICAL_DOMAIN_CONFIG_VERSION,
 
   // Section 2 of the certification standard.
