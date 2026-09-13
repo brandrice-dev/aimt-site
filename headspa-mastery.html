@@ -13987,26 +13987,42 @@ const M8_CHAPTERS = [
     notes:['Explain the format difference clearly during booking — clients who\'ve had the Extended service will notice the absence of steam and hand massage in Core.'],
     adapt:[], continuity:'The waterfall, cooling spray, and hot towel sequence follows in both formats once treatment processing is complete.' },
   { num:'09', title:'Final Rinse + Halo Massage', label:'Video 09 — Final Rinse & Halo Massage', tCore:'Core: ~2 min left', tExtended:'Extended: ~2 min left',
-    watchFor:'the temperature contrast during the final rinse and cooling spray, then the gradual pace of sitting the client back up to close the service.',
-    guidance:['Waterfall neck rinse under the halo — confirm alignment and temperature before water contacts the client. Cooling scalp spray — a deliberate temperature contrast, positioned and timed for client comfort. Hot towel press — warm compression, signals the transition toward completion.',
-      'Wrap hair. Help client sit up slowly — they\'ve been horizontal for up to two hours. Deliver the closing observation. Share one specific detail from the service before moving toward the end of the appointment.'],
-    why:['This phase clears the conditioning portion while intentionally transitioning the client toward the close — the final Halo work should feel controlled and unhurried, not rushed to finish. Cooling creates a deliberate sensory contrast after an extended warm-water experience; its value is experiential — temperature contrast, a recognizable sensory transition, and an identity for the closing phase before the appointment wraps up.'],
+    // Text updated for the owner's replaced Chapter 9 video (full service
+    // close now demonstrated, not just the rinse/Halo portion). Title,
+    // label, num, and video ID are deliberately unchanged per explicit
+    // owner instruction — the expanded close is carried by this text, not
+    // a rename.
+    watchFor:'the controlled transition from final rinse into Halo massage and the service close — steady temperature checks, unhurried contact, a deliberate finishing element, and a gradual return from the treatment room.',
+    guidance:['Before the final rinse, use a wide-tooth comb through the scalp for stimulation only — not detangling. Check water temperature on your own skin first, confirm it with the client, then rinse thoroughly from underneath, paying particular attention to the nape, around the ears, the front hairline, and the crown.',
+      'Prepare the Halo with only enough clean water to run the flow. Protect the client\'s chest with a dry towel, position the Halo carefully, and keep the flow low. Continue into slow, broad neck-and-shoulder massage with steady contact so this portion feels like a gradual release from the treatment rather than an abrupt ending.',
+      'As the Halo work ends, turn the water fully off and prevent dripping before returning the Halo to rest. Fold the protective towel back over the client and continue with slow, even, large movements.',
+      'Choose one finishing element: a cooling scalp spray, or a warm towel infused with the client\'s chosen essential oil. If using the warm towel, test the temperature on your own skin before applying it.',
+      'Gently squeeze — never rub — excess moisture from the hair, wrap it loosely to one side, remove the weighted blanket and eye mask, and help the client sit up slowly. Step out to give them privacy to dress.',
+      'When they return, greet them with a glass of ice water and revisit the microscope so they can see their scalp after the service. Offer a blow-dry using controlled airflow and moderate heat, then finish with any final service observations or recommendations before moving into checkout.'],
+    why:['This phase clears the conditioning portion while gradually transitioning the client out of treatment. The final Halo work should remain broad, steady, and unhurried. The finishing element provides a deliberate sensory close, while the slower sit-up, privacy handoff, and re-greet prevent the transition out of the treatment room from feeling abrupt.',
+      'Returning to the microscope gives the client a clear visual reference for what you observed after the service. The physical close should feel as intentional as the opening.'],
     teach:[
       { type:'quiet', label:'Keep the flow quiet', note:'This part of the service is largely sensory. Do not narrate the obvious water movements of the final rinse and halo massage.' },
-      // Corrected per owner instruction: do not offer to skip the cooling
-      // step by default — that's an intake-stage decision, not a repeated
-      // mid-service opt-out. The temperature change is still worth
-      // preparing the client for.
-      { label:'Communication cue (cooling transition)', text:'"I\'m going to move into the cool mist next, so you\'ll notice a quick temperature change."' },
-      { label:'If they ask (why the cooling step is included)', text:'"It creates sensory contrast after the warm-water portion and helps signal that the service is moving into its closing phase."' },
-      // Closing cue stays limited to the treatment-closing observation and
-      // wellbeing check — retail/home-care recommendations, rebooking, and
-      // pricing belong to Module 9 (Checkout, Client Closing & Pricing
-      // Strategy), not duplicated here.
+      // Corrected per owner instruction: cooling is now one of two optional
+      // finishing elements (the other being the warm essential-oil towel),
+      // not a default step — both this cue and its "If they ask" pair are
+      // scoped explicitly to the cooling option, never presented as
+      // required.
+      { label:'Communication cue (if using the cooling spray)', text:'"I\'m going to move into the cool mist next, so you\'ll notice a quick temperature change."' },
+      { label:'If they ask (about the cooling option)', text:'"It creates sensory contrast after the warm-water portion and helps signal that the service is moving into its closing phase."' },
+      { label:'Communication cue (before eye-mask removal)', text:'"I\'m going to have you prepare your eyes a little bit because I\'ll be removing your mask in just a moment."' },
+      { label:'Communication cue (privacy handoff)', text:'"I have your hair wrapped over to the side, and there\'s an extra towel in the basket if you need it. Take your time getting up and getting changed. When you\'re ready, come right out and we\'ll get you dried off."' },
+      // Closing-observation script kept per module-08.md's own "retained,
+      // unchanged" authority (see Step-specific approved corrections) --
+      // independent of this video, not merely a leftover from the prior
+      // Chapter 9 text. Retail/home-care recommendations, rebooking, and
+      // pricing still belong to Module 9 (Checkout, Client Closing &
+      // Pricing Strategy), not duplicated here.
       { label:'Communication cue (treatment close)', text:'"Today I focused a little more on [area or service priority you addressed]. How are you feeling?"' }
     ],
     notes:['A specific, personalized observation at close is one of the strongest ways to make a service feel complete and intentional rather than rushed. Clients remember being seen — that\'s worth doing well regardless of what it does for your schedule.'],
-    adapt:[], continuity:'That\'s the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.' }
+    adapt:['If the client\'s anatomy prevents the Halo from seating comfortably after correct positioning, support the chin as needed and ask the client to lift slightly while the water runs, keeping the flow controlled and away from the face.'],
+    continuity:'That\'s the full service, opening to close. The sequence you just watched is the map — "Protect the Flow," next, tests what happens when a client changes it.' }
 ];
 
 let m8ActiveChapter = 0;
