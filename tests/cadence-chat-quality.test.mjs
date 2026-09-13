@@ -334,8 +334,14 @@ await (async function harnessMirrorsProductionTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
+    // Fingerprint updated by the Modules 2-11 bulk launch-triage fix pass
+  // (separate, later task): m4cp2's question text was corrected from the
+  // drifted "During the crown assessment..." to module-04.md's approved
+  // "During the crown station..." (headspa-mastery.html's
+  // M4.questions.m4cp2). No other checkpoint text changed -- this task's
+  // own work still touched zero checkpoint content.
   check('CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint -- this task touched zero checkpoint content',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-e0ea1714');
   check('CHECKPOINT CONTENT UNCHANGED', 'CHAT_DATASET case count is unchanged (16) -- the fixture set itself was not edited, only the harness\'s system-prompt assembly',
     CHAT_DATASET.length === 16);
 })();

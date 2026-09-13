@@ -307,7 +307,15 @@ Placed at the end because it synthesizes the full module: spectrum placement, re
 
 ### Completion card — `m6Complete`
 
-See "Completion behavior" below.
+**Completion behavior (documentation gap closed during the Modules 2–11 bulk launch-triage fix pass — see `implementation-log.md`):** this subsection previously referred to a "Completion behavior" section that did not exist anywhere in this document. No new curriculum was written to fill the gap; the decision below uses only concepts already approved elsewhere in this document (the "Approved outcomes" list, the module's own opening paragraph, and the `m6cp1`/`m6cp2` "Competency assessed" lines above).
+
+Module 6 uses the same course-wide standardized completion-card structure as every other module besides Module 1 (checkmark, generic title, one competency-line sentence, unchanged next-module handoff) — nothing here reopens that course-wide decision. The one thing this module's card must do correctly is name **both** halves of what the module actually teaches, matching this document's own framing ("to tell apart two presentations that are commonly confused... to know what a visual impression can and cannot establish, and to decide whether the responsible next step is to proceed, modify, or refer") and both checkpoints' competencies (`m6cp1`: dry-scalp-vs-dandruff recognition and correction; `m6cp2`: spectrum placement and proceed/modify/refer referral judgment) — not only the identification half.
+
+**Competency line:**
+
+> You can tell apart a dry-scalp presentation from the dandruff spectrum, know what a visual impression can and cannot establish, and decide whether to proceed, modify, or refer.
+
+Completion requirement, next-module handoff, and button copy are unchanged (both `m6cp1` and `m6cp2` passed; "Up next — Module 7").
 
 ---
 

@@ -352,8 +352,13 @@ await (async function failClosedRobustnessTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
+  // Fingerprint intentionally updated by the Modules 2-11 bulk launch-triage
+  // fix pass: m4cp2's question text was corrected from the drifted "During
+  // the crown assessment..." to module-04.md's approved "During the crown
+  // station..." (headspa-mastery.html's M4.questions.m4cp2). No other
+  // checkpoint text changed.
   check('Q. CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-e0ea1714');
 })();
 
 // ---- Report ----

@@ -2913,6 +2913,15 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   .m11-hear-step:first-child { border-top:none; }
 }
 
+/* Standalone course-authored statement typography (11.3 x2, 11.5, 11.8) —
+   module-11.md's own "signature question"/"signature takeaway" framing
+   device. Deliberately not a card and not attributed to Cadence (unlike
+   .cadence-note/.cn-text): a serif pull-quote sitting directly in the body
+   copy, matching this course's existing serif-italic emphasis convention
+   (see .mo-tagline/.cn-text) without reusing either of those on-brand-dark
+   or Cadence-attributed components. */
+.m11-statement { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1.15rem; line-height: 1.5; letter-spacing: -0.005em; color: var(--text); margin: 1.5rem 0; }
+
 /* 11.4 — AI scalp-analysis example image paired with the Human Review
    card. Top-aligned (not stretched) so the Human Review card keeps its
    own natural height instead of being padded out to match the image —
@@ -5003,7 +5012,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="interaction-hint">Select each structure to expand</div>
 
     <div class="timeline-wrap" id="anatomyToAction">
-      <button type="button" class="timeline-item" id="a2a-trigger-0" aria-expanded="false" aria-controls="a2a-step-0" onclick="openStep(0)">
+      <button type="button" class="timeline-item" id="a2a-trigger-0" aria-expanded="false" aria-controls="a2a-step-0" onclick="m3OpenAnatomyStep(0)">
         <div class="tl-num">1</div>
         <div class="tl-info">
           <div class="tl-title">Surface barrier</div>
@@ -5018,7 +5027,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="tld-highlight"><strong>What not to assume:</strong> One surface clue does not establish dandruff, dehydration, infection, inflammation, or the cause of sensitivity.</div>
       </div>
 
-      <button type="button" class="timeline-item" id="a2a-trigger-1" aria-expanded="false" aria-controls="a2a-step-1" onclick="openStep(1)">
+      <button type="button" class="timeline-item" id="a2a-trigger-1" aria-expanded="false" aria-controls="a2a-step-1" onclick="m3OpenAnatomyStep(1)">
         <div class="tl-num">2</div>
         <div class="tl-info">
           <div class="tl-title">Follicle opening and sebaceous gland</div>
@@ -5033,7 +5042,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="tld-highlight"><strong>What not to assume:</strong> Visible material does not prove that a follicle is "clogged" or identify the cause.</div>
       </div>
 
-      <button type="button" class="timeline-item" id="a2a-trigger-2" aria-expanded="false" aria-controls="a2a-step-2" onclick="openStep(2)">
+      <button type="button" class="timeline-item" id="a2a-trigger-2" aria-expanded="false" aria-controls="a2a-step-2" onclick="m3OpenAnatomyStep(2)">
         <div class="tl-num">3</div>
         <div class="tl-info">
           <div class="tl-title">Follicle, bulb, and dermal papilla</div>
@@ -5048,7 +5057,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="tld-highlight"><strong>What not to assume:</strong> Surface appearance cannot establish why a follicle is shedding, miniaturizing, inflamed, or no longer producing hair.</div>
       </div>
 
-      <button type="button" class="timeline-item" id="a2a-trigger-3" aria-expanded="false" aria-controls="a2a-step-3" onclick="openStep(3)">
+      <button type="button" class="timeline-item" id="a2a-trigger-3" aria-expanded="false" aria-controls="a2a-step-3" onclick="m3OpenAnatomyStep(3)">
         <div class="tl-num">4</div>
         <div class="tl-info">
           <div class="tl-title">Vessels and nerves</div>
@@ -6642,8 +6651,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="lesson-complete" id="m4Complete" style="display:none;">
       <div class="lc-check">✓</div>
-      <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You can run a standardized five-point scan, use disciplined observation language, and know when to pause or refer — the camera collects evidence, and restraint turns it into a good decision.</div>
+      <div class="lc-next-label">Module 4 complete</div>
+      <div class="lc-title">You can collect evidence before making a decision.</div>
+      <div class="lc-body">You demonstrated a standardized five-point scan, disciplined observation language, regional comparison, image-consent awareness, and pause/referral judgment.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 5</div>
         <div class="lc-next-text">Module 4 taught you how to gather and describe the evidence. Module 5 teaches you how to translate appropriate findings into a cosmetic treatment direction without collapsing the entire scalp into one label.</div>
@@ -8065,7 +8075,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="lesson-complete" id="m6Complete" style="display:none;">
       <div class="lc-check">✓</div>
       <div class="lc-title">Module complete.</div>
-      <div class="lc-body">You can now read the difference between dry scalp and dandruff, understand the Malassezia spectrum, and explain it to a client in plain language.</div>
+      <div class="lc-body">You can tell apart a dry-scalp presentation from the dandruff spectrum, know what a visual impression can and cannot establish, and decide whether to proceed, modify, or refer.</div>
       <div class="lc-next">
         <div class="lc-next-label">Up next — Module 7</div>
         <div class="lc-next-text">Even the most knowledgeable practitioner cannot deliver a high-level experience in a poorly designed setup. Module 7 covers equipment, tools, room design, and how to build a workspace that makes everything else possible.</div>
@@ -9789,6 +9799,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <div class="sec-eyebrow">11.3 — Human authority</div>
     <div class="sec-title">Decide How Much Authority to Give the Tool</div>
 
+    <div class="m11-statement">"What are you asking the tool to do — and what still belongs to you?"</div>
+
     <div class="m11-framework">
       <div class="m11-framework-grid">
         <div class="m11-framework-col">
@@ -9808,6 +9820,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
     </div>
+
+    <div class="m11-statement">"Use AI for leverage. Keep human authority where it matters."</div>
 
     <hr class="divider">
 
@@ -9866,6 +9880,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
     </div>
+
+    <div class="m11-statement">"The goal is not to defeat the AI answer. It is to return the conversation to responsible human judgment."</div>
 
     <hr class="divider">
 
@@ -9951,6 +9967,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">11.8 — Human-led practice</div>
     <div class="sec-title">Stay Human Where Human Matters</div>
+
+    <div class="m11-statement">"Modern does not mean less human."</div>
 
     <div class="body-text"><strong>AI may draft.</strong> The practitioner owns the message.</div>
     <div class="body-text"><strong>AI may organize information.</strong> The practitioner owns the judgment.</div>
@@ -10895,7 +10913,7 @@ const M4 = {
   // markup for m4cp1 / m4cp2 inside #module4Wrap.
   questions: {
     m4cp1: 'During a five-point scan, the crown appears shiny with visible material around several follicular openings, while the frontal hairline looks matte with fine loose scale. The client reports no pain or burning. Describe what you would document, explain why one label for the entire scalp would be weak, and name one question you would ask before deciding how to adjust the service.',
-    m4cp2: 'During the crown assessment, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.'
+    m4cp2: 'During the crown station, you see a cluster of raised lesions with visible fluid and crusting. The client says the area does not bother them and asks you to continue. Explain what you do with the microscope and the service, what you say to the client, and why.'
   },
   // Module-4/checkpoint-specific evaluator configuration (one rubric per
   // checkpoint), combined with the shared tone/format rules inside
@@ -11814,6 +11832,23 @@ function selectM3Timing(choice) {
       '<p class="practice-anchor">The beginner looks at what happened this week. The informed practitioner also asks what happened months ago.</p>';
   }
   feedback.classList.add('show');
+}
+
+// "Anatomy to Action" visual explorer — ungraded, revisit-freely accordion
+// (Module 3). Deliberately Module-3-scoped, not a bare global — the removed
+// global openStep() this replaces used to be Module 2's own, unrelated
+// arrival accordion (see M2_BD_ITEMS's header comment above); Module 3's four
+// buttons kept calling that same global name after Module 2's rebuild
+// deleted it, which is what silently broke this interaction. No progress,
+// checkpoint, or completion state is touched.
+function m3OpenAnatomyStep(i) {
+  const trigger = getActiveElementById('a2a-trigger-' + i);
+  const detail = getActiveElementById('a2a-step-' + i);
+  if (!trigger || !detail) return;
+  const nowOpen = !trigger.classList.contains('open');
+  trigger.classList.toggle('open', nowOpen);
+  detail.classList.toggle('open', nowOpen);
+  trigger.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
 }
 
 // ── MODULE 3 ──

@@ -309,14 +309,17 @@ const registry = getCadenceModelRegistry(CURRENT_VERSION);
 // ─────────────────────────────────────────────────────────────────────────
 (function noCollateralChangeTests() {
   const rubrics = loadCheckpointRubrics();
-  // Fingerprint re-pinned by a later, separate Module 1 launch-fix task's
+  // Fingerprint re-pinned twice by later, separate tasks, neither of which
+  // touched this task's own promotion work: (1) a Module 1 launch-fix task's
   // addition of an M1 `errorMessages` block (module-01.md's approved
-  // checkpoint network-error copy) -- an intentional, task-authorized
-  // checkpoint-adjacent addition, not a question/rubric change. This task's
-  // own promotion work is still proven to have touched zero checkpoint
-  // content: only that later, unrelated addition moved this hash.
+  // checkpoint network-error copy); (2) the Modules 2-11 bulk launch-triage
+  // fix pass's correction of m4cp2's drifted question text ("During the
+  // crown assessment..." -> module-04.md's approved "During the crown
+  // station..."). This task's own promotion work is still proven to have
+  // touched zero checkpoint content: only those later, unrelated changes
+  // moved this hash.
   check('NO COLLATERAL CHANGE', 'The full M0-M11 checkpoint rubric/question set matches the current fingerprint -- promoting the registry touched zero checkpoint content',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-e0ea1714');
 
   check('NO COLLATERAL CHANGE', 'GRADING_DATASET case count unchanged (72)',
     GRADING_DATASET.length === 72);
