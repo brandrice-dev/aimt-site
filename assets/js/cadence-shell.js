@@ -305,12 +305,39 @@
   // production there is no competing fixed banner, so this is always 0
   // there. Measured live rather than hardcoded so a future banner copy
   // change can't silently desync the offset.
-  function getPageChromeOffsetTop() {
+  function getReviewBannerOffsetTop() {
     const banner = document.getElementById('reviewModeBanner');
     if (!banner) return 0;
     const cs = getComputedStyle(banner);
     if (cs.display === 'none' || !banner.classList.contains('show')) return 0;
     return banner.getBoundingClientRect().height;
+  }
+
+  // BUG FIX (Cadence/header collision): the lesson page's own sticky
+  // header (`.lesson-nav`, --nav-h in headspa-mastery.html) was never
+  // measured here, only the review banner. Since that header is always
+  // pinned to the same on-screen position (in-flow at the very top when
+  // unscrolled, sticky-stuck at the same spot once scrolled), omitting it
+  // meant the shell had zero top clearance in production -- at/near
+  // scrollY 0 it could render flush with the header instead of starting
+  // below it, most visible during the shell's own open transition (the
+  // header is what's momentarily showing through). Measured live (not
+  // hardcoded to --nav-h) so a future header height change can't silently
+  // desync this again; naturally 0 outside the lesson view or wherever
+  // `.lesson-nav` isn't in the DOM (e.g. Module 12's own header-less
+  // states), since a hidden ancestor collapses getBoundingClientRect() to
+  // zero. Deliberately scroll-position-independent -- the header occupies
+  // the same screen position whether the page is at the top or scrolled,
+  // so this offset must not vary between the two.
+  function getLessonHeaderOffsetTop() {
+    const nav = document.querySelector('#lessonView .lesson-nav');
+    if (!nav) return 0;
+    const rect = nav.getBoundingClientRect();
+    return rect.height > 0 ? rect.height : 0;
+  }
+
+  function getPageChromeOffsetTop() {
+    return getReviewBannerOffsetTop() + getLessonHeaderOffsetTop();
   }
 
   function autoGrowInput() {

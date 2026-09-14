@@ -13,11 +13,22 @@ rewritten to match the real, reconciled Chapter 1 teaching (the opening
 sequence now covers changing/arrival, intake completion, scalp
 microscopy, and the aromatherapy ritual — not aromatherapy alone), and
 **M8-02**'s phase-one label is updated to match the live page's own
-`.cc-sub` text. Chapter 9 ("Final Rinse + Halo Massage") and its
-already-updated closing-sequence teaching are unchanged by this pass — that
-reconciliation happened separately, in commit `04faf79` ("Align Module 8
-Chapter 9 with updated service video"), against `headspa-mastery.html`
-directly.
+`.cc-sub` text.
+
+**v3 update (course source freeze pass, 2026-09-13):** Two changes.
+(1) **M8-05**'s Chapter 9 paragraph was still narrating the *pre-*04faf79
+close (cooling spray as a near-default step, no comb/temperature/Halo-
+shutoff/towel-alternative/microscope-reveal/blow-dry detail) even though
+`M8_CHAPTERS[8]` on the live page was already reconciled to the full
+close in that commit — this doc had not caught up. Rewritten below
+against the live `M8_CHAPTERS[8]` `guidance`/`why`/`teach` fields
+directly; title and Vimeo ID (`STEP_VIDEO_IDS[8]`, `1214960268`)
+unchanged. (2) The Module 8 chapter template was restructured on the page
+(teaching content now precedes each chapter's video; "Watch for" moved to
+sit immediately before it) — see the new **Video handoff /
+chapter-reorder synchronization note** section below for what that means
+for narration once this module gets full per-chapter audio, not just the
+by-name overview these M8-04/M8-05 segments currently give it.
 
 **Curriculum authority:** the 7-phase overview, Sections 8.1–8.3, the
 9-chapter video masterclass (`M8_CHAPTERS`), a 3-scenario "Protect the
@@ -112,7 +123,11 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 >
 > Chapter eight, Deep Conditioning and Hand-and-Arm Massage: the conditioning portion supports the actual hair and scalp service plan, following the product's real processing requirements — and the hand-and-forearm massage makes productive use of otherwise passive processing time, wherever it fits your scope and training.
 >
-> And chapter nine, Final Rinse and Halo Massage: this phase clears the conditioning portion while intentionally transitioning the client toward the close — the final halo work should feel controlled and unhurried. The cooling spray creates a deliberate temperature contrast after an extended warm-water experience, and it's worth preparing the client for that shift rather than offering to skip it mid-service. Then: wrap the hair, help the client sit up slowly — they've been horizontal for up to two hours — and deliver a specific, personalized closing observation. That's one of the strongest ways to make a service feel complete rather than rushed.
+> And chapter nine, Final Rinse and Halo Massage: a wide-tooth comb moves through the scalp before the final rinse — that's for stimulation, not detangling. Temperature gets checked on your own skin first, confirmed with the client, then the rinse runs thorough, with real attention to the nape, around the ears, the hairline, and the crown. The Halo comes back for one more pass — low flow, the client's chest protected — into slow, broad neck-and-shoulder massage with steady contact, so this reads as a gradual release rather than an abrupt stop. Once that finishes, the water goes fully off and the Halo returns to rest before you choose one finishing element, never both: a cooling scalp spray, or a warm towel infused with the client's chosen oil, tested on your own skin first if it's the towel.
+>
+> Let the client know before the mask comes off, then gently squeeze — never rub — the excess moisture from the hair, wrap it loosely to one side, and step out so they can dress in privacy. When they return: a glass of ice water, and a second look through the microscope so they can actually see what changed since the first one. Finish with a controlled blow-dry — moderate heat, controlled airflow — a closing observation specific to what you actually addressed today, and any final recommendations before the appointment moves toward checkout.
+>
+> [warmly] The close should feel as intentional as the opening did.
 >
 > Once you know this service, you shouldn't have to reopen this lesson to run it. On screen there's the A-I-M-T Service Timer — a real treatment-room companion, included with your certification, that runs the full Core and Extended sequences, open to close, so you can train pacing and rehearse before a client without reopening the course.
 
@@ -159,6 +174,31 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 > Up next, Module 9: checkout, client closing, and pricing strategy — how to close the appointment, communicate value, and price the services you now know how to perform.
 
 ---
+
+## Video handoff / chapter-reorder synchronization note
+
+The live page's Module 8 chapter template was restructured (course source
+freeze pass, 2026-09-13): each chapter now runs **teaching content →
+"Watch for [in the demonstration]" → video → chapter-complete nav**,
+video last, instead of video-first. This script (M8-04/M8-05) already
+narrates by chapter *name*, not as a synced per-chapter audio track, so
+nothing in the script above needed to move — but this is the rule future
+full per-chapter Listen Mode narration (if this module is ever produced
+beyond the current by-name overview) must follow:
+
+- Narrate the chapter's teaching (why + communication script) first, the
+  same content this script already draws from `M8_CHAPTERS[n].why`/`teach`.
+- Hand off to the video only after that teaching is spoken — something
+  like *"now watch the demonstration and pay attention to [the chapter's
+  `watchFor` cue, or a close paraphrase]"*. Vary the phrasing chapter to
+  chapter; don't repeat one exact sentence nine times.
+- The video itself stays non-narrated, matching the existing screen/video
+  boundary above (Listen Mode has never voiced hand technique).
+- Once the handoff line plays, treat the chapter as finished for audio
+  purposes — no post-video narration block. This matches the page: only
+  chapter status/nav and a one-line "what's next" now render after the
+  video, and neither is spoken content already covered by M8-04/M8-05's
+  chapter-to-chapter transitions.
 
 ## Editorial QA (pre-generation checklist)
 

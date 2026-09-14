@@ -483,7 +483,7 @@ body.timer-open{overflow:hidden}
               <div class="read-item"><div class="read-index">05</div><div><h4>Communication cues</h4><p><strong>Say when needed</strong> is reserved for positioning, temperature, pressure, comfort or a meaningful transition. <strong>If they ask</strong> gives you a short answer for a direct client question; it is not an instruction to narrate the service.</p></div></div>
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
-            <div class="pacing-note"><strong>Before the clock</strong><p>Aromatherapy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
+            <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
       </div>
@@ -582,7 +582,7 @@ body.timer-open{overflow:hidden}
             <div class="step-eyebrow" id="step-eyebrow">Step 01 · Pre-Timer Opening</div>
             <div class="phase-pill" id="phase-pill">Pre-Timer Opening</div>
           </div>
-          <h2 class="step-title" id="step-title">Aromatherapy</h2>
+          <h2 class="step-title" id="step-title">Opening Rituals + Microscopy</h2>
           <p class="step-purpose" id="step-purpose"></p>
           <div class="guide-box"><span class="guide-label">Practitioner cue</span><div class="guide-text" id="guide-text"></div></div>
           <div class="comm-box" id="comm-box"></div>
@@ -683,10 +683,10 @@ body.timer-open{overflow:hidden}
 
 const PRE_TIMER_STEPS = [
   {
-    id:'01', phase:'Pre-Timer Opening', title:'Aromatherapy',
-    purpose:'Confirm the client’s scent preference before the treatment clock begins. Keep the choice concise and compatible with the intake plan.',
-    cue:'A fragrance-free service is valid. If essential oils are included, have the selected option ready before you begin the timed dry opening.',
-    communication:{proactive:'“I have three scent options for you today. Take a moment with each and tell me which one you’re most drawn to.”',ifAsked:'“Aromatherapy is part of the sensory opening of the service. It helps establish the tone of the experience before we move into the hands-on treatment.”'}
+    id:'01', phase:'Pre-Timer Opening', title:'Opening Rituals + Microscopy',
+    purpose:'Confirm intake is complete, walk the client through scalp microscopy, then move into live aromatherapy sampling with an intentional first touch — all before the treatment clock begins.',
+    cue:'Connect every microscopy observation to the plan — what you saw, what you’ll do, why — without diagnosing. Keep one hand on the shoulder through the aromatherapy selection as the first deliberate touch. A fragrance-free service is valid; skip the live sampling and move straight to first touch when intake already established it.',
+    communication:{proactive:'“Let’s take a look at your scalp under the microscope first, then I’ll have you sample a few scent options before we begin.”',ifAsked:'“The microscopy helps me tailor today’s service to what I’m actually seeing, and the aromatherapy sets the sensory tone before we move into the hands-on treatment.”'}
   },
   {
     id:'02', phase:'Pre-Timer Opening', title:'Client Positioning + Comfort',
@@ -862,7 +862,7 @@ function openTimer(key, existing=false){
   render();
   startTicker();
   setTimeout(()=>ALL.main.focus({preventScroll:true}),30);
-  announce(`${session.protocol.label} timer opened. Step 01 Aromatherapy. Treatment clock has not started.`);
+  announce(`${session.protocol.label} timer opened. Step 01 Opening Rituals + Microscopy. Treatment clock has not started.`);
 }
 
 function closeTimerToPage(){
@@ -1207,7 +1207,7 @@ function resetToNewService(){
   const key=session ? session.protocolKey : 'core';
   session=makeSession(key);
   ALL.complete.classList.remove('show'); ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
-  render(); startTicker(); announce(`${session.protocol.label} reset. Step 01 Aromatherapy.`);
+  render(); startTicker(); announce(`${session.protocol.label} reset. Step 01 Opening Rituals + Microscopy.`);
 }
 
 function discardSession(){

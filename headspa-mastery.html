@@ -2634,7 +2634,11 @@ textarea#gpInput::placeholder { color: var(--muted2); }
    uses the shared .body-text sizing (0.94rem/1.84/66ch) rather than bespoke
    Module 8 values — these rules now only ADD to .body-text, never replace
    its font-size/line-height/measure. Markup combines class="body-text ...". */
-.sms-watchfor { font-style:italic; color:var(--muted); margin:0 0 0.15rem; }
+/* Reordered pass: watchfor now always follows teaching content (guidance/
+   why/teach/adapt/notes) rather than sitting first in the card, so it
+   needs its own top clearance -- previously relied on the drawer above it
+   already carrying a bottom margin. */
+.sms-watchfor { font-style:italic; color:var(--muted); margin:1.25rem 0 0.15rem; }
 .sms-watchfor strong { font-style:normal; font-weight:500; color:var(--text); }
 .sms-what { margin:1rem 0 0; }
 .sms-note { font-size:0.86rem; line-height:1.7; color:var(--muted); font-weight:300; font-style:italic; margin-top:1rem; max-width:64ch; }
@@ -2661,7 +2665,13 @@ textarea#gpInput::placeholder { color: var(--muted2); }
    all live inside a single visual container so the masterclass reads as
    one product, not a video plus disconnected cards (owner correction,
    Aug 19 2026). */
-.m8-masterclass { background:rgba(255,255,255,0.6); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-lg); padding:1.5rem 1.4rem 1.75rem; margin:1.25rem 0 1.5rem; }
+.m8-masterclass { background:rgba(255,255,255,0.6); border:0.5px solid var(--border2); border-radius: var(--aimt-radius-lg); padding:1.5rem 1.4rem 1.75rem; margin:1.25rem 0 1.5rem;
+  /* Chapter-nav QA fix: m8GoToChapter()'s scrollIntoView({block:'start'})
+     lands this container's top flush with the viewport edge, which sits
+     directly under the sticky .lesson-nav (--nav-h) -- without this, the
+     new chapter's number/title render hidden behind that header right
+     after Next/Previous chapter. */
+  scroll-margin-top: calc(var(--nav-h) + 14px); }
 .m8mc-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:1rem; }
 .m8mc-chapters-toggle { flex-shrink:0; display:flex; align-items:center; gap:6px; background:none; border:0.5px solid var(--border2); border-radius:980px; padding:0.42rem 0.9rem; font-family:var(--aimt-font-sans); font-size:0.72rem; font-weight:500; color:var(--text); cursor:pointer; transition:all 0.2s; min-height:36px; margin-top:2px; }
 .m8mc-chapters-toggle:hover { background:rgba(255,255,255,0.8); }
@@ -8668,7 +8678,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="m8-masterclass" id="m8Masterclass">
       <div class="m8mc-top">
-        <div class="sms-head" id="m8mcHead">
+        <div class="sms-head" id="m8mcHead" tabindex="-1">
           <div class="sms-num" id="m8mcNum">01</div>
           <div class="sms-info">
             <div class="sms-title" id="m8mcTitle">Opening Rituals + Microscopy</div>
@@ -8686,6 +8696,26 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="m8mc-drawer" id="m8mcDrawer" hidden>
         <ol class="m8mc-list" id="m8mcList" aria-label="Module 8 chapters"></ol>
       </div>
+
+      <!-- Teach-first architecture (Listen Mode source freeze pass): the
+           video is each chapter's demonstration/capstone, not its opener --
+           full teaching content comes first, "Watch for" moves to a viewing
+           lens directly before the video, and only chapter-completion nav
+           plus a one-line "what's next" remain below it. See docs/course-
+           audit/modules/module-08.md's September 13, 2026 amendment for the
+           reordering rationale. -->
+      <div class="sms-section-label">How to do it</div>
+      <div id="m8mcGuidance"></div>
+
+      <div class="sms-section-label">Why we do it</div>
+      <div id="m8mcWhy"></div>
+
+      <div class="sms-section-label">How to communicate it</div>
+      <div id="m8mcTeach"></div>
+
+      <div id="m8mcAdapt"></div>
+
+      <div id="m8mcNotes"></div>
 
       <div class="body-text sms-watchfor" id="m8mcWatchFor"></div>
 
@@ -8706,17 +8736,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
       </div>
 
-      <div class="sms-section-label">How to do it</div>
-      <div id="m8mcGuidance"></div>
-      <div id="m8mcAdapt"></div>
-
-      <div class="sms-section-label">Why we do it</div>
-      <div id="m8mcWhy"></div>
-
-      <div class="sms-section-label">How to communicate it</div>
-      <div id="m8mcTeach"></div>
-
-      <div id="m8mcNotes"></div>
+      <div class="sms-note" id="m8mcContinuity"></div>
 
       <div class="m8mc-nav">
         <button type="button" class="m8mc-nav-btn" id="m8mcPrevBtn" onclick="m8GoToChapter(m8ActiveChapter - 1)">← Previous chapter</button>
@@ -14084,6 +14104,12 @@ function m8GoToChapter(idx) {
   m8CloseChapterDrawer();
   const mc = document.getElementById('m8Masterclass');
   if (mc) mc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Move a11y focus to the new chapter's heading -- tabIndex=-1 keeps it
+  // out of normal tab order, and preventScroll avoids fighting the
+  // scrollIntoView above (which already accounts for the sticky header
+  // via #m8Masterclass's scroll-margin-top).
+  const headEl = document.getElementById('m8mcHead');
+  if (headEl) headEl.focus({ preventScroll: true });
 }
 
 // Chapter drawer — collapsed by default so the chapter list stays
@@ -14158,7 +14184,7 @@ function m8RenderChapter(idx) {
   document.getElementById('m8mcTiming').innerHTML = ch.preTimer
     ? '<span class="t-badge t-pretimer">Pre-Timer Opening</span>'
     : (ch.tCore ? '<span class="t-badge">' + ch.tCore + '</span>' : '') + (ch.tExtended ? '<span class="t-badge t-extended">' + ch.tExtended + '</span>' : '');
-  document.getElementById('m8mcWatchFor').innerHTML = '<strong>Watch for:</strong> ' + ch.watchFor;
+  document.getElementById('m8mcWatchFor').innerHTML = '<strong>Watch for in the demonstration:</strong> ' + ch.watchFor;
 
   const thumb = document.getElementById('m8mcVideoThumb');
   const wrap = document.getElementById('m8mcVideoWrap');
@@ -14213,12 +14239,28 @@ function m8RenderChapter(idx) {
     }
     return '<div class="sms-teach"><span class="teach-label">' + t.label + '</span><span class="sms-teach-text">' + t.text + '</span></div>';
   }).join('');
-  document.getElementById('m8mcAdapt').innerHTML = (ch.adapt || []).map((a) =>
-    '<div class="key-point"><div class="kp-icon">→</div><div class="kp-text">' + a + '</div></div>'
-  ).join('');
-  document.getElementById('m8mcNotes').innerHTML =
-    (ch.notes || []).map((n) => '<div class="sms-note">' + n + '</div>').join('') +
-    '<div class="sms-note">Next: ' + ch.continuity + '</div>';
+  // Adapt/Notes sections are conditionally labeled -- most chapters have
+  // no adapt or notes content (M8_CHAPTERS' empty arrays), and a chapter
+  // that legitimately has nothing here should show no empty section
+  // header (per this pass's rule: don't manufacture structure just to
+  // make every chapter look identical).
+  document.getElementById('m8mcAdapt').innerHTML = (ch.adapt && ch.adapt.length)
+    ? '<div class="sms-section-label">Adapt</div>' + ch.adapt.map((a) =>
+        // Canonical AIMT orbital mark (same #aimtOrbitalMark geometry used
+        // by the favicon/top nav), not a generic arrow -- matches every
+        // other plain (non-warn/non-success) .key-point callout on this
+        // page (owner QA fix: this was the one instructional callout still
+        // using a stray "→" instead of the institutional mark).
+        '<div class="key-point"><div class="kp-icon" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/><circle cx="22" cy="22" r="2" fill="currentColor" opacity="1"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div><div class="kp-text">' + a + '</div></div>'
+      ).join('')
+    : '';
+  document.getElementById('m8mcNotes').innerHTML = (ch.notes && ch.notes.length)
+    ? '<div class="sms-section-label">Notes</div>' + ch.notes.map((n) => '<div class="sms-note">' + n + '</div>').join('')
+    : '';
+  // One-line "what's next" takeaway -- the only prose allowed below the
+  // video (teach-first architecture: substantial instruction lives above
+  // the video, not after it).
+  document.getElementById('m8mcContinuity').textContent = 'Next: ' + ch.continuity;
 
   m8RefreshChapterChrome(idx);
 }
@@ -14403,8 +14445,8 @@ function markVideoChapterEnded(chapterIndex) {
 // Timer's own Extended-format values (90-minute reference) — not new
 // curriculum authority, sourced from the same tool this previews.
 const M8_TIMER_PREVIEW_STEPS = [
-  { num:'01', title:'Aromatherapy', phase:'Pre-Timer Opening', preTimer:true,
-    desc:'Offer the fragrance options already identified as appropriate from intake — or follow the fragrance-free path if that was established. Rest a hand at the shoulder as an understood part of the moment.',
+  { num:'01', title:'Opening Rituals + Microscopy', phase:'Pre-Timer Opening', preTimer:true,
+    desc:'Complete intake, walk the client through scalp microscopy, then move into live aromatherapy sampling — or the fragrance-free path if already established — with a hand at the shoulder as the first deliberate touch.',
     note:'The treatment clock has not started yet — Steps 01–02 are the pre-timer opening.',
     dur: 0 },
   { num:'02', title:'Client Positioning + Comfort', phase:'Pre-Timer Opening', preTimer:true,
