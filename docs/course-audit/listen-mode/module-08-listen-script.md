@@ -30,6 +30,26 @@ chapter-reorder synchronization note** section below for what that means
 for narration once this module gets full per-chapter audio, not just the
 by-name overview these M8-04/M8-05 segments currently give it.
 
+**v4 update (pre-audio polish pass, 2026-09-13) — visual-anchor note, no
+narration rewrite.** The AIMT Service Timer section moved on the live page
+from after both Module 8 checkpoints to **between them**: the on-screen
+order is now `m8cp1` → Service Timer (`#m8TimerFeature`) → `m8cp2`. Nothing
+in **M8-05**'s or **M8-08**'s spoken text made a positional claim, so no
+line below was rewritten. What changes is anchor placement for whoever
+wires this module's real per-chunk visual targets: **M8-08 currently reads
+as one continuous "Checkpoint 1 + Checkpoint 2" beat, which assumed the two
+checkpoints sit adjacent on screen — they no longer do.** When this module
+gets real visual anchors, checkpoint 1's anchor stays at `#m8cp1` (still
+right after the Protect-the-Flow scenarios), the Service Timer mention
+already living in **M8-05** should anchor to `#m8TimerFeature` in its new
+position, and **checkpoint 2's anchor must resolve to `#m8cp2` in its new,
+post-Timer position** — i.e. after `#m8TimerFeature`, not immediately after
+checkpoint 1. If M8-08 is ever split into two separate spoken beats (one
+per checkpoint) rather than staying combined, the natural split point is
+exactly there, with the Timer mention (or a brief re-orientation line) able
+to sit between them. The **Player segments** line below is updated to
+reflect this; none of its own segment audio content changed.
+
 **Curriculum authority:** the 7-phase overview, Sections 8.1–8.3, the
 9-chapter video masterclass (`M8_CHAPTERS`), a 3-scenario "Protect the
 Flow" signature interaction, two checkpoints, the AIMT Service Timer
@@ -51,8 +71,12 @@ teaching content) is mentioned by name and purpose, not narrated in
 mechanical detail.
 
 **Player segments (9):** Opening (briefing) → Phases overview → 8.1 →
-8.2 intro + chapters 1–5 → chapters 6–9 → 8.3 → Protect the Flow →
-Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
+8.2 intro + chapters 1–5 → chapters 6–9 + Service Timer → 8.3 → Protect the
+Flow → Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff. (On-screen
+order as of the 2026-09-13 pre-audio polish pass: `m8cp1` → Service Timer →
+`m8cp2` — see the **v4 update** note above for what this means for future
+visual-anchor placement; the spoken segment order/content above is
+unchanged.)
 
 ---
 
@@ -156,7 +180,11 @@ Checkpoint 1 + Checkpoint 2 → post-pass recap/handoff.
 > [firmly] Across all three, the same principle applies: adjust without treating a reasonable change as a disruption, adapt technique by degree rather than switching it off entirely, and keep any recalculating calm and internal rather than visibly scrambling in front of the client. The protocol gives structure. Judgment keeps it appropriate.
 
 ### M8-08 — Checkpoint 1 + Checkpoint 2 (`m8cp1`, `m8cp2`)
-**VOICE:** Teaching.
+**VOICE:** Teaching. **Visual anchor note (see v4 update above):** on
+screen, `m8cp1` and `m8cp2` are no longer adjacent — the Service Timer
+(M8-05) now sits between them. Real per-chunk visual anchors, when built,
+must send `m8cp1`'s beat to `#m8cp1` and `m8cp2`'s beat to `#m8cp2` in its
+new post-Timer position, not assume one contiguous on-screen block.
 
 > Here's your first checkpoint. You're moving into the exfoliation portion of the service and determine that a strong exfoliation approach isn't appropriate for this client today. Walk through how you'd modify the treatment while preserving the service flow — what you'd change about product, pressure, technique, or intensity, and what you'd communicate to the client.
 >

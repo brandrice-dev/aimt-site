@@ -1110,19 +1110,27 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
 .checkpoint.cc-card .cc-hidden-anchor { display: none; }
 
 .checkpoint.cc-card .cp-btn {
-  /* Mobile: a comfortable, centered touch target rather than a full-
-     width slab spanning the entire card (owner QA) -- max-width caps it
-     to a sane button size, margin:auto centers it to match the rest of
-     the now-centered mobile card. width: 100% (the desktop behavior)
-     comes back in the 768px+ override below, where the button sits in
-     its own right-hand content column next to the rail rather than
-     centered under the mark, and DOES need to fill that column -- see
-     that rule's own comment for why 100% is correct there specifically. */
-  width: 100%; max-width: 340px; margin-left: auto; margin-right: auto;
+  /* Mobile (CTA-proportion fix, follow-up to the owner QA note this
+     comment used to describe): a `width:100%; max-width:340px` slab still
+     rendered edge-to-edge on real narrow viewports, because the card's own
+     content column is itself well under 340px there (~304px at 375px
+     wide) -- max-width never got a chance to bind, `width:100%` always
+     won. Switched to the same natural-content-width technique the
+     .cc-resolved button below already uses successfully: `inline-flex` +
+     `width:auto` shrink-wraps to the label + padding, and the card's own
+     `text-align:center` (mobile-only, see that rule's comment) centers it
+     -- no margin:auto needed on an inline-level box. `max-width` stays on
+     as a defensive cap, not the thing doing the centering/sizing work.
+     width: 100% + display:flex (the desktop behavior) come back in the
+     768px+ override below, where the button sits in its own right-hand
+     content column next to the rail rather than centered under the mark,
+     and DOES need to fill that column -- see that rule's own comment for
+     why 100% is correct there specifically. */
+  width: auto; max-width: 280px; display: inline-flex;
   height: auto; border-radius: var(--aimt-radius-md);
   background: #faf8f5; border: none; color: #1a1814;
   font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 600;
-  padding: 0.9rem 1.3rem; display: flex; align-items: center; justify-content: center;
+  padding: 0.95rem 1.75rem; align-items: center; justify-content: center;
   margin-bottom: 1.65rem; transition: opacity 0.15s;
 }
 .checkpoint.cc-card .cp-btn:hover { opacity: 0.86; }
@@ -1192,10 +1200,11 @@ hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 2.85re
   /* Undo the mobile-only centering treatment: .cc-line goes back to a
      plain left-aligned block (no max-width centering margin needed once
      it's already flush with the rest of the left-aligned column), and
-     .cp-btn goes back to filling its column (see that rule's own
-     comment for why 100%/no max-width is what's correct here). */
+     .cp-btn goes back to a block-level flex row filling its column
+     (explicit here since the base rule is now inline-flex/width:auto for
+     the mobile shrink-wrap fix -- see that rule's own comment). */
   .checkpoint.cc-card .cc-line { margin-left: 0; margin-right: 0; }
-  .checkpoint.cc-card .cp-btn { max-width: none; margin-left: 0; margin-right: 0; margin-bottom: 2rem; }
+  .checkpoint.cc-card .cp-btn { width: 100%; max-width: none; display: flex; margin-left: 0; margin-right: 0; margin-bottom: 2rem; }
   /* The wildcard reset directly above zeroes every content child's own
      padding-left/right (same selector, same specificity, so source order
      decides) -- restore the resolved button's own horizontal padding
@@ -8859,29 +8868,16 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="checkpoint cc-card" id="m8cp2">
-      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
-      <div class="cc-divider" aria-hidden="true"></div>
-      <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
-      <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
-      <div class="cc-eyebrow cc-eyebrow-done">✓ Cadence Check Complete</div>
-      <div class="cp-label cc-headline">Client question</div>
-      <div class="cc-title cc-title-ready">Apply what you just learned.</div>
-      <div class="cc-title cc-title-progress">Finish your thought.</div>
-      <div class="cc-title cc-title-done">Competency demonstrated.</div>
-      <div class="cc-line cc-line-ready">Use Cadence to explain your reasoning and demonstrate this competency.</div>
-      <div class="cc-line cc-line-progress">Cadence has asked you to clarify part of your response.</div>
-      <div class="cc-line cc-line-done">Your Cadence conversation is complete and saved.</div>
-      <div class="cp-input-row cc-hidden-anchor">
-          <textarea class="cp-input" id="m8cp2In" placeholder="Write your response — in the moment, staying in the service..." rows="1" oninput="grow(this)" onkeydown="m8cpKey(event,'m8cp2')"></textarea>
-          <button class="voice-btn" onclick="startVoice('m8cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
-      </div>
-      <button class="cp-btn" id="m8cp2Btn" onclick="submitM8CP('m8cp2')" aria-label="Open Cadence Check">Open Cadence Check →</button>
-      <div class="cp-res" id="m8cp2Res" aria-live="polite"></div>
-    </div>
-
-    <hr class="divider">
-
+    <!-- Section-order fix (pre-audio polish pass, 2026-09-13): the AIMT
+         Service Timer now sits between m8cp1 and the FINAL Cadence Check
+         (m8cp2) instead of after both -- the practitioner receives the
+         practical execution tool after learning the full service and
+         before demonstrating final competency, not after. Timer content,
+         link, functionality, and the Core/Extended framework are
+         unchanged; m8cp2 itself (id, question, rubric) is unchanged and
+         unmoved relative to the completion card that follows it -- see
+         docs/course-audit/listen-mode/module-08-listen-script.md's "v4
+         update" for the resulting visual-anchor note. -->
     <div class="sec-eyebrow">Take the Service Into Practice</div>
     <div class="sec-title">Your service protocol, available anywhere.</div>
     <div class="body-text">Once you know this service, you shouldn't have to reopen this lesson to run it. The AIMT Service Timer is that protocol, made practical — a treatment-room companion for training the full service, rehearsing pacing, refreshing before a client, and keeping the sequence available without reopening the course.</div>
@@ -8972,6 +8968,29 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="m8tf-footer-text">The complete Service Timer covers the full Core (60-minute) and Extended (90-minute) sequences, open to close, in an immersive treatment-room mode. This preview is Steps 01–04 of the Extended reference only.</div>
         <a class="lc-btn-ghost" href="aimt-service-timer.html" style="display:inline-block;margin-top:0.75rem;">Open the AIMT Service Timer →</a>
       </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="checkpoint cc-card" id="m8cp2">
+      <div class="cc-rail" aria-hidden="true"><span class="cadence-id" aria-hidden="true"><span class="cadence-id-halo"></span><svg class="cadence-id-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#cadence-mark"></use></svg></span></div>
+      <div class="cc-divider" aria-hidden="true"></div>
+      <div class="cc-eyebrow cc-eyebrow-ready">Cadence Check</div>
+      <div class="cc-eyebrow cc-eyebrow-progress">Cadence Check · In Progress</div>
+      <div class="cc-eyebrow cc-eyebrow-done">✓ Cadence Check Complete</div>
+      <div class="cp-label cc-headline">Client question</div>
+      <div class="cc-title cc-title-ready">Apply what you just learned.</div>
+      <div class="cc-title cc-title-progress">Finish your thought.</div>
+      <div class="cc-title cc-title-done">Competency demonstrated.</div>
+      <div class="cc-line cc-line-ready">Use Cadence to explain your reasoning and demonstrate this competency.</div>
+      <div class="cc-line cc-line-progress">Cadence has asked you to clarify part of your response.</div>
+      <div class="cc-line cc-line-done">Your Cadence conversation is complete and saved.</div>
+      <div class="cp-input-row cc-hidden-anchor">
+          <textarea class="cp-input" id="m8cp2In" placeholder="Write your response — in the moment, staying in the service..." rows="1" oninput="grow(this)" onkeydown="m8cpKey(event,'m8cp2')"></textarea>
+          <button class="voice-btn" onclick="startVoice('m8cp2In',this)" title="Speak your answer" aria-label="Speak your answer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+      </div>
+      <button class="cp-btn" id="m8cp2Btn" onclick="submitM8CP('m8cp2')" aria-label="Open Cadence Check">Open Cadence Check →</button>
+      <div class="cp-res" id="m8cp2Res" aria-live="polite"></div>
     </div>
 
     <div class="lesson-complete" id="m8Complete" style="display:none;">
