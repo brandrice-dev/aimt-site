@@ -65,6 +65,29 @@ function extractFunctionSource(src, signature) {
   throw new Error('unbalanced braces for: ' + signature);
 }
 
+/* Same balanced-brace extraction as extractFunctionSource(), but for a
+   top-level `const NAME = { ... };` object literal instead of a function
+   -- used to pull in a small support object (e.g. COURSE_STATE) that an
+   extracted function's body references as a free variable. */
+function extractConstSource(src, constSignature) {
+  const start = src.indexOf(constSignature);
+  if (start === -1) throw new Error('signature not found: ' + constSignature);
+  const braceStart = src.indexOf('{', start);
+  let depth = 0;
+  for (let i = braceStart; i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        let end = i + 1;
+        if (src[end] === ';') end++;
+        return src.slice(start, end);
+      }
+    }
+  }
+  throw new Error('unbalanced braces for: ' + constSignature);
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // A. COURSE -> DASHBOARD LINK EXISTS IN ACTIVE PRODUCTION COURSE UI (P1-3)
 // ─────────────────────────────────────────────────────────────────────────
@@ -84,8 +107,8 @@ function extractFunctionSource(src, signature) {
 // B. DASHBOARD -> COURSE LINK REMAINS VALID
 // ─────────────────────────────────────────────────────────────────────────
 (function dashboardToCourseLinkTests() {
-  check('B. DASHBOARD -> COURSE LINK', 'my-aimt.html\'s COURSES registry still points headspa-mastery at headspa-mastery.html?enter=1',
-    /entry:\s*'headspa-mastery\.html\?enter=1'/.test(dashboardSrc));
+  check('B. DASHBOARD -> COURSE LINK', 'my-aimt.html\'s COURSES registry points headspa-mastery at the clean student-facing URL (head-spa-certification?enter=1), not the legacy filename',
+    /entry:\s*'head-spa-certification\?enter=1'/.test(dashboardSrc));
   check('B. DASHBOARD -> COURSE LINK', 'headspa-mastery.html still recognizes ?enter=1 as the dashboard\'s purchased-course entry flag',
     /params\.get\('enter'\) === '1'/.test(courseSrc));
   check('B. DASHBOARD -> COURSE LINK', 'headspa-mastery.html is a real file that exists on disk',
@@ -116,6 +139,11 @@ function extractFunctionSource(src, signature) {
 // ─────────────────────────────────────────────────────────────────────────
 const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
   const loadResourcesFn = extractFunctionSource(dashboardSrc, 'async function loadResources(entitledSlugs)');
+  // loadResources() references TOOL_DISPLAY (per-tool icon/copy overrides,
+  // e.g. for the Service Timer row) as a free top-level identifier -- pull
+  // the real object in so the sandboxed eval below resolves it exactly as
+  // the shipped page does, instead of throwing ReferenceError.
+  const toolDisplayConstSrc = extractConstSource(dashboardSrc, 'const TOOL_DISPLAY = {');
   // Execute the real, unmodified loadResources() against a mocked document,
   // once with a real entitlement and once with none -- proves the gate is
   // the entitledSlugs input, not any assumption baked into the registry.
@@ -135,7 +163,7 @@ const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
       },
     };
     const sandbox = { document: fakeDocument, window: { AIMT_COURSE_RESOURCES: REGISTRY } };
-    const fn = new Function('document', 'window', `return (${loadResourcesFn});`)(sandbox.document, sandbox.window);
+    const fn = new Function('document', 'window', `${toolDisplayConstSrc}\nreturn (${loadResourcesFn});`)(sandbox.document, sandbox.window);
     return fn(entitledSlugs).then(() => ({ toolsHtml, resourcesHtml, combinedHtml: toolsHtml + resourcesHtml }));
   }
 
@@ -151,12 +179,15 @@ const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
     check('D. ENTITLED SEES RESOURCES', 'An entitled student also sees the AIMT Service Timer tool entry (now in the separate Practitioner Tools area)',
       /AIMT Service Timer/.test(entitled.toolsHtml));
     check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A student with zero entitled slugs sees the empty state in both areas, not any resource item',
-      /will appear here/.test(none.combinedHtml) && !/Enhancement Strategy Guide/.test(none.combinedHtml));
+      /No practitioner tools are available for this course yet\./.test(none.combinedHtml) &&
+      /No resources are available for this course yet\./.test(none.combinedHtml) &&
+      !/Enhancement Strategy Guide/.test(none.combinedHtml));
     check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A slug not present in the registry renders the empty state, not a crash or fabricated content',
-      /will appear here/.test(wrongCourse.combinedHtml));
-    check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'loadResources() is only ever called with loadCourses()\'s own return value in my-aimt.html (the RLS-scoped course_entitlements read), never a separately-trusted client flag',
-      /const entitledSlugs = await loadCourses\(email\);/.test(dashboardSrc) &&
-      /loadResources\(entitledSlugs\)/.test(dashboardSrc));
+      /No practitioner tools are available for this course yet\./.test(wrongCourse.combinedHtml) &&
+      /No resources are available for this course yet\./.test(wrongCourse.combinedHtml));
+    check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'loadResources() is only ever called with loadEntitlements()\'s own return value in my-aimt.html (the RLS-scoped course_entitlements read), never a separately-trusted client flag',
+      /const \{ slugs, errored \} = await loadEntitlements\(email\);/.test(dashboardSrc) &&
+      /loadResources\(slugs\)/.test(dashboardSrc));
   });
 })();
 
@@ -186,22 +217,39 @@ const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
 
 // ─────────────────────────────────────────────────────────────────────────
 // H/I/J. CERTIFICATE STATE TRUTHFULNESS + SERVER AUTHORITY
+//
+// The dashboard splits this into two real functions (not the single
+// `loadCertificates()` this section used to assume — that name never
+// existed in my-aimt.html): `loadCertificationState(slugs)` fetches the
+// authoritative `completions`/`certification_attempts` rows, and the sync
+// `renderCertification(slugs, progressBySlug, certBySlug)` renders them
+// into #certArea via the shared `resolveCourseState()` state machine. Both
+// are extracted and executed verbatim below, same pattern as the rest of
+// this file.
 // ─────────────────────────────────────────────────────────────────────────
 const certificateStateTestsDone = (function certificateStateTests() {
-  const loadCertificatesFn = extractFunctionSource(dashboardSrc, 'async function loadCertificates()');
+  const loadCertificationStateFn = extractFunctionSource(dashboardSrc, 'async function loadCertificationState(slugs)');
+  const courseStateConstSrc = extractConstSource(dashboardSrc, 'const COURSE_STATE = {');
+  const resolveCourseStateFn = extractFunctionSource(dashboardSrc, 'function resolveCourseState(progress, certState)');
+  const renderCertificationFn = extractFunctionSource(dashboardSrc, 'function renderCertification(slugs, progressBySlug, certBySlug)');
 
-  function runLoadCertificates({ completions, attempts }) {
-    let renderedHtml = '';
-    const fakeArea = { set innerHTML(v) { renderedHtml = v; }, get innerHTML() { return renderedHtml; } };
-    const fakeDocument = { getElementById: (id) => (id === 'certArea' ? fakeArea : null) };
-    function makeQuery(rows) {
-      const q = {
-        eq() { return q; },
-        order() { return Promise.resolve({ data: rows }); },
-        then(resolve) { return Promise.resolve({ data: rows }).then(resolve); },
-      };
-      return q;
-    }
+  const COURSES_FIXTURE = { 'headspa-mastery': { title: 'HeadSpa Mastery', entry: 'head-spa-certification?enter=1' } };
+  // Fixed "in progress" coursework state -- resolveCourseState() only
+  // consults progress at all when certState is neither certified nor in
+  // remediation, and both BEGIN/CONTINUE render the same generic card, so
+  // one fixture value is sufficient for every scenario below.
+  const PROGRESS_FIXTURE = { 'headspa-mastery': { done: 3, pct: 25, nextModuleId: 4 } };
+
+  function makeQuery(rows) {
+    const q = {
+      eq() { return q; },
+      order() { return Promise.resolve({ data: rows }); },
+      then(resolve) { return Promise.resolve({ data: rows }).then(resolve); },
+    };
+    return q;
+  }
+
+  function loadCertBySlug({ completions, attempts }) {
     const fakeSupabase = {
       from(table) {
         if (table === 'completions') return { select: () => makeQuery(completions) };
@@ -209,46 +257,56 @@ const certificateStateTestsDone = (function certificateStateTests() {
         throw new Error('unexpected table: ' + table);
       },
     };
-    const sandbox = {
-      document: fakeDocument,
-      supabaseClient: fakeSupabase,
-      currentUser: { id: 'user-1' },
-      COURSES: { 'headspa-mastery': { title: 'HeadSpa Mastery', entry: 'headspa-mastery.html?enter=1' } },
-    };
     const fn = new Function(
-      'document', 'supabaseClient', 'currentUser', 'COURSES',
-      `return (${loadCertificatesFn});`
-    )(sandbox.document, sandbox.supabaseClient, sandbox.currentUser, sandbox.COURSES);
-    return fn().then(() => renderedHtml);
+      'supabaseClient', 'currentUser',
+      `return (${loadCertificationStateFn});`
+    )(fakeSupabase, { id: 'user-1' });
+    return fn(['headspa-mastery']);
+  }
+
+  function render(certBySlug) {
+    let renderedHtml = '';
+    const fakeArea = { set innerHTML(v) { renderedHtml = v; }, get innerHTML() { return renderedHtml; } };
+    const fakeDocument = { getElementById: (id) => (id === 'certArea' ? fakeArea : null) };
+    const fn = new Function(
+      'document', 'COURSES',
+      `${courseStateConstSrc}\n${resolveCourseStateFn}\nreturn (${renderCertificationFn});`
+    )(fakeDocument, COURSES_FIXTURE);
+    fn(['headspa-mastery'], PROGRESS_FIXTURE, certBySlug);
+    return renderedHtml;
+  }
+
+  function runScenario(rows) {
+    return loadCertBySlug(rows).then(render);
   }
 
   return Promise.all([
-    runLoadCertificates({ completions: [], attempts: [] }),
-    runLoadCertificates({
+    runScenario({ completions: [], attempts: [] }),
+    runScenario({
       completions: [],
       attempts: [{ course_slug: 'headspa-mastery', certification_decision: 'not_yet_passed', attempt_number: 2 }],
     }),
-    runLoadCertificates({
+    runScenario({
       completions: [{ credential_id: 'AIMT-HS-2026-ABC123', course_slug: 'headspa-mastery', student_name: 'Jane Doe', completed_at: '2026-08-01T00:00:00Z', revoked: false }],
       attempts: [],
     }),
-    runLoadCertificates({
+    runScenario({
       completions: [{ credential_id: 'AIMT-HS-2026-OLD999', course_slug: 'headspa-mastery', student_name: 'Jane Doe', completed_at: '2026-08-01T00:00:00Z', revoked: true }],
       attempts: [],
     }),
   ]).then(([inProgressHtml, notYetPassedHtml, certifiedHtml, revokedHtml]) => {
-    check('H. NO CERT FOR NON-PASS', 'Course in progress (no completions, no finalized attempt) shows the honest generic empty state, no certificate, no Performance Review claim',
+    check('H. NO CERT FOR NON-PASS', 'Course in progress (no completions, no finalized attempt) shows the honest generic in-progress card, no Certified label, no credential',
       /certification path is in progress/i.test(inProgressHtml) &&
-      !/AIMT Certified/.test(inProgressHtml) && !/Performance Review/.test(inProgressHtml));
-    check('H. NO CERT FOR NON-PASS', 'A finalized not_yet_passed attempt shows a not-yet-issued state with a Performance Review entry point, never a "Certified" claim or a fabricated credential ID',
-      /Certification Not Yet Issued/.test(notYetPassedHtml) && /Review Next Steps/.test(notYetPassedHtml) &&
-      !/AIMT Certified/.test(notYetPassedHtml) && !/Credential ID/.test(notYetPassedHtml));
-    check('H. NO CERT FOR NON-PASS', 'A revoked completions row is excluded entirely (falls back to the honest empty state)',
-      /certification path is in progress/i.test(revokedHtml) && !/AIMT Certified/.test(revokedHtml));
-    check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders "AIMT Certified" with the real credential ID and student name',
-      /AIMT Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
-    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View certificate" link deep-links into the course with &cert=1 (direct Module 12 access, not just the course entry)',
-      /href="headspa-mastery\.html\?enter=1&cert=1"/.test(certifiedHtml));
+      !/is-active">Certified/.test(inProgressHtml) && !/Credential ID/.test(inProgressHtml));
+    check('H. NO CERT FOR NON-PASS', 'A finalized not_yet_passed attempt renders the Remediation card with a Review Next Steps entry point, never a Certified label or a fabricated credential ID',
+      /is-attention">Remediation/.test(notYetPassedHtml) && /Review Next Steps/.test(notYetPassedHtml) &&
+      !/is-active">Certified/.test(notYetPassedHtml) && !/Credential ID/.test(notYetPassedHtml));
+    check('H. NO CERT FOR NON-PASS', 'A revoked completions row is excluded entirely (falls back to the honest in-progress card)',
+      /certification path is in progress/i.test(revokedHtml) && !/is-active">Certified/.test(revokedHtml));
+    check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders the Certified card with the real credential ID and student name',
+      /is-active">Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
+    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View & Download Certificate" link deep-links into the course with &cert=1 (direct Module 12 access, not just the course entry)',
+      /href="head-spa-certification\?enter=1&cert=1"/.test(certifiedHtml));
     check('I. CERT ACCESS FOR PASS', 'The certified card still links to the independent verify.html verification page',
       /href="verify\.html"/.test(certifiedHtml));
   }).then(() => {
@@ -268,7 +326,7 @@ const certificateStateTestsDone = (function certificateStateTests() {
 // ─────────────────────────────────────────────────────────────────────────
 (function performanceReviewTruthTests() {
   check('K. PERFORMANCE REVIEW MATCHES CAPABILITY', 'The real, pre-existing performanceReviewBlock() in module12-certification.js is untouched by this task (dashboard reuses it via deep link, never duplicates its rendering)',
-    /function performanceReviewBlock\(review\)/.test(m12Src));
+    /function performanceReviewBlock\(review, eyebrow, title, bodyHtml, bannerClass\)/.test(m12Src));
   check('K. PERFORMANCE REVIEW MATCHES CAPABILITY', 'The real, pre-existing /request-review workflow is untouched (dashboard does not build a second one)',
     /apiPost\('\/request-review'/.test(m12Src));
   check('K. PERFORMANCE REVIEW MATCHES CAPABILITY', 'The real, pre-existing GET /get-status endpoint is untouched (Module12Cert.render always re-fetches live authoritative state)',
@@ -285,6 +343,18 @@ const certificateStateTestsDone = (function certificateStateTests() {
 
 // ─────────────────────────────────────────────────────────────────────────
 // M/N. RESUME + HISTORICAL PASS BEHAVIOR UNCHANGED
+//
+// The 'rubric-e0ea1714' fingerprint below was re-pinned 2026-09-15 (test
+// triage session). It was 'rubric-efe55590' as of 7a78d17 ("Fix Module 1
+// launch regressions"), correct at that commit -- but the very next
+// commit, 28e935a ("Fix bulk-audit launch regressions"), intentionally
+// corrected one word in Module 4's m4cp2 question text ("crown assessment"
+// -> "crown station"), which changed this hash. That commit never
+// re-pinned this guard (its own scope was elsewhere), so it
+// has failed on every run since. Verified via git-worktree bisection across
+// 7a78d17..HEAD: 28e935a is the sole commit that moves the hash, and its
+// only content-bearing change is that single Module-4 wording fix -- not
+// Module 2/3/6 curriculum. See docs/course-audit/AIMT-TEST-FAILURE-TRIAGE.md.
 // ─────────────────────────────────────────────────────────────────────────
 (function resumeAndHistoricalBehaviorTests() {
   check('M. RESUME STATE CORRECT', 'openModuleById still gates on APP_STATE.setCurrentModule()\'s own canAccessModule() check (no new bypass introduced for the deep link)',
@@ -294,7 +364,7 @@ const certificateStateTestsDone = (function certificateStateTests() {
   check('N. HISTORICAL PASS UNCHANGED', 'A passed checkpoint\'s input-lock guard (status === \'passed\') is untouched',
     /status === 'passed'/.test(readFileSync(path.join(ROOT, 'assets/js/cadence-shell.js'), 'utf8')));
   check('N. HISTORICAL PASS UNCHANGED', 'The 22-checkpoint rubric/question extraction from headspa-mastery.html hashes to the exact pre-task fingerprint -- no checkpoint content anywhere was touched',
-    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-e0ea1714');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -309,7 +379,7 @@ const certificateStateTestsDone = (function certificateStateTests() {
     /resolveCadenceModel\(env, 'CADENCE_GRADING_MODEL'\)/.test(readFileSync(path.join(ROOT, 'functions/_lib/certification/cadence-grader.mjs'), 'utf8')));
 
   check('P. 22 CHECKPOINT GATE MAP UNCHANGED', 'Full extracted rubric/question set still hashes to the pre-task fingerprint',
-    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(loadCheckpointRubrics())) === 'rubric-e0ea1714');
   const rubrics = loadCheckpointRubrics();
   const moduleKeys = Object.keys(rubrics);
   const checkpointCount = moduleKeys.reduce((n, k) => n + Object.keys(rubrics[k].questions || {}).length, 0);

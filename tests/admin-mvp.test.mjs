@@ -68,9 +68,51 @@ test('Admin UI contains core MVP operational surfaces', () => {
     'Course access',
     'Certification attempts',
     'Account support',
+    'Reactivate access',
   ]) {
     assert.ok(adminHtml.includes(label), `missing UI label: ${label}`);
   }
+});
+
+test('Support role does not see grant/revoke/reactivate mutation controls (UX polish only — server-side requireAdminRole remains the real boundary and is untouched)', () => {
+  assert.match(adminHtml, /function canMutate\(\)\{return !!\(actor&&actor\.role!=='support'\);\}/);
+  // Grant course access is hidden for support once the actor's role is known.
+  assert.match(adminHtml, /\$\('grantBtn'\)\.style\.display=canMutate\(\)\?'':'none'/);
+  // Revoke manual access is only rendered for manual entitlements AND a mutating role.
+  assert.match(adminHtml, /e\.source==='manual'&&canMutate\(\)/);
+  // Reactivate access is only rendered for a revoke audit row AND a mutating role.
+  assert.match(adminHtml, /grantId&&canMutate\(\)/);
+});
+
+test('Reactivation path exists, is owner/admin gated, and cannot target a non admin-grant- id', () => {
+  const reactivateStart = adminApi.indexOf('async function reactivateManualAccess');
+  const exportStart = adminApi.indexOf('export async function onRequestGet');
+  assert.ok(reactivateStart >= 0, 'reactivateManualAccess should be defined');
+  assert.ok(exportStart > reactivateStart);
+  const block = adminApi.slice(reactivateStart, exportStart);
+  assert.match(block, /requireAdminRole\(actor, \['owner', 'admin'\]\)/);
+  assert.match(block, /grantId\.startsWith\(MANUAL_PREFIX\)/);
+  assert.match(block, /Paid Stripe entitlements are protected/);
+  assert.match(adminApi, /reactivate_manual_course_access/);
+  assert.match(adminApi, /reactivate_manual_access/);
+});
+
+test('Reactivation path does not mutate progress, attempts, or completion records', () => {
+  const reactivateStart = adminApi.indexOf('async function reactivateManualAccess');
+  const exportStart = adminApi.indexOf('export async function onRequestGet');
+  const block = adminApi.slice(reactivateStart, exportStart);
+  assert.doesNotMatch(block, /course_progress/);
+  assert.doesNotMatch(block, /certification_attempts/);
+  assert.doesNotMatch(block, /\bcompletions\b/);
+});
+
+test('Reactivation only ever inserts a new entitlement row — never a DELETE or UPDATE against course_entitlements', () => {
+  const reactivateStart = adminApi.indexOf('async function reactivateManualAccess');
+  const exportStart = adminApi.indexOf('export async function onRequestGet');
+  const block = adminApi.slice(reactivateStart, exportStart);
+  assert.doesNotMatch(block, /method: 'DELETE'/);
+  assert.doesNotMatch(block, /method: 'PATCH'/);
+  assert.match(block, /method: 'POST'/);
 });
 
 test('Specification retains release gate and no-production rule', () => {

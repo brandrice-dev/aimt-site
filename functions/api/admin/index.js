@@ -1,5 +1,6 @@
 import { supabaseRest } from '../../_lib/certification/auth.mjs';
 import { adminJson, requireAdminRole, resolveAdmin, writeAdminAudit } from '../../_lib/admin/auth.mjs';
+import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite-email.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const MANUAL_PREFIX = 'admin-grant-';
@@ -208,7 +209,7 @@ async function handleAudit(env) {
   return adminJson({ audit: rows });
 }
 
-async function grantAccess(env, actor, body) {
+async function grantAccess(env, actor, body, request) {
   if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
   const email = normalizeEmail(body.email);
   const source = String(body.source || 'manual').trim().toLowerCase();
@@ -230,11 +231,37 @@ async function grantAccess(env, actor, body) {
   });
   if (!res.ok) return adminJson({ error: 'Unable to grant course access.' }, 500);
 
+  // New-account-only invite send (functions/_lib/admin/manual-grant-invite-email.mjs).
+  // Never fires for a grant that bound to an already-existing account, is
+  // fully independent of the entitlement write above (already committed
+  // either way), and never throws — a failed or skipped send is recorded
+  // below rather than raised, so it can never undo the grant.
+  let inviteEmail = null;
+  if (account.created) {
+    try {
+      const studentAccessUrl = `${new URL(request.url).origin}/student-access.html`;
+      inviteEmail = await sendManualGrantInviteEmail(env, {
+        grantId,
+        email,
+        firstName: body.firstName,
+        studentAccessUrl,
+      });
+    } catch (error) {
+      inviteEmail = {
+        attempted: true,
+        sent: false,
+        reason: 'unexpected_error',
+        errorMessage: error?.message || String(error),
+        warning: 'Invite email failed unexpectedly. Notify the student manually — their account and course access were still created.',
+      };
+    }
+  }
+
   await writeAdminAudit(env, actor, 'grant_course_access', {
     targetUserId: account.user.id,
     targetEmail: email,
     courseSlug: COURSE_SLUG,
-    details: { source, grantId, accountCreated: account.created },
+    details: { source, grantId, accountCreated: account.created, inviteEmail },
   });
 
   return adminJson({
@@ -242,6 +269,7 @@ async function grantAccess(env, actor, body) {
     userId: account.user.id,
     accountCreated: account.created,
     grantId,
+    inviteEmail,
     setupInstruction: account.created
       ? 'Account created. Have the student open Student Access and use “Forgot your password?” to set their password, then sign in normally.'
       : 'Access granted to the existing AIMT account. The student can sign in normally.',
@@ -273,6 +301,96 @@ async function revokeManualAccess(env, actor, body) {
   return adminJson({ ok: true });
 }
 
+async function findRevokedManualGrant(env, grantId) {
+  // Reactivation must only ever apply to a grant that this Admin surface itself
+  // revoked. We look it up by scanning the authoritative admin_audit_log for a
+  // revoke_manual_course_access row whose recorded details.grantId matches —
+  // never by trusting a client-asserted email/source pair. The action check is
+  // re-applied in JS (not just via the query filter) so this can never match a
+  // grant_course_access row, which also stores a `grantId` key in its details.
+  const rows = await readRows(
+    env,
+    'admin_audit_log',
+    'select=target_user_id,target_email,course_slug,action,details,created_at&action=eq.revoke_manual_course_access&order=created_at.desc&limit=500'
+  );
+  return rows.find((r) => r.action === 'revoke_manual_course_access' && r?.details?.grantId === grantId) || null;
+}
+
+async function reactivateManualAccess(env, actor, body) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  const grantId = String(body.grantId || '').trim();
+  if (!grantId.startsWith(MANUAL_PREFIX)) {
+    return adminJson({ error: 'Reactivation is only available for manually granted access. Paid Stripe entitlements are protected.' }, 400);
+  }
+  const sourceMatch = grantId.slice(MANUAL_PREFIX.length).match(/^([a-z]+)-/);
+  const source = sourceMatch ? sourceMatch[1] : '';
+  if (!ALLOWED_GRANT_SOURCES.has(source)) return adminJson({ error: 'Unrecognized manual grant id format.' }, 400);
+
+  // The original row is gone (revoke is a hard delete — see spec). We recover
+  // who it belonged to from the authoritative audit trail rather than from any
+  // client-supplied identity, so this action can only ever restore access for
+  // a student who genuinely had a manual grant revoked through Admin MVP.
+  const original = await findRevokedManualGrant(env, grantId);
+  if (!original) {
+    return adminJson({ error: 'No revoked manual grant found with that ID. Reactivation is only available for access that was revoked through AIMT Admin.' }, 404);
+  }
+  const targetEmail = normalizeEmail(original.target_email);
+  if (!targetEmail) return adminJson({ error: 'The original revoked grant has no recoverable student email.' }, 400);
+
+  // Duplicate guard: if the student already has an active (currently existing)
+  // manual entitlement for this course, do nothing rather than create a second
+  // one. This is a safe no-op, not an error — the student already has access.
+  const filters = original.target_user_id
+    ? `or=(user_id.eq.${original.target_user_id},purchaser_email.eq.${encodeURIComponent(targetEmail)})`
+    : `purchaser_email=eq.${encodeURIComponent(targetEmail)}`;
+  const existing = await readRows(env, 'course_entitlements', `select=checkout_session_id,user_id,purchaser_email&course_slug=eq.${COURSE_SLUG}&${filters}`);
+  const existingManual = existing.find((e) => e.checkout_session_id.startsWith(MANUAL_PREFIX));
+  if (existingManual) {
+    return adminJson({
+      ok: true,
+      alreadyActive: true,
+      grantId: existingManual.checkout_session_id,
+      message: 'This student already has active manually granted access. No new entitlement was created.',
+    });
+  }
+
+  // From here this performs exactly the same operations grantAccess does
+  // (resolve-or-create the AIMT account, insert a fresh admin-grant- row,
+  // write the privileged audit record) — this creates a brand-new entitlement
+  // and does not resurrect the deleted row or its old ID.
+  const account = await ensureAuthUser(env, targetEmail);
+  const newGrantId = `${MANUAL_PREFIX}${source}-${crypto.randomUUID()}`;
+  const entitlement = {
+    checkout_session_id: newGrantId,
+    course_slug: COURSE_SLUG,
+    purchaser_email: targetEmail,
+    user_id: account.user.id,
+  };
+  const res = await supabaseRest(env, 'course_entitlements', {
+    method: 'POST',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify(entitlement),
+  });
+  if (!res.ok) return adminJson({ error: 'Unable to reactivate course access.' }, 500);
+
+  await writeAdminAudit(env, actor, 'reactivate_manual_course_access', {
+    targetUserId: account.user.id,
+    targetEmail,
+    courseSlug: COURSE_SLUG,
+    details: { source, grantId: newGrantId, originalGrantId: grantId, accountCreated: account.created },
+  });
+
+  return adminJson({
+    ok: true,
+    userId: account.user.id,
+    accountCreated: account.created,
+    grantId: newGrantId,
+    setupInstruction: account.created
+      ? 'Account re-created. Have the student open Student Access and use “Forgot your password?” to set their password, then sign in normally.'
+      : 'Access reactivated for the existing AIMT account. The student can sign in normally.',
+  });
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const actor = await resolveAdmin(env, request);
@@ -300,8 +418,9 @@ export async function onRequestPost(context) {
   try {
     const body = await request.json().catch(() => ({}));
     const action = String(body.action || '').trim();
-    if (action === 'grant_access') return await grantAccess(env, actor, body);
+    if (action === 'grant_access') return await grantAccess(env, actor, body, request);
     if (action === 'revoke_manual_access') return await revokeManualAccess(env, actor, body);
+    if (action === 'reactivate_manual_access') return await reactivateManualAccess(env, actor, body);
     return adminJson({ error: 'Unknown admin action.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to complete AIMT admin action.' }, 500);

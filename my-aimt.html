@@ -346,9 +346,10 @@
     <span class="aimt-public-nav-name">AIMT</span>
   </a>
   <div class="aimt-public-nav-right">
-    <a class="aimt-public-nav-link" href="headspa-mastery.html">Head Spa Certification</a>
+    <a class="aimt-public-nav-link" href="head-spa-certification">Head Spa Certification</a>
     <span class="aimt-public-nav-sep"></span>
     <div class="aimt-public-nav-account">
+      <a class="aimt-public-nav-link aimt-admin-entry" href="admin.html" style="display:none;">AIMT Admin</a>
       <span class="aimt-public-nav-account-email" id="navUserEmail"></span>
       <button type="button" class="aimt-public-nav-signout" onclick="signOut()">Sign out</button>
     </div>
@@ -358,8 +359,9 @@
       </button>
       <div class="aimt-public-nav-account-panel" id="accountMenuPanel">
         <div class="aimt-public-nav-account-panel-email" id="mobileUserEmail"></div>
-        <a href="headspa-mastery.html">Head Spa Certification</a>
+        <a href="head-spa-certification">Head Spa Certification</a>
         <a href="student-access.html#reset">Change Password</a>
+        <a href="admin.html" class="aimt-admin-entry" style="display:none;">AIMT Admin</a>
         <button type="button" onclick="signOut()">Sign out</button>
       </div>
     </div>
@@ -378,7 +380,7 @@
     <span class="aimt-public-nav-name">AIMT</span>
   </a>
   <div class="aimt-public-nav-right">
-    <a href="headspa-mastery.html" class="aimt-public-nav-link">Head Spa Certification</a>
+    <a href="head-spa-certification" class="aimt-public-nav-link">Head Spa Certification</a>
     <span class="aimt-public-nav-sep"></span>
     <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
     <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
@@ -389,7 +391,7 @@
   </div>
 </nav>
 <div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
-  <a href="headspa-mastery.html" class="aimt-public-nav-mobile-link">Head Spa Certification</a>
+  <a href="head-spa-certification" class="aimt-public-nav-mobile-link">Head Spa Certification</a>
   <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
 </div>
 
@@ -503,7 +505,7 @@
         <span class="aimt-lock-status"><span aria-hidden="true">🔒</span> Available with enrollment</span>
       </div>
       <div class="chero-right">
-        <a class="btn" href="headspa-mastery.html">Explore The Course →</a>
+        <a class="btn" href="head-spa-certification">Explore The Course →</a>
       </div>
     </div>
 
@@ -529,7 +531,7 @@
       <h2>Turn your Readiness Profile into a stronger practice.</h2>
       <p>Your results already show where the biggest opportunity is. The AIMT Head Spa Certification Course is designed to build the judgment, service systems, and professional tools behind those areas.</p>
       <div class="rp-cta-actions">
-        <a class="btn" href="headspa-mastery.html">Explore Head Spa Certification →</a>
+        <a class="btn" href="head-spa-certification">Explore Head Spa Certification →</a>
         <button type="button" class="btn text-link" id="rpResendBtn" style="display:none;">Email My Profile Again</button>
       </div>
       <div class="rp-resend-form" id="rpResendForm" style="display:none;">
@@ -562,7 +564,7 @@ const COURSES = {
   'headspa-mastery': {
     title: 'Head Spa Certification Course',
     subtitle: 'AIMT · Certification 01',
-    entry: 'headspa-mastery.html?enter=1'
+    entry: 'head-spa-certification?enter=1'
   }
 };
 
@@ -724,6 +726,33 @@ function hideSections(ids) {
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
 
+/* Convenience-only entry point into /admin.html for authenticated
+   owner/admin/support users -- this is NEVER the security boundary. That
+   stays entirely server-side in functions/api/admin/index.js's
+   resolveAdmin()/requireAdminRole(), which this call does not touch and
+   which still gates /admin.html and /api/admin exactly as before. A
+   non-admin student, a signed-out visitor, or a failed/timed-out request
+   all simply leave the link in its default hidden state -- nothing here
+   grants, implies, or checks access on its own; it only decides whether to
+   show a link to a page that re-checks access itself. */
+function revealAdminEntry() {
+  document.querySelectorAll('.aimt-admin-entry').forEach(function (el) { el.style.display = ''; });
+}
+
+async function checkAdminEntryPoint() {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const accessToken = data && data.session && data.session.access_token;
+    if (!accessToken) return;
+    const res = await fetch('/api/admin?view=me', { headers: { Authorization: 'Bearer ' + accessToken } });
+    if (!res.ok) return; // not an active admin_users row (or admin API unavailable) -- stay hidden
+    const body = await res.json().catch(function () { return null; });
+    if (body && body.actor && body.actor.role) revealAdminEntry();
+  } catch (_) {
+    /* network/API error -- leave hidden, this is convenience only */
+  }
+}
+
 async function init() {
   const { data } = await supabaseClient.auth.getUser();
   currentUser = data && data.user;
@@ -731,6 +760,7 @@ async function init() {
     window.location.href = 'student-access.html';
     return;
   }
+  checkAdminEntryPoint(); // fire-and-forget; never blocks or gates the rest of this page
   const email = (currentUser.email || '').toLowerCase();
   document.getElementById('navUserEmail').textContent = email;
   document.getElementById('mobileUserEmail').textContent = email;
