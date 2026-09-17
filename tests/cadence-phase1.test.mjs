@@ -205,7 +205,12 @@ function loadHeadspaState() {
   // even though the underlying transport is not callAI()/PROXY_URL
   // anymore. Only the deactivated legacy guide panel (gpSend) still calls
   // callAI() directly today.
-  check('CLIENT MODEL LOG', 'evaluateScript() and submitIntro() both destructure the {text, modelInfo} shape via callCadenceFormative(), not callAI()', (src.match(/\.then\(\(\{\s*text:\s*r\s*\}\)\s*=>/g) || []).length >= 2 && /callCadenceFormative\('\/api\/cadence\/evaluate-script'/.test(src) && /callCadenceFormative\('\/api\/cadence\/submit-intro'/.test(src));
+  // Both call sites destructure the `text` field out of callCadenceFormative()'s
+  // {text, modelInfo} return shape -- evaluateScript() renames it to `r`
+  // (`{ text: r }`), submitIntro() keeps the bare name (`{ text }`). Both are
+  // valid destructuring of the same shape; the check accepts either spelling
+  // rather than assuming one specific rename.
+  check('CLIENT MODEL LOG', 'evaluateScript() and submitIntro() both destructure the {text, modelInfo} shape via callCadenceFormative(), not callAI()', (src.match(/\.then\(\(\{\s*text\s*[:}]/g) || []).length >= 2 && /callCadenceFormative\('\/api\/cadence\/evaluate-script'/.test(src) && /callCadenceFormative\('\/api\/cadence\/submit-intro'/.test(src));
   check('CLIENT MODEL LOG', 'The deactivated legacy guide panel (gpSend) still destructures callAI()\'s {text, modelInfo} shape directly', /const\s*\{\s*text:\s*r\s*\}\s*=\s*await callAI/.test(src));
 })();
 

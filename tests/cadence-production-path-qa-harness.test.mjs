@@ -16,6 +16,7 @@
 
 import { readFileSync, existsSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import {
   QA_CASES,
@@ -200,7 +201,11 @@ await (async function callCountMeasurableTests() {
 })();
 
 await (async function cliOutFileTests() {
-  const outPath = '/private/tmp/claude-501/-Users-brand-Documents-GitHub-aimt-site/7fa72925-b934-47ea-8935-adeb1a1b9dd5/scratchpad/qa-harness-test-out.json';
+  // Portable across machines/sessions: os.tmpdir() rather than a
+  // hardcoded absolute path baked into the test file (a prior version
+  // pointed at one specific Claude Code session's scratchpad directory,
+  // which doesn't exist outside that session).
+  const outPath = path.join(os.tmpdir(), `aimt-qa-harness-test-out-${process.pid}.json`);
   const mock = sequencedFetch([genStep('A plain Zone A explanation of overlapping telogen waves.')]);
   const originalKey = process.env.ANTHROPIC_API_KEY;
   process.env.ANTHROPIC_API_KEY = 'mock-key-for-cli-test';
@@ -244,11 +249,20 @@ await (async function cliOutFileTests() {
 
 // ─────────────────────────────────────────────────────────────────────────
 // 14. CHECKPOINT CONTENT UNCHANGED
+//
+// The 'rubric-e0ea1714' fingerprint below was re-pinned 2026-09-15 (test
+// triage session): it was 'rubric-efe55590' as of 7a78d17 ("Fix Module 1
+// launch regressions"), correct at that commit, but the very next commit
+// (28e935a, "Fix bulk-audit launch regressions") intentionally corrected
+// one word in Module 4's m4cp2 question text ("crown assessment" -> "crown
+// station"), changing this hash without re-pinning this guard. Verified via
+// git-worktree bisection across 7a78d17..HEAD -- not Module 2/3/6 content.
+// See docs/course-audit/AIMT-TEST-FAILURE-TRIAGE.md.
 // ─────────────────────────────────────────────────────────────────────────
 (function checkpointContentUnchangedTests() {
   const rubrics = loadCheckpointRubrics();
   check('14. CHECKPOINT CONTENT UNCHANGED', 'Full M0-M11 checkpoint rubric/question set is byte-identical to its pre-existing fingerprint',
-    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-efe55590');
+    rubricVersionTag(JSON.stringify(rubrics)) === 'rubric-e0ea1714');
 })();
 
 // ---- Report ----

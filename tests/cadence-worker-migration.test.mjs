@@ -203,9 +203,26 @@ await runEndpointChecks('../functions/api/cadence/submit-intro.js', 'SUBMIT-INTR
     const fnMatch = html.match(/async function evaluateScript\(\) \{[\s\S]*?\n\}/);
     return !!fnMatch && !fnMatch[0].includes('callAI(') && fnMatch[0].includes("callCadenceFormative('/api/cadence/evaluate-script'");
   })());
-  check('WORKER REACHABILITY', 'submitIntro() no longer calls callAI()/PROXY_URL', (() => {
-    const fnMatch = html.match(/async function submitIntro\(\) \{[\s\S]*?\n\}\n\nasync function introProceed/);
-    return !!fnMatch && !fnMatch[0].includes('callAI(') && fnMatch[0].includes("callCadenceFormative('/api/cadence/submit-intro'");
+  // SUPERSEDED premise: the standalone submitIntro()/introProceed() pair
+  // this originally matched no longer exists (verified against git HEAD,
+  // not just this session's uncommitted work) -- the whole pre-course
+  // intro flow was refactored into mountCadenceIntro(), which mounts the
+  // shared aimt-cadence-intro.js component and supplies a synthesize()
+  // callback as the real endpoint call. Balanced-brace-extract that
+  // function's body (same pattern used throughout this repo's tests)
+  // instead of matching a function signature that no longer exists.
+  check('WORKER REACHABILITY', 'The pre-course intro flow (mountCadenceIntro(), successor to the old submitIntro()) no longer calls callAI()/PROXY_URL', (() => {
+    const start = html.indexOf('function mountCadenceIntro() {');
+    if (start === -1) return false;
+    const braceStart = html.indexOf('{', start);
+    let depth = 0, end = -1;
+    for (let i = braceStart; i < html.length; i++) {
+      if (html[i] === '{') depth++;
+      else if (html[i] === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
+    }
+    if (end === -1) return false;
+    const fnBody = html.slice(start, end);
+    return !fnBody.includes('callAI(') && fnBody.includes("callCadenceFormative('/api/cadence/submit-intro'");
   })());
 
   // The only two remaining callAI()/PROXY_URL callers, both non-current-

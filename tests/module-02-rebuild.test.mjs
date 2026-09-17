@@ -56,6 +56,13 @@ function extractWrap(src, id) {
 
 const module2Wrap = extractWrap(courseSrc, 'module2Wrap');
 const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
+// The "Before you begin" Listen Mode orientation this file originally added
+// to module0Wrap (commit 817d3f5) was deliberately relocated out of Module 0
+// into its own one-time pre-Welcome view by commit 2a56bf5 ("Add How AIMT
+// Works course orientation" -- "Moves the redundant Listen Mode explainer
+// out of Module 0 into the new page") and expanded into a full platform
+// walkthrough by 7314f5a/3a668d7/2d42c72/c76dfa8. See section I2 below.
+const howAimtWorksWrap = extractWrap(courseSrc, 'howAimtWorksView');
 
 // ─────────────────────────────────────────────────────────────────────────
 // A. MODULE 2 — SECTION ORDER + CORE DOCTRINE
@@ -109,7 +116,21 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
   const m2ObjectMatch = courseSrc.match(/const M2 = \{[\s\S]*?\n\};/);
   check('D. CHECKPOINT', 'the M2 questions/rubric object is found', !!m2ObjectMatch);
   const newQuestion = 'A new client has completed their intake and is booked for your standard Head Spa service. Walk through the transition from reviewing their intake to the first few minutes of hands-on treatment. Explain what you want established before the service begins, how you remove preventable uncertainty during arrival and preparation, why the shoulder contact matters as the first-touch moment, how you handle the aromatherapy opening, and what kinds of communication still belong during the service once the plan has already been established. You do not need to reproduce a script—explain the reasoning behind your approach.';
-  check('D. CHECKPOINT', 'the on-screen .cp-q text matches the new question exactly', module2Wrap.includes('<div class="cp-q">' + newQuestion + '</div>'));
+  // The static `.cp-q` question div this assertion originally checked was
+  // retired course-wide (all 22 checkpoints, not just Module 2) by the
+  // later "Cadence Check" redesign (commit 6b36a58, "Finalize Module 8
+  // timer and Cadence Check flow") -- verified via grep: zero
+  // `class="cp-q"` occurrences remain anywhere in headspa-mastery.html.
+  // The full question is no longer pre-rendered as page text at all;
+  // cadence-shell.js now opens every checkpoint by appending that exact
+  // same question as Cadence's own first chat message
+  // (appendMessageEl('assistant', session.question)), and grades against
+  // that same session.question -- so displayed/evaluated parity (this
+  // check's original protective intent) is preserved through the new
+  // mechanism instead of the retired static div.
+  const cadenceShellSrc = readFileSync(path.join(ROOT, 'assets/js/cadence-shell.js'), 'utf8');
+  check('D. CHECKPOINT', 'the retired .cp-q display is gone course-wide (not a Module-2-specific regression), and the Cadence Check chat flow still opens every checkpoint with the exact question text it grades against (displayed/evaluated parity preserved through the new mechanism)',
+    !courseSrc.includes('class="cp-q"') && /appendMessageEl\('assistant', session\.question\)/.test(cadenceShellSrc));
   check('D. CHECKPOINT', 'M2.questions.m2cp1 matches the same new question exactly (displayed/evaluated parity)', m2ObjectMatch[0].includes(newQuestion));
   check('D. CHECKPOINT', 'checkpoint id m2cp1 is unchanged (element id, submit handler, key binding)', module2Wrap.includes('id="m2cp1"') && module2Wrap.includes("submitM2CP('m2cp1')") && module2Wrap.includes("m2cpKey(event,'m2cp1')"));
   check('D. CHECKPOINT', 'MODULE_CHECKPOINTS still lists exactly one checkpoint for module 2: m2cp1 (persistence/gating keys unchanged)', /'2': \['m2cp1'\]/.test(courseSrc));
@@ -233,31 +254,77 @@ const module0Wrap = extractWrap(courseSrc, 'module0Wrap');
 // ─────────────────────────────────────────────────────────────────────────
 (function module0Tests() {
   check('I. MODULE 0', 'module0Wrap extracted successfully', !!module0Wrap && module0Wrap.length > 500);
-  check('I. MODULE 0', 'the new "Before you begin" orientation block renders, positioned right after the opener and before 0.1', (() => {
-    const openerEnd = module0Wrap.indexOf('mo-footer-soon');
-    const orientation = module0Wrap.indexOf('Before you begin');
-    const section01 = module0Wrap.indexOf('0.1 — Welcome');
-    return openerEnd !== -1 && orientation !== -1 && section01 !== -1 && openerEnd < orientation && orientation < section01;
-  })());
-  check('I. MODULE 0', 'explains manual opt-in / never autoplay', /never starts on its own/.test(module0Wrap));
-  check('I. MODULE 0', 'explains pause/resume and leave-and-return', /pause and resume anytime/.test(module0Wrap) && /leave a module and come back/.test(module0Wrap));
-  check('I. MODULE 0', 'explains required checkpoints stop listening and must be completed personally', /required checkpoint stops the audio and waits/.test(module0Wrap) && /complete that checkpoint yourself/.test(module0Wrap));
-  check('I. MODULE 0', 'explains listening never grants competency or checkpoint credit', /listening never grants competency or checkpoint credit/i.test(module0Wrap));
-  check('I. MODULE 0', 'explains Continue Listening appears after an authoritative pass', /Continue Listening becomes available/.test(module0Wrap));
-  check('I. MODULE 0', 'explains Listen Again replays from the opening', /Listen Again starts the narration over from the opening|Replay a completed module from the beginning/.test(module0Wrap));
-  check('I. MODULE 0', 'all four controls (Resume Listening / Start Over / Continue Listening / Listen Again) are named', ['Resume Listening', 'Start Over', 'Continue Listening', 'Listen Again'].every((c) => module0Wrap.includes(c)));
-  check('I. MODULE 0', 'distinguishes Listen with Cadence from Ask Cadence', /Listen with Cadence is the narrated course experience/.test(module0Wrap) && /Ask Cadence is separate/.test(module0Wrap));
-  check('I. MODULE 0', 'closes with the required line', module0Wrap.includes('Read, listen, or move between both. The curriculum is the same.'));
+
   check('I. MODULE 0', 'does not display "Module 0" anywhere in the new orientation text (Welcome Module naming preserved)', !/Before you begin[\s\S]{0,1800}?Module 0(?!Wrap)/.test(module0Wrap.slice(module0Wrap.indexOf('Before you begin'), module0Wrap.indexOf('0.1 — Welcome'))));
   check('I. MODULE 0', 'the module opener title is still "Welcome" (Welcome Module naming preserved)', /<div class="mo-title">Welcome<\/div>/.test(module0Wrap));
+})();
 
+// ─────────────────────────────────────────────────────────────────────────
+// I2. ORIENTATION (How AIMT Works) — the 8 of the original 10 "Before you
+// begin" assertions that were stale DOM-shape checks, not real regressions:
+// the content they protect is still live, just relocated + reworded by the
+// already-shipped "How AIMT Works" redesign (commits 2a56bf5 / 7314f5a /
+// 3a668d7 / 2d42c72 / c76dfa8), one-time-routed before the Welcome Module
+// instead of being a permanent block inside module0Wrap. Re-targeted at
+// #howAimtWorksView's current copy, same protective intent as each original
+// check, not weakened. See docs/course-audit/AIMT-ORIENTATION-TEST-
+// DECISION.md for the full per-assertion trace.
+// ─────────────────────────────────────────────────────────────────────────
+(function orientationTests() {
+  check('I2. ORIENTATION (How AIMT Works)', 'howAimtWorksWrap extracted successfully', !!howAimtWorksWrap && howAimtWorksWrap.length > 500);
+
+  check('I2. ORIENTATION (How AIMT Works)', 'the orientation is a dedicated one-time view that renders before the Welcome Module (view routing replaces the old same-wrap DOM position: completeOrientationAndEnterWelcome() persists orientationComplete then opens Module 0 directly), and module0Wrap no longer duplicates the orientation copy', (() => {
+    const eyebrowIdx = howAimtWorksWrap.indexOf('Before you begin');
+    const ctaIdx = howAimtWorksWrap.indexOf('completeOrientationAndEnterWelcome()');
+    const routesIntoWelcome = /function completeOrientationAndEnterWelcome\(\) \{\s*APP_STATE\.setStudent\(\{ orientationComplete: true \}\);\s*openModuleById\(0\);/.test(courseSrc);
+    return eyebrowIdx !== -1 && ctaIdx !== -1 && eyebrowIdx < ctaIdx && routesIntoWelcome && module0Wrap.indexOf('Before you begin') === -1;
+  })());
+
+  check('I2. ORIENTATION (How AIMT Works)', 'explains pause/resume and leave-and-return: the player\'s own Play/Pause control plus the persisted "Resume Listening" state (picks up right where you left off) cover the same guarantee the retired copy stated in different words', /Play \/ Pause<\/div><div class="cc-def">Start or stop the narration\./.test(howAimtWorksWrap) && /Resume Listening<\/strong> and picks up right where you left off/.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'explains a required Cadence Check stops the narration and must be completed personally (course-wide "checkpoint" -> "Cadence Check" terminology -- see this file\'s own D. CHECKPOINT section for the same rename)', /it pauses and waits\. Complete the check yourself, in your own words/.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'explains listening alone never grants competency credit', /Listening alone never passes a competency check/.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'explains Continue Listening appears once the check is passed', /once you pass, <strong>Continue Listening<\/strong> appears/.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'explains Listen Again restarts a completed module\'s narration from the beginning', /Listen Again starts that module's narration over from the beginning/.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'all four controls are still named in the current live copy (Start Over now reads as the icon-button label "Start over", same restart-from-beginning control, not a dropped control)', ['Resume Listening', 'Continue Listening', 'Listen Again'].every((c) => howAimtWorksWrap.includes(c)) && /Start over<\/div><div class="cc-def">Restart this module's narration from the beginning\./.test(howAimtWorksWrap));
+
+  check('I2. ORIENTATION (How AIMT Works)', 'distinguishes Listen with Cadence (section 02) from Ask Cadence (section 03, explicitly "optional and ... never graded") -- same distinction as before, no longer phrased as "X is separate"', /02 — Read or listen with Cadence/.test(howAimtWorksWrap) && /03 — Cadence is with you throughout AIMT/.test(howAimtWorksWrap) && /Ask Cadence is optional and is never graded/.test(howAimtWorksWrap));
+
+  // These two were genuine content gaps (not stale DOM-shape checks) as of
+  // docs/course-audit/AIMT-ORIENTATION-TEST-DECISION.md -- the reassurance
+  // each one checks for did not exist anywhere in the live page. Restored
+  // in howAimtWorksWrap (section 02 for the opt-in/autoplay line, the
+  // closing copy before the CTA for the parity line) and retargeted here
+  // from module0Wrap, where this content never lived even before the
+  // 2a56bf5 "How AIMT Works" relocation -- it belongs with the other 8
+  // orientation checks above, not in I. MODULE 0.
+  check('I2. ORIENTATION (How AIMT Works)', 'explains manual opt-in / never autoplay', /never starts on its own/.test(howAimtWorksWrap));
+  check('I2. ORIENTATION (How AIMT Works)', 'closes with the required parity line', howAimtWorksWrap.includes('Read, listen, or move between both. The curriculum is the same.'));
+})();
+
+(function noNewGateAndNarrationTests() {
   check('I. NO NEW GATE', 'module0Wrap still has exactly one checkpoint (m0cp1) -- the orientation added no new completion gate', (module0Wrap.match(/class="checkpoint(?: cc-card)?" id="/g) || []).length === 1 && module0Wrap.includes('id="m0cp1"'));
   check('I. NO NEW GATE', 'MODULE_CHECKPOINTS still lists exactly one checkpoint for module 0: m0cp1', /'0': \['m0cp1'\]/.test(courseSrc));
   check('I. NO NEW GATE', 'm0Complete completion card is still the only completion element', (module0Wrap.match(/class="lesson-complete" id="/g) || []).length === 1 && module0Wrap.includes('id="m0Complete"'));
 
-  check('I. NARRATION UPDATED', 'module-00-listen-script.md includes a new chunk for the orientation content', /M0-01b/.test(m0ScriptDoc) && /Before you begin/.test(m0ScriptDoc));
-  check('I. NARRATION UPDATED', 'only piece A1 is documented as regenerated; A2-B1 documented as untouched (safe partial replacement, not a full regen)', /A1 \(v2 — regenerated this pass\)/.test(m0ScriptDoc) && (m0ScriptDoc.match(/\(untouched, still v1\)/g) || []).length === 4);
-  check('I. NARRATION UPDATED', '"AIMT" is spelled out letter-by-letter in the updated piece', /A-I-M-T/.test(m0ScriptDoc));
+  // Corrected 2026-09-17: the module-00-listen-script.md v1 draft this
+  // fixture originally checked against added a new M0-01b chunk to narrate
+  // the (then-live) "Before you begin" orientation block. That block was
+  // since relocated out of #module0Wrap entirely into #howAimtWorksView
+  // (see the I2 fixture above), so a strict-fidelity rebuild of Module 0's
+  // narration correctly REMOVES M0-01b rather than keeping it -- the
+  // opposite of what this fixture originally verified. Re-targeted at the
+  // real v2 rebuild's actual properties: M0-01b is documented as
+  // intentionally dropped (not silently missing), it's a full rebuild (not
+  // the old partial A1-only patch), and "AIMT" uses the current locked
+  // space-separated TTS convention, not the retired hyphenated one.
+  check('I. NARRATION UPDATED', 'module-00-listen-script.md documents M0-01b as intentionally removed (orientation content relocated to #howAimtWorksView, not narrated here)', /M0-01b/.test(m0ScriptDoc) && /dropped/i.test(m0ScriptDoc) && /howAimtWorksView/.test(m0ScriptDoc));
+  check('I. NARRATION UPDATED', 'documented as a full v2 strict-fidelity rebuild, not a partial single-piece patch', /v2, strict-fidelity rebuild/.test(m0ScriptDoc));
+  check('I. NARRATION UPDATED', '"AIMT" is spelled out letter-by-letter using the current space-separated TTS convention ("A I M T", not hyphenated)', /A I M T/.test(m0ScriptDoc));
 })();
 
 // ---- Report ----
