@@ -6,12 +6,12 @@
 <title>Head Spa Certification Course Online for Beauty Professionals | AIMT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="description" content="Online head spa certification for beauty professionals with scalp assessment, service training, Cadence feedback, practitioner tools and an earned credential.">
-<link rel="canonical" href="https://aimtrichology.com/headspa-mastery.html">
+<link rel="canonical" href="https://aimtrichology.com/head-spa-certification">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AIMT">
 <meta property="og:title" content="Head Spa Certification Course | AIMT">
 <meta property="og:description" content="Serious depth, modern learning, practitioner tools, and competency-based certification for beauty professionals building stronger head spa services.">
-<meta property="og:url" content="https://aimtrichology.com/headspa-mastery.html">
+<meta property="og:url" content="https://aimtrichology.com/head-spa-certification">
 <meta property="og:image" content="https://aimtrichology.com/assets/aimt-share.png">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -1852,13 +1852,40 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .lp-m12-choice.is-selected .lp-m12-choice-indicator::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #1e1a16; }
 .lp-m12-choice-text { font-family: var(--aimt-font-sans); font-size: 0.84rem; line-height: 1.52; color: #1e1a16; padding-top: 1px; }
 
-/* Performance Review — mirrors .m12x-notyet-banner, .m12x-perf-card/-head/-title/-score, .m12x-domain-row, .m12x-btn */
-.lp-m12-met-banner { border-top: 3px solid var(--aimt-success, #3f7d51); padding-top: 0.9rem; margin-bottom: 0.9rem; }
-.lp-m12-perf-card { border: 0.5px solid rgba(30,26,22,0.14); border-radius: 14px; padding: 1.05rem 1.15rem; margin: 1rem 0; background: rgba(30,26,22,0.02); }
-.lp-m12-perf-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.4rem 1rem; margin-bottom: 0.6rem; }
-.lp-m12-perf-title { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.88rem; color: #1e1a16; }
-.lp-m12-perf-meta { font-size: 0.7rem; color: #8a8078; }
-.lp-m12-perf-score { font-family: var(--aimt-font-mont); font-size: 1.2rem; font-weight: 600; color: #1e1a16; }
+/* Performance Review (course-audit Module 12 accuracy pass): the real
+   renderer (performanceReviewBlock()/domainCardHtml() in
+   module12-certification.js) grew from a flat percentage list into a
+   scored overall ring + per-domain minimum-threshold cards -- mirrors
+   .m12x-result-hero/-hero-top/-summary/-eyebrow/-title/-standard/-meta,
+   .m12x-domain-grid/-domain-card(-label/-score/-bar/-bar-fill/-bar-tick/
+   -threshold/-status), .m12x-critical-block/-label, .m12x-domain-row,
+   .m12x-btn. The ring itself reuses the REAL, always-loaded
+   .aimt-metric-ring markup (assets/css/aimt-metric-ring.css +
+   assets/js/aimt-metric-ring.js, both linked in <head> regardless of
+   section) rather than a namespaced copy -- same component, default
+   (non-"lg") size to fit this compact side-by-side preview card; the real
+   full-page result uses size "lg". Static final ring position only: no
+   draw-in animation, matching every other inert control in this demo. */
+.lp-m12-result-hero { background: var(--hero-bg, #262626); border-radius: var(--aimt-radius-lg, 20px); padding: 1.5rem 1.6rem 1.3rem; margin-bottom: 1rem; box-shadow: inset 0 3px 0 0 var(--aimt-success, #3a5a3a); }
+.lp-m12-result-hero-top { display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; }
+.lp-m12-result-summary { flex: 1 1 190px; min-width: 170px; }
+.lp-m12-result-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 0.45rem; }
+.lp-m12-result-title { font-family: var(--aimt-font-serif); font-size: 1.18rem; font-weight: 500; color: #fff; line-height: 1.28; margin-bottom: 0.5rem; }
+.lp-m12-result-body { color: rgba(255,255,255,0.76); font-size: 0.8rem; line-height: 1.58; margin-bottom: 0; }
+.lp-m12-result-standard { font-size: 0.7rem; color: rgba(255,255,255,0.55); margin-top: 0.75rem; line-height: 1.5; max-width: 40ch; }
+.lp-m12-result-meta { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.38); margin-top: 0.45rem; }
+.lp-m12-domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 0 0 0.95rem; }
+@media (max-width: 520px) { .lp-m12-domain-grid { grid-template-columns: 1fr; } }
+.lp-m12-domain-card { border: 0.5px solid rgba(30,26,22,0.14); border-radius: 14px; padding: 0.75rem 0.8rem 0.8rem; background: rgba(30,26,22,0.02); }
+.lp-m12-domain-card-label { font-family: var(--aimt-font-mont); font-size: 0.64rem; font-weight: 600; color: #1e1a16; line-height: 1.3; margin-bottom: 0.5rem; min-height: 1.7em; }
+.lp-m12-domain-card-score { font-family: var(--aimt-font-mont); font-size: 1.15rem; font-weight: 600; color: #1e1a16; line-height: 1; margin-bottom: 0.5rem; }
+.lp-m12-domain-card-bar { position: relative; height: 4px; background: rgba(0,0,0,0.08); border-radius: 2px; margin-bottom: 0.45rem; }
+.lp-m12-domain-card-bar-fill { height: 100%; border-radius: 2px; background: var(--aimt-success, #3a5a3a); }
+.lp-m12-domain-card-bar-tick { position: absolute; top: -2px; width: 2px; height: 8px; background: #1e1a16; opacity: 0.32; }
+.lp-m12-domain-card-threshold { font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.03em; color: #8a8078; margin-bottom: 0.35rem; }
+.lp-m12-domain-card-status { font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.07em; text-transform: uppercase; font-weight: 600; color: var(--aimt-success, #3a5a3a); }
+.lp-m12-critical-block { border: 0.5px solid rgba(30,26,22,0.14); border-radius: 14px; padding: 0.8rem 0.9rem; margin-bottom: 1rem; background: rgba(30,26,22,0.02); }
+.lp-m12-critical-label { font-family: var(--aimt-font-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8078; margin-bottom: 0.2rem; }
 .lp-m12-domain-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 0.5px solid rgba(30,26,22,0.1); font-size: 0.82rem; color: #1e1a16; }
 .lp-m12-domain-row:last-child { border-bottom: none; }
 .lp-m12-domain-row.is-flagged { color: var(--aimt-warning, #8b5e00); font-weight: 500; }
@@ -1869,6 +1896,54 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 .cs-hidden-msg.cs-mounted { display: flex; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
 .cs-hidden-msg.cs-mounted.show { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) { .cs-hidden-msg.cs-mounted { transition: none; } }
+
+/* ── Economics of the Room: interactive gross service revenue explorer.
+   Section band reuses .lp-band-proof as-is (same #f0ebe4 ivory surface
+   already used above for Product Explorer / below for AIMT Credential) --
+   not a new theme. The calculator itself is a white card layered on that
+   ivory band, the same white-card-on-ivory recipe as .lp-m12-demo above
+   and .format-card elsewhere. Every result is always labeled "gross
+   service revenue" (never earnings/income/take-home/profit/salary) --
+   see the HTML below. Plain client-side arithmetic only, no backend
+   call, no persisted state. ── */
+/* Centered composition for this section only -- .lp-proof-head is shared
+   with left-aligned sections elsewhere (Product Explorer, Curriculum);
+   here the heading is widened to match the card and centered above it so
+   the whole band reads as one deliberately centered unit, not a
+   left-aligned heading floating over a centered card. */
+.lp-band-econ .lp-proof-head { max-width: 860px; margin: 0 auto 2.25rem; text-align: center; }
+.lp-econ-card { background: #ffffff; border: 0.5px solid rgba(30,26,22,0.1); border-radius: var(--aimt-radius-panel, 16px); box-shadow: 0 18px 42px rgba(30,26,22,0.1); padding: 2rem 2.1rem 1.9rem; max-width: 860px; margin: 0 auto; }
+@media (max-width: 700px) { .lp-econ-card { padding: 1.5rem 1.3rem 1.5rem; } }
+.lp-econ-controls { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.8rem; }
+.lp-econ-control-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.55rem; }
+.lp-econ-control-head label { font-family: var(--aimt-font-sans); font-size: 0.86rem; color: var(--aimt-charcoal, #2B2B2B); }
+.lp-econ-control-value { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.95rem; color: var(--aimt-charcoal, #2B2B2B); font-variant-numeric: tabular-nums; }
+.lp-econ-range-ends { display: flex; justify-content: space-between; margin-top: 0.4rem; font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.06em; color: #a3968d; }
+/* Range input: thin taupe track, charcoal thumb -- restrained/editorial,
+   not a bright SaaS-slider. Cross-browser (WebKit/Blink + Firefox); native
+   <input type="range"> gives keyboard operability (arrows/Home/End/PageUp-
+   Down) for free. */
+.lp-econ-controls input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: transparent; cursor: pointer; margin: 0; }
+.lp-econ-controls input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: rgba(30,26,22,0.14); border-radius: 2px; }
+.lp-econ-controls input[type="range"]::-moz-range-track { height: 3px; background: rgba(30,26,22,0.14); border-radius: 2px; }
+.lp-econ-controls input[type="range"]::-moz-range-progress { height: 3px; background: var(--aimt-charcoal, #2B2B2B); border-radius: 2px; }
+.lp-econ-controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--aimt-charcoal, #2B2B2B); border: 2px solid #fff; box-shadow: 0 0 0 0.5px rgba(30,26,22,0.25); margin-top: -6.5px; transition: transform 0.15s ease; }
+.lp-econ-controls input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--aimt-charcoal, #2B2B2B); border: 2px solid #fff; box-shadow: 0 0 0 0.5px rgba(30,26,22,0.25); transition: transform 0.15s ease; }
+.lp-econ-controls input[type="range"]:hover::-webkit-slider-thumb, .lp-econ-controls input[type="range"]:focus-visible::-webkit-slider-thumb { transform: scale(1.15); }
+.lp-econ-controls input[type="range"]:hover::-moz-range-thumb, .lp-econ-controls input[type="range"]:focus-visible::-moz-range-thumb { transform: scale(1.15); }
+.lp-econ-controls input[type="range"]:focus-visible { outline: 2px solid var(--accent2); outline-offset: 4px; border-radius: 2px; }
+.lp-econ-divider { height: 0.5px; background: rgba(30,26,22,0.14); margin-bottom: 1.7rem; }
+.lp-econ-results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+@media (max-width: 640px) { .lp-econ-results { grid-template-columns: repeat(2, 1fr); gap: 1.6rem 1.2rem; } }
+.lp-econ-result { text-align: center; }
+.lp-econ-result-value { font-family: var(--aimt-font-mont); font-weight: 700; font-size: clamp(1.3rem, 3.6vw, 1.7rem); letter-spacing: -0.01em; color: var(--aimt-charcoal, #2B2B2B); line-height: 1.1; margin-bottom: 0.5rem; font-variant-numeric: tabular-nums; }
+.lp-econ-result-period { display: block; font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--aimt-charcoal, #2B2B2B); margin-bottom: 2px; }
+.lp-econ-result-kind { display: block; font-family: var(--aimt-font-mono); font-size: 0.54rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8078; }
+@keyframes lpEconPulse { from { opacity: 0.4; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+.lp-econ-result-value.lp-econ-pulse { animation: lpEconPulse 0.3s ease; }
+@media (prefers-reduced-motion: reduce) { .lp-econ-result-value.lp-econ-pulse { animation: none; } }
+.lp-econ-yearnote { font-family: var(--aimt-font-sans); font-size: 0.76rem; color: #8a8078; text-align: center; margin-bottom: 1.1rem; }
+.lp-econ-disclosure { font-family: var(--aimt-font-sans); font-size: 0.72rem; line-height: 1.6; color: rgba(30,26,22,0.5); border-top: 0.5px solid rgba(30,26,22,0.1); padding-top: 1rem; margin: 0; }
 
 /* ── Product tour: view-details affordance + lightbox ── */
 .lp-tour-viewbtn {
@@ -3898,20 +3973,58 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                   <p class="lp-m12-example-tag">Representative sample · not a live assessment-bank item</p>
                 </div>
                 <div class="lp-m12-demo">
-                  <div class="lp-m12-met-banner">
-                    <div class="mh-eyebrow">Final Assessment Results</div>
-                    <div class="sec-title">Certification standard met</div>
-                    <p class="body-text">Your assessment shows the required standard has been met across Knowledge &amp; Retention, Applied Practitioner Cases, and Practitioner Conversation, with all Critical Competencies cleared.</p>
-                  </div>
-                  <div class="lp-m12-perf-card">
-                    <div class="lp-m12-perf-head">
-                      <div><div class="lp-m12-perf-title">AIMT Head Spa Certification</div><div class="lp-m12-perf-meta">Certification Performance Review · Attempt 1</div></div>
-                      <div class="lp-m12-perf-score">88%</div>
+                  <div class="lp-m12-result-hero">
+                    <div class="lp-m12-result-hero-top">
+                      <!-- Real, always-loaded AIMTMetricRing markup (assets/js/aimt-metric-ring.js,
+                           assets/css/aimt-metric-ring.css) -- the same component the real results
+                           screen uses, rendered here at a fixed static value instead of via
+                           AIMTMetricRing.render() since this card has no attempt data or JS state. -->
+                      <div class="aimt-metric-ring" role="img" aria-label="Overall score: 88%. Certification requires 80 percent or higher overall, plus every component minimum and all critical competency areas. Certification Standard Met.">
+                        <svg class="aimt-metric-ring-svg" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                          <circle class="aimt-metric-ring-track" cx="60" cy="60" r="52"></circle>
+                          <circle class="aimt-metric-ring-fill" cx="60" cy="60" r="52" style="stroke-dasharray:326.73;stroke-dashoffset:39.21;"></circle>
+                        </svg>
+                        <div class="aimt-metric-ring-center" aria-hidden="true">
+                          <div class="aimt-metric-ring-value">88%</div>
+                          <div class="aimt-metric-ring-label">Overall</div>
+                        </div>
+                      </div>
+                      <div class="aimt-metric-ring-status" aria-hidden="true">Certification Standard Met</div>
+                      <div class="lp-m12-result-summary">
+                        <div class="lp-m12-result-eyebrow">AIMT Head Spa Certification</div>
+                        <div class="lp-m12-result-title">You met the standard.</div>
+                        <p class="lp-m12-result-body">Your assessment shows the required standard has been met across Knowledge &amp; Retention, Applied Practitioner Cases, and Practitioner Conversation, with all Critical Competencies cleared.</p>
+                        <div class="lp-m12-result-standard">Certification standard: 80% overall, every component minimum, and all critical competency areas.</div>
+                        <div class="lp-m12-result-meta">Attempt 1</div>
+                      </div>
                     </div>
-                    <div class="lp-m12-domain-row"><span>Knowledge &amp; Retention</span><span>86%</span></div>
-                    <div class="lp-m12-domain-row"><span>Applied Practitioner Cases</span><span>84%</span></div>
-                    <div class="lp-m12-domain-row"><span>Practitioner Conversation</span><span>92%</span></div>
-                    <div class="lp-m12-domain-row is-cleared"><span>Critical Competencies</span><span>Cleared ✓</span></div>
+                  </div>
+                  <div class="lp-m12-domain-grid">
+                    <div class="lp-m12-domain-card meets">
+                      <div class="lp-m12-domain-card-label">Knowledge &amp; Retention</div>
+                      <div class="lp-m12-domain-card-score">86%</div>
+                      <div class="lp-m12-domain-card-bar" aria-hidden="true"><div class="lp-m12-domain-card-bar-fill" style="width:86%;"></div><div class="lp-m12-domain-card-bar-tick" style="left:75%;"></div></div>
+                      <div class="lp-m12-domain-card-threshold">Minimum 75%</div>
+                      <div class="lp-m12-domain-card-status">Meets Standard</div>
+                    </div>
+                    <div class="lp-m12-domain-card meets">
+                      <div class="lp-m12-domain-card-label">Applied Practitioner Cases</div>
+                      <div class="lp-m12-domain-card-score">84%</div>
+                      <div class="lp-m12-domain-card-bar" aria-hidden="true"><div class="lp-m12-domain-card-bar-fill" style="width:84%;"></div><div class="lp-m12-domain-card-bar-tick" style="left:75%;"></div></div>
+                      <div class="lp-m12-domain-card-threshold">Minimum 75%</div>
+                      <div class="lp-m12-domain-card-status">Meets Standard</div>
+                    </div>
+                    <div class="lp-m12-domain-card meets">
+                      <div class="lp-m12-domain-card-label">Practitioner Conversation</div>
+                      <div class="lp-m12-domain-card-score">92%</div>
+                      <div class="lp-m12-domain-card-bar" aria-hidden="true"><div class="lp-m12-domain-card-bar-fill" style="width:92%;"></div><div class="lp-m12-domain-card-bar-tick" style="left:80%;"></div></div>
+                      <div class="lp-m12-domain-card-threshold">Minimum 80%</div>
+                      <div class="lp-m12-domain-card-status">Meets Standard</div>
+                    </div>
+                  </div>
+                  <div class="lp-m12-critical-block">
+                    <div class="lp-m12-critical-label">Critical Competency Areas</div>
+                    <div class="lp-m12-domain-row is-cleared"><span>All Cleared</span><span aria-hidden="true">✓</span></div>
                   </div>
                   <div class="sec-title" style="font-size:0.92rem;">Your AIMT credential is ready.</div>
                   <p class="body-text">Certification is issued after required course progression and a passing Final Certification Assessment. Your credential carries a unique ID and can be verified through AIMT's public verification system.</p>
@@ -3919,7 +4032,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                     <button type="button" class="lp-m12-btn">View &amp; Download Certificate</button>
                     <button type="button" class="lp-m12-btn secondary">Return To Course Home</button>
                   </div>
-                  <p class="lp-m12-example-tag">Example Performance Review</p>
+                  <p class="lp-m12-example-tag">Example Performance Review · illustrative scores, not a real student result</p>
                 </div>
               </div>
               <p class="lp-tour-caption"><strong>Certification is evaluated, not automatically unlocked.</strong> The Final Certification Assessment evaluates knowledge and retention, applied practitioner cases, and practitioner reasoning with Cadence. Students must meet the certification standards before the AIMT credential is issued.</p>
@@ -4041,6 +4154,79 @@ textarea#gpInput::placeholder { color: var(--muted2); }
             <p class="lp-proof-body" style="margin-top:0.9rem;">The course also prepares practitioners to handle conversations where AI-generated conclusions and their own assessment do not align.</p>
             <p class="lp-proof-eyebrow" style="margin-top:1.5rem;margin-bottom:0;">Covered in Module 11 — AI / Modern Practice Tools</p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ECONOMICS OF THE ROOM — interactive gross service revenue explorer.
+         Placed here deliberately: after credibility (Product Explorer,
+         Complete Service, Curriculum, Practical Outcomes, Modern Practice)
+         is established and immediately before the first pricing/enrollment
+         block (09 VALUE INTERRUPTION, next). Frames head spa as a business/
+         service unit, never as an income promise -- every result is always
+         labeled "gross service revenue" (never earnings/income/take-home/
+         profit/guaranteed revenue/salary), and the card carries its own
+         illustrative-only disclosure. Formulas: DAY = price × clients/day;
+         WEEK = DAY × days/week; MONTH = WEEK × 4.33; YEAR = WEEK × 48 (48
+         operating weeks, disclosed inline near the results). No profit or
+         margin calculator -- gross revenue only. Vanilla JS, no backend
+         call, no persisted state (see script block near the end of this
+         page's own <script>). -->
+    <div class="lp-section-band lp-band-proof lp-band-econ">
+      <div class="lp-band-inner">
+        <div class="lp-proof-head">
+          <div class="lp-proof-eyebrow">The Business Of Head Spa</div>
+          <div class="lp-proof-title">The Economics Of The Room.</div>
+          <p class="lp-proof-body">Explore the revenue potential of a head spa treatment room. Adjust the service price, clients per day, and days per week to see how a single room's gross service revenue scales.</p>
+        </div>
+        <div class="lp-econ-card" id="lpEconCard">
+          <div class="lp-econ-controls">
+            <div class="lp-econ-control">
+              <div class="lp-econ-control-head">
+                <label for="lpEconPrice">Average service price</label>
+                <output class="lp-econ-control-value" for="lpEconPrice" id="lpEconPriceVal">$175</output>
+              </div>
+              <input type="range" id="lpEconPrice" min="75" max="300" step="5" value="175" aria-describedby="lpEconDisclosure">
+              <div class="lp-econ-range-ends" aria-hidden="true"><span>$75</span><span>$300</span></div>
+            </div>
+            <div class="lp-econ-control">
+              <div class="lp-econ-control-head">
+                <label for="lpEconClients">Clients per day</label>
+                <output class="lp-econ-control-value" for="lpEconClients" id="lpEconClientsVal">3</output>
+              </div>
+              <input type="range" id="lpEconClients" min="1" max="8" step="1" value="3" aria-describedby="lpEconDisclosure">
+              <div class="lp-econ-range-ends" aria-hidden="true"><span>1</span><span>8</span></div>
+            </div>
+            <div class="lp-econ-control">
+              <div class="lp-econ-control-head">
+                <label for="lpEconDays">Days per week offering head spa</label>
+                <output class="lp-econ-control-value" for="lpEconDays" id="lpEconDaysVal">4</output>
+              </div>
+              <input type="range" id="lpEconDays" min="1" max="7" step="1" value="4" aria-describedby="lpEconDisclosure">
+              <div class="lp-econ-range-ends" aria-hidden="true"><span>1</span><span>7</span></div>
+            </div>
+          </div>
+          <div class="lp-econ-divider" role="presentation"></div>
+          <div class="lp-econ-results" id="lpEconResults" aria-live="polite">
+            <div class="lp-econ-result">
+              <div class="lp-econ-result-value" id="lpEconDay">$525</div>
+              <div class="lp-econ-result-label"><span class="lp-econ-result-period">Day</span><span class="lp-econ-result-kind">Gross Service Revenue</span></div>
+            </div>
+            <div class="lp-econ-result">
+              <div class="lp-econ-result-value" id="lpEconWeek">$2,100</div>
+              <div class="lp-econ-result-label"><span class="lp-econ-result-period">Week</span><span class="lp-econ-result-kind">Gross Service Revenue</span></div>
+            </div>
+            <div class="lp-econ-result">
+              <div class="lp-econ-result-value" id="lpEconMonth">$9,093</div>
+              <div class="lp-econ-result-label"><span class="lp-econ-result-period">Month</span><span class="lp-econ-result-kind">Gross Service Revenue</span></div>
+            </div>
+            <div class="lp-econ-result">
+              <div class="lp-econ-result-value" id="lpEconYear">$100,800</div>
+              <div class="lp-econ-result-label"><span class="lp-econ-result-period">Year</span><span class="lp-econ-result-kind">Gross Service Revenue</span></div>
+            </div>
+          </div>
+          <p class="lp-econ-yearnote">The annual figure uses 48 operating weeks per year.</p>
+          <p class="lp-econ-disclosure" id="lpEconDisclosure">These figures are illustrative only — not a projection, promise, or guarantee. Actual results vary based on pricing, demand, utilization, operating costs, staffing, location, taxes, and other factors. Figures shown reflect gross service revenue only, not earnings, income, take-home pay, or profit.</p>
         </div>
       </div>
     </div>
@@ -4216,7 +4402,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         </div>
         <div class="aimt-footer-col">
           <span class="aimt-footer-col-title">Education</span>
-          <a href="headspa-mastery.html">Head Spa Certification</a>
+          <a href="head-spa-certification">Head Spa Certification</a>
           <a href="courses.html">AIMT Programs</a>
         </div>
         <div class="aimt-footer-col">
@@ -4374,6 +4560,80 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     });
   });
 });
+
+/* Economics of the Room — interactive gross service revenue calculator.
+   Pure client-side arithmetic, no backend call, no persisted state, no
+   effect on startCheckout()/course logic. Formulas: DAY = price ×
+   clients/day; WEEK = DAY × days/week; MONTH = WEEK × 4.33; YEAR = WEEK ×
+   48. Every result is always labeled "gross service revenue" in the
+   markup itself -- this script only ever writes the numeric figure, never
+   a label, so that wording discipline can't drift here. One
+   aria-live="polite" region wraps all four results (#lpEconResults, not
+   one live region per figure) so a screen-reader user hears the updated
+   set as a whole, not a running commentary per keystroke/drag-tick. The
+   subtle number pulse checks prefers-reduced-motion directly and is also
+   gated by the same media query in CSS (.lp-econ-pulse), so reduced-motion
+   users get an instant, non-animated update either way. */
+(function () {
+  const card = document.getElementById('lpEconCard');
+  if (!card) return;
+  const priceInput = document.getElementById('lpEconPrice');
+  const clientsInput = document.getElementById('lpEconClients');
+  const daysInput = document.getElementById('lpEconDays');
+  if (!priceInput || !clientsInput || !daysInput) return;
+  const priceOut = document.getElementById('lpEconPriceVal');
+  const clientsOut = document.getElementById('lpEconClientsVal');
+  const daysOut = document.getElementById('lpEconDaysVal');
+  const dayEl = document.getElementById('lpEconDay');
+  const weekEl = document.getElementById('lpEconWeek');
+  const monthEl = document.getElementById('lpEconMonth');
+  const yearEl = document.getElementById('lpEconYear');
+
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+  function reduceMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function pulse(el) {
+    if (reduceMotion()) return;
+    el.classList.remove('lp-econ-pulse');
+    void el.offsetWidth; // restart the CSS animation
+    el.classList.add('lp-econ-pulse');
+  }
+
+  function setValue(el, text) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    pulse(el);
+  }
+
+  function recalc() {
+    const price = Number(priceInput.value);
+    const clients = Number(clientsInput.value);
+    const days = Number(daysInput.value);
+
+    if (priceOut) priceOut.textContent = money.format(price);
+    if (clientsOut) clientsOut.textContent = String(clients);
+    if (daysOut) daysOut.textContent = String(days);
+
+    const day = price * clients;
+    const week = day * days;
+    const month = week * 4.33;
+    const year = week * 48;
+
+    if (dayEl) setValue(dayEl, money.format(day));
+    if (weekEl) setValue(weekEl, money.format(week));
+    if (monthEl) setValue(monthEl, money.format(month));
+    if (yearEl) setValue(yearEl, money.format(year));
+  }
+
+  [priceInput, clientsInput, daysInput].forEach((input) => {
+    input.addEventListener('input', recalc);
+  });
+
+  recalc();
+})();
 </script>
 
 <!-- ══ CADENCE PRE-COURSE INTRO ══
@@ -4633,7 +4893,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <div class="sec-eyebrow">02 — Read or listen with Cadence</div>
     <h2 class="sec-title">Choose how you move through a lesson.</h2>
-    <div class="body-text">Every lesson can be read on screen. When Listen with Cadence is available in a module, Cadence narrates it out loud while the page moves with the audio, bringing important cards and frameworks into view as she reaches them.</div>
+    <div class="body-text">Every lesson can be read on screen. When Listen with Cadence is available in a module, Cadence narrates it out loud while the page moves with the audio, bringing important cards and frameworks into view as she reaches them. Listening is entirely optional — you choose when to open it, and it never starts on its own.</div>
 
     <div class="haw-step-label">A. Where to find it</div>
     <div class="body-text">Look for the Listen with Cadence entry near the top of a module, just below the "In this module" summary:</div>
@@ -4866,6 +5126,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <div class="body-text" style="text-align:center;max-width:52ch;margin-inline:auto;">You do not need to memorize any of this. AIMT will show you what is available and what is required as you move through the course.</div>
+    <div class="body-text" style="text-align:center;max-width:52ch;margin-inline:auto;">Read, listen, or move between both. The curriculum is the same.</div>
 
     <div class="haw-cta">
       <button type="button" class="haw-cta-btn" onclick="completeOrientationAndEnterWelcome()">Continue to Welcome Module →</button>
@@ -5417,7 +5678,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mo-tagline">Read the pattern.<br>Adjust the service.</div>
       <div class="mo-desc">Module 4 taught you how to gather and describe evidence. Now you will turn supported observations, client-reported experience, and regional differences into a cosmetic service plan. The goal is not to assign one permanent scalp type. The goal is to make each step earn its place.</div>
 
-      <div class="mo-section">
+      <div class="mo-section" id="m5WrittenBriefing">
         <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
         <ul class="mo-list">
           <li>Turn evidence and observation into an actual service plan.</li>
@@ -5434,12 +5695,31 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
 
       <div class="mo-footer">
-        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+        <button type="button" id="m5ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. ~30 min · Includes 2 checkpoint stops. Press to start listening.">
+          <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+          <span class="aimt-lm-entry-copy">
+            <span class="aimt-lm-entry-title">Listen with Cadence</span>
+            <span class="aimt-lm-entry-meta">~30 min · Includes 2 checkpoint stops</span>
+          </span>
+        </button>
+        <div class="mo-footer-note" data-aimt-entry-note aria-live="polite"></div>
+        <script>
+          (function () {
+            var btn = document.getElementById('m5ListenWithCadenceButton');
+            if (!btn) return;
+            var baseline = function () {
+              var note = btn.parentNode && btn.parentNode.querySelector('[data-aimt-entry-note]');
+              if (note) note.textContent = "Audio couldn't start. Try again.";
+            };
+            btn._aimtClickHandler = baseline;
+            btn.addEventListener('click', baseline);
+          })();
+        </script>
       </div>
     </div>
 
     <!-- 5.1 -->
-    <div class="sec-eyebrow">5.1 · From evidence to action</div>
+    <div class="sec-eyebrow" id="m5VisualEvidenceToAction">5.1 · From evidence to action</div>
     <div class="sec-title">The scalp does not need a label. The service needs a reason.</div>
     <div class="body-text">A useful assessment changes what you do next. It may change how thoroughly you cleanse, whether you exfoliate, how much heat you use, where you place product, how much pressure you apply, or whether you pause the service entirely.</div>
     <div class="body-text">The weak approach is to notice one feature, assign one type, and run the same protocol across the entire scalp. The stronger approach is to combine what is visible with what the client reports, what happened recently, and how each region responds.</div>
@@ -5461,7 +5741,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.2 -->
-    <div class="sec-eyebrow">5.2 · What you can actually change</div>
+    <div class="sec-eyebrow" id="m5VisualWhatYouCanChange">5.2 · What you can actually change</div>
     <div class="sec-title">Most protocol changes come from five levers.</div>
     <div class="body-text">Skilled customization is usually not a completely different service. It is a deliberate change in intensity, placement, duration, or omission.</div>
 
@@ -5496,7 +5776,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.3 -->
-    <div class="sec-eyebrow">5.3 · Priority order</div>
+    <div class="sec-eyebrow" id="m5VisualPriorityOrder">5.3 · Priority order</div>
     <div class="sec-title">The safest limit outranks the client's request.</div>
     <div class="body-text">Clients may ask for the deepest cleanse, the strongest exfoliation, maximum steam, or firm pressure. Their preference matters—but it does not override what the assessment and consultation tell you is appropriate today.</div>
 
@@ -5531,7 +5811,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.4 -->
-    <div class="sec-eyebrow">5.4 · Patterns, not permanent types</div>
+    <div class="sec-eyebrow" id="m5VisualPatterns">5.4 · Patterns, not permanent types</div>
     <div class="sec-title">Read the dominant need without forcing the whole scalp into it.</div>
 
     <div class="protocol-card">
@@ -5624,7 +5904,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- SIGNATURE INTERACTION: WHAT CHANGES FIRST? -->
-    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-eyebrow" id="m5VisualSignatureWhatChanges">Signature interaction</div>
     <div class="sec-title">What changes first?</div>
     <div class="body-text">Choose the first responsible service direction. You are not diagnosing the scalp. You are deciding what the current evidence allows you to do next.</div>
 
@@ -5675,7 +5955,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.5 -->
-    <div class="sec-eyebrow">5.5 · One appointment, more than one approach</div>
+    <div class="sec-eyebrow" id="m5VisualOneAppointment">5.5 · One appointment, more than one approach</div>
     <div class="sec-title">The protocol can change without the service feeling fragmented.</div>
     <div class="body-text">Regional customization should feel intentional, not improvised. Use the same service structure, then adjust the levers by area.</div>
     <div class="body-text">You might cleanse the crown more thoroughly, skip exfoliation near a reactive hairline, lower pressure at the temples, and use a lighter finish at the roots. The client still experiences one cohesive service. The practitioner simply stops pretending that every square inch has the same need.</div>
@@ -5746,7 +6026,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.6 -->
-    <div class="sec-eyebrow">5.6 · Choose a function, not a fantasy</div>
+    <div class="sec-eyebrow" id="m5VisualChooseFunction">5.6 · Choose a function, not a fantasy</div>
     <div class="sec-title">The right product is the one that supports the decision you already made.</div>
     <div class="body-text">Product knowledge matters, but product enthusiasm can distort judgment. A practitioner who starts with the bottle often finds a reason to use it. Start with the service need instead.</div>
     <div class="body-text">Choose a product category based on what the current region can tolerate and what you are trying to accomplish cosmetically.</div>
@@ -5785,7 +6065,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.7 -->
-    <div class="sec-eyebrow">5.7 · Intensity is part of the protocol</div>
+    <div class="sec-eyebrow" id="m5VisualIntensity">5.7 · Intensity is part of the protocol</div>
     <div class="sec-title">More heat, more pressure, and more time do not equal more expertise.</div>
 
     <div class="condition-cards">
@@ -5826,7 +6106,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.8 -->
-    <div class="sec-eyebrow">5.8 · Client communication</div>
+    <div class="sec-eyebrow" id="m5VisualClientCommunication">5.8 · Client communication</div>
     <div class="sec-title">Redirect the method without dismissing the goal.</div>
     <div class="body-text">Clients often ask for intensity because they associate intensity with results. Your job is not to argue with the goal. Your job is to explain why a different method is the better fit today.</div>
 
@@ -5864,7 +6144,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- 5.9 -->
-    <div class="sec-eyebrow">5.9 · Errors that make protocols less intelligent</div>
+    <div class="sec-eyebrow" id="m5VisualErrors">5.9 · Errors that make protocols less intelligent</div>
     <div class="sec-title">The most common mistake is treating the label instead of the client.</div>
 
     <div class="protocol-card">
@@ -6010,7 +6290,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mo-tagline">Stop assuming.<br>Start seeing.</div>
       <div class="mo-desc">Magnification does not hand you a diagnosis. It gives you a better view. This module teaches a repeatable five-point scan, disciplined observation, and the moment a cosmetic service should be customized, simplified, paused, or referred.</div>
 
-      <div class="mo-section">
+      <div class="mo-section" id="m4WrittenBriefing">
         <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
         <ul class="mo-list">
           <li>Learn a repeatable five-point scalp scan you can use every time.</li>
@@ -6027,11 +6307,30 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
 
       <div class="mo-footer">
-        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+        <button type="button" id="m4ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. ~29 min · Includes 2 checkpoint stops. Press to start listening.">
+          <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+          <span class="aimt-lm-entry-copy">
+            <span class="aimt-lm-entry-title">Listen with Cadence</span>
+            <span class="aimt-lm-entry-meta">~29 min · Includes 2 checkpoint stops</span>
+          </span>
+        </button>
+        <div class="mo-footer-note" data-aimt-entry-note aria-live="polite"></div>
+        <script>
+          (function () {
+            var btn = document.getElementById('m4ListenWithCadenceButton');
+            if (!btn) return;
+            var baseline = function () {
+              var note = btn.parentNode && btn.parentNode.querySelector('[data-aimt-entry-note]');
+              if (note) note.textContent = "Audio couldn't start. Try again.";
+            };
+            btn._aimtClickHandler = baseline;
+            btn.addEventListener('click', baseline);
+          })();
+        </script>
       </div>
     </div>
 
-    <div class="sec-eyebrow">4.1 — The role of magnification</div>
+    <div class="sec-eyebrow" id="m4VisualRoleOfMagnification">4.1 — The role of magnification</div>
     <div class="sec-title">A closer view is not a final answer.</div>
     <div class="body-text">A scalp camera can reveal details that are easy to miss with the unaided eye: surface shine, scale, residue, material around follicular openings, hair-shaft variation, and differences from one region to another.</div>
     <div class="body-text">That does not mean the device knows what caused what you see. Medical trichoscopy is a clinical diagnostic technique interpreted alongside history, examination, and other medical information. In a head spa, scalp microscopy is a cosmetic observation and education tool.</div>
@@ -6049,7 +6348,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.2 — Presenting the assessment</div>
+    <div class="sec-eyebrow" id="m4VisualPresentingAssessment">4.2 — Presenting the assessment</div>
     <div class="sec-title">Make the lens feel informative—not invasive.</div>
     <div class="body-text">Tell the client what the camera is for before it touches the scalp. The assessment should feel like part of customization, not a search for something wrong.</div>
 
@@ -6075,7 +6374,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.3 — Image integrity</div>
+    <div class="sec-eyebrow" id="m4VisualImageIntegrity">4.3 — Image integrity</div>
     <div class="sec-title">A useful image begins before the lens touches the scalp.</div>
     <div class="body-text">Magnification can exaggerate a poor setup. Standardize the conditions before you interpret the screen.</div>
 
@@ -6118,7 +6417,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.4 — The five-point scalp scan</div>
+    <div class="sec-eyebrow" id="m4VisualFivePointScan">4.4 — The five-point scalp scan</div>
     <div class="sec-title">Five assessment points prevent one-angle thinking.</div>
     <div class="body-text">The scalp is not uniform. AIMT's baseline scan uses the same five assessment points in the same order so the practitioner does not let one dramatic image represent the entire head.</div>
 
@@ -6211,7 +6510,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.5 — The five observation lenses</div>
+    <div class="sec-eyebrow" id="m4VisualObservationLenses">4.5 — The five observation lenses</div>
     <div class="sec-title">Do not label the scalp. Read the evidence.</div>
     <div class="body-text">Use the same five lenses at every assessment area. They keep the assessment specific enough to be useful and restrained enough to remain honest.</div>
 
@@ -6262,7 +6561,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">Observation discipline</div>
+    <div class="sec-eyebrow" id="m4VisualObservationDiscipline">Observation discipline</div>
     <div class="sec-title">Say only what the image earned.</div>
     <div class="body-text">Classify each statement as a supported observation, a working question, or an unsupported conclusion.</div>
 
@@ -6343,7 +6642,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.6 — Appearance examples</div>
+    <div class="sec-eyebrow" id="m4VisualAppearanceExamples">4.6 — Appearance examples</div>
     <div class="sec-title">Patterns overlap. That is why labels fail.</div>
     <div class="body-text">These images build visual vocabulary. They are illustrative magnified examples, not authenticated clinical captures and not proof of a diagnosis. Use each one to practice description, questioning, and restraint.</div>
 
@@ -6444,7 +6743,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">Similar image. Different possible story.</div>
+    <div class="sec-eyebrow" id="m4VisualSimilarImage">Similar image. Different possible story.</div>
     <div class="sec-title">The camera shows the material. The consultation helps explain it.</div>
 
     <div class="photo-pair">
@@ -6482,7 +6781,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.7 — From image to decision</div>
+    <div class="sec-eyebrow" id="m4VisualImageToDecision">4.7 — From image to decision</div>
     <div class="sec-title">The image earns its place by changing what happens next.</div>
     <div class="body-text">Assessment is not a performance. It should support one of four professional decisions.</div>
 
@@ -6512,7 +6811,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.8 — When not to proceed</div>
+    <div class="sec-eyebrow" id="m4VisualWhenNotToProceed">4.8 — When not to proceed</div>
     <div class="sec-title">The most important image may be the one that ends the service.</div>
 
     <div class="clinical-note">
@@ -6547,7 +6846,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.9 — Practitioner insight</div>
+    <div class="sec-eyebrow" id="m4VisualPractitionerInsight">4.9 — Practitioner insight</div>
     <div class="sec-title">The device can create the evidence you think you found.</div>
 
     <div class="info-card">
@@ -6578,7 +6877,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">4.10 — Common mistakes</div>
+    <div class="sec-eyebrow" id="m4VisualCommonMistakes">4.10 — Common mistakes</div>
     <div class="sec-title">What to unlearn before the camera makes it look convincing.</div>
 
     <div class="protocol-card">
@@ -7668,7 +7967,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mo-tagline">Before you treat,<br>you have to interpret correctly.</div>
       <div class="mo-desc">By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer — conditions that change how those patterns behave. Because if you misread what you're seeing, you will choose the wrong approach with confidence.</div>
 
-      <div class="mo-section">
+      <div class="mo-section" id="m6WrittenBriefing">
         <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
         <ul class="mo-list">
           <li>Learn what you can — and cannot — conclude from appearance alone.</li>
@@ -7685,11 +7984,30 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
 
       <div class="mo-footer">
-        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+        <button type="button" id="m6ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. ~25 min · Includes 2 checkpoint stops. Press to start listening.">
+          <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+          <span class="aimt-lm-entry-copy">
+            <span class="aimt-lm-entry-title">Listen with Cadence</span>
+            <span class="aimt-lm-entry-meta">~25 min · Includes 2 checkpoint stops</span>
+          </span>
+        </button>
+        <div class="mo-footer-note" data-aimt-entry-note aria-live="polite"></div>
+        <script>
+          (function () {
+            var btn = document.getElementById('m6ListenWithCadenceButton');
+            if (!btn) return;
+            var baseline = function () {
+              var note = btn.parentNode && btn.parentNode.querySelector('[data-aimt-entry-note]');
+              if (note) note.textContent = "Audio couldn't start. Try again.";
+            };
+            btn._aimtClickHandler = baseline;
+            btn.addEventListener('click', baseline);
+          })();
+        </script>
       </div>
     </div>
 
-    <div class="sec-eyebrow">6.1 — Your role here</div>
+    <div class="sec-eyebrow" id="m6VisualYourRole">6.1 — Your role here</div>
     <div class="sec-title">Recognize. Understand. Adjust. Know when to stop.</div>
     <div class="body-text">Most clients are not intentionally mismanaging their scalp. They are guessing. They see flakes and assume dryness. They feel itching and assume dandruff. They see oil and assume they need stronger cleansing. Then they treat based on symptoms instead of cause. Your job is not to agree with their diagnosis. Your job is to interpret.</div>
     <div class="body-text">In a head spa setting you will regularly encounter clients with visible scalp concerns — flaking, oil imbalance, irritation, buildup, itching, discomfort. Some of these fall well within scope. Others require referral. Your responsibility is to recognize what you're seeing, understand what may be driving it, adjust your service, and know when not to proceed.</div>
@@ -7704,7 +8022,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">6.3 — The most important distinction in scalp care</div>
+    <div class="sec-eyebrow" id="m6VisualImportantDistinction">6.3 — The most important distinction in scalp care</div>
     <div class="sec-title">Dry scalp and dandruff are not the same thing.</div>
     <div class="body-text">They may both present with flaking. But the cause — and therefore the treatment approach — is completely different. Getting this wrong is one of the most common and most consequential mistakes in scalp care.</div>
 
@@ -7762,7 +8080,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- ── FOLLOW THE CYCLE — progressive causal-sequence interaction ── -->
-    <div class="sec-eyebrow">6.4 — The cycle worth understanding</div>
+    <div class="sec-eyebrow" id="m6VisualCycle">6.4 — The cycle worth understanding</div>
     <div class="sec-title">Why the wrong product makes things worse.</div>
     <div class="body-text">This is a common, avoidable pattern: a client sees flakes, assumes dandruff, and reaches for the strongest anti-dandruff product they can find. Here's what actually happens — work through it in order.</div>
     <div class="interaction-hint">Open each stage in order to follow the cycle</div>
@@ -7823,17 +8141,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="fc-detail" id="fcDetail-5">By the time they reach you, the scalp has been compromised repeatedly. Your first job is often to stop the damage — not start a new treatment.</div>
       </div>
 
-      <div class="fc-final" id="fcFinal" style="display:none">
-        <div class="fc-final-eyebrow">Final reasoning</div>
-        <div class="fc-final-heading">Where do you break the cycle?</div>
-        <div class="fc-final-prompt">A client arrives after repeatedly escalating anti-dandruff products for a dry, increasingly reactive scalp. What should change first?</div>
-        <div class="bq-options" role="group" aria-label="Where do you break the cycle?">
-          <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="fcAnswer(0,this)">Move to a stronger dandruff product</button>
-          <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="fcAnswer(1,this)">Reassess the presentation before choosing the product direction</button>
-          <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="fcAnswer(2,this)">Add more exfoliation</button>
-        </div>
-        <div class="bq-feedback" id="fcFeedback" aria-live="polite" style="display:none;"></div>
-      </div>
     </div>
 
     <div class="cadence-note" style="margin-top:1.5rem">
@@ -7841,7 +8148,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="cn-text">"This is not treatment failure. It is misidentification. Flaking alone does not justify anti-dandruff treatment. Your job is to identify what type of flaking you are seeing before recommending anything. Sometimes the best thing you can do is simplify — not add more."</div>
     </div>
 
-    <div class="m6-scenario-heading">What this looks like in real time</div>
+    <div class="m6-scenario-heading" id="m6VisualScenarios">What this looks like in real time</div>
     <div class="m6-scenario-list">
       <div class="m6-scenario-card">
         <div class="m6-scenario-title">Scenario 1</div>
@@ -7902,6 +8209,18 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
+    <div class="fc-final" id="fcFinal" style="display:none">
+      <div class="fc-final-eyebrow">Final reasoning</div>
+      <div class="fc-final-heading">Where do you break the cycle?</div>
+      <div class="fc-final-prompt">A client arrives after repeatedly escalating anti-dandruff products for a dry, increasingly reactive scalp. What should change first?</div>
+      <div class="bq-options" role="group" aria-label="Where do you break the cycle?">
+        <button type="button" class="bq-opt" data-choice="0" aria-pressed="false" onclick="fcAnswer(0,this)">Move to a stronger dandruff product</button>
+        <button type="button" class="bq-opt" data-choice="1" aria-pressed="false" onclick="fcAnswer(1,this)">Reassess the presentation before choosing the product direction</button>
+        <button type="button" class="bq-opt" data-choice="2" aria-pressed="false" onclick="fcAnswer(2,this)">Add more exfoliation</button>
+      </div>
+      <div class="bq-feedback" id="fcFeedback" aria-live="polite" style="display:none;"></div>
+    </div>
+
     <hr class="divider">
 
     <!-- ── MIDPOINT CHECKPOINT ── -->
@@ -7929,7 +8248,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- ── MALASSEZIA SPECTRUM SLIDER ── -->
-    <div class="sec-eyebrow">6.5 — Malassezia to seborrheic dermatitis: one spectrum</div>
+    <div class="sec-eyebrow" id="m6VisualSpectrum">6.5 — Malassezia to seborrheic dermatitis: one spectrum</div>
     <div class="sec-title">Not two conditions. One spectrum.</div>
     <div class="body-text">Malassezia is a naturally occurring yeast found on most scalps. It becomes a problem when several factors line up together — increased oil, a shift in the scalp's surface environment, and individual variation in how the scalp's immune and inflammatory response reacts to the yeast's activity. As it progresses, it moves along a spectrum from mild dandruff to seborrheic dermatitis — the same underlying process at different levels of severity.</div>
     <div class="interaction-hint">Drag to move along the spectrum</div>
@@ -7948,7 +8267,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- ── STANDALONE REFERRAL SECTION ── -->
-    <div class="sec-eyebrow">6.6 — When to pause or refer</div>
+    <div class="sec-eyebrow" id="m6VisualPauseOrRefer">6.6 — When to pause or refer</div>
     <div class="sec-title">Know these without needing to touch anything.</div>
     <div class="info-card">
       <div class="ic-title">Refer when you see</div>
@@ -7968,7 +8287,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- SIGNATURE INTERACTION: SORT THREE PRESENTATIONS -->
-    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-eyebrow" id="m6VisualSignatureSort">Signature interaction</div>
     <div class="sec-title">Sort three presentations.</div>
     <div class="body-text">For each presentation, decide whether to proceed as usual, proceed with a modification, or pause and refer. Weigh the combination of cues together — not any single feature in isolation.</div>
 
@@ -8005,7 +8324,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- ── TREATMENT APPROACH ── -->
-    <div class="sec-eyebrow">6.7 — Treatment within scope</div>
+    <div class="sec-eyebrow" id="m6VisualTreatmentScope">6.7 — Treatment within scope</div>
     <div class="sec-title">You are supporting the environment. Not treating the condition.</div>
 
     <div class="treatment-grid">
@@ -8039,7 +8358,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <hr class="divider">
 
     <!-- ── TRIGGERS (static — reveal mechanic removed on audit) ── -->
-    <div class="sec-eyebrow">6.8 — What makes it worse</div>
+    <div class="sec-eyebrow" id="m6VisualWhatMakesWorse">6.8 — What makes it worse</div>
     <div class="sec-title">Match the trigger to what it does.</div>
     <div class="body-text">Understanding what aggravates these conditions helps you educate clients in a way that actually changes their behavior.</div>
 
@@ -8130,7 +8449,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="mo-tagline">Before the service starts, your setup is already speaking.</div>
       <div class="mo-desc">By the time your hands touch the client, they've already formed an impression. Not consciously — but they feel whether you're prepared, whether the space is controlled, whether the service will be smooth or interrupted. Your setup is not separate from the service. It is part of it.</div>
 
-      <div class="mo-section">
+      <div class="mo-section" id="m7WrittenBriefing">
         <div class="mo-section-label"><span class="mo-plus">+</span>In this module</div>
         <ul class="mo-list">
           <li>Set up a treatment bed that works for the service, not against it.</li>
@@ -8147,11 +8466,30 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
 
       <div class="mo-footer">
-        <div class="mo-footer-soon">Listen with Cadence — coming soon · Includes 2 checkpoint stops</div>
+        <button type="button" id="m7ListenWithCadenceButton" class="aimt-lm-entry" aria-label="Listen with Cadence. ~18 min · Includes 2 checkpoint stops. Press to start listening.">
+          <span class="aimt-lm-entry-play" aria-hidden="true"><svg viewBox="0 0 32 32" width="20" height="20" fill="none"><circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="1"/><path d="M13 10.5 L22 16 L13 21.5 Z" fill="currentColor"/></svg></span>
+          <span class="aimt-lm-entry-copy">
+            <span class="aimt-lm-entry-title">Listen with Cadence</span>
+            <span class="aimt-lm-entry-meta">~18 min · Includes 2 checkpoint stops</span>
+          </span>
+        </button>
+        <div class="mo-footer-note" data-aimt-entry-note aria-live="polite"></div>
+        <script>
+          (function () {
+            var btn = document.getElementById('m7ListenWithCadenceButton');
+            if (!btn) return;
+            var baseline = function () {
+              var note = btn.parentNode && btn.parentNode.querySelector('[data-aimt-entry-note]');
+              if (note) note.textContent = "Audio couldn't start. Try again.";
+            };
+            btn._aimtClickHandler = baseline;
+            btn.addEventListener('click', baseline);
+          })();
+        </script>
       </div>
     </div>
 
-    <div class="sec-eyebrow">7.1 — The treatment bed</div>
+    <div class="sec-eyebrow" id="m7VisualTreatmentBed">7.1 — The treatment bed</div>
     <div class="sec-title">Your most important equipment decision.</div>
 
     <figure class="clinical-photo">
@@ -8212,7 +8550,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">7.2 — Tools & supplies</div>
+    <div class="sec-eyebrow" id="m7VisualToolsSupplies">7.2 — Tools & supplies</div>
     <div class="sec-title">Essentials first. Upgrades later.</div>
     <div class="body-text">Most people overvalue tools. They assume more tools means a better service. That's incorrect. Your hands create the experience. Tools support, enhance, and assist — but they should never replace presence. Overuse of tools leads to a mechanical-feeling service, loss of connection, and inconsistent pressure. Clients may not say it. But they feel it.</div>
     <div class="body-text">Start with everything on the essentials list. Nothing on the upgrades list is necessary to deliver a premium service — add from the upgrade tier when your volume justifies it.</div>
@@ -8291,7 +8629,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">7.3 — Station prep sequence</div>
+    <div class="sec-eyebrow" id="m7VisualStationPrep">7.3 — Station prep sequence</div>
     <div class="sec-title">Run this before every single client.</div>
 
     <figure class="clinical-photo">
@@ -8326,7 +8664,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">7.4 — Client positioning</div>
+    <div class="sec-eyebrow" id="m7VisualClientPositioning">7.4 — Client positioning</div>
     <div class="sec-title">Three things to confirm before the water runs.</div>
 
     <div class="photo-pair">
@@ -8381,7 +8719,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
     <hr class="divider">
 
-    <div class="sec-eyebrow">Signature interaction</div>
+    <div class="sec-eyebrow" id="m7VisualSignatureMistakes">Signature interaction</div>
     <div class="sec-title">Find the setup mistakes.</div>
     <div class="body-text">Not every difference is a mistake. Look at each setup and decide whether something actually needs to change — or whether it is simply a different, functional way of working.</div>
 
@@ -11677,12 +12015,12 @@ function openModuleById(id, options = {}) {
   const STATIC_MODULES = {
     3: () => { if (wrap && module3HTML) wrap.innerHTML = module3HTML; },
     2: () => { const w = document.getElementById('module2Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m2BdReset(); },
-    4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; },
-    5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
-    6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); },
+    4: () => { const w = document.getElementById('module4Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; window._m4cpsDone = 0; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 4, entryButtonEl: wrap.querySelector('#m4ListenWithCadenceButton'), appState: APP_STATE }); },
+    5: () => { const w = document.getElementById('module5Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 5, entryButtonEl: wrap.querySelector('#m5ListenWithCadenceButton'), appState: APP_STATE }); },
+    6: () => { const w = document.getElementById('module6Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; setTimeout(() => { const ss = document.getElementById('spectrumSlider'); if (ss) updateSpectrum(ss.value); }, 100); fcReset(); if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 6, entryButtonEl: wrap.querySelector('#m6ListenWithCadenceButton'), appState: APP_STATE }); },
     0: () => { const w = document.getElementById('module0Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     1: () => { const w = document.getElementById('module1Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 1, entryButtonEl: wrap.querySelector('#m1ListenWithCadenceButton'), appState: APP_STATE }); renderM1ReviewQAPanel(); },
-    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); },
+    7: () => { const w = document.getElementById('module7Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; resetPrepChecklist(); if (window.AIMTListenMode) window.AIMTListenMode.mount({ courseSlug: 'headspa-mastery', moduleId: 7, entryButtonEl: wrap.querySelector('#m7ListenWithCadenceButton'), appState: APP_STATE }); },
     8: () => { const w = document.getElementById('module8Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; m8InitMasterclass(); },
     9: () => { const w = document.getElementById('module9Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },
     10: () => { const w = document.getElementById('module10Wrap'); if (w && wrap) wrap.innerHTML = w.innerHTML; },

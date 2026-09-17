@@ -446,10 +446,22 @@ body {
     });
     const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
     const HEADSPA_COURSE_SLUG = 'headspa-mastery';
-    const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
+    const COURSE_ENTRY_URL = 'head-spa-certification?enter=1';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const AIMT_LOGS_TABLE = 'aimt_logs';
+    const DEFAULT_POST_LOGIN_ROUTE = 'my-aimt.html';
+    // Known-safe, same-origin, AIMT-relative destinations a ?next= param is
+    // allowed to send a signed-in student to after login -- exact match
+    // only (see isSafeNextRoute() below). Grepped confirmed the only
+    // current sender is the Service Timer's access gate, which redirects
+    // here as student-access.html?next=aimt-service-timer.html when a
+    // signed-out visitor lands on aimt-service-timer.html. Extend this
+    // list only when another real page starts sending ?next= here.
+    const SAFE_NEXT_ROUTES = new Set([
+      'aimt-service-timer.html',
+      DEFAULT_POST_LOGIN_ROUTE
+    ]);
     let existingAuthorizedSession = null;
 
     const form = document.getElementById('signInForm');
@@ -695,9 +707,65 @@ body {
       } catch (_) {}
     }
 
+    // Defensively unwrap percent-encoding so an encoded external-URL
+    // attempt (%2F%2Fevil.com, https%3A%2F%2Fevil.com, or a double-encoded
+    // variant like %252F%252Fevil.com) can't slip past isSafeNextRoute()
+    // just because it still looked harmless after URLSearchParams' single
+    // automatic decode pass. Bounded loop (never infinite on malformed
+    // input); stops as soon as decoding stops changing the value.
+    function decodeNextCandidate(rawValue) {
+      let value = String(rawValue || '');
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        let decoded;
+        try {
+          decoded = decodeURIComponent(value);
+        } catch (_) {
+          break;
+        }
+        if (decoded === value) break;
+        value = decoded;
+      }
+      return value;
+    }
+
+    // Never treat a candidate as safe unless it is an exact match (after
+    // stripping at most one leading slash) for a known AIMT-relative route
+    // in SAFE_NEXT_ROUTES. This blocks open-redirect vectors by
+    // construction -- protocol-relative ("//evil.com"), any absolute
+    // scheme ("https://...", "javascript:...", "data:..."), backslash
+    // tricks, and unrecognized/typo'd paths all simply fail the allowlist
+    // check -- rather than trying to blocklist every possible bad pattern.
+    function isSafeNextRoute(candidate) {
+      if (!candidate || typeof candidate !== 'string') return false;
+      if (candidate.indexOf('\\') !== -1) return false;
+      if (/^\/\//.test(candidate)) return false;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(candidate)) return false;
+      const normalized = candidate.replace(/^\/+/, '');
+      return SAFE_NEXT_ROUTES.has(normalized);
+    }
+
+    // Reads ?next= from the current URL and returns it ONLY if it passes
+    // isSafeNextRoute(); otherwise returns the safe default
+    // (my-aimt.html). Used by redirectToCourse() so a signed-in student
+    // who arrived via a ?next= link (currently: the Service Timer's access
+    // gate) lands back where they meant to go, without turning this page
+    // into an open redirector for anyone else.
+    function getSafeNextRoute() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('next');
+        if (!raw) return DEFAULT_POST_LOGIN_ROUTE;
+        const decoded = decodeNextCandidate(raw);
+        if (isSafeNextRoute(decoded)) return decoded.replace(/^\/+/, '');
+        return DEFAULT_POST_LOGIN_ROUTE;
+      } catch (_) {
+        return DEFAULT_POST_LOGIN_ROUTE;
+      }
+    }
+
     function redirectToCourse() {
       setAccessFlowHandoff(existingAuthorizedSession ? 'student-access-session-continue' : 'student-access-signin');
-      window.location.href = 'my-aimt.html';
+      window.location.href = getSafeNextRoute();
     }
 
     async function ensureSessionReady(userId) {
