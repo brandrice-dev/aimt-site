@@ -2,7 +2,7 @@
 
 ## What this is
 Production site for AIMT (American Institute of Modern Trichology) — an online
-certification platform. First course: **HeadSpa Mastery** ($497), a head spa
+certification platform. First course: **HeadSpa Mastery** ($597), a head spa
 practitioner certification with an AI tutor named **Cadence**. Owner: Brandon.
 Deployed on **Cloudflare Pages** (auto-deploys on push to main).
 Currently pre-launch. Target: end of July 2026.
