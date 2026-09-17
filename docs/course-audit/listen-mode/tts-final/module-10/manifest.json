@@ -1,0 +1,120 @@
+{
+  "module": "10",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M10-BATCH-A1.txt",
+      "chunkIds": [
+        "M10-01",
+        "M10-02"
+      ],
+      "normalizedChars": 2670,
+      "firstSpokenLine": "Welcome to Module 10. Most people treat sanitation and reset as something separate from the service. It's not. Clients may not watch you cle",
+      "lastSpokenLine": "nly where it's specifically required. Disinfected is not the same as sterile, and not every head spa setup requires sterilization equipment.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M10-BATCH-A2.txt",
+      "chunkIds": [
+        "M10-03"
+      ],
+      "normalizedChars": 2177,
+      "firstSpokenLine": "Section 10.2 — Process the right item the right way. Match the process to what the item actually is.",
+      "lastSpokenLine": " instructions. This is a maintenance tip, not a required procedure — it doesn't replace any disinfection step your system actually requires.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M10-BATCH-A3.txt",
+      "chunkIds": [
+        "M10-04"
+      ],
+      "normalizedChars": 2261,
+      "firstSpokenLine": "Section 10.3 — Build a reset around what cannot be rushed. Contain. Clean. Disinfect. Reset. Verify.",
+      "lastSpokenLine": "ng, or starting the service and finishing the process afterward. The required time is required — not a suggestion that yields to a schedule.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M10-BATCH-B1.txt",
+      "chunkIds": [
+        "M10-05"
+      ],
+      "normalizedChars": 1905,
+      "firstSpokenLine": "Section 10.4 — Build the system before you're under pressure. Reduce decisions. Not standards.",
+      "lastSpokenLine": "ectants, services, or procedures change. An annual internal review is a reasonable business habit, not a guarantee of compliance on its own.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M10-BATCH-B2.txt",
+      "chunkIds": [
+        "M10-06"
+      ],
+      "normalizedChars": 2354,
+      "firstSpokenLine": "Section 10.5 — When routine reset is not enough. Blood or body fluid is not a routine reset.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m9cp1,m9cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M10-BATCH-C1.txt",
+      "chunkIds": [
+        "M10-07"
+      ],
+      "normalizedChars": 364,
+      "firstSpokenLine": "Module complete. You can deliver a great service. You can reset it cleanly. That discipline is what makes the experience repeatable — for ev",
+      "lastSpokenLine": "actitioners are already encountering AI — this module teaches you to use it well, without losing the judgment that makes you a professional.",
+      "checkpointRelationship": "m9cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M10-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 745
+    },
+    {
+      "chunkId": "M10-02",
+      "title": "Building on your licensure + 10.1 Use the right process for the job",
+      "normalizedChars": 1923
+    },
+    {
+      "chunkId": "M10-03",
+      "title": "10.2 Process the right item the right way",
+      "normalizedChars": 2177
+    },
+    {
+      "chunkId": "M10-04",
+      "title": "10.3 Build a reset around what cannot be rushed + Reset Under Pressure",
+      "normalizedChars": 2261
+    },
+    {
+      "chunkId": "M10-05",
+      "title": "10.4 Build the system before you're under pressure",
+      "normalizedChars": 1905
+    },
+    {
+      "chunkId": "M10-06",
+      "title": "10.5 When routine reset is not enough + Checkpoint 1 + Checkpoint 2 (`m9cp1`, `m9cp2`)",
+      "normalizedChars": 2354,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m9cp1,m9cp2"
+    },
+    {
+      "chunkId": "M10-07",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 364,
+      "gateType": "post-pass",
+      "checkpointId": "m9cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

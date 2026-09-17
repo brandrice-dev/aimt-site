@@ -1,0 +1,137 @@
+{
+  "module": "09",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M9-BATCH-A1.txt",
+      "chunkIds": [
+        "M9-01",
+        "M9-02"
+      ],
+      "normalizedChars": 2864,
+      "firstSpokenLine": "Welcome to Module 9. The treatment is done — what happens next, how you close the appointment and how you price what you do, is its own skil",
+      "lastSpokenLine": "mendations at once, or creating false urgency about availability. Look at all six and choose the one that actually preserves the experience.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M9-BATCH-A2.txt",
+      "chunkIds": [
+        "M9-03"
+      ],
+      "normalizedChars": 1397,
+      "firstSpokenLine": "Section 9.2 — Know the real cost. Four inputs — not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal ",
+      "lastSpokenLine": "[firmly] Thirty percent markup and thirty percent margin do not produce the same selling price. Know which one you're using.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M9-BATCH-A3.txt",
+      "chunkIds": [
+        "M9-04",
+        "M9-05",
+        "M9-06"
+      ],
+      "normalizedChars": 3356,
+      "firstSpokenLine": "Section 9.4 — Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned — ente",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m10cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M9-BATCH-B1.txt",
+      "chunkIds": [
+        "M9-07"
+      ],
+      "normalizedChars": 1125,
+      "firstSpokenLine": "Section 9.8 — When a client says the price felt high. One comment. Several possible causes.",
+      "lastSpokenLine": " communicate meaningful differences? Is this feedback recurring? [slowly] Don't assume the client is wrong. Don't assume the price is wrong.",
+      "checkpointRelationship": "m10cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M9-BATCH-B2.txt",
+      "chunkIds": [
+        "M9-08"
+      ],
+      "normalizedChars": 1099,
+      "firstSpokenLine": "Section 9.9 — Why pricing really goes wrong. Confidence is not a financial model.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m10cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M9-BATCH-C1.txt",
+      "chunkIds": [
+        "M9-09"
+      ],
+      "normalizedChars": 275,
+      "firstSpokenLine": "Module complete. You can close a service the way you opened it, and price it from real numbers instead of pressure or guesswork.",
+      "lastSpokenLine": "xt, Module 10: sanitation and reset systems — the work between every service that separates consistent professionals from inconsistent ones.",
+      "checkpointRelationship": "m10cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M9-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 728
+    },
+    {
+      "chunkId": "M9-02",
+      "title": "9.1 From treatment close to checkout + Close Without Pressure",
+      "normalizedChars": 2134
+    },
+    {
+      "chunkId": "M9-03",
+      "title": "9.2 Know the real cost + 9.3 Margin vs. markup",
+      "normalizedChars": 1397
+    },
+    {
+      "chunkId": "M9-04",
+      "title": "9.4 Price your service + 9.5 Market context",
+      "normalizedChars": 1120
+    },
+    {
+      "chunkId": "M9-05",
+      "title": "9.6 Design your menu + 9.7 Enhancements that earn their place",
+      "normalizedChars": 1915
+    },
+    {
+      "chunkId": "M9-06",
+      "title": "Checkpoint 1 (`m10cp1`)",
+      "normalizedChars": 317,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m10cp1"
+    },
+    {
+      "chunkId": "M9-07",
+      "title": "Post-pass: 9.8 When a client says the price felt high",
+      "normalizedChars": 1125,
+      "gateType": "post-pass",
+      "checkpointId": "m10cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M9-08",
+      "title": "9.9 Why pricing really goes wrong + Checkpoint 2 (`m10cp2`)",
+      "normalizedChars": 1099,
+      "gateType": "checkpoint-stop-then-post-pass",
+      "checkpointId": "m10cp2"
+    },
+    {
+      "chunkId": "M9-09",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 275,
+      "gateType": "post-pass",
+      "checkpointId": "m10cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

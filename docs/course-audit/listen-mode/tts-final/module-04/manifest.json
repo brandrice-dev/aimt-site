@@ -1,0 +1,219 @@
+{
+  "module": "04",
+  "version": "v6-strict-fidelity",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M4-BATCH-A1.txt",
+      "chunkIds": [
+        "M4-01",
+        "M4-02",
+        "M4-03"
+      ],
+      "normalizedChars": 3040,
+      "firstSpokenLine": "[warmly] Welcome to Module Four — Microscopy and Scalp Assessment. Stop assuming. Start seeing.",
+      "lastSpokenLine": "t feel dirty, damaged, or alarmed. Describe the finding. Explain the cosmetic decision. State the limit when the cause cannot be determined.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M4-BATCH-A2.txt",
+      "chunkIds": [
+        "M4-04",
+        "M4-05"
+      ],
+      "normalizedChars": 3134,
+      "firstSpokenLine": "Section 4.3 — Image integrity. A useful image begins before the lens touches the scalp.",
+      "lastSpokenLine": "A five-point scan creates the baseline. The client's concern tells you where to add targeted views.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M4-BATCH-A3.txt",
+      "chunkIds": [
+        "M4-06",
+        "M4-07"
+      ],
+      "normalizedChars": 3220,
+      "firstSpokenLine": "Section 4.5 — The five observation lenses. Do not label the scalp. Read the evidence.",
+      "lastSpokenLine": "Strong assessment language is precise about what is visible and disciplined about what remains unknown.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M4-BATCH-A4.txt",
+      "chunkIds": [
+        "M4-08"
+      ],
+      "normalizedChars": 491,
+      "firstSpokenLine": "Here's your first checkpoint — read the full scan.",
+      "lastSpokenLine": "Take your time.",
+      "checkpointRelationship": "m4cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M4-BATCH-B1.txt",
+      "chunkIds": [
+        "M4-09",
+        "M4-10"
+      ],
+      "normalizedChars": 3461,
+      "firstSpokenLine": "[warmly] Good — you're back. Let's move from that two-region example into a full set of real appearance patterns, so you can practice the sa",
+      "lastSpokenLine": "y are reviewed. What it does not prove: follicular blockage, infrequent hygiene, sebum composition, infection, or the cause of the material.",
+      "checkpointRelationship": "m4cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M4-BATCH-B2.txt",
+      "chunkIds": [
+        "M4-11",
+        "M4-12",
+        "M4-13"
+      ],
+      "normalizedChars": 3620,
+      "firstSpokenLine": "Similar image. Different possible story. The camera shows the material. The consultation helps explain it.",
+      "lastSpokenLine": " otherwise compromised area, remove it from service and follow the manufacturer's required cleaning and disinfection procedure before reuse.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B3",
+      "file": "M4-BATCH-B3.txt",
+      "chunkIds": [
+        "M4-14",
+        "M4-15"
+      ],
+      "normalizedChars": 2057,
+      "firstSpokenLine": "Section 4.9 — Practitioner insight. The device can create the evidence you think you found.",
+      "lastSpokenLine": "[firmly] The microscope is not the skill. The collection method, language, and decision are the skill.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B4",
+      "file": "M4-BATCH-B4.txt",
+      "chunkIds": [
+        "M4-16"
+      ],
+      "normalizedChars": 389,
+      "firstSpokenLine": "Here's your last checkpoint — know when the image ends the service.",
+      "lastSpokenLine": "Take your time.",
+      "checkpointRelationship": "m4cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M4-BATCH-C1.txt",
+      "chunkIds": [
+        "M4-17"
+      ],
+      "normalizedChars": 596,
+      "firstSpokenLine": "[warmly] Good — that's the judgment this module is built around: what you saw, what you said, and why you stopped.",
+      "lastSpokenLine": "o translate appropriate findings into a cosmetic treatment direction without collapsing the entire scalp into one label. I'll see you there.",
+      "checkpointRelationship": "m4cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M4-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 862
+    },
+    {
+      "chunkId": "M4-02",
+      "title": "4.1 The role of magnification",
+      "normalizedChars": 967
+    },
+    {
+      "chunkId": "M4-03",
+      "title": "4.2 Presenting the assessment",
+      "normalizedChars": 1207
+    },
+    {
+      "chunkId": "M4-04",
+      "title": "4.3 Image integrity",
+      "normalizedChars": 1382
+    },
+    {
+      "chunkId": "M4-05",
+      "title": "4.4 The five-point scalp scan",
+      "normalizedChars": 1750
+    },
+    {
+      "chunkId": "M4-06",
+      "title": "4.5 The five observation lenses",
+      "normalizedChars": 1726
+    },
+    {
+      "chunkId": "M4-07",
+      "title": "Observation discipline (classification practice, ungraded)",
+      "normalizedChars": 1492
+    },
+    {
+      "chunkId": "M4-08",
+      "title": "Checkpoint 1 (`m4cp1`)",
+      "normalizedChars": 491,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m4cp1"
+    },
+    {
+      "chunkId": "M4-09",
+      "title": "Post-pass continuation (`m4cp1`)",
+      "normalizedChars": 209,
+      "gateType": "post-pass",
+      "checkpointId": "m4cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M4-10",
+      "title": "4.6 Appearance examples",
+      "normalizedChars": 3250
+    },
+    {
+      "chunkId": "M4-11",
+      "title": "Similar image, different possible story",
+      "normalizedChars": 783
+    },
+    {
+      "chunkId": "M4-12",
+      "title": "4.7 From image to decision",
+      "normalizedChars": 1302
+    },
+    {
+      "chunkId": "M4-13",
+      "title": "4.8 When not to proceed",
+      "normalizedChars": 1531
+    },
+    {
+      "chunkId": "M4-14",
+      "title": "4.9 Practitioner insight",
+      "normalizedChars": 1044
+    },
+    {
+      "chunkId": "M4-15",
+      "title": "4.10 Common mistakes",
+      "normalizedChars": 1011
+    },
+    {
+      "chunkId": "M4-16",
+      "title": "Checkpoint 2 (`m4cp2`)",
+      "normalizedChars": 389,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m4cp2"
+    },
+    {
+      "chunkId": "M4-17",
+      "title": "Post-pass continuation (`m4cp2`) + completion + Module 5 handoff",
+      "normalizedChars": 596,
+      "gateType": "post-pass",
+      "checkpointId": "m4cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

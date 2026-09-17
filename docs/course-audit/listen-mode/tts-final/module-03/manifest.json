@@ -1,0 +1,149 @@
+{
+  "module": "03",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M3-BATCH-A1.txt",
+      "chunkIds": [
+        "M3-01",
+        "M3-02",
+        "M3-03"
+      ],
+      "normalizedChars": 3014,
+      "firstSpokenLine": "Welcome to Module 3. This is where the course turns technical — but the goal isn't to memorize anatomy for its own sake. Once you understand",
+      "lastSpokenLine": "[firmly] Anatomy makes pressure more intelligent. It does not turn deeper tissue into a cosmetic claim.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M3-BATCH-A2.txt",
+      "chunkIds": [
+        "M3-04"
+      ],
+      "normalizedChars": 2945,
+      "firstSpokenLine": "Section 3.3 — The living system beneath the strand. The strand is the output. The follicle is the living system.",
+      "lastSpokenLine": "[firmly] The expert move isn't naming more structures. It's knowing what each structure actually allows you to conclude.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M3-BATCH-A3.txt",
+      "chunkIds": [
+        "M3-05",
+        "M3-06"
+      ],
+      "normalizedChars": 2006,
+      "firstSpokenLine": "Section 3.4 — The hair-growth cycle. Hair loss is often a timing problem before it's a pattern problem.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M3-BATCH-B1.txt",
+      "chunkIds": [
+        "M3-07",
+        "M3-08"
+      ],
+      "normalizedChars": 3734,
+      "firstSpokenLine": "Section 3.5 — Read the pattern. Don't start with the name. Start with the pattern.",
+      "lastSpokenLine": "Treat the pattern you can support cosmetically — not the diagnosis you cannot establish.",
+      "checkpointRelationship": "cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M3-BATCH-B2.txt",
+      "chunkIds": [
+        "M3-09",
+        "M3-10"
+      ],
+      "normalizedChars": 2472,
+      "firstSpokenLine": "Section 3.7 — Massage and anatomy. Massage is technique, not mythology.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M3-BATCH-C1.txt",
+      "chunkIds": [
+        "M3-11"
+      ],
+      "normalizedChars": 599,
+      "firstSpokenLine": "You can now see beneath the surface.",
+      "lastSpokenLine": "omy gave you the map. Now you'll learn to read the visible scalp in real time — through assessment, microscopy, and disciplined observation.",
+      "checkpointRelationship": "cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M3-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 727
+    },
+    {
+      "chunkId": "M3-02",
+      "title": "3.1 Read beneath the surface",
+      "normalizedChars": 861
+    },
+    {
+      "chunkId": "M3-03",
+      "title": "3.2 The scalp map",
+      "normalizedChars": 1422
+    },
+    {
+      "chunkId": "M3-04",
+      "title": "3.3 The living system beneath the strand + Anatomy to action",
+      "normalizedChars": 2945
+    },
+    {
+      "chunkId": "M3-05",
+      "title": "3.4 The hair-growth cycle + Predict before you reveal",
+      "normalizedChars": 1697
+    },
+    {
+      "chunkId": "M3-06",
+      "title": "Checkpoint 1 (`cp1`)",
+      "normalizedChars": 307,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "cp1"
+    },
+    {
+      "chunkId": "M3-07",
+      "title": "Post-pass: 3.5 Read the pattern",
+      "normalizedChars": 2229,
+      "gateType": "post-pass",
+      "checkpointId": "cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M3-08",
+      "title": "3.6 Barrier and surface lipids",
+      "normalizedChars": 1503
+    },
+    {
+      "chunkId": "M3-09",
+      "title": "3.7 Massage and anatomy",
+      "normalizedChars": 1268
+    },
+    {
+      "chunkId": "M3-10",
+      "title": "3.8 Anatomy in practice + Checkpoint 2 (`cp2`)",
+      "normalizedChars": 1202,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "cp2"
+    },
+    {
+      "chunkId": "M3-11",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 599,
+      "gateType": "post-pass",
+      "checkpointId": "cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

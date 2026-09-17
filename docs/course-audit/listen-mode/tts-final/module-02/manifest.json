@@ -1,0 +1,139 @@
+{
+  "module": "02",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M2-BATCH-A1.txt",
+      "chunkIds": [
+        "M2-01",
+        "M2-02",
+        "M2-03"
+      ],
+      "normalizedChars": 2535,
+      "firstSpokenLine": "Welcome to Module 2. The experience begins before your hands do.",
+      "lastSpokenLine": " isn't to eliminate communication. It's to avoid discovering basic service decisions one step at a time while the client is trying to relax.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M2-BATCH-A2.txt",
+      "chunkIds": [
+        "M2-04",
+        "M2-05"
+      ],
+      "normalizedChars": 2801,
+      "firstSpokenLine": "Section 2.2 — Remove preventable uncertainty. Relaxation begins with certainty.",
+      "lastSpokenLine": "scomfort, or a changed decision. It means you don't repeatedly reopen decisions that have already been established unless something changes.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M2-BATCH-A3.txt",
+      "chunkIds": [
+        "M2-06",
+        "M2-07",
+        "M2-08"
+      ],
+      "normalizedChars": 3359,
+      "firstSpokenLine": "There's a practitioner resource on screen here — the Head Spa Intake and Service Plan. It's a two-part fillable form: gather the information",
+      "lastSpokenLine": "[warmly] Prepared practitioners can stay quiet because they already know what they'd say if the client needs them.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M2-BATCH-A4.txt",
+      "chunkIds": [
+        "M2-09",
+        "M2-10",
+        "M2-11"
+      ],
+      "normalizedChars": 2446,
+      "firstSpokenLine": "Section 2.6 — When something changes. The plan is established. Your attention stays active.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m2cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M2-BATCH-B1.txt",
+      "chunkIds": [
+        "M2-12"
+      ],
+      "normalizedChars": 429,
+      "firstSpokenLine": "Module complete. You can use intake and preparation to remove preventable uncertainty, establish the service plan before treatment, and prot",
+      "lastSpokenLine": "he hair and scalp. The goal is to understand what you're observing, so later service decisions have a clear professional reason behind them.",
+      "checkpointRelationship": "m2cp1",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M2-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 817
+    },
+    {
+      "chunkId": "M2-02",
+      "title": "The governing principle",
+      "normalizedChars": 637
+    },
+    {
+      "chunkId": "M2-03",
+      "title": "2.1 Intake Before Arrival",
+      "normalizedChars": 1077
+    },
+    {
+      "chunkId": "M2-04",
+      "title": "2.2 Remove Preventable Uncertainty",
+      "normalizedChars": 1188
+    },
+    {
+      "chunkId": "M2-05",
+      "title": "2.3 Set the Plan Before the Quiet + Before/During",
+      "normalizedChars": 1611
+    },
+    {
+      "chunkId": "M2-06",
+      "title": "Practitioner resource: Head Spa Intake + Service Plan",
+      "normalizedChars": 630
+    },
+    {
+      "chunkId": "M2-07",
+      "title": "2.4 First Touch",
+      "normalizedChars": 1487
+    },
+    {
+      "chunkId": "M2-08",
+      "title": "2.5 Protect the Quiet",
+      "normalizedChars": 1238
+    },
+    {
+      "chunkId": "M2-09",
+      "title": "2.6 When Something Changes + interaction framing",
+      "normalizedChars": 986
+    },
+    {
+      "chunkId": "M2-10",
+      "title": "2.7 Consistency",
+      "normalizedChars": 764
+    },
+    {
+      "chunkId": "M2-11",
+      "title": "Checkpoint (`m2cp1`)",
+      "normalizedChars": 692,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m2cp1"
+    },
+    {
+      "chunkId": "M2-12",
+      "title": "Post-pass continuation: completion + handoff",
+      "normalizedChars": 429,
+      "gateType": "post-pass",
+      "checkpointId": "m2cp1",
+      "resumeAfterPass": true
+    }
+  ]
+}

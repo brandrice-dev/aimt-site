@@ -1,0 +1,2469 @@
+{
+  "note": "Running log of real ElevenLabs generations for the full Listen Mode regeneration pass. Appended to as each batch completes. voice=Y3ZPRGOSIxbV4Rbb3WiA (Jane - Bright, Smooth and Friendly), model=eleven_v3 throughout.",
+  "entries": [
+    {
+      "module": "09",
+      "batchId": "C1",
+      "chunkIds": [
+        "M9-09"
+      ],
+      "generationId": "LP9XrGbvBFqqMdS5GRbC",
+      "flowId": "OlrdPQvbFgVhBRMwpFcB",
+      "sessionId": "Hv0SMOLw6ItDbtSCT07R",
+      "durationSecs": 21.12,
+      "creditsCharged": 275,
+      "costUsd": 0.045375,
+      "normalizedChars": 278,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-C1-RAW.mp3",
+      "fileBytes": 355844,
+      "status": "ok"
+    },
+    {
+      "module": "00",
+      "batchId": "A1a",
+      "chunkIds": [
+        "M0-01",
+        "M0-01b",
+        "M0-02"
+      ],
+      "generationId": "yYJfPZAkG8BNIFuqnJW9",
+      "flowId": "0GnuG63AyYpnIkqtB0wz",
+      "sessionId": "t3fS7yXojC5iB1g80qKm",
+      "durationSecs": 229.28,
+      "creditsCharged": 2926,
+      "costUsd": 0.48279,
+      "normalizedChars": 2922,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-A1a-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3686561
+    },
+    {
+      "module": "00",
+      "batchId": "A1b",
+      "chunkIds": [
+        "M0-03",
+        "M0-04"
+      ],
+      "generationId": "cRQ8AIoL0Dl0EFOhQpyC",
+      "flowId": "pJYtQOAaN20c9EKQ14Kk",
+      "sessionId": "MWu196bZgI6qzrNrYuS1",
+      "durationSecs": 158.64,
+      "creditsCharged": 1901,
+      "costUsd": 0.313665,
+      "normalizedChars": 1899,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-A1b-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2555982
+    },
+    {
+      "module": "00",
+      "batchId": "A2",
+      "chunkIds": [
+        "M0-05",
+        "M0-06",
+        "M0-07",
+        "M0-08"
+      ],
+      "generationId": "ofy8kbyEI2K1lDo28TaS",
+      "flowId": "oYiME1fCBNz2oJVZZclx",
+      "sessionId": "VS4okjfpV077GKBQqObE",
+      "durationSecs": 275.04,
+      "creditsCharged": 3590,
+      "costUsd": 0.59235,
+      "normalizedChars": 3584,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4418408
+    },
+    {
+      "module": "10",
+      "batchId": "A1",
+      "chunkIds": [
+        "M10-01",
+        "M10-02"
+      ],
+      "generationId": "LzdvHhhxIpAzgDK3g0Ce",
+      "flowId": "rg8H4VFQr9Pr97dCxOPE",
+      "sessionId": "3szNSMcyp426c5a4hmZg",
+      "durationSecs": 218.4,
+      "creditsCharged": 2670,
+      "costUsd": 0.44055,
+      "normalizedChars": 2670,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3512272
+    },
+    {
+      "module": "10",
+      "batchId": "A2",
+      "chunkIds": [
+        "M10-03"
+      ],
+      "generationId": "4OYPdphBK3TcaHl8Ijc8",
+      "flowId": "Y4XppOmaLWRjRxJGfMwD",
+      "sessionId": "FVivU4WeFSjbfhxRApF2",
+      "durationSecs": 179.36,
+      "creditsCharged": 2177,
+      "costUsd": 0.359205,
+      "normalizedChars": 2177,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2887841
+    },
+    {
+      "module": "10",
+      "batchId": "A3",
+      "chunkIds": [
+        "M10-04"
+      ],
+      "generationId": "8PaSVEBRPQ0wmaEy8Sxm",
+      "flowId": "T4V1qrADiLz1lpAuHqZB",
+      "sessionId": "SRRhVo2xYqEEjvrk6xt3",
+      "durationSecs": 180.8,
+      "creditsCharged": 2261,
+      "costUsd": 0.373065,
+      "normalizedChars": 2261,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2910829
+    },
+    {
+      "module": "10",
+      "batchId": "B1",
+      "chunkIds": [
+        "M10-05"
+      ],
+      "generationId": "x0gf4cE7ScrHk0uMM1wi",
+      "flowId": "BbVNMXudm2I4CDetuvKZ",
+      "sessionId": "77pAWiI5XN3b7XIDCJ5y",
+      "durationSecs": 152,
+      "creditsCharged": 1905,
+      "costUsd": 0.314325,
+      "normalizedChars": 1905,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2449820
+    },
+    {
+      "module": "10",
+      "batchId": "B2",
+      "chunkIds": [
+        "M10-06"
+      ],
+      "generationId": "sWzz0ZF2jdXk5vJi9jpH",
+      "flowId": "EB4LVga1b6mADphQtH7k",
+      "sessionId": "sL8pWEiQV1li1yrI0i60",
+      "durationSecs": 184.96,
+      "creditsCharged": 2354,
+      "costUsd": 0.38841,
+      "normalizedChars": 2354,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2977284
+    },
+    {
+      "module": "10",
+      "batchId": "C1",
+      "chunkIds": [
+        "M10-07"
+      ],
+      "generationId": "4E5u9jZ9OdtZbVMl9sSp",
+      "flowId": "pa0FsUleR8q4kOHm6eZF",
+      "sessionId": "TZ1bIBSe6NjfIg0fUn5x",
+      "durationSecs": 32.16,
+      "creditsCharged": 364,
+      "costUsd": 0.06006,
+      "normalizedChars": 364,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 532641
+    },
+    {
+      "module": "11",
+      "batchId": "A1",
+      "chunkIds": [
+        "M11-01",
+        "M11-02"
+      ],
+      "generationId": "OhttNTaaV0XyTY8lCsYo",
+      "flowId": "R9Mr3yHlNxm0RxKkSjXI",
+      "sessionId": "oR7i0AVnFtFsAllomwMK",
+      "durationSecs": 173.84,
+      "creditsCharged": 2073,
+      "costUsd": 0.342045,
+      "normalizedChars": 2073,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2799234
+    },
+    {
+      "module": "11",
+      "batchId": "A2",
+      "chunkIds": [
+        "M11-03"
+      ],
+      "generationId": "hjmtECOKWMRRKN696tbw",
+      "flowId": "OO1JptOpUbDKTccnw2sv",
+      "sessionId": "LrToyhbuR0qFTMDhCw8o",
+      "durationSecs": 124.96,
+      "creditsCharged": 1506,
+      "costUsd": 0.24849,
+      "normalizedChars": 1506,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2017232
+    },
+    {
+      "module": "11",
+      "batchId": "A3",
+      "chunkIds": [
+        "M11-04"
+      ],
+      "generationId": "rMyIvp0gcH3pGgOMggOW",
+      "flowId": "HI2T7cOTuJRDTVf9O2JA",
+      "sessionId": "4gfAnEhgIg1vMsKdCXFJ",
+      "durationSecs": 181.52,
+      "creditsCharged": 2051,
+      "costUsd": 0.338415,
+      "normalizedChars": 2051,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2922114
+    },
+    {
+      "module": "11",
+      "batchId": "B1",
+      "chunkIds": [
+        "M11-05"
+      ],
+      "generationId": "Hqq8i83dv1v97zD9WWdo",
+      "flowId": "LecXabYhNy1zrFX2WCHz",
+      "sessionId": "jglO28yDzy8dsnXORQN1",
+      "durationSecs": 115.84,
+      "creditsCharged": 1580,
+      "costUsd": 0.2607,
+      "normalizedChars": 1580,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1871364
+    },
+    {
+      "module": "11",
+      "batchId": "B2",
+      "chunkIds": [
+        "M11-06"
+      ],
+      "generationId": "W6OcjI0ueSZjXfN0cDnw",
+      "flowId": "6cYAQ1SEk2Ic9SWSmm0z",
+      "sessionId": "P5aZnEYeYOKHzMKsl10x",
+      "durationSecs": 236.88,
+      "creditsCharged": 2834,
+      "costUsd": 0.46761,
+      "normalizedChars": 2834,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3808187
+    },
+    {
+      "module": "11",
+      "batchId": "C1",
+      "chunkIds": [
+        "M11-07"
+      ],
+      "generationId": "CY4OeY7WWpzJyIgwgYIY",
+      "flowId": "JpEZBy8uFxvr1cuWpKrW",
+      "sessionId": "u5fWhAakHBiOxHkAautS",
+      "durationSecs": 25.2,
+      "creditsCharged": 319,
+      "costUsd": 0.052635,
+      "normalizedChars": 319,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 421046
+    },
+    {
+      "module": "12",
+      "batchId": "A1",
+      "chunkIds": [
+        "M12-01"
+      ],
+      "generationId": "kOVkRngrRo0FdxERQur5",
+      "flowId": "ZrPgDXY6NApNI1b7OBiO",
+      "sessionId": "J8Vk6ukqT6voVS8XTYg2",
+      "durationSecs": 278.4,
+      "creditsCharged": 3966,
+      "costUsd": 0.65439,
+      "normalizedChars": 3966,
+      "rawFile": "AIMT-Listen-Mode-Final/12-Module-12/M12-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4472324
+    },
+    {
+      "module": "00",
+      "batchId": "A3",
+      "chunkIds": [
+        "M0-09",
+        "M0-10",
+        "M0-11"
+      ],
+      "generationId": "sbUxEXb69GakD3nN7ubd",
+      "flowId": "vsyprlFBk4aWj5PX9HZR",
+      "sessionId": "GP4uQXNmQxiLVjZh1B1Q",
+      "durationSecs": 238.4,
+      "creditsCharged": 2956,
+      "costUsd": 0.48774,
+      "normalizedChars": 2956,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3832429
+    },
+    {
+      "module": "00",
+      "batchId": "A4",
+      "chunkIds": [
+        "M0-12",
+        "M0-13",
+        "M0-14"
+      ],
+      "generationId": "ocppGGScSxppKMHwxlp0",
+      "flowId": "NV1Hanj2Kkd16YgjREXJ",
+      "sessionId": "hJuJ956EfUteqP6RHPQc",
+      "durationSecs": 139.44,
+      "creditsCharged": 1745,
+      "costUsd": 0.287925,
+      "normalizedChars": 1745,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-A4-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2248782
+    },
+    {
+      "module": "00",
+      "batchId": "B1",
+      "chunkIds": [
+        "M0-15"
+      ],
+      "generationId": "e7iyAroJfUUIS5qXUx13",
+      "flowId": "9kll8A6JnxoAG3MGjJ8B",
+      "sessionId": "3DdXvs1g7AI2OYiKrym1",
+      "durationSecs": 51.84,
+      "creditsCharged": 701,
+      "costUsd": 0.115665,
+      "normalizedChars": 701,
+      "rawFile": "AIMT-Listen-Mode-Final/00-Welcome/M0-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 847364
+    },
+    {
+      "module": "01",
+      "batchId": "A1",
+      "chunkIds": [
+        "M1-01",
+        "M1-02",
+        "M1-03"
+      ],
+      "generationId": "2o4rIt60R5VRPa6k32Cs",
+      "flowId": "0pkwwd5y3T5DhfJT7M9J",
+      "sessionId": "fety9pasl9z5I6Ia1HYu",
+      "durationSecs": 256.56,
+      "creditsCharged": 3303,
+      "costUsd": 0.544995,
+      "normalizedChars": 3303,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4122911
+    },
+    {
+      "module": "01",
+      "batchId": "A2",
+      "chunkIds": [
+        "M1-04",
+        "M1-05"
+      ],
+      "generationId": "aFN0bdMjZtF9f6kwY7My",
+      "flowId": "i32RQtozigKZC4EoS4DN",
+      "sessionId": "OE0zdtig7p1ZbL5Koz02",
+      "durationSecs": 288.88,
+      "creditsCharged": 3610,
+      "costUsd": 0.59565,
+      "normalizedChars": 3610,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4639926
+    },
+    {
+      "module": "01",
+      "batchId": "A3",
+      "chunkIds": [
+        "M1-06",
+        "M1-07"
+      ],
+      "generationId": "1TjkAml8fbcSCuB6Qbg7",
+      "flowId": "DUXfz9SfTSRIhz78UjZf",
+      "sessionId": "J3ym5AZiJIGIgKErBNW7",
+      "durationSecs": 159.92,
+      "creditsCharged": 2151,
+      "costUsd": 0.354915,
+      "normalizedChars": 2151,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2576462
+    },
+    {
+      "module": "01",
+      "batchId": "B1",
+      "chunkIds": [
+        "M1-08",
+        "M1-09",
+        "M1-10",
+        "M1-11"
+      ],
+      "generationId": "MxIOS6eRSh2ngHMQ0Kdi",
+      "flowId": "ZXof4nATLF8NxQ3UDcMf",
+      "sessionId": "on3rBzCMIlnsKHFSvf2n",
+      "durationSecs": 219.6,
+      "creditsCharged": 2596,
+      "costUsd": 0.42834,
+      "normalizedChars": 2596,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3531498
+    },
+    {
+      "module": "01",
+      "batchId": "B2",
+      "chunkIds": [
+        "M1-12",
+        "M1-13"
+      ],
+      "generationId": "Zkxv9QSUYZczGbRoQDUc",
+      "flowId": "aqa6wB5KCgAE8UhEsZfl",
+      "sessionId": "6heeLaDCOVm6yoQs3GwO",
+      "durationSecs": 108.24,
+      "creditsCharged": 1431,
+      "costUsd": 0.236115,
+      "normalizedChars": 1431,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1749738
+    },
+    {
+      "module": "01",
+      "batchId": "C1",
+      "chunkIds": [
+        "M1-14"
+      ],
+      "generationId": "Kj6YlKJ9PsPHNfQ4vhU9",
+      "flowId": "Iwc5QAMXolqTf03294Ez",
+      "sessionId": "F0Fk0FAPvn5pjqKvaVdF",
+      "durationSecs": 64.48,
+      "creditsCharged": 910,
+      "costUsd": 0.15015,
+      "normalizedChars": 910,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1049657
+    },
+    {
+      "module": "02",
+      "batchId": "A1",
+      "chunkIds": [
+        "M2-01",
+        "M2-02",
+        "M2-03"
+      ],
+      "generationId": "CwyaQglqP28rBPHgYo00",
+      "flowId": "ulVriLCLG02SUAxrQq4i",
+      "sessionId": "z1gilLDSjHo42q7ypKWt",
+      "durationSecs": 183.28,
+      "creditsCharged": 2535,
+      "costUsd": 0.418275,
+      "normalizedChars": 2535,
+      "rawFile": "AIMT-Listen-Mode-Final/02-Module-2/M2-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2950535
+    },
+    {
+      "module": "02",
+      "batchId": "A2",
+      "chunkIds": [
+        "M2-04",
+        "M2-05"
+      ],
+      "generationId": "UifNGQaiWPbuHkZXuyqe",
+      "flowId": "YBwUuTiQyC0tbqbwY8te",
+      "sessionId": "kAW3iy16SPt0eSRUNlQq",
+      "durationSecs": 228.88,
+      "creditsCharged": 2801,
+      "costUsd": 0.462165,
+      "normalizedChars": 2801,
+      "rawFile": "AIMT-Listen-Mode-Final/02-Module-2/M2-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3679874
+    },
+    {
+      "module": "02",
+      "batchId": "A3",
+      "chunkIds": [
+        "M2-06",
+        "M2-07",
+        "M2-08"
+      ],
+      "generationId": "ag8WFCCfJFhrNaRWDwZb",
+      "flowId": "eJtQz96uVTwk0uAh3iaZ",
+      "sessionId": "67NuEiTNxpZFXMjpNhZm",
+      "durationSecs": 262.16,
+      "creditsCharged": 3359,
+      "costUsd": 0.554235,
+      "normalizedChars": 3359,
+      "rawFile": "AIMT-Listen-Mode-Final/02-Module-2/M2-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4212354
+    },
+    {
+      "module": "02",
+      "batchId": "A4",
+      "chunkIds": [
+        "M2-09",
+        "M2-10",
+        "M2-11"
+      ],
+      "generationId": "1KsiegNg7rdeN4kt5XtU",
+      "flowId": "0JOVpNXSUbk3vWlczvSO",
+      "sessionId": "5MEyYliernNEwkqh1A67",
+      "durationSecs": 190.96,
+      "creditsCharged": 2446,
+      "costUsd": 0.40359,
+      "normalizedChars": 2446,
+      "rawFile": "AIMT-Listen-Mode-Final/02-Module-2/M2-BATCH-A4-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3073415
+    },
+    {
+      "module": "02",
+      "batchId": "B1",
+      "chunkIds": [
+        "M2-12"
+      ],
+      "generationId": "g5iKa8pRKhKg3beqO3Ju",
+      "flowId": "JlVupF6yeCZ6eAJYfrHy",
+      "sessionId": "vuezFgC1VzS70s0dQSD2",
+      "durationSecs": 29.44,
+      "creditsCharged": 429,
+      "costUsd": 0.070785,
+      "normalizedChars": 429,
+      "rawFile": "AIMT-Listen-Mode-Final/02-Module-2/M2-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 488755
+    },
+    {
+      "module": "03",
+      "batchId": "A1",
+      "chunkIds": [
+        "M3-01",
+        "M3-02",
+        "M3-03"
+      ],
+      "generationId": "DJSlx3W1JCdnl61BV3Xy",
+      "flowId": "xQKl5pEIAVGQgs3tk2qW",
+      "sessionId": "B0dC1MDawhqsGUamhtat",
+      "durationSecs": 242.32,
+      "creditsCharged": 3014,
+      "costUsd": 0.49731,
+      "normalizedChars": 3014,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3895123
+    },
+    {
+      "module": "03",
+      "batchId": "A2",
+      "chunkIds": [
+        "M3-04"
+      ],
+      "generationId": "cP8GIw9LMLMyqISouUQc",
+      "flowId": "GTiP4qH40YRe8jydmUZ8",
+      "sessionId": "nBmmrk8pdcIxpdXKVHgg",
+      "durationSecs": 237.04,
+      "creditsCharged": 2945,
+      "costUsd": 0.485925,
+      "normalizedChars": 2945,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3810695
+    },
+    {
+      "module": "03",
+      "batchId": "A3",
+      "chunkIds": [
+        "M3-05",
+        "M3-06"
+      ],
+      "generationId": "7LxSJolyb17hnb5R4AW3",
+      "flowId": "yhhLMCNa7fvY8w3AnqC5",
+      "sessionId": "5XOMif2fsOqmbwtNMi0S",
+      "durationSecs": 162.96,
+      "creditsCharged": 2006,
+      "costUsd": 0.33099,
+      "normalizedChars": 2006,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2625363
+    },
+    {
+      "module": "03",
+      "batchId": "B1",
+      "chunkIds": [
+        "M3-07",
+        "M3-08"
+      ],
+      "generationId": "w7y5D8Evf9HwKdp23s6Y",
+      "flowId": "5Ttbw5kYzUXYfgBYeEbg",
+      "sessionId": "uv3oeIL8oVy8NR81nFXq",
+      "durationSecs": 305.76,
+      "creditsCharged": 3734,
+      "costUsd": 0.61611,
+      "normalizedChars": 3734,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4909928
+    },
+    {
+      "module": "03",
+      "batchId": "B2",
+      "chunkIds": [
+        "M3-09",
+        "M3-10"
+      ],
+      "generationId": "bFUw7qdEf5uFNIUpP1kz",
+      "flowId": "xIgzlDFP5kNLgq3Fwu2Z",
+      "sessionId": "AfT6jMhYQokwN5yIktJB",
+      "durationSecs": 203.52,
+      "creditsCharged": 2472,
+      "costUsd": 0.40788,
+      "normalizedChars": 2472,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3274035
+    },
+    {
+      "module": "03",
+      "batchId": "C1",
+      "chunkIds": [
+        "M3-11"
+      ],
+      "generationId": "GFrP3g1tNwk7adW3lixt",
+      "flowId": "LHb0XtCQgKpVvbBzcSiK",
+      "sessionId": "PY0OJokf0WDpMRFYr5ww",
+      "durationSecs": 44.56,
+      "creditsCharged": 599,
+      "costUsd": 0.098835,
+      "normalizedChars": 599,
+      "rawFile": "AIMT-Listen-Mode-Final/03-Module-3/M3-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 730754
+    },
+    {
+      "module": "04",
+      "batchId": "A1",
+      "chunkIds": [
+        "M4-01",
+        "M4-02"
+      ],
+      "generationId": "yUgKqzTDyTOuOT2nlzVF",
+      "flowId": "3uR851ePEpEr4adNsXNS",
+      "sessionId": "UXjaeeF8tDa1by8lVIyI",
+      "durationSecs": 210.48,
+      "creditsCharged": 2643,
+      "costUsd": 0.436095,
+      "normalizedChars": 2643,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3385631
+    },
+    {
+      "module": "04",
+      "batchId": "A2",
+      "chunkIds": [
+        "M4-03"
+      ],
+      "generationId": "t0zImQ96gc78mGI4yodS",
+      "flowId": "wPeUjNwqk8phStAUaVl7",
+      "sessionId": "13ro0zHJ5yqnOZ7OrPNU",
+      "durationSecs": 107.36,
+      "creditsCharged": 1261,
+      "costUsd": 0.208065,
+      "normalizedChars": 1261,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1735528
+    },
+    {
+      "module": "04",
+      "batchId": "A3",
+      "chunkIds": [
+        "M4-04",
+        "M4-05"
+      ],
+      "generationId": "IKL9ExodgGTsIbyJLkYO",
+      "flowId": "cUvQ2Aio8xABcYy8xfdn",
+      "sessionId": "fuWqxayLE3c25Y4UTD02",
+      "durationSecs": 260.48,
+      "creditsCharged": 3091,
+      "costUsd": 0.510015,
+      "normalizedChars": 3091,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4185604
+    },
+    {
+      "module": "04",
+      "batchId": "B1",
+      "chunkIds": [
+        "M4-06"
+      ],
+      "generationId": "q8GKHPNGdWfTPVNX8MNP",
+      "flowId": "Yk6HpkGEuK2CMFVUG21e",
+      "sessionId": "zLd7ijN3xHH6zVUbZhcb",
+      "durationSecs": 205.36,
+      "creditsCharged": 2445,
+      "costUsd": 0.403425,
+      "normalizedChars": 2445,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3303711
+    },
+    {
+      "module": "04",
+      "batchId": "B2",
+      "chunkIds": [
+        "M4-07",
+        "M4-08"
+      ],
+      "generationId": "QyZWO9YuyE2gzDcNK2Yt",
+      "flowId": "GTDZDsP1fCATdMWmC5Z6",
+      "sessionId": "snKjAzYYSGr0i3JCsCT5",
+      "durationSecs": 224,
+      "creditsCharged": 2704,
+      "costUsd": 0.44616,
+      "normalizedChars": 2704,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3601715
+    },
+    {
+      "module": "04",
+      "batchId": "B3",
+      "chunkIds": [
+        "M4-09",
+        "M4-10"
+      ],
+      "generationId": "pYDnpTbZeXFgZOBWb652",
+      "flowId": "fMMSKihvQRPU35TSgWtD",
+      "sessionId": "hqNtYx84NVTK1FKeZDA0",
+      "durationSecs": 188.48,
+      "creditsCharged": 2392,
+      "costUsd": 0.39468,
+      "normalizedChars": 2392,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3033709
+    },
+    {
+      "module": "04",
+      "batchId": "C1",
+      "chunkIds": [
+        "M4-11"
+      ],
+      "generationId": "HfYdHrITvM5SrjclZtOQ",
+      "flowId": "7GghvInjqRQ1y6N2JK4v",
+      "sessionId": "L1s8Q1GIdHnWSG87fxrP",
+      "durationSecs": 48.48,
+      "creditsCharged": 596,
+      "costUsd": 0.09834,
+      "normalizedChars": 596,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 793448
+    },
+    {
+      "module": "05",
+      "batchId": "A1",
+      "chunkIds": [
+        "M5-01",
+        "M5-02"
+      ],
+      "generationId": "YqoXpOr53btXtpGXDVxK",
+      "flowId": "ZyoT5WL0WyYZoRfSWdgj",
+      "sessionId": "wetPGnEEOykVcPN0G2QH",
+      "durationSecs": 219.84,
+      "creditsCharged": 2899,
+      "costUsd": 0.478335,
+      "normalizedChars": 2899,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3535260,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A2",
+      "chunkIds": [
+        "M5-03",
+        "M5-04"
+      ],
+      "generationId": "L68IP66em2hlfVWxmJHd",
+      "flowId": "3fMbYoufva93ooLVSISS",
+      "sessionId": "cos3VUSQrCUqIocbojZU",
+      "durationSecs": 274.32,
+      "creditsCharged": 3246,
+      "costUsd": 0.53559,
+      "normalizedChars": 3246,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4407123,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A3",
+      "chunkIds": [
+        "M5-05",
+        "M5-06"
+      ],
+      "generationId": "4WB4iFlvJeVkMg14jIRH",
+      "flowId": "G7Izn6IWH1Y1KCA4GfNr",
+      "sessionId": "mSKkJQYAqf5v9zLAn7zh",
+      "durationSecs": 114.24,
+      "creditsCharged": 1420,
+      "costUsd": 0.2343,
+      "normalizedChars": 1420,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1845869,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B1",
+      "chunkIds": [
+        "M5-07",
+        "M5-08"
+      ],
+      "generationId": "emSHkruxF4DR9Htdlqsb",
+      "flowId": "5jcWkI1EyOzVmVLsPAb5",
+      "sessionId": "PoUVpQPyM6LGR5ZgOPCm",
+      "durationSecs": 217.44,
+      "creditsCharged": 2787,
+      "costUsd": 0.459855,
+      "normalizedChars": 2787,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3496808,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B2",
+      "chunkIds": [
+        "M5-09",
+        "M5-10"
+      ],
+      "generationId": "kziLzInVeFN4VSf17ESj",
+      "flowId": "Jdvoe7KeQkJjmFOtVSXZ",
+      "sessionId": "5hPraG0mOYqQ78RgPBiM",
+      "durationSecs": 266,
+      "creditsCharged": 3234,
+      "costUsd": 0.53361,
+      "normalizedChars": 3234,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4273794,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "05",
+      "batchId": "C1",
+      "chunkIds": [
+        "M5-11"
+      ],
+      "generationId": "XSUR5Z3JEN9Hxnj8Xfrw",
+      "flowId": "Fcwvpkd50WimrdmfOihp",
+      "sessionId": "1PruimZewxsF4pREG88d",
+      "durationSecs": 52.24,
+      "creditsCharged": 603,
+      "costUsd": 0.099495,
+      "normalizedChars": 603,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/archive-loose-v1/M5-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 853634,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-15). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 05 entries below (sourced directly from module-05/manifest.json's own embedded generation records) for the actual approved Module 5 generation data. Corrected 2026-09-17 during Module 5 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "06",
+      "batchId": "A1",
+      "chunkIds": [
+        "M6-01",
+        "M6-02"
+      ],
+      "generationId": "9gAMq5bobXwOeLzGdqH5",
+      "flowId": "SA1xE8Y62J4ZTBNguz9L",
+      "sessionId": "Uk39LdXnmlpDUS3gEnW1",
+      "durationSecs": 184.48,
+      "creditsCharged": 2326,
+      "costUsd": 0.38379,
+      "normalizedChars": 2326,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2969761
+    },
+    {
+      "module": "06",
+      "batchId": "A2",
+      "chunkIds": [
+        "M6-03"
+      ],
+      "generationId": "g3vT9BorhxeIVD92G9aF",
+      "flowId": "Kr3PV1wbLo5QzEQx4NMQ",
+      "sessionId": "zJwj91UyUkGfjb6wY3qh",
+      "durationSecs": 123.76,
+      "creditsCharged": 1722,
+      "costUsd": 0.28413,
+      "normalizedChars": 1722,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1998006
+    },
+    {
+      "module": "06",
+      "batchId": "A3",
+      "chunkIds": [
+        "M6-04",
+        "M6-05"
+      ],
+      "generationId": "1hyuBuldG79V1qwCug81",
+      "flowId": "Lao6um4ns4H7UJFplVWS",
+      "sessionId": "2TPzBIAyxV0Xr7UdwmWY",
+      "durationSecs": 247.84,
+      "creditsCharged": 3190,
+      "costUsd": 0.52635,
+      "normalizedChars": 3190,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3983312
+    },
+    {
+      "module": "06",
+      "batchId": "B1",
+      "chunkIds": [
+        "M6-06",
+        "M6-07"
+      ],
+      "generationId": "WJJ8g19BaVcjeOWI6uzt",
+      "flowId": "hWikzqVALXtHxOgJ3itD",
+      "sessionId": "qCEJIpa3vfVzIW4bQOhE",
+      "durationSecs": 177.44,
+      "creditsCharged": 2279,
+      "costUsd": 0.376035,
+      "normalizedChars": 2279,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2856912
+    },
+    {
+      "module": "06",
+      "batchId": "B2",
+      "chunkIds": [
+        "M6-08",
+        "M6-09"
+      ],
+      "generationId": "a48svFnPWQY3pFydPkEi",
+      "flowId": "516DYZDd6L9gALimgk41",
+      "sessionId": "8GpablHd6wkR0Hvyq3Uu",
+      "durationSecs": 237.92,
+      "creditsCharged": 2842,
+      "costUsd": 0.46893,
+      "normalizedChars": 2842,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3824488
+    },
+    {
+      "module": "06",
+      "batchId": "C1",
+      "chunkIds": [
+        "M6-10"
+      ],
+      "generationId": "N7OhY2AFTHMHE4BMDhWo",
+      "flowId": "r0gWxslO0NGxLss7pWrv",
+      "sessionId": "7gxbFOG3up35ZcYZJYa8",
+      "durationSecs": 27.6,
+      "creditsCharged": 402,
+      "costUsd": 0.06633,
+      "normalizedChars": 402,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 459498
+    },
+    {
+      "module": "07",
+      "batchId": "A1",
+      "chunkIds": [
+        "M7-01",
+        "M7-02"
+      ],
+      "generationId": "Rk17dZ2CYeMDUKXannEs",
+      "flowId": "i4n5ykVSNDSDrTyvIgaK",
+      "sessionId": "YvfkKVCDTR7aA738lroz",
+      "durationSecs": 174.24,
+      "creditsCharged": 2618,
+      "costUsd": 0.43197,
+      "normalizedChars": 2618,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/archive-loose-v1/M7-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2805921,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-16). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 07 entries below for the actual approved Module 7 generation data. Corrected 2026-09-17 during Module 7 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A2",
+      "chunkIds": [
+        "M7-03",
+        "M7-04"
+      ],
+      "generationId": "yeG99eFknK7PmflJ8aSE",
+      "flowId": "kllJMqk3EMGgySPyPenJ",
+      "sessionId": "Gei1qSomN6aqOnzBExeM",
+      "durationSecs": 198.16,
+      "creditsCharged": 2543,
+      "costUsd": 0.419595,
+      "normalizedChars": 2543,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/archive-loose-v1/M7-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3188354,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-16). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 07 entries below for the actual approved Module 7 generation data. Corrected 2026-09-17 during Module 7 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A3",
+      "chunkIds": [
+        "M7-05",
+        "M7-06",
+        "M7-07"
+      ],
+      "generationId": "Hdun1riU5Y2AKdp0Ny9l",
+      "flowId": "AvZSgGkfSXUhKLaBwrYx",
+      "sessionId": "7UmgxccTe8TH8OHDM2lS",
+      "durationSecs": 313.92,
+      "creditsCharged": 3788,
+      "costUsd": 0.62502,
+      "normalizedChars": 3788,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/archive-loose-v1/M7-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 5040749,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-16). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 07 entries below for the actual approved Module 7 generation data. Corrected 2026-09-17 during Module 7 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "07",
+      "batchId": "B1",
+      "chunkIds": [
+        "M7-08"
+      ],
+      "generationId": "FL9UXdndXV5G3TieaQfe",
+      "flowId": "lHFLqQQ1JcHp4n9CgIJN",
+      "sessionId": "XRjLtuiZT9MW21FNXX1q",
+      "durationSecs": 25.04,
+      "creditsCharged": 287,
+      "costUsd": 0.047355,
+      "normalizedChars": 287,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/archive-loose-v1/M7-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 418538,
+      "dataIntegrityNote": "Pre-rebuild v1 pass, superseded by the owner-approved v2-strict-fidelity rebuild (2026-09-16). rawFile corrected below to reflect its actual archived location, verified by exact fileBytes match against the archived file. Retained for historical record only -- see the pass:\"v2-strict-fidelity\" module 07 entries below for the actual approved Module 7 generation data. Corrected 2026-09-17 during Module 7 log-bookkeeping repair, no audio touched."
+    },
+    {
+      "module": "08",
+      "batchId": "A1",
+      "chunkIds": [
+        "M8-01",
+        "M8-02",
+        "M8-03"
+      ],
+      "generationId": "iOsZPpjcZO3Vr1UVtxkR",
+      "flowId": "haGPLtalRukd6ozrZl2D",
+      "sessionId": "5zvvuOuRRbx8384vpkob",
+      "durationSecs": 294.8,
+      "creditsCharged": 3345,
+      "costUsd": 0.551925,
+      "normalizedChars": 3345,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4734803
+    },
+    {
+      "module": "08",
+      "batchId": "A2",
+      "chunkIds": [
+        "M8-04"
+      ],
+      "generationId": "C0I8STnqIElmkylHBm5n",
+      "flowId": "tTBOfHVH9E7GsbobYvHD",
+      "sessionId": "iU8RFFStEeDsMgPcOjV1",
+      "durationSecs": 244.88,
+      "creditsCharged": 3018,
+      "costUsd": 0.49797,
+      "normalizedChars": 3018,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3936083
+    },
+    {
+      "module": "08",
+      "batchId": "A3",
+      "chunkIds": [
+        "M8-05"
+      ],
+      "generationId": "Xc0RVVGqLDhCbuCYrukx",
+      "flowId": "roVVDm4r1nXBgb1xMGiS",
+      "sessionId": "Ml8DvEaYdSgkLrVg5hnH",
+      "durationSecs": 167.68,
+      "creditsCharged": 2481,
+      "costUsd": 0.409365,
+      "normalizedChars": 2481,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2700595
+    },
+    {
+      "module": "08",
+      "batchId": "B1",
+      "chunkIds": [
+        "M8-06",
+        "M8-07",
+        "M8-08a"
+      ],
+      "generationId": "q4zdTy0sH8vm7CQbuukL",
+      "flowId": "TRnWG4FbiUxMXlfAiSyC",
+      "sessionId": "RTydSxbUCbseFMyA7FCX",
+      "durationSecs": 203.28,
+      "creditsCharged": 2741,
+      "costUsd": 0.452265,
+      "normalizedChars": 2741,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3270274
+    },
+    {
+      "module": "08",
+      "batchId": "B2",
+      "chunkIds": [
+        "M8-08b",
+        "M8-08c"
+      ],
+      "generationId": "TYqM9fNQztwEPENUluDC",
+      "flowId": "ORmVBHmXA4oOSYdlEyPX",
+      "sessionId": "bpzADY3uj6OeNYZYDX4U",
+      "durationSecs": 53.28,
+      "creditsCharged": 742,
+      "costUsd": 0.12243,
+      "normalizedChars": 742,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 870352
+    },
+    {
+      "module": "08",
+      "batchId": "C1",
+      "chunkIds": [
+        "M8-09"
+      ],
+      "generationId": "g3KzF6FlZtz98XlKOpVm",
+      "flowId": "R2OLXcezNfIqdIQYopDE",
+      "sessionId": "ZmWfAFWfIv85xd2QXEny",
+      "durationSecs": 25.52,
+      "creditsCharged": 309,
+      "costUsd": 0.050985,
+      "normalizedChars": 309,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 426062
+    },
+    {
+      "module": "09",
+      "batchId": "A1",
+      "chunkIds": [
+        "M9-01",
+        "M9-02"
+      ],
+      "generationId": "jlJXWgqGaLCI1GUiluVa",
+      "flowId": "OaCITv8lG6m6sloPvu42",
+      "sessionId": "wmVGdsYxH0zh6NQDP8vm",
+      "durationSecs": 215.68,
+      "creditsCharged": 2864,
+      "costUsd": 0.47256,
+      "normalizedChars": 2864,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 3468804
+    },
+    {
+      "module": "09",
+      "batchId": "A2",
+      "chunkIds": [
+        "M9-03"
+      ],
+      "generationId": "MvICaDK86kNf0qy2s7fn",
+      "flowId": "xUwQFXHabiULRVAhb59b",
+      "sessionId": "VtxjKDqLDPHIh4MsijQa",
+      "durationSecs": 133.84,
+      "creditsCharged": 1397,
+      "costUsd": 0.230505,
+      "normalizedChars": 1397,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 2159338
+    },
+    {
+      "module": "09",
+      "batchId": "A3",
+      "chunkIds": [
+        "M9-04",
+        "M9-05",
+        "M9-06"
+      ],
+      "generationId": "sZMi5CthU5k9f12q59ei",
+      "flowId": "mThQP7LgIgIbPlgyfctR",
+      "sessionId": "vCJkFIlTj5GBSliQqng0",
+      "durationSecs": 265.6,
+      "creditsCharged": 3356,
+      "costUsd": 0.55374,
+      "normalizedChars": 3356,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 4267524
+    },
+    {
+      "module": "09",
+      "batchId": "B1",
+      "chunkIds": [
+        "M9-07"
+      ],
+      "generationId": "OBAxxSheuzIZXF4KfzBQ",
+      "flowId": "aX4JK05VU25xhEaTvnCB",
+      "sessionId": "mmhOVWxGCTOccflQPybI",
+      "durationSecs": 91.6,
+      "creditsCharged": 1125,
+      "costUsd": 0.185625,
+      "normalizedChars": 1125,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1483498
+    },
+    {
+      "module": "09",
+      "batchId": "B2",
+      "chunkIds": [
+        "M9-08"
+      ],
+      "generationId": "zOGLSViayvNDfsjdFcfb",
+      "flowId": "izUUS60AxLapYel8jbLE",
+      "sessionId": "LNe42rM3OIxStpia5vnv",
+      "durationSecs": 88.48,
+      "creditsCharged": 1099,
+      "costUsd": 0.181335,
+      "normalizedChars": 1099,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "fileBytes": 1433761
+    },
+    {
+      "module": "01v6",
+      "batchId": "A1",
+      "chunkIds": [
+        "M1-01",
+        "M1-02",
+        "M1-03"
+      ],
+      "generationId": "3ChAxz0sRIAqizMzQLZ4",
+      "flowId": "1AOy5hbFuE1mB62foaUP",
+      "sessionId": "962ZvSCZPyxbLRPIV2jd",
+      "durationSecs": 217.84,
+      "creditsCharged": 2701,
+      "costUsd": 0.445665,
+      "normalizedChars": 2701,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A1-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild, supersedes archived v1",
+      "fileBytes": 3503495
+    },
+    {
+      "module": "01v6",
+      "batchId": "A2",
+      "chunkIds": [
+        "M1-04",
+        "M1-05"
+      ],
+      "generationId": "5vhXakQoXkSViDCOKqUI",
+      "flowId": "UUFIvyflSwZbMik5j6ID",
+      "sessionId": "udImqpLSlPUdTd69irch",
+      "durationSecs": 282.48,
+      "creditsCharged": 3657,
+      "costUsd": 0.603405,
+      "normalizedChars": 3657,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A2-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild",
+      "fileBytes": 4537526
+    },
+    {
+      "module": "01v6",
+      "batchId": "A3",
+      "chunkIds": [
+        "M1-06",
+        "M1-07"
+      ],
+      "generationId": "FjmTX3r5qhIsaDzfWoyl",
+      "flowId": "ktPhyUXogBh2UfnZsADB",
+      "sessionId": "n04ouhgyIgtx6E8O2U5v",
+      "durationSecs": 135.76,
+      "creditsCharged": 1866,
+      "costUsd": 0.30789,
+      "normalizedChars": 1866,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-A3-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild, ends at m1cp1 checkpoint stop",
+      "fileBytes": 2190267
+    },
+    {
+      "module": "01v6",
+      "batchId": "B1",
+      "chunkIds": [
+        "M1-08",
+        "M1-09",
+        "M1-10",
+        "M1-11"
+      ],
+      "generationId": "J4NBZz62pfDLmtKUjUI7",
+      "flowId": "Yx7jvUMJZWcfvVLBtZD8",
+      "sessionId": "tOT7LtU7nMVA4tMpI3nm",
+      "durationSecs": 232.24,
+      "creditsCharged": 2658,
+      "costUsd": 0.43857,
+      "normalizedChars": 2658,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-B1-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild",
+      "fileBytes": 3733791
+    },
+    {
+      "module": "01v6",
+      "batchId": "B2",
+      "chunkIds": [
+        "M1-12",
+        "M1-13"
+      ],
+      "generationId": "fdKblqLYwKtgFcrWctOF",
+      "flowId": "oBnXEhCxSk8dfJgP4ywH",
+      "sessionId": "EteftVVrD6qa1hDjD81T",
+      "durationSecs": 120.24,
+      "creditsCharged": 1492,
+      "costUsd": 0.24618,
+      "normalizedChars": 1492,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-B2-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild, ends at m1cp2 checkpoint stop",
+      "fileBytes": 1941582
+    },
+    {
+      "module": "01v6",
+      "batchId": "C1",
+      "chunkIds": [
+        "M1-14"
+      ],
+      "generationId": "gn5qhPVI4hbEIpBoJ7wx",
+      "flowId": "W8xZLFatNY6xlMg5Y8kL",
+      "sessionId": "lfE5Wlu1JLOLtdGLnYl3",
+      "durationSecs": 44.16,
+      "creditsCharged": 559,
+      "costUsd": 0.092235,
+      "normalizedChars": 559,
+      "rawFile": "AIMT-Listen-Mode-Final/01-Module-1/M1-BATCH-C1-RAW.mp3",
+      "status": "ok",
+      "note": "Module 1 v6 strict-fidelity rebuild, final batch",
+      "fileBytes": 724484
+    },
+    {
+      "module": "04v6",
+      "batchId": "A1",
+      "chunkIds": [
+        "M4-01",
+        "M4-02",
+        "M4-03"
+      ],
+      "generationId": "y5foZtCcK9UG78Adnz8L",
+      "sessionId": "SEFpy6qPWzRbtKfiZauK",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3040,
+      "durationSecs": 231.84,
+      "credits": 3040,
+      "costUsd": 0.5016,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A1-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "fileBytes": 3727521
+    },
+    {
+      "module": "04v6",
+      "batchId": "A2",
+      "chunkIds": [
+        "M4-04",
+        "M4-05"
+      ],
+      "generationId": "sjZNpA4kHegXOEpc7kpH",
+      "sessionId": "p4KNh6TIuMNfufkJr0Bi",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3134,
+      "durationSecs": 268.72,
+      "credits": 3134,
+      "costUsd": 0.51711,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A2-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "fileBytes": 4317262
+    },
+    {
+      "module": "04v6",
+      "batchId": "A3",
+      "chunkIds": [
+        "M4-06",
+        "M4-07"
+      ],
+      "generationId": "7Auj7e22hNcfDJFYljjx",
+      "sessionId": "TkqpS1vc6Uqr87TbzlQs",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3220,
+      "durationSecs": 270.64,
+      "credits": 3220,
+      "costUsd": 0.5313,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A3-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "fileBytes": 4348191
+    },
+    {
+      "module": "04v6",
+      "batchId": "A4",
+      "chunkIds": [
+        "M4-08"
+      ],
+      "generationId": "sXYB2y80MfhWmctLQ7oq",
+      "sessionId": "SwWMbroBu2YwQLy5CEk5",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 491,
+      "durationSecs": 38.08,
+      "credits": 491,
+      "costUsd": 0.081015,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-A4-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "checkpoint": "m4cp1",
+      "fileBytes": 627100
+    },
+    {
+      "module": "04v6",
+      "batchId": "B1",
+      "chunkIds": [
+        "M4-09",
+        "M4-10"
+      ],
+      "generationId": "01SiLrV3gpe6Im8hZaS8",
+      "sessionId": "QBM8oNLgJKZ2ZJa1S3Js",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3461,
+      "durationSecs": 339.36,
+      "credits": 3461,
+      "costUsd": 0.571065,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B1-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "checkpoint": "m4cp1",
+      "fileBytes": 5447841
+    },
+    {
+      "module": "04v6",
+      "batchId": "B2",
+      "chunkIds": [
+        "M4-11",
+        "M4-12",
+        "M4-13"
+      ],
+      "generationId": "I5FL2OdRHIItW2OfCe2n",
+      "sessionId": "oV7rSWym3YtodNwO3bDB",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3620,
+      "durationSecs": 323.76,
+      "credits": 3620,
+      "costUsd": 0.5973,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B2-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "fileBytes": 5197902
+    },
+    {
+      "module": "04v6",
+      "batchId": "B3",
+      "chunkIds": [
+        "M4-14",
+        "M4-15"
+      ],
+      "generationId": "XL85sPPmLNNW1dDiY3FW",
+      "sessionId": "4DOHkicFzCGezjByMWZm",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2057,
+      "durationSecs": 192.16,
+      "credits": 2057,
+      "costUsd": 0.339405,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B3-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "fileBytes": 3092641
+    },
+    {
+      "module": "04v6",
+      "batchId": "B4",
+      "chunkIds": [
+        "M4-16"
+      ],
+      "generationId": "AnaG4Uo0GKRiuaiAF5gP",
+      "sessionId": "UE6fBjHY29RQFXCNZ7dw",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 389,
+      "durationSecs": 29.28,
+      "credits": 389,
+      "costUsd": 0.064185,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-B4-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "checkpoint": "m4cp2",
+      "fileBytes": 486248
+    },
+    {
+      "module": "04v6",
+      "batchId": "C1",
+      "chunkIds": [
+        "M4-17"
+      ],
+      "generationId": "eFms67covxqr9nqges10",
+      "sessionId": "ayYBraEit6b7SLhZbNSD",
+      "flowId": "VbK8qObk0uml5N89UPNv",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 596,
+      "durationSecs": 49.12,
+      "credits": 596,
+      "costUsd": 0.09834,
+      "rawFile": "AIMT-Listen-Mode-Final/04-Module-4/M4-BATCH-C1-RAW.mp3",
+      "pass": "v6-strict-fidelity",
+      "checkpoint": "m4cp2",
+      "fileBytes": 803897
+    },
+    {
+      "module": "06",
+      "batchId": "A1",
+      "chunkIds": [
+        "M6-01",
+        "M6-02"
+      ],
+      "generationId": "nvn7V4xNQhGks5l6jYMR",
+      "sessionId": "8obG6ZlySmwygkOE2f50",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2575,
+      "durationSecs": 191.44,
+      "credits": 2575,
+      "costUsd": 0.424875,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3080938
+    },
+    {
+      "module": "06",
+      "batchId": "A2",
+      "chunkIds": [
+        "M6-03"
+      ],
+      "generationId": "PLKxQE3Jb80AIkhj5Tgt",
+      "sessionId": "LIHccagZM3lKGxfJplQa",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2149,
+      "durationSecs": 173.6,
+      "credits": 2149,
+      "costUsd": 0.354585,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2795472
+    },
+    {
+      "module": "06",
+      "batchId": "A3",
+      "chunkIds": [
+        "M6-04"
+      ],
+      "generationId": "VbIWv5cUDg4cpKMxrVxT",
+      "sessionId": "jFZYDg8baBrNPrSJ1kOy",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2064,
+      "durationSecs": 164.32,
+      "credits": 2064,
+      "costUsd": 0.34056,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2647097
+    },
+    {
+      "module": "06",
+      "batchId": "A4",
+      "chunkIds": [
+        "M6-05"
+      ],
+      "generationId": "3d0RLynf0J0y4usK5XBb",
+      "sessionId": "fZoKGq6OPl4sIWfzSEWl",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2451,
+      "durationSecs": 193.6,
+      "credits": 2451,
+      "costUsd": 0.404415,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3115629
+    },
+    {
+      "module": "06",
+      "batchId": "A5",
+      "chunkIds": [
+        "M6-06"
+      ],
+      "generationId": "lYFmWcScvYU0fqaL22Fs",
+      "sessionId": "n9aqskuXe46U6IaDogDC",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 352,
+      "durationSecs": 25.76,
+      "credits": 352,
+      "costUsd": 0.05808,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-A5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m6cp1",
+      "fileBytes": 430241
+    },
+    {
+      "module": "06",
+      "batchId": "B1",
+      "chunkIds": [
+        "M6-07",
+        "M6-08"
+      ],
+      "generationId": "wdwwxQcSXvVHn4rhJ1Wq",
+      "sessionId": "Htu7uGqN0dDsREgp30gW",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1386,
+      "durationSecs": 118.32,
+      "credits": 1386,
+      "costUsd": 0.22869,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m6cp1",
+      "fileBytes": 1911071
+    },
+    {
+      "module": "06",
+      "batchId": "B2",
+      "chunkIds": [
+        "M6-09",
+        "M6-10"
+      ],
+      "generationId": "sLYNS02o44fWLny25JcP",
+      "sessionId": "FHFOOjFqpzEYFuZxyPBz",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3686,
+      "durationSecs": 301.44,
+      "credits": 3686,
+      "costUsd": 0.60819,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 4840964
+    },
+    {
+      "module": "06",
+      "batchId": "B3",
+      "chunkIds": [
+        "M6-11"
+      ],
+      "generationId": "a305W0skiZlr0wsdH4rp",
+      "sessionId": "YjAdE5d5oMcOMoqY9F90",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1148,
+      "durationSecs": 89.28,
+      "credits": 1148,
+      "costUsd": 0.18942,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 1446300
+    },
+    {
+      "module": "06",
+      "batchId": "B4",
+      "chunkIds": [
+        "M6-12"
+      ],
+      "generationId": "NRgpeXz1FJg1FaXZcoPP",
+      "sessionId": "9K2rSgAZ8cX3u8JY1lqS",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2298,
+      "durationSecs": 167.6,
+      "credits": 2298,
+      "costUsd": 0.37917,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2699342
+    },
+    {
+      "module": "06",
+      "batchId": "B5",
+      "chunkIds": [
+        "M6-13"
+      ],
+      "generationId": "RpfbweFftQBGNqqtMnS3",
+      "sessionId": "Uoc8FamTCI2ZXaGzxsbQ",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 343,
+      "durationSecs": 25.04,
+      "credits": 343,
+      "costUsd": 0.056595,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-B5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m6cp2",
+      "fileBytes": 418538
+    },
+    {
+      "module": "06",
+      "batchId": "C1",
+      "chunkIds": [
+        "M6-14"
+      ],
+      "generationId": "SUHPd4uggiyw2pp4tDGY",
+      "sessionId": "TvOeWwpIYFHlzRHYldPW",
+      "flowId": "YQl4PGwSmlExjg2m4MsA",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 434,
+      "durationSecs": 30.8,
+      "credits": 434,
+      "costUsd": 0.07161,
+      "rawFile": "AIMT-Listen-Mode-Final/06-Module-6/M6-BATCH-C1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m6cp2",
+      "fileBytes": 510907
+    },
+    {
+      "module": "08",
+      "batchId": "A1",
+      "chunkIds": [
+        "M8-01",
+        "M8-02",
+        "M8-03"
+      ],
+      "generationId": "43ZLA4IRAbpuc0ioAs6E",
+      "sessionId": "52sfFUNliSxkqImg6XO2",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 4299,
+      "durationSecs": 348.72,
+      "credits": 4299,
+      "costUsd": 0.709335,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 5597471
+    },
+    {
+      "module": "08",
+      "batchId": "A2",
+      "chunkIds": [
+        "M8-04"
+      ],
+      "generationId": "UFcvCDg6XkBXVQWZT2nA",
+      "sessionId": "2MxKAGOC7zDQpeyn8keO",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2109,
+      "durationSecs": 172.24,
+      "credits": 2109,
+      "costUsd": 0.347985,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2773738
+    },
+    {
+      "module": "08",
+      "batchId": "A3",
+      "chunkIds": [
+        "M8-05"
+      ],
+      "generationId": "bTmVZmlDPSG1vOPsMmcM",
+      "sessionId": "SxEzlxsTmPqae31mViw3",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3830,
+      "durationSecs": 261.6,
+      "credits": 3830,
+      "costUsd": 0.63195,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 4203577
+    },
+    {
+      "module": "08",
+      "batchId": "A4",
+      "chunkIds": [
+        "M8-06",
+        "M8-07"
+      ],
+      "generationId": "EZRSpJActil0teAZYL2r",
+      "sessionId": "Pf34Ip8mQPzLAsvH1ykw",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3054,
+      "durationSecs": 241.28,
+      "credits": 3054,
+      "costUsd": 0.50391,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3878404
+    },
+    {
+      "module": "08",
+      "batchId": "A5",
+      "chunkIds": [
+        "M8-08"
+      ],
+      "generationId": "A57cveUy1CsXW7poqEaE",
+      "sessionId": "t9e7lcU2ENzC6gTlmRWe",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2667,
+      "durationSecs": 217.2,
+      "credits": 2667,
+      "costUsd": 0.440055,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3493046
+    },
+    {
+      "module": "08",
+      "batchId": "A6",
+      "chunkIds": [
+        "M8-09"
+      ],
+      "generationId": "LsjYodYgznc1dCH9fcMP",
+      "sessionId": "hRhqiF51w0HmMTFzcT9c",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2395,
+      "durationSecs": 173.76,
+      "credits": 2395,
+      "costUsd": 0.395175,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A6-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2797980
+    },
+    {
+      "module": "08",
+      "batchId": "A7",
+      "chunkIds": [
+        "M8-10"
+      ],
+      "generationId": "WDYJt90MsY6wlZJ7DY6j",
+      "sessionId": "qdiqtPHwQ1RgEZIRB8Rn",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2208,
+      "durationSecs": 155.2,
+      "credits": 2208,
+      "costUsd": 0.36432,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A7-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2501229
+    },
+    {
+      "module": "08",
+      "batchId": "A8",
+      "chunkIds": [
+        "M8-11",
+        "M8-12"
+      ],
+      "generationId": "pkYYStUDNXiXpJ0W5iCf",
+      "sessionId": "bMa8VJIhhzNaokZ4Xc9U",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3935,
+      "durationSecs": 266.16,
+      "credits": 3935,
+      "costUsd": 0.649275,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A8-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 4276302
+    },
+    {
+      "module": "08",
+      "batchId": "A9",
+      "chunkIds": [
+        "M8-13"
+      ],
+      "generationId": "Xmxx9Pz8UiSItPew4jfk",
+      "sessionId": "WoBmyQxzkhwYDaKYOWcF",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1613,
+      "durationSecs": 138,
+      "credits": 1613,
+      "costUsd": 0.266145,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A9-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2225794
+    },
+    {
+      "module": "08",
+      "batchId": "A10",
+      "chunkIds": [
+        "M8-14"
+      ],
+      "generationId": "POS64dxG71OjbBkGNSBf",
+      "sessionId": "yFZg1yirNCSJoMkdhayB",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3266,
+      "durationSecs": 225.76,
+      "credits": 3266,
+      "costUsd": 0.53889,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A10-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3630137
+    },
+    {
+      "module": "08",
+      "batchId": "A11",
+      "chunkIds": [
+        "M8-15"
+      ],
+      "generationId": "XsJRUjcdplwKbfAlAv2p",
+      "sessionId": "FjRZf35iBm0Mgid8U45Y",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 455,
+      "durationSecs": 31.12,
+      "credits": 455,
+      "costUsd": 0.075075,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-A11-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m8cp1",
+      "fileBytes": 515923
+    },
+    {
+      "module": "08",
+      "batchId": "B1",
+      "chunkIds": [
+        "M8-16"
+      ],
+      "generationId": "H61AoNZemIdQPjYpHoAR",
+      "sessionId": "845UUefb4mQxMWBDsctm",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1353,
+      "durationSecs": 101.6,
+      "credits": 1353,
+      "costUsd": 0.223245,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-B1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m8cp1",
+      "fileBytes": 1643577
+    },
+    {
+      "module": "08",
+      "batchId": "B2",
+      "chunkIds": [
+        "M8-17"
+      ],
+      "generationId": "tkffyJGZAQOywzbdWPaJ",
+      "sessionId": "5y5onrqS3claYhQ9aEWk",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 269,
+      "durationSecs": 17.76,
+      "credits": 269,
+      "costUsd": 0.044385,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-B2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m8cp2",
+      "fileBytes": 301928
+    },
+    {
+      "module": "08",
+      "batchId": "C1",
+      "chunkIds": [
+        "M8-18"
+      ],
+      "generationId": "zWz2fqVldQko4Ry0KaQi",
+      "sessionId": "IRz0TDjVesqeo3HX9rUZ",
+      "flowId": "eMGmx8M8IFgukZNs6ka5",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 292,
+      "durationSecs": 24,
+      "credits": 292,
+      "costUsd": 0.04818,
+      "rawFile": "AIMT-Listen-Mode-Final/08-Module-8/M8-BATCH-C1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m8cp2",
+      "fileBytes": 401820
+    },
+    {
+      "module": "07",
+      "batchId": "A1",
+      "chunkIds": [
+        "M7-01",
+        "M7-02"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3944,
+      "durationSecs": 290.586,
+      "credits": 3944,
+      "costUsd": 0.6508,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-A1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 4666675,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A2",
+      "chunkIds": [
+        "M7-03"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3101,
+      "durationSecs": 252.682,
+      "credits": 3101,
+      "costUsd": 0.5117,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-A2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 4060217,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A3",
+      "chunkIds": [
+        "M7-04",
+        "M7-05"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3975,
+      "durationSecs": 328.908,
+      "credits": 3975,
+      "costUsd": 0.6559,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-A3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 5279822,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A4",
+      "chunkIds": [
+        "M7-06"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1839,
+      "durationSecs": 138.684,
+      "credits": 1839,
+      "costUsd": 0.3034,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-A4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2236243,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "A5",
+      "chunkIds": [
+        "M7-07"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 209,
+      "durationSecs": 13.636,
+      "credits": 209,
+      "costUsd": 0.0345,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-A5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m7cp1",
+      "fileBytes": 235472,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "B1",
+      "chunkIds": [
+        "M7-08"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 308,
+      "durationSecs": 21.629,
+      "credits": 308,
+      "costUsd": 0.0508,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-B1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m7cp2",
+      "fileBytes": 363368,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "07",
+      "batchId": "C1",
+      "chunkIds": [
+        "M7-09"
+      ],
+      "generationId": null,
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 346,
+      "durationSecs": 28.839,
+      "credits": 346,
+      "costUsd": 0.0571,
+      "rawFile": "AIMT-Listen-Mode-Final/07-Module-7/M7-BATCH-C1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m7cp2",
+      "fileBytes": 478724,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 7 log-bookkeeping repair. durationSecs decoded directly from the current *-EDIT.wav (verified against Module 7's own final owner-review report). costUsd taken from that same report (the only surviving record). generationId/sessionId/flowId could not be recovered and are explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A1",
+      "chunkIds": [
+        "M5-01",
+        "M5-02"
+      ],
+      "generationId": "2XVFvmCdEzY9HQG4UOl2",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1917,
+      "durationSecs": 153.626122,
+      "credits": 1917,
+      "costUsd": 0.316305,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2475315,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A2",
+      "chunkIds": [
+        "M5-03",
+        "M5-04"
+      ],
+      "generationId": "b4WCZ981ZYpAolBfWQlQ",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2976,
+      "durationSecs": 232.202449,
+      "credits": 2976,
+      "costUsd": 0.49104,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3732537,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A3",
+      "chunkIds": [
+        "M5-05"
+      ],
+      "generationId": "3B7RXFfhwur1oy3xutjO",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 4364,
+      "durationSecs": 368.84898,
+      "credits": 4364,
+      "costUsd": 0.72006,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 5918881,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A4",
+      "chunkIds": [
+        "M5-06"
+      ],
+      "generationId": "MtV8iJTg1AEAODTgMaVV",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3990,
+      "durationSecs": 320.365714,
+      "credits": 3990,
+      "costUsd": 0.65835,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 5143149,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A5",
+      "chunkIds": [
+        "M5-07"
+      ],
+      "generationId": "10Tx60FmULK1MHyIHAcP",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1556,
+      "durationSecs": 125.962449,
+      "credits": 1556,
+      "costUsd": 0.25673999999999997,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2032697,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "A6",
+      "chunkIds": [
+        "M5-08"
+      ],
+      "generationId": "DIXoF6Ir1uUlmX4CrVUp",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 385,
+      "durationSecs": 28.917551,
+      "credits": 385,
+      "costUsd": 0.063525,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-A6-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m5cp1",
+      "fileBytes": 479978,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B1",
+      "chunkIds": [
+        "M5-09",
+        "M5-10"
+      ],
+      "generationId": "t8OZzS35cK5G3ghEjvca",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1506,
+      "durationSecs": 117.002449,
+      "credits": 1506,
+      "costUsd": 0.24849,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-B1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m5cp1",
+      "fileBytes": 1889337,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B2",
+      "chunkIds": [
+        "M5-11",
+        "M5-12"
+      ],
+      "generationId": "NPFu5ztUceZNDKzXK6OK",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2726,
+      "durationSecs": 217.547755,
+      "credits": 2726,
+      "costUsd": 0.44978999999999997,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-B2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3498062,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B3",
+      "chunkIds": [
+        "M5-13"
+      ],
+      "generationId": "ffdnhn3s1dWIug4dHvAJ",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2426,
+      "durationSecs": 185.730612,
+      "credits": 2426,
+      "costUsd": 0.40029000000000003,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-B3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2988987,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "B4",
+      "chunkIds": [
+        "M5-14"
+      ],
+      "generationId": "situQEIlPnX8K5k3jHe8",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 344,
+      "durationSecs": 23.797551,
+      "credits": 344,
+      "costUsd": 0.056760000000000005,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-B4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m5cp2",
+      "fileBytes": 398058,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "05",
+      "batchId": "C1",
+      "chunkIds": [
+        "M5-15"
+      ],
+      "generationId": "djhWOLlT1qTaQVCYNo32",
+      "sessionId": null,
+      "flowId": null,
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 470,
+      "durationSecs": 39.000816,
+      "credits": 470,
+      "costUsd": 0.07755,
+      "rawFile": "AIMT-Listen-Mode-Final/05-Module-5/M5-BATCH-C1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m5cp2",
+      "fileBytes": 641311,
+      "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    }
+  ]
+}

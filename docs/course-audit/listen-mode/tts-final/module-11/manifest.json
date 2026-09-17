@@ -1,0 +1,122 @@
+{
+  "module": "11",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M11-BATCH-A1.txt",
+      "chunkIds": [
+        "M11-01",
+        "M11-02"
+      ],
+      "normalizedChars": 2073,
+      "firstSpokenLine": "Welcome to Module 11. AI is already becoming part of modern practice — from business and communication to research, imaging, and the questio",
+      "lastSpokenLine": "ot automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M11-BATCH-A2.txt",
+      "chunkIds": [
+        "M11-03"
+      ],
+      "normalizedChars": 1506,
+      "firstSpokenLine": "Section 11.2 — Better input. Give AI a better B-R-I-E-F.",
+      "lastSpokenLine": " that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M11-BATCH-A3.txt",
+      "chunkIds": [
+        "M11-04"
+      ],
+      "normalizedChars": 2051,
+      "firstSpokenLine": "Section 11.3 — Human authority. Decide how much authority to give the tool. The question is always: what are you asking the tool to do, and ",
+      "lastSpokenLine": "gh literacy that a polished percentage never reads as universal truth. General conversational AI should not become your scalp diagnostician.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M11-BATCH-B1.txt",
+      "chunkIds": [
+        "M11-05"
+      ],
+      "normalizedChars": 1580,
+      "firstSpokenLine": "Section 11.5 — Client-supplied AI. When the client brings an AI answer.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m11cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M11-BATCH-B2.txt",
+      "chunkIds": [
+        "M11-06"
+      ],
+      "normalizedChars": 2834,
+      "firstSpokenLine": "Section 11.6 — Privacy and client data. Client information, images, and AI.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m11cp1,m11cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M11-BATCH-C1.txt",
+      "chunkIds": [
+        "M11-07"
+      ],
+      "normalizedChars": 319,
+      "firstSpokenLine": "Module complete. You now know how to use AI as leverage without handing over your judgment. That distinction is what separates a practitione",
+      "lastSpokenLine": "Up next, Module 12: course completion and certification. Take a moment — you built something real.",
+      "checkpointRelationship": "m11cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M11-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 687
+    },
+    {
+      "chunkId": "M11-02",
+      "title": "Intro + AIMT position + 11.1 Tool literacy",
+      "normalizedChars": 1384
+    },
+    {
+      "chunkId": "M11-03",
+      "title": "11.2 Better input: the B.R.I.E.F. framework",
+      "normalizedChars": 1506
+    },
+    {
+      "chunkId": "M11-04",
+      "title": "11.3 Human authority + 11.4 Scalp and hair analysis",
+      "normalizedChars": 2051
+    },
+    {
+      "chunkId": "M11-05",
+      "title": "11.5 Client-supplied AI + Checkpoint 1 (`m11cp1`)",
+      "normalizedChars": 1580,
+      "gateType": "checkpoint-stop-then-post-pass",
+      "checkpointId": "m11cp1"
+    },
+    {
+      "chunkId": "M11-06",
+      "title": "Post-pass: 11.6 Privacy, 11.7 Practice leverage, 11.8 Human-led practice + Checkpoint 2 (`m11cp2`)",
+      "normalizedChars": 2834,
+      "gateType": "post-pass-then-checkpoint-stop",
+      "checkpointId": "m11cp1,m11cp2"
+    },
+    {
+      "chunkId": "M11-07",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 319,
+      "gateType": "post-pass",
+      "checkpointId": "m11cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

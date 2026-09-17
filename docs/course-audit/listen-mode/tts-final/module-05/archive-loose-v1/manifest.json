@@ -1,0 +1,149 @@
+{
+  "module": "05",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M5-BATCH-A1.txt",
+      "chunkIds": [
+        "M5-01",
+        "M5-02"
+      ],
+      "normalizedChars": 2899,
+      "firstSpokenLine": "Welcome to Module 5. Module 4 taught you how to gather and describe evidence. Now you'll turn that evidence — plus what the client reports a",
+      "lastSpokenLine": "product — choose the service direction first, then select a compatible product within your license, training, and manufacturer instructions.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M5-BATCH-A2.txt",
+      "chunkIds": [
+        "M5-03",
+        "M5-04"
+      ],
+      "normalizedChars": 3246,
+      "firstSpokenLine": "Section 5.3 — Priority order. The safest limit outranks the client's request. Clients may ask for the deepest cleanse or the firmest pressur",
+      "lastSpokenLine": " by side — the crown calling for more targeted cleansing, the hairline calling for a gentler approach. Same client, two different decisions.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M5-BATCH-A3.txt",
+      "chunkIds": [
+        "M5-05",
+        "M5-06"
+      ],
+      "normalizedChars": 1420,
+      "firstSpokenLine": "Signature interaction: what changes first? You're not diagnosing the scalp — you're deciding what the current evidence allows you to do next",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m5cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M5-BATCH-B1.txt",
+      "chunkIds": [
+        "M5-07",
+        "M5-08"
+      ],
+      "normalizedChars": 2787,
+      "firstSpokenLine": "Section 5.5 — One appointment, more than one approach. The protocol can change without the service feeling fragmented. Use the same structur",
+      "lastSpokenLine": "[slowly] The protocol isn't the number of steps. It's the quality of the decisions between them.",
+      "checkpointRelationship": "m5cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M5-BATCH-B2.txt",
+      "chunkIds": [
+        "M5-09",
+        "M5-10"
+      ],
+      "normalizedChars": 3234,
+      "firstSpokenLine": "Section 5.8 — Client communication. Redirect the method without dismissing the goal. Clients often ask for intensity because they associate ",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m5cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M5-BATCH-C1.txt",
+      "chunkIds": [
+        "M5-11"
+      ],
+      "normalizedChars": 603,
+      "firstSpokenLine": "Module complete. Assessment becomes skill when it changes the service responsibly.",
+      "lastSpokenLine": "ed with cosmetic patterns. Same goal as always — observe carefully, stay within scope, and know when medical evaluation belongs in the plan.",
+      "checkpointRelationship": "m5cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M5-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 732
+    },
+    {
+      "chunkId": "M5-02",
+      "title": "5.1 From evidence to action + 5.2 What you can actually change",
+      "normalizedChars": 2165
+    },
+    {
+      "chunkId": "M5-03",
+      "title": "5.3 Priority order",
+      "normalizedChars": 1199
+    },
+    {
+      "chunkId": "M5-04",
+      "title": "5.4 Patterns, not permanent types",
+      "normalizedChars": 2045
+    },
+    {
+      "chunkId": "M5-05",
+      "title": "Signature interaction: What changes first?",
+      "normalizedChars": 1033
+    },
+    {
+      "chunkId": "M5-06",
+      "title": "Checkpoint 1 (`m5cp1`)",
+      "normalizedChars": 385,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m5cp1"
+    },
+    {
+      "chunkId": "M5-07",
+      "title": "Post-pass: 5.5 One appointment, more than one approach",
+      "normalizedChars": 1164,
+      "gateType": "post-pass",
+      "checkpointId": "m5cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M5-08",
+      "title": "5.6 Choose a function, not a fantasy + 5.7 Intensity is part of the protocol",
+      "normalizedChars": 1621
+    },
+    {
+      "chunkId": "M5-09",
+      "title": "5.8 Client communication",
+      "normalizedChars": 1343
+    },
+    {
+      "chunkId": "M5-10",
+      "title": "5.9 Errors that make protocols less intelligent + Checkpoint 2 (`m5cp2`)",
+      "normalizedChars": 1889,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m5cp2"
+    },
+    {
+      "chunkId": "M5-11",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 603,
+      "gateType": "post-pass",
+      "checkpointId": "m5cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

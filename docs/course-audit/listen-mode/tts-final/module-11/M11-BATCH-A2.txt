@@ -1,0 +1,9 @@
+Section 11.2 — Better input. Give AI a better B-R-I-E-F.
+
+Better input produces more useful output. Prompting isn't magic wording — it's giving the tool a clear job.
+
+B is for Background — what does the tool need to know? R is for Request — what do you actually want it to do? I is for Instructions — what tone, audience, boundaries, or requirements matter? E is for Expected Output — what should the finished response look like? And F is for Fact-check — what still needs human verification?
+
+On screen there's a "Build Your B.R.I.E.F." exercise, ungraded, nothing saved or scored, starting from the deliberately weak prompt "Write a post about my head spa" — a space to draft your own Background, Request, Instructions, Expected Output, and Fact-check for a real task in your own practice.
+
+[slowly] Here's a strong example, not a required script. Background: I run a solo head spa studio, my clients are mostly working professionals booking a relaxation-focused scalp treatment on their lunch break or after work. Request: write a 100-word Instagram caption inviting followers to book a 45-minute lunch-break scalp treatment. Instructions: calm, unhurried tone, not salesy — don't claim the treatment cures anything or guarantees hair growth. Expected Output: one caption under 100 words, plus two shorter alternate versions to pick between. Fact-check: I'd check that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.

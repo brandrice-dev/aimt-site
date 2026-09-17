@@ -1,0 +1,143 @@
+{
+  "module": "06",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M6-BATCH-A1.txt",
+      "chunkIds": [
+        "M6-01",
+        "M6-02"
+      ],
+      "normalizedChars": 2326,
+      "firstSpokenLine": "Welcome to Module 6. By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer — conditions",
+      "lastSpokenLine": "wash timing, recent changes, symptoms — and favor the gentler service direction. Don't force a label just to make the picture feel resolved.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M6-BATCH-A2.txt",
+      "chunkIds": [
+        "M6-03"
+      ],
+      "normalizedChars": 1722,
+      "firstSpokenLine": "Section 6.3 — The most important distinction in scalp care. Dry scalp and dandruff are not the same thing. They can both present with flakin",
+      "lastSpokenLine": "sk about recent products, wash frequency, how long the pattern's been present, and favor the gentler direction until the picture is clearer.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M6-BATCH-A3.txt",
+      "chunkIds": [
+        "M6-04",
+        "M6-05"
+      ],
+      "normalizedChars": 3190,
+      "firstSpokenLine": "Section 6.4 — The cycle worth understanding. Why the wrong product makes things worse. This is a common, avoidable pattern — a client sees f",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m6cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M6-BATCH-B1.txt",
+      "chunkIds": [
+        "M6-06",
+        "M6-07"
+      ],
+      "normalizedChars": 2279,
+      "firstSpokenLine": "Section 6.5 — Malassezia to seborrheic dermatitis: one spectrum. Not two conditions — one spectrum.",
+      "lastSpokenLine": " screen — proceed, modify, or refer — using everything you just learned about the dry-versus-dandruff distinction and the referral criteria.",
+      "checkpointRelationship": "m6cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M6-BATCH-B2.txt",
+      "chunkIds": [
+        "M6-08",
+        "M6-09"
+      ],
+      "normalizedChars": 2842,
+      "firstSpokenLine": "Section 6.7 — Treatment within scope. You're supporting the environment. Not treating the condition.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m6cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M6-BATCH-C1.txt",
+      "chunkIds": [
+        "M6-10"
+      ],
+      "normalizedChars": 402,
+      "firstSpokenLine": "Module complete. You can now read the difference between dry scalp and dandruff, understand the Malassezia spectrum, and explain it to a cli",
+      "lastSpokenLine": "in a poorly designed setup. Module 7 covers equipment, tools, room design, and how to build a workspace that makes everything else possible.",
+      "checkpointRelationship": "m6cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M6-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 708
+    },
+    {
+      "chunkId": "M6-02",
+      "title": "6.1 Your role here + 6.2 What you can and cannot conclude",
+      "normalizedChars": 1616
+    },
+    {
+      "chunkId": "M6-03",
+      "title": "6.3 The most important distinction in scalp care",
+      "normalizedChars": 1722
+    },
+    {
+      "chunkId": "M6-04",
+      "title": "6.4 The cycle worth understanding",
+      "normalizedChars": 2837
+    },
+    {
+      "chunkId": "M6-05",
+      "title": "Checkpoint 1 (`m6cp1`)",
+      "normalizedChars": 351,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m6cp1"
+    },
+    {
+      "chunkId": "M6-06",
+      "title": "Post-pass: 6.5 Malassezia to seborrheic dermatitis + 6.6 When to pause or refer",
+      "normalizedChars": 1503,
+      "gateType": "post-pass",
+      "checkpointId": "m6cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M6-07",
+      "title": "Signature interaction: Sort three presentations",
+      "normalizedChars": 774
+    },
+    {
+      "chunkId": "M6-08",
+      "title": "6.7 Treatment within scope",
+      "normalizedChars": 1122
+    },
+    {
+      "chunkId": "M6-09",
+      "title": "6.8 What makes it worse + Checkpoint 2 (`m6cp2`)",
+      "normalizedChars": 1718,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m6cp2"
+    },
+    {
+      "chunkId": "M6-10",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 402,
+      "gateType": "post-pass",
+      "checkpointId": "m6cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

@@ -44,3 +44,20 @@ assets/audio/listen/**/raw-sessions-v2/**/*.mp3
 # once installed post-CapCut.
 assets/audio/listen/**/raw-pieces/**
 assets/audio/listen/**/capcut-masters/**
+
+# Course-wide Listen Mode FULL REGENERATION pass (Welcome-M12, course-audit
+# task "final Listen Mode production run"): owner-editing staging directory
+# for raw ElevenLabs output awaiting the owner's CapCut pass, plus the
+# owner-processed files returned afterward. Reproducible/large local
+# artifacts, same treatment as raw-pieces/ and capcut-masters/ above --
+# never contains canonical student audio (that only ever lives directly
+# under assets/audio/listen/<course>/module-XX/*.mp3 once installed).
+# Text-only production docs (manifests, source scripts, cut maps, the
+# master CapCut worklist) are NOT under this directory and stay tracked --
+# see docs/course-audit/listen-mode/tts-final/.
+AIMT-Listen-Mode-Final/**/*.mp3
+AIMT-Listen-Mode-Final/**/*.MP3
+AIMT-Listen-Mode-Final/**/*.wav
+AIMT-Listen-Mode-Final/**/*.WAV
+AIMT-Listen-Mode-Final/**/*.flac
+AIMT-Listen-Mode-Final/**/*.FLAC

@@ -9,6 +9,12 @@ findings surfaced editorial, synchronization, continuity, and UI issues that
 are structural, not Module-1-specific, so they're captured here once rather
 than re-derived per module.
 
+**Addendum, 2026-09-16:** Sections F, G, and H below were added this pass
+(launch-hygiene session, `course-audit-build` branch). F and G are new
+permanent, LOCKED rules — same standing as A–E — for Modules 8–12 and any
+future rebuild of an earlier module. H is an informational note only and
+codifies no new rule.
+
 This document governs how future Listen Mode scripts get written and how the
 player presents them. It does not itself change any shipped audio, chunk
 manifest, or checkpoint. Module-specific application (chunk maps, cut points,
@@ -96,6 +102,85 @@ instead of reading every list item) remains an approved technique — but only
 when representative examples are chosen so that no *required competency* is
 left uncovered, and the omission is documented (see each script's coverage
 map). Parity is about instructional landmarks, not word count.
+
+## F. Checkpoint-closing directional language ("above" is always wrong)
+
+Locked rule, effective this pass, applies to Modules 0–12 (including any
+future rebuild of an already-shipped module).
+
+If a checkpoint's closing narration uses a directional cue pointing the
+student at the response field at all, it must never say **"answer above"**
+(or any equivalent — "your answer is above," "respond above," "response
+above," etc.) — the student's response text area sits **below** the
+checkpoint prompt on screen in the live player, never above it. Telling the
+student to look "above" points them in the wrong direction.
+
+- If a closing directional cue is used, the only approved wording is
+  **"Take your time, and answer below."** (or an equivalent phrase that says
+  "below" — never "above").
+- A checkpoint's closing narration may also omit a directional cue entirely;
+  that is acceptable and does not require adding one.
+- This is enforced automatically going forward by
+  `scripts/aimt-listen-tts-preflight.mjs`, which rejects (exit code 1) any
+  ElevenLabs batch payload containing "answer above"/"respond
+  above"/"response above"/"your answer is above" phrasing before that batch
+  is ever sent to ElevenLabs — see the `DIRECTIONAL_ABOVE` check in that
+  script. Modules 8–12 (and any future rebuild) cannot silently reintroduce
+  this defect through that gate.
+
+## G. Mandatory end-of-module fidelity re-check before audio generation
+
+Locked rule, effective this pass, applies to every future Listen Mode module
+rebuild (Modules 8–12 now, and any later revisit of an earlier module).
+
+Added in direct response to a real quality issue found in the Module 6
+rebuild: the owner caught, on review, a substantive on-screen headline that
+had been silently skipped even though its body content was narrated — the
+coverage-map audit process at the time didn't force an explicit accounting
+of every heading, and (per the Module 7 fidelity audit's own framing of the
+incident) the pattern was specifically a **last-item-in-a-sequence** drop
+near the end of the module, not something the first coverage pass caught on
+its own. Nobody caught it until owner review.
+
+Going forward, before any audio generation for a module rebuild:
+
+1. A **second, dedicated fidelity pass** must be performed specifically over
+   the **final third of the module** — re-reading the live page's final
+   third side by side with the narration's final third, independently of
+   the full coverage-map pass over the whole module.
+2. That pass must explicitly check for: headline/card/list thinning,
+   paraphrase creep, exact completion-language match against the live page,
+   and exact checkpoint placement (immediately after the element it gates,
+   in live DOM order).
+3. That pass must be documented in the module's own coverage-audit file
+   (`module-NN-fidelity-coverage-audit.md`) as its own explicit section
+   titled **"END-OF-MODULE FIDELITY CHECK"**, ending in a stated
+   **PASS/FAIL** result for that check. A FAIL must be fixed and the
+   check re-run (and the batch files regenerated from the corrected source)
+   before the module is considered ready for audio generation.
+
+Module 7's rebuild was the first to actually apply this rule — see
+`module-07-fidelity-coverage-audit.md`'s "END-OF-MODULE FIDELITY CHECK"
+section (scoped to Section 7.4 through module completion, chunks M7-05
+through M7-09; result: PASS, after two small drifts caught by that specific
+pass were fixed before the batches were generated).
+
+## H. Known non-compliant already-shipped audio (informational — no action taken here)
+
+Informational note only; codifies no new rule and authorizes no fix.
+
+A preflight sweep this session (2026-09-16) found the exact "answer above"
+defect described in Section F above already present in **15 already-shipped
+batch files across 9 modules** (00, 02, 03, 05, 06, 08, 09, 10, 11) —
+including Modules 5 and 6, whose audio is already generated and
+owner-approved. Full detail and the per-file list live in
+`module-07-fidelity-coverage-audit.md` (drift row #12).
+
+Fixing any of that already-shipped narration/audio is a separate,
+not-yet-decided owner action. It is explicitly out of scope of this
+document and was not attempted as part of adding Sections F and G — this
+entry exists only so the defect is recorded once, centrally, rather than
+re-discovered independently per module.
 
 ---
 
