@@ -19,6 +19,8 @@
      Copy the signing secret → STRIPE_WEBHOOK_SECRET
    ═══════════════════════════════════════════════════════════════ */
 
+import { sendPaidEnrollmentEmail } from '../_lib/enrollment/paid-enrollment-email.mjs';
+
 const ENTITLEMENTS_TABLE = 'course_entitlements';
 const AIMT_LOGS_TABLE = 'aimt_logs';
 const SIGNATURE_TOLERANCE_SECONDS = 300; // 5 minutes
@@ -219,6 +221,29 @@ export async function onRequestPost(context) {
       email: purchaserEmail,
       message: `session_${session.id}_course_${courseSlug}`
     });
+
+    /* Paid-enrollment welcome email — strictly after the entitlement write
+       above, and never allowed to affect this response. sendPaidEnrollmentEmail
+       never throws by design (see functions/_lib/enrollment/paid-enrollment-email.mjs),
+       but this is wrapped anyway as defense-in-depth: a missing RESEND_API_KEY,
+       a Resend error, or a network failure must never turn a successful
+       entitlement write into a 500 that makes Stripe retry the whole event. */
+    try {
+      const origin = new URL(request.url).origin;
+      const rawName = String(session.customer_details?.name || '').trim();
+      const firstName = rawName ? rawName.split(/\s+/)[0] : '';
+      await sendPaidEnrollmentEmail(env, {
+        checkoutSessionId: session.id,
+        email: purchaserEmail,
+        firstName,
+        courseEntryUrl: `${origin}/success.html?session_id=${encodeURIComponent(session.id)}`
+      });
+    } catch (error) {
+      await logEvent(env, 'webhook_enrollment_email_unexpected_error', {
+        email: purchaserEmail,
+        message: error && error.message ? error.message : 'unknown_error'
+      });
+    }
 
     return new Response(JSON.stringify({ received: true }), {
       headers: { 'Content-Type': 'application/json' }
