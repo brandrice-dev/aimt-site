@@ -207,35 +207,80 @@ Folder: `AIMT-Listen-Mode-Final/08-Module-8/`
 
 ## Module 9 -- Checkout, Client Closing & Pricing Strategy
 
-Folder: `AIMT-Listen-Mode-Final/09-Module-9/`
+**REJECTED 2026-09-17 -- v2 audio failed owner fidelity review** (systemic
+compression drift in the back half of the module — see
+`module-09-fidelity-coverage-audit.md`'s "Concrete drift" table for the
+full accounting). The v2 RAW/EDIT files this table used to list are
+archived, not deleted, at
+`AIMT-Listen-Mode-Final/09-Module-9/archive-loose-v2-REJECTED/` — **do
+not use those files, do not import them into CapCut.** v1 audio remains
+separately archived at `archive-loose-v1/` in that same folder.
 
-| Batch | Import into CapCut (EDIT.wav) | Chunks | Duration | Chars | Checkpoint | Cut order / notes |
-|---|---|---|---:|---:|---|---|
-| A1 | `M9-BATCH-A1-EDIT.wav` | M9-01, M9-02 | 3:36 | 2864 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| A2 | `M9-BATCH-A2-EDIT.wav` | M9-03 | 2:14 | 1397 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| A3 | `M9-BATCH-A3-EDIT.wav` | M9-04, M9-05, M9-06 | 4:26 | 3356 | m10cp1 | Cut boundary: checkpoint stop at end of this batch's last chunk (m10cp1) -- natural seam, cut here. |
-| B1 | `M9-BATCH-B1-EDIT.wav` | M9-07 | 1:32 | 1125 | m10cp1 | Cut boundary: checkpoint stop at end of this batch's last chunk (m10cp1) -- natural seam, cut here. |
-| B2 | `M9-BATCH-B2-EDIT.wav` | M9-08 | 1:28 | 1099 | m10cp2 | Cut boundary: checkpoint stop at end of this batch's last chunk (m10cp2) -- natural seam, cut here. |
-| C1 | `M9-BATCH-C1-EDIT.wav` | M9-09 | 0:21 | 278 | m10cp2 | Cut boundary: checkpoint stop at end of this batch's last chunk (m10cp2) -- natural seam, cut here. |
-
-**Module total:** 6 batches, 13:36, $1.67.
+**Current status: script + audits rebuilt to v3, awaiting owner text
+review. No v3 audio exists yet — this table has nothing to import.** See
+`docs/course-audit/listen-mode/module-09-listen-script.md` (v3) and
+`module-09-fidelity-coverage-audit.md` (v3) for the corrected script and
+the full drift/coverage accounting. Once the owner approves the v3 text,
+generation will produce the same 15-batch shape (9 narration + 6
+interaction-feedback branches for "Close Without Pressure") at
+`AIMT-Listen-Mode-Final/09-Module-9/`, ~14,960 chars (v3 restores content
+v2 had dropped, so this batch table will be rebuilt with new durations/
+costs once real audio exists — the old table's numbers no longer apply
+and are not reproduced here to avoid confusion with the new content).
 
 ---
 
 ## Module 10 -- Sanitation & Reset Systems
 
+**REJECTED 2026-09-18 -- v1 audio failed the current editorial standard**
+("answer above" instead of "answer below" per Section F; the "Reset Under
+Pressure" interaction narrating its own verdict before the student could
+act, per Section I.2; both checkpoints narrated back-to-back with no gate
+between them, per Section I.1 -- see
+`docs/course-audit/listen-mode/module-10-listen-script.md`'s "Why v1 was
+rejected"). v1's RAW/EDIT files are archived, not deleted, at
+`AIMT-Listen-Mode-Final/10-Module-10/archive-loose-v1/` -- **do not use
+those files, do not import them into CapCut.**
+
+**Current status: v2 strict-fidelity rebuild complete -- script, audit
+(PASS), and audio all done.** See
+`docs/course-audit/listen-mode/module-10-listen-script.md` (v2) and
+`module-10-fidelity-coverage-audit.md` (v2) for the corrected script and
+the full coverage/END-OF-MODULE-CHECK accounting.
+
+**Pronunciation correction (A1 only, 2026-09-18):** the owner caught, by
+ear, the locked course-wide single-spaced "A I M T" form rendering as
+"Am-tee" (A-I-M spells the real word "aim," which `eleven_v3` collapses
+toward). Fixed for this module by respelling both occurrences
+comma-separated: "A, I, M, T" / "A, I, M, T's" -- confirmed by ear against
+a rejected `[slowly]`-tag alternative. A1 was regenerated; the
+mispronounced original is archived at
+`AIMT-Listen-Mode-Final/10-Module-10/archive-mispronounced-aimt/`, not
+deleted. **Flag for the owner:** every other already-generated module
+uses the same single-spaced "A I M T" convention and has not been
+re-checked by ear for this same defect -- that is out of scope here.
+
 Folder: `AIMT-Listen-Mode-Final/10-Module-10/`
 
 | Batch | Import into CapCut (EDIT.wav) | Chunks | Duration | Chars | Checkpoint | Cut order / notes |
 |---|---|---|---:|---:|---|---|
-| A1 | `M10-BATCH-A1-EDIT.wav` | M10-01, M10-02 | 3:38 | 2670 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| A2 | `M10-BATCH-A2-EDIT.wav` | M10-03 | 2:59 | 2177 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| A3 | `M10-BATCH-A3-EDIT.wav` | M10-04 | 3:01 | 2261 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| B1 | `M10-BATCH-B1-EDIT.wav` | M10-05 | 2:32 | 1905 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
-| B2 | `M10-BATCH-B2-EDIT.wav` | M10-06 | 3:05 | 2354 | m9cp1,m9cp2 | Cut boundary: checkpoint stop at end of this batch's last chunk (m9cp1,m9cp2) -- natural seam, cut here. |
-| C1 | `M10-BATCH-C1-EDIT.wav` | M10-07 | 0:32 | 364 | m9cp2 | Cut boundary: checkpoint stop at end of this batch's last chunk (m9cp2) -- natural seam, cut here. |
+| A1 | `M10-BATCH-A1-EDIT.wav` | M10-01, M10-02 | 4:04 | 2958 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
+| A2 | `M10-BATCH-A2-EDIT.wav` | M10-03 | 3:03 | 2223 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
+| A3 | `M10-BATCH-A3-EDIT.wav` | M10-04 | 2:16 | 1482 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
+| A4 | `M10-BATCH-A4-EDIT.wav` | M10-05 (interaction prompt + 5 options only) | 1:11 | 903 | -- | Interaction stop (`m10RupDecision`) at end of this clip -- do not append any feedback branch after it; the player halts here until the student selects an option. |
+| A4fb0 | `M10-BATCH-A4fb0-EDIT.wav` | M10-05-fb0 (option 1 feedback, strongest) | 0:17 | 254 | -- | Plays only if option 1 is selected -- keep as its own separate clip, never merged into A4 or another fb clip. |
+| A4fb1 | `M10-BATCH-A4fb1-EDIT.wav` | M10-05-fb1 (option 2 feedback) | 0:11 | 165 | -- | Plays only if option 2 is selected. |
+| A4fb2 | `M10-BATCH-A4fb2-EDIT.wav` | M10-05-fb2 (option 3 feedback) | 0:10 | 165 | -- | Plays only if option 3 is selected. |
+| A4fb3 | `M10-BATCH-A4fb3-EDIT.wav` | M10-05-fb3 (option 4 feedback) | 0:09 | 147 | -- | Plays only if option 4 is selected. |
+| A4fb4 | `M10-BATCH-A4fb4-EDIT.wav` | M10-05-fb4 (option 5 feedback) | 0:10 | 173 | -- | Plays only if option 5 is selected. |
+| B1 | `M10-BATCH-B1-EDIT.wav` | M10-06 | 2:48 | 1945 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
+| B2 | `M10-BATCH-B2-EDIT.wav` | M10-07 | 2:13 | 1755 | -- | No checkpoint in this batch -- cut only at a clean chunk boundary if this file needs splitting. |
+| B3 | `M10-BATCH-B3-EDIT.wav` | M10-08 (checkpoint 1 alone) | 0:27 | 342 | m9cp1 | Checkpoint stop at end of this clip -- the player halts here until `m9cp1` passes. Already its own separate clip; no cutting needed. |
+| B4 | `M10-BATCH-B4-EDIT.wav` | M10-09 (post-pass transition, tiny) | 0:02 | 30 | m9cp1 | Plays only after `m9cp1` passes -- a bare 2-second transition line, already isolated. |
+| B5 | `M10-BATCH-B5-EDIT.wav` | M10-10 (checkpoint 2 alone) | 0:22 | 319 | m9cp2 | Checkpoint stop at end of this clip -- the player halts here until `m9cp2` passes. Already its own separate clip; no cutting needed. |
+| C1 | `M10-BATCH-C1-EDIT.wav` | M10-11 (completion + handoff) | 0:29 | 365 | m9cp2 | Plays only after `m9cp2` passes -- final clip of the module. |
 
-**Module total:** 6 batches, 15:48, $1.94.
+**Module total:** 15 batches, 17:58, $2.18, 13,226 chars.
 
 ---
 

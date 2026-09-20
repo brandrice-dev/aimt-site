@@ -1,5 +1,6 @@
 {
   "module": "12",
+  "version": "v1-verified-corrected-aimt-spacing",
   "batches": [
     {
       "batchId": "A1",
@@ -7,18 +8,20 @@
       "chunkIds": [
         "M12-01"
       ],
-      "normalizedChars": 3966,
-      "firstSpokenLine": "Welcome to your final assessment. You've completed the instructional part of the Head Spa Certification Course and demonstrated your underst",
+      "normalizedChars": 4083,
+      "aimtPronunciation": "single-spaced (A I M T), no punctuation — owner correction 2026-09-20: the comma-separated form ('A, I, M, T') caused Jane/eleven_v3 to pause too heavily between letters and sound choppy. Reverses the earlier comma-separated choice; this is now the permanent course-wide rule going forward (see 00-listen-mode-editorial-standard.md).",
+      "firstSpokenLine": "Welcome to Module 12 — the Final Certification Assessment. You've completed the instructional part of the Head Spa Certification Course and demonstrated your understanding at required checkpoints along the way.",
       "lastSpokenLine": "Good luck.",
       "checkpointRelationship": null,
+      "gateType": "normal",
       "overCeiling": false
     }
   ],
   "chunkMeta": [
     {
       "chunkId": "M12-01",
-      "title": "State A orientation (spoken)",
-      "normalizedChars": 3966
+      "title": "State A orientation (spoken) — verified/corrected, AIMT pronunciation fixed",
+      "normalizedChars": 4083
     }
   ]
 }

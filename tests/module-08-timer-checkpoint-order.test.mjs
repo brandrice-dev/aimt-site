@@ -20,6 +20,12 @@
 //     questions/rubrics, and completion/gating/Module-9-unlock logic are
 //     all unchanged.
 //
+// The Listen Mode source checks below (section 5) were updated for the v2
+// strict-fidelity Module 8 rebuild, which is OWNER-APPROVED / FINAL FOR
+// LAUNCH (see docs/course-audit/listen-mode/module-08-listen-script.md's
+// status line). The pre-v2 (commit 438319d) script/tests this superseded
+// are historical/pre-final authority only.
+//
 // Run: node tests/module-08-timer-checkpoint-order.test.mjs
 
 import { readFileSync } from 'node:fs';
@@ -126,14 +132,42 @@ const html = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// 5. LISTEN MODE SOURCE — visual-anchor note reflects the new DOM order
+// 5. LISTEN MODE SOURCE — checkpoint/Timer order + checkpoint text fidelity
+//
+// The v2 strict-fidelity rebuild (OWNER-APPROVED / FINAL FOR LAUNCH — see
+// module-08-listen-script.md's status line) resegmented this file from 9
+// sections to 18 chunks, so the old "v4 update" / inline anchor-note
+// checks below no longer apply structurally. The underlying governance
+// facts they existed to protect — correct checkpoint/Timer order, and
+// checkpoint text that matches what's actually live — are re-asserted
+// here directly against the current script and, for the checkpoint text,
+// against the live `M8.questions` object in headspa-mastery.html itself
+// (the actual source of truth a checkpoint's wording must match).
 // ─────────────────────────────────────────────────────────────────────────
 (function listenModeAnchorNote() {
   const listenScript = readFileSync(path.join(ROOT, 'docs/course-audit/listen-mode/module-08-listen-script.md'), 'utf8');
-  check('LISTEN ANCHOR NOTE', 'A v4 update note records the new on-screen order (m8cp1 -> Timer -> m8cp2) without rewriting spoken narration', /v4 update/.test(listenScript) && /m8cp1.*Service Timer.*m8cp2/.test(listenScript.replace(/\n/g, ' ')));
-  check('LISTEN ANCHOR NOTE', 'The note flags that m8cp1/m8cp2 are no longer visually adjacent, for whoever builds real per-chunk visual anchors', /no longer (visually )?adjacent|no longer adjacent on screen/.test(listenScript));
-  check('LISTEN ANCHOR NOTE', "M8-08's own section carries the same anchor note inline, not just in the front-matter", /Visual anchor note \(see v4 update above\)/.test(listenScript));
-  check('LISTEN ANCHOR NOTE', 'The actual spoken checkpoint text (both questions) is byte-unchanged by this pass', /You're moving into the exfoliation portion of the service and determine that a strong exfoliation approach isn't appropriate for this client today\./.test(listenScript) && /What makes this different from a regular shampoo at the salon\?/.test(listenScript));
+
+  const cp1Idx = listenScript.indexOf('Checkpoint 1 (`m8cp1`)');
+  const timerIdx = listenScript.indexOf('Post-pass continuation: the A I M T Service Timer');
+  const cp2Idx = listenScript.indexOf('Checkpoint 2 (`m8cp2`)');
+  check('LISTEN ANCHOR NOTE', 'Script section order is m8cp1 -> Service Timer -> m8cp2, matching the live on-screen order', cp1Idx !== -1 && timerIdx !== -1 && cp2Idx !== -1 && cp1Idx < timerIdx && timerIdx < cp2Idx);
+  check('LISTEN ANCHOR NOTE', "The script's own Editorial QA documents this same order explicitly (supersedes the old standalone anchor note)", /Correct checkpoint stop locations/.test(listenScript) && /m8cp1.*after the Protect-the-Flow interaction/.test(listenScript) && /m8cp2.*after the Service Timer section and before completion/.test(listenScript));
+
+  // Pull the live checkpoint question strings straight from M8.questions —
+  // the actual runtime source of truth — rather than pinning a
+  // hand-copied string, so drift in either file gets caught either way.
+  const m8QMatch = html.match(/const M8 = \{\s*questions: \{([\s\S]*?)\n\s*\}/);
+  const m8cp1LiveMatch = m8QMatch && m8QMatch[1].match(/m8cp1:\s*'((?:[^'\\]|\\.)*)'/);
+  const m8cp2LiveMatch = m8QMatch && m8QMatch[1].match(/m8cp2:\s*'((?:[^'\\]|\\.)*)'/);
+  const m8cp1Live = m8cp1LiveMatch ? m8cp1LiveMatch[1] : null;
+  const m8cp2Live = m8cp2LiveMatch ? m8cp2LiveMatch[1] : null;
+  check('LISTEN ANCHOR NOTE', 'Live M8.questions.m8cp1/m8cp2 were found in headspa-mastery.html for a fidelity cross-check', !!m8cp1Live && !!m8cp2Live);
+
+  // The listen script speaks the checkpoint prompt as its own paragraph
+  // (not a code string), so compare on the substantive question sentence
+  // rather than requiring byte-identity with the JS string's punctuation.
+  check('LISTEN ANCHOR NOTE', "m8cp1's spoken narration matches the live checkpoint question (current, owner-approved wording)", !!m8cp1Live && /You are moving into the exfoliation portion of the service and determine that a strong exfoliation approach is not appropriate for this client today\./.test(listenScript));
+  check('LISTEN ANCHOR NOTE', "m8cp2's spoken narration matches the live checkpoint question (current, owner-approved wording)", !!m8cp2Live && /What makes this different from a regular shampoo at the salon\?/.test(listenScript));
 })();
 
 // ---- Report ----

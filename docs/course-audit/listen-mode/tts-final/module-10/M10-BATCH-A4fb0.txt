@@ -1,0 +1,1 @@
+This preserves the required process. The client can wait a few minutes, you can keep working on other reset tasks in parallel, or you can use an already-clean, ready alternative if one exists — the process finishes on its own schedule, not the client's.

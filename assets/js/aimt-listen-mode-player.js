@@ -51,12 +51,40 @@
     return isCheckpointPassed(appState, chunk.moduleId, chunk.checkpointId);
   }
 
+  // Read-only DOM lookup: which option (if any) has the student already
+  // selected inside one ungraded interaction's on-screen container? This is
+  // the interaction-stop counterpart to isCheckpointPassed above — same
+  // read-only-never-writes contract, just reading transient interaction DOM
+  // state (owned and written entirely by the existing per-module handlers,
+  // e.g. m8Protect()/m10RupSelect()) instead of APP_STATE. `container` is a
+  // DOM Element (or, in tests, a minimal fake with the same two methods) already
+  // scoped to the interaction's own id — callers resolve that scoping
+  // themselves (see the player's queryLessonScoped, which duplicate-id-scopes
+  // the same way scrollToVisualTarget does for visualTarget). Returns the
+  // selected option's zero-based index (from its data-choice attribute) or
+  // null if nothing is selected yet.
+  function resolveSelectedOption(container, optionsSelector) {
+    if (!container || typeof container.querySelectorAll !== 'function') return null;
+    var opts = container.querySelectorAll(optionsSelector || '.bq-opt');
+    for (var i = 0; i < opts.length; i++) {
+      var opt = opts[i];
+      if (!opt.getAttribute || opt.getAttribute('aria-pressed') !== 'true') continue;
+      var raw = opt.getAttribute('data-choice');
+      var idx = parseInt(raw, 10);
+      return isNaN(idx) ? null : idx;
+    }
+    return null;
+  }
+
   // Decide what happens after the chunk at `index` finishes playing.
   function resolveAfterEnd(chunks, index, appState) {
     var current = chunks[index];
     if (!current) return { type: 'ended' };
     if (current.gateType === 'checkpoint-stop') {
       return { type: 'awaiting-checkpoint', checkpointId: current.checkpointId, afterIndex: index + 1 };
+    }
+    if (current.gateType === 'interaction-stop') {
+      return { type: 'awaiting-interaction', interactionId: current.interactionId, afterIndex: index + 1 };
     }
     var nextIndex = index + 1;
     if (nextIndex >= chunks.length) return { type: 'ended' };
@@ -176,6 +204,7 @@
   var engine = {
     isCheckpointPassed: isCheckpointPassed,
     isChunkPlayable: isChunkPlayable,
+    resolveSelectedOption: resolveSelectedOption,
     resolveAfterEnd: resolveAfterEnd,
     resolveResumeIndex: resolveResumeIndex,
     storageKey: storageKey,
@@ -368,6 +397,13 @@
 
     var index = engine.resolveEntryIndex(chunks, appState, engine.readStoredPosition(win, courseSlug, moduleId));
     var awaitingCheckpointId = null;
+    var awaitingInteraction = null; // { stopChunk, afterIndex } while paused on an interaction-stop chunk
+    // Set only while a per-option interactionFeedback clip is actively
+    // playing as a one-off detour outside the normal chunks[] sequence --
+    // the shared audio 'ended' handler checks this FIRST (see below) so the
+    // detour's own end never re-runs resolveAfterEnd against the stale
+    // interaction-stop `index`, which would just re-enter awaiting-interaction.
+    var pendingInteractionResumeIndex = null;
     var pollTimer = null;
     var gapTimer = null;
     var destroyed = false;
@@ -503,6 +539,17 @@
     }
 
     function setNote(text) { noteEl.textContent = text || ''; }
+
+    // Same duplicate-id-safe scoping scrollToVisualTarget uses (below),
+    // factored out read-only so enterAwaitingInteraction's DOM poll can
+    // resolve an interactionId the identical way -- a module's hidden
+    // `#moduleNWrap` source template carries its own copy of every id
+    // inside it, interactionId included, so an unscoped lookup is
+    // genuinely ambiguous about which copy it resolves to.
+    function queryLessonScoped(id) {
+      var scope = (doc.querySelector && doc.querySelector('.lesson-wrap')) || doc;
+      return scope.querySelector ? scope.querySelector('[id="' + id + '"]') : null;
+    }
 
     function scrollToVisualTarget(chunk) {
       if (!chunk || !chunk.visualTarget) return;
@@ -657,6 +704,59 @@
       body.appendChild(resumeBtn);
     }
 
+    // Never-reveal-before-the-student-acts gate for ungraded interactions
+    // (Section I of the editorial standard). `chunk` is the interaction-stop
+    // chunk that just finished narrating the prompt + option labels only --
+    // its own audio never contains any option's feedback/rationale. Mirrors
+    // enterAwaitingCheckpoint's shape (disable play, poll, resume once
+    // resolved) but polls the DOM (read-only) instead of course state, since
+    // these interactions are explicitly ungraded and never write APP_STATE.
+    function enterAwaitingInteraction(chunk) {
+      awaitingInteraction = { stopChunk: chunk, afterIndex: index + 1 };
+      playBtn.disabled = true;
+      setNote('Choose your response above to continue. I’ll pick back up right after.');
+      stopPolling();
+      pollTimer = win.setInterval(function () {
+        if (destroyed || !awaitingInteraction) return;
+        var container = queryLessonScoped(chunk.interactionId);
+        var selectedIndex = engine.resolveSelectedOption(container, chunk.interactionOptionsSelector);
+        if (selectedIndex === null) return;
+        stopPolling();
+        playInteractionFeedback(chunk, selectedIndex, awaitingInteraction.afterIndex);
+      }, POLL_MS);
+    }
+
+    // Plays exactly the one interactionFeedback entry matching the option
+    // the student selected, as a one-off detour outside chunks[] (it is
+    // never itself an addressable player position -- Back/Forward/Start
+    // Over/resume never land on it), then resumes the main sequence at
+    // `afterIndex` once it ends (see the audio 'ended' handler below).
+    function playInteractionFeedback(stopChunk, selectedIndex, afterIndex) {
+      awaitingInteraction = null;
+      rebuildControlBody();
+      var list = stopChunk.interactionFeedback || [];
+      var feedbackChunk = null;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].optionIndex === selectedIndex) { feedbackChunk = list[i]; break; }
+      }
+      // Fail safe, never fail silent-forever: an unmatched option index or
+      // audio that isn't actually installed/approved yet must resume the
+      // module rather than leave the student stuck on a chunk that will
+      // never arrive -- QA/manifest validation (aimt-listen-mode-data.js)
+      // is what should catch this before a module ever ships, not this
+      // runtime guard, but the guard exists so a gap fails open, not stuck.
+      if (!feedbackChunk || !isChunkQAAvailable(feedbackChunk)) {
+        advanceAfterGap(afterIndex);
+        return;
+      }
+      playBtn.disabled = false;
+      pendingInteractionResumeIndex = afterIndex;
+      updateTitle(feedbackChunk);
+      updateMediaSession(feedbackChunk);
+      loadAudio(feedbackChunk);
+      play();
+    }
+
     function rebuildControlBody() {
       body.innerHTML = '';
       body.appendChild(controlRow);
@@ -702,6 +802,8 @@
       stopPolling();
       stopGapTimer();
       awaitingCheckpointId = null;
+      awaitingInteraction = null;
+      pendingInteractionResumeIndex = null;
       index = i;
       updateTitle(chunk);
       scrollToVisualTarget(chunk);
@@ -802,6 +904,17 @@
       persistPosition(audio.currentTime);
     });
     audio.addEventListener('ended', function () {
+      // A per-option interactionFeedback clip playing as a detour (see
+      // playInteractionFeedback) is not chunks[index] -- resolve it FIRST,
+      // before touching engine.resolveAfterEnd(chunks, index, ...), which
+      // would otherwise re-evaluate the stale interaction-stop chunk `index`
+      // was still pointing at and re-enter awaiting-interaction forever.
+      if (pendingInteractionResumeIndex !== null) {
+        var resumeTo = pendingInteractionResumeIndex;
+        pendingInteractionResumeIndex = null;
+        advanceAfterGap(resumeTo);
+        return;
+      }
       var decision = engine.resolveAfterEnd(chunks, index, appState);
       // Only a genuine 'ended' decision (ran off the end of the module's
       // last chunk) marks the stored position finished:true — that single
@@ -811,6 +924,8 @@
       persistPosition(0, decision.type === 'ended');
       if (decision.type === 'awaiting-checkpoint') {
         enterAwaitingCheckpoint(decision.checkpointId);
+      } else if (decision.type === 'awaiting-interaction') {
+        enterAwaitingInteraction(chunks[index]);
       } else if (decision.type === 'locked') {
         enterLocked(chunks[decision.index]);
       } else if (decision.type === 'advance') {

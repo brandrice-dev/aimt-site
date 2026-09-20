@@ -1,15 +1,7 @@
-Welcome to Module 11. AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal isn't to hand over your judgment. It's to learn how to use these tools well.
+Welcome to Module 11 — AI, or Modern Practice Tools. Human-led. AI-assisted.
 
-You'll build real tool literacy for what AI is actually useful for in practice, learn how better input leads to better output, keep human authority over every judgment AI helps inform, handle client-supplied AI results and scalp analysis responsibly, and protect client privacy whenever AI tools are involved.
+AI is already becoming part of modern practice — from business and communication to research, imaging, and the questions clients bring into the room. The goal is not to hand over your judgment. It is to learn how to use these tools well.
 
-[warmly] Pay attention to this: AI can inform your judgment. It can never replace it. The final call is always yours.
+Here's what's ahead: you'll build real tool literacy — what AI is actually useful for in practice. You'll learn how better input leads to better, more usable output. You'll keep human authority over every judgment AI helps inform. You'll handle client-supplied AI results and scalp analysis responsibly. And you'll protect client privacy and data whenever AI tools are involved.
 
-You've already experienced A I M T's philosophy in action through me. This course was built by human practitioners and professionals; I'm an AI learning-support tool built around that curriculum. AI can make education and practice more useful and responsive, but I don't replace the human expertise behind me. Hands-on training, webinars, and clinical or practical education remain human-led.
-
-[firmly] A I M T's position: if you're going to use AI, learn to use it well.
-
-Section 11.1 — Tool literacy. What AI is actually good at.
-
-The specific tools will change. The more durable skill is understanding what kind of job you're giving them, and what kind of output they can realistically produce. Language and reasoning assistants: drafting, brainstorming, summarizing, organizing, comparison, research, explanation, decision support. Creative AI: marketing concepts, imagery, educational visuals, promotional creative, content and video workflows. Scalp and hair imaging analysis: imaging, comparison, density measurement, pattern recognition, tracking, scoring, routine suggestions. And automation and practice systems: scheduling, CRM, email, workflows, analytics, documentation, customer service.
-
-[slowly] Professional-looking output is not automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool.
+[warmly] Pay attention to this: AI can inform your judgment. It can never replace it — the final call is always yours.

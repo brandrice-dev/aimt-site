@@ -1,0 +1,11 @@
+Section 9.4 — Price your service. Cost base to target price.
+
+Enter your own numbers — real or illustrative — for a service you offer or plan to offer. The calculator uses margin, the concept from 9.3: it solves for the selling price required to hit the target margin you choose, starting from your modeled cost base. The four inputs are product cost per service, overhead per service, your full practitioner time cost, and your target margin.
+
+Business note: this calculator is a planning tool. A business may also need to account for items such as taxes, payroll burden, payment-processing costs, insurance, locally required charges, and other operating expenses, depending on business structure and jurisdiction. A I M T does not prescribe state-specific tax treatment or business or legal structure.
+
+Section 9.5 — Market context, not copycat pricing. Look at the market after you know your own numbers — not instead of them.
+
+A competitor's price may not cover their own actual costs — copying it risks copying a model that's already losing money. Know your own economics first, then look at your local market. Market context can legitimately inform client expectations, positioning, local price ranges, service comparison, demand, and business model — it isn't irrelevant, just secondary.
+
+[slowly] Why this matters: final price sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of these alone.

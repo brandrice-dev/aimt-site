@@ -1,19 +1,17 @@
-Section 9.4 — Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned — enter your own product cost, overhead, practitioner time, and target margin, and it solves for the selling price that hits your target. It's a planning tool — a real business may also need to account for taxes, payroll burden, payment processing, insurance, and other costs depending on your structure and jurisdiction. A I M T doesn't prescribe state-specific tax treatment or business structure.
+Section 9.2 — Know the real cost. Four inputs — not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal number either. It's components you account for deliberately.
 
-Section 9.5 — Market context, not copycat pricing. Look at the market after you know your own numbers, not instead of them.
+One, direct and variable costs: products, consumables, laundry, disposables. These scale with each service. Track your actual use per service — not a rough guess.
 
-A competitor's price may not even cover their own actual costs — copying it risks copying a model that's already losing money. Know your own economics first, then look at your local market; context can legitimately inform expectations, positioning, and demand — it isn't irrelevant, just secondary. [slowly] Final price sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of those alone.
+Two, allocated overhead: rent, utilities, insurance, software, shared supplies. These exist whether you see a client or not. There's no single universally correct way to allocate them across your services — how you divide them is a business decision, not a course requirement.
 
-Section 9.6 — Design your menu. Make it easy to understand. A concise menu is generally easier to navigate — two or three clearly differentiated options can be useful, but the number should follow your actual business, not a universal rule.
+Three, practitioner time — broader than treatment time: setup, consultation, treatment, transitions, cleanup, checkout, documentation. A "sixty-minute service" can require meaningfully more than sixty minutes of your capacity. Account for your own full time — not someone else's ratio.
 
-Require meaningful differentiation: different menu options should change something real — time, bodywork, processing, enhancements, scope — never an artificial "premium" difference just to create an anchor. And remember: Core and Extended are A I M T's own teaching labels from Module 8, not required client-facing menu names. Your business can package its services however it wants.
+And four, desired profitability: how much margin you want. How much margin you want is not a course-prescribed number. It's a deliberate business decision you make and can explain — not a default you accept without thinking about it.
 
-Section 9.7 — Enhancements that earn their place. A genuine enhancement has a distinct purpose, a real service difference, a cost effect, and clear positioning — based on the established plan, the client's goals, your observation within scope, and the time you actually have.
+Section 9.3 — Margin versus markup. Two words. Two different prices.
 
-Five examples, with real client language for each: a scalp treatment serum — "based on what I'm observing today, I'd suggest adding a treatment serum, it takes about five minutes and supports what we're already doing." Extended massage time — "I noticed some tension through your shoulders today, I can extend your massage by fifteen minutes if you'd like." A deep conditioning upgrade — "your ends could use extra moisture, I can swap in a protein mask and add steam." A blow dry, which you decide in advance to include or offer as an add-on — either is valid, just be consistent. And an aromatherapy enhancement — "we can add a custom aromatherapy blend today, based on your preference."
+Markup is calculated from cost: a 30% markup on a $100 cost is $130. Margin is calculated from selling price: a 30% margin means 30% of the selling price is profit, which requires solving price equals cost divided by one minus margin — at a 30% margin, that same $100 cost produces a price of about $143, not $130.
 
-[firmly] Don't imply "what the scalp needs" — that phrasing crosses into diagnosis. Don't recommend an enhancement just because it's on the menu. And an enhancement recommendation must never override a genuine scalp-presentation safety reason not to add a product — if a presentation calls for restraint, restraint wins.
+Same $100 cost, two different results. A 30% markup on a $100 cost: $100 times 1.30 equals $130. A 30% margin on a $100 cost: $100 divided by 1 minus 0.30 is approximately $143.
 
-Here's your first checkpoint. Build or evaluate a head spa service menu for your business. For each service, name what it includes and its price, then explain the real costs and practitioner time behind the pricing, and why the differences between the options are clear to a client.
-
-Take your time, and answer above.
+[firmly] Key point: "30% markup" and "30% margin" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.

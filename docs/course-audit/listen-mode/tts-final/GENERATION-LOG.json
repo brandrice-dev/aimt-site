@@ -2464,6 +2464,1291 @@
       "checkpoint": "m5cp2",
       "fileBytes": 641311,
       "reconstructionNote": "Reconstructed 2026-09-17 during Module 5 log-bookkeeping repair, sourced directly from module-05/manifest.json's own embedded generation record for this batch (generationId, durationSecs, realCostCents all real, not re-derived). sessionId/flowId are not present in that manifest and could not be recovered elsewhere -- explicitly marked null rather than invented. No audio was touched."
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb3",
+      "chunkIds": [
+        "M9-03-fb3"
+      ],
+      "generationId": "geeZk7VX54aJRZAzuKuU",
+      "sessionId": "BySxk2srUgE8syge0bbp",
+      "flowId": "QdK6AwhP7LC1ZiVLOtJY",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 149,
+      "durationSecs": 9.84,
+      "credits": 149,
+      "costUsd": 0.024585,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 175286
+    },
+    {
+      "module": "09",
+      "batchId": "A1",
+      "chunkIds": [
+        "M9-01",
+        "M9-02"
+      ],
+      "generationId": "0NXvWHFEdRv1N1q1vvPX",
+      "sessionId": "8CsArdcgGPazRBM8Sk8s",
+      "flowId": "RljJ1RzM17s9QcjNNv9f",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2112,
+      "durationSecs": 164.08,
+      "credits": 2112,
+      "costUsd": 0.34848,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2643335
+    },
+    {
+      "module": "09",
+      "batchId": "A2",
+      "chunkIds": [
+        "M9-03"
+      ],
+      "generationId": "bdsPunXHxHXSiG1ZVRbH",
+      "sessionId": "YM3HyLO1l07E5NOfW6oT",
+      "flowId": "L0lPAjpt0Vrr0dBcWxzQ",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1637,
+      "durationSecs": 120,
+      "credits": 1637,
+      "costUsd": 0.270105,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 1937820
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb0",
+      "chunkIds": [
+        "M9-03-fb0"
+      ],
+      "generationId": "AU9DHCViY8L4wUPsxtjy",
+      "sessionId": "ES9uz4eLLFIiIquQJwqi",
+      "flowId": "urLIRwvsOa8U0dV1mZwm",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 191,
+      "durationSecs": 14.88,
+      "credits": 191,
+      "costUsd": 0.031515,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb0-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 255952
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb1",
+      "chunkIds": [
+        "M9-03-fb1"
+      ],
+      "generationId": "JRLDeaW0dATCEDZcxmU9",
+      "sessionId": "gyntFZlKKLsHrbiQWxbq",
+      "flowId": "sKPRaFRjH3rON06rzHBI",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 222,
+      "durationSecs": 15.04,
+      "credits": 222,
+      "costUsd": 0.03663,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 258460
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb2",
+      "chunkIds": [
+        "M9-03-fb2"
+      ],
+      "generationId": "ieIQV0pNGFSLh4x0pRFs",
+      "sessionId": "vqdJcJitpjnXPub0gRmU",
+      "flowId": "b1JXz1IwluzfogCwfw6N",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 223,
+      "durationSecs": 15.6,
+      "credits": 223,
+      "costUsd": 0.036795,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 267655
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb4",
+      "chunkIds": [
+        "M9-03-fb4"
+      ],
+      "generationId": "L9tupEsDL4R6vwZGHfn1",
+      "sessionId": "09ScYS65zan6uNNyx1xM",
+      "flowId": "FESWoO9yKj1nQz7gRYcx",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 190,
+      "durationSecs": 11.52,
+      "credits": 190,
+      "costUsd": 0.03135,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 202035
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb5",
+      "chunkIds": [
+        "M9-03-fb5"
+      ],
+      "generationId": "9ugaPWuV21OZBAOaVON5",
+      "sessionId": "Rm0WBuCBjaaRW4ulfuEk",
+      "flowId": "vbRCsUwQUqUUMvpk8PEk",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 163,
+      "durationSecs": 10.72,
+      "credits": 163,
+      "costUsd": 0.026895,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "interaction": "m9CwpDecision",
+      "fileBytes": 189497
+    },
+    {
+      "module": "09",
+      "batchId": "A3",
+      "chunkIds": [
+        "M9-04"
+      ],
+      "generationId": "0K1uY2vQtnkOkcJRBCrk",
+      "sessionId": "UiHToXDOy9tuQGpTKBeC",
+      "flowId": "Vv7GwhJjuks9Is9IMCvQ",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1397,
+      "durationSecs": 136.16,
+      "credits": 1397,
+      "costUsd": 0.230505,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 2196537
+    },
+    {
+      "module": "09",
+      "batchId": "A4",
+      "chunkIds": [
+        "M9-05",
+        "M9-06"
+      ],
+      "generationId": "79elcUulK4dVc8hUymNf",
+      "sessionId": "BxZArMaDvRekZH7CG7OB",
+      "flowId": "BYVc7QtLICIkvMk5it9C",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3037,
+      "durationSecs": 246.96,
+      "credits": 3037,
+      "costUsd": 0.501105,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A4-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 3969102
+    },
+    {
+      "module": "09",
+      "batchId": "A5",
+      "chunkIds": [
+        "M9-07"
+      ],
+      "generationId": "9EZVgdMpjgexoxLECewP",
+      "sessionId": "rISlmzlm7LfFSWTDsmR8",
+      "flowId": "yr6LgiJ0NqFTmvfDi513",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 317,
+      "durationSecs": 20.8,
+      "credits": 317,
+      "costUsd": 0.052305,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A5-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m10cp1",
+      "fileBytes": 350829
+    },
+    {
+      "module": "09",
+      "batchId": "B1",
+      "chunkIds": [
+        "M9-08"
+      ],
+      "generationId": "bd7FxfofJs6CN8kk9ZSu",
+      "sessionId": "RW6VPHRlq91kIYgKTxP8",
+      "flowId": "UdnmdiFkF6v19pwS1Mqe",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1156,
+      "durationSecs": 95.6,
+      "credits": 1156,
+      "costUsd": 0.19074,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m10cp1",
+      "fileBytes": 1547446
+    },
+    {
+      "module": "09",
+      "batchId": "B2",
+      "chunkIds": [
+        "M9-09"
+      ],
+      "generationId": "Ey6xJNq9nxwggYHNNcTl",
+      "sessionId": "jhNmdfwMLbZu0n9rF6ml",
+      "flowId": "qBcWglac2AaZo17jIg3Z",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 798,
+      "durationSecs": 66.16,
+      "credits": 798,
+      "costUsd": 0.13167,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B2-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": null,
+      "fileBytes": 1076406
+    },
+    {
+      "module": "09",
+      "batchId": "B3",
+      "chunkIds": [
+        "M9-10"
+      ],
+      "generationId": "98f4NhcimAWYuBTp70RE",
+      "sessionId": "MyuggqdNSqvBX7MjSow7",
+      "flowId": "7zynZlioT9ZjrHoPtZBC",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 299,
+      "durationSecs": 21.84,
+      "credits": 299,
+      "costUsd": 0.049335,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B3-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m10cp2",
+      "fileBytes": 367547
+    },
+    {
+      "module": "09",
+      "batchId": "C1",
+      "chunkIds": [
+        "M9-11"
+      ],
+      "generationId": "1oSSIpPOWO1IJGuo5NOM",
+      "sessionId": "EFr1eXeOQUifiGz5dmdd",
+      "flowId": "C0cPqRAeJfMnxLlKBxrZ",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 275,
+      "durationSecs": 23.2,
+      "credits": 275,
+      "costUsd": 0.045375,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-C1-RAW.mp3",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m10cp2",
+      "fileBytes": 389281
+    },
+    {
+      "module": "09",
+      "batchId": "A1",
+      "chunkIds": [
+        "M9-01",
+        "M9-02"
+      ],
+      "generationId": "hckcaAeCNckZddjJmxQ7",
+      "sessionId": "IEQC8rdTbhXqPy2Z4XYx",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3035,
+      "durationSecs": 239.804082,
+      "credits": 3035,
+      "costUsd": 0.500775,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A1-EDIT.wav",
+      "pass": "v4-strict-fidelity"
+    },
+    {
+      "module": "09",
+      "batchId": "A2",
+      "chunkIds": [
+        "M9-03"
+      ],
+      "generationId": "Hc3z3gkbb4OUYcu6FEiF",
+      "sessionId": "xmFWKVhKb1n4iLJsONSS",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1637,
+      "durationSecs": 119.719184,
+      "credits": 1637,
+      "costUsd": 0.270105,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb0",
+      "chunkIds": [
+        "M9-03-fb0"
+      ],
+      "generationId": "EvKSb1P83mKK84DHE4dw",
+      "sessionId": "A19EqQB6mm3CNKPpcYKz",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 191,
+      "durationSecs": 15.960816,
+      "credits": 191,
+      "costUsd": 0.031515,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb0-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb0-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb1",
+      "chunkIds": [
+        "M9-03-fb1"
+      ],
+      "generationId": "JgiRjYXohpkS7lAq6Dpt",
+      "sessionId": "vfp1Oc9gGzoIlokQDEro",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 222,
+      "durationSecs": 15.15102,
+      "credits": 222,
+      "costUsd": 0.03663,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb1-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb2",
+      "chunkIds": [
+        "M9-03-fb2"
+      ],
+      "generationId": "tfQYpamnhdXJIyNdHmx0",
+      "sessionId": "QwM7YQOkILFd0oIBEJit",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 223,
+      "durationSecs": 15.15102,
+      "credits": 223,
+      "costUsd": 0.036795,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb2-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb3",
+      "chunkIds": [
+        "M9-03-fb3"
+      ],
+      "generationId": "tigbZMMQhYhNronzd3Qw",
+      "sessionId": "P7sTjayUegFUwaoYx7qA",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 149,
+      "durationSecs": 9.247347,
+      "credits": 149,
+      "costUsd": 0.024585,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb3-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb4",
+      "chunkIds": [
+        "M9-03-fb4"
+      ],
+      "generationId": "TiuYDURTImaDqnJZUutC",
+      "sessionId": "Y7bcEZGEf2N5pBOJrFoA",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 190,
+      "durationSecs": 11.31102,
+      "credits": 190,
+      "costUsd": 0.03135,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb4-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A2fb5",
+      "chunkIds": [
+        "M9-03-fb5"
+      ],
+      "generationId": "5Ga2jpvV3tczNVEDBCap",
+      "sessionId": "Uo9ZsJVlJXnOhQnrQ4NR",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 163,
+      "durationSecs": 9.639184,
+      "credits": 163,
+      "costUsd": 0.026895,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb5-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A2fb5-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "module": "09",
+      "batchId": "A3",
+      "chunkIds": [
+        "M9-04"
+      ],
+      "generationId": "sMB6XUbR2WsAzyJJ6iKw",
+      "sessionId": "D2dvSgI3SmTqbYhtLOUL",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1894,
+      "durationSecs": 181.159184,
+      "credits": 1894,
+      "costUsd": 0.31251,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A3-EDIT.wav",
+      "pass": "v4-strict-fidelity"
+    },
+    {
+      "module": "09",
+      "batchId": "A4",
+      "chunkIds": [
+        "M9-05"
+      ],
+      "generationId": "jn2ZujfJZdOOnBXTcSym",
+      "sessionId": "hU7G3g2OHxCyNsATvCHQ",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1475,
+      "durationSecs": 116.506122,
+      "credits": 1475,
+      "costUsd": 0.243375,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A4-EDIT.wav",
+      "pass": "v4-strict-fidelity"
+    },
+    {
+      "module": "09",
+      "batchId": "A4b",
+      "chunkIds": [
+        "M9-06"
+      ],
+      "generationId": "N4SfyLeAspHUG7U3jjQu",
+      "sessionId": "Uex4E9OhaXyRU2IiIBa3",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 3109,
+      "durationSecs": 255.79102,
+      "credits": 3109,
+      "costUsd": 0.512985,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A4b-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A4b-EDIT.wav",
+      "pass": "v4-strict-fidelity"
+    },
+    {
+      "module": "09",
+      "batchId": "A5",
+      "chunkIds": [
+        "M9-07"
+      ],
+      "generationId": "h9hwNg0lx77JiL35rXzJ",
+      "sessionId": "reDsIscL2iZXClGhW67R",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 346,
+      "durationSecs": 24.842449,
+      "credits": 346,
+      "costUsd": 0.05709,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A5-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-A5-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "checkpoint": "m10cp1"
+    },
+    {
+      "module": "09",
+      "batchId": "B1",
+      "chunkIds": [
+        "M9-08"
+      ],
+      "generationId": "eImlVzrvWlu7y5LLvesI",
+      "sessionId": "7MvLu47cf7LE836svIF8",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1413,
+      "durationSecs": 114.834286,
+      "credits": 1413,
+      "costUsd": 0.233145,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B1-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "checkpoint": "m10cp1"
+    },
+    {
+      "module": "09",
+      "batchId": "B2",
+      "chunkIds": [
+        "M9-09"
+      ],
+      "generationId": "AYhFjdhmNCcNUgoQOiLX",
+      "sessionId": "6WEemAWXq4c76Qn8yAU3",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 881,
+      "durationSecs": 71.549388,
+      "credits": 881,
+      "costUsd": 0.145365,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B2-EDIT.wav",
+      "pass": "v4-strict-fidelity"
+    },
+    {
+      "module": "09",
+      "batchId": "B3",
+      "chunkIds": [
+        "M9-10"
+      ],
+      "generationId": "hgpXT51kEdk1zTYVYnIA",
+      "sessionId": "spSGmo6DF9OntM0WdWsF",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 335,
+      "durationSecs": 20.845714,
+      "credits": 335,
+      "costUsd": 0.055275,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-B3-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "checkpoint": "m10cp2"
+    },
+    {
+      "module": "09",
+      "batchId": "C1",
+      "chunkIds": [
+        "M9-11"
+      ],
+      "generationId": "XnvOFwy31mxoOdL4B6bk",
+      "sessionId": "2YSSct30qisgRRnJiyZf",
+      "flowId": "QnvhyfYtydIJhXlbj6xS",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 275,
+      "durationSecs": 19.565714,
+      "credits": 275,
+      "costUsd": 0.045375,
+      "rawFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-C1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/09-Module-9/M9-BATCH-C1-EDIT.wav",
+      "pass": "v4-strict-fidelity",
+      "checkpoint": "m10cp2"
+    },
+    {
+      "module": "10",
+      "batchId": "A1",
+      "chunkIds": [
+        "M10-01",
+        "M10-02"
+      ],
+      "generationId": "NKG1r6bUD17SdB5PjyY3",
+      "sessionId": "ZvUpYO89D1EIeHnITeeU",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2952,
+      "durationSecs": 240.4,
+      "credits": 2951,
+      "costUsd": 0.486915,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A1-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A2",
+      "chunkIds": [
+        "M10-03"
+      ],
+      "generationId": "ZmAJnRyJf8VmsCULPiJN",
+      "sessionId": "zMG8yCznDeMMsyFDEBgE",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2223,
+      "durationSecs": 183.44,
+      "credits": 2222,
+      "costUsd": 0.36663,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A2-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A3",
+      "chunkIds": [
+        "M10-04"
+      ],
+      "generationId": "YyNdAL6uT5KvHzaBwCrg",
+      "sessionId": "gDYJ3OE1XpKqei6c1S8G",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1482,
+      "durationSecs": 136.24,
+      "credits": 1481,
+      "costUsd": 0.244365,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A3-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4",
+      "chunkIds": [
+        "M10-05"
+      ],
+      "generationId": "ZPndF254jbrDvuZVUmIz",
+      "sessionId": "URnsUnDlJ94XzutOXdB8",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 903,
+      "durationSecs": 71.68,
+      "credits": 902,
+      "costUsd": 0.14883,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4fb0",
+      "chunkIds": [
+        "M10-05-fb0"
+      ],
+      "generationId": "Q5bwFn2iMqHS9y6gjLuO",
+      "sessionId": "kG97EAvEUGd1ORGMlyxU",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 254,
+      "durationSecs": 17.6,
+      "credits": 253,
+      "costUsd": 0.041745,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb0-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb0-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4fb1",
+      "chunkIds": [
+        "M10-05-fb1"
+      ],
+      "generationId": "diavfZONnGShjiUKt206",
+      "sessionId": "TPoxplXRZqdOxbrYBvFL",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 165,
+      "durationSecs": 11.52,
+      "credits": 164,
+      "costUsd": 0.02706,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb1-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4fb2",
+      "chunkIds": [
+        "M10-05-fb2"
+      ],
+      "generationId": "HAl5D5o5BX8leOOQqJq3",
+      "sessionId": "ZsuuJMqWbRP0QCtULLQR",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 165,
+      "durationSecs": 10.48,
+      "credits": 164,
+      "costUsd": 0.02706,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb2-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4fb3",
+      "chunkIds": [
+        "M10-05-fb3"
+      ],
+      "generationId": "XDUdZHj69GPj5VKIYpsR",
+      "sessionId": "oMiHtvS6RDTQl5LFpAGX",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 147,
+      "durationSecs": 9.68,
+      "credits": 146,
+      "costUsd": 0.02409,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb3-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "A4fb4",
+      "chunkIds": [
+        "M10-05-fb4"
+      ],
+      "generationId": "9TV7zFiFJDK1J9HWTO82",
+      "sessionId": "l3xIEy5biFmmBFMrDJO7",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 173,
+      "durationSecs": 10.8,
+      "credits": 172,
+      "costUsd": 0.02838,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A4fb4-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "B1",
+      "chunkIds": [
+        "M10-06"
+      ],
+      "generationId": "rLbkocgNZoiuS4gaarnM",
+      "sessionId": "iVGFVIJ60qxtQ42N3fCR",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1945,
+      "durationSecs": 168.64,
+      "credits": 1944,
+      "costUsd": 0.32076,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B1-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "B2",
+      "chunkIds": [
+        "M10-07"
+      ],
+      "generationId": "tzsm2LA8EJPBkBCeNJEj",
+      "sessionId": "bOLFwwJjqp8ZZ5Oq69dT",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1755,
+      "durationSecs": 133.04,
+      "credits": 1754,
+      "costUsd": 0.28941,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B2-EDIT.wav",
+      "pass": "v2-strict-fidelity"
+    },
+    {
+      "module": "10",
+      "batchId": "B3",
+      "chunkIds": [
+        "M10-08"
+      ],
+      "generationId": "LLdHFXpvucI3goYL3FUr",
+      "sessionId": "ljbg4G9W3RnzpPYfIj1r",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 342,
+      "durationSecs": 27.44,
+      "credits": 341,
+      "costUsd": 0.056265,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B3-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m9cp1"
+    },
+    {
+      "module": "10",
+      "batchId": "B4",
+      "chunkIds": [
+        "M10-09"
+      ],
+      "generationId": "ETWpS94kMHWTmgExM3cN",
+      "sessionId": "KZPx74uAgMvSWJIKpdHk",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 30,
+      "durationSecs": 2.4,
+      "credits": 29,
+      "costUsd": 0.004785,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B4-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m9cp1"
+    },
+    {
+      "module": "10",
+      "batchId": "B5",
+      "chunkIds": [
+        "M10-10"
+      ],
+      "generationId": "OmivPTynV5l3OAv3Tb4b",
+      "sessionId": "MVVHzv0wyW87BISo0qt3",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 319,
+      "durationSecs": 22.24,
+      "credits": 318,
+      "costUsd": 0.05247,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B5-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-B5-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m9cp2"
+    },
+    {
+      "module": "10",
+      "batchId": "C1",
+      "chunkIds": [
+        "M10-11"
+      ],
+      "generationId": "1ysLRHzwLdM8IWO4jWzV",
+      "sessionId": "nJ6SJ2KnrJNiJ5fqVtob",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 365,
+      "durationSecs": 29.04,
+      "credits": 364,
+      "costUsd": 0.06006,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-C1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-C1-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m9cp2"
+    },
+    {
+      "module": "10",
+      "batchId": "A1",
+      "chunkIds": [
+        "M10-01",
+        "M10-02"
+      ],
+      "generationId": "xzGcAz63poVCpt1bNum6",
+      "sessionId": "FQgihO8sGNnvj9CqAu9j",
+      "flowId": "Bq0eJRIXil5pBJF4nXnq",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 2958,
+      "durationSecs": 244,
+      "credits": 2957,
+      "costUsd": 0.487905,
+      "rawFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/10-Module-10/M10-BATCH-A1-EDIT.wav",
+      "pass": "v2-strict-fidelity-aimt-pronunciation-fix",
+      "note": "regenerated: AIMT normalized to comma-separated A, I, M, T after owner reported single-spaced A I M T rendering as Am-tee; supersedes prior A1 entry (generationId NKG1r6bUD17SdB5PjyY3), archived at AIMT-Listen-Mode-Final/10-Module-10/archive-mispronounced-aimt/"
+    },
+    {
+      "module": "11",
+      "batchId": "A1",
+      "chunkIds": [
+        "M11-01"
+      ],
+      "generationId": "cPyed196qCzVJHcE9vm9",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "xtBSeCp78F6SNd8WCGCn",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 815,
+      "durationSecs": 60.24,
+      "credits": 815,
+      "costUsd": 0.134475,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A1-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 981947
+    },
+    {
+      "module": "11",
+      "batchId": "A2",
+      "chunkIds": [
+        "M11-02"
+      ],
+      "generationId": "5DdArQtokYFD2nmkvDJn",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "dMUvaiZ6mR0edx5lU9Fo",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1389,
+      "durationSecs": 131.92,
+      "credits": 1389,
+      "costUsd": 0.229185,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A2-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 2128827
+    },
+    {
+      "module": "11",
+      "batchId": "A3",
+      "chunkIds": [
+        "M11-03"
+      ],
+      "generationId": "AnGkq1s90wXh7kjkSRiz",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "Y0U9sZOrbLfHRx4tqPAh",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1888,
+      "durationSecs": 155.92,
+      "credits": 1888,
+      "costUsd": 0.31152,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A3-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 2512514
+    },
+    {
+      "module": "11",
+      "batchId": "A4",
+      "chunkIds": [
+        "M11-04"
+      ],
+      "generationId": "K0Io9G43ZrWDsYkSe7KJ",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "aHorYEKNfDWASU43DeoM",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 999,
+      "durationSecs": 93.2,
+      "credits": 999,
+      "costUsd": 0.164835,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A4-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 1508994
+    },
+    {
+      "module": "11",
+      "batchId": "A5",
+      "chunkIds": [
+        "M11-05"
+      ],
+      "generationId": "cRHnnQ2LNRSZWN4kYTC3",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "hCcCVn1ZZmaeGNYHLqwX",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1049,
+      "durationSecs": 80.16,
+      "credits": 1049,
+      "costUsd": 0.173085,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A5-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A5-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 1300432
+    },
+    {
+      "module": "11",
+      "batchId": "A6",
+      "chunkIds": [
+        "M11-06"
+      ],
+      "generationId": "uVNkjSYJTovbTu0QdheP",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "Zfqxq14Ol4xK2zEL58xD",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1337,
+      "durationSecs": 111.68,
+      "credits": 1337,
+      "costUsd": 0.220605,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A6-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A6-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 1804909
+    },
+    {
+      "module": "11",
+      "batchId": "B1",
+      "chunkIds": [
+        "M11-07"
+      ],
+      "generationId": "39tYggjppKmhZjasdsK6",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "AWhjNNl2HlxdNjGDCOxR",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 304,
+      "durationSecs": 22.16,
+      "credits": 304,
+      "costUsd": 0.05016,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B1-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m11cp1",
+      "fileBytes": 372563
+    },
+    {
+      "module": "11",
+      "batchId": "B2",
+      "chunkIds": [
+        "M11-08"
+      ],
+      "generationId": "LfI8Ch2x5vYvsmjYNzXm",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "jfOTNFrjked4bxI3X6Bl",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 751,
+      "durationSecs": 64.64,
+      "credits": 751,
+      "costUsd": 0.123915,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B2-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m11cp1",
+      "fileBytes": 1052164
+    },
+    {
+      "module": "11",
+      "batchId": "B3",
+      "chunkIds": [
+        "M11-09"
+      ],
+      "generationId": "zughN5o9w6VfM8ms1lAU",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "09KbzoeA8OZrxju8cBho",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 708,
+      "durationSecs": 66.08,
+      "credits": 708,
+      "costUsd": 0.11682,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B3-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 1075152
+    },
+    {
+      "module": "11",
+      "batchId": "B4",
+      "chunkIds": [
+        "M11-10"
+      ],
+      "generationId": "WoMAL3MiGfQ1eqMe5MHB",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "VPDyAc2934GTWQRlVYD0",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1099,
+      "durationSecs": 102.88,
+      "credits": 1099,
+      "costUsd": 0.181335,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B4-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "fileBytes": 1664057
+    },
+    {
+      "module": "11",
+      "batchId": "B5",
+      "chunkIds": [
+        "M11-11"
+      ],
+      "generationId": "IpELiOisvbTMH0tTgSfc",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "j4JJGswZr15hFj4c92Nb",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 338,
+      "durationSecs": 27.12,
+      "credits": 338,
+      "costUsd": 0.05577,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B5-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B5-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m11cp2",
+      "fileBytes": 451975
+    },
+    {
+      "module": "11",
+      "batchId": "C1",
+      "chunkIds": [
+        "M11-12"
+      ],
+      "generationId": "hKKmCdC7Pnr2TAmweuU9",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "GcbXYwf9ahLeXChKxj98",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 319,
+      "durationSecs": 25.84,
+      "credits": 319,
+      "costUsd": 0.052635,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-C1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-C1-EDIT.wav",
+      "pass": "v2-strict-fidelity",
+      "checkpoint": "m11cp2",
+      "fileBytes": 431495
+    },
+    {
+      "module": "11",
+      "batchId": "A2",
+      "chunkIds": [
+        "M11-02"
+      ],
+      "generationId": "oGLfDoyhRE8iEFjIQ7aj",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "gRxJI1jAuZfUYwnJBgKN",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1377,
+      "durationSecs": 114,
+      "credits": 1377,
+      "costUsd": 0.227205,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A2-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A2-EDIT.wav",
+      "pass": "v2-strict-fidelity-narrator-person-fix",
+      "note": "regenerated: M11-02 corrected from third-person page-copy narration (\"...through Cadence...Cadence is an AI learning-support tool...\") to first-person narrator voice (\"...through me...I'm an AI learning-support tool...\") per owner correction — Cadence, as Listen Mode narrator, must never refer to herself in third person; supersedes prior A2 entry (generationId 5DdArQtokYFD2nmkvDJn), archived at AIMT-Listen-Mode-Final/11-Module-11/archive-superseded-narrator-fix/",
+      "fileBytes": 1842107
+    },
+    {
+      "module": "12",
+      "batchId": "A1",
+      "chunkIds": [
+        "M12-01"
+      ],
+      "generationId": "UWvDWqCKcCAfw2avvr8A",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "6ymMoLtrIOdCRLLa7wMk",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 4095,
+      "durationSecs": 304.88,
+      "credits": 4095,
+      "costUsd": 0.675675,
+      "rawFile": "AIMT-Listen-Mode-Final/12-Module-12/M12-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/12-Module-12/M12-BATCH-A1-EDIT.wav",
+      "pass": "v1-verified-corrected",
+      "note": "regenerated: AIMT normalized from course-wide single-spaced form (A I M T, the same form Module 10 found rendering as Am-tee on this exact voice/model) to comma-separated A, I, M, T; also added the module title/eyebrow opening line and the checkpoint-history lead sentence, both present in live COPY.stateA but missing from the original v1 take. Cadence narrator-perspective (first person) and all other content were already correct in v1 and are unchanged. Supersedes prior A1 entry (generationId kOVkRngrRo0FdxERQur5), archived at AIMT-Listen-Mode-Final/12-Module-12/archive-superseded-aimt-pronunciation/",
+      "fileBytes": 4896135
+    },
+    {
+      "module": "11",
+      "batchId": "A3",
+      "chunkIds": [
+        "M11-03"
+      ],
+      "generationId": "gB9MqHbBwbgCiGZLmyl0",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "yagz2lKH8FobkUQXIVpz",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1871,
+      "durationSecs": 160.64,
+      "credits": 1871,
+      "costUsd": 0.308715,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A3-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-A3-EDIT.wav",
+      "pass": "v2-strict-fidelity-brief-pronunciation-fix",
+      "note": "regenerated: B.R.I.E.F. framework NAME normalized from comma-spelled letters (B, R, I, E, F) to the natural spoken word brief (Give AI a better brief / Build your brief); the individual-letter teaching sequence (B, Background... R, Request...) is unchanged. Supersedes prior A3 entry (generationId AnGkq1s90wXh7kjkSRiz), archived at AIMT-Listen-Mode-Final/11-Module-11/archive-superseded-pronunciation-fix/",
+      "fileBytes": 2588164
+    },
+    {
+      "module": "11",
+      "batchId": "B4",
+      "chunkIds": [
+        "M11-10"
+      ],
+      "generationId": "QT3zz1cbMFvB8mRvU6PK",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "0tOy8lktHinunTUhGjHl",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 1090,
+      "durationSecs": 96.56,
+      "credits": 1090,
+      "costUsd": 0.17985,
+      "rawFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B4-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/11-Module-11/M11-BATCH-B4-EDIT.wav",
+      "pass": "v2-strict-fidelity-brief-pronunciation-fix",
+      "note": "regenerated: Toolkit description B.R.I.E.F. framework NAME normalized to the spoken word brief (brief prompt framework). Supersedes prior B4 entry (generationId WoMAL3MiGfQ1eqMe5MHB), archived at AIMT-Listen-Mode-Final/11-Module-11/archive-superseded-pronunciation-fix/",
+      "fileBytes": 1562911
+    },
+    {
+      "module": "12",
+      "batchId": "A1",
+      "chunkIds": [
+        "M12-01"
+      ],
+      "generationId": "E9LOYKYQeeFflmypiBZy",
+      "flowId": "XjRXM05qVuKcfXcfFCbr",
+      "sessionId": "r0IzByrSNaXiMh1fd4U1",
+      "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+      "modelId": "eleven_v3",
+      "chars": 4083,
+      "durationSecs": 298.24,
+      "credits": 4083,
+      "costUsd": 0.673695,
+      "rawFile": "AIMT-Listen-Mode-Final/12-Module-12/M12-BATCH-A1-RAW.mp3",
+      "editFile": "AIMT-Listen-Mode-Final/12-Module-12/M12-BATCH-A1-EDIT.wav",
+      "pass": "v1-verified-corrected-aimt-spacing",
+      "note": "regenerated: AIMT normalized from comma-separated (A, I, M, T) to single-spaced (A I M T), no punctuation -- owner correction: the comma form caused Jane/eleven_v3 to pause too heavily between letters and sound choppy. This reverses the earlier comma-separated choice and is now the permanent course-wide rule. Zero other narration text changed (verified byte-level: only 12 commas removed across 4 occurrences). Supersedes prior A1 entry (generationId UWvDWqCKcCAfw2avvr8A, comma-separated), archived at AIMT-Listen-Mode-Final/12-Module-12/archive-superseded-aimt-spacing/",
+      "fileBytes": 4789555
     }
   ]
 }

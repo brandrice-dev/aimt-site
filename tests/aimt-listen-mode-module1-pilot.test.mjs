@@ -58,7 +58,10 @@ const manifest = AIMTListenModeData.getManifest('headspa-mastery', 1);
   check('B. MANIFEST SHAPE', 'chunk IDs are m1-01..m1-14 in order', JSON.stringify(actualIds) === JSON.stringify(expectedIds), actualIds.join(','));
   const validation = AIMTListenModeData.validateManifest(manifest);
   check('B. MANIFEST SHAPE', 'manifest passes structural validation', validation.valid, validation.errors.join('; '));
-  check('B. MANIFEST SHAPE', 'getManifest for an unknown module returns null (safe no-op for other modules)', AIMTListenModeData.getManifest('headspa-mastery', 2) === null);
+  // Module 2 used to be the "not yet built" example here, but it now has a
+  // real, live manifest (course-wide Listen Mode rollout) -- use a module
+  // ID that is genuinely unsupported (no course goes to 99) instead.
+  check('B. MANIFEST SHAPE', 'getManifest for a genuinely unsupported module returns null (safe no-op)', AIMTListenModeData.getManifest('headspa-mastery', 99) === null);
   check('B. MANIFEST SHAPE', 'getManifest for an unknown course returns null', AIMTListenModeData.getManifest('nope', 1) === null);
 })();
 
@@ -748,7 +751,20 @@ function diffAgainstStart(relPath) {
     check('SCOPE CONTAINMENT', 'git status is readable', false, String(e));
     return;
   }
-  const changedPaths = statusLines.map((l) => l.replace(/^[AMD?!\s]+/, '').trim());
+  const changedPaths = statusLines.map((l) => {
+    // Porcelain v1 status codes are AMDR?! (this previously omitted 'R'
+    // for renames, leaving the whole "R  old -> new" line un-stripped).
+    // The status prefix is bounded to 1-2 characters (matching git's XY
+    // code), not an unbounded character class -- an unbounded class here
+    // also ate the leading "A" off paths like "AIMT-Listen-Mode-Final/..."
+    // whenever a status code (e.g. "??") was immediately followed by a
+    // path starting with a letter that's also a valid status code.
+    const stripped = l.replace(/^[AMDR?!]{1,2}\s+/, '').trim();
+    // For a rename/copy line, classify the destination (current) path --
+    // that's what's actually sitting in the working tree now.
+    const arrow = stripped.indexOf(' -> ');
+    return arrow === -1 ? stripped : stripped.slice(arrow + 4).trim();
+  });
   const allowlist = new Set([
     '.gitignore',
     'headspa-mastery.html',
@@ -934,6 +950,105 @@ function diffAgainstStart(relPath) {
   allowlist.add('docs/course-audit/modules/README.md');
   allowlist.add('docs/course-audit/implementation-log.md');
   allowlist.add('docs/course-audit/00-aimt-current-course-status.md');
+
+  // Course-wide Listen Mode rollout finalization (Modules 0, 2, 3, 8-12
+  // wired into the live player) + the Module 8 v2 strict-fidelity
+  // restoration authority pass -- explicitly owner-authorized, later,
+  // separate work. Module 1 itself (the frozen reference implementation
+  // this file's other checks pin) is untouched by any of it.
+  allowlist.add('.wrangler/'); // local dev-server (miniflare) state; not part of any task's scope, always present
+  allowlist.add('tests/module-08-course-source-freeze.test.mjs');
+  allowlist.add('tests/module-08-timer-checkpoint-order.test.mjs');
+  allowlist.add('tests/aimt-listen-mode-interaction-gate.test.mjs');
+  allowlist.add('scripts/aimt-listen-tts-preflight.mjs');
+  allowlist.add('scripts/aimt-listen-module08-v2-build.mjs');
+  allowlist.add('scripts/aimt-listen-module09-v2-build.mjs'); // superseded by v4, kept as local production history
+  allowlist.add('scripts/aimt-listen-module09-v3-build.mjs'); // superseded by v4, kept as local production history
+  allowlist.add('scripts/aimt-listen-module09-v4-build.mjs'); // current, final
+  allowlist.add('scripts/aimt-listen-module11-v2-build.mjs'); // current, only version
+  allowlist.add('docs/course-audit/listen-mode/tts-final/ALL-MODULES-MANIFEST.json');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/GENERATION-LOG.json');
+  ['08', '09', '10', '11', '12'].forEach((n) => {
+    allowlist.add('docs/course-audit/listen-mode/module-' + n + '-fidelity-coverage-audit.md');
+    allowlist.add('docs/course-audit/listen-mode/tts-final/module-' + n + '/manifest.json');
+  });
+  allowlist.add('AIMT-Listen-Mode-Final/MASTER-CAPCUT-WORKLIST.md');
+  ['09', '10', '11', '12'].forEach((n) => {
+    allowlist.add('AIMT-Listen-Mode-Final/' + n + '-Module-' + Number(n) + '/README.md');
+  });
+  allowlist.add('AIMT-Listen-Mode-Final/08-Module-8/README.md');
+  // Historical/rejected material this same rollout produced along the way
+  // (superseded script/audit versions, rejected takes, and older TTS batch
+  // generations) -- explicitly out of ship scope, but still an expected,
+  // accounted-for byproduct of this authorized work, not an unrelated
+  // change. Directories git collapses to a single untracked line only need
+  // one representative allowlisted path (see the startsWith() handling
+  // below); the rest are listed individually where git enumerates them.
+  [
+    'docs/course-audit/listen-mode/archive-loose-v1/module-08-listen-script-v1-REJECTED.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-09-fidelity-coverage-audit-v2-REJECTED.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-09-fidelity-coverage-audit-v3.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-09-listen-script-v1.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-09-listen-script-v2-REJECTED.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-09-listen-script-v3.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-10-listen-script-v1-REJECTED.md',
+    'docs/course-audit/listen-mode/archive-loose-v1/module-11-listen-script-v1-REJECTED.md',
+    'AIMT-Listen-Mode-Final/09-Module-9/archive-loose-v1/', // collapsed dir
+    'docs/course-audit/listen-mode/tts-final/module-08/', // collapsed dir (all-new module)
+    'docs/course-audit/listen-mode/tts-final/module-09/archive-loose-v1/', // collapsed dir
+    'docs/course-audit/listen-mode/tts-final/module-09/archive-loose-v2-REJECTED/', // collapsed dir
+    'docs/course-audit/listen-mode/tts-final/module-09/archive-loose-v3/', // collapsed dir
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-A1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-A2.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-A3.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-B1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-B2.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/M10-BATCH-C1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-10/archive-loose-v1/manifest.json',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-A1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-A2.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-A3.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-B1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-B2.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/M11-BATCH-C1.txt',
+    'docs/course-audit/listen-mode/tts-final/module-11/archive-loose-v1/manifest-v1.json',
+  ].forEach((p) => allowlist.add(p));
+  // Current production TTS batches (modules 8-12) and their manifests.
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A1.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A3.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-B1.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-B2.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-12/M12-BATCH-A1.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb0.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb1.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb2.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb3.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb4.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A2fb5.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A4.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A4b.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-A5.txt');
+  allowlist.add('docs/course-audit/listen-mode/tts-final/module-09/M9-BATCH-B3.txt');
+  ['A1', 'A2', 'A3', 'A4', 'A4fb0', 'A4fb1', 'A4fb2', 'A4fb3', 'A4fb4', 'B1', 'B2', 'B3', 'B4', 'B5', 'C1'].forEach((b) => {
+    allowlist.add('docs/course-audit/listen-mode/tts-final/module-10/M10-BATCH-' + b + '.txt');
+  });
+  ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'B1', 'B2', 'B3', 'B4', 'B5', 'C1'].forEach((b) => {
+    allowlist.add('docs/course-audit/listen-mode/tts-final/module-11/M11-BATCH-' + b + '.txt');
+  });
+  // Current production audio (Modules 0, 2, 3, 8-12) -- one canonical mp3
+  // per chunk, plus the interaction-stop feedback variants for Modules 9/10.
+  const audioModuleChunkCounts = { '00': 15, '02': 12, '03': 11, '08': 18, '11': 12, '12': 1 };
+  Object.keys(audioModuleChunkCounts).forEach((mod) => {
+    for (let i = 1; i <= audioModuleChunkCounts[mod]; i++) {
+      allowlist.add('assets/audio/listen/headspa-mastery/module-' + mod + '/m' + Number(mod) + '-' + String(i).padStart(2, '0') + '.mp3');
+    }
+  });
+  for (let i = 1; i <= 11; i++) allowlist.add('assets/audio/listen/headspa-mastery/module-09/m9-' + String(i).padStart(2, '0') + '.mp3');
+  for (let i = 0; i <= 5; i++) allowlist.add('assets/audio/listen/headspa-mastery/module-09/m9-03-fb' + i + '.mp3');
+  for (let i = 1; i <= 11; i++) allowlist.add('assets/audio/listen/headspa-mastery/module-10/m10-' + String(i).padStart(2, '0') + '.mp3');
+  for (let i = 0; i <= 4; i++) allowlist.add('assets/audio/listen/headspa-mastery/module-10/m10-05-fb' + i + '.mp3');
+
   const allowlistArr = Array.from(allowlist);
   // git status reports a wholly-new, untracked directory as a single line
   // (e.g. "docs/course-audit/listen-mode/tts/") rather than expanding every
@@ -1853,7 +1968,7 @@ function runStudentPreviewInit(hostname, search) {
   })();
 
   // -- goToChunk cancels any stray checkpoint-wait poll on explicit navigation --
-  check('AF. STRAY POLL CANCELLED', 'goToChunk stops any pending checkpoint poll (and, since the section-gap pass, any pending section-transition-gap timer) before navigating (Start Over / Jump / Continue Listening can never be undermined by a late offerContinue() or delayed auto-advance firing)', /function goToChunk\(i, playOpts\) \{[\s\S]{0,900}stopPolling\(\);\s*\n\s*stopGapTimer\(\);\s*\n\s*awaitingCheckpointId = null;\s*\n\s*index = i;/.test(playerSrc));
+  check('AF. STRAY POLL CANCELLED', 'goToChunk stops any pending checkpoint poll (and, since the section-gap pass, any pending section-transition-gap timer, and, since the interaction-stop pass, any pending interaction wait/detour) before navigating (Start Over / Jump / Continue Listening can never be undermined by a late offerContinue() or delayed auto-advance firing)', /function goToChunk\(i, playOpts\) \{[\s\S]{0,900}stopPolling\(\);\s*\n\s*stopGapTimer\(\);\s*\n\s*awaitingCheckpointId = null;\s*\n\s*awaitingInteraction = null;\s*\n\s*pendingInteractionResumeIndex = null;\s*\n\s*index = i;/.test(playerSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

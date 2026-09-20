@@ -1,118 +1,220 @@
 {
   "module": "11",
+  "version": "v2-strict-fidelity",
   "batches": [
     {
       "batchId": "A1",
       "file": "M11-BATCH-A1.txt",
       "chunkIds": [
-        "M11-01",
-        "M11-02"
+        "M11-01"
       ],
-      "normalizedChars": 2073,
-      "firstSpokenLine": "Welcome to Module 11. AI is already becoming part of modern practice — from business and communication to research, imaging, and the questio",
-      "lastSpokenLine": "ot automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool.",
+      "normalizedChars": 815,
+      "firstSpokenLine": "Welcome to Module 11 — AI, or Modern Practice Tools. Human-led. AI-assisted.",
+      "lastSpokenLine": "[warmly] Pay attention to this: AI can inform your judgment. It can never replace it — the final call is always yours.",
       "checkpointRelationship": null,
+      "gateType": "normal",
       "overCeiling": false
     },
     {
       "batchId": "A2",
       "file": "M11-BATCH-A2.txt",
       "chunkIds": [
-        "M11-03"
+        "M11-02"
       ],
-      "normalizedChars": 1506,
-      "firstSpokenLine": "Section 11.2 — Better input. Give AI a better B-R-I-E-F.",
-      "lastSpokenLine": " that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.",
+      "normalizedChars": 1377,
+      "firstSpokenLine": "You've already experienced A, I, M, T's philosophy in action through me. This course was built by human practitioners and professionals; I'm",
+      "lastSpokenLine": "ot automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner — never the tool.",
       "checkpointRelationship": null,
+      "gateType": "normal",
       "overCeiling": false
     },
     {
       "batchId": "A3",
       "file": "M11-BATCH-A3.txt",
       "chunkIds": [
+        "M11-03"
+      ],
+      "normalizedChars": 1871,
+      "firstSpokenLine": "Section 11.2 — Better input. Give AI a better brief.",
+      "lastSpokenLine": " that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.",
+      "checkpointRelationship": null,
+      "gateType": "normal",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M11-BATCH-A4.txt",
+      "chunkIds": [
         "M11-04"
       ],
-      "normalizedChars": 2051,
-      "firstSpokenLine": "Section 11.3 — Human authority. Decide how much authority to give the tool. The question is always: what are you asking the tool to do, and ",
+      "normalizedChars": 999,
+      "firstSpokenLine": "Section 11.3 — Human authority. Decide How Much Authority to Give the Tool.",
+      "lastSpokenLine": "[firmly] Use AI for leverage. Keep human authority where it matters.",
+      "checkpointRelationship": null,
+      "gateType": "normal",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A5",
+      "file": "M11-BATCH-A5.txt",
+      "chunkIds": [
+        "M11-05"
+      ],
+      "normalizedChars": 1049,
+      "firstSpokenLine": "Section 11.4 — Scalp and hair analysis. A Confidence Score Is Information — Not a Verdict.",
       "lastSpokenLine": "gh literacy that a polished percentage never reads as universal truth. General conversational AI should not become your scalp diagnostician.",
       "checkpointRelationship": null,
+      "gateType": "normal",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A6",
+      "file": "M11-BATCH-A6.txt",
+      "chunkIds": [
+        "M11-06"
+      ],
+      "normalizedChars": 1337,
+      "firstSpokenLine": "Section 11.5 — Client-supplied AI. When the Client Brings an AI Answer.",
+      "lastSpokenLine": "[slowly] \"The goal is not to defeat the AI answer. It is to return the conversation to responsible human judgment.\"",
+      "checkpointRelationship": null,
+      "gateType": "normal",
       "overCeiling": false
     },
     {
       "batchId": "B1",
       "file": "M11-BATCH-B1.txt",
       "chunkIds": [
-        "M11-05"
+        "M11-07"
       ],
-      "normalizedChars": 1580,
-      "firstSpokenLine": "Section 11.5 — Client-supplied AI. When the client brings an AI answer.",
-      "lastSpokenLine": "Take your time, and answer above.",
+      "normalizedChars": 304,
+      "firstSpokenLine": "Here's your first checkpoint — responding to a client's AI result. A client tells you, \"I asked ChatGPT about my scalp and it says I have da",
+      "lastSpokenLine": "Take your time, and answer below.",
       "checkpointRelationship": "m11cp1",
+      "gateType": "checkpoint-stop",
       "overCeiling": false
     },
     {
       "batchId": "B2",
       "file": "M11-BATCH-B2.txt",
       "chunkIds": [
-        "M11-06"
+        "M11-08"
       ],
-      "normalizedChars": 2834,
-      "firstSpokenLine": "Section 11.6 — Privacy and client data. Client information, images, and AI.",
-      "lastSpokenLine": "Take your time, and answer above.",
-      "checkpointRelationship": "m11cp1,m11cp2",
+      "normalizedChars": 751,
+      "firstSpokenLine": "Nice work — let's keep going.",
+      "lastSpokenLine": "sk needs — not everything you know. Uploading client scalp imagery into a general-purpose AI tool should not be treated as a casual default.",
+      "checkpointRelationship": "m11cp1",
+      "gateType": "post-pass",
+      "resumeAfterPass": true,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B3",
+      "file": "M11-BATCH-B3.txt",
+      "chunkIds": [
+        "M11-09"
+      ],
+      "normalizedChars": 708,
+      "firstSpokenLine": "Section 11.7 — Practice leverage. Where AI Can Strengthen Your Practice.",
+      "lastSpokenLine": "And Administrative Leverage: reduce repetitive work where useful — don't automate human interaction just because you can.",
+      "checkpointRelationship": null,
+      "gateType": "normal",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B4",
+      "file": "M11-BATCH-B4.txt",
+      "chunkIds": [
+        "M11-10"
+      ],
+      "normalizedChars": 1090,
+      "firstSpokenLine": "Section 11.8 — Human-led practice. Stay Human Where Human Matters.",
+      "lastSpokenLine": "n AI-use and verification matrix, the client-brings-AI response framework, privacy and data checks, and ready-to-customize practice prompts.",
+      "checkpointRelationship": null,
+      "gateType": "normal",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B5",
+      "file": "M11-BATCH-B5.txt",
+      "chunkIds": [
+        "M11-11"
+      ],
+      "normalizedChars": 338,
+      "firstSpokenLine": "Here's your final checkpoint — a real AI request, with real verification. Choose one real task in your practice where AI could help. Write t",
+      "lastSpokenLine": "Take your time, and answer below.",
+      "checkpointRelationship": "m11cp2",
+      "gateType": "checkpoint-stop",
       "overCeiling": false
     },
     {
       "batchId": "C1",
       "file": "M11-BATCH-C1.txt",
       "chunkIds": [
-        "M11-07"
+        "M11-12"
       ],
       "normalizedChars": 319,
       "firstSpokenLine": "Module complete. You now know how to use AI as leverage without handing over your judgment. That distinction is what separates a practitione",
       "lastSpokenLine": "Up next, Module 12: course completion and certification. Take a moment — you built something real.",
       "checkpointRelationship": "m11cp2",
+      "gateType": "post-pass",
+      "resumeAfterPass": true,
       "overCeiling": false
     }
   ],
   "chunkMeta": [
     {
       "chunkId": "M11-01",
-      "title": "Module Briefing (spoken)",
-      "normalizedChars": 687
+      "normalizedChars": 815
     },
     {
       "chunkId": "M11-02",
-      "title": "Intro + AIMT position + 11.1 Tool literacy",
-      "normalizedChars": 1384
+      "normalizedChars": 1377
     },
     {
       "chunkId": "M11-03",
-      "title": "11.2 Better input: the B.R.I.E.F. framework",
-      "normalizedChars": 1506
+      "normalizedChars": 1871
     },
     {
       "chunkId": "M11-04",
-      "title": "11.3 Human authority + 11.4 Scalp and hair analysis",
-      "normalizedChars": 2051
+      "normalizedChars": 999
     },
     {
       "chunkId": "M11-05",
-      "title": "11.5 Client-supplied AI + Checkpoint 1 (`m11cp1`)",
-      "normalizedChars": 1580,
-      "gateType": "checkpoint-stop-then-post-pass",
-      "checkpointId": "m11cp1"
+      "normalizedChars": 1049
     },
     {
       "chunkId": "M11-06",
-      "title": "Post-pass: 11.6 Privacy, 11.7 Practice leverage, 11.8 Human-led practice + Checkpoint 2 (`m11cp2`)",
-      "normalizedChars": 2834,
-      "gateType": "post-pass-then-checkpoint-stop",
-      "checkpointId": "m11cp1,m11cp2"
+      "normalizedChars": 1337
     },
     {
       "chunkId": "M11-07",
-      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 304,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m11cp1"
+    },
+    {
+      "chunkId": "M11-08",
+      "normalizedChars": 751,
+      "gateType": "post-pass",
+      "checkpointId": "m11cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M11-09",
+      "normalizedChars": 708
+    },
+    {
+      "chunkId": "M11-10",
+      "normalizedChars": 1090
+    },
+    {
+      "chunkId": "M11-11",
+      "normalizedChars": 338,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m11cp2"
+    },
+    {
+      "chunkId": "M11-12",
       "normalizedChars": 319,
       "gateType": "post-pass",
       "checkpointId": "m11cp2",

@@ -182,6 +182,269 @@ document and was not attempted as part of adding Sections F and G — this
 entry exists only so the defect is recorded once, centrally, rather than
 re-discovered independently per module.
 
+## I. Never reveal an answer or resolution before the student acts
+
+Locked rule, effective this pass (`course-audit-build`, launch-hygiene
+session, 2026-09-17). Applies to Module 9 forward and any future module
+rebuild. Module 8 is owner-approved, final for launch, and explicitly out
+of scope of any retrofit under this section — it is not touched by this
+rule. Modules 1/4/5/6/7 are owner-locked and likewise not touched by this
+rule; their existing narration already happens to satisfy the checkpoint
+half of it (see below) and is left exactly as shipped.
+
+**Principle:** Listen Mode must never let a student hear which answer is
+correct, what a graded checkpoint's result is, or which option "wins" an
+ungraded scenario before that student has actually acted on screen. This
+applies identically whether the interaction is graded (a required Cadence
+Check) or ungraded (a signature interaction / practice scenario /
+multiple-choice compare-and-decide block) — the spoiler risk is the same
+either way, only the underlying state the player watches differs.
+
+### I.1 Required Cadence Checks (graded checkpoints)
+
+This was already true of the shipped mechanism before this section existed
+to name it; this subsection formalizes it as a locked, permanent rule
+rather than an incidental property of `gateType: 'checkpoint-stop'` /
+`'post-pass'`:
+
+1. The checkpoint becomes visible on screen (`visualTarget` scrolls it into
+   view) before Cadence narrates its prompt.
+2. Cadence reads the checkpoint prompt only — never the grading rubric,
+   never the result, never any answer-dependent branch.
+3. Playback halts the instant that narration ends (`checkpoint-stop`) and
+   waits — it does not auto-advance, and it does not poll or reveal
+   anything about a wrong attempt.
+4. The student answers using the existing on-screen checkpoint UI
+   (`submitCheckpoint()` and its grading pipeline in
+   `headspa-mastery.html`) — Listen Mode never grades, never writes
+   `APP_STATE`, and only ever reads whether a pass has been recorded
+   (`engine.isCheckpointPassed`).
+5. Nothing narrated reveals grading/result/feedback before a genuine pass
+   is recorded — a wrong attempt simply leaves the player paused,
+   continuing to wait, exactly as if nothing had happened yet.
+6. Only once a pass is detected does the player resume — via an explicit
+   "Continue Listening" affordance (`resumeAfterPass`), not a surprise
+   auto-play, into the `post-pass` chunk.
+
+Reference implementation: `assets/js/aimt-listen-mode-player.js`'s
+`isCheckpointPassed`, `isChunkPlayable`, `resolveAfterEnd`,
+`enterAwaitingCheckpoint`, `offerContinue`. Proven by
+`tests/aimt-listen-mode-module1-pilot.test.mjs`.
+
+Checkpoint closing language remains governed by Section F above (never
+"answer above") — unchanged by this section.
+
+### I.2 Ungraded interactive scenarios (signature interactions, practice
+    scenarios, multiple-choice compare-and-decide blocks)
+
+These are the sitewide `m5Decide`/`m8Protect`/`m9Cwp`/`m10RupSelect`-family
+single-select-with-per-option-feedback pattern: a block of `.bq-opt`
+option buttons (each carrying `aria-pressed` and a `data-choice` index) and
+a `.bq-feedback` region, entirely client-side, explicitly ungraded, and
+never written to `APP_STATE` or persisted. Before this section, Listen
+Mode had no gating mechanism for these at all — an interaction's narration
+was authored and generated as one continuous chunk that read the prompt,
+every option, AND every option's rationale back to back (naming which
+option "protects the flow"/"is the strongest response"/etc. before an
+audio-only student could have chosen anything). That is now a defect under
+this rule and must not be repeated in any Module 9-forward narration.
+
+**Required shape going forward, mirroring the checkpoint mechanism above:**
+
+1. The interaction becomes visible on screen before Cadence narrates it.
+2. Cadence reads the prompt and every option's label — and *only* the
+   label; never any option's rationale, verdict, or "this is the response
+   that protects the flow"-style tell. This is one narration chunk,
+   `gateType: 'interaction-stop'`.
+3. Playback halts the instant that chunk ends and polls the interaction's
+   own DOM state (read-only — `interactionId` + `interactionOptionsSelector`,
+   scoped the same duplicate-id-safe way `visualTarget` is) for a selected
+   option, the same way a checkpoint-stop chunk polls course state for a
+   pass. Nothing about which option is "correct" is narrated during this
+   wait.
+4. Only once the student selects an option (any option — this is
+   ungraded, so there is no "wrong attempt stays paused" branch the way a
+   checkpoint has; a selection is itself the resolution) does the player
+   play that *one* option's own dedicated feedback clip
+   (`interactionFeedback[n]`, matched by `optionIndex`) — never any other
+   option's feedback, and never the narration that would have played had a
+   different option been picked.
+5. If the interaction has multiple scenarios in sequence (e.g. three
+   compare-and-decide scenarios under one "Signature interaction"
+   heading), each scenario is its own `interaction-stop` chunk with its
+   own `interactionFeedback` set — the player naturally chains through
+   them via the same `afterIndex` resume mechanism, never collapsing them
+   into one narrated block the way pre-this-section scripts did.
+6. Once the selected option's feedback finishes, the player resumes the
+   main narration sequence exactly where it would have continued had the
+   interaction not existed.
+
+**Script-authoring implication for Module 9 forward:** an interaction's
+prompt/options chunk and its per-option feedback are separate TTS batches,
+never one combined batch — the batch/chunk map for any module's
+interactive scenario must show this split explicitly (see each module's
+own interaction/checkpoint timing map, produced before audio generation
+per Section G).
+
+Reference implementation: `assets/js/aimt-listen-mode-data.js`'s
+`interaction-stop` gate type, `interactionId`, `interactionOptionsSelector`,
+and `interactionFeedback` schema fields (with `validateManifest`/
+`isProductionReady` coverage — a module is never production-ready if any
+option's feedback branch isn't itself `APPROVED`, even if the prompt/
+options chunk is); `assets/js/aimt-listen-mode-player.js`'s
+`engine.resolveSelectedOption`, `resolveAfterEnd`'s `interaction-stop`
+branch, `enterAwaitingInteraction`, `playInteractionFeedback`. Proven by
+`tests/aimt-listen-mode-interaction-gate.test.mjs` against a synthetic
+fixture (deliberately not tied to any real module's manifest — no new
+audio was generated and no shipped/locked module was touched to build or
+prove this mechanism).
+
+## J. Narrator perspective — Cadence never refers to herself in third person
+
+Locked rule, effective this pass (`course-audit-build`, 2026-09-20).
+Applies to Module 11 forward and any future module rebuild. Codifies a
+principle that was already implicit and already correctly followed
+course-wide (Module 0/0-v2's "I'm Cadence" self-introductions, Module 4's
+"From Cadence:" quote attribution) but had never been written down as an
+explicit rule — the gap surfaced when Module 11's v2 rebuild initially
+preserved a page paragraph's third-person Cadence description verbatim
+("...through Cadence...Cadence is an AI learning-support tool...") on the
+mistaken theory that Reference Voice must never adapt grammatical person.
+The owner correction: it must, specifically for this one thing.
+
+**Principle:** Cadence is the Listen Mode narrator. When narration is
+Cadence describing herself — what she is, what she does, what she's
+built from — she speaks in first person, even where the live page's
+visible copy (written for a reading student, not voiced by Cadence)
+describes her in third person. This is a **narrator-perspective
+adaptation only** — it changes grammatical person, never factual
+substance. "Cadence is an AI learning-support tool built around that
+curriculum" becomes "I'm an AI learning-support tool built around that
+curriculum"; "through Cadence" becomes "through me." Everything else in
+the sentence is preserved exactly.
+
+**This is not blanket permission to rewrite every "Cadence" mention.**
+Distinguish two cases before touching any occurrence:
+
+- **Narrator self-reference (must adapt to first person):** the visible
+  text is describing Cadence herself — what she is, what she can do,
+  what built her — in a sentence a reading student would understand as
+  "this is what this AI tutor is." This is the case Section J corrects.
+- **Legitimate third-person reference (leave as-is):** the visible text
+  names a distinct product/feature by its proper name rather than
+  describing the narrator generically — e.g. "Listen with Cadence" vs.
+  "Ask Cadence" (two different named features being distinguished from
+  each other), "Practitioner Conversation with Cadence" (a named
+  assessment component), or "From Cadence:" (a quote-attribution label).
+  These stay third person because they are naming things, not Cadence
+  describing herself.
+
+**Do not blind-string-replace.** A pattern match alone cannot make this
+distinction — judgment is required for every match. Accordingly, the
+automated preflight check for this (see below) only **flags** matches
+for human/editorial review; it never auto-rewrites and never fails the
+build on its own.
+
+**Enforcement:** `scripts/aimt-listen-tts-preflight.mjs`'s
+`CADENCE_THIRD_PERSON` check scans every batch payload for
+`Cadence is`/`Cadence can`/`Cadence helps`/`through Cadence` (and similar
+constructions) and prints a non-blocking `NOTE` (not a `FAIL`) for each
+match, so a human reviews it against the two cases above before that
+batch is generated. Module 11's `M11-02` is the reference example this
+check exists to catch.
+
+## K. B.R.I.E.F. (and any similarly-spelled framework name) — spoken as the ordinary word, not letter-by-letter
+
+Locked rule, effective this pass (`course-audit-build`, 2026-09-20).
+Applies to Module 11 forward and any future module that names a
+framework whose letters spell a real word.
+
+**Principle:** when a framework's display name is written as a
+letter-acronym that also spells an ordinary English word — AIMT's
+Module 11 "B.R.I.E.F." (Background / Request / Instructions / Expected
+Output / Fact-check) spells "brief" — the framework's *name*, when
+spoken as a whole, is pronounced as that ordinary word: "brief," not "B,
+R, I, E, F" or any other letter-by-letter spelling. This is the mirror
+case of the AIMT display/TTS distinction (Section governing that
+pronunciation): AIMT display → spoken as separated letters (because
+"AIMT" is *not* an ordinary word and reads wrong as one); B.R.I.E.F.
+display → spoken as the ordinary word (because "B.R.I.E.F." *is* an
+ordinary word once spoken, and reads wrong as separated letters).
+**Visible course text/UI is never changed by this rule** — only the TTS
+payload.
+
+**This does not apply to the individual-letter teaching sequence.**
+When Cadence is explicitly teaching what each letter stands for ("B is
+for Background... R is for Request..."), those letters are spoken
+individually — that is a different narration purpose (defining each
+component) than naming the framework as a whole, and remains unchanged.
+Test: is this sentence *naming* the framework, or *defining one of its
+components*? Only the naming case takes the ordinary-word pronunciation.
+
+**Enforcement:** `scripts/aimt-listen-tts-preflight.mjs`'s
+`LETTER_SPELLED_WORD_NOTE` check flags any run of single letters
+separated only by punctuation/whitespace (e.g. "B, R, I, E, F",
+"B.R.I.E.F", "B-R-I-E-F") as a non-blocking `NOTE` for review. This
+pattern cannot match the legitimate teaching sequence, because real
+words (the component labels) sit between the letters there, not bare
+punctuation — so the check does not require judgment to avoid that
+false positive the way Section J's Cadence check does, but it still
+only flags rather than auto-rewrites, since a human should confirm the
+flagged acronym actually spells a real word.
+
+## L. AIMT pronunciation — single-spaced letters, no punctuation
+
+**Locked rule, effective this pass (`course-audit-build`, 2026-09-20).
+Supersedes every earlier AIMT-pronunciation choice in this document's
+history. Applies to all future Listen Mode production. Do not change
+this rule again unless the owner explicitly changes it.**
+
+**Rule:**
+
+| | |
+|---|---|
+| Visible course text | `AIMT` |
+| TTS payload | `A I M T` (single space between each letter, no other punctuation) |
+| Spoken intent | Recite the four letters — A, I, M, T — naturally, as an initialism, in normal connected speech. Never pronounce it as the word "AIMT." Never exaggerate pauses between letters. |
+
+**Invalid TTS forms (all rejected):** bare `AIMT`, hyphenated
+`A-I-M-T`, dotted `A.I.M.T`, and — as of this pass — **comma-separated
+`A, I, M, T`**.
+
+**History (why this took three passes to land):**
+1. The original course-wide convention was single-spaced `A I M T`. On
+   this exact voice (`Y3ZPRGOSIxbV4Rbb3WiA`, Jane) and model
+   (`eleven_v3`), the owner found this rendering as "Am-tee" —
+   `eleven_v3` collapses the first three letters, A-I-M, toward the real
+   word "aim," plus "T" (first found in Module 10, 2026-09-18).
+2. The fix at the time was comma-separated `A, I, M, T`, which the owner
+   confirmed by ear resolved to four distinct letters (rejecting a
+   `[slowly]`-tagged alternative as "sounds crazy"). This was applied to
+   Modules 10, 11, and (briefly) 12.
+3. On further listening (Module 12, 2026-09-20), the owner found the
+   comma-separated form caused Jane to pause too heavily between
+   letters and sound choppy — the opposite failure mode from "Am-tee."
+   The fix is single-spaced letters **with no punctuation of any kind**
+   between them — this reads as four distinct letters in natural
+   connected speech without either collapsing into "aim" or over-pausing
+   on comma boundaries. Confirmed correct and locked as of this pass.
+
+**Scope of the 2026-09-20 reversal:** applied to Module 12 only (the
+only module with an in-flight AIMT correction at the time). **Not**
+applied retroactively to Modules 10 or 11's already-shipped
+comma-separated audio — revisiting that already-shipped audio is a
+separate, not-yet-decided owner action and was not attempted here. Any
+future module built from this point forward uses this Section L rule
+(single-spaced, no punctuation) from the start.
+
+**Enforcement:** `scripts/aimt-listen-tts-preflight.mjs` already rejects
+bare `AIMT`, hyphenated `A-I-M-T`, and dotted `A.I.M.T`. It does not yet
+reject comma-separated `A, I, M, T` as a hard failure (that form is not
+"AIMT as a word," so the existing checks don't catch it) — a future
+preflight update could add this as a fourth rejected pattern now that
+Section L makes it invalid, but no such check exists yet as of this
+pass.
+
 ---
 
 ## How these interact with production (Section 11 architecture)

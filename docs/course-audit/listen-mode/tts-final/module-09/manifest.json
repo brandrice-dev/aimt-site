@@ -1,5 +1,6 @@
 {
   "module": "09",
+  "version": "v4-strict-fidelity",
   "batches": [
     {
       "batchId": "A1",
@@ -8,10 +9,11 @@
         "M9-01",
         "M9-02"
       ],
-      "normalizedChars": 2864,
-      "firstSpokenLine": "Welcome to Module 9. The treatment is done — what happens next, how you close the appointment and how you price what you do, is its own skil",
-      "lastSpokenLine": "mendations at once, or creating false urgency about availability. Look at all six and choose the one that actually preserves the experience.",
+      "normalizedChars": 3035,
+      "firstSpokenLine": "Welcome to Module 9 — Checkout, Client Closing and Pricing Strategy. Close the experience as intentionally as you opened it.",
+      "lastSpokenLine": "course doesn't teach a specific point-of-sale platform, and gratuity is never mandatory or a fixed percentage — both are business decisions.",
       "checkpointRelationship": null,
+      "interactionRelationship": null,
       "overCeiling": false
     },
     {
@@ -20,114 +22,290 @@
       "chunkIds": [
         "M9-03"
       ],
-      "normalizedChars": 1397,
-      "firstSpokenLine": "Section 9.2 — Know the real cost. Four inputs — not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal ",
-      "lastSpokenLine": "[firmly] Thirty percent markup and thirty percent margin do not produce the same selling price. Know which one you're using.",
+      "normalizedChars": 1637,
+      "firstSpokenLine": "Close without pressure — choose the response that keeps the experience intact.",
+      "lastSpokenLine": "Choose the response you think best preserves the experience.",
       "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb0",
+      "file": "M9-BATCH-A2fb0.txt",
+      "chunkIds": [
+        "M9-03-fb0"
+      ],
+      "normalizedChars": 191,
+      "firstSpokenLine": "This keeps the shape from 9.1: a moment to reorient, a concise truthful recap, an open door for questions, and an invitation to future optio",
+      "lastSpokenLine": ", a concise truthful recap, an open door for questions, and an invitation to future options without pressure — nothing here is being pushed.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb1",
+      "file": "M9-BATCH-A2fb1.txt",
+      "chunkIds": [
+        "M9-03-fb1"
+      ],
+      "normalizedChars": 222,
+      "firstSpokenLine": "This skips reorientation and jumps straight into booking before the client has had a moment to settle. Give the recap and the reorientation ",
+      "lastSpokenLine": " a moment to settle. Give the recap and the reorientation moment first — sales pressure, even friendly-sounding pressure, is still pressure.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb2",
+      "file": "M9-BATCH-A2fb2.txt",
+      "chunkIds": [
+        "M9-03-fb2"
+      ],
+      "normalizedChars": 223,
+      "firstSpokenLine": "This recites the entire service back step by step instead of a concise, genuine recap. A brief acknowledgment of what mattered is enough — n",
+      "lastSpokenLine": "ap. A brief acknowledgment of what mattered is enough — narrating everything can feel like a performance report, not a closing conversation.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb3",
+      "file": "M9-BATCH-A2fb3.txt",
+      "chunkIds": [
+        "M9-03-fb3"
+      ],
+      "normalizedChars": 149,
+      "firstSpokenLine": "\"Congested\" states a conclusion about the client's scalp rather than describing what was done. Recap what you did, not a diagnosis of what y",
+      "lastSpokenLine": "d\" states a conclusion about the client's scalp rather than describing what was done. Recap what you did, not a diagnosis of what you found.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb4",
+      "file": "M9-BATCH-A2fb4.txt",
+      "chunkIds": [
+        "M9-03-fb4"
+      ],
+      "normalizedChars": 190,
+      "firstSpokenLine": "Retail, home care, and rebooking are all offered in one breath. A recommendation should have a specific reason tied to the service you just ",
+      "lastSpokenLine": "n one breath. A recommendation should have a specific reason tied to the service you just delivered — and shouldn't be unloaded all at once.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2fb5",
+      "file": "M9-BATCH-A2fb5.txt",
+      "chunkIds": [
+        "M9-03-fb5"
+      ],
+      "normalizedChars": 163,
+      "firstSpokenLine": "Implying the client needs to decide immediately creates artificial urgency. Future options should be offered without pressure — the client c",
+      "lastSpokenLine": "ds to decide immediately creates artificial urgency. Future options should be offered without pressure — the client can always call to book.",
+      "checkpointRelationship": null,
+      "interactionRelationship": "m9CwpDecision",
       "overCeiling": false
     },
     {
       "batchId": "A3",
       "file": "M9-BATCH-A3.txt",
       "chunkIds": [
-        "M9-04",
-        "M9-05",
+        "M9-04"
+      ],
+      "normalizedChars": 1894,
+      "firstSpokenLine": "Section 9.2 — Know the real cost. Four inputs — not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal ",
+      "lastSpokenLine": "% markup\" and \"30% margin\" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.",
+      "checkpointRelationship": null,
+      "interactionRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M9-BATCH-A4.txt",
+      "chunkIds": [
+        "M9-05"
+      ],
+      "normalizedChars": 1475,
+      "firstSpokenLine": "Section 9.4 — Price your service. Cost base to target price.",
+      "lastSpokenLine": "sits at the intersection of cost structure, service design, capacity, market context, and business positioning — not any one of these alone.",
+      "checkpointRelationship": null,
+      "interactionRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4b",
+      "file": "M9-BATCH-A4b.txt",
+      "chunkIds": [
         "M9-06"
       ],
-      "normalizedChars": 3356,
-      "firstSpokenLine": "Section 9.4 — Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned — ente",
-      "lastSpokenLine": "Take your time, and answer above.",
+      "normalizedChars": 3109,
+      "firstSpokenLine": "Section 9.6 — Design your menu. Make it easy to understand. A concise menu is generally easier for a client to navigate. Two or three clearl",
+      "lastSpokenLine": "nt ideas, why they may earn a place on your menu, and how to position them clearly without turning the client experience into a sales pitch.",
+      "checkpointRelationship": null,
+      "interactionRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A5",
+      "file": "M9-BATCH-A5.txt",
+      "chunkIds": [
+        "M9-07"
+      ],
+      "normalizedChars": 346,
+      "firstSpokenLine": "Here's your first checkpoint — pricing and menu reasoning. Build or evaluate a head spa service menu for your business. For each service, na",
+      "lastSpokenLine": "Take your time, and answer below.",
       "checkpointRelationship": "m10cp1",
+      "interactionRelationship": null,
       "overCeiling": false
     },
     {
       "batchId": "B1",
       "file": "M9-BATCH-B1.txt",
       "chunkIds": [
-        "M9-07"
+        "M9-08"
       ],
-      "normalizedChars": 1125,
-      "firstSpokenLine": "Section 9.8 — When a client says the price felt high. One comment. Several possible causes.",
-      "lastSpokenLine": " communicate meaningful differences? Is this feedback recurring? [slowly] Don't assume the client is wrong. Don't assume the price is wrong.",
+      "normalizedChars": 1413,
+      "firstSpokenLine": "Nice work — let's keep going.",
+      "lastSpokenLine": "[slowly] Remember: don't assume the client is wrong. Don't assume the price is wrong.",
       "checkpointRelationship": "m10cp1",
+      "interactionRelationship": null,
       "overCeiling": false
     },
     {
       "batchId": "B2",
       "file": "M9-BATCH-B2.txt",
       "chunkIds": [
-        "M9-08"
+        "M9-09"
       ],
-      "normalizedChars": 1099,
+      "normalizedChars": 881,
       "firstSpokenLine": "Section 9.9 — Why pricing really goes wrong. Confidence is not a financial model.",
-      "lastSpokenLine": "Take your time, and answer above.",
+      "lastSpokenLine": "ore service.\" \"This is more expensive\" becomes \"this is our extended experience.\" These describe accurate framing — not engineered pressure.",
+      "checkpointRelationship": null,
+      "interactionRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "B3",
+      "file": "M9-BATCH-B3.txt",
+      "chunkIds": [
+        "M9-10"
+      ],
+      "normalizedChars": 335,
+      "firstSpokenLine": "Here's your final checkpoint — price feedback and client closing. At checkout, a client says, \"I loved the service, but the price felt high.",
+      "lastSpokenLine": "Take your time, and answer below.",
       "checkpointRelationship": "m10cp2",
+      "interactionRelationship": null,
       "overCeiling": false
     },
     {
       "batchId": "C1",
       "file": "M9-BATCH-C1.txt",
       "chunkIds": [
-        "M9-09"
+        "M9-11"
       ],
       "normalizedChars": 275,
       "firstSpokenLine": "Module complete. You can close a service the way you opened it, and price it from real numbers instead of pressure or guesswork.",
       "lastSpokenLine": "xt, Module 10: sanitation and reset systems — the work between every service that separates consistent professionals from inconsistent ones.",
       "checkpointRelationship": "m10cp2",
+      "interactionRelationship": null,
       "overCeiling": false
     }
   ],
   "chunkMeta": [
     {
       "chunkId": "M9-01",
-      "title": "Module Briefing (spoken)",
-      "normalizedChars": 728
+      "normalizedChars": 887
     },
     {
       "chunkId": "M9-02",
-      "title": "9.1 From treatment close to checkout + Close Without Pressure",
-      "normalizedChars": 2134
+      "normalizedChars": 2146
     },
     {
       "chunkId": "M9-03",
-      "title": "9.2 Know the real cost + 9.3 Margin vs. markup",
-      "normalizedChars": 1397
+      "normalizedChars": 1637,
+      "gateType": "interaction-stop",
+      "interactionId": "m9CwpDecision"
+    },
+    {
+      "chunkId": "M9-03-fb0",
+      "normalizedChars": 191,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 0
+    },
+    {
+      "chunkId": "M9-03-fb1",
+      "normalizedChars": 222,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 1
+    },
+    {
+      "chunkId": "M9-03-fb2",
+      "normalizedChars": 223,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 2
+    },
+    {
+      "chunkId": "M9-03-fb3",
+      "normalizedChars": 149,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 3
+    },
+    {
+      "chunkId": "M9-03-fb4",
+      "normalizedChars": 190,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 4
+    },
+    {
+      "chunkId": "M9-03-fb5",
+      "normalizedChars": 163,
+      "gateType": "interaction-feedback",
+      "interactionId": "m9CwpDecision",
+      "optionIndex": 5
     },
     {
       "chunkId": "M9-04",
-      "title": "9.4 Price your service + 9.5 Market context",
-      "normalizedChars": 1120
+      "normalizedChars": 1894
     },
     {
       "chunkId": "M9-05",
-      "title": "9.6 Design your menu + 9.7 Enhancements that earn their place",
-      "normalizedChars": 1915
+      "normalizedChars": 1475
     },
     {
       "chunkId": "M9-06",
-      "title": "Checkpoint 1 (`m10cp1`)",
-      "normalizedChars": 317,
+      "normalizedChars": 3109
+    },
+    {
+      "chunkId": "M9-07",
+      "normalizedChars": 346,
       "gateType": "checkpoint-stop",
       "checkpointId": "m10cp1"
     },
     {
-      "chunkId": "M9-07",
-      "title": "Post-pass: 9.8 When a client says the price felt high",
-      "normalizedChars": 1125,
+      "chunkId": "M9-08",
+      "normalizedChars": 1413,
       "gateType": "post-pass",
       "checkpointId": "m10cp1",
       "resumeAfterPass": true
     },
     {
-      "chunkId": "M9-08",
-      "title": "9.9 Why pricing really goes wrong + Checkpoint 2 (`m10cp2`)",
-      "normalizedChars": 1099,
-      "gateType": "checkpoint-stop-then-post-pass",
+      "chunkId": "M9-09",
+      "normalizedChars": 881
+    },
+    {
+      "chunkId": "M9-10",
+      "normalizedChars": 335,
+      "gateType": "checkpoint-stop",
       "checkpointId": "m10cp2"
     },
     {
-      "chunkId": "M9-09",
-      "title": "Post-pass continuation: completion + recap + handoff",
+      "chunkId": "M9-11",
       "normalizedChars": 275,
       "gateType": "post-pass",
       "checkpointId": "m10cp2",

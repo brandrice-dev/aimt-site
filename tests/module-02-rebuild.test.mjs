@@ -194,7 +194,27 @@ const howAimtWorksWrap = extractWrap(courseSrc, 'howAimtWorksView');
   check('E. INTERACTION', 'feedback text is concise (a single sentence, not a paragraph)', answerFnMatch && !/[.!?]\s+[A-Z][^.!?]*[.!?]\s+[A-Z]/.test(answerFnMatch[0].match(/fb\.textContent = ([\s\S]*?);/)[1]));
   check('E. INTERACTION', 'the interaction never touches APP_STATE, progress, or completion (ungraded, no progress write)', answerFnMatch && renderFnMatch && !/APP_STATE/.test(answerFnMatch[0] + renderFnMatch[0]) && !/\.save\(\)/.test(answerFnMatch[0] + renderFnMatch[0]));
   check('E. INTERACTION', 'the interaction is retryable (re-clicking always re-evaluates, no disabling of buttons; Next wraps back to item 1 for a full restart)', answerFnMatch && !/\.disabled\s*=\s*true/.test(answerFnMatch[0]));
-  check('E. INTERACTION', 'the reset hook (m2BdReset) is wired into STATIC_MODULES[2] so each visit starts at item 1', /2: \(\) => \{ const w = document\.getElementById\('module2Wrap'\); if \(w && wrap\) wrap\.innerHTML = w\.innerHTML; m2BdReset\(\); \}/.test(courseSrc));
+  // The reset hook used to be checked via an exact-string match on the
+  // whole STATIC_MODULES[2] loader body, anchored right after
+  // "m2BdReset();". That broke once the course-wide Listen Mode rollout
+  // (a separate, later, authorized task) appended an additive
+  // AIMTListenMode.mount() call to every module's loader, including this
+  // one. Isolate module 2's loader body specifically (between its own key
+  // and module 4's) and verify the real invariants directly instead of
+  // pinning the whole function's source text.
+  const staticModulesMatch = courseSrc.match(/const STATIC_MODULES = \{[\s\S]*?\n  \};/);
+  const staticModulesSrc = staticModulesMatch ? staticModulesMatch[0] : '';
+  const m2LoaderStart = staticModulesSrc.indexOf('2: () =>');
+  const m4LoaderStart = staticModulesSrc.indexOf('4: () =>');
+  const m2Loader = (m2LoaderStart !== -1 && m4LoaderStart !== -1 && m4LoaderStart > m2LoaderStart) ? staticModulesSrc.slice(m2LoaderStart, m4LoaderStart) : '';
+  check('E. INTERACTION', "Module 2's STATIC_MODULES loader was isolated for targeted checks (between its own key and module 4's)", m2Loader.length > 0);
+
+  const innerHTMLIdx = m2Loader.indexOf("wrap.innerHTML = w.innerHTML;");
+  const resetIdx = m2Loader.indexOf('m2BdReset();');
+  const mountIdx = m2Loader.search(/if \(window\.AIMTListenMode\) window\.AIMTListenMode\.mount\(\{[^}]*moduleId: 2,/);
+  check('E. INTERACTION', 'm2BdReset() is still called on every Module 2 visit (so each visit starts at item 1)', resetIdx !== -1);
+  check('E. INTERACTION', "Listen Mode mount for Module 2 is additive -- AIMTListenMode.mount() is called, guarded by a window.AIMTListenMode existence check, not substituted for the reset call", mountIdx !== -1);
+  check('E. INTERACTION', 'reset behavior was not reordered incorrectly: content is swapped into the DOM, THEN m2BdReset() re-renders into it (m2BdReset -> m2BdRender reads live #m2bdOptions markup, which only exists after the swap), and the mount call comes after both, not between them', innerHTMLIdx !== -1 && resetIdx !== -1 && mountIdx !== -1 && innerHTMLIdx < resetIdx && resetIdx < mountIdx);
   check('E. INTERACTION', 'the two option buttons carry aria-pressed for accessibility', (module2Wrap.match(/aria-pressed="false" onclick="m2BdAnswer/g) || []).length === 2);
   check('E. INTERACTION', 'the feedback region is aria-live for accessibility', module2Wrap.includes('id="m2bdFeedback" style="display:none;" aria-live="polite"'));
   check('E. INTERACTION', 'the old scent-script-builder UI entry point is gone from module2Wrap (evaluateScript() is retired, not deleted -- see its own comment)', !module2Wrap.includes('onclick="evaluateScript()"'));

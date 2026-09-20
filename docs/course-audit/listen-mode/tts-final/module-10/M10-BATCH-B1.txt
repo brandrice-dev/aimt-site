@@ -1,13 +1,21 @@
-Section 10.4 — Build the system before you're under pressure. Reduce decisions. Not standards.
+Section 10.4 — Build the System Before You're Under Pressure. Reduce decisions. Not standards.
 
 Reliability doesn't come from moving faster under pressure. It comes from a system that already removed the decisions pressure would otherwise force you to make badly.
 
-Picture this: you're running behind, one client just left, the next arrives early. A weak system looks like rushed cleaning, missing items, scattered tools — the next service starts unstable. A strong system looks like an automatic reset, no thinking required, everything already in place — the next service starts controlled. The difference is not discipline in the moment. It's the system you built before the moment.
+Here's what this looks like under pressure: you are running behind. One client just left. The next client arrives early.
 
-Consistency comes from: clear clean and used zones, known product label and contact-time instructions, equipment instructions accessible, appropriate clean backups on hand, protected clean linens and supplies, a room-specific reset order, and adequate turnover time built into the schedule.
+A weak system looks like this: rushed cleaning, missing items, scattered tools. Next service starts unstable.
+
+A strong system looks like this: automatic reset, no thinking required, everything already in place. Next service starts controlled.
+
+The difference is not discipline in the moment — it's the system you built before the moment.
+
+Consistency comes from: clear clean and used zones. Known product label and contact-time instructions. Equipment instructions accessible. Appropriate clean backups on hand. Protected clean linens and supplies. A room-specific reset order. And adequate turnover time built into the schedule.
 
 [slowly] Pressure test your system: can I reset without thinking? Does it hold up when I'm behind? Is everything I need already within reach? If not, the system isn't finished — the pressure just revealed it.
 
-Records can support consistency, maintenance history, traceability, and review when a concern occurs. Keep any records your jurisdiction requires, plus any additional logs your own business uses to verify its procedures — possible fields include date and time, product used, dilution where applicable, contact time, equipment maintenance performed, who performed the procedure, and any issues or deviations.
+Records can support consistency, maintenance history, traceability, and review when a concern occurs. Keep any records your jurisdiction requires, plus any additional logs your own business uses to verify its procedures.
 
-Use your current state or local requirements, and set up a recurring compliance review, not a once-a-year checkbox. Recheck whenever your regulations, equipment, disinfectants, services, or procedures change. An annual internal review is a reasonable business habit, not a guarantee of compliance on its own.
+Possible log fields: date and time. Product used. Dilution where applicable. Contact time. Equipment maintenance performed. Person performing the procedure. And issues or deviations.
+
+Use your current state or local requirements, and set up a recurring compliance review — not a once-a-year checkbox. Recheck whenever your regulations, equipment, disinfectants, services, or procedures change. An annual internal review is a reasonable business habit, not a guarantee of compliance on its own.

@@ -16,6 +16,10 @@
 //  3. Module 8 Listen Mode source (module-08-listen-script.md): Chapter
 //     9's narration paragraph reconciled to the real, expanded
 //     M8_CHAPTERS[8] close (was still narrating the pre-04faf79 version).
+//     Superseded again by the v2 strict-fidelity rebuild (OWNER-APPROVED /
+//     FINAL FOR LAUNCH — see that file's status line): the LISTEN SOURCE
+//     checks below now assert against the live M8_CHAPTERS/M8.questions
+//     content directly rather than a pinned older script version.
 //  4. Cadence shell header-collision fix (assets/js/cadence-shell.js):
 //     the shell's top-clearance offset now accounts for the lesson page's
 //     own sticky header, not just the review-mode banner.
@@ -25,13 +29,15 @@
 //
 // Run: node tests/module-08-course-source-freeze.test.mjs
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+const require = createRequire(import.meta.url);
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -121,33 +127,72 @@ const masterclassBlock = masterclassMatch ? masterclassMatch[0] : '';
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// 4. MODULE 8 LISTEN MODE SOURCE — Chapter 9 realignment
+// 4. MODULE 8 LISTEN MODE SOURCE — v2 strict-fidelity production (OWNER-
+//    APPROVED / FINAL FOR LAUNCH — see module-08-listen-script.md status
+//    line). The pre-v2 (commit 438319d) narration this superseded was
+//    itself written against a stale 12-chapter placeholder masterclass
+//    structure (see that file's own front matter) and is historical/
+//    pre-final authority only — it does not govern this test. These
+//    assertions were re-pointed at the current, owner-approved v2 text,
+//    and where possible now cross-check the Listen Mode narration
+//    directly against the live, unchanged `M8_CHAPTERS` / `M8.questions`
+//    content in headspa-mastery.html — the actual source of authority —
+//    rather than a hand-copied string, so future drift in either
+//    direction gets caught regardless of which side changes.
 // ─────────────────────────────────────────────────────────────────────────
 (function listenSource() {
-  check('LISTEN SOURCE', "Chapter 1's final title is referenced correctly", /Chapter one, Opening Rituals and Microscopy/.test(listenScript));
-  check('LISTEN SOURCE', "Chapter 9's title is referenced correctly and unchanged", /chapter nine, Final Rinse and Halo Massage/.test(listenScript));
+  check('LISTEN SOURCE', "Chapter 1's title is referenced correctly (v2 delivery phrasing)", /Chapter one — Opening Rituals and Microscopy/.test(listenScript));
+  check('LISTEN SOURCE', "Chapter 9's title is referenced correctly (v2 delivery phrasing)", /Chapter nine — Final Rinse and Halo Massage/.test(listenScript));
 
-  const requiredConcepts = [
-    /stimulation, not detangling/,      // comb = scalp stimulation, not detangling
-    /Temperature gets checked/,          // temperature checks
-    /gradual release/,                   // Halo massage as gradual release
-    /slow, broad neck-and-shoulder massage with steady contact/, // slow/broad/steady contact
-    /water goes fully off/,              // Halo shutoff
-    /never both/,                        // cooling OR towel, never both mandatory
-    /gently squeeze — never rub/,        // gently squeeze, never rub
-    /wrap it loosely to one side/,       // loose side wrap
-    /Let the client know before the mask comes off/, // eye-mask cue
-    /step out so they can dress in privacy/, // privacy handoff / practitioner exits
-    /glass of ice water/,                // ice-water re-greet
-    /second look through the microscope/, // microscope reveal
-    /controlled blow-dry/,               // controlled airflow/moderate-heat blow-dry
-    /closing observation specific to what you actually addressed/, // final observations
-  ];
-  const missing = requiredConcepts.filter((re) => !re.test(listenScript));
-  check('LISTEN SOURCE', "Chapter 9's narration includes every required close concept from the freeze-pass brief", missing.length === 0, missing.length ? 'Missing: ' + missing.map((r) => r.source).join(' | ') : '');
+  // Cross-check against the live page content itself: M8_CHAPTERS[8] (num
+  // '09') is the real, unchanged, on-page Chapter 9 text. Every guidance
+  // paragraph there must appear verbatim in the Listen Mode script — this
+  // is the actual strict-fidelity contract, not a copy of one script
+  // version's wording.
+  const m8ChaptersMatch = html.match(/const M8_CHAPTERS = \[[\s\S]*?\n\];/);
+  const chaptersSrc = m8ChaptersMatch ? m8ChaptersMatch[0] : '';
+  const ch9Match = chaptersSrc.match(/\{ num:'09'[\s\S]*?guidance:\[([\s\S]*?)\],\s*\n\s*why:/);
+  const ch9GuidanceSrc = ch9Match ? ch9Match[1] : '';
+  const ch9GuidanceParas = [...ch9GuidanceSrc.matchAll(/'((?:[^'\\]|\\.)*)'/g)].map((m) => m[1].replace(/\\'/g, "'"));
+  check('LISTEN SOURCE', "Chapter 9's real on-page guidance paragraphs were extracted for a fidelity cross-check", ch9GuidanceParas.length >= 6, 'got ' + ch9GuidanceParas.length);
+  const notNarrated = ch9GuidanceParas.filter((p) => !listenScript.includes(p));
+  check('LISTEN SOURCE', "Chapter 9's Listen Mode narration includes every real on-page guidance paragraph verbatim (strict fidelity to the live page, not an older or invented version)", notNarrated.length === 0, notNarrated.length ? 'Not found verbatim in listenScript: ' + notNarrated.map((p) => JSON.stringify(p.slice(0, 60) + '…')).join(' | ') : '');
 
   check('LISTEN SOURCE', 'The stale pre-04faf79 Chapter 9 paragraph (cooling spray treated as a near-default step) is gone', !/it's worth preparing the client for that shift rather than offering to skip it mid-service/.test(listenScript));
-  check('LISTEN SOURCE', 'A synchronization note records the new teaching -> Watch for -> video handoff -> next-chapter rule for future full per-chapter narration', /## Video handoff \/ chapter-reorder synchronization note/.test(listenScript) && /video itself stays non-narrated/.test(listenScript));
+
+  // The old "Video handoff / chapter-reorder synchronization note" heading
+  // doesn't exist post-resegmentation (9 sections -> 18 chunks), but the
+  // same governance fact — correct checkpoint stop locations relative to
+  // the live DOM — is now recorded in the script's own Editorial QA list.
+  check('LISTEN SOURCE', "The script's own Editorial QA documents correct checkpoint stop locations matching live DOM order (supersedes the old standalone sync note)", /Correct checkpoint stop locations/.test(listenScript) && /m8cp1.*after the Protect-the-Flow interaction/.test(listenScript) && /m8cp2.*after the Service Timer section and before completion/.test(listenScript));
+
+  // Structural order check independent of prose: checkpoint 1's chunk
+  // heading must precede the Timer's, which must precede checkpoint 2's.
+  const cp1Idx = listenScript.indexOf('Checkpoint 1 (`m8cp1`)');
+  const timerIdx = listenScript.indexOf('Post-pass continuation: the A I M T Service Timer');
+  const cp2Idx = listenScript.indexOf('Checkpoint 2 (`m8cp2`)');
+  check('LISTEN SOURCE', 'Script section order is m8cp1 -> Service Timer -> m8cp2 (matches live DOM order)', cp1Idx !== -1 && timerIdx !== -1 && cp2Idx !== -1 && cp1Idx < timerIdx && timerIdx < cp2Idx);
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// 4b. MODULE 8 LISTEN MODE PRODUCTION AUDIO — manifest + path integrity
+// ─────────────────────────────────────────────────────────────────────────
+(function listenAudioProduction() {
+  const AIMTListenModeData = require('../assets/js/aimt-listen-mode-data.js');
+  const manifest = AIMTListenModeData.getManifest('headspa-mastery', 8);
+  check('LISTEN AUDIO', 'getManifest returns Module 8\'s chunk array', Array.isArray(manifest) && manifest.length > 0, 'got ' + (manifest && manifest.length));
+
+  if (Array.isArray(manifest)) {
+    const validation = AIMTListenModeData.validateManifest(manifest);
+    check('LISTEN AUDIO', 'Module 8 manifest passes structural validation', validation.valid, validation.errors.join('; '));
+    check('LISTEN AUDIO', 'Module 8 manifest is production-ready (every chunk APPROVED)', AIMTListenModeData.isProductionReady(manifest));
+
+    const missingFiles = manifest.filter((c) => !existsSync(path.join(ROOT, c.audioSrc)));
+    check('LISTEN AUDIO', 'Every Module 8 chunk\'s audio file exists on disk at its exact (case-sensitive) path', missingFiles.length === 0, missingFiles.map((c) => c.audioSrc).join(', '));
+
+    const staleRef = manifest.find((c) => /\/(raw|raw-pieces|capcut-masters)\//i.test(c.audioSrc) || /RAW|EDIT|archive/i.test(c.audioSrc));
+    check('LISTEN AUDIO', 'No Module 8 chunk references RAW/EDIT/capcut-masters/raw-pieces/archive audio (only installed production mp3s)', !staleRef, staleRef ? staleRef.audioSrc : '');
+  }
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
