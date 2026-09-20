@@ -480,9 +480,19 @@ body {
         }
       };
     }
+    // No `storage:` override here — this must stay on Supabase's default
+    // (localStorage) persistence, the same as student-access.html and
+    // headspa-mastery.html. This file previously passed
+    // storage: createSessionAuthStorage() (sessionStorage-backed), which was
+    // never updated when 41e612d ("Fix: persistent auth sessions + sync init
+    // on all entry paths") switched every other auth page off that adapter.
+    // The mismatch meant a session created by signUp() here was invisible to
+    // every other page's Supabase client (each reads a different storage
+    // bucket), so a freshly-created paid account looked signed-out the
+    // moment it landed anywhere else — the root cause of the post-purchase
+    // bounce to the public course page.
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        storage: createSessionAuthStorage(),
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
@@ -504,7 +514,6 @@ body {
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const passwordHint = document.getElementById('passwordHint');
     const confirmPasswordHint = document.getElementById('confirmPasswordHint');
-    const COURSE_ENTRY_URL = 'head-spa-certification?enter=1';
     const COURSE_SIGNIN_URL = 'student-access.html';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
@@ -658,7 +667,11 @@ body {
     function redirectToCourse(delayMs) {
       setAccessFlowHandoff('success-claim');
       window.setTimeout(() => {
-        window.location.href = COURSE_ENTRY_URL;
+        // Student Access, not straight into the course: it re-checks the
+        // now-localStorage-persisted session and entitlement itself before
+        // letting the student continue, so this page never has to be the
+        // sole gate that decides someone gets in.
+        window.location.href = COURSE_SIGNIN_URL;
       }, delayMs || 0);
     }
 
@@ -788,7 +801,7 @@ body {
         markAccountStepComplete();
         showSuccessPanel('Account ready.', 'You already have an active AIMT session. We’re taking you into the Head Spa Certification Course now.');
         showMessage('You are already signed in. Continuing into your course access flow now.');
-        showNextStep('Already signed in?', 'If the redirect does not happen automatically, continue into the course here.', COURSE_ENTRY_URL, 'Enter My AIMT →');
+        showNextStep('Already signed in?', 'If the redirect does not happen automatically, continue here.', COURSE_SIGNIN_URL, 'Go to Student Access');
         setSubmitState('Continuing to course…', true);
         redirectToCourse(900);
       } catch (_) {}
