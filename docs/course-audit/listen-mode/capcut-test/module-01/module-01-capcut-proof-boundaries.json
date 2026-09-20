@@ -1,0 +1,83 @@
+{
+  "_purpose": "QA metadata only. Records the exact, sample-accurate construction of module-01-capcut-proof-master.wav so the CapCut export can be automatically re-split back into the original chunks. Not consumed by the course app; not the manifest at assets/js/aimt-listen-mode-data.js.",
+  "master": "module-01-capcut-proof-master.wav",
+  "sourceFormat": {
+    "sampleRateHz": 44100,
+    "channels": 1,
+    "sampleFormat": "pcm_s16le",
+    "note": "Native format of the raw ElevenLabs decode — no resampling applied at any stage."
+  },
+  "separator": {
+    "durationSec": 2.0,
+    "type": "digital silence (anullsrc), verified all-zero PCM samples",
+    "sampleCount": 88200
+  },
+  "chunks": [
+    {
+      "chunkId": "m1-01",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3",
+      "originalDurationSec": 65.44,
+      "masterStartSec": 0.0,
+      "masterEndSec": 65.44
+    },
+    {
+      "separator": true,
+      "afterChunkId": "m1-01",
+      "beforeChunkId": "m1-02",
+      "startSec": 65.44,
+      "endSec": 67.44,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-02",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-02.mp3",
+      "originalDurationSec": 76.8,
+      "masterStartSec": 67.44,
+      "masterEndSec": 144.24
+    },
+    {
+      "separator": true,
+      "afterChunkId": "m1-02",
+      "beforeChunkId": "m1-03",
+      "startSec": 144.24,
+      "endSec": 146.24,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-03",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-03.mp3",
+      "originalDurationSec": 92.16,
+      "masterStartSec": 146.24,
+      "masterEndSec": 238.4
+    },
+    {
+      "separator": true,
+      "afterChunkId": "m1-03",
+      "beforeChunkId": "m1-04",
+      "startSec": 238.4,
+      "endSec": 240.4,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-04",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-04.mp3",
+      "originalDurationSec": 146.08,
+      "masterStartSec": 240.4,
+      "masterEndSec": 386.48,
+      "note": "Known worst-case sibilance reference chunk from the earlier Auphonic/de-ess/Master-V2/V3/parallel-blend comparison rounds — included here specifically to test whether one locked CapCut Enhance Voice pass also controls this chunk's sibilance, not just cross-chunk tonal continuity."
+    }
+  ],
+  "masterTotalDurationSec": 386.48,
+  "verification": {
+    "method": "Byte-for-byte PCM sample comparison against each source's decoded WAV and against a freshly-generated 2.0s all-zero silence reference, performed immediately after building the master.",
+    "m1-01SegmentIdenticalToSource": true,
+    "separator1IdenticalToGeneratedSilence": true,
+    "m1-02SegmentIdenticalToSource": true,
+    "separator2IdenticalToGeneratedSilence": true,
+    "m1-03SegmentIdenticalToSource": true,
+    "separator3IdenticalToGeneratedSilence": true,
+    "m1-04SegmentIdenticalToSource": true,
+    "masterFrameCount": 17043768,
+    "masterFrameCountMatchesArithmeticSum": true
+  }
+}

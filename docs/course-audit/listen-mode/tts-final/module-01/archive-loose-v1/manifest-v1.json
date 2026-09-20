@@ -1,0 +1,167 @@
+{
+  "module": "01",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M1-BATCH-A1.txt",
+      "chunkIds": [
+        "M1-01",
+        "M1-02",
+        "M1-03"
+      ],
+      "normalizedChars": 3303,
+      "firstSpokenLine": "[warmly] Welcome to Module One. Before we start, here's the reason this one comes first.",
+      "lastSpokenLine": "nd holding control of the room from the first minute to the last. That's the actual job. The physical steps are just the visible part of it.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M1-BATCH-A2.txt",
+      "chunkIds": [
+        "M1-04",
+        "M1-05"
+      ],
+      "normalizedChars": 3610,
+      "firstSpokenLine": "Section 1.3 — Observation vs. diagnosis. This next part is the center of the whole module, so let's slow down here.",
+      "lastSpokenLine": ". One side is conditional, and needs checking every time. The other side just isn't — not now, not later, no matter how experienced you get.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M1-BATCH-A3.txt",
+      "chunkIds": [
+        "M1-06",
+        "M1-07"
+      ],
+      "normalizedChars": 2151,
+      "firstSpokenLine": "Before your first checkpoint, a quick practice round — no grade, no pressure, just a chance to test your ear for this before it counts.",
+      "lastSpokenLine": "Take whatever time you actually need. I'm not timing you.",
+      "checkpointRelationship": "m1cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M1-BATCH-B1.txt",
+      "chunkIds": [
+        "M1-08",
+        "M1-09",
+        "M1-10",
+        "M1-11"
+      ],
+      "normalizedChars": 2596,
+      "firstSpokenLine": "Good — that's exactly the shape of it. You described what's visible, left the diagnosis to someone actually qualified to give one, and gave ",
+      "lastSpokenLine": "pport. They need clear observation, honest expectations, and confidence that you'll know when to proceed, when to adjust, and when to refer.",
+      "checkpointRelationship": "m1cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B2",
+      "file": "M1-BATCH-B2.txt",
+      "chunkIds": [
+        "M1-12",
+        "M1-13"
+      ],
+      "normalizedChars": 1431,
+      "firstSpokenLine": "Section 1.8 — Mistakes new practitioners make. Let's close the teaching with five patterns worth recognizing before they become habits.",
+      "lastSpokenLine": "Think in terms of a concrete service moment — one you've experienced, or a realistic hypothetical — not just a definition.",
+      "checkpointRelationship": "m1cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M1-BATCH-C1.txt",
+      "chunkIds": [
+        "M1-14"
+      ],
+      "normalizedChars": 910,
+      "firstSpokenLine": "[warmly] Good — that's the difference. You weren't just describing the steps. You were showing the judgment behind them.",
+      "lastSpokenLine": "Next, we move into the client experience itself — the moments before the hands-on service even begins. I'll see you in Module Two.",
+      "checkpointRelationship": "m1cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M1-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 964
+    },
+    {
+      "chunkId": "M1-02",
+      "title": "1.1 What is a head spa?",
+      "normalizedChars": 1054
+    },
+    {
+      "chunkId": "M1-03",
+      "title": "1.2 What is a head spa technician?",
+      "normalizedChars": 1281
+    },
+    {
+      "chunkId": "M1-04",
+      "title": "1.3 Observation vs. diagnosis",
+      "normalizedChars": 2265
+    },
+    {
+      "chunkId": "M1-05",
+      "title": "1.4 Scope of practice",
+      "normalizedChars": 1343
+    },
+    {
+      "chunkId": "M1-06",
+      "title": "Practice interaction: \"Where is the line?\"",
+      "normalizedChars": 1682
+    },
+    {
+      "chunkId": "M1-07",
+      "title": "Checkpoint 1 (`m1cp1`)",
+      "normalizedChars": 467,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m1cp1"
+    },
+    {
+      "chunkId": "M1-08",
+      "title": "Post-pass continuation (`m1cp1`)",
+      "normalizedChars": 290,
+      "gateType": "post-pass",
+      "checkpointId": "m1cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M1-09",
+      "title": "1.5 Limitations of a head spa service",
+      "normalizedChars": 869
+    },
+    {
+      "chunkId": "M1-10",
+      "title": "1.6 Licensing",
+      "normalizedChars": 548
+    },
+    {
+      "chunkId": "M1-11",
+      "title": "1.7 Practitioner insight",
+      "normalizedChars": 883
+    },
+    {
+      "chunkId": "M1-12",
+      "title": "1.8 Mistakes new practitioners make",
+      "normalizedChars": 1057
+    },
+    {
+      "chunkId": "M1-13",
+      "title": "Checkpoint 2 (`m1cp2`)",
+      "normalizedChars": 372,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m1cp2"
+    },
+    {
+      "chunkId": "M1-14",
+      "title": "Post-pass continuation (`m1cp2`) + completion + closing recap + Module 2 handoff",
+      "normalizedChars": 910,
+      "gateType": "post-pass",
+      "checkpointId": "m1cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

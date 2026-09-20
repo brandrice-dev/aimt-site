@@ -1,12 +1,220 @@
 (function() {
   const STORAGE_KEY = 'levo_app';
   const LEGACY_PROFILE_KEY = 'levo4_profile';
-  const SCHEMA_VERSION = 2;
-  const MODULE_COUNT = 12;
+  const SCHEMA_VERSION = 4;
+  /* Technical module slots 0–12 (13 total): 0 = Welcome, 1–11 = instructional
+     modules, 12 = Course Completion & Certification. See "Module 11 → 12
+     structural relocation" below. */
+  const MODULE_COUNT = 13;
+  /* Module 9 ↔ 10 reorder — saved-state migration quarantine key.
+     See docs/course-audit/modules/module-09-reorder-migration-plan.md §6.1.
+     Deliberately a separate localStorage key, outside the sanitized
+     'levo_app' blob: sanitizeState() reconstructs a fixed five-key shape
+     and would silently drop anything written onto the raw object instead. */
+  const MODULE9_REORDER_QUARANTINE_KEY = 'aimt_module9_reorder_quarantine';
+  /* Module 11 → 12 structural relocation — saved-state migration quarantine
+     key. Same rationale as MODULE9_REORDER_QUARANTINE_KEY above: a separate
+     localStorage key outside the sanitized 'levo_app' blob so quarantined
+     evidence survives sanitizeState()'s fixed-shape reconstruction. */
+  const MODULE11_RELOCATE_QUARANTINE_KEY = 'aimt_module11_relocate_quarantine';
 
   function now() {
     return Date.now();
   }
+
+  /* ══════════════════════════════════════════════════════
+     COURSE REVIEW MODE — audit-only, owner inspection.
+     Never activates on a production hostname. Session-only;
+     never touches localStorage['levo_app'] or progress sync.
+     See docs/course-audit/implementation-log.md for the audit trail.
+     ══════════════════════════════════════════════════════ */
+  const REVIEW_MODE_SESSION_KEY = 'aimt_review_mode';
+  const REVIEW_MODE_PRODUCTION_HOSTS = [
+    'aimtrichology.com',
+    'www.aimtrichology.com',
+    'aimt-site.pages.dev' /* bare Cloudflare Pages production alias */
+  ];
+
+  function isReviewModeProductionHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    return REVIEW_MODE_PRODUCTION_HOSTS.indexOf(h) !== -1;
+  }
+
+  function isReviewModeEligibleHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    if (isReviewModeProductionHost(h)) return false;
+    if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')) return true;
+    /* Cloudflare Pages branch-preview subdomains: <branch>.aimt-site.pages.dev */
+    if (/^[a-z0-9-]+\.aimt-site\.pages\.dev$/.test(h)) return true;
+    return false;
+  }
+
+  const ReviewMode = {
+    _active: false,
+
+    init() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+
+      if (isReviewModeProductionHost(hostname)) {
+        /* Hard block: never active on production, regardless of any
+           stale session flag or query param. */
+        try { sessionStorage.removeItem(REVIEW_MODE_SESSION_KEY); } catch (e) {}
+        this._active = false;
+        return;
+      }
+
+      let requested = false;
+      try {
+        requested = new URLSearchParams(window.location.search).get('review') === '1';
+      } catch (e) {}
+
+      let sessionFlag = false;
+      try { sessionFlag = sessionStorage.getItem(REVIEW_MODE_SESSION_KEY) === '1'; } catch (e) {}
+
+      const eligible = isReviewModeEligibleHost(hostname);
+      this._active = eligible && (requested || sessionFlag);
+
+      if (this._active) {
+        try { sessionStorage.setItem(REVIEW_MODE_SESSION_KEY, '1'); } catch (e) {}
+      }
+    },
+
+    isActive() {
+      return this._active === true;
+    },
+
+    applyUI() {
+      const banner = document.getElementById('reviewModeBanner');
+      if (this._active) {
+        document.body.classList.add('review-mode-active');
+        if (banner) banner.classList.add('show');
+      } else {
+        document.body.classList.remove('review-mode-active');
+        if (banner) banner.classList.remove('show');
+      }
+    },
+
+    exit() {
+      try { sessionStorage.removeItem(REVIEW_MODE_SESSION_KEY); } catch (e) {}
+      const path = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
+      params.delete('review');
+      const nextQuery = params.toString();
+      window.location.href = nextQuery ? (path + '?' + nextQuery) : path;
+    }
+  };
+
+  ReviewMode.init();
+  window.ReviewMode = ReviewMode;
+
+  /* ══════════════════════════════════════════════════════
+     STUDENT PREVIEW — localhost-only, owner product review.
+     Lets the owner experience not-yet-APPROVED Listen Mode audio through
+     the real, unmodified student interface (no QA panel, no badges, no
+     chunk ids) instead of Review Mode's engineering-inspection UI.
+     Hostname-gated by ALLOWLIST (127.0.0.1 / localhost only -- no
+     .local or .pages.dev exceptions the way Review Mode has), which is
+     structurally safer than a blocklist: anything not exactly one of
+     these two hostnames is automatically excluded, with no host list to
+     keep in sync. Session-only, no persistence -- active only while
+     ?studentpreview=1 is literally present in the URL, which is fine
+     since this SPA never full-page-reloads during normal in-course
+     navigation. See assets/js/aimt-listen-mode-player.js for the one
+     narrow thing this is allowed to relax (GENERATED audio playability)
+     -- it never touches qaStatus, entitlement, authentication, module
+     sequencing, checkpoint gates, Cadence grading, or any other
+     authoritative state.
+     ══════════════════════════════════════════════════════ */
+  const STUDENT_PREVIEW_ALLOWED_HOSTS = ['127.0.0.1', 'localhost'];
+
+  function isStudentPreviewEligibleHost(hostname) {
+    const h = (hostname || '').toLowerCase();
+    return STUDENT_PREVIEW_ALLOWED_HOSTS.indexOf(h) !== -1;
+  }
+
+  const StudentPreview = {
+    _active: false,
+
+    // True only when BOTH: this host passes isStudentPreviewEligibleHost()
+    // AND ?freshintro=1 is present alongside ?studentpreview=1. Read by
+    // headspa-mastery.html's shouldShowIntro() BEFORE any introComplete /
+    // legacy-migration check runs (see that function for why), so it
+    // always forces the Cadence pre-course intro open on this load --
+    // regardless of local progress, the legacy levo4_profile key, or any
+    // previously completed intro. This flag is a pure read-time decision
+    // override: it never writes to localStorage and never modifies
+    // persisted student, course, or Supabase state. Production hostnames
+    // never see it set, because isStudentPreviewEligibleHost() gates it
+    // exactly like the rest of Student Preview.
+    forceFreshIntro: false,
+
+    init() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+
+      if (!isStudentPreviewEligibleHost(hostname)) {
+        this._active = false;
+        this.forceFreshIntro = false;
+        return;
+      }
+
+      let requested = false;
+      let freshRequested = false;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        requested = params.get('studentpreview') === '1';
+        freshRequested = params.get('freshintro') === '1';
+      } catch (e) {}
+
+      this._active = requested;
+      this.forceFreshIntro = requested && freshRequested;
+    },
+
+    isActive() {
+      return this._active === true;
+    },
+
+    // Developer/local-only convenience for clearing local course
+    // progress -- never exposed as a UI control, never run automatically.
+    // Same hostname gate as the rest of Student Preview (a no-op
+    // everywhere else). Clears levo_app (STORAGE_KEY) and every Listen
+    // Mode resume-position key (aimt_listen_position::*).
+    //
+    // This does NOT clear the legacy levo4_profile key, and therefore
+    // does NOT reliably make the next load "look like a brand-new
+    // student": APP_STATE._migrate() reads levo4_profile on every load
+    // and can restore fields such as introComplete from it independent
+    // of whatever levo_app holds. To force the Cadence pre-course intro
+    // open regardless of any locally stored or migrated completion
+    // state, use the forceFreshIntro flag above (set automatically from
+    // ?studentpreview=1&freshintro=1) instead -- it is not solved by
+    // deleting more storage here.
+    //
+    // Call this function itself from the browser console when you
+    // actually want to clear local course progress:
+    //   window.StudentPreview.resetLocalProgress()
+    // then reload the page.
+    resetLocalProgress() {
+      let hostname = '';
+      try { hostname = window.location.hostname; } catch (e) {}
+      if (!isStudentPreviewEligibleHost(hostname)) return false;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('aimt_progress_saved_at');
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf('aimt_listen_position::') === 0) toRemove.push(key);
+        }
+        toRemove.forEach((key) => localStorage.removeItem(key));
+      } catch (e) { return false; }
+      return true;
+    }
+  };
+
+  StudentPreview.init();
+  window.StudentPreview = StudentPreview;
 
   function createCheckpointMeta() {
     return {
@@ -14,7 +222,13 @@
       feedback: '',
       answer: '',
       attempts: 0,
-      updatedAt: null
+      updatedAt: null,
+      // Which Cadence model actually graded the current answer/feedback
+      // pair -- {provider, modelName, status, registryVersion, at} or null.
+      // Diagnostic only (Phase 1 model/version logging, see
+      // functions/_lib/cadence/model-config.mjs); never read for grading
+      // or progress decisions.
+      lastGradedWith: null
     };
   }
 
@@ -49,12 +263,22 @@
     3: ['anatomy-grounding', 'barrier-thinking', 'client-explanation'],
     4: ['pattern-recognition', 'scope-awareness', 'referral-judgment'],
     5: ['protocol-matching', 'barrier-thinking', 'client-guidance'],
-    6: ['pattern-recognition', 'scope-awareness', 'referral-judgment', 'barrier-thinking'],
+    6: ['pattern-recognition', 'referral-judgment', 'barrier-thinking'],
     7: ['service-flow', 'room-prep', 'client-guidance'],
     8: ['client-explanation', 'service-flow', 'client-guidance'],
-    9: ['sanitation-discipline', 'complaint-response', 'service-flow'],
-    10: ['pricing-logic', 'positioning', 'client-explanation'],
-    11: ['service-flow', 'scope-awareness', 'client-guidance', 'pricing-logic', 'pattern-recognition']
+    /* Module 9 ↔ 10 reorder: slot 9 is now Checkout, Client Closing &
+       Pricing Strategy (m10cp1/m10cp2 content); slot 10 is now Sanitation &
+       Reset Systems (m9cp1/m9cp2 content). Tags follow the content, not the
+       historical checkpoint-ID numbering. See
+       docs/course-audit/modules/module-09-reorder-migration-plan.md §2.7. */
+    9: ['pricing-logic', 'positioning', 'client-explanation'],
+    10: ['sanitation-discipline', 'complaint-response', 'service-flow'],
+    /* Module 11 → 12 structural relocation: slot 11 is now AI / Modern
+       Practice Tools (m11cp1/m11cp2); slot 12 is now Course Completion &
+       Certification (the historically-tagged, no-checkpoint final module —
+       see migrateModule11To12IfNeeded above). */
+    11: ['ai-literacy', 'verification-judgment', 'client-guidance', 'privacy-judgment'],
+    12: ['service-flow', 'scope-awareness', 'client-guidance', 'pricing-logic', 'pattern-recognition']
   };
 
   function createCadenceMemory() {
@@ -84,7 +308,13 @@
       lastVisitedAt: null,
       lastScrollY: 0,
       maxReadPercent: 0,
-      completedAt: null
+      completedAt: null,
+      /* Video-chapter completion (currently only Module 8's masterclass
+         player uses this — see MODULE_REQUIRED_VIDEO_CHAPTERS). `completed`
+         holds distinct chapter indices (0-based) marked complete by a real
+         player completion event; `current` is a resume convenience only and
+         never gates anything. */
+      videoChapters: { completed: [], current: 0 }
     };
   }
 
@@ -99,6 +329,14 @@
         name: '',
         introResponse: '',
         introComplete: false,
+        // One-time "How AIMT Works" course orientation, shown once between
+        // the Cadence intro and the Welcome Module. Additive field, same
+        // pattern as introComplete above -- see sanitizeState() below and
+        // enterCourseHomeOrOrientation() in headspa-mastery.html. Never
+        // migrated/backfilled from progress: a missing/false value always
+        // means "show it," including for pre-existing students who never
+        // had this field.
+        orientationComplete: false,
         joined: '',
         responses: [],
         background: '',
@@ -251,16 +489,20 @@
       if (/\b(step|sequence|massage|shampoo|service)\b/i.test(text)) tags.push('service-flow');
       if (/\b(calm|specific|without over-explain|guide)\b/i.test(text)) tags.push('client-guidance');
     } else if (moduleId === 9) {
-      if (/\b(reset|flush|sanitize|log|bin|bed vinyl|sequence)\b/i.test(text)) tags.push('sanitation-discipline');
-      if (/\b(client calls|complaint|document|respond|investigate)\b/i.test(text)) tags.push('complaint-response');
-      if (/\b(order|sequence|after service)\b/i.test(text)) tags.push('service-flow');
-    } else if (moduleId === 10) {
+      /* Post-reorder: slot 9 = Checkout, Client Closing & Pricing Strategy
+         (m10cp1/m10cp2 content) — see MODULE_MEMORY_TAGS[9] above. */
       if (/\b(price|pricing|profit|overhead|cost|margin|tier)\b/i.test(text)) tags.push('pricing-logic');
       if (/\b(position|value|expensive|perception)\b/i.test(text)) tags.push('positioning');
       if (/\b(explain|respond|say to the client)\b/i.test(text)) tags.push('client-explanation');
+    } else if (moduleId === 10) {
+      /* Post-reorder: slot 10 = Sanitation & Reset Systems (m9cp1/m9cp2
+         content) — see MODULE_MEMORY_TAGS[10] above. */
+      if (/\b(reset|flush|sanitize|log|bin|bed vinyl|sequence)\b/i.test(text)) tags.push('sanitation-discipline');
+      if (/\b(client calls|complaint|document|respond|investigate)\b/i.test(text)) tags.push('complaint-response');
+      if (/\b(order|sequence|after service)\b/i.test(text)) tags.push('service-flow');
     }
 
-    if (/\bclient\b/i.test(text) && !tags.includes('client-guidance') && moduleId !== 8 && moduleId !== 10) {
+    if (/\bclient\b/i.test(text) && !tags.includes('client-guidance') && moduleId !== 8 && moduleId !== 9) {
       tags.push('client-guidance');
     }
 
@@ -313,14 +555,39 @@
           : (meta && meta.status === 'retry' && (attempts > 0 || feedback || answer || updatedAt))
             ? 'retry'
             : '';
+        const rawGradedWith = meta && meta.lastGradedWith && typeof meta.lastGradedWith === 'object' ? meta.lastGradedWith : null;
+        const lastGradedWith = rawGradedWith && rawGradedWith.modelName
+          ? {
+              provider: sanitizeString(rawGradedWith.provider, ''),
+              modelName: sanitizeString(rawGradedWith.modelName, ''),
+              status: sanitizeString(rawGradedWith.status, ''),
+              registryVersion: sanitizeString(rawGradedWith.registryVersion, ''),
+              at: sanitizeNumber(rawGradedWith.at, null)
+            }
+          : null;
         checkpointMeta[cpId] = {
           status,
           feedback,
           answer,
           attempts,
-          updatedAt
+          updatedAt,
+          lastGradedWith
         };
       });
+      const rawVideo = raw && raw.videoChapters && typeof raw.videoChapters === 'object' ? raw.videoChapters : null;
+      // Bound against this module's own declared chapter count (see
+      // MODULE_REQUIRED_VIDEO_CHAPTERS in headspa-mastery.html) rather than
+      // a hardcoded literal, so a future chapter-count change for any
+      // module can't leave a stale ceiling here.
+      const videoChapterCeiling = Math.max(1, sanitizeNumber((window.MODULE_REQUIRED_VIDEO_CHAPTERS || {})[id], 12));
+      const completedVideoChapters = Array.isArray(rawVideo && rawVideo.completed)
+        ? Array.from(new Set(
+            rawVideo.completed
+              .map((n) => sanitizeNumber(n, -1))
+              .filter((n) => Number.isInteger(n) && n >= 0 && n < videoChapterCeiling)
+          )).sort((a, b) => a - b)
+        : [];
+
       progress[id] = {
         checkpoints: Array.isArray(raw && raw.checkpoints)
           ? raw.checkpoints.filter((cp) => typeof cp === 'string')
@@ -332,10 +599,198 @@
         lastVisitedAt: sanitizeNumber(raw && raw.lastVisitedAt, null),
         lastScrollY: Math.max(0, sanitizeNumber(raw && raw.lastScrollY, 0)),
         maxReadPercent: Math.max(0, Math.min(100, sanitizeNumber(raw && raw.maxReadPercent, 0))),
-        completedAt: sanitizeNumber(raw && raw.completedAt, null)
+        completedAt: sanitizeNumber(raw && raw.completedAt, null),
+        videoChapters: {
+          completed: completedVideoChapters,
+          current: Math.max(0, Math.min(videoChapterCeiling - 1, sanitizeNumber(rawVideo && rawVideo.current, 0)))
+        }
       };
     }
     return progress;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     MODULE 9 ↔ 10 REORDER — saved-state migration.
+     See docs/course-audit/modules/module-09-reorder-migration-plan.md
+     (approved design) for the full rationale, state-shape inventory, and
+     fail-closed rules this function implements.
+
+     Runs on the RAW parsed localStorage object, before sanitizeState() —
+     sanitizeState() unconditionally overwrites schemaVersion and rebuilds
+     progress/guide/resume from a fixed shape, so the pre-migration version
+     number and pre-swap slot data must be read/mutated here first.
+
+     Idempotent: gated by schemaVersion >= 3. A fresh student (no raw state
+     at all) is left untouched — sanitizeState(null) already produces
+     schemaVersion-3 defaults with no old 9/10 data to move.
+     ══════════════════════════════════════════════════════ */
+  function isWellFormedModuleProgressShape(value) {
+    return !!(value && typeof value === 'object' && !Array.isArray(value));
+  }
+
+  function migrateModule9ReorderIfNeeded(rawParsedState) {
+    if (!rawParsedState || typeof rawParsedState !== 'object') return;
+
+    const rawProgress = rawParsedState.progress;
+    if (!rawProgress || typeof rawProgress !== 'object') return;
+
+    const version = sanitizeNumber(rawParsedState.schemaVersion, 0);
+    if (version >= 3) return; // already migrated — hard no-op
+
+    const slot9Present = Object.prototype.hasOwnProperty.call(rawProgress, '9');
+    const slot10Present = Object.prototype.hasOwnProperty.call(rawProgress, '10');
+    if (!slot9Present && !slot10Present) return; // nothing to migrate
+
+    const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
+
+    const slot9 = rawProgress['9'];
+    const slot10 = rawProgress['10'];
+    const slot9Malformed = slot9Present && !isWellFormedModuleProgressShape(slot9);
+    const slot10Malformed = slot10Present && !isWellFormedModuleProgressShape(slot10);
+
+    if (slot9Malformed || slot10Malformed) {
+      // Fail closed: quarantine the raw evidence (outside levo_app, never
+      // interpreted as progress), then replace both ambiguous slots with
+      // safe empty defaults. Never persisted while Review Mode is active —
+      // Review Mode's contract is unsaved inspection, not a write path.
+      if (!reviewModeActive) {
+        try {
+          localStorage.setItem(MODULE9_REORDER_QUARANTINE_KEY, JSON.stringify({
+            slot9: slot9,
+            slot10: slot10,
+            quarantinedAt: now()
+          }));
+        } catch (e) {}
+        try {
+          console.warn('[AIMT] Module 9/10 saved progress was malformed on load — quarantined to localStorage[\'' + MODULE9_REORDER_QUARANTINE_KEY + '\'] and reset to safe defaults.');
+        } catch (e) {}
+      }
+      rawProgress['9'] = createModuleProgress(9);
+      rawProgress['10'] = createModuleProgress(10);
+    } else {
+      // Swap the two ENTIRE per-slot progress objects (not a field merge) —
+      // checkpointMeta (the real evidence) travels with its consistent
+      // engagement metadata (startedAt, lastVisitedAt, etc.). complete/
+      // unlocked/completedAt/checkpoints are never hand-copied here; they
+      // self-correct via reconcileModuleState()/_syncDerivedState(), which
+      // load() always runs immediately after this function returns.
+      rawProgress['9'] = slot10Present ? slot10 : null;
+      rawProgress['10'] = slot9Present ? slot9 : null;
+    }
+
+    // Content-identity pointer: student.cadenceMemory.notableAnswers[].moduleId
+    // — remapped by each entry's own checkpointId prefix (the stable
+    // identity), never by blindly comparing the stored moduleId number.
+    const notableAnswers = rawParsedState.student
+      && rawParsedState.student.cadenceMemory
+      && Array.isArray(rawParsedState.student.cadenceMemory.notableAnswers)
+      ? rawParsedState.student.cadenceMemory.notableAnswers
+      : [];
+    notableAnswers.forEach((entry) => {
+      if (!entry || typeof entry !== 'object') return;
+      const cpId = typeof entry.checkpointId === 'string' ? entry.checkpointId : '';
+      if (cpId.indexOf('m9cp') === 0) entry.moduleId = 10;
+      else if (cpId.indexOf('m10cp') === 0) entry.moduleId = 9;
+    });
+
+    // Content-identity pointers: guide.currentModule / resume.moduleId —
+    // remapped ONLY when the raw value is exactly 9 or 10. Every other
+    // numeric field (attempts counters, scrollY, video chapter index,
+    // timestamps) is left untouched, even when it coincidentally equals
+    // 9 or 10 — see module-09-reorder-migration-plan.md §3.2's explicit
+    // ruled-out-fields list.
+    if (rawParsedState.guide && typeof rawParsedState.guide === 'object') {
+      if (rawParsedState.guide.currentModule === 9) rawParsedState.guide.currentModule = 10;
+      else if (rawParsedState.guide.currentModule === 10) rawParsedState.guide.currentModule = 9;
+    }
+    if (rawParsedState.resume && typeof rawParsedState.resume === 'object') {
+      if (rawParsedState.resume.moduleId === 9) rawParsedState.resume.moduleId = 10;
+      else if (rawParsedState.resume.moduleId === 10) rawParsedState.resume.moduleId = 9;
+    }
+
+    // Stamp handled — prevents re-running (and re-quarantining) on every
+    // subsequent load, including the malformed-state branch. Never reaches
+    // localStorage while Review Mode is active, since save() itself is
+    // guarded (see APP_STATE.save()) and this assignment only mutates the
+    // in-memory object load() is about to hand to sanitizeState().
+    rawParsedState.schemaVersion = 3;
+  }
+
+  /* Module 11 → 12 structural relocation (course-audit-build): the
+     existing "Course Completion & Certification" experience — previously
+     technical slot 11 — moves to technical slot 12. Slot 11 becomes a new
+     module, AI / Modern Practice Tools, with its own competency state.
+     This is a one-directional relocation, not a swap like the 9/10 reorder
+     above: old slot 11 progress belongs to the content now living at slot
+     12, and the new slot 11 must begin genuinely empty — a student's prior
+     "I finished the course" state must never be interpreted as AI-module
+     competency. Confirmed by direct inspection of MODULE_CHECKPOINTS['11']
+     (empty array pre-relocation — Course Completion & Certification had no
+     required checkpoints) and sanitizeNotableAnswers() (which discards any
+     entry without a non-empty checkpointId) that no cadenceMemory
+     notableAnswers entry can exist tagged to old moduleId 11 — so unlike
+     the 9/10 migration, no notableAnswers remap is needed here. */
+  function migrateModule11To12IfNeeded(rawParsedState) {
+    if (!rawParsedState || typeof rawParsedState !== 'object') return;
+
+    const rawProgress = rawParsedState.progress;
+    if (!rawProgress || typeof rawProgress !== 'object') return;
+
+    const version = sanitizeNumber(rawParsedState.schemaVersion, 0);
+    if (version >= 4) return; // already migrated — hard no-op
+
+    const slot11Present = Object.prototype.hasOwnProperty.call(rawProgress, '11');
+    if (!slot11Present) {
+      rawParsedState.schemaVersion = 4;
+      return; // nothing to relocate
+    }
+
+    const reviewModeActive = !!(window.ReviewMode && window.ReviewMode.isActive());
+    const slot11 = rawProgress['11'];
+    const slot11Malformed = !isWellFormedModuleProgressShape(slot11);
+
+    if (slot11Malformed) {
+      // Fail closed: quarantine the raw evidence, then replace both the
+      // relocated slot and the new slot with safe empty defaults. Never
+      // persisted while Review Mode is active.
+      if (!reviewModeActive) {
+        try {
+          localStorage.setItem(MODULE11_RELOCATE_QUARANTINE_KEY, JSON.stringify({
+            slot11: slot11,
+            quarantinedAt: now()
+          }));
+        } catch (e) {}
+        try {
+          console.warn('[AIMT] Module 11 saved progress was malformed on load — quarantined to localStorage[\'' + MODULE11_RELOCATE_QUARANTINE_KEY + '\'] and reset to safe defaults.');
+        } catch (e) {}
+      }
+      rawProgress['11'] = createModuleProgress(11);
+      rawProgress['12'] = createModuleProgress(12);
+    } else {
+      // Whole-object move (not a field merge) — the entire old slot 11
+      // progress object (checkpointMeta, complete, completedAt, etc.)
+      // becomes slot 12's progress verbatim. complete/unlocked are never
+      // hand-trusted past this point; they self-correct via the existing,
+      // unmodified reconcileModuleState()/_syncDerivedState() pipeline
+      // load() always runs immediately after migration.
+      rawProgress['12'] = slot11;
+      rawProgress['11'] = createModuleProgress(11);
+    }
+
+    // Content-identity pointers: guide.currentModule / resume.moduleId —
+    // remapped ONLY when the raw value is exactly 11 (a student who was on
+    // the completion/certificate screen resumes on the relocated version
+    // of that same screen, now at slot 12). Every other numeric field
+    // (attempts counters, scrollY, timestamps) is left untouched, matching
+    // the ruled-out-fields precedent in migrateModule9ReorderIfNeeded.
+    if (rawParsedState.guide && typeof rawParsedState.guide === 'object') {
+      if (rawParsedState.guide.currentModule === 11) rawParsedState.guide.currentModule = 12;
+    }
+    if (rawParsedState.resume && typeof rawParsedState.resume === 'object') {
+      if (rawParsedState.resume.moduleId === 11) rawParsedState.resume.moduleId = 12;
+    }
+
+    rawParsedState.schemaVersion = 4;
   }
 
   function sanitizeState(raw) {
@@ -348,6 +803,7 @@
         name: sanitizeString(raw.student && raw.student.name, ''),
         introResponse: sanitizeString(raw.student && raw.student.introResponse, ''),
         introComplete: sanitizeBoolean(raw.student && raw.student.introComplete, false),
+        orientationComplete: sanitizeBoolean(raw.student && raw.student.orientationComplete, false),
         joined: sanitizeString(raw.student && raw.student.joined, ''),
         responses: sanitizeResponses(raw.student && raw.student.responses),
         background: sanitizeString(raw.student && raw.student.background, ''),
@@ -397,6 +853,9 @@
         parsed = null;
       }
 
+      migrateModule9ReorderIfNeeded(parsed);
+      migrateModule11To12IfNeeded(parsed);
+
       this.data = sanitizeState(parsed);
       this._migrate();
       this._syncDerivedState();
@@ -405,6 +864,8 @@
 
     save() {
       this._syncDerivedState();
+      /* Course Review Mode: never write real student records. */
+      if (window.ReviewMode && window.ReviewMode.isActive()) return;
       try {
         localStorage.setItem(this._key, JSON.stringify(this.data));
       } catch (e) {}
@@ -432,8 +893,8 @@
       for (let i = 0; i < MODULE_COUNT; i++) {
         const mod = this.reconcileModuleState(i);
         const required = this.getRequiredCheckpointIds(i);
-        if (required.length) {
-          mod.complete = this._hasAllRequiredCheckpoints(i);
+        if (required.length || this.getRequiredVideoChapterCount(i)) {
+          mod.complete = this._isModuleFullyComplete(i);
         }
         mod.unlocked = i === 0 || this.isModuleComplete(i - 1);
         if (!mod.complete) {
@@ -481,7 +942,7 @@
         return !!(meta && meta.status === 'passed');
       });
 
-      mod.complete = this._hasAllRequiredCheckpoints(moduleId);
+      mod.complete = this._isModuleFullyComplete(moduleId);
       if (mod.complete && !mod.completedAt) {
         mod.completedAt = now();
       }
@@ -504,6 +965,94 @@
       });
     },
 
+    /* ── Video-chapter completion (Module 8 masterclass player) ──
+       Declared via window.MODULE_REQUIRED_VIDEO_CHAPTERS[moduleId] = count
+       (see headspa-mastery.html). Modules without an entry are unaffected —
+       this never changes behavior for Modules 0–7, 9–11. */
+    getRequiredVideoChapterCount(moduleId) {
+      const all = window.MODULE_REQUIRED_VIDEO_CHAPTERS || {};
+      return Math.max(0, sanitizeNumber(all[String(moduleId)], 0));
+    },
+
+    getCompletedVideoChapters(moduleId) {
+      return this.getModuleProgress(moduleId).videoChapters.completed.slice();
+    },
+
+    isVideoChapterComplete(moduleId, chapterIndex) {
+      return this.getModuleProgress(moduleId).videoChapters.completed.indexOf(Number(chapterIndex)) !== -1;
+    },
+
+    /* A chapter is reachable in normal student mode once the chapter before
+       it is complete (chapter 0 is always reachable); a completed chapter
+       stays reachable so it can be replayed. Review Mode may bypass this in
+       the UI layer for inspection only — this method itself never checks
+       Review Mode, so it always reflects the real, would-be-locked state. */
+    isVideoChapterUnlocked(moduleId, chapterIndex) {
+      const idx = Number(chapterIndex);
+      if (idx <= 0) return true;
+      const completed = this.getModuleProgress(moduleId).videoChapters.completed;
+      return completed.indexOf(idx) !== -1 || completed.indexOf(idx - 1) !== -1;
+    },
+
+    _hasAllRequiredVideoChapters(moduleId) {
+      const required = this.getRequiredVideoChapterCount(moduleId);
+      if (!required) return true;
+      return this.getCompletedVideoChapters(moduleId).length >= required;
+    },
+
+    /* Combined checkpoint + video-chapter requirement — the single source
+       of truth for module completion. For modules with no declared video
+       requirement this reduces to _hasAllRequiredCheckpoints exactly as
+       before. */
+    _isModuleFullyComplete(moduleId) {
+      return this._hasAllRequiredCheckpoints(moduleId) && this._hasAllRequiredVideoChapters(moduleId);
+    },
+
+    /* Marks one chapter genuinely complete (intended to be called only from
+       a real player completion/"ended" event once Phase 2 installs real
+       video — never from opening, starting, or seeking a video). No-ops
+       outside the valid chapter range. Respects Course Review Mode via the
+       shared save() guard, exactly like setCheckpointResult. */
+    setVideoChapterComplete(moduleId, chapterIndex) {
+      const idx = Number(chapterIndex);
+      const required = this.getRequiredVideoChapterCount(moduleId);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= required) return;
+      const mod = this.getModuleProgress(moduleId);
+      if (mod.videoChapters.completed.indexOf(idx) === -1) {
+        mod.videoChapters.completed.push(idx);
+        mod.videoChapters.completed.sort((a, b) => a - b);
+      }
+      mod.videoChapters.current = Math.min(required - 1, idx + 1);
+      mod.lastVisitedAt = now();
+      if (!mod.startedAt) mod.startedAt = mod.lastVisitedAt;
+
+      mod.complete = this._isModuleFullyComplete(moduleId);
+      if (mod.complete && !mod.completedAt) {
+        mod.completedAt = now();
+      }
+      if (!mod.complete) {
+        mod.completedAt = null;
+      }
+
+      this.data.resume.moduleId = Number(moduleId);
+      this.data.resume.updatedAt = now();
+      this.save();
+    },
+
+    /* Resume convenience only — which chapter the student was last viewing.
+       Never used to gate access or completion. */
+    setActiveVideoChapter(moduleId, chapterIndex) {
+      const ceiling = Math.max(0, this.getRequiredVideoChapterCount(moduleId) - 1);
+      const idx = Math.max(0, Math.min(ceiling, Number(chapterIndex) || 0));
+      const mod = this.getModuleProgress(moduleId);
+      mod.videoChapters.current = idx;
+      this.save();
+    },
+
+    getActiveVideoChapter(moduleId) {
+      return this.getModuleProgress(moduleId).videoChapters.current || 0;
+    },
+
     getCheckpointMeta(moduleId, cpId) {
       const mod = this.getModuleProgress(moduleId);
       if (!mod.checkpointMeta[cpId]) {
@@ -520,11 +1069,20 @@
       meta.answer = sanitizeString(result && result.answer, '');
       meta.attempts = Math.max(1, (meta.attempts || 0) + 1);
       meta.updatedAt = now();
+      if (result && result.modelInfo && typeof result.modelInfo === 'object') {
+        meta.lastGradedWith = {
+          provider: sanitizeString(result.modelInfo.provider, ''),
+          modelName: sanitizeString(result.modelInfo.modelName, ''),
+          status: sanitizeString(result.modelInfo.status, ''),
+          registryVersion: sanitizeString(result.modelInfo.registryVersion, ''),
+          at: meta.updatedAt
+        };
+      }
       mod.lastVisitedAt = meta.updatedAt;
       if (!mod.startedAt) mod.startedAt = meta.updatedAt;
 
       this.reconcileModuleState(moduleId);
-      mod.complete = this._hasAllRequiredCheckpoints(moduleId);
+      mod.complete = this._isModuleFullyComplete(moduleId);
       if (mod.complete && !mod.completedAt) {
         mod.completedAt = now();
       }
@@ -540,8 +1098,21 @@
     canAccessModule(moduleId) {
       const id = Number(moduleId);
       if (!Number.isInteger(id) || id < 0 || id >= MODULE_COUNT) return false;
+      /* Course Review Mode: owner may open any module for inspection
+         without affecting real unlock state (see wouldBeLockedWithoutReview). */
+      if (window.ReviewMode && window.ReviewMode.isActive()) return true;
       if (id === 0) return true;
       return this.isModuleComplete(id - 1);
+    },
+
+    /* Course Review Mode UI only — reports whether a module would be
+       locked for a real student, independent of the Review Mode override
+       above. Does not affect access or persistence. */
+    wouldBeLockedWithoutReview(moduleId) {
+      const id = Number(moduleId);
+      if (!Number.isInteger(id) || id < 0 || id >= MODULE_COUNT) return true;
+      if (id === 0) return false;
+      return !this.isModuleComplete(id - 1);
     },
 
     getHighestUnlockedModule() {
@@ -637,7 +1208,7 @@
 
     _checkModuleComplete(moduleId) {
       const mod = this.getModuleProgress(moduleId);
-      const isComplete = this._hasAllRequiredCheckpoints(moduleId);
+      const isComplete = this._isModuleFullyComplete(moduleId);
       if (!isComplete) {
         mod.complete = false;
         mod.completedAt = null;
@@ -665,8 +1236,8 @@
     isModuleComplete(moduleId) {
       if (Number(moduleId) < 0) return true;
       const mod = this.getModuleProgress(moduleId);
-      if (this.getRequiredCheckpointIds(moduleId).length) {
-        return this._hasAllRequiredCheckpoints(moduleId);
+      if (this.getRequiredCheckpointIds(moduleId).length || this.getRequiredVideoChapterCount(moduleId)) {
+        return this._isModuleFullyComplete(moduleId);
       }
       return mod.complete;
     },
@@ -769,12 +1340,16 @@
         .slice()
         .map((item) => ({ item, score: scoreMemoryItemForModule(item, moduleNumber) }))
         .sort((a, b) => b.score - a.score);
+      /* moduleNumber === 12: Course Completion & Certification (relocated
+         from 11 — see migrateModule11To12IfNeeded above) is the closing
+         conversation, so it draws on the student's full notable-answer
+         history rather than only topically relevant ones. */
       let relevantAnswers = scoredAnswers
-        .filter((entry) => entry.score > 0 || moduleNumber === 11)
+        .filter((entry) => entry.score > 0 || moduleNumber === 12)
         .map((entry) => entry.item)
         .slice(0, purpose === 'checkpoint' ? 1 : 2);
 
-      if (!relevantAnswers.length && purpose === 'guide' && memory.notableAnswers.length && moduleNumber === 11) {
+      if (!relevantAnswers.length && purpose === 'guide' && memory.notableAnswers.length && moduleNumber === 12) {
         relevantAnswers = memory.notableAnswers.slice(-2);
       }
 

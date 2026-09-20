@@ -1,0 +1,1940 @@
+{
+  "10": {
+    "module": "10",
+    "version": "v2-strict-fidelity",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M10-BATCH-A1.txt",
+        "chunkIds": [
+          "M10-01",
+          "M10-02"
+        ],
+        "normalizedChars": 2958,
+        "aimtPronunciation": "comma-separated (A, I, M, T) \u2014 corrected 2026-09-18 after owner reported the course-wide single-spaced form rendering as 'Am-tee'",
+        "firstSpokenLine": "Welcome to Module 10 \u2014 Sanitation and Reset Systems. Build a sanitation system that holds up all day.",
+        "lastSpokenLine": "\u2026only where it's specifically required. Disinfected is not the same as sterile, and not every Head Spa setup requires sterilization equipment.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M10-BATCH-A2.txt",
+        "chunkIds": [
+          "M10-03"
+        ],
+        "normalizedChars": 2223,
+        "firstSpokenLine": "Section 10.2 \u2014 Process the Right Item the Right Way. Match the process to what the item actually is.",
+        "lastSpokenLine": "\u2026This is a maintenance tip, not a required procedure \u2014 it doesn't replace any disinfection step your system actually requires.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M10-BATCH-A3.txt",
+        "chunkIds": [
+          "M10-04"
+        ],
+        "normalizedChars": 1482,
+        "firstSpokenLine": "Section 10.3 \u2014 Build a Reset Around What Cannot Be Rushed. Contain. Clean. Disinfect. Reset. Verify.",
+        "lastSpokenLine": "\u2026the required process itself never gets shortened because the next client is waiting.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4",
+        "file": "M10-BATCH-A4.txt",
+        "chunkIds": [
+          "M10-05"
+        ],
+        "normalizedChars": 903,
+        "firstSpokenLine": "Reset Under Pressure \u2014 the room isn't fully ready, and the next client already is.",
+        "lastSpokenLine": "Choose the response you think best handles this.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-stop",
+        "interactionId": "m10RupDecision",
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4fb0",
+        "file": "M10-BATCH-A4fb0.txt",
+        "chunkIds": [
+          "M10-05-fb0"
+        ],
+        "normalizedChars": 254,
+        "firstSpokenLine": "This preserves the required process. The client can wait a few minutes, you can keep working on other reset tasks in parallel, or you can use an already-clean, ready alternative if one exists \u2014 the process finishes on its own schedule, not the client's.",
+        "lastSpokenLine": "This preserves the required process. The client can wait a few minutes, you can keep working on other reset tasks in parallel, or you can use an already-clean, ready alternative if one exists \u2014 the process finishes on its own schedule, not the client's.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 0,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4fb1",
+        "file": "M10-BATCH-A4fb1.txt",
+        "chunkIds": [
+          "M10-05-fb1"
+        ],
+        "normalizedChars": 165,
+        "firstSpokenLine": "Wiping it dry because it looks clean skips the actual requirement. Visual cleanliness is not the same as a completed disinfectant contact time or equipment process.",
+        "lastSpokenLine": "Wiping it dry because it looks clean skips the actual requirement. Visual cleanliness is not the same as a completed disinfectant contact time or equipment process.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 1,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4fb2",
+        "file": "M10-BATCH-A4fb2.txt",
+        "chunkIds": [
+          "M10-05-fb2"
+        ],
+        "normalizedChars": 165,
+        "firstSpokenLine": "Skipping the remaining contact time defeats the reason the process exists. The client arriving early doesn't change what the product or equipment actually requires.",
+        "lastSpokenLine": "Skipping the remaining contact time defeats the reason the process exists. The client arriving early doesn't change what the product or equipment actually requires.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 2,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4fb3",
+        "file": "M10-BATCH-A4fb3.txt",
+        "chunkIds": [
+          "M10-05-fb3"
+        ],
+        "normalizedChars": 147,
+        "firstSpokenLine": "An unprocessed backup hasn't gone through cleaning or disinfection yet \u2014 using it introduces exactly the risk the reset process exists to prevent.",
+        "lastSpokenLine": "An unprocessed backup hasn't gone through cleaning or disinfection yet \u2014 using it introduces exactly the risk the reset process exists to prevent.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 3,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4fb4",
+        "file": "M10-BATCH-A4fb4.txt",
+        "chunkIds": [
+          "M10-05-fb4"
+        ],
+        "normalizedChars": 173,
+        "firstSpokenLine": "Starting the service before the process finishes and catching up afterward reverses the order that keeps the room and tools safe for the next step. The process comes first.",
+        "lastSpokenLine": "Starting the service before the process finishes and catching up afterward reverses the order that keeps the room and tools safe for the next step. The process comes first.",
+        "checkpointRelationship": null,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 4,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M10-BATCH-B1.txt",
+        "chunkIds": [
+          "M10-06"
+        ],
+        "normalizedChars": 1945,
+        "firstSpokenLine": "Section 10.4 \u2014 Build the System Before You're Under Pressure. Reduce decisions. Not standards.",
+        "lastSpokenLine": "\u2026An annual internal review is a reasonable business habit, not a guarantee of compliance on its own.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M10-BATCH-B2.txt",
+        "chunkIds": [
+          "M10-07"
+        ],
+        "normalizedChars": 1755,
+        "firstSpokenLine": "Section 10.5 \u2014 When Routine Reset Is Not Enough. Blood or body fluid is not a routine reset.",
+        "lastSpokenLine": "\u2026plus a fillable page for recording your own verified product, equipment, and jurisdiction details.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B3",
+        "file": "M10-BATCH-B3.txt",
+        "chunkIds": [
+          "M10-08"
+        ],
+        "normalizedChars": 342,
+        "firstSpokenLine": "Here's your first checkpoint \u2014 between-client reset reasoning. Walk me through your between-client reset in the order that works for your setup.",
+        "lastSpokenLine": "Take your time, and answer below.",
+        "checkpointRelationship": "m9cp1",
+        "gateType": "checkpoint-stop",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B4",
+        "file": "M10-BATCH-B4.txt",
+        "chunkIds": [
+          "M10-09"
+        ],
+        "normalizedChars": 30,
+        "firstSpokenLine": "Nice work \u2014 let's keep going.",
+        "lastSpokenLine": "Nice work \u2014 let's keep going.",
+        "checkpointRelationship": "m9cp1",
+        "gateType": "post-pass",
+        "resumeAfterPass": true,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B5",
+        "file": "M10-BATCH-B5.txt",
+        "chunkIds": [
+          "M10-10"
+        ],
+        "normalizedChars": 319,
+        "firstSpokenLine": "Here's your final checkpoint \u2014 post-service concern response. A client contacts you the next day and reports a rash on her neck after the service.",
+        "lastSpokenLine": "Take your time, and answer below.",
+        "checkpointRelationship": "m9cp2",
+        "gateType": "checkpoint-stop",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M10-BATCH-C1.txt",
+        "chunkIds": [
+          "M10-11"
+        ],
+        "normalizedChars": 365,
+        "firstSpokenLine": "Module complete. You can deliver a great service. You can reset it cleanly. That discipline is what makes the experience repeatable \u2014 for every client, every time.",
+        "lastSpokenLine": "\u2026Modern practitioners are already encountering AI \u2014 this module teaches you to use it well, without losing the judgment that makes you a professional.",
+        "checkpointRelationship": "m9cp2",
+        "gateType": "post-pass",
+        "resumeAfterPass": true,
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M10-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 745
+      },
+      {
+        "chunkId": "M10-02",
+        "title": "Building on Your Licensure + Governing sources + 10.1 Use the Right Process for the Job",
+        "normalizedChars": 2213
+      },
+      {
+        "chunkId": "M10-03",
+        "title": "10.2 Process the Right Item the Right Way",
+        "normalizedChars": 2223
+      },
+      {
+        "chunkId": "M10-04",
+        "title": "10.3 Build a Reset Around What Cannot Be Rushed",
+        "normalizedChars": 1482
+      },
+      {
+        "chunkId": "M10-05",
+        "title": "Reset Under Pressure (interaction prompt + options)",
+        "normalizedChars": 903,
+        "gateType": "interaction-stop",
+        "interactionId": "m10RupDecision"
+      },
+      {
+        "chunkId": "M10-05-fb0",
+        "title": "feedback for option 1 (strongest)",
+        "normalizedChars": 254,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 0
+      },
+      {
+        "chunkId": "M10-05-fb1",
+        "title": "feedback for option 2",
+        "normalizedChars": 165,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 1
+      },
+      {
+        "chunkId": "M10-05-fb2",
+        "title": "feedback for option 3",
+        "normalizedChars": 165,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 2
+      },
+      {
+        "chunkId": "M10-05-fb3",
+        "title": "feedback for option 4",
+        "normalizedChars": 147,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 3
+      },
+      {
+        "chunkId": "M10-05-fb4",
+        "title": "feedback for option 5",
+        "normalizedChars": 173,
+        "gateType": "interaction-feedback",
+        "interactionId": "m10RupDecision",
+        "optionIndex": 4
+      },
+      {
+        "chunkId": "M10-06",
+        "title": "10.4 Build the System Before You're Under Pressure",
+        "normalizedChars": 1945
+      },
+      {
+        "chunkId": "M10-07",
+        "title": "10.5 When Routine Reset Is Not Enough",
+        "normalizedChars": 1755
+      },
+      {
+        "chunkId": "M10-08",
+        "title": "Checkpoint 1 (m9cp1)",
+        "normalizedChars": 342,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m9cp1"
+      },
+      {
+        "chunkId": "M10-09",
+        "title": "Post-pass (m9cp1): transition only",
+        "normalizedChars": 30,
+        "gateType": "post-pass",
+        "checkpointId": "m9cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M10-10",
+        "title": "Checkpoint 2 (m9cp2)",
+        "normalizedChars": 319,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m9cp2"
+      },
+      {
+        "chunkId": "M10-11",
+        "title": "Post-pass (m9cp2): completion + recap + handoff",
+        "normalizedChars": 365,
+        "gateType": "post-pass",
+        "checkpointId": "m9cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "11": {
+    "module": "11",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M11-BATCH-A1.txt",
+        "chunkIds": [
+          "M11-01",
+          "M11-02"
+        ],
+        "normalizedChars": 2073,
+        "firstSpokenLine": "Welcome to Module 11. AI is already becoming part of modern practice \u2014 from business and communication to research, imaging, and the questio",
+        "lastSpokenLine": "ot automatically verified output. Creative AI leaves accuracy, claims, brand fit, and final approval with the practitioner \u2014 never the tool.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M11-BATCH-A2.txt",
+        "chunkIds": [
+          "M11-03"
+        ],
+        "normalizedChars": 1506,
+        "firstSpokenLine": "Section 11.2 \u2014 Better input. Give AI a better B-R-I-E-F.",
+        "lastSpokenLine": " that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M11-BATCH-A3.txt",
+        "chunkIds": [
+          "M11-04"
+        ],
+        "normalizedChars": 2051,
+        "firstSpokenLine": "Section 11.3 \u2014 Human authority. Decide how much authority to give the tool. The question is always: what are you asking the tool to do, and ",
+        "lastSpokenLine": "gh literacy that a polished percentage never reads as universal truth. General conversational AI should not become your scalp diagnostician.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M11-BATCH-B1.txt",
+        "chunkIds": [
+          "M11-05"
+        ],
+        "normalizedChars": 1580,
+        "firstSpokenLine": "Section 11.5 \u2014 Client-supplied AI. When the client brings an AI answer.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m11cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M11-BATCH-B2.txt",
+        "chunkIds": [
+          "M11-06"
+        ],
+        "normalizedChars": 2834,
+        "firstSpokenLine": "Section 11.6 \u2014 Privacy and client data. Client information, images, and AI.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m11cp1,m11cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M11-BATCH-C1.txt",
+        "chunkIds": [
+          "M11-07"
+        ],
+        "normalizedChars": 319,
+        "firstSpokenLine": "Module complete. You now know how to use AI as leverage without handing over your judgment. That distinction is what separates a practitione",
+        "lastSpokenLine": "Up next, Module 12: course completion and certification. Take a moment \u2014 you built something real.",
+        "checkpointRelationship": "m11cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M11-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 687
+      },
+      {
+        "chunkId": "M11-02",
+        "title": "Intro + AIMT position + 11.1 Tool literacy",
+        "normalizedChars": 1384
+      },
+      {
+        "chunkId": "M11-03",
+        "title": "11.2 Better input: the B.R.I.E.F. framework",
+        "normalizedChars": 1506
+      },
+      {
+        "chunkId": "M11-04",
+        "title": "11.3 Human authority + 11.4 Scalp and hair analysis",
+        "normalizedChars": 2051
+      },
+      {
+        "chunkId": "M11-05",
+        "title": "11.5 Client-supplied AI + Checkpoint 1 (`m11cp1`)",
+        "normalizedChars": 1580,
+        "gateType": "checkpoint-stop-then-post-pass",
+        "checkpointId": "m11cp1"
+      },
+      {
+        "chunkId": "M11-06",
+        "title": "Post-pass: 11.6 Privacy, 11.7 Practice leverage, 11.8 Human-led practice + Checkpoint 2 (`m11cp2`)",
+        "normalizedChars": 2834,
+        "gateType": "post-pass-then-checkpoint-stop",
+        "checkpointId": "m11cp1,m11cp2"
+      },
+      {
+        "chunkId": "M11-07",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 319,
+        "gateType": "post-pass",
+        "checkpointId": "m11cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "12": {
+    "module": "12",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M12-BATCH-A1.txt",
+        "chunkIds": [
+          "M12-01"
+        ],
+        "normalizedChars": 3966,
+        "firstSpokenLine": "Welcome to your final assessment. You've completed the instructional part of the Head Spa Certification Course and demonstrated your underst",
+        "lastSpokenLine": "Good luck.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M12-01",
+        "title": "State A orientation (spoken)",
+        "normalizedChars": 3966
+      }
+    ]
+  },
+  "00": {
+    "module": "00",
+    "batches": [
+      {
+        "batchId": "A1a",
+        "file": "M0-BATCH-A1a.txt",
+        "chunkIds": [
+          "M0-01",
+          "M0-01b",
+          "M0-02"
+        ],
+        "normalizedChars": 2926,
+        "firstSpokenLine": "Welcome. I'm Cadence \u2014 I'll be your guide through this course: testing your reasoning, and connecting every idea back to a real service you'",
+        "lastSpokenLine": " decisions, in real time. This isn't theory dressed up as expertise. It's a framework built through repetition, observation, and refinement.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A1b",
+        "file": "M0-BATCH-A1b.txt",
+        "chunkIds": [
+          "M0-03",
+          "M0-04"
+        ],
+        "normalizedChars": 1901,
+        "firstSpokenLine": "Section 0.2 \u2014 What this course is. A framework. Not a script.",
+        "lastSpokenLine": "Inspiration is easy to find. Repetition, structure, judgment, and execution \u2014 that's what makes a real practitioner.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M0-BATCH-A2.txt",
+        "chunkIds": [
+          "M0-05",
+          "M0-06",
+          "M0-07",
+          "M0-08"
+        ],
+        "normalizedChars": 3590,
+        "firstSpokenLine": "Section 0.4 \u2014 What you'll learn. You're not just learning steps. You're learning how those steps connect.",
+        "lastSpokenLine": " knows when to adjust, when to simplify, and when to refer out. You don't prove skill by pushing through situations you should have stopped.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M0-BATCH-A3.txt",
+        "chunkIds": [
+          "M0-09",
+          "M0-10",
+          "M0-11"
+        ],
+        "normalizedChars": 2956,
+        "firstSpokenLine": "Section 0.7 \u2014 What makes a great technician. A great technician isn't just someone with good hands.",
+        "lastSpokenLine": "And perform repeatably: deliver the same quality experience for every client \u2014 not just the ones where everything happened to go smoothly.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4",
+        "file": "M0-BATCH-A4.txt",
+        "chunkIds": [
+          "M0-12",
+          "M0-13",
+          "M0-14"
+        ],
+        "normalizedChars": 1745,
+        "firstSpokenLine": "Section 0.10 \u2014 Practitioner insight. Clients remember how it felt. Not just what you did.",
+        "lastSpokenLine": "Take your time, and answer above in your own words.",
+        "checkpointRelationship": "m0cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M0-BATCH-B1.txt",
+        "chunkIds": [
+          "M0-15"
+        ],
+        "normalizedChars": 701,
+        "firstSpokenLine": "The standard is established.",
+        "lastSpokenLine": " head spa practitioner is actually responsible for, where that responsibility ends, and why that boundary protects both you and your client.",
+        "checkpointRelationship": "m0cp1",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M0-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 751
+      },
+      {
+        "chunkId": "M0-01b",
+        "title": "Before you begin (Listen Mode orientation)",
+        "normalizedChars": 1202
+      },
+      {
+        "chunkId": "M0-02",
+        "title": "0.1 Welcome",
+        "normalizedChars": 969
+      },
+      {
+        "chunkId": "M0-03",
+        "title": "0.2 What this course is",
+        "normalizedChars": 1420
+      },
+      {
+        "chunkId": "M0-04",
+        "title": "0.3 Who this is for",
+        "normalizedChars": 479
+      },
+      {
+        "chunkId": "M0-05",
+        "title": "0.4 What you'll learn",
+        "normalizedChars": 636
+      },
+      {
+        "chunkId": "M0-06",
+        "title": "0.5 How to use this course",
+        "normalizedChars": 887
+      },
+      {
+        "chunkId": "M0-07",
+        "title": "Practice interaction: \"Same steps. Different service.\"",
+        "normalizedChars": 691
+      },
+      {
+        "chunkId": "M0-08",
+        "title": "0.6 The standard",
+        "normalizedChars": 1370
+      },
+      {
+        "chunkId": "M0-09",
+        "title": "0.7 What makes a great technician",
+        "normalizedChars": 1101
+      },
+      {
+        "chunkId": "M0-10",
+        "title": "0.8 Scope and safety",
+        "normalizedChars": 1105
+      },
+      {
+        "chunkId": "M0-11",
+        "title": "0.9 What success looks like",
+        "normalizedChars": 746
+      },
+      {
+        "chunkId": "M0-12",
+        "title": "0.10 Practitioner insight",
+        "normalizedChars": 496
+      },
+      {
+        "chunkId": "M0-13",
+        "title": "0.11 Common early mistakes",
+        "normalizedChars": 831
+      },
+      {
+        "chunkId": "M0-14",
+        "title": "Checkpoint (`m0cp1`)",
+        "normalizedChars": 414,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m0cp1"
+      },
+      {
+        "chunkId": "M0-15",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 701,
+        "gateType": "post-pass",
+        "checkpointId": "m0cp1",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "01": {
+    "module": "01",
+    "version": "v6-strict-fidelity",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M1-BATCH-A1.txt",
+        "chunkIds": [
+          "M1-01",
+          "M1-02",
+          "M1-03"
+        ],
+        "normalizedChars": 2701,
+        "firstSpokenLine": "Welcome to Module 1 \u2014 Role, Scope, and Professional Boundaries. Know what you are. Know what you are not.",
+        "lastSpokenLine": "ating, adjusting pressure and pacing, protecting scope, recognizing when to simplify or stop, and maintaining control from beginning to end.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M1-BATCH-A2.txt",
+        "chunkIds": [
+          "M1-04",
+          "M1-05"
+        ],
+        "normalizedChars": 3657,
+        "firstSpokenLine": "Section 1.3 \u2014 Observation vs. diagnosis. Recognizing a pattern is not the same as diagnosing a condition.",
+        "lastSpokenLine": "procedure. Presenting scanner, microscopy, or AI output as a medical diagnosis. And practicing beyond the license or authorization you hold.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M1-BATCH-A3.txt",
+        "chunkIds": [
+          "M1-06",
+          "M1-07"
+        ],
+        "normalizedChars": 1866,
+        "firstSpokenLine": "Before your first checkpoint, a quick practice round \u2014 ungraded. Where is the line? Read each statement and decide for yourself whether it's",
+        "lastSpokenLine": "Take whatever time you need. I'm not timing you.",
+        "checkpointRelationship": "m1cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M1-BATCH-B1.txt",
+        "chunkIds": [
+          "M1-08",
+          "M1-09",
+          "M1-10",
+          "M1-11"
+        ],
+        "normalizedChars": 2658,
+        "firstSpokenLine": "Good \u2014 you kept the boundary while still giving her somewhere real to go. Let's continue into Section 1.5.",
+        "lastSpokenLine": "They need clear observation, responsible expectations, and confidence that you will know when to proceed, when to adjust, and when to refer.",
+        "checkpointRelationship": "m1cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M1-BATCH-B2.txt",
+        "chunkIds": [
+          "M1-12",
+          "M1-13"
+        ],
+        "normalizedChars": 1492,
+        "firstSpokenLine": "Section 1.8 \u2014 Mistakes new practitioners make. Five patterns. All avoidable.",
+        "lastSpokenLine": "Take your time.",
+        "checkpointRelationship": "m1cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M1-BATCH-C1.txt",
+        "chunkIds": [
+          "M1-14"
+        ],
+        "normalizedChars": 559,
+        "firstSpokenLine": "Good \u2014 that's the difference. You weren't just describing the steps. You were showing the judgment behind them.",
+        "lastSpokenLine": "o the client experience before the scalp service begins: intake, first contact, communication, and the opening moments that establish trust.",
+        "checkpointRelationship": "m1cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M1-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 677
+      },
+      {
+        "chunkId": "M1-02",
+        "title": "1.1 What is a head spa?",
+        "normalizedChars": 1122
+      },
+      {
+        "chunkId": "M1-03",
+        "title": "1.2 What is a head spa technician?",
+        "normalizedChars": 898
+      },
+      {
+        "chunkId": "M1-04",
+        "title": "1.3 Observation vs. diagnosis",
+        "normalizedChars": 2346
+      },
+      {
+        "chunkId": "M1-05",
+        "title": "1.4 Scope of practice",
+        "normalizedChars": 1309
+      },
+      {
+        "chunkId": "M1-06",
+        "title": "Practice interaction: \"Where is the line?\"",
+        "normalizedChars": 1469
+      },
+      {
+        "chunkId": "M1-07",
+        "title": "Checkpoint 1 (`m1cp1`)",
+        "normalizedChars": 395,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m1cp1"
+      },
+      {
+        "chunkId": "M1-08",
+        "title": "Post-pass continuation (`m1cp1`)",
+        "normalizedChars": 106,
+        "gateType": "post-pass",
+        "checkpointId": "m1cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M1-09",
+        "title": "1.5 Limitations of a head spa service",
+        "normalizedChars": 1003
+      },
+      {
+        "chunkId": "M1-10",
+        "title": "1.6 Licensing",
+        "normalizedChars": 697
+      },
+      {
+        "chunkId": "M1-11",
+        "title": "1.7 Practitioner insight",
+        "normalizedChars": 846
+      },
+      {
+        "chunkId": "M1-12",
+        "title": "1.8 Mistakes new practitioners make",
+        "normalizedChars": 1179
+      },
+      {
+        "chunkId": "M1-13",
+        "title": "Checkpoint 2 (`m1cp2`)",
+        "normalizedChars": 311,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m1cp2"
+      },
+      {
+        "chunkId": "M1-14",
+        "title": "Post-pass continuation (`m1cp2`) + completion + Module 2 handoff",
+        "normalizedChars": 559,
+        "gateType": "post-pass",
+        "checkpointId": "m1cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "02": {
+    "module": "02",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M2-BATCH-A1.txt",
+        "chunkIds": [
+          "M2-01",
+          "M2-02",
+          "M2-03"
+        ],
+        "normalizedChars": 2535,
+        "firstSpokenLine": "Welcome to Module 2. The experience begins before your hands do.",
+        "lastSpokenLine": " isn't to eliminate communication. It's to avoid discovering basic service decisions one step at a time while the client is trying to relax.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M2-BATCH-A2.txt",
+        "chunkIds": [
+          "M2-04",
+          "M2-05"
+        ],
+        "normalizedChars": 2801,
+        "firstSpokenLine": "Section 2.2 \u2014 Remove preventable uncertainty. Relaxation begins with certainty.",
+        "lastSpokenLine": "scomfort, or a changed decision. It means you don't repeatedly reopen decisions that have already been established unless something changes.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M2-BATCH-A3.txt",
+        "chunkIds": [
+          "M2-06",
+          "M2-07",
+          "M2-08"
+        ],
+        "normalizedChars": 3359,
+        "firstSpokenLine": "There's a practitioner resource on screen here \u2014 the Head Spa Intake and Service Plan. It's a two-part fillable form: gather the information",
+        "lastSpokenLine": "[warmly] Prepared practitioners can stay quiet because they already know what they'd say if the client needs them.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A4",
+        "file": "M2-BATCH-A4.txt",
+        "chunkIds": [
+          "M2-09",
+          "M2-10",
+          "M2-11"
+        ],
+        "normalizedChars": 2446,
+        "firstSpokenLine": "Section 2.6 \u2014 When something changes. The plan is established. Your attention stays active.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m2cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M2-BATCH-B1.txt",
+        "chunkIds": [
+          "M2-12"
+        ],
+        "normalizedChars": 429,
+        "firstSpokenLine": "Module complete. You can use intake and preparation to remove preventable uncertainty, establish the service plan before treatment, and prot",
+        "lastSpokenLine": "he hair and scalp. The goal is to understand what you're observing, so later service decisions have a clear professional reason behind them.",
+        "checkpointRelationship": "m2cp1",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M2-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 817
+      },
+      {
+        "chunkId": "M2-02",
+        "title": "The governing principle",
+        "normalizedChars": 637
+      },
+      {
+        "chunkId": "M2-03",
+        "title": "2.1 Intake Before Arrival",
+        "normalizedChars": 1077
+      },
+      {
+        "chunkId": "M2-04",
+        "title": "2.2 Remove Preventable Uncertainty",
+        "normalizedChars": 1188
+      },
+      {
+        "chunkId": "M2-05",
+        "title": "2.3 Set the Plan Before the Quiet + Before/During",
+        "normalizedChars": 1611
+      },
+      {
+        "chunkId": "M2-06",
+        "title": "Practitioner resource: Head Spa Intake + Service Plan",
+        "normalizedChars": 630
+      },
+      {
+        "chunkId": "M2-07",
+        "title": "2.4 First Touch",
+        "normalizedChars": 1487
+      },
+      {
+        "chunkId": "M2-08",
+        "title": "2.5 Protect the Quiet",
+        "normalizedChars": 1238
+      },
+      {
+        "chunkId": "M2-09",
+        "title": "2.6 When Something Changes + interaction framing",
+        "normalizedChars": 986
+      },
+      {
+        "chunkId": "M2-10",
+        "title": "2.7 Consistency",
+        "normalizedChars": 764
+      },
+      {
+        "chunkId": "M2-11",
+        "title": "Checkpoint (`m2cp1`)",
+        "normalizedChars": 692,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m2cp1"
+      },
+      {
+        "chunkId": "M2-12",
+        "title": "Post-pass continuation: completion + handoff",
+        "normalizedChars": 429,
+        "gateType": "post-pass",
+        "checkpointId": "m2cp1",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "03": {
+    "module": "03",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M3-BATCH-A1.txt",
+        "chunkIds": [
+          "M3-01",
+          "M3-02",
+          "M3-03"
+        ],
+        "normalizedChars": 3014,
+        "firstSpokenLine": "Welcome to Module 3. This is where the course turns technical \u2014 but the goal isn't to memorize anatomy for its own sake. Once you understand",
+        "lastSpokenLine": "[firmly] Anatomy makes pressure more intelligent. It does not turn deeper tissue into a cosmetic claim.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M3-BATCH-A2.txt",
+        "chunkIds": [
+          "M3-04"
+        ],
+        "normalizedChars": 2945,
+        "firstSpokenLine": "Section 3.3 \u2014 The living system beneath the strand. The strand is the output. The follicle is the living system.",
+        "lastSpokenLine": "[firmly] The expert move isn't naming more structures. It's knowing what each structure actually allows you to conclude.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M3-BATCH-A3.txt",
+        "chunkIds": [
+          "M3-05",
+          "M3-06"
+        ],
+        "normalizedChars": 2006,
+        "firstSpokenLine": "Section 3.4 \u2014 The hair-growth cycle. Hair loss is often a timing problem before it's a pattern problem.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M3-BATCH-B1.txt",
+        "chunkIds": [
+          "M3-07",
+          "M3-08"
+        ],
+        "normalizedChars": 3734,
+        "firstSpokenLine": "Section 3.5 \u2014 Read the pattern. Don't start with the name. Start with the pattern.",
+        "lastSpokenLine": "Treat the pattern you can support cosmetically \u2014 not the diagnosis you cannot establish.",
+        "checkpointRelationship": "cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M3-BATCH-B2.txt",
+        "chunkIds": [
+          "M3-09",
+          "M3-10"
+        ],
+        "normalizedChars": 2472,
+        "firstSpokenLine": "Section 3.7 \u2014 Massage and anatomy. Massage is technique, not mythology.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M3-BATCH-C1.txt",
+        "chunkIds": [
+          "M3-11"
+        ],
+        "normalizedChars": 599,
+        "firstSpokenLine": "You can now see beneath the surface.",
+        "lastSpokenLine": "omy gave you the map. Now you'll learn to read the visible scalp in real time \u2014 through assessment, microscopy, and disciplined observation.",
+        "checkpointRelationship": "cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M3-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 727
+      },
+      {
+        "chunkId": "M3-02",
+        "title": "3.1 Read beneath the surface",
+        "normalizedChars": 861
+      },
+      {
+        "chunkId": "M3-03",
+        "title": "3.2 The scalp map",
+        "normalizedChars": 1422
+      },
+      {
+        "chunkId": "M3-04",
+        "title": "3.3 The living system beneath the strand + Anatomy to action",
+        "normalizedChars": 2945
+      },
+      {
+        "chunkId": "M3-05",
+        "title": "3.4 The hair-growth cycle + Predict before you reveal",
+        "normalizedChars": 1697
+      },
+      {
+        "chunkId": "M3-06",
+        "title": "Checkpoint 1 (`cp1`)",
+        "normalizedChars": 307,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "cp1"
+      },
+      {
+        "chunkId": "M3-07",
+        "title": "Post-pass: 3.5 Read the pattern",
+        "normalizedChars": 2229,
+        "gateType": "post-pass",
+        "checkpointId": "cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M3-08",
+        "title": "3.6 Barrier and surface lipids",
+        "normalizedChars": 1503
+      },
+      {
+        "chunkId": "M3-09",
+        "title": "3.7 Massage and anatomy",
+        "normalizedChars": 1268
+      },
+      {
+        "chunkId": "M3-10",
+        "title": "3.8 Anatomy in practice + Checkpoint 2 (`cp2`)",
+        "normalizedChars": 1202,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "cp2"
+      },
+      {
+        "chunkId": "M3-11",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 599,
+        "gateType": "post-pass",
+        "checkpointId": "cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "04": {
+    "module": "04",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M4-BATCH-A1.txt",
+        "chunkIds": [
+          "M4-01",
+          "M4-02"
+        ],
+        "normalizedChars": 2643,
+        "firstSpokenLine": "Welcome to Module 4. Magnification doesn't hand you a diagnosis \u2014 it gives you a better view. This module teaches a repeatable five-point sc",
+        "lastSpokenLine": "nt feel dirty, damaged, or alarmed. Describe the finding. Explain the cosmetic decision. State the limit when the cause can't be determined.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M4-BATCH-A2.txt",
+        "chunkIds": [
+          "M4-03"
+        ],
+        "normalizedChars": 1261,
+        "firstSpokenLine": "Section 4.3 \u2014 Image integrity. A useful image begins before the lens touches the scalp. Magnification can exaggerate a poor setup \u2014 standard",
+        "lastSpokenLine": "eeding, weeping, oozing, or draining skin. If the setup changes, the image changes \u2014 document the difference before you call it improvement.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M4-BATCH-A3.txt",
+        "chunkIds": [
+          "M4-04",
+          "M4-05"
+        ],
+        "normalizedChars": 3091,
+        "firstSpokenLine": "Section 4.4 \u2014 The five-point scalp scan. The scalp isn't uniform \u2014 A I M T's baseline scan uses the same five assessment points, in the same",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m4cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M4-BATCH-B1.txt",
+        "chunkIds": [
+          "M4-06"
+        ],
+        "normalizedChars": 2445,
+        "firstSpokenLine": "Section 4.6 \u2014 Appearance examples. These build visual vocabulary \u2014 illustrative magnified examples, not authenticated clinical captures, and",
+        "lastSpokenLine": " a gentle cleanse change what's visible? When two possible stories look similar, ask a better question instead of choosing a stronger label.",
+        "checkpointRelationship": "m4cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M4-BATCH-B2.txt",
+        "chunkIds": [
+          "M4-07",
+          "M4-08"
+        ],
+        "normalizedChars": 2704,
+        "firstSpokenLine": "Section 4.7 \u2014 From image to decision. The image earns its place by changing what happens next. Assessment isn't a performance \u2014 it should su",
+        "lastSpokenLine": " otherwise compromised area, remove it from service and follow the manufacturer's required cleaning and disinfection procedure before reuse.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B3",
+        "file": "M4-BATCH-B3.txt",
+        "chunkIds": [
+          "M4-09",
+          "M4-10"
+        ],
+        "normalizedChars": 2392,
+        "firstSpokenLine": "Section 4.9 \u2014 Practitioner insight. The device can create the evidence you think you found.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m4cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M4-BATCH-C1.txt",
+        "chunkIds": [
+          "M4-11"
+        ],
+        "normalizedChars": 596,
+        "firstSpokenLine": "You can collect evidence before making a decision.",
+        "lastSpokenLine": "ll learn to translate appropriate findings into an actual cosmetic treatment direction \u2014 without collapsing the entire scalp into one label.",
+        "checkpointRelationship": "m4cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M4-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 727
+      },
+      {
+        "chunkId": "M4-02",
+        "title": "4.1 The role of magnification + 4.2 Presenting the assessment",
+        "normalizedChars": 1914
+      },
+      {
+        "chunkId": "M4-03",
+        "title": "4.3 Image integrity",
+        "normalizedChars": 1261
+      },
+      {
+        "chunkId": "M4-04",
+        "title": "4.4 Five-point scan + 4.5 Five observation lenses + Observation discipline",
+        "normalizedChars": 2653
+      },
+      {
+        "chunkId": "M4-05",
+        "title": "Checkpoint 1 (`m4cp1`)",
+        "normalizedChars": 436,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m4cp1"
+      },
+      {
+        "chunkId": "M4-06",
+        "title": "Post-pass: 4.6 Appearance examples + Similar image, different story",
+        "normalizedChars": 2445,
+        "gateType": "post-pass",
+        "checkpointId": "m4cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M4-07",
+        "title": "4.7 From image to decision",
+        "normalizedChars": 1259
+      },
+      {
+        "chunkId": "M4-08",
+        "title": "4.8 When not to proceed",
+        "normalizedChars": 1443
+      },
+      {
+        "chunkId": "M4-09",
+        "title": "4.9 Practitioner insight",
+        "normalizedChars": 1042
+      },
+      {
+        "chunkId": "M4-10",
+        "title": "4.10 Common mistakes + Checkpoint 2 (`m4cp2`)",
+        "normalizedChars": 1348,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m4cp2"
+      },
+      {
+        "chunkId": "M4-11",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 596,
+        "gateType": "post-pass",
+        "checkpointId": "m4cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "05": {
+    "module": "05",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M5-BATCH-A1.txt",
+        "chunkIds": [
+          "M5-01",
+          "M5-02"
+        ],
+        "normalizedChars": 2899,
+        "firstSpokenLine": "Welcome to Module 5. Module 4 taught you how to gather and describe evidence. Now you'll turn that evidence \u2014 plus what the client reports a",
+        "lastSpokenLine": "product \u2014 choose the service direction first, then select a compatible product within your license, training, and manufacturer instructions.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M5-BATCH-A2.txt",
+        "chunkIds": [
+          "M5-03",
+          "M5-04"
+        ],
+        "normalizedChars": 3246,
+        "firstSpokenLine": "Section 5.3 \u2014 Priority order. The safest limit outranks the client's request. Clients may ask for the deepest cleanse or the firmest pressur",
+        "lastSpokenLine": " by side \u2014 the crown calling for more targeted cleansing, the hairline calling for a gentler approach. Same client, two different decisions.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M5-BATCH-A3.txt",
+        "chunkIds": [
+          "M5-05",
+          "M5-06"
+        ],
+        "normalizedChars": 1420,
+        "firstSpokenLine": "Signature interaction: what changes first? You're not diagnosing the scalp \u2014 you're deciding what the current evidence allows you to do next",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m5cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M5-BATCH-B1.txt",
+        "chunkIds": [
+          "M5-07",
+          "M5-08"
+        ],
+        "normalizedChars": 2787,
+        "firstSpokenLine": "Section 5.5 \u2014 One appointment, more than one approach. The protocol can change without the service feeling fragmented. Use the same structur",
+        "lastSpokenLine": "[slowly] The protocol isn't the number of steps. It's the quality of the decisions between them.",
+        "checkpointRelationship": "m5cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M5-BATCH-B2.txt",
+        "chunkIds": [
+          "M5-09",
+          "M5-10"
+        ],
+        "normalizedChars": 3234,
+        "firstSpokenLine": "Section 5.8 \u2014 Client communication. Redirect the method without dismissing the goal. Clients often ask for intensity because they associate ",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m5cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M5-BATCH-C1.txt",
+        "chunkIds": [
+          "M5-11"
+        ],
+        "normalizedChars": 603,
+        "firstSpokenLine": "Module complete. Assessment becomes skill when it changes the service responsibly.",
+        "lastSpokenLine": "ed with cosmetic patterns. Same goal as always \u2014 observe carefully, stay within scope, and know when medical evaluation belongs in the plan.",
+        "checkpointRelationship": "m5cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M5-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 732
+      },
+      {
+        "chunkId": "M5-02",
+        "title": "5.1 From evidence to action + 5.2 What you can actually change",
+        "normalizedChars": 2165
+      },
+      {
+        "chunkId": "M5-03",
+        "title": "5.3 Priority order",
+        "normalizedChars": 1199
+      },
+      {
+        "chunkId": "M5-04",
+        "title": "5.4 Patterns, not permanent types",
+        "normalizedChars": 2045
+      },
+      {
+        "chunkId": "M5-05",
+        "title": "Signature interaction: What changes first?",
+        "normalizedChars": 1033
+      },
+      {
+        "chunkId": "M5-06",
+        "title": "Checkpoint 1 (`m5cp1`)",
+        "normalizedChars": 385,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m5cp1"
+      },
+      {
+        "chunkId": "M5-07",
+        "title": "Post-pass: 5.5 One appointment, more than one approach",
+        "normalizedChars": 1164,
+        "gateType": "post-pass",
+        "checkpointId": "m5cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M5-08",
+        "title": "5.6 Choose a function, not a fantasy + 5.7 Intensity is part of the protocol",
+        "normalizedChars": 1621
+      },
+      {
+        "chunkId": "M5-09",
+        "title": "5.8 Client communication",
+        "normalizedChars": 1343
+      },
+      {
+        "chunkId": "M5-10",
+        "title": "5.9 Errors that make protocols less intelligent + Checkpoint 2 (`m5cp2`)",
+        "normalizedChars": 1889,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m5cp2"
+      },
+      {
+        "chunkId": "M5-11",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 603,
+        "gateType": "post-pass",
+        "checkpointId": "m5cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "06": {
+    "module": "06",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M6-BATCH-A1.txt",
+        "chunkIds": [
+          "M6-01",
+          "M6-02"
+        ],
+        "normalizedChars": 2326,
+        "firstSpokenLine": "Welcome to Module 6. By this point you know how to observe the scalp and recognize scalp types. Now you're adding another layer \u2014 conditions",
+        "lastSpokenLine": "wash timing, recent changes, symptoms \u2014 and favor the gentler service direction. Don't force a label just to make the picture feel resolved.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M6-BATCH-A2.txt",
+        "chunkIds": [
+          "M6-03"
+        ],
+        "normalizedChars": 1722,
+        "firstSpokenLine": "Section 6.3 \u2014 The most important distinction in scalp care. Dry scalp and dandruff are not the same thing. They can both present with flakin",
+        "lastSpokenLine": "sk about recent products, wash frequency, how long the pattern's been present, and favor the gentler direction until the picture is clearer.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M6-BATCH-A3.txt",
+        "chunkIds": [
+          "M6-04",
+          "M6-05"
+        ],
+        "normalizedChars": 3190,
+        "firstSpokenLine": "Section 6.4 \u2014 The cycle worth understanding. Why the wrong product makes things worse. This is a common, avoidable pattern \u2014 a client sees f",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m6cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M6-BATCH-B1.txt",
+        "chunkIds": [
+          "M6-06",
+          "M6-07"
+        ],
+        "normalizedChars": 2279,
+        "firstSpokenLine": "Section 6.5 \u2014 Malassezia to seborrheic dermatitis: one spectrum. Not two conditions \u2014 one spectrum.",
+        "lastSpokenLine": " screen \u2014 proceed, modify, or refer \u2014 using everything you just learned about the dry-versus-dandruff distinction and the referral criteria.",
+        "checkpointRelationship": "m6cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M6-BATCH-B2.txt",
+        "chunkIds": [
+          "M6-08",
+          "M6-09"
+        ],
+        "normalizedChars": 2842,
+        "firstSpokenLine": "Section 6.7 \u2014 Treatment within scope. You're supporting the environment. Not treating the condition.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m6cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M6-BATCH-C1.txt",
+        "chunkIds": [
+          "M6-10"
+        ],
+        "normalizedChars": 402,
+        "firstSpokenLine": "Module complete. You can now read the difference between dry scalp and dandruff, understand the Malassezia spectrum, and explain it to a cli",
+        "lastSpokenLine": "in a poorly designed setup. Module 7 covers equipment, tools, room design, and how to build a workspace that makes everything else possible.",
+        "checkpointRelationship": "m6cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M6-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 708
+      },
+      {
+        "chunkId": "M6-02",
+        "title": "6.1 Your role here + 6.2 What you can and cannot conclude",
+        "normalizedChars": 1616
+      },
+      {
+        "chunkId": "M6-03",
+        "title": "6.3 The most important distinction in scalp care",
+        "normalizedChars": 1722
+      },
+      {
+        "chunkId": "M6-04",
+        "title": "6.4 The cycle worth understanding",
+        "normalizedChars": 2837
+      },
+      {
+        "chunkId": "M6-05",
+        "title": "Checkpoint 1 (`m6cp1`)",
+        "normalizedChars": 351,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m6cp1"
+      },
+      {
+        "chunkId": "M6-06",
+        "title": "Post-pass: 6.5 Malassezia to seborrheic dermatitis + 6.6 When to pause or refer",
+        "normalizedChars": 1503,
+        "gateType": "post-pass",
+        "checkpointId": "m6cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M6-07",
+        "title": "Signature interaction: Sort three presentations",
+        "normalizedChars": 774
+      },
+      {
+        "chunkId": "M6-08",
+        "title": "6.7 Treatment within scope",
+        "normalizedChars": 1122
+      },
+      {
+        "chunkId": "M6-09",
+        "title": "6.8 What makes it worse + Checkpoint 2 (`m6cp2`)",
+        "normalizedChars": 1718,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m6cp2"
+      },
+      {
+        "chunkId": "M6-10",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 402,
+        "gateType": "post-pass",
+        "checkpointId": "m6cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "07": {
+    "module": "07",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M7-BATCH-A1.txt",
+        "chunkIds": [
+          "M7-01",
+          "M7-02"
+        ],
+        "normalizedChars": 2618,
+        "firstSpokenLine": "Welcome to Module 7. By the time your hands touch the client, they've already formed an impression \u2014 not consciously, but they feel whether ",
+        "lastSpokenLine": "ooks impressive in photos over what actually feels comfortable to lie in for an hour. Choose the bed your clients will want to come back to.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M7-BATCH-A2.txt",
+        "chunkIds": [
+          "M7-03",
+          "M7-04"
+        ],
+        "normalizedChars": 2543,
+        "firstSpokenLine": "Section 7.2 \u2014 Tools and supplies. Essentials first. Upgrades later.",
+        "lastSpokenLine": "s atmosphere. Massage oil and lotion ready on the cart. And ambient \u2014 music, lighting, diffuser \u2014 running before the client enters the room.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M7-BATCH-A3.txt",
+        "chunkIds": [
+          "M7-05",
+          "M7-06",
+          "M7-07"
+        ],
+        "normalizedChars": 3788,
+        "firstSpokenLine": "Section 7.4 \u2014 Client positioning. Three things to confirm before the water runs.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m7cp1,m7cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M7-BATCH-B1.txt",
+        "chunkIds": [
+          "M7-08"
+        ],
+        "normalizedChars": 287,
+        "firstSpokenLine": "Module complete. You can evaluate a setup, prepare a station, and position a client correctly \u2014 and now know what to do if something's off.",
+        "lastSpokenLine": "t, Module 8: the full service itself. Every transition, every micro-teach moment that makes this service worth the price clients pay for it.",
+        "checkpointRelationship": "m7cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M7-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 758
+      },
+      {
+        "chunkId": "M7-02",
+        "title": "7.1 The treatment bed",
+        "normalizedChars": 1858
+      },
+      {
+        "chunkId": "M7-03",
+        "title": "7.2 Tools and supplies",
+        "normalizedChars": 1384
+      },
+      {
+        "chunkId": "M7-04",
+        "title": "7.3 Station prep sequence",
+        "normalizedChars": 1157
+      },
+      {
+        "chunkId": "M7-05",
+        "title": "7.4 Client positioning",
+        "normalizedChars": 1931
+      },
+      {
+        "chunkId": "M7-06",
+        "title": "Signature interaction: Find the setup mistakes",
+        "normalizedChars": 1342
+      },
+      {
+        "chunkId": "M7-07",
+        "title": "Checkpoint 1 + Checkpoint 2 (`m7cp1`, `m7cp2`)",
+        "normalizedChars": 511,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m7cp1,m7cp2"
+      },
+      {
+        "chunkId": "M7-08",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 287,
+        "gateType": "post-pass",
+        "checkpointId": "m7cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "08": {
+    "module": "08",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M8-BATCH-A1.txt",
+        "chunkIds": [
+          "M8-01",
+          "M8-02",
+          "M8-03"
+        ],
+        "normalizedChars": 3345,
+        "firstSpokenLine": "Welcome to Module 8 \u2014 the head spa service itself. This module is about understanding how the service moves, from one technique to the next,",
+        "lastSpokenLine": "ere the extra time genuinely improves the experience. The goal is deciding where time adds value \u2014 not forcing the protocol to fit a number.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M8-BATCH-A2.txt",
+        "chunkIds": [
+          "M8-04"
+        ],
+        "normalizedChars": 3018,
+        "firstSpokenLine": "Section 8.2 \u2014 The service map. On screen, this masterclass walks through nine real video chapters, one technique at a time \u2014 I'll walk you t",
+        "lastSpokenLine": "s from intentional rhythm, full coverage, continuity, and appropriate pressure, not casual rubbing and not a specific physiological outcome.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M8-BATCH-A3.txt",
+        "chunkIds": [
+          "M8-05"
+        ],
+        "normalizedChars": 2481,
+        "firstSpokenLine": "Chapter six, Neck and Shoulder Massage: the head spa experience doesn't have to stop at the hairline \u2014 this extends the relaxation beyond th",
+        "lastSpokenLine": "[warmly] The close should feel as intentional as the opening did.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M8-BATCH-B1.txt",
+        "chunkIds": [
+          "M8-06",
+          "M8-07",
+          "M8-08a"
+        ],
+        "normalizedChars": 2741,
+        "firstSpokenLine": "Section 8.3 \u2014 Flow, pressure, and transitions. The skills most people never train explicitly.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m8cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M8-BATCH-B2.txt",
+        "chunkIds": [
+          "M8-08b",
+          "M8-08c"
+        ],
+        "normalizedChars": 742,
+        "firstSpokenLine": "Take the service into practice. Once you know this service, you shouldn't have to reopen this lesson to run it. On screen is the real A I M ",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m8cp1 / m8cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M8-BATCH-C1.txt",
+        "chunkIds": [
+          "M8-09"
+        ],
+        "normalizedChars": 309,
+        "firstSpokenLine": "Module complete. You can run the full service, adapt it when conditions change, and communicate with intention \u2014 not just recite the steps.",
+        "lastSpokenLine": " client closing, and pricing strategy \u2014 how to close the appointment, communicate value, and price the services you now know how to perform.",
+        "checkpointRelationship": "m8cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M8-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 711
+      },
+      {
+        "chunkId": "M8-02",
+        "title": "Think in phases, not steps",
+        "normalizedChars": 1469
+      },
+      {
+        "chunkId": "M8-03",
+        "title": "8.1 Core and Extended",
+        "normalizedChars": 1161
+      },
+      {
+        "chunkId": "M8-04",
+        "title": "8.2 The service map, chapters 1\u20135",
+        "normalizedChars": 3018
+      },
+      {
+        "chunkId": "M8-05",
+        "title": "8.2 The service map, chapters 6\u20139 + Service Timer",
+        "normalizedChars": 2481
+      },
+      {
+        "chunkId": "M8-06",
+        "title": "8.3 Flow, pressure, and transitions",
+        "normalizedChars": 1396
+      },
+      {
+        "chunkId": "M8-07",
+        "title": "Signature interaction: Protect the Flow",
+        "normalizedChars": 939
+      },
+      {
+        "chunkId": "M8-08a",
+        "title": "Checkpoint 1 (`m8cp1`)",
+        "normalizedChars": 402,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m8cp1"
+      },
+      {
+        "chunkId": "M8-08b",
+        "title": "Post-pass continuation (`m8cp1`) \u2014 AIMT Service Timer",
+        "normalizedChars": 458,
+        "gateType": "post-pass",
+        "checkpointId": "m8cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M8-08c",
+        "title": "Checkpoint 2 (`m8cp2`)",
+        "normalizedChars": 282,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m8cp2"
+      },
+      {
+        "chunkId": "M8-09",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 309,
+        "gateType": "post-pass",
+        "checkpointId": "m8cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  },
+  "09": {
+    "module": "09",
+    "batches": [
+      {
+        "batchId": "A1",
+        "file": "M9-BATCH-A1.txt",
+        "chunkIds": [
+          "M9-01",
+          "M9-02"
+        ],
+        "normalizedChars": 2864,
+        "firstSpokenLine": "Welcome to Module 9. The treatment is done \u2014 what happens next, how you close the appointment and how you price what you do, is its own skil",
+        "lastSpokenLine": "mendations at once, or creating false urgency about availability. Look at all six and choose the one that actually preserves the experience.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A2",
+        "file": "M9-BATCH-A2.txt",
+        "chunkIds": [
+          "M9-03"
+        ],
+        "normalizedChars": 1397,
+        "firstSpokenLine": "Section 9.2 \u2014 Know the real cost. Four inputs \u2014 not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal ",
+        "lastSpokenLine": "[firmly] Thirty percent markup and thirty percent margin do not produce the same selling price. Know which one you're using.",
+        "checkpointRelationship": null,
+        "overCeiling": false
+      },
+      {
+        "batchId": "A3",
+        "file": "M9-BATCH-A3.txt",
+        "chunkIds": [
+          "M9-04",
+          "M9-05",
+          "M9-06"
+        ],
+        "normalizedChars": 3356,
+        "firstSpokenLine": "Section 9.4 \u2014 Price your service. On screen there's a cost-base-to-target-price calculator, using the margin concept you just learned \u2014 ente",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m10cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B1",
+        "file": "M9-BATCH-B1.txt",
+        "chunkIds": [
+          "M9-07"
+        ],
+        "normalizedChars": 1125,
+        "firstSpokenLine": "Section 9.8 \u2014 When a client says the price felt high. One comment. Several possible causes.",
+        "lastSpokenLine": " communicate meaningful differences? Is this feedback recurring? [slowly] Don't assume the client is wrong. Don't assume the price is wrong.",
+        "checkpointRelationship": "m10cp1",
+        "overCeiling": false
+      },
+      {
+        "batchId": "B2",
+        "file": "M9-BATCH-B2.txt",
+        "chunkIds": [
+          "M9-08"
+        ],
+        "normalizedChars": 1099,
+        "firstSpokenLine": "Section 9.9 \u2014 Why pricing really goes wrong. Confidence is not a financial model.",
+        "lastSpokenLine": "Take your time, and answer above.",
+        "checkpointRelationship": "m10cp2",
+        "overCeiling": false
+      },
+      {
+        "batchId": "C1",
+        "file": "M9-BATCH-C1.txt",
+        "chunkIds": [
+          "M9-09"
+        ],
+        "normalizedChars": 275,
+        "firstSpokenLine": "Module complete. You can close a service the way you opened it, and price it from real numbers instead of pressure or guesswork.",
+        "lastSpokenLine": "xt, Module 10: sanitation and reset systems \u2014 the work between every service that separates consistent professionals from inconsistent ones.",
+        "checkpointRelationship": "m10cp2",
+        "overCeiling": false
+      }
+    ],
+    "chunkMeta": [
+      {
+        "chunkId": "M9-01",
+        "title": "Module Briefing (spoken)",
+        "normalizedChars": 728
+      },
+      {
+        "chunkId": "M9-02",
+        "title": "9.1 From treatment close to checkout + Close Without Pressure",
+        "normalizedChars": 2134
+      },
+      {
+        "chunkId": "M9-03",
+        "title": "9.2 Know the real cost + 9.3 Margin vs. markup",
+        "normalizedChars": 1397
+      },
+      {
+        "chunkId": "M9-04",
+        "title": "9.4 Price your service + 9.5 Market context",
+        "normalizedChars": 1120
+      },
+      {
+        "chunkId": "M9-05",
+        "title": "9.6 Design your menu + 9.7 Enhancements that earn their place",
+        "normalizedChars": 1915
+      },
+      {
+        "chunkId": "M9-06",
+        "title": "Checkpoint 1 (`m10cp1`)",
+        "normalizedChars": 317,
+        "gateType": "checkpoint-stop",
+        "checkpointId": "m10cp1"
+      },
+      {
+        "chunkId": "M9-07",
+        "title": "Post-pass: 9.8 When a client says the price felt high",
+        "normalizedChars": 1125,
+        "gateType": "post-pass",
+        "checkpointId": "m10cp1",
+        "resumeAfterPass": true
+      },
+      {
+        "chunkId": "M9-08",
+        "title": "9.9 Why pricing really goes wrong + Checkpoint 2 (`m10cp2`)",
+        "normalizedChars": 1099,
+        "gateType": "checkpoint-stop-then-post-pass",
+        "checkpointId": "m10cp2"
+      },
+      {
+        "chunkId": "M9-09",
+        "title": "Post-pass continuation: completion + recap + handoff",
+        "normalizedChars": 275,
+        "gateType": "post-pass",
+        "checkpointId": "m10cp2",
+        "resumeAfterPass": true
+      }
+    ]
+  }
+}

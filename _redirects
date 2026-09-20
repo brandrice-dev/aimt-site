@@ -1,0 +1,100 @@
+# Clean, student-facing URL for the HeadSpa Mastery course.
+#
+# The physical file stays headspa-mastery.html (per CLAUDE.md: avoid
+# renaming it -- renaming breaks every existing bookmark/link
+# immediately, a rewrite doesn't). This file teaches Cloudflare Pages'
+# edge how to (a) serve that file's content under a clean path without
+# changing the browser's address bar, and (b) permanently send every
+# other way of reaching that file to the one clean canonical URL, so
+# bookmarks/search results consolidate instead of duplicate-content at
+# three addresses.
+#
+# CRITICAL, EMPIRICALLY VERIFIED GOTCHA (found via `wrangler pages dev`,
+# both locally reproduced and matching documented Cloudflare Pages
+# behavior): Cloudflare Pages automatically strips the .html extension
+# off every static HTML asset and serves a client-visible 301/308 to
+# the extensionless URL whenever the .html path is requested -- and
+# critically, this automatic redirect also fires on a 200 rewrite rule's
+# DESTINATION if that destination still ends in .html. An earlier
+# version of rule 1 below targeted /headspa-mastery.html directly, which
+# made Cloudflare's own automatic redirect leak through the rewrite:
+# requesting /head-spa-certification returned a visible 308 to
+# /headspa-mastery (a third, unconfigured URL), defeating the entire
+# point of the rewrite. The fix: point the rewrite at the EXTENSIONLESS
+# path (/headspa-mastery, no .html) that Cloudflare already treats as
+# that file's canonical serving path -- since the destination is already
+# in its canonical form, no secondary redirect fires, and the rewrite is
+# genuinely transparent. Confirmed locally: GET /head-spa-certification
+# now returns 200 with the real page content, address bar unchanged.
+#
+# Ordering note: rules 1, 3, and 4 below all have different source
+# paths, so file order between them doesn't matter for matching
+# ("top-most wins" only applies among rules that share the same source
+# path). Per Cloudflare's own docs, a 200 rewrite's destination is
+# served directly and is NOT re-run back through this file -- confirmed
+# locally, requesting /head-spa-certification does not loop through
+# rule 4 even though rule 4's source path is rule 1's destination path.
+
+# 1. Rewrite (200): keep /head-spa-certification in the browser's
+#    address bar while serving the real course file's content. This is
+#    a proxy-style rewrite, not a client redirect, so the browser's
+#    actual request -- path AND query string -- reaches the edge
+#    untouched and is what the browser keeps showing; the deep links
+#    the app already relies on (?enter=1, ?cert=1, ?studentpreview=1)
+#    keep working exactly as they do today. headspa-mastery.html's own
+#    inline script reads window.location.search/pathname generically
+#    and has no hardcoded "headspa-mastery.html" path check, so this
+#    rewrite is transparent to it. Destination is deliberately
+#    extensionless -- see the gotcha note above; do not "simplify" this
+#    back to /headspa-mastery.html, that reintroduces the redirect leak.
+/head-spa-certification /headspa-mastery 200
+
+# 2. Trailing-slash variant of the clean URL -- redirect to the
+#    canonical (no trailing slash) form instead of dead-ending, which
+#    then matches rule 1 above.
+/head-spa-certification/ /head-spa-certification 301
+
+# 3. Legacy filename (with .html) now permanently redirects to the
+#    clean URL.
+/headspa-mastery.html /head-spa-certification 301
+
+# 4. Legacy filename WITHOUT .html -- Cloudflare Pages exposes this as
+#    a real, independently-fetchable 200 URL for any static .html file
+#    (it's the same canonical path rule 1 rewrites to internally), so
+#    without this rule a visitor could land on /headspa-mastery directly
+#    and get a second, non-canonical 200 URL for the same content --
+#    exactly the duplicate-content problem this whole file exists to
+#    avoid. Redirect it to the clean URL like rule 3 does for the .html
+#    variant. Verified locally this does not loop with rule 1: a rewrite
+#    destination is fetched directly and never re-enters this file (see
+#    the ordering note above), so rule 1's internal fetch of
+#    /headspa-mastery is unaffected by this rule existing.
+/headspa-mastery /head-spa-certification 301
+
+# 4. Cadence Intro Preview (cadence-intro-preview.html) is an owner/dev-only
+#    review surface -- its own header comment says so explicitly: no
+#    course, no Supabase, no entitlement/auth, a mocked reply that never
+#    calls a real API, and it is explicitly written to be safe to open
+#    locally as a file:// URL for review. It has never been linked from
+#    any real page (grep confirms only source comments reference its
+#    filename, never a live <a href> or redirect). The real Cadence intro
+#    students actually see is served a completely different way: it is
+#    mounted inline inside headspa-mastery.html itself via
+#    mountCadenceIntro() (see that file), which this rule does not touch
+#    at all. `<meta name="robots" content="noindex, nofollow">` on the
+#    preview page is not access control -- it only asks well-behaved
+#    crawlers not to index a URL that remains fully fetchable by anyone
+#    who finds or guesses it. Since this is purely a dev/preview tool with
+#    no legitimate production audience, the narrowest fix is to remove it
+#    from public deployment routing entirely rather than build a new
+#    auth-gate for a page that was deliberately designed to need none.
+#    NOTE: Cloudflare Pages' _redirects only accepts status 200, 301, 302,
+#    303, 307, or 308 -- a 404 status here is invalid and Cloudflare
+#    silently drops the whole rule (confirmed via `wrangler pages dev`,
+#    which rejects it outright), so an earlier version of this rule using
+#    404 did NOT actually block the page. Using 301 to /index.html instead
+#    -- not a true 404, but it stops the page from being served at its own
+#    URL to an ordinary visitor, production and previews alike. The
+#    physical file stays in the repo for local/file:// review exactly as
+#    its header comment describes -- only the deployed URL is redirected.
+/cadence-intro-preview.html /index.html 301

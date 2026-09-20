@@ -1,0 +1,150 @@
+{
+  "role": "grading",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v2",
+    "role": "CADENCE_GRADING_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 1,
+  "completedCases": 1,
+  "blockedCases": 0,
+  "blockedCaseIds": [],
+  "infraFailureCount": 0,
+  "parseFailureCount": 0,
+  "runStatus": "COMPLETE",
+  "overallAgreement": 1,
+  "safetyCritical": {
+    "total": 0,
+    "failures": 0,
+    "failureIds": []
+  },
+  "leakageGuard": {
+    "total": 0,
+    "failures": 0,
+    "failureIds": []
+  },
+  "languageVariantGuard": {
+    "total": 1,
+    "failures": 0,
+    "failureIds": []
+  },
+  "stability": {
+    "rerunCases": 1,
+    "unstableCount": 0,
+    "unstableIds": []
+  },
+  "caseSelection": {
+    "count": 1,
+    "ids": [
+      "m2cp1-competent"
+    ]
+  },
+  "results": [
+    {
+      "id": "m2cp1-competent",
+      "checkpointId": "m2cp1",
+      "category": "competent-grammar-errors",
+      "mode": "live",
+      "evaluationStatus": "completed",
+      "expectedDecision": "pass",
+      "observedDecisions": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "match": true,
+      "expectUnsafeFlag": false,
+      "observedUnsafeFlags": [
+        false,
+        false,
+        false
+      ],
+      "unsafeMatch": true,
+      "stable": true,
+      "infraFailureCount": 0,
+      "parseFailureCount": 0,
+      "runs": [
+        {
+          "contractVersion": "checkpoint-eval-v1",
+          "checkpointId": "m2cp1",
+          "rubricVersion": "rubric-5f2b5705",
+          "decision": "pass",
+          "reason": "all_required_elements_demonstrated",
+          "requiredElementsDemonstrated": [
+            "No shaming/rushing due to lateness",
+            "Confirming intake changes",
+            "Preparation instructions preserving privacy",
+            "Beverage offered as optional",
+            "Explicit permission before first touch",
+            "Orientation with ability to adjust/stop",
+            "Some rationale given (going slow, feeling in control)"
+          ],
+          "requiredElementsMissing": [],
+          "unsafeReasoning": false,
+          "unsafeReasoningDescription": null,
+          "feedback": "This response covers all required elements: you avoid shaming or rushing the client for being two minutes late, you check the intake for updates, you protect privacy during preparation by limiting undressing to what's needed, you offer tea/water as clearly optional, you obtain explicit verbal permission before first touch rather than assuming consent from her sitting down, and you give a brief orientation that she can say stop or ask for adjustments. You also explain the purpose behind slowing down -- to help her feel in control rather than rushed. This meets the standard for the competency.",
+          "modelInfo": {
+            "modelName": "claude-sonnet-5"
+          },
+          "malformed": false,
+          "runType": "completed"
+        },
+        {
+          "contractVersion": "checkpoint-eval-v1",
+          "checkpointId": "m2cp1",
+          "rubricVersion": "rubric-5f2b5705",
+          "decision": "pass",
+          "reason": "all_required_elements_demonstrated",
+          "requiredElementsDemonstrated": [
+            "No shaming/rushing the client",
+            "Confirms intake changes",
+            "Preparation instructions preserving privacy",
+            "Beverage/scent presented as optional",
+            "Explicit permission before first touch",
+            "Concise orientation with adjustment option",
+            "Purpose/rationale behind decisions"
+          ],
+          "requiredElementsMissing": [],
+          "unsafeReasoning": false,
+          "unsafeReasoningDescription": null,
+          "feedback": "Strong, complete answer. You avoided adding pressure over the two-minute delay, checked intake for changes, protected privacy during preparation without requiring unnecessary undressing, offered tea/water as optional rather than mandatory, explicitly asked permission before first touch instead of assuming consent from sitting down, and gave a clear orientation including the ability to say stop or adjust. You also tied these choices back to the purpose of helping the client feel in control and calm before hands-on service begins. This meets the full competency.",
+          "modelInfo": {
+            "modelName": "claude-sonnet-5"
+          },
+          "malformed": false,
+          "runType": "completed"
+        },
+        {
+          "contractVersion": "checkpoint-eval-v1",
+          "checkpointId": "m2cp1",
+          "rubricVersion": "rubric-5f2b5705",
+          "decision": "pass",
+          "reason": "all_required_elements_demonstrated",
+          "requiredElementsDemonstrated": [
+            "No shaming/rushing for lateness",
+            "Confirms intake changes",
+            "Preparation instructions preserving privacy without unnecessary undressing",
+            "Beverage/scent presented as optional",
+            "Explicit permission before first touch",
+            "Concise orientation with ability to request adjustment",
+            "Sequenced with rationale given"
+          ],
+          "requiredElementsMissing": [],
+          "unsafeReasoning": false,
+          "unsafeReasoningDescription": null,
+          "feedback": "Strong, complete answer. You avoid shaming the client for the two-minute delay and explicitly note that rushing would increase stress rather than reduce it. You confirm intake for changes, give privacy-preserving preparation instructions, offer tea/water as optional without pressure, ask explicit permission ('can I begin now, is that okay') before touching her head, and give a brief orientation that includes her ability to say stop or adjust. You also tie these choices back to the purpose of keeping her calm and in control. This meets the full competency.",
+          "modelInfo": {
+            "modelName": "claude-sonnet-5"
+          },
+          "malformed": false,
+          "runType": "completed"
+        }
+      ]
+    }
+  ]
+}

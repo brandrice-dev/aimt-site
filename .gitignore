@@ -1,1 +1,63 @@
 .DS_Store
+scripts/.module12-review-output.html
+
+# Local dev-only tooling config (e.g. the static-preview server definition
+# used by the browser-preview tool) -- machine-local, not shipped.
+.claude/
+
+# CapCut Listen Mode finishing workflow: module masters, round-trip proof
+# exports, and resplit intermediates are reproducible local production
+# artifacts (rebuilt from assets/audio/listen/**/raw/ + one CapCut pass per
+# module), not permanent history -- they'd add ~200MB+ per module if
+# committed. Docs, boundary manifests (.json), scripts, and tests in the
+# same directories stay tracked; only the generated audio is ignored. Does
+# NOT apply to assets/audio/listen/ (canonical student production audio,
+# governed separately).
+docs/course-audit/listen-mode/capcut-test/**/*.wav
+docs/course-audit/listen-mode/capcut-test/**/*.flac
+docs/course-audit/listen-mode/capcut-test/**/*.FLAC
+docs/course-audit/listen-mode/capcut-test/**/*.mp3
+docs/course-audit/listen-mode/capcut-production/**/*.wav
+docs/course-audit/listen-mode/capcut-production/**/*.flac
+docs/course-audit/listen-mode/capcut-production/**/*.FLAC
+docs/course-audit/listen-mode/capcut-production/**/*.mp3
+
+# Continuous-recording-session production model (raw-sessions-v2/, per
+# module): the raw ElevenLabs session exports, CapCut-ready PCM masters, and
+# CapCut-processed FLACs are reproducible local production artifacts, not
+# permanent history -- same treatment as capcut-production/ above, backed up
+# to R2 instead of git (see scripts/aimt-media-backup.mjs). The final
+# technical player segments these get cut into are installed directly under
+# assets/audio/listen/<course>/<module>/ (NOT inside raw-sessions-v2/) and
+# stay tracked as the canonical student production audio.
+assets/audio/listen/**/raw-sessions-v2/**/*.wav
+assets/audio/listen/**/raw-sessions-v2/**/*.flac
+assets/audio/listen/**/raw-sessions-v2/**/*.FLAC
+assets/audio/listen/**/raw-sessions-v2/**/*.mp3
+
+# Course-wide Listen Mode production batch (Modules 0, 2-12): same
+# reproducible-local-artifact treatment as raw-sessions-v2/ above, applied
+# per module under raw-pieces/ (individual ElevenLabs generations before
+# concatenation) and capcut-masters/ (CapCut-ready PCM WAVs awaiting the
+# owner's CapCut pass). Never contains canonical student audio -- that only
+# ever lives directly under assets/audio/listen/<course>/module-XX/*.mp3
+# once installed post-CapCut.
+assets/audio/listen/**/raw-pieces/**
+assets/audio/listen/**/capcut-masters/**
+
+# Course-wide Listen Mode FULL REGENERATION pass (Welcome-M12, course-audit
+# task "final Listen Mode production run"): owner-editing staging directory
+# for raw ElevenLabs output awaiting the owner's CapCut pass, plus the
+# owner-processed files returned afterward. Reproducible/large local
+# artifacts, same treatment as raw-pieces/ and capcut-masters/ above --
+# never contains canonical student audio (that only ever lives directly
+# under assets/audio/listen/<course>/module-XX/*.mp3 once installed).
+# Text-only production docs (manifests, source scripts, cut maps, the
+# master CapCut worklist) are NOT under this directory and stay tracked --
+# see docs/course-audit/listen-mode/tts-final/.
+AIMT-Listen-Mode-Final/**/*.mp3
+AIMT-Listen-Mode-Final/**/*.MP3
+AIMT-Listen-Mode-Final/**/*.wav
+AIMT-Listen-Mode-Final/**/*.WAV
+AIMT-Listen-Mode-Final/**/*.flac
+AIMT-Listen-Mode-Final/**/*.FLAC

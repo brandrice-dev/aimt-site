@@ -1,0 +1,362 @@
+{
+  "module": "05",
+  "version": "v2-strict-fidelity",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M5-BATCH-A1.txt",
+      "chunkIds": [
+        "M5-01",
+        "M5-02"
+      ],
+      "normalizedChars": 1917,
+      "firstSpokenLine": "Welcome to Module 5. Module 4 taught you how to gather and describe evidence. Now you're going to turn supported observations, what the clie",
+      "lastSpokenLine": "[firmly] Limit first. Priority second. Region by region.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "2XVFvmCdEzY9HQG4UOl2",
+        "rawFile": "M5-BATCH-A1-RAW.mp3",
+        "editWavFile": "M5-BATCH-A1-EDIT.wav",
+        "durationSecs": 153.626122,
+        "realCostCents": 31.6305,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "A2",
+      "file": "M5-BATCH-A2.txt",
+      "chunkIds": [
+        "M5-03",
+        "M5-04"
+      ],
+      "normalizedChars": 2976,
+      "firstSpokenLine": "Section 5.2 — What you can actually change. Most protocol changes come from five levers. Skilled customization is usually not a completely d",
+      "lastSpokenLine": "ngest service is not the one with the most steps. It is the one in which every step has a reason and nothing is added simply to prove value.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "b4WCZ981ZYpAolBfWQlQ",
+        "rawFile": "M5-BATCH-A2-RAW.mp3",
+        "editWavFile": "M5-BATCH-A2-EDIT.wav",
+        "durationSecs": 232.202449,
+        "realCostCents": 49.104,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "A3",
+      "file": "M5-BATCH-A3.txt",
+      "chunkIds": [
+        "M5-05"
+      ],
+      "normalizedChars": 4364,
+      "firstSpokenLine": "Section 5.4 — Patterns, not permanent types. Read the dominant need without forcing the whole scalp into it.",
+      "lastSpokenLine": " which may call for a gentler service direction instead. This is illustrative only — appearance alone does not establish cause or diagnosis.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "3B7RXFfhwur1oy3xutjO",
+        "rawFile": "M5-BATCH-A3-RAW.mp3",
+        "editWavFile": "M5-BATCH-A3-EDIT.wav",
+        "durationSecs": 368.84898,
+        "realCostCents": 72.006,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "A4",
+      "file": "M5-BATCH-A4.txt",
+      "chunkIds": [
+        "M5-06"
+      ],
+      "normalizedChars": 3990,
+      "firstSpokenLine": "Signature interaction: what changes first? Choose the first responsible service direction. You are not diagnosing the scalp — you are decidi",
+      "lastSpokenLine": "educe stimulation when there is reported discomfort, and stop contact entirely — pause and refer — the moment skin integrity is in question.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "MtV8iJTg1AEAODTgMaVV",
+        "rawFile": "M5-BATCH-A4-RAW.mp3",
+        "editWavFile": "M5-BATCH-A4-EDIT.wav",
+        "durationSecs": 320.365714,
+        "realCostCents": 65.835,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "A5",
+      "file": "M5-BATCH-A5.txt",
+      "chunkIds": [
+        "M5-07"
+      ],
+      "normalizedChars": 1556,
+      "firstSpokenLine": "Section 5.5 — One appointment, more than one approach. The protocol can change without the service feeling fragmented. Regional customizatio",
+      "lastSpokenLine": " specifically at the roots. Regional customization may change product placement and cleansing intensity without changing the entire service.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "10Tx60FmULK1MHyIHAcP",
+        "rawFile": "M5-BATCH-A5-RAW.mp3",
+        "editWavFile": "M5-BATCH-A5-EDIT.wav",
+        "durationSecs": 125.962449,
+        "realCostCents": 25.674,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "A6",
+      "file": "M5-BATCH-A6.txt",
+      "chunkIds": [
+        "M5-08"
+      ],
+      "normalizedChars": 385,
+      "firstSpokenLine": "Here's your midpoint check. During the five-point assessment, the crown shows diffuse shine and visible surface residue, while the sides and",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m5cp1",
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "DIXoF6Ir1uUlmX4CrVUp",
+        "rawFile": "M5-BATCH-A6-RAW.mp3",
+        "editWavFile": "M5-BATCH-A6-EDIT.wav",
+        "durationSecs": 28.917551,
+        "realCostCents": 6.3525,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "B1",
+      "file": "M5-BATCH-B1.txt",
+      "chunkIds": [
+        "M5-09",
+        "M5-10"
+      ],
+      "normalizedChars": 1506,
+      "firstSpokenLine": "Good work — let's keep going.",
+      "lastSpokenLine": "cted products may carry license, labeling, contraindication, or manufacturer requirements. Follow the product — not a social-media protocol.",
+      "checkpointRelationship": "m5cp1",
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "t8OZzS35cK5G3ghEjvca",
+        "rawFile": "M5-BATCH-B1-RAW.mp3",
+        "editWavFile": "M5-BATCH-B1-EDIT.wav",
+        "durationSecs": 117.002449,
+        "realCostCents": 24.849,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "B2",
+      "file": "M5-BATCH-B2.txt",
+      "chunkIds": [
+        "M5-11",
+        "M5-12"
+      ],
+      "normalizedChars": 2726,
+      "firstSpokenLine": "Section 5.7 — Intensity is part of the protocol. More heat, more pressure, and more time do not equal more expertise.",
+      "lastSpokenLine": "tep. It is created by giving the client a clear reason, a thoughtful alternative when one is appropriate, and a service plan you can defend.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "NPFu5ztUceZNDKzXK6OK",
+        "rawFile": "M5-BATCH-B2-RAW.mp3",
+        "editWavFile": "M5-BATCH-B2-EDIT.wav",
+        "durationSecs": 217.547755,
+        "realCostCents": 44.979,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "B3",
+      "file": "M5-BATCH-B3.txt",
+      "chunkIds": [
+        "M5-13"
+      ],
+      "normalizedChars": 2426,
+      "firstSpokenLine": "Section 5.9 — Errors that make protocols less intelligent. The most common mistake is treating the label instead of the client.",
+      "lastSpokenLine": " should be able to name what you observed, what context changed your interpretation, what you modified, and what you intentionally left out.",
+      "checkpointRelationship": null,
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "ffdnhn3s1dWIug4dHvAJ",
+        "rawFile": "M5-BATCH-B3-RAW.mp3",
+        "editWavFile": "M5-BATCH-B3-EDIT.wav",
+        "durationSecs": 185.730612,
+        "realCostCents": 40.029,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "B4",
+      "file": "M5-BATCH-B4.txt",
+      "chunkIds": [
+        "M5-14"
+      ],
+      "normalizedChars": 344,
+      "firstSpokenLine": "Here's your final checkpoint. A client reports stinging and tenderness, and you observe a reactive-appearing area. They still ask for the st",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m5cp2",
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "situQEIlPnX8K5k3jHe8",
+        "rawFile": "M5-BATCH-B4-RAW.mp3",
+        "editWavFile": "M5-BATCH-B4-EDIT.wav",
+        "durationSecs": 23.797551,
+        "realCostCents": 5.676,
+        "rawEditDurationMatch": true
+      }
+    },
+    {
+      "batchId": "C1",
+      "file": "M5-BATCH-C1.txt",
+      "chunkIds": [
+        "M5-15"
+      ],
+      "normalizedChars": 470,
+      "firstSpokenLine": "Module complete. You can translate regional observations into a real service plan without forcing the scalp into one label — identify the sa",
+      "lastSpokenLine": "ith cosmetic patterns. The goal stays the same — observe carefully, stay within scope, and know when medical evaluation belongs in the plan.",
+      "checkpointRelationship": "m5cp2",
+      "overCeiling": false,
+      "generation": {
+        "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+        "voiceName": "Jane - Bright, Smooth and Friendly",
+        "modelId": "eleven_v3",
+        "generationId": "djhWOLlT1qTaQVCYNo32",
+        "rawFile": "M5-BATCH-C1-RAW.mp3",
+        "editWavFile": "M5-BATCH-C1-EDIT.wav",
+        "durationSecs": 39.000816,
+        "realCostCents": 7.755,
+        "rawEditDurationMatch": true
+      }
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M5-01",
+      "title": "Module Briefing",
+      "normalizedChars": 784
+    },
+    {
+      "chunkId": "M5-02",
+      "title": "5.1 From evidence to action",
+      "normalizedChars": 1131
+    },
+    {
+      "chunkId": "M5-03",
+      "title": "5.2 What you can actually change",
+      "normalizedChars": 1580
+    },
+    {
+      "chunkId": "M5-04",
+      "title": "5.3 Priority order + Cadence note",
+      "normalizedChars": 1394
+    },
+    {
+      "chunkId": "M5-05",
+      "title": "5.4 Patterns, not permanent types",
+      "normalizedChars": 4364
+    },
+    {
+      "chunkId": "M5-06",
+      "title": "Signature interaction: What changes first?",
+      "normalizedChars": 3990
+    },
+    {
+      "chunkId": "M5-07",
+      "title": "5.5 One appointment, more than one approach",
+      "normalizedChars": 1556
+    },
+    {
+      "chunkId": "M5-08",
+      "title": "Checkpoint 1 (`m5cp1`)",
+      "normalizedChars": 385,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m5cp1"
+    },
+    {
+      "chunkId": "M5-09",
+      "title": "Post-pass transition",
+      "normalizedChars": 29,
+      "gateType": "post-pass",
+      "checkpointId": "m5cp1",
+      "resumeAfterPass": true
+    },
+    {
+      "chunkId": "M5-10",
+      "title": "5.6 Choose a function, not a fantasy",
+      "normalizedChars": 1475
+    },
+    {
+      "chunkId": "M5-11",
+      "title": "5.7 Intensity is part of the protocol",
+      "normalizedChars": 1162
+    },
+    {
+      "chunkId": "M5-12",
+      "title": "5.8 Client communication + Cadence note",
+      "normalizedChars": 1562
+    },
+    {
+      "chunkId": "M5-13",
+      "title": "5.9 Errors that make protocols less intelligent",
+      "normalizedChars": 2426
+    },
+    {
+      "chunkId": "M5-14",
+      "title": "Checkpoint 2 (`m5cp2`)",
+      "normalizedChars": 344,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m5cp2"
+    },
+    {
+      "chunkId": "M5-15",
+      "title": "Post-pass: completion + recap + handoff",
+      "normalizedChars": 470,
+      "gateType": "post-pass",
+      "checkpointId": "m5cp2",
+      "resumeAfterPass": true
+    }
+  ],
+  "generationSummary": {
+    "generatedAt": "2026-09-15",
+    "totalDurationSecs": 1813.002,
+    "totalDurationHuman": "30 min 13 sec",
+    "totalRealCostCents": 373.89,
+    "totalRealCostUsd": 3.74,
+    "preGenerationEstimateCents": 827.09,
+    "note": "Real per-generation pricing came in at roughly 45% of the pre-generation estimate_only quote for this voice/model.",
+    "sequential": true,
+    "allRawEditDurationsMatch": true,
+    "ownerAudioReviewPending": true
+  }
+}

@@ -217,6 +217,10 @@
   window.AIMT_SYNC = {
     /* Call once, after auth + entitlement are confirmed. */
     init: function (supabaseClient, courseSlug) {
+      if (window.ReviewMode && window.ReviewMode.isActive()) {
+        log('init skipped — Course Review Mode active, no sync');
+        return Promise.resolve();
+      }
       if (_initStarted) return Promise.resolve();
       _initStarted = true;
       if (!supabaseClient || !window.APP_STATE) {

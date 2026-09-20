@@ -1,0 +1,17 @@
+Section 9.2 — Know the real cost. Four inputs — not a rigid formula, a way of thinking. Real cost isn't a guess, and it isn't one universal number either. It's components you account for deliberately.
+
+One, direct and variable costs: products, consumables, laundry, disposables. These scale with each service. Track your actual use per service — not a rough guess.
+
+Two, allocated overhead: rent, utilities, insurance, software, shared supplies. These exist whether you see a client or not. There's no single universally correct way to allocate them across your services — how you divide them is a business decision, not a course requirement.
+
+Three, practitioner time — broader than treatment time: setup, consultation, treatment, transitions, cleanup, checkout, documentation. A "sixty-minute service" can require meaningfully more than sixty minutes of your capacity. Account for your own full time — not someone else's ratio.
+
+And four, desired profitability: how much margin you want. How much margin you want is not a course-prescribed number. It's a deliberate business decision you make and can explain — not a default you accept without thinking about it.
+
+Section 9.3 — Margin versus markup. Two words. Two different prices.
+
+Markup is calculated from cost: a 30% markup on a $100 cost is $130. Margin is calculated from selling price: a 30% margin means 30% of the selling price is profit, which requires solving price equals cost divided by one minus margin — at a 30% margin, that same $100 cost produces a price of about $143, not $130.
+
+Same $100 cost, two different results. A 30% markup on a $100 cost: $100 times 1.30 equals $130. A 30% margin on a $100 cost: $100 divided by 1 minus 0.30 is approximately $143.
+
+[firmly] Key point: "30% markup" and "30% margin" do not produce the same selling price. Know which one you're using — this course's calculator, next, uses margin.

@@ -1,0 +1,147 @@
+{
+  "module": "07",
+  "version": "v2-strict-fidelity",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M7-BATCH-A1.txt",
+      "chunkIds": [
+        "M7-01",
+        "M7-02"
+      ],
+      "normalizedChars": 3944,
+      "firstSpokenLine": "Welcome to Module 7: Equipment and Room Setup. Before the service starts, your setup is already speaking.",
+      "lastSpokenLine": "actually feels comfortable to lie in for an hour. Choose the bed your clients will want to come back to — not the one that photographs well.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M7-BATCH-A2.txt",
+      "chunkIds": [
+        "M7-03"
+      ],
+      "normalizedChars": 3101,
+      "firstSpokenLine": "Section 7.2 — Tools and supplies. Essentials first. Upgrades later.",
+      "lastSpokenLine": "ation supplies earns its place — it only does its job if it's maintained during the live service, not just set up before the client arrives.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M7-BATCH-A3.txt",
+      "chunkIds": [
+        "M7-04",
+        "M7-05"
+      ],
+      "normalizedChars": 3975,
+      "firstSpokenLine": "Section 7.3 — Station prep sequence. Run this before every single client.",
+      "lastSpokenLine": "g flow? Can I reach everything without stepping away? Does this still work when I'm not thinking perfectly? If not, your setup is not ready.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M7-BATCH-A4.txt",
+      "chunkIds": [
+        "M7-06"
+      ],
+      "normalizedChars": 1839,
+      "firstSpokenLine": "Now for a signature interaction: find the setup mistakes. Not every difference is a mistake. Look at each setup and decide whether something",
+      "lastSpokenLine": " professional setup is judged by function — support, reach, comfort, and service flow — not by whether every treatment room looks identical.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A5",
+      "file": "M7-BATCH-A5.txt",
+      "chunkIds": [
+        "M7-07"
+      ],
+      "normalizedChars": 209,
+      "firstSpokenLine": "Here's your first checkpoint. A new student is setting up their first head spa room from scratch. What would you tell them to do first — and",
+      "lastSpokenLine": "Take your time and answer below.",
+      "checkpointRelationship": "m7cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M7-BATCH-B1.txt",
+      "chunkIds": [
+        "M7-08"
+      ],
+      "normalizedChars": 308,
+      "firstSpokenLine": "Nice work. Here's your second and final checkpoint for this module.",
+      "lastSpokenLine": "Take your time and answer below.",
+      "checkpointRelationship": "m7cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "C1",
+      "file": "M7-BATCH-C1.txt",
+      "chunkIds": [
+        "M7-09"
+      ],
+      "normalizedChars": 346,
+      "firstSpokenLine": "Module complete. You can evaluate a setup, prepare a station, and position a client correctly — and now know what to do if something's off. ",
+      "lastSpokenLine": "tep service map, in both formats — every transition and every micro-teach moment that makes this service worth the price clients pay for it.",
+      "checkpointRelationship": "m7cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M7-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 891
+    },
+    {
+      "chunkId": "M7-02",
+      "title": "7.1 The treatment bed",
+      "normalizedChars": 3051
+    },
+    {
+      "chunkId": "M7-03",
+      "title": "7.2 Tools and supplies",
+      "normalizedChars": 3101
+    },
+    {
+      "chunkId": "M7-04",
+      "title": "7.3 Station prep sequence",
+      "normalizedChars": 1552
+    },
+    {
+      "chunkId": "M7-05",
+      "title": "7.4 Client positioning",
+      "normalizedChars": 2421
+    },
+    {
+      "chunkId": "M7-06",
+      "title": "Signature interaction: Find the setup mistakes",
+      "normalizedChars": 1839
+    },
+    {
+      "chunkId": "M7-07",
+      "title": "Checkpoint 1 (`m7cp1`)",
+      "normalizedChars": 209,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m7cp1"
+    },
+    {
+      "chunkId": "M7-08",
+      "title": "Checkpoint 2 (`m7cp2`) — opens with the m7cp1 resume transition",
+      "normalizedChars": 308,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m7cp2",
+      "resumesAfterCheckpoint": "m7cp1"
+    },
+    {
+      "chunkId": "M7-09",
+      "title": "Post-pass: completion + recap + handoff",
+      "normalizedChars": 346,
+      "gateType": "post-pass",
+      "checkpointId": "m7cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

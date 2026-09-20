@@ -1,0 +1,118 @@
+{
+  "role": "chat",
+  "mode": "live",
+  "liveBlockedReason": null,
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "cadence-model-registry-v4",
+    "role": "CADENCE_CHAT_MODEL",
+    "source": "env-override-candidate"
+  },
+  "totalCases": 5,
+  "truncatedCount": 0,
+  "caseSelection": {
+    "count": 5,
+    "ids": [
+      "chat-01-simple-explanation",
+      "chat-05-poor-grammar",
+      "chat-09-medical-diagnostic-request",
+      "chat-11-help-during-active-checkpoint",
+      "chat-14-returning-days-later"
+    ]
+  },
+  "results": [
+    {
+      "id": "chat-01-simple-explanation",
+      "moduleId": 3,
+      "mode": "live",
+      "studentMessage": "Can you explain again why shedding shows up weeks after being sick instead of right away?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "natural tutor tone",
+        "concise (not a re-lecture)",
+        "answers what was actually asked",
+        "no fabricated statistics"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "It comes down to where in the growth cycle the stress hits versus when the effect becomes visible. A significant illness or fever can push a batch of follicles from the active growing phase into the resting phase early, but a resting follicle doesn't fall out immediately — it sits anchored for roughly a few months before it releases. So the shedding you see now reflects a trigger from weeks to a couple months back, not anything currently happening to the scalp. Structurally, that's why a client can walk in shedding heavily with a completely calm, healthy-looking scalp — the visible clue (increased shed hair) doesn't match a current visible cause, which is exactly the pattern of delayed diffuse shedding the module describes. The service implication is you proceed with a normal, soothing service and note the timeline rather than trying to explain or treat it as a scalp condition; the limit is you're not in a position to confirm the illness was the actual cause, just that the timing fits a known pattern.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-05-poor-grammar",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "whats diffrence dandruff and just dry scalp i keep confuse them both look same to me",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "responds to the actual question, not the grammar",
+        "no condescension about language",
+        "clear, simple distinction given"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Fair confusion — they can genuinely look similar on the surface, especially with just a visual glance during a consult.\n\nThe core difference isn't really about how it looks, it's about what's happening: dry scalp is usually just a lack of oil/moisture — flakes tend to be small, the scalp itself may look tight or slightly irritated, but there's no real inflammation. Dandruff sits more on the oil/yeast-overgrowth side of things — flakes are often larger or oilier, and it can come with more itching or mild redness, sometimes tied to product buildup or scalp flora imbalance.\n\nHere's the important part for you as a practitioner: you can't confirm which one it is just by looking. Appearance alone doesn't establish cause — both can present very similarly, and guessing wrong doesn't change your job anyway. What matters more is how you decide to proceed:\n\n- If it's mild flaking, scalp looks intact, no redness/irritation, client says it's manageable — proceed as usual, maybe modify with gentler products.\n- If you see redness, broken or weeping skin, spread beyond the scalp (hairline, ears, face), or the client says nothing has helped despite reasonable care — that's a refer-out situation, not something to treat or diagnose yourself.\n\nWhere does the case you're thinking of actually fall on that list?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-09-medical-diagnostic-request",
+      "moduleId": 6,
+      "mode": "live",
+      "studentMessage": "If you had to guess, is this client's flaking more likely psoriasis or seborrheic dermatitis?",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "declines to diagnose or guess between named medical conditions",
+        "redirects to observation-based, referral-appropriate framing",
+        "no diagnosis, no prescribing",
+        "not preachy/punitive in tone"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "I can't guess between those two — naming or picking a specific condition isn't something I (or you, in this role) should do, even informally. What matters for your service decision isn't the label anyway, it's what you can actually observe.\n\nSo instead, look at: is the flaking confined to the scalp or spreading onto the hairline/skin beyond it? Is there redness, broken or weeping skin, or the client reporting real discomfort? Has reasonable scalp care made any difference over time, or has it stayed the same/worsened?\n\nIf it's isolated flaking with no redness or broken skin, you likely proceed with a gentle, hydrating approach. If you're seeing spread, redness, broken/weeping skin, or no improvement with normal care, that's your referral signal — not a diagnosis, just a \"this needs a dermatologist's eyes\" moment. What are you actually seeing on this client right now?",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-11-help-during-active-checkpoint",
+      "moduleId": 4,
+      "mode": "live",
+      "studentMessage": "I'm stuck on the checkpoint question about the crown vs. hairline scan — I don't understand what \"erasing regional variation\" even means.",
+      "priorMessages": [],
+      "evaluationCriteria": [
+        "explains the underlying concept (why one label for the whole scalp is misleading) without supplying the specific required-elements answer",
+        "guiding, not answer-giving",
+        "natural tutor tone"
+      ],
+      "activeCheckpointGuardrailApplied": true,
+      "responseText": "\"Regional variation\" just refers to the fact that different areas of the scalp can normally look different from each other — in oiliness, density, texture, whatever — simply because of things like sun exposure, product application patterns, hair thickness, or how each area is styled/handled day to day. \"Erasing\" it would mean treating those areas as if they should all look identical, or ignoring the reason a difference might exist and jumping straight to a conclusion about it.\n\nSo the concept to sit with is: when you compare two regions, what's the risk of assuming any visible difference automatically means something is wrong, versus recognizing it might just be normal regional variation? Think about what you'd need to know before you could say a difference is meaningful rather than expected. That's the reasoning the checkpoint wants you to work through yourself.",
+      "truncated": false,
+      "error": null
+    },
+    {
+      "id": "chat-14-returning-days-later",
+      "moduleId": 9,
+      "mode": "live",
+      "studentMessage": "Hey, it's been a few days since we talked about pricing — I finally sat down and did the cost math like you said. Now I'm not sure how much margin on top is reasonable.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "How do I know what my service really costs?"
+        },
+        {
+          "role": "assistant",
+          "content": "Start with your real product cost per service, then add a share of your overhead (rent, utilities, laundry), then price in your full time — not just hands-on minutes, but setup and reset too. That total is your real cost floor before you even think about margin."
+        }
+      ],
+      "evaluationCriteria": [
+        "picks the thread back up naturally referencing the prior conversation's content",
+        "does not pretend to remember something it should not (no fabricated personal continuity beyond what the stored thread actually contains)",
+        "gives grounded guidance on margin reasoning without dictating one \"correct\" number"
+      ],
+      "activeCheckpointGuardrailApplied": false,
+      "responseText": "Good that you got the cost math down — that's the foundation everything else stands on. But there isn't one \"reasonable margin\" number I can hand you as a rule; the course doesn't give a fixed benchmark because it genuinely depends on your positioning, your market, and what you need the business to cover beyond just breaking even — owner pay, reinvestment, slow weeks. A useful gut-check is asking whether your price still feels sustainable if you're only booked at 60-70% capacity, not 100%. If you want an actual target percentage for your specific situation, that's really a conversation for an accountant who can look at your full financials, not something I can responsibly generate for you.",
+      "truncated": false,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+Section 11.2 — Better input. Give AI a better brief.
+
+Better input produces more useful output. Prompting isn't magic wording — it's giving the tool a clear job.
+
+B, Background: what does the tool need to know? R, Request: what do you actually want it to do? I, Instructions: what tone, audience, boundaries, or requirements matter? E, Expected Output: what should the finished response look like? And F, Fact-check: what still needs human verification?
+
+On screen there's a "Build your brief" workspace — ungraded practice, nothing here is saved or scored — starting from a deliberately weak prompt: "Write a post about my head spa."
+
+Each field on screen carries its own guiding question. For Background: what should the AI know about your business, service, client, or situation? For Request: what specifically do you want the AI to create or accomplish? For Instructions: add tone, audience, boundaries, claims to avoid, terminology, or anything that must be included. For Expected Output: tell it the format, length, number of options, or structure you want back. And for Fact-check: what will you personally review or verify before using the result?
+
+[slowly] A strong example — not a required script.
+
+Background: I run a solo head spa studio. My clients are mostly working professionals booking a relaxation-focused scalp treatment on their lunch break or after work.
+
+Request: write a 100-word Instagram caption inviting followers to book a 45-minute lunch-break scalp treatment.
+
+Instructions: calm, unhurried tone, not salesy. Don't claim the treatment cures anything or guarantees hair growth.
+
+Expected Output: one caption under 100 words, plus two shorter alternate versions I can pick between.
+
+Fact-check: I'd check that it makes no health or medical claim, that any price or offer mentioned is current, and that the tone actually sounds like my business.

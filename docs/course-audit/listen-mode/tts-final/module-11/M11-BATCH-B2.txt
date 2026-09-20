@@ -1,0 +1,13 @@
+Nice work — let's keep going.
+
+Section 11.6 — Privacy and client data. Client Information, Images and AI.
+
+Data and privacy practices differ by tool and change over time. Do not rely on one frozen claim about what "AI" does with information.
+
+Need: does the AI actually need this information or image?
+
+Minimize: can identifying details be removed? Can the task be completed with less client information?
+
+Verify: what are the tool's current data and privacy practices, account settings, permission and consent requirements, and applicable workplace or business requirements?
+
+[firmly] Give the tool what the task needs — not everything you know. Uploading client scalp imagery into a general-purpose AI tool should not be treated as a casual default.

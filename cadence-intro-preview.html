@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cadence Intro Preview (Owner/Dev Only)</title>
+<meta name="robots" content="noindex, nofollow">
+<!--
+  ═══════════════════════════════════════════════════════════════
+  CADENCE INTRO — STANDALONE OWNER PREVIEW
+  ---------------------------------------------------------------
+  A development/review surface ONLY. Loads nothing from the real
+  course: no APP_STATE, no Supabase, no entitlement/course-progress/
+  checkpoint code, no AIMT public nav, no course dashboard, no
+  Module 0. This page exists so the Cadence intro's pacing, fades,
+  typography, and copy can be reviewed without fighting the entire
+  course routing.
+
+  It renders the SAME reusable component headspa-mastery.html mounts
+  for real students -- assets/js/aimt-cadence-intro.js and
+  assets/css/aimt-cadence-intro.css are the one shared source of
+  truth. A fade/pacing change made by editing that JS/CSS is
+  inherited by both this preview and the real course automatically;
+  nothing about the intro itself is duplicated here.
+
+  The "synthesize" function below is a clearly-labeled, preview-only
+  MOCK reply -- it never calls /api/cadence/submit-intro, and this
+  mock never appears in the real course (headspa-mastery.html
+  supplies its own real implementation there). Everything a student
+  types here stays in this tab's memory for the current session only:
+  nothing is written to localStorage, Supabase, or any course state.
+
+  Safe to open directly from Finder as a file:// URL -- see the
+  synthesize()/onSubmitContext() below, which make no network calls.
+  ═══════════════════════════════════════════════════════════════
+-->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-cadence-intro.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0a0808; height: 100%; }
+  body { font-family: var(--aimt-font-sans, 'Outfit', sans-serif); overflow-x: hidden; }
+
+  /* Shown after the intro hands off (Enter the Welcome Module / Skip) --
+     this preview has no course to enter, so it just confirms what
+     happened and offers a one-click restart. Not part of the shared
+     component; this page's own dev-only wrapper. */
+  #previewDone {
+    display: none; position: fixed; inset: 0; z-index: 900;
+    background: #0a0808; color: rgba(255,255,255,0.85);
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 1.25rem; text-align: center; padding: 2rem;
+  }
+  #previewDone.show { display: flex; }
+  #previewDoneLabel {
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.62rem; font-weight: 400;
+    letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+  }
+  #previewDoneTitle {
+    font-family: var(--aimt-font-mont, sans-serif); font-size: 1.1rem; font-weight: 600;
+    letter-spacing: 0.02em; color: rgba(255,255,255,0.92);
+  }
+  #previewRestartBtn {
+    display: flex; align-items: center; gap: 10px; margin-top: 0.5rem;
+    background: none; border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 980px; padding: 0.75rem 1.6rem; cursor: pointer;
+    font-family: var(--aimt-font-mont, sans-serif); font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68);
+    transition: all 0.25s;
+  }
+  #previewRestartBtn:hover { border-color: rgba(163,150,141,0.55); color: #fff; background: rgba(255,255,255,0.04); }
+
+  /* Preview-only dev boot-failure banner -- see the DOMContentLoaded
+     handler below. Never shown when mount() succeeds; never present in
+     the real course (headspa-mastery.html has no equivalent of this,
+     by design -- see that comment below). */
+  #previewBootError {
+    display: none; position: fixed; inset: 0; z-index: 950;
+    background: #0a0808; color: #e8b4b4;
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 0.85rem; text-align: center; padding: 2rem;
+  }
+  #previewBootError.show { display: flex; }
+  #previewBootErrorTitle {
+    font-family: var(--aimt-font-mont, sans-serif); font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #e8b4b4;
+  }
+  #previewBootErrorDetail {
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.72rem;
+    color: rgba(232,180,180,0.7); max-width: 34rem; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div id="previewDone">
+  <span id="previewDoneLabel">Cadence Intro Preview</span>
+  <span id="previewDoneTitle">Preview complete.</span>
+  <button id="previewRestartBtn" type="button" onclick="location.reload()">↻ Restart preview</button>
+</div>
+
+<div id="previewBootError">
+  <span id="previewBootErrorTitle">Cadence preview failed to initialize</span>
+  <span id="previewBootErrorDetail">See the browser console for the actual error.</span>
+</div>
+
+<script src="assets/js/aimt-cadence-intro.js"></script>
+<script>
+// Standalone boot -- explicit, on DOMContentLoaded, using the real
+// AimtCadenceIntro.mount() API the shared component exposes (the same
+// one headspa-mastery.html's mountCadenceIntro() calls for real
+// students). This page never waits on, or depends on, APP_STATE,
+// Supabase, authentication, entitlement, shouldEnterPurchasedCourse(),
+// shouldShowIntro(), ?studentpreview params, or introComplete -- those
+// are course-integration concerns and do not exist here.
+document.addEventListener('DOMContentLoaded', function () {
+  // Optional ?name=Whatever for reviewing the personalized-greeting
+  // path -- defaults to "Cady" (the named preview example throughout
+  // this project's Cadence audio production docs) so a fresh reload
+  // exercises the named path and its real matching dev audio fixtures
+  // (see requestRuntimeAudio below) without requiring a query param.
+  // Pass ?name= (empty) explicitly to review the unnamed "Hi." path.
+  var params = new URLSearchParams(window.location.search);
+  var previewFirstName = params.has('name') ? params.get('name') : 'Cady';
+
+  // Real Jane dev-preview fixtures (generated once, same voice/model as
+  // the approved static audio) for the three runtime segments this
+  // preview exercises -- see requestRuntimeAudio below. Text match
+  // exactly:
+  //   cadence_intro_01           "Hi, Cady."
+  //   cadence_synthesis_response the fixed mock reply in synthesize() below
+  //   cadence_closing_meet       the named closing line for "Cady"
+  // These are dev-preview-only assets, never referenced by production.
+  var PREVIEW_DEV_AUDIO_FIXTURES = {
+    cadence_intro_01: 'assets/audio/cadence-intro-preview-fixtures/cadence_intro_01.mp3',
+    cadence_synthesis_response: 'assets/audio/cadence-intro-preview-fixtures/cadence_synthesis_response.mp3',
+    cadence_closing_meet: 'assets/audio/cadence-intro-preview-fixtures/cadence_closing_meet.mp3'
+  };
+
+  function showDone(title) {
+    document.getElementById('previewDoneTitle').textContent = title;
+    document.getElementById('previewDone').classList.add('show');
+  }
+
+  // Fail LOUDLY here in preview mode -- if the shared component didn't
+  // load or mount() throws, a silent blank black page is the worst
+  // possible outcome for a page whose whole purpose is visual review.
+  // This banner + console.error is deliberately preview-only: the real
+  // course (headspa-mastery.html) has no equivalent fallback UI, by
+  // design, since a production student should never see raw error text.
+  function showBootError(err) {
+    console.error('[Cadence intro preview] failed to initialize:', err);
+    var banner = document.getElementById('previewBootError');
+    var detail = document.getElementById('previewBootErrorDetail');
+    if (detail) detail.textContent = (err && (err.message || String(err))) || 'Unknown error -- see console.';
+    if (banner) banner.classList.add('show');
+  }
+
+  try {
+    if (!window.AimtCadenceIntro || typeof window.AimtCadenceIntro.mount !== 'function') {
+      throw new Error('assets/js/aimt-cadence-intro.js did not load (window.AimtCadenceIntro.mount is unavailable).');
+    }
+
+    window.AimtCadenceIntro.mount(document.body, {
+      firstName: previewFirstName,
+
+      // Dev-only mock -- never calls the real endpoint, never appears in
+      // the real course. A FIXED string (not interpolated from the
+      // student's actual answer) so it has one exact, deterministic
+      // value -- see PREVIEW_DEV_AUDIO_FIXTURES below, which holds a
+      // real matching Jane recording of this exact sentence.
+      synthesize: function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve(
+              'Based on what you shared, the real course would reference specific AIMT modules here. ' +
+              'This line only exists to let you review pacing and fade timing.'
+            );
+          }, 500);
+        });
+      },
+
+      // Dev-only fixtures for exercising the runtime-audio code path
+      // (fetch -> ArrayBuffer -> decode -> play -> analyser -> orbital)
+      // end to end in a real browser without a live ElevenLabs key or
+      // Cloudflare Function. Each of the three runtime segment ids maps
+      // to its own real Jane recording of the EXACT text this preview
+      // displays for it (same voice/model already used for this
+      // project's approved static Cadence audio -- see
+      // assets/audio/cadence-intro-preview-fixtures/), never a stand-in
+      // clip played over mismatched text. Preview-only: never referenced
+      // by headspa-mastery.html, which calls the real
+      // functions/api/cadence/tts-intro.js endpoint instead -- see that
+      // host's own requestRuntimeAudio implementation.
+      requestRuntimeAudio: function (segmentId, text) {
+        var fixtureUrl = PREVIEW_DEV_AUDIO_FIXTURES[segmentId];
+        if (!fixtureUrl) {
+          console.warn('[Cadence intro preview] no dev audio fixture for segment "' + segmentId + '" -- continuing visual-only.');
+          return Promise.reject(new Error('no dev audio fixture for ' + segmentId));
+        }
+        console.log('[Cadence intro preview] dev audio fixture for ' + segmentId + ' ("' + text + '")');
+        return fetch(fixtureUrl).then(function (res) {
+          if (!res.ok) throw new Error('dev audio fixture fetch failed: ' + fixtureUrl);
+          return res.arrayBuffer();
+        });
+      },
+
+      // Preview-only: no persistence, no course state. Logged so the
+      // captured context is still inspectable while reviewing.
+      onSubmitContext: function (context) {
+        console.log('[Cadence intro preview] context captured (not persisted):', context);
+      },
+      onComplete: function (context) {
+        console.log('[Cadence intro preview] synthesis complete:', context);
+      },
+      onEnterCourse: function () {
+        showDone('Preview complete — "Enter the Welcome Module" was clicked.');
+      },
+      onSkip: function () {
+        showDone('Preview complete — Skip was clicked.');
+      }
+    });
+  } catch (err) {
+    showBootError(err);
+  }
+});
+</script>
+</body>
+</html>

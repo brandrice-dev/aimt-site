@@ -1,0 +1,133 @@
+{
+  "_purpose": "QA metadata only. Records the exact, sample-accurate construction of module-01-capcut-master-part-a.wav (Part A (M1-01 through M1-07, ends at the first checkpoint) of the Module 1 CapCut production set -- split at the M1-07/M1-08 checkpoint boundary because the full 14-chunk master exceeds CapCuts 15:00 Enhance Voice limit) so the CapCut export can be automatically position-anchored re-split back into the original semantic chunks. Not consumed by the course app; not the manifest at assets/js/aimt-listen-mode-data.js.",
+  "master": "module-01-capcut-master-part-a.wav",
+  "partLabel": "Part A (M1-01 through M1-07, ends at the first checkpoint)",
+  "preset": "CADENCE_CAPCUT_FINISH_PRESET_V1",
+  "createdAtUtc": "2026-08-30T23:19:04Z",
+  "sourceFormat": {
+    "sampleRateHz": 44100,
+    "channels": 1,
+    "sampleFormat": "pcm_s16le",
+    "note": "Native format of the raw ElevenLabs decode -- no resampling applied at any stage."
+  },
+  "separator": {
+    "durationSec": 2.0,
+    "type": "digital silence (anullsrc), verified all-zero PCM samples",
+    "sampleCount": 88200,
+    "count": 6,
+    "placement": "between every pair of adjacent chunks within this part only -- none before the first chunk, none after the last"
+  },
+  "sourceChunkCount": 7,
+  "chunks": [
+    {
+      "chunkId": "m1-01",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-01.mp3",
+      "originalDurationSec": 65.44,
+      "masterStartSec": 0.0,
+      "masterEndSec": 65.44
+    },
+    {
+      "separator": true,
+      "index": 1,
+      "beforeChunk": "m1-01",
+      "afterChunk": "m1-02",
+      "startSec": 65.44,
+      "endSec": 67.44,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-02",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-02.mp3",
+      "originalDurationSec": 76.8,
+      "masterStartSec": 67.44,
+      "masterEndSec": 144.24
+    },
+    {
+      "separator": true,
+      "index": 2,
+      "beforeChunk": "m1-02",
+      "afterChunk": "m1-03",
+      "startSec": 144.24,
+      "endSec": 146.24,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-03",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-03.mp3",
+      "originalDurationSec": 92.16,
+      "masterStartSec": 146.24,
+      "masterEndSec": 238.4
+    },
+    {
+      "separator": true,
+      "index": 3,
+      "beforeChunk": "m1-03",
+      "afterChunk": "m1-04",
+      "startSec": 238.4,
+      "endSec": 240.4,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-04",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-04.mp3",
+      "originalDurationSec": 146.08,
+      "masterStartSec": 240.4,
+      "masterEndSec": 386.48
+    },
+    {
+      "separator": true,
+      "index": 4,
+      "beforeChunk": "m1-04",
+      "afterChunk": "m1-05",
+      "startSec": 386.48,
+      "endSec": 388.48,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-05",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-05.mp3",
+      "originalDurationSec": 69.2,
+      "masterStartSec": 388.48,
+      "masterEndSec": 457.68
+    },
+    {
+      "separator": true,
+      "index": 5,
+      "beforeChunk": "m1-05",
+      "afterChunk": "m1-06",
+      "startSec": 457.68,
+      "endSec": 459.68,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-06",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-06.mp3",
+      "originalDurationSec": 128.4,
+      "masterStartSec": 459.68,
+      "masterEndSec": 588.08
+    },
+    {
+      "separator": true,
+      "index": 6,
+      "beforeChunk": "m1-06",
+      "afterChunk": "m1-07",
+      "startSec": 588.08,
+      "endSec": 590.08,
+      "durationSec": 2.0
+    },
+    {
+      "chunkId": "m1-07",
+      "sourceFile": "assets/audio/listen/headspa-mastery/module-01/raw/m1-07.mp3",
+      "originalDurationSec": 38.72,
+      "masterStartSec": 590.08,
+      "masterEndSec": 628.8
+    }
+  ],
+  "masterTotalDurationSec": 628.8,
+  "verification": {
+    "method": "Byte-for-byte PCM sample comparison of every chunk segment and every separator segment against their decoded source WAVs and a freshly-generated 2.0s all-zero silence reference, performed immediately after building the master.",
+    "allSegmentsAndSeparatorsBitExact": true,
+    "masterFrameCount": 27730080,
+    "masterFrameCountMatchesArithmeticSum": true
+  }
+}

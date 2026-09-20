@@ -14,16 +14,62 @@
      ALLOWED_ORIGINS            comma-separated, e.g.
                                 https://yourdomain.com,https://aimt-site.pages.dev
      STAFF_EMAILS               comma-separated staff emails (optional)
+     CADENCE_CHAT_MODEL         optional override — MUST exactly equal
+                                APPROVED_CHAT_MODEL or CANDIDATE_CHAT_MODEL
+                                below, or the request is REFUSED (503), not
+                                silently served on a different model. Never
+                                set this to a provider "latest" alias.
 
    Limits enforced:
-     - model allowlist (only your course model)
+     - model allowlist (only the approved/candidate course model — see below)
      - max_tokens clamp (1000)
      - 20 requests/min per user (in-memory; resets on isolate recycle —
        good enough to stop abuse; upgrade to KV/DO later if needed)
      - 300 requests/day per user (in-memory, same caveat)
-   ═══════════════════════════════════════════════════════════════ */
 
-const ALLOWED_MODELS = ['claude-sonnet-4-20250514'];
+   ─── MODEL LIFECYCLE (mirrors functions/_lib/cadence/model-config.mjs's
+   CADENCE_CHAT_MODEL role, registry version 'cadence-model-registry-v2') ───
+   This Worker deploys by dashboard paste and cannot import that module
+   directly. Keep the constants below in sync with it BY HAND — a
+   repo-internal test (tests/cadence-phase0.test.mjs) fails the local suite
+   if this file's values and the Pages Function registry disagree, but it
+   cannot see what is actually deployed live. See
+   docs/course-audit/00-cadence-launch-sweep-build-contract.md Section 6a.
+
+   LEGACY_CHAT_MODEL is AIMT's original Cadence generation — superseded,
+   never used as a fallback of any kind, kept here only so a deliberately
+   authored future rollback has something explicit to point at.
+   CANDIDATE_CHAT_MODEL is the current Anthropic Sonnet generation,
+   registered for controlled regression testing, not yet cleared for
+   default traffic. APPROVED_CHAT_MODEL is null: NO model has been promoted
+   for default production use yet. This is not an oversight — it is the
+   correct, honest state until a model clears the AIMT grading/conversation
+   regression suite and a human explicitly promotes it (a new dated value
+   here, never a silent substitution). Until then this Worker FAILS SAFE
+   (503) rather than silently running checkpoint/guide-panel traffic on the
+   legacy generation. ─────────────────────────────────────────────────── */
+
+const LEGACY_CHAT_MODEL = 'claude-sonnet-4-20250514';
+const CANDIDATE_CHAT_MODEL = 'claude-sonnet-5';
+const APPROVED_CHAT_MODEL = null; // no model promoted yet — see header above
+
+const CHAT_MODEL_REGISTRY_VERSION = 'cadence-model-registry-v2'; // mirrors functions/_lib/cadence/model-config.mjs
+
+// Returns {modelName, status} or null (fail safe). Exposed to the client via
+// response headers (Phase 1 model/version logging — see the fetch handler
+// below) so a graded checkpoint's stored record can note what actually
+// graded it, the same way Module 12's certification path already does.
+function resolveChatModel(env) {
+  const override = typeof env.CADENCE_CHAT_MODEL === 'string' ? env.CADENCE_CHAT_MODEL.trim() : '';
+  if (override) {
+    if (APPROVED_CHAT_MODEL && override === APPROVED_CHAT_MODEL) return { modelName: APPROVED_CHAT_MODEL, status: 'APPROVED' };
+    if (override === CANDIDATE_CHAT_MODEL) return { modelName: CANDIDATE_CHAT_MODEL, status: 'CANDIDATE' };
+    return null; // unregistered / legacy / retired / arbitrary override — fail safe
+  }
+  if (APPROVED_CHAT_MODEL) return { modelName: APPROVED_CHAT_MODEL, status: 'APPROVED' };
+  return null; // no approved model registered — fail safe
+}
+
 const MAX_TOKENS_CAP = 1000;
 const RATE_PER_MINUTE = 20;
 const RATE_PER_DAY = 300;
@@ -165,7 +211,13 @@ export default {
       return json({ error: { message: 'Invalid request' } }, 400, cors);
     }
 
-    const model = ALLOWED_MODELS.includes(body.model) ? body.model : ALLOWED_MODELS[0];
+    // Model identity is a server-side decision, never a client one — the
+    // client no longer sends a model string at all (see headspa-mastery.
+    // html's callAI()); any legacy/unexpected body.model is ignored.
+    const modelInfo = resolveChatModel(env);
+    if (!modelInfo) {
+      return json({ error: { message: 'Cadence is not currently configured with an approved model. Please try again later.' } }, 503, cors);
+    }
     const maxTokens = Math.min(
       Number.isFinite(Number(body.max_tokens)) ? Number(body.max_tokens) : MAX_TOKENS_CAP,
       MAX_TOKENS_CAP
@@ -182,7 +234,7 @@ export default {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model,
+        model: modelInfo.modelName,
         max_tokens: maxTokens,
         system: typeof body.system === 'string' ? body.system : undefined,
         messages: body.messages
@@ -192,7 +244,16 @@ export default {
     const data = await upstream.text();
     return new Response(data, {
       status: upstream.status,
-      headers: { 'Content-Type': 'application/json', ...cors }
+      headers: {
+        'Content-Type': 'application/json',
+        ...cors,
+        // Diagnostic only (Phase 1 model/version logging) — the client
+        // never uses these to decide anything, only to record what
+        // actually graded a response. See headspa-mastery.html's callAI().
+        'X-Cadence-Model': modelInfo.modelName,
+        'X-Cadence-Model-Status': modelInfo.status,
+        'X-Cadence-Registry-Version': CHAT_MODEL_REGISTRY_VERSION
+      }
     });
   }
 };

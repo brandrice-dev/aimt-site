@@ -4,155 +4,557 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My AIMT — Student Dashboard</title>
-<meta name="description" content="Your AIMT student home: course progress, certificates, and resources.">
+<meta name="description" content="Your AIMT student home for course progress, practitioner tools, resources and certification.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/aimt-course-resources.js"></script>
+<script src="assets/js/aimt-metric-ring.js"></script>
+<script src="assets/js/aimt-readiness-config.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: var(--aimt-color-bg-primary, #1a1814);
     color: var(--aimt-color-text-strong, rgba(255,255,255,0.95));
     font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
     font-weight: 300;
     min-height: 100vh;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.5rem 4rem; }
-  .topbar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3rem; gap: 1rem; flex-wrap: wrap; }
-  .brand {
-    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-  }
-  .brand a { color: inherit; text-decoration: none; }
-  .signout {
-    background: none; border: none; cursor: pointer;
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em;
-  }
-  .signout:hover { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); }
+  .wrap { padding-bottom: 4rem; }
+
+  .page-head { padding: 2.25rem 0 1.75rem; }
+  .page-head .aimt-sp-eyebrow { margin-bottom: 0.85rem; }
+
   h1 {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-weight: 500; font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 0.4rem;
-  }
-  .welcome-email { color: var(--aimt-color-text-muted, rgba(255,255,255,0.43)); font-size: 0.9rem; margin-bottom: 2.8rem; }
-  .section-label {
     font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
-    font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase;
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    margin: 2.6rem 0 1rem;
+    font-weight: 700; letter-spacing: -0.02em;
+    font-size: clamp(1.7rem, 3.4vw, 2.4rem); margin-bottom: 0.55rem;
   }
-  .card {
-    background: var(--aimt-surface-2, rgba(255,255,255,0.03));
-    border: 1px solid var(--aimt-border-default, rgba(255,255,255,0.07));
-    border-radius: var(--aimt-radius-md); padding: 1.6rem 1.7rem; margin-bottom: 1rem;
-  }
-  .card h3 {
-    font-family: var(--aimt-font-serif, 'Playfair Display', serif);
-    font-weight: 500; font-size: 1.25rem; margin-bottom: 0.35rem;
-  }
-  .card .meta { color: var(--aimt-color-text-body, rgba(255,255,255,0.52)); font-size: 0.88rem; line-height: 1.6; }
-  .progress-row { display: flex; align-items: center; gap: 1rem; margin: 1.1rem 0 1.2rem; }
-  .progress-track {
-    flex: 1; height: 4px; border-radius: 2px;
-    background: var(--aimt-surface-4, rgba(255,255,255,0.045));
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; width: 0%;
-    background: var(--aimt-color-accent, #a3968d);
-    border-radius: 2px; transition: width 0.6s ease;
-  }
-  .progress-pct {
+  .greeting-sub { color: rgba(255,255,255,0.6); font-size: 0.94rem; line-height: 1.7; max-width: 56ch; }
+
+  .section-label {
+    display: flex; align-items: baseline; gap: 0.6em;
     font-family: var(--aimt-font-mono, monospace);
-    font-size: 0.78rem; color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    min-width: 3.2em; text-align: right;
+    font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--aimt-color-accent, #a3968d);
+    margin: 2.75rem 0 1.1rem;
   }
+  .section-label:first-of-type { margin-top: 0; }
+  .section-num { color: rgba(163,150,141,0.38); }
+
+  /* Primary course hero — one dominant, dimensional focal surface. The
+     wrap used to carry a decorative radial-glow ::before for ambient
+     lift, but that pseudo-element was a plain unrounded rectangle sitting
+     behind the rounded card — once the card gained its own full-bleed
+     photo background, that rectangle's top-left corner started showing
+     as a visible hard edge outside the card's radius. Removed rather than
+     patched: the photo + overlay now supplies all the surface's depth, so
+     the wrap needs no background of its own — the rounded course-hero is
+     the only visible container. */
+  .course-hero {
+    position: relative; z-index: 1; overflow: hidden;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.25rem;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: var(--aimt-radius-panel, 16px);
+    padding: 2.15rem 2.25rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  /* Full-card atmospheric background: the real head-spa texture photo sits
+     on ::before (its own layer, so cover-sizing never fights the card's
+     other backgrounds), ::after is a warm-black wash + a directional
+     gradient darkest under the left text zone and the right ring zone —
+     deliberately lighter across the middle so highlights/bubble texture
+     stay visible there. Both are edge-to-edge and clipped by the card's
+     own radius (overflow:hidden above) — never a separate framed photo. */
+  .course-hero::before {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background-image: url('assets/images/marketing/my-aimt-course-texture.png');
+    background-size: cover; background-position: 62% 42%;
+  }
+  .course-hero::after {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background:
+      linear-gradient(90deg, rgba(20,17,13,0.86) 0%, rgba(20,17,13,0.4) 38%, rgba(20,17,13,0.5) 62%, rgba(20,17,13,0.86) 100%),
+      rgba(20,17,13,0.32);
+  }
+  .chero-left, .chero-right { position: relative; z-index: 1; }
+  .chero-left { flex: 1 1 300px; min-width: 0; }
+  .chero-tag {
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(163,150,141,0.75); margin-bottom: 0.8rem; display: block;
+  }
+  .chero-left h2 {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-weight: 700; font-size: clamp(1.55rem, 2.8vw, 2rem); letter-spacing: -0.02em;
+  }
+  .chero-next { margin-top: 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .chero-next-label {
+    font-family: var(--aimt-font-mono, monospace);
+    font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .chero-next-value {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-weight: 500; font-size: 1.05rem; letter-spacing: -0.01em;
+    color: rgba(255,255,255,0.94);
+  }
+  /* Dynamic progress message — AIMT quietly noting real forward movement.
+     Brighter than muted metadata (0.5-0.6 elsewhere) but still clearly
+     secondary to the course title and Next Up value; no pill, no card,
+     no icon. See progressMessageFor() for the stage copy this holds. */
+  .chero-progress-msg { margin-top: 0.6rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6; }
+
+  .chero-right { flex: 0 1 220px; min-width: 200px; display: flex; flex-direction: column; align-items: center; gap: 0.9rem; }
+  .chero-ring-support { font-family: var(--aimt-font-sans); font-size: 0.8rem; color: rgba(255,255,255,0.5); text-align: center; }
+  .chero-right .btn { width: 100%; }
+
   .btn {
-    display: inline-block; background: var(--aimt-color-accent, #a3968d);
-    color: #1a1814; text-decoration: none; border: none; cursor: pointer;
-    font-family: var(--aimt-font-sans, 'Outfit', sans-serif);
-    font-size: 0.88rem; font-weight: 500; letter-spacing: 0.04em;
-    padding: 0.7rem 1.5rem; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif);
+    font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    background: #fff; color: #1a1814; text-decoration: none; border: none; cursor: pointer;
+    padding: 0.85rem 1.3rem; border-radius: var(--aimt-radius-pill, 980px);
+    min-height: 44px;
   }
   .btn.ghost {
-    background: transparent;
-    border: 1px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid var(--aimt-border-accent-strong, rgba(163,150,141,0.24));
+    color: rgba(255,255,255,0.75);
+  }
+  .btn.text-link {
+    background: none; padding: 0; min-height: auto;
+    color: rgba(255,255,255,0.5); text-transform: none; font-family: var(--aimt-font-sans); font-weight: 400; font-size: 0.84rem; letter-spacing: normal;
+  }
+  .btn.text-link:hover { color: #fff; }
+
+  /* Certification — editorial status area, one hairline strip, not a card
+     wall. Certified gets a touch more weight (warm border, faint tint,
+     the real earned-credential badge) — it's the destination state. */
+  .cert-panel { border-top: 0.5px solid rgba(255,255,255,0.08); padding: 1.5rem 0; }
+  .cert-panel:last-child { border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .cert-panel h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; margin-bottom: 0.4rem; }
+  .cert-panel .meta { color: rgba(255,255,255,0.62); font-size: 0.86rem; line-height: 1.6; }
+  .cred-line { font-family: var(--aimt-font-mono, monospace); font-size: 0.8rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.55); margin: 0.75rem 0 1rem; word-break: break-all; }
+  .cert-status-label {
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(163,150,141,0.75); margin-bottom: 0.6rem; display: block;
+  }
+  .cert-status-label.is-active { color: #9fc39f; }
+  .cert-status-label.is-attention { color: #d9a568; }
+  .cert-panel-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 1rem; }
+  .cert-panel--certified {
+    border-top-color: rgba(163,150,141,0.32);
+    background: linear-gradient(180deg, rgba(163,150,141,0.05) 0%, transparent 65%);
+  }
+  .cert-certified-row { display: flex; align-items: flex-start; gap: 1.5rem; }
+  .cert-badge { width: 76px; height: 76px; flex-shrink: 0; }
+  .cert-certified-body { flex: 1 1 auto; min-width: 0; }
+
+  /* Practitioner tools — editorial row with a quiet product icon, not a
+     card grid. Future tools reuse the same row. */
+  .tool-list { border-top: 0.5px solid rgba(255,255,255,0.07); }
+  .tool-row {
+    display: flex; align-items: center; gap: 1.25rem;
+    padding: 1.35rem 0; border-bottom: 0.5px solid rgba(255,255,255,0.07);
+    flex-wrap: wrap;
+  }
+  .tool-row-icon {
+    width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%;
+    background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
     color: var(--aimt-color-accent, #a3968d);
   }
-  .cred-line {
-    font-family: var(--aimt-font-mono, monospace);
-    font-size: 0.82rem; letter-spacing: 0.06em;
-    color: var(--aimt-color-text-muted, rgba(255,255,255,0.43));
-    margin: 0.7rem 0 1rem; word-break: break-all;
+  .tool-row-icon svg { width: 24px; height: 24px; }
+  .tool-row-copy { flex: 1 1 240px; min-width: 0; }
+  .tool-row-eyebrow { font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.6); display: block; margin-bottom: 0.35rem; }
+  .tool-row-copy h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 0.98rem; margin-bottom: 0.35rem; }
+  .tool-row-copy p { color: rgba(255,255,255,0.6); font-size: 0.86rem; line-height: 1.6; max-width: 50ch; }
+
+  /* Resource library — grouped rows, not cards */
+  .resource-group-label {
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(163,150,141,0.6); padding: 1.1rem 0 0.5rem; border-top: 0.5px solid rgba(255,255,255,0.07);
   }
-  .empty {
-    color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34));
-    font-size: 0.9rem; line-height: 1.6;
-  }
-  .resource-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0.85rem 0; gap: 1rem;
-    border-bottom: 1px solid var(--aimt-border-soft, rgba(255,255,255,0.06));
-  }
+  .resource-group:first-child .resource-group-label { border-top: none; padding-top: 0; }
+  .resource-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; gap: 1rem; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
   .resource-item:last-child { border-bottom: none; }
   .resource-item .r-name { font-size: 0.92rem; }
-  .resource-item .r-desc { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.78rem; margin-top: 0.15rem; }
-  .resource-item a {
-    color: var(--aimt-color-accent, #a3968d); text-decoration: none;
-    font-size: 0.84rem; white-space: nowrap;
+  .resource-item .r-desc { color: rgba(255,255,255,0.46); font-size: 0.78rem; margin-top: 0.2rem; max-width: 56ch; }
+  .resource-item a.dl {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+    color: var(--aimt-color-accent, #a3968d); text-decoration: none; font-size: 0.82rem; white-space: nowrap;
+    flex-shrink: 0;
+    border: 0.5px solid rgba(163,150,141,0.3); border-radius: var(--aimt-radius-pill, 980px);
+    padding: 0 1.1rem;
   }
-  .account-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .loading { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); font-size: 0.9rem; padding: 2rem 0; }
-  footer {
-    text-align: center; padding: 2.5rem 1.5rem;
-    color: var(--aimt-color-text-micro, rgba(255,255,255,0.28)); font-size: 0.78rem;
+  .resource-item a.dl:hover { border-color: rgba(163,150,141,0.6); color: #fff; }
+
+  /* Empty / error notices — same quiet hairline treatment, no boxed card */
+  .empty-card { border-top: 0.5px solid rgba(255,255,255,0.08); padding: 1.5rem 0; }
+  .empty-card h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem; }
+  .empty-card .meta { color: rgba(255,255,255,0.62); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
+  .empty-row { color: rgba(255,255,255,0.44); font-size: 0.9rem; line-height: 1.6; padding: 0.5rem 0; }
+
+  /* Account — quiet row, no card */
+  .account-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding-top: 1.25rem; border-top: 0.5px solid rgba(255,255,255,0.07);
   }
-  footer a { color: var(--aimt-color-text-subtle, rgba(255,255,255,0.34)); text-decoration: none; margin: 0 0.55rem; }
+  .account-row .meta { color: rgba(255,255,255,0.6); font-size: 0.88rem; }
+  .account-row-actions { display: flex; align-items: center; gap: 1.4rem; }
+
+  .loading { color: rgba(255,255,255,0.44); font-size: 0.9rem; padding: 3rem 0; }
+
+  @media (max-width: 700px) {
+    .course-hero { padding: 1.6rem 1.4rem; flex-direction: column; }
+    .course-hero::after {
+      background:
+        linear-gradient(180deg, rgba(20,17,13,0.88) 0%, rgba(20,17,13,0.6) 55%, rgba(20,17,13,0.88) 100%),
+        rgba(20,17,13,0.45);
+    }
+    .chero-left, .chero-right { flex-basis: auto; }
+    .chero-right { width: 100%; }
+    /* Mobile stack order: course info, then the CTA, then the ring last —
+       the ring is a supporting metric here, not the first thing reached. */
+    .chero-right .btn { order: -1; }
+    .cert-certified-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .cert-badge { width: 60px; height: 60px; }
+    .tool-row { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+    .tool-row .btn { width: 100%; }
+    .resource-item { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+    .resource-item a.dl { align-self: flex-start; }
+    .account-row-actions { width: 100%; justify-content: space-between; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     Readiness Preview Mode (?preview=readiness) — unauthenticated
+     surface built from the local aimt_readiness_profile_v1 profile
+     only. Shares Student Mode's tokens/section rhythm/course-hero/
+     cert-panel/tool-row/resource-item primitives above; adds only the
+     preview-specific hero, pillar rows, action plan and CTA blocks
+     below. See initReadinessPreview() in the script for the render
+     logic and the hard rule against any Supabase/student-data query
+     on this path. ══════════════════════════════════════════════ */
+  .rp-hero {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2.5rem;
+    padding: 0.5rem 0 2.5rem; border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .rp-hero-ring { flex: 0 0 auto; }
+  .rp-hero-body { flex: 1 1 320px; min-width: 0; }
+  .rp-band-name {
+    font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 700;
+    letter-spacing: 0.02em; text-transform: uppercase; font-size: 1.35rem; margin-bottom: 0.6rem;
+  }
+  .rp-band-copy { color: rgba(255,255,255,0.62); font-size: 0.92rem; line-height: 1.7; max-width: 52ch; margin-bottom: 1.6rem; }
+  .rp-quickfacts { display: flex; flex-wrap: wrap; gap: 2.25rem; }
+  .rp-quickfact { display: flex; flex-direction: column; gap: 0.3rem; }
+  .rp-quickfact-label { font-family: var(--aimt-font-mono, monospace); font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.7); }
+  .rp-quickfact-value { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 600; font-size: 1.02rem; }
+
+  .rp-pillar-rows { display: grid; gap: 1.15rem; padding: 0.25rem 0 2.5rem; }
+  .rp-pillar-row-head { display: flex; justify-content: space-between; font-size: 0.88rem; color: rgba(255,255,255,0.75); margin-bottom: 0.4rem; }
+  .rp-pillar-row-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .rp-pillar-row-fill { height: 100%; background: var(--aimt-color-accent, #a3968d); border-radius: 2px; }
+
+  .rp-priority-block { padding: 0.25rem 0 1.5rem; }
+  .rp-priority-eyebrow { font-family: var(--aimt-font-mono, monospace); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--aimt-color-accent, #a3968d); margin-bottom: 0.6rem; }
+  .rp-priority-block h3 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 700; font-size: 1.25rem; margin-bottom: 0.9rem; }
+  .rp-priority-block > p { color: rgba(255,255,255,0.62); font-size: 0.9rem; line-height: 1.7; max-width: 60ch; margin-bottom: 1.3rem; }
+  .rp-moves-label { font-family: var(--aimt-font-mono, monospace); font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(163,150,141,0.6); margin-bottom: 0.75rem; }
+  .rp-moves-list { display: grid; gap: 0.7rem; padding-left: 1.3em; }
+  .rp-moves-list li { color: rgba(255,255,255,0.72); font-size: 0.92rem; line-height: 1.6; }
+  .rp-strongest-note { color: rgba(255,255,255,0.5); font-size: 0.88rem; line-height: 1.7; padding-bottom: 2.5rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+
+  .rp-desire { text-align: center; padding: 3rem 0 2.25rem; max-width: 62ch; margin: 0 auto; }
+  .rp-desire h2 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 700; font-size: clamp(1.5rem, 3vw, 2rem); margin: 0.85rem 0 1rem; letter-spacing: -0.01em; }
+  .rp-desire p { color: rgba(255,255,255,0.6); font-size: 0.92rem; line-height: 1.75; }
+
+  .rp-locked-copy { color: rgba(255,255,255,0.68); font-size: 0.9rem; line-height: 1.7; max-width: 52ch; margin: 0.9rem 0 1.1rem; }
+
+  /* Tasteful, quiet lock indicator — small mono status text, never a
+     giant overlay; the 🔒 glyph is decorative (status is already
+     written out), so it stays aria-hidden. */
+  .aimt-lock-status {
+    display: inline-flex; align-items: center; gap: 0.45em; white-space: nowrap;
+    font-family: var(--aimt-font-mono, monospace); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(163,150,141,0.72);
+  }
+
+  .rp-cta { text-align: center; padding: 3.5rem 0 1rem; max-width: 64ch; margin: 0 auto; }
+  .rp-cta h2 { font-family: var(--aimt-font-mont, 'Montserrat', sans-serif); font-weight: 700; font-size: clamp(1.5rem, 3vw, 2rem); margin: 0.85rem 0 1rem; letter-spacing: -0.01em; }
+  .rp-cta p { color: rgba(255,255,255,0.62); font-size: 0.92rem; line-height: 1.75; margin-bottom: 1.75rem; }
+  .rp-cta-actions { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; }
+  .rp-resend-form { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 1.25rem; }
+  .rp-resend-form input {
+    min-height: 44px; min-width: 220px; border-radius: var(--aimt-radius-sm, 10px);
+    border: 0.5px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04);
+    color: #fff; font-family: var(--aimt-font-sans); font-size: 16px; padding: 0 1rem; outline: none;
+  }
+  .rp-resend-form input:focus-visible { border-color: rgba(163,150,141,0.6); outline: 2px solid #a3968d; outline-offset: 1px; }
+  .rp-resend-confirm { color: rgba(255,255,255,0.56); font-size: 0.86rem; margin-top: 1rem; }
+
+  @media (max-width: 700px) {
+    .rp-hero { flex-direction: column; align-items: center; text-align: center; padding-top: 0; }
+    .rp-hero-body { text-align: left; width: 100%; }
+    .rp-quickfacts { justify-content: center; }
+  }
+
 </style>
 </head>
-<body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand"><a href="index.html">American Institute of Modern Trichology</a></div>
-    <button class="signout" onclick="signOut()">Sign out</button>
-  </div>
+<body class="aimt-sp-depth-primary">
+<!-- ══ CANONICAL AIMT BRAND MARK ══
+     Single source of truth for the orbital circular mark + surrounding dots.
+     Every AIMT mark on this page (nav, footer, decorative reuse) renders via
+     <use href="#aimtOrbitalMark"> against this one definition — never a
+     re-drawn or simplified copy, and never assets/brand/aimt-orbital-mark.svg
+     via a cross-document <use> (unsupported in this browser environment --
+     confirmed via isolated test: an external-file+fragment <use> silently
+     renders nothing, which is why the nav mark and Cadence marks had gone
+     invisible). AIMT identity and Cadence identity are two DIFFERENT marks
+     now living in two different local <symbol>s (see cadence-mark below,
+     where present) -- they must never share one definition again. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
 
-  <h1>My AIMT</h1>
-  <div class="welcome-email" id="userEmail"></div>
+
+<nav class="aimt-public-nav aimt-public-nav--sticky" id="studentNav">
+  <a href="index.html" class="aimt-public-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"></use></svg>
+  </a>
+  <a href="index.html" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <a class="aimt-public-nav-link" href="head-spa-certification">Head Spa Certification</a>
+    <span class="aimt-public-nav-sep"></span>
+    <div class="aimt-public-nav-account">
+      <a class="aimt-public-nav-link aimt-admin-entry" href="admin.html" style="display:none;">AIMT Admin</a>
+      <span class="aimt-public-nav-account-email" id="navUserEmail"></span>
+      <button type="button" class="aimt-public-nav-signout" onclick="signOut()">Sign out</button>
+    </div>
+    <div class="aimt-public-nav-mobile-account">
+      <button type="button" class="aimt-public-nav-account-btn" id="accountMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenuPanel" aria-label="Account menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12" cy="7.5" r="3.5" stroke="currentColor" stroke-width="1.4"/></svg>
+      </button>
+      <div class="aimt-public-nav-account-panel" id="accountMenuPanel">
+        <div class="aimt-public-nav-account-panel-email" id="mobileUserEmail"></div>
+        <a href="head-spa-certification">Head Spa Certification</a>
+        <a href="student-access.html#reset">Change Password</a>
+        <a href="admin.html" class="aimt-admin-entry" style="display:none;">AIMT Admin</a>
+        <button type="button" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Readiness Preview Mode nav (?preview=readiness) — unauthenticated
+     funnel shell: no account control exists because no account exists.
+     Hidden by default; shown instead of #studentNav only in preview
+     mode (see initReadinessPreview() in the script). -->
+<nav class="aimt-public-nav aimt-public-nav--sticky" id="previewNav" style="display:none;">
+  <a href="index.html" class="aimt-public-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"></use></svg>
+  </a>
+  <a href="index.html" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <a href="head-spa-certification" class="aimt-public-nav-link">Head Spa Certification</a>
+    <span class="aimt-public-nav-sep"></span>
+    <a href="student-access.html" class="aimt-public-nav-link">Student Access</a>
+    <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+      <span class="aimt-public-nav-hamburger-line"></span>
+      <span class="aimt-public-nav-hamburger-line"></span>
+      <span class="aimt-public-nav-hamburger-line"></span>
+    </button>
+  </div>
+</nav>
+<div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="head-spa-certification" class="aimt-public-nav-mobile-link">Head Spa Certification</a>
+  <a href="student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
+</div>
+
+<div class="wrap aimt-sp-container" id="studentModeRoot">
+  <div class="page-head">
+    <span class="aimt-sp-eyebrow">My AIMT</span>
+    <h1 id="greetingTitle">Welcome back.</h1>
+    <p class="greeting-sub">Continue your course, access practitioner tools and resources, and keep track of your AIMT certification.</p>
+  </div>
 
   <div id="loading" class="loading">Loading your studies…</div>
 
   <div id="dashboard" style="display:none">
-    <div class="section-label">Your Courses</div>
-    <div id="coursesArea"></div>
+    <span class="section-label"><span class="section-num">01</span>Continue Learning</span>
+    <div class="course-hero-wrap" id="coursesArea"></div>
 
-    <div class="section-label">Certification</div>
+    <span class="section-label" id="certLabel"><span class="section-num">02</span>Certification</span>
     <div id="certArea"></div>
 
-    <div class="section-label">Resources</div>
-    <div class="card" id="resourcesCard"></div>
+    <span class="section-label" id="toolsLabel"><span class="section-num">03</span>Practitioner Tools</span>
+    <div class="tool-list" id="toolsArea"></div>
 
-    <div class="section-label">Account</div>
-    <div class="card">
-      <div class="account-row">
-        <div class="meta">Signed in as <span id="accountEmail"></span></div>
-        <a class="btn ghost" href="student-access.html#reset">Change password</a>
+    <span class="section-label" id="resourcesLabel"><span class="section-num">04</span>Resource Library</span>
+    <div id="resourcesCard"></div>
+
+    <span class="section-label"><span class="section-num">05</span>Account</span>
+    <div class="account-row">
+      <div class="meta">Signed in as <span id="accountEmail"></span></div>
+      <div class="account-row-actions">
+        <a class="btn text-link" href="student-access.html#reset">Change Password</a>
+        <button type="button" class="btn text-link" onclick="signOut()">Sign out</button>
       </div>
     </div>
   </div>
 </div>
 
-<footer>
-  <a href="index.html">AIMT</a> · <a href="courses.html">Certifications</a> ·
-  <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> ·
-  <a href="refunds.html">Refunds</a> · <a href="verify.html">Verify a Credential</a>
+<!-- ══════════════════════════════════════════════════════════════
+     READINESS PREVIEW MODE (?preview=readiness)
+     ---------------------------------------------------------------
+     Unauthenticated. Rendered entirely from the local
+     aimt_readiness_profile_v1 browser profile by initReadinessPreview()
+     in the script — never touches Supabase, entitlements, progress,
+     or certification state. Hidden by default; shown in place of
+     #studentModeRoot only when the mode check at the bottom of the
+     script detects ?preview=readiness. ══════════════════════════ -->
+<div class="wrap aimt-sp-container" id="previewModeRoot" hidden>
+
+  <div id="rpEmptyState" class="empty-card" hidden>
+    <h3>Complete your Readiness Profile first.</h3>
+    <p class="meta">We couldn’t find a saved Readiness Profile on this browser. Take the free 3-minute assessment to get your personalized results.</p>
+    <div><a class="btn" href="head-spa-readiness.html">Take the Readiness Assessment →</a></div>
+  </div>
+
+  <div id="rpContent" hidden>
+    <div class="page-head">
+      <span class="aimt-sp-eyebrow">Your AIMT Readiness Profile</span>
+      <h1 id="rpGreeting">Welcome.</h1>
+      <p class="greeting-sub">Your results show where your current head spa practice is strongest, where more structure could help, and what to focus on next.</p>
+    </div>
+
+    <!-- Hero: ring + band + strongest/priority quick facts -->
+    <div class="rp-hero">
+      <div class="rp-hero-ring" id="rpRingArea"></div>
+      <div class="rp-hero-body">
+        <div class="rp-band-name" id="rpBandName">—</div>
+        <p class="rp-band-copy" id="rpBandCopy"></p>
+        <div class="rp-quickfacts">
+          <div class="rp-quickfact">
+            <span class="rp-quickfact-label">Your Strongest Area</span>
+            <span class="rp-quickfact-value" id="rpStrongestPillar">—</span>
+          </div>
+          <div class="rp-quickfact">
+            <span class="rp-quickfact-label">Your First Priority</span>
+            <span class="rp-quickfact-value" id="rpPriorityPillar">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Five-pillar breakdown -->
+    <span class="section-label"><span class="section-num">01</span>Your Five-Part Breakdown</span>
+    <div class="rp-pillar-rows" id="rpPillarRows"></div>
+
+    <!-- Personalized action plan -->
+    <span class="section-label"><span class="section-num">02</span>Your Personalized Action Plan</span>
+    <div class="rp-priority-block">
+      <div class="rp-priority-eyebrow">Your First Priority</div>
+      <h3 id="rpPriorityTitle">—</h3>
+      <p id="rpPriorityWhy"></p>
+      <div class="rp-moves-label">Your Next Moves</div>
+      <ol class="rp-moves-list" id="rpMovesList"></ol>
+    </div>
+    <p class="rp-strongest-note" id="rpStrongestNote"></p>
+
+    <!-- Desire moment -->
+    <div class="rp-desire">
+      <span class="aimt-sp-eyebrow">Your AIMT Workspace</span>
+      <h2>This is where the work continues.</h2>
+      <p>Your Readiness Profile identifies the gaps. AIMT gives you the curriculum, feedback, tools, and systems to build them.</p>
+    </div>
+
+    <!-- Locked Head Spa Certification course surface — same course-hero
+         visual language (incl. the wet-hair texture) as Student Mode's
+         real Continue Learning card; no ring, no fake progress. -->
+    <span class="section-label"><span class="section-num">03</span>Continue Learning</span>
+    <div class="course-hero">
+      <div class="chero-left">
+        <span class="chero-tag">AIMT · Certification 01</span>
+        <h2>Head Spa Certification Course</h2>
+        <p class="rp-locked-copy">Complete professional head spa training from foundations and scalp observation through service execution, systems, modern practice tools, and final certification assessment.</p>
+        <span class="aimt-lock-status"><span aria-hidden="true">🔒</span> Available with enrollment</span>
+      </div>
+      <div class="chero-right">
+        <a class="btn" href="head-spa-certification">Explore The Course →</a>
+      </div>
+    </div>
+
+    <!-- Locked certification -->
+    <span class="section-label"><span class="section-num">04</span>Certification</span>
+    <div class="cert-panel">
+      <span class="cert-status-label"><span aria-hidden="true">🔒</span> Earned through assessment</span>
+      <h3>AIMT Head Spa Certification</h3>
+      <p class="meta">Complete the Final Certification Assessment and meet AIMT’s competency standard to earn your verifiable AIMT credential.</p>
+    </div>
+
+    <!-- Locked practitioner tools -->
+    <span class="section-label"><span class="section-num">05</span>Practitioner Tools</span>
+    <div class="tool-list" id="rpToolsArea"></div>
+
+    <!-- Locked resource library -->
+    <span class="section-label"><span class="section-num">06</span>Resource Library</span>
+    <div id="rpResourcesArea"></div>
+
+    <!-- Conversion CTA -->
+    <div class="rp-cta">
+      <span class="aimt-sp-eyebrow">Ready To Build The Next Level?</span>
+      <h2>Turn your Readiness Profile into a stronger practice.</h2>
+      <p>Your results already show where the biggest opportunity is. The AIMT Head Spa Certification Course is designed to build the judgment, service systems, and professional tools behind those areas.</p>
+      <div class="rp-cta-actions">
+        <a class="btn" href="head-spa-certification">Explore Head Spa Certification →</a>
+        <button type="button" class="btn text-link" id="rpResendBtn" style="display:none;">Email My Profile Again</button>
+      </div>
+      <div class="rp-resend-form" id="rpResendForm" style="display:none;">
+        <label for="rpResendEmail" style="position:absolute;left:-9999px;">Email address</label>
+        <input type="email" id="rpResendEmail" placeholder="you@email.com" autocomplete="email">
+        <button type="button" class="btn ghost" id="rpResendSubmit">Send →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="aimt-footer">
+  <div class="aimt-footer-bottom" style="text-align:center; border-top:none; margin-top:0;">
+    <a href="index.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">AIMT</a> ·
+    <a href="courses.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Certifications</a> ·
+    <a href="terms.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Terms</a> ·
+    <a href="privacy.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Privacy</a> ·
+    <a href="refunds.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Refunds</a> ·
+    <a href="verify.html" style="color:rgba(255,255,255,0.4); text-decoration:none;">Verify a Credential</a>
+  </div>
 </footer>
 
+<script src="assets/js/aimt-public-nav.js"></script>
 <script>
 /* ── Config (anon key is public by design; RLS enforces access) ── */
 const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
@@ -160,19 +562,123 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const COURSES = {
   'headspa-mastery': {
-    title: 'HeadSpa Mastery',
-    subtitle: 'Head Spa Practitioner Certification · 12 modules',
-    entry: 'headspa-mastery.html?enter=1',
-    totalModules: 12
+    title: 'Head Spa Certification Course',
+    subtitle: 'AIMT · Certification 01',
+    entry: 'head-spa-certification?enter=1'
   }
 };
 
-/* Downloadable resources. To activate: create a PRIVATE Supabase Storage
-   bucket named 'course-resources', upload files, and list them here.
-   Empty array = friendly empty state, nothing breaks. */
-const RESOURCES = [
-  /* { course: 'headspa-mastery', name: 'Service Protocol Quick Card', desc: 'Printable 17-step reference', path: 'headspa-mastery/protocol-quick-card.pdf' }, */
-];
+/* Display-only titles for the required coursework units — Welcome Module
+   (0) + Modules 1–11. Mirrors the course shell's own authoritative
+   MODULE_TITLES (headspa-mastery.html) as of this pass; kept as a
+   dashboard-local copy rather than loading that protected ~500KB course
+   file just to read a title string. Purely cosmetic — never touches
+   progress state or gating. Module 12 (Final Certification Assessment)
+   is intentionally absent: it is not a coursework unit, and its status
+   comes from `completions` / `certification_attempts`, not this map. */
+const REQUIRED_MODULE_TITLES = {
+  0: 'Welcome Module',
+  1: 'Role of the Head Spa Technician',
+  2: 'Welcoming Your Client',
+  3: 'Hair & Scalp Anatomy',
+  4: 'Microscopy & Scalp Assessment',
+  5: 'Scalp Patterns & Service Adaptation',
+  6: 'Conditions & Disorders',
+  7: 'Equipment & Room Setup',
+  8: 'The Head Spa Service',
+  9: 'Checkout, Client Closing & Pricing Strategy',
+  10: 'Sanitation & Reset Systems',
+  11: 'AI / Modern Practice Tools'
+};
+const REQUIRED_MODULE_COUNT = 12; /* Welcome (0) + Modules 1–11 — excludes Module 12 */
+
+/* One named state per course, resolved once per render pass and consumed
+   by both Continue Learning and Certification instead of each re-deriving
+   its own certified/remediation/progress branching. This is also the seam
+   a future Readiness Preview render mode plugs into: it would supply one
+   of these states directly (e.g. a locked "not enrolled" treatment) rather
+   than duplicating this table, without the visual components changing. */
+const COURSE_STATE = {
+  BEGIN: 'begin',
+  CONTINUE: 'continue',
+  ASSESSMENT_READY: 'assessment_ready',
+  REMEDIATION: 'remediation',
+  CERTIFIED: 'certified'
+};
+
+function resolveCourseState(progress, certState) {
+  if (certState.certified) return COURSE_STATE.CERTIFIED;
+  if (certState.remediation) return COURSE_STATE.REMEDIATION;
+  if (progress.nextModuleId === null) return COURSE_STATE.ASSESSMENT_READY;
+  if (progress.done > 0) return COURSE_STATE.CONTINUE;
+  return COURSE_STATE.BEGIN;
+}
+
+/* Centralized copy/actions per state, rather than scattering CTA labels
+   and hrefs across render functions. */
+const COURSE_STATE_META = {
+  [COURSE_STATE.BEGIN]: { cta: 'Begin Course →', hrefSuffix: '', nextLabel: 'Next Up' },
+  [COURSE_STATE.CONTINUE]: { cta: 'Continue Course →', hrefSuffix: '', nextLabel: 'Next Up' },
+  [COURSE_STATE.ASSESSMENT_READY]: { cta: 'Final Assessment →', hrefSuffix: '&cert=1', nextLabel: 'Next Up' },
+  [COURSE_STATE.REMEDIATION]: { cta: 'Review Next Steps →', hrefSuffix: '&cert=1', nextLabel: 'Status' },
+  [COURSE_STATE.CERTIFIED]: { cta: 'Review Course →', hrefSuffix: '', nextLabel: 'Status' }
+};
+
+function nextValueFor(state, progress) {
+  if (state === COURSE_STATE.ASSESSMENT_READY) return 'Final Certification Assessment';
+  if (state === COURSE_STATE.REMEDIATION) return 'Certification Review';
+  if (state === COURSE_STATE.CERTIFIED) return 'Certification Earned';
+  const title = REQUIRED_MODULE_TITLES[progress.nextModuleId] || ('Module ' + progress.nextModuleId);
+  return progress.nextModuleId === 0 ? title : ('Module ' + progress.nextModuleId + ' — ' + title);
+}
+
+/* One short, positive line reflecting real forward movement -- reuses the
+   exact `progress.done` count that already feeds the coursework metric
+   ring (computeCourseworkState()) and the exact `state` Continue Learning
+   and Certification already resolve via resolveCourseState(). No new
+   progress calculation; this only picks which approved sentence to show,
+   in priority order: certified > remediation > coursework-complete >
+   the matching normal-progress stage bucket. */
+function progressMessageFor(state, progress) {
+  if (state === COURSE_STATE.CERTIFIED) {
+    return 'You earned it. Your course and resources remain here whenever you need them.';
+  }
+  if (state === COURSE_STATE.REMEDIATION) {
+    return 'You’re closer than you were. Your next review path is ready.';
+  }
+  if (progress.nextModuleId === null) {
+    return 'Coursework complete. The Final Certification Assessment is next.';
+  }
+  const done = progress.done;
+  if (done === 0) return 'Your course is ready. Start building the foundation.';
+  if (done <= 2) return 'You’re underway — the foundation is taking shape.';
+  if (done <= 5) return 'Momentum is building. The pieces are starting to connect.';
+  if (done <= 8) return 'You’re well into the course now — your practitioner framework is getting stronger.';
+  return 'You’re in the final stretch. Keep sharpening the details.';
+}
+
+/* Display-only copy for the Practitioner Tools row: the resources
+   registry's description is written for the Resource Library list; this
+   section wants its own scope-grounded wording and a quiet product icon
+   for the same entry. Does not touch the registry or its entitlement
+   behavior. Future tools add an entry here and pick up the same row. */
+const TOOL_DISPLAY = {
+  'AIMT Service Timer': {
+    eyebrow: 'Practitioner Tool',
+    description: 'A treatment-room pacing companion for the Core 60-minute and Extended 90-minute AIMT service formats.',
+    cta: 'Open Service Timer →',
+    icon: '<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="19" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><path d="M22 22 L22 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M22 22 L29 26" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="22" cy="22" r="1.6" fill="currentColor"/></svg>'
+  }
+};
+
+/* Presentation-only name formatting — capitalizes what the account already
+   stores (e.g. "brandon" -> "Brandon"). Never rewrites the stored value. */
+function toDisplayName(name) {
+  if (!name) return '';
+  return String(name).trim().split(/\s+/).map(function (w) {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+}
 
 /* ── Same per-tab session storage as the rest of the site ── */
 function createSessionAuthStorage() {
@@ -194,6 +700,59 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 let currentUser = null;
 
+/* First incomplete required coursework module (0–11 only), replacing the
+   old "highest module touched" display: a student briefly opening Module 8
+   must not be told Module 8 is their continuation point while Module 5 is
+   still incomplete. Mirrors headspa-state.js's own getNextIncompleteModule()
+   logic, computed here from the raw course_progress.state blob since this
+   page never loads the course shell/APP_STATE runtime itself. */
+function computeCourseworkState(state) {
+  const progress = (state && state.progress) || {};
+  let done = 0;
+  let nextModuleId = null;
+  for (let i = 0; i < REQUIRED_MODULE_COUNT; i++) {
+    const complete = !!(progress[i] && progress[i].complete);
+    if (complete) done++;
+    else if (nextModuleId === null) nextModuleId = i;
+  }
+  return {
+    done,
+    pct: Math.round((done / REQUIRED_MODULE_COUNT) * 100),
+    nextModuleId /* null once all 12 required units are complete */
+  };
+}
+
+function hideSections(ids) {
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+}
+
+/* Convenience-only entry point into /admin.html for authenticated
+   owner/admin/support users -- this is NEVER the security boundary. That
+   stays entirely server-side in functions/api/admin/index.js's
+   resolveAdmin()/requireAdminRole(), which this call does not touch and
+   which still gates /admin.html and /api/admin exactly as before. A
+   non-admin student, a signed-out visitor, or a failed/timed-out request
+   all simply leave the link in its default hidden state -- nothing here
+   grants, implies, or checks access on its own; it only decides whether to
+   show a link to a page that re-checks access itself. */
+function revealAdminEntry() {
+  document.querySelectorAll('.aimt-admin-entry').forEach(function (el) { el.style.display = ''; });
+}
+
+async function checkAdminEntryPoint() {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const accessToken = data && data.session && data.session.access_token;
+    if (!accessToken) return;
+    const res = await fetch('/api/admin?view=me', { headers: { Authorization: 'Bearer ' + accessToken } });
+    if (!res.ok) return; // not an active admin_users row (or admin API unavailable) -- stay hidden
+    const body = await res.json().catch(function () { return null; });
+    if (body && body.actor && body.actor.role) revealAdminEntry();
+  } catch (_) {
+    /* network/API error -- leave hidden, this is convenience only */
+  }
+}
+
 async function init() {
   const { data } = await supabaseClient.auth.getUser();
   currentUser = data && data.user;
@@ -201,102 +760,250 @@ async function init() {
     window.location.href = 'student-access.html';
     return;
   }
+  checkAdminEntryPoint(); // fire-and-forget; never blocks or gates the rest of this page
   const email = (currentUser.email || '').toLowerCase();
-  document.getElementById('userEmail').textContent = email;
+  document.getElementById('navUserEmail').textContent = email;
+  document.getElementById('mobileUserEmail').textContent = email;
   document.getElementById('accountEmail').textContent = email;
 
-  await Promise.all([loadCourses(email), loadCertificates(), loadResources()]);
+  const rawFirstName = currentUser.user_metadata && currentUser.user_metadata.first_name;
+  const firstName = toDisplayName(rawFirstName);
+  document.getElementById('greetingTitle').textContent = firstName ? `Welcome back, ${firstName}.` : 'Welcome back.';
+
+  const { slugs, errored } = await loadEntitlements(email);
+
+  if (errored) {
+    document.getElementById('coursesArea').innerHTML =
+      '<div class="empty-card"><h3>We couldn’t load your AIMT account right now.</h3>' +
+      '<p class="meta">Please refresh and try again.</p></div>';
+    hideSections(['certLabel', 'certArea', 'toolsLabel', 'toolsArea', 'resourcesLabel', 'resourcesCard']);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    return;
+  }
+
+  if (!slugs.length) {
+    document.getElementById('coursesArea').innerHTML =
+      '<div class="empty-card"><h3>No AIMT programs are connected to this account yet.</h3>' +
+      '<p class="meta">If you enrolled with a different email, sign out and use that account. Otherwise, you can explore current AIMT programs.</p>' +
+      '<div><a class="btn" href="courses.html">View Programs →</a></div></div>';
+    hideSections(['certLabel', 'certArea', 'toolsLabel', 'toolsArea', 'resourcesLabel', 'resourcesCard']);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    return;
+  }
+
+  const [progressBySlug, certBySlug] = await Promise.all([
+    loadProgress(slugs),
+    loadCertificationState(slugs)
+  ]);
+
+  renderContinueLearning(slugs, progressBySlug, certBySlug);
+  renderCertification(slugs, progressBySlug, certBySlug);
+  loadResources(slugs);
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
 }
 
-async function loadCourses(email) {
-  const area = document.getElementById('coursesArea');
+async function loadEntitlements(email) {
   const { data: ents, error } = await supabaseClient
     .from('course_entitlements')
     .select('course_slug')
     .or('user_id.eq.' + currentUser.id + ',purchaser_email.eq.' + email);
+  if (error) return { slugs: [], errored: true };
+  return { slugs: [...new Set((ents || []).map(e => e.course_slug))], errored: false };
+}
 
-  if (error || !ents || !ents.length) {
-    area.innerHTML = '<div class="card"><div class="empty">No enrollments yet. Browse our <a href="courses.html" style="color:var(--aimt-color-accent,#a3968d)">certifications</a> to begin.</div></div>';
-    return;
-  }
-
-  /* progress for all courses in one query */
+async function loadProgress(slugs) {
   const { data: progRows } = await supabaseClient
     .from('course_progress')
     .select('course_slug, state')
     .eq('user_id', currentUser.id);
-  const progBySlug = {};
-  (progRows || []).forEach(r => { progBySlug[r.course_slug] = r.state; });
-
-  const slugs = [...new Set(ents.map(e => e.course_slug))];
-  area.innerHTML = slugs.map(slug => {
-    const course = COURSES[slug] || { title: slug, subtitle: '', entry: '#', totalModules: 12 };
-    let done = 0;
-    const state = progBySlug[slug];
-    try {
-      const progress = (state && state.progress) || {};
-      Object.keys(progress).forEach(k => { if (progress[k] && progress[k].complete) done++; });
-    } catch (_) {}
-    const pct = Math.min(100, Math.round((done / course.totalModules) * 100));
-    const label = done === 0 ? 'Begin course' : (pct >= 100 ? 'Revisit course' : 'Continue');
-    return '<div class="card">' +
-      '<h3>' + course.title + '</h3>' +
-      '<div class="meta">' + course.subtitle + '</div>' +
-      '<div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="progress-pct">' + pct + '%</div></div>' +
-      '<a class="btn" href="' + course.entry + '">' + label + '</a>' +
-      '</div>';
-  }).join('');
+  const stateBySlug = {};
+  (progRows || []).forEach(r => { stateBySlug[r.course_slug] = r.state; });
+  const out = {};
+  slugs.forEach(slug => { out[slug] = computeCourseworkState(stateBySlug[slug]); });
+  return out;
 }
 
-async function loadCertificates() {
-  const area = document.getElementById('certArea');
-  const { data: comps, error } = await supabaseClient
+/* Certification is decided entirely by `completions` (issued credential)
+   and `certification_attempts` (Final Certification Assessment outcome) —
+   both authoritative, RLS-scoped server tables (see supabase/migrations/
+   20260826_create_certification_assessment.sql). This never recomputes or
+   duplicates Module 12 scoring; it only reads the decision that already
+   exists. Performance Review itself is rendered inside Module 12
+   (assets/js/module12-certification.js), driven by
+   GET /api/certification/get-status — this only surfaces a truthful entry
+   point back to it. */
+async function loadCertificationState(slugs) {
+  const out = {};
+  slugs.forEach(slug => { out[slug] = { certified: false, remediation: false }; });
+
+  const { data: comps } = await supabaseClient
     .from('completions')
     .select('credential_id, course_slug, student_name, completed_at, revoked')
     .eq('user_id', currentUser.id);
+  (comps || []).filter(c => !c.revoked).forEach(c => {
+    if (!out[c.course_slug]) out[c.course_slug] = { certified: false, remediation: false };
+    out[c.course_slug].certified = true;
+    out[c.course_slug].credential = c;
+  });
 
-  if (error || !comps || !comps.filter(c => !c.revoked).length) {
-    area.innerHTML = '<div class="card"><div class="empty">Your certificate will appear here when you complete a course. Every AIMT credential carries a unique ID your employer can verify.</div></div>';
-    return;
-  }
+  const { data: attempts } = await supabaseClient
+    .from('certification_attempts')
+    .select('course_slug, certification_decision, attempt_number')
+    .eq('user_id', currentUser.id)
+    .eq('certification_decision', 'not_yet_passed')
+    .order('attempt_number', { ascending: false });
+  (attempts || []).forEach(a => {
+    const slugState = out[a.course_slug];
+    if (!slugState || slugState.certified) return;
+    if (!slugState.attempt || a.attempt_number > slugState.attempt.attempt_number) {
+      slugState.remediation = true;
+      slugState.attempt = a;
+    }
+  });
 
-  area.innerHTML = comps.filter(c => !c.revoked).map(c => {
-    const course = COURSES[c.course_slug] || { title: c.course_slug, entry: '#' };
-    const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    return '<div class="card">' +
-      '<h3>' + course.title + ' — Certified</h3>' +
-      '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
-      '<div class="cred-line">Credential ID: ' + c.credential_id + '</div>' +
-      '<a class="btn" href="' + course.entry + '" style="margin-right:0.6rem">View certificate</a>' +
-      '<a class="btn ghost" href="verify.html">Verification page</a>' +
+  return out;
+}
+
+function renderContinueLearning(slugs, progressBySlug, certBySlug) {
+  const area = document.getElementById('coursesArea');
+  area.innerHTML = slugs.map(slug => {
+    const course = COURSES[slug] || { title: slug, subtitle: '', entry: '#' };
+    const progress = progressBySlug[slug] || { done: 0, pct: 0, nextModuleId: 0 };
+    const certState = certBySlug[slug] || { certified: false, remediation: false };
+    const state = resolveCourseState(progress, certState);
+    const meta = COURSE_STATE_META[state];
+    const nextValue = nextValueFor(state, progress);
+    const ctaHref = course.entry + meta.hrefSuffix;
+
+    const ringHtml = window.AIMTMetricRing.render({
+      value: progress.pct,
+      display: progress.pct + '%',
+      label: 'Coursework',
+      accessibleText: 'Coursework progress: ' + progress.pct + ' percent, ' + progress.done + ' of ' + REQUIRED_MODULE_COUNT + ' coursework units complete.'
+    });
+
+    return '<div class="course-hero">' +
+      '<div class="chero-left">' +
+        '<span class="chero-tag">' + course.subtitle + '</span>' +
+        '<h2>' + course.title + '</h2>' +
+        '<div class="chero-next"><span class="chero-next-label">' + meta.nextLabel + '</span><span class="chero-next-value">' + nextValue + '</span></div>' +
+        '<div class="chero-progress-msg">' + progressMessageFor(state, progress) + '</div>' +
+      '</div>' +
+      '<div class="chero-right">' +
+        ringHtml +
+        '<div class="chero-ring-support" aria-hidden="true">' + progress.done + ' of ' + REQUIRED_MODULE_COUNT + ' coursework units complete</div>' +
+        '<a class="btn" href="' + ctaHref + '">' + meta.cta + '</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderCertification(slugs, progressBySlug, certBySlug) {
+  const area = document.getElementById('certArea');
+  area.innerHTML = slugs.map(slug => {
+    const course = COURSES[slug] || { title: slug, entry: '#' };
+    const progress = progressBySlug[slug] || { nextModuleId: 0 };
+    const certState = certBySlug[slug] || { certified: false, remediation: false };
+    const state = resolveCourseState(progress, certState);
+
+    if (state === COURSE_STATE.CERTIFIED) {
+      const c = certState.credential;
+      const date = new Date(c.completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      return '<div class="cert-panel cert-panel--certified"><div class="cert-certified-row">' +
+        '<img class="cert-badge" src="assets/brand/aimt-badge-transparent.png" alt="" aria-hidden="true">' +
+        '<div class="cert-certified-body">' +
+        '<span class="cert-status-label is-active">Certified</span>' +
+        '<h3>' + course.title + '</h3>' +
+        '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
+        '<div class="cred-line">Credential ID · ' + c.credential_id + '</div>' +
+        '<div class="cert-panel-actions">' +
+        '<a class="btn" href="' + course.entry + '&cert=1">View &amp; Download Certificate →</a>' +
+        '<a class="btn ghost" href="verify.html">Verify Credential →</a>' +
+        '</div></div></div></div>';
+    }
+
+    if (state === COURSE_STATE.REMEDIATION) {
+      const a = certState.attempt;
+      return '<div class="cert-panel">' +
+        '<span class="cert-status-label is-attention">Remediation</span>' +
+        '<h3>' + course.title + '</h3>' +
+        '<div class="meta">Attempt ' + a.attempt_number + ' · your latest assessment has been reviewed. Return to the course to follow your recommended review and remediation path.</div>' +
+        '<div class="cert-panel-actions"><a class="btn ghost" href="' + course.entry + '&cert=1">Review Next Steps →</a></div>' +
+        '</div>';
+    }
+
+    if (state === COURSE_STATE.ASSESSMENT_READY) {
+      return '<div class="cert-panel">' +
+        '<span class="cert-status-label is-attention">Assessment Ready</span>' +
+        '<h3>The Final Certification Assessment is ready.</h3>' +
+        '<p class="meta">Required coursework is complete. Enter the course to begin Part I of the Final Certification Assessment.</p>' +
+        '<div class="cert-panel-actions"><a class="btn" href="' + course.entry + '&cert=1">Final Assessment →</a></div>' +
+        '</div>';
+    }
+
+    return '<div class="cert-panel">' +
+      '<span class="cert-status-label">In Progress</span>' +
+      '<h3>Your certification path is in progress.</h3>' +
+      '<p class="meta">Complete the required course work to reach the Final Certification Assessment.</p>' +
       '</div>';
   }).join('');
 }
 
-async function loadResources() {
-  const card = document.getElementById('resourcesCard');
-  if (!RESOURCES.length) {
-    card.innerHTML = '<div class="empty">Course downloads — protocol cards, checklists, and printable guides — will appear here as they\'re released.</div>';
-    return;
-  }
-  const items = await Promise.all(RESOURCES.map(async r => {
-    try {
-      const { data, error } = await supabaseClient
-        .storage.from('course-resources')
-        .createSignedUrl(r.path, 60 * 60);
-      const href = (!error && data && data.signedUrl) ? data.signedUrl : null;
-      return '<div class="resource-item"><div><div class="r-name">' + r.name + '</div>' +
-        (r.desc ? '<div class="r-desc">' + r.desc + '</div>' : '') + '</div>' +
-        (href ? '<a href="' + href + '" target="_blank" rel="noopener">Download</a>'
-              : '<span class="r-desc">Unavailable</span>') +
-        '</div>';
-    } catch (_) { return ''; }
-  }));
-  card.innerHTML = items.join('') || '<div class="empty">Resources are temporarily unavailable.</div>';
+/* Resources are gated on real entitlement, not client state: entitledSlugs
+   comes from loadEntitlements()'s RLS-scoped course_entitlements read, so a
+   non-entitled user manipulating client state gains nothing — the registry
+   for a course they aren't in `entitledSlugs` is simply never rendered.
+   Tool-type entries (e.g. the Service Timer) render in Practitioner Tools;
+   everything else renders as a resource download row, grouped by module. */
+async function loadResources(entitledSlugs) {
+  const toolsArea = document.getElementById('toolsArea');
+  const resourcesArea = document.getElementById('resourcesCard');
+  const registry = window.AIMT_COURSE_RESOURCES || {};
+  const toolItems = [];
+  const byModule = {};
+
+  (entitledSlugs || []).forEach(slug => {
+    (registry[slug] || []).forEach(r => {
+      if (r.type === 'tool') {
+        toolItems.push(r);
+      } else {
+        if (!byModule[r.module]) byModule[r.module] = { label: r.moduleLabel, items: [] };
+        byModule[r.module].items.push(r);
+      }
+    });
+  });
+
+  toolsArea.innerHTML = toolItems.length
+    ? toolItems.map(r => {
+        const display = TOOL_DISPLAY[r.title] || {};
+        return '<div class="tool-row">' +
+          (display.icon ? '<div class="tool-row-icon" aria-hidden="true">' + display.icon + '</div>' : '') +
+          '<div class="tool-row-copy">' +
+          (display.eyebrow ? '<span class="tool-row-eyebrow">' + display.eyebrow + '</span>' : '') +
+          '<h3>' + r.title + '</h3>' +
+          '<p>' + (display.description || r.description) + '</p></div>' +
+          '<a class="btn ghost" href="' + r.href + '">' + (display.cta || 'Open →') + '</a></div>';
+      }).join('')
+    : '<div class="empty-row">No practitioner tools are available for this course yet.</div>';
+
+  const moduleKeys = Object.keys(byModule).map(Number).sort((a, b) => a - b);
+  resourcesArea.innerHTML = moduleKeys.length
+    ? moduleKeys.map(k => {
+        const group = byModule[k];
+        return '<div class="resource-group">' +
+          '<div class="resource-group-label">' + group.label + '</div>' +
+          group.items.map(r =>
+            '<div class="resource-item"><div><div class="r-name">' + r.title + '</div>' +
+            '<div class="r-desc">' + r.description + '</div></div>' +
+            '<a class="dl" href="' + r.href + '" download>Download</a></div>'
+          ).join('') +
+          '</div>';
+      }).join('')
+    : '<div class="empty-row">No resources are available for this course yet.</div>';
 }
 
 async function signOut() {
@@ -304,7 +1011,245 @@ async function signOut() {
   window.location.href = 'index.html';
 }
 
-init();
+(function setupAccountMenu() {
+  const btn = document.getElementById('accountMenuBtn');
+  const panel = document.getElementById('accountMenuPanel');
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e) => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || btn.contains(e.target)) return;
+    panel.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) {
+      panel.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   READINESS PREVIEW MODE (?preview=readiness)
+   ---------------------------------------------------------------
+   Entirely separate render path from init() above. Reads ONLY the
+   local aimt_readiness_profile_v1 browser profile (written by
+   head-spa-readiness.html) and never calls supabaseClient or any of
+   init()'s helpers — no entitlements, progress, completions,
+   certification_attempts, or Cadence data is queried here, by design,
+   because this mode is unauthenticated and must never touch protected
+   student data. See the mode check at the bottom of this script for
+   the fork between this function and init().
+   ══════════════════════════════════════════════════════════════ */
+const READINESS_PROFILE_KEY = 'aimt_readiness_profile_v1';
+
+const PREVIEW_PILLAR_META = {
+  scope: 'Professional Foundation & Scope',
+  assessment: 'Scalp Observation & Assessment',
+  service: 'Service Flow & Adaptation',
+  communication: 'Client Communication & Experience',
+  business: 'Operations & Business Systems'
+};
+const PREVIEW_PILLAR_ORDER = ['scope', 'assessment', 'service', 'communication', 'business'];
+
+/* Small, fixed lookup (4 bands, set by head-spa-readiness.html's own
+   bandFor()) rather than storing a duplicate copy of this copy in every
+   saved profile — the profile only needs to carry the band name. */
+const PREVIEW_BAND_COPY = {
+  'Refinement Stage': 'Your foundation is strong. Your biggest gains from here are likely to come from tightening the areas that are still inconsistent and deepening your assessment judgment.',
+  'Strong Foundation': 'You have meaningful systems in place. A few specific areas are worth sharpening to make the whole practice easier to repeat.',
+  'Developing System': 'You have the pieces. They are not all working as one system yet — specific decisions still depend on memory, improvisation, or confidence that changes from client to client.',
+  'Foundation Building': 'Your strongest next move is not adding more equipment or techniques. It is building the professional foundation that makes the service safer, clearer, and easier to explain.'
+};
+
+/* Practitioner Tools shown locked in preview. Cadence and Listen Mode
+   are built-in course features (no standalone resource-registry entry
+   to reuse); Service Timer reuses TOOL_DISPLAY's real icon/copy above
+   so the two surfaces never drift on that one. */
+const PREVIEW_TOOLS = [
+  {
+    name: 'Cadence',
+    description: 'Your AIMT learning companion for course questions, reasoning, checkpoints, and practitioner feedback.',
+    icon: '<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 14h24a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H18l-7 6v-6h-1a3 3 0 0 1-3-3V17a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="16" cy="22" r="1.3" fill="currentColor"/><circle cx="22" cy="22" r="1.3" fill="currentColor"/><circle cx="28" cy="22" r="1.3" fill="currentColor"/></svg>'
+  },
+  {
+    name: 'Listen Mode',
+    description: 'Listen through course instruction with intentional pauses for visuals, interaction, and competency checks.',
+    icon: '<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 24v-3a12 12 0 0 1 24 0v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="7" y="24" width="6" height="9" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="31" y="24" width="6" height="9" rx="2.5" stroke="currentColor" stroke-width="1.2"/></svg>'
+  },
+  {
+    name: 'AIMT Service Timer',
+    description: TOOL_DISPLAY['AIMT Service Timer'].description,
+    icon: TOOL_DISPLAY['AIMT Service Timer'].icon
+  }
+];
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* Defensive against a missing/malformed/tampered localStorage value —
+   never substitutes fake data; a bad read just falls through to the
+   "complete your Readiness Profile first" empty state. */
+function readReadinessProfile() {
+  try {
+    const raw = window.localStorage.getItem(READINESS_PROFILE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (typeof parsed.score !== 'number' || !parsed.band || !parsed.pillar_scores) return null;
+    if (!PREVIEW_PILLAR_ORDER.every((k) => typeof parsed.pillar_scores[k] === 'number')) return null;
+    if (!PREVIEW_PILLAR_META[parsed.strongest_pillar] || !PREVIEW_PILLAR_META[parsed.priority_pillar]) return null;
+    return parsed;
+  } catch (_) {
+    return null;
+  }
+}
+
+function renderLockedTools() {
+  document.getElementById('rpToolsArea').innerHTML = PREVIEW_TOOLS.map((t) =>
+    '<div class="tool-row">' +
+      '<div class="tool-row-icon" aria-hidden="true">' + t.icon + '</div>' +
+      '<div class="tool-row-copy"><h3>' + escapeHtml(t.name) + '</h3><p>' + escapeHtml(t.description) + '</p></div>' +
+      '<span class="aimt-lock-status"><span aria-hidden="true">🔒</span> Available with enrollment</span>' +
+    '</div>'
+  ).join('');
+}
+
+/* Reuses the real launch resource registry (assets/js/aimt-course-resources.js)
+   so the preview shows actual practitioner deliverables, not filler —
+   that registry is static public content, not gated student data, so
+   reading it here does not touch the section 15 protected-data rule. */
+function renderLockedResources() {
+  const registry = (window.AIMT_COURSE_RESOURCES && window.AIMT_COURSE_RESOURCES['headspa-mastery']) || [];
+  const items = registry.filter((r) => r.type !== 'tool');
+  document.getElementById('rpResourcesArea').innerHTML = items.length
+    ? items.map((r) =>
+        '<div class="resource-item"><div><div class="r-name">' + escapeHtml(r.title) + '</div>' +
+        '<div class="r-desc">' + escapeHtml(r.description) + '</div></div>' +
+        '<span class="aimt-lock-status"><span aria-hidden="true">🔒</span> Available with course access</span></div>'
+      ).join('')
+    : '<div class="empty-row">No resources are available for this course yet.</div>';
+}
+
+/* "Email My Profile Again" stays hidden until READINESS_DELIVERY_ENDPOINT
+   (assets/js/aimt-readiness-config.js) is set at launch — no fake resend
+   confirmation is ever shown. The local profile never retained the
+   prospect's email (see head-spa-readiness.html), so a real resend has
+   to re-collect it here before it can call the same delivery seam. */
+function setupResendAction(profile) {
+  /* .btn / .rp-resend-form each set their own display in CSS, which (as
+     author styles) outranks the UA [hidden] default — toggle via inline
+     style here rather than the hidden attribute, same reasoning as the
+     nav swap in initReadinessPreview(). */
+  const endpoint = window.AIMT_READINESS_CONFIG && window.AIMT_READINESS_CONFIG.READINESS_DELIVERY_ENDPOINT;
+  const resendBtn = document.getElementById('rpResendBtn');
+  if (!endpoint) { resendBtn.style.display = 'none'; return; }
+
+  resendBtn.style.display = 'inline-flex';
+  resendBtn.addEventListener('click', () => {
+    resendBtn.style.display = 'none';
+    document.getElementById('rpResendForm').style.display = 'flex';
+    document.getElementById('rpResendEmail').focus();
+  });
+
+  document.getElementById('rpResendSubmit').addEventListener('click', async () => {
+    const emailInput = document.getElementById('rpResendEmail');
+    const email = emailInput.value.trim();
+    if (!email) { emailInput.focus(); return; }
+    const submitBtn = document.getElementById('rpResendSubmit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+    const payload = Object.assign({}, profile, {
+      source: 'my-aimt-readiness-preview',
+      email: email,
+      marketing_consent: false
+    });
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById('rpResendForm').outerHTML = '<p class="rp-resend-confirm" id="rpResendForm">Sent — check your inbox.</p>';
+    } catch (_) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Try again';
+    }
+  });
+}
+
+function renderReadinessPreview(profile) {
+  const firstName = profile.first_name ? toDisplayName(profile.first_name) : '';
+  document.getElementById('rpGreeting').textContent = firstName ? ('Welcome, ' + firstName + '.') : 'Welcome.';
+
+  document.getElementById('rpRingArea').innerHTML = window.AIMTMetricRing.render({
+    value: profile.score,
+    display: profile.score + '<span class="aimt-metric-ring-max">/100</span>',
+    label: 'Readiness',
+    size: 'lg',
+    accessibleText: 'AIMT Readiness score: ' + profile.score + ' out of 100, ' + profile.band + '.'
+  });
+  document.getElementById('rpBandName').textContent = profile.band;
+  document.getElementById('rpBandCopy').textContent = PREVIEW_BAND_COPY[profile.band] || '';
+
+  const strongestName = PREVIEW_PILLAR_META[profile.strongest_pillar] || profile.strongest_pillar;
+  const priorityName = PREVIEW_PILLAR_META[profile.priority_pillar] || profile.priority_pillar;
+  document.getElementById('rpStrongestPillar').textContent = strongestName;
+  document.getElementById('rpPriorityPillar').textContent = priorityName;
+
+  document.getElementById('rpPillarRows').innerHTML = PREVIEW_PILLAR_ORDER.map((key) => {
+    const score = profile.pillar_scores[key] || 0;
+    return '<div><div class="rp-pillar-row-head"><span>' + escapeHtml(PREVIEW_PILLAR_META[key]) + '</span><span>' + score + ' / 6</span></div>' +
+      '<div class="rp-pillar-row-track"><div class="rp-pillar-row-fill" style="width:' + (score / 6 * 100) + '%;"></div></div></div>';
+  }).join('');
+
+  document.getElementById('rpPriorityTitle').textContent = priorityName;
+  document.getElementById('rpPriorityWhy').textContent = profile.priority_explanation || '';
+  document.getElementById('rpMovesList').innerHTML = (profile.priority_actions || []).map((a) => '<li>' + escapeHtml(a) + '</li>').join('');
+  const strongestScore = profile.pillar_scores[profile.strongest_pillar] || 0;
+  document.getElementById('rpStrongestNote').textContent = strongestName + ' is currently your strongest area (' + strongestScore + ' / 6).';
+
+  renderLockedTools();
+  renderLockedResources();
+  setupResendAction(profile);
+}
+
+function initReadinessPreview() {
+  /* .aimt-public-nav sets its own display:flex, which (being author CSS)
+     outranks the UA [hidden] default — toggle these two via inline style,
+     not the hidden attribute, or the "hidden" nav still renders. */
+  document.getElementById('studentNav').style.display = 'none';
+  document.getElementById('previewNav').style.display = 'flex';
+  document.getElementById('studentModeRoot').hidden = true;
+  document.getElementById('previewModeRoot').hidden = false;
+
+  const profile = readReadinessProfile();
+  if (!profile) {
+    document.getElementById('rpContent').hidden = true;
+    document.getElementById('rpEmptyState').hidden = false;
+    return;
+  }
+  document.getElementById('rpEmptyState').hidden = true;
+  document.getElementById('rpContent').hidden = false;
+  renderReadinessPreview(profile);
+}
+
+/* ── Mode fork ── ?preview=readiness renders the unauthenticated
+   preview above and returns before init() (Student Mode) ever runs —
+   init() is the only code path that talks to Supabase, so this keeps
+   the separation absolute rather than relying on conditionals inside
+   a shared function. */
+const isReadinessPreview = new URLSearchParams(window.location.search).get('preview') === 'readiness';
+if (isReadinessPreview) {
+  initReadinessPreview();
+} else {
+  init();
+}
 </script>
 </body>
 </html>

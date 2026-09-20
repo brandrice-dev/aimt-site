@@ -1,0 +1,3 @@
+Here's your first checkpoint — responding to a client's AI result. A client tells you, "I asked ChatGPT about my scalp and it says I have dandruff." Walk me through how you would respond, what you would and would not confirm, and how you would decide what happens next.
+
+Take your time, and answer below.

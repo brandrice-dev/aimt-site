@@ -1,0 +1,11 @@
+Section 11.3 — Human authority. Decide How Much Authority to Give the Tool.
+
+"What are you asking the tool to do — and what still belongs to you?"
+
+Level 1, AI can lead the first draft: social copy, brainstorming, content calendars, service-description drafts, email drafts, messages, FAQs, internal organization. A human reviews before anything ships.
+
+Level 2, AI can assist, but you verify: research, ingredient explanations, product comparisons, pricing calculations, regulatory research, educational claims, business forecasting, source gathering. AI can accelerate the search — it does not eliminate verification. Use authoritative sources when facts matter.
+
+Level 3, keep final authority human: diagnosing, establishing a medical condition, prescribing, deciding medical safety, exceeding your professional role, making claims you could not responsibly make yourself. The tool does not expand your professional authority.
+
+[firmly] Use AI for leverage. Keep human authority where it matters.

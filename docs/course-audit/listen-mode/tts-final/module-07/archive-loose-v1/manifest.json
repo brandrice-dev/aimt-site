@@ -1,0 +1,104 @@
+{
+  "module": "07",
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M7-BATCH-A1.txt",
+      "chunkIds": [
+        "M7-01",
+        "M7-02"
+      ],
+      "normalizedChars": 2618,
+      "firstSpokenLine": "Welcome to Module 7. By the time your hands touch the client, they've already formed an impression — not consciously, but they feel whether ",
+      "lastSpokenLine": "ooks impressive in photos over what actually feels comfortable to lie in for an hour. Choose the bed your clients will want to come back to.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M7-BATCH-A2.txt",
+      "chunkIds": [
+        "M7-03",
+        "M7-04"
+      ],
+      "normalizedChars": 2543,
+      "firstSpokenLine": "Section 7.2 — Tools and supplies. Essentials first. Upgrades later.",
+      "lastSpokenLine": "s atmosphere. Massage oil and lotion ready on the cart. And ambient — music, lighting, diffuser — running before the client enters the room.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M7-BATCH-A3.txt",
+      "chunkIds": [
+        "M7-05",
+        "M7-06",
+        "M7-07"
+      ],
+      "normalizedChars": 3788,
+      "firstSpokenLine": "Section 7.4 — Client positioning. Three things to confirm before the water runs.",
+      "lastSpokenLine": "Take your time, and answer above.",
+      "checkpointRelationship": "m7cp1,m7cp2",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M7-BATCH-B1.txt",
+      "chunkIds": [
+        "M7-08"
+      ],
+      "normalizedChars": 287,
+      "firstSpokenLine": "Module complete. You can evaluate a setup, prepare a station, and position a client correctly — and now know what to do if something's off.",
+      "lastSpokenLine": "t, Module 8: the full service itself. Every transition, every micro-teach moment that makes this service worth the price clients pay for it.",
+      "checkpointRelationship": "m7cp2",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M7-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 758
+    },
+    {
+      "chunkId": "M7-02",
+      "title": "7.1 The treatment bed",
+      "normalizedChars": 1858
+    },
+    {
+      "chunkId": "M7-03",
+      "title": "7.2 Tools and supplies",
+      "normalizedChars": 1384
+    },
+    {
+      "chunkId": "M7-04",
+      "title": "7.3 Station prep sequence",
+      "normalizedChars": 1157
+    },
+    {
+      "chunkId": "M7-05",
+      "title": "7.4 Client positioning",
+      "normalizedChars": 1931
+    },
+    {
+      "chunkId": "M7-06",
+      "title": "Signature interaction: Find the setup mistakes",
+      "normalizedChars": 1342
+    },
+    {
+      "chunkId": "M7-07",
+      "title": "Checkpoint 1 + Checkpoint 2 (`m7cp1`, `m7cp2`)",
+      "normalizedChars": 511,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m7cp1,m7cp2"
+    },
+    {
+      "chunkId": "M7-08",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 287,
+      "gateType": "post-pass",
+      "checkpointId": "m7cp2",
+      "resumeAfterPass": true
+    }
+  ]
+}

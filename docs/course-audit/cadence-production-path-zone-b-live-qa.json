@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-08-29T04:47:30.227Z",
+  "results": [
+    {
+      "id": "qa-a-zone-a-tutoring",
+      "purpose": "Ordinary Zone A tutoring stays single-generation and ungated -- no verifier call, no regeneration.",
+      "priorMessages": [],
+      "studentMessage": "Can you explain why shedding can show up later after someone was sick?",
+      "finalResponse": "This has to do with how the hair-growth cycle works over time rather than in real time — a stressor (like an illness) can push a batch of follicles into the resting/shedding phase, but the actual shedding shows up weeks to months later, once that resting phase runs its course. So the timeline doesn't line up with the person's memory of \"when I was sick\" — they may not connect the two events at all, which is exactly why history-taking matters more than what you see on the scalp in that moment. Structurally, there's no visible marker on the scalp itself that says \"this shedding started from illness\" — the strands themselves can look normal, and the follicle openings typically don't show inflammation or scarring from this kind of trigger. For service purposes, this means diffuse, non-patchy shedding with a plausible timeline of a prior illness is something you can note and proceed gently with, but you're not in a position to confirm that's the actual cause — you're just working with a pattern that's consistent with it. If there's any patchiness, scalp irritation, or signs that don't fit that diffuse picture, that's where the referral conversation comes in rather than continuing to reason it through yourself.",
+      "scenarioGate": {
+        "triggered": true,
+        "unsupportedFactFound": false,
+        "regenerated": false,
+        "outcome": "original"
+      },
+      "modelInfo": {
+        "provider": "anthropic",
+        "modelName": "claude-sonnet-5",
+        "status": "CANDIDATE",
+        "registryVersion": "cadence-model-registry-v4",
+        "role": "CADENCE_CHAT_MODEL",
+        "source": "env-override-candidate"
+      },
+      "providerCallCount": 2
+    },
+    {
+      "id": "qa-b-chat-13-real-failure",
+      "purpose": "The exact scenario that produced the live chat-13 violation -- proves unsupported scenario facts never reach the final answer, whichever of the three system-correct outcomes (clean original / regenerated / safe fallback) occurs.",
+      "priorMessages": [
+        {
+          "role": "user",
+          "content": "Why can shedding appear months after an illness?"
+        },
+        {
+          "role": "assistant",
+          "content": "Because a major stressor like a fever can push a batch of follicles into the resting (telogen) phase early — the actual shedding shows up weeks to months later when those follicles release, not at the time of the illness itself."
+        }
+      ],
+      "studentMessage": "Okay that makes sense. So if a client had TWO fevers a few months apart, could that make the shedding look kind of continuous instead of one clear episode?",
+      "finalResponse": "Yes, that's a plausible pattern — two separate triggers spaced apart could each push their own batch of follicles into telogen on staggered timelines, so the release windows overlap and it reads as one continuous shed rather than two distinct episodes. As a practitioner, what you're going on is what you can actually observe in the service: is the shedding diffuse and generalized, or is there patchiness, scarring, or scalp irritation involved? If it's diffuse with no patchiness or barrier compromise, that's consistent with the telogen-release pattern we're describing, but you're still not diagnosing the cause — you're just noting the pattern and deciding whether it's a proceed, modify, or refer situation based on what's actually in front of you. If you're seeing something beyond diffuse shedding, that's worth telling me so we can talk through what it means for the service.",
+      "scenarioGate": {
+        "triggered": true,
+        "unsupportedFactFound": true,
+        "regenerated": true,
+        "outcome": "regenerated"
+      },
+      "modelInfo": {
+        "provider": "anthropic",
+        "modelName": "claude-sonnet-5",
+        "status": "CANDIDATE",
+        "registryVersion": "cadence-model-registry-v4",
+        "role": "CADENCE_CHAT_MODEL",
+        "source": "env-override-candidate"
+      },
+      "providerCallCount": 4
+    },
+    {
+      "id": "qa-c-supported-actionable",
+      "purpose": "The student supplies the relevant facts directly -- proves the gate does not become overprotective when actionable guidance is genuinely supported.",
+      "priorMessages": [],
+      "studentMessage": "My client has diffuse shedding across the whole scalp -- no patchy bald spots anywhere, and no irritation or broken skin that I can see. Based on just that, is it reasonable to proceed with the standard service today?",
+      "finalResponse": "Diffuse shedding without patchiness, scarring, or irritation is generally the pattern that lets you stay in the \"proceed with modification\" lane rather than an immediate referral lane — patchy loss or visible skin breaks are what typically push toward \"stop and refer.\" That said, a clean visual check only tells you about the surface; it doesn't tell you what's driving the shedding internally, so \"no bald spots, no broken skin\" supports proceeding, it doesn't confirm a benign cause. In practice I'd still ask a few intake questions — how long it's been happening, whether it's new or ongoing, any recent major life or health changes — because that history matters more than what you can see under the light. If nothing in that conversation raises a flag, you can proceed with the standard service, just avoid promising the massage will regrow hair or \"wake up\" follicles — frame it as scalp care and relaxation, not a treatment for the shedding itself.",
+      "scenarioGate": {
+        "triggered": true,
+        "unsupportedFactFound": false,
+        "regenerated": false,
+        "outcome": "original"
+      },
+      "modelInfo": {
+        "provider": "anthropic",
+        "modelName": "claude-sonnet-5",
+        "status": "CANDIDATE",
+        "registryVersion": "cadence-model-registry-v4",
+        "role": "CADENCE_CHAT_MODEL",
+        "source": "env-override-candidate"
+      },
+      "providerCallCount": 2
+    }
+  ]
+}

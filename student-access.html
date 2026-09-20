@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Student Access — AIMT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="description" content="Sign in to your AIMT student account to access your courses, progress, and certificates.">
+<meta name="description" content="Sign in to your AIMT student account to access courses, progress, resources and credentials.">
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,20 +33,42 @@ body {
   overflow-x: hidden;
 }
 .wrap {
-  min-height: 100dvh;
+  min-height: calc(100dvh - 56px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
 }
 .card {
-  width: min(100%, 760px);
+  width: min(100%, 980px);
+  display: grid;
+  grid-template-columns: 0.85fr 1fr;
+  align-items: stretch;
+  gap: 0;
   background: var(--panel);
   border: 0.5px solid var(--panel-border);
   border-radius: 18px;
-  padding: clamp(2rem, 4vw, 3.1rem);
+  overflow: hidden;
   box-shadow: 0 16px 42px rgba(0,0,0,0.18);
   backdrop-filter: blur(14px);
+}
+.card-identity {
+  padding: clamp(2rem, 4vw, 3.1rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card-form-col {
+  padding: clamp(2rem, 4vw, 3.1rem);
+  background: rgba(255,255,255,0.02);
+  border-left: 0.5px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 860px) {
+  .card { grid-template-columns: 1fr; }
+  .card-form-col { border-left: none; border-top: 0.5px solid rgba(255,255,255,0.06); }
 }
 .eyebrow {
   font-family: var(--aimt-font-mono);
@@ -86,6 +110,7 @@ body {
   padding-top: 2rem;
   border-top: 0.5px solid rgba(255,255,255,0.08);
 }
+.card-form-col > .setup:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 .setup-label {
   font-family: var(--aimt-font-mono);
   font-size: 0.58rem;
@@ -259,19 +284,71 @@ body {
 </style>
 </head>
 <body>
+<!-- ══ CANONICAL AIMT BRAND MARK ══
+     Single source of truth for the orbital circular mark + surrounding dots.
+     Every AIMT mark on this page (nav, footer, decorative reuse) renders via
+     <use href="#aimtOrbitalMark"> against this one definition — never a
+     re-drawn or simplified copy, and never assets/brand/aimt-orbital-mark.svg
+     via a cross-document <use> (unsupported in this browser environment --
+     confirmed via isolated test: an external-file+fragment <use> silently
+     renders nothing, which is why the nav mark and Cadence marks had gone
+     invisible). AIMT identity and Cadence identity are two DIFFERENT marks
+     now living in two different local <symbol>s (see cadence-mark below,
+     where present) -- they must never share one definition again. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+
+  <!-- ══ AIMT PUBLIC NAVIGATION — canonical (assets/css/aimt-public-nav.css,
+       visual source of truth: index.html). position:sticky (not the
+       fixed modifier the marketing pages use) so this page's content
+       keeps flowing normally beneath it — same rendered result, no
+       content offset needed. ══ -->
+  <nav class="aimt-public-nav aimt-public-nav--sticky">
+    <a href="index.html" class="aimt-public-nav-mark">
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"></use></svg>
+    </a>
+    <a href="index.html" class="aimt-public-nav-wordmark">
+      <span class="aimt-public-nav-name">AIMT</span>
+    </a>
+    <div class="aimt-public-nav-right">
+      <div class="aimt-public-nav-links">
+        <a href="courses.html" class="aimt-public-nav-link">Certifications</a>
+      </div>
+      <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+        <span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span>
+      </button>
+    </div>
+  </nav>
+  <div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+    <a href="courses.html" class="aimt-public-nav-mobile-link">Certifications</a>
+  </div>
   <main class="wrap">
     <section class="card">
-      <div class="eyebrow">Student Access</div>
-      <h1 class="headline">
-        <em>AIMT · HeadSpa Mastery</em>
-        Sign in to your course.
-      </h1>
-      <p class="lead">Use your AIMT account to enter HeadSpa Mastery. If your purchase access is still syncing, this page will retry that connection automatically when possible. If you just purchased, finish account creation on your confirmation page first.</p>
+      <div class="card-identity">
+        <div class="eyebrow">Student Access</div>
+        <h1 class="headline">Welcome back.</h1>
+        <p class="lead">Continue your AIMT training. Sign in with the email connected to your AIMT account.</p>
+      </div>
 
+      <div class="card-form-col">
       <div class="setup">
-        <div class="setup-label">Account access</div>
-        <div class="setup-title">Enter HeadSpa Mastery.</div>
-        <p class="setup-copy">Sign in with the email tied to your enrollment. Returning students start here. New purchases should complete account creation on the confirmation page first, then return here for future access.</p>
+        <div class="setup-label">Enter My AIMT</div>
+        <div class="setup-title">Sign in to continue.</div>
+        <p class="setup-copy">Returning students start here. New purchases should complete account creation on the confirmation page first, then return here for future access.</p>
 
         <form id="signInForm" novalidate>
           <div class="form-grid">
@@ -292,17 +369,17 @@ body {
           <div class="notice" id="notice"></div>
 
           <div class="actions">
-            <button type="submit" class="btn btn-primary" id="submitBtn">Enter HeadSpa Mastery</button>
-            <a href="courses.html" class="btn btn-secondary">View Certifications</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Continue Your Training →</button>
+            <a href="courses.html" class="btn btn-secondary">View AIMT Certifications →</a>
           </div>
 
-          <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span><br>If you just enrolled and have not created your AIMT account yet, return to your confirmation page to finish setup first.</div>
+          <div class="helper">Forgot your password? <span class="forgot" id="forgotLink">Reset it here</span><br>Just enrolled and still need to create your account? Return to your enrollment confirmation page to finish setup.</div>
         </form>
 
         <div class="setup" id="recoveryPanel" style="display:none; margin-top:1.25rem;">
-          <div class="setup-label">Password recovery</div>
+          <div class="setup-label">Password Recovery</div>
           <div class="setup-title">Set a new password.</div>
-          <p class="setup-copy">Choose a new password for your AIMT account, then sign in again from Student Access.</p>
+          <p class="setup-copy">Choose a new password for your AIMT account. After it updates, you can continue your training normally.</p>
           <div class="form-grid">
             <div class="field">
               <label class="field-label" for="recoveryPassword">New password</label>
@@ -322,9 +399,10 @@ body {
             </div>
           </div>
           <div class="actions" style="margin-top:1rem;">
-            <button type="button" class="btn btn-primary" id="recoverySubmitBtn">Update password</button>
+            <button type="button" class="btn btn-primary" id="recoverySubmitBtn">Update Password →</button>
           </div>
         </div>
+      </div>
       </div>
     </section>
   </main>
@@ -368,10 +446,22 @@ body {
     });
     const COURSE_ENTITLEMENTS_TABLE = 'course_entitlements';
     const HEADSPA_COURSE_SLUG = 'headspa-mastery';
-    const COURSE_ENTRY_URL = 'headspa-mastery.html?enter=1';
+    const COURSE_ENTRY_URL = 'head-spa-certification?enter=1';
     const PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
     const ACCESS_FLOW_HANDOFF_KEY = 'aimt_headspa_access_flow_handoff';
     const AIMT_LOGS_TABLE = 'aimt_logs';
+    const DEFAULT_POST_LOGIN_ROUTE = 'my-aimt.html';
+    // Known-safe, same-origin, AIMT-relative destinations a ?next= param is
+    // allowed to send a signed-in student to after login -- exact match
+    // only (see isSafeNextRoute() below). Grepped confirmed the only
+    // current sender is the Service Timer's access gate, which redirects
+    // here as student-access.html?next=aimt-service-timer.html when a
+    // signed-out visitor lands on aimt-service-timer.html. Extend this
+    // list only when another real page starts sending ?next= here.
+    const SAFE_NEXT_ROUTES = new Set([
+      'aimt-service-timer.html',
+      DEFAULT_POST_LOGIN_ROUTE
+    ]);
     let existingAuthorizedSession = null;
 
     const form = document.getElementById('signInForm');
@@ -520,13 +610,13 @@ body {
 
     function setLoading(isLoading, label) {
       submitBtn.disabled = isLoading;
-      submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Enter HeadSpa Mastery';
+      submitBtn.textContent = isLoading ? (label || 'Checking access...') : 'Continue Your Training →';
     }
 
     function setRecoveryLoading(isLoading, label) {
       if (!recoverySubmitBtn) return;
       recoverySubmitBtn.disabled = isLoading;
-      recoverySubmitBtn.textContent = isLoading ? (label || 'Updating password...') : 'Update password';
+      recoverySubmitBtn.textContent = isLoading ? (label || 'Updating password...') : 'Update Password →';
     }
 
     function parseRecoveryParams() {
@@ -617,9 +707,65 @@ body {
       } catch (_) {}
     }
 
+    // Defensively unwrap percent-encoding so an encoded external-URL
+    // attempt (%2F%2Fevil.com, https%3A%2F%2Fevil.com, or a double-encoded
+    // variant like %252F%252Fevil.com) can't slip past isSafeNextRoute()
+    // just because it still looked harmless after URLSearchParams' single
+    // automatic decode pass. Bounded loop (never infinite on malformed
+    // input); stops as soon as decoding stops changing the value.
+    function decodeNextCandidate(rawValue) {
+      let value = String(rawValue || '');
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        let decoded;
+        try {
+          decoded = decodeURIComponent(value);
+        } catch (_) {
+          break;
+        }
+        if (decoded === value) break;
+        value = decoded;
+      }
+      return value;
+    }
+
+    // Never treat a candidate as safe unless it is an exact match (after
+    // stripping at most one leading slash) for a known AIMT-relative route
+    // in SAFE_NEXT_ROUTES. This blocks open-redirect vectors by
+    // construction -- protocol-relative ("//evil.com"), any absolute
+    // scheme ("https://...", "javascript:...", "data:..."), backslash
+    // tricks, and unrecognized/typo'd paths all simply fail the allowlist
+    // check -- rather than trying to blocklist every possible bad pattern.
+    function isSafeNextRoute(candidate) {
+      if (!candidate || typeof candidate !== 'string') return false;
+      if (candidate.indexOf('\\') !== -1) return false;
+      if (/^\/\//.test(candidate)) return false;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(candidate)) return false;
+      const normalized = candidate.replace(/^\/+/, '');
+      return SAFE_NEXT_ROUTES.has(normalized);
+    }
+
+    // Reads ?next= from the current URL and returns it ONLY if it passes
+    // isSafeNextRoute(); otherwise returns the safe default
+    // (my-aimt.html). Used by redirectToCourse() so a signed-in student
+    // who arrived via a ?next= link (currently: the Service Timer's access
+    // gate) lands back where they meant to go, without turning this page
+    // into an open redirector for anyone else.
+    function getSafeNextRoute() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('next');
+        if (!raw) return DEFAULT_POST_LOGIN_ROUTE;
+        const decoded = decodeNextCandidate(raw);
+        if (isSafeNextRoute(decoded)) return decoded.replace(/^\/+/, '');
+        return DEFAULT_POST_LOGIN_ROUTE;
+      } catch (_) {
+        return DEFAULT_POST_LOGIN_ROUTE;
+      }
+    }
+
     function redirectToCourse() {
       setAccessFlowHandoff(existingAuthorizedSession ? 'student-access-session-continue' : 'student-access-signin');
-      window.location.href = 'my-aimt.html';
+      window.location.href = getSafeNextRoute();
     }
 
     async function ensureSessionReady(userId) {
@@ -685,14 +831,21 @@ body {
         user_id: user.id || null
       });
 
+      let accessToken = '';
       try {
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        accessToken = (sessionData && sessionData.session && sessionData.session.access_token) || '';
+      } catch (_) {}
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
         const response = await fetch('/api/claim-course-access', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             sessionId,
-            email: normalizeAccessEmail(user.email),
-            userId: user.id || ''
+            email: normalizeAccessEmail(user.email)
           })
         });
 
@@ -794,14 +947,14 @@ body {
 
         if (await canAccessCourse(data.session.user)) {
           existingAuthorizedSession = data.session.user;
-          showNotice('You already have an active AIMT session. Click "Enter HeadSpa Mastery" to continue through the access gate.');
+          showNotice('You already have an active AIMT session. Click "Continue Your Training →" to continue.');
           return;
         }
 
         await supabaseClient.auth.signOut();
         showNotice(getPendingCheckoutSessionId()
           ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
-          : 'This account does not currently have access to HeadSpa Mastery.');
+          : 'This account does not currently have access to the Head Spa Certification Course.');
       } catch (_) {
         showNotice('Unable to verify access right now. Please try again in a moment.');
       } finally {
@@ -859,7 +1012,7 @@ body {
               return;
             }
             if (!(await ensureSessionReady(created.user.id))) {
-              showNotice('Staff account created. Your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+              showNotice('Staff account created. Your session is still initializing. Tap "Continue Your Training →" once more.');
               existingAuthorizedSession = created.user;
               return;
             }
@@ -879,12 +1032,12 @@ body {
           await supabaseClient.auth.signOut();
           showNotice(getPendingCheckoutSessionId()
             ? 'Your payment may be complete, but access has not synced yet. Please return to your confirmation page and try again.'
-            : 'This account does not currently have access to HeadSpa Mastery.');
+            : 'This account does not currently have access to the Head Spa Certification Course.');
           return;
         }
 
         if (!(await ensureSessionReady(data.user.id))) {
-          showNotice('You are signed in, but your session is still initializing. Tap "Enter HeadSpa Mastery" once more.');
+          showNotice('You are signed in, but your session is still initializing. Tap "Continue Your Training →" once more.');
           existingAuthorizedSession = data.user;
           return;
         }
@@ -1009,5 +1162,6 @@ body {
     <a href="privacy.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Privacy</a>
     <a href="refunds.html" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Refunds</a>
   </footer>
+  <script src="assets/js/aimt-public-nav.js"></script>
 </body>
 </html>

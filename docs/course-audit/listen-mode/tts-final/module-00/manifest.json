@@ -1,0 +1,174 @@
+{
+  "module": "00",
+  "batches": [
+    {
+      "batchId": "A1a",
+      "file": "M0-BATCH-A1a.txt",
+      "chunkIds": [
+        "M0-01",
+        "M0-01b",
+        "M0-02"
+      ],
+      "normalizedChars": 2926,
+      "firstSpokenLine": "Welcome. I'm Cadence — I'll be your guide through this course: testing your reasoning, and connecting every idea back to a real service you'",
+      "lastSpokenLine": " decisions, in real time. This isn't theory dressed up as expertise. It's a framework built through repetition, observation, and refinement.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A1b",
+      "file": "M0-BATCH-A1b.txt",
+      "chunkIds": [
+        "M0-03",
+        "M0-04"
+      ],
+      "normalizedChars": 1901,
+      "firstSpokenLine": "Section 0.2 — What this course is. A framework. Not a script.",
+      "lastSpokenLine": "Inspiration is easy to find. Repetition, structure, judgment, and execution — that's what makes a real practitioner.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A2",
+      "file": "M0-BATCH-A2.txt",
+      "chunkIds": [
+        "M0-05",
+        "M0-06",
+        "M0-07",
+        "M0-08"
+      ],
+      "normalizedChars": 3590,
+      "firstSpokenLine": "Section 0.4 — What you'll learn. You're not just learning steps. You're learning how those steps connect.",
+      "lastSpokenLine": " knows when to adjust, when to simplify, and when to refer out. You don't prove skill by pushing through situations you should have stopped.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A3",
+      "file": "M0-BATCH-A3.txt",
+      "chunkIds": [
+        "M0-09",
+        "M0-10",
+        "M0-11"
+      ],
+      "normalizedChars": 2956,
+      "firstSpokenLine": "Section 0.7 — What makes a great technician. A great technician isn't just someone with good hands.",
+      "lastSpokenLine": "And perform repeatably: deliver the same quality experience for every client — not just the ones where everything happened to go smoothly.",
+      "checkpointRelationship": null,
+      "overCeiling": false
+    },
+    {
+      "batchId": "A4",
+      "file": "M0-BATCH-A4.txt",
+      "chunkIds": [
+        "M0-12",
+        "M0-13",
+        "M0-14"
+      ],
+      "normalizedChars": 1745,
+      "firstSpokenLine": "Section 0.10 — Practitioner insight. Clients remember how it felt. Not just what you did.",
+      "lastSpokenLine": "Take your time, and answer above in your own words.",
+      "checkpointRelationship": "m0cp1",
+      "overCeiling": false
+    },
+    {
+      "batchId": "B1",
+      "file": "M0-BATCH-B1.txt",
+      "chunkIds": [
+        "M0-15"
+      ],
+      "normalizedChars": 701,
+      "firstSpokenLine": "The standard is established.",
+      "lastSpokenLine": " head spa practitioner is actually responsible for, where that responsibility ends, and why that boundary protects both you and your client.",
+      "checkpointRelationship": "m0cp1",
+      "overCeiling": false
+    }
+  ],
+  "chunkMeta": [
+    {
+      "chunkId": "M0-01",
+      "title": "Module Briefing (spoken)",
+      "normalizedChars": 751
+    },
+    {
+      "chunkId": "M0-01b",
+      "title": "Before you begin (Listen Mode orientation)",
+      "normalizedChars": 1202
+    },
+    {
+      "chunkId": "M0-02",
+      "title": "0.1 Welcome",
+      "normalizedChars": 969
+    },
+    {
+      "chunkId": "M0-03",
+      "title": "0.2 What this course is",
+      "normalizedChars": 1420
+    },
+    {
+      "chunkId": "M0-04",
+      "title": "0.3 Who this is for",
+      "normalizedChars": 479
+    },
+    {
+      "chunkId": "M0-05",
+      "title": "0.4 What you'll learn",
+      "normalizedChars": 636
+    },
+    {
+      "chunkId": "M0-06",
+      "title": "0.5 How to use this course",
+      "normalizedChars": 887
+    },
+    {
+      "chunkId": "M0-07",
+      "title": "Practice interaction: \"Same steps. Different service.\"",
+      "normalizedChars": 691
+    },
+    {
+      "chunkId": "M0-08",
+      "title": "0.6 The standard",
+      "normalizedChars": 1370
+    },
+    {
+      "chunkId": "M0-09",
+      "title": "0.7 What makes a great technician",
+      "normalizedChars": 1101
+    },
+    {
+      "chunkId": "M0-10",
+      "title": "0.8 Scope and safety",
+      "normalizedChars": 1105
+    },
+    {
+      "chunkId": "M0-11",
+      "title": "0.9 What success looks like",
+      "normalizedChars": 746
+    },
+    {
+      "chunkId": "M0-12",
+      "title": "0.10 Practitioner insight",
+      "normalizedChars": 496
+    },
+    {
+      "chunkId": "M0-13",
+      "title": "0.11 Common early mistakes",
+      "normalizedChars": 831
+    },
+    {
+      "chunkId": "M0-14",
+      "title": "Checkpoint (`m0cp1`)",
+      "normalizedChars": 414,
+      "gateType": "checkpoint-stop",
+      "checkpointId": "m0cp1"
+    },
+    {
+      "chunkId": "M0-15",
+      "title": "Post-pass continuation: completion + recap + handoff",
+      "normalizedChars": 701,
+      "gateType": "post-pass",
+      "checkpointId": "m0cp1",
+      "resumeAfterPass": true
+    }
+  ]
+}

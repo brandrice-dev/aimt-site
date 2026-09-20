@@ -1,0 +1,90 @@
+{
+  "module": "00",
+  "version": "v2-strict-fidelity",
+  "generation": {
+    "status": "GENERATED — owner review pending, not integrated",
+    "voice": "Jane",
+    "voiceId": "Y3ZPRGOSIxbV4Rbb3WiA",
+    "modelId": "eleven_v3",
+    "generatedAt": "2026-09-17",
+    "generationsCountPerBatch": 1,
+    "totalCharacters": 12801,
+    "totalDurationSecs": 974.92,
+    "totalCostUsd": 2.098635,
+    "rawAudioDir": "AIMT-Listen-Mode-Final/00-Welcome-v2-staging",
+    "note": "Old v1 audio in AIMT-Listen-Mode-Final/00-Welcome/ left completely untouched. This v2 audio is staged in a separate directory pending owner review and has NOT been installed into assets/audio/listen/ or wired into aimt-listen-mode-data.js."
+  },
+  "batches": [
+    {
+      "batchId": "A1",
+      "file": "M0-BATCH-A1.txt",
+      "chunkIds": ["M0-01", "M0-02", "M0-03"],
+      "normalizedChars": 3630,
+      "durationSecs": 246.52,
+      "costUsd": 0.595485,
+      "checkpointRelationship": null
+    },
+    {
+      "batchId": "A2",
+      "file": "M0-BATCH-A2.txt",
+      "chunkIds": ["M0-04", "M0-05", "M0-06", "M0-07"],
+      "normalizedChars": 2697,
+      "durationSecs": 213.04,
+      "costUsd": 0.44253,
+      "checkpointRelationship": null
+    },
+    {
+      "batchId": "A3",
+      "file": "M0-BATCH-A3.txt",
+      "chunkIds": ["M0-08", "M0-09"],
+      "normalizedChars": 2467,
+      "durationSecs": 208.56,
+      "costUsd": 0.40458,
+      "checkpointRelationship": null
+    },
+    {
+      "batchId": "A4",
+      "file": "M0-BATCH-A4.txt",
+      "chunkIds": ["M0-10", "M0-11"],
+      "normalizedChars": 1856,
+      "durationSecs": 135.12,
+      "costUsd": 0.303105,
+      "checkpointRelationship": null
+    },
+    {
+      "batchId": "A5",
+      "file": "M0-BATCH-A5.txt",
+      "chunkIds": ["M0-12", "M0-13", "M0-14"],
+      "normalizedChars": 1712,
+      "durationSecs": 138.64,
+      "costUsd": 0.281325,
+      "checkpointRelationship": "m0cp1"
+    },
+    {
+      "batchId": "B1",
+      "file": "M0-BATCH-B1.txt",
+      "chunkIds": ["M0-15"],
+      "normalizedChars": 439,
+      "durationSecs": 33.04,
+      "costUsd": 0.07161,
+      "checkpointRelationship": "m0cp1"
+    }
+  ],
+  "chunkMeta": [
+    { "chunkId": "M0-01", "title": "Module Briefing (spoken)" },
+    { "chunkId": "M0-02", "title": "0.1 Welcome" },
+    { "chunkId": "M0-03", "title": "0.2 What this course is" },
+    { "chunkId": "M0-04", "title": "0.3 Who this is for" },
+    { "chunkId": "M0-05", "title": "0.4 What you'll learn" },
+    { "chunkId": "M0-06", "title": "0.5 How to use this course" },
+    { "chunkId": "M0-07", "title": "Practice interaction: \"Same steps. Different service.\"" },
+    { "chunkId": "M0-08", "title": "0.6 The standard" },
+    { "chunkId": "M0-09", "title": "0.7 What makes a great technician" },
+    { "chunkId": "M0-10", "title": "0.8 Scope and safety" },
+    { "chunkId": "M0-11", "title": "0.9 What success looks like" },
+    { "chunkId": "M0-12", "title": "0.10 Practitioner insight" },
+    { "chunkId": "M0-13", "title": "0.11 Common early mistakes" },
+    { "chunkId": "M0-14", "title": "Checkpoint (m0cp1)", "gateType": "checkpoint-stop", "checkpointId": "m0cp1" },
+    { "chunkId": "M0-15", "title": "Post-pass continuation: completion + recap + handoff", "gateType": "post-pass", "checkpointId": "m0cp1", "resumeAfterPass": true }
+  ]
+}

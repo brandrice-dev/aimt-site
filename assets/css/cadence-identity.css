@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════════
+   Cadence identity primitive — .cadence-id
+   ---------------------------------------------------------------
+   ONE reusable Cadence mark for every non-intro surface (Ask Cadence
+   chat, Cadence Checks, floating entry pill, public/course badges,
+   Module 12), so they all read as the same product identity instead of
+   several slightly-different Cadence widgets. Renders Cadence's OWN
+   mark (a local `<symbol id="cadence-mark">`, one per page -- see
+   headspa-mastery.html/index.html/etc. -- sourced from the owner
+   designer pack at assets/brand/cadence/cadence-mark.svg; deliberately
+   NOT assets/brand/aimt-orbital-mark.svg, which is the separate AIMT
+   institute mark) via currentColor -- the same currentColor approach
+   assets/js/aimt-cadence-intro.js's own identityMarkHtml()/orbitalSvg()
+   uses for the pre-course intro's mark (a different mark/geometry, kept
+   deliberately frozen and unchanged there).
+
+   Geometry, colors, timings, and easing below are copied VERBATIM from
+   assets/css/aimt-cadence-intro.css's .intro-mark-icon/.intro-halo/
+   .intro-mark-icon-wrap.is-blooming rules (resting color
+   rgba(255,255,255,.55), bloom color rgba(255,255,255,.95), halo inset
+   ratio -20px:52px, bloom halo opacity 0.4, 550ms bloom transition,
+   cubic-bezier(0.37,0,0.63,1) easing) — this file does not fork or
+   redefine the intro's own rules, it duplicates only the numbers needed
+   to reproduce the same visual language elsewhere. The intro file itself
+   is frozen and untouched.
+
+   Two states:
+   A. Static (default) — clean resting mark, no glow, no rotation.
+   B. Activation (.is-blooming, plus a JS-driven one-time 360° turn) —
+      the exact intro turn+glow, added by assets/js/cadence-identity.js's
+      CadenceIdentity.activate(), then automatically settles back to
+      static. Never loops/spins continuously.
+
+   A light surface (chat header/avatars, sitting on the .cshell panel's
+   white/--bg background) gets .cadence-id-chip: the same mark rendered
+   as clean black line/dot artwork on a transparent background -- no
+   filled disc behind it (a filled dark circle here read as a bullseye,
+   per owner visual review) -- without inventing a second mark design.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --cadence-id-ease: cubic-bezier(0.37, 0, 0.63, 1);
+}
+
+.cadence-id {
+  --cadence-id-size: 44px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cadence-id-size);
+  height: var(--cadence-id-size);
+  flex-shrink: 0;
+}
+.cadence-id-halo {
+  position: absolute;
+  /* Same ratio as the intro's -20px inset on a 52px icon. */
+  inset: calc(var(--cadence-id-size) * -0.3846);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9), transparent 72%);
+  opacity: 0.06;
+  pointer-events: none;
+  transition: opacity 2100ms var(--cadence-id-ease);
+}
+.cadence-id-icon {
+  width: 100%; height: 100%;
+  color: rgba(255,255,255,0.55);
+  position: relative; z-index: 1;
+  transition: color 2100ms var(--cadence-id-ease), rotate 2600ms var(--cadence-id-ease);
+}
+.cadence-id.is-blooming .cadence-id-halo { opacity: 0.4; transition: opacity 550ms var(--cadence-id-ease); }
+.cadence-id.is-blooming .cadence-id-icon { color: rgba(255,255,255,0.95); transition: color 550ms var(--cadence-id-ease), rotate 2600ms var(--cadence-id-ease); }
+
+/* Black-line variant for a mark that has to sit on a light surface
+   (e.g. the Ask Cadence chat panel, which is --bg:#faf8f5, and the
+   .cshell-head header, which is --white:#fff) -- same mark/halo/bloom
+   mechanics, just recolored to the site's own ink (#262626, matching
+   .cshell-bub's text color) instead of white, with no backing shape. */
+.cadence-id-chip {
+  background: none;
+}
+.cadence-id-chip .cadence-id-icon { color: rgba(38,38,38,0.82); }
+.cadence-id-chip.is-blooming .cadence-id-icon { color: rgba(38,38,38,0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* No rotation, no unnecessary movement -- the mark simply sits in its
+     resting state; activate() also skips the turn/bloom timers entirely
+     for these users (see cadence-identity.js). */
+  .cadence-id-icon, .cadence-id-halo { transition: none !important; }
+}

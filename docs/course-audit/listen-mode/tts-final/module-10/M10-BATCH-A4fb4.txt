@@ -1,0 +1,1 @@
+Starting the service before the process finishes and catching up afterward reverses the order that keeps the room and tools safe for the next step. The process comes first.
