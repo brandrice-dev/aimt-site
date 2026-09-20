@@ -33,6 +33,48 @@ function courseSlugForPrice(priceId, env) {
   return null;
 }
 
+/* The customer-facing enrollment email must always link to the canonical
+   production domain, never to wherever Stripe happens to be configured to
+   POST this webhook (in production that's the Cloudflare Pages default
+   https://aimt-site.pages.dev/api/stripe-webhook, not the custom domain —
+   deriving the link from `new URL(request.url).origin` was the bug). This
+   is a narrowly-scoped constant, not an env var, since create-checkout-
+   session.js already treats this exact domain as the one real customers
+   reach the site through, and there's nothing else in this webhook's env
+   that should decide it. */
+const CANONICAL_SITE_URL = 'https://aimtrichology.com';
+const SUCCESS_PATH = '/success.html';
+const CHECKOUT_SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}';
+
+/* Prefer the checkout Session's own `success_url` (set at checkout-
+   creation time in create-checkout-session.js from the real page origin
+   the customer purchased from — Stripe-verified truth, not a guess) when
+   it already resolves to our canonical domain and success page. Stripe
+   stores that field with the literal `{CHECKOUT_SESSION_ID}` token
+   unresolved — only the browser redirect substitutes it — so it's resolved
+   here using the session's own authoritative `id`. Anything that doesn't
+   parse, or doesn't land on the canonical origin/path (e.g. a purchase
+   made while browsing the pages.dev preview domain), falls back to the
+   hardcoded canonical URL so the email link is never wrong either way. */
+function resolveCourseEntryUrl(session) {
+  const sessionId = session && session.id ? String(session.id) : '';
+  const rawSuccessUrl = typeof session?.success_url === 'string' ? session.success_url : '';
+
+  if (sessionId && rawSuccessUrl.includes(CHECKOUT_SESSION_ID_PLACEHOLDER)) {
+    const resolved = rawSuccessUrl.replace(CHECKOUT_SESSION_ID_PLACEHOLDER, encodeURIComponent(sessionId));
+    try {
+      const parsed = new URL(resolved);
+      if (parsed.origin === CANONICAL_SITE_URL && parsed.pathname === SUCCESS_PATH) {
+        return parsed.toString();
+      }
+    } catch (_) {
+      /* malformed success_url — fall through to the canonical fallback */
+    }
+  }
+
+  return `${CANONICAL_SITE_URL}${SUCCESS_PATH}?session_id=${encodeURIComponent(sessionId)}`;
+}
+
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
@@ -229,14 +271,13 @@ export async function onRequestPost(context) {
        a Resend error, or a network failure must never turn a successful
        entitlement write into a 500 that makes Stripe retry the whole event. */
     try {
-      const origin = new URL(request.url).origin;
       const rawName = String(session.customer_details?.name || '').trim();
       const firstName = rawName ? rawName.split(/\s+/)[0] : '';
       await sendPaidEnrollmentEmail(env, {
         checkoutSessionId: session.id,
         email: purchaserEmail,
         firstName,
-        courseEntryUrl: `${origin}/success.html?session_id=${encodeURIComponent(session.id)}`
+        courseEntryUrl: resolveCourseEntryUrl(session)
       });
     } catch (error) {
       await logEvent(env, 'webhook_enrollment_email_unexpected_error', {

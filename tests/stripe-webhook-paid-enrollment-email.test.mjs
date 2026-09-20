@@ -19,7 +19,15 @@ import { sendPaidEnrollmentEmail, paidEnrollmentEmailIdempotencyKey } from '../f
 
 const STRIPE_URL = 'https://api.stripe.com';
 const RESEND_URL = 'https://api.resend.com/emails';
-const WEBHOOK_URL = 'https://aimtrichology.com/api/stripe-webhook';
+// Real production value: Stripe's dashboard webhook endpoint for this site
+// is configured against the Cloudflare Pages default domain, not the
+// custom domain — this is the exact URL that triggered the PR #3 review
+// finding (the enrollment email's CTA was being derived from this request's
+// own origin). Every test in this file posts to this URL by default so
+// the whole suite proves the fix under the real problematic condition,
+// not just a hand-picked one.
+const WEBHOOK_URL = 'https://aimt-site.pages.dev/api/stripe-webhook';
+const CANONICAL_SITE_URL = 'https://aimtrichology.com';
 const WEBHOOK_SECRET = 'whsec_test_secret';
 const MATCHING_PRICE_ID = 'price_headspa_live';
 
@@ -41,6 +49,12 @@ function makeCheckoutSessionEvent(overrides = {}) {
         payment_status: 'paid',
         status: 'complete',
         customer_details: { email: 'student@example.com', name: 'Jamie Rivera' },
+        // Real Stripe behavior: success_url is stored with the literal
+        // {CHECKOUT_SESSION_ID} token unresolved — only the browser redirect
+        // substitutes it. This is the real, canonical value
+        // create-checkout-session.js sets when a customer checks out from
+        // the actual production domain.
+        success_url: `${CANONICAL_SITE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
         ...overrides,
       },
     },
@@ -195,7 +209,8 @@ test('a successful entitlement write sends exactly one enrollment email with the
   assert.equal(sent.headers['Idempotency-Key'], paidEnrollmentEmailIdempotencyKey('cs_test_123'));
   assert.equal(sent.headers['Idempotency-Key'], 'enrollment/cs_test_123');
   assert.match(sent.body.html, /Welcome to the Head Spa Certification Course, Jamie/);
-  assert.match(sent.body.html, /success\.html\?session_id=cs_test_123/);
+  assert.match(sent.body.html, new RegExp(`${CANONICAL_SITE_URL.replace(/\./g, '\\.')}/success\\.html\\?session_id=cs_test_123`));
+  assert.doesNotMatch(sent.body.html, /pages\.dev/, 'the CTA must never leak the webhook request origin into the email');
 
   const sentLog = state.aimtLogs.find((r) => r.event_type === 'paid_enrollment_email_sent');
   assert.ok(sentLog, 'a paid_enrollment_email_sent aimt_logs row must be written');
@@ -203,12 +218,64 @@ test('a successful entitlement write sends exactly one enrollment email with the
   assert.equal(sentLog.email, 'student@example.com');
 });
 
-test('the email CTA URL is built from the request origin, matching the real success_url pattern from create-checkout-session.js', async (t) => {
+// ---------------------------------------------------------------------------
+// B2. PR #3 REVIEW FIX — CTA MUST NEVER BE DERIVED FROM THE WEBHOOK'S OWN
+//     REQUEST ORIGIN, WHICH IN PRODUCTION IS THE PAGES.DEV DOMAIN
+// ---------------------------------------------------------------------------
+
+test('even though this webhook is posted to the real production pages.dev endpoint, the enrollment email CTA resolves to the canonical aimtrichology.com domain', async (t) => {
   const state = makeState();
   t.mock.method(globalThis, 'fetch', createFetchMock(state));
   const env = makeEnv({ RESEND_API_KEY: 're_test_123' });
 
+  // postWebhook() posts to WEBHOOK_URL, which is
+  // https://aimt-site.pages.dev/api/stripe-webhook — the exact URL flagged
+  // in the PR #3 review as the real Stripe dashboard webhook endpoint.
   await postWebhook(env);
+  const sent = state.resendCalls[0];
+  assert.equal(
+    (sent.body.html.match(/https:\/\/aimtrichology\.com\/success\.html\?session_id=cs_test_123/g) || []).length > 0,
+    true
+  );
+  assert.doesNotMatch(sent.body.html, /aimt-site\.pages\.dev/);
+});
+
+test('a checkout Session whose success_url was itself created from the pages.dev preview domain still falls back to the canonical aimtrichology.com URL', async (t) => {
+  // Simulates the edge case of a real customer completing checkout while
+  // browsing the pages.dev preview domain directly (so create-checkout-
+  // session.js's own request origin, and therefore success_url, was
+  // pages.dev too) — the fallback must still win rather than trusting a
+  // non-canonical success_url.
+  const state = makeState();
+  t.mock.method(globalThis, 'fetch', createFetchMock(state));
+  const env = makeEnv({ RESEND_API_KEY: 're_test_123' });
+
+  await postWebhook(env, {
+    success_url: 'https://aimt-site.pages.dev/success.html?session_id={CHECKOUT_SESSION_ID}',
+  });
+  const sent = state.resendCalls[0];
+  assert.match(sent.body.html, /https:\/\/aimtrichology\.com\/success\.html\?session_id=cs_test_123/);
+  assert.doesNotMatch(sent.body.html, /aimt-site\.pages\.dev/);
+});
+
+test('a missing success_url on the session falls back cleanly to the canonical URL without erroring', async (t) => {
+  const state = makeState();
+  t.mock.method(globalThis, 'fetch', createFetchMock(state));
+  const env = makeEnv({ RESEND_API_KEY: 're_test_123' });
+
+  await postWebhook(env, { success_url: undefined });
+  assert.equal(state.resendCalls.length, 1);
+  const sent = state.resendCalls[0];
+  assert.match(sent.body.html, /https:\/\/aimtrichology\.com\/success\.html\?session_id=cs_test_123/);
+});
+
+test('a malformed success_url falls back cleanly to the canonical URL without erroring or failing the webhook', async (t) => {
+  const state = makeState();
+  t.mock.method(globalThis, 'fetch', createFetchMock(state));
+  const env = makeEnv({ RESEND_API_KEY: 're_test_123' });
+
+  const res = await postWebhook(env, { success_url: 'not a valid url {CHECKOUT_SESSION_ID}' });
+  assert.equal(res.status, 200);
   const sent = state.resendCalls[0];
   assert.match(sent.body.html, /https:\/\/aimtrichology\.com\/success\.html\?session_id=cs_test_123/);
 });
