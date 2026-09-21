@@ -49,23 +49,11 @@
    }] }
    ═══════════════════════════════════════════════════════════════ */
 
+import { checkBearerAuth } from '../_lib/research/auth.mjs';
+
 const STATUS_RANK = { DISCOVERED: 0, SOURCE_VERIFIED: 1, CLAIM_VERIFIED: 2, AIMT_APPROVED: 3 };
 const DEFAULT_MIN_STATUS = 'CLAIM_VERIFIED';
 const MAX_LIMIT = 100;
-
-function timingSafeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-function checkAuth(request, env) {
-  const header = request.headers.get('authorization') || '';
-  const [scheme, token] = header.split(' ');
-  if (scheme !== 'Bearer' || !token) return false;
-  return timingSafeEqual(token, env.RESEARCH_QUERY_SECRET);
-}
 
 async function parseParams(request) {
   if (request.method === 'POST') {
@@ -98,7 +86,7 @@ export async function onRequest(context) {
   if (!env.RESEARCH_QUERY_SECRET || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     return new Response('Misconfigured', { status: 500 });
   }
-  if (!checkAuth(request, env)) {
+  if (!checkBearerAuth(request, env.RESEARCH_QUERY_SECRET)) {
     return new Response('Unauthorized', { status: 401 });
   }
 

@@ -1,6 +1,13 @@
 .DS_Store
 scripts/.module12-review-output.html
 
+# Local-only secrets for one-off scripts run from a terminal (e.g. the
+# research library importer's SUPABASE_SERVICE_ROLE_KEY). Never committed,
+# never has real content checked in. Production secrets live in Cloudflare
+# Pages/Worker env vars, not here -- this is strictly for local CLI use.
+.env
+.env.*
+
 # Research Library: Grok research export (input data, not application
 # source) and its unpacked working dataset. Never commit the corpus itself --
 # it is imported into Supabase, not versioned in git.
