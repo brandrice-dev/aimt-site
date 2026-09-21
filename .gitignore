@@ -1,6 +1,11 @@
 .DS_Store
 scripts/.module12-review-output.html
 
+# Local Wrangler dev-server state (Pages/Workers local emulation: D1/KV/R2
+# sqlite state, cache, and tmp bundle output for `wrangler pages dev`).
+# Machine-local and regenerated on every local run -- never shipped.
+.wrangler/
+
 # Local-only secrets for one-off scripts run from a terminal (e.g. the
 # research library importer's SUPABASE_SERVICE_ROLE_KEY). Never committed,
 # never has real content checked in. Production secrets live in Cloudflare

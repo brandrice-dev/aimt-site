@@ -10,7 +10,7 @@
    Exit code 0 = all assertions passed, nonzero = failure (with detail).
    ═══════════════════════════════════════════════════════════════ */
 
-import { getAuthorizationId, evaluateConsentGate } from '../assets/js/oauth-consent-logic.mjs';
+import { getAuthorizationId, evaluateConsentGate, isApprovingRole, classifyAuthorizationDetailsResponse } from '../assets/js/oauth-consent-logic.mjs';
 
 let failures = 0;
 function assert(cond, msg) {
@@ -95,6 +95,73 @@ function testGateMessagesAreHumanReadable() {
   }
 }
 
+/* ══════════════ isApprovingRole: owner/admin only, support/unknown fail closed ══════════════
+   Regression test for the external-review finding: consent.html's
+   checkAdmin() must not treat a 'support' actor.role (permitted by
+   /api/admin?view=me's general resolveAdmin() role set) as eligible to
+   approve an OAuth connector. */
+function testIsApprovingRole() {
+  console.log('\n--- isApprovingRole: only owner/admin may approve; support/unknown/missing fail closed ---');
+  assert(isApprovingRole('owner') === true, "role 'owner' -> can approve");
+  assert(isApprovingRole('admin') === true, "role 'admin' -> can approve");
+  assert(isApprovingRole('support') === false, "role 'support' -> CANNOT approve (the regression this fixes)");
+  assert(isApprovingRole('some-unknown-role') === false, 'unrecognized role string -> cannot approve');
+  assert(isApprovingRole(undefined) === false, 'missing role (undefined) -> cannot approve');
+  assert(isApprovingRole(null) === false, 'missing role (null) -> cannot approve');
+  assert(isApprovingRole('') === false, 'empty-string role -> cannot approve');
+  assert(isApprovingRole('Owner') === false, "role casing must match exactly -- 'Owner' is not 'owner'");
+}
+
+/* ══════════════ classifyAuthorizationDetailsResponse: OAuthAuthorizationDetails vs OAuthRedirect ══════════════
+   Regression test for the external-review finding: getAuthorizationDetails()
+   can return either shape depending on whether the user already consented
+   to this exact authorization_id; consent.html must handle both and fail
+   closed on neither. */
+function testClassifyAuthorizationDetailsResponse() {
+  console.log('\n--- classifyAuthorizationDetailsResponse: consent-details vs already-consented redirect vs malformed ---');
+
+  const consentDetails = classifyAuthorizationDetailsResponse({
+    authorization_id: 'auth-abc-123',
+    client: { name: 'Grok / AIMT Research Harvester' },
+    scope: 'research.submit',
+    redirect_uri: 'https://grok.example.com/oauth/callback'
+  });
+  assert(consentDetails.kind === 'consent_details', `response carrying authorization_id -> 'consent_details' (got ${consentDetails.kind})`);
+  assert(consentDetails.data.client.name === 'Grok / AIMT Research Harvester', 'consent_details classification preserves the original response data for rendering');
+
+  const alreadyConsented = classifyAuthorizationDetailsResponse({
+    redirect_url: 'https://grok.example.com/oauth/callback?code=xyz'
+  });
+  assert(alreadyConsented.kind === 'already_consented_redirect', `response carrying only redirect_url -> 'already_consented_redirect' (got ${alreadyConsented.kind})`);
+  assert(alreadyConsented.redirectUrl === 'https://grok.example.com/oauth/callback?code=xyz', 'already_consented_redirect classification exposes the exact redirect_url to navigate to');
+
+  const malformedCases = [
+    null,
+    undefined,
+    {},
+    { authorization_id: '' },
+    { authorization_id: 42 },
+    { redirect_url: '' },
+    { redirect_url: 12345 },
+    { some_other_field: 'nothing recognizable' },
+    'a plain string, not an object'
+  ];
+  for (const bad of malformedCases) {
+    const result = classifyAuthorizationDetailsResponse(bad);
+    assert(result.kind === 'invalid', `malformed response ${JSON.stringify(bad)} -> 'invalid' (fail closed, got ${result.kind})`);
+  }
+
+  // Both fields present (shouldn't happen per the two documented response
+  // shapes, but if it did): a pending consent request takes precedence --
+  // approveAuthorization()/denyAuthorization() are the only calls allowed
+  // to mint a fresh redirect_url for an authorization still awaiting consent.
+  const bothPresent = classifyAuthorizationDetailsResponse({
+    authorization_id: 'auth-xyz',
+    redirect_url: 'https://grok.example.com/oauth/callback?code=already'
+  });
+  assert(bothPresent.kind === 'consent_details', 'if both fields are somehow present, the pending-consent shape takes precedence over the redirect shape');
+}
+
 async function main() {
   testGetAuthorizationId();
   testGateMissingAuthorizationId();
@@ -102,6 +169,8 @@ async function main() {
   testGateRequiresAdmin();
   testGateReadyOnlyWhenAllThreeHold();
   testGateMessagesAreHumanReadable();
+  testIsApprovingRole();
+  testClassifyAuthorizationDetailsResponse();
 
   console.log(`\n=== ${failures === 0 ? 'ALL PASSED' : `${failures} ASSERTION(S) FAILED`} ===`);
   process.exit(failures === 0 ? 0 : 1);
