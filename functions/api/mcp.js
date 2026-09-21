@@ -31,6 +31,15 @@
    call this endpoint and never bypasses any research trust control
    below (quarantine, AIMT_APPROVED human-only gate, RLS).
 
+   OAuth discovery (RFC 9728): a 401 here (missing/invalid bearer, both
+   paths above having failed) carries a WWW-Authenticate header pointing
+   at this resource's Protected Resource Metadata document, served by
+   functions/.well-known/oauth-protected-resource/api/mcp.js -- see
+   functions/_lib/mcp/discovery.mjs for both. A 403 (authenticated but
+   not an authorized admin, or an OAuth client_id mismatch) never
+   carries that header. Supabase remains the only authorization server;
+   this endpoint does not implement one.
+
    ── DUAL-ERA PROTOCOL SUPPORT ──────────────────────────────────────
    Built against the official spec text (fetched directly, not assumed):
      - Modern: https://modelcontextprotocol.io/specification/2026-07-28
@@ -93,6 +102,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { resolveMcpAuth } from '../_lib/mcp/auth.mjs';
+import { wwwAuthenticateHeader } from '../_lib/mcp/discovery.mjs';
 import { processIngestionBatch, logIngestEvent } from '../_lib/research/ingest-request.mjs';
 
 const SOURCE = 'api/mcp';
@@ -227,6 +237,23 @@ function originAllowed(request) {
 
 function forbiddenOrigin() {
   return jsonResponse({ jsonrpc: '2.0', id: null, error: { code: -32000, message: 'Origin not allowed' } }, 403);
+}
+
+/* Builds the response for a resolveMcpAuth() failure. A 401 (missing/
+   invalid bearer -- static secret AND OAuth token both failed) carries
+   WWW-Authenticate per RFC 9728 section 5.1 / the MCP authorization
+   spec's "return proper challenges" guidance, so a standards-compliant
+   client (e.g. Grok Bot Desktop's AuthenticateMcpServer) can discover
+   the Protected Resource Metadata document and start OAuth. A 403
+   (authenticated but not an authorized admin, or an OAuth-client-id
+   mismatch) is unchanged from before this header existed -- no
+   WWW-Authenticate, since the caller already has a token and retrying
+   the OAuth discovery flow would not fix a 403. Never sent on success. */
+function mcpAuthFailureResponse(auth) {
+  if (auth.status === 401) {
+    return new Response('Unauthorized', { status: 401, headers: { 'WWW-Authenticate': wwwAuthenticateHeader() } });
+  }
+  return new Response('Forbidden', { status: 403 });
 }
 
 /* Decodes the `=?base64?...?=` sentinel format used for header values
@@ -498,7 +525,7 @@ export async function onRequestPost(context) {
   const auth = await resolveMcpAuth(env, request);
   if (!auth.ok) {
     await logIngestEvent(env, SOURCE, 'mcp_auth_rejected', auth.reason);
-    return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
+    return mcpAuthFailureResponse(auth);
   }
 
   let message;
@@ -529,7 +556,7 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   if (!originAllowed(request)) return forbiddenOrigin();
   const auth = await resolveMcpAuth(env, request);
-  if (!auth.ok) return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
+  if (!auth.ok) return mcpAuthFailureResponse(auth);
   return new Response('Method Not Allowed', { status: 405 });
 }
 
@@ -537,6 +564,6 @@ export async function onRequestDelete(context) {
   const { request, env } = context;
   if (!originAllowed(request)) return forbiddenOrigin();
   const auth = await resolveMcpAuth(env, request);
-  if (!auth.ok) return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
+  if (!auth.ok) return mcpAuthFailureResponse(auth);
   return new Response('Method Not Allowed', { status: 405 });
 }
