@@ -1,0 +1,48 @@
+# AIMT Research Harvester — Cloudflare Worker (foundation only)
+# ---------------------------------------------------------------------
+# Self-contained: this file configures ONLY this worker. It lives under
+# workers/research-harvester/, not the repo root, specifically so it can
+# never be picked up by or interfere with the existing aimt-site
+# Cloudflare Pages deployment (functions/, _redirects, etc.). Do not move
+# this file to the repo root and do not add a root-level wrangler config
+# that references it.
+#
+# NOT DEPLOYED by this branch. This worker has never been deployed, has
+# no Cloudflare secrets set, and has no Cron Trigger enabled. See
+# README.md in this directory for the manual, post-review procedure.
+
+name = "aimt-research-harvester"
+main = "src/index.mjs"
+compatibility_date = "2026-01-01"
+
+# ── Non-secret configuration ──────────────────────────────────────────
+# Safe defaults only. HARVESTER_MODE defaults to the safest mode
+# (dry-run) so an unconfigured or misconfigured deploy can never
+# accidentally write to AIMT -- see src/run.mjs's resolveMode(), which
+# applies this same safe-default rule even if this var is absent or set
+# to something invalid. Override per-environment via the Cloudflare
+# dashboard or `wrangler deploy --var`, not by weakening this default.
+[vars]
+HARVESTER_MODE = "dry-run"
+# Sensible current default for a research-capable xAI model (verified
+# against xAI's own Responses API / tools documentation at
+# docs.x.ai/docs/guides/tools/{remote-mcp-tools,search-tools} while
+# building this worker). Fully overridable per-environment so a future
+# model change never requires a code change -- see src/run.mjs.
+XAI_RESEARCH_MODEL = "grok-4.7"
+
+# ── Secrets ────────────────────────────────────────────────────────────
+# XAI_API_KEY, MCP_CONNECTOR_SECRET, and HARVESTER_RUN_SECRET are NEVER
+# declared here, in any form, real or placeholder. Set them with
+# `wrangler secret put <NAME>` from inside this directory, after code
+# review -- see README.md's "First controlled dry-run" section.
+
+# ── Cron ───────────────────────────────────────────────────────────────
+# The scheduled() handler exists in src/index.mjs / src/run.mjs and runs
+# the exact same governed pipeline as POST /run, but NO Cron Trigger is
+# enabled yet -- this array is deliberately empty. Do not add a cron
+# expression until after one controlled dry-run AND one controlled live
+# run have both succeeded via POST /run (see README.md); cadence is a
+# decision for after that, not part of this foundation.
+[triggers]
+crons = []
