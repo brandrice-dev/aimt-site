@@ -16,8 +16,22 @@
 -- on top (see CHECK constraints on research_claims/research_sources below)
 -- -- they must never be settable by the same automated path that writes
 -- verification_status, so that a Grok re-sync can never silently promote
--- research into public content. Run manually in the Supabase SQL editor.
--- Safe to re-run (idempotent).
+-- research into public content.
+--
+-- CRITICAL RLS INVARIANT (do not weaken): research_sources and
+-- research_claims are RAW internal tables (verification_notes,
+-- body_markdown/body_sections, extras, migration metadata, reviewer
+-- names) and carry NO anon/authenticated policies of any kind -- not even
+-- a `published = true` SELECT. `published`/`public_eligible` on those two
+-- tables only gate which rows a human/process may curate INTO
+-- research_public_pages (§11); they are not themselves a client-readable
+-- flag. The public site, and anon/authenticated Supabase clients
+-- generally, may only ever read research_public_pages where
+-- status = 'published'. Never add a broader SELECT policy to
+-- research_sources/research_claims to "make the public site work" --
+-- build the sanitized page/view instead.
+--
+-- Run manually in the Supabase SQL editor. Safe to re-run (idempotent).
 
 create extension if not exists vector with schema extensions;
 create extension if not exists pg_trgm with schema extensions;
@@ -184,14 +198,16 @@ create unique index if not exists research_sources_doi_unique_idx on public.rese
 
 alter table public.research_sources enable row level security;
 
+-- No anon/authenticated policies of ANY kind, including SELECT, by design
+-- -- this is the raw research table (verification_notes, body_markdown,
+-- extras, migration metadata, reviewer names, ...) and stays service-role
+-- only regardless of `published`. `published = true` here only marks a
+-- source as eligible material for a human/process to curate INTO
+-- research_public_pages (§11 below) -- it is not itself a client-readable
+-- flag. The public site reads research_public_pages, never this table.
+-- (Drop kept below, idempotent, in case an earlier apply of this
+-- migration created the now-removed client SELECT policy.)
 drop policy if exists "research_sources_select_published" on public.research_sources;
-create policy "research_sources_select_published"
-  on public.research_sources
-  for select
-  to anon, authenticated
-  using (published = true);
--- No insert/update/delete policies for anon/authenticated by design.
--- All writes are service-role (research-ingest function / owner console).
 
 create or replace function public.touch_research_sources_updated_at()
 returns trigger
@@ -337,13 +353,12 @@ create index if not exists research_claims_public_published_idx on public.resear
 
 alter table public.research_claims enable row level security;
 
+-- No anon/authenticated policies of ANY kind, including SELECT, by design
+-- -- same rationale as research_sources above: this raw table carries
+-- body_markdown/body_sections, extras, reviewer names and internal notes.
+-- `published = true` marks a claim as eligible for curation into
+-- research_public_pages, not as directly client-readable.
 drop policy if exists "research_claims_select_published" on public.research_claims;
-create policy "research_claims_select_published"
-  on public.research_claims
-  for select
-  to anon, authenticated
-  using (published = true);
--- No insert/update/delete policies for anon/authenticated by design.
 
 create or replace function public.touch_research_claims_updated_at()
 returns trigger

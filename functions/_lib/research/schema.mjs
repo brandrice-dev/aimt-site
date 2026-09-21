@@ -168,21 +168,52 @@ export function validateClaim(record) {
   return { errors };
 }
 
+/* Same YAML 1.1 bare-yes/no ambiguity as normalizeYesNo() above, but this
+   field (claims.verified_against_primary_source) maps straight to a
+   Postgres boolean column rather than a string enum, so the fix is a
+   direct bool passthrough instead of a string. Verified against the live
+   2026-09-20 export: 608 raw `true` / 18 raw `false` (58% of all claims)
+   alongside 392 'yes' / 63 'no' strings -- an earlier version of this
+   function only matched the strings and silently discarded the 626
+   boolean-typed values as null. Caught by the DB-constraint preflight
+   (scripts/research-library-preflight.mjs), not by JS enum validation,
+   since a null boolean doesn't violate any CHECK constraint -- it just
+   quietly loses real data. */
 function yesNoToBool(v) {
-  if (v === 'yes') return true;
-  if (v === 'no') return false;
+  if (v === true || v === 'yes') return true;
+  if (v === false || v === 'no') return false;
+  return null;
+}
+
+/* Postgres's `date` type input requires day precision (YYYY-MM-DD or a
+   full timestamp) -- a reduced-precision value like "2025-03" is not
+   something we can pass through without either risking an insert-time
+   error or fabricating a day-of-month that isn't in the source data
+   (SCHEMA.md: "never invent"). Found exactly once in the live export
+   (sobral-oral-vs-topical-minoxidil-ma-2025.date_published) by the
+   DB-constraint preflight. Rather than guess how Postgres's parser would
+   handle it, values that don't match full day precision are left out of
+   the typed date column and preserved verbatim in `extras` under
+   `<field>_raw_unparsed` instead -- no information lost, nothing invented,
+   nothing that can fail a `date` column's implicit input parsing. */
+const FULL_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}:\d{2}.*)?$/;
+function safeDateOrNull(v, fieldName, extrasOut) {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'string' && FULL_DATE_RE.test(v)) return v;
+  extrasOut[`${fieldName}_raw_unparsed`] = v;
   return null;
 }
 
 /** Map a validated raw source record -> DB row. Never includes AIMT-side gate columns. */
 export function mapSourceRow(record, { grokExportBatch } = {}) {
+  const extras = extrasOf(record, DOCUMENTED_SOURCE_KEYS);
   return {
     source_id: record.source_id,
     schema_version: record.schema_version ?? null,
     title: record.title ?? null,
     authors: record.authors ?? null,
     year: record.year ?? null,
-    date_published: record.date_published ?? null,
+    date_published: safeDateOrNull(record.date_published, 'date_published', extras),
     source_venue: record.source_venue ?? null,
     doi: record.doi ?? null,
     url: record.url ?? null,
@@ -192,32 +223,32 @@ export function mapSourceRow(record, { grokExportBatch } = {}) {
     source_role: record.source_role ?? null,
     topics: record.topics ?? [],
     verification_depth: record.verification_depth ?? null,
-    verified_on: record.verified_on ?? null,
+    verified_on: safeDateOrNull(record.verified_on, 'verified_on', extras),
     verification_notes: record.verification_notes ?? null,
     rights_access_status: record.rights_access_status ?? null,
     full_text_held: !!record.full_text_held,
     license_or_rights_notes: record.license_or_rights_notes ?? null,
     use_status: record.use_status ?? null,
     use_status_reason: record.use_status_reason ?? null,
-    date_retrieved: record.date_retrieved ?? null,
-    last_reviewed_on: record.last_reviewed_on ?? null,
-    review_due_on: record.review_due_on ?? null,
+    date_retrieved: safeDateOrNull(record.date_retrieved, 'date_retrieved', extras),
+    last_reviewed_on: safeDateOrNull(record.last_reviewed_on, 'last_reviewed_on', extras),
+    review_due_on: safeDateOrNull(record.review_due_on, 'review_due_on', extras),
     version_or_amendment: record.version_or_amendment ?? null,
     freshness_notes: record.freshness_notes ?? null,
     legacy_entry_file: record.legacy_entry_file ?? null,
-    migrated_on: record.migrated_on ?? null,
+    migrated_on: safeDateOrNull(record.migrated_on, 'migrated_on', extras),
     migration_confidence: record.migration_confidence ?? null,
     migration_flags: record.migration_flags ?? [],
     verification_status: record.verification_status ?? null,
     full_text_access_observed: normalizeYesNo(record.full_text_access_observed) ?? null,
     reviewed_by: record.reviewed_by ?? null,
     verification_review_status: record.verification_review_status ?? null,
-    date_discovered: record.date_discovered ?? null,
+    date_discovered: safeDateOrNull(record.date_discovered, 'date_discovered', extras),
     discovery_lane_status: record.discovery_lane_status ?? null,
     body_markdown: record.body_markdown ?? null,
     body_sections: record.body_sections ?? {},
     source_file: record.source_file ?? null,
-    extras: extrasOf(record, DOCUMENTED_SOURCE_KEYS),
+    extras,
     grok_export_batch: grokExportBatch ?? null,
     last_imported_at: new Date().toISOString()
   };
@@ -226,6 +257,7 @@ export function mapSourceRow(record, { grokExportBatch } = {}) {
 /** Map a validated raw claim record -> DB row. Never includes AIMT-side gate columns,
     and never writes verification_status = 'AIMT_APPROVED' (see assertNeverAutoApproves). */
 export function mapClaimRow(record, { grokExportBatch } = {}) {
+  const extras = extrasOf(record, DOCUMENTED_CLAIM_KEYS);
   return {
     claim_id: record.claim_id,
     source_id: record.source_id,
@@ -241,20 +273,20 @@ export function mapClaimRow(record, { grokExportBatch } = {}) {
     extraction_confidence: record.extraction_confidence ?? null,
     use_status: record.use_status ?? null,
     use_status_reason: record.use_status_reason ?? null,
-    migrated_on: record.migrated_on ?? null,
+    migrated_on: safeDateOrNull(record.migrated_on, 'migrated_on', extras),
     migration_flags: record.migration_flags ?? [],
     claim_origin: record.claim_origin ?? null,
     verification_status: record.verification_status ?? null,
     verified_against_primary_source: yesNoToBool(record.verified_against_primary_source),
     page_or_section_locator: record.page_or_section_locator ?? null,
-    verified_on: record.verified_on ?? null,
+    verified_on: safeDateOrNull(record.verified_on, 'verified_on', extras),
     reviewed_by: record.reviewed_by ?? null,
     verification_review_status: record.verification_review_status ?? null,
     body_markdown: record.body_markdown ?? null,
     body_sections: record.body_sections ?? {},
     claim_file: record.claim_file ?? null,
     frontmatter_parse_mode: record._frontmatter_parse_mode ?? 'strict',
-    extras: extrasOf(record, DOCUMENTED_CLAIM_KEYS),
+    extras,
     grok_export_batch: grokExportBatch ?? null,
     last_imported_at: new Date().toISOString()
   };

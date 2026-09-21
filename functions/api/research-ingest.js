@@ -131,13 +131,16 @@ export async function onRequestPost(context) {
 
   const { valid: validSources, rejected: rejectedSources } = partitionRecords(body.sources, validateSource, 'source_id');
   const { valid: validClaims, rejected: rejectedClaims } = partitionRecords(body.claims, validateClaim, 'claim_id');
-  /* No batch-local orphan check here (unlike the CLI importer): a claim's
-     source may legitimately already exist in the DB from an earlier
-     batch without being resent in this one. research_claims.source_id's
-     FK constraint is the real backstop -- a genuinely orphaned claim
-     fails at the DB level and the batch is reported 'partial' with an
-     error_summary in research_ingestion_log, rather than silently
-     vanishing or this endpoint wrongly rejecting a claims-only batch. */
+  /* No orphan-FK check here: a claim's source may legitimately already
+     exist in the DB from an earlier batch without being resent in this
+     one, so a simple "is source_id in THIS request's sources" check would
+     wrongly reject valid claims-only batches. The real orphan check --
+     against this batch's sources AND the existing database -- happens
+     inside runImport() (functions/_lib/research/importer.mjs, step 4a)
+     BEFORE any claims upsert, so a genuinely orphaned claim is quarantined
+     rather than hitting the (never weakened) research_claims.source_id FK
+     and aborting the run. result.rejectedClaims below is the count AFTER
+     that check, not just JS-validation rejects. */
 
   const loaded = {
     sources: validSources,
@@ -156,15 +159,21 @@ export async function onRequestPost(context) {
       triggeredBy: 'research-ingest-endpoint'
     });
 
-    await logEvent(env, 'research_ingest_complete', `batch_${batchId}_status_${result.rejectedSources + result.rejectedClaims > 0 ? 'partial' : 'success'}`);
+    const totalRejected = result.rejectedSources + result.rejectedClaims;
+    await logEvent(env, 'research_ingest_complete', `batch_${batchId}_status_${totalRejected > 0 ? 'partial' : 'success'}`);
 
+    /* Counts below are post-import (result.*), which include orphan claims
+       quarantined inside runImport -- NOT just the pre-import JS-validation
+       rejects (rejectedSources/rejectedClaims above), so a batch with a
+       stray orphan claim correctly reports 'partial' with the right count
+       instead of a misleadingly clean 'ok'. */
     return new Response(JSON.stringify({
       batch_id: batchId,
-      status: (rejectedSources.length + rejectedClaims.length) > 0 ? 'partial' : 'ok',
+      status: totalRejected > 0 ? 'partial' : 'ok',
       accepted: { sources: result.insertedSources + result.updatedSources, claims: result.insertedClaims + result.updatedClaims },
       inserted: { sources: result.insertedSources, claims: result.insertedClaims },
       updated: { sources: result.updatedSources, claims: result.updatedClaims },
-      quarantined: { sources: rejectedSources.length, claims: rejectedClaims.length }
+      quarantined: { sources: result.rejectedSources, claims: result.rejectedClaims, orphan_claims: result.orphanClaims }
     }), { headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     await logEvent(env, 'research_ingest_failure', error && error.message ? error.message : 'unknown_error');

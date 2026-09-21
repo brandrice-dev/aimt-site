@@ -160,10 +160,43 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       });
     }
 
-    /* 4. Claims -- protect existing AIMT_APPROVED rows from downgrade */
+    /* 4a. Quarantine true orphan claims BEFORE any claims upsert. The
+       research_claims.source_id FK is real and is never weakened -- a
+       genuinely orphaned row (source missing from both this batch and the
+       existing database) WOULD be rejected by Postgres at insert time,
+       which would abort the whole chunk/run for one bad record. Checking
+       here first means that can only still happen for a source this
+       function itself just upserted moments ago and Postgres somehow
+       doesn't see yet (a real infra/consistency fault, correctly left to
+       fail the batch), not for a bad or unknown source_id. */
+    const batchSourceIds = new Set(loaded.sources.map((s) => s.source_id));
+    const candidateOrphanSourceIds = [...new Set(
+      loaded.claims.map((c) => c.source_id).filter((id) => id && !batchSourceIds.has(id))
+    )];
+    const dbKnownSourceIds = new Set();
+    for (const idsChunk of chunk(candidateOrphanSourceIds, chunkSize)) {
+      const found = await selectIds(env, 'research_sources', 'source_id',
+        `&source_id=in.(${idsChunk.map((id) => `"${id}"`).join(',')})`);
+      for (const id of found) dbKnownSourceIds.add(id);
+    }
+    const orphanClaims = [];
+    const claimsToProcess = [];
+    for (const c of loaded.claims) {
+      if (c.source_id && (batchSourceIds.has(c.source_id) || dbKnownSourceIds.has(c.source_id))) {
+        claimsToProcess.push(c);
+      } else {
+        orphanClaims.push({
+          natural_id: c.claim_id || null,
+          errors: [`source_id ${JSON.stringify(c.source_id)} not found in this batch or the existing database (orphan claim)`],
+          raw: c
+        });
+      }
+    }
+
+    /* 4b. Claims -- protect existing AIMT_APPROVED rows from downgrade */
     const alreadyApproved = await selectIds(env, 'research_claims', 'claim_id', `&verification_status=eq.AIMT_APPROVED`);
     let insertedClaims = 0, updatedClaims = 0;
-    for (const rawBatch of chunk(loaded.claims, chunkSize)) {
+    for (const rawBatch of chunk(claimsToProcess, chunkSize)) {
       const protectedBatch = rawBatch.filter((c) => alreadyApproved.has(c.claim_id));
       const normalBatch = rawBatch.filter((c) => !alreadyApproved.has(c.claim_id));
 
@@ -187,9 +220,12 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       }
     }
 
-    /* 5. claim <-> topic join rows */
+    /* 5. claim <-> topic join rows -- claimsToProcess only: a
+       research_claim_topics row for an orphaned (quarantined) claim_id
+       would hit that table's own FK to research_claims and fail the same
+       way, so it must track whichever claims actually got upserted. */
     const claimTopicRows = [];
-    for (const c of loaded.claims) for (const t of (c.topics || [])) claimTopicRows.push({ claim_id: c.claim_id, topic: t });
+    for (const c of claimsToProcess) for (const t of (c.topics || [])) claimTopicRows.push({ claim_id: c.claim_id, topic: t });
     for (const c of chunk(claimTopicRows, chunkSize)) {
       await fetch(`${env.SUPABASE_URL}/rest/v1/research_claim_topics?on_conflict=claim_id,topic`, {
         method: 'POST', headers: supabaseHeaders(env, { Prefer: 'resolution=ignore-duplicates,return=minimal' }),
@@ -218,14 +254,16 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       await upsert(env, 'research_coverage', rows, 'topic');
     }
 
-    /* 7. Quarantine rejected rows */
+    /* 7. Quarantine rejected rows (JS-validation rejects + orphan claims
+       caught in step 4a) */
+    const allRejectedClaims = [...loaded.rejected.claims, ...orphanClaims];
     await insertQuarantine(env, batchId, 'source', loaded.rejected.sources);
-    await insertQuarantine(env, batchId, 'claim', loaded.rejected.claims);
+    await insertQuarantine(env, batchId, 'claim', allRejectedClaims);
 
     const countsAfter = {};
     for (const t of LOGGED_TABLES) countsAfter[t] = await countTable(env, t);
 
-    const rejectedTotal = loaded.rejected.sources.length + loaded.rejected.claims.length;
+    const rejectedTotal = loaded.rejected.sources.length + allRejectedClaims.length;
     await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
       method: 'PATCH',
       headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
@@ -235,14 +273,15 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
         counts_after: countsAfter,
         inserted_counts: { sources: insertedSources, claims: insertedClaims },
         updated_counts: { sources: updatedSources, claims: updatedClaims },
-        rejected_counts: { sources: loaded.rejected.sources.length, claims: loaded.rejected.claims.length }
+        rejected_counts: { sources: loaded.rejected.sources.length, claims: allRejectedClaims.length, orphan_claims: orphanClaims.length }
       })
     });
 
     return {
       logId: logRow.id, countsBefore, countsAfter,
       insertedSources, updatedSources, insertedClaims, updatedClaims,
-      rejectedSources: loaded.rejected.sources.length, rejectedClaims: loaded.rejected.claims.length
+      rejectedSources: loaded.rejected.sources.length, rejectedClaims: allRejectedClaims.length,
+      orphanClaims: orphanClaims.length
     };
   } catch (err) {
     await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
