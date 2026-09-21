@@ -198,10 +198,12 @@ test('valid existing account: generate_link called once with exact type/email/re
   assert.equal(linkCalls[0].body.redirect_to, 'https://aimtrichology.com/student-access.html');
   assert.equal(linkCalls[0].headers.apikey, 'fake-service-role-key');
   assert.equal(linkCalls[0].headers.Authorization, 'Bearer fake-service-role-key');
+  assert.equal(linkCalls[0].headers['X-JWT-AUD'], 'authenticated');
 
   const sent = resendCalls(state);
   assert.equal(sent.length, 1, 'Resend must be called exactly once');
   assert.equal(sent[0].headers.Authorization, 'Bearer re_test_123');
+  assert.equal(sent[0].headers['X-JWT-AUD'], undefined, 'X-JWT-AUD is a Supabase Admin API header -- it must never leak onto the Resend call');
   assert.equal(sent[0].body.to[0], 'student@example.com');
   assert.equal(sent[0].body.reply_to, 'support@aimtrichology.com');
   assert.equal(sent[0].body.subject, 'Reset your AIMT password');
@@ -213,7 +215,26 @@ test('valid existing account: generate_link called once with exact type/email/re
   );
 });
 
-test('nonexistent account: generate_link reports not-found, no Resend send happens, response is the identical generic 200', async (t) => {
+test('generate_link explicitly selects the "authenticated" audience via X-JWT-AUD, alongside unchanged service-role apikey/Authorization headers', async (t) => {
+  _resetRateLimitBucketsForTests();
+  const state = makeState();
+  t.mock.method(globalThis, 'fetch', createFetchMock(state));
+  const env = makeEnv();
+
+  await onRequestPost({ request: makeRequest({ body: { email: 'student@example.com' } }), env });
+
+  const linkCalls = generateLinkCalls(state);
+  assert.equal(linkCalls.length, 1);
+  const headers = linkCalls[0].headers;
+  assert.equal(headers['X-JWT-AUD'], 'authenticated', 'the audience header must be present and exactly "authenticated"');
+  // Unchanged from before this correction -- the header addition must not
+  // have disturbed the existing service-role auth headers.
+  assert.equal(headers.apikey, 'fake-service-role-key');
+  assert.equal(headers.Authorization, 'Bearer fake-service-role-key');
+  assert.equal(headers['Content-Type'], 'application/json');
+});
+
+test('nonexistent account: generate_link still carries X-JWT-AUD, reports not-found, no Resend send happens, response is the identical generic 200', async (t) => {
   _resetRateLimitBucketsForTests();
   const state = makeState({ generateLinkBehavior: 'not_found' });
   t.mock.method(globalThis, 'fetch', createFetchMock(state));
@@ -225,6 +246,7 @@ test('nonexistent account: generate_link reports not-found, no Resend send happe
   assert.deepEqual(data, { ok: true, message: GENERIC_MESSAGE });
   assert.equal(resendCalls(state).length, 0, 'no email must be sent for a nonexistent account');
   assert.doesNotMatch(JSON.stringify(data), /not.?found|no.?user|does.?not.?exist/i);
+  assert.equal(generateLinkCalls(state)[0].headers['X-JWT-AUD'], 'authenticated', 'the audience header is sent on every generate_link attempt, not only successful ones');
 });
 
 test('Supabase provider error (500 from generate_link) is enumeration-safe: same generic 200, no provider detail leaked', async (t) => {
@@ -358,10 +380,19 @@ test('neither server secret appears anywhere in the browser-shipped HTML/JS file
   }
 });
 
-test('the endpoint module itself never references a hardcoded secret value (env-only access)', () => {
+test('X-JWT-AUD never reaches browser-shipped HTML/JS -- it is a server-to-Supabase admin header only', () => {
+  const filesToCheck = ['student-access.html', 'headspa-mastery.html', 'success.html', 'admin.html'];
+  for (const file of filesToCheck) {
+    const contents = readFileSync(path.join(REPO_ROOT, file), 'utf8');
+    assert.doesNotMatch(contents, /X-JWT-AUD/i, `${file} must never reference the audience header`);
+  }
+});
+
+test('the endpoint module itself never references a hardcoded secret value (env-only access), and sets the audience header as a literal constant', () => {
   const src = readFileSync(path.join(REPO_ROOT, 'functions/api/request-password-reset.js'), 'utf8');
   assert.match(src, /env\.SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(src, /env\.RESEND_API_KEY/);
+  assert.match(src, /'X-JWT-AUD':\s*'authenticated'/);
   // No console.* call anywhere -- the action_link must never reach logs.
   assert.doesNotMatch(src, /console\.\w+\(/);
 });

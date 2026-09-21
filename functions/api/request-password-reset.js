@@ -185,7 +185,15 @@ function renderResetHtml({ actionLink }) {
    triggering GoTrue's own mailer. Any non-ok response (including "user
    not found", which Supabase reports for a nonexistent/ineligible email)
    is folded into the same enumeration-safe generic result by the caller
-   -- this function itself never distinguishes "why" beyond ok/not-ok. */
+   -- this function itself never distinguishes "why" beyond ok/not-ok.
+
+   X-JWT-AUD: for a service-role request, GoTrue's requestAud() otherwise
+   falls back to its own runtime-configured config.JWT.Aud to decide which
+   audience partition to search (FindUserByEmailAndAudience requires an
+   exact aud match) -- a value this codebase has no visibility into and no
+   control over. Every existing AIMT user is directly verified as
+   aud:"authenticated", so this header selects that audience explicitly
+   rather than depending on hidden server config staying aligned with it. */
 async function generateRecoveryLink(env, email) {
   const response = await fetch(`${env.SUPABASE_URL}/auth/v1/admin/generate_link`, {
     method: 'POST',
@@ -193,6 +201,7 @@ async function generateRecoveryLink(env, email) {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
+      'X-JWT-AUD': 'authenticated',
     },
     body: JSON.stringify({ type: 'recovery', email, redirect_to: REDIRECT_TO }),
   });
