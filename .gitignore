@@ -1,6 +1,11 @@
 .DS_Store
 scripts/.module12-review-output.html
 
+# Research Library: Grok research export (input data, not application
+# source) and its unpacked working dataset. Never commit the corpus itself --
+# it is imported into Supabase, not versioned in git.
+research-import/
+
 # Local dev-only tooling config (e.g. the static-preview server definition
 # used by the browser-preview tool) -- machine-local, not shipped.
 .claude/
