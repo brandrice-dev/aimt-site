@@ -1,6 +1,7 @@
 import { supabaseRest } from '../../_lib/certification/auth.mjs';
 import { adminJson, requireAdminRole, resolveAdmin, writeAdminAudit } from '../../_lib/admin/auth.mjs';
 import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite-email.mjs';
+import { computeConfigHealth } from '../../_lib/admin/config-health.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const MANUAL_PREFIX = 'admin-grant-';
@@ -209,6 +210,19 @@ async function handleAudit(env) {
   return adminJson({ audit: rows });
 }
 
+// Owner/admin only -- deliberately narrower than resolveAdmin()'s default
+// ['owner','admin','support'], same pattern grantAccess() already uses for
+// a second, view-specific role check. Support role must not see which
+// production credentials are configured. Pure presence-only report (see
+// functions/_lib/admin/config-health.mjs's own header) -- no I/O, no
+// Supabase call, so nothing here can fail except the role check itself.
+function handleConfigHealth(env, actor) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) {
+    return adminJson({ error: 'Owner or admin access required.' }, 403);
+  }
+  return adminJson(computeConfigHealth(env));
+}
+
 async function grantAccess(env, actor, body, request) {
   if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
   const email = normalizeEmail(body.email);
@@ -404,6 +418,7 @@ export async function onRequestGet(context) {
     if (view === 'students') return await handleStudents(env, url.searchParams.get('q'));
     if (view === 'student') return await handleStudent(env, url.searchParams.get('userId'), url.searchParams.get('email'));
     if (view === 'audit') return await handleAudit(env);
+    if (view === 'config-health') return handleConfigHealth(env, actor);
     return adminJson({ error: 'Unknown admin view.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to load AIMT admin data.' }, 500);
