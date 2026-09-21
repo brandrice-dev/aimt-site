@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIMT Connector Authorization</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#141210;--panel:#1d1a17;--line:rgba(255,255,255,.08);--text:rgba(255,255,255,.94);--muted:rgba(255,255,255,.48);--accent:#a3968d;--good:#8ea892;--warn:#c9a56f;--bad:#bc7d7d}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;padding:24px}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{width:min(460px,100%);border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:28px}
+.eyebrow{font-family:'Montserrat',sans-serif;font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;margin-bottom:10px}
+p{color:var(--muted);font-size:.85rem;line-height:1.6}
+.field{display:grid;gap:5px;margin-bottom:10px}
+.field label{font-size:.66rem;color:var(--muted)}
+.field input{background:#181512;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:11px 12px;font-size:.85rem;width:100%}
+.btn{border:1px solid var(--line);border-radius:999px;min-height:44px;padding:0 18px;background:transparent;color:var(--text);font-size:.8rem;font-weight:500;width:100%;margin-top:6px}
+.btn.primary{background:var(--text);color:#171411;border-color:var(--text)}
+.btn.danger{color:#e2aaaa;border-color:rgba(226,170,170,.3)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.notice{display:none;margin:14px 0;padding:12px 14px;border:1px solid rgba(163,150,141,.25);background:rgba(163,150,141,.08);border-radius:10px;color:rgba(255,255,255,.8);font-size:.82rem;line-height:1.5}
+.notice.show{display:block}
+.notice.error{border-color:rgba(188,125,125,.32);background:rgba(188,125,125,.09);color:#e2b8b8}
+.notice.blocked{border-color:rgba(201,165,111,.3);background:rgba(201,165,111,.08);color:#dcc498}
+.request-card{border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0;background:#181512}
+.request-card .name{font-weight:500;font-size:.95rem;margin-bottom:4px}
+.request-card .scope{font-size:.72rem;color:var(--muted);word-break:break-word}
+.actions{display:flex;gap:8px;margin-top:6px}
+.actions .btn{margin-top:0}
+.loading{color:var(--muted);font-size:.84rem;padding:12px 0}
+.view{display:none}
+.view.active{display:block}
+.foot-link{display:block;text-align:center;margin-top:16px;font-size:.74rem;color:var(--muted);background:none;border:0;width:100%}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">American Institute of Modern Trichology</div>
+
+  <!-- Terminal failure: no authorization_id at all. Nothing else renders. -->
+  <section class="view" id="view-missing-id">
+    <h1>Authorization link incomplete</h1>
+    <p id="missingIdMessage"></p>
+  </section>
+
+  <!-- Sign-in required before this request can even be evaluated. -->
+  <section class="view" id="view-signin">
+    <h1>Sign in to review</h1>
+    <p id="signinMessage">Sign in with your AIMT admin account to review this connector request.</p>
+    <form id="signinForm">
+      <div class="field"><label for="signinEmail">Email</label><input id="signinEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="signinPassword">Password</label><input id="signinPassword" type="password" autocomplete="current-password" required></div>
+      <div class="notice" id="signinNotice"></div>
+      <button class="btn primary" id="signinBtn" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <!-- Authenticated but not an AIMT admin -- fails closed, no approve path. -->
+  <section class="view" id="view-not-admin">
+    <h1>Admin access required</h1>
+    <p id="notAdminMessage"></p>
+    <button class="btn" id="notAdminSignOut" type="button">Sign out</button>
+  </section>
+
+  <!-- Loading / fetching authorization + consent details. -->
+  <section class="view" id="view-loading">
+    <h1>Checking this request&hellip;</h1>
+    <div class="loading" id="loadingMessage">One moment.</div>
+  </section>
+
+  <!-- Fail-closed error state: authenticated + admin, but the OAuth
+       authorization itself couldn't be loaded, approved, or denied. -->
+  <section class="view" id="view-error">
+    <h1>Unable to complete this request</h1>
+    <p id="errorMessage"></p>
+    <button class="btn" id="errorRetry" type="button">Try again</button>
+  </section>
+
+  <!-- The actual consent screen. -->
+  <section class="view" id="view-consent">
+    <h1>Authorize connector access</h1>
+    <p><strong id="consentClientName">A connector</strong> is requesting access to submit governed research to AIMT on your Research Library&rsquo;s behalf.</p>
+    <div class="request-card">
+      <div class="name" id="consentClientNameCard">&mdash;</div>
+      <div class="scope" id="consentScope"></div>
+    </div>
+    <p>Approving grants this connector ongoing access to <code>/api/mcp</code>&rsquo;s <code>submit_research_batch</code> tool only. Everything it submits is still quarantined for human review under AIMT&rsquo;s existing trust ladder &mdash; nothing it sends is ever auto-published or auto-approved.</p>
+    <div class="notice" id="consentNotice"></div>
+    <div class="actions">
+      <button class="btn danger" id="denyBtn" type="button">Deny</button>
+      <button class="btn primary" id="approveBtn" type="button">Approve</button>
+    </div>
+    <div style="margin-top:14px"><span id="consentActorLabel" style="font-size:.7rem;color:var(--muted)"></span></div>
+    <button class="foot-link" id="consentSignOut" type="button">Not you? Sign out</button>
+  </section>
+</div>
+
+<script type="module">
+import { getAuthorizationId, evaluateConsentGate } from '../assets/js/oauth-consent-logic.mjs';
+
+const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+// Same published anon key used by every other AIMT browser page
+// (admin.html, student-access.html, my-aimt.html, success.html). Never a
+// service-role key -- this page only ever acts as the signed-in user.
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+const $ = (id) => document.getElementById(id);
+const views = ['missing-id', 'signin', 'not-admin', 'loading', 'error', 'consent'];
+function showView(name) {
+  views.forEach((v) => $(`view-${v}`).classList.toggle('active', v === name));
+}
+function showNotice(el, msg, kind) {
+  el.textContent = msg || '';
+  el.classList.remove('error', 'blocked');
+  if (kind) el.classList.add(kind);
+  el.classList.toggle('show', !!msg);
+}
+
+const authorizationId = getAuthorizationId(window.location.search);
+
+async function accessToken() {
+  const { data } = await supabaseClient.auth.getSession();
+  return (data && data.session && data.session.access_token) || '';
+}
+
+/** Reuses the EXISTING /api/admin canonical admin check (functions/_lib/
+    admin/auth.mjs's resolveAdmin) -- no second admin system. Returns
+    { authenticated, isAdmin, actor } and never throws. */
+async function checkAdmin() {
+  const token = await accessToken();
+  if (!token) return { authenticated: false, isAdmin: false, actor: null };
+  try {
+    const res = await fetch('/api/admin?view=me', { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 401) return { authenticated: false, isAdmin: false, actor: null };
+    if (!res.ok) return { authenticated: true, isAdmin: false, actor: null };
+    const data = await res.json().catch(() => ({}));
+    return { authenticated: true, isAdmin: !!(data && data.actor), actor: (data && data.actor) || null };
+  } catch (_) {
+    // Fail closed: a network/parse error is never treated as "is admin".
+    return { authenticated: true, isAdmin: false, actor: null };
+  }
+}
+
+async function loadAuthorizationDetails() {
+  showView('loading');
+  $('loadingMessage').textContent = 'Loading the connector’s request…';
+  try {
+    const { data, error } = await supabaseClient.auth.oauth.getAuthorizationDetails(authorizationId);
+    if (error || !data) throw error || new Error('No authorization details returned.');
+    const clientName = (data.client && data.client.name) || 'Grok / AIMT Research Harvester';
+    $('consentClientName').textContent = clientName;
+    $('consentClientNameCard').textContent = clientName;
+    $('consentScope').textContent = data.scope ? `Requested scope: ${data.scope}` : 'No specific scope was declared by this connector.';
+    showNotice($('consentNotice'), '');
+    showView('consent');
+  } catch (err) {
+    $('errorMessage').textContent = (err && err.message) || 'Could not load this authorization request from Supabase. Nothing was approved.';
+    showView('error');
+  }
+}
+
+async function runGate() {
+  const gate0 = evaluateConsentGate({ authorizationId, authenticated: false, isAdmin: false });
+  if (gate0.state === 'missing_authorization_id') {
+    $('missingIdMessage').textContent = gate0.message;
+    showView('missing-id');
+    return;
+  }
+
+  showView('loading');
+  $('loadingMessage').textContent = 'Checking your AIMT account…';
+  const { authenticated, isAdmin, actor } = await checkAdmin();
+  const gate = evaluateConsentGate({ authorizationId, authenticated, isAdmin });
+
+  if (gate.state === 'sign_in_required') {
+    showNotice($('signinNotice'), '');
+    $('signinMessage').textContent = gate.message;
+    showView('signin');
+    return;
+  }
+  if (gate.state === 'not_admin') {
+    $('notAdminMessage').textContent = gate.message;
+    showView('not-admin');
+    return;
+  }
+
+  $('consentActorLabel').textContent = actor ? `Signed in as ${actor.email} · ${actor.role}` : '';
+  await loadAuthorizationDetails();
+}
+
+$('signinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showNotice($('signinNotice'), '');
+  const btn = $('signinBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  try {
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: $('signinEmail').value.trim(),
+      password: $('signinPassword').value
+    });
+    if (error) throw error;
+    await runGate();
+  } catch (err) {
+    showNotice($('signinNotice'), (err && err.message) || 'Unable to sign in.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+});
+
+async function signOutAndRestart() {
+  await supabaseClient.auth.signOut();
+  await runGate();
+}
+$('notAdminSignOut').addEventListener('click', signOutAndRestart);
+$('consentSignOut').addEventListener('click', signOutAndRestart);
+$('errorRetry').addEventListener('click', runGate);
+
+$('approveBtn').addEventListener('click', async () => {
+  showNotice($('consentNotice'), '');
+  $('approveBtn').disabled = true;
+  $('denyBtn').disabled = true;
+  $('approveBtn').textContent = 'Approving…';
+  try {
+    // Re-verify admin status immediately before approving -- never trust
+    // a stale in-memory flag for the one action that actually grants access.
+    const { authenticated, isAdmin } = await checkAdmin();
+    const gate = evaluateConsentGate({ authorizationId, authenticated, isAdmin });
+    if (!gate.canApprove) {
+      showNotice($('consentNotice'), gate.message, 'blocked');
+      if (gate.state === 'not_admin') { showView('not-admin'); $('notAdminMessage').textContent = gate.message; }
+      else if (gate.state === 'sign_in_required') { showView('signin'); }
+      return;
+    }
+    const { data, error } = await supabaseClient.auth.oauth.approveAuthorization(authorizationId);
+    if (error || !data || !data.redirect_url) throw error || new Error('Supabase did not return a redirect URL.');
+    window.location.href = data.redirect_url;
+  } catch (err) {
+    showNotice($('consentNotice'), (err && err.message) || 'Unable to approve this request. Nothing was granted.', 'error');
+  } finally {
+    $('approveBtn').disabled = false;
+    $('denyBtn').disabled = false;
+    $('approveBtn').textContent = 'Approve';
+  }
+});
+
+$('denyBtn').addEventListener('click', async () => {
+  showNotice($('consentNotice'), '');
+  $('approveBtn').disabled = true;
+  $('denyBtn').disabled = true;
+  $('denyBtn').textContent = 'Denying…';
+  try {
+    const { data, error } = await supabaseClient.auth.oauth.denyAuthorization(authorizationId);
+    if (error) throw error;
+    if (data && data.redirect_url) window.location.href = data.redirect_url;
+    else { showNotice($('consentNotice'), 'Request denied.'); }
+  } catch (err) {
+    showNotice($('consentNotice'), (err && err.message) || 'Unable to deny this request.', 'error');
+  } finally {
+    $('approveBtn').disabled = false;
+    $('denyBtn').disabled = false;
+    $('denyBtn').textContent = 'Deny';
+  }
+});
+
+runGate();
+</script>
+</body>
+</html>

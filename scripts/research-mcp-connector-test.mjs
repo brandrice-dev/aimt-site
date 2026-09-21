@@ -66,6 +66,20 @@ function makeRequest({ auth, origin, protocolVersion, mcpMethod, mcpName, body }
   });
 }
 
+/* Builds a JWT-shaped (but unsigned/fake) access token string for OAuth
+   auth tests. The mock /auth/v1/user handler below never checks the
+   signature -- it looks the raw token string up in a caller-supplied
+   map, exactly standing in for "Supabase verified this token server-
+   side and it belongs to this user." functions/_lib/mcp/auth.mjs only
+   ever decodes the payload segment AFTER that mocked verification has
+   already succeeded, to read the optional client_id claim -- so a fake,
+   unsigned token here is a faithful stand-in for what that code path
+   actually reads. */
+function makeFakeAccessToken(payload) {
+  const b64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
+  return `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url(payload)}.fake-signature-mock-never-verifies-this`;
+}
+
 async function readResponse(res) {
   const status = res.status;
   const text = await res.text();
@@ -109,16 +123,43 @@ async function legacyCall(env, method, params = {}, opts = {}) {
 }
 
 /* ── Minimal in-memory PostgREST mock (same shape as
-   research-library-ingestion-test.mjs's mock). ── */
-function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [] } = {}) {
+   research-library-ingestion-test.mjs's mock). ──
+   `oauthUsers`: map of raw access-token string -> mock Supabase auth user
+   object (what GET /auth/v1/user would return for that token). A token
+   with no entry simulates an invalid/expired OAuth access token (401).
+   `adminUsersByUserId`: map of user_id -> { user_id, role, active } mock
+   admin_users row, standing in for the real admin_users table that
+   functions/_lib/admin/auth.mjs's resolveAdmin() reads. */
+function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [], oauthUsers = {}, adminUsersByUserId = {} } = {}) {
   const state = { sources: new Set(existingSourceIds), approvedClaims: new Set(existingApprovedClaimIds), calls: [] };
   function rangeHeader(n) { return { get: (k) => (k.toLowerCase() === 'content-range' ? `0-0/${n}` : null) }; }
 
   async function mockFetch(url, opts = {}) {
     const method = opts.method || 'GET';
     const body = opts.body ? JSON.parse(opts.body) : null;
-    state.calls.push({ method, url, body });
+    const headers = opts.headers || {};
+    state.calls.push({ method, url, body, authorization: headers.Authorization || headers.authorization || null });
 
+    if (url.includes('/auth/v1/user')) {
+      const authHeader = headers.Authorization || headers.authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+      const user = oauthUsers[token];
+      if (!user) return { ok: false, status: 401, json: async () => ({ error: 'invalid_token' }), text: async () => 'invalid_token' };
+      return { ok: true, status: 200, json: async () => user, text: async () => JSON.stringify(user) };
+    }
+    if (url.includes('/rest/v1/admin_users')) {
+      const m = url.match(/user_id=eq\.([^&]+)/);
+      if (m) {
+        const userId = decodeURIComponent(m[1]);
+        const row = adminUsersByUserId[userId];
+        return { ok: true, headers: rangeHeader(row ? 1 : 0), json: async () => (row ? [row] : []) };
+      }
+      // countAdminRows() path (bootstrap-owner check) -- only reached when
+      // no admin_users row matched above and env.AIMT_OWNER_EMAIL is set;
+      // none of these tests set it, so this branch exists only so an
+      // unexpected hit fails loudly with a real count instead of a crash.
+      return { ok: true, headers: rangeHeader(Object.keys(adminUsersByUserId).length), json: async () => [] };
+    }
     if (url.includes('/rest/v1/research_ingestion_log') && method === 'POST') {
       return { ok: true, json: async () => [{ id: 'log-1', ...body[0] }] };
     }
@@ -431,6 +472,125 @@ async function testProtocolSmokeNoData() {
   });
 }
 
+/* ══════════════ OAuth: valid Supabase OAuth token + AIMT admin -> allowed ══════════════
+   (functions/_lib/mcp/auth.mjs's Path B, via the canonical resolveAdmin()/
+   resolveUser() helpers already used by functions/api/admin/index.js.) */
+async function testOAuthAdminAllowed() {
+  console.log('\n--- OAuth: valid Supabase OAuth access token + AIMT admin -> allowed ---');
+  const env = makeEnv();
+  const adminUserId = 'admin-user-uuid-1';
+  const token = makeFakeAccessToken({ sub: adminUserId, role: 'authenticated', client_id: 'grok-client-abc' });
+  const { mockFetch } = makeMockSupabase({
+    oauthUsers: { [token]: { id: adminUserId, email: 'owner@aimtrichology.com' } },
+    adminUsersByUserId: { [adminUserId]: { user_id: adminUserId, role: 'admin', active: true } }
+  });
+  await withMockedFetch(mockFetch, async () => {
+    const init = await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${token}` });
+    assert(init.status === 200, `OAuth admin token -> 200 on initialize (got ${init.status})`);
+
+    const toolCall = await modernCall(env, 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'oauth-admin-test', sources: [], claims: [] } }, { auth: `Bearer ${token}` });
+    assert(toolCall.status === 200, `OAuth admin token can call submit_research_batch (got ${toolCall.status})`);
+    assert(toolCall.json.result.structuredContent.status === 'ok', 'tool call succeeds normally under OAuth admin auth');
+  });
+}
+
+/* ══════════════ OAuth: authenticated but not an AIMT admin -> 403 ══════════════ */
+async function testOAuthNonAdminForbidden() {
+  console.log('\n--- OAuth: valid Supabase token, authenticated non-admin -> 403 ---');
+  const env = makeEnv();
+  const studentUserId = 'student-user-uuid-1';
+  const token = makeFakeAccessToken({ sub: studentUserId, role: 'authenticated' });
+  const { mockFetch } = makeMockSupabase({
+    oauthUsers: { [token]: { id: studentUserId, email: 'student@example.com' } },
+    adminUsersByUserId: {} // no admin_users row for this user
+  });
+  await withMockedFetch(mockFetch, async () => {
+    const res = await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${token}` });
+    assert(res.status === 403, `authenticated non-admin OAuth token -> 403, not 401 (got ${res.status})`);
+  });
+}
+
+/* ══════════════ OAuth: invalid/expired/garbage token -> 401 ══════════════ */
+async function testOAuthInvalidTokenRejected() {
+  console.log('\n--- OAuth: invalid/expired Supabase access token -> 401 ---');
+  const env = makeEnv();
+  const { mockFetch } = makeMockSupabase(); // no oauthUsers registered -> every token is "invalid"
+  await withMockedFetch(mockFetch, async () => {
+    const unrecognized = makeFakeAccessToken({ sub: 'nobody', role: 'authenticated' });
+    const res = await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${unrecognized}` });
+    assert(res.status === 401, `unrecognized/expired OAuth token -> 401 (got ${res.status})`);
+
+    const garbage = await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: 'Bearer not-even-a-jwt' });
+    assert(garbage.status === 401, `garbage bearer value that also isn't the static secret -> 401 (got ${garbage.status})`);
+  });
+}
+
+/* ══════════════ OAuth: the access token value is never logged ══════════════ */
+async function testOAuthTokenNeverLogged() {
+  console.log('\n--- OAuth: access token value never appears in a logged/persisted write ---');
+  const env = makeEnv();
+  const studentUserId = 'student-user-uuid-2';
+  const adminUserId = 'admin-user-uuid-2';
+  const nonAdminToken = makeFakeAccessToken({ sub: studentUserId, role: 'authenticated', marker: 'NON_ADMIN_TOKEN_MUST_NEVER_BE_LOGGED' });
+  const adminToken = makeFakeAccessToken({ sub: adminUserId, role: 'authenticated', marker: 'ADMIN_TOKEN_MUST_NEVER_BE_LOGGED' });
+  const { state, mockFetch } = makeMockSupabase({
+    oauthUsers: {
+      [nonAdminToken]: { id: studentUserId, email: 'student2@example.com' },
+      [adminToken]: { id: adminUserId, email: 'owner2@aimtrichology.com' }
+    },
+    adminUsersByUserId: { [adminUserId]: { user_id: adminUserId, role: 'owner', active: true } }
+  });
+  await withMockedFetch(mockFetch, async () => {
+    await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${nonAdminToken}` }); // -> 403
+    await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${adminToken}` }); // -> 200
+    await legacyCall(env, 'initialize', { protocolVersion: '2025-06-18' }, { auth: 'Bearer totally-invalid-value' }); // -> 401
+
+    const aimtLogsCalls = state.calls.filter((c) => c.url.includes('/rest/v1/aimt_logs') && c.method === 'POST');
+    assert(aimtLogsCalls.length > 0, 'sanity check: a rejected auth attempt actually produced at least one aimt_logs write, so the checks below are meaningful');
+    for (const call of aimtLogsCalls) {
+      const serialized = JSON.stringify(call.body || {});
+      assert(!serialized.includes(nonAdminToken), 'aimt_logs write never contains the raw non-admin OAuth token');
+      assert(!serialized.includes(adminToken), 'aimt_logs write never contains the raw admin OAuth token');
+      assert(!serialized.includes('totally-invalid-value'), 'aimt_logs write never contains the raw invalid bearer value');
+    }
+  });
+}
+
+/* ══════════════ Optional client binding: GROK_MCP_OAUTH_CLIENT_ID ══════════════ */
+async function testClientIdBinding() {
+  console.log('\n--- Optional client binding: GROK_MCP_OAUTH_CLIENT_ID mismatch -> rejected when configured ---');
+  const adminUserId = 'admin-user-uuid-3';
+  const wrongClientToken = makeFakeAccessToken({ sub: adminUserId, role: 'authenticated', client_id: 'some-other-oauth-client' });
+  const rightClientToken = makeFakeAccessToken({ sub: adminUserId, role: 'authenticated', client_id: 'grok-registered-client-id' });
+  const noClientClaimToken = makeFakeAccessToken({ sub: adminUserId, role: 'authenticated' });
+  const { mockFetch } = makeMockSupabase({
+    oauthUsers: {
+      [wrongClientToken]: { id: adminUserId, email: 'owner3@aimtrichology.com' },
+      [rightClientToken]: { id: adminUserId, email: 'owner3@aimtrichology.com' },
+      [noClientClaimToken]: { id: adminUserId, email: 'owner3@aimtrichology.com' }
+    },
+    adminUsersByUserId: { [adminUserId]: { user_id: adminUserId, role: 'owner', active: true } }
+  });
+  await withMockedFetch(mockFetch, async () => {
+    const envWithBinding = makeEnv({ GROK_MCP_OAUTH_CLIENT_ID: 'grok-registered-client-id' });
+
+    const wrong = await legacyCall(envWithBinding, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${wrongClientToken}` });
+    assert(wrong.status === 403, `token issued to a different OAuth client -> 403 when GROK_MCP_OAUTH_CLIENT_ID is set (got ${wrong.status})`);
+
+    const missing = await legacyCall(envWithBinding, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${noClientClaimToken}` });
+    assert(missing.status === 403, `token with no client_id claim at all -> 403 when GROK_MCP_OAUTH_CLIENT_ID is set (got ${missing.status})`);
+
+    const right = await legacyCall(envWithBinding, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${rightClientToken}` });
+    assert(right.status === 200, `token issued to the configured OAuth client -> allowed (got ${right.status})`);
+
+    // Same "wrong client" token is still accepted when the var isn't set at
+    // all -- the binding is opt-in and inert until GROK_MCP_OAUTH_CLIENT_ID exists.
+    const envWithoutBinding = makeEnv();
+    const unbound = await legacyCall(envWithoutBinding, 'initialize', { protocolVersion: '2025-06-18' }, { auth: `Bearer ${wrongClientToken}` });
+    assert(unbound.status === 200, `same token is allowed when GROK_MCP_OAUTH_CLIENT_ID is not configured (got ${unbound.status})`);
+  });
+}
+
 async function main() {
   await testModernDiscoverAndToolsList();
   await testModernToolCall();
@@ -445,6 +605,11 @@ async function main() {
   await testMalformedPayloadModern();
   await testAimtApprovedRejectedModern();
   await testProtocolSmokeNoData();
+  await testOAuthAdminAllowed();
+  await testOAuthNonAdminForbidden();
+  await testOAuthInvalidTokenRejected();
+  await testOAuthTokenNeverLogged();
+  await testClientIdBinding();
 
   console.log(`\n=== ${failures === 0 ? 'ALL PASSED' : `${failures} ASSERTION(S) FAILED`} ===`);
   process.exit(failures === 0 ? 0 : 1);

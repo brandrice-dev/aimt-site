@@ -3,21 +3,33 @@
    ---------------------------------------------------------------
    A minimal MCP server exposing ONE write tool, submit_research_batch,
    so Grok's research harvester can submit research batches WITHOUT ever
-   receiving or storing RESEARCH_INGEST_SECRET. Grok authenticates to
-   THIS endpoint with its own, separate credential (MCP_CONNECTOR_SECRET);
-   this endpoint then calls the exact same canonical validation/import
-   pipeline (functions/_lib/research/ingest-request.mjs) that the direct
-   webhook uses. No second ingestion implementation exists.
+   receiving or storing RESEARCH_INGEST_SECRET. This endpoint then calls
+   the exact same canonical validation/import pipeline
+   (functions/_lib/research/ingest-request.mjs) that the direct webhook
+   uses. No second ingestion implementation exists.
 
    Cloudflare Pages env vars required:
-     MCP_CONNECTOR_SECRET        (separate from RESEARCH_INGEST_SECRET;
-                                   give ONLY this one to Grok)
+     MCP_CONNECTOR_SECRET        (separate from RESEARCH_INGEST_SECRET)
      SUPABASE_URL                 (existing)
      SUPABASE_SERVICE_ROLE_KEY    (existing)
+   Optional:
+     GROK_MCP_OAUTH_CLIENT_ID     (once set, an OAuth caller's access
+                                   token must have been issued to this
+                                   exact OAuth client -- see
+                                   functions/_lib/mcp/auth.mjs)
 
-   Auth: header  Authorization: Bearer <MCP_CONNECTOR_SECRET>, checked
-   with a constant-time compare (functions/_lib/research/auth.mjs), on
-   EVERY request to this endpoint, before anything else is inspected.
+   Auth: header Authorization: Bearer <token>, resolved by
+   functions/_lib/mcp/auth.mjs on EVERY request before anything else is
+   inspected. The bearer value is either MCP_CONNECTOR_SECRET (constant-
+   time compare, e.g. for internal diagnostics/CLI use -- unchanged from
+   the original implementation), OR a Supabase OAuth access token
+   belonging to an authorized AIMT admin (see /oauth/consent.html and
+   docs/admin's existing admin_users model) -- e.g. for Grok's web
+   Custom MCP Connector, whose UI requires real OAuth rather than a
+   static bearer secret. Both paths are enforced before origin-agnostic
+   protocol handling begins; OAuth authorization only determines WHO may
+   call this endpoint and never bypasses any research trust control
+   below (quarantine, AIMT_APPROVED human-only gate, RLS).
 
    ── DUAL-ERA PROTOCOL SUPPORT ──────────────────────────────────────
    Built against the official spec text (fetched directly, not assumed):
@@ -80,7 +92,7 @@
    listen-stream nor a session may do.
    ═══════════════════════════════════════════════════════════════ */
 
-import { checkBearerAuth } from '../_lib/research/auth.mjs';
+import { resolveMcpAuth } from '../_lib/mcp/auth.mjs';
 import { processIngestionBatch, logIngestEvent } from '../_lib/research/ingest-request.mjs';
 
 const SOURCE = 'api/mcp';
@@ -483,9 +495,10 @@ export async function onRequestPost(context) {
     return new Response('Misconfigured', { status: 500 });
   }
 
-  if (!checkBearerAuth(request, env.MCP_CONNECTOR_SECRET)) {
-    await logIngestEvent(env, SOURCE, 'mcp_bad_auth', null);
-    return new Response('Unauthorized', { status: 401 });
+  const auth = await resolveMcpAuth(env, request);
+  if (!auth.ok) {
+    await logIngestEvent(env, SOURCE, 'mcp_auth_rejected', auth.reason);
+    return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
   }
 
   let message;
@@ -515,17 +528,15 @@ export async function onRequestPost(context) {
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!originAllowed(request)) return forbiddenOrigin();
-  if (!env.MCP_CONNECTOR_SECRET || !checkBearerAuth(request, env.MCP_CONNECTOR_SECRET)) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  const auth = await resolveMcpAuth(env, request);
+  if (!auth.ok) return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
   return new Response('Method Not Allowed', { status: 405 });
 }
 
 export async function onRequestDelete(context) {
   const { request, env } = context;
   if (!originAllowed(request)) return forbiddenOrigin();
-  if (!env.MCP_CONNECTOR_SECRET || !checkBearerAuth(request, env.MCP_CONNECTOR_SECRET)) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  const auth = await resolveMcpAuth(env, request);
+  if (!auth.ok) return new Response(auth.status === 403 ? 'Forbidden' : 'Unauthorized', { status: auth.status });
   return new Response('Method Not Allowed', { status: 405 });
 }
