@@ -56,3 +56,44 @@ export function evaluateConsentGate({ authorizationId, authenticated, isAdmin } 
   }
   return { canApprove: true, state: 'ready', message: null };
 }
+
+/**
+ * Whether an AIMT admin_users role may approve an OAuth consent request.
+ * /api/admin?view=me's resolveAdmin() default role set also permits
+ * 'support' (read-only elsewhere in AIMT Admin) -- OAuth approval is a
+ * grant of standing API access, not a read, so this page holds it to a
+ * stricter bar than the general admin endpoint. Anything other than
+ * exactly 'owner' or 'admin' -- including 'support', an unknown string,
+ * or a missing/non-string role -- fails closed.
+ *
+ * @param {unknown} role
+ * @returns {boolean}
+ */
+export function isApprovingRole(role) {
+  return role === 'owner' || role === 'admin';
+}
+
+/**
+ * Classifies a supabase.auth.oauth.getAuthorizationDetails(...) response.
+ * Per Supabase's OAuth 2.1 server, a successful call can return either:
+ *   A) OAuthAuthorizationDetails -- `authorization_id` present, consent
+ *      is still needed -- render the consent UI.
+ *   B) OAuthRedirect -- the user already consented; `redirect_url` is
+ *      present instead -- navigate there directly, and never call
+ *      approveAuthorization() again for it.
+ * Anything matching neither shape (missing/wrong-typed fields, null,
+ * non-object) classifies as 'invalid' so the caller fails closed into
+ * an error state rather than guessing.
+ *
+ * @param {unknown} data
+ * @returns {{kind: 'consent_details', data: object} | {kind: 'already_consented_redirect', redirectUrl: string} | {kind: 'invalid'}}
+ */
+export function classifyAuthorizationDetailsResponse(data) {
+  if (data && typeof data === 'object' && typeof data.authorization_id === 'string' && data.authorization_id) {
+    return { kind: 'consent_details', data };
+  }
+  if (data && typeof data === 'object' && typeof data.redirect_url === 'string' && data.redirect_url) {
+    return { kind: 'already_consented_redirect', redirectUrl: data.redirect_url };
+  }
+  return { kind: 'invalid' };
+}

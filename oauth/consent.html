@@ -102,7 +102,7 @@ p{color:var(--muted);font-size:.85rem;line-height:1.6}
 </div>
 
 <script type="module">
-import { getAuthorizationId, evaluateConsentGate } from '../assets/js/oauth-consent-logic.mjs';
+import { getAuthorizationId, evaluateConsentGate, isApprovingRole, classifyAuthorizationDetailsResponse } from '../assets/js/oauth-consent-logic.mjs';
 
 const SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
 // Same published anon key used by every other AIMT browser page
@@ -133,7 +133,11 @@ async function accessToken() {
 }
 
 /** Reuses the EXISTING /api/admin canonical admin check (functions/_lib/
-    admin/auth.mjs's resolveAdmin) -- no second admin system. Returns
+    admin/auth.mjs's resolveAdmin) -- no second admin system. That
+    endpoint's default role set also permits 'support' (read-only
+    elsewhere in AIMT Admin); this page narrows further via
+    isApprovingRole() so OAuth approval requires owner/admin specifically
+    -- /api/admin's own general role behavior is untouched. Returns
     { authenticated, isAdmin, actor } and never throws. */
 async function checkAdmin() {
   const token = await accessToken();
@@ -143,7 +147,8 @@ async function checkAdmin() {
     if (res.status === 401) return { authenticated: false, isAdmin: false, actor: null };
     if (!res.ok) return { authenticated: true, isAdmin: false, actor: null };
     const data = await res.json().catch(() => ({}));
-    return { authenticated: true, isAdmin: !!(data && data.actor), actor: (data && data.actor) || null };
+    const actor = (data && data.actor) || null;
+    return { authenticated: true, isAdmin: !!(actor && isApprovingRole(actor.role)), actor };
   } catch (_) {
     // Fail closed: a network/parse error is never treated as "is admin".
     return { authenticated: true, isAdmin: false, actor: null };
@@ -155,13 +160,30 @@ async function loadAuthorizationDetails() {
   $('loadingMessage').textContent = 'Loading the connector’s request…';
   try {
     const { data, error } = await supabaseClient.auth.oauth.getAuthorizationDetails(authorizationId);
-    if (error || !data) throw error || new Error('No authorization details returned.');
-    const clientName = (data.client && data.client.name) || 'Grok / AIMT Research Harvester';
-    $('consentClientName').textContent = clientName;
-    $('consentClientNameCard').textContent = clientName;
-    $('consentScope').textContent = data.scope ? `Requested scope: ${data.scope}` : 'No specific scope was declared by this connector.';
-    showNotice($('consentNotice'), '');
-    showView('consent');
+    if (error) throw error;
+    const classified = classifyAuthorizationDetailsResponse(data);
+
+    if (classified.kind === 'already_consented_redirect') {
+      // The user already consented to this exact authorization (e.g. a
+      // page reload, or Supabase re-issuing the same authorization_id).
+      // Supabase itself already minted the redirect -- follow it as-is
+      // and never call approveAuthorization() again for it.
+      window.location.href = classified.redirectUrl;
+      return;
+    }
+
+    if (classified.kind === 'consent_details') {
+      const clientName = (classified.data.client && classified.data.client.name) || 'Grok / AIMT Research Harvester';
+      $('consentClientName').textContent = clientName;
+      $('consentClientNameCard').textContent = clientName;
+      $('consentScope').textContent = classified.data.scope ? `Requested scope: ${classified.data.scope}` : 'No specific scope was declared by this connector.';
+      showNotice($('consentNotice'), '');
+      showView('consent');
+      return;
+    }
+
+    // Neither recognized shape -- fail closed rather than guess.
+    throw new Error('Supabase returned an unrecognized authorization response. Nothing was approved.');
   } catch (err) {
     $('errorMessage').textContent = (err && err.message) || 'Could not load this authorization request from Supabase. Nothing was approved.';
     showView('error');
