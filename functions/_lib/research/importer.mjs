@@ -119,25 +119,49 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
   const [logRow] = await logRes.json();
 
   try {
-    /* 1. Topics -- controlled vocab first, then anything observed in the
-       batch, then anything referenced by a source/claim but not yet
-       cataloged (so join-table FKs never fail on a brand-new tag). */
+    /* 1. Topics -- TWO-STAGE upsert so a batch that doesn't report topic
+       rollup data can never null out previously-observed counts.
+
+       Stage A (identity/catalog): every controlled topic, plus anything
+       observed in the batch's own topics[], plus anything referenced by
+       a source/claim but not yet cataloged (so join-table FKs never
+       fail on a brand-new tag). Row shape is ONLY {topic,
+       in_controlled_vocab} -- PostgREST's upsert only SETs the columns
+       present in the JSON body, so this stage structurally cannot touch
+       source_count_observed/claim_count_observed.
+
+       Stage B (observed counts): a per-topic PATCH that includes ONLY
+       the specific count field(s) that topic's row in THIS batch
+       actually provided (checked with `'x' in t`, not `t.x ?? null` --
+       a field a batch never mentions must leave the stored value alone,
+       not overwrite it with null). A single homogeneous-array upsert
+       can't do this safely: PostgREST derives one shared column list
+       across the whole array, so a row missing a field would still get
+       an explicit NULL for it if any sibling row in the same call
+       includes that field. Per-topic PATCH avoids that entirely.
+       (See external review: a normal incremental Grok batch with
+       sources/claims but no topics payload was nulling all 24
+       controlled topics' observed counts every time.) */
     const topicNames = new Set(CONTROLLED_TOPICS);
-    for (const t of loaded.topics) topicNames.add(t.topic);
+    for (const t of loaded.topics) if (t && t.topic) topicNames.add(t.topic);
     for (const s of loaded.sources) for (const t of (s.topics || [])) topicNames.add(t);
     for (const c of loaded.claims) for (const t of (c.topics || [])) topicNames.add(t);
 
-    const topicByName = new Map(loaded.topics.map((t) => [t.topic, t]));
-    const topicRows = [...topicNames].map((topic) => {
-      const observed = topicByName.get(topic);
-      return {
-        topic,
-        in_controlled_vocab: isControlledTopic(topic),
-        source_count_observed: observed?.source_count_observed ?? null,
-        claim_count_observed: observed?.claim_count_observed ?? null
-      };
-    });
-    await upsert(env, 'research_topics', topicRows, 'topic');
+    const identityRows = [...topicNames].map((topic) => ({ topic, in_controlled_vocab: isControlledTopic(topic) }));
+    await upsert(env, 'research_topics', identityRows, 'topic');
+
+    for (const t of loaded.topics) {
+      if (!t || !t.topic) continue;
+      const patch = {};
+      if ('source_count_observed' in t) patch.source_count_observed = t.source_count_observed;
+      if ('claim_count_observed' in t) patch.claim_count_observed = t.claim_count_observed;
+      if (Object.keys(patch).length === 0) continue;
+      await fetch(`${env.SUPABASE_URL}/rest/v1/research_topics?topic=eq.${encodeURIComponent(t.topic)}`, {
+        method: 'PATCH',
+        headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
+        body: JSON.stringify(patch)
+      });
+    }
 
     /* 2. Sources */
     const sourceRows = loaded.sources.map((s) => mapSourceRow(s, { grokExportBatch: batchId }));

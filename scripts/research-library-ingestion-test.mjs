@@ -28,6 +28,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { runImport } from '../functions/_lib/research/importer.mjs';
+import { CONTROLLED_TOPICS } from '../functions/_lib/research/schema.mjs';
 
 let failures = 0;
 function assert(cond, msg) {
@@ -36,10 +37,11 @@ function assert(cond, msg) {
 }
 
 /* ── Minimal in-memory PostgREST mock ── */
-function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [], failSourcesUpsert = false } = {}) {
+function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [], failSourcesUpsert = false, existingTopics = {} } = {}) {
   const state = {
     sources: new Set(existingSourceIds),
     approvedClaims: new Set(existingApprovedClaimIds),
+    topics: new Map(Object.entries(existingTopics).map(([topic, row]) => [topic, { topic, ...row }])),
     calls: [] // { method, url, body }
   };
 
@@ -98,7 +100,28 @@ function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [
       return { ok: true, json: async () => [] };
     }
 
-    // topic joins, topics upsert, relationships/queue/coverage upserts -- accept unconditionally
+    // topics identity/catalog upsert (stage A) -- merge ONLY the keys present in
+    // each row, exactly like a real PostgREST upsert only SETs columns present
+    // in the JSON body. Object.assign-style merge leaves absent keys (e.g.
+    // source_count_observed/claim_count_observed) untouched on existing rows.
+    if (method === 'POST' && url.includes('/rest/v1/research_topics?on_conflict=topic')) {
+      for (const row of body) {
+        const existing = state.topics.get(row.topic) || { topic: row.topic };
+        state.topics.set(row.topic, { ...existing, ...row });
+      }
+      return { ok: true, json: async () => [] };
+    }
+
+    // per-topic observed-count PATCH (stage B) -- same partial-merge semantics.
+    if (method === 'PATCH' && url.includes('/rest/v1/research_topics?topic=eq.')) {
+      const m = url.match(/topic=eq\.([^&]+)/);
+      const topic = decodeURIComponent(m[1]);
+      const existing = state.topics.get(topic) || { topic };
+      state.topics.set(topic, { ...existing, ...body });
+      return { ok: true, json: async () => [] };
+    }
+
+    // topic joins, relationships/queue/coverage upserts -- accept unconditionally
     if (method === 'POST') {
       return { ok: true, json: async () => [] };
     }
@@ -177,9 +200,74 @@ async function testInfraFailureStillAborts() {
   assert(threw, 'a simulated infra failure (500 on sources upsert) still throws / fails the run, not silently absorbed');
 }
 
+/* ── Scenario 3 (BLOCKER 3 regression): an incremental source/claim-only
+   batch (no `topics` payload at all) must never null out previously-
+   observed topic counts. ── */
+async function testIncrementalBatchPreservesTopicCounts() {
+  console.log('\n--- Scenario 3: source/claim-only incremental batch preserves existing topic counts ---');
+
+  const existingTopics = {};
+  for (const topic of CONTROLLED_TOPICS) {
+    existingTopics[topic] = { in_controlled_vocab: true, source_count_observed: 42, claim_count_observed: 137 };
+  }
+
+  const { state, mockFetch } = makeMockSupabase({ existingTopics });
+
+  const loaded = {
+    sources: [{
+      source_id: 'incremental-src-1', title: 'A new source, no topic rollup data',
+      record_type: 'source', verification_status: 'SOURCE_VERIFIED', topics: ['dandruff']
+    }],
+    claims: [{
+      claim_id: 'incremental-src-1--c01', source_id: 'incremental-src-1', claim_text: 'a new claim',
+      record_type: 'claim', verification_status: 'CLAIM_VERIFIED', topics: ['dandruff']
+    }],
+    topics: [], // <-- the exact condition that used to null every topic's counts
+    relationships: [], verificationQueue: [], coverage: [],
+    rejected: { sources: [], claims: [] }
+  };
+
+  await withMockedFetch(mockFetch, () =>
+    runImport({ SUPABASE_URL: 'https://mock.local', SUPABASE_SERVICE_ROLE_KEY: 'mock-key' },
+      { loaded, batchId: 'test-batch-3-incremental', triggeredBy: 'test' })
+  );
+
+  let allNonNull = true;
+  let allUnchanged = true;
+  for (const topic of CONTROLLED_TOPICS) {
+    const row = state.topics.get(topic);
+    if (!row || row.source_count_observed === null || row.claim_count_observed === null) allNonNull = false;
+    if (!row || row.source_count_observed !== 42 || row.claim_count_observed !== 137) allUnchanged = false;
+  }
+  assert(allNonNull, 'every controlled topic still has non-null source_count_observed/claim_count_observed after the incremental batch');
+  assert(allUnchanged, 'every controlled topic\'s observed counts are byte-identical to their pre-batch values (42/137), not nulled or recomputed');
+
+  const dandruff = state.topics.get('dandruff');
+  assert(dandruff && dandruff.in_controlled_vocab === true, 'in_controlled_vocab is still maintained for a referenced topic');
+
+  // A batch that DOES explicitly provide counts for a topic may still update it normally.
+  const { state: state2, mockFetch: mockFetch2 } = makeMockSupabase({
+    existingTopics: { dandruff: { in_controlled_vocab: true, source_count_observed: 42, claim_count_observed: 137 } }
+  });
+  const loadedWithExplicitCounts = {
+    sources: [], claims: [],
+    topics: [{ topic: 'dandruff', source_count_observed: 99, claim_count_observed: 400 }],
+    relationships: [], verificationQueue: [], coverage: [],
+    rejected: { sources: [], claims: [] }
+  };
+  await withMockedFetch(mockFetch2, () =>
+    runImport({ SUPABASE_URL: 'https://mock.local', SUPABASE_SERVICE_ROLE_KEY: 'mock-key' },
+      { loaded: loadedWithExplicitCounts, batchId: 'test-batch-3-explicit', triggeredBy: 'test' })
+  );
+  const updatedDandruff = state2.topics.get('dandruff');
+  assert(updatedDandruff && updatedDandruff.source_count_observed === 99 && updatedDandruff.claim_count_observed === 400,
+    'a topic row that DOES explicitly provide counts updates them normally (99/400)');
+}
+
 async function main() {
   await testOrphanQuarantine();
   await testInfraFailureStillAborts();
+  await testIncrementalBatchPreservesTopicCounts();
 
   console.log(`\n=== ${failures === 0 ? 'ALL PASSED' : `${failures} ASSERTION(S) FAILED`} ===`);
   process.exit(failures === 0 ? 0 : 1);
