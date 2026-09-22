@@ -1,7 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /my-aimt.html
-Disallow: /success.html
-Disallow: /admin.html
 
 Sitemap: https://aimtrichology.com/sitemap.xml
