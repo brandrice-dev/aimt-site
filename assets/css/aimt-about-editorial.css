@@ -166,9 +166,13 @@
 .aa-linkout { margin-top: 1.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
 
 /* ── CONTACT ── */
-.aa-contact { text-align: center; padding: 3.5rem 1.5rem; }
-.aa-contact p { margin: 0 auto 0.5rem; }
-.aa-contact a.aa-email { font-family: var(--aimt-font-mont); font-size: 1.05rem; font-weight: var(--aimt-weight-semibold); }
+.aa-contact { text-align: center; padding: 2.75rem 1.5rem 3.5rem; }
+.aa-contact .aa-eyebrow { margin-bottom: 0.55rem; }
+.aa-contact h2 { font-size: 1.3rem; margin-bottom: 1.3rem; }
+.aa-contact a.aa-email {
+  font-size: 0.85rem; font-weight: var(--aimt-weight-semibold);
+  text-transform: none; letter-spacing: normal;
+}
 
 @media (max-width: 700px) {
   .aa-hero { padding: calc(var(--aimt-nav-height) + 2.5rem) 1.25rem 3rem; }
