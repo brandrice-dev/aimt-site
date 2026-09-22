@@ -37,24 +37,23 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Course",
-  "name": "Head Spa Certification Course",
-  "description": "A rigorous online head spa certification for beauty professionals. Welcome Module plus 12 numbered modules, Cadence-guided learning, full service training, and an independently verifiable credential. Structured. $597.",
-  "provider": {
-    "@type": "Organization",
-    "name": "American Institute of Modern Trichology",
-    "alternateName": "AIMT",
-    "url": "https://aimtrichology.com/"
-  },
-  "hasCourseInstance": {
-    "@type": "CourseInstance",
-    "courseMode": "online"
-  },
-  "offers": {
-    "@type": "Offer",
-    "price": "597",
-    "priceCurrency": "USD"
-  }
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://aimtrichology.com/#organization",
+      "name": "American Institute of Modern Trichology",
+      "alternateName": "AIMT",
+      "url": "https://aimtrichology.com/"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://aimtrichology.com/#website",
+      "url": "https://aimtrichology.com/",
+      "name": "American Institute of Modern Trichology",
+      "alternateName": "AIMT",
+      "publisher": { "@id": "https://aimtrichology.com/#organization" }
+    }
+  ]
 }
 </script>
 <style>
