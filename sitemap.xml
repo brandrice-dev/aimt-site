@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://aimtrichology.com/</loc><priority>1.0</priority></url>
-  <url><loc>https://aimtrichology.com/courses.html</loc><priority>0.9</priority></url>
-  <url><loc>https://aimtrichology.com/head-spa-certification</loc><priority>0.9</priority></url>
-  <url><loc>https://aimtrichology.com/verify.html</loc><priority>0.5</priority></url>
-  <url><loc>https://aimtrichology.com/terms.html</loc><priority>0.2</priority></url>
-  <url><loc>https://aimtrichology.com/privacy.html</loc><priority>0.2</priority></url>
-  <url><loc>https://aimtrichology.com/refunds.html</loc><priority>0.3</priority></url>
+  <url><loc>https://aimtrichology.com/</loc></url>
+  <url><loc>https://aimtrichology.com/courses</loc></url>
+  <url><loc>https://aimtrichology.com/head-spa-certification</loc></url>
+  <url><loc>https://aimtrichology.com/head-spa-readiness</loc></url>
+  <url><loc>https://aimtrichology.com/verify</loc></url>
+  <url><loc>https://aimtrichology.com/privacy</loc></url>
+  <url><loc>https://aimtrichology.com/terms</loc></url>
+  <url><loc>https://aimtrichology.com/refunds</loc></url>
 </urlset>
