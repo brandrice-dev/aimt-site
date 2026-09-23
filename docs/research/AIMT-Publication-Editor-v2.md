@@ -217,10 +217,76 @@ then mechanically checks:
     `resolved_synthesis_signals` — silently ignoring a declared signal is
     itself a violation, not an implicit pass.
 
-`determineShadowDisposition()` maps validation results to one of the
-three shadow-only outcomes (see below) — it is the only place that
-decision is made, and it is a pure function of `{v1Result, callFailed,
-aiOutput, validation}`, never of the model's own stated confidence alone.
+## Governance correction (v2.1): a validator rejection is not automatically a human task
+
+The first live pilot run (see "Pilot result" below) surfaced exactly the
+scenario this correction exists for: a synthesis with 126 of 128 claims
+correctly dispositioned, high-quality grounded content, and a validator
+rejection over 2 missing dispositions — a mechanical accounting gap, not
+a scientific or safety judgment call. Routing that straight to
+`HUMAN_REVIEW` would mean **every** near-complete, high-quality proposal
+on a large candidate set ends up in the human queue, which defeats the
+purpose of an autonomous pipeline. Humans should review genuine
+exceptions, not bookkeeping gaps this same pipeline can safely close
+itself.
+
+`functions/_lib/research/publication-synthesis-reconciliation.mjs` adds a
+classification step and a **bounded** repair lane, never an open-ended
+retry loop:
+
+**Violation classification** (`classifyValidatorViolations()`) sorts
+every validator violation into exactly one bucket:
+
+| Bucket | Meaning | Example codes |
+|---|---|---|
+| `REPAIRABLE_ACCOUNTING` | The model forgot to disposition a claim — mechanically detectable, mechanically fixable. | `CLAIM_MISSING_DISPOSITION` (the only repairable code in v2.1) |
+| `SUBSTANTIVE` | A genuine exception. | `HIGH_RISK_TOPIC_CANNOT_AUTO_CLEAR`, `UNRESOLVED_ISSUES_WITH_AUTO_READY`, `V1_RESULT_NOT_NEEDS_SYNTHESIS`, `V1_EVIDENCE_GAPS_PRESENT` |
+| `NON_REPAIRABLE_MECHANICAL` | An integrity/grounding defect no targeted repair could safely fix. | `SELECTED_CLAIM_NOT_IN_EVIDENCE_BUNDLE` (hallucinated ID), `CLAIM_DOUBLE_DISPOSITION`, `SELECTED_CLAIM_FAILS_CANDIDACY`, `EXCLUDED_CLAIM_REAPPEARS_IN_OUTPUT` |
+
+Reconciliation is attempted **only** when every violation is
+`REPAIRABLE_ACCOUNTING` (`classification.only_repairable_accounting`).
+Any `SUBSTANTIVE` violation present routes straight to `HUMAN_REVIEW`,
+untouched. Any `NON_REPAIRABLE_MECHANICAL` violation (even alongside a
+repairable one) routes straight to `SYNTHESIS_FAILED` — reconciliation
+never runs on a proposal that already contains a hallucinated ID or
+similar integrity defect.
+
+**The bounded pipeline** (`functions/_lib/research/publication-synthesis-orchestrator.mjs#runSynthesisPipeline`),
+at most 3 model calls total, never a loop:
+
+1. **Initial synthesis.** Valid → done. Only repairable-accounting
+   violations → step 2. Anything else → done (mapped via
+   `mapViolationsToTerminalStatus`: substantive → `HUMAN_REVIEW`,
+   otherwise → `SYNTHESIS_FAILED`).
+2. **ONE targeted reconciliation call** — sends only the missing
+   claims' full evidence (never the whole candidate set again) plus the
+   existing synthesis for context, and a strict
+   `RECONCILIATION_OUTPUT_JSON_SCHEMA` requiring every supplied missing
+   `claim_id` to appear exactly once, nothing else, `SELECTED` needing a
+   role and `EXCLUDED` needing a reason_code, and an explicit
+   `materially_changes_existing_synthesis` boolean + reason per claim
+   (`validateReconciliationShape()` enforces every one of these
+   mechanically before anything is trusted).
+3. If **every** resolution is non-material →
+   `mergeReconciliationIntoSynthesis()` (pure — appends to
+   `selected_claims`/`excluded_claims`, never touches `public_framing`)
+   → the **full** deterministic validator runs again on the merged
+   result → done.
+4. If **any** resolution is material → **ONE bounded full retry** — a
+   fresh complete synthesis call, told explicitly about the previous
+   attempt and which claim(s) reconciliation found material, required to
+   disposition every candidate claim again → the full validator runs
+   again → done.
+5. **No third attempt, ever.** A violation that survives the retry —
+   even a bare `CLAIM_MISSING_DISPOSITION` — maps straight to
+   `SYNTHESIS_FAILED` via the same terminal mapper as step 1's "anything
+   else" branch. Reconciliation is never re-entered.
+
+Every `synthesizeFn`/`reconcileFn`/`retryFn` the orchestrator calls is
+injectable (defaulting to the real `publication-synthesis-client.mjs`
+implementations), which is what makes this entire bounded state machine
+unit-testable with zero live/model calls
+(`tests/research-publication-synthesis-orchestrator.test.mjs`).
 
 ## AUTO_READY meaning
 
@@ -233,37 +299,58 @@ and does not create a `research_public_pages` row. It is never persisted
 to any production table — it exists only in this run's JSON report under
 gitignored `research-import/`.
 
-## HUMAN_REVIEW behavior
+## HUMAN_REVIEW behavior (narrowed in v2.1)
 
-`HUMAN_REVIEW` here means the same thing it means in v1: a genuine
-exception, not the default outcome of ordinary synthesis. In v2 it is
-reached when: the model itself declares `recommended_disposition:
-HUMAN_REVIEW` (it could not resolve something safely), the validator
-finds any of the 15 violations above, the underlying `v1Result.risk_tier`
-is `HIGH`, or the underlying v1 result was not actually `NEEDS_SYNTHESIS`.
+`HUMAN_REVIEW` means a **genuine exception**, never the default outcome
+of ordinary synthesis and never an ordinary model-output defect. Per the
+governance correction above, it is reached **only** when:
 
-## Failure behavior (STEP 12)
+- `v1Result.risk_tier` is `HIGH`.
+- A candidate claim is already externally flagged `use_status=needs_review`
+  (an already-identified exception from a prior process — see v1).
+- The model itself declares `recommended_disposition: HUMAN_REVIEW` (it
+  could not resolve something safely).
+- The validator finds a `SUBSTANTIVE` violation (an unresolved-issue/
+  `AUTO_READY` contradiction, or a v1-level precondition failure) — at
+  the initial stage, or surviving a merge/retry.
+- The underlying v1 result was not actually `NEEDS_SYNTHESIS`.
+
+A mechanical defect the model produced — a hallucinated claim ID, a
+double-dispositioned claim, an accounting gap that survives the bounded
+repair policy — is **never** routed here. Those map to `SYNTHESIS_FAILED`
+instead (see below): automation failed to produce a trustworthy proposal,
+which is a different thing from a human needing to exercise judgment.
+
+## Failure behavior (STEP 12, widened in v2.1)
 
 Every one of these maps to `SYNTHESIS_FAILED`, never a silent
-`AUTO_READY`, and never a crash of the CLI script:
+`AUTO_READY`, never `HUMAN_REVIEW`, and never a crash of the CLI script:
 
-- Missing `ANTHROPIC_PUBLICATION_EDITOR_API_KEY` (`publication-synthesis-client.mjs` returns
-  a tagged failure rather than throwing).
+- Missing `ANTHROPIC_PUBLICATION_EDITOR_API_KEY`, at any of the up-to-3
+  calls (initial synthesis, reconciliation, or the bounded retry) —
+  `publication-synthesis-client.mjs` returns a tagged failure rather than
+  throwing.
 - A transport/HTTP failure from Anthropic (after `fetchAnthropicMessages`'s
-  own bounded retry is exhausted).
+  own bounded retry is exhausted), at any of the 3 calls.
 - `stop_reason: max_tokens` — a truncated response, explicitly checked
-  before attempting to parse it.
+  before attempting to parse it, at any of the 3 calls.
 - Unparseable JSON (direct parse, then one fenced-block fallback, then
   fail safe — same defensive order as `checkpoint-evaluation.mjs`'s
-  `parseCheckpointEvaluation()`).
+  `parseCheckpointEvaluation()`), at any of the 3 calls.
 - A structurally invalid schema (missing required fields, wrong enum
   value, wrong type) — `validateSchemaShape()` fails before any semantic
-  check runs.
-
-A validator rejection (structurally valid JSON, but a grounding violation
-— e.g. a hallucinated claim ID) is **not** `SYNTHESIS_FAILED`: the model
-did produce a usable, parseable structured decision, it just was not
-trustworthy, which is exactly what `HUMAN_REVIEW` is for.
+  check runs, for either the synthesis or the reconciliation schema.
+- **A `NON_REPAIRABLE_MECHANICAL` validator violation** (hallucinated
+  claim/source ID, double disposition, a selected claim failing
+  candidacy, an excluded claim resurfacing as public support) — this
+  never enters the reconciliation lane at all.
+- **A reconciliation output that fails `validateReconciliationShape()`**
+  — a missing expected claim ID, an invented extra ID, a `SELECTED`
+  without a valid role, an `EXCLUDED` without a valid reason.
+- **An accounting or mechanical violation that survives the bounded
+  merge or the bounded retry** — there is no third attempt; per the
+  originating request, "reconciliation still misses one → `SYNTHESIS_FAILED`,
+  not `HUMAN_REVIEW`."
 
 ## Zero-write shadow guarantee
 
@@ -329,55 +416,66 @@ with no safety claim involved (see
 is proven on the safest, closest-to-ready topic before it is ever pointed
 at a topic carrying a `safety_conclusion` claim.
 
-## Pilot result (2026-09-23, live production, read-only)
+## Pilot results (2026-09-23, live production, read-only)
 
-Ran against the live production corpus (`--live`; GET/SELECT only, 0
-writes) using a dedicated `ANTHROPIC_PUBLICATION_EDITOR_API_KEY`. v1
-returned `NEEDS_SYNTHESIS` (128 candidate claims, 27 sources, LOWER risk).
-The evidence loader initially sent the model claim metadata with
-`claim_text` empty for every claim — a real gap in v1's shared live-fetch
-field list (`CLAIM_SELECT_FIELDS` never needed `claim_text`/
-`page_or_section_locator` for its own deterministic checks, so it never
-selected them). Fixed by widening that field list (additive only, no v1
-behavior change — 65/65 v1 tests still pass); the model's own response to
-the missing text on the first attempt was to correctly decline to
-proceed with confidence rather than guess, which is itself a small
-validation of the "never fabricate certainty" instruction.
+Three live runs against the production corpus (`--live`; GET/SELECT
+only, 0 writes each), tracing the architecture's own evolution:
 
-With real claim text in the bundle, one full, successful synthesis run
-produced: `recommended_disposition: AUTO_READY`, `confidence: high`, 23
-claims selected, 103 excluded, zero `unresolved_issues`, 8 grounded core
-points about follicle phases/timing/anatomy, 2 preserved limitations
-(mouse-model-to-human translation caveat; narrative-review, not
-treatment-evaluation, evidence base), and a `resolved_synthesis_signals`
-entry that directly answers the pilot's key question (see below).
+**Run 1 (pre-reconciliation v2):** `claim_text` came back empty for
+every claim — a real gap in v1's shared live-fetch field list
+(`CLAIM_SELECT_FIELDS` never needed `claim_text`/`page_or_section_locator`
+for its own deterministic checks, so it never selected them, fixed
+additively with no v1 behavior change — 65/65 v1 tests still passed).
+The model's own response to the missing text was to correctly decline to
+proceed with confidence rather than guess — a small live validation of
+the "never fabricate certainty" instruction.
 
-**The deterministic validator still rejected it**, for exactly one reason:
-2 of the 128 candidate claims never appeared in either `selected_claims`
-or `excluded_claims` — a full-accounting gap the model's own stated "high
-confidence" gave no indication of. Final shadow result: **`HUMAN_REVIEW`**
-(`validator_rejected_proposal`), not `AUTO_READY` — the exact behavior
-this architecture exists to guarantee: the model's self-reported
-confidence is never the thing that decides.
+**Run 2 (pre-reconciliation v2, after the `claim_text` fix):** a full,
+successful synthesis produced `recommended_disposition: AUTO_READY`,
+`confidence: high`, 23 claims selected, 103 excluded, zero
+`unresolved_issues`, 8 grounded core points, 2 preserved limitations —
+but the validator found 2 of 128 candidate claims never received any
+disposition at all. Under the pre-v2.1 architecture, ANY validator
+rejection meant `HUMAN_REVIEW` — so a 126/128-complete, otherwise
+high-quality proposal was sent to the human queue over 2 stragglers. This
+result is exactly what motivated the v2.1 governance correction above.
 
-**The 6 supports_effect / 1 no_effect question, answered from evidence:**
-the synthesis identified that these claims describe entirely different
-interventions and endpoints — PRP, scalp massage, GLP-1 receptor
-agonists, and antimitotic medications — with directionally opposite
-effects on hair from each other, not from any disagreement about normal
-cycle biology. All were excluded from the hair-cycle page as out-of-scope
-treatment/medication material (answer **B** from the task's own A/B/C
-framing), not reconciled as an on-page contradiction.
+**Run 3 (v2.1, with bounded reconciliation):** the initial synthesis
+again had exactly one `CLAIM_MISSING_DISPOSITION` violation
+(`tan-lim-lay-hf-modelling-2024--c04`, a bioengineering/regenerative-
+medicine claim). `classifyValidatorViolations()` correctly identified
+this as `only_repairable_accounting`, triggering ONE targeted
+reconciliation call. The model resolved it — `EXCLUDED`,
+`OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION`, `materially_changes_existing_synthesis: false`
+— `validateReconciliationShape()` confirmed the shape was clean (exactly
+the one requested claim ID, nothing else), the safe merge ran, and the
+**full** deterministic validator re-checked the merged 128-claim result
+clean. **Final shadow result: `AUTO_READY`** (stage
+`reconciliation-merge`) — 40 claims selected, 88 excluded (40+88=128,
+every candidate accounted for), 12 sources, 5 core points, 2 limitations,
+using 2 model calls total (1 initial + 1 reconciliation, 0 full retries),
+41,605 input tokens / 36,510 output tokens.
 
-**Recommended v2 follow-up** (not implemented here): a token-budget note
-— two rounds of live tuning were needed (`max_tokens` 16000 → 32000 →
-64000) before a 128-claim bundle stopped truncating, since adaptive
-thinking and per-claim reasoning both draw from the same ceiling; and a
-process note — a "did every candidate claim_id receive a disposition?"
-reconciliation pass (either a stricter prompt reminder or a targeted
-follow-up turn naming exactly the missing IDs) could resolve this
-specific near-miss automatically, rather than routing an otherwise
-high-quality, 126/128-complete proposal to human review over 2 stragglers.
+**The 6 supports_effect / 1 no_effect question, answered from evidence
+(consistent across all three runs):** these claims describe entirely
+different interventions and endpoints — scalp massage self-perceived
+effect, PRP treatment efficacy/safety, and an experimental dermal-papilla-
+cell/exosome injection intervention — with directionally opposite effects
+on hair from each other, not from any disagreement about normal cycle
+biology. Run 3 resolved this per-claim (each of the 7 claims individually
+`EXCLUDED` with its own `OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION` reason)
+rather than via one grouped `resolved_synthesis_signals` entry — this is
+answer **B** from the task's own A/B/C framing, confirmed at both the
+grouped-signal level (runs 1-2) and the individual-claim level (run 3).
+
+**A real bug found and fixed along the way:** this doc's own CLI
+reporting helper (`explainDirectionSplit()`) initially only checked
+`resolved_synthesis_signals` for the direction-split answer, and reported
+"unresolved" for run 3 even though every one of the 7 claims had in fact
+been correctly, individually addressed — because run 3's model resolved
+the split per-claim rather than via one grouped signal. Fixed to check
+both a grouped signal AND each direction-conflicted claim's own final
+disposition before concluding anything is unresolved.
 
 ## Files
 
@@ -389,15 +487,28 @@ high-quality, 126/128-complete proposal to human review over 2 stragglers.
   JSON Schema output contract + system-prompt builder.
 - `functions/_lib/research/publication-synthesis-evidence.mjs` — pure
   evidence bundle builder (Step 2) + page evidence brief builder (Step 10).
-- `functions/_lib/research/publication-synthesis-client.mjs` — the one I/O
-  module; calls Anthropic, never decides a disposition itself.
+- `functions/_lib/research/publication-synthesis-client.mjs` — the only
+  I/O module; calls Anthropic (initial synthesis, targeted reconciliation,
+  and the bounded full retry), never decides a disposition itself.
 - `functions/_lib/research/publication-synthesis-validator.mjs` — pure
-  deterministic post-synthesis validator (Step 6) + shadow disposition
-  mapper (Step 7).
+  deterministic post-synthesis validator (Step 6), 15 mechanical rules.
+- `functions/_lib/research/publication-synthesis-reconciliation.mjs` —
+  pure v2.1 violation classifier, reconciliation output schema/shape
+  validator, safe-merge vs. material-change router, and merge function
+  (see "Governance correction" above).
+- `functions/_lib/research/publication-synthesis-orchestrator.mjs` — the
+  bounded state machine (`runSynthesisPipeline()`) tying the client,
+  validator, and reconciliation modules together; every I/O call it makes
+  is injectable, which is what makes it fully unit-testable.
 - `scripts/research-publication-editor-v2-shadow.mjs` — CLI orchestrator
   for the hair-cycle pilot.
-- `tests/research-publication-synthesis-validator.test.mjs` — synthetic-
-  fixture unit tests, no live/model calls.
+- `tests/research-publication-synthesis-validator.test.mjs` — validator
+  unit tests, synthetic fixtures, no live/model calls.
+- `tests/research-publication-synthesis-reconciliation.test.mjs` —
+  classifier/shape/merge unit tests, synthetic fixtures, no live/model calls.
+- `tests/research-publication-synthesis-orchestrator.test.mjs` — full
+  bounded-pipeline branch tests using injected fake client functions, no
+  live/model calls.
 
 Generated run reports follow the same policy as v1: runtime artifacts
 under gitignored `research-import/`, never committed. See

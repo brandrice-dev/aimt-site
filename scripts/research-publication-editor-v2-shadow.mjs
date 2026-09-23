@@ -1,25 +1,29 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════
-   AIMT Publication Editor v2 — shadow-mode synthesis pilot (hair-cycle)
+   AIMT Publication Editor v2.1 — shadow-mode synthesis pilot (hair-cycle)
    ---------------------------------------------------------------
-   Orchestrates the full v2 pipeline for exactly ONE topic (hair-cycle,
-   per this task's explicit scope):
+   Orchestrates the full bounded v2.1 pipeline for exactly ONE topic
+   (hair-cycle, per this task's explicit scope):
 
      1. load hair-cycle evidence (live Supabase or local export)
      2. run Publication Editor v1 (assessTopicReadiness)
      3. confirm the result is NEEDS_SYNTHESIS
      4. take v1's synthesis_packet
      5. resolve the full verified claim text / source evidence bundle
-     6. call the AI Publication Editor (Anthropic, structured output)
-     7. run the deterministic post-synthesis validator
-     8. report AUTO_READY / HUMAN_REVIEW / SYNTHESIS_FAILED
+     6. run the bounded synthesis pipeline (initial synthesis ->
+        targeted reconciliation if only accounting is broken -> one
+        bounded full retry if reconciliation found a material change)
+     7. report AUTO_READY / HUMAN_REVIEW / SYNTHESIS_FAILED plus the
+        full narrative of what happened at each stage
 
    SHADOW MODE / READ-ONLY GUARANTEE:
      - Live mode issues GET requests only against Supabase (same
        fetchTopicEvidenceLive() v1 already uses) -- never a write.
-     - The Anthropic call is the only network write-shaped request this
-       script makes, and it writes nothing to any AIMT system -- it only
-       returns a proposal this script then validates and reports.
+     - The Anthropic calls (1-3 of them: initial, optional
+       reconciliation, optional bounded retry) are the only network
+       write-shaped requests this script makes, and they write nothing
+       to any AIMT system -- they only return proposals this script
+       then validates and reports.
      - Nothing here sets AIMT_APPROVED / public_eligible / published,
        creates a research_public_pages row, or publishes anything.
      - AUTO_READY / HUMAN_REVIEW / SYNTHESIS_FAILED are SHADOW-ONLY
@@ -57,8 +61,8 @@ import {
 } from '../functions/_lib/research/publication-readiness-loader.mjs';
 import { assessTopicReadiness, READINESS_STATUS } from '../functions/_lib/research/publication-readiness.mjs';
 import { buildSynthesisEvidenceBundle, buildPageEvidenceBrief } from '../functions/_lib/research/publication-synthesis-evidence.mjs';
-import { synthesizeTopic } from '../functions/_lib/research/publication-synthesis-client.mjs';
-import { validateSynthesisOutput, determineShadowDisposition, POST_SYNTHESIS_VALIDATOR_VERSION } from '../functions/_lib/research/publication-synthesis-validator.mjs';
+import { runSynthesisPipeline } from '../functions/_lib/research/publication-synthesis-orchestrator.mjs';
+import { POST_SYNTHESIS_VALIDATOR_VERSION } from '../functions/_lib/research/publication-synthesis-validator.mjs';
 import { getPageSynthesisIntent } from '../functions/_lib/research/publication-page-intent.mjs';
 
 const TOPIC_SLUG = 'hair-cycle'; // hard-scoped for this pilot -- see docs/research/AIMT-Publication-Editor-v2.md
@@ -84,20 +88,72 @@ async function loadTopicEvidence(concept, args) {
   return selectTopicEvidenceFromRows(concept.controlled_topics, { claims, sources });
 }
 
-function explainDirectionSplit(v1Result, aiCallResult) {
+/** Answers "why did the 6 supports_effect / 1 no_effect split happen"
+    from whatever the final (post-reconciliation/retry) output actually
+    did with those specific claim_ids -- checking BOTH an explicit
+    resolved_synthesis_signals entry grouping them AND, since a model may
+    instead resolve a split by dispositioning each claim individually
+    (each with its own out-of-scope reason) rather than naming one grouped
+    signal, each direction-conflicted claim_id's own final selected/
+    excluded disposition. A live run surfaced exactly this: the model
+    addressed the split entirely through 7 individual EXCLUDED entries,
+    with no single resolved_synthesis_signals entry naming all of them
+    together -- an earlier version of this function only checked the
+    signals array and misreported that as "unresolved" when every one of
+    the 7 claims had in fact been explicitly, correctly addressed. */
+function explainDirectionSplit(v1Result, pipelineResult) {
   const dist = v1Result.metrics.finding_direction_distribution || {};
   const supportsCount = dist.supports_effect || 0;
   const noEffectCount = dist.no_effect || 0;
   const base = `v1 observed ${supportsCount} supports_effect and ${noEffectCount} no_effect verified finding claim(s) for hair-cycle.`;
-  if (!aiCallResult || !aiCallResult.ok) {
-    return `${base} Synthesis did not complete (${aiCallResult ? aiCallResult.reason : 'no attempt'}), so no evidence-grounded explanation is available yet -- this remains an open question pending a successful synthesis run.`;
+  const output = pipelineResult.finalOutput || (pipelineResult.initial && pipelineResult.initial.output);
+  if (!output) {
+    return `${base} Synthesis did not complete, so no evidence-grounded explanation is available yet -- this remains an open question pending a successful synthesis run.`;
   }
-  const signals = (aiCallResult.output.resolved_synthesis_signals || [])
-    .filter((s) => (s.claim_ids || []).some((id) => v1Result.metrics.finding_direction_detail.some((d) => d.claim_id === id)));
-  if (!signals.length) {
-    return `${base} The synthesis output did not explicitly address this signal (see resolved_synthesis_signals) -- treat as unresolved.`;
+
+  const directionClaimIds = v1Result.metrics.finding_direction_detail.map((d) => d.claim_id);
+  const signals = (output.resolved_synthesis_signals || [])
+    .filter((s) => (s.claim_ids || []).some((id) => directionClaimIds.includes(id)));
+
+  const selectedById = new Map((output.selected_claims || []).map((c) => [c.claim_id, c]));
+  const excludedById = new Map((output.excluded_claims || []).map((c) => [c.claim_id, c]));
+  const perClaimDispositions = directionClaimIds
+    .filter((id) => !signals.some((s) => (s.claim_ids || []).includes(id))) // don't double-report ones a grouped signal already covered
+    .map((id) => {
+      if (excludedById.has(id)) {
+        const e = excludedById.get(id);
+        return `${id} -> EXCLUDED (${e.reason_code}): ${e.reason}`;
+      }
+      if (selectedById.has(id)) {
+        const s = selectedById.get(id);
+        return `${id} -> SELECTED (${s.role}): ${s.reason}`;
+      }
+      return `${id} -> not found in final selected/excluded claims (unaccounted)`;
+    });
+
+  const parts = [];
+  if (signals.length) {
+    parts.push(`Grouped resolution: ${signals.map((s) => `${s.resolution} (claims: ${s.claim_ids.join(', ')})`).join(' | ')}`);
   }
-  return `${base} Synthesis resolution: ${signals.map((s) => `${s.resolution} (claims: ${s.claim_ids.join(', ')})`).join(' | ')}`;
+  if (perClaimDispositions.length) {
+    parts.push(`Per-claim resolution: ${perClaimDispositions.join(' | ')}`);
+  }
+  if (!parts.length) {
+    return `${base} Neither a grouped synthesis signal nor an individual claim disposition addressed these claim_ids -- treat as genuinely unresolved.`;
+  }
+  return `${base} ${parts.join(' ')}`;
+}
+
+function summarizeReconciliation(pipelineResult) {
+  if (!pipelineResult.reconciliation) return { ran: false };
+  const resolutions = pipelineResult.reconciliation.resolutions || [];
+  return {
+    ran: true,
+    missing_claim_count: resolutions.length,
+    dispositions: resolutions.map((r) => ({ claim_id: r.claim_id, disposition: r.disposition, materially_changes_existing_synthesis: r.materially_changes_existing_synthesis })),
+    any_material_change: resolutions.some((r) => r.materially_changes_existing_synthesis),
+    full_retry_required: pipelineResult.stage === 'full_retry',
+  };
 }
 
 async function main() {
@@ -113,7 +169,7 @@ async function main() {
   const mode = args.live
     ? 'LIVE Supabase production corpus (read-only SELECT via PostgREST -- no writes issued)'
     : `local validated export: ${path.relative(ROOT, args.exportDir)}`;
-  console.log('=== AIMT Publication Editor v2 — shadow-mode synthesis pilot (hair-cycle) ===');
+  console.log('=== AIMT Publication Editor v2.1 — bounded shadow synthesis pilot (hair-cycle) ===');
   console.log(`mode: ${mode}`);
 
   // STEP 1-2: v1 gate.
@@ -148,48 +204,75 @@ async function main() {
   console.log(`[v2] evidence bundle: ${evidenceBundle.claim_count} claims, ${evidenceBundle.source_count} sources`);
   report.evidence_bundle_summary = { claim_count: evidenceBundle.claim_count, source_count: evidenceBundle.source_count };
 
-  // STEP 6: AI synthesis call.
-  const aiCallResult = await synthesizeTopic(process.env, { topic_slug: TOPIC_SLUG, evidenceBundle });
-  let validation = null;
-  let disposition;
-  if (!aiCallResult.ok) {
-    console.log(`[v2] synthesis call did not succeed: ${aiCallResult.reason} (${aiCallResult.detail || 'no detail'})`);
-    disposition = determineShadowDisposition({ v1Result, callFailed: true, callFailureReason: aiCallResult.reason });
-    report.ai_call = { ok: false, reason: aiCallResult.reason, detail: aiCallResult.detail };
+  // STEP 6: bounded synthesis pipeline (initial -> reconciliation -> bounded retry).
+  const pipelineResult = await runSynthesisPipeline(process.env, { topic_slug: TOPIC_SLUG, v1Result, evidenceBundle });
+
+  if (pipelineResult.initial) {
+    console.log(`\n[v2] initial synthesis: recommended_disposition=${pipelineResult.initial.output.recommended_disposition} confidence=${pipelineResult.initial.output.confidence}`);
+    console.log(`[v2] initial validator violations: ${pipelineResult.initial.violations.length ? pipelineResult.initial.violations.join(', ') : 'none'}`);
   } else {
-    console.log(`[v2] synthesis call succeeded (model=${aiCallResult.modelInfo.modelName}, status=${aiCallResult.modelInfo.status})`);
-    // STEP 7: deterministic post-synthesis validation.
-    validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: aiCallResult.output });
-    disposition = determineShadowDisposition({ v1Result, callFailed: false, aiOutput: aiCallResult.output, validation });
-    report.ai_call = {
-      ok: true,
-      model: { provider: aiCallResult.modelInfo.provider, model_name: aiCallResult.modelInfo.modelName, status: aiCallResult.modelInfo.status, registry_version: aiCallResult.modelInfo.registryVersion },
-      contract_version: aiCallResult.contractVersion,
-      output: aiCallResult.output,
-    };
-    report.validation = validation;
+    console.log(`\n[v2] initial synthesis call did not succeed (stage=${pipelineResult.stage}, reason=${pipelineResult.reason})`);
   }
 
-  report.v2_outcome = disposition;
-  report.direction_split_explanation = explainDirectionSplit(v1Result, aiCallResult);
+  const reconciliationSummary = summarizeReconciliation(pipelineResult);
+  if (reconciliationSummary.ran) {
+    console.log(`[v2] reconciliation ran: ${reconciliationSummary.missing_claim_count} missing claim(s), material_change=${reconciliationSummary.any_material_change}, full_retry_required=${reconciliationSummary.full_retry_required}`);
+  } else {
+    console.log('[v2] reconciliation did not run (either not needed, or a substantive/non-repairable violation blocked it, or the initial call itself failed)');
+  }
 
-  console.log(`\n[v2] FINAL RESULT: ${disposition.status} (${disposition.reason})`);
-  if (disposition.violations) console.log(`  violations: ${disposition.violations.join(', ')}`);
-  console.log(`\n${report.direction_split_explanation}`);
+  console.log(`\n[v2] FINAL RESULT: ${pipelineResult.status} (${pipelineResult.reason}) -- stage=${pipelineResult.stage}`);
+  if (pipelineResult.violations) console.log(`  final violations: ${pipelineResult.violations.join(', ')}`);
 
-  // STEP 10: page evidence brief, only for AUTO_READY.
-  if (disposition.status === 'AUTO_READY') {
+  const directionSplitExplanation = explainDirectionSplit(v1Result, pipelineResult);
+  console.log(`\n${directionSplitExplanation}`);
+
+  report.pipeline_result = {
+    status: pipelineResult.status,
+    reason: pipelineResult.reason,
+    stage: pipelineResult.stage,
+    violations: pipelineResult.violations || null,
+    initial: pipelineResult.initial,
+    reconciliation_raw: pipelineResult.reconciliation,
+    reconciliation_summary: reconciliationSummary,
+    final_output: pipelineResult.finalOutput,
+  };
+  report.direction_split_explanation = directionSplitExplanation;
+
+  // STEP 10: cost/efficiency metrics -- no API keys, just call/token counts.
+  report.cost_metrics = {
+    model_calls: pipelineResult.metrics.model_calls,
+    reconciliation_calls: pipelineResult.metrics.reconciliation_calls,
+    full_retries: pipelineResult.metrics.full_retries,
+    total_input_tokens: pipelineResult.metrics.total_input_tokens,
+    total_output_tokens: pipelineResult.metrics.total_output_tokens,
+    calls: pipelineResult.metrics.calls,
+  };
+  console.log(`\n[v2] cost metrics: ${report.cost_metrics.model_calls} model call(s) (${report.cost_metrics.reconciliation_calls} reconciliation, ${report.cost_metrics.full_retries} full retry), ${report.cost_metrics.total_input_tokens} input tokens, ${report.cost_metrics.total_output_tokens} output tokens`);
+
+  // STEP 9: page evidence brief, only for a validated AUTO_READY.
+  if (pipelineResult.status === 'AUTO_READY') {
     const pageIntent = getPageSynthesisIntent(TOPIC_SLUG);
+    const aiOutput = pipelineResult.finalOutput;
     const brief = buildPageEvidenceBrief({
       v1Result,
       pageIntent,
       evidenceBundle,
-      aiOutput: aiCallResult.output,
-      modelInfo: aiCallResult.modelInfo,
+      aiOutput,
+      modelInfo: pipelineResult.metrics.model_info,
       validatorVersion: POST_SYNTHESIS_VALIDATOR_VERSION,
     });
     report.page_evidence_brief = brief;
-    console.log(`\n[v2] Page evidence brief generated: ${brief.approved_for_draft_claim_ids.length} approved claims, ${brief.source_ids.length} sources, ${brief.core_factual_points.length} core points.`);
+
+    const allCandidateIds = new Set(evidenceBundle.claims.map((c) => c.claim_id));
+    const accountedIds = new Set([...aiOutput.selected_claims.map((c) => c.claim_id), ...aiOutput.excluded_claims.map((c) => c.claim_id)]);
+    const fullyAccounted = allCandidateIds.size === accountedIds.size && [...allCandidateIds].every((id) => accountedIds.has(id));
+
+    console.log(`\n[v2] Page evidence brief generated:`);
+    console.log(`  selected=${aiOutput.selected_claims.length} excluded=${aiOutput.excluded_claims.length} (sum=${aiOutput.selected_claims.length + aiOutput.excluded_claims.length}, candidates=${evidenceBundle.claim_count}, fully_accounted=${fullyAccounted})`);
+    console.log(`  sources=${brief.source_ids.length} core_points=${brief.core_factual_points.length} limitations=${brief.limitations.length}`);
+    console.log(`  citation_map entries=${Object.keys(brief.citation_map).length}`);
+    console.log(`  risk_tier=${brief.risk_tier}`);
   }
 
   writeReport(args, report);
