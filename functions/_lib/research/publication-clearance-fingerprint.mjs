@@ -253,6 +253,16 @@ function arraysEqualAsSets(a, b) {
  * only the convenience columns after the fact, since those columns
  * aren't part of what's hashed.
  *
+ * ALGORITHM ENFORCEMENT: a row's `fingerprint_algorithm` must equal this
+ * module's own `FINGERPRINT_ALGORITHM` exactly. If a row claims an
+ * algorithm this code doesn't recognize (missing, or e.g. a future/typo'd
+ * `sha256-canonical-json-v999`), this function refuses to hash the input
+ * under the v2 implementation and pretend that proves anything --
+ * hashing under an algorithm the row doesn't actually claim would
+ * silently validate a claim this code has no basis for. A future
+ * algorithm version should add explicit per-version dispatch here, not
+ * assume every stored row means "v2."
+ *
  * @param {object} record - a research_public_pages-shaped row (or
  *   candidate record before write)
  * @returns {Promise<{valid: boolean, expected_hash: string|null, stored_hash: string|null, violations: string[]}>}
@@ -262,9 +272,16 @@ export async function verifyStoredClearanceIntegrity(record) {
   const clearance = record.publication_clearance;
   const storedHash = record.generation_source_hash ?? null;
 
-  if (!clearance || typeof clearance !== 'object' || !clearance.fingerprint_algorithm) {
+  const algorithm = clearance && typeof clearance === 'object' ? clearance.fingerprint_algorithm : null;
+  if (!algorithm) {
     violations.push('MISSING_FINGERPRINT_ALGORITHM');
+    return { valid: false, expected_hash: null, stored_hash: storedHash, violations };
   }
+  if (algorithm !== FINGERPRINT_ALGORITHM) {
+    violations.push('UNSUPPORTED_FINGERPRINT_ALGORITHM');
+    return { valid: false, expected_hash: null, stored_hash: storedHash, violations };
+  }
+
   const input = clearance && typeof clearance === 'object' ? clearance.fingerprint_input : null;
   if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length === 0) {
     violations.push('MISSING_FINGERPRINT_INPUT');

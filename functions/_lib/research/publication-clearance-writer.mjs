@@ -22,7 +22,18 @@
      - It never sets status = 'published', never sets published_at, and
        ALLOWED_COLUMNS doesn't even include those keys -- there is no
        way to ask this function to publish anything.
+     - INTEGRITY GATE (added after review found the CLI's own
+       verifyStoredClearanceIntegrity() call was advisory-only -- it
+       printed PASS/FAIL but nothing stopped --write from proceeding on
+       FAIL): writeClearanceRecord() independently re-verifies the
+       record's own stored-clearance integrity
+       (publication-clearance-fingerprint.mjs#verifyStoredClearanceIntegrity)
+       before any network call, and throws if it fails. This is
+       deliberately NOT left to the CLI alone -- this module must protect
+       itself regardless of what future code calls it directly.
    ═══════════════════════════════════════════════════════════════ */
+
+import { verifyStoredClearanceIntegrity } from './publication-clearance-fingerprint.mjs';
 
 export const ALLOWED_COLUMNS = Object.freeze([
   'topic_slug',
@@ -57,6 +68,28 @@ export function assertWritableClearanceRecord(record) {
 }
 
 /**
+ * Re-verifies a record's OWN stored-clearance integrity
+ * (verifyStoredClearanceIntegrity -- pure, Web-Crypto-only, no I/O) and
+ * throws if it fails. This is the writer's own independent gate: it does
+ * not trust that whatever called writeClearanceRecord() already checked
+ * this (the CLI does too, for UX, but this function protects the writer
+ * even if called directly by future code that skips the CLI entirely).
+ * The thrown message lists violation CODES only (e.g. "HASH_MISMATCH",
+ * "KEY_CLAIM_IDS_MISMATCH") -- never record contents, env vars, or any
+ * secret.
+ *
+ * @param {object} record
+ * @returns {Promise<{valid: true, expected_hash: string, stored_hash: string, violations: []}>}
+ */
+export async function assertClearanceIntegrityOrThrow(record) {
+  const integrity = await verifyStoredClearanceIntegrity(record);
+  if (integrity.valid !== true) {
+    throw new Error(`writeClearanceRecord: refusing to write -- stored clearance failed integrity verification (${integrity.violations.join(', ')}).`);
+  }
+  return integrity;
+}
+
+/**
  * Upserts one page-level clearance record into research_public_pages via
  * PostgREST, keyed on topic_slug (the table's primary key). Never called
  * automatically by anything in this repo -- always an explicit, manual
@@ -73,6 +106,9 @@ export async function writeClearanceRecord(env, record) {
     throw new Error('writeClearanceRecord: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. Refusing to write.');
   }
   assertWritableClearanceRecord(record);
+  // Integrity gate -- before ANY network call. See assertClearanceIntegrityOrThrow's
+  // own header comment for why this can't be left to the CLI alone.
+  await assertClearanceIntegrityOrThrow(record);
 
   const payload = {};
   for (const col of ALLOWED_COLUMNS) {

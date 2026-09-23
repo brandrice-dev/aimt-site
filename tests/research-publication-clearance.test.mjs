@@ -1,10 +1,12 @@
 // AIMT Automated Publication Clearance — deterministic unit tests.
 // NO LIVE/MODEL/DATABASE CALLS: every fixture is synthetic; the
-// fingerprint uses Web Crypto locally (no network); the writer's network
-// call is never exercised here -- only its pure guard
-// (assertWritableClearanceRecord); the DB CHECK constraints are exercised
-// via their pure JS mirror (publication-clearance-invariants.mjs), not a
-// live Postgres connection.
+// fingerprint uses Web Crypto locally (no network); writeClearanceRecord
+// IS exercised here for its pre-network-call guards (integrity + column
+// allow-list), but only ever against a mocked globalThis.fetch (same
+// withMockFetch pattern as tests/cadence-chat-config.test.mjs) -- real
+// network access is never reachable from this file; the DB CHECK
+// constraints are exercised via their pure JS mirror
+// (publication-clearance-invariants.mjs), not a live Postgres connection.
 //
 // Run: node tests/research-publication-clearance.test.mjs
 
@@ -23,8 +25,28 @@ import {
   isClearanceStale,
   FINGERPRINT_ALGORITHM,
 } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
-import { ALLOWED_COLUMNS, assertWritableClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
+import {
+  ALLOWED_COLUMNS,
+  assertWritableClearanceRecord,
+  assertClearanceIntegrityOrThrow,
+  writeClearanceRecord,
+} from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { validatePageInvariants } from '../functions/_lib/research/publication-clearance-invariants.mjs';
+
+async function withMockFetch(mockImpl, fn) {
+  const original = globalThis.fetch;
+  globalThis.fetch = mockImpl;
+  try { return await fn(); } finally { globalThis.fetch = original; }
+}
+
+function countingFetch(callCounter, responseImpl) {
+  return async (...args) => {
+    callCounter.count += 1;
+    return (responseImpl || (async () => ({ ok: true, status: 200, json: async () => ([]) })))(...args);
+  };
+}
+
+const FAKE_ENV = { SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'fake-service-role-key-not-real' };
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -377,6 +399,136 @@ async function testTamperedTopLevelSourceIdsFailsCrossCheck() {
   check('INTEGRITY_TOP_LEVEL_SOURCE_IDS_DRIFT', 'hash itself still matches (only the cross-check fails)', !result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
 }
 
+async function testMissingFingerprintAlgorithmFailsIntegrity() {
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  delete tampered.publication_clearance.fingerprint_algorithm;
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_MISSING_ALGORITHM', 'a missing fingerprint_algorithm fails integrity', !result.valid && result.violations.includes('MISSING_FINGERPRINT_ALGORITHM'), JSON.stringify(result));
+}
+
+async function testUnsupportedFingerprintAlgorithmFailsIntegrity() {
+  // Bug 2: a stored algorithm value that isn't the current
+  // FINGERPRINT_ALGORITHM must be rejected outright -- never silently
+  // hashed under the current implementation while the row claims a
+  // different/unsupported algorithm.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_algorithm = 'sha256-canonical-json-v999';
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_UNSUPPORTED_ALGORITHM', 'fingerprint_algorithm value is checked against the current FINGERPRINT_ALGORITHM, not just presence', 'sha256-canonical-json-v999' !== FINGERPRINT_ALGORITHM);
+  check('INTEGRITY_UNSUPPORTED_ALGORITHM', 'an unsupported fingerprint_algorithm value fails integrity', !result.valid && result.violations.includes('UNSUPPORTED_FINGERPRINT_ALGORITHM'), JSON.stringify(result));
+  check('INTEGRITY_UNSUPPORTED_ALGORITHM', 'does not compute expected_hash for an unsupported algorithm (never silently hashes under v2 anyway)', result.expected_hash === null, JSON.stringify(result));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Writer-level integrity gate (Bug 1 fix): writeClearanceRecord() must
+// independently re-verify integrity before ANY network call, regardless
+// of whether a caller already checked. globalThis.fetch is mocked
+// (withMockFetch, same pattern as tests/cadence-chat-config.test.mjs) so
+// a bug here would show up as an unexpected fetch call, never a real
+// network request.
+// ─────────────────────────────────────────────────────────────────────────
+async function testWriterRefusesHashMismatch() {
+  // Item 1.
+  const record = await buildValidRecord();
+  const tampered = { ...record, generation_source_hash: '0'.repeat(64) };
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await writeClearanceRecord(FAKE_ENV, tampered); } catch (e) { threw = true; }
+  });
+  check('WRITER_INTEGRITY_GATE', 'writer refuses a record whose stored hash does not reproduce', threw);
+  check('WRITER_INTEGRITY_GATE', 'zero fetch calls when hash mismatch', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testWriterRefusesKeyClaimIdsDrift() {
+  // Item 2.
+  const record = await buildValidRecord();
+  const tampered = { ...record, key_claim_ids: ['c1', 'c2', 'c-added-after-clearance'] };
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await writeClearanceRecord(FAKE_ENV, tampered); } catch (e) { threw = true; }
+  });
+  check('WRITER_INTEGRITY_GATE', 'writer refuses top-level key_claim_ids drift', threw);
+  check('WRITER_INTEGRITY_GATE', 'zero fetch calls when key_claim_ids drift', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testWriterRefusesSourceIdsDrift() {
+  // Item 3.
+  const record = await buildValidRecord();
+  const tampered = { ...record, source_ids: ['s1', 's2', 's-added-after-clearance'] };
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await writeClearanceRecord(FAKE_ENV, tampered); } catch (e) { threw = true; }
+  });
+  check('WRITER_INTEGRITY_GATE', 'writer refuses top-level source_ids drift', threw);
+  check('WRITER_INTEGRITY_GATE', 'zero fetch calls when source_ids drift', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testWriterRefusesUnsupportedAlgorithm() {
+  // Item 4, plus part of item 5 (zero network calls) and the "no secrets
+  // in the thrown message" requirement.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_algorithm = 'sha256-canonical-json-v999';
+  const counter = { count: 0 };
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await writeClearanceRecord(FAKE_ENV, tampered); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  check('WRITER_INTEGRITY_GATE', 'writer refuses an unsupported fingerprint_algorithm', threw);
+  check('WRITER_INTEGRITY_GATE', 'thrown message names the violation without leaking the service role key', errorMessage.includes('UNSUPPORTED_FINGERPRINT_ALGORITHM') && !errorMessage.includes(FAKE_ENV.SUPABASE_SERVICE_ROLE_KEY), errorMessage);
+  check('WRITER_INTEGRITY_GATE', 'zero fetch calls when algorithm is unsupported', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testWriterAcceptsValidRecord() {
+  // Item 6: a genuinely valid, untampered record must NOT be blocked by
+  // the new integrity gate -- proves this is a real gate, not a
+  // fail-closed-on-everything bug, and that assertClearanceIntegrityOrThrow
+  // itself resolves (doesn't throw) for good input.
+  const record = await buildValidRecord();
+  const integrityResult = await assertClearanceIntegrityOrThrow(record);
+  check('WRITER_INTEGRITY_GATE', 'assertClearanceIntegrityOrThrow resolves (does not throw) for a valid record', integrityResult.valid === true, JSON.stringify(integrityResult));
+
+  const counter = { count: 0 };
+  let threw = false;
+  let result;
+  await withMockFetch(countingFetch(counter, async () => ({ ok: true, status: 200, json: async () => ([{ ...record }]) })), async () => {
+    try { result = await writeClearanceRecord(FAKE_ENV, record); } catch (e) { threw = true; }
+  });
+  check('WRITER_INTEGRITY_GATE', 'a valid, untampered record passes the writer preflight and reaches the (mocked) network call', !threw && counter.count === 1, `threw=${threw} fetchCalls=${counter.count}`);
+  check('WRITER_INTEGRITY_GATE', 'writeClearanceRecord resolves with the mocked upserted row', Array.isArray(result) && result.length === 1);
+}
+
+async function testCliCannotReachWriteAfterIntegrityFail() {
+  // Item 7: structural proof that the CLI's own control flow stops
+  // before writeClearanceRecord() when verifyStoredClearanceIntegrity()
+  // fails (not just that the writer itself refuses -- already proven
+  // above). Finds the `if (!integrity.valid) { ... }` block by brace
+  // matching and asserts it (a) contains an unconditional `return;` and
+  // (b) appears, in source order, before the write call site.
+  const src = readSrc('scripts/research-publication-clearance-shadow.mjs');
+  const guardStart = src.indexOf('if (!integrity.valid) {');
+  const writeCallIndex = src.indexOf('await writeClearanceRecord(');
+  check('CLI_INTEGRITY_GATE', 'shadow script has an explicit "if (!integrity.valid)" guard', guardStart !== -1);
+  check('CLI_INTEGRITY_GATE', 'the write call exists in the source', writeCallIndex !== -1);
+  check('CLI_INTEGRITY_GATE', 'the integrity guard appears BEFORE the write call in source order', guardStart !== -1 && writeCallIndex !== -1 && guardStart < writeCallIndex);
+
+  let depth = 0;
+  let blockEnd = -1;
+  const braceStart = src.indexOf('{', guardStart);
+  for (let i = braceStart; i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') { depth--; if (depth === 0) { blockEnd = i; break; } }
+  }
+  const guardBlock = blockEnd !== -1 ? src.slice(guardStart, blockEnd) : '';
+  check('CLI_INTEGRITY_GATE', 'the integrity-fail guard block contains an unconditional return (not just a log)', /\breturn;/.test(guardBlock), guardBlock);
+}
+
 async function testIntegrityChecksRequireNoModelCall() {
   // Item 16: structural self-check that this whole integrity/
   // reproducibility test section never imports or calls anything that
@@ -700,6 +852,14 @@ const tests = [
   testTamperedHashAloneFailsIntegrity,
   testTamperedTopLevelKeyClaimIdsFailsCrossCheck,
   testTamperedTopLevelSourceIdsFailsCrossCheck,
+  testMissingFingerprintAlgorithmFailsIntegrity,
+  testUnsupportedFingerprintAlgorithmFailsIntegrity,
+  testWriterRefusesHashMismatch,
+  testWriterRefusesKeyClaimIdsDrift,
+  testWriterRefusesSourceIdsDrift,
+  testWriterRefusesUnsupportedAlgorithm,
+  testWriterAcceptsValidRecord,
+  testCliCannotReachWriteAfterIntegrityFail,
   testIntegrityChecksRequireNoModelCall,
   testCannotIntroduceForbiddenFields,
   testWriterRefusesForbiddenColumns,

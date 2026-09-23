@@ -169,7 +169,19 @@ async function main() {
   console.log(`\n[clearance] verifyStoredClearanceIntegrity: ${integrity.valid ? 'PASS' : 'FAIL'}`);
   console.log(`[clearance] expected_hash: ${integrity.expected_hash}`);
   console.log(`[clearance] stored_hash:   ${integrity.stored_hash}`);
-  if (!integrity.valid) console.log(`[clearance] violations: ${integrity.violations.join(', ')}`);
+  if (!integrity.valid) {
+    console.log(`[clearance] violations: ${integrity.violations.join(', ')}`);
+    // BUG FIX (this revision): this used to only print FAIL and then fall
+    // through into the --write branch below regardless. A failed
+    // integrity check must make a write impossible -- stop here,
+    // unconditionally, before even looking at args.write. writeClearanceRecord()
+    // also independently refuses on integrity failure (see
+    // publication-clearance-writer.mjs#assertClearanceIntegrityOrThrow),
+    // so this is a defense-in-depth stop for clear CLI UX, not the only
+    // guard.
+    console.log('\nRefusing to proceed: this just-built record failed its own integrity check. Not written, regardless of --write.');
+    return;
+  }
 
   if (!args.write) {
     console.log('\nPreview only -- nothing written. Pass --write (with explicit owner authorization) to persist this record.');
