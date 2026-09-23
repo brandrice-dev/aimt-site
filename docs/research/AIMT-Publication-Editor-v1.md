@@ -363,33 +363,58 @@ first, model synthesis second, deterministic re-validation third, human
 review reserved for genuine exceptions last** — never a model call that
 can promote something to `AIMT_APPROVED`/`public_eligible` on its own.
 
+## Generated artifacts are runtime output, not version-controlled state
+
+Running the CLI (`scripts/research-publication-editor-shadow.mjs`,
+locally or `--live`) produces a JSON + Markdown report per run. These are
+**runtime artifacts, not durable project state**:
+
+- Default output goes under `research-import/`, which is **gitignored**
+  by design (the repo's existing convention for import/report output —
+  see `research-library-import.mjs`'s own reports in the same directory).
+- A future scheduled/recurring run of this engine (a publication-review
+  cycle, an SEO priority loop, etc. — see "How this is intended to plug
+  into later automation" above) **must not** commit a fresh per-run report
+  to the repository on every cycle. That would turn every run into a
+  multi-thousand-line diff of claim/source IDs with no lasting value —
+  exactly the pattern this cleanup pass exists to prevent.
+- What **is** versioned: the engine code, the loader, the CLI, the tests,
+  and durable prose documentation (this file, and
+  `docs/research/AIMT-Publication-Editor-v1-Pilot.md` for pilot
+  conclusions). A one-off pilot's *conclusions* are worth a short,
+  hand-maintained summary; its raw per-run JSON is not.
+- If/when this engine's output needs to be queried, compared across runs,
+  or acted on by other tooling (a future v2 synthesis layer, a page
+  generator, an owner dashboard), the right home for that is a database
+  table (e.g. an addition alongside `research_coverage` or a new
+  service-role-only table), not an ever-growing pile of committed JSON
+  snapshots. No such table exists yet and none is added by this PR — this
+  is a statement of intent for whoever builds that next, not a change
+  made here.
+
 ## Pilot run (2026-09-20 export, and live production — read-only)
 
 The owner authorized a live, read-only run against the production
 Supabase corpus for this pilot (SELECT/GET only, via the existing `--live`
-path; zero writes). Both runs are committed for comparison:
-
-- `docs/research/publication-editor-shadow-pilot-report-2026-09-23.{json,md}`
-  — local validated 2026-09-20 export
-- `docs/research/publication-editor-shadow-pilot-report-2026-09-23-live.{json,md}`
-  — live production corpus, read-only
-
-**Result: the two are identical** — same topic counts, same candidate
-counts, same readiness states, for all six pilot concepts. The production
-corpus has not diverged from the committed 2026-09-20 export since it was
-imported.
-
-Re-run against the local export at any time with:
+path; zero writes). See
+`docs/research/AIMT-Publication-Editor-v1-Pilot.md` for the durable,
+versioned summary of what was run and what it found — the raw JSON/
+Markdown reports from that run are not committed (see previous section)
+and can be regenerated at any time:
 
 ```
 node scripts/research-publication-editor-shadow.mjs
+node scripts/research-publication-editor-shadow.mjs --live   # requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY, read-only
 ```
 
-Re-run against live Supabase (read-only) with:
-
-```
-SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/research-publication-editor-shadow.mjs --live
-```
+**Result: the live and local runs produced identical readiness outcomes
+and evidence metrics for all six pilot concepts** (same distinct-source
+counts, same candidate-claim counts, same risk tiers, same readiness
+states). The production corpus has not diverged from the committed
+2026-09-20 export since it was imported. (This describes the two runs'
+*outcomes*, not a claim that the generated report files themselves were
+byte-identical — timestamps and run-mode metadata inside them necessarily
+differ.)
 
 ## Recommended adjustments (from the real pilot output)
 
