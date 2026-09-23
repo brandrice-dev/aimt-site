@@ -8,14 +8,31 @@
 
    TARGET PRINCIPLE (see docs/research/AIMT-Publication-Editor-Cost-
    Baseline.md): Publication Editor is the expensive evidence-selection
-   stage (128 candidate claims into one synthesis call). Page Builder
-   should be materially cheaper because it receives only the already-
-   cleared snapshot (40 selected claims for hair-cycle, not 128) and,
-   in v1, makes ZERO model calls at all -- the deterministic draft
-   builder and deterministic fidelity check together cost nothing beyond
-   ordinary compute. A future version's optional AI polish/fidelity pass
-   would add real cost here, and this module is where that cost gets
-   recorded once it exists -- not before.
+   stage (128 candidate claims into one synthesis call, for hair-cycle).
+   Page Builder should be materially cheaper because it receives only
+   the already-cleared snapshot and, in v1, makes ZERO model calls at
+   all -- the deterministic draft builder and deterministic fidelity
+   check together cost nothing beyond ordinary compute. A future
+   version's optional AI polish/fidelity pass would add real cost here,
+   and this module is where that cost gets recorded once it exists --
+   not before.
+
+   CORRECTION (this revision): candidateClaimCount used to be hardcoded
+   to 128 at the call site (scripts/page-builder-shadow.mjs) -- correct
+   for hair-cycle today, silently wrong for any other topic tomorrow.
+   This module now only ever reports whatever candidateClaimCount value
+   its caller actually passes in (the caller is responsible for reading
+   it from the real persisted record -- see scripts/page-builder-
+   shadow.mjs's own comment). A caller with no real value passes `null`,
+   and this module reports `null`, never a guess.
+
+   Also distinguishes selectedClaimCount (the size of the cleared
+   selected_claim_ids SET, i.e. what was made AVAILABLE to Page Builder)
+   from renderedSupportClaimCount (the number of UNIQUE claim IDs that
+   actually ended up attached to rendered content --
+   page-builder-content-units.mjs#computeRenderedSupportClaimIds()'s
+   output length). These can legitimately differ; this module never
+   claims "N claims used" using the wrong one of the two.
    ═══════════════════════════════════════════════════════════════ */
 
 export function buildCostMetrics({
@@ -24,6 +41,7 @@ export function buildCostMetrics({
   retries = 0,
   candidateClaimCount = null,
   selectedClaimCount = null,
+  renderedSupportClaimCount = null,
 } = {}) {
   const totalInputTokens = modelCalls.reduce((sum, c) => sum + (typeof c.input_tokens === 'number' ? c.input_tokens : 0), 0);
   const totalOutputTokens = modelCalls.reduce((sum, c) => sum + (typeof c.output_tokens === 'number' ? c.output_tokens : 0), 0);
@@ -47,9 +65,10 @@ export function buildCostMetrics({
     estimated_cost_usd: null,
     candidate_claim_count: candidateClaimCount,
     selected_claim_count: selectedClaimCount,
+    rendered_support_claim_count: renderedSupportClaimCount,
     cost_reduction_note:
-      candidateClaimCount && selectedClaimCount
+      typeof candidateClaimCount === 'number' && typeof selectedClaimCount === 'number' && candidateClaimCount > 0
         ? `Page Builder worked from ${selectedClaimCount} cleared claims, not the ${candidateClaimCount} candidate claims Publication Editor originally considered (${Math.round((1 - selectedClaimCount / candidateClaimCount) * 100)}% fewer).`
-        : null,
+        : 'candidate_claim_count not available on the persisted record -- reduction percentage not computed rather than guessed.',
   };
 }

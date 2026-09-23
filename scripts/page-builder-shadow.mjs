@@ -36,6 +36,7 @@ import { checkDraftFidelity } from '../functions/_lib/page-builder/page-builder-
 import { finalizeSeo, buildStructuredData } from '../functions/_lib/page-builder/page-builder-seo.mjs';
 import { renderDraftHtml } from '../functions/_lib/page-builder/page-builder-render.mjs';
 import { buildCostMetrics } from '../functions/_lib/page-builder/page-builder-cost.mjs';
+import { computeRenderedSupportClaimIds, findDuplicateFactualText } from '../functions/_lib/page-builder/page-builder-content-units.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -77,6 +78,10 @@ async function main() {
   console.log('\n[validate] running the deterministic post-draft validator...');
   const validation = validatePageDraft(draft, snapshot, { integrityResult: integrity });
   console.log(`[validate] valid=${validation.valid}`);
+  console.log(`[validate] route_check=${JSON.stringify(validation.report.route_check)}`);
+  console.log(`[validate] scope_note_preserved=${validation.report.scope_note_preserved}`);
+  console.log(`[validate] duplicate_factual_text=${JSON.stringify(validation.report.duplicate_factual_text)}`);
+  console.log(`[validate] rendered_support_claim_count=${validation.report.rendered_support_claim_count} of selected_claim_count=${validation.report.selected_claim_count}`);
   if (!validation.valid) {
     console.error(`[validate] violations: ${validation.violations.join(', ')}`);
     console.error('\nRefusing to emit shadow artifacts for a draft that failed validation.');
@@ -95,12 +100,21 @@ async function main() {
   const structuredData = buildStructuredData(draft);
   const html = renderDraftHtml(draft, structuredData);
 
+  // Never hardcode the candidate pool size -- read it from the actual
+  // persisted record (buildAutoReadyClearanceRecord() always writes
+  // v1Result.metrics.candidate_claim_count here). null if genuinely
+  // absent, never a guessed/carried-over literal.
+  const candidateClaimCount = typeof record.publication_clearance.candidate_claim_count === 'number' ? record.publication_clearance.candidate_claim_count : null;
+  const renderedSupportClaimIds = computeRenderedSupportClaimIds(draft);
+  const duplicateFactualText = findDuplicateFactualText(draft);
+
   const costMetrics = buildCostMetrics({
     modelCalls: [], // zero model calls in v1 -- deterministic draft + deterministic fidelity check only
     fidelityCheckCalls: fidelity.paragraph_results.length, // deterministic checks, not model calls
     retries: 0,
-    candidateClaimCount: 128, // Publication Editor's original candidate pool for this topic (from v1_result.metrics, carried in record.publication_clearance.candidate_claim_count)
+    candidateClaimCount,
     selectedClaimCount: snapshot.selected_claim_ids.length,
+    renderedSupportClaimCount: renderedSupportClaimIds.length,
   });
   console.log('\n[cost] ' + JSON.stringify(costMetrics));
 
@@ -118,6 +132,10 @@ async function main() {
     invariants_result: invariants,
     validation_result: validation,
     fidelity_result: fidelity,
+    rendered_support_claim_ids: renderedSupportClaimIds,
+    rendered_support_claim_count: renderedSupportClaimIds.length,
+    selected_claim_count: snapshot.selected_claim_ids.length,
+    duplicate_factual_text: duplicateFactualText,
     no_anthropic_call_made: true,
     no_production_write_made: true,
   };

@@ -24,10 +24,21 @@
    model adapter (page-builder-model-config.mjs) has something concrete
    to plug into later, without this task making a live Anthropic call.
    Tests exercise it only against a mocked fetch.
+
+   CORRECTION (this revision): checkDraftFidelity() used to only inspect
+   draft.sections[] paragraphs. It now runs over
+   page-builder-content-units.mjs#collectRenderedFactualUnits() --
+   answer_summary and key_takeaways are visible rendered factual content
+   too, and a paragraph-only fidelity check was silently not covering
+   them. The deterministic single-unit check itself
+   (checkParagraphFidelityDeterministic) is unchanged; it accepts any
+   {text, supporting_claim_ids, is_framing} shape, which a rendered unit
+   already is.
    ═══════════════════════════════════════════════════════════════ */
 
 import { fetchAnthropicMessages, extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
 import { resolvePageBuilderFidelityModel } from './page-builder-model-config.mjs';
+import { collectRenderedFactualUnits } from './page-builder-content-units.mjs';
 
 export const FIDELITY_RESULT = Object.freeze({
   PASS: 'PASS',
@@ -80,20 +91,20 @@ export function checkParagraphFidelityDeterministic(paragraph, snapshot) {
 }
 
 /**
- * Runs the deterministic check across every factual paragraph in a
- * draft. Returns PASS only if every paragraph individually passes.
+ * Runs the deterministic check across EVERY rendered factual unit in a
+ * draft -- answer_summary, section paragraphs, AND key_takeaways (see
+ * page-builder-content-units.mjs). Returns PASS only if every unit
+ * individually passes.
  *
  * @param {object} draft
  * @param {object} snapshot
- * @returns {{result: string, paragraph_results: Array<{section_id: string, result: string, reason: string}>}}
+ * @returns {{result: string, paragraph_results: Array<{unit_id: string, group: string, result: string, reason: string}>}}
  */
 export function checkDraftFidelity(draft, snapshot) {
   const paragraphResults = [];
-  for (const section of draft.sections) {
-    for (const p of section.paragraphs) {
-      const { result, reason } = checkParagraphFidelityDeterministic(p, snapshot);
-      paragraphResults.push({ section_id: section.section_id, result, reason });
-    }
+  for (const unit of collectRenderedFactualUnits(draft)) {
+    const { result, reason } = checkParagraphFidelityDeterministic(unit, snapshot);
+    paragraphResults.push({ unit_id: unit.unit_id, group: unit.group, result, reason });
   }
   const worst = paragraphResults.some((r) => r.result === FIDELITY_RESULT.HUMAN_REVIEW)
     ? FIDELITY_RESULT.HUMAN_REVIEW

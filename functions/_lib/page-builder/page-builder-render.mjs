@@ -27,11 +27,19 @@ function renderParagraph(p) {
   return `<p>${escapeHtml(p.text)}</p>`;
 }
 
-function renderSection(section) {
+function renderSection(section, scopeNote) {
+  // The cleared scope note is rendered here, in the limitations/scope
+  // section -- a distinct, verbatim block, never merged into or
+  // replaced by the SEO meta description (see page-builder-draft.mjs's
+  // scope_note field and page-builder-validator.mjs's
+  // SCOPE_NOTE_NOT_PRESERVED rule for why the two are kept separate).
+  const scopeBlock = section.section_id === 'limitations' && scopeNote
+    ? `<p class="aimt-page-builder-scope-note"><em>Scope: ${escapeHtml(scopeNote)}</em></p>\n  `
+    : '';
   return `
 <section class="aimt-legal-doc__section" id="${escapeHtml(section.section_id)}">
   <h2>${escapeHtml(section.heading)}</h2>
-  ${section.paragraphs.map(renderParagraph).join('\n  ')}
+  ${scopeBlock}${section.paragraphs.map(renderParagraph).join('\n  ')}
 </section>`;
 }
 
@@ -80,7 +88,7 @@ ${JSON.stringify(structuredData, null, 2)}
     <span class="aimt-sp-eyebrow" style="margin-bottom:0.9rem;">AIMT Education Library</span>
     <h1>${escapeHtml(draft.seo.h1)}</h1>
     <p class="aimt-page-builder-answer-summary"><strong>${escapeHtml(draft.answer_summary.text)}</strong></p>
-    ${draft.sections.map(renderSection).join('\n')}
+    ${draft.sections.map((s) => renderSection(s, draft.scope_note)).join('\n')}
     <section class="aimt-legal-doc__section" id="key-takeaways">
       <h2>Key takeaways</h2>
       <ul>${draft.key_takeaways.map((t) => `<li>${escapeHtml(t.text)}</li>`).join('\n')}</ul>
