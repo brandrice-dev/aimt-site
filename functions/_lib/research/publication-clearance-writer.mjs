@@ -31,9 +31,29 @@
        before any network call, and throws if it fails. This is
        deliberately NOT left to the CLI alone -- this module must protect
        itself regardless of what future code calls it directly.
+     - AUTOMATED WRITER AUTHORITY (added after review found two bypasses:
+       a direct caller could hand this writer a hash-consistent record
+       whose clearance_mode was 'HUMAN_APPROVED', or whose canonical
+       fingerprint_input.risk_tier was 'HIGH', and nothing here stopped
+       it -- the DB CHECK constraint allows both values in general, since
+       it has to accommodate a FUTURE human-authenticated write path and
+       HIGH-risk topics that are simply never automated). THIS module is
+       the AUTOMATED AUTO_READY persistence path ONLY.
+       assertWritableClearanceRecord() now also throws for anything other
+       than clearance_mode === 'AUTO_READY' (so HUMAN_APPROVED,
+       HUMAN_REVIEW_REQUIRED, null, and any unknown value are all refused
+       by the same check), and assertAutomatedRiskTierAuthority() throws
+       for anything other than a canonical (fingerprint_input.risk_tier)
+       LOWER/MODERATE risk tier (so HIGH, missing, and unrecognized tiers
+       are all refused) -- both before any network call. A future
+       HUMAN_APPROVED writer must be built as its own, separate,
+       human-authenticated code path -- never a flag or parameter added
+       to this one.
    ═══════════════════════════════════════════════════════════════ */
 
 import { verifyStoredClearanceIntegrity } from './publication-clearance-fingerprint.mjs';
+
+const AUTOMATED_ALLOWED_RISK_TIERS = Object.freeze(['LOWER', 'MODERATE']);
 
 export const ALLOWED_COLUMNS = Object.freeze([
   'topic_slug',
@@ -51,19 +71,59 @@ export const ALLOWED_COLUMNS = Object.freeze([
 ]);
 
 /** Pure guard: throws if `record` contains any key outside ALLOWED_COLUMNS,
-    or if status is anything other than 'ready_for_page_builder' (this
-    write path's only legitimate target status -- 'published' is refused
-    even if somehow present, since it is not in ALLOWED_COLUMNS at all
-    and would already be stripped, but this is a second, explicit check
-    against a caller ever trying). Exported so tests can exercise it
-    without a network call. */
+    if status is anything other than 'ready_for_page_builder' (this write
+    path's only legitimate target status -- 'published' is refused even
+    if somehow present, since it is not in ALLOWED_COLUMNS at all and
+    would already be stripped, but this is a second, explicit check
+    against a caller ever trying), or if clearance_mode is anything other
+    than 'AUTO_READY'. This module is the AUTOMATED AUTO_READY
+    persistence path ONLY -- rejecting anything other than exactly
+    'AUTO_READY' also rejects 'HUMAN_APPROVED' (a legitimate DB state,
+    reserved for a future, separate, human-authenticated write path this
+    module must never be capable of impersonating), 'HUMAN_REVIEW_REQUIRED',
+    null/undefined, and any unrecognized value, all with the same check.
+    Exported so tests can exercise it without a network call. */
 export function assertWritableClearanceRecord(record) {
   const extraKeys = Object.keys(record).filter((k) => !ALLOWED_COLUMNS.includes(k));
   if (extraKeys.length) {
     throw new Error(`writeClearanceRecord: refusing to write unexpected column(s): ${extraKeys.join(', ')}`);
   }
-  if (record.status && record.status !== 'ready_for_page_builder') {
+  if (record.status !== 'ready_for_page_builder') {
     throw new Error(`writeClearanceRecord: refusing to write status "${record.status}" -- this write path only ever sets 'ready_for_page_builder'.`);
+  }
+  if (record.clearance_mode !== 'AUTO_READY') {
+    throw new Error(
+      `writeClearanceRecord: refusing to write clearance_mode "${record.clearance_mode}" -- this is the automated AUTO_READY writer; it can never persist HUMAN_APPROVED, HUMAN_REVIEW_REQUIRED, or a missing/unrecognized clearance_mode. A human-approved write must go through a separate, human-authenticated path (not built here).`
+    );
+  }
+}
+
+/**
+ * Risk-tier authority guard specific to THIS writer -- separate from
+ * assertWritableClearanceRecord()'s column/status/clearance_mode
+ * allow-list, because the authority here is the persisted CANONICAL
+ * evidence snapshot, not a top-level column. Requires
+ * record.publication_clearance.fingerprint_input.risk_tier (the
+ * evidence snapshot's own authority -- not
+ * publication_clearance.risk_tier, the top-level convenience duplicate)
+ * to be exactly 'LOWER' or 'MODERATE'. 'HIGH', a missing
+ * fingerprint_input, or any unrecognized value is refused.
+ * buildAutoReadyClearanceRecord() already refuses to build a HIGH-risk
+ * record in the first place, but this writer does not trust that every
+ * caller went through that builder -- it fails closed on its own, before
+ * any network call.
+ *
+ * @param {object} record
+ */
+export function assertAutomatedRiskTierAuthority(record) {
+  const fingerprintInput = record.publication_clearance && typeof record.publication_clearance === 'object'
+    ? record.publication_clearance.fingerprint_input
+    : null;
+  const canonicalRiskTier = fingerprintInput && typeof fingerprintInput === 'object' ? fingerprintInput.risk_tier : undefined;
+  if (!AUTOMATED_ALLOWED_RISK_TIERS.includes(canonicalRiskTier)) {
+    throw new Error(
+      `writeClearanceRecord: refusing to write -- canonical risk_tier "${canonicalRiskTier}" (from publication_clearance.fingerprint_input.risk_tier) is not eligible for automated persistence; only LOWER or MODERATE may pass through this writer. HIGH, missing, and unrecognized risk tiers are always refused.`
+    );
   }
 }
 
@@ -106,6 +166,12 @@ export async function writeClearanceRecord(env, record) {
     throw new Error('writeClearanceRecord: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. Refusing to write.');
   }
   assertWritableClearanceRecord(record);
+  // Risk-tier authority gate -- before ANY network call. See
+  // assertAutomatedRiskTierAuthority's own header comment: this writer is
+  // the AUTOMATED AUTO_READY path only, and never trusts a caller's
+  // claimed risk tier without checking the canonical fingerprint_input
+  // itself.
+  assertAutomatedRiskTierAuthority(record);
   // Integrity gate -- before ANY network call. See assertClearanceIntegrityOrThrow's
   // own header comment for why this can't be left to the CLI alone.
   await assertClearanceIntegrityOrThrow(record);

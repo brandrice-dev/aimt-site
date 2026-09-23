@@ -273,11 +273,11 @@ async function testFreshFingerprintNotStale() {
 // items 2-12 and 16 from the originating request's test list (item 1 is
 // covered inline in testValidAutoReadyProducesRecord above).
 // ─────────────────────────────────────────────────────────────────────────
-async function buildValidRecord(overrides = {}) {
+async function buildValidRecord(overrides = {}, v1ResultOverrides = {}) {
   const brief = baselineBrief(overrides);
   const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   return buildAutoReadyClearanceRecord({
-    topicSlug: TOPIC, controlledTopic: TOPIC, v1Result: baselineV1Result(),
+    topicSlug: TOPIC, controlledTopic: TOPIC, v1Result: baselineV1Result(v1ResultOverrides),
     pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
 }
@@ -502,6 +502,140 @@ async function testWriterAcceptsValidRecord() {
   });
   check('WRITER_INTEGRITY_GATE', 'a valid, untampered record passes the writer preflight and reaches the (mocked) network call', !threw && counter.count === 1, `threw=${threw} fetchCalls=${counter.count}`);
   check('WRITER_INTEGRITY_GATE', 'writeClearanceRecord resolves with the mocked upserted row', Array.isArray(result) && result.length === 1);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Automated writer AUTHORITY (this revision): assertWritableClearanceRecord()
+// now also rejects any clearance_mode other than 'AUTO_READY', and
+// assertAutomatedRiskTierAuthority() rejects any canonical
+// (fingerprint_input.risk_tier) other than LOWER/MODERATE. Every scenario
+// below runs writeClearanceRecord() itself against a mocked
+// globalThis.fetch and asserts BOTH that it throws AND that the mock was
+// never called -- proving the record never got as far as being sent
+// anywhere, not just that some check somewhere returned false.
+// ─────────────────────────────────────────────────────────────────────────
+async function writeAndCountFetch(record) {
+  const counter = { count: 0 };
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await writeClearanceRecord(FAKE_ENV, record); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  return { threw, errorMessage, fetchCalls: counter.count };
+}
+
+async function testWriterAcceptsValidLowerRisk() {
+  // Item 1.
+  const record = await buildValidRecord({ risk_tier: 'LOWER' }, { risk_tier: 'LOWER' });
+  const { threw, fetchCalls } = await writeAndCountFetch(record);
+  check('WRITER_AUTHORITY_VALID_RISK', 'valid AUTO_READY + LOWER risk reaches the mocked fetch exactly once', !threw && fetchCalls === 1, `threw=${threw} fetchCalls=${fetchCalls}`);
+}
+
+async function testWriterAcceptsValidModerateRisk() {
+  // Item 2.
+  const record = await buildValidRecord({ risk_tier: 'MODERATE' }, { risk_tier: 'MODERATE' });
+  check('WRITER_AUTHORITY_VALID_RISK', 'a MODERATE-risk record is a genuinely consistent fixture (fingerprint_input and publication_clearance agree)', record.publication_clearance.fingerprint_input.risk_tier === 'MODERATE' && record.publication_clearance.risk_tier === 'MODERATE');
+  const { threw, fetchCalls } = await writeAndCountFetch(record);
+  check('WRITER_AUTHORITY_VALID_RISK', 'valid AUTO_READY + MODERATE risk reaches the mocked fetch exactly once', !threw && fetchCalls === 1, `threw=${threw} fetchCalls=${fetchCalls}`);
+}
+
+async function testWriterRefusesHumanApproved() {
+  // Item 3.
+  const record = await buildValidRecord();
+  const tampered = { ...record, clearance_mode: 'HUMAN_APPROVED' };
+  const { threw, errorMessage, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_CLEARANCE_MODE', 'a HUMAN_APPROVED record is refused by this writer', threw && errorMessage.includes('HUMAN_APPROVED'), errorMessage);
+  check('WRITER_AUTHORITY_CLEARANCE_MODE', 'zero fetch calls for a HUMAN_APPROVED record', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testWriterRefusesHumanReviewRequired() {
+  // Item 4.
+  const record = await buildValidRecord();
+  const tampered = { ...record, clearance_mode: 'HUMAN_REVIEW_REQUIRED' };
+  const { threw, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_CLEARANCE_MODE', 'a HUMAN_REVIEW_REQUIRED record is refused by this writer', threw);
+  check('WRITER_AUTHORITY_CLEARANCE_MODE', 'zero fetch calls for a HUMAN_REVIEW_REQUIRED record', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testWriterRefusesNullOrUnknownClearanceMode() {
+  // Item 5.
+  const record = await buildValidRecord();
+  for (const badMode of [null, undefined, 'SOMETHING_MADE_UP']) {
+    const tampered = { ...record, clearance_mode: badMode };
+    const { threw, fetchCalls } = await writeAndCountFetch(tampered);
+    check('WRITER_AUTHORITY_CLEARANCE_MODE', `clearance_mode=${JSON.stringify(badMode)} is refused by this writer`, threw);
+    check('WRITER_AUTHORITY_CLEARANCE_MODE', `zero fetch calls for clearance_mode=${JSON.stringify(badMode)}`, fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+  }
+}
+
+async function testWriterRefusesHighRiskBypass() {
+  // Item 6: simulates a direct caller bypassing buildAutoReadyClearanceRecord()
+  // (which already refuses to build HIGH-risk records) by tampering the
+  // canonical fingerprint_input directly on an otherwise-built record.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.risk_tier = 'HIGH';
+  tampered.publication_clearance.risk_tier = 'HIGH'; // keep the duplicate consistent so this is purely a risk-tier-authority test, not an incidental integrity failure
+  const { threw, errorMessage, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_RISK_TIER', 'AUTO_READY + HIGH canonical risk_tier is refused', threw && errorMessage.includes('HIGH'), errorMessage);
+  check('WRITER_AUTHORITY_RISK_TIER', 'zero fetch calls for a HIGH-risk bypass attempt', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testWriterRefusesMissingRiskTier() {
+  // Item 7.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  delete tampered.publication_clearance.fingerprint_input.risk_tier;
+  const { threw, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_RISK_TIER', 'a missing canonical risk_tier is refused', threw);
+  check('WRITER_AUTHORITY_RISK_TIER', 'zero fetch calls for a missing canonical risk_tier', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testWriterRefusesUnknownRiskTier() {
+  // Item 8.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.risk_tier = 'SOMETHING_MADE_UP';
+  tampered.publication_clearance.risk_tier = 'SOMETHING_MADE_UP';
+  const { threw, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_RISK_TIER', 'an unrecognized canonical risk_tier is refused', threw);
+  check('WRITER_AUTHORITY_RISK_TIER', 'zero fetch calls for an unrecognized canonical risk_tier', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testWriterRefusesDuplicateRiskTierDrift() {
+  // Item 9: the risk-tier AUTHORITY check passes (fingerprint_input.risk_tier
+  // is still a valid LOWER/MODERATE value), but the top-level
+  // publication_clearance.risk_tier duplicate disagrees with it -- this
+  // must be caught by the INTEGRITY gate (RISK_TIER_MISMATCH /
+  // MISSING_RISK_TIER), not silently accepted.
+  const record = await buildValidRecord({ risk_tier: 'LOWER' }, { risk_tier: 'LOWER' });
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.risk_tier = 'MODERATE'; // fingerprint_input.risk_tier stays LOWER
+  const integrityResult = await verifyStoredClearanceIntegrity(tampered);
+  check('WRITER_AUTHORITY_RISK_TIER_DUPLICATE_DRIFT', 'a drifted publication_clearance.risk_tier duplicate fails integrity directly', !integrityResult.valid && integrityResult.violations.includes('RISK_TIER_MISMATCH'), JSON.stringify(integrityResult));
+  const { threw, fetchCalls } = await writeAndCountFetch(tampered);
+  check('WRITER_AUTHORITY_RISK_TIER_DUPLICATE_DRIFT', 'the writer refuses a drifted publication_clearance.risk_tier duplicate', threw);
+  check('WRITER_AUTHORITY_RISK_TIER_DUPLICATE_DRIFT', 'zero fetch calls for a drifted risk_tier duplicate', fetchCalls === 0, `fetch called ${fetchCalls} time(s)`);
+}
+
+async function testNoAutomatedCodePathCanPersistHumanApproved() {
+  // Item 10: structural proof, not just behavioral -- no line of code in
+  // this feature's build/write path ever assigns clearance_mode to
+  // 'HUMAN_APPROVED'. Comments are stripped first so governance prose
+  // explaining what does NOT happen doesn't produce a false match.
+  const files = [
+    'functions/_lib/research/publication-clearance.mjs',
+    'functions/_lib/research/publication-clearance-writer.mjs',
+  ];
+  for (const f of files) {
+    const code = stripComments(readSrc(f));
+    check('NO_AUTOMATED_HUMAN_APPROVED_PATH', `${f} never assigns clearance_mode = 'HUMAN_APPROVED'`, !/clearance_mode\s*[:=]\s*['"]HUMAN_APPROVED['"]/.test(code));
+  }
+  // Behavioral corroboration: buildAutoReadyClearanceRecord() has no
+  // parameter that could route to HUMAN_APPROVED, and the writer actively
+  // refuses it even if handed one directly (proven above).
+  const record = await buildValidRecord();
+  check('NO_AUTOMATED_HUMAN_APPROVED_PATH', 'buildAutoReadyClearanceRecord() never produces clearance_mode = HUMAN_APPROVED', record.clearance_mode === 'AUTO_READY');
 }
 
 async function testCliCannotReachWriteAfterIntegrityFail() {
@@ -859,6 +993,16 @@ const tests = [
   testWriterRefusesSourceIdsDrift,
   testWriterRefusesUnsupportedAlgorithm,
   testWriterAcceptsValidRecord,
+  testWriterAcceptsValidLowerRisk,
+  testWriterAcceptsValidModerateRisk,
+  testWriterRefusesHumanApproved,
+  testWriterRefusesHumanReviewRequired,
+  testWriterRefusesNullOrUnknownClearanceMode,
+  testWriterRefusesHighRiskBypass,
+  testWriterRefusesMissingRiskTier,
+  testWriterRefusesUnknownRiskTier,
+  testWriterRefusesDuplicateRiskTierDrift,
+  testNoAutomatedCodePathCanPersistHumanApproved,
   testCliCannotReachWriteAfterIntegrityFail,
   testIntegrityChecksRequireNoModelCall,
   testCannotIntroduceForbiddenFields,

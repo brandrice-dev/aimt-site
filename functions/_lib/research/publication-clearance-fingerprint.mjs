@@ -246,12 +246,17 @@ function arraysEqualAsSets(a, b) {
  * was hashed when clearance was issued, nothing more.
  *
  * Also cross-checks that the top-level convenience columns
- * (`key_claim_ids`, `source_ids`) and `publication_clearance.risk_tier`
- * (kept duplicated outside `fingerprint_input` for at-a-glance reading)
- * haven't drifted from the canonical `fingerprint_input` they were
- * derived from -- a hash match alone wouldn't catch a bug that mutated
- * only the convenience columns after the fact, since those columns
- * aren't part of what's hashed.
+ * (`key_claim_ids`, `source_ids`) haven't drifted from the canonical
+ * `fingerprint_input` they were derived from, and that
+ * `publication_clearance.risk_tier` -- kept duplicated outside
+ * `fingerprint_input` so the persisted audit record states its own risk
+ * tier explicitly, at a glance, without requiring a reader to descend
+ * into `fingerprint_input` -- is both PRESENT and matching. A hash match
+ * alone wouldn't catch a bug that mutated only a convenience column
+ * after the fact, since none of these are part of what's hashed; an
+ * omitted `risk_tier` duplicate is treated the same as a mismatched one
+ * (`MISSING_RISK_TIER`), not silently skipped, so this field can never
+ * simply be left off a record built by this system.
  *
  * ALGORITHM ENFORCEMENT: a row's `fingerprint_algorithm` must equal this
  * module's own `FINGERPRINT_ALGORITHM` exactly. If a row claims an
@@ -301,7 +306,15 @@ export async function verifyStoredClearanceIntegrity(record) {
   if (!arraysEqualAsSets(record.source_ids, input.source_ids)) {
     violations.push('SOURCE_IDS_MISMATCH');
   }
-  if (clearance.risk_tier !== undefined && clearance.risk_tier !== input.risk_tier) {
+  // publication_clearance.risk_tier is REQUIRED, not merely
+  // checked-if-present: an omitted duplicate would make the persisted
+  // audit record silently incomplete, and this table's own writer
+  // (publication-clearance.mjs#buildAutoReadyClearanceRecord) always sets
+  // it -- so its absence on a supposedly-AUTO_READY row is itself a sign
+  // something built or tampered with this record outside that path.
+  if (clearance.risk_tier === undefined || clearance.risk_tier === null) {
+    violations.push('MISSING_RISK_TIER');
+  } else if (clearance.risk_tier !== input.risk_tier) {
     violations.push('RISK_TIER_MISMATCH');
   }
 
