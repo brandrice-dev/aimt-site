@@ -29,7 +29,14 @@
        every build).
    ═══════════════════════════════════════════════════════════════ */
 
-import { FINGERPRINT_ALGORITHM } from './publication-clearance-fingerprint.mjs';
+// No fingerprint-computation import here by design: this module never
+// computes a hash itself. It only ever consumes a pre-built
+// fingerprintArtifact ({ algorithm, input, hash }) from
+// publication-clearance-fingerprint.mjs#buildEvidenceFingerprintArtifact,
+// so a record's persisted fingerprint_input can never diverge from the
+// content that actually produced generation_source_hash (see that
+// function's own header comment for why this used to be two separately-
+// supplied values and why that was a problem).
 
 export const CLEARANCE_MODES = Object.freeze(['AUTO_READY', 'HUMAN_APPROVED', 'HUMAN_REVIEW_REQUIRED']);
 
@@ -89,11 +96,17 @@ export function assertNoForbiddenFields(record) {
  * @param {string} params.pipelineStatus - the v2 orchestrator's final
  *   `status` ('AUTO_READY' | 'HUMAN_REVIEW' | 'SYNTHESIS_FAILED')
  * @param {object} params.pageEvidenceBrief - buildPageEvidenceBrief() output
- * @param {string} params.fingerprint - computeEvidenceFingerprint() output
+ * @param {{algorithm: string, input: object, hash: string}} params.fingerprintArtifact -
+ *   the ONE trusted output of publication-clearance-fingerprint.mjs's
+ *   buildEvidenceFingerprintArtifact(topicSlug, pageEvidenceBrief). Never
+ *   accepts a bare hash string and a separately-reconstructed input
+ *   object -- both must come from that single call, so the persisted
+ *   `publication_clearance.fingerprint_input` is, by construction, the
+ *   exact object that produced `generation_source_hash`.
  * @returns {object} a research_public_pages-column-shaped record, plus
  *   the extra `publication_clearance` jsonb payload column
  */
-export function buildAutoReadyClearanceRecord({ topicSlug, controlledTopic = null, v1Result, pipelineStatus, pageEvidenceBrief, fingerprint }) {
+export function buildAutoReadyClearanceRecord({ topicSlug, controlledTopic = null, v1Result, pipelineStatus, pageEvidenceBrief, fingerprintArtifact }) {
   if (pipelineStatus !== 'AUTO_READY') {
     throw new ClearanceIneligibleError(
       `Cannot build a clearance record for pipeline status "${pipelineStatus}" -- only a validated AUTO_READY result is eligible for automated clearance.`
@@ -105,8 +118,8 @@ export function buildAutoReadyClearanceRecord({ topicSlug, controlledTopic = nul
   if (!pageEvidenceBrief) {
     throw new ClearanceIneligibleError('Cannot build a clearance record without a page evidence brief.');
   }
-  if (!fingerprint) {
-    throw new ClearanceIneligibleError('Cannot build a clearance record without an evidence fingerprint.');
+  if (!fingerprintArtifact || !fingerprintArtifact.hash || !fingerprintArtifact.input || !fingerprintArtifact.algorithm) {
+    throw new ClearanceIneligibleError('Cannot build a clearance record without a complete evidence fingerprint artifact (algorithm + input + hash from buildEvidenceFingerprintArtifact).');
   }
 
   const generatedAt = new Date().toISOString();
@@ -121,16 +134,20 @@ export function buildAutoReadyClearanceRecord({ topicSlug, controlledTopic = nul
     practitioner_relevance_markdown: pageEvidenceBrief.scope_language.scope_note,
     status: 'ready_for_page_builder',
     clearance_mode: 'AUTO_READY',
-    generation_source_hash: fingerprint,
+    generation_source_hash: fingerprintArtifact.hash,
     last_generated_at: generatedAt,
     publication_clearance: {
-      fingerprint_algorithm: FINGERPRINT_ALGORITHM,
-      page_concept: pageEvidenceBrief.page_concept,
-      public_intent: pageEvidenceBrief.public_intent,
+      fingerprint_algorithm: fingerprintArtifact.algorithm,
+      // The EXACT canonical object that was hashed to produce
+      // generation_source_hash -- not a second, independently-assembled
+      // representation. This is what a Page Builder drafts from (see
+      // docs/research/AIMT-Automated-Publication-Clearance.md's
+      // corrected Page Builder contract): the immutable evidence
+      // snapshot that actually earned AUTO_READY, not the full
+      // topic-wide candidate pool.
+      fingerprint_input: fingerprintArtifact.input,
       risk_tier: v1Result.risk_tier,
       excluded_claim_ids: pageEvidenceBrief.excluded_claim_ids,
-      citation_map: pageEvidenceBrief.citation_map,
-      scope_language: pageEvidenceBrief.scope_language,
       provenance: pageEvidenceBrief.provenance,
       candidate_claim_count: v1Result.metrics.candidate_claim_count,
       distinct_source_count: v1Result.metrics.distinct_source_count,

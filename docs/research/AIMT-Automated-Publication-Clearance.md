@@ -158,17 +158,67 @@ implemented — nothing in the current brief shape marks a model/version
 change as materially relevant on its own, and inventing that rule now
 would be speculative.
 
-## Invalidation rules
+**Reproducible snapshot (added this revision):** a fingerprint is only
+independently verifiable if the exact object that was hashed is itself
+recoverable later. `buildEvidenceFingerprintArtifact(topicSlug, brief)`
+is the ONE function that produces `{ algorithm, input, hash }` —
+`input` is `buildFingerprintInput(topicSlug, brief)`'s own output, and
+`hash` is computed from that SAME `input` object, in one call.
+`buildAutoReadyClearanceRecord()` takes this whole artifact, never a
+bare hash string and a separately-reconstructed input object that could
+disagree with each other — so `publication_clearance.fingerprint_input`,
+once persisted, is guaranteed by construction to be the exact canonical
+object that produced `generation_source_hash`, not a second,
+independently-assembled representation of it.
 
-**Enforceable now**, via `isClearanceStale(topicSlug, brief,
-storedFingerprint)`: recomputes the fingerprint from a freshly-generated
-brief (and the same `topicSlug`) and compares — any of the categories
-above changing (a claim superseded/excluded changing
-`selected_claim_ids`, a citation correction changing `citation_map`, a
-new safety claim changing which claims got selected/excluded, a risk
-reclassification changing `risk_tier`, a source set change, or — new in
-v2 — the page's own concept/intent/scope framing changing) makes the
-stored fingerprint stale, detected mechanically, not by inference.
+## Integrity vs. freshness — two different questions, kept separate
+
+This distinction was missed in an earlier revision of this document and
+is corrected here, because conflating the two would have made a Page
+Builder do something actively wrong.
+
+**INTEGRITY asks: "Is this stored clearance artifact exactly the
+artifact AIMT cleared?"** Answered by
+`verifyStoredClearanceIntegrity(record)`
+(`functions/_lib/research/publication-clearance-fingerprint.mjs`): it
+re-hashes the row's OWN persisted `publication_clearance.fingerprint_input`
+and compares against the row's OWN persisted `generation_source_hash`,
+then cross-checks that the top-level convenience columns
+(`topic_slug`, `key_claim_ids`, `source_ids`) and
+`publication_clearance.risk_tier` haven't drifted from the
+`fingerprint_input` they were derived from. **No AI call. No database
+write. No regeneration of anything.** This is the ORDINARY check a Page
+Builder runs before drafting from an `AUTO_READY` row — see "Recommended
+Page Builder phase" below.
+
+**FRESHNESS asks: "Has the underlying research changed enough that AIMT
+should run Publication Editor again?"** That is a separate,
+**not-yet-built** research-update/invalidation process. Critically, it
+is **NOT** solved by regenerating the evidence brief and refingerprinting
+it every time a page is read: Publication Editor's synthesis step is
+**nondeterministic** (an LLM call) — this repo's own hair-cycle pilot has
+already produced different, independently-valid `AUTO_READY` briefs
+(different selected-claim counts) across separate runs against the SAME
+unchanged evidence. Regenerating and re-fingerprinting therefore proves
+nothing about whether a stored clearance is still good; a mismatch there
+would only mean the model produced a different brief this time, not that
+anything is wrong.
+
+`isClearanceStale(topicSlug, newBrief, storedFingerprint)` still exists,
+but ONLY for the freshness case — comparing a stored fingerprint against
+a NEW brief that a human or process has *intentionally, already
+generated* via a fresh Publication Editor run. It must never be a Page
+Builder's routine "is this still good" check; that is
+`verifyStoredClearanceIntegrity()`'s job, and its job alone.
+
+**Enforceable now (freshness signals)**, once a new brief has been
+generated: any of the fingerprint's categories changing (a claim
+superseded/excluded changing `selected_claim_ids`, a citation correction
+changing `citation_map`, a new safety claim changing which claims got
+selected/excluded, a risk reclassification changing `risk_tier`, a
+source set change, or the page's own concept/intent/scope framing
+changing) makes the stored fingerprint stale relative to that new brief,
+detected mechanically, not by inference.
 
 **Not enforceable yet, named rather than guessed at:**
 - *A selected source becomes retracted/unavailable* — no existing
@@ -178,9 +228,10 @@ stored fingerprint stale, detected mechanically, not by inference.
   but there is no dedicated "retracted" signal to watch for
   independently of regenerating the brief).
 - *Automatic re-triggering of Publication Editor on claim change* — this
-  phase adds no schedule and no trigger (explicitly out of scope). Re-
-  checking staleness today means re-running the CLI and comparing
-  fingerprints by hand.
+  phase adds no schedule and no trigger (explicitly out of scope), and
+  would need to be balanced against synthesis's nondeterminism regardless
+  (see above) — re-running Publication Editor is not itself proof
+  anything changed.
 
 ## Page-level DB invariants (defense in depth)
 
@@ -199,6 +250,16 @@ merely a `clearance_mode` value.** A "complete" clearance is:
 - at least one `source_id`
 - a non-empty `publication_clearance` provenance object (not `NULL`, and
   not the column's own `'{}'::jsonb` default)
+- (added this revision) `publication_clearance` carrying a non-empty
+  `fingerprint_algorithm` string AND a non-empty `fingerprint_input`
+  object — the exact canonical snapshot that was hashed, without which
+  `generation_source_hash` cannot be independently reproduced from the
+  row alone. The migration only checks *presence and shape*
+  (`jsonb ? 'key'`, which is always a definite boolean even when the key
+  is absent — no three-valued-logic gotcha there — plus
+  `jsonb_typeof(...) = 'object'` and `<> '{}'::jsonb`); it does not, and
+  cannot, verify the SHA-256 itself. That check is application-level —
+  see `verifyStoredClearanceIntegrity()` below.
 
 1. **`research_public_pages_ready_requires_clearance`** — a row with
    `status = 'ready_for_page_builder'` must have a complete clearance, as
@@ -269,30 +330,45 @@ upsert — never invoked automatically, and per the originating request,
 not exercised against production without explicit, separate owner
 authorization obtained in conversation first.
 
-## Hair-cycle pilot preview (2026-09-23, regenerated under fingerprint v2)
+## Hair-cycle pilot preview
 
-Ran the full pipeline against the local validated export (identical to
-production, per Publication Editor v2's own pilot findings). Result:
-`AUTO_READY` on the initial synthesis alone (no reconciliation needed
-this run — LLM output naturally varies run to run; a prior live run
-needed one reconciliation call for the same topic, this one didn't).
+**Prior run (2026-09-23, fingerprint v2, pre-reproducibility-hardening):**
+`AUTO_READY` on the initial synthesis alone — 16 of 128 candidate claims
+selected, 6 sources cited (27 distinct in the candidate pool), 7 core
+factual points, 3 limitations, fingerprint (`sha256-canonical-json-v2`)
+`bd36a062193001b7689a83b34c894226e6aa7e29cc8a1c99ceebbd3b7a2f27f4`.
+**Not written.** That run predates this revision's
+`buildEvidenceFingerprintArtifact()`/`fingerprint_input`
+persistence change, so its record does not itself carry a persisted
+`fingerprint_input` snapshot — a genuinely fresh AUTO_READY run is
+needed to demonstrate the new, reproducible shape end-to-end.
 
-This run was regenerated after the fingerprint v1→v2 correction (see
-below) specifically to capture a fingerprint computed under the
-corrected canonical input — the number below is not comparable to any
-fingerprint value recorded before this revision.
+**Attempted regeneration, this revision (2026-09-23):** two attempts to
+re-run the live pipeline both returned `pipeline status=SYNTHESIS_FAILED
+stage=initial reason=request_failed`. The underlying Anthropic API
+response was `429`-equivalent: `"You have reached your specified API
+usage limits. You will regain access on 2026-10-01 at 00:00 UTC."` — the
+dedicated `ANTHROPIC_PUBLICATION_EDITOR_API_KEY` is rate-limited until
+then. This is an external constraint, not a code defect; per this
+phase's own scope, no production write was attempted or possible either
+way. A live regeneration should be re-run after 2026-10-01 to capture a
+real hair-cycle `fingerprint_input`/hash pair under the new mechanism —
+whatever claim count it selects is fine; reproducibility of the artifact
+matters, not the exact count (see the correction above).
 
-- 16 of 128 candidate claims selected; 112 excluded with individual
-  reasons (treatment/intervention content, unrelated conditions,
-  molecular/immunologic/microbiome detail beyond practitioner scope).
-- 6 sources cited (27 distinct sources were in the candidate pool),
-  complete citation metadata for each.
-- 7 core factual points, 3 limitations (animal-model/narrative-review
-  evidence-base caveats).
-- Fingerprint (`sha256-canonical-json-v2`):
-  `bd36a062193001b7689a83b34c894226e6aa7e29cc8a1c99ceebbd3b7a2f27f4`.
-- `clearance_mode: 'AUTO_READY'`, `status: 'ready_for_page_builder'`.
-- **Not written.** Preview only, per this phase's own scope.
+**Mechanism verified locally instead (no model call, no live evidence)**
+— `buildEvidenceFingerprintArtifact()` → `buildAutoReadyClearanceRecord()`
+→ `verifyStoredClearanceIntegrity()` run end-to-end against a synthetic
+evidence brief through the actual production code (not test-only
+duplicate logic):
+- `fingerprint_algorithm`: `sha256-canonical-json-v2`
+- `publication_clearance.fingerprint_input` present: `true` (10 keys:
+  `topic_slug`, `page_concept`, `public_intent`, `scope_language`,
+  `risk_tier`, `selected_claim_ids`, `core_factual_points`,
+  `limitations`, `citation_map`, `source_ids`)
+- resulting `generation_source_hash`:
+  `a60f9f18efdfcb2a9bb0d8870841bed3c16825c492a03e1b4d97be4ea37f97cc`
+- `verifyStoredClearanceIntegrity(record)`: `{"valid":true,"expected_hash":"a60f9f18efdfcb2a9bb0d8870841bed3c16825c492a03e1b4d97be4ea37f97cc","stored_hash":"a60f9f18efdfcb2a9bb0d8870841bed3c16825c492a03e1b4d97be4ea37f97cc","violations":[]}` — **PASS**, hash reproduced independently from the persisted `fingerprint_input` alone.
 
 ## Recommended Page Builder phase
 
@@ -320,18 +396,39 @@ AND status = 'ready_for_page_builder'
 
 and:
 
-1. **Verify the stored clearance fingerprint is still current** —
-   regenerate the evidence brief, recompute
-   `computeEvidenceFingerprint(topic_slug, brief)`, and compare against
-   `generation_source_hash` (`isClearanceStale()`). A mismatch means the
-   underlying evidence or page intent moved since clearance was issued —
-   route back to Publication Editor, never build from stale evidence.
-2. **Draft only from the cleared evidence brief** — `key_claim_ids`
-   (selected claims) and `publication_clearance`'s citation map, never
-   the full topic-wide candidate set.
+1. **Verify the stored clearance's INTEGRITY — do not regenerate
+   anything.** Call `verifyStoredClearanceIntegrity(record)`
+   (`functions/_lib/research/publication-clearance-fingerprint.mjs`): it
+   re-hashes the row's own persisted `publication_clearance.fingerprint_input`
+   and compares against the row's own `generation_source_hash`, no AI
+   call and no database write involved. **Correction (this revision):**
+   an earlier version of this step said to regenerate the evidence brief
+   and recompute its fingerprint to check for staleness — that is wrong
+   and must never be done here. Publication Editor's synthesis step is
+   nondeterministic; the same unchanged evidence has already produced
+   different, independently-valid `AUTO_READY` briefs (different
+   selected-claim counts) across separate runs of this repo's own
+   hair-cycle pilot. Regenerating a brief to "verify" an existing
+   clearance would not prove the clearance is bad on a mismatch — it
+   would only prove the model answered differently this time. See
+   "Integrity vs. freshness" above. `verifyStoredClearanceIntegrity()`
+   failing means the persisted row itself is inconsistent (tampered,
+   corrupted, or built by a buggy writer) — escalate to `HUMAN_REVIEW_REQUIRED`
+   rather than drafting from it.
+2. **Draft only from the cleared evidence SNAPSHOT** —
+   `publication_clearance.fingerprint_input` is the exact, immutable
+   evidence that earned `AUTO_READY`: its `selected_claim_ids`,
+   `core_factual_points` (with `supporting_claim_ids`), `limitations`
+   (same), `citation_map`, and `source_ids`. Draft from THAT snapshot,
+   never the full topic-wide candidate set and never a freshly-generated
+   brief — going back to the candidate pool and making a new selection
+   would defeat the entire point of clearing one specific, auditable
+   evidence brief.
 3. **Preserve citations, limitations, and scope language** exactly as
-   the cleared brief states them — `publication_clearance.citation_map`,
-   `limitations_markdown`, `practitioner_relevance_markdown`.
+   the cleared snapshot states them —
+   `publication_clearance.fingerprint_input.citation_map`,
+   `.limitations`, `.scope_language` — not a freshly-regenerated version
+   of any of them.
 4. **Pass deterministic page-level QA** (a future check: does the drafted
    page's actual copy still say only what the selected claims support?)
    before anything can move toward `published`.

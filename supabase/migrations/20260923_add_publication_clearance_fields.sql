@@ -106,6 +106,9 @@ comment on column public.research_public_pages.publication_clearance is
 --   - at least one source_id
 --   - a non-empty publication_clearance provenance object (not null, not
 --     the column's own '{}'::jsonb default)
+--   - publication_clearance carries BOTH a fingerprint_algorithm string
+--     AND a non-empty fingerprint_input object (added this revision --
+--     see below)
 -- The original version of constraint 1 below checked everything except
 -- publication_clearance, and the original constraint 3 (published) only
 -- checked clearance_mode -- meaning a buggy future writer could satisfy
@@ -117,6 +120,23 @@ comment on column public.research_public_pages.publication_clearance is
 -- be relied on to catch an empty payload -- hence the explicit
 -- `jsonb_typeof(...) = 'object' and publication_clearance <> '{}'::jsonb`.
 -- Neither constraint requires claim-level AIMT_APPROVED.
+--
+-- REPRODUCIBILITY (added this revision): `generation_source_hash` alone is
+-- not independently verifiable without the exact canonical object that
+-- was hashed to produce it. `publication_clearance.fingerprint_input` (see
+-- functions/_lib/research/publication-clearance-fingerprint.mjs#
+-- buildEvidenceFingerprintArtifact) is that exact object, so
+-- `generation_source_hash` can be recomputed and cross-checked from the
+-- persisted row alone (functions/_lib/research/
+-- publication-clearance-fingerprint.mjs#verifyStoredClearanceIntegrity) --
+-- no re-run of Publication Editor's (nondeterministic) synthesis step is
+-- ever required or appropriate for that check. This migration only
+-- verifies fingerprint_input's PRESENCE and shape (`jsonb ? 'key'` --
+-- never null even when the key is absent, unlike `->`, so the naive-NULL
+-- gotcha above doesn't apply here either); the actual SHA-256
+-- recomputation and comparison is application-level (Postgres CHECK
+-- constraints have no SHA-256 primitive and this migration does not
+-- attempt one).
 
 -- 1. A row claiming to be ready for the Page Builder must carry a
 --    COMPLETE clearance -- never an accidental/partial state.
@@ -136,6 +156,12 @@ alter table public.research_public_pages
         and publication_clearance is not null
         and jsonb_typeof(publication_clearance) = 'object'
         and publication_clearance <> '{}'::jsonb
+        and publication_clearance ? 'fingerprint_algorithm'
+        and publication_clearance ->> 'fingerprint_algorithm' is not null
+        and publication_clearance ->> 'fingerprint_algorithm' <> ''
+        and publication_clearance ? 'fingerprint_input'
+        and jsonb_typeof(publication_clearance -> 'fingerprint_input') = 'object'
+        and publication_clearance -> 'fingerprint_input' <> '{}'::jsonb
       )
     );
 
@@ -177,5 +203,11 @@ alter table public.research_public_pages
         and publication_clearance is not null
         and jsonb_typeof(publication_clearance) = 'object'
         and publication_clearance <> '{}'::jsonb
+        and publication_clearance ? 'fingerprint_algorithm'
+        and publication_clearance ->> 'fingerprint_algorithm' is not null
+        and publication_clearance ->> 'fingerprint_algorithm' <> ''
+        and publication_clearance ? 'fingerprint_input'
+        and jsonb_typeof(publication_clearance -> 'fingerprint_input') = 'object'
+        and publication_clearance -> 'fingerprint_input' <> '{}'::jsonb
       )
     );

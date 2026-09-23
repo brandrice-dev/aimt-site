@@ -55,7 +55,7 @@ import { buildSynthesisEvidenceBundle, buildPageEvidenceBrief } from '../functio
 import { runSynthesisPipeline } from '../functions/_lib/research/publication-synthesis-orchestrator.mjs';
 import { POST_SYNTHESIS_VALIDATOR_VERSION } from '../functions/_lib/research/publication-synthesis-validator.mjs';
 import { getPageSynthesisIntent } from '../functions/_lib/research/publication-page-intent.mjs';
-import { computeEvidenceFingerprint } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
+import { buildEvidenceFingerprintArtifact, verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
 import { buildAutoReadyClearanceRecord, ClearanceIneligibleError } from '../functions/_lib/research/publication-clearance.mjs';
 import { writeClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 
@@ -134,8 +134,9 @@ async function main() {
     validatorVersion: POST_SYNTHESIS_VALIDATOR_VERSION,
   });
 
-  const fingerprint = await computeEvidenceFingerprint(TOPIC_SLUG, brief);
-  console.log(`\n[clearance] evidence fingerprint: ${fingerprint}`);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC_SLUG, brief);
+  console.log(`\n[clearance] evidence fingerprint algorithm: ${fingerprintArtifact.algorithm}`);
+  console.log(`[clearance] evidence fingerprint hash: ${fingerprintArtifact.hash}`);
 
   let record;
   try {
@@ -145,7 +146,7 @@ async function main() {
       v1Result,
       pipelineStatus: pipelineResult.status,
       pageEvidenceBrief: brief,
-      fingerprint,
+      fingerprintArtifact,
     });
   } catch (err) {
     if (err instanceof ClearanceIneligibleError) {
@@ -157,6 +158,18 @@ async function main() {
 
   console.log('\n[clearance] The exact record that would be upserted into research_public_pages:');
   console.log(JSON.stringify(record, null, 2));
+
+  // INTEGRITY check -- no AI call, no DB write: re-hashes the record's own
+  // persisted publication_clearance.fingerprint_input and compares against
+  // its own generation_source_hash. This is the ordinary check a Page
+  // Builder would run before drafting from this row; it is NOT the same
+  // as re-running synthesis (see publication-clearance-fingerprint.mjs's
+  // integrity-vs-freshness header note).
+  const integrity = await verifyStoredClearanceIntegrity(record);
+  console.log(`\n[clearance] verifyStoredClearanceIntegrity: ${integrity.valid ? 'PASS' : 'FAIL'}`);
+  console.log(`[clearance] expected_hash: ${integrity.expected_hash}`);
+  console.log(`[clearance] stored_hash:   ${integrity.stored_hash}`);
+  if (!integrity.valid) console.log(`[clearance] violations: ${integrity.violations.join(', ')}`);
 
   if (!args.write) {
     console.log('\nPreview only -- nothing written. Pass --write (with explicit owner authorization) to persist this record.');

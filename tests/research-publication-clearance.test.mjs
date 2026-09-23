@@ -18,6 +18,8 @@ import {
 } from '../functions/_lib/research/publication-clearance.mjs';
 import {
   computeEvidenceFingerprint,
+  buildEvidenceFingerprintArtifact,
+  verifyStoredClearanceIntegrity,
   isClearanceStale,
   FINGERPRINT_ALGORITHM,
 } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
@@ -67,18 +69,19 @@ function baselineV1Result(overrides = {}) {
 async function testValidAutoReadyProducesRecord() {
   const brief = baselineBrief();
   const v1Result = baselineV1Result();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   const record = buildAutoReadyClearanceRecord({
     topicSlug: TOPIC, controlledTopic: TOPIC, v1Result,
-    pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprint,
+    pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
   check('VALID_AUTO_READY', 'record built', !!record);
   check('VALID_AUTO_READY', 'clearance_mode is AUTO_READY', record.clearance_mode === 'AUTO_READY', record.clearance_mode);
   check('VALID_AUTO_READY', 'status is ready_for_page_builder', record.status === 'ready_for_page_builder', record.status);
-  check('VALID_AUTO_READY', 'generation_source_hash set to the fingerprint', record.generation_source_hash === fingerprint);
+  check('VALID_AUTO_READY', 'generation_source_hash set to the fingerprint hash', record.generation_source_hash === fingerprintArtifact.hash);
   check('VALID_AUTO_READY', 'key_claim_ids matches selected claims', JSON.stringify(record.key_claim_ids) === JSON.stringify(['c1', 'c2']));
   check('VALID_AUTO_READY', 'CLEARANCE_MODES includes AUTO_READY', CLEARANCE_MODES.includes('AUTO_READY'));
   check('VALID_AUTO_READY', 'fingerprint_algorithm recorded is the current v2 algorithm', record.publication_clearance.fingerprint_algorithm === FINGERPRINT_ALGORITHM && FINGERPRINT_ALGORITHM === 'sha256-canonical-json-v2', FINGERPRINT_ALGORITHM);
+  check('VALID_AUTO_READY', 'persisted fingerprint_input is the EXACT object that was hashed (item 1)', JSON.stringify(record.publication_clearance.fingerprint_input) === JSON.stringify(fingerprintArtifact.input));
   check('VALID_AUTO_READY', 'DB invariant mirror accepts this record', validatePageInvariants(record).valid, JSON.stringify(validatePageInvariants(record)));
 }
 
@@ -87,10 +90,10 @@ async function testValidAutoReadyProducesRecord() {
 // ─────────────────────────────────────────────────────────────────────────
 async function testHumanReviewCannotClear() {
   const brief = baselineBrief();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   let threw = false;
   try {
-    buildAutoReadyClearanceRecord({ topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'HUMAN_REVIEW', pageEvidenceBrief: brief, fingerprint });
+    buildAutoReadyClearanceRecord({ topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'HUMAN_REVIEW', pageEvidenceBrief: brief, fingerprintArtifact });
   } catch (e) {
     threw = e instanceof ClearanceIneligibleError;
   }
@@ -99,10 +102,10 @@ async function testHumanReviewCannotClear() {
 
 async function testSynthesisFailedCannotClear() {
   const brief = baselineBrief();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   let threw = false;
   try {
-    buildAutoReadyClearanceRecord({ topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'SYNTHESIS_FAILED', pageEvidenceBrief: brief, fingerprint });
+    buildAutoReadyClearanceRecord({ topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'SYNTHESIS_FAILED', pageEvidenceBrief: brief, fingerprintArtifact });
   } catch (e) {
     threw = e instanceof ClearanceIneligibleError;
   }
@@ -111,10 +114,10 @@ async function testSynthesisFailedCannotClear() {
 
 async function testHighRiskCannotClear() {
   const brief = baselineBrief({ risk_tier: 'HIGH' });
-  const fingerprint = await computeEvidenceFingerprint('contraindications', brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact('contraindications', brief);
   let threw = false;
   try {
-    buildAutoReadyClearanceRecord({ topicSlug: 'contraindications', v1Result: baselineV1Result({ risk_tier: 'HIGH' }), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprint });
+    buildAutoReadyClearanceRecord({ topicSlug: 'contraindications', v1Result: baselineV1Result({ risk_tier: 'HIGH' }), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact });
   } catch (e) {
     threw = e instanceof ClearanceIneligibleError;
   }
@@ -240,13 +243,171 @@ async function testFreshFingerprintNotStale() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Reproducible fingerprint snapshot + stored-clearance INTEGRITY (not
+// FRESHNESS -- see publication-clearance-fingerprint.mjs's header note).
+// verifyStoredClearanceIntegrity() re-hashes the record's OWN persisted
+// fingerprint_input and cross-checks it against the record's OWN
+// top-level columns. No AI call, no regeneration, no database access --
+// items 2-12 and 16 from the originating request's test list (item 1 is
+// covered inline in testValidAutoReadyProducesRecord above).
+// ─────────────────────────────────────────────────────────────────────────
+async function buildValidRecord(overrides = {}) {
+  const brief = baselineBrief(overrides);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
+  return buildAutoReadyClearanceRecord({
+    topicSlug: TOPIC, controlledTopic: TOPIC, v1Result: baselineV1Result(),
+    pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
+  });
+}
+
+async function testStoredFingerprintInputHashesToStoredHash() {
+  // Item 2: the persisted fingerprint_input, rehashed independently here
+  // (via the same canonicalStringify path computeEvidenceFingerprint
+  // uses), reproduces generation_source_hash exactly -- proving the
+  // stored hash is not an arbitrary value but a genuine function of the
+  // stored input.
+  const record = await buildValidRecord();
+  const rehashed = await computeEvidenceFingerprint(record.publication_clearance.fingerprint_input.topic_slug, {
+    // Reconstruct a "brief" shape from fingerprint_input's own fields --
+    // buildFingerprintInput just re-sorts/canonicalizes them, so feeding
+    // it back its own canonical output round-trips to the same hash.
+    page_concept: record.publication_clearance.fingerprint_input.page_concept,
+    public_intent: record.publication_clearance.fingerprint_input.public_intent,
+    scope_language: record.publication_clearance.fingerprint_input.scope_language,
+    risk_tier: record.publication_clearance.fingerprint_input.risk_tier,
+    approved_for_draft_claim_ids: record.publication_clearance.fingerprint_input.selected_claim_ids,
+    core_factual_points: record.publication_clearance.fingerprint_input.core_factual_points,
+    limitations: record.publication_clearance.fingerprint_input.limitations,
+    citation_map: record.publication_clearance.fingerprint_input.citation_map,
+    source_ids: record.publication_clearance.fingerprint_input.source_ids,
+  });
+  check('STORED_INPUT_HASHES_TO_STORED_HASH', 'independently rehashing the stored fingerprint_input reproduces generation_source_hash', rehashed === record.generation_source_hash, `${rehashed} vs ${record.generation_source_hash}`);
+}
+
+async function testUntouchedRecordPassesIntegrity() {
+  // Item 3.
+  const record = await buildValidRecord();
+  const result = await verifyStoredClearanceIntegrity(record);
+  check('INTEGRITY_UNTOUCHED_PASSES', 'an untouched, freshly-built record passes verifyStoredClearanceIntegrity', result.valid, JSON.stringify(result));
+  check('INTEGRITY_UNTOUCHED_PASSES', 'expected_hash matches stored_hash', result.expected_hash === result.stored_hash && result.expected_hash === record.generation_source_hash);
+}
+
+async function testTamperedCorePointFailsIntegrity() {
+  // Item 4.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.core_factual_points[0].statement = 'A statement that was never actually cleared.';
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_CORE_POINT', 'a mutated core factual point fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedSupportingClaimIdsFailsIntegrity() {
+  // Item 5.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.core_factual_points[0].supporting_claim_ids = ['c-not-really-supporting'];
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_SUPPORTING_CLAIMS', "a mutated core point's supporting_claim_ids fails integrity", !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedLimitationFailsIntegrity() {
+  // Item 6.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.limitations[0].statement = 'A limitation that was never actually cleared.';
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_LIMITATION', 'a mutated limitation fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedSelectedClaimIdsFailsIntegrity() {
+  // Item 7.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.selected_claim_ids = ['c1', 'c2', 'c-never-cleared'];
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_SELECTED_CLAIMS', 'mutated fingerprint_input.selected_claim_ids fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedSourceIdsFailsIntegrity() {
+  // Item 8.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.source_ids = ['s1', 's2', 's-never-cleared'];
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_SOURCE_IDS', 'mutated fingerprint_input.source_ids fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedScopeLanguageFailsIntegrity() {
+  // Item 9.
+  const record = await buildValidRecord();
+  const tampered = JSON.parse(JSON.stringify(record));
+  tampered.publication_clearance.fingerprint_input.scope_language.scope_note = 'A scope note that was never actually cleared.';
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_SCOPE_LANGUAGE', 'mutated fingerprint_input.scope_language fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedHashAloneFailsIntegrity() {
+  // Item 10: fingerprint_input untouched, but generation_source_hash
+  // itself was changed -- proves the check compares against the ACTUAL
+  // stored hash, not just re-deriving and trusting a new one.
+  const record = await buildValidRecord();
+  const tampered = { ...record, generation_source_hash: '0'.repeat(64) };
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TAMPERED_HASH_ALONE', 'a changed generation_source_hash alone fails integrity', !result.valid && result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedTopLevelKeyClaimIdsFailsCrossCheck() {
+  // Item 11: fingerprint_input (and therefore the hash) is untouched, but
+  // the top-level convenience column key_claim_ids was mutated -- the
+  // hash alone can't catch this since key_claim_ids isn't part of what's
+  // hashed; the cross-check must.
+  const record = await buildValidRecord();
+  const tampered = { ...record, key_claim_ids: ['c1', 'c2', 'c-added-after-clearance'] };
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TOP_LEVEL_KEY_CLAIM_IDS_DRIFT', 'top-level key_claim_ids drifting from fingerprint_input.selected_claim_ids fails the cross-check', !result.valid && result.violations.includes('KEY_CLAIM_IDS_MISMATCH'), JSON.stringify(result));
+  check('INTEGRITY_TOP_LEVEL_KEY_CLAIM_IDS_DRIFT', 'hash itself still matches (only the cross-check fails)', !result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testTamperedTopLevelSourceIdsFailsCrossCheck() {
+  // Item 12.
+  const record = await buildValidRecord();
+  const tampered = { ...record, source_ids: ['s1', 's2', 's-added-after-clearance'] };
+  const result = await verifyStoredClearanceIntegrity(tampered);
+  check('INTEGRITY_TOP_LEVEL_SOURCE_IDS_DRIFT', 'top-level source_ids drifting from fingerprint_input.source_ids fails the cross-check', !result.valid && result.violations.includes('SOURCE_IDS_MISMATCH'), JSON.stringify(result));
+  check('INTEGRITY_TOP_LEVEL_SOURCE_IDS_DRIFT', 'hash itself still matches (only the cross-check fails)', !result.violations.includes('HASH_MISMATCH'), JSON.stringify(result));
+}
+
+async function testIntegrityChecksRequireNoModelCall() {
+  // Item 16: structural self-check that this whole integrity/
+  // reproducibility test section never imports or calls anything that
+  // would reach the Anthropic API -- verifyStoredClearanceIntegrity and
+  // buildEvidenceFingerprintArtifact are pure/Web-Crypto-only by design.
+  // Plain substring checks (not regex) so this assertion cannot
+  // accidentally match its own source text.
+  const thisFileSrc = readSrc('tests/research-publication-clearance.test.mjs');
+  const forbiddenSubstrings = [
+    'publication-synthesis-orchestrator.mjs',
+    'cadence-anthropic-response',
+    'fetchAnthropicMessages',
+    'ANTHROPIC_PUBLICATION_EDITOR_API_KEY',
+  ];
+  for (const needle of forbiddenSubstrings) {
+    const occurrences = thisFileSrc.split(needle).length - 1;
+    // This very check necessarily contains each needle once, as a string
+    // literal in the `forbiddenSubstrings` array above -- so 1 occurrence
+    // is the "clean" baseline, not 0.
+    check('INTEGRITY_NO_MODEL_CALL', `test file never actually uses "${needle}" outside this self-check`, occurrences <= 1, `found ${occurrences} occurrence(s)`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Cannot set AIMT_APPROVED / claim public_eligible / published / sitemap
 // ─────────────────────────────────────────────────────────────────────────
 async function testCannotIntroduceForbiddenFields() {
   const brief = baselineBrief();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   const record = buildAutoReadyClearanceRecord({
-    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprint,
+    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
   const allKeys = [...Object.keys(record), ...Object.keys(record.publication_clearance)];
   for (const forbidden of FORBIDDEN_CLEARANCE_FIELDS) {
@@ -257,9 +418,9 @@ async function testCannotIntroduceForbiddenFields() {
 
 async function testWriterRefusesForbiddenColumns() {
   const brief = baselineBrief();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   const record = buildAutoReadyClearanceRecord({
-    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprint,
+    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
   // A caller (or a future bug) tries to sneak a forbidden column in.
   const tampered = { ...record, published: true, public_eligible: true, AIMT_APPROVED: true };
@@ -316,9 +477,9 @@ async function testNoCodePathTouchesClaimTables() {
 // ─────────────────────────────────────────────────────────────────────────
 async function testCannotMarkPublished() {
   const brief = baselineBrief();
-  const fingerprint = await computeEvidenceFingerprint(TOPIC, brief);
+  const fingerprintArtifact = await buildEvidenceFingerprintArtifact(TOPIC, brief);
   const record = buildAutoReadyClearanceRecord({
-    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprint,
+    topicSlug: TOPIC, v1Result: baselineV1Result(), pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
   check('CANNOT_PUBLISH', 'status is never "published"', record.status !== 'published', record.status);
   check('CANNOT_PUBLISH', 'status is always "ready_for_page_builder" for an AUTO_READY clearance', record.status === 'ready_for_page_builder');
@@ -343,7 +504,11 @@ function invariantRow(overrides = {}) {
     generation_source_hash: 'deadbeef',
     key_claim_ids: ['c1'],
     source_ids: ['s1'],
-    publication_clearance: { fingerprint_algorithm: 'sha256-canonical-json-v2', risk_tier: 'LOWER' },
+    publication_clearance: {
+      fingerprint_algorithm: 'sha256-canonical-json-v2',
+      fingerprint_input: { topic_slug: 'hair-cycle', selected_claim_ids: ['c1'], source_ids: ['s1'] },
+      risk_tier: 'LOWER',
+    },
     ...overrides,
   };
 }
@@ -398,6 +563,27 @@ async function testInvariantReadyEmptyPublicationClearanceRejected() {
   check('INVARIANT_READY_EMPTY_CLEARANCE_PAYLOAD', 'ready_for_page_builder with publication_clearance = null is rejected', !resultNull.valid, JSON.stringify(resultNull));
 }
 
+async function testInvariantReadyMissingFingerprintInputRejected() {
+  // Item 13.
+  const withoutInput = validatePageInvariants(invariantRow({
+    publication_clearance: { fingerprint_algorithm: 'sha256-canonical-json-v2' },
+  }));
+  const withEmptyInput = validatePageInvariants(invariantRow({
+    publication_clearance: { fingerprint_algorithm: 'sha256-canonical-json-v2', fingerprint_input: {} },
+  }));
+  check('INVARIANT_READY_MISSING_FINGERPRINT_INPUT', 'ready_for_page_builder with no fingerprint_input key is rejected', !withoutInput.valid, JSON.stringify(withoutInput));
+  check('INVARIANT_READY_MISSING_FINGERPRINT_INPUT', 'names the exact constraint', withoutInput.violations.includes('research_public_pages_ready_requires_clearance:fingerprint_input'), JSON.stringify(withoutInput.violations));
+  check('INVARIANT_READY_MISSING_FINGERPRINT_INPUT', 'ready_for_page_builder with fingerprint_input = {} is also rejected', !withEmptyInput.valid, JSON.stringify(withEmptyInput));
+}
+
+async function testInvariantReadyMissingFingerprintAlgorithmRejected() {
+  const result = validatePageInvariants(invariantRow({
+    publication_clearance: { fingerprint_input: { topic_slug: 'hair-cycle' } },
+  }));
+  check('INVARIANT_READY_MISSING_FINGERPRINT_ALGORITHM', 'ready_for_page_builder with no fingerprint_algorithm is rejected', !result.valid, JSON.stringify(result));
+  check('INVARIANT_READY_MISSING_FINGERPRINT_ALGORITHM', 'names the exact constraint', result.violations.includes('research_public_pages_ready_requires_clearance:fingerprint_algorithm'), JSON.stringify(result.violations));
+}
+
 async function testInvariantPublishedAutoReadyAllowed() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY' }));
   check('INVARIANT_PUBLISHED_AUTO_READY', 'published + AUTO_READY + hash + claims + sources + real publication_clearance is structurally allowed (not actually published anywhere in this PR)', result.valid, JSON.stringify(result));
@@ -430,6 +616,17 @@ async function testInvariantPublishedEmptyPublicationClearanceRejected() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY', publication_clearance: {} }));
   check('INVARIANT_PUBLISHED_EMPTY_CLEARANCE_PAYLOAD', 'published + AUTO_READY but publication_clearance = {} is rejected', !result.valid, JSON.stringify(result));
   check('INVARIANT_PUBLISHED_EMPTY_CLEARANCE_PAYLOAD', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:publication_clearance'), JSON.stringify(result.violations));
+}
+
+async function testInvariantPublishedMissingFingerprintInputRejected() {
+  // Item 14.
+  const result = validatePageInvariants(invariantRow({
+    status: 'published',
+    clearance_mode: 'AUTO_READY',
+    publication_clearance: { fingerprint_algorithm: 'sha256-canonical-json-v2' },
+  }));
+  check('INVARIANT_PUBLISHED_MISSING_FINGERPRINT_INPUT', 'published + AUTO_READY with no fingerprint_input key is rejected', !result.valid, JSON.stringify(result));
+  check('INVARIANT_PUBLISHED_MISSING_FINGERPRINT_INPUT', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:fingerprint_input'), JSON.stringify(result.violations));
 }
 
 async function testInvariantPublishedNullClearanceRejected() {
@@ -492,6 +689,18 @@ const tests = [
   testFingerprintIgnoresIrrelevantAndReorderedFields,
   testStaleFingerprintDetected,
   testFreshFingerprintNotStale,
+  testStoredFingerprintInputHashesToStoredHash,
+  testUntouchedRecordPassesIntegrity,
+  testTamperedCorePointFailsIntegrity,
+  testTamperedSupportingClaimIdsFailsIntegrity,
+  testTamperedLimitationFailsIntegrity,
+  testTamperedSelectedClaimIdsFailsIntegrity,
+  testTamperedSourceIdsFailsIntegrity,
+  testTamperedScopeLanguageFailsIntegrity,
+  testTamperedHashAloneFailsIntegrity,
+  testTamperedTopLevelKeyClaimIdsFailsCrossCheck,
+  testTamperedTopLevelSourceIdsFailsCrossCheck,
+  testIntegrityChecksRequireNoModelCall,
   testCannotIntroduceForbiddenFields,
   testWriterRefusesForbiddenColumns,
   testNoCodePathTouchesClaimTables,
@@ -503,12 +712,15 @@ const tests = [
   testInvariantReadyEmptySourceIdsRejected,
   testInvariantReadyMissingHashRejected,
   testInvariantReadyEmptyPublicationClearanceRejected,
+  testInvariantReadyMissingFingerprintInputRejected,
+  testInvariantReadyMissingFingerprintAlgorithmRejected,
   testInvariantPublishedAutoReadyAllowed,
   testInvariantPublishedHumanApprovedAllowed,
   testInvariantPublishedMissingHashRejected,
   testInvariantPublishedEmptyKeyClaimIdsRejected,
   testInvariantPublishedEmptySourceIdsRejected,
   testInvariantPublishedEmptyPublicationClearanceRejected,
+  testInvariantPublishedMissingFingerprintInputRejected,
   testInvariantPublishedNullClearanceRejected,
   testInvariantPublishedHumanReviewRequiredRejected,
   testInvariantDraftRowsWithNullClearanceRemainAllowed,

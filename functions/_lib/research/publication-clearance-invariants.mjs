@@ -16,17 +16,35 @@
      1. status = 'ready_for_page_builder' requires a COMPLETE clearance:
         clearance_mode in (AUTO_READY, HUMAN_APPROVED), a non-empty
         generation_source_hash, at least one key_claim_id, at least one
-        source_id, and a non-empty publication_clearance object.
+        source_id, a non-empty publication_clearance object, AND (added
+        this revision) publication_clearance carrying a non-empty
+        fingerprint_algorithm string and a non-empty fingerprint_input
+        object.
      2. clearance_mode = 'HUMAN_REVIEW_REQUIRED' may never coexist with
         status in (ready_for_page_builder, published).
      3. status = 'published' requires the SAME complete clearance as (1)
         -- forward-looking; this phase never sets status = 'published'
-        itself. Hardened this revision: previously this only checked
-        clearance_mode, which would have let a buggy future writer mark a
-        row published with clearance_mode = 'AUTO_READY' but no hash, no
-        claims, no sources, or an empty publication_clearance -- passing
-        the letter of the constraint while defeating the auditability it
-        exists to guarantee.
+        itself. Hardened in an earlier revision: previously this only
+        checked clearance_mode, which would have let a buggy future
+        writer mark a row published with clearance_mode = 'AUTO_READY'
+        but no hash, no claims, no sources, or an empty
+        publication_clearance -- passing the letter of the constraint
+        while defeating the auditability it exists to guarantee.
+
+   REPRODUCIBILITY (added this revision): this module only checks that
+   fingerprint_input is PRESENT and non-empty -- it does not, and cannot,
+   recompute the SHA-256 hash itself (no crypto here, deliberately kept
+   pure/sync so it can mirror what a Postgres CHECK constraint can
+   actually enforce). The actual "does this hash reproduce from this
+   input" check lives in publication-clearance-fingerprint.mjs's
+   verifyStoredClearanceIntegrity() -- a SEPARATE, async, crypto-using
+   function, not duplicated here. See that function's own header comment
+   for the INTEGRITY-vs-FRESHNESS distinction: this module (and the
+   migration it mirrors) only ever asks "does the auditable payload
+   exist," never "does the underlying research still support it" or "is
+   this the same brief a fresh AI run would produce" -- Publication
+   Editor's synthesis step is nondeterministic, so neither question can
+   be answered by regenerating anything.
 
    None of these three checks anywhere require or reference
    AIMT_APPROVED, claim-level public_eligible, or claim-level published
@@ -72,6 +90,13 @@ function pushCompleteClearanceViolations(row, constraintName, violations) {
   }
   if (!isNonEmptyPlainObject(row.publication_clearance)) {
     violations.push(`${constraintName}:publication_clearance`);
+  } else {
+    if (!isNonEmptyString(row.publication_clearance.fingerprint_algorithm)) {
+      violations.push(`${constraintName}:fingerprint_algorithm`);
+    }
+    if (!isNonEmptyPlainObject(row.publication_clearance.fingerprint_input)) {
+      violations.push(`${constraintName}:fingerprint_input`);
+    }
   }
 }
 

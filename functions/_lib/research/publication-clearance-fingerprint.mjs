@@ -51,6 +51,35 @@
    because nothing in the current evidence-brief shape marks that
    distinction as materially relevant on its own, and speculative
    invalidation rules are explicitly out of scope for this phase.
+
+   ── INTEGRITY vs. FRESHNESS -- these are two DIFFERENT questions, and
+   this module deliberately keeps them separate (per architectural review
+   after the initial version of this module conflated them):
+
+   INTEGRITY asks: "Is this stored clearance artifact exactly the
+   artifact AIMT cleared?" Answered by verifyStoredClearanceIntegrity()
+   below: hash the PERSISTED fingerprint_input, compare to the PERSISTED
+   generation_source_hash. No AI call, no regeneration, no network I/O.
+   This is the ORDINARY check a Page Builder runs before drafting from an
+   AUTO_READY row -- see docs/research/AIMT-Automated-Publication-
+   Clearance.md's corrected Page Builder contract.
+
+   FRESHNESS asks: "Has the underlying research changed enough that AIMT
+   should run Publication Editor again?" That is a separate, NOT-YET-BUILT
+   research-update/invalidation process, and it is NOT solved by silently
+   rerunning synthesis every time a page is read. Publication Editor's
+   synthesis step is NONDETERMINISTIC by design (an LLM call) -- the same
+   unchanged evidence has already produced different, independently valid
+   AUTO_READY briefs (different selected-claim counts) across separate
+   runs of this repo's own hair-cycle pilot. Regenerating the brief and
+   recomputing its fingerprint therefore CANNOT be used as a routine
+   integrity check: a fingerprint mismatch there would not prove the
+   stored clearance is invalid, only that the model produced a different
+   (possibly equally valid) brief this time. isClearanceStale() below
+   still exists for the FRESHNESS case -- comparing a stored fingerprint
+   against a NEW brief that a human or process has intentionally, already
+   generated via a fresh Publication Editor run -- but it must never be
+   invoked by a Page Builder as its routine "is this still good" check.
    ═══════════════════════════════════════════════════════════════ */
 
 export const FINGERPRINT_ALGORITHM = 'sha256-canonical-json-v2';
@@ -125,6 +154,16 @@ export function canonicalStringify(value) {
   return JSON.stringify(canonicalize(value));
 }
 
+/** Web Crypto SHA-256 over a UTF-8 string, lowercase hex-encoded. The
+    ONLY place this module hashes anything -- both computeEvidenceFingerprint
+    and buildEvidenceFingerprintArtifact route through this single
+    function so the hash algorithm/encoding can never drift between them. */
+async function sha256Hex(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digestBuffer = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digestBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 /**
  * Computes the deterministic SHA-256 fingerprint of a page evidence
  * brief's page-identity + materially-relevant content. Uses Web Crypto
@@ -140,24 +179,114 @@ export function canonicalStringify(value) {
  */
 export async function computeEvidenceFingerprint(topicSlug, brief) {
   const input = buildFingerprintInput(topicSlug, brief);
-  const json = canonicalStringify(input);
-  const bytes = new TextEncoder().encode(json);
-  const digestBuffer = await crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(digestBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return sha256Hex(canonicalStringify(input));
 }
 
 /**
- * Checks whether a previously-stored fingerprint still matches a
- * (possibly regenerated) page evidence brief -- the deterministic
- * invalidation check. Never throws; returns a structured result so a
- * caller can log/report exactly what happened.
+ * Builds the ONE atomic artifact a clearance record is ever built from:
+ * the canonical fingerprint input, the algorithm that will hash it, and
+ * the resulting hash -- computed from that SAME input object, in one
+ * call. Exists specifically so a clearance record's persisted
+ * `publication_clearance.fingerprint_input` can never diverge from the
+ * content that actually produced `generation_source_hash`: callers
+ * (buildAutoReadyClearanceRecord) take this whole artifact, never a
+ * separately-supplied hash string and a separately-reconstructed input
+ * object that could disagree with each other.
  *
  * @param {string} topicSlug - see buildFingerprintInput()
- * @param {object} brief - the current page evidence brief
+ * @param {object} brief - a page evidence brief
+ * @returns {Promise<{algorithm: string, input: object, hash: string}>}
+ */
+export async function buildEvidenceFingerprintArtifact(topicSlug, brief) {
+  const input = buildFingerprintInput(topicSlug, brief);
+  const hash = await sha256Hex(canonicalStringify(input));
+  return { algorithm: FINGERPRINT_ALGORITHM, input, hash };
+}
+
+/**
+ * FRESHNESS check (see the header note above) -- checks whether a
+ * previously-stored fingerprint still matches a NEW, already-generated
+ * page evidence brief. This is for the case where a human or process has
+ * intentionally re-run Publication Editor and produced a new validated
+ * brief, and something needs to confirm whether that new brief actually
+ * differs from what's currently cleared. It is NOT a routine integrity
+ * check, and a Page Builder must never call this as its "is the stored
+ * clearance still good" check -- Publication Editor's synthesis step is
+ * nondeterministic, so simply regenerating a brief and refingerprinting
+ * it can legitimately produce a different (not necessarily invalid)
+ * result even when nothing about the underlying research changed. Use
+ * verifyStoredClearanceIntegrity() for that instead. Never throws;
+ * returns a structured result so a caller can log/report exactly what
+ * happened.
+ *
+ * @param {string} topicSlug - see buildFingerprintInput()
+ * @param {object} brief - a NEW page evidence brief, already generated
  * @param {string} storedFingerprint - the fingerprint recorded on a prior clearance
  * @returns {Promise<{stale: boolean, currentFingerprint: string}>}
  */
 export async function isClearanceStale(topicSlug, brief, storedFingerprint) {
   const currentFingerprint = await computeEvidenceFingerprint(topicSlug, brief);
   return { stale: currentFingerprint !== storedFingerprint, currentFingerprint };
+}
+
+function arraysEqualAsSets(a, b) {
+  const sa = [...(a || [])].sort();
+  const sb = [...(b || [])].sort();
+  return sa.length === sb.length && sa.every((v, i) => v === sb[i]);
+}
+
+/**
+ * INTEGRITY check (see the header note above) -- the ORDINARY check a
+ * Page Builder (or anything else reading a cleared row) runs before
+ * trusting a `research_public_pages` row's clearance. PURE + Web Crypto
+ * only: no AI call, no database write, no regeneration of anything.
+ * Re-hashes the row's OWN persisted `publication_clearance.fingerprint_input`
+ * and compares against the row's OWN persisted `generation_source_hash`
+ * -- proving the stored evidence snapshot is exactly the snapshot that
+ * was hashed when clearance was issued, nothing more.
+ *
+ * Also cross-checks that the top-level convenience columns
+ * (`key_claim_ids`, `source_ids`) and `publication_clearance.risk_tier`
+ * (kept duplicated outside `fingerprint_input` for at-a-glance reading)
+ * haven't drifted from the canonical `fingerprint_input` they were
+ * derived from -- a hash match alone wouldn't catch a bug that mutated
+ * only the convenience columns after the fact, since those columns
+ * aren't part of what's hashed.
+ *
+ * @param {object} record - a research_public_pages-shaped row (or
+ *   candidate record before write)
+ * @returns {Promise<{valid: boolean, expected_hash: string|null, stored_hash: string|null, violations: string[]}>}
+ */
+export async function verifyStoredClearanceIntegrity(record) {
+  const violations = [];
+  const clearance = record.publication_clearance;
+  const storedHash = record.generation_source_hash ?? null;
+
+  if (!clearance || typeof clearance !== 'object' || !clearance.fingerprint_algorithm) {
+    violations.push('MISSING_FINGERPRINT_ALGORITHM');
+  }
+  const input = clearance && typeof clearance === 'object' ? clearance.fingerprint_input : null;
+  if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).length === 0) {
+    violations.push('MISSING_FINGERPRINT_INPUT');
+    return { valid: false, expected_hash: null, stored_hash: storedHash, violations };
+  }
+
+  const expectedHash = await sha256Hex(canonicalStringify(input));
+  if (expectedHash !== storedHash) {
+    violations.push('HASH_MISMATCH');
+  }
+  if (record.topic_slug !== input.topic_slug) {
+    violations.push('TOPIC_SLUG_MISMATCH');
+  }
+  if (!arraysEqualAsSets(record.key_claim_ids, input.selected_claim_ids)) {
+    violations.push('KEY_CLAIM_IDS_MISMATCH');
+  }
+  if (!arraysEqualAsSets(record.source_ids, input.source_ids)) {
+    violations.push('SOURCE_IDS_MISMATCH');
+  }
+  if (clearance.risk_tier !== undefined && clearance.risk_tier !== input.risk_tier) {
+    violations.push('RISK_TIER_MISMATCH');
+  }
+
+  return { valid: violations.length === 0, expected_hash: expectedHash, stored_hash: storedHash, violations };
 }
