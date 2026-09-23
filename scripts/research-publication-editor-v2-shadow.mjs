@@ -38,10 +38,12 @@
        [--out-dir <dir>]        where to write the report (default:
                                  research-import/)
 
-   Requires ANTHROPIC_API_KEY in env to actually call the AI Publication
-   Editor. Without it, the pipeline still runs through v1 and reports
-   SYNTHESIS_FAILED (missing_api_key) for step 6 onward -- this is the
-   correct STEP 12 fail-safe behavior, not a crash.
+   Requires ANTHROPIC_PUBLICATION_EDITOR_API_KEY in env to actually call
+   the AI Publication Editor -- a dedicated credential, separate from
+   Cadence's own ANTHROPIC_API_KEY, never shared or read from it. Without
+   it, the pipeline still runs through v1 and reports SYNTHESIS_FAILED
+   (missing_api_key) for step 6 onward -- this is the correct STEP 12
+   fail-safe behavior, not a crash.
    ═══════════════════════════════════════════════════════════════ */
 
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';

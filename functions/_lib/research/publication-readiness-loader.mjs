@@ -88,9 +88,20 @@ export const PILOT_TOPIC_CONCEPTS = Object.freeze([
   }
 ]);
 
+/* claim_text and page_or_section_locator are included for Publication
+   Editor v2 (functions/_lib/research/publication-synthesis-evidence.mjs's
+   buildSynthesisEvidenceBundle()), which needs the actual verified claim
+   wording to synthesize from -- v1's own assessTopicReadiness() never
+   reads either field, so their presence here is a pure widening of what
+   gets fetched, not a v1 behavior change (v1's 65-test suite exercises
+   the engine directly against synthetic fixtures and is unaffected).
+   Found via a live v2 pilot run: the model correctly, conservatively
+   reported it could not verify claim wording when claim_text came back
+   null for every claim in the bundle -- a real live-fetch gap, not a v1
+   defect, since v1 never needed this field. */
 const CLAIM_SELECT_FIELDS = [
-  'claim_id', 'source_id', 'claim_type', 'direction', 'topics', 'population_or_scope',
-  'verification_status', 'use_status', 'verification_review_status', 'claim_origin'
+  'claim_id', 'source_id', 'claim_type', 'claim_text', 'direction', 'topics', 'population_or_scope',
+  'page_or_section_locator', 'verification_status', 'use_status', 'verification_review_status', 'claim_origin'
 ];
 const SOURCE_SELECT_FIELDS = [
   'source_id', 'title', 'authors', 'year', 'date_published', 'doi', 'url', 'pmid', 'pmcid',

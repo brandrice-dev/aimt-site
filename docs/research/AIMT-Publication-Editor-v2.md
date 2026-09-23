@@ -40,6 +40,13 @@ the validator then either certifies or rejects.
 `CANDIDATE` (not `APPROVED`) in a new, isolated registry:
 `functions/_lib/research/publication-editor-model-config.mjs`.
 
+**Credential:** `ANTHROPIC_PUBLICATION_EDITOR_API_KEY` — a dedicated key,
+separate from Cadence's own `ANTHROPIC_API_KEY`. `publication-synthesis-
+client.mjs` never reads or falls back to Cadence's credential; a missing
+`ANTHROPIC_PUBLICATION_EDITOR_API_KEY` fails safe to `SYNTHESIS_FAILED`
+(see "Failure behavior" below), it never silently borrows another
+subsystem's key.
+
 ### Step 1 finding: existing model infrastructure
 
 This repo already has a mature model-lifecycle system for Cadence
@@ -240,7 +247,7 @@ is `HIGH`, or the underlying v1 result was not actually `NEEDS_SYNTHESIS`.
 Every one of these maps to `SYNTHESIS_FAILED`, never a silent
 `AUTO_READY`, and never a crash of the CLI script:
 
-- Missing `ANTHROPIC_API_KEY` (`publication-synthesis-client.mjs` returns
+- Missing `ANTHROPIC_PUBLICATION_EDITOR_API_KEY` (`publication-synthesis-client.mjs` returns
   a tagged failure rather than throwing).
 - A transport/HTTP failure from Anthropic (after `fetchAnthropicMessages`'s
   own bounded retry is exhausted).
@@ -321,6 +328,56 @@ with no safety claim involved (see
 `docs/research/AIMT-Publication-Editor-v1-Pilot.md`) — the architecture
 is proven on the safest, closest-to-ready topic before it is ever pointed
 at a topic carrying a `safety_conclusion` claim.
+
+## Pilot result (2026-09-23, live production, read-only)
+
+Ran against the live production corpus (`--live`; GET/SELECT only, 0
+writes) using a dedicated `ANTHROPIC_PUBLICATION_EDITOR_API_KEY`. v1
+returned `NEEDS_SYNTHESIS` (128 candidate claims, 27 sources, LOWER risk).
+The evidence loader initially sent the model claim metadata with
+`claim_text` empty for every claim — a real gap in v1's shared live-fetch
+field list (`CLAIM_SELECT_FIELDS` never needed `claim_text`/
+`page_or_section_locator` for its own deterministic checks, so it never
+selected them). Fixed by widening that field list (additive only, no v1
+behavior change — 65/65 v1 tests still pass); the model's own response to
+the missing text on the first attempt was to correctly decline to
+proceed with confidence rather than guess, which is itself a small
+validation of the "never fabricate certainty" instruction.
+
+With real claim text in the bundle, one full, successful synthesis run
+produced: `recommended_disposition: AUTO_READY`, `confidence: high`, 23
+claims selected, 103 excluded, zero `unresolved_issues`, 8 grounded core
+points about follicle phases/timing/anatomy, 2 preserved limitations
+(mouse-model-to-human translation caveat; narrative-review, not
+treatment-evaluation, evidence base), and a `resolved_synthesis_signals`
+entry that directly answers the pilot's key question (see below).
+
+**The deterministic validator still rejected it**, for exactly one reason:
+2 of the 128 candidate claims never appeared in either `selected_claims`
+or `excluded_claims` — a full-accounting gap the model's own stated "high
+confidence" gave no indication of. Final shadow result: **`HUMAN_REVIEW`**
+(`validator_rejected_proposal`), not `AUTO_READY` — the exact behavior
+this architecture exists to guarantee: the model's self-reported
+confidence is never the thing that decides.
+
+**The 6 supports_effect / 1 no_effect question, answered from evidence:**
+the synthesis identified that these claims describe entirely different
+interventions and endpoints — PRP, scalp massage, GLP-1 receptor
+agonists, and antimitotic medications — with directionally opposite
+effects on hair from each other, not from any disagreement about normal
+cycle biology. All were excluded from the hair-cycle page as out-of-scope
+treatment/medication material (answer **B** from the task's own A/B/C
+framing), not reconciled as an on-page contradiction.
+
+**Recommended v2 follow-up** (not implemented here): a token-budget note
+— two rounds of live tuning were needed (`max_tokens` 16000 → 32000 →
+64000) before a 128-claim bundle stopped truncating, since adaptive
+thinking and per-claim reasoning both draw from the same ceiling; and a
+process note — a "did every candidate claim_id receive a disposition?"
+reconciliation pass (either a stricter prompt reminder or a targeted
+follow-up turn naming exactly the missing IDs) could resolve this
+specific near-miss automatically, rather than routing an otherwise
+high-quality, 126/128-complete proposal to human review over 2 stragglers.
 
 ## Files
 

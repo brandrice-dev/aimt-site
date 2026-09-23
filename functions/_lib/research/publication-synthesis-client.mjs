@@ -15,6 +15,13 @@
    config.mjs's header for why the MODEL SELECTION itself is not
    likewise reused from Cadence's registry.
 
+   CREDENTIAL: uses its OWN dedicated env var,
+   ANTHROPIC_PUBLICATION_EDITOR_API_KEY -- never Cadence's
+   ANTHROPIC_API_KEY. Same rationale as the isolated model registry: this
+   is a separate subsystem with its own key, its own usage/spend, and its
+   own blast radius if ever misconfigured, never sharing or reading
+   Cadence's credential.
+
    STEP 12 (model failure safety): every failure mode here -- missing
    API key, transport/HTTP failure, max_tokens truncation, unparseable
    JSON -- returns a tagged failure result rather than throwing past
@@ -33,7 +40,20 @@ import { getPageSynthesisIntent } from './publication-page-intent.mjs';
 // GRADING_MAX_TOKENS precedent for why this repo prefers a clearly
 // oversized round-number ceiling to routine max_tokens termination over a
 // tightly-tuned one that risks silently truncating a well-formed response.
-export const SYNTHESIS_MAX_TOKENS = 16000;
+//
+// CORRECTED TWICE from an initial 16000: a live hair-cycle run against the
+// full 128-claim/27-source bundle hit stop_reason:max_tokens at that
+// ceiling -- adaptive thinking plus a fully-enumerated per-claim
+// disposition output (every one of 128 claims requires its own selected/
+// excluded entry, per the validator's full-accounting rule) needs more
+// headroom than a several-criterion grading rubric ever did. Raised to
+// 32000, then found to still truncate once the evidence bundle actually
+// carried real claim_text (see publication-readiness-loader.mjs's
+// CLAIM_SELECT_FIELDS fix) -- richer per-claim reasoning grounded in real
+// wording produces materially longer selected/excluded reasons than the
+// earlier claim_text-less run did. Raised to 64000 rather than reducing
+// `thinking`/effort quality to fit a tighter ceiling.
+export const SYNTHESIS_MAX_TOKENS = 64000;
 export const SYNTHESIS_EFFORT = 'medium';
 
 /** Never throws -- returns a tagged failure object instead, per STEP 12. */
@@ -70,13 +90,15 @@ function parseSynthesisOutput(rawText) {
  * for a misconfigured/unregistered model override is allowed to propagate,
  * since that is a caller configuration bug, not a runtime synthesis failure.
  *
- * @param {Object} env - must carry ANTHROPIC_API_KEY (and optionally
- *   PUBLICATION_EDITOR_SYNTHESIS_MODEL to override the resolved model)
+ * @param {Object} env - must carry ANTHROPIC_PUBLICATION_EDITOR_API_KEY (a
+ *   dedicated credential, separate from Cadence's own ANTHROPIC_API_KEY --
+ *   see module header) and optionally PUBLICATION_EDITOR_SYNTHESIS_MODEL
+ *   to override the resolved model
  * @param {{topic_slug: string, evidenceBundle: {claims: object[], sources: object[]}}} params
  */
 export async function synthesizeTopic(env, { topic_slug, evidenceBundle }) {
-  if (!env || !env.ANTHROPIC_API_KEY) {
-    return failure('missing_api_key', 'ANTHROPIC_API_KEY not configured in this environment.');
+  if (!env || !env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY) {
+    return failure('missing_api_key', 'ANTHROPIC_PUBLICATION_EDITOR_API_KEY not configured in this environment.');
   }
 
   let modelInfo;
@@ -103,7 +125,7 @@ export async function synthesizeTopic(env, { topic_slug, evidenceBundle }) {
   let data;
   try {
     data = await fetchAnthropicMessages({
-      apiKey: env.ANTHROPIC_API_KEY,
+      apiKey: env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY,
       body: {
         model: modelInfo.modelName,
         max_tokens: SYNTHESIS_MAX_TOKENS,
