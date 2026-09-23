@@ -1,7 +1,7 @@
 # AIMT Publication Editor v1 — Shadow-Mode Topic Readiness Report
 
-Generated: 2026-09-23T02:48:41.313Z
-Data source: local validated export: research-import/unpacked/aimt-research-library-export-2026-09-20
+Generated: 2026-09-23T02:48:49.414Z
+Data source: LIVE Supabase production corpus (read-only SELECT via PostgREST, service-role key -- no writes issued)
 
 **This is a shadow-mode / dry-run report.** Nothing in this document has changed any research_claims, research_sources, or research_public_pages row. `READY` / `NOT_READY` / `NEEDS_SYNTHESIS` / `HUMAN_REVIEW` below are this engine's own reporting labels -- they do not set, and are not the same as, AIMT_APPROVED, public_eligible, or published. `NEEDS_SYNTHESIS` is intended for the future AI Publication Editor (v2), not automatically a human task -- see docs/research/AIMT-Publication-Editor-v1.md.
 
@@ -27,7 +27,7 @@ Data source: local validated export: research-import/unpacked/aimt-research-libr
 - Total claims considered (any status, matching topic): 399
 - Candidate CLAIM_VERIFIED-or-higher claims: 378
 - Distinct supporting sources: 78 (need 2+)
-- Evidence-type distribution: {"narrative_review":13,"meta_analysis":23,"professional_org":17,"systematic_review":10,"clinical_guideline":2,"rct":8,"other":1,"observational":2,"technical_report":2}
+- Evidence-type distribution: {"narrative_review":13,"professional_org":17,"meta_analysis":23,"systematic_review":10,"clinical_guideline":2,"rct":8,"other":1,"observational":2,"technical_report":2}
 - Systematic-tier evidence present (systematic_review/meta_analysis/clinical_guideline/RCT): true
 - Professional-consensus source present: true
 
@@ -72,7 +72,7 @@ Data source: local validated export: research-import/unpacked/aimt-research-libr
 - Total claims considered (any status, matching topic): 183
 - Candidate CLAIM_VERIFIED-or-higher claims: 164
 - Distinct supporting sources: 35 (need 2+)
-- Evidence-type distribution: {"narrative_review":17,"professional_org":5,"observational":4,"systematic_review":4,"meta_analysis":4,"technical_report":1}
+- Evidence-type distribution: {"narrative_review":17,"systematic_review":4,"professional_org":5,"observational":4,"meta_analysis":4,"technical_report":1}
 - Systematic-tier evidence present (systematic_review/meta_analysis/clinical_guideline/RCT): true
 - Professional-consensus source present: true
 
@@ -114,7 +114,7 @@ Data source: local validated export: research-import/unpacked/aimt-research-libr
 - Total claims considered (any status, matching topic): 303
 - Candidate CLAIM_VERIFIED-or-higher claims: 287
 - Distinct supporting sources: 60 (need 2+)
-- Evidence-type distribution: {"narrative_review":9,"meta_analysis":21,"professional_org":12,"systematic_review":8,"rct":5,"observational":2,"technical_report":2,"clinical_guideline":1}
+- Evidence-type distribution: {"professional_org":12,"meta_analysis":21,"systematic_review":8,"narrative_review":9,"rct":5,"observational":2,"technical_report":2,"clinical_guideline":1}
 - Systematic-tier evidence present (systematic_review/meta_analysis/clinical_guideline/RCT): true
 - Professional-consensus source present: true
 
@@ -194,7 +194,7 @@ Data source: local validated export: research-import/unpacked/aimt-research-libr
 - Total claims considered (any status, matching topic): 113
 - Candidate CLAIM_VERIFIED-or-higher claims: 111
 - Distinct supporting sources: 23 (need 2+)
-- Evidence-type distribution: {"narrative_review":7,"professional_org":7,"systematic_review":1,"meta_analysis":3,"clinical_guideline":1,"other":1,"rct":3}
+- Evidence-type distribution: {"narrative_review":7,"professional_org":7,"meta_analysis":3,"systematic_review":1,"clinical_guideline":1,"other":1,"rct":3}
 - Systematic-tier evidence present (systematic_review/meta_analysis/clinical_guideline/RCT): true
 - Professional-consensus source present: true
 
@@ -235,7 +235,7 @@ Data source: local validated export: research-import/unpacked/aimt-research-libr
 - Total claims considered (any status, matching topic): 146
 - Candidate CLAIM_VERIFIED-or-higher claims: 128
 - Distinct supporting sources: 27 (need 2+)
-- Evidence-type distribution: {"narrative_review":16,"observational":4,"systematic_review":3,"professional_org":1,"technical_report":1,"meta_analysis":2}
+- Evidence-type distribution: {"narrative_review":16,"systematic_review":3,"observational":4,"professional_org":1,"technical_report":1,"meta_analysis":2}
 - Systematic-tier evidence present (systematic_review/meta_analysis/clinical_guideline/RCT): true
 - Professional-consensus source present: true
 

@@ -89,7 +89,7 @@ export const PILOT_TOPIC_CONCEPTS = Object.freeze([
 ]);
 
 const CLAIM_SELECT_FIELDS = [
-  'claim_id', 'source_id', 'claim_type', 'direction', 'topics',
+  'claim_id', 'source_id', 'claim_type', 'direction', 'topics', 'population_or_scope',
   'verification_status', 'use_status', 'verification_review_status', 'claim_origin'
 ];
 const SOURCE_SELECT_FIELDS = [

@@ -56,24 +56,35 @@ function parseArgs(argv) {
 }
 
 function fmtList(arr) {
-  return arr.length ? arr.join(', ') : 'none';
+  return arr && arr.length ? arr.join(', ') : 'none';
 }
 
-function requirementsToBecomeReady(result) {
+function pathForward(result) {
   const asks = [];
   if (result.readiness_status === 'READY') return ['Already READY under v1 rules.'];
-  if (result.risk_tier === 'HIGH') {
-    asks.push('Human editorial review of HIGH-risk framing -- this tier is never auto-READY in v1 regardless of corroboration.');
+
+  if (result.readiness_status === 'HUMAN_REVIEW') {
+    if (result.risk_tier === 'HIGH') {
+      asks.push('Human editorial review of HIGH-risk framing -- this tier never auto-clears in v1 regardless of corroboration or synthesis outcome.');
+    }
+    if (result.metrics.needs_review_flagged_claim_count > 0) {
+      asks.push(`Resolve the ${result.metrics.needs_review_flagged_claim_count} claim(s) already flagged use_status=needs_review -- an already-identified exception, not ordinary synthesis material.`);
+    }
+    return asks.length ? asks : ['Human editorial review required; no further deterministic detail available in v1.'];
   }
-  if (result.conflict_flags.includes('SAFETY_CONCLUSION_PRESENT')) {
-    asks.push('Human synthesis of the safety_conclusion claim(s) into practitioner-scope-safe language.');
+
+  if (result.readiness_status === 'NEEDS_SYNTHESIS') {
+    if (result.conflict_flags.includes('SAFETY_CONCLUSION_PRESENT')) {
+      asks.push('AI Publication Editor (v2) synthesis of the safety_conclusion claim(s): exclude, include with scope framing, or escalate -- see synthesis_packet.safety_claim_ids.');
+    }
+    if (result.conflict_flags.includes('POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS')) {
+      asks.push('AI Publication Editor (v2) synthesis reconciling verified findings that disagree on effect direction -- see synthesis_packet.finding_direction_detail for whether they address different interventions/populations/questions.');
+    }
+    asks.push('A deterministic post-synthesis validator must confirm the synthesized output before this topic can move to an auto-clear state -- see docs/research/AIMT-Publication-Editor-v1.md "future auto-clear contract".');
+    return asks;
   }
-  if (result.conflict_flags.includes('POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS')) {
-    asks.push('Human synthesis reconciling verified findings that disagree on effect direction (supports_effect vs no_effect).');
-  }
-  if (result.conflict_flags.includes('CANDIDATE_CLAIMS_FLAGGED_NEEDS_REVIEW')) {
-    asks.push('Resolve the claim(s) already flagged use_status=needs_review before considering this topic further.');
-  }
+
+  // NOT_READY
   if (result.evidence_gaps.includes('no_verified_substantive_claim')) {
     asks.push('At least one CLAIM_VERIFIED finding or recommendation claim (not just limitations/method notes).');
   }
@@ -101,17 +112,19 @@ function buildMarkdown({ generatedAt, mode, results }) {
   lines.push('');
   lines.push('**This is a shadow-mode / dry-run report.** Nothing in this document has changed any '
     + 'research_claims, research_sources, or research_public_pages row. `READY` / `NOT_READY` / '
-    + '`NEEDS_REVIEW` below are this engine\'s own reporting labels -- they do not set, and are not the '
-    + 'same as, AIMT_APPROVED, public_eligible, or published. See docs/research/AIMT-Publication-Editor-v1.md.');
+    + '`NEEDS_SYNTHESIS` / `HUMAN_REVIEW` below are this engine\'s own reporting labels -- they do not '
+    + 'set, and are not the same as, AIMT_APPROVED, public_eligible, or published. '
+    + '`NEEDS_SYNTHESIS` is intended for the future AI Publication Editor (v2), not automatically a human '
+    + 'task -- see docs/research/AIMT-Publication-Editor-v1.md.');
   lines.push('');
 
-  const counts = { READY: 0, NOT_READY: 0, NEEDS_REVIEW: 0 };
+  const counts = { READY: 0, NOT_READY: 0, NEEDS_SYNTHESIS: 0, HUMAN_REVIEW: 0 };
   for (const r of results) counts[r.result.readiness_status] += 1;
   lines.push('## Summary');
   lines.push('');
-  lines.push(`| READY | NOT_READY | NEEDS_REVIEW |`);
-  lines.push(`|---|---|---|`);
-  lines.push(`| ${counts.READY} | ${counts.NOT_READY} | ${counts.NEEDS_REVIEW} |`);
+  lines.push(`| READY | NOT_READY | NEEDS_SYNTHESIS | HUMAN_REVIEW |`);
+  lines.push(`|---|---|---|---|`);
+  lines.push(`| ${counts.READY} | ${counts.NOT_READY} | ${counts.NEEDS_SYNTHESIS} | ${counts.HUMAN_REVIEW} |`);
   lines.push('');
 
   for (const { concept, result } of results) {
@@ -143,8 +156,21 @@ function buildMarkdown({ generatedAt, mode, results }) {
     lines.push('**Reasons:**');
     for (const reason of result.reasons) lines.push(`- ${reason}`);
     lines.push('');
-    lines.push('**What would be required to become READY:**');
-    for (const ask of requirementsToBecomeReady(result)) lines.push(`- ${ask}`);
+    lines.push('**Path forward:**');
+    for (const ask of pathForward(result)) lines.push(`- ${ask}`);
+
+    if (result.synthesis_packet) {
+      const sp = result.synthesis_packet;
+      lines.push('');
+      lines.push('**Synthesis packet (for the future AI Publication Editor v2):**');
+      lines.push(`- Safety claims to synthesize: ${sp.safety_claim_ids.length}`);
+      lines.push(`- supports_effect finding claims: ${sp.supports_effect_claim_ids.length}`);
+      lines.push(`- no_effect finding claims: ${sp.no_effect_claim_ids.length}`);
+      lines.push(`- Limitation claims available to preserve: ${sp.limitation_claim_ids.length}`);
+      lines.push(`- Distinct populations/scopes recorded on direction-conflicted claims: ${fmtList([...new Set(sp.finding_direction_detail.map((d) => d.population_or_scope).filter(Boolean))])}`);
+      lines.push('- Full packet (all claim/source IDs, citation metadata, post-synthesis validation rules) is in the JSON report only -- not expanded in this human summary.');
+    }
+
     lines.push('');
     lines.push('---');
     lines.push('');
@@ -172,7 +198,9 @@ async function main() {
     process.exit(1);
   }
 
-  const mode = args.live ? `LIVE Supabase (read-only SELECT)` : `local export: ${path.relative(ROOT, args.exportDir)}`;
+  const mode = args.live
+    ? 'LIVE Supabase production corpus (read-only SELECT via PostgREST, service-role key -- no writes issued)'
+    : `local validated export: ${path.relative(ROOT, args.exportDir)}`;
   console.log(`=== AIMT Publication Editor v1 — shadow-mode run ===`);
   console.log(`mode: ${mode}`);
 
@@ -181,6 +209,7 @@ async function main() {
     const { claims, sources } = await loadConceptEvidence(concept, args);
     const result = assessTopicReadiness({
       topic_slug: concept.topic_slug,
+      seo_page_concept: concept.seo_page_concept,
       controlled_topics: concept.controlled_topics,
       claims,
       sources
@@ -193,6 +222,7 @@ async function main() {
   const jsonReport = {
     generated_at: generatedAt,
     mode,
+    data_source: args.live ? 'live_production_readonly' : 'local_validated_export',
     shadow_mode: true,
     write_operations_performed: 0,
     engine_version: 'publication-readiness-v1',
@@ -208,15 +238,18 @@ async function main() {
       metrics: result.metrics,
       conflict_flags: result.conflict_flags,
       evidence_gaps: result.evidence_gaps,
-      requirements_to_become_ready: requirementsToBecomeReady(result),
+      path_forward: pathForward(result),
       candidate_claim_ids: result.candidate_claim_ids,
-      candidate_source_ids: result.candidate_source_ids
+      candidate_source_ids: result.candidate_source_ids,
+      synthesis_candidate_claim_ids: result.synthesis_candidate_claim_ids,
+      synthesis_packet: result.synthesis_packet
     }))
   };
 
   if (!existsSync(args.outDir)) mkdirSync(args.outDir, { recursive: true });
-  const jsonPath = path.join(args.outDir, `publication-editor-shadow-report-${generatedAt.slice(0, 10)}.json`);
-  const mdPath = path.join(args.outDir, `publication-editor-shadow-report-${generatedAt.slice(0, 10)}.md`);
+  const suffix = args.live ? '-live' : '';
+  const jsonPath = path.join(args.outDir, `publication-editor-shadow-report-${generatedAt.slice(0, 10)}${suffix}.json`);
+  const mdPath = path.join(args.outDir, `publication-editor-shadow-report-${generatedAt.slice(0, 10)}${suffix}.md`);
   writeFileSync(jsonPath, JSON.stringify(jsonReport, null, 2));
   writeFileSync(mdPath, buildMarkdown({ generatedAt, mode, results }));
 
