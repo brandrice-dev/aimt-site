@@ -467,3 +467,8 @@ Once both exist and have been validated on real `NEEDS_SYNTHESIS` output,
 `AUTO_READY` (step 7) becomes the natural addition, with `HUMAN_REVIEW`
 kept as the exception path it was always meant to be — never the default
 outcome for ordinary publication flow.
+
+**Update:** this step has been built, as a hair-cycle-only pilot, in
+**Publication Editor v2** — see `docs/research/AIMT-Publication-Editor-v2.md`
+for the AI synthesis client, the JSON-schema structured-output contract,
+and the full deterministic post-synthesis validator described above.
