@@ -134,7 +134,7 @@ async function main() {
     validatorVersion: POST_SYNTHESIS_VALIDATOR_VERSION,
   });
 
-  const fingerprint = await computeEvidenceFingerprint(brief);
+  const fingerprint = await computeEvidenceFingerprint(TOPIC_SLUG, brief);
   console.log(`\n[clearance] evidence fingerprint: ${fingerprint}`);
 
   let record;

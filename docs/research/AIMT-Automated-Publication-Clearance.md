@@ -116,7 +116,7 @@ is the only place this shape is decided. It:
   `verification_status`, `AIMT_APPROVED`) before returning — a future
   edit that accidentally introduces one of these fails loudly.
 
-## Fingerprint design
+## Fingerprint design (v2 — bound to page intent)
 
 `functions/_lib/research/publication-clearance-fingerprint.mjs` — pure,
 Web Crypto (`crypto.subtle.digest('SHA-256', …)`, matching this repo's
@@ -124,35 +124,50 @@ Web Crypto (`crypto.subtle.digest('SHA-256', …)`, matching this repo's
 verification), so the identical function runs in a Node script or a
 Cloudflare Function without a dependency.
 
-Per the CRITICAL FINGERPRINT RULE: the hash covers **exactly** six
-materially-relevant categories, extracted into a canonical object before
-hashing — `risk_tier`, `selected_claim_ids` (sorted), `core_factual_points`
-(each `{statement, supporting_claim_ids}`, array sorted by its own
-canonical JSON so point *order* doesn't matter), `limitations` (same
-treatment), `citation_map` (recursively key-sorted), `source_ids`
-(sorted). Everything else on a brief — `review_timestamp`, `provenance`
-(model/version metadata), `page_concept`/`public_intent` prose, excluded-
-claim *reasons* — is deliberately excluded, which is also what makes two
-semantically-identical briefs with reordered or extra fields hash
-identically (tested directly:
+**v1 → v2 correction:** because this is *page-level* clearance, the
+fingerprint must not authorize the same evidence for a materially
+different page purpose. v1's canonical input covered only evidence
+content; v2 adds the page's own identity — `topic_slug` (passed as an
+explicit parameter to `computeEvidenceFingerprint(topicSlug, brief)`,
+not read off the brief, since `buildPageEvidenceBrief()` doesn't carry
+it), `page_concept`, `public_intent`, and `scope_language`. Changing the
+intended page question or practitioner-scope framing now invalidates a
+prior clearance and requires a fresh Publication Editor pass, even if the
+underlying claim/source content is untouched. `FINGERPRINT_ALGORITHM` was
+bumped to `'sha256-canonical-json-v2'` rather than silently keeping the
+old name once the canonical input contract changed.
+
+Per the CRITICAL FINGERPRINT RULE, the hash now covers exactly these
+categories, extracted into a canonical object before hashing: `topic_slug`,
+`page_concept`, `public_intent`, `scope_language` (recursively key-sorted),
+`risk_tier`, `selected_claim_ids` (sorted), `core_factual_points` (each
+`{statement, supporting_claim_ids}`, array sorted by its own canonical
+JSON so point *order* doesn't matter), `limitations` (same treatment),
+`citation_map` (recursively key-sorted), `source_ids` (sorted). Everything
+else on a brief — `review_timestamp`, `provenance` (model/version
+metadata), excluded-claim *reasons* — is deliberately excluded, which is
+also what makes two semantically-identical briefs with reordered or extra
+fields hash identically (tested directly:
 `FINGERPRINT_IGNORES_IRRELEVANT` in `tests/research-publication-clearance.test.mjs`).
 
 **Known limitation, stated rather than papered over:** a synthesis MODEL
 or VERSION change alone does not move the fingerprint, only a change in
-evidence content. Per the originating request's own instruction to
-distinguish enforceable-now from speculative, this is not implemented —
-nothing in the current brief shape marks a model/version change as
-materially relevant on its own, and inventing that rule now would be
-speculative.
+evidence/page-intent content. Per the originating request's own
+instruction to distinguish enforceable-now from speculative, this is not
+implemented — nothing in the current brief shape marks a model/version
+change as materially relevant on its own, and inventing that rule now
+would be speculative.
 
 ## Invalidation rules
 
-**Enforceable now**, via `isClearanceStale(brief, storedFingerprint)`:
-recomputes the fingerprint from a freshly-generated brief and compares —
-any of the six categories changing (a claim superseded/excluded changing
+**Enforceable now**, via `isClearanceStale(topicSlug, brief,
+storedFingerprint)`: recomputes the fingerprint from a freshly-generated
+brief (and the same `topicSlug`) and compares — any of the categories
+above changing (a claim superseded/excluded changing
 `selected_claim_ids`, a citation correction changing `citation_map`, a
 new safety claim changing which claims got selected/excluded, a risk
-reclassification changing `risk_tier`, a source set change) makes the
+reclassification changing `risk_tier`, a source set change, or — new in
+v2 — the page's own concept/intent/scope framing changing) makes the
 stored fingerprint stale, detected mechanically, not by inference.
 
 **Not enforceable yet, named rather than guessed at:**
@@ -166,6 +181,47 @@ stored fingerprint stale, detected mechanically, not by inference.
   phase adds no schedule and no trigger (explicitly out of scope). Re-
   checking staleness today means re-running the CLI and comparing
   fingerprints by hand.
+
+## Page-level DB invariants (defense in depth)
+
+`publication-clearance-writer.mjs` already enforces the write-time rules
+in application code, but the migration also adds three CHECK constraints
+directly on `research_public_pages`, so the governance contract holds
+even against a future writer this repo hasn't reviewed yet:
+
+1. **`research_public_pages_ready_requires_clearance`** — a row with
+   `status = 'ready_for_page_builder'` must have `clearance_mode IN
+   ('AUTO_READY', 'HUMAN_APPROVED')`, a non-empty `generation_source_hash`,
+   at least one `key_claim_id`, and at least one `source_id`.
+2. **`research_public_pages_review_required_not_ready`** — a row with
+   `clearance_mode = 'HUMAN_REVIEW_REQUIRED'` can never also have
+   `status IN ('ready_for_page_builder', 'published')`.
+3. **`research_public_pages_published_requires_clearance`** —
+   forward-looking (this phase never sets `status = 'published'` itself):
+   IF a row is ever published, it must have `clearance_mode IN
+   ('AUTO_READY', 'HUMAN_APPROVED')`.
+
+None of the three reference `AIMT_APPROVED` or claim-level
+`public_eligible`/`published` — deliberately (see "Recommended Page
+Builder phase" below for why).
+
+**A real Postgres three-valued-logic gotcha, caught and fixed while
+writing these:** a naive `clearance_mode IN (...)` is `NULL`, not
+`FALSE`, when `clearance_mode IS NULL`, and Postgres CHECK constraints
+**pass** on a `NULL` result — only an explicit `FALSE` fails them. The
+same trap applies to `array_length()` on an empty array (returns `NULL`,
+not `0`). Written naively, constraint 1 would have silently passed
+exactly the row it exists to reject (`ready_for_page_builder` +
+`clearance_mode IS NULL`). Fixed with an explicit `clearance_mode IS NOT
+NULL AND clearance_mode IN (...)` and `COALESCE(array_length(...), 0) >
+0` throughout the migration.
+
+`functions/_lib/research/publication-clearance-invariants.mjs` is a pure,
+hand-kept JS re-statement of these same three checks — the same posture
+`scripts/research-library-preflight.mjs` already takes toward the
+`research_claims`/`research_sources` CHECK constraints — so
+`tests/research-publication-clearance.test.mjs` can verify the invariants
+a live migration would enforce without a live Postgres connection.
 
 ## Write path
 
@@ -193,7 +249,7 @@ upsert — never invoked automatically, and per the originating request,
 not exercised against production without explicit, separate owner
 authorization obtained in conversation first.
 
-## Hair-cycle pilot preview (2026-09-23)
+## Hair-cycle pilot preview (2026-09-23, regenerated under fingerprint v2)
 
 Ran the full pipeline against the local validated export (identical to
 production, per Publication Editor v2's own pilot findings). Result:
@@ -201,24 +257,77 @@ production, per Publication Editor v2's own pilot findings). Result:
 this run — LLM output naturally varies run to run; a prior live run
 needed one reconciliation call for the same topic, this one didn't).
 
-- 20 of 128 candidate claims selected; 108 excluded with individual
+This run was regenerated after the fingerprint v1→v2 correction (see
+below) specifically to capture a fingerprint computed under the
+corrected canonical input — the number below is not comparable to any
+fingerprint value recorded before this revision.
+
+- 16 of 128 candidate claims selected; 112 excluded with individual
   reasons (treatment/intervention content, unrelated conditions,
-  molecular detail beyond practitioner scope, duplicates).
-- 8 sources cited, complete citation metadata for each.
-- 6 core factual points, 1 limitation (mouse-model/narrative-review
-  evidence-base caveat).
-- Fingerprint: `9899babb9aed2aeb13569cd28e0456f287affaa13a231636b95253f17e61d9c6`.
+  molecular/immunologic/microbiome detail beyond practitioner scope).
+- 6 sources cited (27 distinct sources were in the candidate pool),
+  complete citation metadata for each.
+- 7 core factual points, 3 limitations (animal-model/narrative-review
+  evidence-base caveats).
+- Fingerprint (`sha256-canonical-json-v2`):
+  `bd36a062193001b7689a83b34c894226e6aa7e29cc8a1c99ceebbd3b7a2f27f4`.
 - `clearance_mode: 'AUTO_READY'`, `status: 'ready_for_page_builder'`.
 - **Not written.** Preview only, per this phase's own scope.
 
 ## Recommended Page Builder phase
 
-Once the migration is applied and a real clearance write is authorized:
-a Page Builder would read `research_public_pages` rows where
-`clearance_mode = 'AUTO_READY'` and `status = 'ready_for_page_builder'`,
-draft actual page copy from `key_claim_ids`/`publication_clearance`'s
-citation map/scope language, and — critically — still require a human to
-review the drafted page and move `key_claim_ids`' underlying claims to
-`AIMT_APPROVED`/`public_eligible` before `status` could ever become
-`published`. This phase does not build that; it only makes the handoff
-point honest and auditable.
+**Correction (this revision):** an earlier draft of this section said a
+Page Builder should still require a human to promote every underlying
+`key_claim_ids` entry to `AIMT_APPROVED`/`public_eligible` before a page
+could publish. That was wrong, and contradicted the entire point of
+building this bridge. `AIMT_APPROVED` and claim-level `public_eligible`/
+`published` are **claim/source-level** trust signals — Rick verified the
+wording, or a human separately reviewed that specific claim. Page-level
+`clearance_mode` (`AUTO_READY`/`HUMAN_APPROVED`) is a **different, already
+-sufficient** trust signal for page-level eligibility, and re-imposing a
+claim-level human gate on top of it would mean no topic could ever
+publish autonomously — defeating the reason this whole pipeline
+(`CLAIM_VERIFIED → v1 → v2 synthesis → deterministic validation →
+AUTO_READY → page-level clearance`) was built.
+
+Once the migration is applied and a real clearance write is authorized, a
+Page Builder should consume rows where:
+
+```
+clearance_mode = 'AUTO_READY'
+AND status = 'ready_for_page_builder'
+```
+
+and:
+
+1. **Verify the stored clearance fingerprint is still current** —
+   regenerate the evidence brief, recompute
+   `computeEvidenceFingerprint(topic_slug, brief)`, and compare against
+   `generation_source_hash` (`isClearanceStale()`). A mismatch means the
+   underlying evidence or page intent moved since clearance was issued —
+   route back to Publication Editor, never build from stale evidence.
+2. **Draft only from the cleared evidence brief** — `key_claim_ids`
+   (selected claims) and `publication_clearance`'s citation map, never
+   the full topic-wide candidate set.
+3. **Preserve citations, limitations, and scope language** exactly as
+   the cleared brief states them — `publication_clearance.citation_map`,
+   `limitations_markdown`, `practitioner_relevance_markdown`.
+4. **Pass deterministic page-level QA** (a future check: does the drafted
+   page's actual copy still say only what the selected claims support?)
+   before anything can move toward `published`.
+5. **Escalate substantive/high-risk issues if encountered** — if drafting
+   surfaces something Publication Editor's own deterministic validator
+   couldn't have caught (e.g. a factual drift introduced during drafting),
+   route to `HUMAN_REVIEW_REQUIRED`, the same narrow, exception-only path
+   v1/v2 already use.
+6. **Proceed toward publication WITHOUT claim-level `AIMT_APPROVED`
+   promotion.** `clearance_mode = 'AUTO_READY'` is a complete, independent
+   basis for `status = 'published'` per constraint 3 above — a human is
+   never required to additionally bless each selected claim.
+
+Human claim-level `AIMT_APPROVED` remains available and higher-trust —
+AIMT can still choose to manually review specific claims — but it is
+**optional**, not a required step in the ordinary autonomous publication
+path. This phase does not build the Page Builder itself; it only makes
+the handoff point honest, auditable, and — critically — usable
+autonomously for eligible LOWER/MODERATE-risk content.

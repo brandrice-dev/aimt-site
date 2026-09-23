@@ -72,3 +72,71 @@ comment on column public.research_public_pages.clearance_mode is
 
 comment on column public.research_public_pages.publication_clearance is
   'Structured provenance for a clearance decision: fingerprint algorithm, risk tier, excluded claim IDs + reasons, citation map, scope language, engine/model/validator versions, and candidate/source counts. Distinct from structured_data (reserved for this page''s own public JSON-LD/schema.org markup, a different concern). Written only by functions/_lib/research/publication-clearance-writer.mjs, itself only invoked manually via scripts/research-publication-clearance-shadow.mjs -- no automated schedule and no public route write this column.';
+
+-- ── Page-level invariants (defense in depth) ───────────────────────────
+-- The writer (publication-clearance-writer.mjs) already enforces these in
+-- application code, but the table should protect the governance contract
+-- on its own, independent of any particular writer's correctness. None of
+-- the three checks below reference AIMT_APPROVED or claim-level
+-- public_eligible/published anywhere, and none may ever be changed to --
+-- page-level clearance (AUTO_READY or HUMAN_APPROVED) is a self-
+-- sufficient, independent route to page eligibility; it must never be
+-- made to require a human having separately promoted every underlying
+-- selected claim. A JS-side mirror of these three checks, kept in sync by
+-- hand (same posture as scripts/research-library-preflight.mjs already
+-- takes toward the claims/sources CHECK constraints), lives in
+-- functions/_lib/research/publication-clearance-invariants.mjs and is
+-- exercised by tests/research-publication-clearance.test.mjs without a
+-- live Postgres connection.
+--
+-- THREE-VALUED-LOGIC NOTE: every predicate below explicitly tests
+-- `clearance_mode is not null` before comparing it, and uses
+-- coalesce(array_length(...), 0) rather than a bare array_length(...) --
+-- Postgres CHECK constraints PASS on a NULL result (only an explicit
+-- FALSE fails them), and both a NULL clearance_mode compared with `in
+-- (...)` and array_length() on an empty array evaluate to NULL, not
+-- FALSE, if written naively. Written naively, these constraints would
+-- silently pass exactly the rows they exist to reject.
+
+-- 1. A row claiming to be ready for the Page Builder must carry a real,
+--    non-empty clearance -- never an accidental/partial state.
+alter table public.research_public_pages
+  drop constraint if exists research_public_pages_ready_requires_clearance;
+alter table public.research_public_pages
+  add constraint research_public_pages_ready_requires_clearance
+    check (
+      status <> 'ready_for_page_builder'
+      or (
+        clearance_mode is not null
+        and clearance_mode in ('AUTO_READY', 'HUMAN_APPROVED')
+        and generation_source_hash is not null
+        and generation_source_hash <> ''
+        and coalesce(array_length(key_claim_ids, 1), 0) > 0
+        and coalesce(array_length(source_ids, 1), 0) > 0
+      )
+    );
+
+-- 2. A row explicitly flagged HUMAN_REVIEW_REQUIRED can never also claim
+--    to be ready for the Page Builder or already published.
+alter table public.research_public_pages
+  drop constraint if exists research_public_pages_review_required_not_ready;
+alter table public.research_public_pages
+  add constraint research_public_pages_review_required_not_ready
+    check (
+      clearance_mode is distinct from 'HUMAN_REVIEW_REQUIRED'
+      or status not in ('ready_for_page_builder', 'published')
+    );
+
+-- 3. Forward-looking: IF a row is ever published (not done by this
+--    migration or this PR -- status stays 'ready_for_page_builder' at
+--    most here), it must carry a real page-level clearance. Deliberately
+--    does NOT require AIMT_APPROVED claim status -- AUTO_READY alone is
+--    sufficient, by design (see the governance note above).
+alter table public.research_public_pages
+  drop constraint if exists research_public_pages_published_requires_clearance;
+alter table public.research_public_pages
+  add constraint research_public_pages_published_requires_clearance
+    check (
+      status <> 'published'
+      or (clearance_mode is not null and clearance_mode in ('AUTO_READY', 'HUMAN_APPROVED'))
+    );

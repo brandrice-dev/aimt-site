@@ -29,6 +29,8 @@
        every build).
    ═══════════════════════════════════════════════════════════════ */
 
+import { FINGERPRINT_ALGORITHM } from './publication-clearance-fingerprint.mjs';
+
 export const CLEARANCE_MODES = Object.freeze(['AUTO_READY', 'HUMAN_APPROVED', 'HUMAN_REVIEW_REQUIRED']);
 
 /* Columns/keys a clearance record must NEVER contain. Asserted on every
@@ -122,7 +124,7 @@ export function buildAutoReadyClearanceRecord({ topicSlug, controlledTopic = nul
     generation_source_hash: fingerprint,
     last_generated_at: generatedAt,
     publication_clearance: {
-      fingerprint_algorithm: 'sha256-canonical-json-v1',
+      fingerprint_algorithm: FINGERPRINT_ALGORITHM,
       page_concept: pageEvidenceBrief.page_concept,
       public_intent: pageEvidenceBrief.public_intent,
       risk_tier: v1Result.risk_tier,
