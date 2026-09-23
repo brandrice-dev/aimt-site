@@ -241,7 +241,12 @@ function isCandidateClaim(claim) {
 /* "Citations resolve to real source records with sufficient citation
    metadata" (Step 6, rule 4): a title, a year (or full date_published),
    and at least one external identifier a reader could actually follow. */
-function hasSufficientCitationMetadata(source) {
+/* Exported (v2 addition, no behavior change) so the Publication Editor v2
+   post-synthesis validator (publication-synthesis-validator.mjs) can reuse
+   the exact same "does this source resolve to a real, citeable record"
+   check v1 already uses, instead of re-implementing an independent copy
+   that could silently drift from this one. */
+export function hasSufficientCitationMetadata(source) {
   if (!source) return false;
   const hasTitle = !!source.title;
   const hasYear = !!(source.year || source.date_published);
