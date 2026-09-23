@@ -13,15 +13,20 @@
    connection.
 
    Three invariants, matching the migration exactly:
-     1. status = 'ready_for_page_builder' requires a real clearance:
+     1. status = 'ready_for_page_builder' requires a COMPLETE clearance:
         clearance_mode in (AUTO_READY, HUMAN_APPROVED), a non-empty
         generation_source_hash, at least one key_claim_id, at least one
-        source_id.
+        source_id, and a non-empty publication_clearance object.
      2. clearance_mode = 'HUMAN_REVIEW_REQUIRED' may never coexist with
         status in (ready_for_page_builder, published).
-     3. status = 'published' requires clearance_mode in (AUTO_READY,
-        HUMAN_APPROVED) -- forward-looking; this phase never sets
-        status = 'published' itself.
+     3. status = 'published' requires the SAME complete clearance as (1)
+        -- forward-looking; this phase never sets status = 'published'
+        itself. Hardened this revision: previously this only checked
+        clearance_mode, which would have let a buggy future writer mark a
+        row published with clearance_mode = 'AUTO_READY' but no hash, no
+        claims, no sources, or an empty publication_clearance -- passing
+        the letter of the constraint while defeating the auditability it
+        exists to guarantee.
 
    None of these three checks anywhere require or reference
    AIMT_APPROVED, claim-level public_eligible, or claim-level published
@@ -40,6 +45,36 @@ function arrayCount(v) {
   return Array.isArray(v) ? v.length : 0;
 }
 
+function isNonEmptyPlainObject(v) {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    !Array.isArray(v) &&
+    Object.keys(v).length > 0
+  );
+}
+
+// Shared by both the ready and published invariants -- a "complete"
+// page-level clearance is the same evidence bar either way (see header).
+function pushCompleteClearanceViolations(row, constraintName, violations) {
+  const clearanceMode = row.clearance_mode ?? null;
+  if (!(clearanceMode === 'AUTO_READY' || clearanceMode === 'HUMAN_APPROVED')) {
+    violations.push(`${constraintName}:clearance_mode`);
+  }
+  if (!isNonEmptyString(row.generation_source_hash)) {
+    violations.push(`${constraintName}:generation_source_hash`);
+  }
+  if (arrayCount(row.key_claim_ids) === 0) {
+    violations.push(`${constraintName}:key_claim_ids`);
+  }
+  if (arrayCount(row.source_ids) === 0) {
+    violations.push(`${constraintName}:source_ids`);
+  }
+  if (!isNonEmptyPlainObject(row.publication_clearance)) {
+    violations.push(`${constraintName}:publication_clearance`);
+  }
+}
+
 /**
  * @param {object} row - a research_public_pages-shaped row (or candidate
  *   record before write)
@@ -52,18 +87,7 @@ export function validatePageInvariants(row) {
 
   // 1. research_public_pages_ready_requires_clearance
   if (status === 'ready_for_page_builder') {
-    if (!(clearanceMode === 'AUTO_READY' || clearanceMode === 'HUMAN_APPROVED')) {
-      violations.push('research_public_pages_ready_requires_clearance:clearance_mode');
-    }
-    if (!isNonEmptyString(row.generation_source_hash)) {
-      violations.push('research_public_pages_ready_requires_clearance:generation_source_hash');
-    }
-    if (arrayCount(row.key_claim_ids) === 0) {
-      violations.push('research_public_pages_ready_requires_clearance:key_claim_ids');
-    }
-    if (arrayCount(row.source_ids) === 0) {
-      violations.push('research_public_pages_ready_requires_clearance:source_ids');
-    }
+    pushCompleteClearanceViolations(row, 'research_public_pages_ready_requires_clearance', violations);
   }
 
   // 2. research_public_pages_review_required_not_ready
@@ -72,8 +96,8 @@ export function validatePageInvariants(row) {
   }
 
   // 3. research_public_pages_published_requires_clearance (forward-looking)
-  if (status === 'published' && !(clearanceMode === 'AUTO_READY' || clearanceMode === 'HUMAN_APPROVED')) {
-    violations.push('research_public_pages_published_requires_clearance');
+  if (status === 'published') {
+    pushCompleteClearanceViolations(row, 'research_public_pages_published_requires_clearance', violations);
   }
 
   return { valid: violations.length === 0, violations };

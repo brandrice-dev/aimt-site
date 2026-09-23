@@ -343,6 +343,7 @@ function invariantRow(overrides = {}) {
     generation_source_hash: 'deadbeef',
     key_claim_ids: ['c1'],
     source_ids: ['s1'],
+    publication_clearance: { fingerprint_algorithm: 'sha256-canonical-json-v2', risk_tier: 'LOWER' },
     ...overrides,
   };
 }
@@ -383,26 +384,82 @@ async function testInvariantReadyMissingHashRejected() {
   check('INVARIANT_READY_NO_HASH', 'ready_for_page_builder with empty-string generation_source_hash is rejected', !resultEmpty.valid);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Hardened this revision: a "complete" clearance also requires a real,
+// non-empty publication_clearance provenance object -- for BOTH
+// ready_for_page_builder and published. Items 1, 3-6 from the originating
+// request's new test list.
+// ─────────────────────────────────────────────────────────────────────────
+async function testInvariantReadyEmptyPublicationClearanceRejected() {
+  const resultEmptyObject = validatePageInvariants(invariantRow({ publication_clearance: {} }));
+  const resultNull = validatePageInvariants(invariantRow({ publication_clearance: null }));
+  check('INVARIANT_READY_EMPTY_CLEARANCE_PAYLOAD', 'ready_for_page_builder with publication_clearance = {} is rejected', !resultEmptyObject.valid, JSON.stringify(resultEmptyObject));
+  check('INVARIANT_READY_EMPTY_CLEARANCE_PAYLOAD', 'names the exact constraint', resultEmptyObject.violations.includes('research_public_pages_ready_requires_clearance:publication_clearance'), JSON.stringify(resultEmptyObject.violations));
+  check('INVARIANT_READY_EMPTY_CLEARANCE_PAYLOAD', 'ready_for_page_builder with publication_clearance = null is rejected', !resultNull.valid, JSON.stringify(resultNull));
+}
+
 async function testInvariantPublishedAutoReadyAllowed() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY' }));
-  check('INVARIANT_PUBLISHED_AUTO_READY', 'published + AUTO_READY is structurally allowed (not actually published anywhere in this PR)', result.valid, JSON.stringify(result));
+  check('INVARIANT_PUBLISHED_AUTO_READY', 'published + AUTO_READY + hash + claims + sources + real publication_clearance is structurally allowed (not actually published anywhere in this PR)', result.valid, JSON.stringify(result));
 }
 
 async function testInvariantPublishedHumanApprovedAllowed() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'HUMAN_APPROVED' }));
-  check('INVARIANT_PUBLISHED_HUMAN_APPROVED', 'published + HUMAN_APPROVED is structurally allowed', result.valid, JSON.stringify(result));
+  check('INVARIANT_PUBLISHED_HUMAN_APPROVED', 'published + HUMAN_APPROVED + a complete clearance payload is structurally allowed', result.valid, JSON.stringify(result));
+}
+
+async function testInvariantPublishedMissingHashRejected() {
+  const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY', generation_source_hash: null }));
+  check('INVARIANT_PUBLISHED_NO_HASH', 'published + AUTO_READY but missing generation_source_hash is rejected', !result.valid);
+  check('INVARIANT_PUBLISHED_NO_HASH', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:generation_source_hash'), JSON.stringify(result.violations));
+}
+
+async function testInvariantPublishedEmptyKeyClaimIdsRejected() {
+  const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY', key_claim_ids: [] }));
+  check('INVARIANT_PUBLISHED_EMPTY_CLAIMS', 'published + AUTO_READY but empty key_claim_ids is rejected', !result.valid);
+  check('INVARIANT_PUBLISHED_EMPTY_CLAIMS', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:key_claim_ids'), JSON.stringify(result.violations));
+}
+
+async function testInvariantPublishedEmptySourceIdsRejected() {
+  const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY', source_ids: [] }));
+  check('INVARIANT_PUBLISHED_EMPTY_SOURCES', 'published + AUTO_READY but empty source_ids is rejected', !result.valid);
+  check('INVARIANT_PUBLISHED_EMPTY_SOURCES', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:source_ids'), JSON.stringify(result.violations));
+}
+
+async function testInvariantPublishedEmptyPublicationClearanceRejected() {
+  const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'AUTO_READY', publication_clearance: {} }));
+  check('INVARIANT_PUBLISHED_EMPTY_CLEARANCE_PAYLOAD', 'published + AUTO_READY but publication_clearance = {} is rejected', !result.valid, JSON.stringify(result));
+  check('INVARIANT_PUBLISHED_EMPTY_CLEARANCE_PAYLOAD', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:publication_clearance'), JSON.stringify(result.violations));
 }
 
 async function testInvariantPublishedNullClearanceRejected() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: null }));
   check('INVARIANT_PUBLISHED_NULL', 'published + NULL clearance is rejected', !result.valid);
-  check('INVARIANT_PUBLISHED_NULL', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance'), JSON.stringify(result.violations));
+  check('INVARIANT_PUBLISHED_NULL', 'names the exact constraint', result.violations.includes('research_public_pages_published_requires_clearance:clearance_mode'), JSON.stringify(result.violations));
 }
 
 async function testInvariantPublishedHumanReviewRequiredRejected() {
   const result = validatePageInvariants(invariantRow({ status: 'published', clearance_mode: 'HUMAN_REVIEW_REQUIRED' }));
   check('INVARIANT_PUBLISHED_HUMAN_REVIEW_REQUIRED', 'published + HUMAN_REVIEW_REQUIRED is rejected', !result.valid);
-  check('INVARIANT_PUBLISHED_HUMAN_REVIEW_REQUIRED', 'trips both the published-clearance and review-required constraints', result.violations.includes('research_public_pages_published_requires_clearance') && result.violations.includes('research_public_pages_review_required_not_ready'), JSON.stringify(result.violations));
+  check('INVARIANT_PUBLISHED_HUMAN_REVIEW_REQUIRED', 'trips both the published-clearance and review-required constraints', result.violations.includes('research_public_pages_published_requires_clearance:clearance_mode') && result.violations.includes('research_public_pages_review_required_not_ready'), JSON.stringify(result.violations));
+}
+
+async function testInvariantDraftRowsWithNullClearanceRemainAllowed() {
+  // Item 10 from the originating request's new test list: this hardening
+  // pass must not retroactively break ordinary, pre-clearance rows --
+  // draft/in_review/approved/archived rows with no clearance decision
+  // recorded yet are untouched by any of these three constraints.
+  for (const status of ['draft', 'in_review', 'approved', 'archived']) {
+    const result = validatePageInvariants({
+      status,
+      clearance_mode: null,
+      generation_source_hash: null,
+      key_claim_ids: [],
+      source_ids: [],
+      publication_clearance: {},
+    });
+    check('INVARIANT_DRAFT_NULL_CLEARANCE_ALLOWED', `status="${status}" with NULL clearance_mode and empty fields remains allowed`, result.valid, JSON.stringify(result));
+  }
 }
 
 async function testInvariantDoesNotRequireAimtApproved() {
@@ -445,10 +502,16 @@ const tests = [
   testInvariantReadyEmptyKeyClaimIdsRejected,
   testInvariantReadyEmptySourceIdsRejected,
   testInvariantReadyMissingHashRejected,
+  testInvariantReadyEmptyPublicationClearanceRejected,
   testInvariantPublishedAutoReadyAllowed,
   testInvariantPublishedHumanApprovedAllowed,
+  testInvariantPublishedMissingHashRejected,
+  testInvariantPublishedEmptyKeyClaimIdsRejected,
+  testInvariantPublishedEmptySourceIdsRejected,
+  testInvariantPublishedEmptyPublicationClearanceRejected,
   testInvariantPublishedNullClearanceRejected,
   testInvariantPublishedHumanReviewRequiredRejected,
+  testInvariantDraftRowsWithNullClearanceRemainAllowed,
   testInvariantDoesNotRequireAimtApproved,
 ];
 

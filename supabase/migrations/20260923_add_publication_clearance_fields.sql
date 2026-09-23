@@ -97,9 +97,29 @@ comment on column public.research_public_pages.publication_clearance is
 -- (...)` and array_length() on an empty array evaluate to NULL, not
 -- FALSE, if written naively. Written naively, these constraints would
 -- silently pass exactly the rows they exist to reject.
+--
+-- COMPLETE CLEARANCE (hardened, this revision): a row is not considered
+-- to carry a real page-level clearance unless it has ALL of:
+--   - clearance_mode in ('AUTO_READY', 'HUMAN_APPROVED')
+--   - a non-empty generation_source_hash
+--   - at least one key_claim_id
+--   - at least one source_id
+--   - a non-empty publication_clearance provenance object (not null, not
+--     the column's own '{}'::jsonb default)
+-- The original version of constraint 1 below checked everything except
+-- publication_clearance, and the original constraint 3 (published) only
+-- checked clearance_mode -- meaning a buggy future writer could satisfy
+-- both the ready and published CHECKs while leaving generation_source_hash,
+-- key_claim_ids, source_ids, or publication_clearance empty, defeating the
+-- auditability this table exists to guarantee. Both constraints now
+-- require the SAME complete definition; `publication_clearance`'s own
+-- column default is `not null default '{}'::jsonb`, so NULL alone cannot
+-- be relied on to catch an empty payload -- hence the explicit
+-- `jsonb_typeof(...) = 'object' and publication_clearance <> '{}'::jsonb`.
+-- Neither constraint requires claim-level AIMT_APPROVED.
 
--- 1. A row claiming to be ready for the Page Builder must carry a real,
---    non-empty clearance -- never an accidental/partial state.
+-- 1. A row claiming to be ready for the Page Builder must carry a
+--    COMPLETE clearance -- never an accidental/partial state.
 alter table public.research_public_pages
   drop constraint if exists research_public_pages_ready_requires_clearance;
 alter table public.research_public_pages
@@ -113,6 +133,9 @@ alter table public.research_public_pages
         and generation_source_hash <> ''
         and coalesce(array_length(key_claim_ids, 1), 0) > 0
         and coalesce(array_length(source_ids, 1), 0) > 0
+        and publication_clearance is not null
+        and jsonb_typeof(publication_clearance) = 'object'
+        and publication_clearance <> '{}'::jsonb
       )
     );
 
@@ -129,14 +152,30 @@ alter table public.research_public_pages
 
 -- 3. Forward-looking: IF a row is ever published (not done by this
 --    migration or this PR -- status stays 'ready_for_page_builder' at
---    most here), it must carry a real page-level clearance. Deliberately
---    does NOT require AIMT_APPROVED claim status -- AUTO_READY alone is
---    sufficient, by design (see the governance note above).
+--    most here), it must carry the SAME complete page-level clearance as
+--    constraint 1 -- not merely a clearance_mode value. Deliberately does
+--    NOT require AIMT_APPROVED claim status -- AUTO_READY alone is
+--    sufficient, by design (see the governance note above). This
+--    coexists with the pre-existing
+--    research_public_pages_published_requires_timestamp constraint
+--    (supabase/migrations/20260920_create_research_library.sql), which
+--    already requires published_at whenever status = 'published' -- that
+--    constraint is untouched.
 alter table public.research_public_pages
   drop constraint if exists research_public_pages_published_requires_clearance;
 alter table public.research_public_pages
   add constraint research_public_pages_published_requires_clearance
     check (
       status <> 'published'
-      or (clearance_mode is not null and clearance_mode in ('AUTO_READY', 'HUMAN_APPROVED'))
+      or (
+        clearance_mode is not null
+        and clearance_mode in ('AUTO_READY', 'HUMAN_APPROVED')
+        and generation_source_hash is not null
+        and generation_source_hash <> ''
+        and coalesce(array_length(key_claim_ids, 1), 0) > 0
+        and coalesce(array_length(source_ids, 1), 0) > 0
+        and publication_clearance is not null
+        and jsonb_typeof(publication_clearance) = 'object'
+        and publication_clearance <> '{}'::jsonb
+      )
     );

@@ -187,19 +187,39 @@ stored fingerprint stale, detected mechanically, not by inference.
 `publication-clearance-writer.mjs` already enforces the write-time rules
 in application code, but the migration also adds three CHECK constraints
 directly on `research_public_pages`, so the governance contract holds
-even against a future writer this repo hasn't reviewed yet:
+even against a future writer this repo hasn't reviewed yet.
+
+**Both `status = 'ready_for_page_builder'` and `status = 'published'`
+require the SAME complete, auditable page-level clearance record — not
+merely a `clearance_mode` value.** A "complete" clearance is:
+
+- `clearance_mode IN ('AUTO_READY', 'HUMAN_APPROVED')`
+- a non-empty `generation_source_hash`
+- at least one `key_claim_id`
+- at least one `source_id`
+- a non-empty `publication_clearance` provenance object (not `NULL`, and
+  not the column's own `'{}'::jsonb` default)
 
 1. **`research_public_pages_ready_requires_clearance`** — a row with
-   `status = 'ready_for_page_builder'` must have `clearance_mode IN
-   ('AUTO_READY', 'HUMAN_APPROVED')`, a non-empty `generation_source_hash`,
-   at least one `key_claim_id`, and at least one `source_id`.
+   `status = 'ready_for_page_builder'` must have a complete clearance, as
+   defined above.
 2. **`research_public_pages_review_required_not_ready`** — a row with
    `clearance_mode = 'HUMAN_REVIEW_REQUIRED'` can never also have
    `status IN ('ready_for_page_builder', 'published')`.
 3. **`research_public_pages_published_requires_clearance`** —
    forward-looking (this phase never sets `status = 'published'` itself):
-   IF a row is ever published, it must have `clearance_mode IN
-   ('AUTO_READY', 'HUMAN_APPROVED')`.
+   IF a row is ever published, it must have the SAME complete clearance
+   as constraint 1 — hardened in a later revision after review found the
+   original version of this constraint checked `clearance_mode` alone,
+   which would have let a hypothetical future buggy writer mark a row
+   `published` with `clearance_mode = 'AUTO_READY'` but no hash, no
+   selected claims, no sources, or an empty `publication_clearance` —
+   satisfying the letter of the constraint while defeating the
+   auditability it exists to guarantee. This coexists with the
+   pre-existing `research_public_pages_published_requires_timestamp`
+   constraint (`supabase/migrations/20260920_create_research_library.sql`),
+   which already requires `published_at` whenever `status = 'published'`
+   and is untouched by this change.
 
 None of the three reference `AIMT_APPROVED` or claim-level
 `public_eligible`/`published` — deliberately (see "Recommended Page
