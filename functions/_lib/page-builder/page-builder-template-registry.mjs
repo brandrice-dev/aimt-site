@@ -69,12 +69,32 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     // public_intent field itself is untouched in research_public_pages.
     why_it_matters_framing: 'This overview is designed for beauty and scalp-care professionals who want a clear reference for the normal hair-growth cycle, its stages, typical timing, and normal variation.',
 
+    // Owner Correction Pass: "why it matters" originally carried only the
+    // framing intro above and never actually answered the question. The
+    // cleared PRACTITIONER_RELEVANCE point -- "Because follicles cycle
+    // individually and asynchronously, distinguishing normal cycle
+    // variation from abnormal cycling requires attention to objective
+    // morphological criteria, which is relevant for practitioners
+    // assessing scalp health" -- IS the page's practitioner-relevance
+    // evidence, verbatim, with its own supporting_claim_ids (not new
+    // framing, not a paraphrase). Placing it here, first, establishes
+    // relevance where a reader expects it. Because buildPageDraft() adds
+    // it to usedStatements before the sections loop below runs, the
+    // 'cycle-vs-shedding' section (which draws from this same bucket)
+    // now finds nothing left and is omitted rather than repeating it --
+    // "evidence controls the page," not a hardcoded removal. If a future
+    // re-cleared hair-cycle snapshot adds a second, distinct
+    // PRACTITIONER_RELEVANCE statement specifically about shedding, that
+    // section would reappear on its own with that additional evidence.
+    why_it_matters_buckets: ['PRACTITIONER_RELEVANCE'],
+
     limitations_heading: 'What this information cannot tell you',
 
     // Ordered body sections. Each pulls from its listed buckets, MINUS
-    // whatever statement answer_summary (or an earlier section in this
-    // list) already used. A section with nothing left after that
-    // exclusion is simply omitted -- "evidence controls the page."
+    // whatever statement answer_summary, why_it_matters (or an earlier
+    // section in this list) already used. A section with nothing left
+    // after that exclusion is simply omitted -- "evidence controls the
+    // page."
     sections: [
       { section_id: 'stages', heading: 'The stages of the hair growth cycle', buckets: ['DEFINITION', 'TIMING'] },
       { section_id: 'cycle-vs-shedding', heading: 'Hair cycle vs. normal shedding', buckets: ['PRACTITIONER_RELEVANCE'] },

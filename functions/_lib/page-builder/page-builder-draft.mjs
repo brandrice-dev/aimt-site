@@ -115,19 +115,35 @@ export function buildPageDraft(snapshot, meta = {}) {
 
   const sections = [];
 
-  // Framing section -- both heading and body are template-specific,
-  // hand-authored presentation copy anchored to the cleared
-  // page_concept/public_intent wording (exactly like template.meta_description
-  // below), not the raw snapshot.public_intent string itself. That raw
-  // field is written as an internal page-intent instruction rather than
-  // reader-facing prose -- see page-builder-template-registry.mjs's
-  // why_it_matters_framing comment for the full rationale. Always
-  // is_framing: true, so it is exempt from the factual-fidelity check and
-  // from the answer_summary/body de-duplication rule (see module header).
+  // Framing section -- heading and the intro paragraph are
+  // template-specific, hand-authored presentation copy anchored to the
+  // cleared page_concept/public_intent wording (exactly like
+  // template.meta_description below), not the raw snapshot.public_intent
+  // string itself -- see page-builder-template-registry.mjs's
+  // why_it_matters_framing comment for the full rationale. That intro
+  // paragraph is always is_framing: true (exempt from the
+  // factual-fidelity check and the de-duplication rule).
+  //
+  // Beyond that editorial intro, "why it matters" MAY also carry real
+  // cleared evidence establishing practical relevance -- drawn from
+  // template.why_it_matters_buckets via the exact same generic
+  // bucket/de-duplication mechanism template.sections uses below (not a
+  // hardcoded exception). Any point placed here is added to
+  // usedStatements BEFORE the section loop runs, so a later section
+  // drawing from the same bucket automatically excludes it instead of
+  // duplicating it verbatim ("evidence controls the page").
+  const whyItMattersPoints = (template.why_it_matters_buckets || [])
+    .flatMap((bucket) => grouped[bucket] || [])
+    .filter((point) => !usedStatements.has(point.statement));
+  whyItMattersPoints.forEach((point) => usedStatements.add(point.statement));
+
   sections.push({
     section_id: 'why-it-matters',
     heading: template.why_it_matters_heading,
-    paragraphs: [{ text: template.why_it_matters_framing, supporting_claim_ids: [], is_framing: true }],
+    paragraphs: [
+      { text: template.why_it_matters_framing, supporting_claim_ids: [], is_framing: true },
+      ...whyItMattersPoints.map(paragraph),
+    ],
   });
 
   // Template-defined body sections, each excluding any statement
