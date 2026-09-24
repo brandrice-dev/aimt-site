@@ -1,14 +1,17 @@
-> **STATUS: EDITORIAL EXEMPLAR / OWNER REVIEW.** This document is NOT yet a
-> permanent canonical brand document. It records what was tried, and why,
-> on ONE page — `/education/hair-loss/hair-growth-cycle` — so the owner
-> can review a concrete example before any of this becomes a reusable
-> rule. It does not override, and is subordinate to,
+> **STATUS: OWNER-APPROVED EDITORIAL EXEMPLAR.** The hair-cycle page's
+> writing, voice, page structure, typography, visual direction, and
+> evidence/teaching balance are approved as AIMT's first Education
+> editorial exemplar. This document records what was built, and why, on
+> that ONE page — `/education/hair-loss/hair-growth-cycle` — as the
+> approved basis for developing a reusable AIMT Education writing layer.
+> It does not override, and is subordinate to,
 > `docs/brand/AIMT-INSTITUTIONAL-POSITIONING.md`, which remains the
 > canonical institutional authority.
 >
-> **This becomes the basis for an automated AIMT Education writing layer
-> ONLY after owner approval of this first page.** Nothing here is wired
-> into an automatic, unreviewed pipeline — see "Governance" below.
+> **This is the approved basis for developing the reusable AIMT Education
+> writing layer, but the generalized automated writing system has NOT yet
+> been proven on a second topic.** Nothing here is wired into an
+> automatic, unreviewed pipeline — see "Governance" below.
 
 ## Why this exists
 
@@ -274,16 +277,21 @@ Nothing in this pass makes Page Builder a general paraphrase system:
   was hand-authored and hand-reviewed against the cleared snapshot, not
   generated or polished by a model.
 
-## What the owner still needs to approve
+## Owner approval
 
-1. Whether this voice — "evidence → explanation → meaning → practitioner
-   context," with italicized framing bridges distinguishing editorial
-   voice from evidence — is the right AIMT Education voice going forward.
-2. Whether the specific paraphrases in "why it matters" and "what
-   professionals should understand" read as genuinely more useful without
-   overstating the evidence.
-3. Whether the `{ kind: 'framing' | 'verbatim' | 'paraphrase' }` template
-   mechanism (opt-in, per-section, hand-authored) is an acceptable
-   foundation to eventually generalize — with real safeguards (a
-   real entailment check, likely model-assisted, replacing today's
-   hand-review) — into a second topic, once one exists.
+**Approved.** The hair-cycle page's writing, voice, page structure,
+typography, visual direction, and evidence/teaching balance — "evidence →
+explanation → meaning → practitioner context," with italicized framing
+bridges distinguishing editorial voice from evidence, the specific
+paraphrases in "why it matters" and "what professionals should
+understand," and the `{ kind: 'framing' | 'verbatim' | 'paraphrase' }`
+template mechanism itself — are approved as AIMT's first Education
+editorial exemplar.
+
+**What remains open, explicitly not resolved by this approval:** the
+generalized, automated AIMT Education writing system has **not** been
+proven on a second topic. Today's mechanism is opt-in, per-section, and
+hand-authored/hand-reviewed — there is still no real, deterministic (or
+model-assisted) entailment check standing in for the human editorial
+review this page received. Generalizing beyond hair-cycle requires that
+safeguard first, not just copying this template shape onto a new topic.

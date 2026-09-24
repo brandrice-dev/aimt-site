@@ -192,6 +192,91 @@
   margin-top: 0.15rem;
 }
 
+/* ---------- Library / hub body copy (non-article pages: /education,
+   /education/<topic>) ---------- */
+.aimt-edu-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 2rem 5rem;
+}
+@media (max-width: 700px) {
+  .aimt-edu-body { padding-inline: 1.25rem; }
+}
+
+/* ---------- Topic / article cards (library landing + topic hubs) ----------
+   One shared card primitive: .aimt-edu-card-grid holds a stack of
+   .aimt-edu-card entries. --lg is the larger, more prominent treatment for
+   a hub's single featured article; --future is the restrained, non-
+   interactive treatment for a topic area that has no published content
+   yet -- never a fake/invented link, just a labeled placeholder. */
+.aimt-edu-card-grid {
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+.aimt-edu-card {
+  display: block;
+  text-decoration: none;
+  background: var(--aimt-card-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid var(--aimt-card-border, rgba(255,255,255,0.08));
+  border-radius: var(--aimt-radius-card, 18px);
+  padding: 1.4rem 1.6rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+a.aimt-edu-card:hover, a.aimt-edu-card:focus-visible {
+  border-color: rgba(163,150,141,0.32);
+  background: var(--aimt-card-bg-hover, rgba(255,255,255,0.045));
+}
+.aimt-edu-card--lg {
+  padding: 1.9rem 2rem;
+  background: var(--aimt-card-bg-featured, rgba(255,255,255,0.035));
+  border-color: var(--aimt-card-border-featured, rgba(163,150,141,0.18));
+}
+.aimt-edu-card--future {
+  border-style: dashed;
+  opacity: 0.62;
+  cursor: default;
+}
+.aimt-edu-card-eyebrow {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.75);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.aimt-edu-card--future .aimt-edu-card-eyebrow { color: rgba(255,255,255,0.34); }
+.aimt-edu-card-title {
+  font-family: var(--aimt-font-mont);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.aimt-edu-card--lg .aimt-edu-card-title { font-size: clamp(1.2rem, 2.6vw, 1.4rem); }
+.aimt-edu-card-title-arrow { color: rgba(163,150,141,0.75); flex: none; }
+.aimt-edu-card-desc {
+  font-family: var(--aimt-font-sans);
+  font-size: 0.88rem;
+  line-height: 1.62;
+  color: rgba(255,255,255,0.6);
+  margin: 0;
+}
+.aimt-edu-card-meta {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.36);
+  margin-top: 0.9rem;
+}
+
 /* ---------- Related AIMT ---------- */
 .aimt-edu-related {
   list-style: none;
@@ -231,5 +316,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aimt-edu-badge, .aimt-edu-related a { transition: none !important; }
+  .aimt-edu-badge, .aimt-edu-related a, a.aimt-edu-card { transition: none !important; }
 }
