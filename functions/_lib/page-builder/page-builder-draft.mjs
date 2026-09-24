@@ -115,12 +115,19 @@ export function buildPageDraft(snapshot, meta = {}) {
 
   const sections = [];
 
-  // Framing section -- content is generic (snapshot.public_intent),
-  // heading is template-specific.
+  // Framing section -- both heading and body are template-specific,
+  // hand-authored presentation copy anchored to the cleared
+  // page_concept/public_intent wording (exactly like template.meta_description
+  // below), not the raw snapshot.public_intent string itself. That raw
+  // field is written as an internal page-intent instruction rather than
+  // reader-facing prose -- see page-builder-template-registry.mjs's
+  // why_it_matters_framing comment for the full rationale. Always
+  // is_framing: true, so it is exempt from the factual-fidelity check and
+  // from the answer_summary/body de-duplication rule (see module header).
   sections.push({
     section_id: 'why-it-matters',
     heading: template.why_it_matters_heading,
-    paragraphs: [{ text: snapshot.public_intent, supporting_claim_ids: [], is_framing: true }],
+    paragraphs: [{ text: template.why_it_matters_framing, supporting_claim_ids: [], is_framing: true }],
   });
 
   // Template-defined body sections, each excluding any statement

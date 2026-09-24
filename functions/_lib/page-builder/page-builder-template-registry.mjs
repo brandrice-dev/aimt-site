@@ -55,6 +55,20 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     answer_summary_bucket: 'DEFINITION',
 
     why_it_matters_heading: 'Why the hair growth cycle matters',
+
+    // Reader-facing framing copy for the "why it matters" section.
+    // Owner Correction Pass: v1 originally rendered snapshot.public_intent
+    // verbatim here, which is written as an internal page-intent
+    // instruction ("Explain the normal hair-growth cycle clearly and
+    // accurately for...") rather than reader-facing prose. Exactly like
+    // meta_description below, this is hand-authored, per-template
+    // presentation copy closely anchored to the cleared
+    // page_concept/public_intent wording rather than freely invented --
+    // it restates the page's own stated purpose for a reader, it does not
+    // add or alter any factual/scientific claim. The underlying cleared
+    // public_intent field itself is untouched in research_public_pages.
+    why_it_matters_framing: 'This overview is designed for beauty and scalp-care professionals who want a clear reference for the normal hair-growth cycle, its stages, typical timing, and normal variation.',
+
     limitations_heading: 'What this information cannot tell you',
 
     // Ordered body sections. Each pulls from its listed buckets, MINUS
