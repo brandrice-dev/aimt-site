@@ -1,0 +1,210 @@
+/* ═══════════════════════════════════════════════════════════════
+   AIMT Education Library — editorial page primitives
+   ---------------------------------------------------------------
+   Standalone, additive stylesheet for /education/* pages. Reuses
+   assets/css/aimt-design-system.css tokens and the shared
+   .aimt-legal-* / .aimt-sp-* primitives from
+   assets/css/aimt-supporting-pages.css rather than inventing a new
+   visual language -- this file only adds the handful of
+   education-specific compositions (hero, evidence indicator, scope
+   callout, takeaways, sources, related) that those files don't
+   already cover.
+
+   Depends on aimt-design-system.css + aimt-supporting-pages.css
+   (load both first).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ---------- Hero ---------- */
+.aimt-edu-hero {
+  max-width: var(--aimt-container-max, 1100px);
+  margin: 0 auto;
+  padding: 4.5rem 2rem 2.5rem;
+}
+.aimt-edu-hero h1 {
+  font-family: var(--aimt-font-serif);
+  font-weight: 500;
+  font-size: clamp(2rem, 4.6vw, 2.9rem);
+  line-height: var(--aimt-leading-editorial, 1.42);
+  margin: 0.9rem 0 1.4rem;
+  max-width: 20ch;
+}
+.aimt-edu-lede {
+  font-family: var(--aimt-font-sans);
+  font-weight: 300;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(255,255,255,0.82);
+  max-width: 62ch;
+  margin: 0 0 1.6rem;
+}
+.aimt-edu-lede strong { color: #fff; font-weight: 500; }
+
+/* ---------- Evidence indicator ---------- */
+.aimt-edu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--aimt-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.66);
+  background: rgba(163,150,141,0.08);
+  border: var(--aimt-border-hairline, 0.5px) solid rgba(163,150,141,0.28);
+  border-radius: var(--aimt-radius-pill, 980px);
+  padding: 0.55rem 1rem;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.aimt-edu-badge:hover, .aimt-edu-badge:focus-visible {
+  border-color: rgba(163,150,141,0.5);
+  color: #fff;
+}
+.aimt-edu-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--aimt-color-accent, #a3968d);
+  flex: none;
+}
+
+/* ---------- Scope callout ---------- */
+.aimt-edu-scope {
+  margin: 0 0 2.6rem;
+}
+.aimt-edu-scope h2 {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.75);
+  font-weight: 400;
+  margin: 0 0 0.75rem;
+}
+.aimt-edu-scope p {
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* ---------- Key takeaways ---------- */
+.aimt-edu-takeaways {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+.aimt-edu-takeaway {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--aimt-card-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid var(--aimt-card-border, rgba(255,255,255,0.08));
+  border-radius: var(--aimt-radius-card, 18px);
+  padding: 1.1rem 1.3rem;
+}
+.aimt-edu-takeaway-index {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.72rem;
+  color: rgba(163,150,141,0.75);
+  flex: none;
+  padding-top: 0.15rem;
+}
+.aimt-edu-takeaway p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.78);
+}
+
+/* ---------- Inline citation markers ---------- */
+.aimt-edu-cite {
+  font-size: 0.68em;
+  vertical-align: super;
+  line-height: 0;
+  margin-left: 0.15em;
+}
+.aimt-edu-cite a {
+  color: rgba(163,150,141,0.85);
+  text-decoration: none;
+}
+.aimt-edu-cite a:hover, .aimt-edu-cite a:focus-visible { color: #fff; }
+
+/* ---------- Sources ---------- */
+.aimt-edu-sources {
+  list-style: none;
+  counter-reset: aimt-edu-source;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+.aimt-edu-source {
+  counter-increment: aimt-edu-source;
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0.6rem;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.56);
+  padding: 0.75rem 0;
+  border-bottom: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.06);
+}
+.aimt-edu-source:last-child { border-bottom: none; }
+.aimt-edu-source::before {
+  content: counter(aimt-edu-source);
+  font-family: var(--aimt-font-mono);
+  font-size: 0.72rem;
+  color: rgba(163,150,141,0.65);
+}
+.aimt-edu-source-title { color: rgba(255,255,255,0.85); }
+.aimt-edu-source a {
+  color: var(--aimt-color-accent, #a3968d);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.aimt-edu-source-meta {
+  display: block;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+/* ---------- Related AIMT ---------- */
+.aimt-edu-related {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.aimt-edu-related a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  background: var(--aimt-sp-surface-2-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.07);
+  border-radius: var(--aimt-radius-md, 12px);
+  padding: 1rem 1.2rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.aimt-edu-related a:hover, .aimt-edu-related a:focus-visible {
+  border-color: rgba(163,150,141,0.32);
+  background: rgba(255,255,255,0.035);
+}
+.aimt-edu-related a::after {
+  content: '→';
+  color: rgba(163,150,141,0.75);
+  flex: none;
+}
+
+@media (max-width: 700px) {
+  .aimt-edu-hero { padding: 3rem 1.25rem 2rem; }
+  .aimt-edu-source { grid-template-columns: 1.25rem minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aimt-edu-badge, .aimt-edu-related a { transition: none !important; }
+}
