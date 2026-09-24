@@ -55,13 +55,82 @@ that baseline gives those observations context." These carry no
 `supporting_claim_ids` and must never smuggle in a new scientific
 assertion. They exist to create rhythm, transition, and "so what,"
 between evidence-backed statements. Used sparingly — this page has 2–3
-per section, not one per sentence.
+per section, not one per sentence. **See "Framing is not a loophole"
+below — a framing unit must be removable from the page without changing
+its scientific meaning.**
 
 ### 3. Scope / limitations (protected)
 
 The cleared `scope_note` and both cleared `limitations` statements. Not
 touched in this pass at all — rendered exactly as they were before this
 editorial exemplar (see "What was deliberately left alone" below).
+
+## Framing is not a loophole
+
+The first version of this exemplar treated "no `supporting_claim_ids`"
+as sufficient proof a sentence was safe framing. It wasn't. Two of the
+original framing bridges quietly restated or introduced scientific
+content — accurate content, but content that should have been VERBATIM
+or PARAPHRASE (with real claim IDs and a traceable source statement), not
+a sentence exempt from every claim/fidelity check that governs the rest
+of the page.
+
+**The rule: a FRAMING unit must be removable from the page without
+changing its scientific meaning.** Read the page with that sentence
+deleted. If nothing scientific is lost, it was framing. If something is
+lost, it wasn't.
+
+A FRAMING unit may:
+
+- orient the reader
+- create rhythm
+- introduce a question
+- signal why the next material is useful
+- create emphasis
+- connect sections editorially
+
+A FRAMING unit may **not** introduce or summarize:
+
+- a biological fact
+- a physiological sequence
+- timing or duration
+- a mechanism
+- a causal relationship
+- a prevalence or percentage
+- a diagnostic or treatment implication
+- any other claim that would need evidence if it stood alone
+
+**Two corrections made under this rule** (Owner Correction Pass, after
+the first version of this exemplar):
+
+1. The original "stages" lead-in — *"Each of those phases has a typical
+   length, and the numbers below are worth knowing — they set the
+   baseline for what normal actually looks like."* — restated a factual
+   idea ("each phase has a typical length") on its own. Deleting it would
+   have deleted a (mild, but real) scientific claim. Replaced with *"The
+   numbers matter because they give the cycle scale"* — this motivates
+   the numbers that follow without itself stating one.
+2. The original "stages" closing bridge — *"Exogen — the shedding phase
+   — isn't a separate event. It's simply where the cycle arrives once a
+   follicle has moved through telogen."* — asserted a sequence/mechanism
+   claim (exogen follows telogen) beyond what the TIMING statement itself
+   supports. **Removed outright, not paraphrased** — the evidence
+   available doesn't cleanly support turning it into a claim-backed
+   PARAPHRASE either, and the hero's answer_summary already identifies
+   exogen as shedding of the old hair, which is sufficient for this page.
+3. The original "for-professionals" lead-in — *"Here's what actually
+   drives that cycle, and what can shift its timing."* — was too close to
+   a summary of the two evidence paragraphs that immediately follow it.
+   Replaced with *"The cycle is more than a timetable"* — orients the
+   reader toward mechanism without pre-stating it.
+
+This is a **human editorial judgment call**, not a deterministic check —
+`checkDraftFidelity()` cannot detect a framing unit that smuggles in
+science, because it exempts `is_framing: true` units from inspection
+entirely by design. `scripts/page-builder-editorial-audit.mjs` now
+reports every FRAMING unit as `FRAMING_REQUIRES_EDITORIAL_REVIEW`
+(distinct from VERBATIM's deterministic `OK`) precisely so this can never
+be mistaken for an automated proof.
 
 ## Worked example: "Why the hair growth cycle matters"
 
@@ -108,12 +177,12 @@ editorial audit (below) checks that explicitly.
 
 **"The stages of the hair growth cycle"** — the numeric statement (3
 years / 3 weeks / 3 months / 9%) stays **VERBATIM**, unparaphrased, by
-design (numbers must stay maximally close to the cleared language). Two
-FRAMING bridges were added: one explaining why the numbers are worth
-knowing, one connecting "exogen" (shedding) back to the cycle as a
-sequential arrival rather than a separate event — read directly off the
-already-verbatim-displayed phase order in the answer_summary, not a new
-claim.
+design (numbers must stay maximally close to the cleared language). One
+FRAMING lead-in motivates why the numbers are worth knowing without
+itself stating a fact (*"The numbers matter because they give the cycle
+scale."*). The section's original closing bridge about exogen/shedding
+was removed under the framing rule above, not replaced — see "Framing is
+not a loophole."
 
 **"What professionals should understand"** — both statements
 (mechanism: stem cells / dermal papilla / signaling pathways; factors:
@@ -121,7 +190,32 @@ hormones, stress, nutrition, sleep, inflammation, blood flow) became
 **PARAPHRASE**, restructured for plainer language ("conserved" → "core";
 "cycling is driven by" → "that process is directed by") without dropping
 a single named factor or pathway, and without adding a practice
-implication the evidence doesn't support (see below).
+implication the evidence doesn't support (see below). Its FRAMING
+lead-in was corrected under the framing rule — see "Framing is not a
+loophole."
+
+## Style direction that worked
+
+Captured from this page for reuse, independent of the specific
+sentences:
+
+- Concise teaching bridges — one sentence, rarely two.
+- Natural contractions are acceptable ("don't," "isn't," "here's") —
+  AIMT Education voice is not a journal abstract.
+- Short emphasis sentences are acceptable ("That distinction matters."),
+  used sparingly.
+- Practitioner relevance should be **explained**, not merely announced —
+  don't just say a fact "is relevant to practitioners," say why.
+- Evidence paragraphs do not need to sound like journal abstracts even
+  when they stay VERBATIM or close-PARAPHRASE — plain-language synonyms
+  ("core" for "conserved") are fine as long as the underlying claim is
+  unchanged.
+- Personality must sit **around** evidence, or faithfully **rephrase**
+  it — it must never **replace** evidence's boundaries. A confident,
+  warm sentence that quietly drops a limitation, hedges an uncertainty
+  into certainty, or states a fact standing alone with no claim ID is not
+  "voice" — it's drift, and the framing rule above exists specifically to
+  catch it.
 
 ## What was deliberately left alone
 
@@ -163,13 +257,19 @@ Nothing in this pass makes Page Builder a general paraphrase system:
   otherwise.
 - A new, separate script,
   `scripts/page-builder-editorial-audit.mjs`, reconciles each unit's
-  declared editorial status against that raw fidelity result and reports
-  `EDITORIAL_REVIEW_REQUIRED` for an *expected* paraphrase mismatch,
-  while still treating an unexpected mismatch on a VERBATIM or FRAMING
-  unit as a real, build-failing problem. `scripts/page-builder-shadow.mjs`
-  — the original, fully-automated shadow script — is untouched and would
-  still correctly refuse (exit 1) to treat this page's paraphrase content
-  as a clean, silent PASS.
+  declared editorial status against that raw fidelity result:
+  - **VERBATIM** → `OK` — deterministic, fidelity actually proves this.
+  - **PARAPHRASE** → `EDITORIAL_REVIEW_REQUIRED` for the *expected*
+    fidelity mismatch (never a silent PASS).
+  - **FRAMING** → `FRAMING_REQUIRES_EDITORIAL_REVIEW`, always — fidelity
+    trivially exempts framing, which is not proof it carries no science
+    (see "Framing is not a loophole"). Never reported as the same `OK`
+    VERBATIM gets.
+  An unexpected mismatch on a VERBATIM or FRAMING unit is a real,
+  build-failing problem. `scripts/page-builder-shadow.mjs` — the
+  original, fully-automated shadow script — is untouched and would still
+  correctly refuse (exit 1) to treat this page's paraphrase content as a
+  clean, silent PASS.
 - No Anthropic call is made anywhere in this pass. Every paraphrase here
   was hand-authored and hand-reviewed against the cleared snapshot, not
   generated or polished by a model.

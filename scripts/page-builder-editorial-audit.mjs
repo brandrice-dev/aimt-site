@@ -29,12 +29,13 @@
         (VERBATIM / PARAPHRASE / FRAMING -- set in
         page-builder-draft.mjs's resolveEditorialUnit()) against
         checkDraftFidelity()'s real per-unit result, and reports:
-          - VERBATIM  + fidelity PASS             -> OK
-          - VERBATIM  + fidelity != PASS           -> REAL PROBLEM (exits 1)
-          - FRAMING   + fidelity != PASS            -> REAL PROBLEM (exits 1)
+          - VERBATIM   + fidelity PASS             -> OK (deterministic -- fidelity actually proves this)
+          - VERBATIM   + fidelity != PASS          -> REAL PROBLEM (exits 1)
+          - FRAMING    + fidelity PASS             -> FRAMING_REQUIRES_EDITORIAL_REVIEW (fidelity trivially exempts framing -- that is NOT proof it carries no science; "framing cannot carry science" is a human editorial judgment call for this v0 exemplar, checked against the rule "removing this sentence would not remove scientific content," never conflated with VERBATIM's deterministic OK)
+          - FRAMING    + fidelity != PASS          -> REAL PROBLEM (exits 1 -- a framing unit should always trivially pass; this means it isn't actually flagged is_framing:true)
           - PARAPHRASE + fidelity REWRITE_REQUIRED -> EDITORIAL_REVIEW_REQUIRED (expected, does not fail the script)
-          - PARAPHRASE + fidelity PASS              -> OK (accidentally verbatim-equivalent)
-          - PARAPHRASE + fidelity HUMAN_REVIEW       -> REAL PROBLEM (claim IDs don't trace to any cleared statement at all)
+          - PARAPHRASE + fidelity PASS             -> OK (accidentally verbatim-equivalent)
+          - PARAPHRASE + fidelity HUMAN_REVIEW     -> REAL PROBLEM (claim IDs don't trace to any cleared statement at all)
      4. Independently re-verifies, straight from the snapshot (not by
         trusting page-builder-draft.mjs's own bookkeeping), that every
         PARAPHRASE unit's supporting_claim_ids are an exact match for a
@@ -114,13 +115,24 @@ function auditUnit(unit, snapshot, fidelityResult, stmtIndex) {
     if (fidelityResult === 'REWRITE_REQUIRED') reconciled = 'EDITORIAL_REVIEW_REQUIRED';
     else if (fidelityResult === 'PASS') reconciled = 'OK (accidentally verbatim-equivalent)';
     else { reconciled = 'REAL_PROBLEM'; problems.push(`Unexpected fidelity result for a paraphrase: ${fidelityResult} (expected REWRITE_REQUIRED or PASS).`); }
+  } else if (status === 'FRAMING') {
+    // "Framing cannot carry science": checkDraftFidelity() trivially
+    // PASSes any is_framing:true unit -- that is NOT proof it contains
+    // no scientific content, only that fidelity never checked it. This
+    // is a human editorial judgment call, reported explicitly as such,
+    // never conflated with VERBATIM's deterministic PASS.
+    if (fidelityResult === 'PASS') reconciled = 'FRAMING_REQUIRES_EDITORIAL_REVIEW';
+    else { reconciled = 'REAL_PROBLEM'; problems.push(`FRAMING unit failed fidelity unexpectedly: ${fidelityResult} (a framing paragraph should always trivially PASS -- this usually means it isn't actually flagged is_framing:true).`); }
   } else {
+    // VERBATIM
     if (fidelityResult === 'PASS') reconciled = 'OK';
-    else { reconciled = 'REAL_PROBLEM'; problems.push(`${status} unit failed fidelity unexpectedly: ${fidelityResult} (should always PASS).`); }
+    else { reconciled = 'REAL_PROBLEM'; problems.push(`VERBATIM unit failed fidelity unexpectedly: ${fidelityResult} (should always PASS).`); }
   }
 
   return { reconciled, problems };
 }
+
+const FRAMING_REVIEW_NOTE = 'Reviewed under the rule: removing this sentence would not remove scientific content. This is a human editorial judgment call for this v0 exemplar, not a deterministic semantic proof -- checkDraftFidelity() never inspects framing text at all, it only trivially exempts it.';
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -186,6 +198,7 @@ async function main() {
       raw_fidelity_result: fr.result,
       raw_fidelity_reason: fr.reason,
       reconciled_status: reconciled,
+      review_note: unit.editorial_status === 'FRAMING' ? FRAMING_REVIEW_NOTE : null,
       problems,
     });
   }
@@ -242,6 +255,12 @@ async function main() {
   mdLines.push(`Raw checkDraftFidelity() result: \`${fidelity.result}\` (a non-PASS overall result is expected once paraphrase content exists)`);
   mdLines.push(`Unexpected problems: **${realProblems}**`);
   mdLines.push('');
+  mdLines.push('## What each editorial_status means for this audit');
+  mdLines.push('');
+  mdLines.push('- **VERBATIM** — evidence fidelity is deterministic: byte-identical to a cleared statement, checkDraftFidelity() proves it. No owner review needed on the text itself.');
+  mdLines.push('- **PARAPHRASE** — evidence-linked (real supporting_claim_ids, real source_statements), but checkDraftFidelity() cannot prove entailment deterministically. Owner editorial review required.');
+  mdLines.push('- **FRAMING** — non-factual editorial language, exempt from fidelity by construction. That exemption is NOT proof it contains no science — owner editorial review required, checked against the rule "removing this sentence would not remove scientific content."');
+  mdLines.push('');
   mdLines.push('| unit_id | status | reconciled | text |');
   mdLines.push('|---|---|---|---|');
   for (const row of auditRows) {
@@ -261,6 +280,7 @@ async function main() {
       for (const s of row.source_statements) mdLines.push(`  - "${s}"`);
     }
     mdLines.push(`- Rendered text: "${row.text}"`);
+    if (row.review_note) mdLines.push(`- 🔎 ${row.review_note}`);
     if (row.problems.length) mdLines.push(`- ⚠️ Problems: ${row.problems.join('; ')}`);
   }
 

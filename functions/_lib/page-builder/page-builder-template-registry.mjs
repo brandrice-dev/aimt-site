@@ -57,9 +57,26 @@
 
    Each unit is one of:
      { kind: 'framing', text }
-       Non-factual editorial/teaching copy. No claim IDs, no new
-       scientific assertion -- purely connective or interpretive. Exempt
-       from fidelity, exactly like why_it_matters_framing always was.
+       Non-factual editorial/teaching copy. No claim IDs. Exempt from
+       fidelity, exactly like why_it_matters_framing always was.
+       GOVERNANCE RULE (Owner Correction Pass, "framing cannot carry
+       science" -- see docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md's
+       "Framing is not a loophole" section): a framing unit must be
+       REMOVABLE FROM THE PAGE WITHOUT CHANGING ITS SCIENTIFIC MEANING.
+       It may orient the reader, create rhythm, introduce a question,
+       signal why the next material is useful, create emphasis, or
+       connect sections editorially. It may NOT introduce or summarize a
+       biological fact, physiological sequence, timing/duration,
+       mechanism, causal relationship, prevalence/percentage, or
+       diagnostic/treatment implication -- any claim that would need
+       evidence if it stood alone. If deleting a framing sentence would
+       delete scientific information, it is not framing; it must be
+       VERBATIM or PARAPHRASE (with real supporting_claim_ids and
+       source_statements) instead. This is a human editorial judgment
+       call for this v0 exemplar, not a deterministic check --
+       scripts/page-builder-editorial-audit.mjs reports every FRAMING
+       unit as FRAMING_REQUIRES_EDITORIAL_REVIEW rather than treating
+       "has no claim IDs" as automatically safe.
      { kind: 'verbatim', bucket }
        Renders the named bucket's own cleared statement text and its
        own supporting_claim_ids, byte-identical -- used wherever a
@@ -141,20 +158,36 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
         // months / 9%) -- kept 'verbatim', never paraphrased, because
         // page-builder-validator.mjs's UNSUPPORTED_NUMERIC_CLAIM rule
         // requires any digit-bearing rendered unit to be byte-identical
-        // to its cleared statement. The framing bridges around it teach
-        // why the numbers matter and connect exogen/shedding back to
-        // the cycle, without touching the numbers themselves.
+        // to its cleared statement.
+        //
+        // Owner Correction Pass ("framing cannot carry science"): the
+        // original lead-in here ("Each of those phases has a typical
+        // length...") restated a factual idea on its own -- removable-
+        // without-losing-science fails for it, so it is not legitimate
+        // framing. Replaced with a line that motivates the numbers
+        // without stating one. The original closing bridge ("Exogen --
+        // the shedding phase -- isn't a separate event...") asserted a
+        // sequence/mechanism claim (exogen follows telogen) beyond what
+        // TIMING itself states -- removed outright, not paraphrased, per
+        // docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md's "Framing is
+        // not a loophole" section. The hero's answer_summary already
+        // identifies exogen as shedding of the old hair; that remains
+        // sufficient for this page.
         units: [
-          { kind: 'framing', text: 'Each of those phases has a typical length, and the numbers below are worth knowing — they set the baseline for what normal actually looks like.' },
+          { kind: 'framing', text: 'The numbers matter because they give the cycle scale.' },
           { kind: 'verbatim', bucket: 'TIMING' },
-          { kind: 'framing', text: "Exogen — the shedding phase — isn't a separate event. It's simply where the cycle arrives once a follicle has moved through telogen." },
         ],
       },
       {
         section_id: 'for-professionals',
         heading: 'What professionals should understand',
+        // Owner Correction Pass: the original lead-in ("Here's what
+        // actually drives that cycle, and what can shift its timing.")
+        // was too close to a factual summary of the two paragraphs that
+        // follow it -- replaced with framing that orients the reader
+        // without pre-stating the mechanism/factors content itself.
         units: [
-          { kind: 'framing', text: "Here's what actually drives that cycle, and what can shift its timing." },
+          { kind: 'framing', text: 'The cycle is more than a timetable.' },
           { kind: 'paraphrase', bucket: 'MECHANISM', text: 'That process is directed by hair follicle stem cells and the dermal papilla, coordinated through core signaling pathways such as Wnt, Sonic hedgehog, Notch, and BMP.' },
           { kind: 'paraphrase', bucket: 'FACTORS', text: 'Everyday physiological factors — hormones, stress, nutrition, sleep, inflammation, and blood flow among them — can normally influence when that transition between growth and rest happens.' },
         ],
