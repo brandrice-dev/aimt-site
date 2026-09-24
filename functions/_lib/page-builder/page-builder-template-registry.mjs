@@ -38,6 +38,51 @@
    statement is never rendered twice across answer_summary + body
    sections. `key_takeaways` are exempt from that exclusion (they are
    an explicit recap, by design) -- see page-builder-draft.mjs.
+
+   AIMT EDUCATION VOICE v0 -- EDITORIAL EXEMPLAR (Owner Correction Pass):
+   hair-cycle is now ALSO a hand-reviewed voice exemplar, not just a
+   verbatim-content pilot. A section whose config below is an object
+   with a `units` array (rather than the older `{ buckets }` shape) is
+   built by the NEW resolveEditorialUnit() path in page-builder-draft.mjs
+   instead of the original generic bucket-loop. This is an OPT-IN,
+   per-section override -- a section with no `units` array still goes
+   through the original, fully generic, verbatim-only mechanism
+   unchanged. See docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md
+   (STATUS: EDITORIAL EXEMPLAR / OWNER REVIEW) for the full voice
+   rationale. This is explicitly NOT a general paraphrase system a
+   future topic inherits automatically -- it is hand-authored,
+   topic-specific presentation copy, exactly like meta_description
+   already was, just extended to full section prose for this one
+   owner-reviewed page.
+
+   Each unit is one of:
+     { kind: 'framing', text }
+       Non-factual editorial/teaching copy. No claim IDs, no new
+       scientific assertion -- purely connective or interpretive. Exempt
+       from fidelity, exactly like why_it_matters_framing always was.
+     { kind: 'verbatim', bucket }
+       Renders the named bucket's own cleared statement text and its
+       own supporting_claim_ids, byte-identical -- used wherever a
+       statement's numbers/duration must stay maximally close to the
+       cleared language (page-builder-validator.mjs's
+       UNSUPPORTED_NUMERIC_CLAIM rule requires this for any digit-
+       bearing rendered unit; TIMING is why 'stages' still uses this,
+       not 'paraphrase').
+     { kind: 'paraphrase', bucket, text }
+       Conservative, meaning-preserving paraphrase of the named bucket's
+       cleared statement. Automatically inherits ALL of that statement's
+       own supporting_claim_ids (never hand-typed here, so there is no
+       way for a paraphrase to end up attached to the wrong claims).
+       Not byte-identical to the cleared statement by design --
+       checkDraftFidelity() will correctly report REWRITE_REQUIRED for
+       these (it has no way to verify a paraphrase's entailment
+       deterministically), which scripts/page-builder-editorial-audit.mjs
+       reports as the expected, reviewed EDITORIAL_REVIEW_REQUIRED status
+       rather than a false PASS or a silent failure.
+   Both 'verbatim' and 'paraphrase' mark their source statement as used
+   in the same usedStatements set the generic mechanism already
+   maintains, so a bucket consumed here is correctly excluded from any
+   other section that might otherwise repeat it.
    ═══════════════════════════════════════════════════════════════ */
 
 export class PageBuilderTemplateError extends Error {
@@ -54,51 +99,66 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     // this bucket is empty for some reason (see buildPageDraft()).
     answer_summary_bucket: 'DEFINITION',
 
-    why_it_matters_heading: 'Why the hair growth cycle matters',
-
-    // Reader-facing framing copy for the "why it matters" section.
-    // Owner Correction Pass: v1 originally rendered snapshot.public_intent
-    // verbatim here, which is written as an internal page-intent
-    // instruction ("Explain the normal hair-growth cycle clearly and
-    // accurately for...") rather than reader-facing prose. Exactly like
-    // meta_description below, this is hand-authored, per-template
-    // presentation copy closely anchored to the cleared
-    // page_concept/public_intent wording rather than freely invented --
-    // it restates the page's own stated purpose for a reader, it does not
-    // add or alter any factual/scientific claim. The underlying cleared
-    // public_intent field itself is untouched in research_public_pages.
-    why_it_matters_framing: 'This overview is designed for beauty and scalp-care professionals who want a clear reference for the normal hair-growth cycle, its stages, typical timing, and normal variation.',
-
-    // Owner Correction Pass: "why it matters" originally carried only the
-    // framing intro above and never actually answered the question. The
-    // cleared PRACTITIONER_RELEVANCE point -- "Because follicles cycle
+    // "why it matters" is now built entirely from `units` (AIMT
+    // Education Voice v0 exemplar): a framing intro, a conservative
+    // paraphrase of the cleared PRACTITIONER_RELEVANCE statement, a
+    // one-line editorial bridge, and a second paraphrase unit covering
+    // the rest of that same statement's meaning. Both paraphrase units
+    // derive from -- and inherit the real supporting_claim_ids of --
+    // the SAME single cleared statement: "Because follicles cycle
     // individually and asynchronously, distinguishing normal cycle
     // variation from abnormal cycling requires attention to objective
     // morphological criteria, which is relevant for practitioners
-    // assessing scalp health" -- IS the page's practitioner-relevance
-    // evidence, verbatim, with its own supporting_claim_ids (not new
-    // framing, not a paraphrase). Placing it here, first, establishes
-    // relevance where a reader expects it. Because buildPageDraft() adds
-    // it to usedStatements before the sections loop below runs, the
-    // 'cycle-vs-shedding' section (which draws from this same bucket)
-    // now finds nothing left and is omitted rather than repeating it --
-    // "evidence controls the page," not a hardcoded removal. If a future
-    // re-cleared hair-cycle snapshot adds a second, distinct
-    // PRACTITIONER_RELEVANCE statement specifically about shedding, that
-    // section would reappear on its own with that additional evidence.
-    why_it_matters_buckets: ['PRACTITIONER_RELEVANCE'],
+    // assessing scalp health." Splitting one dense sentence into two
+    // teaching beats with a bridge between them is a presentation
+    // choice, not two different facts. Because this bucket is marked
+    // used here, the old 'cycle-vs-shedding' section (which drew from
+    // the same PRACTITIONER_RELEVANCE bucket) continues to be omitted
+    // by "evidence controls the page" -- unchanged from the prior pass.
+    why_it_matters: {
+      heading: 'Why the hair growth cycle matters',
+      units: [
+        { kind: 'framing', text: 'This overview is designed for beauty and scalp-care professionals who want a clear reference for the normal hair-growth cycle, its stages, typical timing, and normal variation.' },
+        { kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE', text: "Hair follicles don't move through the cycle in lockstep — each one progresses on its own timeline." },
+        { kind: 'framing', text: 'Understanding that baseline gives those observations context.' },
+        { kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE', text: "That's exactly why distinguishing normal cycle variation from abnormal cycling is relevant for practitioners assessing scalp health — and why making that distinction depends on objective morphological criteria." },
+      ],
+    },
 
     limitations_heading: 'What this information cannot tell you',
 
-    // Ordered body sections. Each pulls from its listed buckets, MINUS
-    // whatever statement answer_summary, why_it_matters (or an earlier
-    // section in this list) already used. A section with nothing left
-    // after that exclusion is simply omitted -- "evidence controls the
-    // page."
+    // Ordered body sections. A section with a `units` array is built by
+    // the editorial-unit resolver (see the file header); a section with
+    // the older `{ buckets }` shape still goes through the fully
+    // generic, verbatim-only mechanism unchanged. Either way, a section
+    // left with nothing to render (its evidence already used elsewhere)
+    // is simply omitted -- "evidence controls the page."
     sections: [
-      { section_id: 'stages', heading: 'The stages of the hair growth cycle', buckets: ['DEFINITION', 'TIMING'] },
-      { section_id: 'cycle-vs-shedding', heading: 'Hair cycle vs. normal shedding', buckets: ['PRACTITIONER_RELEVANCE'] },
-      { section_id: 'for-professionals', heading: 'What professionals should understand', buckets: ['MECHANISM', 'FACTORS', 'OTHER'] },
+      {
+        section_id: 'stages',
+        heading: 'The stages of the hair growth cycle',
+        // TIMING carries the cycle's durations (3 years / 3 weeks / 3
+        // months / 9%) -- kept 'verbatim', never paraphrased, because
+        // page-builder-validator.mjs's UNSUPPORTED_NUMERIC_CLAIM rule
+        // requires any digit-bearing rendered unit to be byte-identical
+        // to its cleared statement. The framing bridges around it teach
+        // why the numbers matter and connect exogen/shedding back to
+        // the cycle, without touching the numbers themselves.
+        units: [
+          { kind: 'framing', text: 'Each of those phases has a typical length, and the numbers below are worth knowing — they set the baseline for what normal actually looks like.' },
+          { kind: 'verbatim', bucket: 'TIMING' },
+          { kind: 'framing', text: "Exogen — the shedding phase — isn't a separate event. It's simply where the cycle arrives once a follicle has moved through telogen." },
+        ],
+      },
+      {
+        section_id: 'for-professionals',
+        heading: 'What professionals should understand',
+        units: [
+          { kind: 'framing', text: "Here's what actually drives that cycle, and what can shift its timing." },
+          { kind: 'paraphrase', bucket: 'MECHANISM', text: 'That process is directed by hair follicle stem cells and the dermal papilla, coordinated through core signaling pathways such as Wnt, Sonic hedgehog, Notch, and BMP.' },
+          { kind: 'paraphrase', bucket: 'FACTORS', text: 'Everyday physiological factors — hormones, stress, nutrition, sleep, inflammation, and blood flow among them — can normally influence when that transition between growth and rest happens.' },
+        ],
+      },
     ],
 
     // Key takeaways MAY intentionally recap statements already used

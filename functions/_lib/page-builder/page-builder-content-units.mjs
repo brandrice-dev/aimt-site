@@ -18,9 +18,23 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /**
+ * editorial_status/source_statements are AIMT Education Voice v0 additions
+ * (Owner Correction Pass): a unit that doesn't carry them (any older/hand-
+ * built paragraph object, e.g. in tests) defaults exactly to v1's original
+ * assumption -- framing units are 'FRAMING', everything else is 'VERBATIM'
+ * -- so this is purely additive and never changes behavior for a
+ * paragraph that predates this field.
+ *
  * @param {object} draft - page-builder-draft.mjs#buildPageDraft() output
- * @returns {Array<{unit_id: string, group: string, text: string, supporting_claim_ids: string[], is_framing: boolean}>}
+ * @returns {Array<{unit_id: string, group: string, text: string, supporting_claim_ids: string[], is_framing: boolean, editorial_status: string, source_statements: string[]}>}
  */
+function withEditorialMeta(u) {
+  return {
+    editorial_status: u.editorial_status || (u.is_framing ? 'FRAMING' : 'VERBATIM'),
+    source_statements: [...(u.source_statements || [])],
+  };
+}
+
 export function collectRenderedFactualUnits(draft) {
   const units = [];
 
@@ -30,6 +44,7 @@ export function collectRenderedFactualUnits(draft) {
     text: draft.answer_summary.text,
     supporting_claim_ids: [...(draft.answer_summary.supporting_claim_ids || [])],
     is_framing: !!draft.answer_summary.is_framing,
+    ...withEditorialMeta(draft.answer_summary),
   });
 
   for (const section of draft.sections) {
@@ -40,6 +55,7 @@ export function collectRenderedFactualUnits(draft) {
         text: p.text,
         supporting_claim_ids: [...(p.supporting_claim_ids || [])],
         is_framing: !!p.is_framing,
+        ...withEditorialMeta(p),
       });
     });
   }
@@ -51,6 +67,7 @@ export function collectRenderedFactualUnits(draft) {
       text: t.text,
       supporting_claim_ids: [...(t.supporting_claim_ids || [])],
       is_framing: !!t.is_framing,
+      ...withEditorialMeta(t),
     });
   });
 
