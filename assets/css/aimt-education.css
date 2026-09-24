@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════════════
+   AIMT Education Library — editorial page primitives
+   ---------------------------------------------------------------
+   Standalone, additive stylesheet for /education/* pages. Reuses
+   assets/css/aimt-design-system.css tokens and the shared
+   .aimt-legal-* / .aimt-sp-* primitives from
+   assets/css/aimt-supporting-pages.css rather than inventing a new
+   visual language -- this file only adds the handful of
+   education-specific compositions (hero, evidence indicator, scope
+   callout, takeaways, sources, related) that those files don't
+   already cover.
+
+   Depends on aimt-design-system.css + aimt-supporting-pages.css
+   (load both first).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ---------- Editorial heading system (Owner Correction Pass) ----------
+   Scoped to this Education stylesheet only -- does not touch the shared
+   Tier 2 Playfair Display h1/h2 tokens that about/research-standards.html,
+   terms.html, privacy.html, refunds.html, and verify.html still use.
+   Structured Montserrat instead of the editorial serif, kept refined
+   (moderate weight, tight-but-not-heavy tracking) rather than the bold
+   uppercase Tier 1 marketing treatment. Body copy stays Outfit
+   (--aimt-font-sans); eyebrow/micro-label/evidence-system text stays
+   mono (--aimt-font-mono) -- see .aimt-edu-scope h2 below, which is
+   deliberately in that micro-label bucket, not this heading system. */
+.aimt-edu-hero h1,
+.aimt-edu-article h1,
+.aimt-edu-article h2 {
+  font-family: var(--aimt-font-mont);
+}
+
+/* ---------- Hero ---------- */
+.aimt-edu-hero {
+  max-width: var(--aimt-container-max, 1100px);
+  margin: 0 auto;
+  padding: 4.5rem 2rem 2.5rem;
+}
+.aimt-edu-hero h1 {
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+  line-height: 1.2;
+  margin: 0.9rem 0 1.4rem;
+  max-width: 22ch;
+}
+.aimt-edu-article h1 {
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.aimt-edu-article h2 {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+}
+.aimt-edu-lede {
+  font-family: var(--aimt-font-sans);
+  font-weight: 300;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(255,255,255,0.82);
+  max-width: 62ch;
+  margin: 0 0 1.6rem;
+}
+.aimt-edu-lede strong { color: #fff; font-weight: 500; }
+
+/* ---------- Evidence indicator ---------- */
+.aimt-edu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--aimt-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.66);
+  background: rgba(163,150,141,0.08);
+  border: var(--aimt-border-hairline, 0.5px) solid rgba(163,150,141,0.28);
+  border-radius: var(--aimt-radius-pill, 980px);
+  padding: 0.55rem 1rem;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.aimt-edu-badge:hover, .aimt-edu-badge:focus-visible {
+  border-color: rgba(163,150,141,0.5);
+  color: #fff;
+}
+.aimt-edu-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--aimt-color-accent, #a3968d);
+  flex: none;
+}
+
+/* ---------- Scope callout ---------- */
+.aimt-edu-scope {
+  margin: 0 0 2.6rem;
+}
+.aimt-edu-article .aimt-edu-scope h2 {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.75);
+  font-weight: 400;
+  margin: 0 0 0.75rem;
+}
+.aimt-edu-scope p {
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* ---------- Key takeaways ---------- */
+.aimt-edu-takeaways {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+.aimt-edu-takeaway {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: var(--aimt-card-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid var(--aimt-card-border, rgba(255,255,255,0.08));
+  border-radius: var(--aimt-radius-card, 18px);
+  padding: 1.1rem 1.3rem;
+}
+.aimt-edu-takeaway-index {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.72rem;
+  color: rgba(163,150,141,0.75);
+  flex: none;
+  padding-top: 0.15rem;
+}
+.aimt-edu-takeaway p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.78);
+}
+
+/* ---------- Sources ----------
+   No paragraph-level inline citation markers here by design: the cleared
+   snapshot's claim IDs are not a persisted, formal claim-to-source
+   mapping (see the HTML comment above the Sources section), so Page
+   Builder does not infer or render a per-paragraph source relationship.
+   This list presents the full cleared source set only. */
+.aimt-edu-article p.aimt-edu-sources-note {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.44);
+  margin-bottom: 0;
+}
+
+/* ---------- Sources ---------- */
+.aimt-edu-sources {
+  list-style: none;
+  counter-reset: aimt-edu-source;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+.aimt-edu-source {
+  counter-increment: aimt-edu-source;
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0.6rem;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.56);
+  padding: 0.75rem 0;
+  border-bottom: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.06);
+}
+.aimt-edu-source:last-child { border-bottom: none; }
+.aimt-edu-source::before {
+  content: counter(aimt-edu-source);
+  font-family: var(--aimt-font-mono);
+  font-size: 0.72rem;
+  color: rgba(163,150,141,0.65);
+}
+.aimt-edu-source-title { color: rgba(255,255,255,0.85); }
+.aimt-edu-source a {
+  color: var(--aimt-color-accent, #a3968d);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.aimt-edu-source-meta {
+  display: block;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+/* ---------- Library / hub body copy (non-article pages: /education,
+   /education/<topic>) ---------- */
+.aimt-edu-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 2rem 5rem;
+}
+@media (max-width: 700px) {
+  .aimt-edu-body { padding-inline: 1.25rem; }
+}
+
+/* ---------- Topic / article cards (library landing + topic hubs) ----------
+   One shared card primitive: .aimt-edu-card-grid holds a stack of
+   .aimt-edu-card entries. --lg is the larger, more prominent treatment for
+   a hub's single featured article; --future is the restrained, non-
+   interactive treatment for a topic area that has no published content
+   yet -- never a fake/invented link, just a labeled placeholder. */
+.aimt-edu-card-grid {
+  list-style: none;
+  display: grid;
+  gap: 0.9rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+.aimt-edu-card {
+  display: block;
+  text-decoration: none;
+  background: var(--aimt-card-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid var(--aimt-card-border, rgba(255,255,255,0.08));
+  border-radius: var(--aimt-radius-card, 18px);
+  padding: 1.4rem 1.6rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+a.aimt-edu-card:hover, a.aimt-edu-card:focus-visible {
+  border-color: rgba(163,150,141,0.32);
+  background: var(--aimt-card-bg-hover, rgba(255,255,255,0.045));
+}
+.aimt-edu-card--lg {
+  padding: 1.9rem 2rem;
+  background: var(--aimt-card-bg-featured, rgba(255,255,255,0.035));
+  border-color: var(--aimt-card-border-featured, rgba(163,150,141,0.18));
+}
+.aimt-edu-card--future {
+  border-style: dashed;
+  opacity: 0.62;
+  cursor: default;
+}
+.aimt-edu-card-eyebrow {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(163,150,141,0.75);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.aimt-edu-card--future .aimt-edu-card-eyebrow { color: rgba(255,255,255,0.34); }
+.aimt-edu-card-title {
+  font-family: var(--aimt-font-mont);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.aimt-edu-card--lg .aimt-edu-card-title { font-size: clamp(1.2rem, 2.6vw, 1.4rem); }
+.aimt-edu-card-title-arrow { color: rgba(163,150,141,0.75); flex: none; }
+.aimt-edu-card-desc {
+  font-family: var(--aimt-font-sans);
+  font-size: 0.88rem;
+  line-height: 1.62;
+  color: rgba(255,255,255,0.6);
+  margin: 0;
+}
+.aimt-edu-card-meta {
+  font-family: var(--aimt-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.36);
+  margin-top: 0.9rem;
+}
+
+/* ---------- Related AIMT ---------- */
+.aimt-edu-related {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.aimt-edu-related a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--aimt-font-sans);
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  background: var(--aimt-sp-surface-2-bg, rgba(255,255,255,0.02));
+  border: var(--aimt-border-hairline, 0.5px) solid rgba(255,255,255,0.07);
+  border-radius: var(--aimt-radius-md, 12px);
+  padding: 1rem 1.2rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.aimt-edu-related a:hover, .aimt-edu-related a:focus-visible {
+  border-color: rgba(163,150,141,0.32);
+  background: rgba(255,255,255,0.035);
+}
+.aimt-edu-related a::after {
+  content: '→';
+  color: rgba(163,150,141,0.75);
+  flex: none;
+}
+
+@media (max-width: 700px) {
+  .aimt-edu-hero { padding: 3rem 1.25rem 2rem; }
+  .aimt-edu-source { grid-template-columns: 1.25rem minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aimt-edu-badge, .aimt-edu-related a, a.aimt-edu-card { transition: none !important; }
+}

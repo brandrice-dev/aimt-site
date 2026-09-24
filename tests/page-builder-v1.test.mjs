@@ -66,6 +66,14 @@ function findSection(draft, sectionId) {
   return draft.sections.find((s) => s.section_id === sectionId);
 }
 
+// AIMT Education Voice v0 (Owner Correction Pass): 'stages' now interleaves
+// non-factual framing bridges around its one factual (VERBATIM TIMING)
+// paragraph, so a fixed paragraph index is no longer stable. Find the
+// actual factual unit by property instead of assuming position.
+function findFactualParagraph(section) {
+  return section.paragraphs.find((p) => !p.is_framing);
+}
+
 const VALID_INTEGRITY = { valid: true, expected_hash: 'deadbeef', stored_hash: 'deadbeef', violations: [] };
 
 function readSrc(relPath) {
@@ -127,7 +135,7 @@ async function testFailedIntegrityRefuses() {
 function testUnsupportedClaimIdFails() {
   const { snapshot, draft } = buildValidDraft();
   const tampered = JSON.parse(JSON.stringify(draft));
-  findSection(tampered, 'stages').paragraphs[0].supporting_claim_ids.push('c-never-cleared-or-excluded');
+  findFactualParagraph(findSection(tampered, 'stages')).supporting_claim_ids.push('c-never-cleared-or-excluded');
   const validation = validatePageDraft(tampered, snapshot, { integrityResult: VALID_INTEGRITY });
   check('UNSUPPORTED_CLAIM_ID_FAILS', 'a claim ID outside selected_claim_ids fails validation', !validation.valid && validation.violations.some((v) => v.startsWith('UNSUPPORTED_CLAIM_ID')), JSON.stringify(validation));
 }
@@ -142,7 +150,7 @@ function testExcludedClaimNeverReachableAtAll() {
 function testUnsupportedFactualParagraphFails() {
   const { snapshot, draft } = buildValidDraft();
   const tampered = JSON.parse(JSON.stringify(draft));
-  findSection(tampered, 'stages').paragraphs[0].supporting_claim_ids = [];
+  findFactualParagraph(findSection(tampered, 'stages')).supporting_claim_ids = [];
   const validation = validatePageDraft(tampered, snapshot, { integrityResult: VALID_INTEGRITY });
   check('UNSUPPORTED_FACTUAL_PARAGRAPH_FAILS', 'a factual paragraph with zero supporting_claim_ids fails validation', !validation.valid && validation.violations.some((v) => v.startsWith('FACTUAL_PARAGRAPH_MISSING_SUPPORT')), JSON.stringify(validation));
 }
@@ -543,10 +551,23 @@ function testTemplateRegistryOnlyRegistersHairCycle() {
 // ─────────────────────────────────────────────────────────────────────────
 // Extra: deterministic fidelity check behaves as designed
 // ─────────────────────────────────────────────────────────────────────────
+// AIMT Education Voice v0 (Owner Correction Pass): the real, registered
+// hair-cycle template is no longer verbatim-only -- it now also carries
+// hand-authored PARAPHRASE units (see page-builder-template-registry.mjs).
+// The correct, honest contract is no longer "the whole draft passes
+// fidelity" -- it is "every VERBATIM unit passes, and every PARAPHRASE
+// unit is truthfully flagged REWRITE_REQUIRED rather than a false PASS."
+// checkDraftFidelity() itself is UNCHANGED; this test proves it is not
+// silently fooled by the new paraphrase content.
 function testDeterministicFidelityPassesOnVerbatimReuse() {
   const { snapshot, draft } = buildValidDraft();
   const fidelity = checkDraftFidelity(draft, snapshot);
-  check('FIDELITY_VERBATIM_PASS', 'a v1 draft (verbatim reuse of cleared statements) passes the deterministic fidelity check', fidelity.result === 'PASS', JSON.stringify(fidelity));
+  const statusByUnitId = new Map(collectRenderedFactualUnits(draft).map((u) => [u.unit_id, u.editorial_status]));
+  const verbatimResults = fidelity.paragraph_results.filter((r) => statusByUnitId.get(r.unit_id) === 'VERBATIM');
+  const paraphraseResults = fidelity.paragraph_results.filter((r) => statusByUnitId.get(r.unit_id) === 'PARAPHRASE');
+  check('FIDELITY_VERBATIM_PASS', 'every VERBATIM-tagged rendered unit passes the deterministic fidelity check', verbatimResults.length > 0 && verbatimResults.every((r) => r.result === 'PASS'), JSON.stringify(verbatimResults));
+  check('FIDELITY_VERBATIM_PASS', 'every PARAPHRASE-tagged rendered unit is honestly flagged REWRITE_REQUIRED, never a false PASS', paraphraseResults.length > 0 && paraphraseResults.every((r) => r.result === 'REWRITE_REQUIRED'), JSON.stringify(paraphraseResults));
+  check('FIDELITY_VERBATIM_PASS', 'the overall draft fidelity result honestly reflects the paraphrase content rather than a false PASS', fidelity.result === 'REWRITE_REQUIRED', JSON.stringify(fidelity));
 }
 
 function testDeterministicFidelityFlagsParaphrase() {

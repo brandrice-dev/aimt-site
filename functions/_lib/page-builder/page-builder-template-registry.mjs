@@ -38,6 +38,68 @@
    statement is never rendered twice across answer_summary + body
    sections. `key_takeaways` are exempt from that exclusion (they are
    an explicit recap, by design) -- see page-builder-draft.mjs.
+
+   AIMT EDUCATION VOICE v0 -- EDITORIAL EXEMPLAR (Owner Correction Pass):
+   hair-cycle is now ALSO a hand-reviewed voice exemplar, not just a
+   verbatim-content pilot. A section whose config below is an object
+   with a `units` array (rather than the older `{ buckets }` shape) is
+   built by the NEW resolveEditorialUnit() path in page-builder-draft.mjs
+   instead of the original generic bucket-loop. This is an OPT-IN,
+   per-section override -- a section with no `units` array still goes
+   through the original, fully generic, verbatim-only mechanism
+   unchanged. See docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md
+   (STATUS: EDITORIAL EXEMPLAR / OWNER REVIEW) for the full voice
+   rationale. This is explicitly NOT a general paraphrase system a
+   future topic inherits automatically -- it is hand-authored,
+   topic-specific presentation copy, exactly like meta_description
+   already was, just extended to full section prose for this one
+   owner-reviewed page.
+
+   Each unit is one of:
+     { kind: 'framing', text }
+       Non-factual editorial/teaching copy. No claim IDs. Exempt from
+       fidelity, exactly like why_it_matters_framing always was.
+       GOVERNANCE RULE (Owner Correction Pass, "framing cannot carry
+       science" -- see docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md's
+       "Framing is not a loophole" section): a framing unit must be
+       REMOVABLE FROM THE PAGE WITHOUT CHANGING ITS SCIENTIFIC MEANING.
+       It may orient the reader, create rhythm, introduce a question,
+       signal why the next material is useful, create emphasis, or
+       connect sections editorially. It may NOT introduce or summarize a
+       biological fact, physiological sequence, timing/duration,
+       mechanism, causal relationship, prevalence/percentage, or
+       diagnostic/treatment implication -- any claim that would need
+       evidence if it stood alone. If deleting a framing sentence would
+       delete scientific information, it is not framing; it must be
+       VERBATIM or PARAPHRASE (with real supporting_claim_ids and
+       source_statements) instead. This is a human editorial judgment
+       call for this v0 exemplar, not a deterministic check --
+       scripts/page-builder-editorial-audit.mjs reports every FRAMING
+       unit as FRAMING_REQUIRES_EDITORIAL_REVIEW rather than treating
+       "has no claim IDs" as automatically safe.
+     { kind: 'verbatim', bucket }
+       Renders the named bucket's own cleared statement text and its
+       own supporting_claim_ids, byte-identical -- used wherever a
+       statement's numbers/duration must stay maximally close to the
+       cleared language (page-builder-validator.mjs's
+       UNSUPPORTED_NUMERIC_CLAIM rule requires this for any digit-
+       bearing rendered unit; TIMING is why 'stages' still uses this,
+       not 'paraphrase').
+     { kind: 'paraphrase', bucket, text }
+       Conservative, meaning-preserving paraphrase of the named bucket's
+       cleared statement. Automatically inherits ALL of that statement's
+       own supporting_claim_ids (never hand-typed here, so there is no
+       way for a paraphrase to end up attached to the wrong claims).
+       Not byte-identical to the cleared statement by design --
+       checkDraftFidelity() will correctly report REWRITE_REQUIRED for
+       these (it has no way to verify a paraphrase's entailment
+       deterministically), which scripts/page-builder-editorial-audit.mjs
+       reports as the expected, reviewed EDITORIAL_REVIEW_REQUIRED status
+       rather than a false PASS or a silent failure.
+   Both 'verbatim' and 'paraphrase' mark their source statement as used
+   in the same usedStatements set the generic mechanism already
+   maintains, so a bucket consumed here is correctly excluded from any
+   other section that might otherwise repeat it.
    ═══════════════════════════════════════════════════════════════ */
 
 export class PageBuilderTemplateError extends Error {
@@ -54,17 +116,82 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     // this bucket is empty for some reason (see buildPageDraft()).
     answer_summary_bucket: 'DEFINITION',
 
-    why_it_matters_heading: 'Why the hair growth cycle matters',
+    // "why it matters" is now built entirely from `units` (AIMT
+    // Education Voice v0 exemplar): a framing intro, a conservative
+    // paraphrase of the cleared PRACTITIONER_RELEVANCE statement, a
+    // one-line editorial bridge, and a second paraphrase unit covering
+    // the rest of that same statement's meaning. Both paraphrase units
+    // derive from -- and inherit the real supporting_claim_ids of --
+    // the SAME single cleared statement: "Because follicles cycle
+    // individually and asynchronously, distinguishing normal cycle
+    // variation from abnormal cycling requires attention to objective
+    // morphological criteria, which is relevant for practitioners
+    // assessing scalp health." Splitting one dense sentence into two
+    // teaching beats with a bridge between them is a presentation
+    // choice, not two different facts. Because this bucket is marked
+    // used here, the old 'cycle-vs-shedding' section (which drew from
+    // the same PRACTITIONER_RELEVANCE bucket) continues to be omitted
+    // by "evidence controls the page" -- unchanged from the prior pass.
+    why_it_matters: {
+      heading: 'Why the hair growth cycle matters',
+      units: [
+        { kind: 'framing', text: 'This overview is designed for beauty and scalp-care professionals who want a clear reference for the normal hair-growth cycle, its stages, typical timing, and normal variation.' },
+        { kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE', text: "Hair follicles don't move through the cycle in lockstep — each one progresses on its own timeline." },
+        { kind: 'framing', text: 'Understanding that baseline gives those observations context.' },
+        { kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE', text: "That's exactly why distinguishing normal cycle variation from abnormal cycling is relevant for practitioners assessing scalp health — and why making that distinction depends on objective morphological criteria." },
+      ],
+    },
+
     limitations_heading: 'What this information cannot tell you',
 
-    // Ordered body sections. Each pulls from its listed buckets, MINUS
-    // whatever statement answer_summary (or an earlier section in this
-    // list) already used. A section with nothing left after that
-    // exclusion is simply omitted -- "evidence controls the page."
+    // Ordered body sections. A section with a `units` array is built by
+    // the editorial-unit resolver (see the file header); a section with
+    // the older `{ buckets }` shape still goes through the fully
+    // generic, verbatim-only mechanism unchanged. Either way, a section
+    // left with nothing to render (its evidence already used elsewhere)
+    // is simply omitted -- "evidence controls the page."
     sections: [
-      { section_id: 'stages', heading: 'The stages of the hair growth cycle', buckets: ['DEFINITION', 'TIMING'] },
-      { section_id: 'cycle-vs-shedding', heading: 'Hair cycle vs. normal shedding', buckets: ['PRACTITIONER_RELEVANCE'] },
-      { section_id: 'for-professionals', heading: 'What professionals should understand', buckets: ['MECHANISM', 'FACTORS', 'OTHER'] },
+      {
+        section_id: 'stages',
+        heading: 'The stages of the hair growth cycle',
+        // TIMING carries the cycle's durations (3 years / 3 weeks / 3
+        // months / 9%) -- kept 'verbatim', never paraphrased, because
+        // page-builder-validator.mjs's UNSUPPORTED_NUMERIC_CLAIM rule
+        // requires any digit-bearing rendered unit to be byte-identical
+        // to its cleared statement.
+        //
+        // Owner Correction Pass ("framing cannot carry science"): the
+        // original lead-in here ("Each of those phases has a typical
+        // length...") restated a factual idea on its own -- removable-
+        // without-losing-science fails for it, so it is not legitimate
+        // framing. Replaced with a line that motivates the numbers
+        // without stating one. The original closing bridge ("Exogen --
+        // the shedding phase -- isn't a separate event...") asserted a
+        // sequence/mechanism claim (exogen follows telogen) beyond what
+        // TIMING itself states -- removed outright, not paraphrased, per
+        // docs/brand/AIMT-EDUCATION-EDITORIAL-VOICE-v0.md's "Framing is
+        // not a loophole" section. The hero's answer_summary already
+        // identifies exogen as shedding of the old hair; that remains
+        // sufficient for this page.
+        units: [
+          { kind: 'framing', text: 'The numbers matter because they give the cycle scale.' },
+          { kind: 'verbatim', bucket: 'TIMING' },
+        ],
+      },
+      {
+        section_id: 'for-professionals',
+        heading: 'What professionals should understand',
+        // Owner Correction Pass: the original lead-in ("Here's what
+        // actually drives that cycle, and what can shift its timing.")
+        // was too close to a factual summary of the two paragraphs that
+        // follow it -- replaced with framing that orients the reader
+        // without pre-stating the mechanism/factors content itself.
+        units: [
+          { kind: 'framing', text: 'The cycle is more than a timetable.' },
+          { kind: 'paraphrase', bucket: 'MECHANISM', text: 'That process is directed by hair follicle stem cells and the dermal papilla, coordinated through core signaling pathways such as Wnt, Sonic hedgehog, Notch, and BMP.' },
+          { kind: 'paraphrase', bucket: 'FACTORS', text: 'Everyday physiological factors — hormones, stress, nutrition, sleep, inflammation, and blood flow among them — can normally influence when that transition between growth and rest happens.' },
+        ],
+      },
     ],
 
     // Key takeaways MAY intentionally recap statements already used
