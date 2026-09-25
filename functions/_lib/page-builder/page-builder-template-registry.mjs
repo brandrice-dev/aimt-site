@@ -273,7 +273,7 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     why_it_matters: {
       heading: 'How the shift happens',
       units: [
-        { kind: 'framing', text: "That shift is the mechanical heart of telogen effluvium -- everything else follows from it." },
+        { kind: 'framing', text: "This is the shift the rest of the overview builds around." },
         {
           kind: 'paraphrase', bucket: 'OTHER', index: 1,
           text: "What actually happens is that a larger-than-usual, synchronized group of follicles shifts from the growth (anagen) phase into the resting (telogen) phase all at once -- a shift researchers link to general trigger categories like inflammation, hormonal change, physical or emotional stress, nutritional deficiency, poor sleep, or certain medications.",
