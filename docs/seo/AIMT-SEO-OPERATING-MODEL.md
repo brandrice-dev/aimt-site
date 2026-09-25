@@ -5,16 +5,21 @@ This document describes the steady-state process AFTER the SEO
 build/audit project closes — not a plan for further foundational work.
 It is operational and intentionally short.
 
-**The autonomous publishing scheduler described in the OWNER INVOLVEMENT
-section below does NOT exist yet.** Every Education page published to
-date (hair-cycle, telogen-effluvium) was produced through a manually
-triggered, per-topic run of the Publication Editor / Page Builder
-pipeline, with an owner explicitly starting each run and reviewing each
-result. Nothing in this repository currently starts that pipeline on a
-schedule, on a trigger, or without a human invoking it. Building that
-scheduler is explicitly a **separate, later project** — this document
-describes the target operating model that scheduler is meant to serve,
-not a system already running.
+**Update (AIMT Education Operations v1):** the autonomous publishing
+scheduler described in the OWNER INVOLVEMENT section below now EXISTS
+as code and as a scheduled GitHub Actions workflow
+(`.github/workflows/aimt-education-operations.yml`, running
+`scripts/education-operations-cycle.mjs`) — but it runs in `--shadow`
+mode by default and **autonomous production publishing remains
+disabled** (`AIMT_EDUCATION_AUTOPUBLISH_ENABLED` is not set to `true`
+anywhere). It has never published a page. Both Education pages live
+today (hair-cycle, telogen-effluvium) were still produced through a
+manually triggered, owner-reviewed run of the Publication Editor / Page
+Builder pipeline, before this scheduler existed. See
+`docs/education/AIMT-EDUCATION-OPERATIONS-v1.md` for the full
+architecture, exactly what the scheduler does today (a safe, file-write-
+free decision-pipeline dry run), and the specific remaining steps before
+autonomous publishing could be switched on.
 
 ## Research
 
