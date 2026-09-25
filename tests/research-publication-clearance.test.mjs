@@ -30,6 +30,7 @@ import {
   assertWritableClearanceRecord,
   assertClearanceIntegrityOrThrow,
   writeClearanceRecord,
+  replaceNonPublicClearanceRecord,
 } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { validatePageInvariants } from '../functions/_lib/research/publication-clearance-invariants.mjs';
 
@@ -502,6 +503,97 @@ async function testWriterAcceptsValidRecord() {
   });
   check('WRITER_INTEGRITY_GATE', 'a valid, untampered record passes the writer preflight and reaches the (mocked) network call', !threw && counter.count === 1, `threw=${threw} fetchCalls=${counter.count}`);
   check('WRITER_INTEGRITY_GATE', 'writeClearanceRecord resolves with the mocked upserted row', Array.isArray(result) && result.length === 1);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Guarded REPLACE of an existing non-public row (seo/education-page-2-
+// generalization, telogen/exogen correction): replaceNonPublicClearanceRecord()
+// issues a single conditional PATCH instead of a blind upsert. Every
+// scenario mocks globalThis.fetch and inspects the actual request made
+// (method + URL query string), never a real network call.
+// ─────────────────────────────────────────────────────────────────────────
+async function testReplaceRequiresCurrentHash() {
+  const record = await buildValidRecord();
+  const counter = { count: 0 };
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await replaceNonPublicClearanceRecord(FAKE_ENV, record, {}); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'refuses without requireCurrentHash', threw && errorMessage.includes('requireCurrentHash'), errorMessage);
+  check('REPLACE_NONPUBLIC_GUARD', 'zero fetch calls when requireCurrentHash is missing', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testReplaceRunsSameIntegrityGatesAsWriter() {
+  // A tampered record must be refused before any network call, exactly
+  // like writeClearanceRecord's own gates -- replaceNonPublicClearanceRecord
+  // must not be a bypass for the integrity/authority checks.
+  const record = await buildValidRecord();
+  const tampered = { ...record, generation_source_hash: '0'.repeat(64) };
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await replaceNonPublicClearanceRecord(FAKE_ENV, tampered, { requireCurrentHash: 'old-hash-value' }); } catch (e) { threw = true; }
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'refuses a tampered/hash-mismatched new record before any network call', threw);
+  check('REPLACE_NONPUBLIC_GUARD', 'zero fetch calls when the new record itself fails integrity', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testReplaceIssuesGuardedPatchWithExpectedFilters() {
+  const record = await buildValidRecord();
+  let capturedUrl = null;
+  let capturedMethod = null;
+  let capturedBody = null;
+  await withMockFetch(async (url, opts) => {
+    capturedUrl = String(url);
+    capturedMethod = opts.method;
+    capturedBody = JSON.parse(opts.body);
+    return { ok: true, status: 200, json: async () => ([{ ...record }]) };
+  }, async () => {
+    await replaceNonPublicClearanceRecord(FAKE_ENV, record, { requireCurrentHash: 'the-old-hash' });
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'issues a PATCH (never POST/PUT)', capturedMethod === 'PATCH', capturedMethod);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH query filters on topic_slug', capturedUrl.includes(`topic_slug=eq.${TOPIC}`), capturedUrl);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH query requires status=ready_for_page_builder', capturedUrl.includes('status=eq.ready_for_page_builder'), capturedUrl);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH query requires sitemap_eligible=false', capturedUrl.includes('sitemap_eligible=eq.false'), capturedUrl);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH query requires published_at is null', capturedUrl.includes('published_at=is.null'), capturedUrl);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH query requires the caller-supplied prior hash', capturedUrl.includes('generation_source_hash=eq.the-old-hash'), capturedUrl);
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH body omits topic_slug (never rewrites the match key)', !Object.prototype.hasOwnProperty.call(capturedBody, 'topic_slug'), JSON.stringify(capturedBody));
+  check('REPLACE_NONPUBLIC_GUARD', 'PATCH body includes the new generation_source_hash', capturedBody.generation_source_hash === record.generation_source_hash, JSON.stringify(capturedBody));
+}
+
+async function testReplaceRefusesWhenZeroRowsMatch() {
+  // The precondition no longer holds (row published, replaced concurrently,
+  // or simply different) -- PostgREST returns an empty array, and the
+  // guard must throw rather than silently succeed or fall back to upsert.
+  const record = await buildValidRecord();
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(async () => ({ ok: true, status: 200, json: async () => ([]) }), async () => {
+    try { await replaceNonPublicClearanceRecord(FAKE_ENV, record, { requireCurrentHash: 'stale-hash' }); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'throws when zero rows match the guard precondition', threw && errorMessage.includes('expected exactly 1 row'), errorMessage);
+}
+
+async function testReplaceRefusesWhenMultipleRowsMatch() {
+  // Defensive: topic_slug is the table's primary key so this should be
+  // structurally impossible, but the guard must not silently accept it.
+  const record = await buildValidRecord();
+  let threw = false;
+  await withMockFetch(async () => ({ ok: true, status: 200, json: async () => ([{ ...record }, { ...record }]) }), async () => {
+    try { await replaceNonPublicClearanceRecord(FAKE_ENV, record, { requireCurrentHash: 'the-old-hash' }); } catch (e) { threw = true; }
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'throws when more than 1 row matches (never trusts an unexpectedly wide match)', threw);
+}
+
+async function testReplaceSucceedsOnHappyPath() {
+  const record = await buildValidRecord();
+  let result;
+  let threw = false;
+  await withMockFetch(async () => ({ ok: true, status: 200, json: async () => ([{ ...record }]) }), async () => {
+    try { result = await replaceNonPublicClearanceRecord(FAKE_ENV, record, { requireCurrentHash: 'the-old-hash' }); } catch (e) { threw = true; }
+  });
+  check('REPLACE_NONPUBLIC_GUARD', 'a valid replace with exactly 1 matching row succeeds', !threw && Array.isArray(result) && result.length === 1, `threw=${threw}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -993,6 +1085,12 @@ const tests = [
   testWriterRefusesSourceIdsDrift,
   testWriterRefusesUnsupportedAlgorithm,
   testWriterAcceptsValidRecord,
+  testReplaceRequiresCurrentHash,
+  testReplaceRunsSameIntegrityGatesAsWriter,
+  testReplaceIssuesGuardedPatchWithExpectedFilters,
+  testReplaceRefusesWhenZeroRowsMatch,
+  testReplaceRefusesWhenMultipleRowsMatch,
+  testReplaceSucceedsOnHappyPath,
   testWriterAcceptsValidLowerRisk,
   testWriterAcceptsValidModerateRisk,
   testWriterRefusesHumanApproved,

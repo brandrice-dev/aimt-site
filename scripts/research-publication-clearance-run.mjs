@@ -38,9 +38,22 @@
                                  (read-only; requires SUPABASE_URL +
                                  SUPABASE_SERVICE_ROLE_KEY)
        [--export-dir <dir>]     local validated export to read instead
-       [--write]                actually upsert the clearance record
+       [--write]                actually persist the clearance record
                                  (requires explicit owner authorization --
-                                 see module header)
+                                 see module header). By default this is a
+                                 plain upsert (writeClearanceRecord) -- only
+                                 safe for a topic's FIRST clearance write.
+       [--write --replace-nonpublic]
+                                 for REPLACING an existing non-public row
+                                 (e.g. after a corrected synthesis intent):
+                                 reads the existing row, requires it to
+                                 still be status=ready_for_page_builder /
+                                 sitemap_eligible=false / published_at=null,
+                                 then replaces it via a guarded PATCH
+                                 (replaceNonPublicClearanceRecord) keyed on
+                                 that row's own generation_source_hash --
+                                 refuses if the row changed since it was
+                                 read. Never touches a published row.
 
    <slug> must already have both:
      - a PILOT_TOPIC_CONCEPTS entry (publication-readiness-loader.mjs)
@@ -63,21 +76,34 @@ import { POST_SYNTHESIS_VALIDATOR_VERSION } from '../functions/_lib/research/pub
 import { getPageSynthesisIntent } from '../functions/_lib/research/publication-page-intent.mjs';
 import { buildEvidenceFingerprintArtifact, verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
 import { buildAutoReadyClearanceRecord, ClearanceIneligibleError } from '../functions/_lib/research/publication-clearance.mjs';
-import { writeClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
+import { writeClearanceRecord, replaceNonPublicClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_EXPORT_DIR = path.join(ROOT, 'research-import/unpacked/aimt-research-library-export-2026-09-20');
 
 function parseArgs(argv) {
-  const args = { topic: null, live: false, write: false, exportDir: DEFAULT_EXPORT_DIR };
+  const args = { topic: null, live: false, write: false, exportDir: DEFAULT_EXPORT_DIR, replaceNonpublic: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--topic') args.topic = argv[++i];
     else if (argv[i] === '--live') args.live = true;
     else if (argv[i] === '--write') args.write = true;
+    else if (argv[i] === '--replace-nonpublic') args.replaceNonpublic = true;
     else if (argv[i] === '--export-dir') args.exportDir = path.isAbsolute(argv[i + 1]) ? argv[++i] : path.join(ROOT, argv[++i]);
   }
   return args;
+}
+
+/** Read-only GET of the current persisted row for a topic_slug, if any.
+    Used only to (a) report the OLD hash before a replace and (b) supply
+    replaceNonPublicClearanceRecord()'s required precondition hash -- never
+    to decide what to write. */
+async function readExistingClearanceRow(env, topicSlug) {
+  const url = `${env.SUPABASE_URL}/rest/v1/research_public_pages?topic_slug=eq.${encodeURIComponent(topicSlug)}&select=topic_slug,status,sitemap_eligible,published_at,generation_source_hash`;
+  const res = await fetch(url, { headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` } });
+  if (!res.ok) throw new Error(`readExistingClearanceRow: GET failed (${res.status})`);
+  const rows = await res.json();
+  return rows[0] || null;
 }
 
 async function loadTopicEvidence(concept, args) {
@@ -209,12 +235,37 @@ async function main() {
 
   if (!args.write) {
     console.log('\nPreview only -- nothing written. Pass --write (with explicit owner authorization) to persist this record.');
+    if (args.replaceNonpublic) console.log('(--replace-nonpublic was also passed; it has no effect without --write.)');
     return;
   }
 
-  console.log('\nWriting clearance record to research_public_pages ...');
-  const written = await writeClearanceRecord(process.env, record);
-  console.log('Write succeeded:', JSON.stringify(written, null, 2));
+  if (!args.replaceNonpublic) {
+    console.log('\nWriting clearance record to research_public_pages (writeClearanceRecord upsert) ...');
+    const written = await writeClearanceRecord(process.env, record);
+    console.log('Write succeeded:', JSON.stringify(written, null, 2));
+    return;
+  }
+
+  console.log('\n--replace-nonpublic requested: reading the existing persisted row first (read-only) ...');
+  const existing = await readExistingClearanceRow(process.env, args.topic);
+  if (!existing) {
+    console.log(`\nNo existing row found for topic_slug="${args.topic}" -- there is nothing to replace. Re-run with --write alone to create the first row.`);
+    return;
+  }
+  console.log('[replace] existing row:', JSON.stringify(existing, null, 2));
+  if (existing.status !== 'ready_for_page_builder' || existing.sitemap_eligible !== false || existing.published_at !== null) {
+    console.log('\nRefusing: the existing row is not in the expected non-public state (status=ready_for_page_builder, sitemap_eligible=false, published_at=null). This guarded path never touches a published or otherwise-altered row.');
+    return;
+  }
+  const oldHash = existing.generation_source_hash;
+  console.log(`[replace] old generation_source_hash: ${oldHash}`);
+  console.log(`[replace] new generation_source_hash: ${record.generation_source_hash}`);
+  console.log(`[replace] hash changed: ${oldHash !== record.generation_source_hash}`);
+
+  console.log('\nReplacing clearance record via guarded PATCH (replaceNonPublicClearanceRecord) ...');
+  const replaced = await replaceNonPublicClearanceRecord(process.env, record, { requireCurrentHash: oldHash });
+  console.log(`Replace succeeded: ${replaced.length} row(s) affected.`);
+  console.log(JSON.stringify(replaced, null, 2));
 }
 
 main().catch((err) => {

@@ -41,12 +41,22 @@ export const PAGE_SYNTHESIS_INTENT = Object.freeze({
       'disease treatment or diagnosis',
     ]),
   },
+  // SEMANTIC CORRECTION (seo/education-page-2-generalization, post-review):
+  // the original in_scope_concepts entry below said "shift into
+  // telogen/shedding", which the model read as license to call telogen
+  // itself "the shedding phase" -- contradicting the published hair-cycle
+  // page, where telogen = rest and exogen = shedding of the old hair. The
+  // verified evidence behind this page's definition (natarelli--c01/c02,
+  // landells-canadian-te-algorithm-2025--c01) only supports an anagen->
+  // telogen shift and a resulting increase in shedding; none of it
+  // describes a specific telogen->exogen mechanism, so this intent no
+  // longer asks the synthesis to assert one.
   'telogen-effluvium': {
     page_concept: 'Telogen Effluvium: A Practitioner Education Overview',
     public_intent: 'Explain telogen effluvium -- a temporary, diffuse shedding pattern distinct from progressive hair loss -- clearly and accurately for beauty/scalp-care professionals and informed readers.',
     in_scope_concepts: Object.freeze([
       'what telogen effluvium is: a diffuse, temporary increase in shedding following a precipitating trigger',
-      'the relationship to the normal hair cycle (an exaggerated, synchronized shift into telogen/shedding, not a separate disease process)',
+      "the relationship to the normal hair cycle (an exaggerated, synchronized shift of follicles from anagen into telogen, not a separate disease process -- per AIMT's published hair-cycle page, telogen is the resting phase and is distinct from exogen, the shedding of the old hair; describe the anagen-to-telogen shift and the resulting increase in visible shedding as related but separate facts, and do not state or imply that telogen itself is the shedding phase, or that telogen and exogen are the same phase, unless the evidence explicitly supports a specific telogen-to-exogen mechanism)",
       'documented categories of precipitating triggers (e.g. illness, stress, postpartum, nutritional deficiency) as described by the evidence, without diagnosing an individual case',
       'typical onset delay and course, including the distinction between acute and chronic/persistent presentations where the evidence supports it',
       'why distinguishing diffuse temporary shedding from progressive/patterned hair loss is relevant for a practitioner making an observation-based judgment',
