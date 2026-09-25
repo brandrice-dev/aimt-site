@@ -118,6 +118,18 @@ function validResolution(overrides = {}) {
   check('SHAPE_EXCLUDED_NO_REASON', 'names the rule', shape.errors.includes('EXCLUDED_REQUIRES_VALID_REASON_CODE:c1'), JSON.stringify(shape.errors));
 })();
 
+(function testShapeExcludedNonCoreConflictRejectedInReconciliationLane() {
+  // UNRESOLVED_NON_CORE_CONFLICT requires symmetrically excluding every
+  // side of a specific disagreement -- a judgment this narrow, one-
+  // claim-at-a-time repair lane cannot make safely (see publication-
+  // synthesis-reconciliation.mjs's validateReconciliationShape). That
+  // decision belongs to a full synthesis pass only.
+  const output = { resolutions: [validResolution({ claim_id: 'c1', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT' })] };
+  const shape = validateReconciliationShape(output, ['c1']);
+  check('SHAPE_NON_CORE_CONFLICT_REJECTED', 'invalid', !shape.valid);
+  check('SHAPE_NON_CORE_CONFLICT_REJECTED', 'names the rule', shape.errors.includes('NON_CORE_CONFLICT_NOT_VALID_IN_RECONCILIATION:c1'), JSON.stringify(shape.errors));
+})();
+
 (function testShapeMaterialChangeWithoutReason() {
   const output = { resolutions: [validResolution({ claim_id: 'c1', materially_changes_existing_synthesis: true, material_change_reason: null })] };
   const shape = validateReconciliationShape(output, ['c1']);

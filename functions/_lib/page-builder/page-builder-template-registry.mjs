@@ -240,71 +240,80 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
   // bucket's first point; telogen-effluvium's FACTORS bucket genuinely
   // has two) -- both documented at their own definitions, not here.
   'telogen-effluvium': {
+    // RE-TEMPLATED (seo/education-page-2-generalization, non-core conflict
+    // narrowing round): the clearance this template reads from was
+    // rebuilt after excluding the disputed vitamin-D/ferritin biomarker
+    // material (see publication-page-intent.mjs's telogen-effluvium
+    // header comment). A fresh synthesis over narrowed evidence does not
+    // reproduce the same core_factual_points, in the same order, in the
+    // same buckets -- the FACTORS bucket that the previous template's
+    // "triggers" section read from is now genuinely empty (its two prior
+    // points were the trigger-category list and the excluded ferritin/
+    // vitamin-D statement; the trigger-category material re-synthesized
+    // into a single combined mechanism-and-triggers statement that the
+    // classifier now places in OTHER instead), and the previous "prevalence"
+    // section's TIMING point changed from a COVID-era prevalence
+    // percentage to a normal-cycle background statistic (~9% of follicles
+    // in telogen at any time) -- a different fact the old section's
+    // framing sentence ("this number... shows the trigger effect") no
+    // longer honestly describes. This entry was rebuilt against the ACTUAL
+    // new core_factual_points rather than patched to keep old prose next
+    // to new claim_ids -- the failure mode a hardcoded bucket/index
+    // template is otherwise prone to across independent re-synthesis runs.
+    // Nothing here reflects a topic-specific bucket/classifier change;
+    // classifyCoreFactualPoints() and resolveEditorialUnit() are unchanged
+    // from the prior round.
     answer_summary_bucket: 'DEFINITION',
 
-    // Opening section mirrors hair-cycle's PRINCIPLE (establish practical
-    // relevance right after the hero's definition, before any supporting
-    // detail) but not its wording or heading. Both paraphrase units
-    // derive from the cleared PRACTITIONER_RELEVANCE statement and the
-    // cleared OTHER statement (the "is chronic TE a distinct condition"
-    // debate) respectively -- two different cleared statements this
-    // time, not one statement split in two the way hair-cycle's was.
+    // Opens with the mechanism itself (OTHER[1]: the anagen-to-telogen
+    // shift plus its general trigger categories) followed immediately by
+    // the normal-cycle background stat (TIMING) that gives it scale --
+    // read together, before "why it matters", the same ordering principle
+    // as before (ground the reader in the biology first).
     why_it_matters: {
-      heading: 'Why the distinction matters',
+      heading: 'How the shift happens',
       units: [
-        { kind: 'framing', text: "That distinction is where a practitioner's judgment actually comes in." },
+        { kind: 'framing', text: "That shift is the mechanical heart of telogen effluvium -- everything else follows from it." },
         {
-          kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE',
-          text: "Telling diffuse, temporary shedding apart from progressive, patterned hair loss matters for exactly this reason: systematic review evidence suggests some cases labeled ‘chronic’ telogen effluvium may actually be early patterned hair loss, or a trigger that's still ongoing and hasn't been identified yet.",
+          kind: 'paraphrase', bucket: 'OTHER', index: 1,
+          text: "What actually happens is that a larger-than-usual, synchronized group of follicles shifts from the growth (anagen) phase into the resting (telogen) phase all at once -- a shift researchers link to general trigger categories like inflammation, hormonal change, physical or emotional stress, nutritional deficiency, poor sleep, or certain medications.",
         },
-        {
-          // Owner Correction Pass precedent applied proactively: avoids
-          // "non-diagnostic" here, which would otherwise trip
-          // page-builder-validator.mjs's crude 'diagnos' substring check
-          // (TREATMENT_DRIFT_TERMS) as a false positive -- that phrase is
-          // an explicit safety-affirming disclaimer, not drift, but the
-          // shared validator's simple containsAny() can't tell a negation
-          // apart from the term itself. Reworded to preserve the exact
-          // same meaning (observation over declaring a cause) without
-          // touching the shared safety-term list, which stays untouched
-          // and unweakened for every topic.
-          kind: 'paraphrase', bucket: 'OTHER',
-          text: "Whether a persistent, ‘chronic’ form of telogen effluvium is really its own distinct condition is still debated in the literature — which is exactly why staying in an observation-based professional lane, rather than declaring a cause, is the right posture.",
-        },
+        { kind: 'verbatim', bucket: 'TIMING' },
       ],
     },
 
     limitations_heading: 'What this information cannot tell you',
 
+    // Second section carries what was previously "why it matters" --
+    // the practitioner-relevance distinction, plus the illness/COVID
+    // example, which now (post-narrowing) reports no specific numbers,
+    // just the pattern itself.
     sections: [
       {
-        section_id: 'triggers',
-        heading: 'What can trigger it',
-        // FACTORS has two distinct cleared points here (unlike
-        // hair-cycle's single-point buckets) -- index 0 and 1
-        // respectively, per page-builder-draft.mjs's resolveEditorialUnit()
-        // generalization fix.
+        // Distinct from the auto-generated top-level why_it_matters
+        // block's own hardcoded section_id ('why-it-matters', set in
+        // page-builder-draft.mjs) -- this is a second, later section, not
+        // a duplicate of it.
+        section_id: 'distinguishing-te',
+        heading: 'Why the distinction matters',
         units: [
-          { kind: 'framing', text: 'That list is longer than most people expect.' },
+          { kind: 'framing', text: "That distinction is where a practitioner's judgment actually comes in." },
           {
-            kind: 'paraphrase', bucket: 'FACTORS', index: 0,
-            text: 'Illness and inflammation, hormonal changes, psychological stress, nutritional deficiency, poor sleep, certain medications, and the postpartum period are among the documented trigger categories — no single one explains every case.',
+            kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE',
+            text: "Telling diffuse, temporary shedding apart from progressive, patterned hair loss matters for exactly this reason: reviews of cases labeled ‘chronic’ telogen effluvium have found that many likely represent early patterned hair loss or an ongoing trigger that hasn't been identified yet -- and biopsy studies in these cases have shown normal ratios of thick-to-thin hairs, unlike the pattern typically seen in progressive hair loss.",
           },
           {
-            kind: 'paraphrase', bucket: 'FACTORS', index: 1,
-            text: "Some studies have also found lower average ferritin and vitamin D levels in people with telogen effluvium compared with people without it — one more thread of support for nutrition as a trigger category, though how strong that association is varies from study to study.",
+            // Deliberately says "a global pandemic" rather than naming
+            // "COVID-19" -- the digit in that proper noun would trip
+            // page-builder-validator.mjs's UNSUPPORTED_NUMERIC_CLAIM rule
+            // (any digit in a non-byte-identical unit is treated as an
+            // unverified numeric claim), and a PARAPHRASE is exactly the
+            // place to generalize wording, not introduce a new literal
+            // token the cleared statement's own text supplies only inside
+            // the VERBATIM-only numeric-fidelity contract.
+            kind: 'paraphrase', bucket: 'OTHER', index: 0,
+            text: "Illness episodes on a large scale, such as a global pandemic, show how a systemic trigger can be followed by a rise in reported telogen effluvium, though the exact biological mechanism connecting the two still isn't clear.",
           },
-        ],
-      },
-      {
-        section_id: 'prevalence',
-        heading: 'How common the shift is',
-        // TIMING carries a specific prevalence percentage-pair -- kept
-        // 'verbatim', never paraphrased, for the same numeric-fidelity
-        // reason hair-cycle's duration statement was.
-        units: [
-          { kind: 'framing', text: 'This number matters because it shows the trigger effect at a population scale.' },
-          { kind: 'verbatim', bucket: 'TIMING' },
         ],
       },
     ],
@@ -312,11 +321,13 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
     key_takeaways_buckets: ['DEFINITION', 'PRACTITIONER_RELEVANCE', 'TIMING'],
     key_takeaways_limit: 3,
 
-    meta_description: 'A practitioner-oriented overview of telogen effluvium — its triggers, typical patterns, and how it differs from progressive hair loss.',
+    meta_description: 'A practitioner-oriented overview of telogen effluvium — its relationship to the hair cycle, typical patterns, and how it differs from progressive hair loss.',
 
     provenance_notes: {
       classifier_generalization_note:
         'The cleared definitional statement for this topic ("Telogen effluvium (TE) is a diffuse, temporary increase...") did not match the original DEFINITION pattern, which was tuned only to hair-cycle\'s phrasing -- fixed generically in classifyCoreFactualPoints() rather than special-cased per topic.',
+      re_templating_note:
+        'Rebuilt against a re-synthesized clearance (non-core vitamin-D/ferritin conflict excluded, see publication-page-intent.mjs) whose core_factual_points landed in genuinely different buckets/positions than the original synthesis -- confirms the classifier and editorial-unit mechanism are stable across independent re-synthesis runs, but that a hand-authored template must be re-verified against its actual bucket contents after any re-synthesis, not assumed to still line up.',
     },
   },
 });

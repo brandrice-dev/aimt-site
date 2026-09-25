@@ -196,6 +196,16 @@ export function validateReconciliationShape(output, expectedClaimIds) {
     if (r.disposition === 'EXCLUDED' && !EXCLUSION_REASON_CODES.includes(r.reason_code)) {
       errors.push(`EXCLUDED_REQUIRES_VALID_REASON_CODE:${r.claim_id}`);
     }
+    // UNRESOLVED_NON_CORE_CONFLICT requires symmetrically excluding every
+    // claim on both/all sides of a specific disagreement (see
+    // publication-synthesis-validator.mjs) -- a judgment this narrow,
+    // single-claim reconciliation pass has no way to make safely, since it
+    // never re-examines claims that already received a disposition in the
+    // original synthesis. That decision belongs to a full synthesis pass
+    // with the whole evidence bundle in view, never to this repair lane.
+    if (r.disposition === 'EXCLUDED' && r.reason_code === 'UNRESOLVED_NON_CORE_CONFLICT') {
+      errors.push(`NON_CORE_CONFLICT_NOT_VALID_IN_RECONCILIATION:${r.claim_id}`);
+    }
     if (!isNonEmptyString(r.reason)) {
       errors.push(`MISSING_OR_INVALID:resolutions[${i}].reason`);
     }
@@ -250,7 +260,11 @@ export function mergeReconciliationIntoSynthesis(originalOutput, resolutions) {
     if (r.disposition === 'SELECTED') {
       selected.push({ claim_id: r.claim_id, role: r.role, reason: r.reason });
     } else {
-      excluded.push({ claim_id: r.claim_id, reason_code: r.reason_code, reason: r.reason });
+      // related_conflict_claim_ids is always [] here -- validateReconciliationShape
+      // already refuses UNRESOLVED_NON_CORE_CONFLICT within this lane (see
+      // above), so a reconciliation-repaired exclusion is never a non-core
+      // conflict pairing and the field stays structurally empty.
+      excluded.push({ claim_id: r.claim_id, reason_code: r.reason_code, reason: r.reason, related_conflict_claim_ids: [] });
     }
   }
 

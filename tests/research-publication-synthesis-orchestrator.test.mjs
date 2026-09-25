@@ -69,7 +69,7 @@ function completeAiOutput(overrides = {}) {
       { claim_id: 'c2', role: 'limitation', reason: 'ok' },
     ],
     excluded_claims: [
-      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'unrelated' },
+      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'unrelated', related_conflict_claim_ids: [] },
     ],
     resolved_synthesis_signals: [{ signal: 'x', resolution: 'y', claim_ids: ['c3'] }],
     unresolved_issues: [],

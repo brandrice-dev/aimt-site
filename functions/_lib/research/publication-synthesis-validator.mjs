@@ -76,7 +76,8 @@ export function validateSchemaShape(aiOutput) {
     errors.push('MISSING_OR_INVALID:excluded_claims');
   } else {
     aiOutput.excluded_claims.forEach((c, i) => {
-      if (!c || !isNonEmptyString(c.claim_id) || !EXCLUSION_REASON_CODES.includes(c.reason_code) || !isNonEmptyString(c.reason)) {
+      if (!c || !isNonEmptyString(c.claim_id) || !EXCLUSION_REASON_CODES.includes(c.reason_code) || !isNonEmptyString(c.reason)
+        || !isStringArray(c.related_conflict_claim_ids)) {
         errors.push(`MISSING_OR_INVALID:excluded_claims[${i}]`);
       }
     });
@@ -195,12 +196,49 @@ export function validateSynthesisSemantics({ v1Result, evidenceBundle, aiOutput 
     selectedIds.add(sel.claim_id);
   }
   // Rule 2: every excluded claim_id must exist in the evidence bundle.
+  const excludedByClaimId = new Map();
   for (const exc of excluded) {
     if (!allBundleClaimIds.has(exc.claim_id)) {
       violations.push(`EXCLUDED_CLAIM_NOT_IN_EVIDENCE_BUNDLE:${exc.claim_id}`);
       continue;
     }
     excludedIds.add(exc.claim_id);
+    excludedByClaimId.set(exc.claim_id, exc);
+  }
+
+  // NON-CORE CONFLICT EXCLUSION: UNRESOLVED_NON_CORE_CONFLICT is only a
+  // valid resolution when BOTH (all) sides of the specific disagreement
+  // are excluded together -- this is what makes it structurally
+  // impossible for the model to quietly keep the more-favorable claim
+  // while excluding the other under this code. Every other exclusion
+  // reason must leave related_conflict_claim_ids empty, so the field
+  // stays a reliable signal rather than a place to stash unrelated notes.
+  for (const exc of excluded) {
+    const related = Array.isArray(exc.related_conflict_claim_ids) ? exc.related_conflict_claim_ids : [];
+    if (exc.reason_code === 'UNRESOLVED_NON_CORE_CONFLICT') {
+      if (related.length === 0) {
+        violations.push(`NON_CORE_CONFLICT_MISSING_RELATED_CLAIMS:${exc.claim_id}`);
+      }
+      if (!isSubstantiveJustificationReason(exc.reason)) {
+        violations.push(`NON_CORE_CONFLICT_MISSING_JUSTIFICATION:${exc.claim_id}`);
+      }
+      for (const relatedId of related) {
+        if (!allBundleClaimIds.has(relatedId)) {
+          violations.push(`NON_CORE_CONFLICT_RELATED_CLAIM_NOT_IN_EVIDENCE_BUNDLE:${relatedId}`);
+          continue;
+        }
+        const relatedExclusion = excludedByClaimId.get(relatedId);
+        if (!relatedExclusion || relatedExclusion.reason_code !== 'UNRESOLVED_NON_CORE_CONFLICT') {
+          // The claim this one names as its conflict partner was not
+          // excluded under the same code -- exactly the one-sided,
+          // favorable-side-picking outcome this mechanism exists to
+          // prevent.
+          violations.push(`NON_CORE_CONFLICT_ONE_SIDED_EXCLUSION:${exc.claim_id}->${relatedId}`);
+        }
+      }
+    } else if (related.length > 0) {
+      violations.push(`NON_CORE_CONFLICT_FIELD_MISUSED:${exc.claim_id}`);
+    }
   }
 
   // Rule 4/18: full accounting -- every bundle claim disposed exactly once.
