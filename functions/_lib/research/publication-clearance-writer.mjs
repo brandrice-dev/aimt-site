@@ -286,3 +286,106 @@ export async function writeClearanceRecord(env, record) {
   }
   return res.json();
 }
+
+const PUBLISH_COLUMNS = Object.freeze(['status', 'sitemap_eligible', 'published_at']);
+
+/**
+ * THE separate, human-authenticated write path this module's header
+ * comment anticipated -- "A future HUMAN_APPROVED writer must be built
+ * as its own, separate, human-authenticated code path -- never a flag or
+ * parameter added to this one." This is that path, and it is
+ * deliberately incapable of doing anything writeClearanceRecord() or
+ * replaceNonPublicClearanceRecord() do:
+ *   - It can ONLY ever set exactly {status: 'published', sitemap_eligible:
+ *     true, published_at: <timestamp>} -- PUBLISH_COLUMNS is not
+ *     ALLOWED_COLUMNS, and nothing here ever touches clearance_mode,
+ *     generation_source_hash, publication_clearance, key_claim_ids, or
+ *     source_ids. Those stay exactly as the automated AUTO_READY writer
+ *     left them.
+ *   - It never builds or accepts a caller-supplied record -- there is no
+ *     way to hand it arbitrary column values. Its only inputs are the
+ *     topic_slug being published and the hash the caller last read.
+ *   - It re-reads the live row itself (never trusts a caller's cached
+ *     copy), re-verifies that row's OWN clearance integrity
+ *     (verifyStoredClearanceIntegrity), and requires it to still be in
+ *     the exact non-public AUTO_READY state
+ *     (status=ready_for_page_builder, clearance_mode=AUTO_READY,
+ *     sitemap_eligible=false, published_at=null,
+ *     generation_source_hash=requireCurrentHash) before issuing a single
+ *     conditional PATCH whose WHERE clause repeats every one of those
+ *     conditions server-side, atomically -- exactly
+ *     replaceNonPublicClearanceRecord()'s guard pattern, applied to a
+ *     publish transition instead of a replace. Zero rows matching (state
+ *     changed since read) or more than one row throws rather than
+ *     silently doing nothing or succeeding on the wrong row.
+ *   - This function is never called automatically by anything in this
+ *     repo -- only from an explicit, manual, owner-authorized CLI
+ *     invocation, exactly like every other write in this module.
+ *
+ * @param {Object} env - must carry SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+ * @param {string} topicSlug
+ * @param {{requireCurrentHash: string}} opts
+ * @returns {Promise<object[]>} exactly one row (the newly-published record)
+ */
+export async function publishClearanceRecord(env, topicSlug, { requireCurrentHash } = {}) {
+  if (!env || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('publishClearanceRecord: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. Refusing to write.');
+  }
+  if (!topicSlug || typeof topicSlug !== 'string') {
+    throw new Error('publishClearanceRecord: topicSlug is required.');
+  }
+  if (!requireCurrentHash || typeof requireCurrentHash !== 'string') {
+    throw new Error('publishClearanceRecord: requireCurrentHash is required -- this is a guarded transition of a specific known row, not a blind publish.');
+  }
+
+  const readRes = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/research_public_pages?topic_slug=eq.${encodeURIComponent(topicSlug)}&select=*`,
+    { headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` } }
+  );
+  if (!readRes.ok) throw new Error(`publishClearanceRecord: pre-publish read failed (${readRes.status})`);
+  const [currentRow] = await readRes.json();
+  if (!currentRow) throw new Error(`publishClearanceRecord: no row found for topic_slug="${topicSlug}".`);
+  if (
+    currentRow.status !== 'ready_for_page_builder'
+    || currentRow.clearance_mode !== 'AUTO_READY'
+    || currentRow.sitemap_eligible !== false
+    || currentRow.published_at !== null
+    || currentRow.generation_source_hash !== requireCurrentHash
+  ) {
+    throw new Error('publishClearanceRecord: the live row is not in the expected pre-publish state (status=ready_for_page_builder, clearance_mode=AUTO_READY, sitemap_eligible=false, published_at=null, generation_source_hash matching the caller-supplied value). Refusing to publish.');
+  }
+
+  const integrity = await verifyStoredClearanceIntegrity(currentRow);
+  if (!integrity.valid) {
+    throw new Error(`publishClearanceRecord: refusing to publish -- the live row failed its own integrity verification (${integrity.violations.join(', ')}).`);
+  }
+
+  const publishedAt = new Date().toISOString();
+  const qs = new URLSearchParams({
+    topic_slug: `eq.${topicSlug}`,
+    status: 'eq.ready_for_page_builder',
+    clearance_mode: 'eq.AUTO_READY',
+    sitemap_eligible: 'eq.false',
+    published_at: 'is.null',
+    generation_source_hash: `eq.${requireCurrentHash}`,
+  });
+  const patchRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_public_pages?${qs.toString()}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify({ status: 'published', sitemap_eligible: true, published_at: publishedAt }),
+  });
+  if (!patchRes.ok) {
+    const errBody = await patchRes.text().catch(() => '');
+    throw new Error(`publishClearanceRecord: guarded PATCH failed (${patchRes.status}): ${errBody.slice(0, 500)}`);
+  }
+  const rows = await patchRes.json();
+  if (rows.length !== 1) {
+    throw new Error(`publishClearanceRecord: guard failed -- expected exactly 1 row to match the publish precondition for topic_slug="${topicSlug}", but ${rows.length} matched. The row may have changed since it was last read -- refusing to publish blindly.`);
+  }
+  return rows;
+}
