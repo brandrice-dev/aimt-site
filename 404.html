@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Not Found | AIMT</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<!-- This page intentionally makes no SEO claim of its own -- it exists
+     to stop a missing URL from returning a false 200 (the soft-404
+     defect this page fixes), not to rank. noindex so it is never
+     surfaced as a search result in its own right; follow so a crawler
+     that lands here can still discover the real links below and is not
+     dead-ended. Cloudflare Pages serves this file automatically for any
+     unmatched path when a root-level 404.html exists -- see _redirects'
+     and this repo's SEO closeout docs for the full mechanism. -->
+<meta name="robots" content="noindex, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-supporting-pages.css">
+<link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
+<style>
+  .aimt-404-wrap { min-height: 60vh; display: flex; align-items: center; }
+  .aimt-404-inner { max-width: 640px; margin-inline: auto; padding: 4rem 2rem; text-align: center; }
+  .aimt-404-code { font-family: var(--aimt-font-sans); font-size: 0.8rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.44); text-transform: uppercase; margin-bottom: 1rem; }
+  .aimt-404-inner h1 { margin-bottom: 1rem; }
+  .aimt-404-inner p { color: rgba(255,255,255,0.66); margin-bottom: 2.25rem; }
+  .aimt-404-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
+</style>
+</head>
+<body class="aimt-legal-body">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+
+<nav class="aimt-public-nav aimt-public-nav--sticky">
+  <a href="/" class="aimt-public-nav-mark">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"></use></svg>
+  </a>
+  <a href="/" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <div class="aimt-public-nav-links">
+      <a href="/courses" class="aimt-public-nav-link">Courses</a>
+      <a href="/about" class="aimt-public-nav-link">About</a>
+      <a href="/student-access.html" class="aimt-public-nav-link">Student Access</a>
+    </div>
+    <button type="button" class="aimt-public-nav-hamburger" id="navHamburger" aria-expanded="false" aria-controls="navMobileMenu" aria-label="Menu">
+      <span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span><span class="aimt-public-nav-hamburger-line"></span>
+    </button>
+  </div>
+</nav>
+<div class="aimt-public-nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="/courses" class="aimt-public-nav-mobile-link">Courses</a>
+  <a href="/about" class="aimt-public-nav-mobile-link">About</a>
+  <a href="/student-access.html" class="aimt-public-nav-mobile-link">Student Access</a>
+</div>
+
+<div class="aimt-sp-depth-secondary aimt-404-wrap">
+  <div class="aimt-404-inner">
+    <div class="aimt-404-code">404 &middot; Page not found</div>
+    <h1>We couldn't find that page</h1>
+    <p>The page you're looking for may have moved or no longer exists. Here are a few places to pick back up.</p>
+    <div class="aimt-404-links">
+      <a href="/" class="aimt-cta aimt-cta-ghost-light">Home</a>
+      <a href="/education" class="aimt-cta aimt-cta-ghost-light">Education Library</a>
+      <a href="/courses" class="aimt-cta aimt-cta-ghost-light">Courses</a>
+      <a href="/about" class="aimt-cta aimt-cta-ghost-light">About AIMT</a>
+    </div>
+  </div>
+</div>
+
+<footer class="aimt-footer">
+  <div class="aimt-footer-bottom is-standalone">
+    <a href="/">AIMT</a> &middot; <a href="/about">About</a> &middot; <a href="/about/standards">Standards</a> &middot; <a href="/about/research-standards">Research Standards</a> &middot; <a href="/education">Education</a> &middot; <a href="/courses">Courses</a> &middot; <a href="/verify">Verify Credential</a> &middot; <a href="/terms">Terms</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/refunds">Refunds</a>
+  </div>
+</footer>
+<script src="/assets/js/aimt-public-nav.js"></script>
+</body>
+</html>
