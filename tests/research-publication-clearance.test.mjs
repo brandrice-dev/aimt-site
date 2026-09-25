@@ -31,6 +31,7 @@ import {
   assertClearanceIntegrityOrThrow,
   writeClearanceRecord,
   replaceNonPublicClearanceRecord,
+  publishClearanceRecord,
 } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { validatePageInvariants } from '../functions/_lib/research/publication-clearance-invariants.mjs';
 
@@ -281,6 +282,16 @@ async function buildValidRecord(overrides = {}, v1ResultOverrides = {}) {
     topicSlug: TOPIC, controlledTopic: TOPIC, v1Result: baselineV1Result(v1ResultOverrides),
     pipelineStatus: 'AUTO_READY', pageEvidenceBrief: brief, fingerprintArtifact,
   });
+}
+
+// buildAutoReadyClearanceRecord() never sets sitemap_eligible/published_at
+// (those are real DB columns with defaults the builder doesn't know
+// about) -- a live Supabase row always has concrete values for both.
+// Publish-guard tests need a fixture shaped like an actual GET response,
+// not just the builder's own output.
+async function buildLiveNonPublicRow(overrides = {}, v1ResultOverrides = {}) {
+  const record = await buildValidRecord(overrides, v1ResultOverrides);
+  return { ...record, sitemap_eligible: false, published_at: null };
 }
 
 async function testStoredFingerprintInputHashesToStoredHash() {
@@ -594,6 +605,120 @@ async function testReplaceSucceedsOnHappyPath() {
     try { result = await replaceNonPublicClearanceRecord(FAKE_ENV, record, { requireCurrentHash: 'the-old-hash' }); } catch (e) { threw = true; }
   });
   check('REPLACE_NONPUBLIC_GUARD', 'a valid replace with exactly 1 matching row succeeds', !threw && Array.isArray(result) && result.length === 1, `threw=${threw}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Guarded PUBLISH transition (AIMT Education Page #2 launch): the
+// separate, human-authenticated write path publication-clearance-writer.mjs's
+// own header comment anticipated. Every scenario mocks globalThis.fetch
+// and inspects each request's method/URL/body; no live network access.
+// ─────────────────────────────────────────────────────────────────────────
+function mockGetThenPatch({ getRow, patchRows, captureRequest }) {
+  return async (url, opts) => {
+    const method = (opts && opts.method) || 'GET';
+    if (captureRequest) captureRequest(String(url), opts);
+    if (method === 'GET') {
+      return { ok: true, status: 200, json: async () => (getRow ? [{ ...getRow }] : []) };
+    }
+    return { ok: true, status: 200, json: async () => patchRows };
+  };
+}
+
+async function testPublishRequiresCurrentHash() {
+  const counter = { count: 0 };
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(countingFetch(counter), async () => {
+    try { await publishClearanceRecord(FAKE_ENV, 'telogen-effluvium', {}); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  check('PUBLISH_GUARD', 'refuses without requireCurrentHash', threw && errorMessage.includes('requireCurrentHash'), errorMessage);
+  check('PUBLISH_GUARD', 'zero fetch calls when requireCurrentHash is missing', counter.count === 0, `fetch called ${counter.count} time(s)`);
+}
+
+async function testPublishRefusesWhenLiveRowNotInExpectedState() {
+  const record = await buildLiveNonPublicRow();
+  const staleRow = { ...record, status: 'published' }; // already published
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(mockGetThenPatch({ getRow: staleRow, captureRequest: () => { counter.count += 1; } }), async () => {
+    try { await publishClearanceRecord(FAKE_ENV, record.topic_slug, { requireCurrentHash: record.generation_source_hash }); } catch (e) { threw = true; }
+  });
+  check('PUBLISH_GUARD', 'refuses when the live row is not in the expected pre-publish state', threw);
+  check('PUBLISH_GUARD', 'only the read happened, never a PATCH', counter.count === 1, `fetch called ${counter.count} time(s)`);
+}
+
+async function testPublishRefusesOnIntegrityFailure() {
+  const record = await buildLiveNonPublicRow();
+  const tamperedRow = { ...record, generation_source_hash: '0'.repeat(64) };
+  const counter = { count: 0 };
+  let threw = false;
+  await withMockFetch(mockGetThenPatch({ getRow: tamperedRow, captureRequest: () => { counter.count += 1; } }), async () => {
+    // requireCurrentHash matches the tampered value on the row (so the
+    // pre-publish STATE check passes), but the row's own stored hash
+    // doesn't reproduce from its own fingerprint_input -- the independent
+    // integrity re-check must still catch this.
+    try { await publishClearanceRecord(FAKE_ENV, record.topic_slug, { requireCurrentHash: '0'.repeat(64) }); } catch (e) { threw = true; }
+  });
+  check('PUBLISH_GUARD', 'refuses when the live row fails its own integrity check', threw);
+  check('PUBLISH_GUARD', 'only the read happened, never a PATCH', counter.count === 1, `fetch called ${counter.count} time(s)`);
+}
+
+async function testPublishIssuesGuardedPatchWithExpectedFiltersAndBody() {
+  const record = await buildLiveNonPublicRow();
+  let capturedUrl = null;
+  let capturedMethod = null;
+  let capturedBody = null;
+  await withMockFetch(mockGetThenPatch({
+    getRow: record,
+    patchRows: [{ ...record, status: 'published', sitemap_eligible: true, published_at: '2026-09-25T03:00:00.000Z' }],
+    captureRequest: (url, opts) => {
+      if (opts && opts.method === 'PATCH') {
+        capturedUrl = url;
+        capturedMethod = opts.method;
+        capturedBody = JSON.parse(opts.body);
+      }
+    },
+  }), async () => {
+    await publishClearanceRecord(FAKE_ENV, record.topic_slug, { requireCurrentHash: record.generation_source_hash });
+  });
+  check('PUBLISH_GUARD', 'issues a PATCH', capturedMethod === 'PATCH', capturedMethod);
+  check('PUBLISH_GUARD', 'PATCH query requires status=ready_for_page_builder', capturedUrl.includes('status=eq.ready_for_page_builder'), capturedUrl);
+  check('PUBLISH_GUARD', 'PATCH query requires clearance_mode=AUTO_READY', capturedUrl.includes('clearance_mode=eq.AUTO_READY'), capturedUrl);
+  check('PUBLISH_GUARD', 'PATCH query requires sitemap_eligible=false', capturedUrl.includes('sitemap_eligible=eq.false'), capturedUrl);
+  check('PUBLISH_GUARD', 'PATCH query requires published_at is null', capturedUrl.includes('published_at=is.null'), capturedUrl);
+  check('PUBLISH_GUARD', 'PATCH query requires the caller-supplied hash', capturedUrl.includes(`generation_source_hash=eq.${record.generation_source_hash}`), capturedUrl);
+  check('PUBLISH_GUARD', 'PATCH body sets status to published', capturedBody.status === 'published', JSON.stringify(capturedBody));
+  check('PUBLISH_GUARD', 'PATCH body sets sitemap_eligible to true', capturedBody.sitemap_eligible === true, JSON.stringify(capturedBody));
+  check('PUBLISH_GUARD', 'PATCH body sets a published_at timestamp', typeof capturedBody.published_at === 'string' && capturedBody.published_at.length > 0, JSON.stringify(capturedBody));
+  check('PUBLISH_GUARD', 'PATCH body touches ONLY status/sitemap_eligible/published_at', Object.keys(capturedBody).sort().join(',') === 'published_at,sitemap_eligible,status', JSON.stringify(capturedBody));
+}
+
+async function testPublishRefusesWhenZeroRowsMatchOnPatch() {
+  const record = await buildLiveNonPublicRow();
+  let threw = false;
+  let errorMessage = '';
+  await withMockFetch(mockGetThenPatch({ getRow: record, patchRows: [] }), async () => {
+    try { await publishClearanceRecord(FAKE_ENV, record.topic_slug, { requireCurrentHash: record.generation_source_hash }); } catch (e) { threw = true; errorMessage = e.message; }
+  });
+  check('PUBLISH_GUARD', 'throws when zero rows match the guarded PATCH', threw && errorMessage.includes('expected exactly 1 row'), errorMessage);
+}
+
+async function testPublishSucceedsOnHappyPath() {
+  const record = await buildLiveNonPublicRow();
+  let result;
+  let threw = false;
+  await withMockFetch(mockGetThenPatch({
+    getRow: record,
+    patchRows: [{ ...record, status: 'published', sitemap_eligible: true, published_at: '2026-09-25T03:00:00.000Z' }],
+  }), async () => {
+    try { result = await publishClearanceRecord(FAKE_ENV, record.topic_slug, { requireCurrentHash: record.generation_source_hash }); } catch (e) { threw = true; }
+  });
+  check('PUBLISH_GUARD', 'a valid publish with exactly 1 matching row succeeds', !threw && Array.isArray(result) && result.length === 1, `threw=${threw}`);
+  check('PUBLISH_GUARD', 'resulting row reports status=published', result && result[0].status === 'published');
+  check('PUBLISH_GUARD', 'resulting row reports sitemap_eligible=true', result && result[0].sitemap_eligible === true);
+  check('PUBLISH_GUARD', 'resulting row reports a non-null published_at', result && result[0].published_at != null);
+  check('PUBLISH_GUARD', 'clearance_mode is unchanged by publish', result && result[0].clearance_mode === 'AUTO_READY');
+  check('PUBLISH_GUARD', 'generation_source_hash is unchanged by publish', result && result[0].generation_source_hash === record.generation_source_hash);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1091,6 +1216,12 @@ const tests = [
   testReplaceRefusesWhenZeroRowsMatch,
   testReplaceRefusesWhenMultipleRowsMatch,
   testReplaceSucceedsOnHappyPath,
+  testPublishRequiresCurrentHash,
+  testPublishRefusesWhenLiveRowNotInExpectedState,
+  testPublishRefusesOnIntegrityFailure,
+  testPublishIssuesGuardedPatchWithExpectedFiltersAndBody,
+  testPublishRefusesWhenZeroRowsMatchOnPatch,
+  testPublishSucceedsOnHappyPath,
   testWriterAcceptsValidLowerRisk,
   testWriterAcceptsValidModerateRisk,
   testWriterRefusesHumanApproved,
