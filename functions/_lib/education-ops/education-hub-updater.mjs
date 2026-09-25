@@ -48,6 +48,21 @@ export function insertHubCard(hubHtml, cardHtml) {
   const closeIdx = hubHtml.indexOf(gridClose, openIdx);
   if (closeIdx === -1) throw new HubUpdateError('insertHubCard: found the grid opening tag but no matching closing </ul> after it.');
 
+  // HREF-DEDUP CORRECTION: check the TARGET ROUTE, not just the whole
+  // card's exact text -- two cards for the same href with different
+  // surrounding copy (a different h1/description/source count) are
+  // still a duplicate card for the same page, and must be refused just
+  // as firmly as a byte-identical repeat. Scoped to the grid's own
+  // contents only (openIdx..closeIdx), so an unrelated nav/footer link
+  // to the same route elsewhere on the hub page never triggers this.
+  const hrefMatch = cardHtml.match(/href="([^"]*)"/);
+  if (hrefMatch) {
+    const hrefAttr = `href="${hrefMatch[1]}"`;
+    if (hubHtml.slice(openIdx, closeIdx).includes(hrefAttr)) {
+      throw new HubUpdateError(`insertHubCard: the hub already links to "${hrefMatch[1]}" -- refusing to insert a second card for the same route even though the surrounding card text differs.`);
+    }
+  }
+
   if (hubHtml.includes(cardHtml.trim())) {
     throw new HubUpdateError('insertHubCard: this exact card already appears in the hub file -- refusing to insert a duplicate.');
   }

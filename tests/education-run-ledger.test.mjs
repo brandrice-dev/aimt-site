@@ -3,7 +3,7 @@
 //
 // Run: node tests/education-run-ledger.test.mjs
 
-import { buildRunReport, RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -37,6 +37,75 @@ function check(fixtureName, label, condition, detail) {
   check('AGGREGATION', 'total_calls counted', report.model_calls.total_calls === 2);
   check('AGGREGATION', 'input tokens summed', report.model_calls.total_input_tokens === 300);
   check('AGGREGATION', 'output tokens summed', report.model_calls.total_output_tokens === 200);
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// MODEL-CALL-CEILING CORRECTION: "4 conceptual roles" is not the same
+// as "4 actual API calls" -- Publication Editor's own bounded pipeline
+// may issue up to 3 real calls on its own. The ledger must track the
+// TRUE actual count and refuse to report a run that structurally
+// shouldn't be possible.
+// ─────────────────────────────────────────────────────────────────────────
+(function testFourRolesEachOneCallEqualsFour() {
+  const report = buildRunReport({
+    run_id: 'r1', mode: 'shadow', final_state: RUN_FINAL_STATE.SHADOW_CANDIDATE_READY,
+    model_calls: [
+      { role: 'intent_planner', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+      { role: 'publication_editor', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+      { role: 'education_writer', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+      { role: 'education_reviewer', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+    ],
+  });
+  check('FOUR_ROLES_FOUR_CALLS', 'total_roles_invoked is 4', report.model_calls.total_roles_invoked === 4);
+  check('FOUR_ROLES_FOUR_CALLS', 'actual_model_call_count is 4 (best case: PE made exactly 1 call)', report.model_calls.actual_model_call_count === 4);
+  check('FOUR_ROLES_FOUR_CALLS', 'total_calls alias matches actual_model_call_count', report.model_calls.total_calls === 4);
+})();
+
+(function testFourRolesWithPublicationEditorWorstCaseEqualsSix() {
+  const report = buildRunReport({
+    run_id: 'r2', mode: 'shadow', final_state: RUN_FINAL_STATE.SHADOW_CANDIDATE_READY,
+    model_calls: [
+      { role: 'intent_planner', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+      { role: 'publication_editor', actual_call_count: 3, input_tokens: 30, output_tokens: 30 }, // worst case: 1 initial + reconciliation + full retry
+      { role: 'education_writer', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+      { role: 'education_reviewer', actual_call_count: 1, input_tokens: 10, output_tokens: 10 },
+    ],
+  });
+  check('WORST_CASE_SIX_CALLS', 'total_roles_invoked is still only 4 (roles, not calls)', report.model_calls.total_roles_invoked === 4);
+  check('WORST_CASE_SIX_CALLS', 'actual_model_call_count is the TRUE 6, not 4', report.model_calls.actual_model_call_count === 6, report.model_calls.actual_model_call_count);
+  check('WORST_CASE_SIX_CALLS', 'exactly at the declared ceiling', report.model_calls.actual_model_call_count === MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN);
+})();
+
+(function testExceedingTheCeilingFailsClosed() {
+  let threw = false;
+  let message = '';
+  try {
+    buildRunReport({
+      run_id: 'r3', mode: 'shadow', final_state: RUN_FINAL_STATE.SHADOW_CANDIDATE_READY,
+      model_calls: [
+        { role: 'intent_planner', actual_call_count: 1 },
+        { role: 'publication_editor', actual_call_count: 3 },
+        { role: 'education_writer', actual_call_count: 1 },
+        { role: 'education_reviewer', actual_call_count: 2 }, // simulated architecture drift: 7 total
+      ],
+    });
+  } catch (e) {
+    threw = true;
+    message = e.message;
+  }
+  check('EXCEEDS_CEILING_FAILS_CLOSED', 'buildRunReport throws rather than silently reporting a 7-call run', threw);
+  check('EXCEEDS_CEILING_FAILS_CLOSED', 'the error names the ceiling', message.includes(String(MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN)), message);
+})();
+
+(function testMissingActualCallCountDefaultsToOnePerEntry() {
+  // A role entry that doesn't explicitly set actual_call_count (e.g. an
+  // older/simpler test fixture) is assumed to be exactly 1 real call --
+  // never silently 0, which would undercount the true ceiling.
+  const report = buildRunReport({
+    run_id: 'r4', mode: 'shadow', final_state: RUN_FINAL_STATE.NO_OP_SUCCESS,
+    model_calls: [{ role: 'intent_planner' }],
+  });
+  check('DEFAULT_ONE_PER_ENTRY', 'defaults to 1 actual call when unset', report.model_calls.actual_model_call_count === 1);
 })();
 
 (function testEveryDocumentedFinalStateIsBuildable() {

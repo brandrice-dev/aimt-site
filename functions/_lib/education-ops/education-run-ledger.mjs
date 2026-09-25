@@ -10,6 +10,18 @@
    including NO_OP_SUCCESS.
    ═══════════════════════════════════════════════════════════════ */
 
+// MODEL-CALL-CEILING CORRECTION: docs/reports previously called this
+// "4 conceptual roles" (intent planner, Publication Editor, writer,
+// reviewer) as if that were the hard ceiling on actual API calls. It is
+// not -- Publication Editor's own bounded pipeline may itself issue up
+// to 3 real model calls (1 initial + <=1 reconciliation + <=1 full
+// retry, unchanged, existing behavior). The TRUE maximum actual API
+// requests in one run is therefore 1 (intent planner) + 3 (Publication
+// Editor, worst case) + 1 (writer) + 1 (reviewer) = 6, never 4. This
+// constant is the one true ceiling; buildRunReport() below enforces it
+// mechanically rather than merely documenting it.
+export const MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN = 6;
+
 export const RUN_FINAL_STATE = Object.freeze({
   NO_OP_SUCCESS: 'NO_OP_SUCCESS',
   SHADOW_CANDIDATE_READY: 'SHADOW_CANDIDATE_READY',
@@ -63,6 +75,15 @@ export function buildRunReport(fields) {
 
   const totalInputTokens = model_calls.reduce((sum, c) => sum + (c.input_tokens || 0), 0);
   const totalOutputTokens = model_calls.reduce((sum, c) => sum + (c.output_tokens || 0), 0);
+  // actual_call_count on a Publication Editor entry may legitimately be
+  // up to 3 (its own internal bounded retry count); every other role's
+  // entry defaults to 1 if not given explicitly.
+  const actualModelCallCount = model_calls.reduce((sum, c) => sum + (typeof c.actual_call_count === 'number' ? c.actual_call_count : 1), 0);
+  if (actualModelCallCount > MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN) {
+    throw new Error(
+      `buildRunReport: actual_model_call_count (${actualModelCallCount}) exceeds the hard ceiling of ${MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN} -- this should be structurally impossible under the normal pipeline (1 intent planner + <=3 Publication Editor + 1 writer + 1 reviewer = 6 max); refusing to report a run that violates its own model-call budget rather than silently accepting it.`
+    );
+  }
 
   return {
     run_id,
@@ -86,7 +107,17 @@ export function buildRunReport(fields) {
     stopped_before_model_stage,
     model_calls: {
       calls: model_calls,
-      total_calls: model_calls.length,
+      // Distinct roles invoked this run (max 4: intent planner,
+      // Publication Editor, writer, reviewer) -- NOT the actual API
+      // call count; see actual_model_call_count for that.
+      total_roles_invoked: model_calls.length,
+      // The TRUE actual-API-call count (max 6, see
+      // MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN above).
+      actual_model_call_count: actualModelCallCount,
+      // Kept as an alias of actual_model_call_count for backward
+      // compatibility with earlier reports/tests that read total_calls
+      // -- prefer actual_model_call_count in new code.
+      total_calls: actualModelCallCount,
       total_input_tokens: totalInputTokens,
       total_output_tokens: totalOutputTokens,
     },

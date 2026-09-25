@@ -42,7 +42,10 @@ export const INTENT_PLAN_JSON_SCHEMA = {
  *   topicSlug: string, seoPageConcept: string, riskTier: string,
  *   cluster: string, routePrefix: string,
  *   candidateEvidenceInventory: Array<{claim_id: string, claim_type: string, topics: string[]}>,
- *   existingClusterPages: Array<{topic_slug: string, route: string, page_concept: string}>,
+ *   existingClusterPages: Array<{topic_slug: string, route: string, label: string}>
+ *     -- real, trusted route+label data (education-related-links.mjs /
+ *     the orchestrator's resolveTrustedSiblingPages()), CONTEXT ONLY;
+ *     the planner never authors a route/href from this,
  * }} args
  */
 export function buildIntentPlanningInstruction({ topicSlug, seoPageConcept, riskTier, cluster, routePrefix, candidateEvidenceInventory, existingClusterPages }) {

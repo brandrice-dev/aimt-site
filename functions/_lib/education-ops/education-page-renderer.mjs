@@ -24,6 +24,27 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * JSON-LD CORRECTION: HTML-entity escaping (escapeHtml above) is NOT
+ * JSON string serialization -- reusing it inside a <script
+ * type="application/ld+json"> block previously produced literal
+ * "&amp;"/"&quot;" INSIDE the JSON string values themselves (correct
+ * for an HTML attribute or text node, wrong for JSON, where a parser
+ * must get back the plain "&"/'"' the page actually means). The fix:
+ * build a real JS object and let JSON.stringify() do the ONE correct
+ * serialization, then escape ONLY the `<` character (as the valid JSON
+ * escape `<`) so a value containing a literal "</script>" can
+ * never terminate the script tag early -- this is a no-op for every
+ * other character and never touches `&`/`"` at all.
+ *
+ * @param {object} data
+ * @returns {string} JSON text safe to embed verbatim inside <script
+ *   type="application/ld+json">...</script>
+ */
+function toSafeJsonLd(data) {
+  return JSON.stringify(data, null, 2).replace(/</g, '\\u003c');
+}
+
 function renderUnit(unit) {
   return unit.kind === 'FRAMING'
     ? `<p><em>${escapeHtml(unit.text)}</em></p>`
@@ -80,6 +101,16 @@ function renderTakeaways(units) {
  */
 export function renderEducationPageHtml(plan) {
   const canonicalUrl = `${SITE_ORIGIN}${plan.route}`;
+  const jsonLd = toSafeJsonLd({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'Organization', '@id': `${SITE_ORIGIN}/#organization`, name: 'American Institute of Modern Trichology', alternateName: 'AIMT', url: `${SITE_ORIGIN}/` },
+      {
+        '@type': 'WebPage', '@id': `${canonicalUrl}#webpage`, url: canonicalUrl, name: plan.h1, description: plan.meta_description,
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` }, about: { '@id': `${SITE_ORIGIN}/#organization` }, publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+      },
+    ],
+  });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,13 +133,7 @@ export function renderEducationPageHtml(plan) {
 <meta name="twitter:title" content="${escapeHtml(plan.h1)}">
 <meta name="twitter:description" content="${escapeHtml(plan.meta_description)}">
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    { "@type": "Organization", "@id": "${SITE_ORIGIN}/#organization", "name": "American Institute of Modern Trichology", "alternateName": "AIMT", "url": "${SITE_ORIGIN}/" },
-    { "@type": "WebPage", "@id": "${escapeHtml(canonicalUrl)}#webpage", "url": "${escapeHtml(canonicalUrl)}", "name": "${escapeHtml(plan.h1)}", "description": "${escapeHtml(plan.meta_description)}", "isPartOf": { "@id": "${SITE_ORIGIN}/#website" }, "about": { "@id": "${SITE_ORIGIN}/#organization" }, "publisher": { "@id": "${SITE_ORIGIN}/#organization" } }
-  ]
-}
+${jsonLd}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

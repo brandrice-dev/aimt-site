@@ -79,9 +79,28 @@ export function validatePagePlanShape(plan) {
  * @param {object} plan - a shape-valid Education Page Plan
  * @param {object} clearedSnapshot - the exact fingerprint_input the
  *   plan was supposedly built from: { selected_claim_ids, core_factual_points, limitations, scope_note, source_ids }
+ * @param {{expectedTopicSlug?: string, expectedCluster?: string, expectedRoute?: string}} [context]
+ *   ROUTE-COLLISION CORRECTION: the plan must never be validated in
+ *   isolation from the orchestration decision that produced it -- a
+ *   model cannot redirect the page it's building by simply changing its
+ *   own topic_slug/cluster/route output. When provided, every field is
+ *   required to match EXACTLY; omitting a context field skips that
+ *   specific check (used only by tests exercising other rules in
+ *   isolation -- the real orchestrator always supplies all three).
  */
-export function validatePagePlanSemantics(plan, clearedSnapshot) {
+export function validatePagePlanSemantics(plan, clearedSnapshot, context = {}) {
   const violations = [];
+
+  if (context.expectedTopicSlug !== undefined && plan.topic_slug !== context.expectedTopicSlug) {
+    violations.push(`PLAN_TOPIC_SLUG_MISMATCH:${plan.topic_slug}!=${context.expectedTopicSlug}`);
+  }
+  if (context.expectedCluster !== undefined && plan.cluster !== context.expectedCluster) {
+    violations.push(`PLAN_CLUSTER_MISMATCH:${plan.cluster}!=${context.expectedCluster}`);
+  }
+  if (context.expectedRoute !== undefined && plan.route !== context.expectedRoute) {
+    violations.push(`PLAN_ROUTE_MISMATCH:${plan.route}!=${context.expectedRoute}`);
+  }
+
   const selectedIds = new Set(clearedSnapshot.selected_claim_ids || []);
   const clearedStatements = new Set([
     ...(clearedSnapshot.core_factual_points || []).map((p) => p.statement),
@@ -146,18 +165,49 @@ export function validatePagePlanSemantics(plan, clearedSnapshot) {
   const clearedScopeNote = clearedSnapshot.scope_language ? clearedSnapshot.scope_language.scope_note : clearedSnapshot.scope_note;
   if (plan.scope_note !== clearedScopeNote) violations.push('SCOPE_NOTE_NOT_PRESERVED');
 
-  // Every rendered source must resolve to a real, cleared source_id.
+  // SOURCE AUTHORITY CORRECTION: the rendered source_id set must equal
+  // the cleared source_id set EXACTLY -- not merely "every rendered
+  // source is cleared" (UNCLEARED_SOURCE_RENDERED, extras) but ALSO
+  // "every cleared source is rendered" (MISSING_CLEARED_SOURCE, no
+  // silent drops). In the real pipeline `plan.sources` is now always
+  // built deterministically from clearedSnapshot itself (see
+  // education-source-authority.mjs), so this should be structurally
+  // unreachable -- it is kept as an independent, defense-in-depth check
+  // that does not trust that every caller went through that builder.
+  const renderedSourceIds = new Set();
   for (const s of plan.sources) {
+    renderedSourceIds.add(s.source_id);
     if (!clearedSourceIds.has(s.source_id)) violations.push(`UNCLEARED_SOURCE_RENDERED:${s.source_id}`);
+  }
+  for (const sourceId of clearedSourceIds) {
+    if (!renderedSourceIds.has(sourceId)) violations.push(`MISSING_CLEARED_SOURCE:${sourceId}`);
+  }
+
+  // RELATED-LINK AUTHORITY CORRECTION: every rendered href must be an
+  // internal AIMT route (absolute path, no scheme/host) -- never an
+  // arbitrary external destination. Structurally, related_links is now
+  // always attached by the orchestrator from trusted route data (see
+  // education-related-links.mjs), never authored by the model at all;
+  // this is the same kind of defense-in-depth backstop as the source
+  // check above, not the primary mechanism.
+  for (const link of plan.related_links) {
+    if (!link || typeof link.href !== 'string' || !link.href.startsWith('/')) {
+      violations.push(`RELATED_LINK_NOT_INTERNAL:${link && link.href}`);
+    }
   }
 
   return { valid: violations.length === 0, violations };
 }
 
-/** Full validation: shape, then (only if shape passes) semantics. */
-export function validateEducationPagePlan(plan, clearedSnapshot) {
+/**
+ * Full validation: shape, then (only if shape passes) semantics.
+ * @param {object} plan
+ * @param {object} clearedSnapshot
+ * @param {{expectedTopicSlug?: string, expectedCluster?: string, expectedRoute?: string}} [context]
+ */
+export function validateEducationPagePlan(plan, clearedSnapshot, context = {}) {
   const shape = validatePagePlanShape(plan);
   if (!shape.valid) return { valid: false, shapeValid: false, violations: shape.errors };
-  const semantics = validatePagePlanSemantics(plan, clearedSnapshot);
+  const semantics = validatePagePlanSemantics(plan, clearedSnapshot, context);
   return { valid: semantics.valid, shapeValid: true, violations: semantics.violations };
 }

@@ -76,9 +76,58 @@ import { buildRunReport, RUN_FINAL_STATE } from '../functions/_lib/education-ops
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
 import { writeClearanceRecord, replaceNonPublicClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { buildHubCardHtml, insertHubCard } from '../functions/_lib/education-ops/education-hub-updater.mjs';
+import { buildTrustedSources } from '../functions/_lib/education-ops/education-source-authority.mjs';
+import { buildEducationRelatedLinks } from '../functions/_lib/education-ops/education-related-links.mjs';
+import { checkRouteNotAlreadyPublished } from '../functions/_lib/education-ops/education-route-guard.mjs';
+import { getPageBuilderRoute } from '../functions/_lib/page-builder/page-builder-route-registry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+
+/**
+ * TRUST-BOUNDARY CORRECTION: the ONLY place a currently-published
+ * sibling page's route/label is resolved, from trusted data -- the
+ * existing Page Builder route registry (legacy hair-cycle/
+ * telogen-effluvium) or, for a future generated/published page, its own
+ * persisted, git-tracked Page Plan artifact under
+ * functions/_data/education-page-plans/. NEVER invents a route for a
+ * slug that resolves via neither source -- that slug is silently
+ * omitted rather than guessed. Feeds THREE consumers with the exact
+ * same trusted data: the Writer's context-only existingClusterPages,
+ * the deterministic related_links builder, and the route-collision
+ * guard (via the routes it returns).
+ *
+ * @param {string[]} publishedTopicSlugs
+ * @param {string} clusterKey
+ * @returns {Array<{topic_slug: string, route: string, label: string}>}
+ */
+function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey) {
+  const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
+  const pages = [];
+  for (const slug of publishedTopicSlugs) {
+    if (!memberSet.has(slug)) continue;
+    try {
+      const { route } = getPageBuilderRoute(slug);
+      const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug);
+      pages.push({ topic_slug: slug, route, label: concept ? concept.seo_page_concept : slug });
+      continue;
+    } catch (_err) {
+      // Not in the legacy registry -- fall through to a persisted Page
+      // Plan artifact, the trusted source for a future generated page.
+    }
+    const artifactPath = path.join(ROOT, 'functions/_data/education-page-plans', `${slug}.json`);
+    if (!existsSync(artifactPath)) continue; // no trusted source for this slug -- never guess
+    try {
+      const data = JSON.parse(readFileSync(artifactPath, 'utf8'));
+      if (data && data.plan && typeof data.plan.route === 'string' && typeof data.plan.h1 === 'string') {
+        pages.push({ topic_slug: slug, route: data.plan.route, label: data.plan.h1 });
+      }
+    } catch (_err) {
+      // Malformed artifact -- skip rather than guess at its route.
+    }
+  }
+  return pages;
+}
 
 export const AUTOPUBLISH_ENV_VAR = 'AIMT_EDUCATION_AUTOPUBLISH_ENABLED';
 export const MAX_PAGES_PER_WEEK_ENV_VAR = 'AIMT_EDUCATION_MAX_PAGES_PER_WEEK';
@@ -141,10 +190,22 @@ export async function runDecisionPipeline(env, options = {}) {
   const fns = options.fns || {};
   const common = {};
 
-  const finish = (fields) => buildRunReport({
-    run_id: runId, started_at: startedAt, finished_at: new Date().toISOString(),
-    mode: options.mode || 'shadow', model_calls: modelCalls, ...common, ...fields,
-  });
+  // NOTE: __internal is deliberately NOT part of buildRunReport()'s
+  // typed field list (it's the SHADOW_CANDIDATE_READY case's own
+  // in-memory handoff to prepareGeneratedArtifacts() -- preparedArtifact
+  // is far too large/sensitive to belong in the durable, persisted run
+  // report). buildRunReport() returns a plain literal of only its own
+  // named fields, so __internal must be attached AFTER, never passed
+  // through it (passing it through would silently drop it).
+  const finish = (fields) => {
+    const { __internal, ...reportFields } = fields;
+    const report = buildRunReport({
+      run_id: runId, started_at: startedAt, finished_at: new Date().toISOString(),
+      mode: options.mode || 'shadow', model_calls: modelCalls, ...common, ...reportFields,
+    });
+    if (__internal) report.__internal = __internal;
+    return report;
+  };
 
   // --- 1. Live published-topic state (fail closed -- never fall back
   //        to a hardcoded constant for a real run) --------------------
@@ -160,6 +221,13 @@ export async function runDecisionPipeline(env, options = {}) {
     }
   }
   common.published_topics = publishedTopicSlugs;
+
+  // Trusted sibling-page data (route+label), resolved ONCE from the
+  // live published set -- feeds the Writer's context, the deterministic
+  // related_links builder, and the route-collision guard below. Never
+  // guessed; see resolveTrustedSiblingPages()'s own header comment.
+  const trustedSiblingPages = resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey);
+  const trustedPublishedRoutes = trustedSiblingPages.map((p) => p.route);
 
   // --- 2. Live weekly publication count -------------------------------
   let pagesPublishedThisWeek;
@@ -229,10 +297,12 @@ export async function runDecisionPipeline(env, options = {}) {
 
   // --- 7. Intent planning ----------------------------------------------
   const planIntentFn = fns.planIntentFn || planPageIntent;
-  const existingClusterPages = publishedTopicSlugs.map((slug) => {
-    const c = PILOT_TOPIC_CONCEPTS.find((cc) => cc.topic_slug === slug);
-    return { topic_slug: slug, page_concept: c ? c.seo_page_concept : slug };
-  });
+  // Real, trusted route+label data -- see resolveTrustedSiblingPages().
+  // Renamed from `page_concept` to `label` to match what it actually is
+  // now (a route registry/persisted-artifact value, not a re-derived
+  // PILOT_TOPIC_CONCEPTS lookup) -- CONTEXT ONLY for the Writer; it never
+  // authors an href itself (see education-related-links.mjs).
+  const existingClusterPages = trustedSiblingPages.map((p) => ({ topic_slug: p.topic_slug, route: p.route, label: p.label }));
   const candidateEvidenceInventory = selected.v1_result.candidate_claim_ids.map((id) => ({ claim_id: id }));
 
   const intentResult = await planIntentFn(env, {
@@ -244,7 +314,7 @@ export async function runDecisionPipeline(env, options = {}) {
     candidateEvidenceInventory,
     existingClusterPages,
   });
-  if (intentResult.ok) modelCalls.push({ role: 'intent_planner', ...intentResult.usage });
+  if (intentResult.ok) modelCalls.push({ role: 'intent_planner', actual_call_count: 1, ...intentResult.usage });
   if (!intentResult.ok) {
     return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Intent planner call failed: ${intentResult.reason}` });
   }
@@ -256,6 +326,24 @@ export async function runDecisionPipeline(env, options = {}) {
     return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, final_state: RUN_FINAL_STATE.HUMAN_REVIEW, exception_reason: `Intent plan requested unsupported scope: ${intentValidation.violations.join(', ')}` });
   }
   const intentPlan = intentResult.output;
+  const route = `${ACTIVE_CLUSTERS[clusterKey].route_prefix}/${intentPlan.route_slug}`;
+
+  // --- ROUTE-COLLISION GUARD (before spending a synthesis call) --------
+  // A planner choosing a route_slug that happens to match a CURRENTLY
+  // LIVE page (e.g. "telogen-effluvium" for an unrelated topic) would
+  // otherwise compute the exact route/file the real, live page already
+  // occupies -- and the generated-diff allowlist alone would not catch
+  // it, since that path is still inside education/**. Checked here,
+  // early, against the SAME trusted route data used for related_links
+  // (never a guess), so a colliding candidate fails cheaply as
+  // INFRA_REVIEW rather than after 1-3 more model calls are spent on it.
+  const routeGuard = checkRouteNotAlreadyPublished(route, trustedPublishedRoutes);
+  if (!routeGuard.valid) {
+    return finish({
+      candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Route collision: ${routeGuard.violations.join(', ')}`,
+    });
+  }
 
   // --- Publication Editor synthesis (EXACTLY ONCE; see education-synthesis-cache.mjs) ---
   const synthesisResult = await prepareTopicArtifact(env, {
@@ -265,7 +353,21 @@ export async function runDecisionPipeline(env, options = {}) {
     pageIntent: { page_concept: intentPlan.page_concept, public_intent: intentPlan.public_intent, in_scope_concepts: intentPlan.in_scope_concepts, out_of_scope_concepts: intentPlan.out_of_scope_concepts },
     evidenceRows: evidencePool,
   }, fns);
-  if (synthesisResult.pipelineMetrics) modelCalls.push({ role: 'publication_editor', model_calls: synthesisResult.pipelineMetrics.model_calls, input_tokens: synthesisResult.pipelineMetrics.total_input_tokens, output_tokens: synthesisResult.pipelineMetrics.total_output_tokens });
+  if (synthesisResult.pipelineMetrics) {
+    modelCalls.push({
+      role: 'publication_editor',
+      // Publication Editor's OWN bounded pipeline may issue up to 3 real
+      // model calls (1 initial + <=1 reconciliation + <=1 full retry,
+      // unchanged, existing behavior) -- actual_call_count carries that
+      // TRUE count, never assumed to be 1, so the run ledger's ceiling
+      // enforcement (MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN) reflects
+      // reality rather than "4 conceptual roles".
+      actual_call_count: synthesisResult.pipelineMetrics.model_calls,
+      model_calls: synthesisResult.pipelineMetrics.model_calls,
+      input_tokens: synthesisResult.pipelineMetrics.total_input_tokens,
+      output_tokens: synthesisResult.pipelineMetrics.total_output_tokens,
+    });
+  }
 
   if (!synthesisResult.ok) {
     const isHumanReview = synthesisResult.status === 'HUMAN_REVIEW';
@@ -281,24 +383,54 @@ export async function runDecisionPipeline(env, options = {}) {
   const clearedSnapshot = preparedArtifact.record.publication_clearance.fingerprint_input;
 
   // --- Education Writer ---------------------------------------------------
+  // (route was already computed above, before the route-collision guard)
   const writeFn = fns.writeFn || writeEducationPagePlan;
-  const route = `${ACTIVE_CLUSTERS[clusterKey].route_prefix}/${intentPlan.route_slug}`;
   const writerResult = await writeFn(env, { intentPlan, clearedSnapshot, route, cluster: clusterKey, existingClusterPages });
-  if (writerResult.ok) modelCalls.push({ role: 'education_writer', ...writerResult.usage });
+  if (writerResult.ok) modelCalls.push({ role: 'education_writer', actual_call_count: 1, ...writerResult.usage });
   if (!writerResult.ok) {
     return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Writer call failed: ${writerResult.reason}` });
   }
 
-  const planValidation = validateEducationPagePlan(writerResult.output, clearedSnapshot);
+  // SOURCE/LINK AUTHORITY CORRECTION: the model's own output NEVER
+  // carries sources/related_links (see EDUCATION_WRITER_OUTPUT_JSON_SCHEMA
+  // -- there is no schema slot for either). Both are attached here,
+  // deterministically, from trusted data only: sources from the cleared
+  // snapshot's own citation_map (education-source-authority.mjs), links
+  // from the trusted sibling-page data already resolved above
+  // (education-related-links.mjs). The model never sees either value
+  // and cannot influence it.
+  const plan = {
+    ...writerResult.output,
+    sources: buildTrustedSources(clearedSnapshot),
+    related_links: buildEducationRelatedLinks({
+      clusterLabel: ACTIVE_CLUSTERS[clusterKey].label,
+      clusterRoutePrefix: ACTIVE_CLUSTERS[clusterKey].route_prefix,
+      siblingPages: trustedSiblingPages,
+    }),
+  };
+
+  // ROUTE-COLLISION CORRECTION (Page Plan validator context): the plan
+  // is never validated in isolation from the orchestration decision --
+  // the model cannot redirect the page by disagreeing with its own
+  // topic_slug/cluster/route. A mismatch here is an architecture-safety
+  // signal (INFRA_REVIEW), not a content-quality one (EDITORIAL_REVIEW).
+  const planValidation = validateEducationPagePlan(plan, clearedSnapshot, {
+    expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route,
+  });
   if (!planValidation.valid) {
-    return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: false, violations: planValidation.violations }, final_state: RUN_FINAL_STATE.EDITORIAL_REVIEW, exception_reason: `Page Plan failed deterministic validation: ${planValidation.violations.join(', ')}` });
+    const isRouteCollisionClass = planValidation.violations.some((v) => v.startsWith('PLAN_TOPIC_SLUG_MISMATCH') || v.startsWith('PLAN_CLUSTER_MISMATCH') || v.startsWith('PLAN_ROUTE_MISMATCH'));
+    return finish({
+      candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+      publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: false, violations: planValidation.violations },
+      final_state: isRouteCollisionClass ? RUN_FINAL_STATE.INFRA_REVIEW : RUN_FINAL_STATE.EDITORIAL_REVIEW,
+      exception_reason: `Page Plan failed deterministic validation: ${planValidation.violations.join(', ')}`,
+    });
   }
-  const plan = writerResult.output;
 
   // --- Education Reviewer --------------------------------------------------
   const reviewFn = fns.reviewFn || reviewEducationPagePlan;
   const reviewResult = await reviewFn(env, { plan, clearedSnapshot, intentPlan });
-  if (reviewResult.ok) modelCalls.push({ role: 'education_reviewer', ...reviewResult.usage });
+  if (reviewResult.ok) modelCalls.push({ role: 'education_reviewer', actual_call_count: 1, ...reviewResult.usage });
   if (!reviewResult.ok) {
     return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Reviewer call failed: ${reviewResult.reason}` });
   }
@@ -363,11 +495,28 @@ export function prepareGeneratedArtifacts(report) {
 
   const relativeArticlePath = `education${route}.html`;
   const articlePath = path.join(ROOT, relativeArticlePath);
+  const relativePlanPath = `functions/_data/education-page-plans/${plan.topic_slug}.json`;
+  const planArtifactPath = path.join(ROOT, relativePlanPath);
+
+  // ROUTE-COLLISION CORRECTION (file-existence gate, checked BEFORE any
+  // write): runDecisionPipeline() already checked the computed route
+  // against currently LIVE (published) pages, but that says nothing
+  // about a STALE local file left behind by a prior, never-merged
+  // --prepare run for this exact topic/route -- e.g. this same CLI
+  // invoked twice against an uncommitted worktree. Never overwrite an
+  // existing page in this new-page lane; a future freshness/update lane
+  // that intentionally replaces an existing page is an explicit,
+  // separate contract, not built here.
+  if (existsSync(articlePath)) {
+    throw new Error(`prepareGeneratedArtifacts: INFRA_REVIEW -- target article file already exists, refusing to overwrite: ${relativeArticlePath}`);
+  }
+  if (existsSync(planArtifactPath)) {
+    throw new Error(`prepareGeneratedArtifacts: INFRA_REVIEW -- target Page Plan artifact already exists, refusing to overwrite: ${relativePlanPath}`);
+  }
+
   mkdirSync(path.dirname(articlePath), { recursive: true });
   writeFileSync(articlePath, renderEducationPageHtml(plan));
 
-  const relativePlanPath = `functions/_data/education-page-plans/${plan.topic_slug}.json`;
-  const planArtifactPath = path.join(ROOT, relativePlanPath);
   mkdirSync(path.dirname(planArtifactPath), { recursive: true });
   writeFileSync(planArtifactPath, JSON.stringify({
     topic_slug: plan.topic_slug,

@@ -52,6 +52,35 @@ const REAL_HUB_PATH = fileURLToPath(new URL('../education/hair-loss.html', impor
   check('DUPLICATE_CARD', 'refuses to insert the exact same card twice', threw);
 })();
 
+(function testThrowsOnDuplicateHrefEvenWithDifferentCardText() {
+  // The correction this locks in: two cards for the SAME route with
+  // COMPLETELY DIFFERENT surrounding text (different h1, different
+  // description, different source count) are still a duplicate for
+  // that page, and must be refused just as firmly as a byte-identical
+  // repeat card.
+  const hub = '<ul class="aimt-edu-card-grid">\n  <li>existing</li>\n</ul>';
+  const firstCard = buildHubCardHtml({ route: '/education/hair-loss/alopecia-areata', h1: 'Alopecia Areata Overview', meta_description: 'First description.', sourceCount: 5 });
+  const afterFirst = insertHubCard(hub, firstCard);
+
+  const secondCardSameRoute = buildHubCardHtml({ route: '/education/hair-loss/alopecia-areata', h1: 'A Totally Different Title', meta_description: 'An entirely different description.', sourceCount: 12 });
+  let threw = false;
+  try {
+    insertHubCard(afterFirst, secondCardSameRoute);
+  } catch (e) {
+    threw = e instanceof HubUpdateError;
+  }
+  check('DUPLICATE_HREF', 'refuses a second card for the same route even with different surrounding text', threw);
+})();
+
+(function testDifferentRouteIsNotConsideredADuplicate() {
+  const hub = '<ul class="aimt-edu-card-grid">\n  <li>existing</li>\n</ul>';
+  const firstCard = buildHubCardHtml({ route: '/education/hair-loss/alopecia-areata', h1: 'Alopecia Areata', meta_description: 'x', sourceCount: 5 });
+  const afterFirst = insertHubCard(hub, firstCard);
+  const secondCardDifferentRoute = buildHubCardHtml({ route: '/education/hair-loss/androgenetic-alopecia', h1: 'Androgenetic Alopecia', meta_description: 'y', sourceCount: 7 });
+  const afterSecond = insertHubCard(afterFirst, secondCardDifferentRoute);
+  check('DIFFERENT_ROUTE_OK', 'a genuinely new route is inserted without complaint', afterSecond.includes('/education/hair-loss/androgenetic-alopecia'));
+})();
+
 (function testCardHtmlEscapesUserFacingText() {
   const card = buildHubCardHtml({ route: '/education/hair-loss/x', h1: 'A & B <script>', meta_description: 'Contains "quotes" & an ampersand.', sourceCount: 3 });
   check('ESCAPING', 'ampersand escaped', card.includes('A &amp; B'));

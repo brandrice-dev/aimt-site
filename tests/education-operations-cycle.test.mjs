@@ -5,19 +5,31 @@
 // together correctly using injected mocks -- per the originating task's
 // own instruction ("Do not call Anthropic merely to prove scheduler
 // plumbing if fixtures/mocks can prove it"), NO live model call, NO
-// live Supabase call, NO file write, NO git/GitHub action anywhere in
-// this file.
+// live Supabase call, NO git/GitHub action anywhere in this file.
+//
+// EXCEPTION: the ROUTE-COLLISION-GUARD tests for prepareGeneratedArtifacts()
+// (the "existing article file" / "existing Page Plan artifact" fixtures
+// near the bottom of this file) deliberately pre-create ONE stale file
+// each, to prove the real filesystem check refuses to overwrite it --
+// every such test cleans up in a finally block, and none of them ever
+// reaches an actual write (that's the whole point: the check fires
+// before prepareGeneratedArtifacts() writes anything).
 //
 // Run: node tests/education-operations-cycle.test.mjs
 
+import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
-  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction,
+  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
 } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
 import { EDUCATION_OPS_API_KEY_ENV_VAR } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
+
+const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -72,7 +84,7 @@ function fakeIntentResult(topicSlug) {
   };
 }
 
-function fakeSynthesizeFn(topicSlug) {
+function fakeSynthesizeFn(topicSlug, { modelCalls = 1 } = {}) {
   return async () => ({
     status: 'AUTO_READY', stage: 'initial', reason: 'validated',
     finalOutput: {
@@ -88,7 +100,11 @@ function fakeSynthesizeFn(topicSlug) {
         scope_note: 'Scope note.',
       },
     },
-    metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 500, total_output_tokens: 500, model_info: {} },
+    // modelCalls is deliberately injectable here so orchestrator-level
+    // tests can prove the run ledger reports the TRUE actual-call count
+    // (up to 3 for Publication Editor alone) -- see the model-call-
+    // ceiling correction.
+    metrics: { model_calls: modelCalls, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 500, total_output_tokens: 500, model_info: {} },
   });
 }
 
@@ -107,8 +123,11 @@ function fakeWriterResult(topicSlug, clearedSnapshot) {
       scope_note: clearedSnapshot.scope_language.scope_note,
       limitations: [u('VERBATIM', `Limitation for ${topicSlug}.`, [`${topicSlug}-c2`], [`Limitation for ${topicSlug}.`])],
       key_takeaways: [u('VERBATIM', `Finding ${topicSlug}-c1.`, [`${topicSlug}-c1`], [`Finding ${topicSlug}-c1.`])],
-      sources: clearedSnapshot.source_ids.map((id) => ({ source_id: id, title: `S ${id}`, authors: ['A'], year: 2024, doi: `10.1/${id}`, url: `https://doi.org/10.1/${id}` })),
-      related_links: [{ href: '/education', label: 'Education Library', relation: 'library_home' }],
+      // NO sources/related_links here -- matching the real Education
+      // Writer's contract (EDUCATION_WRITER_OUTPUT_JSON_SCHEMA), both
+      // are attached deterministically by the orchestrator itself, from
+      // clearedSnapshot.citation_map and trusted route data. See the
+      // source/link-authority correction.
       visual_recommendation: { recommendation: 'NONE', rationale: 'Prose is sufficient here.' },
     },
   };
@@ -445,6 +464,227 @@ async function testNoCommandCanMarkStatusPublished() {
   check('NO_COMMAND_MARKS_PUBLISHED', 'the attempt is reported as failed, not silently accepted', outcome.result.ok === false, JSON.stringify(outcome.result));
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// ROUTE-COLLISION CORRECTION: a planner choosing a route_slug that
+// matches a CURRENTLY LIVE page must fail cheaply (before spending a
+// synthesis/writer/reviewer call), and a writer disagreeing with the
+// orchestrator-computed route must fail too -- both as INFRA_REVIEW,
+// never silently accepted, never merely EDITORIAL_REVIEW (this is an
+// architecture-safety class of failure, not a content-quality one).
+// ─────────────────────────────────────────────────────────────────────────
+async function testPlannerChoosingExistingPublishedSlugFailsAsInfraReview() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium'], // resolves via the REAL Page Builder route registry
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => {
+        const base = fakeIntentResult(topicSlug);
+        // The planner chooses a route_slug matching telogen-effluvium's
+        // REAL, live route -- for a completely different topic.
+        return { ...base, output: { ...base.output, route_slug: 'telogen-effluvium' } };
+      },
+    },
+  });
+  check('ROUTE_COLLISION_PLANNER', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('ROUTE_COLLISION_PLANNER', 'exception names the collision rule', report.exception_reason.includes('ROUTE_COLLIDES_WITH_PUBLISHED_PAGE'), report.exception_reason);
+  check('ROUTE_COLLISION_PLANNER', 'exception names the exact colliding route', report.exception_reason.includes('/education/hair-loss/telogen-effluvium'), report.exception_reason);
+  check('ROUTE_COLLISION_PLANNER', 'caught BEFORE any synthesis/writer/reviewer call -- only the intent planner call happened', report.model_calls.actual_model_call_count === 1, report.model_calls.actual_model_call_count);
+}
+
+async function testWriterPlanRouteMismatchFailsAsInfraReviewNotEditorialReview() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => {
+        const result = fakeWriterResult(topicSlug, clearedSnapshot);
+        // The writer's own `route` field disagrees with the
+        // orchestrator-computed route -- otherwise a perfectly valid plan.
+        result.output.route = '/education/hair-loss/a-totally-different-route';
+        return result;
+      },
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('ROUTE_MISMATCH_WRITER', 'final_state is INFRA_REVIEW, not EDITORIAL_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('ROUTE_MISMATCH_WRITER', 'violations name the route mismatch', report.writer_result.violations.some((v) => v.startsWith('PLAN_ROUTE_MISMATCH')), JSON.stringify(report.writer_result.violations));
+}
+
+async function testNormalUnusedRoutePassesEndToEnd() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium'],
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('NORMAL_ROUTE_PASSES', 'a genuinely unused route reaches SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('NORMAL_ROUTE_PASSES', 'sources came from the cleared snapshot, not the (now-nonexistent) model field', report.__internal.plan.sources.length > 0);
+  check('NORMAL_ROUTE_PASSES', 'related_links include the cluster hub and the two real published siblings', ['/education/hair-loss', '/education/hair-loss/hair-growth-cycle', '/education/hair-loss/telogen-effluvium'].every((href) => report.__internal.plan.related_links.some((l) => l.href === href)), JSON.stringify(report.__internal.plan.related_links));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// MODEL-CALL CEILING: the run ledger reports the TRUE actual-call count
+// (max 6), never "4 conceptual roles" -- proven end-to-end, not just at
+// the run-ledger unit level.
+// ─────────────────────────────────────────────────────────────────────────
+async function testModelCallLedgerReportsFourWhenPublicationEditorMakesOneCall() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug, { modelCalls: 1 }),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('LEDGER_FOUR_CALLS', 'reaches SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, report.final_state);
+  check('LEDGER_FOUR_CALLS', 'total_roles_invoked is 4', report.model_calls.total_roles_invoked === 4, report.model_calls.total_roles_invoked);
+  check('LEDGER_FOUR_CALLS', 'actual_model_call_count is 4 (1+1+1+1)', report.model_calls.actual_model_call_count === 4, report.model_calls.actual_model_call_count);
+}
+
+async function testModelCallLedgerReportsSixWhenPublicationEditorMakesThreeCalls() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug, { modelCalls: 3 }), // worst case: initial + reconciliation + full retry
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('LEDGER_SIX_CALLS', 'reaches SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, report.final_state);
+  check('LEDGER_SIX_CALLS', 'total_roles_invoked is STILL only 4 (roles, not calls)', report.model_calls.total_roles_invoked === 4);
+  check('LEDGER_SIX_CALLS', 'actual_model_call_count is the TRUE 6 (1+3+1+1), never the conceptual 4', report.model_calls.actual_model_call_count === 6, report.model_calls.actual_model_call_count);
+}
+
+async function testExceedingTheCeilingCrashesRatherThanSilentlyMisreporting() {
+  // Simulates an architecture change that would push Publication Editor
+  // beyond its own documented bound (4 calls instead of <=3) -- the run
+  // ledger's own hard ceiling (buildRunReport(), education-run-ledger.mjs)
+  // must refuse to produce a report at all rather than silently reporting
+  // a 7-call run as if it were normal. This proves the two layers
+  // (orchestrator + ledger) are actually wired together, not just each
+  // separately unit-tested.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let threw = false;
+  let message = '';
+  try {
+    await run(FAKE_ENV_WITH_CRED, {
+      fns: {
+        fetchEvidenceFn: async () => pool,
+        planIntentFn: async () => fakeIntentResult(topicSlug),
+        synthesizeFn: fakeSynthesizeFn(topicSlug, { modelCalls: 4 }), // beyond Publication Editor's own documented bound of 3
+        writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+        reviewFn: async () => fakePassingReviewResult(),
+      },
+    });
+  } catch (e) {
+    threw = true;
+    message = e.message;
+  }
+  check('EXCEEDS_CEILING_END_TO_END', 'the run fails closed (throws) rather than reporting a 7-call run as SHADOW_CANDIDATE_READY', threw);
+  check('EXCEEDS_CEILING_END_TO_END', 'the error names the ceiling', message.includes('6'), message);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// FILE-EXISTENCE COLLISION GUARDS (prepareGeneratedArtifacts): checked
+// BEFORE any write. Each test pre-creates exactly ONE stale file to
+// prove the collision, and cleans it up in a finally block regardless
+// of outcome.
+// ─────────────────────────────────────────────────────────────────────────
+async function shadowCandidateReadyReportFor(topicSlug) {
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  return run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+}
+
+async function testPrepareRefusesToOverwriteAnExistingArticleFile() {
+  const topicSlug = 'alopecia-areata';
+  const report = await shadowCandidateReadyReportFor(topicSlug);
+  if (report.final_state !== RUN_FINAL_STATE.SHADOW_CANDIDATE_READY) {
+    check('PREPARE_ARTICLE_COLLISION', 'precondition: reached SHADOW_CANDIDATE_READY', false, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+    return;
+  }
+  const articlePath = path.join(REPO_ROOT, `education${report.__internal.route}.html`);
+  if (existsSync(articlePath)) {
+    check('PREPARE_ARTICLE_COLLISION', 'precondition: no real article already exists at this route (never touch real content)', false, articlePath);
+    return;
+  }
+  mkdirSync(path.dirname(articlePath), { recursive: true });
+  writeFileSync(articlePath, '<html>a stale file from a prior, never-merged --prepare run</html>');
+  try {
+    let threw = false;
+    let message = '';
+    try {
+      prepareGeneratedArtifacts(report);
+    } catch (e) {
+      threw = true;
+      message = e.message;
+    }
+    check('PREPARE_ARTICLE_COLLISION', 'refuses (throws) rather than overwriting', threw);
+    check('PREPARE_ARTICLE_COLLISION', 'names it as an INFRA_REVIEW-class problem', message.includes('INFRA_REVIEW'), message);
+    check('PREPARE_ARTICLE_COLLISION', 'the stale file is untouched (still the original content)', readFileSync(articlePath, 'utf8').includes('stale file from a prior'));
+  } finally {
+    unlinkSync(articlePath);
+  }
+}
+
+async function testPrepareRefusesToOverwriteAnExistingPagePlanArtifact() {
+  const topicSlug = 'alopecia-areata';
+  const report = await shadowCandidateReadyReportFor(topicSlug);
+  if (report.final_state !== RUN_FINAL_STATE.SHADOW_CANDIDATE_READY) {
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'precondition: reached SHADOW_CANDIDATE_READY', false, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+    return;
+  }
+  const planArtifactPath = path.join(REPO_ROOT, 'functions/_data/education-page-plans', `${topicSlug}.json`);
+  if (existsSync(planArtifactPath)) {
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'precondition: no real Page Plan artifact already exists for this topic', false, planArtifactPath);
+    return;
+  }
+  mkdirSync(path.dirname(planArtifactPath), { recursive: true });
+  writeFileSync(planArtifactPath, JSON.stringify({ stale: true }));
+  try {
+    let threw = false;
+    let message = '';
+    try {
+      prepareGeneratedArtifacts(report);
+    } catch (e) {
+      threw = true;
+      message = e.message;
+    }
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'refuses (throws) rather than overwriting', threw);
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'names it as an INFRA_REVIEW-class problem', message.includes('INFRA_REVIEW'), message);
+    // Also proves the article file was never written either -- the
+    // artifact-existence check runs before EITHER write, not just its own.
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'the article file was never written for this run', !existsSync(path.join(REPO_ROOT, `education${report.__internal.route}.html`)));
+  } finally {
+    unlinkSync(planArtifactPath);
+  }
+}
+
 const tests = [
   testWeeklyCapBlocksTheWholeRun,
   testWeeklyCapRuntimeThresholds,
@@ -461,6 +701,14 @@ const tests = [
   testPersistClearanceRefusesWithoutAutopublishEnabled,
   testPersistClearanceRefusesWithoutFromPreparedPath,
   testNoCommandCanMarkStatusPublished,
+  testPlannerChoosingExistingPublishedSlugFailsAsInfraReview,
+  testWriterPlanRouteMismatchFailsAsInfraReviewNotEditorialReview,
+  testNormalUnusedRoutePassesEndToEnd,
+  testModelCallLedgerReportsFourWhenPublicationEditorMakesOneCall,
+  testModelCallLedgerReportsSixWhenPublicationEditorMakesThreeCalls,
+  testExceedingTheCeilingCrashesRatherThanSilentlyMisreporting,
+  testPrepareRefusesToOverwriteAnExistingArticleFile,
+  testPrepareRefusesToOverwriteAnExistingPagePlanArtifact,
 ];
 
 for (const t of tests) await t();

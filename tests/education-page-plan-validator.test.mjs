@@ -156,6 +156,85 @@ function baselinePlan(overrides = {}) {
   check('NO_SUPPORT', 'names the rule', validation.violations.some((v) => v.startsWith('EVIDENCE_UNIT_WITHOUT_SUPPORT')), JSON.stringify(validation.violations));
 })();
 
+// ─────────────────────────────────────────────────────────────────────────
+// ROUTE-COLLISION CORRECTION: the plan must never be validated in
+// isolation from the orchestration decision that produced it.
+// ─────────────────────────────────────────────────────────────────────────
+(function testExactContextMatchPasses() {
+  const validation = validateEducationPagePlan(baselinePlan(), baselineSnapshot(), {
+    expectedTopicSlug: 'x-topic', expectedCluster: 'hair-loss-shedding', expectedRoute: '/education/hair-loss/x-topic',
+  });
+  check('CONTEXT_MATCH', 'passes when topic_slug/cluster/route all match exactly', validation.valid, JSON.stringify(validation.violations));
+})();
+
+(function testTopicSlugMismatchRejected() {
+  const validation = validateEducationPagePlan(baselinePlan(), baselineSnapshot(), {
+    expectedTopicSlug: 'a-different-topic', expectedCluster: 'hair-loss-shedding', expectedRoute: '/education/hair-loss/x-topic',
+  });
+  check('TOPIC_SLUG_MISMATCH', 'rejected', !validation.valid);
+  check('TOPIC_SLUG_MISMATCH', 'names the rule', validation.violations.some((v) => v.startsWith('PLAN_TOPIC_SLUG_MISMATCH')), JSON.stringify(validation.violations));
+})();
+
+(function testClusterMismatchRejected() {
+  const validation = validateEducationPagePlan(baselinePlan(), baselineSnapshot(), {
+    expectedTopicSlug: 'x-topic', expectedCluster: 'a-different-cluster', expectedRoute: '/education/hair-loss/x-topic',
+  });
+  check('CLUSTER_MISMATCH', 'rejected', !validation.valid);
+  check('CLUSTER_MISMATCH', 'names the rule', validation.violations.some((v) => v.startsWith('PLAN_CLUSTER_MISMATCH')), JSON.stringify(validation.violations));
+})();
+
+(function testRouteMismatchRejected() {
+  // This is the exact "writer plan route differs from computed route"
+  // failure mode the correction requires: the model's own `route` field
+  // disagreeing with the orchestrator-computed route must fail, even
+  // though the plan is otherwise perfectly valid on its own terms.
+  const validation = validateEducationPagePlan(baselinePlan(), baselineSnapshot(), {
+    expectedTopicSlug: 'x-topic', expectedCluster: 'hair-loss-shedding', expectedRoute: '/education/hair-loss/telogen-effluvium',
+  });
+  check('ROUTE_MISMATCH', 'rejected', !validation.valid);
+  check('ROUTE_MISMATCH', 'names the rule', validation.violations.some((v) => v.startsWith('PLAN_ROUTE_MISMATCH')), JSON.stringify(validation.violations));
+})();
+
+(function testContextOmittedSkipsThoseChecksForIsolatedTesting() {
+  // Omitting context entirely (the 2-arg call) must not spuriously fail
+  // -- other test fixtures throughout this file rely on this.
+  const validation = validateEducationPagePlan(baselinePlan(), baselineSnapshot());
+  check('CONTEXT_OMITTED', 'no context-mismatch violations when context is not supplied', !validation.violations.some((v) => v.startsWith('PLAN_')), JSON.stringify(validation.violations));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// SOURCE/LINK AUTHORITY CORRECTION: every cleared source must be
+// rendered (not silently dropped), and every related link must be an
+// internal AIMT route.
+// ─────────────────────────────────────────────────────────────────────────
+(function testMissingClearedSourceRejected() {
+  const plan = baselinePlan();
+  const snapshot = baselineSnapshot({ source_ids: ['s1', 's2'] }); // plan.sources only carries s1
+  const validation = validateEducationPagePlan(plan, snapshot);
+  check('MISSING_CLEARED_SOURCE', 'rejected', !validation.valid);
+  check('MISSING_CLEARED_SOURCE', 'names the rule and the missing id', validation.violations.includes('MISSING_CLEARED_SOURCE:s2'), JSON.stringify(validation.violations));
+})();
+
+(function testExactSourceSetPasses() {
+  const plan = baselinePlan();
+  const snapshot = baselineSnapshot({ source_ids: ['s1'] }); // matches plan.sources exactly
+  const validation = validateEducationPagePlan(plan, snapshot);
+  check('EXACT_SOURCE_SET', 'passes when rendered and cleared source_ids match exactly', validation.valid, JSON.stringify(validation.violations));
+})();
+
+(function testExternalRelatedLinkRejected() {
+  const plan = baselinePlan({ related_links: [{ href: 'https://not-aimt.example/page', label: 'External', relation: 'external' }] });
+  const validation = validateEducationPagePlan(plan, baselineSnapshot());
+  check('EXTERNAL_RELATED_LINK', 'rejected', !validation.valid);
+  check('EXTERNAL_RELATED_LINK', 'names the rule', validation.violations.some((v) => v.startsWith('RELATED_LINK_NOT_INTERNAL')), JSON.stringify(validation.violations));
+})();
+
+(function testInternalRelatedLinkPasses() {
+  const plan = baselinePlan({ related_links: [{ href: '/education/hair-loss', label: 'Hair Loss Hub', relation: 'topic_hub' }] });
+  const validation = validateEducationPagePlan(plan, baselineSnapshot());
+  check('INTERNAL_RELATED_LINK', 'passes', validation.valid, JSON.stringify(validation.violations));
+})();
+
 // ---- Report ----
 const byFixture = new Map();
 for (const r of results) {

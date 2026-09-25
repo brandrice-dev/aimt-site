@@ -76,6 +76,24 @@ const RELATED_LINK_JSON_SCHEMA = {
   additionalProperties: false,
 };
 
+const VISUAL_RECOMMENDATION_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    recommendation: { type: 'string', enum: [...VISUAL_RECOMMENDATIONS] },
+    rationale: { type: 'string' },
+  },
+  required: ['recommendation', 'rationale'],
+  additionalProperties: false,
+};
+
+// The COMPLETE, validated/rendered Page Plan shape -- includes `sources`
+// and `related_links`, but this is NOT what the model is asked to
+// produce (see EDUCATION_WRITER_OUTPUT_JSON_SCHEMA below). The
+// orchestrator deterministically attaches both fields (from the cleared
+// snapshot's own citation_map and from trusted route data, never from
+// the model) before this shape is validated or rendered -- see the
+// trust-boundary correction that removed source/link authority from the
+// Writer ("Model must not author source metadata or link destinations").
 export const EDUCATION_PAGE_PLAN_JSON_SCHEMA = {
   type: 'object',
   properties: {
@@ -92,20 +110,43 @@ export const EDUCATION_PAGE_PLAN_JSON_SCHEMA = {
     key_takeaways: { type: 'array', items: PROSE_UNIT_JSON_SCHEMA },
     sources: { type: 'array', items: SOURCE_JSON_SCHEMA },
     related_links: { type: 'array', items: RELATED_LINK_JSON_SCHEMA },
-    visual_recommendation: {
-      type: 'object',
-      properties: {
-        recommendation: { type: 'string', enum: [...VISUAL_RECOMMENDATIONS] },
-        rationale: { type: 'string' },
-      },
-      required: ['recommendation', 'rationale'],
-      additionalProperties: false,
-    },
+    visual_recommendation: VISUAL_RECOMMENDATION_JSON_SCHEMA,
   },
   required: [
     'topic_slug', 'cluster', 'route', 'title', 'meta_description', 'h1',
     'answer_summary', 'sections', 'scope_note', 'limitations',
     'key_takeaways', 'sources', 'related_links', 'visual_recommendation',
+  ],
+  additionalProperties: false,
+};
+
+// What the Education Writer model is ACTUALLY asked to produce --
+// identical to the full shape above MINUS `sources` and `related_links`.
+// The model has no schema slot to even attempt to author source
+// metadata (title/authors/year/doi/url) or a link destination (href) --
+// there is no field name for it to fill in. Both fields are attached by
+// the orchestrator afterward, deterministically, from trusted data
+// (education-source-authority.mjs / education-related-links.mjs).
+export const EDUCATION_WRITER_OUTPUT_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    topic_slug: { type: 'string' },
+    cluster: { type: 'string' },
+    route: { type: 'string' },
+    title: { type: 'string' },
+    meta_description: { type: 'string' },
+    h1: { type: 'string' },
+    answer_summary: PROSE_UNIT_JSON_SCHEMA,
+    sections: { type: 'array', items: SECTION_JSON_SCHEMA },
+    scope_note: { type: 'string' },
+    limitations: { type: 'array', items: PROSE_UNIT_JSON_SCHEMA },
+    key_takeaways: { type: 'array', items: PROSE_UNIT_JSON_SCHEMA },
+    visual_recommendation: VISUAL_RECOMMENDATION_JSON_SCHEMA,
+  },
+  required: [
+    'topic_slug', 'cluster', 'route', 'title', 'meta_description', 'h1',
+    'answer_summary', 'sections', 'scope_note', 'limitations',
+    'key_takeaways', 'visual_recommendation',
   ],
   additionalProperties: false,
 };

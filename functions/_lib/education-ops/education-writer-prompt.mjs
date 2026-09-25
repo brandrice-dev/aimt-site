@@ -24,13 +24,16 @@ const VOICE_RULES = [
   'Any digit-bearing evidence statement (a number, a percentage, a duration) MUST be rendered VERBATIM, byte-identical to its cleared statement text -- never paraphrased, never restated with different wording.',
   'A PARAPHRASE must inherit the REAL supporting_claim_ids of the exact cleared statement(s) it paraphrases -- never invent or hand-pick claim IDs, never strengthen certainty, never turn an association into a causal claim, never add a number the cleared statement does not itself contain.',
   'The scope_note and every limitations entry must be rendered VERBATIM, byte-identical to the cleared snapshot -- never softened, hidden, or creatively rewritten.',
-  'Do not infer or invent inline paragraph-level citation numbers -- the governed clearance snapshot has no claim-to-source map; render the cleared Sources & References set as a distinct block instead.',
+  'Do not infer or invent inline paragraph-level citation numbers -- a Sources & References block is generated separately, deterministically, from the cleared source set; you do not produce it.',
 ];
 
 /**
  * @param {{
  *   intentPlan: object, clearedSnapshot: object, route: string, cluster: string,
- *   existingClusterPages: Array<{route:string, label:string}>
+ *   existingClusterPages: Array<{topic_slug: string, route: string, label: string}>
+ *     -- CONTEXT ONLY. Real, trusted route+label data (see
+ *     education-related-links.mjs / the orchestrator's sibling-route
+ *     resolution), never used by the writer to author a link itself.
  * }} args
  */
 export function buildWriterInstruction({ intentPlan, clearedSnapshot, route, cluster, existingClusterPages }) {
@@ -44,13 +47,13 @@ export function buildWriterInstruction({ intentPlan, clearedSnapshot, route, clu
     JSON.stringify(intentPlan, null, 2),
     ``,
     `ROUTE: ${route}   CLUSTER: ${cluster}`,
-    `OTHER LIVE PAGES IN THIS CLUSTER (link to them where relevant via related_links; never duplicate their content):`,
+    `OTHER LIVE PAGES IN THIS CLUSTER (for CONTEXT ONLY, so you never duplicate their content -- you do NOT produce links to them; a Related AIMT Learning block linking to these is generated separately, deterministically, from trusted site data):`,
     JSON.stringify(existingClusterPages, null, 2),
     ``,
     `THE CLEARED EVIDENCE SNAPSHOT -- this is the ONLY evidence you may use. Every core_factual_points/limitations statement below already passed AIMT's full verification, synthesis, and deterministic clearance process. You may not use any fact, number, or claim not present here:`,
     JSON.stringify(clearedSnapshot, null, 2),
     ``,
-    `Produce a complete Page Plan: topic_slug, cluster, route, title, meta_description, h1, answer_summary (one VERBATIM or PARAPHRASE unit -- the page's opening definition/answer), sections (each with a section_id, a heading YOU choose based on what the evidence actually supports, and units), scope_note (byte-identical to the cleared scope_note), limitations (byte-identical VERBATIM units, one per cleared limitation -- never dropped, softened, or merged away), key_takeaways (3 VERBATIM units recapping the page's most important cleared statements), sources (the cleared source set, from the snapshot's citation_map), related_links (to the other live cluster pages plus the cluster hub and library home), and visual_recommendation (NONE/DIAGRAM/REFERENCE_PHOTOGRAPHY with a one-paragraph rationale -- a visual is warranted ONLY if it would teach something more clearly or quickly than prose; do not recommend decorative imagery).`,
+    `Produce a Page Plan with EXACTLY these fields (you will NOT be asked for sources or related_links -- both are generated separately, deterministically, from trusted data, never from your output): topic_slug, cluster, route, title, meta_description, h1, answer_summary (one VERBATIM or PARAPHRASE unit -- the page's opening definition/answer), sections (each with a section_id, a heading YOU choose based on what the evidence actually supports, and units), scope_note (byte-identical to the cleared scope_note), limitations (byte-identical VERBATIM units, one per cleared limitation -- never dropped, softened, or merged away), key_takeaways (3 VERBATIM units recapping the page's most important cleared statements), and visual_recommendation (NONE/DIAGRAM/REFERENCE_PHOTOGRAPHY with a one-paragraph rationale -- a visual is warranted ONLY if it would teach something more clearly or quickly than prose; do not recommend decorative imagery). topic_slug/cluster/route MUST exactly match the values given to you above -- you are reporting them back, never choosing your own.`,
     `Every unit's supporting_claim_ids must be the REAL claim_ids the cleared statement it derives from actually carries (visible in the snapshot's core_factual_points/limitations entries) -- never hand-invented, never borrowed from a different statement. FRAMING units must have empty supporting_claim_ids and empty source_statements.`,
   ].join('\n');
 }
