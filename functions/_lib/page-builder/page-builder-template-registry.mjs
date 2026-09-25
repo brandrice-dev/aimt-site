@@ -23,14 +23,17 @@
 
    Adding a second topic to Page Builder v1 means adding a template here
    (and a route entry in page-builder-route-registry.mjs) -- it does NOT
-   mean editing buildPageDraft()'s generic assembly logic. No second
-   topic is registered in this revision; hair-cycle is still the only
-   real cleared snapshot that exists, and this task does not invent a
-   hypothetical second template to "prove" generality it hasn't earned
-   yet (see docs/research/AIMT-Page-Builder-v1-Shadow.md's explicit
-   note: v1 remains a one-topic pilot; classification generalizing to a
-   genuinely different topic's evidence shape has not been demonstrated
-   and is not claimed here).
+   mean editing buildPageDraft()'s generic assembly logic.
+
+   GENERALIZATION TEST UPDATE (seo/education-page-2-generalization):
+   telogen-effluvium is now registered below as a genuinely different,
+   independently-cleared topic (see docs/research/
+   AIMT-Page-Builder-v1-Shadow.md's original one-topic-pilot note, which
+   this branch is the first real test of). Two small, generic fixes to
+   the shared classifier/unit-resolution code were required to support
+   it -- documented at classifyCoreFactualPoints() and
+   resolveEditorialUnit() in page-builder-draft.mjs, not here -- but
+   buildPageDraft()'s assembly logic itself needed zero changes.
 
    DEDUPLICATION CONTRACT (enforced by buildPageDraft(), not by this
    file): the answer_summary's chosen statement is tracked and excluded
@@ -217,12 +220,111 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
         'anagen/catagen/telogen/exogen are described jointly (one combined phase-definition statement, one combined duration statement) in the cleared evidence, not as four independently-supported per-phase facts -- so this draft renders one combined "stages" section rather than four forced per-phase headings.',
     },
   },
+
+  // GENERALIZATION TEST (seo/education-page-2-generalization): the second
+  // topic Page Builder v1 has ever been pointed at, cleared via the
+  // governed Publication Editor v2.1 pipeline (see
+  // publication-page-intent.mjs's telogen-effluvium entry and the
+  // HUMAN_REVIEW_MISSING_JUSTIFICATION governance fix that preceded it).
+  // Deliberately does NOT reuse hair-cycle's headings/section_ids/prose --
+  // per the task's own instruction, the page structure follows THIS
+  // topic's own cleared evidence and search intent, not hair-cycle's
+  // shape. What DID carry over unchanged: the three-layer VERBATIM/
+  // PARAPHRASE/FRAMING model, the "framing cannot carry science" rule,
+  // and the editorial-unit mechanism itself (resolveEditorialUnit()) --
+  // proving those generalize as principles, not as hair-cycle's specific
+  // sentences. One real classifier gap surfaced and was fixed generically
+  // in page-builder-draft.mjs (DEFINITION's pattern didn't recognize this
+  // topic's definitional sentence shape) and one real mechanism gap was
+  // fixed generically too (editorial units could only ever read a
+  // bucket's first point; telogen-effluvium's FACTORS bucket genuinely
+  // has two) -- both documented at their own definitions, not here.
+  'telogen-effluvium': {
+    answer_summary_bucket: 'DEFINITION',
+
+    // Opening section mirrors hair-cycle's PRINCIPLE (establish practical
+    // relevance right after the hero's definition, before any supporting
+    // detail) but not its wording or heading. Both paraphrase units
+    // derive from the cleared PRACTITIONER_RELEVANCE statement and the
+    // cleared OTHER statement (the "is chronic TE a distinct condition"
+    // debate) respectively -- two different cleared statements this
+    // time, not one statement split in two the way hair-cycle's was.
+    why_it_matters: {
+      heading: 'Why the distinction matters',
+      units: [
+        { kind: 'framing', text: "That distinction is where a practitioner's judgment actually comes in." },
+        {
+          kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE',
+          text: "Telling diffuse, temporary shedding apart from progressive, patterned hair loss matters for exactly this reason: systematic review evidence suggests some cases labeled ‘chronic’ telogen effluvium may actually be early patterned hair loss, or a trigger that's still ongoing and hasn't been identified yet.",
+        },
+        {
+          // Owner Correction Pass precedent applied proactively: avoids
+          // "non-diagnostic" here, which would otherwise trip
+          // page-builder-validator.mjs's crude 'diagnos' substring check
+          // (TREATMENT_DRIFT_TERMS) as a false positive -- that phrase is
+          // an explicit safety-affirming disclaimer, not drift, but the
+          // shared validator's simple containsAny() can't tell a negation
+          // apart from the term itself. Reworded to preserve the exact
+          // same meaning (observation over declaring a cause) without
+          // touching the shared safety-term list, which stays untouched
+          // and unweakened for every topic.
+          kind: 'paraphrase', bucket: 'OTHER',
+          text: "Whether a persistent, ‘chronic’ form of telogen effluvium is really its own distinct condition is still debated in the literature — which is exactly why staying in an observation-based professional lane, rather than declaring a cause, is the right posture.",
+        },
+      ],
+    },
+
+    limitations_heading: 'What this information cannot tell you',
+
+    sections: [
+      {
+        section_id: 'triggers',
+        heading: 'What can trigger it',
+        // FACTORS has two distinct cleared points here (unlike
+        // hair-cycle's single-point buckets) -- index 0 and 1
+        // respectively, per page-builder-draft.mjs's resolveEditorialUnit()
+        // generalization fix.
+        units: [
+          { kind: 'framing', text: 'That list is longer than most people expect.' },
+          {
+            kind: 'paraphrase', bucket: 'FACTORS', index: 0,
+            text: 'Illness and inflammation, hormonal changes, psychological stress, nutritional deficiency, poor sleep, certain medications, and the postpartum period are among the documented trigger categories — no single one explains every case.',
+          },
+          {
+            kind: 'paraphrase', bucket: 'FACTORS', index: 1,
+            text: "Some studies have also found lower average ferritin and vitamin D levels in people with telogen effluvium compared with people without it — one more thread of support for nutrition as a trigger category, though how strong that association is varies from study to study.",
+          },
+        ],
+      },
+      {
+        section_id: 'prevalence',
+        heading: 'How common the shift is',
+        // TIMING carries a specific prevalence percentage-pair -- kept
+        // 'verbatim', never paraphrased, for the same numeric-fidelity
+        // reason hair-cycle's duration statement was.
+        units: [
+          { kind: 'framing', text: 'This number matters because it shows the trigger effect at a population scale.' },
+          { kind: 'verbatim', bucket: 'TIMING' },
+        ],
+      },
+    ],
+
+    key_takeaways_buckets: ['DEFINITION', 'PRACTITIONER_RELEVANCE', 'TIMING'],
+    key_takeaways_limit: 3,
+
+    meta_description: 'A practitioner-oriented overview of telogen effluvium — its triggers, typical patterns, and how it differs from progressive hair loss.',
+
+    provenance_notes: {
+      classifier_generalization_note:
+        'The cleared definitional statement for this topic ("Telogen effluvium (TE) is a diffuse, temporary increase...") did not match the original DEFINITION pattern, which was tuned only to hair-cycle\'s phrasing -- fixed generically in classifyCoreFactualPoints() rather than special-cased per topic.',
+    },
+  },
 });
 
 export function getPageBuilderTemplate(topicSlug) {
   const template = PAGE_BUILDER_TEMPLATES[topicSlug];
   if (!template) {
-    throw new PageBuilderTemplateError(`No Page Builder presentation template registered for "${topicSlug}". Page Builder v1 is a one-topic pilot (hair-cycle only) -- see docs/research/AIMT-Page-Builder-v1-Shadow.md.`);
+    throw new PageBuilderTemplateError(`No Page Builder presentation template registered for "${topicSlug}". Currently registered: ${Object.keys(PAGE_BUILDER_TEMPLATES).join(', ')} -- see docs/research/AIMT-Page-Builder-v1-Shadow.md.`);
   }
   return template;
 }

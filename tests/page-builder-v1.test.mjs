@@ -66,6 +66,85 @@ function findSection(draft, sectionId) {
   return draft.sections.find((s) => s.section_id === sectionId);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// GENERALIZATION TEST (seo/education-page-2-generalization): a second,
+// independently-shaped synthetic snapshot exercising the REAL registered
+// telogen-effluvium template/route through the exact same generic
+// buildPageDraft()/validatePageDraft()/checkDraftFidelity() pipeline
+// hair-cycle uses -- proving the architecture generalizes as a matter of
+// automated regression, not just a one-off live run. Deliberately a
+// DIFFERENT bucket shape than hair-cycle's fixture: two FACTORS points
+// (exercising resolveEditorialUnit()'s index generalization), a
+// definitional statement using the "X is a Y that Z" shape (exercising
+// classifyCoreFactualPoints()'s DEFINITION generalization), and no
+// MECHANISM point at all (proving an empty bucket doesn't break anything).
+// ─────────────────────────────────────────────────────────────────────────
+function fixtureTelogenEffluviumSnapshot(overrides = {}) {
+  return {
+    topic_slug: 'telogen-effluvium',
+    page_concept: 'Telogen Effluvium: A Practitioner Education Overview',
+    public_intent: 'Explain telogen effluvium clearly and accurately for beauty/scalp-care professionals and informed readers.',
+    risk_tier: 'MODERATE',
+    selected_claim_ids: ['c-def', 'c-timing', 'c-factors-1', 'c-factors-2', 'c-prac', 'c-other', 'c-lim1', 'c-lim2'],
+    core_factual_points: [
+      { statement: 'Telogen effluvium is a temporary, diffuse shedding pattern that follows a precipitating trigger.', supporting_claim_ids: ['c-def'] },
+      { statement: 'Prevalence estimates rose from about 3% to 5% in pooled analysis after a widely-studied illness event.', supporting_claim_ids: ['c-timing'] },
+      { statement: 'Documented trigger factors include illness, hormonal change, and psychological stress.', supporting_claim_ids: ['c-factors-1'] },
+      { statement: 'Nutritional factors such as lower ferritin have also been studied as a possible trigger category.', supporting_claim_ids: ['c-factors-2'] },
+      { statement: 'Distinguishing temporary shedding from progressive hair loss is relevant for practitioners assessing a scalp.', supporting_claim_ids: ['c-prac'] },
+      { statement: 'Whether a chronic form represents a truly distinct condition remains unresolved in the literature.', supporting_claim_ids: ['c-other'] },
+    ],
+    limitations: [
+      { statement: 'Some nutritional associations show high heterogeneity across studies and do not always reach significance.', supporting_claim_ids: ['c-lim1'] },
+      { statement: 'Large epidemiological reviews have not reliably separated acute from chronic presentations.', supporting_claim_ids: ['c-lim2'] },
+    ],
+    citation_map: {
+      's1': { title: 'Source One', authors: ['A. Author'], year: 2023, doi: '10.1/one', url: 'https://doi.org/10.1/one' },
+      's2': { title: 'Source Two', authors: ['B. Author'], year: 2024, doi: '10.1/two', url: 'https://doi.org/10.1/two' },
+    },
+    source_ids: ['s1', 's2'],
+    scope_language: {
+      page_scope: { include: ['normal shedding patterns'], exclude: ['diagnosis', 'oral minoxidil dosing/prescribing'] },
+      scope_note: 'This page is limited to describing telogen effluvium as a shedding pattern for practitioner education purposes.',
+    },
+    ...overrides,
+  };
+}
+
+function buildValidTelogenEffluviumDraft(snapshotOverrides = {}) {
+  const snapshot = fixtureTelogenEffluviumSnapshot(snapshotOverrides);
+  let draft = buildPageDraft(snapshot, { generationSourceHash: 'feedface', fingerprintAlgorithm: 'sha256-canonical-json-v2' });
+  draft = finalizeSeo(draft);
+  return { snapshot, draft };
+}
+
+function testTelogenEffluviumGeneralizesCleanly() {
+  const { snapshot, draft } = buildValidTelogenEffluviumDraft();
+  const validation = validatePageDraft(draft, snapshot, { integrityResult: { valid: true, expected_hash: 'x', stored_hash: 'x', violations: [] } });
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'draft validates cleanly', validation.valid, JSON.stringify(validation.violations));
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'sections use this topic\'s own headings, not hair-cycle\'s', draft.sections.map((s) => s.section_id).join(',') === 'why-it-matters,triggers,prevalence,limitations', draft.sections.map((s) => s.section_id).join(','));
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'why-it-matters heading is topic-specific', findSection(draft, 'why-it-matters').heading === 'Why the distinction matters');
+
+  const triggers = findSection(draft, 'triggers');
+  const factorsParagraphs = triggers.paragraphs.filter((p) => !p.is_framing);
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'both distinct FACTORS points (index 0 and 1) are both present, not the same one twice', factorsParagraphs.length === 2 && factorsParagraphs[0].text !== factorsParagraphs[1].text, JSON.stringify(factorsParagraphs.map((p) => p.text)));
+
+  const prevalence = findSection(draft, 'prevalence');
+  const verbatimNumeric = prevalence.paragraphs.find((p) => !p.is_framing);
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'the digit-bearing TIMING statement is rendered VERBATIM (byte-identical), never paraphrased', verbatimNumeric.text === snapshot.core_factual_points[1].statement, verbatimNumeric.text);
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'the empty MECHANISM bucket did not break anything (no mechanism-only section forced)', !draft.sections.some((s) => s.section_id === 'mechanism'));
+
+  const fidelity = checkDraftFidelity(draft, snapshot);
+  const statusByUnitId = new Map(collectRenderedFactualUnits(draft).map((u) => [u.unit_id, u.editorial_status]));
+  const verbatimResults = fidelity.paragraph_results.filter((r) => statusByUnitId.get(r.unit_id) === 'VERBATIM');
+  const paraphraseResults = fidelity.paragraph_results.filter((r) => statusByUnitId.get(r.unit_id) === 'PARAPHRASE');
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'every VERBATIM unit passes fidelity', verbatimResults.length > 0 && verbatimResults.every((r) => r.result === 'PASS'), JSON.stringify(verbatimResults));
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'every PARAPHRASE unit is honestly flagged, never a false PASS', paraphraseResults.length > 0 && paraphraseResults.every((r) => r.result === 'REWRITE_REQUIRED'), JSON.stringify(paraphraseResults));
+
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'route resolves to this topic\'s own registered route', draft.route === '/education/hair-loss/telogen-effluvium', draft.route);
+  check('GENERALIZATION_TELOGEN_EFFLUVIUM', 'no duplicate factual text', findDuplicateFactualText(draft).length === 0, JSON.stringify(findDuplicateFactualText(draft)));
+}
+
 // AIMT Education Voice v0 (Owner Correction Pass): 'stages' now interleaves
 // non-factual framing bridges around its one factual (VERBATIM TIMING)
 // paragraph, so a fixed paragraph index is no longer stable. Find the
@@ -537,15 +616,23 @@ function testGenericBuilderHasNoHardcodedPresentationStrings() {
   check('TEMPLATE_EXTRACTION', 'the hair-cycle headings now live in the template registry instead', hardcodedHeadings.every((h) => templateCode.includes(h)));
 }
 
-function testTemplateRegistryOnlyRegistersHairCycle() {
+// GENERALIZATION TEST (seo/education-page-2-generalization): this pilot
+// is no longer literally "one topic" -- telogen-effluvium is now also
+// registered, cleared via the governed Publication Editor pipeline. What
+// stays true, and is what this fixture actually verifies, is that the
+// registry remains a real, hand-authored allow-list -- an unregistered
+// topic still throws rather than silently falling back to some invented
+// default template.
+function testTemplateRegistryIsAnExplicitAllowList() {
   let threw = false;
   try {
     getPageBuilderTemplate('some-topic-with-no-clearance-yet');
   } catch (e) {
     threw = true;
   }
-  check('TEMPLATE_ONE_TOPIC_PILOT', 'getPageBuilderTemplate throws for an unregistered topic (no hypothetical second template invented)', threw);
+  check('TEMPLATE_ONE_TOPIC_PILOT', 'getPageBuilderTemplate throws for an unregistered topic (no hypothetical template invented)', threw);
   check('TEMPLATE_ONE_TOPIC_PILOT', 'hair-cycle template resolves', !!getPageBuilderTemplate('hair-cycle'));
+  check('TEMPLATE_ONE_TOPIC_PILOT', 'telogen-effluvium template resolves', !!getPageBuilderTemplate('telogen-effluvium'));
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -668,7 +755,8 @@ const tests = [
   testDuplicateAnswerSummaryBodyTextFails,
   testKeyTakeawaysExemptFromDuplicateRule,
   testGenericBuilderHasNoHardcodedPresentationStrings,
-  testTemplateRegistryOnlyRegistersHairCycle,
+  testTemplateRegistryIsAnExplicitAllowList,
+  testTelogenEffluviumGeneralizesCleanly,
   testDeterministicFidelityPassesOnVerbatimReuse,
   testDeterministicFidelityFlagsParaphrase,
   testFramingParagraphAlwaysPassesFidelity,

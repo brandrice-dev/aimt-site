@@ -102,6 +102,7 @@ function baselineAiOutput(overrides = {}) {
       { signal: 'supports_effect finding present', resolution: 'Addresses an unrelated treatment intervention, not normal cycle biology.', claim_ids: ['c3'] },
     ],
     unresolved_issues: [],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] },
     public_framing: {
       core_points: [{ statement: 'Hair follicles cycle through anagen, catagen, and telogen.', supporting_claim_ids: ['c1'] }],
       limitations: [{ statement: 'Cycle timing varies by individual.', supporting_claim_ids: ['c2'] }],
@@ -317,10 +318,40 @@ function baselineAiOutput(overrides = {}) {
   check('CALL_FAILURE', 'never AUTO_READY', disposition.status !== 'AUTO_READY');
 })();
 
-(function testModelDeclaredHumanReviewRespected() {
+// GOVERNANCE FIX (seo/education-page-2-generalization pilot): a bare
+// HUMAN_REVIEW with no valid, specific justification is no longer an
+// authoritative finding -- it must be rejected so the orchestrator can
+// route it to a bounded retry instead of straight to the human queue.
+(function testBareHumanReviewMissingJustificationRejected() {
   const v1Result = baselineV1Result();
   const evidenceBundle = baselineBundle();
-  const aiOutput = baselineAiOutput({ recommended_disposition: 'HUMAN_REVIEW', confidence: 'low', unresolved_issues: ['Genuinely ambiguous.'] });
+  const aiOutput = baselineAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Genuinely ambiguous.'],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] }, // unchanged from AUTO_READY default -- exactly the bare case this fix targets
+  });
+  const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });
+  check('BARE_HUMAN_REVIEW_REJECTED', 'rejected', !validation.valid);
+  check('BARE_HUMAN_REVIEW_REJECTED', 'names the rule', validation.violations.includes('HUMAN_REVIEW_MISSING_JUSTIFICATION'), JSON.stringify(validation.violations));
+})();
+
+// A HUMAN_REVIEW with a valid, specific, substantive justification remains
+// a legitimate, respected finding -- the fix targets unjustified bareness,
+// not HUMAN_REVIEW itself.
+(function testJustifiedHumanReviewRespected() {
+  const v1Result = baselineV1Result();
+  const evidenceBundle = baselineBundle();
+  const aiOutput = baselineAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Genuinely ambiguous whether c3 represents a real safety concern.'],
+    human_review_justification: {
+      reason_code: 'UNRESOLVED_CONTRADICTION',
+      reason: 'Claim c3 reports a treatment effect that cannot be safely reconciled with the page scope without more context.',
+      related_claim_ids: ['c3'],
+    },
+  });
   const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });
   const disposition = determineShadowDisposition({ v1Result, callFailed: false, aiOutput, validation });
   check('MODEL_DECLARED_HUMAN_REVIEW', 'schema/semantics valid on their own terms', validation.schemaValid && validation.valid, JSON.stringify(validation.violations));

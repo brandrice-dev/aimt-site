@@ -9,10 +9,16 @@
    page, so a topic-wide candidate set (everything sharing a topic tag)
    is never mistaken for page-specific material.
 
-   Per this task's explicit scope: only `hair-cycle` is registered here.
-   The other five pilot concepts are intentionally NOT added yet -- v2 is
-   proving the architecture on one topic first, not being pre-wired for
-   all six.
+   GENERALIZATION TEST (Page #2, seo/education-page-2-generalization):
+   `telogen-effluvium` added as the second entry, proving this registry
+   generalizes to a different evidence shape without touching any shared
+   synthesis logic (evidence loader, client, validator, orchestrator,
+   reconciliation are all already topic-agnostic -- only this registry
+   and v1's PILOT_TOPIC_CONCEPTS, which already had telogen-effluvium
+   registered, are topic-specific by design). Still hand-authored per
+   topic, exactly like hair-cycle's entry -- this is editorial scope
+   policy (what THIS page is narrowed to, out of everything tagged with
+   the topic), not something inferred automatically from evidence.
    ═══════════════════════════════════════════════════════════════ */
 
 export const PAGE_SYNTHESIS_INTENT = Object.freeze({
@@ -35,12 +41,32 @@ export const PAGE_SYNTHESIS_INTENT = Object.freeze({
       'disease treatment or diagnosis',
     ]),
   },
+  'telogen-effluvium': {
+    page_concept: 'Telogen Effluvium: A Practitioner Education Overview',
+    public_intent: 'Explain telogen effluvium -- a temporary, diffuse shedding pattern distinct from progressive hair loss -- clearly and accurately for beauty/scalp-care professionals and informed readers.',
+    in_scope_concepts: Object.freeze([
+      'what telogen effluvium is: a diffuse, temporary increase in shedding following a precipitating trigger',
+      'the relationship to the normal hair cycle (an exaggerated, synchronized shift into telogen/shedding, not a separate disease process)',
+      'documented categories of precipitating triggers (e.g. illness, stress, postpartum, nutritional deficiency) as described by the evidence, without diagnosing an individual case',
+      'typical onset delay and course, including the distinction between acute and chronic/persistent presentations where the evidence supports it',
+      'why distinguishing diffuse temporary shedding from progressive/patterned hair loss is relevant for a practitioner making an observation-based judgment',
+      'limitations, evidence maturity, and normal variation in how telogen effluvium presents',
+    ]),
+    out_of_scope_concepts: Object.freeze([
+      'diagnosis of an individual\'s underlying cause',
+      'ordering or interpreting laboratory/serologic testing',
+      'oral or topical minoxidil dosing, prescribing, or other treatment protocols',
+      'treatment efficacy or therapeutic comparisons between interventions',
+      'androgenetic alopecia or alopecia areata as their own conditions (related-but-separate topics, not this page\'s subject)',
+      'disease treatment or medical management',
+    ]),
+  },
 });
 
 export function getPageSynthesisIntent(topicSlug) {
   const intent = PAGE_SYNTHESIS_INTENT[topicSlug];
   if (!intent) {
-    throw new Error(`No page synthesis intent registered for "${topicSlug}". Publication Editor v2 is scoped to hair-cycle only for this pilot -- see docs/research/AIMT-Publication-Editor-v2.md.`);
+    throw new Error(`No page synthesis intent registered for "${topicSlug}". Publication Editor v2 currently has registered intent for: ${Object.keys(PAGE_SYNTHESIS_INTENT).join(', ')} -- see docs/research/AIMT-Publication-Editor-v2.md.`);
   }
   return intent;
 }

@@ -26,6 +26,26 @@ export const DISPOSITIONS = Object.freeze(['AUTO_READY', 'HUMAN_REVIEW']);
 export const CONFIDENCE_LEVELS = Object.freeze(['high', 'medium', 'low']);
 export const CLAIM_ROLES = Object.freeze(['core_finding', 'supporting_context', 'limitation']);
 
+// GOVERNANCE FIX (seo/education-page-2-generalization pilot): a live
+// telogen-effluvium run surfaced that recommended_disposition:
+// 'HUMAN_REVIEW' carried NO required justification at all -- the schema's
+// only free-text vehicle, unresolved_issues, is never checked for being
+// non-empty when HUMAN_REVIEW is declared, so a model could (and, on one
+// run, effectively did) emit a bare HUMAN_REVIEW that no downstream code
+// could mechanically distinguish from a genuine substantive exception. A
+// bare, unjustified HUMAN_REVIEW must never be treated as an authoritative
+// human-review finding -- see publication-synthesis-validator.mjs's
+// HUMAN_REVIEW_MISSING_JUSTIFICATION rule and publication-synthesis-
+// orchestrator.mjs's bounded retry lane for it.
+export const HUMAN_REVIEW_REASON_CODES = Object.freeze([
+  'NOT_APPLICABLE', // required value when recommended_disposition is AUTO_READY
+  'HIGH_RISK_CONTENT',
+  'UNRESOLVED_CONTRADICTION',
+  'SAFETY_OR_SCOPE_CONCERN',
+  'EVIDENCE_INSUFFICIENCY',
+  'OTHER_SUBSTANTIVE_EXCEPTION',
+]);
+
 // Reason codes for an excluded claim. Not exhaustive of every possible
 // judgment a model could reach, but names the specific out-of-scope
 // pattern this pilot exists to test for (hair-cycle's treatment-effect
@@ -97,6 +117,16 @@ export const SYNTHESIS_OUTPUT_JSON_SCHEMA = {
       },
     },
     unresolved_issues: { type: 'array', items: { type: 'string' } },
+    human_review_justification: {
+      type: 'object',
+      properties: {
+        reason_code: { type: 'string', enum: [...HUMAN_REVIEW_REASON_CODES] },
+        reason: { type: 'string' },
+        related_claim_ids: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['reason_code', 'reason', 'related_claim_ids'],
+      additionalProperties: false,
+    },
     public_framing: {
       type: 'object',
       properties: {
@@ -133,7 +163,8 @@ export const SYNTHESIS_OUTPUT_JSON_SCHEMA = {
   required: [
     'topic_slug', 'page_concept', 'recommended_disposition', 'confidence',
     'page_scope', 'selected_claims', 'excluded_claims',
-    'resolved_synthesis_signals', 'unresolved_issues', 'public_framing',
+    'resolved_synthesis_signals', 'unresolved_issues',
+    'human_review_justification', 'public_framing',
   ],
   additionalProperties: false,
 };
@@ -162,5 +193,6 @@ export function buildSynthesisInstruction({ pageConcept, publicIntent, inScopeCo
     `- Stay within AIMT's observation/education posture: describe, do not diagnose or prescribe.`,
     `- If you cannot resolve a signal safely from the supplied evidence alone, list it in unresolved_issues and set recommended_disposition to HUMAN_REVIEW -- do not guess to force AUTO_READY.`,
     `- recommended_disposition may only be AUTO_READY when unresolved_issues is empty and you are genuinely confident (confidence: "high" or "medium") the page framing is fully supported and in-scope.`,
+    `- You must always include human_review_justification. When recommended_disposition is AUTO_READY, set reason_code to "NOT_APPLICABLE", reason to "Not applicable", and related_claim_ids to an empty array. When recommended_disposition is HUMAN_REVIEW, reason_code must be one of HIGH_RISK_CONTENT, UNRESOLVED_CONTRADICTION, SAFETY_OR_SCOPE_CONCERN, EVIDENCE_INSUFFICIENCY, or OTHER_SUBSTANTIVE_EXCEPTION (never NOT_APPLICABLE), reason must specifically explain what could not be safely resolved and why (not a generic statement), and related_claim_ids must list the specific claim_id(s) that caused the concern, if any exist. A bare HUMAN_REVIEW with a vague or missing reason is not acceptable -- if you cannot articulate a specific reason, reconsider whether the evidence actually supports AUTO_READY instead.`,
   ].join('\n');
 }
