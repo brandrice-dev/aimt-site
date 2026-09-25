@@ -96,12 +96,13 @@ function baselineAiOutput(overrides = {}) {
       { claim_id: 'c2', role: 'limitation', reason: 'Notes a caveat on cycle timing variability.' },
     ],
     excluded_claims: [
-      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'Concerns a treatment effect, not normal cycle biology.' },
+      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'Concerns a treatment effect, not normal cycle biology.', related_conflict_claim_ids: [] },
     ],
     resolved_synthesis_signals: [
       { signal: 'supports_effect finding present', resolution: 'Addresses an unrelated treatment intervention, not normal cycle biology.', claim_ids: ['c3'] },
     ],
     unresolved_issues: [],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] },
     public_framing: {
       core_points: [{ statement: 'Hair follicles cycle through anagen, catagen, and telogen.', supporting_claim_ids: ['c1'] }],
       limitations: [{ statement: 'Cycle timing varies by individual.', supporting_claim_ids: ['c2'] }],
@@ -317,10 +318,40 @@ function baselineAiOutput(overrides = {}) {
   check('CALL_FAILURE', 'never AUTO_READY', disposition.status !== 'AUTO_READY');
 })();
 
-(function testModelDeclaredHumanReviewRespected() {
+// GOVERNANCE FIX (seo/education-page-2-generalization pilot): a bare
+// HUMAN_REVIEW with no valid, specific justification is no longer an
+// authoritative finding -- it must be rejected so the orchestrator can
+// route it to a bounded retry instead of straight to the human queue.
+(function testBareHumanReviewMissingJustificationRejected() {
   const v1Result = baselineV1Result();
   const evidenceBundle = baselineBundle();
-  const aiOutput = baselineAiOutput({ recommended_disposition: 'HUMAN_REVIEW', confidence: 'low', unresolved_issues: ['Genuinely ambiguous.'] });
+  const aiOutput = baselineAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Genuinely ambiguous.'],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] }, // unchanged from AUTO_READY default -- exactly the bare case this fix targets
+  });
+  const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });
+  check('BARE_HUMAN_REVIEW_REJECTED', 'rejected', !validation.valid);
+  check('BARE_HUMAN_REVIEW_REJECTED', 'names the rule', validation.violations.includes('HUMAN_REVIEW_MISSING_JUSTIFICATION'), JSON.stringify(validation.violations));
+})();
+
+// A HUMAN_REVIEW with a valid, specific, substantive justification remains
+// a legitimate, respected finding -- the fix targets unjustified bareness,
+// not HUMAN_REVIEW itself.
+(function testJustifiedHumanReviewRespected() {
+  const v1Result = baselineV1Result();
+  const evidenceBundle = baselineBundle();
+  const aiOutput = baselineAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Genuinely ambiguous whether c3 represents a real safety concern.'],
+    human_review_justification: {
+      reason_code: 'UNRESOLVED_CONTRADICTION',
+      reason: 'Claim c3 reports a treatment effect that cannot be safely reconciled with the page scope without more context.',
+      related_claim_ids: ['c3'],
+    },
+  });
   const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });
   const disposition = determineShadowDisposition({ v1Result, callFailed: false, aiOutput, validation });
   check('MODEL_DECLARED_HUMAN_REVIEW', 'schema/semantics valid on their own terms', validation.schemaValid && validation.valid, JSON.stringify(validation.violations));
@@ -354,6 +385,122 @@ function baselineAiOutput(overrides = {}) {
   const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });
   check('MISSING_DISPOSITION', 'rejected', !validation.valid);
   check('MISSING_DISPOSITION', 'names the rule', validation.violations.includes('CLAIM_MISSING_DISPOSITION:c3'), JSON.stringify(validation.violations));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// NON-CORE CONFLICT EXCLUSION (seo/education-page-2-generalization,
+// telogen-effluvium vitamin-D review): a genuine disagreement isolated to
+// a secondary/example-level detail can be excluded on BOTH/ALL sides
+// under reason_code UNRESOLVED_NON_CORE_CONFLICT, instead of forcing
+// HUMAN_REVIEW over a detail the page's core answer does not depend on --
+// but ONLY when every side of the specific disagreement is excluded
+// together. A custom minimal bundle (no claim_type='limitation' claims,
+// no synthesis_required_flags) isolates this from unrelated rules 8/9.
+// ─────────────────────────────────────────────────────────────────────────
+function nonCoreConflictBundle() {
+  return {
+    claims: [
+      makeClaim({ claim_id: 'c1', claim_type: 'finding', source_id: 's1' }),
+      makeClaim({ claim_id: 'c2', claim_type: 'finding', source_id: 's2', claim_text: 'Meta-analysis A found a statistically significant association.' }),
+      makeClaim({ claim_id: 'c3', claim_type: 'finding', source_id: 's3', claim_text: 'Meta-analysis B found no statistically significant association.' }),
+    ],
+    sources: [
+      makeSource({ source_id: 's1' }),
+      makeSource({ source_id: 's2', title: 'Meta-Analysis A' }),
+      makeSource({ source_id: 's3', title: 'Meta-Analysis B' }),
+    ],
+  };
+}
+function nonCoreConflictV1Result() {
+  return baselineV1Result({
+    synthesis_packet: {
+      controlled_topics: ['hair-cycle'],
+      candidate_claim_ids: ['c1', 'c2', 'c3'],
+      candidate_source_ids: ['s1', 's2', 's3'],
+      safety_claim_ids: [],
+      synthesis_required_flags: [], // isolates from rule 9 (SYNTHESIS_SIGNAL_NOT_ADDRESSED)
+    },
+  });
+}
+function nonCoreConflictAiOutput(excludedClaims) {
+  return {
+    topic_slug: 'hair-cycle',
+    page_concept: 'The Hair Growth Cycle',
+    recommended_disposition: 'AUTO_READY',
+    confidence: 'high',
+    page_scope: { include: ['follicular cycling'], exclude: ['treatment effects'] },
+    selected_claims: [{ claim_id: 'c1', role: 'core_finding', reason: 'Describes the normal cycle phases.' }],
+    excluded_claims: excludedClaims,
+    resolved_synthesis_signals: [],
+    unresolved_issues: [],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] },
+    public_framing: {
+      core_points: [{ statement: 'Hair follicles cycle through recognized phases.', supporting_claim_ids: ['c1'] }],
+      limitations: [],
+      scope_note: 'This page does not cover treatment efficacy.',
+    },
+  };
+}
+
+(function testNonCoreConflictSymmetricExclusionAccepted() {
+  const aiOutput = nonCoreConflictAiOutput([
+    { claim_id: 'c2', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'Disagrees with c3 on statistical significance for this population; a secondary detail, not the page core.', related_conflict_claim_ids: ['c3'] },
+    { claim_id: 'c3', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'Disagrees with c2 on statistical significance for this population; a secondary detail, not the page core.', related_conflict_claim_ids: ['c2'] },
+  ]);
+  const validation = validateSynthesisOutput({ v1Result: nonCoreConflictV1Result(), evidenceBundle: nonCoreConflictBundle(), aiOutput });
+  check('NON_CORE_CONFLICT_SYMMETRIC', 'a genuinely symmetric mutual exclusion is accepted', validation.valid, JSON.stringify(validation.violations));
+})();
+
+(function testNonCoreConflictOneSidedExclusionRejected() {
+  // The bug this mechanism exists to prevent: c3 (the more-favorable
+  // side) stays selected while c2 is excluded citing it as a conflict.
+  const aiOutput = nonCoreConflictAiOutput([
+    { claim_id: 'c2', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'Disagrees with c3 on statistical significance for this population.', related_conflict_claim_ids: ['c3'] },
+  ]);
+  aiOutput.selected_claims.push({ claim_id: 'c3', role: 'supporting_context', reason: 'Supports the favorable finding.' });
+  const validation = validateSynthesisOutput({ v1Result: nonCoreConflictV1Result(), evidenceBundle: nonCoreConflictBundle(), aiOutput });
+  check('NON_CORE_CONFLICT_ONE_SIDED', 'rejected', !validation.valid);
+  check('NON_CORE_CONFLICT_ONE_SIDED', 'names the rule', validation.violations.includes('NON_CORE_CONFLICT_ONE_SIDED_EXCLUSION:c2->c3'), JSON.stringify(validation.violations));
+})();
+
+(function testNonCoreConflictMissingRelatedClaimsRejected() {
+  const aiOutput = nonCoreConflictAiOutput([
+    { claim_id: 'c2', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'Disagrees with another claim on statistical significance.', related_conflict_claim_ids: [] },
+    { claim_id: 'c3', reason_code: 'OTHER', reason: 'Unrelated exclusion.', related_conflict_claim_ids: [] },
+  ]);
+  const validation = validateSynthesisOutput({ v1Result: nonCoreConflictV1Result(), evidenceBundle: nonCoreConflictBundle(), aiOutput });
+  check('NON_CORE_CONFLICT_MISSING_RELATED', 'rejected', !validation.valid);
+  check('NON_CORE_CONFLICT_MISSING_RELATED', 'names the rule', validation.violations.includes('NON_CORE_CONFLICT_MISSING_RELATED_CLAIMS:c2'), JSON.stringify(validation.violations));
+})();
+
+(function testNonCoreConflictMissingJustificationRejected() {
+  const aiOutput = nonCoreConflictAiOutput([
+    { claim_id: 'c2', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'no', related_conflict_claim_ids: ['c3'] },
+    { claim_id: 'c3', reason_code: 'UNRESOLVED_NON_CORE_CONFLICT', reason: 'Disagrees with c2 on statistical significance for this population.', related_conflict_claim_ids: ['c2'] },
+  ]);
+  const validation = validateSynthesisOutput({ v1Result: nonCoreConflictV1Result(), evidenceBundle: nonCoreConflictBundle(), aiOutput });
+  check('NON_CORE_CONFLICT_MISSING_JUSTIFICATION', 'rejected', !validation.valid);
+  check('NON_CORE_CONFLICT_MISSING_JUSTIFICATION', 'names the rule', validation.violations.includes('NON_CORE_CONFLICT_MISSING_JUSTIFICATION:c2'), JSON.stringify(validation.violations));
+})();
+
+(function testNonCoreConflictFieldMisusedRejected() {
+  const aiOutput = nonCoreConflictAiOutput([
+    { claim_id: 'c2', reason_code: 'OTHER', reason: 'Unrelated exclusion, not a conflict.', related_conflict_claim_ids: ['c3'] },
+    { claim_id: 'c3', reason_code: 'OTHER', reason: 'Unrelated exclusion, not a conflict.', related_conflict_claim_ids: [] },
+  ]);
+  const validation = validateSynthesisOutput({ v1Result: nonCoreConflictV1Result(), evidenceBundle: nonCoreConflictBundle(), aiOutput });
+  check('NON_CORE_CONFLICT_FIELD_MISUSED', 'rejected', !validation.valid);
+  check('NON_CORE_CONFLICT_FIELD_MISUSED', 'names the rule', validation.violations.includes('NON_CORE_CONFLICT_FIELD_MISUSED:c2'), JSON.stringify(validation.violations));
+})();
+
+(function testExcludedClaimMissingRelatedConflictFieldFailsSchemaShape() {
+  const evidenceBundle = baselineBundle();
+  const aiOutput = baselineAiOutput({
+    excluded_claims: [{ claim_id: 'c3', reason_code: 'OTHER', reason: 'ok' }], // no related_conflict_claim_ids key at all
+  });
+  const shape = validateSchemaShape(aiOutput);
+  check('NON_CORE_CONFLICT_SCHEMA_SHAPE', 'schema-invalid without related_conflict_claim_ids', !shape.valid);
+  check('NON_CORE_CONFLICT_SCHEMA_SHAPE', 'names the excluded_claims entry', shape.errors.some((e) => e.startsWith('MISSING_OR_INVALID:excluded_claims')), JSON.stringify(shape.errors));
 })();
 
 // ---- Report ----

@@ -12,6 +12,14 @@
                  -> all resolutions non-material     -> merge -> re-validate -> done
                  -> any resolution material          -> ONE bounded full retry
                                                             -> re-validate -> done
+       -> only HUMAN_REVIEW_MISSING_JUSTIFICATION violation (GOVERNANCE FIX)?
+            -> ONE bounded justification retry (fresh full synthesis)
+                 -> call failed / invalid schema     -> SYNTHESIS_FAILED
+                 -> valid (AUTO_READY or justified HUMAN_REVIEW) -> done
+                 -> still unjustified/invalid         -> SYNTHESIS_FAILED
+                    (never a permanent, unexplained HUMAN_REVIEW -- see
+                    publication-synthesis-reconciliation.mjs's
+                    RETRYABLE_INDETERMINATE bucket)
        -> any substantive violation                 -> HUMAN_REVIEW (no repair attempted)
        -> any other (non-repairable-mechanical)      -> SYNTHESIS_FAILED (no repair attempted)
 
@@ -39,6 +47,7 @@ import {
   synthesizeTopic as defaultSynthesizeTopic,
   reconcileMissingClaims as defaultReconcileMissingClaims,
   retrySynthesisWithReconciliation as defaultRetrySynthesisWithReconciliation,
+  retrySynthesisForJustification as defaultRetrySynthesisForJustification,
 } from './publication-synthesis-client.mjs';
 import {
   classifyValidatorViolations,
@@ -105,8 +114,8 @@ function mapViolationsToTerminalStatus(violations) {
  * @param {object} params.v1Result - full assessTopicReadiness() output (must be NEEDS_SYNTHESIS)
  * @param {{claims: object[], sources: object[]}} params.evidenceBundle
  * @param {object} [params.fns] - injectable I/O functions for testing:
- *   { synthesizeFn, reconcileFn, retryFn }, each defaulting to the real
- *   publication-synthesis-client.mjs implementation.
+ *   { synthesizeFn, reconcileFn, retryFn, justifyRetryFn }, each defaulting
+ *   to the real publication-synthesis-client.mjs implementation.
  * @returns {Promise<{
  *   status: 'AUTO_READY'|'HUMAN_REVIEW'|'SYNTHESIS_FAILED',
  *   reason: string,
@@ -122,6 +131,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   const synthesizeFn = fns.synthesizeFn || defaultSynthesizeTopic;
   const reconcileFn = fns.reconcileFn || defaultReconcileMissingClaims;
   const retryFn = fns.retryFn || defaultRetrySynthesisWithReconciliation;
+  const justifyRetryFn = fns.justifyRetryFn || defaultRetrySynthesisForJustification;
   const metrics = emptyMetrics();
 
   const initial = await synthesizeFn(env, { topic_slug, evidenceBundle });
@@ -144,6 +154,34 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   }
 
   const classification = classifyValidatorViolations(initialValidation.violations);
+
+  // ── GOVERNANCE FIX: bare, unjustified HUMAN_REVIEW is retryable, not
+  // terminal. Checked BEFORE the generic substantive/mechanical fallback
+  // below, so this specific violation never falls through to an immediate
+  // HUMAN_REVIEW/SYNTHESIS_FAILED mapping without first giving the model
+  // one bounded chance to resolve or properly justify it. ──────────────
+  if (classification.only_retryable_indeterminate) {
+    const justifyResult = await justifyRetryFn(env, { topic_slug, evidenceBundle, previousOutput: initial.output });
+    recordCall(metrics, 'human_review_justification_retry', justifyResult);
+    metrics.full_retries += 1;
+    if (!justifyResult.ok) {
+      return { status: 'SYNTHESIS_FAILED', reason: justifyResult.reason, stage: 'human_review_justification_retry', finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics };
+    }
+    const justifyValidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: justifyResult.output });
+    if (!justifyValidation.schemaValid) {
+      return { status: 'SYNTHESIS_FAILED', reason: 'invalid_schema', stage: 'human_review_justification_retry', finalOutput: justifyResult.output, violations: justifyValidation.violations, reconciliation: null, initial: initialSummary, metrics };
+    }
+    if (justifyValidation.valid) {
+      return { ...successMapping(v1Result, justifyResult.output), stage: 'human_review_justification_retry', finalOutput: justifyResult.output, reconciliation: null, initial: initialSummary, metrics };
+    }
+    // No third attempt. A violation surviving this bounded retry --
+    // including another HUMAN_REVIEW_MISSING_JUSTIFICATION -- means
+    // automation failed to produce a trustworthy proposal twice in a row.
+    // That is SYNTHESIS_FAILED, never a permanent, unexplained
+    // HUMAN_REVIEW state (per the governance fix's own rationale).
+    return { status: 'SYNTHESIS_FAILED', reason: 'human_review_justification_retry_still_invalid', stage: 'human_review_justification_retry', finalOutput: justifyResult.output, violations: justifyValidation.violations, reconciliation: null, initial: initialSummary, metrics };
+  }
+
   if (!classification.only_repairable_accounting) {
     const mapped = mapViolationsToTerminalStatus(initialValidation.violations);
     return { ...mapped, stage: 'initial', finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics };

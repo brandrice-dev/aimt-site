@@ -51,7 +51,7 @@
 import { fetchAnthropicMessages, extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
 import { resolvePublicationEditorSynthesisModel, PublicationEditorModelConfigError } from './publication-editor-model-config.mjs';
 import { SYNTHESIS_OUTPUT_JSON_SCHEMA, SYNTHESIS_OUTPUT_CONTRACT_VERSION, buildSynthesisInstruction } from './publication-synthesis-schema.mjs';
-import { RECONCILIATION_OUTPUT_JSON_SCHEMA, buildReconciliationInstruction, buildFullRetryInstruction } from './publication-synthesis-reconciliation.mjs';
+import { RECONCILIATION_OUTPUT_JSON_SCHEMA, buildReconciliationInstruction, buildFullRetryInstruction, buildHumanReviewJustificationRetryInstruction } from './publication-synthesis-reconciliation.mjs';
 import { getPageSynthesisIntent } from './publication-page-intent.mjs';
 
 // Generous headroom for a topic-wide candidate set the size hair-cycle's
@@ -274,6 +274,48 @@ export async function retrySynthesisWithReconciliation(env, { topic_slug, eviden
     maxTokens: SYNTHESIS_MAX_TOKENS,
     effort: SYNTHESIS_EFFORT,
     callLabel: 'Full retry',
+  });
+  if (!result.ok) return result;
+  return { ...result, contractVersion: SYNTHESIS_OUTPUT_CONTRACT_VERSION };
+}
+
+/**
+ * GOVERNANCE FIX bounded retry -- reached only when the initial synthesis
+ * declared HUMAN_REVIEW without a valid human_review_justification (see
+ * publication-synthesis-validator.mjs). A fresh, complete synthesis over
+ * the FULL evidence bundle, explicitly told the previous HUMAN_REVIEW
+ * lacked justification and given one bounded chance to resolve to
+ * AUTO_READY or supply a real, specific reason. Never a third attempt --
+ * the orchestrator maps a still-unjustified result here straight to
+ * SYNTHESIS_FAILED, never to a permanent, unexplained HUMAN_REVIEW.
+ *
+ * @param {Object} env
+ * @param {{topic_slug: string, evidenceBundle: object, previousOutput: object}} params
+ */
+export async function retrySynthesisForJustification(env, { topic_slug, evidenceBundle, previousOutput }) {
+  const intent = getPageSynthesisIntent(topic_slug);
+  const baseSystem = buildSynthesisInstruction({
+    pageConcept: intent.page_concept,
+    publicIntent: intent.public_intent,
+    inScopeConcepts: intent.in_scope_concepts,
+    outOfScopeConcepts: intent.out_of_scope_concepts,
+  });
+  const system = buildHumanReviewJustificationRetryInstruction(baseSystem);
+
+  const userContent = JSON.stringify({
+    topic_slug,
+    page_concept: intent.page_concept,
+    evidence_bundle: evidenceBundle,
+    previous_synthesis_attempt: previousOutput,
+  });
+
+  const result = await callStructured(env, {
+    system,
+    userContent,
+    schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
+    maxTokens: SYNTHESIS_MAX_TOKENS,
+    effort: SYNTHESIS_EFFORT,
+    callLabel: 'Human-review justification retry',
   });
   if (!result.ok) return result;
   return { ...result, contractVersion: SYNTHESIS_OUTPUT_CONTRACT_VERSION };

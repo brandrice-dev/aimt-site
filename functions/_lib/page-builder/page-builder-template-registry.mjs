@@ -23,14 +23,17 @@
 
    Adding a second topic to Page Builder v1 means adding a template here
    (and a route entry in page-builder-route-registry.mjs) -- it does NOT
-   mean editing buildPageDraft()'s generic assembly logic. No second
-   topic is registered in this revision; hair-cycle is still the only
-   real cleared snapshot that exists, and this task does not invent a
-   hypothetical second template to "prove" generality it hasn't earned
-   yet (see docs/research/AIMT-Page-Builder-v1-Shadow.md's explicit
-   note: v1 remains a one-topic pilot; classification generalizing to a
-   genuinely different topic's evidence shape has not been demonstrated
-   and is not claimed here).
+   mean editing buildPageDraft()'s generic assembly logic.
+
+   GENERALIZATION TEST UPDATE (seo/education-page-2-generalization):
+   telogen-effluvium is now registered below as a genuinely different,
+   independently-cleared topic (see docs/research/
+   AIMT-Page-Builder-v1-Shadow.md's original one-topic-pilot note, which
+   this branch is the first real test of). Two small, generic fixes to
+   the shared classifier/unit-resolution code were required to support
+   it -- documented at classifyCoreFactualPoints() and
+   resolveEditorialUnit() in page-builder-draft.mjs, not here -- but
+   buildPageDraft()'s assembly logic itself needed zero changes.
 
    DEDUPLICATION CONTRACT (enforced by buildPageDraft(), not by this
    file): the answer_summary's chosen statement is tracked and excluded
@@ -217,12 +220,122 @@ export const PAGE_BUILDER_TEMPLATES = Object.freeze({
         'anagen/catagen/telogen/exogen are described jointly (one combined phase-definition statement, one combined duration statement) in the cleared evidence, not as four independently-supported per-phase facts -- so this draft renders one combined "stages" section rather than four forced per-phase headings.',
     },
   },
+
+  // GENERALIZATION TEST (seo/education-page-2-generalization): the second
+  // topic Page Builder v1 has ever been pointed at, cleared via the
+  // governed Publication Editor v2.1 pipeline (see
+  // publication-page-intent.mjs's telogen-effluvium entry and the
+  // HUMAN_REVIEW_MISSING_JUSTIFICATION governance fix that preceded it).
+  // Deliberately does NOT reuse hair-cycle's headings/section_ids/prose --
+  // per the task's own instruction, the page structure follows THIS
+  // topic's own cleared evidence and search intent, not hair-cycle's
+  // shape. What DID carry over unchanged: the three-layer VERBATIM/
+  // PARAPHRASE/FRAMING model, the "framing cannot carry science" rule,
+  // and the editorial-unit mechanism itself (resolveEditorialUnit()) --
+  // proving those generalize as principles, not as hair-cycle's specific
+  // sentences. One real classifier gap surfaced and was fixed generically
+  // in page-builder-draft.mjs (DEFINITION's pattern didn't recognize this
+  // topic's definitional sentence shape) and one real mechanism gap was
+  // fixed generically too (editorial units could only ever read a
+  // bucket's first point; telogen-effluvium's FACTORS bucket genuinely
+  // has two) -- both documented at their own definitions, not here.
+  'telogen-effluvium': {
+    // RE-TEMPLATED (seo/education-page-2-generalization, non-core conflict
+    // narrowing round): the clearance this template reads from was
+    // rebuilt after excluding the disputed vitamin-D/ferritin biomarker
+    // material (see publication-page-intent.mjs's telogen-effluvium
+    // header comment). A fresh synthesis over narrowed evidence does not
+    // reproduce the same core_factual_points, in the same order, in the
+    // same buckets -- the FACTORS bucket that the previous template's
+    // "triggers" section read from is now genuinely empty (its two prior
+    // points were the trigger-category list and the excluded ferritin/
+    // vitamin-D statement; the trigger-category material re-synthesized
+    // into a single combined mechanism-and-triggers statement that the
+    // classifier now places in OTHER instead), and the previous "prevalence"
+    // section's TIMING point changed from a COVID-era prevalence
+    // percentage to a normal-cycle background statistic (~9% of follicles
+    // in telogen at any time) -- a different fact the old section's
+    // framing sentence ("this number... shows the trigger effect") no
+    // longer honestly describes. This entry was rebuilt against the ACTUAL
+    // new core_factual_points rather than patched to keep old prose next
+    // to new claim_ids -- the failure mode a hardcoded bucket/index
+    // template is otherwise prone to across independent re-synthesis runs.
+    // Nothing here reflects a topic-specific bucket/classifier change;
+    // classifyCoreFactualPoints() and resolveEditorialUnit() are unchanged
+    // from the prior round.
+    answer_summary_bucket: 'DEFINITION',
+
+    // Opens with the mechanism itself (OTHER[1]: the anagen-to-telogen
+    // shift plus its general trigger categories) followed immediately by
+    // the normal-cycle background stat (TIMING) that gives it scale --
+    // read together, before "why it matters", the same ordering principle
+    // as before (ground the reader in the biology first).
+    why_it_matters: {
+      heading: 'How the shift happens',
+      units: [
+        { kind: 'framing', text: "This is the shift the rest of the overview builds around." },
+        {
+          kind: 'paraphrase', bucket: 'OTHER', index: 1,
+          text: "What actually happens is that a larger-than-usual, synchronized group of follicles shifts from the growth (anagen) phase into the resting (telogen) phase all at once -- a shift researchers link to general trigger categories like inflammation, hormonal change, physical or emotional stress, nutritional deficiency, poor sleep, or certain medications.",
+        },
+        { kind: 'verbatim', bucket: 'TIMING' },
+      ],
+    },
+
+    limitations_heading: 'What this information cannot tell you',
+
+    // Second section carries what was previously "why it matters" --
+    // the practitioner-relevance distinction, plus the illness/COVID
+    // example, which now (post-narrowing) reports no specific numbers,
+    // just the pattern itself.
+    sections: [
+      {
+        // Distinct from the auto-generated top-level why_it_matters
+        // block's own hardcoded section_id ('why-it-matters', set in
+        // page-builder-draft.mjs) -- this is a second, later section, not
+        // a duplicate of it.
+        section_id: 'distinguishing-te',
+        heading: 'Why the distinction matters',
+        units: [
+          { kind: 'framing', text: "That distinction is where a practitioner's judgment actually comes in." },
+          {
+            kind: 'paraphrase', bucket: 'PRACTITIONER_RELEVANCE',
+            text: "Telling diffuse, temporary shedding apart from progressive, patterned hair loss matters for exactly this reason: reviews of cases labeled ‘chronic’ telogen effluvium have found that many likely represent early patterned hair loss or an ongoing trigger that hasn't been identified yet -- and biopsy studies in these cases have shown normal ratios of thick-to-thin hairs, unlike the pattern typically seen in progressive hair loss.",
+          },
+          {
+            // Deliberately says "a global pandemic" rather than naming
+            // "COVID-19" -- the digit in that proper noun would trip
+            // page-builder-validator.mjs's UNSUPPORTED_NUMERIC_CLAIM rule
+            // (any digit in a non-byte-identical unit is treated as an
+            // unverified numeric claim), and a PARAPHRASE is exactly the
+            // place to generalize wording, not introduce a new literal
+            // token the cleared statement's own text supplies only inside
+            // the VERBATIM-only numeric-fidelity contract.
+            kind: 'paraphrase', bucket: 'OTHER', index: 0,
+            text: "Illness episodes on a large scale, such as a global pandemic, show how a systemic trigger can be followed by a rise in reported telogen effluvium, though the exact biological mechanism connecting the two still isn't clear.",
+          },
+        ],
+      },
+    ],
+
+    key_takeaways_buckets: ['DEFINITION', 'PRACTITIONER_RELEVANCE', 'TIMING'],
+    key_takeaways_limit: 3,
+
+    meta_description: 'A practitioner-oriented overview of telogen effluvium — its relationship to the hair cycle, typical patterns, and how it differs from progressive hair loss.',
+
+    provenance_notes: {
+      classifier_generalization_note:
+        'The cleared definitional statement for this topic ("Telogen effluvium (TE) is a diffuse, temporary increase...") did not match the original DEFINITION pattern, which was tuned only to hair-cycle\'s phrasing -- fixed generically in classifyCoreFactualPoints() rather than special-cased per topic.',
+      re_templating_note:
+        'Rebuilt against a re-synthesized clearance (non-core vitamin-D/ferritin conflict excluded, see publication-page-intent.mjs) whose core_factual_points landed in genuinely different buckets/positions than the original synthesis -- confirms the classifier and editorial-unit mechanism are stable across independent re-synthesis runs, but that a hand-authored template must be re-verified against its actual bucket contents after any re-synthesis, not assumed to still line up.',
+    },
+  },
 });
 
 export function getPageBuilderTemplate(topicSlug) {
   const template = PAGE_BUILDER_TEMPLATES[topicSlug];
   if (!template) {
-    throw new PageBuilderTemplateError(`No Page Builder presentation template registered for "${topicSlug}". Page Builder v1 is a one-topic pilot (hair-cycle only) -- see docs/research/AIMT-Page-Builder-v1-Shadow.md.`);
+    throw new PageBuilderTemplateError(`No Page Builder presentation template registered for "${topicSlug}". Currently registered: ${Object.keys(PAGE_BUILDER_TEMPLATES).join(', ')} -- see docs/research/AIMT-Page-Builder-v1-Shadow.md.`);
   }
   return template;
 }

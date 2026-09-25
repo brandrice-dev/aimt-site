@@ -48,7 +48,24 @@ export const RECONCILIATION_DISPOSITIONS = Object.freeze(['SELECTED', 'EXCLUDED'
                               SYNTHESIS_FAILED -- automation failed to
                               produce a trustworthy proposal, which is
                               a different thing from a human needing to
-                              exercise judgment. */
+                              exercise judgment.
+   RETRYABLE_INDETERMINATE   -- GOVERNANCE FIX (seo/education-page-2-
+                              generalization pilot): the model declared
+                              HUMAN_REVIEW without a valid, specific
+                              justification (HUMAN_REVIEW_MISSING_
+                              JUSTIFICATION). This is deliberately NOT
+                              SUBSTANTIVE -- an unjustified HUMAN_REVIEW
+                              is not itself proof of a genuine exception,
+                              it is model-output indeterminacy. Routes to
+                              ONE bounded full retry that explicitly asks
+                              the model to either resolve to AUTO_READY
+                              or supply a real, specific justification.
+                              If the retry is STILL unjustified, that is
+                              now a genuine "automation failed to produce
+                              a trustworthy proposal" -> SYNTHESIS_FAILED,
+                              never a permanent, unexplained HUMAN_REVIEW
+                              state (see publication-synthesis-
+                              orchestrator.mjs). */
 const REPAIRABLE_CODE = 'CLAIM_MISSING_DISPOSITION';
 
 const SUBSTANTIVE_CODES = new Set([
@@ -59,6 +76,10 @@ const SUBSTANTIVE_CODES = new Set([
   'V1_EVIDENCE_GAPS_PRESENT',
   'UNRESOLVED_ISSUES_WITH_AUTO_READY',
   'NO_SYNTHESIS_PACKET_ON_V1_RESULT',
+]);
+
+const RETRYABLE_INDETERMINATE_CODES = new Set([
+  'HUMAN_REVIEW_MISSING_JUSTIFICATION',
 ]);
 
 function violationCode(violation) {
@@ -72,13 +93,16 @@ function violationCode(violation) {
  *   repairable_accounting_claim_ids: string[],
  *   substantive: string[],
  *   non_repairable_mechanical: string[],
- *   only_repairable_accounting: boolean
+ *   retryable_indeterminate: string[],
+ *   only_repairable_accounting: boolean,
+ *   only_retryable_indeterminate: boolean
  * }}
  */
 export function classifyValidatorViolations(violations) {
   const repairableAccountingClaimIds = [];
   const substantive = [];
   const nonRepairableMechanical = [];
+  const retryableIndeterminate = [];
 
   for (const v of violations || []) {
     const code = violationCode(v);
@@ -86,6 +110,8 @@ export function classifyValidatorViolations(violations) {
       repairableAccountingClaimIds.push(v.slice(REPAIRABLE_CODE.length + 1));
     } else if (SUBSTANTIVE_CODES.has(code)) {
       substantive.push(v);
+    } else if (RETRYABLE_INDETERMINATE_CODES.has(code)) {
+      retryableIndeterminate.push(v);
     } else {
       nonRepairableMechanical.push(v);
     }
@@ -95,9 +121,15 @@ export function classifyValidatorViolations(violations) {
     repairable_accounting_claim_ids: repairableAccountingClaimIds,
     substantive,
     non_repairable_mechanical: nonRepairableMechanical,
+    retryable_indeterminate: retryableIndeterminate,
     only_repairable_accounting: repairableAccountingClaimIds.length > 0
       && substantive.length === 0
-      && nonRepairableMechanical.length === 0,
+      && nonRepairableMechanical.length === 0
+      && retryableIndeterminate.length === 0,
+    only_retryable_indeterminate: retryableIndeterminate.length > 0
+      && substantive.length === 0
+      && nonRepairableMechanical.length === 0
+      && repairableAccountingClaimIds.length === 0,
   };
 }
 
@@ -164,6 +196,16 @@ export function validateReconciliationShape(output, expectedClaimIds) {
     if (r.disposition === 'EXCLUDED' && !EXCLUSION_REASON_CODES.includes(r.reason_code)) {
       errors.push(`EXCLUDED_REQUIRES_VALID_REASON_CODE:${r.claim_id}`);
     }
+    // UNRESOLVED_NON_CORE_CONFLICT requires symmetrically excluding every
+    // claim on both/all sides of a specific disagreement (see
+    // publication-synthesis-validator.mjs) -- a judgment this narrow,
+    // single-claim reconciliation pass has no way to make safely, since it
+    // never re-examines claims that already received a disposition in the
+    // original synthesis. That decision belongs to a full synthesis pass
+    // with the whole evidence bundle in view, never to this repair lane.
+    if (r.disposition === 'EXCLUDED' && r.reason_code === 'UNRESOLVED_NON_CORE_CONFLICT') {
+      errors.push(`NON_CORE_CONFLICT_NOT_VALID_IN_RECONCILIATION:${r.claim_id}`);
+    }
     if (!isNonEmptyString(r.reason)) {
       errors.push(`MISSING_OR_INVALID:resolutions[${i}].reason`);
     }
@@ -218,7 +260,11 @@ export function mergeReconciliationIntoSynthesis(originalOutput, resolutions) {
     if (r.disposition === 'SELECTED') {
       selected.push({ claim_id: r.claim_id, role: r.role, reason: r.reason });
     } else {
-      excluded.push({ claim_id: r.claim_id, reason_code: r.reason_code, reason: r.reason });
+      // related_conflict_claim_ids is always [] here -- validateReconciliationShape
+      // already refuses UNRESOLVED_NON_CORE_CONFLICT within this lane (see
+      // above), so a reconciliation-repaired exclusion is never a non-core
+      // conflict pairing and the field stays structurally empty.
+      excluded.push({ claim_id: r.claim_id, reason_code: r.reason_code, reason: r.reason, related_conflict_claim_ids: [] });
     }
   }
 
@@ -258,5 +304,21 @@ export function buildFullRetryInstruction(base, { formerlyMissingClaimIds, mater
     ``,
     `THIS IS A BOUNDED RETRY of a previous synthesis attempt for this exact page. That attempt omitted a disposition for these claim_id(s): ${formerlyMissingClaimIds.join(', ')}. A reconciliation pass has already determined that incorporating at least one of them materially changes the synthesis (see the material_change_reason(s) supplied with the evidence bundle below) -- reconsider your public_framing, resolved_synthesis_signals, and unresolved_issues in light of that, not just the omitted claim(s) themselves.`,
     `This is your ONE bounded retry -- there will not be another. Every candidate claim_id in the evidence bundle, including the previously-missing one(s), MUST receive exactly one disposition (selected or excluded) this time.`,
+  ].join('\n');
+}
+
+/** GOVERNANCE FIX bounded retry: reached only when the initial synthesis
+    declared HUMAN_REVIEW without a valid, specific human_review_justification
+    (see publication-synthesis-validator.mjs's HUMAN_REVIEW_MISSING_JUSTIFICATION
+    rule). A fresh, complete synthesis -- not a patch -- explicitly told its
+    previous attempt's disposition was rejected for lacking justification,
+    and given one bounded chance to either resolve to AUTO_READY or supply a
+    real, specific reason. */
+export function buildHumanReviewJustificationRetryInstruction(base) {
+  return [
+    base,
+    ``,
+    `THIS IS A BOUNDED RETRY of a previous synthesis attempt for this exact page. That attempt set recommended_disposition to HUMAN_REVIEW but did not supply a valid, specific human_review_justification -- either the reason_code was NOT_APPLICABLE (invalid for HUMAN_REVIEW) or the reason was too vague/generic to be a real explanation.`,
+    `This is your ONE bounded retry -- there will not be another. Reconsider the full evidence bundle below. If the evidence genuinely supports AUTO_READY, set recommended_disposition to AUTO_READY (with human_review_justification.reason_code "NOT_APPLICABLE", reason "Not applicable", related_claim_ids []). If you still believe this page genuinely needs human review, you MUST set human_review_justification.reason_code to one of HIGH_RISK_CONTENT, UNRESOLVED_CONTRADICTION, SAFETY_OR_SCOPE_CONCERN, EVIDENCE_INSUFFICIENCY, or OTHER_SUBSTANTIVE_EXCEPTION, write a SPECIFIC reason naming what exactly could not be resolved and why, and list the specific claim_id(s) involved in related_claim_ids. A bare or generic HUMAN_REVIEW will not be accepted a second time -- if you cannot articulate a specific reason, that itself indicates the evidence probably supports AUTO_READY.`,
   ].join('\n');
 }

@@ -69,10 +69,11 @@ function completeAiOutput(overrides = {}) {
       { claim_id: 'c2', role: 'limitation', reason: 'ok' },
     ],
     excluded_claims: [
-      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'unrelated' },
+      { claim_id: 'c3', reason_code: 'OUT_OF_SCOPE_TREATMENT_OR_INTERVENTION', reason: 'unrelated', related_conflict_claim_ids: [] },
     ],
     resolved_synthesis_signals: [{ signal: 'x', resolution: 'y', claim_ids: ['c3'] }],
     unresolved_issues: [],
+    human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] },
     public_framing: {
       core_points: [{ statement: 'Cycling.', supporting_claim_ids: ['c1'] }],
       limitations: [{ statement: 'Timing varies.', supporting_claim_ids: ['c2'] }],
@@ -303,6 +304,73 @@ async function testSubstantiveUnresolvedIssueGoesToHumanReview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// GOVERNANCE FIX (seo/education-page-2-generalization pilot): a bare,
+// unjustified HUMAN_REVIEW must trigger ONE bounded justification retry,
+// never go straight to a final status.
+// ─────────────────────────────────────────────────────────────────────────
+function bareHumanReviewOutput() {
+  return completeAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Something felt off.'],
+    // left as the AUTO_READY default -- NOT_APPLICABLE -- exactly the bare case
+  });
+}
+
+async function testUnjustifiedHumanReviewRetriesThenResolvesAutoReady() {
+  const synthesizeFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const reconcileFn = callCounter();
+  const retryFn = callCounter();
+  const justifyRetryFn = callCounter().willReturn(okResult(completeAiOutput())); // reconsiders, resolves cleanly
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn, retryFn, justifyRetryFn },
+  });
+  check('UNJUSTIFIED_HR_RETRY_AUTO_READY', 'justifyRetryFn called exactly once', justifyRetryFn.calls.length === 1);
+  check('UNJUSTIFIED_HR_RETRY_AUTO_READY', 'reconcileFn/retryFn never called (wrong lane)', reconcileFn.calls.length === 0 && retryFn.calls.length === 0);
+  check('UNJUSTIFIED_HR_RETRY_AUTO_READY', 'final status is AUTO_READY', result.status === 'AUTO_READY', JSON.stringify(result));
+  check('UNJUSTIFIED_HR_RETRY_AUTO_READY', 'stage is human_review_justification_retry', result.stage === 'human_review_justification_retry', result.stage);
+  check('UNJUSTIFIED_HR_RETRY_AUTO_READY', 'metrics.full_retries is 1', result.metrics.full_retries === 1, result.metrics.full_retries);
+}
+
+async function testUnjustifiedHumanReviewRetryProducesValidJustifiedHumanReview() {
+  const justifiedOutput = completeAiOutput({
+    recommended_disposition: 'HUMAN_REVIEW',
+    confidence: 'low',
+    unresolved_issues: ['Claim c3 reports a treatment effect that cannot be safely reconciled with page scope.'],
+    human_review_justification: {
+      reason_code: 'UNRESOLVED_CONTRADICTION',
+      reason: 'Claim c3 describes a treatment effect that conflicts with this page\'s descriptive-only scope and cannot be safely excluded without more context.',
+      related_claim_ids: ['c3'],
+    },
+  });
+  const synthesizeFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const justifyRetryFn = callCounter().willReturn(okResult(justifiedOutput));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn: callCounter(), retryFn: callCounter(), justifyRetryFn },
+  });
+  check('UNJUSTIFIED_HR_RETRY_JUSTIFIED_HR', 'final status is HUMAN_REVIEW', result.status === 'HUMAN_REVIEW', result.status);
+  check('UNJUSTIFIED_HR_RETRY_JUSTIFIED_HR', 'stage is human_review_justification_retry', result.stage === 'human_review_justification_retry', result.stage);
+  check('UNJUSTIFIED_HR_RETRY_JUSTIFIED_HR', 'finalOutput carries the real justification', result.finalOutput.human_review_justification.reason_code === 'UNRESOLVED_CONTRADICTION');
+}
+
+async function testUnjustifiedHumanReviewRetryStillUnjustifiedFailsNeverLoops() {
+  const synthesizeFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const reconcileFn = callCounter();
+  const retryFn = callCounter();
+  // The retry ITSELF is still a bare, unjustified HUMAN_REVIEW.
+  const justifyRetryFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn, retryFn, justifyRetryFn },
+  });
+  check('UNJUSTIFIED_HR_RETRY_EXHAUSTED', 'final status is SYNTHESIS_FAILED, never a permanent unexplained HUMAN_REVIEW', result.status === 'SYNTHESIS_FAILED', result.status);
+  check('UNJUSTIFIED_HR_RETRY_EXHAUSTED', 'justifyRetryFn called exactly once (no third attempt)', justifyRetryFn.calls.length === 1);
+  check('UNJUSTIFIED_HR_RETRY_EXHAUSTED', 'reconcileFn/retryFn never called', reconcileFn.calls.length === 0 && retryFn.calls.length === 0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // 12. Repeated accounting failure surviving the bounded retry ->
 //     SYNTHESIS_FAILED, never a second reconciliation/retry (no loop).
 // ─────────────────────────────────────────────────────────────────────────
@@ -371,6 +439,9 @@ const tests = [
   testHallucinatedClaimInInitialNeverReconciles,
   testHighRiskGoesStraightToHumanReview,
   testSubstantiveUnresolvedIssueGoesToHumanReview,
+  testUnjustifiedHumanReviewRetriesThenResolvesAutoReady,
+  testUnjustifiedHumanReviewRetryProducesValidJustifiedHumanReview,
+  testUnjustifiedHumanReviewRetryStillUnjustifiedFailsNeverLoops,
   testRepeatedAccountingFailureAfterRetryNeverLoops,
   testInitialCallFailureIsSynthesisFailed,
   testReconciliationCallFailureIsSynthesisFailed,

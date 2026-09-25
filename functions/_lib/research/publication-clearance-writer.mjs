@@ -150,11 +150,100 @@ export async function assertClearanceIntegrityOrThrow(record) {
 }
 
 /**
+ * Guarded REPLACE of an existing NON-PUBLIC clearance row -- for the case
+ * where a topic's persisted clearance was built from a since-corrected
+ * synthesis intent (e.g. a semantic error found upstream) and must be
+ * superseded, without this becoming a general-purpose "overwrite any row"
+ * tool. Added for seo/education-page-2-generalization's telogen/exogen
+ * correction: the plain writeClearanceRecord() upsert above is a blind
+ * merge-duplicates POST with no precondition -- fine for a first write,
+ * unsafe for a replace, since it can't tell "the row I read is still the
+ * row that's there" from "someone else changed or published it since".
+ *
+ * This function instead issues a single conditional PATCH whose WHERE
+ * clause -- evaluated atomically by Postgres, not read-then-write from
+ * this process -- requires ALL of:
+ *   - topic_slug matches
+ *   - status = 'ready_for_page_builder'   (never touches a published row)
+ *   - sitemap_eligible = false            (never touches a public row)
+ *   - published_at is null                (never touches a published row)
+ *   - generation_source_hash = requireCurrentHash (caller's last-read hash)
+ * and refuses (throws) unless exactly one row matched and was replaced.
+ * If the live row no longer matches -- because it was published, replaced
+ * by a concurrent run, or simply not what the caller thinks it is -- zero
+ * rows match and this throws instead of silently doing nothing or falling
+ * back to a blind write.
+ *
+ * Shares every other safety gate with writeClearanceRecord(): same
+ * ALLOWED_COLUMNS-only payload, same assertWritableClearanceRecord /
+ * assertAutomatedRiskTierAuthority / assertClearanceIntegrityOrThrow
+ * checks against the NEW record before any network call.
+ *
+ * @param {Object} env - must carry SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+ * @param {object} record - output of buildAutoReadyClearanceRecord() for
+ *   the SAME topic_slug as the row being replaced
+ * @param {{requireCurrentHash: string}} opts - the generation_source_hash
+ *   the caller last read for this row; the guard clause that must still
+ *   hold for the replace to proceed
+ * @returns {Promise<object[]>} exactly one row (the newly-replaced record)
+ */
+export async function replaceNonPublicClearanceRecord(env, record, { requireCurrentHash } = {}) {
+  if (!env || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('replaceNonPublicClearanceRecord: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. Refusing to write.');
+  }
+  if (!requireCurrentHash || typeof requireCurrentHash !== 'string') {
+    throw new Error('replaceNonPublicClearanceRecord: requireCurrentHash is required -- this is a guarded replace of a specific known row, not a blind upsert.');
+  }
+  assertWritableClearanceRecord(record);
+  assertAutomatedRiskTierAuthority(record);
+  await assertClearanceIntegrityOrThrow(record);
+
+  const payload = {};
+  for (const col of ALLOWED_COLUMNS) {
+    if (Object.prototype.hasOwnProperty.call(record, col) && col !== 'topic_slug') payload[col] = record[col];
+  }
+
+  const qs = new URLSearchParams({
+    topic_slug: `eq.${record.topic_slug}`,
+    status: 'eq.ready_for_page_builder',
+    sitemap_eligible: 'eq.false',
+    published_at: 'is.null',
+    generation_source_hash: `eq.${requireCurrentHash}`,
+  });
+
+  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/research_public_pages?${qs.toString()}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '');
+    throw new Error(`replaceNonPublicClearanceRecord: guarded PATCH failed (${res.status}): ${errBody.slice(0, 500)}`);
+  }
+  const rows = await res.json();
+  if (rows.length !== 1) {
+    throw new Error(
+      `replaceNonPublicClearanceRecord: guard failed -- expected exactly 1 row matching topic_slug="${record.topic_slug}", status=ready_for_page_builder, sitemap_eligible=false, published_at=null, generation_source_hash="${requireCurrentHash}", but ${rows.length} matched. The persisted row may have changed since it was last read (published, replaced by a concurrent run, or simply different) -- refusing to overwrite blindly.`
+    );
+  }
+  return rows;
+}
+
+/**
  * Upserts one page-level clearance record into research_public_pages via
  * PostgREST, keyed on topic_slug (the table's primary key). Never called
  * automatically by anything in this repo -- always an explicit, manual
  * CLI invocation gated behind an owner go-ahead (see
  * scripts/research-publication-clearance-shadow.mjs's --write flag).
+ * Use this ONLY for a topic's first-ever clearance write; to safely
+ * REPLACE an existing non-public row, use
+ * replaceNonPublicClearanceRecord() above instead, which guards against
+ * overwriting a row that changed since it was last read.
  *
  * @param {Object} env - must carry SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
  * @param {object} record - output of buildAutoReadyClearanceRecord()

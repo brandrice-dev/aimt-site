@@ -14,7 +14,18 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { baselineRiskForTopic, hasSufficientCitationMetadata, RISK_TIER, READINESS_STATUS } from './publication-readiness.mjs';
-import { DISPOSITIONS, CONFIDENCE_LEVELS, CLAIM_ROLES, EXCLUSION_REASON_CODES } from './publication-synthesis-schema.mjs';
+import { DISPOSITIONS, CONFIDENCE_LEVELS, CLAIM_ROLES, EXCLUSION_REASON_CODES, HUMAN_REVIEW_REASON_CODES } from './publication-synthesis-schema.mjs';
+
+// A justification reason must be more than a placeholder ("Needs review.")
+// to count as substantive. This is a deliberately simple, deterministic
+// floor -- not a quality/NLP judgment -- five-or-more words rules out the
+// laziest non-answers without pretending to assess whether the reasoning
+// is actually good (the validator's job is grounding/structure, not
+// literary judgment).
+const MIN_JUSTIFICATION_WORDS = 5;
+function isSubstantiveJustificationReason(reason) {
+  return isNonEmptyString(reason) && reason.trim().split(/\s+/).filter(Boolean).length >= MIN_JUSTIFICATION_WORDS;
+}
 
 export const POST_SYNTHESIS_VALIDATOR_VERSION = 'publication-synthesis-validator-v1';
 
@@ -65,7 +76,8 @@ export function validateSchemaShape(aiOutput) {
     errors.push('MISSING_OR_INVALID:excluded_claims');
   } else {
     aiOutput.excluded_claims.forEach((c, i) => {
-      if (!c || !isNonEmptyString(c.claim_id) || !EXCLUSION_REASON_CODES.includes(c.reason_code) || !isNonEmptyString(c.reason)) {
+      if (!c || !isNonEmptyString(c.claim_id) || !EXCLUSION_REASON_CODES.includes(c.reason_code) || !isNonEmptyString(c.reason)
+        || !isStringArray(c.related_conflict_claim_ids)) {
         errors.push(`MISSING_OR_INVALID:excluded_claims[${i}]`);
       }
     });
@@ -82,6 +94,14 @@ export function validateSchemaShape(aiOutput) {
   }
 
   if (!isStringArray(aiOutput.unresolved_issues)) errors.push('MISSING_OR_INVALID:unresolved_issues');
+
+  const justification = aiOutput.human_review_justification;
+  if (!justification || typeof justification !== 'object'
+    || !HUMAN_REVIEW_REASON_CODES.includes(justification.reason_code)
+    || !isNonEmptyString(justification.reason)
+    || !isStringArray(justification.related_claim_ids)) {
+    errors.push('MISSING_OR_INVALID:human_review_justification');
+  }
 
   const framing = aiOutput.public_framing;
   if (!framing || typeof framing !== 'object') {
@@ -176,12 +196,49 @@ export function validateSynthesisSemantics({ v1Result, evidenceBundle, aiOutput 
     selectedIds.add(sel.claim_id);
   }
   // Rule 2: every excluded claim_id must exist in the evidence bundle.
+  const excludedByClaimId = new Map();
   for (const exc of excluded) {
     if (!allBundleClaimIds.has(exc.claim_id)) {
       violations.push(`EXCLUDED_CLAIM_NOT_IN_EVIDENCE_BUNDLE:${exc.claim_id}`);
       continue;
     }
     excludedIds.add(exc.claim_id);
+    excludedByClaimId.set(exc.claim_id, exc);
+  }
+
+  // NON-CORE CONFLICT EXCLUSION: UNRESOLVED_NON_CORE_CONFLICT is only a
+  // valid resolution when BOTH (all) sides of the specific disagreement
+  // are excluded together -- this is what makes it structurally
+  // impossible for the model to quietly keep the more-favorable claim
+  // while excluding the other under this code. Every other exclusion
+  // reason must leave related_conflict_claim_ids empty, so the field
+  // stays a reliable signal rather than a place to stash unrelated notes.
+  for (const exc of excluded) {
+    const related = Array.isArray(exc.related_conflict_claim_ids) ? exc.related_conflict_claim_ids : [];
+    if (exc.reason_code === 'UNRESOLVED_NON_CORE_CONFLICT') {
+      if (related.length === 0) {
+        violations.push(`NON_CORE_CONFLICT_MISSING_RELATED_CLAIMS:${exc.claim_id}`);
+      }
+      if (!isSubstantiveJustificationReason(exc.reason)) {
+        violations.push(`NON_CORE_CONFLICT_MISSING_JUSTIFICATION:${exc.claim_id}`);
+      }
+      for (const relatedId of related) {
+        if (!allBundleClaimIds.has(relatedId)) {
+          violations.push(`NON_CORE_CONFLICT_RELATED_CLAIM_NOT_IN_EVIDENCE_BUNDLE:${relatedId}`);
+          continue;
+        }
+        const relatedExclusion = excludedByClaimId.get(relatedId);
+        if (!relatedExclusion || relatedExclusion.reason_code !== 'UNRESOLVED_NON_CORE_CONFLICT') {
+          // The claim this one names as its conflict partner was not
+          // excluded under the same code -- exactly the one-sided,
+          // favorable-side-picking outcome this mechanism exists to
+          // prevent.
+          violations.push(`NON_CORE_CONFLICT_ONE_SIDED_EXCLUSION:${exc.claim_id}->${relatedId}`);
+        }
+      }
+    } else if (related.length > 0) {
+      violations.push(`NON_CORE_CONFLICT_FIELD_MISUSED:${exc.claim_id}`);
+    }
   }
 
   // Rule 4/18: full accounting -- every bundle claim disposed exactly once.
@@ -273,6 +330,32 @@ export function validateSynthesisSemantics({ v1Result, evidenceBundle, aiOutput 
   // HIGH-risk topics can never be AUTO_READY regardless of anything above.
   if (v1Result.risk_tier === RISK_TIER.HIGH && aiOutput.recommended_disposition === 'AUTO_READY') {
     violations.push('HIGH_RISK_CANNOT_AUTO_READY');
+  }
+
+  // GOVERNANCE FIX: a HUMAN_REVIEW disposition with no valid, specific
+  // justification is NOT an authoritative substantive finding -- it is an
+  // indeterminate model-output defect. This is deliberately its own
+  // violation code (not folded into SUBSTANTIVE_CODES) so
+  // publication-synthesis-reconciliation.mjs can route it to a bounded
+  // retry instead of straight to the human queue. See
+  // publication-synthesis-schema.mjs's HUMAN_REVIEW_REASON_CODES header.
+  if (aiOutput.recommended_disposition === 'HUMAN_REVIEW') {
+    const justification = aiOutput.human_review_justification;
+    const hasValidCode = justification && HUMAN_REVIEW_REASON_CODES.includes(justification.reason_code) && justification.reason_code !== 'NOT_APPLICABLE';
+    const hasSubstantiveReason = justification && isSubstantiveJustificationReason(justification.reason);
+    if (!hasValidCode || !hasSubstantiveReason) {
+      violations.push('HUMAN_REVIEW_MISSING_JUSTIFICATION');
+    }
+  }
+  // Symmetric consistency check: AUTO_READY must not carry a stray
+  // substantive justification code left over from indecision -- a
+  // structural inconsistency in the model's own output, not a judgment
+  // call, so it is NOT added to SUBSTANTIVE_CODES and falls through to
+  // the default non-repairable-mechanical bucket (-> SYNTHESIS_FAILED).
+  if (aiOutput.recommended_disposition === 'AUTO_READY'
+    && aiOutput.human_review_justification
+    && aiOutput.human_review_justification.reason_code !== 'NOT_APPLICABLE') {
+    violations.push('AUTO_READY_WITH_INCONSISTENT_HUMAN_REVIEW_JUSTIFICATION');
   }
 
   return { valid: violations.length === 0, violations };

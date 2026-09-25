@@ -59,13 +59,29 @@ export const PAGE_BUILDER_DRAFT_VERSION = 'page-builder-draft-v2';
     mention both "phases" and "typically lasts" should classify as
     DEFINITION only if "phases" appears without a duration cue -- TIMING
     is checked before DEFINITION's broader "phases/stages" pattern
-    specifically to avoid that ambiguity. */
+    specifically to avoid that ambiguity.
+
+    GENERALIZATION FIX (seo/education-page-2-generalization pilot): a
+    live telogen-effluvium run surfaced that DEFINITION's pattern was
+    tuned only to hair-cycle's exact phrasing ("cycles through four
+    recognized phases") -- a genuinely definitional statement in a
+    different topic's cleared evidence ("Telogen effluvium (TE) is a
+    diffuse, temporary increase in hair shedding that reflects...") fell
+    through to OTHER instead. Added one additional, still topic-agnostic
+    alternative for the common "<subject> is a <description> that
+    <elaboration>" definitional sentence shape -- not telogen-effluvium-
+    specific wording, a general English definitional pattern. Verified
+    against every hair-cycle AND telogen-effluvium cleared statement
+    (see tests/page-builder-v1.test.mjs) that this addition changes
+    classification for the genuinely-definitional telogen-effluvium
+    statement only, and does not reclassify anything that already
+    correctly matched a different bucket. */
 const BUCKET_PATTERNS = [
   { bucket: 'TIMING', pattern: /\btypically lasts\b|\bduration\b|\bat any given time\b|\d+\s*%|\bpercent\b/i },
   { bucket: 'MECHANISM', pattern: /\bdriven by\b|\bsignal(l)?ing pathway\w*\b|\bregulated by\b|\bcoordinated by\b|\bunderlying biology\b/i },
   { bucket: 'FACTORS', pattern: /\bfactors\b|\bcan (normally |commonly )?influence\b|\bcan shift\b|\baffect(s)? the (transition|cycle)\b/i },
   { bucket: 'PRACTITIONER_RELEVANCE', pattern: /\bdistinguishing\b|\bpractitioner\w*\b|\bnormal (cycle )?variation\b|\babnormal\b|\bassessing\b/i },
-  { bucket: 'DEFINITION', pattern: /\brecognized (phases|stages)\b|\bconsists of\b|\bis defined as\b|\bfour (recognized )?(phases|stages)\b|\bcycles through\b/i },
+  { bucket: 'DEFINITION', pattern: /\brecognized (phases|stages)\b|\bconsists of\b|\bis defined as\b|\bfour (recognized )?(phases|stages)\b|\bcycles through\b|\bis an?\b[\s\S]{0,60}\bthat\b/i },
 ];
 
 function classifyCorePoint(point) {
@@ -95,21 +111,25 @@ function paragraph(point) {
  * twice would. `usedStatements` is still updated as a side effect, so a
  * later GENERIC `{ buckets }` section (the older mechanism, unchanged)
  * correctly treats this bucket's evidence as already spoken for.
- * KNOWN v0 LIMITATION: this looks up only the bucket's FIRST cleared
- * point (grouped[bucket][0]) -- correct today because every hair-cycle
- * bucket has exactly one point (see the file's bucket_counts), but a
- * second point in the same bucket (a future re-cleared snapshot) would
- * not automatically be picked up here the way the generic mechanism's
- * own .flatMap() would. Acceptable for a hand-authored, one-topic,
- * owner-reviewed exemplar; a real gap to close before ever generalizing
- * this mechanism to a second topic.
+ *
+ * GENERALIZATION FIX (seo/education-page-2-generalization pilot): a
+ * live telogen-effluvium bucket (FACTORS) genuinely has two distinct
+ * cleared points, both wanted in separate paragraphs -- the original v0
+ * hair-cycle-only version of this function always took index [0] of a
+ * bucket, a real gap once a second topic's bucket held more than one
+ * point. Fixed with an optional, defaulted `index` on the unit (0 when
+ * omitted, so every existing hair-cycle unit -- which never sets it --
+ * is completely unaffected). This is still not the generic mechanism's
+ * own `.flatMap()` behavior (which uses every point in a listed
+ * bucket automatically) -- an editorial unit still names each point it
+ * wants, deliberately, one hand-authored unit per point.
  *
  * 'paraphrase' NEVER accepts hand-typed claim IDs -- it always inherits
  * every supporting_claim_id already attached to the bucket's own cleared
  * statement, so a paraphrase can never end up citing claims its source
  * statement doesn't actually carry.
  *
- * @param {{kind: 'framing'|'verbatim'|'paraphrase', text?: string, bucket?: string}} unit
+ * @param {{kind: 'framing'|'verbatim'|'paraphrase', text?: string, bucket?: string, index?: number}} unit
  * @param {object} grouped - classifyCoreFactualPoints() output
  * @param {Set<string>} usedStatements
  * @returns {{text: string, supporting_claim_ids: string[], is_framing?: boolean, editorial_status: string, source_statements: string[]}|null}
@@ -118,8 +138,8 @@ function resolveEditorialUnit(unit, grouped, usedStatements) {
   if (unit.kind === 'framing') {
     return { text: unit.text, supporting_claim_ids: [], is_framing: true, editorial_status: 'FRAMING', source_statements: [] };
   }
-  const point = (grouped[unit.bucket] || [])[0];
-  if (!point) return null; // evidence controls the page -- bucket is empty
+  const point = (grouped[unit.bucket] || [])[unit.index || 0];
+  if (!point) return null; // evidence controls the page -- no point at this bucket/index
   usedStatements.add(point.statement);
   if (unit.kind === 'verbatim') {
     return { text: point.statement, supporting_claim_ids: [...(point.supporting_claim_ids || [])], editorial_status: 'VERBATIM', source_statements: [point.statement] };
