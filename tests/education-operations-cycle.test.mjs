@@ -12,9 +12,11 @@
 
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
+  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
 } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
 import { EDUCATION_OPS_API_KEY_ENV_VAR } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
 
 const results = [];
@@ -23,6 +25,24 @@ function check(fixtureName, label, condition, detail) {
 }
 
 const FAKE_ENV_WITH_CRED = { [EDUCATION_OPS_API_KEY_ENV_VAR]: 'fake-not-a-real-key', SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'fake' };
+
+/** Every test in this file runs through this wrapper so NONE of them
+    ever hits a live Supabase endpoint for the (now-live-by-default)
+    published-topic-state / weekly-count / freshness reads this file's
+    own header comment promises never happens -- see the runtime-wiring
+    correction that introduced these three live-by-default reads. Tests
+    that specifically want to exercise the live-query failure path pass
+    their own `publishedTopicSlugs`/`pagesPublishedThisWeek`/`fns`
+    overrides straight through `runDecisionPipeline` instead of through
+    this helper. */
+function run(env, options = {}) {
+  return runDecisionPipeline(env, {
+    publishedTopicSlugs: [],
+    pagesPublishedThisWeek: 0,
+    ...options,
+    fns: { checkFreshnessFn: async () => [], ...(options.fns || {}) },
+  });
+}
 
 function makeSource(id) { return { source_id: id, title: `S ${id}`, year: 2024, doi: `10.1/${id}`, evidence_type: 'systematic_review' }; }
 function makeClaim(id, topic, sourceId, overrides = {}) { return { claim_id: id, source_id: sourceId, claim_type: 'finding', claim_text: `Finding ${id}.`, topics: [topic], verification_status: 'CLAIM_VERIFIED', use_status: 'provisional', ...overrides }; }
@@ -117,9 +137,47 @@ function fakePassingReviewResult() {
 })();
 
 async function testWeeklyCapBlocksTheWholeRun() {
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: 4 });
+  const report = await run(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: 4 });
   check('WEEKLY_CAP_RUN', 'final_state is NO_OP_SUCCESS when the weekly cap is reached', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
   check('WEEKLY_CAP_RUN', 'no topic selected', report.selected_topic === null);
+  check('WEEKLY_CAP_RUN', 'stopped_before_model_stage is true (never even checked the credential)', report.stopped_before_model_stage === true);
+  check('WEEKLY_CAP_RUN', 'pages_published_this_week/weekly_ceiling are recorded', report.pages_published_this_week === 4 && report.weekly_ceiling === DEFAULT_MAX_PAGES_PER_WEEK);
+}
+
+async function testWeeklyCapRuntimeThresholds() {
+  const underCap = await run(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: 0, fns: { fetchEvidenceFn: async () => ({ claims: [], sources: [] }) } });
+  check('WEEKLY_CAP_THRESHOLDS', '0 this week is under cap (proceeds to selection)', underCap.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && underCap.selection_reason === 'NO_ELIGIBLE_TOPIC', JSON.stringify({ state: underCap.final_state, reason: underCap.selection_reason }));
+
+  const oneUnderCap = await run(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: DEFAULT_MAX_PAGES_PER_WEEK - 1, fns: { fetchEvidenceFn: async () => ({ claims: [], sources: [] }) } });
+  check('WEEKLY_CAP_THRESHOLDS', 'max-1 this week is under cap (proceeds to selection)', oneUnderCap.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && oneUnderCap.selection_reason === 'NO_ELIGIBLE_TOPIC');
+
+  const atCap = await run(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: DEFAULT_MAX_PAGES_PER_WEEK });
+  check('WEEKLY_CAP_THRESHOLDS', 'exactly at max is NO_OP_SUCCESS before any model call', atCap.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && atCap.selection_reason.includes('Weekly cap reached'));
+
+  const overCap = await run(FAKE_ENV_WITH_CRED, { pagesPublishedThisWeek: DEFAULT_MAX_PAGES_PER_WEEK + 3 });
+  check('WEEKLY_CAP_THRESHOLDS', 'over max is NO_OP_SUCCESS', overCap.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS);
+}
+
+async function testWeeklyCapCountQueryFailureFailsClosed() {
+  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs: [],
+    fns: {
+      checkFreshnessFn: async () => [],
+      countPagesPublishedThisWeekFn: async () => { throw new Error('Supabase query failed (503).'); },
+    },
+  });
+  check('WEEKLY_CAP_QUERY_FAILS_CLOSED', 'final_state is CONFIG_BLOCKED', report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, report.final_state);
+  check('WEEKLY_CAP_QUERY_FAILS_CLOSED', 'exception names the query failure', report.exception_reason.includes('Weekly publication count query failed'), report.exception_reason);
+  check('WEEKLY_CAP_QUERY_FAILS_CLOSED', 'stopped_before_model_stage is true', report.stopped_before_model_stage === true);
+}
+
+async function testPublishedTopicQueryFailureFailsClosed() {
+  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+    fns: { fetchPublishedTopicSlugsFn: async () => { throw new Error('Supabase query failed (500).'); } },
+  });
+  check('PUBLISHED_TOPIC_QUERY_FAILS_CLOSED', 'final_state is CONFIG_BLOCKED', report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, report.final_state);
+  check('PUBLISHED_TOPIC_QUERY_FAILS_CLOSED', 'exception names the query failure', report.exception_reason.includes('Published-topic state query failed'), report.exception_reason);
+  check('PUBLISHED_TOPIC_QUERY_FAILS_CLOSED', 'never falls back to the PUBLISHED_TOPIC_SLUGS constant', !report.published_topics || report.published_topics.length === 0, JSON.stringify(report.published_topics));
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -135,11 +193,25 @@ async function testWeeklyCapBlocksTheWholeRun() {
 
 // ─────────────────────────────────────────────────────────────────────────
 // CONFIG_BLOCKED: missing dedicated credential, never a silent fallback
+// -- and critically, per the runtime-wiring correction, the read-only
+// part of the run (published topics, weekly cap, freshness, candidate
+// selection) must survive a missing credential rather than being erased.
 // ─────────────────────────────────────────────────────────────────────────
 async function testMissingCredentialIsConfigBlocked() {
-  const report = await runDecisionPipeline({ SUPABASE_URL: 'x', SUPABASE_SERVICE_ROLE_KEY: 'x' /* no ANTHROPIC_EDUCATION_WRITER_API_KEY */ }, {});
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const freshnessStub = [{ topic: 'hair-cycle', state: FRESHNESS_STATE.FRESH, new_claim_ids: [], removed_claim_ids: [] }];
+  const report = await run(
+    { SUPABASE_URL: 'x', SUPABASE_SERVICE_ROLE_KEY: 'x' /* no ANTHROPIC_EDUCATION_WRITER_API_KEY */ },
+    { publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium'], fns: { fetchEvidenceFn: async () => pool, checkFreshnessFn: async () => freshnessStub } },
+  );
   check('CONFIG_BLOCKED', 'final_state is CONFIG_BLOCKED', report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, report.final_state);
   check('CONFIG_BLOCKED', 'exception names the missing credential', report.exception_reason.includes(EDUCATION_OPS_API_KEY_ENV_VAR), report.exception_reason);
+  check('CONFIG_BLOCKED', 'credential_available is false', report.credential_available === false);
+  check('CONFIG_BLOCKED', 'stopped_before_model_stage is true', report.stopped_before_model_stage === true);
+  check('CONFIG_BLOCKED', 'the read-only selection result is PRESERVED, not erased', report.selected_topic === topicSlug, report.selected_topic);
+  check('CONFIG_BLOCKED', 'the read-only published-topic state is PRESERVED', JSON.stringify(report.published_topics) === JSON.stringify(['hair-cycle', 'telogen-effluvium']));
+  check('CONFIG_BLOCKED', 'the read-only freshness scan is PRESERVED', JSON.stringify(report.freshness_scan_summary) === JSON.stringify(freshnessStub));
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -150,7 +222,7 @@ async function testFullShadowCanaryReachesCandidateReady() {
   const topicSlug = 'androgenetic-alopecia'; // an eligible, unpublished, MODERATE-risk cluster member
   const pool = healthyPoolForSingleTopic(topicSlug);
 
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+  const report = await run(FAKE_ENV_WITH_CRED, {
     fns: {
       fetchEvidenceFn: async () => pool,
       planIntentFn: async () => fakeIntentResult(topicSlug),
@@ -169,6 +241,8 @@ async function testFullShadowCanaryReachesCandidateReady() {
   check('SHADOW_CANARY', 'review_result reports PASS', report.review_result && report.review_result.outcome === 'PASS', JSON.stringify(report.review_result));
   check('SHADOW_CANARY', 'model_calls aggregated across all four roles', report.model_calls.total_calls === 4, report.model_calls.total_calls);
   check('SHADOW_CANARY', 'no exception reason on a clean success', report.exception_reason === null);
+  check('SHADOW_CANARY', 'credential_available is true', report.credential_available === true);
+  check('SHADOW_CANARY', 'stopped_before_model_stage is false', report.stopped_before_model_stage === false);
 }
 
 async function testShadowCanaryStopsOnHighRiskPool() {
@@ -182,16 +256,18 @@ async function testShadowCanaryStopsOnHighRiskPool() {
   // crashes, never selects) when the fetched pool is simply empty --
   // the same fail-safe outcome a HIGH-risk-only or otherwise fully
   // ineligible pool produces.
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, { fns: { fetchEvidenceFn: async () => ({ claims: [], sources: [] }) } });
+  const report = await run(FAKE_ENV_WITH_CRED, { fns: { fetchEvidenceFn: async () => ({ claims: [], sources: [] }) } });
   check('NO_ELIGIBLE_STOPS_CLEANLY', 'final_state is NO_OP_SUCCESS for an empty/ineligible pool', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
   check('NO_ELIGIBLE_STOPS_CLEANLY', 'no topic selected', report.selected_topic === null);
   check('NO_ELIGIBLE_STOPS_CLEANLY', 'zero model calls made (never reaches intent planning)', report.model_calls.total_calls === 0);
+  check('NO_ELIGIBLE_STOPS_CLEANLY', 'stopped_before_model_stage is true', report.stopped_before_model_stage === true);
+  check('NO_ELIGIBLE_STOPS_CLEANLY', 'credential_available is null (never even checked)', report.credential_available === null);
 }
 
 async function testHumanReviewSynthesisStopsCleanly() {
   const topicSlug = 'androgenetic-alopecia';
   const pool = healthyPoolForSingleTopic(topicSlug);
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+  const report = await run(FAKE_ENV_WITH_CRED, {
     fns: {
       fetchEvidenceFn: async () => pool,
       planIntentFn: async () => fakeIntentResult(topicSlug),
@@ -209,7 +285,7 @@ async function testHumanReviewSynthesisStopsCleanly() {
 async function testEditorialReviewFailClosed() {
   const topicSlug = 'androgenetic-alopecia';
   const pool = healthyPoolForSingleTopic(topicSlug);
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+  const report = await run(FAKE_ENV_WITH_CRED, {
     fns: {
       fetchEvidenceFn: async () => pool,
       planIntentFn: async () => fakeIntentResult(topicSlug),
@@ -231,7 +307,7 @@ async function testEditorialReviewFailClosed() {
 async function testWriterPlanFailingDeterministicValidationRoutesToEditorialReview() {
   const topicSlug = 'androgenetic-alopecia';
   const pool = healthyPoolForSingleTopic(topicSlug);
-  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+  const report = await run(FAKE_ENV_WITH_CRED, {
     fns: {
       fetchEvidenceFn: async () => pool,
       planIntentFn: async () => fakeIntentResult(topicSlug),
@@ -250,14 +326,141 @@ async function testWriterPlanFailingDeterministicValidationRoutesToEditorialRevi
   check('WRITER_VALIDATION_FAIL', 'violations name the ungrounded claim', report.writer_result.violations.some((v) => v.includes('UNGROUNDED_CLAIM_ID')), JSON.stringify(report.writer_result.violations));
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Runtime published-topic state: a dynamically-injected published set
+// (simulating "Page #3 just published") is excluded from selection with
+// NO CODE CHANGE -- proving the orchestrator no longer trusts the
+// PUBLISHED_TOPIC_SLUGS constant as operational truth.
+// ─────────────────────────────────────────────────────────────────────────
+async function testDynamicPublishedTopicExclusion() {
+  const pool = healthyPoolForSingleTopic('androgenetic-alopecia');
+  // Includes alopecia-areata too, on top of the "real" two published
+  // pages plus a simulated newly-published Page #3 (androgenetic-alopecia)
+  // -- this makes EVERY remaining cluster candidate (hair-loss,
+  // shedding-vs-hair-loss) cannibalized by the union as well, so the
+  // ONLY way this run can resolve to NO_OP_SUCCESS is if
+  // androgenetic-alopecia really is excluded directly by the LIVE
+  // (injected) set rather than the PUBLISHED_TOPIC_SLUGS constant, which
+  // does not contain androgenetic-alopecia or alopecia-areata at all.
+  const publishedTopicSlugs = ['hair-cycle', 'telogen-effluvium', 'androgenetic-alopecia', 'alopecia-areata'];
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs,
+    fns: { fetchEvidenceFn: async () => pool },
+  });
+  check('DYNAMIC_PUBLISHED_EXCLUSION', 'a topic in the LIVE published set is excluded even though it is NOT in the PUBLISHED_TOPIC_SLUGS constant', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && report.selection_reason === 'NO_ELIGIBLE_TOPIC', JSON.stringify({ state: report.final_state, reason: report.selection_reason, exception: report.exception_reason }));
+  check('DYNAMIC_PUBLISHED_EXCLUSION', 'published_topics reflects the injected live set, not the hardcoded constant', JSON.stringify(report.published_topics) === JSON.stringify(publishedTopicSlugs));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Freshness is invoked by the real orchestrator on every run, and its
+// result is retained independently of the new-page lane's own outcome
+// (including when that lane is CONFIG_BLOCKED on a missing credential).
+// ─────────────────────────────────────────────────────────────────────────
+async function testFreshnessInvokedAndIndependentOfNewPageLane() {
+  let freshnessCalledWithTopics = null;
+  const freshnessStub = [
+    { topic: 'hair-cycle', state: FRESHNESS_STATE.FRESH, new_claim_ids: [], removed_claim_ids: [] },
+    { topic: 'telogen-effluvium', state: FRESHNESS_STATE.POTENTIAL_EVIDENCE_CHANGE, new_claim_ids: ['new-c1'], removed_claim_ids: [] },
+  ];
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium'],
+    fns: {
+      checkFreshnessFn: async (env, topics) => { freshnessCalledWithTopics = topics; return freshnessStub; },
+      fetchEvidenceFn: async () => ({ claims: [], sources: [] }), // new-page lane resolves to NO_OP_SUCCESS
+    },
+  });
+  check('FRESHNESS_INDEPENDENT', 'freshness ran against the live published set', JSON.stringify(freshnessCalledWithTopics) === JSON.stringify(['hair-cycle', 'telogen-effluvium']));
+  check('FRESHNESS_INDEPENDENT', 'freshness_scan_summary is attached even though the new-page lane is a plain NO_OP_SUCCESS', JSON.stringify(report.freshness_scan_summary) === JSON.stringify(freshnessStub));
+  check('FRESHNESS_INDEPENDENT', 'the new-page lane final_state is unaffected by a POTENTIAL_EVIDENCE_CHANGE freshness result', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Corrected CLI command semantics: --publish is reserved and always
+// refuses (full autonomous publishing is not implemented); the renamed
+// --persist-clearance is what the old --publish actually did, and stays
+// gated behind AUTOPUBLISH_ENABLED. Neither can ever mark a DB row
+// status='published' -- that column value doesn't exist on either path.
+// ─────────────────────────────────────────────────────────────────────────
+(function testParseArgsRecognizesBothFlags() {
+  check('CLI_SEMANTICS', '--persist-clearance parses to mode "persist-clearance"', parseArgs(['--persist-clearance']).mode === 'persist-clearance');
+  check('CLI_SEMANTICS', '--publish still parses (reserved, always refuses)', parseArgs(['--publish']).mode === 'publish');
+  check('CLI_SEMANTICS', '--from-prepared=<path> is still parsed alongside either flag', parseArgs(['--persist-clearance', '--from-prepared=/tmp/x.json']).fromPrepared === '/tmp/x.json');
+})();
+
+(function testPublishAlwaysRefusesRegardlessOfAutopublish() {
+  const refusalWithAutopublishOff = runFullAutopublishRefusal();
+  check('CLI_SEMANTICS', '--publish refuses when AUTOPUBLISH is off', refusalWithAutopublishOff.ran === false && refusalWithAutopublishOff.ok === false);
+  check('CLI_SEMANTICS', '--publish refusal names it as not implemented', refusalWithAutopublishOff.reason.includes('not implemented'), refusalWithAutopublishOff.reason);
+  check('CLI_SEMANTICS', '--publish refusal points to --persist-clearance instead', refusalWithAutopublishOff.reason.includes('--persist-clearance'));
+  // The function takes no env/args at all -- there is no way to make it
+  // "run" through any input, proving full autonomous publish is
+  // unconditionally unavailable, not just unavailable by default.
+  check('CLI_SEMANTICS', 'runFullAutopublishRefusal takes no arguments (cannot be parameterized into running)', runFullAutopublishRefusal.length === 0);
+})();
+
+async function testPersistClearanceRefusesWithoutAutopublishEnabled() {
+  const outcome = await runPersistClearanceAction({}, { fromPreparedPath: '/tmp/does-not-matter.json' });
+  check('CLI_SEMANTICS', '--persist-clearance refuses when AUTOPUBLISH is off', outcome.ran === false && outcome.ok === false);
+  check('CLI_SEMANTICS', 'refusal reason names the env var', outcome.reason.includes(AUTOPUBLISH_ENV_VAR), outcome.reason);
+}
+
+async function testPersistClearanceRefusesWithoutFromPreparedPath() {
+  const outcome = await runPersistClearanceAction({ [AUTOPUBLISH_ENV_VAR]: 'true' }, {});
+  check('CLI_SEMANTICS', '--persist-clearance refuses without --from-prepared even when AUTOPUBLISH is on', outcome.ran === false && outcome.ok === false);
+  check('CLI_SEMANTICS', 'refusal reason names --from-prepared', outcome.reason.includes('--from-prepared'), outcome.reason);
+}
+
+async function testNoCommandCanMarkStatusPublished() {
+  // --publish: structurally cannot write anything (no write path exists
+  // in the function at all).
+  const publishRefusal = runFullAutopublishRefusal();
+  check('NO_COMMAND_MARKS_PUBLISHED', '--publish has no write capability -- refusal carries no writeFn/result of any kind', !('result' in publishRefusal) && !('writeFn' in publishRefusal));
+
+  // --persist-clearance: publishPreparedArtifact() (education-synthesis-
+  // cache.mjs) re-verifies the artifact's OWN integrity BEFORE ever
+  // calling io.writeFn -- so even a malformed/tampered prepared artifact
+  // (e.g. a fake one, as here) never reaches the write layer at all.
+  // The positive path -- that a GENUINE, integrity-passing artifact's
+  // written record carries status='ready_for_page_builder', never
+  // 'published' (enforced independently by publication-clearance-
+  // writer.mjs's assertWritableClearanceRecord()) -- is proven directly
+  // by tests/education-synthesis-cache.test.mjs's ROUND_TRIP fixture.
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const os = await import('node:os');
+  const tmpPath = path.join(os.tmpdir(), `edu-ops-test-prepared-${Date.now()}.json`);
+  const fakePreparedArtifact = {
+    topic_slug: 'x', record: { topic_slug: 'x', status: 'ready_for_page_builder', clearance_mode: 'AUTO_READY', generation_source_hash: 'not-a-real-matching-hash', publication_clearance: {} },
+    prepared_at: new Date().toISOString(),
+  };
+  fs.writeFileSync(tmpPath, JSON.stringify(fakePreparedArtifact));
+  let writeFnCalled = false;
+  const outcome = await runPersistClearanceAction({ [AUTOPUBLISH_ENV_VAR]: 'true' }, {
+    fromPreparedPath: tmpPath,
+    io: { writeFn: async (record) => { writeFnCalled = true; return [{ ...record }]; } },
+  });
+  fs.unlinkSync(tmpPath);
+  check('NO_COMMAND_MARKS_PUBLISHED', '--persist-clearance ran (attempted)', outcome.ran === true);
+  check('NO_COMMAND_MARKS_PUBLISHED', 'a fake/integrity-failing artifact never reaches writeFn', writeFnCalled === false);
+  check('NO_COMMAND_MARKS_PUBLISHED', 'the attempt is reported as failed, not silently accepted', outcome.result.ok === false, JSON.stringify(outcome.result));
+}
+
 const tests = [
   testWeeklyCapBlocksTheWholeRun,
+  testWeeklyCapRuntimeThresholds,
+  testWeeklyCapCountQueryFailureFailsClosed,
+  testPublishedTopicQueryFailureFailsClosed,
   testMissingCredentialIsConfigBlocked,
   testFullShadowCanaryReachesCandidateReady,
   testShadowCanaryStopsOnHighRiskPool,
   testHumanReviewSynthesisStopsCleanly,
   testEditorialReviewFailClosed,
   testWriterPlanFailingDeterministicValidationRoutesToEditorialReview,
+  testDynamicPublishedTopicExclusion,
+  testFreshnessInvokedAndIndependentOfNewPageLane,
+  testPersistClearanceRefusesWithoutAutopublishEnabled,
+  testPersistClearanceRefusesWithoutFromPreparedPath,
+  testNoCommandCanMarkStatusPublished,
 ];
 
 for (const t of tests) await t();

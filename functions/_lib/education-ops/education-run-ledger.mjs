@@ -27,6 +27,16 @@ export const RUN_FINAL_STATE = Object.freeze({
  *   task; every field is optional except run_id/mode/final_state, so a
  *   ledger can be built incrementally as a run progresses and
  *   finalized once at the end.
+ *
+ *   published_topics/pages_published_this_week/weekly_ceiling/
+ *   credential_available/stopped_before_model_stage were added by the
+ *   runtime-wiring correction round: a run must record the LIVE
+ *   published-topic set and weekly count it actually resolved (never a
+ *   hardcoded constant), whether the Education Ops model credential was
+ *   available, and whether execution stopped before reaching any step
+ *   that needs a model call -- so a missing credential never erases the
+ *   read-only work (published state, weekly cap, freshness, candidate
+ *   selection) a run already did.
  * @returns {object} a plain, JSON-serializable run report
  */
 export function buildRunReport(fields) {
@@ -35,8 +45,10 @@ export function buildRunReport(fields) {
     candidate_topics = [], selected_topic = null, selection_reason = null,
     seo_signal_type = 'SEARCH_OPPORTUNITY_HEURISTIC',
     readiness_result = null, risk_tier = null,
+    published_topics = [], pages_published_this_week = null, weekly_ceiling = null,
     publication_editor_result = null, writer_result = null, review_result = null,
     freshness_scan_summary = null,
+    credential_available = null, stopped_before_model_stage = false,
     model_calls = [], planned_route = null,
     diff_allowlist_result = null, publication_action = null,
     final_state, exception_reason = null,
@@ -63,10 +75,15 @@ export function buildRunReport(fields) {
     seo_signal_type,
     readiness_result,
     risk_tier,
+    published_topics,
+    pages_published_this_week,
+    weekly_ceiling,
     publication_editor_result,
     writer_result,
     review_result,
     freshness_scan_summary,
+    credential_available,
+    stopped_before_model_stage,
     model_calls: {
       calls: model_calls,
       total_calls: model_calls.length,

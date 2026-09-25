@@ -26,9 +26,13 @@
        I/O) and persists exactly that record via the existing guarded
        writers (publication-clearance-writer.mjs).
      - A prepared artifact can be serialized to disk between the
-       `--prepare` and `--publish` CLI invocations (see
-       scripts/education-operations-cycle.mjs) so the two phases can
-       run as separate processes/workflow steps without ever
+       `--prepare` and `--persist-clearance` CLI invocations (see
+       scripts/education-operations-cycle.mjs -- `--persist-clearance`
+       is what this file's own `publishPreparedArtifact()` is invoked
+       from; the CLI's separate `--publish` flag is reserved for a
+       future, unrelated, not-yet-built full autonomous-publication
+       state machine and never calls this function at all) so the two
+       phases can run as separate processes/workflow steps without ever
        re-deriving the artifact -- the file IS the artifact, not a
        description of it.
    ═══════════════════════════════════════════════════════════════ */

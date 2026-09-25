@@ -40,11 +40,19 @@ export const ACTIVE_CLUSTERS = Object.freeze({
 
 export const DEFAULT_ACTIVE_CLUSTER = 'hair-loss-shedding';
 
-// Topics with a live, published Education page (route + persisted
-// AUTO_READY/published clearance). Excluded from NEW-PAGE selection --
-// see the originating task's explicit instruction. A topic here does
-// NOT become eligible again just because it's in this list; it may
-// still be considered by the FRESHNESS monitor (a different lane, see
+// Topics with a live, published Education page, AS OF THE LAST TIME
+// THIS FILE WAS EDITED. This is a FIXTURE/HISTORY DEFAULT for pure unit
+// tests only -- it is NOT operational truth. The real CLI
+// (scripts/education-operations-cycle.mjs) always resolves the current
+// published-topic set live, from research_public_pages
+// (status='published' AND sitemap_eligible=true) via
+// education-published-state-loader.mjs#fetchPublishedTopicSlugsLive,
+// and passes it into candidateConceptsForCluster/checkCannibalization/
+// selectNextTopic explicitly below -- so a newly published page is
+// excluded from new-page selection automatically on the next run, with
+// no edit to this constant required. A topic here does NOT become
+// eligible again just because it's in this list; it may still be
+// considered by the FRESHNESS monitor (a different lane, see
 // education-freshness-monitor.mjs), never by this selector.
 export const PUBLISHED_TOPIC_SLUGS = Object.freeze(['hair-cycle', 'telogen-effluvium']);
 
@@ -55,11 +63,11 @@ export class TopicSelectionError extends Error {
   }
 }
 
-function candidateConceptsForCluster(clusterKey) {
+function candidateConceptsForCluster(clusterKey, publishedTopicSlugs) {
   const cluster = ACTIVE_CLUSTERS[clusterKey];
   if (!cluster) throw new TopicSelectionError(`Unknown active cluster "${clusterKey}".`);
   const memberSet = new Set(cluster.member_topic_slugs);
-  return PILOT_TOPIC_CONCEPTS.filter((c) => memberSet.has(c.topic_slug) && !PUBLISHED_TOPIC_SLUGS.includes(c.topic_slug));
+  return PILOT_TOPIC_CONCEPTS.filter((c) => memberSet.has(c.topic_slug) && !publishedTopicSlugs.includes(c.topic_slug));
 }
 
 /**
@@ -111,10 +119,15 @@ export function scoreSearchOpportunityHeuristic(v1Result) {
  * telogen-effluvium, its only two controlled_topics, are already
  * published on their own pages -- nothing new for a reader).
  *
+ * @param {object} concept - a PILOT_TOPIC_CONCEPTS entry
+ * @param {string[]} [publishedTopicSlugs] - the CURRENT published-topic
+ *   set; defaults to the PUBLISHED_TOPIC_SLUGS fixture constant for pure
+ *   unit tests, but the real orchestrator always passes the live-loaded
+ *   set explicitly (see this module's header comment).
  * @returns {{cannibalizes: boolean, overlapping_with: string[]}}
  */
-export function checkCannibalization(concept) {
-  const publishedConcepts = PILOT_TOPIC_CONCEPTS.filter((c) => PUBLISHED_TOPIC_SLUGS.includes(c.topic_slug));
+export function checkCannibalization(concept, publishedTopicSlugs = PUBLISHED_TOPIC_SLUGS) {
+  const publishedConcepts = PILOT_TOPIC_CONCEPTS.filter((c) => publishedTopicSlugs.includes(c.topic_slug));
   // Check against the UNION of every published concept's controlled_topics,
   // not each individually -- a candidate like "shedding-vs-hair-loss"
   // (controlled_topics: telogen-effluvium, hair-cycle) is not fully
@@ -137,7 +150,10 @@ export function checkCannibalization(concept) {
  *
  * @param {{claims: object[], sources: object[]}} evidencePool - the
  *   FULL claims/sources rows already fetched for this run (any topic)
- * @param {{clusterKey?: string}} [options]
+ * @param {{clusterKey?: string, publishedTopicSlugs?: string[]}} [options]
+ *   publishedTopicSlugs defaults to the PUBLISHED_TOPIC_SLUGS fixture
+ *   constant for pure unit tests; the real orchestrator always passes
+ *   the live-loaded set explicitly (see this module's header comment).
  * @returns {{
  *   cluster: string,
  *   candidates: Array<{topic_slug: string, v1_result: object, opportunity: object, cannibalization: object, eligible: boolean, ineligible_reason: string|null}>,
@@ -147,7 +163,8 @@ export function checkCannibalization(concept) {
  */
 export function selectNextTopic(evidencePool, options = {}) {
   const clusterKey = options.clusterKey || DEFAULT_ACTIVE_CLUSTER;
-  const concepts = candidateConceptsForCluster(clusterKey);
+  const publishedTopicSlugs = options.publishedTopicSlugs || PUBLISHED_TOPIC_SLUGS;
+  const concepts = candidateConceptsForCluster(clusterKey, publishedTopicSlugs);
 
   const candidates = concepts.map((concept) => {
     const { claims, sources } = selectTopicEvidenceFromRows(concept.controlled_topics, evidencePool);
@@ -159,7 +176,7 @@ export function selectNextTopic(evidencePool, options = {}) {
       sources,
     });
     const opportunity = scoreSearchOpportunityHeuristic(v1Result);
-    const cannibalization = checkCannibalization(concept);
+    const cannibalization = checkCannibalization(concept, publishedTopicSlugs);
 
     let eligible = true;
     let ineligibleReason = null;

@@ -81,6 +81,41 @@ function mergePools(...pools) {
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
+// Dynamic published-topic set: both checkCannibalization() and
+// selectNextTopic() accept an explicit publishedTopicSlugs override --
+// the runtime-wiring correction's whole point is that the REAL CLI
+// never trusts the PUBLISHED_TOPIC_SLUGS constant as operational truth,
+// so a newly published topic must be excludable with NO code change,
+// purely by passing a different live-loaded set in.
+// ─────────────────────────────────────────────────────────────────────────
+(function testCannibalizationAcceptsAnInjectedPublishedSet() {
+  const androgeneticAlopecia = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === 'androgenetic-alopecia');
+  // Against the DEFAULT (constant) published set, androgenetic-alopecia
+  // does not cannibalize (already asserted above) -- but against a
+  // dynamically-injected set that simulates it having just published,
+  // checkCannibalization must reflect that WITHOUT the constant itself
+  // ever changing.
+  const withDefaultSet = checkCannibalization(androgeneticAlopecia);
+  check('DYNAMIC_PUBLISHED_SET', 'against the default (constant) published set, androgenetic-alopecia does not cannibalize', !withDefaultSet.cannibalizes);
+
+  const withInjectedSet = checkCannibalization(androgeneticAlopecia, ['hair-cycle', 'telogen-effluvium', 'androgenetic-alopecia']);
+  check('DYNAMIC_PUBLISHED_SET', 'against an injected set that already includes it, androgenetic-alopecia is fully covered (trivially "cannibalized")', withInjectedSet.cannibalizes);
+  check('DYNAMIC_PUBLISHED_SET', 'the PUBLISHED_TOPIC_SLUGS constant itself is unchanged by the injected-set call', PUBLISHED_TOPIC_SLUGS.length === 2 && !PUBLISHED_TOPIC_SLUGS.includes('androgenetic-alopecia'));
+})();
+
+(function testSelectNextTopicAcceptsAnInjectedPublishedSet() {
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  const withDefaultSet = selectNextTopic(pool);
+  check('DYNAMIC_PUBLISHED_SET', 'against the default set, androgenetic-alopecia is a normal eligible candidate', withDefaultSet.candidates.some((c) => c.topic_slug === 'androgenetic-alopecia' && c.eligible));
+
+  // Simulate androgenetic-alopecia having JUST published, live, without
+  // ever touching the PUBLISHED_TOPIC_SLUGS constant.
+  const withInjectedSet = selectNextTopic(pool, { publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium', 'androgenetic-alopecia'] });
+  check('DYNAMIC_PUBLISHED_SET', 'against the injected live set, androgenetic-alopecia never even appears as a candidate', !withInjectedSet.candidates.some((c) => c.topic_slug === 'androgenetic-alopecia'), JSON.stringify(withInjectedSet.candidates.map((c) => c.topic_slug)));
+  check('DYNAMIC_PUBLISHED_SET', 'alopecia-areata (unaffected) is still a normal eligible candidate against the injected set', withInjectedSet.candidates.some((c) => c.topic_slug === 'alopecia-areata' && c.eligible));
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
 // Risk routing: HIGH is never autonomous, MODERATE/LOWER are eligible.
 // ─────────────────────────────────────────────────────────────────────────
 (function testHighRiskNeverAutonomous() {
