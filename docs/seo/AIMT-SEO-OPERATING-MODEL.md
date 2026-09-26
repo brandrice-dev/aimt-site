@@ -6,36 +6,23 @@ build/audit project closes — not a plan for further foundational work.
 It is operational and intentionally short.
 
 **Update (AIMT Education Operations v1):** the automation code described
-in the OWNER INVOLVEMENT section below now EXISTS —
-`scripts/education-operations-cycle.mjs` plus the supporting modules
-under `functions/_lib/education-ops/`. **The scheduled trigger does
-NOT exist yet.** `.github/workflows/aimt-education-operations.yml` is
-design-complete (its exact contents are recorded in
-`docs/education/AIMT-EDUCATION-OPERATIONS-v1.md`) but is not present in
-this repository's `.github/workflows/` directory and has never been
-installed — the push credential used to build this code lacked the
-GitHub OAuth `workflow` scope required to add or update a workflow
-file, so **no GitHub Actions schedule is active, and no unattended run
-of this code has ever occurred.** Running the orchestrator today
-requires an explicit, manual, local invocation (`node
-scripts/education-operations-cycle.mjs --shadow`); it does not run on
-any cadence by itself. Adding the workflow file with a credential that
-does carry `workflow` scope is a required, separate, remaining step. In
-addition, autonomous production publishing remains disabled
-(`AIMT_EDUCATION_AUTOPUBLISH_ENABLED` is not set to `true` anywhere) —
-even once the workflow is installed and running on a schedule, it
-would still only run in `--shadow` mode by default, and full autonomous
-publication is not implemented regardless of that variable (see
-`docs/education/AIMT-EDUCATION-OPERATIONS-v1.md`'s "Corrected CLI
-command semantics" section). It has never published a page. Both
-Education pages live today (hair-cycle, telogen-effluvium) were
-produced through a manually triggered, owner-reviewed run of the
-Publication Editor / Page Builder pipeline, before this scheduler
-existed. See `docs/education/AIMT-EDUCATION-OPERATIONS-v1.md` for the
-full architecture, exactly what the scheduler does today (a safe,
-file-write-free decision-pipeline dry run, run manually), and the
-specific remaining steps before it runs unattended, let alone before
-autonomous publishing could be switched on.
+in the OWNER INVOLVEMENT section below now exists, and the repository
+includes a shadow-only GitHub Actions workflow at
+`.github/workflows/aimt-education-operations.yml`. The workflow runs
+weekdays at 14:00 UTC (plus manual `workflow_dispatch`) and invokes only
+`node scripts/education-operations-cycle.mjs --shadow`. Its permissions
+are limited to `contents: read` and `issues: write`; it has no content
+write or pull-request write permission. It uploads the run ledger as a
+GitHub Actions artifact and can surface governed exception issues, but it
+cannot create a page branch/PR or publish content. Autonomous production
+publishing remains unavailable: `AIMT_EDUCATION_AUTOPUBLISH_ENABLED`
+is set to `false`, `--prepare` is not scheduled, `--persist-clearance`
+is not scheduled, and full `--publish` remains unimplemented and refuses
+unconditionally. The shadow workflow requires the dedicated Publication
+Editor and Education Writer credentials plus Supabase read credentials;
+missing secrets fail closed rather than falling back to Cadence or another
+key. See `docs/education/AIMT-EDUCATION-OPERATIONS-v1.md` for the full
+architecture and rollout state.
 
 ## Research
 
@@ -170,12 +157,13 @@ matches what was actually cleared) while the underlying research has
 since moved on (proving nothing about whether that content is still the
 best available synthesis).
 
-There is currently no automated freshness monitor or rerun trigger. A
-future need: a mechanism that flags a published page's topic when
-materially new evidence enters the library for its `controlled_topics`,
-so a human (or, eventually, a governed automated process) can decide
-whether the page merits a re-synthesis. This is explicitly deferred, not
-built as part of this closeout.
+A deterministic freshness monitor now exists in Education Operations v1.
+Every shadow cycle compares the current eligible evidence set for each
+published topic with the claim set considered at clearance time and
+classifies the page as `FRESH`, `POTENTIAL_EVIDENCE_CHANGE`, or
+`FRESHNESS_CHECK_FAILED`. A freshness flag does not automatically
+re-synthesize or republish the page; it only surfaces the need for review.
+There is still no automatic freshness-triggered rewrite/publish path.
 
 ## Owner involvement
 
