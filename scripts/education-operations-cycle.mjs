@@ -85,48 +85,111 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
 /**
- * TRUST-BOUNDARY CORRECTION: the ONLY place a currently-published
- * sibling page's route/label is resolved, from trusted data -- the
- * existing Page Builder route registry (legacy hair-cycle/
- * telogen-effluvium) or, for a future generated/published page, its own
- * persisted, git-tracked Page Plan artifact under
- * functions/_data/education-page-plans/. NEVER invents a route for a
- * slug that resolves via neither source -- that slug is silently
- * omitted rather than guessed. Feeds THREE consumers with the exact
- * same trusted data: the Writer's context-only existingClusterPages,
- * the deterministic related_links builder, and the route-collision
- * guard (via the routes it returns).
+ * Default (real) artifact reader for resolveTrustedSiblingPages() below.
+ * Reads functions/_data/education-page-plans/<slug>.json and validates
+ * it carries everything a trusted route requires. Never guesses --
+ * every failure mode returns a specific `reason`, never a silent skip.
  *
- * @param {string[]} publishedTopicSlugs
- * @param {string} clusterKey
- * @returns {Array<{topic_slug: string, route: string, label: string}>}
+ * @param {string} slug
+ * @returns {{ok: true, route: string, h1: string} | {ok: false, reason: string}}
  */
-function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey) {
+function readEducationPageArtifact(slug) {
+  const artifactPath = path.join(ROOT, 'functions/_data/education-page-plans', `${slug}.json`);
+  if (!existsSync(artifactPath)) {
+    return { ok: false, reason: 'not in the legacy Page Builder route registry and no persisted Page Plan artifact exists' };
+  }
+  let data;
+  try {
+    data = JSON.parse(readFileSync(artifactPath, 'utf8'));
+  } catch (err) {
+    return { ok: false, reason: `persisted Page Plan artifact is not valid JSON (${err.message})` };
+  }
+  if (!data || typeof data !== 'object' || !data.plan || typeof data.plan !== 'object') {
+    return { ok: false, reason: 'persisted Page Plan artifact has no `plan` object' };
+  }
+  if (typeof data.plan.route !== 'string' || !data.plan.route.trim()) {
+    return { ok: false, reason: 'persisted Page Plan artifact has no valid `plan.route`' };
+  }
+  if (typeof data.plan.h1 !== 'string' || !data.plan.h1.trim()) {
+    return { ok: false, reason: 'persisted Page Plan artifact has no valid `plan.h1`' };
+  }
+  // topic_slug consistency, checked wherever the field is actually
+  // present (the artifact's own top-level topic_slug, written by
+  // prepareGeneratedArtifacts(), and/or the embedded plan's own field).
+  if (typeof data.topic_slug === 'string' && data.topic_slug !== slug) {
+    return { ok: false, reason: `artifact topic_slug "${data.topic_slug}" does not match the published slug "${slug}"` };
+  }
+  if (typeof data.plan.topic_slug === 'string' && data.plan.topic_slug !== slug) {
+    return { ok: false, reason: `artifact plan.topic_slug "${data.plan.topic_slug}" does not match the published slug "${slug}"` };
+  }
+  return { ok: true, route: data.plan.route, h1: data.plan.h1 };
+}
+
+/**
+ * FAIL-CLOSED CORRECTION: research_public_pages is the runtime
+ * authority that a topic is published -- this function used to
+ * silently OMIT any published, active-cluster topic that couldn't be
+ * mapped to a trusted route (missing/malformed artifact, etc.). That is
+ * unsafe: the incomplete result fed route-collision protection,
+ * related-link generation, and the Writer's sibling context, all of
+ * which would then have operated on a published-route set the database
+ * itself disagrees with. It now FAILS CLOSED instead -- every currently
+ * published, active-cluster topic MUST resolve through either the
+ * legacy Page Builder route registry OR a valid persisted Page Plan
+ * artifact, or the whole resolution fails (see readEducationPageArtifact
+ * above for exactly what "valid" requires). Two published topics
+ * resolving to the SAME route is also a failure, never a silent
+ * dedup. A topic outside the active cluster is ignored normally --
+ * this function's job is scoped to the active cluster only.
+ *
+ * @param {string[]} publishedTopicSlugs - the LIVE published set (any cluster)
+ * @param {string} clusterKey
+ * @param {{getPageBuilderRouteFn?: Function, readArtifactFn?: Function}} [io]
+ *   test-only overrides; the real caller never supplies them
+ * @returns {{ok: true, pages: Array<{topic_slug: string, route: string, label: string}>} | {ok: false, violations: string[]}}
+ */
+export function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey, io = {}) {
+  const getRoute = io.getPageBuilderRouteFn || getPageBuilderRoute;
+  const readArtifact = io.readArtifactFn || readEducationPageArtifact;
   const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
-  const pages = [];
+
+  const resolved = [];
+  const violations = [];
+
   for (const slug of publishedTopicSlugs) {
-    if (!memberSet.has(slug)) continue;
+    if (!memberSet.has(slug)) continue; // outside the active cluster -- not this function's concern
+
     try {
-      const { route } = getPageBuilderRoute(slug);
+      const { route } = getRoute(slug);
       const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug);
-      pages.push({ topic_slug: slug, route, label: concept ? concept.seo_page_concept : slug });
+      resolved.push({ topic_slug: slug, route, label: concept ? concept.seo_page_concept : slug });
       continue;
     } catch (_err) {
       // Not in the legacy registry -- fall through to a persisted Page
       // Plan artifact, the trusted source for a future generated page.
     }
-    const artifactPath = path.join(ROOT, 'functions/_data/education-page-plans', `${slug}.json`);
-    if (!existsSync(artifactPath)) continue; // no trusted source for this slug -- never guess
-    try {
-      const data = JSON.parse(readFileSync(artifactPath, 'utf8'));
-      if (data && data.plan && typeof data.plan.route === 'string' && typeof data.plan.h1 === 'string') {
-        pages.push({ topic_slug: slug, route: data.plan.route, label: data.plan.h1 });
-      }
-    } catch (_err) {
-      // Malformed artifact -- skip rather than guess at its route.
+
+    const artifactResult = readArtifact(slug);
+    if (!artifactResult.ok) {
+      violations.push(`UNRESOLVABLE_PUBLISHED_ROUTE:${slug}:${artifactResult.reason}`);
+      continue;
+    }
+    resolved.push({ topic_slug: slug, route: artifactResult.route, label: artifactResult.h1 });
+  }
+
+  // Duplicate-route detection across everything that DID resolve --
+  // two published topics can never legitimately share one route.
+  const routeOwners = new Map();
+  for (const page of resolved) {
+    if (routeOwners.has(page.route)) {
+      violations.push(`DUPLICATE_PUBLISHED_ROUTE:${page.route}:${routeOwners.get(page.route)},${page.topic_slug}`);
+    } else {
+      routeOwners.set(page.route, page.topic_slug);
     }
   }
-  return pages;
+
+  if (violations.length > 0) return { ok: false, violations };
+  return { ok: true, pages: resolved };
 }
 
 export const AUTOPUBLISH_ENV_VAR = 'AIMT_EDUCATION_AUTOPUBLISH_ENABLED';
@@ -222,11 +285,27 @@ export async function runDecisionPipeline(env, options = {}) {
   }
   common.published_topics = publishedTopicSlugs;
 
-  // Trusted sibling-page data (route+label), resolved ONCE from the
-  // live published set -- feeds the Writer's context, the deterministic
-  // related_links builder, and the route-collision guard below. Never
-  // guessed; see resolveTrustedSiblingPages()'s own header comment.
-  const trustedSiblingPages = resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey);
+  // --- 1.5. Trusted sibling-page resolution (FAILS CLOSED) -------------
+  // Feeds the Writer's context, the deterministic related_links
+  // builder, and the route-collision guard below. If ANY currently
+  // published, active-cluster topic cannot be mapped to a trusted route
+  // (legacy registry or a valid persisted Page Plan artifact), or two
+  // resolve to the same route, this is an architecture-safety anomaly --
+  // published DB state and trusted route/artifact state disagree -- and
+  // the run stops as INFRA_REVIEW before any model call, never
+  // silently continuing with an incomplete published-route set. See
+  // resolveTrustedSiblingPages()'s own header comment.
+  const resolveSiblingPages = fns.resolveTrustedSiblingPagesFn || resolveTrustedSiblingPages;
+  const siblingResolution = resolveSiblingPages(publishedTopicSlugs, clusterKey);
+  if (!siblingResolution.ok) {
+    return finish({
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `Published DB state and trusted route/artifact state disagree: ${siblingResolution.violations.join(', ')}`,
+      stopped_before_model_stage: true,
+      credential_available: null,
+    });
+  }
+  const trustedSiblingPages = siblingResolution.pages;
   const trustedPublishedRoutes = trustedSiblingPages.map((p) => p.route);
 
   // --- 2. Live weekly publication count -------------------------------

@@ -124,22 +124,38 @@ Within the cluster (against the current live set — `hair-cycle` and `telogen-e
 Every real cycle runs, in this exact order:
 
 1. Load the LIVE published-topic set (`fetchPublishedTopicSlugsLive`) — fails closed (`CONFIG_BLOCKED`) if this query fails; never silently falls back to the `PUBLISHED_TOPIC_SLUGS` constant.
-2. Count real publications this week (`countPagesPublishedThisWeekLive`) — fails closed the same way.
-3. Run the freshness scan (`checkAllPublishedTopicsFreshness`) against the live published set — **always**, regardless of the weekly cap or the new-page lane's own outcome. `freshness_scan_summary` is attached to every run report from this point forward, independent of everything else.
-4. Weekly cap gate — `NO_OP_SUCCESS` if reached, before any evidence fetch or model call.
-5. Topic selection/readiness (uses the live published set from step 1 for exclusion + cannibalization).
-6. **Only here** — the first point a model call is genuinely needed — is the Education Ops credential (`ANTHROPIC_EDUCATION_WRITER_API_KEY`) checked.
-7. Intent planning → Publication Editor synthesis → Education Writer → Education Reviewer (unchanged from before).
+2. Resolve every published, active-cluster topic to a trusted route (`resolveTrustedSiblingPages` — see "Fail-closed published-route resolution" above) — fails closed (`INFRA_REVIEW`) if any published topic can't be resolved, or two resolve to the same route. Never silently drops a sibling.
+3. Count real publications this week (`countPagesPublishedThisWeekLive`) — fails closed (`CONFIG_BLOCKED`) the same way as step 1.
+4. Run the freshness scan (`checkAllPublishedTopicsFreshness`) against the live published set — **always**, regardless of the weekly cap or the new-page lane's own outcome. `freshness_scan_summary` is attached to every run report from this point forward, independent of everything else.
+5. Weekly cap gate — `NO_OP_SUCCESS` if reached, before any evidence fetch or model call.
+6. Topic selection/readiness (uses the live published set from step 1 for exclusion + cannibalization, and the trusted routes from step 2 for the route-collision guard).
+7. **Only here** — the first point a model call is genuinely needed — is the Education Ops credential (`ANTHROPIC_EDUCATION_WRITER_API_KEY`) checked.
+8. Intent planning → Publication Editor synthesis → Education Writer → Education Reviewer (unchanged from before).
 
-A run report always carries `published_topics`, `pages_published_this_week`, `weekly_ceiling`, `freshness_scan_summary`, `credential_available` (`null` if never reached, otherwise `true`/`false`), and `stopped_before_model_stage` (`true` for any of steps 1–5's early exits, `false` from step 7 onward) — so a `CONFIG_BLOCKED` result on a missing credential still tells you exactly what was already learned before it stopped.
+A run report always carries `published_topics`, `pages_published_this_week`, `weekly_ceiling`, `freshness_scan_summary`, `credential_available` (`null` if never reached, otherwise `true`/`false`), and `stopped_before_model_stage` (`true` for any of steps 1–6's early exits, `false` from step 8 onward) — so a `CONFIG_BLOCKED`/`INFRA_REVIEW` result on a missing credential or an unresolvable published route still tells you exactly what was already learned before it stopped.
 
 ## Automatic page-intent planning
 
 `education-intent-planner-*.mjs`. A structured, model-assisted step that produces the SAME kind of scope decision a human hand-wrote for hair-cycle/telogen-effluvium (`publication-page-intent.mjs`'s existing entries — untouched, still canonical for those two pages). The planner receives ONLY a candidate evidence *inventory* (claim IDs/types/topics, never claim text) — it is choosing scope, not summarizing evidence. Deterministically validated: no digit/statistic may appear anywhere in its output (a hard proxy for "never invent evidence"), out-of-scope must explicitly exclude diagnosis and treatment, topic_slug/cluster must match what was requested, and the route slug must be URL-safe. Any violation is `FAIL -> HUMAN_REVIEW`, never silently corrected.
 
+## Fail-closed published-route resolution
+
+`scripts/education-operations-cycle.mjs#resolveTrustedSiblingPages()`. `research_public_pages` is the runtime authority that a topic is published — but until this correction, a published, active-cluster topic that couldn't be mapped to a trusted route (no legacy registry entry, no persisted Page Plan artifact, or a malformed one) was silently OMITTED from the resolved sibling-page set. That is unsafe: the incomplete set feeds THREE downstream consumers — the route-collision guard below, deterministic `related_links` generation, and the Writer's sibling context — all of which would then have operated on a published-route set the database itself disagrees with, without ever being told so.
+
+**Now fails closed instead.** For every currently-published topic that belongs to the active cluster, resolution must succeed through exactly one of:
+
+1. the existing Page Builder route registry (`page-builder-route-registry.mjs`, legacy hair-cycle/telogen-effluvium), or
+2. its own persisted, git-tracked Education Page Plan artifact (`functions/_data/education-page-plans/<slug>.json`) — which must parse as JSON, carry a `plan` object with a non-empty `plan.route` and `plan.h1`, and (wherever a `topic_slug` field is present, on the artifact itself or its embedded plan) agree with the published slug it's being resolved for.
+
+If NEITHER succeeds for any published, active-cluster topic — or if two published topics resolve to the SAME route — the whole resolution fails: `resolveTrustedSiblingPages()` returns `{ok: false, violations: [...]}` (`UNRESOLVABLE_PUBLISHED_ROUTE:<slug>:<reason>` / `DUPLICATE_PUBLISHED_ROUTE:<route>:<slug>,<slug>`), never a partial, silently-shrunk result. A topic published OUTSIDE the active cluster is ignored normally — this check is scoped to the active cluster only, same as topic selection itself.
+
+The orchestrator wraps this as its own gate, immediately after loading the live published-topic set and before the weekly-cap count, the freshness scan, topic selection, or any model call: a resolution failure becomes `final_state: INFRA_REVIEW`, `stopped_before_model_stage: true`, with `exception_reason` explicitly stating that "published DB state and trusted route/artifact state disagree" — never downgraded to "skip that one sibling." `published_topics` (the raw live list) is still preserved on the run report even though resolution itself failed. Zero Anthropic calls, zero file writes, zero DB writes on this path.
+
+Today's actual production state (`hair-cycle` + `telogen-effluvium`, both legacy-registry entries) resolves normally with no change in behavior — proven directly against the real registry in `tests/education-published-route-resolution.test.mjs`'s `REAL_DEFAULTS_PRODUCTION` fixture. A future Page #3, once it has both a published DB row and a valid persisted Page Plan artifact, resolves automatically through path 2 above — no code change required.
+
 ## Route-collision guard
 
-`education-route-guard.mjs`. A planner choosing a `route_slug` that happens to match a **currently live** page (e.g. `"telogen-effluvium"` for an entirely different topic) would make the orchestrator compute the exact route/file the real, live page already occupies — and the generated-diff allowlist alone would not catch it, since `education/hair-loss/telogen-effluvium.html` is still inside the allowed `education/**` prefix. Closed with three independent checks, all mechanical:
+`education-route-guard.mjs`. Builds on the trusted, fail-closed published-route set above. A planner choosing a `route_slug` that happens to match a **currently live** page (e.g. `"telogen-effluvium"` for an entirely different topic) would make the orchestrator compute the exact route/file the real, live page already occupies — and the generated-diff allowlist alone would not catch it, since `education/hair-loss/telogen-effluvium.html` is still inside the allowed `education/**` prefix. Closed with three independent checks, all mechanical:
 
 1. **Early, cheap check (before any synthesis call):** immediately after intent-plan validation, the orchestrator-computed route is checked against every currently-published route (resolved from the SAME trusted route data described below — never a guess). A collision routes straight to `INFRA_REVIEW` without spending a Publication Editor/Writer/Reviewer call on a doomed candidate.
 2. **Page Plan validator context:** `validateEducationPagePlan(plan, clearedSnapshot, { expectedTopicSlug, expectedCluster, expectedRoute })` requires an EXACT match on all three — the model cannot redirect the page it's building by disagreeing with its own `topic_slug`/`cluster`/`route` output. A mismatch here is `PLAN_TOPIC_SLUG_MISMATCH`/`PLAN_CLUSTER_MISMATCH`/`PLAN_ROUTE_MISMATCH`, classified as `INFRA_REVIEW` (an architecture-safety failure, never `EDITORIAL_REVIEW`, which is reserved for content-quality problems).

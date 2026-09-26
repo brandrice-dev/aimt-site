@@ -364,7 +364,19 @@ async function testDynamicPublishedTopicExclusion() {
   const publishedTopicSlugs = ['hair-cycle', 'telogen-effluvium', 'androgenetic-alopecia', 'alopecia-areata'];
   const report = await run(FAKE_ENV_WITH_CRED, {
     publishedTopicSlugs,
-    fns: { fetchEvidenceFn: async () => pool },
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      // Two of these four slugs (androgenetic-alopecia, alopecia-areata)
+      // have neither a legacy registry entry nor a real persisted Page
+      // Plan artifact -- since the FAIL-CLOSED route-resolution
+      // correction, that would otherwise (correctly) stop this run as
+      // INFRA_REVIEW before it ever reached topic selection. This test
+      // is specifically about topic selection's own dynamic-exclusion
+      // behavior, so resolution itself is mocked to succeed here;
+      // fail-closed resolution has its own dedicated test coverage
+      // (testTrustedRouteResolutionFailureBecomesInfraReview below).
+      resolveTrustedSiblingPagesFn: (slugs) => ({ ok: true, pages: slugs.map((s) => ({ topic_slug: s, route: `/education/hair-loss/${s}`, label: s })) }),
+    },
   });
   check('DYNAMIC_PUBLISHED_EXCLUSION', 'a topic in the LIVE published set is excluded even though it is NOT in the PUBLISHED_TOPIC_SLUGS constant', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && report.selection_reason === 'NO_ELIGIBLE_TOPIC', JSON.stringify({ state: report.final_state, reason: report.selection_reason, exception: report.exception_reason }));
   check('DYNAMIC_PUBLISHED_EXCLUSION', 'published_topics reflects the injected live set, not the hardcoded constant', JSON.stringify(report.published_topics) === JSON.stringify(publishedTopicSlugs));
@@ -462,6 +474,49 @@ async function testNoCommandCanMarkStatusPublished() {
   check('NO_COMMAND_MARKS_PUBLISHED', '--persist-clearance ran (attempted)', outcome.ran === true);
   check('NO_COMMAND_MARKS_PUBLISHED', 'a fake/integrity-failing artifact never reaches writeFn', writeFnCalled === false);
   check('NO_COMMAND_MARKS_PUBLISHED', 'the attempt is reported as failed, not silently accepted', outcome.result.ok === false, JSON.stringify(outcome.result));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// FAIL-CLOSED PUBLISHED-ROUTE RESOLUTION: research_public_pages says a
+// topic is published, but if it can't be mapped to a trusted route
+// (legacy registry or a valid persisted Page Plan artifact), the whole
+// run must stop as INFRA_REVIEW -- never silently continue with an
+// incomplete published-route set. Unit-level coverage of the resolution
+// function itself lives in tests/education-published-route-resolution.test.mjs;
+// these prove the ORCHESTRATOR actually wires the failure through.
+// ─────────────────────────────────────────────────────────────────────────
+async function testUnresolvablePublishedTopicBecomesInfraReviewBeforeAnyModelCall() {
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    // hair-cycle is a real published topic with NO trusted route
+    // resolution available in this test (fetchPublishedTopicSlugsFn is
+    // bypassed via the publishedTopicSlugs override, but resolution
+    // itself is exercised for real -- no resolveTrustedSiblingPagesFn
+    // override here -- against a slug this test knows will fail the
+    // artifact check, since no such artifact exists on disk).
+    publishedTopicSlugs: ['androgenetic-alopecia'], // real cluster member, no legacy route, no real artifact
+  });
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'exception explains the DB/trusted-route disagreement', report.exception_reason.includes('Published DB state and trusted route/artifact state disagree'), report.exception_reason);
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'exception names the specific unresolvable slug', report.exception_reason.includes('UNRESOLVABLE_PUBLISHED_ROUTE:androgenetic-alopecia'), report.exception_reason);
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'stopped_before_model_stage is true', report.stopped_before_model_stage === true);
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'credential_available is null (never even checked)', report.credential_available === null);
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'zero model calls of any kind', report.model_calls.actual_model_call_count === 0, report.model_calls.actual_model_call_count);
+  check('UNRESOLVABLE_PUBLISHED_TOPIC', 'the LIVE published_topics is still preserved on the report', JSON.stringify(report.published_topics) === JSON.stringify(['androgenetic-alopecia']));
+}
+
+async function testDuplicateResolvedRouteAlsoBecomesInfraReview() {
+  const report = await runDecisionPipeline(FAKE_ENV_WITH_CRED, {
+    publishedTopicSlugs: ['hair-cycle', 'telogen-effluvium'],
+    fns: {
+      checkFreshnessFn: async () => [],
+      resolveTrustedSiblingPagesFn: () => ({
+        ok: false,
+        violations: ['DUPLICATE_PUBLISHED_ROUTE:/education/hair-loss/hair-growth-cycle:hair-cycle,telogen-effluvium'],
+      }),
+    },
+  });
+  check('DUPLICATE_ROUTE_END_TO_END', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('DUPLICATE_ROUTE_END_TO_END', 'exception names the duplicate-route rule', report.exception_reason.includes('DUPLICATE_PUBLISHED_ROUTE'), report.exception_reason);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -701,6 +756,8 @@ const tests = [
   testPersistClearanceRefusesWithoutAutopublishEnabled,
   testPersistClearanceRefusesWithoutFromPreparedPath,
   testNoCommandCanMarkStatusPublished,
+  testUnresolvablePublishedTopicBecomesInfraReviewBeforeAnyModelCall,
+  testDuplicateResolvedRouteAlsoBecomesInfraReview,
   testPlannerChoosingExistingPublishedSlugFailsAsInfraReview,
   testWriterPlanRouteMismatchFailsAsInfraReviewNotEditorialReview,
   testNormalUnusedRoutePassesEndToEnd,
