@@ -5,16 +5,37 @@ This document describes the steady-state process AFTER the SEO
 build/audit project closes — not a plan for further foundational work.
 It is operational and intentionally short.
 
-**The autonomous publishing scheduler described in the OWNER INVOLVEMENT
-section below does NOT exist yet.** Every Education page published to
-date (hair-cycle, telogen-effluvium) was produced through a manually
-triggered, per-topic run of the Publication Editor / Page Builder
-pipeline, with an owner explicitly starting each run and reviewing each
-result. Nothing in this repository currently starts that pipeline on a
-schedule, on a trigger, or without a human invoking it. Building that
-scheduler is explicitly a **separate, later project** — this document
-describes the target operating model that scheduler is meant to serve,
-not a system already running.
+**Update (AIMT Education Operations v1):** the automation code described
+in the OWNER INVOLVEMENT section below now EXISTS —
+`scripts/education-operations-cycle.mjs` plus the supporting modules
+under `functions/_lib/education-ops/`. **The scheduled trigger does
+NOT exist yet.** `.github/workflows/aimt-education-operations.yml` is
+design-complete (its exact contents are recorded in
+`docs/education/AIMT-EDUCATION-OPERATIONS-v1.md`) but is not present in
+this repository's `.github/workflows/` directory and has never been
+installed — the push credential used to build this code lacked the
+GitHub OAuth `workflow` scope required to add or update a workflow
+file, so **no GitHub Actions schedule is active, and no unattended run
+of this code has ever occurred.** Running the orchestrator today
+requires an explicit, manual, local invocation (`node
+scripts/education-operations-cycle.mjs --shadow`); it does not run on
+any cadence by itself. Adding the workflow file with a credential that
+does carry `workflow` scope is a required, separate, remaining step. In
+addition, autonomous production publishing remains disabled
+(`AIMT_EDUCATION_AUTOPUBLISH_ENABLED` is not set to `true` anywhere) —
+even once the workflow is installed and running on a schedule, it
+would still only run in `--shadow` mode by default, and full autonomous
+publication is not implemented regardless of that variable (see
+`docs/education/AIMT-EDUCATION-OPERATIONS-v1.md`'s "Corrected CLI
+command semantics" section). It has never published a page. Both
+Education pages live today (hair-cycle, telogen-effluvium) were
+produced through a manually triggered, owner-reviewed run of the
+Publication Editor / Page Builder pipeline, before this scheduler
+existed. See `docs/education/AIMT-EDUCATION-OPERATIONS-v1.md` for the
+full architecture, exactly what the scheduler does today (a safe,
+file-write-free decision-pipeline dry run, run manually), and the
+specific remaining steps before it runs unattended, let alone before
+autonomous publishing could be switched on.
 
 ## Research
 
