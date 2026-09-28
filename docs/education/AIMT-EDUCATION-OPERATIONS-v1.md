@@ -42,46 +42,27 @@ functions/_lib/education-ops/
 
 ## Scheduler cadence
 
-**Design-complete, NOT installed, NOT active.** The intended cadence is weekdays, once per day, via GitHub Actions `schedule: cron: '0 14 * * 1-5'` (14:00 UTC), with a concurrency group (`aimt-education-operations`) ensuring only one run is ever in flight and `workflow_dispatch` available for a manual trigger. The exact YAML for this is recorded below and in this project's pull request, but **the file does not exist in `.github/workflows/` in this repository** — the credential used to build this project could not push a workflow file (missing the GitHub OAuth `workflow` scope; see "What still requires owner input" below). Until someone with that scope adds the file, **there is no active schedule and no unattended run of any kind** — the orchestrator only ever runs when a human invokes `node scripts/education-operations-cycle.mjs --shadow` (or `--prepare`) directly. Evidence readiness, not the clock, is what will decide whether anything happens once a schedule does exist.
+**Installed as a shadow-only workflow.** `.github/workflows/aimt-education-operations.yml` runs weekdays at `cron: '0 14 * * 1-5'` (14:00 UTC) and supports a bare `workflow_dispatch` with no mode inputs. The workflow's only operational command is:
 
-Intended workflow contents (for the separate, narrow PR that will add this file once a `workflow`-scoped credential is available):
-
-```yaml
-name: AIMT Education Operations
-on:
-  schedule:
-    - cron: '0 14 * * 1-5'
-  workflow_dispatch:
-concurrency:
-  group: aimt-education-operations
-  cancel-in-progress: false
-permissions:
-  contents: write
-  pull-requests: write
-jobs:
-  run-cycle:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Run Education Operations cycle
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
-          AIMT_EDUCATION_AUTOPUBLISH_ENABLED: ${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}
-          AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/education-operations-cycle.mjs --shadow
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: education-ops-run-report
-          path: research-import/education-ops/runs/
 ```
+node scripts/education-operations-cycle.mjs --shadow
+```
+
+Concurrency is `aimt-education-operations` with `cancel-in-progress: false`; timeout is 30 minutes. Permissions are deliberately narrow: `contents: read` and `issues: write` only. There is no `contents: write` or `pull-requests: write`, so this scheduled workflow cannot create a generated-page branch/PR even though the local CLI has a separately implemented `--prepare` capability.
+
+The workflow passes only the required read/model credentials and the existing repository variables. It always uploads `research-import/education-ops/runs/` as `education-ops-shadow-${{ github.run_id }}` with 30-day retention. It never uploads or consumes `research-import/education-ops/prepared/`.
+
+Required Actions secrets:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ANTHROPIC_PUBLICATION_EDITOR_API_KEY`
+- `ANTHROPIC_EDUCATION_WRITER_API_KEY`
+
+Required repository variables:
+- `AIMT_EDUCATION_AUTOPUBLISH_ENABLED=false`
+- `AIMT_EDUCATION_MAX_PAGES_PER_WEEK=4`
+
+A missing required secret causes the run to stop safely; it does not authorize fallback to Cadence or another Anthropic credential.
 
 ## Safety states
 
@@ -270,19 +251,32 @@ Steps 13–17 are the future `--publish` state machine described above. DB `publ
 
 ## What happens automatically today
 
-**Nothing runs unattended at all** — there is no active GitHub Actions schedule (see "Scheduler cadence" above). Running any of the below requires a human to invoke the CLI directly.
+The installed GitHub Actions workflow wakes up once each weekday at 14:00 UTC and runs the orchestrator in **shadow mode only**. A manual `workflow_dispatch` runs the exact same shadow command.
 
-- `node scripts/education-operations-cycle.mjs --shadow`, when run manually, executes the full decision pipeline against live evidence, the live published-topic set, the live weekly count, and the live freshness scan. Nothing about that run touches a file, a branch, a PR, or the database.
-- `--prepare` mode is fully implemented (renders the article, writes the Page Plan artifact, updates the cluster hub, opens a branch/PR) but has never been invoked against a real selected topic in this project — doing so would create a real, if unmerged, PR proposing a new Education page, which this project's task explicitly forbade ("Do not create or publish Page #3").
-- `--persist-clearance` mode refuses to run at all unless `AIMT_EDUCATION_AUTOPUBLISH_ENABLED` is exactly `"true"` — which it is not, anywhere, by default.
-- `--publish` mode refuses to run **unconditionally, regardless of any environment variable** — it is reserved for a future state machine that does not exist as code (see "Corrected CLI command semantics" above).
+A shadow run may:
+- read the live published-topic set and weekly publication count;
+- run the read-only freshness monitor;
+- select/rank an eligible candidate;
+- if credentials are available and the run reaches model stages, execute intent planning, Publication Editor synthesis, Education Writer, and Education Reviewer;
+- write the gitignored run ledger in the Actions checkout;
+- upload that run ledger as a 30-day GitHub Actions artifact;
+- create/dedupe GitHub Issues for genuine configured exception states.
 
-## What still requires owner input before scheduled shadow runs can even start
+A scheduled shadow run may **not**:
+- run `--prepare`;
+- create Page #3 or any article file;
+- create a generated-content branch or PR;
+- run `--persist-clearance`;
+- run `--publish`;
+- write a publication clearance or set a page to published.
 
-1. **Add `.github/workflows/aimt-education-operations.yml`** (exact contents recorded under "Scheduler cadence" above) using a credential/account with the GitHub OAuth `workflow` scope — the credential available while building this project did not have it. Until this file exists in `.github/workflows/`, there is no schedule of any kind, shadow or otherwise.
-2. **Create the four exception-issue labels** (`education-review`, `education-infra`, `education-freshness`, `education-config`) in this GitHub repository — `education-exception-reporter.mjs`'s real `gh issue create` wiring (see "Exception surfacing" above) will fail to attach a label that does not exist yet; that failure is caught and logged, never allowed to fail a run, but no issue will actually be created until the labels exist.
-3. **Provision the required GitHub repository secrets** (`ANTHROPIC_EDUCATION_WRITER_API_KEY`, plus the already-existing `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` as repository secrets available to Actions) and repository variables (`AIMT_EDUCATION_AUTOPUBLISH_ENABLED`, `AIMT_EDUCATION_MAX_PAGES_PER_WEEK`) — none of these exist in the repository yet; this project only wrote the code that reads them.
-4. **Confirm GitHub Actions' write/PR permissions and branch protection** actually allow the workflow's own `GITHUB_TOKEN` to push a branch and open a PR in this repository (untested — no workflow run has ever executed, scheduled or dispatched, because the workflow file doesn't exist yet). If branch protection would block an eventual autonomous merge, that needs to be surfaced and decided explicitly, never bypassed with `--admin`.
+`AIMT_EDUCATION_AUTOPUBLISH_ENABLED` remains `false`, and the workflow does not expose any input capable of changing modes.
+
+## What still requires owner input before scheduled shadow runs can fully execute
+
+The workflow itself is installed, and the four exception labels plus the two repository variables are configured. The remaining setup requirement is to provision the four Actions secret values listed under "Scheduler cadence" above. Until all required secrets exist, the workflow is expected to stop safely as a configuration problem rather than complete the model-assisted shadow pipeline.
+
+After the secrets are configured, manually dispatch one shadow run and inspect its uploaded run ledger before relying on the weekday schedule.
 
 ## What still requires owner input beyond that, before AUTOPUBLISH can safely be switched on
 
