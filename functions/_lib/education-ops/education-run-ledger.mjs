@@ -63,6 +63,7 @@ export function buildRunReport(fields) {
     credential_available = null, stopped_before_model_stage = false,
     model_calls = [], planned_route = null,
     diff_allowlist_result = null, publication_action = null,
+    candidate_resume = null,
     final_state, exception_reason = null,
   } = fields;
 
@@ -124,6 +125,7 @@ export function buildRunReport(fields) {
     planned_route,
     diff_allowlist_result,
     publication_action,
+    candidate_resume,
     final_state,
     exception_reason,
   };
