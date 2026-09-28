@@ -215,14 +215,18 @@ function baseAttempt(overrides = {}) {
   };
 }
 
+// Real Anthropic content blocks always carry `type` -- these mocks match
+// that shape since cadence-grader.mjs's Anthropic calls now go through the
+// same extractAnthropicTextSafe() shared extractor checkpoint grading
+// uses, which only ever reads `type: 'text'` blocks.
 function anthropicOkCase() {
-  return { ok: true, status: 200, json: async () => ({ content: [{ text: JSON.stringify({ correctnessScore: 1, explicitUnsafe: false, patternTag: null }) }] }) };
+  return { ok: true, status: 200, json: async () => ({ content: [{ type: 'text', text: JSON.stringify({ correctnessScore: 1, explicitUnsafe: false, patternTag: null }) }] }) };
 }
 function anthropicFailCase() {
   return { ok: false, status: 500, text: async () => 'provider down' };
 }
 function anthropicOkInterview() {
-  return { ok: true, status: 200, json: async () => ({ content: [{ text: JSON.stringify({ criterionScores: { c1: 2, c2: 2, c3: 2, c4: 2 }, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, transitionLine: 'Thanks for walking me through that.' }) }] }) };
+  return { ok: true, status: 200, json: async () => ({ content: [{ type: 'text', text: JSON.stringify({ criterionScores: { c1: 2, c2: 2, c3: 2, c4: 2 }, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, transitionLine: 'Thanks for walking me through that.' }) }] }) };
 }
 function anthropicFailInterview() {
   return { ok: false, status: 500, text: async () => 'provider down' };

@@ -11,10 +11,11 @@
 // fixes every caller at once.
 //
 // Module 12 certification grading (functions/_lib/certification/
-// cadence-grader.mjs) has the identical bug shape but is deliberately not
-// migrated to this helper in this change -- Module 12 is out of scope for
-// this task by explicit instruction. See docs/course-audit for the tracked
-// follow-up.
+// cadence-grader.mjs) had the identical `data.content[0].text` bug shape.
+// It has since been migrated onto this same shared extraction (and the
+// fetchAnthropicMessages transport below) rather than maintaining its own
+// weaker one-off parser -- see cadence-grader.mjs's own header for that
+// change's details.
 
 export class AnthropicResponseError extends Error {
   constructor(message, { code } = {}) {
@@ -88,6 +89,22 @@ export class AnthropicRequestError extends Error {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * True when the Anthropic response was cut off by the max_tokens ceiling
+ * rather than completing normally. A truncated response's content -- JSON
+ * or otherwise -- can never be trusted as complete, even if a lenient
+ * parser could happen to build something JSON.parse accepts out of a
+ * partial object. Callers evaluating a structured response must treat a
+ * truncated response the same as any other evaluator/infrastructure
+ * failure, never as a successful result.
+ *
+ * @param {{stop_reason?: string}} response
+ * @returns {boolean}
+ */
+export function isTruncatedByMaxTokens(response) {
+  return !!(response && response.stop_reason === 'max_tokens');
 }
 
 /**

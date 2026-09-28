@@ -13,48 +13,162 @@
 // role (functions/_lib/cadence/model-config.mjs) rather than a local
 // hardcoded constant — see docs/course-audit/00-cadence-launch-sweep-build-
 // contract.md Section 6 for why that constant used to drift silently.
+//
+// HARDENING (this version): this module previously carried its own older,
+// weaker Anthropic integration pattern instead of the shared infrastructure
+// Module 0-11 checkpoint grading already uses (functions/_lib/cadence/
+// anthropic-response.mjs, functions/_lib/cadence/checkpoint-evaluation.mjs).
+// It independently assumed `data.content[0].text` (silently breaking on any
+// response with a leading non-text block, e.g. thinking), parsed model
+// output with a greedy `/\{[\s\S]*\}/` regex over arbitrary prose (the same
+// bug shape the grading regression writeup at docs/course-audit/
+// cadence-sonnet5-grading-regression.md Section 8 root-caused and fixed for
+// checkpoint grading), never checked for `stop_reason === 'max_tokens'`
+// truncation, and capped output at 1000 tokens — well under the
+// GRADING_MAX_TOKENS budget checkpoint grading's own regression proved
+// necessary once adaptive thinking is enabled. None of that was a model
+// defect; it was this file not yet having been brought onto the same
+// infrastructure checkpoint grading already validated. Fixed by importing
+// fetchAnthropicMessages/extractAnthropicTextSafe/isTruncatedByMaxTokens
+// from anthropic-response.mjs (never reimplementing them here), the exact
+// GRADING_MAX_TOKENS/GRADING_EFFORT/adaptive-thinking execution
+// configuration checkpoint grading's own validation evidence is recorded
+// against (functions/_lib/cadence/checkpoint-evaluation.mjs,
+// cross-checked in model-config.mjs's registry), JSON-schema structured
+// output narrowly scoped to each of this file's two existing response
+// contracts, and the same direct-parse/fenced-fallback/fail-safe defensive
+// parsing standard checkpoint grading uses instead of the old greedy regex.
+// The two evaluator response contracts (correctnessScore/explicitUnsafe/
+// patternTag for applied cases; criterionScores/explicitUnsafeDomains/
+// patternTags/needsFollowUp/followUpPrompt/transitionLine for the
+// practitioner conversation), every rubric, every scoring rule, and every
+// certification threshold are unchanged by this fix.
 
 import { resolveCadenceModel } from '../cadence/model-config.mjs';
-
-const MAX_TOKENS_CAP = 1000;
+import { fetchAnthropicMessages, extractAnthropicTextSafe, isTruncatedByMaxTokens } from '../cadence/anthropic-response.mjs';
+import { GRADING_MAX_TOKENS, GRADING_EFFORT } from '../cadence/checkpoint-evaluation.mjs';
 
 const CADENCE_EXAM_TONE =
   'Tone: warm, direct, clinically aware, and grounded. Supportive without being intimate, cheesy, robotic, or ' +
   'therapist-like. No filler. No coddling. No exaggerated praise. Never reveal a numeric score or rubric detail.';
 
-function extractFirstJsonObject(text) {
-  const match = String(text || '').match(/\{[\s\S]*\}/);
-  if (!match) return null;
+// Narrow JSON Schema for evaluateStructuredCasePart's existing response
+// contract — kept to the same documented supported subset checkpoint
+// grading's schema uses (basic types, enum/anyOf, additionalProperties:
+// false; no numeric min/max constraints).
+const CASE_PART_EVALUATION_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    correctnessScore: { type: 'number' },
+    explicitUnsafe: { type: 'boolean' },
+    patternTag: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+  },
+  required: ['correctnessScore', 'explicitUnsafe', 'patternTag'],
+  additionalProperties: false,
+};
+
+// Narrow JSON Schema for evaluateInterviewTurn's existing response
+// contract. criterionScores/patternTags are keyed by this specific
+// interview's own rubric criterion ids, so the schema is built per call
+// from interviewDef.rubricCriteria rather than hardcoded — it still
+// describes exactly the same shape the prior prompt-only contract already
+// specified, never a new or different one. criterionScores requires every
+// criterion (matching the existing "every criterion..." instruction);
+// patternTags' own keys stay optional (matching the existing "only when a
+// meaningful pattern is present" instruction) — schema shape is descriptive
+// of the existing contract, not a behavior change to it.
+function buildInterviewEvaluationJsonSchema(rubricCriteria) {
+  const criterionIds = (rubricCriteria || []).map((c) => c.id);
+  const criterionScoreProps = {};
+  const patternTagProps = {};
+  for (const id of criterionIds) {
+    criterionScoreProps[id] = { type: 'integer', enum: [0, 1, 2] };
+    patternTagProps[id] = { type: 'string' };
+  }
+  return {
+    type: 'object',
+    properties: {
+      criterionScores: {
+        type: 'object',
+        properties: criterionScoreProps,
+        required: criterionIds,
+        additionalProperties: false,
+      },
+      explicitUnsafeDomains: { type: 'array', items: { type: 'string' } },
+      patternTags: {
+        type: 'object',
+        properties: patternTagProps,
+        additionalProperties: false,
+      },
+      needsFollowUp: { type: 'boolean' },
+      followUpPrompt: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+      transitionLine: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    },
+    required: ['criterionScores', 'explicitUnsafeDomains', 'patternTags', 'needsFollowUp', 'followUpPrompt', 'transitionLine'],
+    additionalProperties: false,
+  };
+}
+
+/** Extracts the content of one cleanly-fenced ```json ... ``` or ``` ... ``` block, if present. */
+function extractFencedJsonBlock(text) {
+  const match = String(text || '').match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return match ? match[1] : null;
+}
+
+/**
+ * Defensive parsing standard shared with checkpoint grading
+ * (parseCheckpointEvaluation in checkpoint-evaluation.mjs): (1) direct
+ * JSON.parse of the full trimmed text — the expected path once
+ * output_config.format has constrained the response; (2) one cleanly-fenced
+ * ```json block, for an edge case that didn't honor structured outputs;
+ * (3) fail safe (returns null — never a greedy regex scan over arbitrary
+ * prose, and never a manufactured/guessed result).
+ */
+function parseStructuredJson(rawText) {
+  const trimmed = String(rawText || '').trim();
+  if (!trimmed) return null;
   try {
-    return JSON.parse(match[0]);
+    return JSON.parse(trimmed);
   } catch (_) {
+    const fenced = extractFencedJsonBlock(trimmed);
+    if (fenced) {
+      try {
+        return JSON.parse(fenced.trim());
+      } catch (_) {
+        return null;
+      }
+    }
     return null;
   }
 }
 
-async function callAnthropic(env, { system, messages, maxTokens = 600 }) {
+/**
+ * Shared Module 12 Anthropic call: resolves the CADENCE_GRADING_MODEL role,
+ * calls through the shared fetchAnthropicMessages transport (bounded retry
+ * on transient 5xx only — same as checkpoint grading), rejects a response
+ * truncated by max_tokens as a recoverable evaluator failure before any
+ * parsing is attempted, and extracts text via the shared, thinking-block-
+ * safe extractor. Never returns thinking-block content — extractAnthropicTextSafe
+ * only ever concatenates `type: 'text'` blocks.
+ */
+async function callAnthropic(env, { system, messages, jsonSchema }) {
   if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
   const modelInfo = resolveCadenceModel(env, 'CADENCE_GRADING_MODEL');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  const data = await fetchAnthropicMessages({
+    apiKey: env.ANTHROPIC_API_KEY,
+    body: {
       model: modelInfo.modelName,
-      max_tokens: Math.min(maxTokens, MAX_TOKENS_CAP),
+      max_tokens: GRADING_MAX_TOKENS,
       system,
       messages,
-    }),
+      thinking: { type: 'adaptive' },
+      output_config: { effort: GRADING_EFFORT, format: { type: 'json_schema', schema: jsonSchema } },
+    },
   });
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    throw new Error(`Cadence evaluation request failed (${res.status}): ${errBody.slice(0, 300)}`);
+  if (isTruncatedByMaxTokens(data)) {
+    throw new Error('Cadence Module 12 evaluation was truncated before completing — treat as a recoverable evaluator failure, not a grading decision.');
   }
-  const data = await res.json();
-  const text = (data && data.content && data.content[0] && data.content[0].text) || '';
+  const text = extractAnthropicTextSafe(data);
   return { text, modelInfo };
 }
 
@@ -89,10 +203,11 @@ export async function evaluateInterviewTurn(env, { interviewDef, priorTranscript
     `Return valid JSON only in this shape: {"criterionScores": {"<criterionId>": 0|1|2, ...every criterion...}, "explicitUnsafeDomains": ["D1"], "patternTags": {"D1": "short_tag"}, "needsFollowUp": true|false, "followUpPrompt": "string, only if needsFollowUp is true", "transitionLine": "one short natural transition sentence, only if needsFollowUp is false"}`;
 
   const messages = [...priorTranscript, { role: 'user', content: studentResponse }];
-  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, maxTokens: 700 });
-  const parsed = extractFirstJsonObject(raw);
-  if (!parsed || typeof parsed.criterionScores !== 'object') {
-    throw new Error('Cadence returned an unparseable interview evaluation.');
+  const jsonSchema = buildInterviewEvaluationJsonSchema(interviewDef.rubricCriteria);
+  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, jsonSchema });
+  const parsed = parseStructuredJson(raw);
+  if (!parsed || typeof parsed.criterionScores !== 'object' || parsed.criterionScores === null) {
+    throw new Error('Cadence returned an unparseable interview evaluation — treat as a recoverable evaluator failure, not a grading decision.');
   }
   return {
     criterionScores: parsed.criterionScores,
@@ -122,10 +237,10 @@ export async function evaluateStructuredCasePart(env, { scenario, part, studentR
     CADENCE_EXAM_TONE +
     '\n\nReturn valid JSON only: {"correctnessScore": 0-1, "explicitUnsafe": true|false, "patternTag": null or a short snake_case tag naming the specific misunderstanding if present}';
   const messages = [{ role: 'user', content: `Case scenario: ${scenario}\n\nPrompt: ${part.prompt}\n\nStudent response: ${studentResponse}` }];
-  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, maxTokens: 400 });
-  const parsed = extractFirstJsonObject(raw);
+  const { text: raw, modelInfo } = await callAnthropic(env, { system, messages, jsonSchema: CASE_PART_EVALUATION_JSON_SCHEMA });
+  const parsed = parseStructuredJson(raw);
   if (!parsed || typeof parsed.correctnessScore !== 'number') {
-    throw new Error('Cadence returned an unparseable case evaluation.');
+    throw new Error('Cadence returned an unparseable case evaluation — treat as a recoverable evaluator failure, not a grading decision.');
   }
   return {
     correctnessScore: Math.max(0, Math.min(1, parsed.correctnessScore)),
