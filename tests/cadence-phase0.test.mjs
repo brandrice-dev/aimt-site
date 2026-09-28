@@ -239,7 +239,13 @@ function anthropicSuccessBody(needsFollowUp) {
   const payload = needsFollowUp
     ? { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: true, followUpPrompt: 'Can you say more about that?' }
     : { criterionScores, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, transitionLine: 'Good — let\'s move on.' };
-  return { content: [{ text: JSON.stringify(payload) }] };
+  // Real Anthropic content blocks always carry `type` -- this mock now
+  // matches that shape (rather than the old `data.content[0].text`
+  // shape-agnostic assumption cadence-grader.mjs used to make), since
+  // cadence-grader.mjs's Anthropic calls now go through the same
+  // extractAnthropicTextSafe() shared extractor checkpoint grading uses,
+  // which only ever reads `type: 'text'` blocks.
+  return { content: [{ type: 'text', text: JSON.stringify(payload) }] };
 }
 
 /**
@@ -279,7 +285,7 @@ function buildMockFetch({ attemptRow, anthropicBehavior }) {
         return { ok: false, status: 500, text: async () => 'mock upstream failure' };
       }
       if (behavior === 'malformed') {
-        return { ok: true, status: 200, json: async () => ({ content: [{ text: 'not json at all' }] }) };
+        return { ok: true, status: 200, json: async () => ({ content: [{ type: 'text', text: 'not json at all' }] }) };
       }
       return { ok: true, status: 200, json: async () => anthropicSuccessBody(behavior === 'followup') };
     }

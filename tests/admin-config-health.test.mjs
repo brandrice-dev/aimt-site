@@ -255,13 +255,58 @@ test('computeConfigHealth never touches env keys outside the manifest, even if e
 // admin.html UI
 // ---------------------------------------------------------------------------
 
-test('admin.html has a System Health nav entry and renders Configured/Missing from the check list', () => {
+test('admin.html has a System Health nav entry and renders a Configured/Missing pill from the check list', () => {
   const html = readFileSync(path.join(REPO_ROOT, 'admin.html'), 'utf8');
   assert.match(html, /data-view="config-health"/);
   assert.match(html, /view=config-health/);
   assert.match(html, /id="view-config-health"/);
-  assert.match(html, /'Configured':'Missing'|"Configured":"Missing"|configured\?'Configured':'Missing'/);
+  assert.match(html, /healthPill/);
+  assert.match(html, /'Configured'/);
+  assert.match(html, /'Missing'/);
   assert.match(html, /aimt-site Production runtime only/);
+});
+
+// ---------------------------------------------------------------------------
+// admin.html System Health: optional Cadence model overrides must not read
+// as failures (instruction #11) -- a required P0/P1 gap still says
+// "Missing", but the two Cadence model-role env vars get their own
+// truthful, non-alarming wording since the centralized registry already
+// supplies an approved default for both roles.
+// ---------------------------------------------------------------------------
+
+test('admin.html labels an absent Cadence model override as using the approved default, not Missing', () => {
+  const html = readFileSync(path.join(REPO_ROOT, 'admin.html'), 'utf8');
+  assert.match(html, /CADENCE_MODEL_OVERRIDE_NAMES/);
+  assert.match(html, /Using approved default/);
+});
+
+test('admin.html labels an explicitly-configured Cadence model override distinctly from a plain "Configured"', () => {
+  const html = readFileSync(path.join(REPO_ROOT, 'admin.html'), 'utf8');
+  assert.match(html, /Configured override/);
+});
+
+test('admin.html labels an absent non-Cadence-model P2 optional variable as neutral, not Missing', () => {
+  const html = readFileSync(path.join(REPO_ROOT, 'admin.html'), 'utf8');
+  assert.match(html, /Not set · optional/);
+});
+
+test('healthPill: required (P0/P1) variable missing still reports Missing', () => {
+  const html = readFileSync(path.join(REPO_ROOT, 'admin.html'), 'utf8');
+  const fnMatch = html.match(/function healthPill\(c\)\{[\s\S]*?\n\}/);
+  assert.ok(fnMatch, 'expected a healthPill(c) function in admin.html');
+  const CADENCE_MODEL_OVERRIDE_NAMES = new Set(['CADENCE_CHAT_MODEL', 'CADENCE_GRADING_MODEL']);
+  // eslint-disable-next-line no-new-func -- evaluating the actual shipped
+  // function body against fixtures, not a fresh reimplementation of it.
+  const healthPill = new Function('CADENCE_MODEL_OVERRIDE_NAMES', `${fnMatch[0]}\nreturn healthPill;`)(CADENCE_MODEL_OVERRIDE_NAMES);
+
+  assert.deepEqual(healthPill({ name: 'STRIPE_SECRET_KEY', configured: false, requirement: 'REQUIRED' }), { cls: 'bad', label: 'Missing' });
+  assert.deepEqual(healthPill({ name: 'RESEND_API_KEY', configured: false, requirement: 'REQUIRED_FOR_FEATURE' }), { cls: 'bad', label: 'Missing' });
+  assert.deepEqual(healthPill({ name: 'STRIPE_SECRET_KEY', configured: true, requirement: 'REQUIRED' }), { cls: 'good', label: 'Configured' });
+  assert.deepEqual(healthPill({ name: 'CADENCE_GRADING_MODEL', configured: false, requirement: 'OPTIONAL' }), { cls: '', label: 'Using approved default' });
+  assert.deepEqual(healthPill({ name: 'CADENCE_CHAT_MODEL', configured: false, requirement: 'OPTIONAL' }), { cls: '', label: 'Using approved default' });
+  assert.deepEqual(healthPill({ name: 'CADENCE_GRADING_MODEL', configured: true, requirement: 'OPTIONAL' }), { cls: 'good', label: 'Configured override' });
+  assert.deepEqual(healthPill({ name: 'AIMT_OWNER_EMAIL', configured: false, requirement: 'OPTIONAL' }), { cls: '', label: 'Not set · optional' });
+  assert.deepEqual(healthPill({ name: 'AIMT_OWNER_EMAIL', configured: true, requirement: 'OPTIONAL' }), { cls: 'good', label: 'Configured' });
 });
 
 test('admin.html hides the System Health nav entry for the support role', () => {

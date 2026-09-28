@@ -103,10 +103,25 @@ async function loadAudit(){try{const data=await api('?view=audit');$('auditList'
 const HEALTH_GROUP_LABEL={P0:'Core production',P1:'Major features',P2:'Optional / conditional'};
 const HEALTH_STATUS_LABEL={healthy:'Healthy',degraded:'Degraded',critical:'Critical'};
 const HEALTH_STATUS_CLASS={healthy:'good',degraded:'warn',critical:'bad'};
+// Cadence model-role env vars are optional test/override knobs, never a
+// required credential -- the centralized model registry already supplies
+// an approved default for both roles. Rendering their absence as the same
+// "Missing" (bad/red) pill as an actually-missing P0/P1 credential is
+// misleading to the owner reading this panel, so these two get their own
+// truthful, non-alarming labels instead. computeConfigHealth() already
+// excludes P2 entries from status by construction -- this only changes the
+// label text/color, never what counts toward Healthy/Degraded/Critical.
+const CADENCE_MODEL_OVERRIDE_NAMES=new Set(['CADENCE_CHAT_MODEL','CADENCE_GRADING_MODEL']);
+function healthPill(c){
+  if(c.configured)return {cls:'good',label:CADENCE_MODEL_OVERRIDE_NAMES.has(c.name)?'Configured override':'Configured'};
+  if(CADENCE_MODEL_OVERRIDE_NAMES.has(c.name))return {cls:'',label:'Using approved default'};
+  if(c.requirement==='OPTIONAL')return {cls:'',label:'Not set · optional'};
+  return {cls:'bad',label:'Missing'};
+}
 async function loadConfigHealth(){$('healthBody').innerHTML='<div class="loading">Loading configuration health…</div>';try{const data=await api('?view=config-health');const cls=HEALTH_STATUS_CLASS[data.status]||'';const label=HEALTH_STATUS_LABEL[data.status]||data.status;
 let html=`<div class="health-status ${cls}"><div class="health-status-label">System Health</div><div class="health-status-value">${esc(label)}</div><div class="health-status-sub">${data.p0_missing} core variable${data.p0_missing===1?'':'s'} missing · ${data.p1_missing} feature variable${data.p1_missing===1?'':'s'} missing</div></div>`;
 const groups={P0:[],P1:[],P2:[]};(data.checks||[]).forEach(c=>{(groups[c.severity]||groups.P2).push(c);});
-['P0','P1','P2'].forEach(sev=>{if(!groups[sev].length)return;html+=`<div class="health-group"><h2>${esc(HEALTH_GROUP_LABEL[sev])}</h2><div class="list">${groups[sev].map(c=>`<div class="list-item"><div class="health-check-top"><strong>${esc(c.name)}</strong><span class="pill ${c.configured?'good':'bad'}">${c.configured?'Configured':'Missing'}</span></div><div class="sub">${esc(c.feature)}</div></div>`).join('')}</div></div>`;});
+['P0','P1','P2'].forEach(sev=>{if(!groups[sev].length)return;html+=`<div class="health-group"><h2>${esc(HEALTH_GROUP_LABEL[sev])}</h2><div class="list">${groups[sev].map(c=>{const hp=healthPill(c);return `<div class="list-item"><div class="health-check-top"><strong>${esc(c.name)}</strong><span class="pill ${hp.cls}">${esc(hp.label)}</span></div><div class="sub">${esc(c.feature)}</div></div>`;}).join('')}</div></div>`;});
 html+='<p class="health-note">This panel checks the aimt-site Production runtime only. External Worker and Supabase dashboard configuration are maintained separately.</p>';
 $('healthBody').innerHTML=html;}catch(e){$('healthBody').innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
 async function reactivateAccess(grantId,email){if(!confirm(`Reactivate manually granted course access for ${email||'this student'}? This creates a new manual entitlement — it does not restore the old record, and does not restore progress, checkpoints, or certification. Paid Stripe access is never affected.`))return;try{const result=await api('',{method:'POST',body:JSON.stringify({action:'reactivate_manual_access',grantId})});showNotice($('globalNotice'),result.alreadyActive?'This student already has active manual access — nothing was changed.':(result.setupInstruction||'Access reactivated.'));await Promise.all([loadDashboard(),loadAudit()]);}catch(e){showNotice($('globalNotice'),e.message,true);}}
