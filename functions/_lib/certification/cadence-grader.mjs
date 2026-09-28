@@ -43,6 +43,20 @@
 // patternTags/needsFollowUp/followUpPrompt/transitionLine for the
 // practitioner conversation), every rubric, every scoring rule, and every
 // certification threshold are unchanged by this fix.
+//
+// CORRECTION (post-review): the interview-turn structured-output schema
+// initially built patternTags' object keys from rubricCriteria[].id (e.g.
+// "c1") -- but patternTags/explicitUnsafeDomains are CRITICAL-DOMAIN-keyed
+// (e.g. "D1"), never criterion-keyed, per the existing prompt text below
+// and per scoring.mjs's scoreInterviewConversation()/
+// interviewEvaluatorFlagsFromState()/evaluateCriticalDomains(), which look
+// evaluator flags up by domain id. A criterion-keyed schema didn't reject
+// anything -- it just forced well-formed JSON keyed the wrong way, which
+// evaluatorFlags[domainId] would then silently fail to find, defeating the
+// D1-D4 Type A/B safety gates without ever throwing. Fixed by deriving the
+// schema's domain id set from the union of rubricCriteria[].
+// criticalDomainEvidence instead. criterionScores is unaffected -- it was
+// already, and remains, correctly keyed by criterion id.
 
 import { resolveCadenceModel } from '../cadence/model-config.mjs';
 import { fetchAnthropicMessages, extractAnthropicTextSafe, isTruncatedByMaxTokens } from '../cadence/anthropic-response.mjs';
@@ -68,23 +82,49 @@ const CASE_PART_EVALUATION_JSON_SCHEMA = {
 };
 
 // Narrow JSON Schema for evaluateInterviewTurn's existing response
-// contract. criterionScores/patternTags are keyed by this specific
-// interview's own rubric criterion ids, so the schema is built per call
-// from interviewDef.rubricCriteria rather than hardcoded — it still
-// describes exactly the same shape the prior prompt-only contract already
-// specified, never a new or different one. criterionScores requires every
-// criterion (matching the existing "every criterion..." instruction);
-// patternTags' own keys stay optional (matching the existing "only when a
-// meaningful pattern is present" instruction) — schema shape is descriptive
-// of the existing contract, not a behavior change to it.
+// contract, built per call from interviewDef.rubricCriteria rather than
+// hardcoded. Two DIFFERENT id vocabularies are in play here and must not be
+// conflated:
+//   - criterionScores is keyed by this interview's rubric CRITERION ids
+//     (e.g. "c1", "c2" -- interviewDef.rubricCriteria[].id).
+//   - explicitUnsafeDomains/patternTags are keyed by CRITICAL DOMAIN ids
+//     (e.g. "D1"-"D4" -- interviewDef.rubricCriteria[].criticalDomainEvidence),
+//     the exact same domain vocabulary scoring.mjs's
+//     scoreInterviewConversation()/interviewEvaluatorFlagsFromState()/
+//     evaluateCriticalDomains() key every Type A/Type B certification-gate
+//     evidence point by. A domain can be shared by multiple criteria and a
+//     criterion can touch zero domains, so the domain id set is the union
+//     of every criterion's criticalDomainEvidence, never a reuse of
+//     criterion ids. Getting this wrong would not reject bad output -- it
+//     would silently produce well-formed JSON keyed the wrong way, which
+//     scoreInterviewConversation()'s evaluatorFlags[domainId] lookup would
+//     then simply fail to find, defeating the D1-D4 safety gates without
+//     ever throwing. This mirrors the existing prompt text below ("keyed by
+//     the relevant domain"), which this schema must reinforce, not narrow
+//     away from.
 function buildInterviewEvaluationJsonSchema(rubricCriteria) {
-  const criterionIds = (rubricCriteria || []).map((c) => c.id);
+  const criteria = rubricCriteria || [];
+  const criterionIds = criteria.map((c) => c.id);
   const criterionScoreProps = {};
-  const patternTagProps = {};
   for (const id of criterionIds) {
     criterionScoreProps[id] = { type: 'integer', enum: [0, 1, 2] };
-    patternTagProps[id] = { type: 'string' };
   }
+
+  const domainIds = Array.from(new Set(criteria.flatMap((c) => c.criticalDomainEvidence || [])));
+  const patternTagProps = {};
+  for (const id of domainIds) patternTagProps[id] = { type: 'string' };
+  // Constrain explicitUnsafeDomains to this interview's own valid domain
+  // ids when any exist, so structured output reinforces the domain
+  // contract rather than allowing an arbitrary string. When an interview
+  // touches no critical domain at all, leave it as a plain string array
+  // rather than an enum with zero allowed values (an empty enum is an
+  // untested, likely-rejected schema shape, and downstream scoring simply
+  // ignores any domain id here that never appears in that interview's own
+  // rubric anyway).
+  const explicitUnsafeDomainsSchema = domainIds.length
+    ? { type: 'array', items: { type: 'string', enum: domainIds } }
+    : { type: 'array', items: { type: 'string' } };
+
   return {
     type: 'object',
     properties: {
@@ -94,7 +134,7 @@ function buildInterviewEvaluationJsonSchema(rubricCriteria) {
         required: criterionIds,
         additionalProperties: false,
       },
-      explicitUnsafeDomains: { type: 'array', items: { type: 'string' } },
+      explicitUnsafeDomains: explicitUnsafeDomainsSchema,
       patternTags: {
         type: 'object',
         properties: patternTagProps,

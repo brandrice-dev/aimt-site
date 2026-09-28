@@ -13,6 +13,22 @@
 // transport -- no live Anthropic call, no production database write, no
 // real student attempt.
 //
+// CORRECTION (post-review): the first version of this file's INTERVIEW_DEF
+// fixture had rubric criteria with no `criticalDomainEvidence` at all, and
+// its patternTags/explicitUnsafeDomains fixtures used criterion ids ('c1',
+// 'c2') where they should have used critical-domain ids ('D1'-'D4'). That
+// hid the exact defect it should have caught: cadence-grader.mjs's
+// interview-turn structured-output schema built patternTags' keys from
+// rubricCriteria[].id instead of the union of rubricCriteria[].
+// criticalDomainEvidence. A criterion-keyed schema doesn't reject anything
+// -- it just produces well-formed JSON keyed the wrong way, which
+// scoring.mjs's evaluatorFlags[domainId] lookup then silently fails to
+// find, defeating the D1-D4 Type A/B safety gates without ever throwing.
+// INTERVIEW_DEF now carries realistic criticalDomainEvidence (mirroring
+// production content-bank.mjs's INT-01..INT-09 shape, where a criterion's
+// own `id` and the domain(s) it provides evidence for are two different id
+// spaces), and every fixture below uses D1/D2 for domain-keyed fields.
+//
 // Run: node --test tests/cadence-module12-grader-hardening.test.mjs
 
 import assert from 'node:assert/strict';
@@ -23,6 +39,8 @@ import test from 'node:test';
 
 import { evaluateStructuredCasePart, evaluateInterviewTurn } from '../functions/_lib/certification/cadence-grader.mjs';
 import { GRADING_MAX_TOKENS, GRADING_EFFORT } from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
+import { scoreInterviewConversation, interviewEvaluatorFlagsFromState, evaluateCriticalDomains } from '../functions/_lib/certification/scoring.mjs';
+import { HEAD_SPA_CRITICAL_DOMAINS } from '../functions/_lib/certification/critical-domains.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -37,12 +55,43 @@ const CASE_PART = {
 };
 const CASE_SCENARIO = 'A 34-year-old client reports a recent scalp procedure.';
 
+// Two criteria touching two DIFFERENT critical domains -- deliberately not
+// "both touch D1" (like most real single-domain interviews), so that any
+// test here reusing a criterion id ('c1') where a domain id ('D1') was
+// meant would fail loudly rather than accidentally still passing (c1 !=
+// D1 as strings, but a same-shaped single-domain fixture could still
+// coincidentally line up and mask the bug). Mirrors real content-bank.mjs
+// interview INT-09's shape (multiple domains across one interview's
+// criteria).
 const INTERVIEW_DEF = {
   id: 'INT-TEST',
   primaryPrompt: 'Walk me through your intake process for a new client.',
   rubricCriteria: [
-    { id: 'c1', label: 'Intake thoroughness', guidance: 'Covers medical history.' },
-    { id: 'c2', label: 'Contraindication awareness', guidance: 'Flags red flags before proceeding.' },
+    {
+      id: 'c1',
+      label: 'Intake thoroughness',
+      guidance: 'Covers medical history.',
+      criticalDomainEvidence: ['D1'],
+      explicitUnsafeRule: { description: 'confirming a named diagnosis as fact.' },
+    },
+    {
+      id: 'c2',
+      label: 'Contraindication awareness',
+      guidance: 'Flags red flags before proceeding.',
+      criticalDomainEvidence: ['D2'],
+    },
+  ],
+};
+
+// A second, independent interview item that also provides D1 evidence --
+// used to prove a repeated cross-item pattern can still trip the Type B
+// gate (real students see this across their multiple selected part3 items,
+// e.g. INT-01 and INT-09 both touch D1).
+const INTERVIEW_DEF_2 = {
+  id: 'INT-TEST-2',
+  primaryPrompt: 'Tell me how you would handle a similar intake scenario.',
+  rubricCriteria: [
+    { id: 'x1', label: 'Intake thoroughness (2)', guidance: 'Covers medical history.', criticalDomainEvidence: ['D1'] },
   ],
 };
 
@@ -253,6 +302,74 @@ test('the interview-turn request schema requires every rubric criterion id and m
   assert.equal(schema.properties.criterionScores.additionalProperties, false);
 });
 
+// ---------------------------------------------------------------------------
+// 8b. Domain-vs-criterion id keying (the post-review correction) --
+//     criterionScores stays criterion-keyed; patternTags/explicitUnsafeDomains
+//     must be critical-domain-keyed, never criterion-keyed.
+// ---------------------------------------------------------------------------
+
+test('interview schema: criterionScores keys remain rubric criterion IDs, unaffected by the domain-keying fix', async (t) => {
+  const mock = mockFetchOnce(t, () => textBlockResponse(VALID_INTERVIEW_PAYLOAD));
+  await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF.primaryPrompt }],
+    studentResponse: 'My intake process is...',
+    followUpAlreadyUsed: false,
+  });
+  const schema = mock.getBody().output_config.format.schema;
+  assert.deepEqual(Object.keys(schema.properties.criterionScores.properties).sort(), ['c1', 'c2']);
+  assert.deepEqual([...schema.properties.criterionScores.required].sort(), ['c1', 'c2']);
+});
+
+test('interview schema: patternTags keys are critical-domain IDs (D1/D2), never rubric criterion IDs (c1/c2)', async (t) => {
+  const mock = mockFetchOnce(t, () => textBlockResponse(VALID_INTERVIEW_PAYLOAD));
+  await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF.primaryPrompt }],
+    studentResponse: 'My intake process is...',
+    followUpAlreadyUsed: false,
+  });
+  const schema = mock.getBody().output_config.format.schema;
+  const patternTagKeys = Object.keys(schema.properties.patternTags.properties);
+  assert.deepEqual(patternTagKeys.sort(), ['D1', 'D2']);
+  assert.ok(!patternTagKeys.includes('c1') && !patternTagKeys.includes('c2'), 'rubric criterion ids must never appear as patternTags schema keys');
+  assert.equal(schema.properties.patternTags.additionalProperties, false, 'additionalProperties:false means a criterion-id-keyed tag would violate this schema, not silently pass through');
+});
+
+test('interview schema: explicitUnsafeDomains is constrained to this interview\'s own critical-domain IDs, not criterion IDs or arbitrary strings', async (t) => {
+  const mock = mockFetchOnce(t, () => textBlockResponse(VALID_INTERVIEW_PAYLOAD));
+  await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF.primaryPrompt }],
+    studentResponse: 'My intake process is...',
+    followUpAlreadyUsed: false,
+  });
+  const schema = mock.getBody().output_config.format.schema;
+  assert.deepEqual([...schema.properties.explicitUnsafeDomains.items.enum].sort(), ['D1', 'D2']);
+  assert.ok(!schema.properties.explicitUnsafeDomains.items.enum.includes('c1'));
+  assert.ok(!schema.properties.explicitUnsafeDomains.items.enum.includes('c2'));
+});
+
+test('interview schema: an interview whose rubric touches zero critical domains falls back to a plain (non-enum) string array, not an impossible empty enum', async (t) => {
+  const noDomainInterview = {
+    id: 'INT-NO-DOMAIN',
+    primaryPrompt: 'Describe your general approach.',
+    rubricCriteria: [{ id: 'g1', label: 'General quality', guidance: 'Overall clarity.', criticalDomainEvidence: [] }],
+  };
+  const mock = mockFetchOnce(t, () => textBlockResponse({
+    criterionScores: { g1: 2 }, explicitUnsafeDomains: [], patternTags: {}, needsFollowUp: false, followUpPrompt: null, transitionLine: 'ok',
+  }));
+  await evaluateInterviewTurn(ENV, {
+    interviewDef: noDomainInterview,
+    priorTranscript: [{ role: 'assistant', content: noDomainInterview.primaryPrompt }],
+    studentResponse: 'My approach is...',
+    followUpAlreadyUsed: false,
+  });
+  const schema = mock.getBody().output_config.format.schema;
+  assert.equal(schema.properties.explicitUnsafeDomains.items.enum, undefined);
+  assert.deepEqual(schema.properties.patternTags.properties, {});
+});
+
 test('no unsupported numeric/string-length JSON Schema constraints appear in either structured-output schema', async (t) => {
   const mock1 = mockFetchOnce(t, () => textBlockResponse(VALID_CASE_PAYLOAD));
   await evaluateStructuredCasePart(ENV, { scenario: CASE_SCENARIO, part: CASE_PART, studentResponse: 'A response.' });
@@ -273,11 +390,11 @@ test('evaluateStructuredCasePart preserves its exact existing contract: correctn
   assert.equal(result.patternTag, 'misapplies_contraindication');
 });
 
-test('evaluateInterviewTurn preserves its exact existing contract', async (t) => {
+test('evaluateInterviewTurn preserves its exact existing contract -- criterionScores criterion-keyed, explicitUnsafeDomains/patternTags domain-keyed', async (t) => {
   mockFetchOnce(t, () => textBlockResponse({
     criterionScores: { c1: 1, c2: 2 },
-    explicitUnsafeDomains: ['c2'],
-    patternTags: { c1: 'skips_history_check' },
+    explicitUnsafeDomains: ['D1'],
+    patternTags: { D2: 'skips_history_check' },
     needsFollowUp: true,
     followUpPrompt: 'Can you elaborate on the contraindication?',
     transitionLine: null,
@@ -290,10 +407,109 @@ test('evaluateInterviewTurn preserves its exact existing contract', async (t) =>
   });
   assert.deepEqual(Object.keys(result).sort(), ['criterionScores', 'explicitUnsafeDomains', 'followUpPrompt', 'modelInfo', 'needsFollowUp', 'patternTags', 'transitionLine'].sort());
   assert.deepEqual(result.criterionScores, { c1: 1, c2: 2 });
-  assert.deepEqual(result.explicitUnsafeDomains, ['c2']);
-  assert.deepEqual(result.patternTags, { c1: 'skips_history_check' });
+  assert.deepEqual(result.explicitUnsafeDomains, ['D1']);
+  assert.deepEqual(result.patternTags, { D2: 'skips_history_check' });
   assert.equal(result.needsFollowUp, true);
   assert.equal(result.followUpPrompt, 'Can you elaborate on the contraindication?');
+});
+
+// ---------------------------------------------------------------------------
+// 9b. End-to-end pipeline: evaluateInterviewTurn() -> persisted conversation-
+//     state shape -> interviewEvaluatorFlagsFromState() ->
+//     scoreInterviewConversation() -> the correct D1/D2 evidence point.
+//     This is the exact chain the post-review defect broke silently
+//     (well-formed but wrongly-keyed JSON, never thrown, evidence just
+//     never found by domain).
+// ---------------------------------------------------------------------------
+
+test('a D1-keyed patternTag from the evaluator survives persistence and scoring as D1 evidence, not lost to a criterion-id mismatch', async (t) => {
+  mockFetchOnce(t, () => textBlockResponse({
+    criterionScores: { c1: 1, c2: 2 },
+    explicitUnsafeDomains: [],
+    patternTags: { D1: 'informal_diagnosis_workaround' },
+    needsFollowUp: false,
+    followUpPrompt: null,
+    transitionLine: 'Thanks for walking me through that.',
+  }));
+  const evaluation = await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF.primaryPrompt }],
+    studentResponse: 'My intake process is...',
+    followUpAlreadyUsed: false,
+  });
+
+  // Mirrors exactly what functions/api/certification/submit-interview-turn.js
+  // persists into part3_conversation_state on finalize (criterionScores/
+  // explicitUnsafeDomains/patternTags straight from the evaluation result).
+  const persistedConversationState = {
+    transcript: [],
+    followUpUsed: false,
+    finalized: true,
+    criterionScores: evaluation.criterionScores,
+    explicitUnsafeDomains: evaluation.explicitUnsafeDomains,
+    patternTags: evaluation.patternTags,
+  };
+
+  const flags = interviewEvaluatorFlagsFromState(persistedConversationState);
+  const scored = scoreInterviewConversation(INTERVIEW_DEF, persistedConversationState.criterionScores, flags);
+
+  const d1Evidence = scored.evidencePoints.find((e) => e.domainId === 'D1');
+  assert.ok(d1Evidence, 'a D1 evidence point must exist -- INTERVIEW_DEF\'s c1 touches D1');
+  assert.equal(d1Evidence.patternTag, 'informal_diagnosis_workaround', 'the D1-keyed patternTag must reach D1\'s evidence point, not be dropped because it was mis-keyed by criterion id');
+  assert.equal(d1Evidence.explicitUnsafe, false);
+
+  const d2Evidence = scored.evidencePoints.find((e) => e.domainId === 'D2');
+  assert.ok(d2Evidence, 'a D2 evidence point must also exist -- INTERVIEW_DEF\'s c2 touches D2');
+  assert.equal(d2Evidence.patternTag, null, 'D2 must show no pattern tag -- only D1 was flagged by the evaluator');
+});
+
+// ---------------------------------------------------------------------------
+// 9c. Type B critical-domain gate is not weakened by this hardening patch:
+//     repeated matching D1 pattern evidence, produced through the real
+//     evaluateInterviewTurn() -> scoreInterviewConversation() chain across
+//     two independent interview items, still trips evaluateCriticalDomains().
+// ---------------------------------------------------------------------------
+
+test('repeated matching D1 pattern evidence across two independent interview items still trips the Type B critical-domain gate', async (t) => {
+  mockFetchOnce(t, () => textBlockResponse({
+    criterionScores: { c1: 1, c2: 2 },
+    explicitUnsafeDomains: [],
+    patternTags: { D1: 'informal_diagnosis_workaround' },
+    needsFollowUp: false, followUpPrompt: null, transitionLine: 'ok',
+  }));
+  const evalA = await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF.primaryPrompt }],
+    studentResponse: 'turn A',
+    followUpAlreadyUsed: false,
+  });
+  const flagsA = interviewEvaluatorFlagsFromState({ explicitUnsafeDomains: evalA.explicitUnsafeDomains, patternTags: evalA.patternTags });
+  const scoredA = scoreInterviewConversation(INTERVIEW_DEF, evalA.criterionScores, flagsA);
+
+  mockFetchOnce(t, () => textBlockResponse({
+    criterionScores: { x1: 1 },
+    explicitUnsafeDomains: [],
+    patternTags: { D1: 'informal_diagnosis_workaround' },
+    needsFollowUp: false, followUpPrompt: null, transitionLine: 'ok',
+  }));
+  const evalB = await evaluateInterviewTurn(ENV, {
+    interviewDef: INTERVIEW_DEF_2,
+    priorTranscript: [{ role: 'assistant', content: INTERVIEW_DEF_2.primaryPrompt }],
+    studentResponse: 'turn B',
+    followUpAlreadyUsed: false,
+  });
+  const flagsB = interviewEvaluatorFlagsFromState({ explicitUnsafeDomains: evalB.explicitUnsafeDomains, patternTags: evalB.patternTags });
+  const scoredB = scoreInterviewConversation(INTERVIEW_DEF_2, evalB.criterionScores, flagsB);
+
+  const allEvidencePoints = [...scoredA.evidencePoints, ...scoredB.evidencePoints];
+  const domainResults = evaluateCriticalDomains(allEvidencePoints, HEAD_SPA_CRITICAL_DOMAINS);
+  const d1 = domainResults.find((d) => d.domainId === 'D1');
+  assert.equal(d1.cleared, false, 'two independent same-pattern D1 evidence points must fail the domain (matches HEAD_SPA_CRITICAL_DOMAINS D1 typeBThreshold)');
+  assert.equal(d1.failureType, 'repeated_pattern');
+  assert.equal(d1.evidenceCount, 2);
+
+  const d2 = domainResults.find((d) => d.domainId === 'D2');
+  assert.equal(d2.cleared, true, 'D2 was never flagged and must remain cleared');
 });
 
 // ---------------------------------------------------------------------------
