@@ -93,8 +93,14 @@ function requireSupabaseEnv(env, fnName) {
  *   topicSlug: string, cluster: string, pageConcept: string,
  *   publicIntent: string, inScopeConcepts: string[], gapSummary: string,
  *   originatingRunId: string, originatingPageIntent: object,
- *   baselineCandidateClaimIds: string[],
- * }} observed
+ *   baselineCandidateClaimIds: string[], controlledTopics: string[],
+ * }} observed - `controlledTopics` (CORRECTION 1) is the page concept's
+ *   own controlled research topics (`selected.concept.controlled_topics`
+ *   -- deterministic from the topic_slug via PILOT_TOPIC_CONCEPTS, so it
+ *   is stored "at creation time" but is simply the same value on every
+ *   later re-observation too), used to gate whether a later targeted
+ *   research submission is actually RELEVANT to this gap -- see
+ *   hasRelevantVerifiedClaim() below.
  * @returns {object} the full row payload (top-level columns + `extras`)
  *   ready to POST as an upsert.
  */
@@ -111,6 +117,7 @@ export function computeGapUpsertPayload(existingRow, observed) {
     page_concept: observed.pageConcept,
     public_intent: observed.publicIntent,
     in_scope_concepts: observed.inScopeConcepts,
+    controlled_topics: [...(observed.controlledTopics || [])],
     gap_summary: observed.gapSummary,
     originating_run_id: observed.originatingRunId,
     originating_page_intent: observed.originatingPageIntent,
@@ -211,6 +218,37 @@ export function determineGapLinkVerification(existingRow) {
   if (existingRow.lane !== RESEARCH_GAP_LANE) return { ok: false, reason: 'WRONG_LANE' };
   if (existingRow.status === RESEARCH_GAP_STATUS.RESOLVED) return { ok: false, reason: 'ALREADY_RESOLVED' };
   return { ok: true, reason: 'LINKABLE' };
+}
+
+/**
+ * PURE. CORRECTION 1 -- the relevant-verified-claim gate. `research_
+ * received` must mean "the canonical ingestion pipeline actually
+ * accepted/imported at least one claim that is BOTH relevant to this
+ * gap's own controlled_topics AND at verification_status
+ * CLAIM_VERIFIED" -- never merely "something, anything, was accepted in
+ * the same batch." An unrelated accepted claim, an accepted source with
+ * no relevant accepted claim, DISCOVERED-only material, and a relevant
+ * claim that was itself quarantined/orphaned/rejected (and therefore
+ * never appears in `processedClaims` at all, since that list is the
+ * canonical ingestion pipeline's OWN record of what it actually
+ * processed -- see importer.mjs's `claimsToProcess`) all correctly
+ * return false here.
+ *
+ * @param {Array<{claim_id: string, topics?: string[], verification_status?: string}>|null|undefined} processedClaims
+ *   -- claims the canonical ingestion pipeline actually accepted/
+ *   imported this batch (never the raw submitted batch, never a
+ *   rejected/quarantined/orphaned claim).
+ * @param {string[]|null|undefined} controlledTopics - the gap's own
+ *   `extras.controlled_topics`.
+ * @returns {boolean}
+ */
+export function hasRelevantVerifiedClaim(processedClaims, controlledTopics) {
+  if (!Array.isArray(processedClaims) || !Array.isArray(controlledTopics) || controlledTopics.length === 0) return false;
+  const topicSet = new Set(controlledTopics);
+  return processedClaims.some((c) => (
+    c && c.verification_status === 'CLAIM_VERIFIED'
+    && Array.isArray(c.topics) && c.topics.some((t) => topicSet.has(t))
+  ));
 }
 
 /** PURE. Resolving is idempotent (already-resolved -> ok no-op) and

@@ -106,6 +106,7 @@ import { wwwAuthenticateHeader } from '../_lib/mcp/discovery.mjs';
 import { processIngestionBatch, logIngestEvent } from '../_lib/research/ingest-request.mjs';
 import {
   listActiveResearchGaps, claimResearchGapById, verifyResearchGapForSubmission, markGapResearchReceivedById,
+  hasRelevantVerifiedClaim,
 } from '../_lib/education-ops/education-research-gap-queue.mjs';
 
 const SOURCE = 'api/mcp';
@@ -218,9 +219,11 @@ const SUBMIT_TOOL = {
       research_gap_transition: {
         type: 'string',
         description:
-          'Only present when research_gap_id was supplied. RESEARCH_RECEIVED if the gap was successfully linked and ' +
-          "marked; otherwise a SKIPPED_<reason> code (e.g. SKIPPED_NOT_FOUND, SKIPPED_ALREADY_RESOLVED, " +
-          'SKIPPED_NOTHING_ACCEPTED) explaining why the batch was still processed normally but not linked.'
+          'Only present when research_gap_id was supplied. RESEARCH_RECEIVED only if this batch actually caused the ' +
+          'canonical ingestion pipeline to accept/import at least one CLAIM_VERIFIED claim relevant to the gap\'s own ' +
+          'topic(s); otherwise a SKIPPED_<reason> code (e.g. SKIPPED_NOT_LINKABLE, SKIPPED_NOTHING_ACCEPTED, ' +
+          'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM) explaining why the batch was still processed normally but not linked -- ' +
+          'an accepted but unrelated or merely-DISCOVERED claim never counts.'
       }
     },
     required: ['batch_id', 'status']
@@ -391,14 +394,14 @@ async function runSubmitResearchBatchTool(env, args) {
   // the underlying ingestion call below -- it only decides whether a
   // successful batch also gets linked back to a gap afterward.
   const researchGapId = typeof safeArgs.research_gap_id === 'string' && safeArgs.research_gap_id.trim() ? safeArgs.research_gap_id.trim() : null;
-  let gapVerified = false;
+  let gapRow = null;
   if (researchGapId) {
     try {
       const verification = await verifyResearchGapForSubmission(env, researchGapId);
-      gapVerified = verification.ok;
-      if (!verification.ok) await logIngestEvent(env, SOURCE, 'mcp_research_gap_link_skipped', `${researchGapId}_${verification.reason}`);
+      if (verification.ok) gapRow = verification.row;
+      else await logIngestEvent(env, SOURCE, 'mcp_research_gap_link_skipped', `${researchGapId}_${verification.reason}`);
     } catch (_err) {
-      gapVerified = false;
+      gapRow = null;
       await logIngestEvent(env, SOURCE, 'mcp_research_gap_link_skipped', `${researchGapId}_VERIFICATION_FAILED`);
     }
   }
@@ -412,12 +415,24 @@ async function runSubmitResearchBatchTool(env, args) {
 
     let researchGapTransition;
     if (researchGapId) {
-      const acceptedSomething = (result.accepted.sources || 0) > 0 || (result.accepted.claims || 0) > 0;
-      if (!gapVerified) {
+      if (!gapRow) {
         researchGapTransition = 'SKIPPED_NOT_LINKABLE';
-      } else if (!acceptedSomething) {
-        // Wholly rejected/quarantined: never falsely claim research_received.
-        researchGapTransition = 'SKIPPED_NOTHING_ACCEPTED';
+      } else if (!hasRelevantVerifiedClaim(result.processedClaims, gapRow.extras && gapRow.extras.controlled_topics)) {
+        // CORRECTION 1: "research_received" must mean the canonical
+        // ingestion pipeline actually accepted/imported at least one
+        // claim that is BOTH relevant to this gap's own controlled_topics
+        // AND CLAIM_VERIFIED -- never merely "something was accepted in
+        // the same batch" (an unrelated claim, a source with no relevant
+        // verified claim, DISCOVERED-only material, or a relevant claim
+        // that was itself quarantined/orphaned/rejected all land here,
+        // never falsely marking the gap received). result.processedClaims
+        // is INTERNAL ONLY -- never included in this tool's own response
+        // below. The gate is claim-based, so "accepted something" here
+        // means "accepted at least one CLAIM" -- an accepted SOURCE with
+        // zero accepted claims (test B) is "nothing accepted" for this
+        // purpose, not "the wrong kind of claim".
+        const acceptedAnyClaim = (result.accepted.claims || 0) > 0;
+        researchGapTransition = acceptedAnyClaim ? 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM' : 'SKIPPED_NOTHING_ACCEPTED';
       } else {
         try {
           const marked = await markGapResearchReceivedById(env, researchGapId, { researchBatchId: result.batch_id });
@@ -436,6 +451,9 @@ async function runSubmitResearchBatchTool(env, args) {
       inserted: result.inserted,
       updated: result.updated,
       quarantined: result.quarantined,
+      // NOTE: result.processedClaims (raw claim ids/topics) is
+      // deliberately NEVER included here -- see importer.mjs's own
+      // comment on why that field is internal-only.
       ...(researchGapId ? { research_gap_transition: researchGapTransition } : {})
     });
   } catch (error) {

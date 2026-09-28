@@ -698,17 +698,38 @@ export async function runDecisionPipeline(env, options = {}) {
       // still routes to the normal human-review path below, unchanged.
       if (isEvidenceInsufficiency && researchGapLoopEnabled) {
         const upsertFn = fns.upsertEvidenceInsufficiencyGapFn || upsertEvidenceInsufficiencyGap;
-        const { row: gapRow, action: gapAction } = await upsertFn(env, {
-          topicSlug: selected.topic_slug,
-          cluster: clusterKey,
-          pageConcept: intentPlan.page_concept,
-          publicIntent: intentPlan.public_intent,
-          inScopeConcepts: intentPlan.in_scope_concepts,
-          gapSummary: synthesisResult.humanReviewJustification.reason,
-          originatingRunId: runId,
-          originatingPageIntent: intentPlan,
-          baselineCandidateClaimIds: selected.v1_result.candidate_claim_ids,
-        });
+        // FAIL CLOSED (correction): a queue WRITE failure here is an
+        // infrastructure fault, never silently swallowed and never
+        // reported as if the gap were actually queued. No model retry --
+        // stop the run here, exactly like the PE-bridge hardening above.
+        let upsertResult;
+        try {
+          upsertResult = await upsertFn(env, {
+            topicSlug: selected.topic_slug,
+            cluster: clusterKey,
+            pageConcept: intentPlan.page_concept,
+            publicIntent: intentPlan.public_intent,
+            inScopeConcepts: intentPlan.in_scope_concepts,
+            gapSummary: synthesisResult.humanReviewJustification.reason,
+            originatingRunId: runId,
+            originatingPageIntent: intentPlan,
+            baselineCandidateClaimIds: selected.v1_result.candidate_claim_ids,
+            // CORRECTION 1: the exact controlled research topics this
+            // page concept covers, stored on the gap so a later targeted
+            // research submission can be checked for RELEVANCE (see
+            // education-research-gap-queue.mjs#hasRelevantVerifiedClaim)
+            // -- an accepted claim about a completely different topic
+            // must never be mistaken for having filled this gap.
+            controlledTopics: selected.concept.controlled_topics,
+          });
+        } catch (err) {
+          return finish({
+            candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+            final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+            exception_reason: `Research-gap queue upsert failed for "${selected.topic_slug}" (${err && err.name || 'Error'}): ${err && err.message} -- refusing to report RESEARCH_GAP_QUEUED for a write that did not actually happen.`,
+          });
+        }
+        const { row: gapRow, action: gapAction } = upsertResult;
         common.research_gap_action = {
           enabled: true, action: gapAction, gap_id: gapRow.queue_id,
           topic_slug: selected.topic_slug, attempt_count: gapRow.extras.attempt_count,
@@ -724,14 +745,30 @@ export async function runDecisionPipeline(env, options = {}) {
         });
       }
 
-      // RELEASE (section 5): Publication Editor progressed BEYOND
-      // EVIDENCE_INSUFFICIENCY (a different genuine HUMAN_REVIEW reason,
-      // or a mechanical/accounting SYNTHESIS_FAILED) -- any pre-existing
-      // gap for this topic is now resolved; the normal human-review /
-      // no-op lane below handles this outcome exactly as it always has.
-      if (researchGapLoopEnabled && existingGapForSelectedTopic) {
+      // RELEASE (section 5, CORRECTED): Publication Editor returning a
+      // VALID governed outcome that is NOT EVIDENCE_INSUFFICIENCY is only
+      // proof the evidence-insufficiency blocker is resolved when that
+      // outcome is itself a genuine HUMAN_REVIEW verdict (a different
+      // valid reason_code -- UNRESOLVED_CONTRADICTION,
+      // SAFETY_OR_SCOPE_CONCERN, HIGH_RISK_CONTENT,
+      // OTHER_SUBSTANTIVE_EXCEPTION, ...). A mechanical/accounting
+      // SYNTHESIS_FAILED proves NOTHING about whether evidence is now
+      // sufficient -- it is infrastructure/model-output noise, and
+      // resolving the gap on it would silently lose the research-
+      // feedback state for no reason. isHumanReview is already known
+      // false here to mean SYNTHESIS_FAILED (isEvidenceInsufficiency,
+      // the only other HUMAN_REVIEW case, already returned above).
+      if (researchGapLoopEnabled && existingGapForSelectedTopic && isHumanReview) {
         const resolveFn = fns.resolveResearchGapByTopicFn || resolveResearchGapByTopic;
-        await resolveFn(env, selected.topic_slug);
+        try {
+          await resolveFn(env, selected.topic_slug);
+        } catch (err) {
+          return finish({
+            candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+            final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+            exception_reason: `Research-gap queue resolve failed for "${selected.topic_slug}" (${err && err.name || 'Error'}): ${err && err.message} -- refusing to report a HUMAN_REVIEW outcome that assumed the gap was resolved when the write did not actually happen.`,
+          });
+        }
         common.research_gap_action = {
           enabled: true, action: 'RESOLVED', gap_id: existingGapForSelectedTopic.queue_id,
           topic_slug: selected.topic_slug, attempt_count: existingGapForSelectedTopic.extras.attempt_count,
@@ -761,10 +798,21 @@ export async function runDecisionPipeline(env, options = {}) {
 
     // RELEASE (section 5): Publication Editor reached AUTO_READY -- any
     // pre-existing gap for this topic is resolved; the run continues
-    // normally (Writer/Reviewer) exactly as it always has.
+    // normally (Writer/Reviewer) exactly as it always has. FAIL CLOSED
+    // (correction): a write failure here stops the run immediately,
+    // BEFORE Writer/Reviewer ever spend a model call, rather than
+    // continuing on an inconsistent research-gap state.
     if (researchGapLoopEnabled && existingGapForSelectedTopic) {
       const resolveFn = fns.resolveResearchGapByTopicFn || resolveResearchGapByTopic;
-      await resolveFn(env, selected.topic_slug);
+      try {
+        await resolveFn(env, selected.topic_slug);
+      } catch (err) {
+        return finish({
+          candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `Research-gap queue resolve failed for "${selected.topic_slug}" (${err && err.name || 'Error'}): ${err && err.message} -- refusing to proceed to Writer/Reviewer on an inconsistent research-gap state.`,
+        });
+      }
       common.research_gap_action = {
         enabled: true, action: 'RESOLVED', gap_id: existingGapForSelectedTopic.queue_id,
         topic_slug: selected.topic_slug, attempt_count: existingGapForSelectedTopic.extras.attempt_count,

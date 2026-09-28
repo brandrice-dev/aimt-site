@@ -12,7 +12,7 @@ import {
   RESEARCH_GAP_CONTRACT_VERSION, RESEARCH_GAP_LANE, RESEARCH_GAP_STATUS,
   buildResearchGapQueueId, computeGapUpsertPayload, determineClaimTransition,
   determineResearchReceivedTransition, determineResolveTransition,
-  determineGapLinkVerification, isTopicHeldByResearchGap,
+  determineGapLinkVerification, isTopicHeldByResearchGap, hasRelevantVerifiedClaim,
 } from '../functions/_lib/education-ops/education-research-gap-queue.mjs';
 
 const results = [];
@@ -28,6 +28,7 @@ function observed(overrides = {}) {
     gapSummary: 'Insufficient evidence for general presentation patterns and disease-course variability.',
     originatingRunId: 'run-7', originatingPageIntent: { topic_slug: 'alopecia-areata', route_slug: 'alopecia-areata' },
     baselineCandidateClaimIds: ['c1', 'c2', 'c3'],
+    controlledTopics: ['alopecia-areata'],
     ...overrides,
   };
 }
@@ -57,6 +58,7 @@ function observed(overrides = {}) {
   check('FRESH_GAP', 'attempt_count is 1', payload.extras.attempt_count === 1);
   check('FRESH_GAP', 'contract_version is set', payload.extras.contract_version === RESEARCH_GAP_CONTRACT_VERSION);
   check('FRESH_GAP', 'baseline_candidate_claim_ids copied', JSON.stringify(payload.extras.baseline_candidate_claim_ids) === JSON.stringify(['c1', 'c2', 'c3']));
+  check('FRESH_GAP', 'controlled_topics copied (CORRECTION 1 -- stored at creation time)', JSON.stringify(payload.extras.controlled_topics) === JSON.stringify(['alopecia-areata']));
   check('FRESH_GAP', 'no claim/research/resolve timestamps yet', payload.extras.claimed_at === null && payload.extras.research_batch_id === null && payload.extras.resolved_at === null);
   check('FRESH_GAP', 'never stores raw model output -- only the governed structured fields', !('finalOutput' in payload.extras) && !('rawOutput' in payload.extras));
 })();
@@ -204,6 +206,57 @@ function observed(overrides = {}) {
 
   check('SELECTOR_HOLD', 'no gap at all -> never held', isTopicHeldByResearchGap(null, ['c1', 'c2', 'c3']) === false);
   check('SELECTOR_HOLD', 'undefined gap -> never held', isTopicHeldByResearchGap(undefined, []) === false);
+})();
+
+// ─────────────────────────────────────────────────────────────────────────
+// hasRelevantVerifiedClaim -- CORRECTION 1: research_received must mean a
+// RELEVANT (matches the gap's own controlled_topics) AND VERIFIED
+// (CLAIM_VERIFIED) claim was actually accepted/imported -- never merely
+// "something was accepted in the batch".
+// ─────────────────────────────────────────────────────────────────────────
+(function testHasRelevantVerifiedClaim() {
+  const controlledTopics = ['alopecia-areata'];
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a relevant, CLAIM_VERIFIED processed claim satisfies the gate', hasRelevantVerifiedClaim(
+    [{ claim_id: 'c1', topics: ['alopecia-areata'], verification_status: 'CLAIM_VERIFIED' }], controlledTopics,
+  ) === true);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'an UNRELATED (different topic) CLAIM_VERIFIED claim does NOT satisfy the gate', hasRelevantVerifiedClaim(
+    [{ claim_id: 'c1', topics: ['androgenetic-alopecia'], verification_status: 'CLAIM_VERIFIED' }], controlledTopics,
+  ) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a relevant but merely DISCOVERED claim does NOT satisfy the gate', hasRelevantVerifiedClaim(
+    [{ claim_id: 'c1', topics: ['alopecia-areata'], verification_status: 'DISCOVERED' }], controlledTopics,
+  ) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'an empty processedClaims list never satisfies the gate (e.g. a source-only submission)', hasRelevantVerifiedClaim([], controlledTopics) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a claim absent from processedClaims (quarantined/orphaned/rejected) cannot satisfy the gate -- it is simply never in the list', hasRelevantVerifiedClaim(
+    [{ claim_id: 'unrelated', topics: ['telogen-effluvium'], verification_status: 'CLAIM_VERIFIED' }], controlledTopics, // the relevant claim never made it into processedClaims at all
+  ) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a claim touching MULTIPLE topics, one of which matches, still satisfies the gate', hasRelevantVerifiedClaim(
+    [{ claim_id: 'c1', topics: ['androgenetic-alopecia', 'alopecia-areata'], verification_status: 'CLAIM_VERIFIED' }], controlledTopics,
+  ) === true);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'null/undefined processedClaims never throws, just fails closed', hasRelevantVerifiedClaim(null, controlledTopics) === false && hasRelevantVerifiedClaim(undefined, controlledTopics) === false);
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'empty/missing controlledTopics never throws, just fails closed', hasRelevantVerifiedClaim([{ claim_id: 'c1', topics: ['x'], verification_status: 'CLAIM_VERIFIED' }], []) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a mixed batch (unrelated verified + relevant discovered) still fails the gate', hasRelevantVerifiedClaim(
+    [
+      { claim_id: 'c1', topics: ['androgenetic-alopecia'], verification_status: 'CLAIM_VERIFIED' },
+      { claim_id: 'c2', topics: ['alopecia-areata'], verification_status: 'DISCOVERED' },
+    ],
+    controlledTopics,
+  ) === false);
+
+  check('RELEVANT_VERIFIED_CLAIM_GATE', 'a mixed batch WITH one relevant+verified claim among unrelated ones satisfies the gate', hasRelevantVerifiedClaim(
+    [
+      { claim_id: 'c1', topics: ['androgenetic-alopecia'], verification_status: 'CLAIM_VERIFIED' },
+      { claim_id: 'c2', topics: ['alopecia-areata'], verification_status: 'CLAIM_VERIFIED' },
+    ],
+    controlledTopics,
+  ) === true);
 })();
 
 // ---- Report ----

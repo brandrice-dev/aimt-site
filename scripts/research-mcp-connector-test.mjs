@@ -668,6 +668,7 @@ function makeGapRow(overrides = {}) {
       page_concept: 'Alopecia Areata Overview',
       public_intent: 'Explain alopecia areata for practitioners.',
       in_scope_concepts: ['general presentation patterns'],
+      controlled_topics: ['alopecia-areata'],
       gap_summary: 'Insufficient evidence for general presentation patterns.',
       originating_run_id: 'run-1',
       originating_page_intent: {},
@@ -770,24 +771,138 @@ async function testSubmitResearchBatchWithoutResearchGapIdBehavesExactlyAsBefore
   });
 }
 
+// CORRECTION 1 fixtures: a relevant source+claim pair (topic matches the
+// gap's controlled_topics, ['alopecia-areata']) and an unrelated one.
+function makeAaSource(id = 'aa-new-source-1') {
+  return { source_id: id, title: 'New AA Source', authors: ['A'], year: 2026, evidence_type: 'narrative_review', source_role: 'primary_research', topics: ['alopecia-areata'] };
+}
+function makeUnrelatedSource(id = 'unrelated-source-1') {
+  return { source_id: id, title: 'Unrelated Source', authors: ['A'], year: 2026, evidence_type: 'narrative_review', source_role: 'primary_research', topics: ['androgenetic-alopecia'] };
+}
+function makeRelevantVerifiedClaim(id, sourceId) {
+  return { claim_id: id, source_id: sourceId, claim_text: 'A relevant, verified claim about alopecia areata.', claim_type: 'finding', topics: ['alopecia-areata'], verification_status: 'CLAIM_VERIFIED', use_status: 'active' };
+}
+function makeRelevantDiscoveredClaim(id, sourceId) {
+  return { claim_id: id, source_id: sourceId, claim_text: 'A relevant but not-yet-verified claim about alopecia areata.', claim_type: 'finding', topics: ['alopecia-areata'], verification_status: 'DISCOVERED', use_status: 'provisional' };
+}
+function makeUnrelatedVerifiedClaim(id, sourceId) {
+  return { claim_id: id, source_id: sourceId, claim_text: 'A verified claim about an unrelated topic.', claim_type: 'finding', topics: ['androgenetic-alopecia'], verification_status: 'CLAIM_VERIFIED', use_status: 'active' };
+}
+
+// A. accepted UNRELATED claim does NOT mark research_received.
+async function testAcceptedUnrelatedClaimDoesNotMarkResearchReceived() {
+  console.log('\n--- A: an accepted but UNRELATED claim does not mark research_received ---');
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const source = makeUnrelatedSource();
+    const claim = makeUnrelatedVerifiedClaim('unrelated-c1', source.source_id);
+    const res = await modernCall(makeEnv(), 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'batch-a', sources: [source], claims: [claim], research_gap_id: gap.queue_id } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.accepted.claims === 1, `sanity: the unrelated claim WAS accepted by ingestion (got ${JSON.stringify(structured.accepted)})`);
+    assert(structured.research_gap_transition === 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM', `A: research_gap_transition is SKIPPED_NO_RELEVANT_VERIFIED_CLAIM (got ${structured.research_gap_transition})`);
+    assert(state.researchGaps.get(gap.queue_id).status === 'claimed', 'A: the gap status is unchanged');
+  });
+}
+
+// B. accepted source only (no claims at all) does NOT mark research_received.
+async function testAcceptedSourceOnlyDoesNotMarkResearchReceived() {
+  console.log('\n--- B: an accepted source with NO claims at all does not mark research_received ---');
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const source = makeAaSource();
+    const res = await modernCall(makeEnv(), 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'batch-b', sources: [source], claims: [], research_gap_id: gap.queue_id } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.accepted.sources === 1 && structured.accepted.claims === 0, `sanity: only the source was accepted (got ${JSON.stringify(structured.accepted)})`);
+    assert(structured.research_gap_transition === 'SKIPPED_NOTHING_ACCEPTED', `B: research_gap_transition is SKIPPED_NOTHING_ACCEPTED (got ${structured.research_gap_transition})`);
+    assert(state.researchGaps.get(gap.queue_id).status === 'claimed', 'B: the gap status is unchanged');
+  });
+}
+
+// C. relevant but only DISCOVERED claim does NOT mark research_received.
+async function testRelevantDiscoveredOnlyClaimDoesNotMarkResearchReceived() {
+  console.log('\n--- C: a RELEVANT claim that is only DISCOVERED (not yet CLAIM_VERIFIED) does not mark research_received ---');
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const source = makeAaSource();
+    const claim = makeRelevantDiscoveredClaim('aa-discovered-1', source.source_id);
+    const res = await modernCall(makeEnv(), 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'batch-c', sources: [source], claims: [claim], research_gap_id: gap.queue_id } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.accepted.claims === 1, `sanity: the DISCOVERED claim WAS accepted by ingestion (got ${JSON.stringify(structured.accepted)})`);
+    assert(structured.research_gap_transition === 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM', `C: research_gap_transition is SKIPPED_NO_RELEVANT_VERIFIED_CLAIM (got ${structured.research_gap_transition})`);
+    assert(state.researchGaps.get(gap.queue_id).status === 'claimed', 'C: the gap status is unchanged');
+  });
+}
+
+// D. a relevant CLAIM_VERIFIED claim that was ACTUALLY accepted DOES mark research_received.
 async function testSuccessfulTargetedSubmissionTransitionsGapToResearchReceived() {
-  console.log('\n--- O: a successful targeted submission transitions the correct gap to research_received ---');
+  console.log('\n--- D/O: a relevant, CLAIM_VERIFIED, actually-accepted claim transitions the gap to research_received ---');
   const env = makeEnv();
   const gap = makeGapRow({ status: 'claimed' });
   const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
   await withMockedFetch(mockFetch, async () => {
-    const source = { source_id: 'aa-new-source-1', title: 'New AA Source', authors: ['A'], year: 2026, evidence_type: 'narrative_review', source_role: 'primary_research', topics: ['alopecia-areata'], verification_status: 'DISCOVERED', use_status: 'provisional' };
+    const source = makeAaSource();
+    const claim = makeRelevantVerifiedClaim('aa-verified-1', source.source_id);
     const res = await modernCall(env, 'tools/call', {
       name: 'submit_research_batch',
-      arguments: { batch_id: 'targeted-batch-1', sources: [source], claims: [], research_gap_id: gap.queue_id },
+      arguments: { batch_id: 'targeted-batch-1', sources: [source], claims: [claim], research_gap_id: gap.queue_id },
     });
     const structured = res.json.result.structuredContent;
     assert(structured.status === 'ok', `targeted submission with real usable material succeeds (got ${JSON.stringify(structured)})`);
     assert(structured.research_gap_transition === 'RESEARCH_RECEIVED', `research_gap_transition is RESEARCH_RECEIVED (got ${structured.research_gap_transition})`);
+    assert(!JSON.stringify(structured).includes('aa-verified-1'), 'M: the raw accepted claim id never appears in the MCP tool response');
     const updated = state.researchGaps.get(gap.queue_id);
     assert(updated.status === 'research_received', `the gap row's status is now research_received (got ${updated.status})`);
     assert(updated.extras.research_batch_id === 'targeted-batch-1', 'research_batch_id is recorded on the gap');
     assert(!!updated.extras.research_received_at, 'research_received_at is recorded on the gap');
+  });
+}
+
+// E. a relevant claim that was quarantined/orphaned (references a
+// source_id that exists neither in this batch nor in the DB) does NOT
+// mark research_received -- it never reaches processedClaims at all.
+async function testRelevantOrphanedClaimDoesNotMarkResearchReceived() {
+  console.log('\n--- E: a relevant claim that is orphaned (unknown source_id) does not mark research_received ---');
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    // No source in this batch, and the mock's DB has no sources either --
+    // this claim is a true orphan, quarantined before any claims upsert.
+    const claim = makeRelevantVerifiedClaim('aa-orphan-1', 'a-source-id-that-does-not-exist-anywhere');
+    const res = await modernCall(makeEnv(), 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'batch-e', sources: [], claims: [claim], research_gap_id: gap.queue_id } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.quarantined.orphan_claims === 1, `sanity: the claim was quarantined as an orphan (got ${JSON.stringify(structured.quarantined)})`);
+    assert(structured.accepted.claims === 0, 'sanity: zero claims were actually accepted');
+    assert(structured.research_gap_transition === 'SKIPPED_NOTHING_ACCEPTED', `E: research_gap_transition is SKIPPED_NOTHING_ACCEPTED, since nothing at all was accepted (got ${structured.research_gap_transition})`);
+    assert(state.researchGaps.get(gap.queue_id).status === 'claimed', 'E: the gap status is unchanged');
+  });
+}
+
+// F. mixed batch: unrelated accepted claim + a REJECTED relevant claim
+// (missing claim_text) -- does NOT mark research_received.
+async function testMixedBatchUnrelatedAcceptedPlusRejectedRelevantDoesNotMarkResearchReceived() {
+  console.log('\n--- F: mixed batch (unrelated accepted + rejected relevant) does not mark research_received ---');
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const unrelatedSource = makeUnrelatedSource();
+    const unrelatedClaim = makeUnrelatedVerifiedClaim('unrelated-c2', unrelatedSource.source_id);
+    const aaSource = makeAaSource('aa-new-source-2');
+    // Missing claim_text -- rejected by validateClaim() before ever
+    // reaching the DB (JS-validation reject, not a DB-level failure).
+    const rejectedRelevantClaim = { claim_id: 'aa-rejected-1', source_id: aaSource.source_id, topics: ['alopecia-areata'], verification_status: 'CLAIM_VERIFIED', use_status: 'active' };
+    const res = await modernCall(makeEnv(), 'tools/call', {
+      name: 'submit_research_batch',
+      arguments: { batch_id: 'batch-f', sources: [unrelatedSource, aaSource], claims: [unrelatedClaim, rejectedRelevantClaim], research_gap_id: gap.queue_id },
+    });
+    const structured = res.json.result.structuredContent;
+    assert(structured.accepted.claims === 1, `sanity: exactly the unrelated claim was accepted (got ${JSON.stringify(structured.accepted)})`);
+    assert(structured.quarantined.claims === 1, `sanity: the relevant claim was rejected/quarantined for missing claim_text (got ${JSON.stringify(structured.quarantined)})`);
+    assert(structured.research_gap_transition === 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM', `F: research_gap_transition is SKIPPED_NO_RELEVANT_VERIFIED_CLAIM (got ${structured.research_gap_transition})`);
+    assert(!JSON.stringify(structured).includes('aa-rejected-1') && !JSON.stringify(structured).includes('unrelated-c2'), 'M: no raw claim id (accepted or rejected) appears in the MCP tool response');
+    assert(state.researchGaps.get(gap.queue_id).status === 'claimed', 'F: the gap status is unchanged');
   });
 }
 
@@ -851,7 +966,12 @@ async function main() {
   await testClaimResearchGapPendingToClaimedAndIdempotent();
   await testClaimResearchGapAlreadyResolvedIsGovernedNonSuccess();
   await testSubmitResearchBatchWithoutResearchGapIdBehavesExactlyAsBefore();
+  await testAcceptedUnrelatedClaimDoesNotMarkResearchReceived();
+  await testAcceptedSourceOnlyDoesNotMarkResearchReceived();
+  await testRelevantDiscoveredOnlyClaimDoesNotMarkResearchReceived();
   await testSuccessfulTargetedSubmissionTransitionsGapToResearchReceived();
+  await testRelevantOrphanedClaimDoesNotMarkResearchReceived();
+  await testMixedBatchUnrelatedAcceptedPlusRejectedRelevantDoesNotMarkResearchReceived();
   await testFullyRejectedTargetedSubmissionDoesNotClaimResearchReceived();
   await testSubmitResearchBatchWithUnknownResearchGapIdStillProcessesTheBatch();
 

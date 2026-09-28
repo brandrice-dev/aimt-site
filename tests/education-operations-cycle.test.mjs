@@ -1396,6 +1396,7 @@ async function testEvidenceInsufficiencyWithLoopEnabledCreatesOneGap() {
   check('EVIDENCE_INSUFFICIENCY_LOOP', 'exactly one upsert call (one gap created)', !!upsertArgs);
   check('EVIDENCE_INSUFFICIENCY_LOOP', 'upsert carries the correct topic/gap summary', upsertArgs.topicSlug === topicSlug && upsertArgs.gapSummary === 'Insufficient evidence for general presentation patterns.');
   check('EVIDENCE_INSUFFICIENCY_LOOP', 'upsert carries the current candidate claim-id set as the baseline', Array.isArray(upsertArgs.baselineCandidateClaimIds) && upsertArgs.baselineCandidateClaimIds.length > 0);
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'CORRECTION 1: upsert carries the page concept\'s controlled_topics for the later relevance gate', Array.isArray(upsertArgs.controlledTopics) && upsertArgs.controlledTopics.includes(topicSlug), JSON.stringify(upsertArgs.controlledTopics));
   check('EVIDENCE_INSUFFICIENCY_LOOP', 'research_gap_action reports QUEUED with the gap id and attempt_count', report.research_gap_action && report.research_gap_action.action === 'QUEUED' && report.research_gap_action.gap_id === `publication_evidence_gap:${topicSlug}` && report.research_gap_action.attempt_count === 1, JSON.stringify(report.research_gap_action));
   check('EVIDENCE_INSUFFICIENCY_LOOP', 'never stores raw model output in validator_violation_codes (empty, this is not a validator failure)', JSON.stringify(report.publication_editor_result.validator_violation_codes) === '[]');
 }
@@ -1523,6 +1524,78 @@ async function testADifferentHumanReviewReasonAlsoResolvesAnExistingEvidenceGap(
   check('AUTO_READY_RESOLVES_GAP', 'final_state is the ordinary HUMAN_REVIEW for the new reason, not RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
 }
 
+async function testSynthesisFailedDoesNotResolveAnActiveResearchGap() {
+  // G (CORRECTION 2): a mechanical/accounting SYNTHESIS_FAILED proves
+  // NOTHING about whether the original evidence insufficiency is
+  // resolved -- it must NEVER resolve a pre-existing gap. The gap must
+  // be preserved exactly as it was so the system does not lose the
+  // research-feedback state because of model/output infrastructure
+  // noise.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let resolveCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'SYNTHESIS_FAILED', stage: 'initial', reason: 'unresolved_mechanical_or_accounting_violation',
+        finalOutput: null, violations: ['LIMITATIONS_NOT_PRESERVED'],
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async () => { resolveCalled = true; return { ok: true, reason: 'RESOLVED', row: {} }; },
+    },
+  });
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: final_state is the ordinary NO_OP_SUCCESS for SYNTHESIS_FAILED, unchanged', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: resolveResearchGapByTopic was NEVER called', resolveCalled === false);
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: research_gap_action is not set to RESOLVED (the gap is preserved, untouched)', !report.research_gap_action || report.research_gap_action.action !== 'RESOLVED', JSON.stringify(report.research_gap_action));
+}
+
+async function testGapUpsertFailureFailsClosedAsInfraReviewNotUncaughtThrow() {
+  // K (CORRECTION 3): a queue WRITE failure must never escape uncaught,
+  // must never be reported as if the gap were queued, and must produce
+  // a governed INFRA_REVIEW with the normal run report still persistable.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug),
+      loadActiveResearchGapsBySlugFn: async () => ({}),
+      upsertEvidenceInsufficiencyGapFn: async () => { throw new Error('simulated Supabase upsert failure'); },
+    },
+  });
+  check('QUEUE_WRITE_FAILURE', 'K: final_state is INFRA_REVIEW, never RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('QUEUE_WRITE_FAILURE', 'K: exception_reason names the upsert failure', report.exception_reason.includes('upsert failed') || report.exception_reason.includes('simulated Supabase upsert failure'), report.exception_reason);
+  check('QUEUE_WRITE_FAILURE', 'K: research_gap_action was never set to a successful action (the write never actually happened)', !report.research_gap_action, JSON.stringify(report.research_gap_action));
+  check('QUEUE_WRITE_FAILURE', 'K: a real, buildable run report was returned -- no uncaught throw escaped runDecisionPipeline', typeof report.run_id === 'string' && report.run_id.length > 0);
+}
+
+async function testGapResolveFailureFailsClosedAsInfraReviewNotUncaughtThrow() {
+  // L (CORRECTION 3): same fail-closed guarantee for the RESOLVE path
+  // (AUTO_READY release) -- and, per "No model retry", the run must stop
+  // here rather than continuing on to spend a Writer/Reviewer call.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let writeFnCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug), // AUTO_READY
+      writeFn: async (env, args) => { writeFnCalled = true; return fakeWriterResult(topicSlug, args.clearedSnapshot); },
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async () => { throw new Error('simulated Supabase resolve failure'); },
+    },
+  });
+  check('QUEUE_WRITE_FAILURE', 'L: final_state is INFRA_REVIEW, never SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('QUEUE_WRITE_FAILURE', 'L: exception_reason names the resolve failure', report.exception_reason.includes('resolve failed') || report.exception_reason.includes('simulated Supabase resolve failure'), report.exception_reason);
+  check('QUEUE_WRITE_FAILURE', 'L: no model retry -- the Writer was never called after the queue-write failure', writeFnCalled === false);
+  check('QUEUE_WRITE_FAILURE', 'L: a real, buildable run report was returned -- no uncaught throw escaped runDecisionPipeline', typeof report.run_id === 'string' && report.run_id.length > 0);
+}
+
 function testResearchGapLoopSafetyInvariants() {
   check('RESEARCH_GAP_SAFETY_INVARIANTS', 'S: AUTOPUBLISH is not enabled in either fake env used by these tests', isAutopublishEnabled(FAKE_ENV_WITH_CRED) === false && isAutopublishEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === false);
   check('RESEARCH_GAP_SAFETY_INVARIANTS', 'T: --publish still unconditionally refuses regardless of the research-gap loop flag', runFullAutopublishRefusal().ok === false);
@@ -1580,6 +1653,9 @@ const tests = [
   testSafetyOrScopeConcernNeverGoesToRickEvenWithLoopEnabled,
   testAutoReadyResolvesAnExistingEvidenceGap,
   testADifferentHumanReviewReasonAlsoResolvesAnExistingEvidenceGap,
+  testSynthesisFailedDoesNotResolveAnActiveResearchGap,
+  testGapUpsertFailureFailsClosedAsInfraReviewNotUncaughtThrow,
+  testGapResolveFailureFailsClosedAsInfraReviewNotUncaughtThrow,
   testResearchGapLoopSafetyInvariants,
 ];
 
