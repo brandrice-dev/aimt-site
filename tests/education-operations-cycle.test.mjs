@@ -346,6 +346,110 @@ async function testWriterPlanFailingDeterministicValidationRoutesToEditorialRevi
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// NUMERIC-FIDELITY REPAIR LANE (full orchestrator path, category H): a
+// deterministically-repairable numeric Writer defect is silently fixed
+// and the Reviewer IS invoked; an unrepairable one is NOT repaired and
+// the Reviewer is NEVER invoked -- EDITORIAL_REVIEW as before this lane
+// existed. Both fixtures share a synthesizeFn whose public_framing
+// carries one digit-bearing core_factual_point.
+// ─────────────────────────────────────────────────────────────────────────
+function fakeSynthesizeFnWithNumericCorePoint(topicSlug) {
+  return async () => ({
+    status: 'AUTO_READY', stage: 'initial', reason: 'validated',
+    finalOutput: {
+      topic_slug: topicSlug, page_concept: `${topicSlug} Overview`, recommended_disposition: 'AUTO_READY', confidence: 'high',
+      page_scope: { include: ['x'], exclude: ['treatment'] },
+      selected_claims: [{ claim_id: `${topicSlug}-c1`, role: 'core_finding', reason: 'ok' }, { claim_id: `${topicSlug}-c2`, role: 'limitation', reason: 'ok' }],
+      excluded_claims: [{ claim_id: `${topicSlug}-safety`, reason_code: 'OTHER', reason: 'Out of scope for a general overview.', related_conflict_claim_ids: [] }],
+      resolved_synthesis_signals: [], unresolved_issues: [],
+      human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] },
+      public_framing: {
+        // TWO core points sharing the same claim id: the original
+        // non-numeric statement (so answer_summary/key_takeaways, which
+        // still cite it verbatim, stay valid) PLUS one digit-bearing
+        // statement -- the exact-match repair pool only ever considers
+        // digit-bearing candidates, so this stays a single, unambiguous
+        // repair target.
+        core_points: [
+          { statement: `Finding ${topicSlug}-c1.`, supporting_claim_ids: [`${topicSlug}-c1`] },
+          { statement: 'Roughly 9% of follicles are affected at any given time.', supporting_claim_ids: [`${topicSlug}-c1`] },
+        ],
+        limitations: [{ statement: `Limitation for ${topicSlug}.`, supporting_claim_ids: [`${topicSlug}-c2`] }],
+        scope_note: 'Scope note.',
+      },
+    },
+    metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 500, total_output_tokens: 500, model_info: {} },
+  });
+}
+
+async function testRepairableNumericParaphraseIsFixedAndReviewerIsInvoked() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let reviewFnCalled = false;
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFnWithNumericCorePoint(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => {
+        const result = fakeWriterResult(topicSlug, clearedSnapshot);
+        // A numeric PARAPHRASE whose supporting_claim_ids maps EXACTLY
+        // to the one digit-bearing cleared core_factual_point above --
+        // the exact scenario the real GitHub Actions run hit.
+        result.output.sections[0].units[1] = {
+          kind: 'PARAPHRASE', text: 'About 9% of follicles show this at once.',
+          supporting_claim_ids: [`${topicSlug}-c1`], source_statements: ['Roughly 9% of follicles are affected at any given time.'],
+        };
+        return result;
+      },
+      reviewFn: async () => { reviewFnCalled = true; return fakePassingReviewResult(); },
+    },
+  });
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'final_state is SHADOW_CANDIDATE_READY -- the repair let the run proceed', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'the Reviewer WAS invoked after a successful repair', reviewFnCalled === true);
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'writer_result reports valid', report.writer_result && report.writer_result.valid === true, JSON.stringify(report.writer_result));
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'writer_result names the repaired location and repair type', report.writer_result.deterministic_repair
+    && report.writer_result.deterministic_repair.attempted === true
+    && report.writer_result.deterministic_repair.repaired_locations.includes('section:overview:1')
+    && report.writer_result.deterministic_repair.repair_type === 'NUMERIC_TO_CLEARED_VERBATIM', JSON.stringify(report.writer_result));
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'the repaired page (via __internal.plan) carries the exact cleared VERBATIM text', report.__internal.plan.sections[0].units[1].text === 'Roughly 9% of follicles are affected at any given time.' && report.__internal.plan.sections[0].units[1].kind === 'VERBATIM', JSON.stringify(report.__internal.plan.sections[0].units[1]));
+}
+
+async function testUnrepairableNumericParaphraseStaysEditorialReviewAndReviewerIsNotInvoked() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let reviewFnCalled = false;
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFnWithNumericCorePoint(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => {
+        const result = fakeWriterResult(topicSlug, clearedSnapshot);
+        // A numeric PARAPHRASE whose supporting_claim_ids maps to the
+        // LIMITATION claim -- but the limitation's cleared statement
+        // carries no digit at all, so zero candidates can ever match:
+        // NOT_REPAIRABLE, must remain EDITORIAL_REVIEW.
+        result.output.sections[0].units[1] = {
+          kind: 'PARAPHRASE', text: 'About 9% of follicles show this at once.',
+          supporting_claim_ids: [`${topicSlug}-c2`], source_statements: [`Limitation for ${topicSlug}.`],
+        };
+        return result;
+      },
+      reviewFn: async () => { reviewFnCalled = true; return fakePassingReviewResult(); },
+    },
+  });
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'final_state remains EDITORIAL_REVIEW -- no unique cleared match exists', report.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, report.final_state);
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'the Reviewer was NEVER invoked for an unrepaired plan', reviewFnCalled === false);
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'writer_result reports invalid', report.writer_result && report.writer_result.valid === false, JSON.stringify(report.writer_result));
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'violations still name the original numeric-fidelity rule', report.writer_result.violations.some((v) => v.startsWith('UNSUPPORTED_NUMERIC_CLAIM')), JSON.stringify(report.writer_result.violations));
+  check('NUMERIC_REPAIR_ORCHESTRATOR', 'writer_result names the unresolved location and the NO_UNIQUE_CLEARED_STATEMENT reason', report.writer_result.deterministic_repair
+    && report.writer_result.deterministic_repair.attempted === true
+    && report.writer_result.deterministic_repair.unresolved_locations.includes('section:overview:1')
+    && report.writer_result.deterministic_repair.reason === 'NO_UNIQUE_CLEARED_STATEMENT', JSON.stringify(report.writer_result));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Runtime published-topic state: a dynamically-injected published set
 // (simulating "Page #3 just published") is excluded from selection with
 // NO CODE CHANGE -- proving the orchestrator no longer trusts the
@@ -837,6 +941,8 @@ const tests = [
   testHumanReviewSynthesisStopsCleanly,
   testEditorialReviewFailClosed,
   testWriterPlanFailingDeterministicValidationRoutesToEditorialReview,
+  testRepairableNumericParaphraseIsFixedAndReviewerIsInvoked,
+  testUnrepairableNumericParaphraseStaysEditorialReviewAndReviewerIsNotInvoked,
   testDynamicPublishedTopicExclusion,
   testFreshnessInvokedAndIndependentOfNewPageLane,
   testPersistClearanceRefusesWithoutAutopublishEnabled,

@@ -74,7 +74,7 @@ Every run resolves to exactly one of (`education-run-ledger.mjs`'s `RUN_FINAL_ST
 | `SHADOW_CANDIDATE_READY` | Everything passed: selection, intent planning, Publication Editor synthesis (AUTO_READY), Education Writer, Education Reviewer. In `--shadow` mode this is where the run stops. |
 | `CONFIG_BLOCKED` | A required credential/config is missing (never a silent fallback to another subsystem's key). |
 | `HUMAN_REVIEW` | Publication Editor synthesis returned a genuinely justified `HUMAN_REVIEW` (structured `reason_code` + substantive reason — see the existing governance contract, unchanged by this project). |
-| `EDITORIAL_REVIEW` | The Page Plan failed deterministic validation OR the model-assisted reviewer found a substantive fidelity/voice/scope problem. |
+| `EDITORIAL_REVIEW` | The Page Plan failed deterministic validation and was not (or could not be) deterministically repaired (see "Numeric-fidelity repair" below), OR the model-assisted reviewer found a substantive fidelity/voice/scope problem. |
 | `INFRA_REVIEW` | The generated-diff allowlist was violated, or the shared architecture proved insufficient for this topic. Never let an autonomous run patch its own governance code to route around this. |
 | `FRESHNESS_FLAGGED` | A published topic's freshness scan found `POTENTIAL_EVIDENCE_CHANGE`. |
 | `PUBLISH_FAILED` | Cloudflare deployment or live-route verification failed after a merge — the DB row is never marked published in this case. |
@@ -165,6 +165,22 @@ The cluster hub insertion (`education-hub-updater.mjs#insertHubCard`) was streng
 - Every `related_links` href must be an internal AIMT route (`RELATED_LINK_NOT_INTERNAL` if not an absolute path starting with `/`) — defense-in-depth; see below for why the model has no path to violate this in the first place.
 
 The Page Plan is persisted as a git-tracked data artifact under `functions/_data/education-page-plans/<topic-slug>.json` — verified safe because `functions/` is Cloudflare Pages Functions *source*, never served as a static asset (the same reason `functions/_lib/` already safely holds service-role-key-using code); a claim ID never becomes a publicly-fetchable URL this way.
+
+## Numeric-fidelity repair (deterministic, Writer-stage)
+
+The first real end-to-end shadow run hit exactly the numeric-fidelity rule above: the Writer produced a digit-bearing unit as a PARAPHRASE (a mechanical Writer-output defect, not evidence uncertainty) and the deterministic validator correctly stopped it with `UNSUPPORTED_NUMERIC_CLAIM:<location>` before the Reviewer was ever called. That rule is **not weakened**. Instead, `education-page-plan-repair.mjs#repairDeterministicPagePlanViolations()` — pure, zero I/O, zero network, zero model calls — runs ONLY when the Page Plan validator's failure consists *entirely* of `UNSUPPORTED_NUMERIC_CLAIM` violations; any other violation (ungrounded claim, dropped scope note, duplicate text, etc.) is untouched by this lane and still falls straight through to `EDITORIAL_REVIEW`, exactly as before this repair existed.
+
+**The repair itself never asks a model to rewrite anything and never invents authority:**
+
+- Candidate statements are built ONLY from `clearedSnapshot.core_factual_points` and `clearedSnapshot.limitations` — never the Writer's own output — filtered to those that carry at least one digit.
+- A repair fires ONLY when exactly one candidate's `supporting_claim_ids` set is EXACTLY equal (not a subset, not a superset) to the offending unit's own `supporting_claim_ids` set. Zero matches → `NOT_REPAIRABLE` (`NO_UNIQUE_CLEARED_STATEMENT`). More than one match → `NOT_REPAIRABLE` (`AMBIGUOUS_CLEARED_STATEMENT`), with no arbitrary "closest" pick.
+- **Optional safe disambiguation:** when multiple cleared candidates genuinely share the same `supporting_claim_ids` set, the Writer's own `source_statements` may break the tie ONLY if exactly one of those already-claim-ID-matching candidates is byte-identical to one of the Writer's `source_statements`. A Writer-authored numeric sentence that is absent from the cleared snapshot can never itself become a candidate — it can only be used to choose among candidates that were already authoritative.
+- A successful repair replaces the unit in place with `{ kind: 'VERBATIM', text: candidate.statement, supporting_claim_ids: [...candidate.supporting_claim_ids], source_statements: [candidate.statement] }` — the exact cleared text, not a rewrite.
+- The orchestrator (`education-operations-cycle.mjs`) re-runs the FULL `validateEducationPagePlan()` on the entire repaired plan from scratch — the repair is a proposal, never a bypass. Only on a clean second pass does the run proceed to the Education Reviewer; otherwise `EDITORIAL_REVIEW` is preserved exactly as if no repair had been attempted.
+- Adds **zero** additional model calls — `MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN` (`education-run-ledger.mjs`) is unaffected.
+- Observability: a successful repair is recorded on the run report as `writer_result.deterministic_repair: { attempted: true, repaired_locations: [...], repair_type: 'NUMERIC_TO_CLEARED_VERBATIM' }`; a failed attempt records `{ attempted: true, repaired_locations: [...], unresolved_locations: [...], reason: 'NO_UNIQUE_CLEARED_STATEMENT' | 'AMBIGUOUS_CLEARED_STATEMENT' }`. Only location/reason codes are ever recorded — never evidence statement text — and the GitHub Issue body (`education-exception-reporter.mjs`) never includes `writer_result` at all, so no private research text reaches a public issue either way.
+
+This is a distinct mechanism from the Education Reviewer's `REPAIRABLE_FAIL` outcome described below — this repair runs deterministically at the Page Plan validator stage, before the Reviewer is ever called, and only ever touches numeric-fidelity text; it does not enable or interact with the Reviewer's own (currently empty-by-design) repairable-verdict set.
 
 ## Source and related-link authority
 
