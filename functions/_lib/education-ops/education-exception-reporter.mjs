@@ -64,12 +64,25 @@ export async function surfaceExceptionIfNeeded(report, io) {
   if (existing) return { action: 'REUSED', label, issue: existing };
 
   const title = `[${report.final_state}] ${report.selected_topic || 'education-operations'} ${marker}`;
+  // OBSERVABILITY: Publication Editor validator codes are already
+  // SANITIZED (CODE only, never a claim id/source id/evidence-text
+  // suffix -- see publication-violation-sanitizer.mjs and
+  // scripts/education-operations-cycle.mjs) by the time they land on
+  // publication_editor_result.validator_violation_codes; still, this is
+  // the ONE place that content could ever reach a public GitHub Issue,
+  // so it is included ONLY as a short list of bare codes, never any
+  // other field off publication_editor_result (no raw claim IDs,
+  // evidence statements, model output, or source titles).
+  const violationCodes = (report.publication_editor_result && Array.isArray(report.publication_editor_result.validator_violation_codes))
+    ? report.publication_editor_result.validator_violation_codes
+    : [];
   const body = [
     `**Run:** ${report.run_id}`,
     `**Final state:** ${report.final_state}`,
     `**Selected topic:** ${report.selected_topic || 'n/a'}`,
     `**Exception reason:** ${report.exception_reason || 'n/a'}`,
     `**Selection reason:** ${report.selection_reason || 'n/a'}`,
+    ...(violationCodes.length > 0 ? ['', 'Publication Editor validator codes:', ...violationCodes.map((code) => `- ${code}`)] : []),
     '',
     'This issue was opened automatically by the AIMT Education Operations scheduler. See the run report artifact for full detail.',
   ].join('\n');

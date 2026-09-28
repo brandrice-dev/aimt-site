@@ -511,6 +511,56 @@ async function testReconciliationCallFailureIsSynthesisFailed() {
   check('RECONCILE_CALL_FAILURE', 'SYNTHESIS_FAILED', result.status === 'SYNTHESIS_FAILED', result.status);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// VIOLATION OBSERVABILITY (diagnostic preservation): a call failure at
+// reconciliation/full-retry/justification-retry still carries the
+// INITIAL validation's violations at the top level, not just nested
+// under `initial` -- so a caller can read `result.violations`
+// uniformly regardless of which stage ultimately failed. Classification
+// logic and status mapping are completely unaffected (still
+// SYNTHESIS_FAILED, same reason) -- this only adds a diagnostic field.
+// ─────────────────────────────────────────────────────────────────────────
+async function testReconcileCallFailureStillPreservesTheTriggeringViolationsAtTopLevel() {
+  const synthesizeFn = callCounter().willReturn(okResult(incompleteAiOutput()));
+  const reconcileFn = callCounter().willReturn(failResult('request_failed'));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn, retryFn: callCounter() },
+  });
+  check('VIOLATION_OBSERVABILITY', 'status/reason are completely unchanged (SYNTHESIS_FAILED, request_failed)', result.status === 'SYNTHESIS_FAILED' && result.reason === 'request_failed', JSON.stringify({ status: result.status, reason: result.reason }));
+  check('VIOLATION_OBSERVABILITY', 'top-level violations now carries the violation that triggered reconciliation', Array.isArray(result.violations) && result.violations.some((v) => v.startsWith('CLAIM_MISSING_DISPOSITION')), JSON.stringify(result.violations));
+  check('VIOLATION_OBSERVABILITY', 'matches the nested initial.violations exactly (never a second, independently-derived value)', JSON.stringify(result.violations) === JSON.stringify(result.initial.violations));
+}
+
+async function testFullRetryCallFailureStillPreservesTheTriggeringViolationsAtTopLevel() {
+  const synthesizeFn = callCounter().willReturn(okResult(incompleteAiOutput()));
+  const reconcileFn = callCounter().willReturn(okResult({
+    resolutions: [{
+      claim_id: 'c3', disposition: 'SELECTED', role: 'core_finding',
+      reason_code: null, reason: 'Actually central.',
+      materially_changes_existing_synthesis: true, material_change_reason: 'Changes a core point.',
+    }],
+  }));
+  const retryFn = callCounter().willReturn(failResult('request_failed'));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn, retryFn },
+  });
+  check('VIOLATION_OBSERVABILITY', 'status/reason are completely unchanged (SYNTHESIS_FAILED, request_failed)', result.status === 'SYNTHESIS_FAILED' && result.reason === 'request_failed');
+  check('VIOLATION_OBSERVABILITY', 'top-level violations is populated even though the failure happened at full_retry', Array.isArray(result.violations) && result.violations.length > 0, JSON.stringify(result.violations));
+}
+
+async function testHumanReviewJustificationRetryCallFailureStillPreservesTheTriggeringViolationsAtTopLevel() {
+  const synthesizeFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const justifyRetryFn = callCounter().willReturn(failResult('request_failed'));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn: callCounter(), retryFn: callCounter(), justifyRetryFn },
+  });
+  check('VIOLATION_OBSERVABILITY', 'status/reason are completely unchanged (SYNTHESIS_FAILED, request_failed)', result.status === 'SYNTHESIS_FAILED' && result.reason === 'request_failed');
+  check('VIOLATION_OBSERVABILITY', 'top-level violations carries HUMAN_REVIEW_MISSING_JUSTIFICATION', Array.isArray(result.violations) && result.violations.includes('HUMAN_REVIEW_MISSING_JUSTIFICATION'), JSON.stringify(result.violations));
+}
+
 // ---- Run all tests sequentially, then report ----
 const tests = [
   testHappyPathNoReconciliationNeeded,
@@ -528,6 +578,9 @@ const tests = [
   testRepeatedAccountingFailureAfterRetryNeverLoops,
   testInitialCallFailureIsSynthesisFailed,
   testReconciliationCallFailureIsSynthesisFailed,
+  testReconcileCallFailureStillPreservesTheTriggeringViolationsAtTopLevel,
+  testFullRetryCallFailureStillPreservesTheTriggeringViolationsAtTopLevel,
+  testHumanReviewJustificationRetryCallFailureStillPreservesTheTriggeringViolationsAtTopLevel,
   testDynamicIntentReachesInitialReconciliationAndFullRetry,
   testDynamicIntentReachesHumanReviewJustificationRetry,
   testOmittedPageIntentPropagatesAsNullEverywhere,

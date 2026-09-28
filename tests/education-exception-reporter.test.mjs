@@ -68,6 +68,53 @@ async function testClosedIssueWithSameMarkerIsNotReused() {
   check('CLOSED_NOT_REUSED', 'creates a fresh issue', createCalls === 1);
 }
 
+async function testIssueBodyIncludesSanitizedViolationCodesButNoRawIds() {
+  let createdWith = null;
+  const report = buildRunReport({
+    run_id: 'r4', mode: 'shadow', final_state: RUN_FINAL_STATE.HUMAN_REVIEW, selected_topic: 'androgenetic-alopecia',
+    exception_reason: 'Genuine unresolved contradiction.',
+    publication_editor_result: {
+      status: 'HUMAN_REVIEW', reason: 'substantive_validator_violation',
+      // ALREADY sanitized by the time it reaches a run report -- this
+      // module never re-derives or re-sanitizes anything itself, it
+      // only ever renders whatever bare codes it is given.
+      validator_violation_codes: ['LIMITATIONS_NOT_PRESERVED', 'SUPPORTING_CLAIM_NOT_SELECTED'],
+      human_review_justification: { reason_code: 'UNRESOLVED_CONTRADICTION', reason: 'Two sources genuinely disagree.', related_claim_ids: ['some-private-claim-id-should-never-appear'] },
+    },
+  });
+  const result = await surfaceExceptionIfNeeded(report, {
+    listIssuesFn: async () => [],
+    createIssueFn: async (input) => { createdWith = input; return { number: 43, title: input.title, url: 'https://github.com/x/x/issues/43' }; },
+  });
+  check('VIOLATION_CODES_IN_ISSUE', 'action is CREATED', result.action === 'CREATED');
+  check('VIOLATION_CODES_IN_ISSUE', 'body includes the "Publication Editor validator codes" section', createdWith.body.includes('Publication Editor validator codes:'));
+  check('VIOLATION_CODES_IN_ISSUE', 'body lists each sanitized code as a bullet', createdWith.body.includes('- LIMITATIONS_NOT_PRESERVED') && createdWith.body.includes('- SUPPORTING_CLAIM_NOT_SELECTED'));
+  check('VIOLATION_CODES_IN_ISSUE', 'body never includes the raw claim id from human_review_justification.related_claim_ids', !createdWith.body.includes('some-private-claim-id-should-never-appear'));
+}
+
+async function testIssueBodyOmitsTheViolationCodesSectionWhenNoneExist() {
+  let createdWith = null;
+  const report = buildRunReport({
+    run_id: 'r5', mode: 'shadow', final_state: RUN_FINAL_STATE.HUMAN_REVIEW, selected_topic: 'androgenetic-alopecia',
+    exception_reason: 'Genuine unresolved contradiction.',
+    publication_editor_result: { status: 'HUMAN_REVIEW', reason: 'substantive_validator_violation', validator_violation_codes: [], human_review_justification: null },
+  });
+  const result = await surfaceExceptionIfNeeded(report, {
+    listIssuesFn: async () => [],
+    createIssueFn: async (input) => { createdWith = input; return { number: 44, title: input.title, url: 'https://github.com/x/x/issues/44' }; },
+  });
+  check('VIOLATION_CODES_IN_ISSUE', 'action is CREATED', result.action === 'CREATED');
+  check('VIOLATION_CODES_IN_ISSUE', 'body has no "Publication Editor validator codes" section when the array is empty', !createdWith.body.includes('Publication Editor validator codes:'));
+}
+
+async function testIssueBodyToleratesAReportWithNoPublicationEditorResultAtAll() {
+  // e.g. INFRA_REVIEW/CONFIG_BLOCKED states where publication_editor_result
+  // may never have been set at all -- must not throw.
+  const report = buildRunReport({ run_id: 'r6', mode: 'shadow', final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'x' });
+  const result = await surfaceExceptionIfNeeded(report, { listIssuesFn: async () => [], createIssueFn: async (input) => ({ number: 45, title: input.title, url: 'x' }) });
+  check('VIOLATION_CODES_IN_ISSUE', 'does not throw and still creates the issue', result.action === 'CREATED');
+}
+
 async function testEveryExceptionFinalStateMapsToALabel() {
   for (const state of ['HUMAN_REVIEW', 'EDITORIAL_REVIEW', 'INFRA_REVIEW', 'FRESHNESS_FLAGGED', 'CONFIG_BLOCKED', 'PUBLISH_FAILED']) {
     const report = buildRunReport({ run_id: 'r1', mode: 'shadow', final_state: state, exception_reason: 'x' });
@@ -76,7 +123,12 @@ async function testEveryExceptionFinalStateMapsToALabel() {
   }
 }
 
-const tests = [testNormalSuccessNeverCreatesAnIssue, testShadowCandidateReadyNeverCreatesAnIssue, testHumanReviewCreatesAnIssue, testDedupReusesExistingOpenIssue, testClosedIssueWithSameMarkerIsNotReused, testEveryExceptionFinalStateMapsToALabel];
+const tests = [
+  testNormalSuccessNeverCreatesAnIssue, testShadowCandidateReadyNeverCreatesAnIssue, testHumanReviewCreatesAnIssue,
+  testDedupReusesExistingOpenIssue, testClosedIssueWithSameMarkerIsNotReused, testEveryExceptionFinalStateMapsToALabel,
+  testIssueBodyIncludesSanitizedViolationCodesButNoRawIds, testIssueBodyOmitsTheViolationCodesSectionWhenNoneExist,
+  testIssueBodyToleratesAReportWithNoPublicationEditorResultAtAll,
+];
 for (const t of tests) await t();
 
 // ---- Report ----

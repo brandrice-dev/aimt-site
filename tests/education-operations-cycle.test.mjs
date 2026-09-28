@@ -1280,6 +1280,78 @@ function testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume
   check('SAFETY_INVARIANTS', '--publish still unconditionally refuses regardless of any candidate-resume state', runFullAutopublishRefusal().ok === false);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// PUBLICATION EDITOR VIOLATION OBSERVABILITY (publication-violation-
+// sanitizer.mjs wired into the publication_editor_result shape). THE
+// FIX: real Education Operations Runs #4-#6 repeated SYNTHESIS_FAILED /
+// unresolved_mechanical_or_accounting_violation for the same topic with
+// zero visibility into WHICH deterministic validator rule(s) actually
+// fired. These tests prove the sanitized codes now reach the run
+// report, with zero raw claim IDs, and that the existing terminal-state
+// mapping (SYNTHESIS_FAILED -> NO_OP_SUCCESS, HUMAN_REVIEW -> HUMAN_REVIEW)
+// is completely unchanged.
+// ─────────────────────────────────────────────────────────────────────────
+async function testSynthesisFailedViolationsReachRunReportAsSanitizedCodes() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'SYNTHESIS_FAILED', stage: 'initial', reason: 'unresolved_mechanical_or_accounting_violation',
+        finalOutput: { human_review_justification: { reason_code: 'NOT_APPLICABLE', reason: 'Not applicable', related_claim_ids: [] } },
+        violations: ['LIMITATIONS_NOT_PRESERVED', `SUPPORTING_CLAIM_NOT_SELECTED:${topicSlug}-c1-super-private-id`, 'LIMITATIONS_NOT_PRESERVED'],
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+    },
+  });
+  check('PE_VIOLATION_OBSERVABILITY', 'final_state is NO_OP_SUCCESS -- the existing SYNTHESIS_FAILED mapping is unchanged', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('PE_VIOLATION_OBSERVABILITY', 'publication_editor_result.status is SYNTHESIS_FAILED', report.publication_editor_result.status === 'SYNTHESIS_FAILED');
+  check('PE_VIOLATION_OBSERVABILITY', 'publication_editor_result.reason is preserved exactly', report.publication_editor_result.reason === 'unresolved_mechanical_or_accounting_violation');
+  check('PE_VIOLATION_OBSERVABILITY', 'validator_violation_codes carries the sanitized, deduplicated codes in order', JSON.stringify(report.publication_editor_result.validator_violation_codes) === JSON.stringify(['LIMITATIONS_NOT_PRESERVED', 'SUPPORTING_CLAIM_NOT_SELECTED']), JSON.stringify(report.publication_editor_result.validator_violation_codes));
+  check('PE_VIOLATION_OBSERVABILITY', 'no raw claim id anywhere in the serialized run report', !JSON.stringify(report).includes('super-private-id'));
+  check('PE_VIOLATION_OBSERVABILITY', 'human_review_justification is still preserved exactly as before', report.publication_editor_result.human_review_justification && report.publication_editor_result.human_review_justification.reason_code === 'NOT_APPLICABLE');
+}
+
+async function testSynthesisFailedWithNoViolationsProducesAnEmptyArray() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'SYNTHESIS_FAILED', stage: 'initial', reason: 'model_call_failed',
+        finalOutput: null,
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+    },
+  });
+  check('PE_VIOLATION_OBSERVABILITY', 'validator_violation_codes is [] when the underlying result carries no violations at all', Array.isArray(report.publication_editor_result.validator_violation_codes) && report.publication_editor_result.validator_violation_codes.length === 0, JSON.stringify(report.publication_editor_result.validator_violation_codes));
+}
+
+async function testHumanReviewStillMapsExactlyAsBeforeWithSanitizedCodesAlsoPresent() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'HUMAN_REVIEW', stage: 'initial', reason: 'substantive_validator_violation',
+        finalOutput: { human_review_justification: { reason_code: 'UNRESOLVED_CONTRADICTION', reason: 'Two sources genuinely disagree on a core finding for this topic.', related_claim_ids: [`${topicSlug}-c1`] } },
+        violations: ['AUTO_READY_WITH_INCONSISTENT_HUMAN_REVIEW_JUSTIFICATION', `NON_CORE_CONFLICT_ONE_SIDED_EXCLUSION:${topicSlug}-c1->${topicSlug}-c2`],
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+    },
+  });
+  check('PE_VIOLATION_OBSERVABILITY', 'final_state is still exactly HUMAN_REVIEW, unchanged', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+  check('PE_VIOLATION_OBSERVABILITY', 'exception_reason still carries the human_review_justification.reason exactly as before', report.exception_reason.includes('Two sources genuinely disagree'), report.exception_reason);
+  check('PE_VIOLATION_OBSERVABILITY', 'validator_violation_codes is ALSO populated and sanitized for a HUMAN_REVIEW outcome', JSON.stringify(report.publication_editor_result.validator_violation_codes) === JSON.stringify(['AUTO_READY_WITH_INCONSISTENT_HUMAN_REVIEW_JUSTIFICATION', 'NON_CORE_CONFLICT_ONE_SIDED_EXCLUSION']), JSON.stringify(report.publication_editor_result.validator_violation_codes));
+  check('PE_VIOLATION_OBSERVABILITY', 'no raw claim id pair anywhere in the serialized run report', !JSON.stringify(report).includes(`${topicSlug}-c1->${topicSlug}-c2`));
+}
+
 const tests = [
   testWeeklyCapBlocksTheWholeRun,
   testWeeklyCapRuntimeThresholds,
@@ -1321,6 +1393,9 @@ const tests = [
   testMalformedBundleFailsClosedAsInfraReviewWithoutResuming,
   testLegacyRunWithNoCandidateBundleStillReachesShadowCandidateReady,
   testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume,
+  testSynthesisFailedViolationsReachRunReportAsSanitizedCodes,
+  testSynthesisFailedWithNoViolationsProducesAnEmptyArray,
+  testHumanReviewStillMapsExactlyAsBeforeWithSanitizedCodesAlsoPresent,
 ];
 
 for (const t of tests) await t();

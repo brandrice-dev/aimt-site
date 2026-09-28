@@ -85,6 +85,7 @@ import {
   buildCandidateBundle, advanceCandidateBundle, verifyCandidateBundleIntegrity,
   resolveCandidateResumeFreshness, determineResumeStage, RESUME_STAGE,
 } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
+import { sanitizePublicationValidatorViolations } from '../functions/_lib/research/publication-violation-sanitizer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -640,9 +641,22 @@ export async function runDecisionPipeline(env, options = {}) {
 
     if (!synthesisResult.ok) {
       const isHumanReview = synthesisResult.status === 'HUMAN_REVIEW';
+      // OBSERVABILITY (real recurring shadow-run failure, alopecia-areata
+      // Runs #4-#6: repeated SYNTHESIS_FAILED /
+      // unresolved_mechanical_or_accounting_violation with no visibility
+      // into WHICH deterministic validator rule(s) actually fired):
+      // prepareTopicArtifact() already threads the orchestrator's raw
+      // internal violations through as synthesisResult.violations --
+      // sanitized here (CODE only, never a claim id/source id suffix)
+      // before it ever reaches a run report or a GitHub Issue.
       return finish({
         candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
-        publication_editor_result: { status: synthesisResult.status, reason: synthesisResult.reason, human_review_justification: synthesisResult.humanReviewJustification },
+        publication_editor_result: {
+          status: synthesisResult.status,
+          reason: synthesisResult.reason,
+          validator_violation_codes: sanitizePublicationValidatorViolations(synthesisResult.violations),
+          human_review_justification: synthesisResult.humanReviewJustification,
+        },
         final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : RUN_FINAL_STATE.NO_OP_SUCCESS,
         exception_reason: isHumanReview ? `HUMAN_REVIEW: ${synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason}` : synthesisResult.reason,
       });
