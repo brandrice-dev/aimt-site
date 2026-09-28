@@ -1,8 +1,11 @@
 name: AIMT Education Operations
 
 on:
-  schedule:
-    - cron: '0 14 * * 1-5'
+  # SCHEDULE DISABLED for this phase (see docs/education/AIMT-EDUCATION-
+  # OPERATIONS-v1.md's "Durable candidate persistence + resume" section):
+  # re-enabled only once the final publish/deploy/verify lane is
+  # connected. workflow_dispatch remains available for a manual run.
+  # - cron: '0 14 * * 1-5'
   workflow_dispatch:
 
 concurrency:
@@ -12,6 +15,10 @@ concurrency:
 permissions:
   contents: read
   issues: write
+  # Read-only: needed to list/download a prior run's uploaded candidate-
+  # bundle artifact so this run can resume from it. Never actions:write
+  # -- this workflow cannot delete or modify any artifact.
+  actions: read
 
 jobs:
   run-cycle:
@@ -22,6 +29,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Find latest durable candidate-bundle artifact
+        id: find-candidate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'education-candidate-bundles',
+              per_page: 1,
+            });
+            const artifact = data.artifacts.find((a) => !a.expired);
+            core.setOutput('found', artifact ? 'true' : 'false');
+            if (artifact) core.setOutput('run-id', String(artifact.workflow_run.id));
+
+      - name: Download latest durable candidate bundle
+        if: steps.find-candidate.outputs.found == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: education-candidate-bundles
+          path: research-import/education-ops/candidates/
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.find-candidate.outputs.run-id }}
+
       - name: Run Education Operations shadow cycle
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -32,9 +64,19 @@ jobs:
           AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
           GH_TOKEN: ${{ github.token }}
         run: node scripts/education-operations-cycle.mjs --shadow
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: education-ops-shadow-${{ github.run_id }}
           path: research-import/education-ops/runs/
           retention-days: 30
+
+      - name: Upload durable candidate bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: education-candidate-bundles
+          path: research-import/education-ops/candidates/
+          retention-days: 90
+          if-no-files-found: ignore

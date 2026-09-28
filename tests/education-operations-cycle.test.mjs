@@ -25,9 +25,10 @@ import {
   parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
 } from '../scripts/education-operations-cycle.mjs';
-import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
 import { EDUCATION_OPS_API_KEY_ENV_VAR } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
+import { RESUME_STAGE } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -46,14 +47,40 @@ const FAKE_ENV_WITH_CRED = { [EDUCATION_OPS_API_KEY_ENV_VAR]: 'fake-not-a-real-k
     that specifically want to exercise the live-query failure path pass
     their own `publishedTopicSlugs`/`pagesPublishedThisWeek`/`fns`
     overrides straight through `runDecisionPipeline` instead of through
-    this helper. */
+    this helper.
+
+    loadCandidateBundleFn/writeCandidateBundleFn default to a no-op,
+    always-empty pair here so the pre-existing (legacy) tests in this
+    file -- none of which know about durable candidate bundles at all --
+    never touch the REAL filesystem under research-import/education-ops/
+    candidates/. Without this, two unrelated tests reusing the same
+    topic_slug (most of this file uses "androgenetic-alopecia") could
+    cross-contaminate each other via a real file one test left behind.
+    The durable-candidate-resume-specific tests below override both with
+    an in-memory Map-backed pair instead. */
 function run(env, options = {}) {
   return runDecisionPipeline(env, {
     publishedTopicSlugs: [],
     pagesPublishedThisWeek: 0,
     ...options,
-    fns: { checkFreshnessFn: async () => [], ...(options.fns || {}) },
+    fns: {
+      checkFreshnessFn: async () => [],
+      loadCandidateBundleFn: () => ({ found: false, bundle: null }),
+      writeCandidateBundleFn: () => {},
+      ...(options.fns || {}),
+    },
   });
+}
+
+/** In-memory candidate-bundle store for the durable-candidate-resume
+    tests below -- never touches the real filesystem. */
+function makeInMemoryCandidateStore(seed = {}) {
+  const store = new Map(Object.entries(seed));
+  return {
+    loadCandidateBundleFn: (topicSlug) => (store.has(topicSlug) ? { found: true, bundle: store.get(topicSlug) } : { found: false, bundle: null }),
+    writeCandidateBundleFn: (topicSlug, bundle) => { store.set(topicSlug, bundle); },
+    store,
+  };
 }
 
 function makeSource(id) { return { source_id: id, title: `S ${id}`, year: 2024, doi: `10.1/${id}`, evidence_type: 'systematic_review' }; }
@@ -930,6 +957,329 @@ async function testPrepareRefusesToOverwriteAnExistingPagePlanArtifact() {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// DURABLE CANDIDATE PERSISTENCE + RESUME (education-candidate-bundle.mjs
+// wired into runDecisionPipeline). THE FIX: real GitHub Actions Run #3
+// selected alopecia-areata, Publication Editor returned AUTO_READY, the
+// Writer ran, and deterministic validation stopped on a numeric defect
+// (EDITORIAL_REVIEW). Run #4 selected the SAME topic and Publication
+// Editor was invoked AGAIN from scratch -- nondeterministically
+// returning SYNTHESIS_FAILED this time. These tests prove a valid, FRESH
+// candidate is durably reused instead, at every resumable stage, and
+// that a corrupt/stale/malformed candidate never resumes and never
+// silently blocks or regenerates in an unsafe way.
+// ─────────────────────────────────────────────────────────────────────────
+
+function spyFn(realFn) {
+  const spy = (...args) => { spy.callCount += 1; return realFn(...args); };
+  spy.callCount = 0;
+  return spy;
+}
+
+/** One full, successful pipeline run against a fresh in-memory candidate
+    store -- the "Run A" setup step most resume tests below build on. */
+async function runFullSuccessfulPipeline(topicSlug, pool, store, fnsOverrides = {}) {
+  return run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+      ...fnsOverrides,
+    },
+  });
+}
+
+async function testResumeAtNeedsWriterSkipsIntentPlannerAndPublicationEditor() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  // Run A: Publication Editor succeeds, but the Writer's OWN call fails
+  // (CONFIG_BLOCKED) -- the durable bundle must already be persisted at
+  // PE-only (NEEDS_WRITER) by the time this run returns.
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async () => ({ ok: false, reason: 'simulated Writer outage' }),
+    },
+  });
+  check('RESUME_AT_WRITER', 'Run A reaches CONFIG_BLOCKED at the Writer call', runA.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, runA.final_state);
+  check('RESUME_AT_WRITER', 'Run A already persisted a candidate bundle (PE succeeded)', store.store.has(topicSlug));
+  check('RESUME_AT_WRITER', 'the persisted bundle has no page_plan yet', store.store.get(topicSlug).page_plan === null);
+
+  // Run B: Intent Planner and Publication Editor must NEVER be called
+  // again -- only the Writer (and, since it now succeeds, the Reviewer).
+  const planIntentSpy = spyFn(async () => fakeIntentResult(topicSlug));
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: planIntentSpy,
+      synthesizeFn: synthesizeSpy,
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('RESUME_AT_WRITER', 'Intent Planner was never called on resume', planIntentSpy.callCount === 0);
+  check('RESUME_AT_WRITER', 'Publication Editor was never called on resume', synthesizeSpy.callCount === 0);
+  check('RESUME_AT_WRITER', 'candidate_resume reports found+reused', runB.candidate_resume.found === true && runB.candidate_resume.reused === true);
+  check('RESUME_AT_WRITER', 'candidate_resume reports resumed_from_stage NEEDS_WRITER', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.NEEDS_WRITER, runB.candidate_resume.resumed_from_stage);
+  check('RESUME_AT_WRITER', 'final_state reaches SHADOW_CANDIDATE_READY', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runB.final_state, reason: runB.exception_reason }));
+  check('RESUME_AT_WRITER', 'only 2 model calls this run (writer + reviewer, never re-deriving intent/PE)', runB.model_calls.total_calls === 2, runB.model_calls.total_calls);
+}
+
+async function testResumeAtNeedsReviewerSkipsPublicationEditorAndWriter() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => ({ ok: false, reason: 'simulated Reviewer outage' }),
+    },
+  });
+  check('RESUME_AT_REVIEWER', 'Run A reaches CONFIG_BLOCKED at the Reviewer call', runA.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, runA.final_state);
+  check('RESUME_AT_REVIEWER', 'the persisted bundle already has a valid page_plan', store.store.get(topicSlug).page_plan !== null && store.store.get(topicSlug).writer_validation.valid === true);
+
+  const planIntentSpy = spyFn(async () => fakeIntentResult(topicSlug));
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const writeSpy = spyFn(async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: planIntentSpy, synthesizeFn: synthesizeSpy, writeFn: writeSpy,
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('RESUME_AT_REVIEWER', 'Intent Planner never called', planIntentSpy.callCount === 0);
+  check('RESUME_AT_REVIEWER', 'Publication Editor never called', synthesizeSpy.callCount === 0);
+  check('RESUME_AT_REVIEWER', 'Writer never called', writeSpy.callCount === 0);
+  check('RESUME_AT_REVIEWER', 'resumed_from_stage is NEEDS_REVIEWER', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.NEEDS_REVIEWER, runB.candidate_resume.resumed_from_stage);
+  check('RESUME_AT_REVIEWER', 'final_state reaches SHADOW_CANDIDATE_READY', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runB.final_state, reason: runB.exception_reason }));
+  check('RESUME_AT_REVIEWER', 'only 1 model call this run (reviewer only)', runB.model_calls.total_calls === 1, runB.model_calls.total_calls);
+}
+
+async function testResumeAtReadyForPrepareMakesZeroModelCallsAndNeverErasesAValidFreshCandidate() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  const runA = await runFullSuccessfulPipeline(topicSlug, pool, store);
+  check('RESUME_READY_FOR_PREPARE', 'Run A reaches SHADOW_CANDIDATE_READY', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runA.final_state, reason: runA.exception_reason }));
+
+  const planIntentSpy = spyFn(async () => fakeIntentResult(topicSlug));
+  // A synthesizeFn that WOULD fail if ever invoked -- proves Publication
+  // Editor cannot be re-triggered for an already-valid FRESH candidate,
+  // even to nondeterministically produce a worse outcome (the exact
+  // Run #3 -> Run #4 regression this feature fixes: a later failed
+  // synthesis must never replace an existing valid FRESH candidate).
+  const synthesizeSpy = spyFn(async () => ({ status: 'SYNTHESIS_FAILED', stage: 'initial', reason: 'unresolved_mechanical_or_accounting_violation', finalOutput: null, metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 1, total_output_tokens: 1, model_info: {} } }));
+  const writeSpy = spyFn(async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot));
+  const reviewSpy = spyFn(async () => fakePassingReviewResult());
+
+  const bundleBefore = JSON.stringify(store.store.get(topicSlug));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: planIntentSpy, synthesizeFn: synthesizeSpy, writeFn: writeSpy, reviewFn: reviewSpy,
+    },
+  });
+  check('RESUME_READY_FOR_PREPARE', 'zero model calls this run', runB.model_calls.total_calls === 0, runB.model_calls.total_calls);
+  check('RESUME_READY_FOR_PREPARE', 'resumed_from_stage is READY_FOR_PREPARE', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.READY_FOR_PREPARE);
+  check('RESUME_READY_FOR_PREPARE', 'final_state is SHADOW_CANDIDATE_READY', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY);
+  check('NO_ERASURE_BY_LATER_FAILURE', 'Intent Planner never called', planIntentSpy.callCount === 0);
+  check('NO_ERASURE_BY_LATER_FAILURE', 'Publication Editor never called despite being wired to fail', synthesizeSpy.callCount === 0);
+  check('NO_ERASURE_BY_LATER_FAILURE', 'Writer never called', writeSpy.callCount === 0);
+  check('NO_ERASURE_BY_LATER_FAILURE', 'Reviewer never called', reviewSpy.callCount === 0);
+  check('NO_ERASURE_BY_LATER_FAILURE', 'the durable bundle is byte-for-byte unchanged after Run B (never overwritten by a later run)', JSON.stringify(store.store.get(topicSlug)) === bundleBefore);
+}
+
+async function testRepairedPagePlanPersistsAsTheCanonicalPlanInTheBundle() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFnWithNumericCorePoint(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => {
+        const result = fakeWriterResult(topicSlug, clearedSnapshot);
+        result.output.sections[0].units[1] = {
+          kind: 'PARAPHRASE', text: 'About 9% of follicles show this at once.',
+          supporting_claim_ids: [`${topicSlug}-c1`], source_statements: ['Roughly 9% of follicles are affected at any given time.'],
+        };
+        return result;
+      },
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('REPAIRED_PLAN_PERSISTED', 'Run A reaches SHADOW_CANDIDATE_READY via repair', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runA.final_state, reason: runA.exception_reason }));
+
+  const persisted = store.store.get(topicSlug);
+  check('REPAIRED_PLAN_PERSISTED', 'the persisted page_plan carries the REPAIRED (VERBATIM) unit, never the original PARAPHRASE', persisted.page_plan.sections[0].units[1].kind === 'VERBATIM' && persisted.page_plan.sections[0].units[1].text === 'Roughly 9% of follicles are affected at any given time.', JSON.stringify(persisted.page_plan.sections[0].units[1]));
+  check('REPAIRED_PLAN_PERSISTED', 'deterministic_repair is recorded on the bundle itself', persisted.deterministic_repair && persisted.deterministic_repair.attempted === true, JSON.stringify(persisted.deterministic_repair));
+
+  // A later resumed run must reuse the REPAIRED plan verbatim (it's
+  // already valid, so it resumes all the way to READY_FOR_PREPARE).
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: { loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn, fetchEvidenceFn: async () => pool },
+  });
+  check('REPAIRED_PLAN_PERSISTED', 'a resumed run reuses the repaired plan as READY_FOR_PREPARE with zero model calls', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.READY_FOR_PREPARE && runB.model_calls.total_calls === 0);
+}
+
+async function testStaleCandidateDueToNewEvidenceDoesNotResumeAndTriggersFreshSynthesis() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const poolA = healthyPoolForSingleTopic(topicSlug);
+  const runA = await runFullSuccessfulPipeline(topicSlug, poolA, store);
+  check('STALE_CANDIDATE', 'Run A succeeds', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runA.final_state, reason: runA.exception_reason }));
+
+  // A NEW claim appears in the evidence pool for the same topic -- the
+  // candidate claim set considered at clearance no longer matches the
+  // CURRENT candidate pool: legitimate staleness, not corruption.
+  const poolB = healthyPoolForSingleTopic(topicSlug);
+  poolB.claims.push(makeClaim(`${topicSlug}-c-new`, topicSlug, `${topicSlug}-s1`));
+
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => poolB,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: synthesizeSpy,
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('STALE_CANDIDATE', 'candidate_resume reports found but NOT reused', runB.candidate_resume.found === true && runB.candidate_resume.reused === false, JSON.stringify(runB.candidate_resume));
+  check('STALE_CANDIDATE', 'freshness_state is POTENTIAL_EVIDENCE_CHANGE', runB.candidate_resume.freshness_state === FRESHNESS_STATE.POTENTIAL_EVIDENCE_CHANGE, runB.candidate_resume.freshness_state);
+  check('STALE_CANDIDATE', 'Publication Editor WAS called fresh -- legitimate regeneration, never a silent block', synthesizeSpy.callCount === 1);
+  check('STALE_CANDIDATE', 'the run still proceeds all the way through on the fresh synthesis', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runB.final_state, reason: runB.exception_reason }));
+  check('STALE_CANDIDATE', 'model-call ceiling is still respected on a fresh regeneration', runB.model_calls.total_calls <= MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN, runB.model_calls.total_calls);
+}
+
+async function testFreshnessCheckFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const runA = await runFullSuccessfulPipeline(topicSlug, pool, store);
+  check('FRESHNESS_CHECK_FAILURE', 'Run A succeeds', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY);
+
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      resolveCandidateResumeFreshnessFn: () => ({ state: FRESHNESS_STATE.FRESHNESS_CHECK_FAILED, reason: 'forced for test' }),
+      synthesizeFn: synthesizeSpy,
+    },
+  });
+  check('FRESHNESS_CHECK_FAILURE', 'final_state is INFRA_REVIEW', runB.final_state === RUN_FINAL_STATE.INFRA_REVIEW, runB.final_state);
+  check('FRESHNESS_CHECK_FAILURE', 'candidate_resume reports the failed freshness state, never reused', runB.candidate_resume.freshness_state === FRESHNESS_STATE.FRESHNESS_CHECK_FAILED && runB.candidate_resume.reused === false);
+  check('FRESHNESS_CHECK_FAILURE', 'never falls through to a fresh Publication Editor call either -- fails closed, does not regenerate in the same run', synthesizeSpy.callCount === 0);
+}
+
+async function testIntegrityFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const runA = await runFullSuccessfulPipeline(topicSlug, pool, store);
+  check('INTEGRITY_FAILURE', 'Run A succeeds', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY);
+
+  // Tamper with the durable bundle's own stored hash directly -- the
+  // REAL verifyCandidateBundleIntegrity() (not mocked) must catch this.
+  const tampered = { ...store.store.get(topicSlug) };
+  tampered.generation_source_hash = '0'.repeat(64);
+  tampered.prepared_artifact = { ...tampered.prepared_artifact, record: { ...tampered.prepared_artifact.record, generation_source_hash: '0'.repeat(64) } };
+  store.store.set(topicSlug, tampered);
+
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      synthesizeFn: synthesizeSpy,
+    },
+  });
+  check('INTEGRITY_FAILURE', 'final_state is INFRA_REVIEW', runB.final_state === RUN_FINAL_STATE.INFRA_REVIEW, runB.final_state);
+  check('INTEGRITY_FAILURE', 'candidate_resume.integrity_valid is false', runB.candidate_resume.integrity_valid === false);
+  check('INTEGRITY_FAILURE', 'never falls through to a fresh Publication Editor call -- refuses to silently regenerate over a tampered artifact', synthesizeSpy.callCount === 0);
+}
+
+async function testMalformedBundleFailsClosedAsInfraReviewWithoutResuming() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const runGarbage = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: () => ({ found: true, bundle: { not: 'a real bundle' } }),
+      writeCandidateBundleFn: () => {},
+      fetchEvidenceFn: async () => pool,
+      synthesizeFn: synthesizeSpy,
+    },
+  });
+  check('MALFORMED_BUNDLE', 'a garbage bundle object -> INFRA_REVIEW', runGarbage.final_state === RUN_FINAL_STATE.INFRA_REVIEW, runGarbage.final_state);
+  check('MALFORMED_BUNDLE', 'a garbage bundle never calls Publication Editor', synthesizeSpy.callCount === 0);
+
+  const synthesizeSpy2 = spyFn(fakeSynthesizeFn(topicSlug));
+  const runParseError = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: () => ({ found: true, bundle: null, parseError: 'Unexpected token in JSON' }),
+      writeCandidateBundleFn: () => {},
+      fetchEvidenceFn: async () => pool,
+      synthesizeFn: synthesizeSpy2,
+    },
+  });
+  check('MALFORMED_BUNDLE', 'a JSON parse failure -> INFRA_REVIEW', runParseError.final_state === RUN_FINAL_STATE.INFRA_REVIEW, runParseError.final_state);
+  check('MALFORMED_BUNDLE', 'a parse failure never calls Publication Editor either', synthesizeSpy2.callCount === 0);
+  check('MALFORMED_BUNDLE', 'exception_reason mentions the parse error', runParseError.exception_reason.includes('Unexpected token in JSON'), runParseError.exception_reason);
+}
+
+async function testLegacyRunWithNoCandidateBundleStillReachesShadowCandidateReady() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  // Deliberately uses run()'s own DEFAULT loadCandidateBundleFn/
+  // writeCandidateBundleFn (a no-op, always-empty pair) -- no override
+  // at all -- proving the default wiring itself reproduces exactly the
+  // pre-existing (legacy) behavior for a topic that has never had a
+  // durable candidate bundle.
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+    },
+  });
+  check('LEGACY_NO_BUNDLE', 'reaches SHADOW_CANDIDATE_READY exactly as before this feature existed', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('LEGACY_NO_BUNDLE', 'candidate_resume.found is false (no bundle ever existed for this topic)', report.candidate_resume.found === false);
+  check('LEGACY_NO_BUNDLE', 'model_calls.total_calls is 4 (all four roles), unaffected by the resume machinery', report.model_calls.total_calls === 4, report.model_calls.total_calls);
+}
+
+function testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume() {
+  check('SAFETY_INVARIANTS', 'AUTOPUBLISH is not enabled in the fake env every resume test above uses', isAutopublishEnabled(FAKE_ENV_WITH_CRED) === false);
+  check('SAFETY_INVARIANTS', '--publish still unconditionally refuses regardless of any candidate-resume state', runFullAutopublishRefusal().ok === false);
+}
+
 const tests = [
   testWeeklyCapBlocksTheWholeRun,
   testWeeklyCapRuntimeThresholds,
@@ -961,6 +1311,16 @@ const tests = [
   testExceedingTheCeilingCrashesRatherThanSilentlyMisreporting,
   testPrepareRefusesToOverwriteAnExistingArticleFile,
   testPrepareRefusesToOverwriteAnExistingPagePlanArtifact,
+  testResumeAtNeedsWriterSkipsIntentPlannerAndPublicationEditor,
+  testResumeAtNeedsReviewerSkipsPublicationEditorAndWriter,
+  testResumeAtReadyForPrepareMakesZeroModelCallsAndNeverErasesAValidFreshCandidate,
+  testRepairedPagePlanPersistsAsTheCanonicalPlanInTheBundle,
+  testStaleCandidateDueToNewEvidenceDoesNotResumeAndTriggersFreshSynthesis,
+  testFreshnessCheckFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating,
+  testIntegrityFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating,
+  testMalformedBundleFailsClosedAsInfraReviewWithoutResuming,
+  testLegacyRunWithNoCandidateBundleStillReachesShadowCandidateReady,
+  testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume,
 ];
 
 for (const t of tests) await t();

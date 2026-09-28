@@ -1,6 +1,6 @@
 # AIMT Education Operations v1
 
-Status as of this writing: **the orchestration CODE exists and is wired end-to-end, but it has never processed a real topic past the decision-pipeline stage, it has no active GitHub Actions schedule (the workflow file is design-complete but NOT installed in this repository), and AUTOPUBLISH is OFF.** Nothing in this document describes a system that runs unattended, on a cadence, or has published anything autonomously. It describes an architecture that has been built and proven safe with fixtures/mocks and live, read-only dry runs (topic selection, weekly count, published-topic state, freshness) — never a real intent-planning/synthesis/writer/reviewer call, and never any write.
+Status as of this writing: **the orchestration CODE exists and is wired end-to-end and IS installed as a GitHub Actions workflow, but its cron schedule is currently disabled (manual `workflow_dispatch` only -- see "Scheduler cadence" below), and AUTOPUBLISH is OFF.** Real shadow runs have reached Publication Editor/Writer/Reviewer (see "Durable candidate persistence + resume" below for the exact regression that phase fixes), but nothing in this document describes a system that publishes anything autonomously. `--prepare`/`--persist-clearance`/`--publish` remain exercised only with fixtures/mocks and live, read-only dry runs — never a real write.
 
 **Trust-boundary correction applied:** a final review found the model was trusted with several things it should never have been -- authoring source metadata (title/authors/year/doi/url) and related-link destinations, and a route/file collision path that the generated-diff allowlist alone could not catch. Both are now closed mechanically (never by discipline alone) -- see "Route-collision guard" and "Source and related-link authority" below.
 
@@ -37,26 +37,52 @@ functions/_lib/education-ops/
   education-freshness-monitor.mjs              (Phase 10: freshness, no model call)
   education-exception-reporter.mjs             (Phase 11: GitHub Issues, deduped)
   education-run-ledger.mjs                     (Phase 14: run report shape)
+  education-candidate-bundle.mjs               (Phase 15: durable candidate persistence + resume)
 .github/workflows/aimt-education-operations.yml (Phase 12: scheduler)
 ```
 
 ## Scheduler cadence
 
-**Installed as a shadow-only workflow.** `.github/workflows/aimt-education-operations.yml` runs weekdays at `cron: '0 14 * * 1-5'` (14:00 UTC) and supports a bare `workflow_dispatch` with no mode inputs. The workflow's only operational command is:
+**Installed as a shadow-only workflow, SCHEDULE CURRENTLY DISABLED.** `.github/workflows/aimt-education-operations.yml`'s `cron: '0 14 * * 1-5'` trigger is commented out for this phase (see "Durable candidate persistence + resume" below) -- only a manual `workflow_dispatch` (bare, no mode inputs) runs it today. The cron will be re-enabled only once the final publish/deploy/verify lane is connected. The workflow's only operational command is still:
 
 ```
 node scripts/education-operations-cycle.mjs --shadow
 ```
 
-Concurrency is `aimt-education-operations` with `cancel-in-progress: false`; timeout is 30 minutes. Permissions are deliberately narrow: `contents: read` and `issues: write` only. There is no `contents: write` or `pull-requests: write`, so this scheduled workflow cannot create a generated-page branch/PR even though the local CLI has a separately implemented `--prepare` capability.
+Concurrency is `aimt-education-operations` with `cancel-in-progress: false`; timeout is 30 minutes. Permissions are deliberately narrow: `contents: read`, `issues: write`, and (new, read-only) `actions: read` -- the last one exists ONLY so the workflow can list/download a prior run's uploaded candidate-bundle artifact (see below); there is still no `actions: write`, `contents: write`, or `pull-requests: write`, so this scheduled workflow cannot create/delete an artifact it didn't just upload itself, nor create a generated-page branch/PR, even though the local CLI has a separately implemented `--prepare` capability.
 
-The workflow passes only the required read/model credentials and the existing repository variables. It always uploads `research-import/education-ops/runs/` as `education-ops-shadow-${{ github.run_id }}` with 30-day retention. It never uploads or consumes `research-import/education-ops/prepared/`.
+The workflow passes only the required read/model credentials and the existing repository variables. It always uploads `research-import/education-ops/runs/` as `education-ops-shadow-${{ github.run_id }}` with 30-day retention. It never uploads or consumes `research-import/education-ops/prepared/`. It also downloads (if one exists) and re-uploads `research-import/education-ops/candidates/` as the fixed-name `education-candidate-bundles` artifact (90-day retention) -- see "Durable candidate persistence + resume" below.
 
 Required Actions secrets:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ANTHROPIC_PUBLICATION_EDITOR_API_KEY`
 - `ANTHROPIC_EDUCATION_WRITER_API_KEY`
+
+## Durable candidate persistence + resume
+
+**THE FIX (real GitHub Actions shadow behavior):** Run #3 selected `alopecia-areata`, Publication Editor returned `AUTO_READY`, the Education Writer ran, and deterministic validation stopped on a numeric Writer defect (`EDITORIAL_REVIEW`). Run #4 selected the SAME topic against the SAME underlying published/freshness context, but Publication Editor was invoked AGAIN from scratch -- and this time returned `SYNTHESIS_FAILED` (`unresolved_mechanical_or_accounting_violation`). Publication Editor's synthesis step is INTENTIONALLY NONDETERMINISTIC (see `publication-clearance-fingerprint.mjs`'s own header); a later, different synthesis result must never erase a previously-valid, unchanged clearance candidate.
+
+`education-candidate-bundle.mjs` (`education-candidate-bundle-v1` contract) + `scripts/education-operations-cycle.mjs`'s own read/write wiring (`loadCandidateBundle`/`writeCandidateBundle`, `research-import/education-ops/candidates/<topic_slug>/candidate.json`, gitignored locally) close this: once Publication Editor produces an `AUTO_READY` artifact for a topic, that EXACT artifact (never rebuilt from pieces, never re-derived) is durably persisted, and every later run for the SAME topic loads it, verifies it, and resumes from the furthest completed stage instead of re-calling Publication Editor.
+
+**Bundle contents:** `contract_version`, `topic_slug`, `cluster`, `route`, `originating_run_id`, `created_at`, `intent_plan`, `prepared_artifact` (the exact `prepareTopicArtifact()` output), `generation_source_hash`, `fingerprint_input`, `page_plan` (the REPAIRED plan when repair was needed, never the pre-repair Writer output), `writer_validation`, `deterministic_repair`, `review_result`, `freshness_basis`, `source_ids`, `selected_claim_ids`. No API keys or secrets.
+
+**Before any resume:**
+1. **Shape validation** (`validateCandidateBundleShape`) -- a malformed bundle (wrong contract version, missing fields, a top-level convenience field that drifted from `prepared_artifact.record`) never resumes, regardless of what integrity verification would say about the nested artifact.
+2. **Integrity verification** (`verifyCandidateBundleIntegrity`) -- the SAME `verifyStoredClearanceIntegrity()` every other reader of a clearance artifact in this codebase uses, plus a defense-in-depth re-validation of the stored intent plan. A hash mismatch or a corrupted intent plan both refuse the SAME way: `INFRA_REVIEW`, never a silent fallback to regenerating over the invalid stored artifact.
+3. **Freshness verification** (`resolveCandidateResumeFreshness`) -- reuses `education-freshness-monitor.mjs`'s own `computeFreshnessDelta()` (never a second, independently-written comparison) against the SAME candidate claim set this run's own topic-selection step already computed (no second evidence fetch). `FRESH` -> reusable. `POTENTIAL_EVIDENCE_CHANGE` -> the stored candidate is legitimately stale; never resumed, never blocking -- falls through to a completely fresh Publication Editor call, exactly as if no bundle existed. `FRESHNESS_CHECK_FAILED` -> fails closed: `INFRA_REVIEW`, never reused, never regenerated in the same run.
+
+**Resume stages** (`determineResumeStage`, only reached once integrity + freshness both pass):
+- `NEEDS_WRITER` -- Publication Editor's artifact is persisted, no valid Writer plan yet. Resume skips Intent Planner + Publication Editor entirely and calls only the Writer.
+- `NEEDS_REVIEWER` -- a valid (post-repair, if repair was needed) Page Plan is persisted, no Reviewer verdict yet. Resume additionally skips the Writer and calls only the Reviewer.
+- `READY_FOR_PREPARE` -- the Reviewer's `PASS` verdict is persisted. **Zero model calls** this run; the candidate is immediately reported `SHADOW_CANDIDATE_READY` again, ready for a future `--prepare` exactly as-is.
+- `EDITORIAL_REVIEW` -- the Reviewer's verdict is persisted and it was NOT a `PASS`. Preserved exactly, never auto-retried -- this governed content outcome is reported again with zero model calls, never silently re-run.
+
+**Critical invariant:** once a valid, FRESH candidate bundle exists for a topic, Publication Editor is structurally never called again for it in the SAME run OR any later run, until the bundle itself is legitimately invalidated by freshness. This is what prevents the Run #3 -> Run #4 regression: a later, nondeterministic (possibly worse) synthesis result can never overwrite an existing valid candidate, because the code path that would call synthesis again for that topic is simply never reached.
+
+**Observability:** every run report carries a `candidate_resume: { found, reused, contract_version, originating_run_id, resumed_from_stage, integrity_valid, freshness_state }` field (`null` before topic selection ever resolves a topic). `education-exception-reporter.mjs`'s GitHub Issue body never includes `writer_result`, `review_result`, or `candidate_resume` at all -- only `run_id`/`final_state`/`selected_topic`/`exception_reason`/`selection_reason` -- so no private evidence or bundle content ever reaches a public issue.
+
+**Cross-run durability:** the workflow downloads the most recent non-expired `education-candidate-bundles` artifact (if one exists, found via the Actions API and `actions/download-artifact@v4`'s `run-id` input) into `research-import/education-ops/candidates/` BEFORE running the cycle, and re-uploads that same directory (whatever the cycle just read, resumed from, and/or wrote) AFTER running it, regardless of outcome (`if: always()`). This is the same cross-run artifact durability gap this document previously flagged as NOT YET BUILT for `--prepare`'s own artifact (see "Prepared-artifact durability" below) -- solved here for the shadow-only Publication Editor/Writer/Reviewer candidate specifically; `--prepare`'s own artifact still has no such path.
 
 Required repository variables:
 - `AIMT_EDUCATION_AUTOPUBLISH_ENABLED=false`
@@ -267,18 +293,20 @@ Steps 13–17 are the future `--publish` state machine described above. DB `publ
 
 ## What happens automatically today
 
-The installed GitHub Actions workflow wakes up once each weekday at 14:00 UTC and runs the orchestrator in **shadow mode only**. A manual `workflow_dispatch` runs the exact same shadow command.
+The installed GitHub Actions workflow runs the orchestrator in **shadow mode only**, on a manual `workflow_dispatch` -- **the weekday `cron` schedule is currently commented out** (see "Durable candidate persistence + resume" above); it will be re-enabled only once the final publish/deploy/verify lane is connected.
 
 A shadow run may:
+- download the latest durable candidate-bundle artifact (if one exists) and resume from it;
 - read the live published-topic set and weekly publication count;
 - run the read-only freshness monitor;
 - select/rank an eligible candidate;
-- if credentials are available and the run reaches model stages, execute intent planning, Publication Editor synthesis, Education Writer, and Education Reviewer;
+- if credentials are available and the run reaches model stages it hasn't already resumed past, execute intent planning, Publication Editor synthesis, Education Writer, and/or Education Reviewer;
 - write the gitignored run ledger in the Actions checkout;
 - upload that run ledger as a 30-day GitHub Actions artifact;
+- upload the (possibly updated) durable candidate-bundle directory as a 90-day GitHub Actions artifact;
 - create/dedupe GitHub Issues for genuine configured exception states.
 
-A scheduled shadow run may **not**:
+A shadow run may **not**:
 - run `--prepare`;
 - create Page #3 or any article file;
 - create a generated-content branch or PR;
@@ -292,12 +320,12 @@ A scheduled shadow run may **not**:
 
 The workflow itself is installed, and the four exception labels plus the two repository variables are configured. The remaining setup requirement is to provision the four Actions secret values listed under "Scheduler cadence" above. Until all required secrets exist, the workflow is expected to stop safely as a configuration problem rather than complete the model-assisted shadow pipeline.
 
-After the secrets are configured, manually dispatch one shadow run and inspect its uploaded run ledger before relying on the weekday schedule.
+After the secrets are configured, manually dispatch shadow runs (via `workflow_dispatch`) and inspect the uploaded run ledger + candidate-bundle behavior across several runs before considering re-enabling the weekday schedule.
 
 ## What still requires owner input beyond that, before AUTOPUBLISH can safely be switched on
 
 5. **Run `--prepare` for real, at least once**, against a real selected topic, and have the owner review the resulting PR the same way hair-cycle and telogen-effluvium were reviewed (including the responsive/browser QA this project's earlier SEO/publication rounds did by hand — the automated reviewer covers fidelity/voice/scope, not visual rendering).
-6. **Watch at least one real freshness scan result** against the two already-published pages in a scheduled (not just manually-invoked) run before trusting `FRESHNESS_FLAGGED` in production.
+6. **Watch at least one real freshness scan result** against the two already-published pages in a manually-dispatched run before trusting `FRESHNESS_FLAGGED` in production, and separately watch at least one real durable-candidate resume (across two separate `workflow_dispatch` runs for the same in-flight topic) before re-enabling the cron schedule.
 7. **Design, build, and test steps 13–17 of the "Exact publication ordering"** (merge, Cloudflare wait, live-route verification, `publishClearanceRecord()` transition, post-write integrity check) — none of this exists as code today; `--publish` refuses unconditionally specifically because this is missing. Merging is the single highest-consequence action in the whole pipeline, and per the originating task's own instruction ("Do NOT assume GitHub Actions can self-merge safely... Build the capability behind AUTOPUBLISH_ENABLED"), this is left as explicit follow-up work for when steps 1–12 have already been proven on real, owner-reviewed pages.
 8. **Only then**, with all of the above proven, set `AIMT_EDUCATION_AUTOPUBLISH_ENABLED=true` as a deliberate, explicit, reversible repository variable change — never a code change — and separately implement and enable whatever `--publish` becomes once steps 13–17 exist.
 
