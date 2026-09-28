@@ -67,6 +67,7 @@ import { validateIntentPlan } from '../functions/_lib/education-ops/education-in
 import { prepareTopicArtifact, publishPreparedArtifact } from '../functions/_lib/education-ops/education-synthesis-cache.mjs';
 import { writeEducationPagePlan } from '../functions/_lib/education-ops/education-writer-client.mjs';
 import { validateEducationPagePlan } from '../functions/_lib/education-ops/education-page-plan-validator.mjs';
+import { repairDeterministicPagePlanViolations } from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
 import { reviewEducationPagePlan } from '../functions/_lib/education-ops/education-reviewer-client.mjs';
 import { aggregateReviewOutcome, REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
 import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
@@ -498,7 +499,7 @@ export async function runDecisionPipeline(env, options = {}) {
   // from the trusted sibling-page data already resolved above
   // (education-related-links.mjs). The model never sees either value
   // and cannot influence it.
-  const plan = {
+  let plan = {
     ...writerResult.output,
     sources: buildTrustedSources(clearedSnapshot),
     related_links: buildEducationRelatedLinks({
@@ -516,14 +517,52 @@ export async function runDecisionPipeline(env, options = {}) {
   const planValidation = validateEducationPagePlan(plan, clearedSnapshot, {
     expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route,
   });
+  let deterministicRepair = null;
   if (!planValidation.valid) {
     const isRouteCollisionClass = planValidation.violations.some((v) => v.startsWith('PLAN_TOPIC_SLUG_MISMATCH') || v.startsWith('PLAN_CLUSTER_MISMATCH') || v.startsWith('PLAN_ROUTE_MISMATCH'));
-    return finish({
-      candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
-      publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: false, violations: planValidation.violations },
-      final_state: isRouteCollisionClass ? RUN_FINAL_STATE.INFRA_REVIEW : RUN_FINAL_STATE.EDITORIAL_REVIEW,
-      exception_reason: `Page Plan failed deterministic validation: ${planValidation.violations.join(', ')}`,
-    });
+    if (isRouteCollisionClass) {
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: false, violations: planValidation.violations },
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+        exception_reason: `Page Plan failed deterministic validation: ${planValidation.violations.join(', ')}`,
+      });
+    }
+
+    // NUMERIC-FIDELITY REPAIR LANE: a Writer defect where a digit-bearing
+    // unit is a PARAPHRASE (or a VERBATIM unit whose text drifted) is
+    // deterministically repairable ONLY when EVERY violation on the plan
+    // is an UNSUPPORTED_NUMERIC_CLAIM -- any other violation (ungrounded
+    // claim, dropped scope_note, duplicate text, etc.) is never touched
+    // by this lane and falls straight through to EDITORIAL_REVIEW below,
+    // exactly as before this repair lane existed. The repair never asks
+    // a model to rewrite anything (education-page-plan-repair.mjs is
+    // pure/zero-network) and never weakens the validator: the repaired
+    // plan is re-validated in full, from scratch, by the same
+    // validateEducationPagePlan() used everywhere else.
+    const allNumericFidelity = planValidation.violations.every((v) => v.startsWith('UNSUPPORTED_NUMERIC_CLAIM:'));
+    const repairFn = fns.repairFn || repairDeterministicPagePlanViolations;
+    const repairOutcome = allNumericFidelity ? repairFn(plan, clearedSnapshot, planValidation.violations) : null;
+    const revalidation = repairOutcome ? validateEducationPagePlan(repairOutcome.repairedPlan, clearedSnapshot, {
+      expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route,
+    }) : null;
+
+    if (revalidation && revalidation.valid) {
+      plan = repairOutcome.repairedPlan;
+      deterministicRepair = { attempted: true, repaired_locations: repairOutcome.repairReport.repaired_locations, repair_type: repairOutcome.repairReport.repair_type };
+    } else {
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        publication_editor_result: { status: 'AUTO_READY' },
+        writer_result: {
+          valid: false,
+          violations: (revalidation || planValidation).violations,
+          ...(repairOutcome ? { deterministic_repair: { attempted: true, repaired_locations: repairOutcome.repairReport.repaired_locations, unresolved_locations: repairOutcome.repairReport.unresolved_locations, reason: repairOutcome.repairReport.reason } } : {}),
+        },
+        final_state: RUN_FINAL_STATE.EDITORIAL_REVIEW,
+        exception_reason: `Page Plan failed deterministic validation: ${planValidation.violations.join(', ')}`,
+      });
+    }
   }
 
   // --- Education Reviewer --------------------------------------------------
@@ -531,13 +570,13 @@ export async function runDecisionPipeline(env, options = {}) {
   const reviewResult = await reviewFn(env, { plan, clearedSnapshot, intentPlan });
   if (reviewResult.ok) modelCalls.push({ role: 'education_reviewer', actual_call_count: 1, ...reviewResult.usage });
   if (!reviewResult.ok) {
-    return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Reviewer call failed: ${reviewResult.reason}` });
+    return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Reviewer call failed: ${reviewResult.reason}` });
   }
   const outcome = aggregateReviewOutcome(reviewResult.output);
   if (outcome.outcome !== REVIEW_OUTCOME.PASS) {
     return finish({
       candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
-      publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true },
+      publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) },
       review_result: outcome, final_state: RUN_FINAL_STATE.EDITORIAL_REVIEW, exception_reason: outcome.summary,
     });
   }
@@ -550,7 +589,7 @@ export async function runDecisionPipeline(env, options = {}) {
     risk_tier: selected.v1_result.risk_tier,
     readiness_result: selected.v1_result.readiness_status,
     publication_editor_result: { status: 'AUTO_READY', generation_source_hash: preparedArtifact.record.generation_source_hash },
-    writer_result: { valid: true },
+    writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) },
     review_result: outcome,
     planned_route: route,
     final_state: RUN_FINAL_STATE.SHADOW_CANDIDATE_READY,
