@@ -32,6 +32,16 @@ export const RUN_FINAL_STATE = Object.freeze({
   FRESHNESS_FLAGGED: 'FRESHNESS_FLAGGED',
   PUBLISH_FAILED: 'PUBLISH_FAILED',
   PUBLISHED: 'PUBLISHED',
+  // RESEARCH-GAP FEEDBACK LOOP v1: Publication Editor's own validated
+  // HUMAN_REVIEW / EVIDENCE_INSUFFICIENCY outcome, routed to the
+  // automated Rick research-gap queue instead of the owner's
+  // human-review lane (see education-research-gap-queue.mjs). Never
+  // creates a GitHub Issue -- deliberately absent from
+  // education-exception-reporter.mjs's FINAL_STATE_TO_LABEL map. Only
+  // ever produced when AIMT_RESEARCH_GAP_LOOP_ENABLED === "true"; with
+  // the loop disabled, EVIDENCE_INSUFFICIENCY still maps to the ordinary
+  // HUMAN_REVIEW state above, unchanged.
+  RESEARCH_GAP_QUEUED: 'RESEARCH_GAP_QUEUED',
 });
 
 /**
@@ -64,6 +74,7 @@ export function buildRunReport(fields) {
     model_calls = [], planned_route = null,
     diff_allowlist_result = null, publication_action = null,
     candidate_resume = null,
+    research_gap_action = null,
     final_state, exception_reason = null,
   } = fields;
 
@@ -126,6 +137,7 @@ export function buildRunReport(fields) {
     diff_allowlist_result,
     publication_action,
     candidate_resume,
+    research_gap_action,
     final_state,
     exception_reason,
   };

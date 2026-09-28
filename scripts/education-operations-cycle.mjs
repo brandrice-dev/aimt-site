@@ -86,6 +86,9 @@ import {
   resolveCandidateResumeFreshness, determineResumeStage, RESUME_STAGE,
 } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
 import { sanitizePublicationValidatorViolations } from '../functions/_lib/research/publication-violation-sanitizer.mjs';
+import {
+  loadActiveResearchGapsBySlug, upsertEvidenceInsufficiencyGap, resolveResearchGapByTopic,
+} from '../functions/_lib/education-ops/education-research-gap-queue.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -244,9 +247,20 @@ export function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey, io =
 export const AUTOPUBLISH_ENV_VAR = 'AIMT_EDUCATION_AUTOPUBLISH_ENABLED';
 export const MAX_PAGES_PER_WEEK_ENV_VAR = 'AIMT_EDUCATION_MAX_PAGES_PER_WEEK';
 export const DEFAULT_MAX_PAGES_PER_WEEK = 4;
+// RESEARCH-GAP FEEDBACK LOOP v1: a NEW production operational DB write
+// (research_verification_queue, lane=publication_evidence_gap) --
+// behind its own explicit gate, same fail-closed default posture as
+// AUTOPUBLISH_ENV_VAR ("anything other than literal 'true' = disabled").
+// Never enabled from code; never implied by AUTOPUBLISH_ENV_VAR or vice
+// versa -- the two flags are completely independent.
+export const RESEARCH_GAP_LOOP_ENV_VAR = 'AIMT_RESEARCH_GAP_LOOP_ENABLED';
 
 export function isAutopublishEnabled(env) {
   return String(env && env[AUTOPUBLISH_ENV_VAR]).trim().toLowerCase() === 'true';
+}
+
+export function isResearchGapLoopEnabled(env) {
+  return String(env && env[RESEARCH_GAP_LOOP_ENV_VAR]).trim().toLowerCase() === 'true';
 }
 
 export function resolveMaxPagesPerWeek(env) {
@@ -399,10 +413,38 @@ export async function runDecisionPipeline(env, options = {}) {
     return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Evidence fetch failed: ${err.message}`, stopped_before_model_stage: true, credential_available: null });
   }
 
-  const selection = selectNextTopic(evidencePool, { clusterKey, publishedTopicSlugs });
+  // --- RESEARCH-GAP FEEDBACK LOOP: load active gaps (read-only) --------
+  // Only queried when the loop is enabled -- with it disabled, this is
+  // a zero-cost no-op ({}) and selectNextTopic()'s hold check never
+  // fires, so existing behavior is byte-for-byte unchanged (section 10:
+  // "When disabled: existing HUMAN_REVIEW behavior remains exactly as it
+  // is today").
+  const researchGapLoopEnabled = isResearchGapLoopEnabled(env);
+  let activeResearchGapsBySlug = {};
+  if (researchGapLoopEnabled) {
+    const loadGapsFn = fns.loadActiveResearchGapsBySlugFn || loadActiveResearchGapsBySlug;
+    try {
+      activeResearchGapsBySlug = await loadGapsFn(env);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Research-gap queue read failed: ${err.message}`, stopped_before_model_stage: true, credential_available: null });
+    }
+  }
+
+  const selection = selectNextTopic(evidencePool, { clusterKey, publishedTopicSlugs, activeResearchGapsBySlug });
   const candidateTopics = selection.candidates.map((c) => ({ topic_slug: c.topic_slug, eligible: c.eligible, reason: c.ineligible_reason, risk_tier: c.v1_result.risk_tier, opportunity_score: c.opportunity.score }));
 
   if (!selection.selected) {
+    // RESEARCH-GAP FEEDBACK LOOP observability: make it obvious when the
+    // reason NOTHING was selected is a pending research gap (section 4),
+    // not just an empty/exhausted candidate pool.
+    const heldCandidate = candidateTopics.find((c) => c.reason === 'RESEARCH_GAP_PENDING');
+    if (heldCandidate) {
+      const heldGap = activeResearchGapsBySlug[heldCandidate.topic_slug];
+      common.research_gap_action = {
+        enabled: true, action: 'SKIPPED_PENDING', gap_id: heldGap ? heldGap.queue_id : null,
+        topic_slug: heldCandidate.topic_slug, attempt_count: heldGap && heldGap.extras ? heldGap.extras.attempt_count : null,
+      };
+    }
     return finish({
       candidate_topics: candidateTopics,
       final_state: RUN_FINAL_STATE.NO_OP_SUCCESS,
@@ -413,6 +455,7 @@ export async function runDecisionPipeline(env, options = {}) {
   }
 
   const selected = selection.selected;
+  const existingGapForSelectedTopic = activeResearchGapsBySlug[selected.topic_slug] || null;
 
   // --- 6. Education Ops credential check -- the FIRST point a model is
   //        genuinely needed. Everything above is preserved in `common`
@@ -641,6 +684,60 @@ export async function runDecisionPipeline(env, options = {}) {
 
     if (!synthesisResult.ok) {
       const isHumanReview = synthesisResult.status === 'HUMAN_REVIEW';
+      const humanReviewReasonCode = synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason_code;
+      const isEvidenceInsufficiency = isHumanReview && humanReviewReasonCode === 'EVIDENCE_INSUFFICIENCY';
+
+      // RESEARCH-GAP FEEDBACK LOOP v1 (section 3): a VALIDATED
+      // EVIDENCE_INSUFFICIENCY is not a scientific/safety/institutional
+      // exception -- it is ordinary evidence acquisition. With the loop
+      // enabled, route it to Rick (research_verification_queue, lane=
+      // publication_evidence_gap) instead of the owner's human-review
+      // queue. Every OTHER HUMAN_REVIEW reason_code (UNRESOLVED_
+      // CONTRADICTION, SAFETY_OR_SCOPE_CONCERN, HIGH_RISK_CONTENT,
+      // OTHER_SUBSTANTIVE_EXCEPTION, ...) is completely unaffected --
+      // still routes to the normal human-review path below, unchanged.
+      if (isEvidenceInsufficiency && researchGapLoopEnabled) {
+        const upsertFn = fns.upsertEvidenceInsufficiencyGapFn || upsertEvidenceInsufficiencyGap;
+        const { row: gapRow, action: gapAction } = await upsertFn(env, {
+          topicSlug: selected.topic_slug,
+          cluster: clusterKey,
+          pageConcept: intentPlan.page_concept,
+          publicIntent: intentPlan.public_intent,
+          inScopeConcepts: intentPlan.in_scope_concepts,
+          gapSummary: synthesisResult.humanReviewJustification.reason,
+          originatingRunId: runId,
+          originatingPageIntent: intentPlan,
+          baselineCandidateClaimIds: selected.v1_result.candidate_claim_ids,
+        });
+        common.research_gap_action = {
+          enabled: true, action: gapAction, gap_id: gapRow.queue_id,
+          topic_slug: selected.topic_slug, attempt_count: gapRow.extras.attempt_count,
+        };
+        // Deliberately NO GitHub Issue for this state (section 3.5) --
+        // RESEARCH_GAP_QUEUED is absent from education-exception-
+        // reporter.mjs's FINAL_STATE_TO_LABEL map by construction.
+        return finish({
+          candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+          publication_editor_result: { status: synthesisResult.status, reason: synthesisResult.reason, validator_violation_codes: [], human_review_justification: synthesisResult.humanReviewJustification },
+          final_state: RUN_FINAL_STATE.RESEARCH_GAP_QUEUED,
+          exception_reason: `Routed to the research-gap queue (${gapRow.queue_id}, attempt ${gapRow.extras.attempt_count}): ${synthesisResult.humanReviewJustification.reason}`,
+        });
+      }
+
+      // RELEASE (section 5): Publication Editor progressed BEYOND
+      // EVIDENCE_INSUFFICIENCY (a different genuine HUMAN_REVIEW reason,
+      // or a mechanical/accounting SYNTHESIS_FAILED) -- any pre-existing
+      // gap for this topic is now resolved; the normal human-review /
+      // no-op lane below handles this outcome exactly as it always has.
+      if (researchGapLoopEnabled && existingGapForSelectedTopic) {
+        const resolveFn = fns.resolveResearchGapByTopicFn || resolveResearchGapByTopic;
+        await resolveFn(env, selected.topic_slug);
+        common.research_gap_action = {
+          enabled: true, action: 'RESOLVED', gap_id: existingGapForSelectedTopic.queue_id,
+          topic_slug: selected.topic_slug, attempt_count: existingGapForSelectedTopic.extras.attempt_count,
+        };
+      }
+
       // OBSERVABILITY (real recurring shadow-run failure, alopecia-areata
       // Runs #4-#6: repeated SYNTHESIS_FAILED /
       // unresolved_mechanical_or_accounting_violation with no visibility
@@ -660,6 +757,18 @@ export async function runDecisionPipeline(env, options = {}) {
         final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : RUN_FINAL_STATE.NO_OP_SUCCESS,
         exception_reason: isHumanReview ? `HUMAN_REVIEW: ${synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason}` : synthesisResult.reason,
       });
+    }
+
+    // RELEASE (section 5): Publication Editor reached AUTO_READY -- any
+    // pre-existing gap for this topic is resolved; the run continues
+    // normally (Writer/Reviewer) exactly as it always has.
+    if (researchGapLoopEnabled && existingGapForSelectedTopic) {
+      const resolveFn = fns.resolveResearchGapByTopicFn || resolveResearchGapByTopic;
+      await resolveFn(env, selected.topic_slug);
+      common.research_gap_action = {
+        enabled: true, action: 'RESOLVED', gap_id: existingGapForSelectedTopic.queue_id,
+        topic_slug: selected.topic_slug, attempt_count: existingGapForSelectedTopic.extras.attempt_count,
+      };
     }
 
     preparedArtifact = synthesisResult.preparedArtifact;

@@ -115,6 +115,26 @@ async function testIssueBodyToleratesAReportWithNoPublicationEditorResultAtAll()
   check('VIOLATION_CODES_IN_ISSUE', 'does not throw and still creates the issue', result.action === 'CREATED');
 }
 
+async function testResearchGapQueuedNeverCreatesAnIssue() {
+  // RESEARCH-GAP FEEDBACK LOOP v1: a VALIDATED EVIDENCE_INSUFFICIENCY
+  // routed to Rick is ordinary evidence acquisition, not an owner-review
+  // exception -- it must never open (or reuse) an education-review
+  // issue, exactly like SHADOW_CANDIDATE_READY/NO_OP_SUCCESS never do.
+  let listCalls = 0, createCalls = 0;
+  const report = buildRunReport({
+    run_id: 'r7', mode: 'shadow', final_state: RUN_FINAL_STATE.RESEARCH_GAP_QUEUED, selected_topic: 'alopecia-areata',
+    exception_reason: 'Routed to the research-gap queue.',
+    research_gap_action: { enabled: true, action: 'QUEUED', gap_id: 'publication_evidence_gap:alopecia-areata', topic_slug: 'alopecia-areata', attempt_count: 1 },
+  });
+  const result = await surfaceExceptionIfNeeded(report, {
+    listIssuesFn: async () => { listCalls += 1; return []; },
+    createIssueFn: async () => { createCalls += 1; return {}; },
+  });
+  check('RESEARCH_GAP_QUEUED_NO_ISSUE', 'action is NONE', result.action === 'NONE');
+  check('RESEARCH_GAP_QUEUED_NO_ISSUE', 'never lists issues', listCalls === 0);
+  check('RESEARCH_GAP_QUEUED_NO_ISSUE', 'never creates an issue', createCalls === 0);
+}
+
 async function testEveryExceptionFinalStateMapsToALabel() {
   for (const state of ['HUMAN_REVIEW', 'EDITORIAL_REVIEW', 'INFRA_REVIEW', 'FRESHNESS_FLAGGED', 'CONFIG_BLOCKED', 'PUBLISH_FAILED']) {
     const report = buildRunReport({ run_id: 'r1', mode: 'shadow', final_state: state, exception_reason: 'x' });
@@ -128,6 +148,7 @@ const tests = [
   testDedupReusesExistingOpenIssue, testClosedIssueWithSameMarkerIsNotReused, testEveryExceptionFinalStateMapsToALabel,
   testIssueBodyIncludesSanitizedViolationCodesButNoRawIds, testIssueBodyOmitsTheViolationCodesSectionWhenNoneExist,
   testIssueBodyToleratesAReportWithNoPublicationEditorResultAtAll,
+  testResearchGapQueuedNeverCreatesAnIssue,
 ];
 for (const t of tests) await t();
 

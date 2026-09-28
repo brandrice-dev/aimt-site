@@ -130,8 +130,16 @@ async function legacyCall(env, method, params = {}, opts = {}) {
    `adminUsersByUserId`: map of user_id -> { user_id, role, active } mock
    admin_users row, standing in for the real admin_users table that
    functions/_lib/admin/auth.mjs's resolveAdmin() reads. */
-function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [], oauthUsers = {}, adminUsersByUserId = {} } = {}) {
-  const state = { sources: new Set(existingSourceIds), approvedClaims: new Set(existingApprovedClaimIds), calls: [] };
+function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [], oauthUsers = {}, adminUsersByUserId = {}, initialResearchGaps = [] } = {}) {
+  const state = {
+    sources: new Set(existingSourceIds), approvedClaims: new Set(existingApprovedClaimIds), calls: [],
+    // RESEARCH-GAP FEEDBACK LOOP v1: an in-memory stand-in for the
+    // publication_evidence_gap lane of research_verification_queue,
+    // keyed by queue_id -- exactly what education-research-gap-
+    // queue.mjs's GET (by queue_id, or by lane+status) and POST
+    // (Prefer: resolution=merge-duplicates, upsert-by-PK) calls expect.
+    researchGaps: new Map(initialResearchGaps.map((row) => [row.queue_id, row])),
+  };
   function rangeHeader(n) { return { get: (k) => (k.toLowerCase() === 'content-range' ? `0-0/${n}` : null) }; }
 
   async function mockFetch(url, opts = {}) {
@@ -168,6 +176,44 @@ function makeMockSupabase({ existingSourceIds = [], existingApprovedClaimIds = [
     }
     if (url.includes('/rest/v1/aimt_logs') && method === 'POST') {
       return { ok: true, json: async () => ([]), text: async () => '' };
+    }
+    // RESEARCH-GAP FEEDBACK LOOP v1: only intercept the two SPECIFIC
+    // query shapes education-research-gap-queue.mjs actually issues
+    // (by queue_id, or by lane+status) -- a plain
+    // research_verification_queue?select=*&limit=1 probe (e.g.
+    // importer.mjs's own countTable(), called for EVERY table
+    // processIngestionBatch touches, including this one, for its
+    // ingestion-log counts_before/counts_after bookkeeping) must fall
+    // through to the generic select=*&limit=1 branch below instead, so
+    // it still gets a real Content-Range header.
+    if (url.includes('/rest/v1/research_verification_queue') && method === 'GET') {
+      const idMatch = url.match(/queue_id=eq\.([^&]+)/);
+      const laneMatch = url.match(/lane=eq\.([^&]+)/);
+      if (idMatch) {
+        const row = state.researchGaps.get(decodeURIComponent(idMatch[1]));
+        return { ok: true, json: async () => (row ? [row] : []) };
+      }
+      if (laneMatch) {
+        // listActiveResearchGaps(): lane=eq....&status=in.(pending,claimed,research_received)
+        const allowedLane = decodeURIComponent(laneMatch[1]);
+        const statusMatch = url.match(/status=in\.\(([^)]*)\)/);
+        const allowedStatuses = statusMatch ? statusMatch[1].split(',') : null;
+        const rows = [...state.researchGaps.values()]
+          .filter((r) => r.lane === allowedLane)
+          .filter((r) => !allowedStatuses || allowedStatuses.includes(r.status));
+        return { ok: true, json: async () => rows };
+      }
+      // else: fall through (e.g. countTable's bare select=*&limit=1 probe).
+    }
+    if (url.includes('/rest/v1/research_verification_queue') && method === 'POST') {
+      // Upsert-by-PK (Prefer: resolution=merge-duplicates) -- education-
+      // research-gap-queue.mjs sends a bare single-row object (same
+      // convention as publication-clearance-writer.mjs#writeClearanceRecord),
+      // never an array, but this accepts either defensively.
+      const incoming = Array.isArray(body) ? body[0] : body;
+      const row = { created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...(state.researchGaps.get(incoming.queue_id) || {}), ...incoming };
+      state.researchGaps.set(row.queue_id, row);
+      return { ok: true, json: async () => [row] };
     }
     if (method === 'GET' && url.includes('select=*&limit=1')) {
       return { ok: true, headers: rangeHeader(0), json: async () => [] };
@@ -226,8 +272,11 @@ async function testModernDiscoverAndToolsList() {
     assert(list.json.result.resultType === 'complete', 'tools/list result has resultType: complete');
     assert(list.json.result.ttlMs === 0 && list.json.result.cacheScope === 'private', 'tools/list uses conservative caching (ttlMs:0, cacheScope:private)');
     const tools = list.json.result.tools;
-    assert(Array.isArray(tools) && tools.length === 1, `exactly one tool exposed (got ${tools && tools.length})`);
-    assert(tools[0].name === 'submit_research_batch', `the one tool is submit_research_batch (got ${tools[0] && tools[0].name})`);
+    assert(Array.isArray(tools) && tools.length === 3, `exactly three tools exposed (got ${tools && tools.length})`);
+    const toolNames = tools.map((t) => t.name);
+    assert(toolNames.includes('submit_research_batch'), 'submit_research_batch is exposed');
+    assert(toolNames.includes('list_research_gaps'), 'list_research_gaps is exposed (research-gap feedback loop)');
+    assert(toolNames.includes('claim_research_gap'), 'claim_research_gap is exposed (research-gap feedback loop)');
   });
 }
 
@@ -591,6 +640,193 @@ async function testClientIdBinding() {
   });
 }
 
+/* ══════════════ RESEARCH-GAP FEEDBACK LOOP v1 ══════════════
+   L/M/N/O/P from the originating request. Exercised through the same
+   modern-era dispatch helper as every other tool -- the loop's DB write
+   path (education-operations-cycle.mjs) is tested separately in
+   tests/education-operations-cycle.test.mjs; these tests cover ONLY the
+   Rick-facing MCP surface (list_research_gaps, claim_research_gap, and
+   submit_research_batch's optional research_gap_id). */
+
+function makeGapRow(overrides = {}) {
+  return {
+    queue_id: 'publication_evidence_gap:alopecia-areata',
+    lane: 'publication_evidence_gap',
+    item_type: 'education_page',
+    item_id: 'alopecia-areata',
+    created_at: '2026-09-01T00:00:00.000Z',
+    updated_at: '2026-09-01T00:00:00.000Z',
+    priority: 90,
+    priority_band: 'high',
+    topics_raw: 'alopecia-areata',
+    status: 'pending',
+    notes: 'Insufficient evidence for general presentation patterns.',
+    extras: {
+      contract_version: 'education-research-gap-v1',
+      topic_slug: 'alopecia-areata',
+      cluster: 'hair-loss-shedding',
+      page_concept: 'Alopecia Areata Overview',
+      public_intent: 'Explain alopecia areata for practitioners.',
+      in_scope_concepts: ['general presentation patterns'],
+      gap_summary: 'Insufficient evidence for general presentation patterns.',
+      originating_run_id: 'run-1',
+      originating_page_intent: {},
+      baseline_candidate_claim_ids: ['c1', 'c2'],
+      attempt_count: 1,
+      claimed_at: null,
+      claimed_by: null,
+      research_batch_id: null,
+      research_received_at: null,
+      resolved_at: null,
+    },
+    ...overrides,
+  };
+}
+
+async function testListResearchGapsReturnsOnlyPublicationEvidenceGaps() {
+  console.log('\n--- L: list_research_gaps returns only publication_evidence_gap rows, only the safe fields ---');
+  const env = makeEnv();
+  const gap = makeGapRow();
+  const otherLaneRow = { queue_id: 'source_verification:s1', lane: 'source_verification', item_type: 'source', item_id: 's1', priority: 50, status: 'pending', extras: {} };
+  const { mockFetch } = makeMockSupabase({ initialResearchGaps: [gap, otherLaneRow] });
+  await withMockedFetch(mockFetch, async () => {
+    const res = await modernCall(env, 'tools/call', { name: 'list_research_gaps', arguments: {} });
+    assert(res.status === 200, `list_research_gaps -> 200 (got ${res.status})`);
+    const gaps = res.json.result.structuredContent.gaps;
+    assert(Array.isArray(gaps) && gaps.length === 1, `returns exactly the one publication_evidence_gap row, never the other-lane row (got ${gaps && gaps.length})`);
+    const g = gaps[0];
+    assert(g.gap_id === gap.queue_id, 'gap_id is the queue_id');
+    assert(g.topic_slug === 'alopecia-areata', 'topic_slug present');
+    assert(g.page_concept === 'Alopecia Areata Overview', 'page_concept present');
+    assert(g.public_intent === 'Explain alopecia areata for practitioners.', 'public_intent present');
+    assert(JSON.stringify(g.in_scope_concepts) === JSON.stringify(['general presentation patterns']), 'in_scope_concepts present');
+    assert(g.gap_summary === gap.extras.gap_summary, 'gap_summary present');
+    assert(g.attempt_count === 1, 'attempt_count present');
+    assert(g.status === 'pending', 'status present');
+    assert('requested_at' in g, 'requested_at present');
+    assert(!('originating_page_intent' in g), 'never exposes the internal originating_page_intent object');
+    assert(!('baseline_candidate_claim_ids' in g) && !JSON.stringify(g).includes('"c1"'), 'never exposes raw candidate claim ids');
+  });
+}
+
+async function testClaimResearchGapCannotMutateOtherVerificationLanes() {
+  console.log('\n--- M: claim_research_gap cannot mutate a row outside the publication_evidence_gap lane ---');
+  const env = makeEnv();
+  const otherLaneRow = { queue_id: 'source_verification:s1', lane: 'source_verification', item_type: 'source', item_id: 's1', priority: 50, status: 'pending', extras: {} };
+  const before = JSON.stringify(otherLaneRow);
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [otherLaneRow] });
+  await withMockedFetch(mockFetch, async () => {
+    const res = await modernCall(env, 'tools/call', { name: 'claim_research_gap', arguments: { gap_id: 'source_verification:s1' } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.ok === false, `refuses to claim a row outside its own lane (got ok=${structured.ok})`);
+    assert(structured.reason === 'WRONG_LANE', `reason is WRONG_LANE (got ${structured.reason})`);
+    assert(res.json.result.isError === true, 'a wrong-lane claim attempt is reported as a tool error (fail closed)');
+  });
+  assert(JSON.stringify(state.researchGaps.get('source_verification:s1')) === before, 'the other-lane row is completely unchanged after the refused claim attempt');
+}
+
+async function testClaimResearchGapPendingToClaimedAndIdempotent() {
+  console.log('\n--- M (positive case) + idempotency: claiming a real pending gap ---');
+  const env = makeEnv();
+  const gap = makeGapRow();
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const first = await modernCall(env, 'tools/call', { name: 'claim_research_gap', arguments: { gap_id: gap.queue_id } });
+    assert(first.json.result.structuredContent.ok === true, 'pending -> claimed succeeds');
+    assert(first.json.result.structuredContent.status === 'claimed', `status is now claimed (got ${first.json.result.structuredContent.status})`);
+    const claimedAt = state.researchGaps.get(gap.queue_id).extras.claimed_at;
+    assert(!!claimedAt, 'claimed_at is recorded');
+    assert(state.researchGaps.get(gap.queue_id).extras.claimed_by === 'grok-research-harvester', 'claimed_by is grok-research-harvester');
+
+    const second = await modernCall(env, 'tools/call', { name: 'claim_research_gap', arguments: { gap_id: gap.queue_id } });
+    assert(second.json.result.structuredContent.ok === true, 'claiming an already-claimed gap is idempotent (still ok)');
+    assert(state.researchGaps.get(gap.queue_id).extras.claimed_at === claimedAt, 'the ORIGINAL claimed_at is preserved -- a duplicate claim never overwrites it');
+  });
+}
+
+async function testClaimResearchGapAlreadyResolvedIsGovernedNonSuccess() {
+  console.log('\n--- claim_research_gap on an already-resolved gap: governed non-success, not a tool error ---');
+  const env = makeEnv();
+  const gap = makeGapRow({ status: 'resolved', extras: { ...makeGapRow().extras, resolved_at: '2026-01-01T00:00:00.000Z' } });
+  const { mockFetch } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const res = await modernCall(env, 'tools/call', { name: 'claim_research_gap', arguments: { gap_id: gap.queue_id } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.ok === false, 'ok is false for an already-resolved gap');
+    assert(structured.reason === 'ALREADY_RESOLVED', `reason is ALREADY_RESOLVED (got ${structured.reason})`);
+    assert(res.json.result.isError !== true, 'a governed non-success is NOT reported as a tool error');
+  });
+}
+
+async function testSubmitResearchBatchWithoutResearchGapIdBehavesExactlyAsBefore() {
+  console.log('\n--- N: submit_research_batch WITHOUT research_gap_id behaves exactly as before ---');
+  const env = makeEnv();
+  const { mockFetch } = makeMockSupabase();
+  await withMockedFetch(mockFetch, async () => {
+    const res = await modernCall(env, 'tools/call', { name: 'submit_research_batch', arguments: { batch_id: 'no-gap-batch', sources: [], claims: [] } });
+    const structured = res.json.result.structuredContent;
+    assert(structured.batch_id === 'no-gap-batch' && structured.status === 'ok', 'ordinary un-targeted submission still succeeds exactly as before');
+    assert(!('research_gap_transition' in structured), 'no research_gap_transition key appears at all when research_gap_id was omitted');
+  });
+}
+
+async function testSuccessfulTargetedSubmissionTransitionsGapToResearchReceived() {
+  console.log('\n--- O: a successful targeted submission transitions the correct gap to research_received ---');
+  const env = makeEnv();
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    const source = { source_id: 'aa-new-source-1', title: 'New AA Source', authors: ['A'], year: 2026, evidence_type: 'narrative_review', source_role: 'primary_research', topics: ['alopecia-areata'], verification_status: 'DISCOVERED', use_status: 'provisional' };
+    const res = await modernCall(env, 'tools/call', {
+      name: 'submit_research_batch',
+      arguments: { batch_id: 'targeted-batch-1', sources: [source], claims: [], research_gap_id: gap.queue_id },
+    });
+    const structured = res.json.result.structuredContent;
+    assert(structured.status === 'ok', `targeted submission with real usable material succeeds (got ${JSON.stringify(structured)})`);
+    assert(structured.research_gap_transition === 'RESEARCH_RECEIVED', `research_gap_transition is RESEARCH_RECEIVED (got ${structured.research_gap_transition})`);
+    const updated = state.researchGaps.get(gap.queue_id);
+    assert(updated.status === 'research_received', `the gap row's status is now research_received (got ${updated.status})`);
+    assert(updated.extras.research_batch_id === 'targeted-batch-1', 'research_batch_id is recorded on the gap');
+    assert(!!updated.extras.research_received_at, 'research_received_at is recorded on the gap');
+  });
+}
+
+async function testFullyRejectedTargetedSubmissionDoesNotClaimResearchReceived() {
+  console.log('\n--- P: a fully rejected/quarantined targeted submission does NOT claim research_received ---');
+  const env = makeEnv();
+  const gap = makeGapRow({ status: 'claimed' });
+  const { mockFetch, state } = makeMockSupabase({ initialResearchGaps: [gap] });
+  await withMockedFetch(mockFetch, async () => {
+    // A malformed source (missing the one strictly-required field,
+    // source_id) -- rejected by schema.mjs's validateSource() before
+    // ever reaching the DB, so accepted.sources/claims are both 0.
+    const res = await modernCall(env, 'tools/call', {
+      name: 'submit_research_batch',
+      arguments: { batch_id: 'rejected-batch-1', sources: [{ title: 'Missing its source_id' }], claims: [], research_gap_id: gap.queue_id },
+    });
+    const structured = res.json.result.structuredContent;
+    assert(structured.research_gap_transition === 'SKIPPED_NOTHING_ACCEPTED', `research_gap_transition is SKIPPED_NOTHING_ACCEPTED (got ${structured.research_gap_transition})`);
+    const stillGap = state.researchGaps.get(gap.queue_id);
+    assert(stillGap.status === 'claimed', `the gap row's status is UNCHANGED, never falsely marked research_received (got ${stillGap.status})`);
+  });
+}
+
+async function testSubmitResearchBatchWithUnknownResearchGapIdStillProcessesTheBatch() {
+  console.log('\n--- targeted submission referencing an unknown gap_id: batch still processes, link is skipped ---');
+  const env = makeEnv();
+  const { mockFetch } = makeMockSupabase();
+  await withMockedFetch(mockFetch, async () => {
+    const source = { source_id: 'aa-new-source-2', title: 'Another Source', authors: ['A'], year: 2026, evidence_type: 'narrative_review', source_role: 'primary_research', topics: ['alopecia-areata'], verification_status: 'DISCOVERED', use_status: 'provisional' };
+    const res = await modernCall(env, 'tools/call', {
+      name: 'submit_research_batch',
+      arguments: { batch_id: 'unknown-gap-batch', sources: [source], claims: [], research_gap_id: 'publication_evidence_gap:does-not-exist' },
+    });
+    const structured = res.json.result.structuredContent;
+    assert(structured.status === 'ok', 'the underlying research submission still succeeds even though the gap_id is unknown');
+    assert(structured.research_gap_transition === 'SKIPPED_NOT_LINKABLE', `research_gap_transition explains the skip (got ${structured.research_gap_transition})`);
+  });
+}
+
 async function main() {
   await testModernDiscoverAndToolsList();
   await testModernToolCall();
@@ -610,6 +846,14 @@ async function main() {
   await testOAuthInvalidTokenRejected();
   await testOAuthTokenNeverLogged();
   await testClientIdBinding();
+  await testListResearchGapsReturnsOnlyPublicationEvidenceGaps();
+  await testClaimResearchGapCannotMutateOtherVerificationLanes();
+  await testClaimResearchGapPendingToClaimedAndIdempotent();
+  await testClaimResearchGapAlreadyResolvedIsGovernedNonSuccess();
+  await testSubmitResearchBatchWithoutResearchGapIdBehavesExactlyAsBefore();
+  await testSuccessfulTargetedSubmissionTransitionsGapToResearchReceived();
+  await testFullyRejectedTargetedSubmissionDoesNotClaimResearchReceived();
+  await testSubmitResearchBatchWithUnknownResearchGapIdStillProcessesTheBatch();
 
   console.log(`\n=== ${failures === 0 ? 'ALL PASSED' : `${failures} ASSERTION(S) FAILED`} ===`);
   process.exit(failures === 0 ? 0 : 1);
