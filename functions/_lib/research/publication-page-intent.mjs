@@ -113,3 +113,71 @@ export function getPageSynthesisIntent(topicSlug) {
   }
   return intent;
 }
+
+export class PageSynthesisIntentError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'PageSynthesisIntentError';
+  }
+}
+
+function isNonEmptyString(v) {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
+/** PURE. Throws PageSynthesisIntentError (never returns a partial
+    result) on any shape violation -- deliberately called BEFORE any
+    model call, so a malformed dynamic intent never reaches the
+    network. Field names and requirements match this registry's own
+    hand-authored entries exactly (see PAGE_SYNTHESIS_INTENT above). */
+function validateExplicitPageSynthesisIntent(topicSlug, explicitIntent) {
+  if (!explicitIntent || typeof explicitIntent !== 'object') {
+    throw new PageSynthesisIntentError(`resolvePageSynthesisIntent: explicit intent for "${topicSlug}" must be an object.`);
+  }
+  const errors = [];
+  if (!isNonEmptyString(explicitIntent.page_concept)) errors.push('page_concept must be a non-empty string');
+  if (!isNonEmptyString(explicitIntent.public_intent)) errors.push('public_intent must be a non-empty string');
+  if (!Array.isArray(explicitIntent.in_scope_concepts) || explicitIntent.in_scope_concepts.length === 0 || !explicitIntent.in_scope_concepts.every(isNonEmptyString)) {
+    errors.push('in_scope_concepts must be a non-empty array of non-empty strings');
+  }
+  if (!Array.isArray(explicitIntent.out_of_scope_concepts) || !explicitIntent.out_of_scope_concepts.every(isNonEmptyString)) {
+    errors.push('out_of_scope_concepts must be an array of non-empty strings');
+  }
+  if (errors.length > 0) {
+    throw new PageSynthesisIntentError(`resolvePageSynthesisIntent: explicit intent for "${topicSlug}" is malformed: ${errors.join('; ')}`);
+  }
+}
+
+/**
+ * FAIL-CLOSED bridge between the hand-authored registry above and a
+ * dynamically-produced (but already deterministically validated) page
+ * intent -- e.g. AIMT Education Operations' own intent planner output.
+ * Historical behavior is completely unchanged: called with no explicit
+ * intent (or `null`), this is exactly `getPageSynthesisIntent()`, same
+ * registry, same throw for an unregistered slug. Called WITH an
+ * explicit intent, it validates that intent's shape deterministically
+ * and returns THAT intent instead -- it never consults, falls back to,
+ * or mutates the registry in that path, and it never infers or invents
+ * a field the caller didn't supply.
+ *
+ * Returns a normalized, frozen defensive copy either way, so nothing
+ * downstream (including a caller holding onto its own mutable copy of
+ * the object it passed in) can mutate what synthesis/reconciliation/
+ * retry/the clearance brief actually used.
+ *
+ * @param {string} topicSlug
+ * @param {{page_concept: string, public_intent: string, in_scope_concepts: string[], out_of_scope_concepts: string[]}|null} [explicitIntent]
+ * @returns {{page_concept: string, public_intent: string, in_scope_concepts: string[], out_of_scope_concepts: string[]}}
+ */
+export function resolvePageSynthesisIntent(topicSlug, explicitIntent = null) {
+  if (explicitIntent === null || explicitIntent === undefined) {
+    return getPageSynthesisIntent(topicSlug);
+  }
+  validateExplicitPageSynthesisIntent(topicSlug, explicitIntent);
+  return Object.freeze({
+    page_concept: explicitIntent.page_concept,
+    public_intent: explicitIntent.public_intent,
+    in_scope_concepts: Object.freeze([...explicitIntent.in_scope_concepts]),
+    out_of_scope_concepts: Object.freeze([...explicitIntent.out_of_scope_concepts]),
+  });
+}

@@ -425,13 +425,33 @@ export async function runDecisionPipeline(env, options = {}) {
   }
 
   // --- Publication Editor synthesis (EXACTLY ONCE; see education-synthesis-cache.mjs) ---
-  const synthesisResult = await prepareTopicArtifact(env, {
-    topicSlug: selected.topic_slug,
-    controlledTopic: selected.concept.controlled_topics.length === 1 ? selected.concept.controlled_topics[0] : null,
-    v1Result: selected.v1_result,
-    pageIntent: { page_concept: intentPlan.page_concept, public_intent: intentPlan.public_intent, in_scope_concepts: intentPlan.in_scope_concepts, out_of_scope_concepts: intentPlan.out_of_scope_concepts },
-    evidenceRows: evidencePool,
-  }, fns);
+  // HARDENING (real GitHub Actions shadow-run failure): prepareTopicArtifact()
+  // / runSynthesisPipeline() must never be allowed to throw uncaught here --
+  // the exact failure this guards against is a topic with no registered
+  // page synthesis intent and no (or a malformed) explicit pageIntent,
+  // which used to crash main() BEFORE persistRunReport() ever ran, leaving
+  // the workflow with no run ledger at all. A governed model OUTCOME
+  // (HUMAN_REVIEW, SYNTHESIS_FAILED) never reaches this catch -- those are
+  // already returned as normal tagged results by prepareTopicArtifact()
+  // and handled by the `!synthesisResult.ok` branch below. This is for
+  // genuinely THROWN architecture/configuration exceptions only.
+  let synthesisResult;
+  try {
+    synthesisResult = await prepareTopicArtifact(env, {
+      topicSlug: selected.topic_slug,
+      controlledTopic: selected.concept.controlled_topics.length === 1 ? selected.concept.controlled_topics[0] : null,
+      v1Result: selected.v1_result,
+      pageIntent: { page_concept: intentPlan.page_concept, public_intent: intentPlan.public_intent, in_scope_concepts: intentPlan.in_scope_concepts, out_of_scope_concepts: intentPlan.out_of_scope_concepts },
+      evidenceRows: evidencePool,
+    }, fns);
+  } catch (err) {
+    const isConfigError = err && (err.name === 'PublicationEditorModelConfigError' || err.name === 'EducationOpsModelConfigError');
+    return finish({
+      candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+      final_state: isConfigError ? RUN_FINAL_STATE.CONFIG_BLOCKED : RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `Publication Editor bridge threw an unexpected exception (${err && err.name || 'Error'}): ${err && err.message}`,
+    });
+  }
   if (synthesisResult.pipelineMetrics) {
     modelCalls.push({
       role: 'publication_editor',

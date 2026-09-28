@@ -113,6 +113,16 @@ function mapViolationsToTerminalStatus(violations) {
  * @param {string} params.topic_slug
  * @param {object} params.v1Result - full assessTopicReadiness() output (must be NEEDS_SYNTHESIS)
  * @param {{claims: object[], sources: object[]}} params.evidenceBundle
+ * @param {object|null} [params.pageIntent] - DYNAMIC-INTENT BRIDGE: an
+ *   explicit, already-validated page synthesis intent for a topic with no
+ *   hand-authored publication-page-intent.mjs registry entry (e.g. AIMT
+ *   Education Operations' own intent planner output). Omitted/null (the
+ *   historical default) resolves through the existing registry, exactly
+ *   as before, for every call this pipeline makes. When supplied, the
+ *   IDENTICAL object is passed to EVERY stage below (initial synthesis,
+ *   reconciliation, full retry, HUMAN_REVIEW justification retry) --
+ *   never re-derived, never swapped, never silently dropped partway
+ *   through a run. See publication-page-intent.mjs#resolvePageSynthesisIntent.
  * @param {object} [params.fns] - injectable I/O functions for testing:
  *   { synthesizeFn, reconcileFn, retryFn, justifyRetryFn }, each defaulting
  *   to the real publication-synthesis-client.mjs implementation.
@@ -127,14 +137,14 @@ function mapViolationsToTerminalStatus(violations) {
  *   metrics: object
  * }>}
  */
-export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidenceBundle, fns = {} }) {
+export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidenceBundle, pageIntent = null, fns = {} }) {
   const synthesizeFn = fns.synthesizeFn || defaultSynthesizeTopic;
   const reconcileFn = fns.reconcileFn || defaultReconcileMissingClaims;
   const retryFn = fns.retryFn || defaultRetrySynthesisWithReconciliation;
   const justifyRetryFn = fns.justifyRetryFn || defaultRetrySynthesisForJustification;
   const metrics = emptyMetrics();
 
-  const initial = await synthesizeFn(env, { topic_slug, evidenceBundle });
+  const initial = await synthesizeFn(env, { topic_slug, evidenceBundle, pageIntent });
   recordCall(metrics, 'initial_synthesis', initial);
   if (!initial.ok) {
     return { status: 'SYNTHESIS_FAILED', reason: initial.reason, stage: 'initial', finalOutput: null, reconciliation: null, initial: null, metrics };
@@ -161,7 +171,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   // HUMAN_REVIEW/SYNTHESIS_FAILED mapping without first giving the model
   // one bounded chance to resolve or properly justify it. ──────────────
   if (classification.only_retryable_indeterminate) {
-    const justifyResult = await justifyRetryFn(env, { topic_slug, evidenceBundle, previousOutput: initial.output });
+    const justifyResult = await justifyRetryFn(env, { topic_slug, evidenceBundle, previousOutput: initial.output, pageIntent });
     recordCall(metrics, 'human_review_justification_retry', justifyResult);
     metrics.full_retries += 1;
     if (!justifyResult.ok) {
@@ -189,7 +199,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
 
   // ── STEP 2: targeted reconciliation (exactly one attempt) ──────────
   const missingClaimIds = classification.repairable_accounting_claim_ids;
-  const reconcileResult = await reconcileFn(env, { topic_slug, evidenceBundle, existingOutput: initial.output, missingClaimIds });
+  const reconcileResult = await reconcileFn(env, { topic_slug, evidenceBundle, existingOutput: initial.output, missingClaimIds, pageIntent });
   recordCall(metrics, 'reconciliation', reconcileResult);
   metrics.reconciliation_calls += 1;
   if (!reconcileResult.ok) {
@@ -223,6 +233,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
     previousOutput: initial.output,
     reconciliation: reconcileResult.output,
     formerlyMissingClaimIds: missingClaimIds,
+    pageIntent,
   });
   recordCall(metrics, 'full_retry', retryResult);
   metrics.full_retries += 1;

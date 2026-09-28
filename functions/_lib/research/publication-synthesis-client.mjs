@@ -52,7 +52,7 @@ import { fetchAnthropicMessages, extractAnthropicTextSafe } from '../cadence/ant
 import { resolvePublicationEditorSynthesisModel, PublicationEditorModelConfigError } from './publication-editor-model-config.mjs';
 import { SYNTHESIS_OUTPUT_JSON_SCHEMA, SYNTHESIS_OUTPUT_CONTRACT_VERSION, buildSynthesisInstruction } from './publication-synthesis-schema.mjs';
 import { RECONCILIATION_OUTPUT_JSON_SCHEMA, buildReconciliationInstruction, buildFullRetryInstruction, buildHumanReviewJustificationRetryInstruction } from './publication-synthesis-reconciliation.mjs';
-import { getPageSynthesisIntent } from './publication-page-intent.mjs';
+import { resolvePageSynthesisIntent } from './publication-page-intent.mjs';
 
 // Generous headroom for a topic-wide candidate set the size hair-cycle's
 // (128 candidate claims) -- see checkpoint-evaluation.mjs's own
@@ -161,10 +161,16 @@ async function callStructured(env, { system, userContent, schema, maxTokens, eff
  *   dedicated credential, separate from Cadence's own ANTHROPIC_API_KEY --
  *   see module header) and optionally PUBLICATION_EDITOR_SYNTHESIS_MODEL
  *   to override the resolved model
- * @param {{topic_slug: string, evidenceBundle: {claims: object[], sources: object[]}}} params
+ * @param {{topic_slug: string, evidenceBundle: {claims: object[], sources: object[]}, pageIntent?: object|null}} params
+ *   pageIntent (DYNAMIC-INTENT BRIDGE): an explicit, already-validated page
+ *   synthesis intent (e.g. AIMT Education Operations' own intent planner
+ *   output) for a topic with no hand-authored publication-page-intent.mjs
+ *   entry. Omitted/null (the historical default) resolves through the
+ *   existing registry exactly as before -- see
+ *   publication-page-intent.mjs#resolvePageSynthesisIntent.
  */
-export async function synthesizeTopic(env, { topic_slug, evidenceBundle }) {
-  const intent = getPageSynthesisIntent(topic_slug);
+export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageIntent = null }) {
+  const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const system = buildSynthesisInstruction({
     pageConcept: intent.page_concept,
     publicIntent: intent.public_intent,
@@ -192,11 +198,14 @@ export async function synthesizeTopic(env, { topic_slug, evidenceBundle }) {
  * the existing synthesis result for context.
  *
  * @param {Object} env
- * @param {{topic_slug: string, evidenceBundle: {claims: object[], sources: object[]}, existingOutput: object, missingClaimIds: string[]}} params
+ * @param {{topic_slug: string, evidenceBundle: {claims: object[], sources: object[]}, existingOutput: object, missingClaimIds: string[], pageIntent?: object|null}} params
+ *   pageIntent -- see synthesizeTopic()'s own param doc; the SAME
+ *   explicit intent object the initial call for this topic used, never
+ *   independently re-derived.
  * @returns {Promise<{ok:true, output:object, modelInfo:object, usage:object} | {ok:false, reason:string, detail:string|null}>}
  */
-export async function reconcileMissingClaims(env, { topic_slug, evidenceBundle, existingOutput, missingClaimIds }) {
-  const intent = getPageSynthesisIntent(topic_slug);
+export async function reconcileMissingClaims(env, { topic_slug, evidenceBundle, existingOutput, missingClaimIds, pageIntent = null }) {
+  const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const system = buildReconciliationInstruction({
     pageConcept: intent.page_concept,
     publicIntent: intent.public_intent,
@@ -246,10 +255,12 @@ export async function reconcileMissingClaims(env, { topic_slug, evidenceBundle, 
  * requirement -- this is a fresh full synthesis, not a patch.
  *
  * @param {Object} env
- * @param {{topic_slug: string, evidenceBundle: object, previousOutput: object, reconciliation: object, formerlyMissingClaimIds: string[]}} params
+ * @param {{topic_slug: string, evidenceBundle: object, previousOutput: object, reconciliation: object, formerlyMissingClaimIds: string[], pageIntent?: object|null}} params
+ *   pageIntent -- see synthesizeTopic()'s own param doc; the SAME
+ *   explicit intent object the initial call for this topic used.
  */
-export async function retrySynthesisWithReconciliation(env, { topic_slug, evidenceBundle, previousOutput, reconciliation, formerlyMissingClaimIds }) {
-  const intent = getPageSynthesisIntent(topic_slug);
+export async function retrySynthesisWithReconciliation(env, { topic_slug, evidenceBundle, previousOutput, reconciliation, formerlyMissingClaimIds, pageIntent = null }) {
+  const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const baseSystem = buildSynthesisInstruction({
     pageConcept: intent.page_concept,
     publicIntent: intent.public_intent,
@@ -290,10 +301,12 @@ export async function retrySynthesisWithReconciliation(env, { topic_slug, eviden
  * SYNTHESIS_FAILED, never to a permanent, unexplained HUMAN_REVIEW.
  *
  * @param {Object} env
- * @param {{topic_slug: string, evidenceBundle: object, previousOutput: object}} params
+ * @param {{topic_slug: string, evidenceBundle: object, previousOutput: object, pageIntent?: object|null}} params
+ *   pageIntent -- see synthesizeTopic()'s own param doc; the SAME
+ *   explicit intent object the initial call for this topic used.
  */
-export async function retrySynthesisForJustification(env, { topic_slug, evidenceBundle, previousOutput }) {
-  const intent = getPageSynthesisIntent(topic_slug);
+export async function retrySynthesisForJustification(env, { topic_slug, evidenceBundle, previousOutput, pageIntent = null }) {
+  const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const baseSystem = buildSynthesisInstruction({
     pageConcept: intent.page_concept,
     publicIntent: intent.public_intent,
