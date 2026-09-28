@@ -175,7 +175,13 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
     recordCall(metrics, 'human_review_justification_retry', justifyResult);
     metrics.full_retries += 1;
     if (!justifyResult.ok) {
-      return { status: 'SYNTHESIS_FAILED', reason: justifyResult.reason, stage: 'human_review_justification_retry', finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics };
+      // DIAGNOSTIC PRESERVATION: the call itself failed here, but the
+      // violations that triggered this retry in the first place
+      // (initialValidation.violations) are already known -- surfaced at
+      // the top level too, not just nested under `initial`, so a
+      // caller can read `pipelineResult.violations` uniformly regardless
+      // of which stage ultimately failed.
+      return { status: 'SYNTHESIS_FAILED', reason: justifyResult.reason, stage: 'human_review_justification_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
     }
     const justifyValidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: justifyResult.output });
     if (!justifyValidation.schemaValid) {
@@ -203,7 +209,9 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   recordCall(metrics, 'reconciliation', reconcileResult);
   metrics.reconciliation_calls += 1;
   if (!reconcileResult.ok) {
-    return { status: 'SYNTHESIS_FAILED', reason: reconcileResult.reason, stage: 'reconciliation', finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics };
+    // DIAGNOSTIC PRESERVATION: see the identical note on the
+    // human_review_justification_retry call-failure branch above.
+    return { status: 'SYNTHESIS_FAILED', reason: reconcileResult.reason, stage: 'reconciliation', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
   }
 
   const shape = validateReconciliationShape(reconcileResult.output, missingClaimIds);
@@ -238,7 +246,9 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   recordCall(metrics, 'full_retry', retryResult);
   metrics.full_retries += 1;
   if (!retryResult.ok) {
-    return { status: 'SYNTHESIS_FAILED', reason: retryResult.reason, stage: 'full_retry', finalOutput: initial.output, reconciliation: reconcileResult.output, initial: initialSummary, metrics };
+    // DIAGNOSTIC PRESERVATION: see the identical note on the
+    // human_review_justification_retry call-failure branch above.
+    return { status: 'SYNTHESIS_FAILED', reason: retryResult.reason, stage: 'full_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: reconcileResult.output, initial: initialSummary, metrics };
   }
 
   const retryValidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: retryResult.output });
