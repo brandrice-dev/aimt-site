@@ -406,6 +406,89 @@ async function testRepeatedAccountingFailureAfterRetryNeverLoops() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// DYNAMIC-INTENT BRIDGE: an explicit pageIntent (e.g. AIMT Education
+// Operations' own intent planner output, for a topic with no
+// hand-authored publication-page-intent.mjs registry entry) must reach
+// EVERY Publication Editor call this pipeline can make -- initial
+// synthesis, reconciliation, the bounded full retry, AND the
+// HUMAN_REVIEW justification retry -- as the IDENTICAL object each
+// time, never independently re-derived or silently dropped partway
+// through a run.
+// ─────────────────────────────────────────────────────────────────────────
+const DYNAMIC_PAGE_INTENT = Object.freeze({
+  page_concept: 'Alopecia Areata: A Practitioner Education Overview',
+  public_intent: 'Explain alopecia areata clearly and accurately for beauty/scalp-care professionals.',
+  in_scope_concepts: Object.freeze(['what alopecia areata is', 'typical presentation']),
+  out_of_scope_concepts: Object.freeze(['diagnosis of an individual case', 'treatment or medication protocols']),
+});
+
+async function testDynamicIntentReachesInitialReconciliationAndFullRetry() {
+  const synthesizeFn = callCounter().willReturn(okResult(incompleteAiOutput()));
+  const reconcileFn = callCounter().willReturn(okResult({
+    resolutions: [{
+      claim_id: 'c3', disposition: 'SELECTED', role: 'core_finding',
+      reason_code: null, reason: 'Actually central.',
+      materially_changes_existing_synthesis: true, material_change_reason: 'Changes a core point.',
+    }],
+  }));
+  const retryFn = callCounter().willReturn(okResult(completeAiOutput({
+    selected_claims: [
+      { claim_id: 'c1', role: 'core_finding', reason: 'ok' },
+      { claim_id: 'c2', role: 'limitation', reason: 'ok' },
+      { claim_id: 'c3', role: 'core_finding', reason: 'reconsidered' },
+    ],
+    excluded_claims: [],
+    public_framing: {
+      core_points: [{ statement: 'Cycling.', supporting_claim_ids: ['c1'] }, { statement: 'Reconsidered point.', supporting_claim_ids: ['c3'] }],
+      limitations: [{ statement: 'Timing varies.', supporting_claim_ids: ['c2'] }],
+      scope_note: 'n/a',
+    },
+  })));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'alopecia-areata', v1Result: baselineV1Result({ topic_slug: 'alopecia-areata' }), evidenceBundle: baselineBundle(),
+    pageIntent: DYNAMIC_PAGE_INTENT,
+    fns: { synthesizeFn, reconcileFn, retryFn },
+  });
+  check('DYNAMIC_INTENT_PROPAGATION', 'reaches full_retry (all three PE calls happen in this run)', result.stage === 'full_retry', JSON.stringify(result));
+  check('DYNAMIC_INTENT_PROPAGATION', 'initial synthesis received the exact pageIntent', synthesizeFn.calls[0][1].pageIntent === DYNAMIC_PAGE_INTENT);
+  check('DYNAMIC_INTENT_PROPAGATION', 'reconciliation received the exact SAME pageIntent object', reconcileFn.calls[0][1].pageIntent === DYNAMIC_PAGE_INTENT);
+  check('DYNAMIC_INTENT_PROPAGATION', 'the full retry received the exact SAME pageIntent object', retryFn.calls[0][1].pageIntent === DYNAMIC_PAGE_INTENT);
+}
+
+async function testDynamicIntentReachesHumanReviewJustificationRetry() {
+  const synthesizeFn = callCounter().willReturn(okResult(bareHumanReviewOutput()));
+  const reconcileFn = callCounter();
+  const retryFn = callCounter();
+  const justifyRetryFn = callCounter().willReturn(okResult(completeAiOutput()));
+  const result = await runSynthesisPipeline({}, {
+    topic_slug: 'alopecia-areata', v1Result: baselineV1Result({ topic_slug: 'alopecia-areata' }), evidenceBundle: baselineBundle(),
+    pageIntent: DYNAMIC_PAGE_INTENT,
+    fns: { synthesizeFn, reconcileFn, retryFn, justifyRetryFn },
+  });
+  check('DYNAMIC_INTENT_PROPAGATION', 'reaches the justification retry stage', result.stage === 'human_review_justification_retry', JSON.stringify(result));
+  check('DYNAMIC_INTENT_PROPAGATION', 'initial synthesis received the exact pageIntent', synthesizeFn.calls[0][1].pageIntent === DYNAMIC_PAGE_INTENT);
+  check('DYNAMIC_INTENT_PROPAGATION', 'the justification retry received the exact SAME pageIntent object', justifyRetryFn.calls[0][1].pageIntent === DYNAMIC_PAGE_INTENT);
+}
+
+async function testOmittedPageIntentPropagatesAsNullEverywhere() {
+  // Legacy call shape (no pageIntent at all) -- every call site must
+  // receive pageIntent === null (or undefined), never a guessed value,
+  // so each client function falls through to the registry exactly as
+  // it always has.
+  const synthesizeFn = callCounter().willReturn(okResult(incompleteAiOutput()));
+  const reconcileFn = callCounter().willReturn(okResult({
+    resolutions: [{ claim_id: 'c3', disposition: 'EXCLUDED', role: null, reason_code: 'OTHER', reason: 'ok', materially_changes_existing_synthesis: false, material_change_reason: null }],
+  }));
+  const retryFn = callCounter();
+  await runSynthesisPipeline({}, {
+    topic_slug: 'hair-cycle', v1Result: baselineV1Result(), evidenceBundle: baselineBundle(),
+    fns: { synthesizeFn, reconcileFn, retryFn },
+  });
+  check('DYNAMIC_INTENT_PROPAGATION', 'no pageIntent supplied -> initial synthesis sees null/undefined, not an invented value', !synthesizeFn.calls[0][1].pageIntent);
+  check('DYNAMIC_INTENT_PROPAGATION', 'no pageIntent supplied -> reconciliation sees null/undefined too', !reconcileFn.calls[0][1].pageIntent);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Additional: model call failure at any stage never becomes AUTO_READY.
 // ─────────────────────────────────────────────────────────────────────────
 async function testInitialCallFailureIsSynthesisFailed() {
@@ -445,6 +528,9 @@ const tests = [
   testRepeatedAccountingFailureAfterRetryNeverLoops,
   testInitialCallFailureIsSynthesisFailed,
   testReconciliationCallFailureIsSynthesisFailed,
+  testDynamicIntentReachesInitialReconciliationAndFullRetry,
+  testDynamicIntentReachesHumanReviewJustificationRetry,
+  testOmittedPageIntentPropagatesAsNullEverywhere,
 ];
 
 for (const t of tests) {

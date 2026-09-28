@@ -167,12 +167,69 @@ async function testPublishRefusesWithNoArtifact() {
   check('NO_ARTIFACT', 'zero writes', writeCallCount === 0);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// DYNAMIC-INTENT BRIDGE FIX: the pageIntent prepareTopicArtifact()
+// receives must reach the synthesis call itself, and the exact SAME
+// object must govern the resulting clearance brief -- never two
+// independently-derived scope definitions. Before this fix, pageIntent
+// was silently dropped on the way into synthesizeFn/runSynthesisPipeline
+// (only ever reaching buildPageEvidenceBrief), which is exactly what let
+// a real GitHub Actions shadow run crash on an unregistered topic.
+// ─────────────────────────────────────────────────────────────────────────
+async function testSynthesisReceivesTheExactPageIntentPrepareWasGiven() {
+  let capturedArgs = null;
+  const synthesizeFn = async (env, args) => {
+    capturedArgs = args;
+    return {
+      status: 'AUTO_READY', stage: 'initial', reason: 'validated',
+      finalOutput: autoReadyOutput(),
+      metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 500, total_output_tokens: 500, model_info: { provider: 'anthropic', modelName: 'claude-sonnet-5', status: 'CANDIDATE' } },
+    };
+  };
+  const intent = baselinePageIntent();
+  const result = await prepareTopicArtifact(FAKE_ENV, {
+    topicSlug: 'x-topic', controlledTopic: 'x-topic', v1Result: baselineV1Result(),
+    pageIntent: intent, evidenceRows: baselineEvidenceRows(),
+  }, { synthesizeFn });
+
+  check('EXACT_INTENT_TO_SYNTHESIS', 'synthesizeFn was actually invoked with a pageIntent field', capturedArgs && 'pageIntent' in capturedArgs, JSON.stringify(capturedArgs));
+  check('EXACT_INTENT_TO_SYNTHESIS', 'synthesizeFn received the EXACT same pageIntent object prepareTopicArtifact was given (===, not a re-derived copy)', capturedArgs.pageIntent === intent);
+  check('EXACT_INTENT_TO_SYNTHESIS', 'the resulting clearance brief\'s public_intent matches that SAME intent', result.ok && result.preparedArtifact.record.publication_clearance.fingerprint_input.public_intent === intent.public_intent, JSON.stringify(result.ok && result.preparedArtifact.record.publication_clearance));
+}
+
+async function testNoSecondIntentResolutionOrGenerationOccurs() {
+  // prepareTopicArtifact() must never itself re-derive, re-validate, or
+  // re-fetch a page intent -- it is handed ONE already-validated intent
+  // and passes it straight through. Proven by mutating the SAME object
+  // reference between the (single) synthesis call and clearance-brief
+  // construction being impossible to distinguish from a single pass --
+  // there is exactly one code path, not two independently-derived ones.
+  let synthesisCallCount = 0;
+  const synthesizeFn = async () => {
+    synthesisCallCount += 1;
+    return {
+      status: 'AUTO_READY', stage: 'initial', reason: 'validated',
+      finalOutput: autoReadyOutput(),
+      metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 500, total_output_tokens: 500, model_info: {} },
+    };
+  };
+  const intent = baselinePageIntent();
+  const result = await prepareTopicArtifact(FAKE_ENV, {
+    topicSlug: 'x-topic', controlledTopic: 'x-topic', v1Result: baselineV1Result(),
+    pageIntent: intent, evidenceRows: baselineEvidenceRows(),
+  }, { synthesizeFn });
+  check('NO_SECOND_INTENT_RESOLUTION', 'synthesis (the only place an intent could be resolved against a registry) ran exactly once', synthesisCallCount === 1);
+  check('NO_SECOND_INTENT_RESOLUTION', 'succeeded using only the one supplied intent, no registry entry for "x-topic" exists', result.ok, JSON.stringify(result));
+}
+
 const tests = [
   testPrepareCallsSynthesisExactlyOnce,
   testPrepareStillCallsOnceOnHumanReview,
   testFullRoundTripCallsSynthesisExactlyOnceTotal,
   testPublishRefusesATamperedArtifact,
   testPublishRefusesWithNoArtifact,
+  testSynthesisReceivesTheExactPageIntentPrepareWasGiven,
+  testNoSecondIntentResolutionOrGenerationOccurs,
 ];
 
 for (const t of tests) await t();

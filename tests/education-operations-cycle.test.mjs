@@ -22,7 +22,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
-  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts,
+  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
 } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
@@ -520,6 +520,92 @@ async function testDuplicateResolvedRouteAlsoBecomesInfraReview() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// DYNAMIC-INTENT BRIDGE HARDENING: the real GitHub Actions shadow-run
+// failure this correction fixes crashed main() BEFORE persistRunReport()
+// ever ran, because the Publication Editor bridge (prepareTopicArtifact/
+// runSynthesisPipeline) threw an uncaught exception instead of returning
+// a governed result. runDecisionPipeline() must now catch any such
+// THROWN exception and resolve to a normal, persistable run report --
+// never let it propagate. A governed model OUTCOME (HUMAN_REVIEW,
+// SYNTHESIS_FAILED) is a completely different code path and must NOT be
+// affected by this change (covered by testHumanReviewSynthesisStopsCleanly
+// and testEditorialReviewFailClosed elsewhere in this file, both still
+// passing unchanged).
+// ─────────────────────────────────────────────────────────────────────────
+async function testThrownSynthesisExceptionBecomesGovernedInfraReview() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let report;
+  let threw = false;
+  try {
+    report = await run(FAKE_ENV_WITH_CRED, {
+      fns: {
+        fetchEvidenceFn: async () => pool,
+        planIntentFn: async () => fakeIntentResult(topicSlug),
+        // Simulates the EXACT real failure: an unregistered page
+        // synthesis intent throwing a plain Error, uncaught, from deep
+        // inside the Publication Editor bridge.
+        synthesizeFn: async () => { throw new Error(`No page synthesis intent registered for "${topicSlug}". Publication Editor v2 currently has registered intent for: hair-cycle, telogen-effluvium.`); },
+      },
+    });
+  } catch (_e) {
+    threw = true;
+  }
+  check('THROWN_SYNTHESIS_EXCEPTION', 'runDecisionPipeline never lets the exception propagate', !threw);
+  check('THROWN_SYNTHESIS_EXCEPTION', 'final_state is INFRA_REVIEW (not a crash, not silently NO_OP_SUCCESS)', report && report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report && report.final_state);
+  check('THROWN_SYNTHESIS_EXCEPTION', 'exception_reason names the real thrown message', report && report.exception_reason.includes('No page synthesis intent registered'), report && report.exception_reason);
+  check('THROWN_SYNTHESIS_EXCEPTION', 'selected_topic is preserved', report && report.selected_topic === topicSlug);
+  check('THROWN_SYNTHESIS_EXCEPTION', 'candidate_topics ranking is preserved', report && Array.isArray(report.candidate_topics) && report.candidate_topics.length > 0, report && JSON.stringify(report.candidate_topics));
+  check('THROWN_SYNTHESIS_EXCEPTION', 'published_topics is preserved', report && Array.isArray(report.published_topics));
+  check('THROWN_SYNTHESIS_EXCEPTION', 'the already-known intent_planner model call is preserved', report && report.model_calls.actual_model_call_count === 1, report && report.model_calls.actual_model_call_count);
+
+  // "run report can be persisted" -- proven for real, not just assumed.
+  const reportPath = persistRunReport(report);
+  check('THROWN_SYNTHESIS_EXCEPTION', 'the governed report can actually be persisted to disk', existsSync(reportPath));
+  const onDisk = JSON.parse(readFileSync(reportPath, 'utf8'));
+  check('THROWN_SYNTHESIS_EXCEPTION', 'the persisted report round-trips correctly', onDisk.final_state === RUN_FINAL_STATE.INFRA_REVIEW);
+  unlinkSync(reportPath);
+}
+
+async function testThrownConfigErrorClassifiesAsConfigBlocked() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => {
+        const err = new Error('PUBLICATION_EDITOR_SYNTHESIS_MODEL override is not a registered model.');
+        err.name = 'PublicationEditorModelConfigError';
+        throw err;
+      },
+    },
+  });
+  check('THROWN_CONFIG_ERROR', 'a clearly-configuration-shaped thrown error classifies as CONFIG_BLOCKED, not INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, report.final_state);
+  check('THROWN_CONFIG_ERROR', 'exception_reason names the real error', report.exception_reason.includes('not a registered model'), report.exception_reason);
+}
+
+async function testGovernedHumanReviewOutcomeIsUnaffectedByTheThrowGuard() {
+  // A governed HUMAN_REVIEW (a normal, tagged, non-throwing result) must
+  // still resolve to HUMAN_REVIEW, never get reclassified as INFRA_REVIEW
+  // by the new try/catch -- the catch only ever sees a THROWN exception.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'HUMAN_REVIEW', stage: 'initial', reason: 'model_declared_human_review',
+        finalOutput: { human_review_justification: { reason_code: 'UNRESOLVED_CONTRADICTION', reason: 'Two sources genuinely disagree.', related_claim_ids: [`${topicSlug}-c1`] } },
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+    },
+  });
+  check('THROW_GUARD_DOES_NOT_AFFECT_GOVERNED_OUTCOMES', 'a real (non-thrown) HUMAN_REVIEW result is unaffected', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // ROUTE-COLLISION CORRECTION: a planner choosing a route_slug that
 // matches a CURRENTLY LIVE page must fail cheaply (before spending a
 // synthesis/writer/reviewer call), and a writer disagreeing with the
@@ -758,6 +844,9 @@ const tests = [
   testNoCommandCanMarkStatusPublished,
   testUnresolvablePublishedTopicBecomesInfraReviewBeforeAnyModelCall,
   testDuplicateResolvedRouteAlsoBecomesInfraReview,
+  testThrownSynthesisExceptionBecomesGovernedInfraReview,
+  testThrownConfigErrorClassifiesAsConfigBlocked,
+  testGovernedHumanReviewOutcomeIsUnaffectedByTheThrowGuard,
   testPlannerChoosingExistingPublishedSlugFailsAsInfraReview,
   testWriterPlanRouteMismatchFailsAsInfraReviewNotEditorialReview,
   testNormalUnusedRoutePassesEndToEnd,

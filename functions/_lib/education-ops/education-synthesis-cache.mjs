@@ -73,7 +73,19 @@ export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = n
   const synthesizeFn = fns.synthesizeFn || runSynthesisPipeline;
 
   const evidenceBundle = buildSynthesisEvidenceBundle(v1Result.synthesis_packet, evidenceRows || { claims: [], sources: [] });
-  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle });
+  // DYNAMIC-INTENT BRIDGE FIX: pageIntent (already deterministically
+  // validated by the caller -- see education-intent-planner-validator.mjs)
+  // MUST reach the actual synthesis call, not just buildPageEvidenceBrief()
+  // below. Before this fix, prepareTopicArtifact() received pageIntent but
+  // never forwarded it to runSynthesisPipeline(), so every Publication
+  // Editor model call fell through to getPageSynthesisIntent(topicSlug) --
+  // which only knows the two hand-authored topics -- and threw for any
+  // other topic before a synthesis call was ever made. Passing the SAME
+  // pageIntent object here and to buildPageEvidenceBrief() below is what
+  // guarantees one validated intent governs both synthesis and the
+  // resulting clearance brief/fingerprint, never two independently-derived
+  // scope definitions.
+  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle, pageIntent });
 
   if (pipelineResult.status !== 'AUTO_READY') {
     return {
