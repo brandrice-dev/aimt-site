@@ -123,6 +123,7 @@ function makeHappyIo({ manifestStore = new Map(), bundle, existingPr = null, exi
     verifyStoredClearanceIntegrityFn: async () => ({ valid: true, violations: [] }),
     waitForDeploymentFn: async () => ({ ok: true, state: 'success', deploymentId: 1, violations: [] }),
     fetchLiveArtifactsFn: async () => ({ httpStatus: 200, html: liveHtmlFor(), sitemapXml: liveSitemapWithRoute(), hubHtml: liveHubWithRoute() }),
+    sleepFn: async () => {},
     _getClearanceRow: () => clearanceRow,
   };
 }
@@ -342,6 +343,36 @@ async function testEveryLiveVerificationFailureBlocksDbPublish() {
     check('LIVE_VERIFY_FAILS_CLOSED', `${label}: final_state is PUBLISH_FAILED`, report.final_state === RUN_FINAL_STATE.PUBLISH_FAILED, JSON.stringify({ label, state: report.final_state, reason: report.exception_reason }));
     check('LIVE_VERIFY_FAILS_CLOSED', `${label}: test #21: publishClearanceRecord was NEVER called`, publishSpy.callCount === 0);
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Post-deploy edge propagation: first live check sees a stale hub while
+// article/canonical/marker/sitemap are already current; a later bounded
+// retry sees the hub card and publication proceeds. This reproduces the
+// first real production publish attempt on 2026-09-29.
+// ─────────────────────────────────────────────────────────────────────────
+async function testLiveVerificationRetriesTransientHubPropagation() {
+  const bundle = makeReadyBundle();
+  const io = makeHappyIo({ bundle });
+  let liveFetchCount = 0;
+  io.fetchLiveArtifactsFn = async () => {
+    liveFetchCount += 1;
+    return {
+      httpStatus: 200,
+      html: liveHtmlFor(),
+      sitemapXml: liveSitemapWithRoute(),
+      hubHtml: liveFetchCount < 3 ? '<ul class="aimt-edu-card-grid"></ul>' : liveHubWithRoute(),
+    };
+  };
+  const publishSpy = spyFn(io.publishClearanceRecordFn);
+  io.publishClearanceRecordFn = publishSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+
+  check('LIVE_VERIFY_PROPAGATION_RETRY', 'transient stale hub is retried instead of immediately failing', liveFetchCount === 3, liveFetchCount);
+  check('LIVE_VERIFY_PROPAGATION_RETRY', 'publication reaches PUBLISHED once ALL live checks pass together', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('LIVE_VERIFY_PROPAGATION_RETRY', 'DB publish occurs exactly once and only after a successful live verification', publishSpy.callCount === 1);
+  check('LIVE_VERIFY_PROPAGATION_RETRY', 'still uses zero model calls', report.model_calls.total_calls === 0);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -802,6 +833,7 @@ const tests = [
   testMergeFailureBecomesPublishFailed,
   testDeploymentFailureTimeoutAndPreviewNotAcceptedAllFailClosed,
   testEveryLiveVerificationFailureBlocksDbPublish,
+  testLiveVerificationRetriesTransientHubPropagation,
   testPostWriteMismatchNeverReportsFalsePublished,
   testAlreadyPublishedRunIsIdempotent,
   testResumesAtDeploymentWaitWhenAlreadyMergedButNotYetDeployed,
