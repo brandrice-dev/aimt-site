@@ -305,7 +305,18 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       logId: logRow.id, countsBefore, countsAfter,
       insertedSources, updatedSources, insertedClaims, updatedClaims,
       rejectedSources: loaded.rejected.sources.length, rejectedClaims: allRejectedClaims.length,
-      orphanClaims: orphanClaims.length
+      orphanClaims: orphanClaims.length,
+      // INTERNAL/PRIVATE ONLY -- the canonical ingestion pipeline's OWN
+      // record of which claims it actually accepted/imported this batch
+      // (claimsToProcess: excludes JS-validation rejects AND orphan
+      // claims quarantined in step 4a; never a raw submitted claim this
+      // function chose not to import). Exists so a caller (the research-
+      // gap feedback loop's relevant-verified-claim gate) never has to
+      // re-derive or guess "what actually got imported" independently.
+      // No caller-facing HTTP/MCP response may ever spread this object
+      // wholesale -- see ingest-request.mjs and functions/api/mcp.js's
+      // own explicit field allow-lists.
+      processedClaims: claimsToProcess.map((c) => ({ claim_id: c.claim_id, topics: [...(c.topics || [])], verification_status: c.verification_status })),
     };
   } catch (err) {
     await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {

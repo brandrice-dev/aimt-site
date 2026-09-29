@@ -125,6 +125,13 @@ export async function processIngestionBatch(env, body, { triggeredBy, defaultSou
     accepted: { sources: result.insertedSources + result.updatedSources, claims: result.insertedClaims + result.updatedClaims },
     inserted: { sources: result.insertedSources, claims: result.insertedClaims },
     updated: { sources: result.updatedSources, claims: result.updatedClaims },
-    quarantined: { sources: result.rejectedSources, claims: result.rejectedClaims, orphan_claims: result.orphanClaims }
+    quarantined: { sources: result.rejectedSources, claims: result.rejectedClaims, orphan_claims: result.orphanClaims },
+    // INTERNAL/PRIVATE ONLY -- see importer.mjs#runImport's own comment.
+    // Both existing HTTP-facing callers (functions/api/research-ingest.js
+    // and functions/api/mcp.js) build their response objects from an
+    // explicit field allow-list and never spread this return value
+    // wholesale, so adding this field here changes neither caller's
+    // response shape.
+    processedClaims: result.processedClaims,
   };
 }

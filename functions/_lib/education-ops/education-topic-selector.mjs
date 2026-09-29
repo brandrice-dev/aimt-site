@@ -26,6 +26,7 @@
 
 import { PILOT_TOPIC_CONCEPTS, selectTopicEvidenceFromRows } from '../research/publication-readiness-loader.mjs';
 import { assessTopicReadiness, READINESS_STATUS, RISK_TIER } from '../research/publication-readiness.mjs';
+import { isTopicHeldByResearchGap } from './education-research-gap-queue.mjs';
 
 export const ACTIVE_CLUSTERS = Object.freeze({
   'hair-loss-shedding': {
@@ -150,10 +151,16 @@ export function checkCannibalization(concept, publishedTopicSlugs = PUBLISHED_TO
  *
  * @param {{claims: object[], sources: object[]}} evidencePool - the
  *   FULL claims/sources rows already fetched for this run (any topic)
- * @param {{clusterKey?: string, publishedTopicSlugs?: string[]}} [options]
+ * @param {{clusterKey?: string, publishedTopicSlugs?: string[], activeResearchGapsBySlug?: object}} [options]
  *   publishedTopicSlugs defaults to the PUBLISHED_TOPIC_SLUGS fixture
  *   constant for pure unit tests; the real orchestrator always passes
  *   the live-loaded set explicitly (see this module's header comment).
+ *   activeResearchGapsBySlug (RESEARCH-GAP FEEDBACK LOOP: education-
+ *   research-gap-queue.mjs) defaults to {} (no held topics at all --
+ *   this keeps every pre-existing pure unit test of this function, and
+ *   every real run with the loop disabled, byte-for-byte unchanged) --
+ *   maps topic_slug -> its active publication_evidence_gap queue row,
+ *   for topics that currently have one.
  * @returns {{
  *   cluster: string,
  *   candidates: Array<{topic_slug: string, v1_result: object, opportunity: object, cannibalization: object, eligible: boolean, ineligible_reason: string|null}>,
@@ -164,6 +171,7 @@ export function checkCannibalization(concept, publishedTopicSlugs = PUBLISHED_TO
 export function selectNextTopic(evidencePool, options = {}) {
   const clusterKey = options.clusterKey || DEFAULT_ACTIVE_CLUSTER;
   const publishedTopicSlugs = options.publishedTopicSlugs || PUBLISHED_TOPIC_SLUGS;
+  const activeResearchGapsBySlug = options.activeResearchGapsBySlug || {};
   const concepts = candidateConceptsForCluster(clusterKey, publishedTopicSlugs);
 
   const candidates = concepts.map((concept) => {
@@ -188,6 +196,16 @@ export function selectNextTopic(evidencePool, options = {}) {
     else if (Array.isArray(v1Result.evidence_gaps) && v1Result.evidence_gaps.length > 0) { eligible = false; ineligibleReason = 'EVIDENCE_GAPS_SKIP'; }
     else if (v1Result.readiness_status !== READINESS_STATUS.NEEDS_SYNTHESIS) { eligible = false; ineligibleReason = `UNEXPECTED_READINESS_STATUS:${v1Result.readiness_status}`; }
     else if (cannibalization.cannibalizes) { eligible = false; ineligibleReason = `CANNIBALIZES_PUBLISHED:${cannibalization.overlapping_with.join(',')}`; }
+    // RESEARCH-GAP FEEDBACK LOOP (checked LAST -- never overrides any of
+    // the safety/readiness/cannibalization reasons above; only excludes
+    // a topic that would otherwise be eligible). Holds a topic that
+    // already has an active (pending/claimed) evidence-gap request whose
+    // baseline candidate claim set has not changed since -- see
+    // education-research-gap-queue.mjs#isTopicHeldByResearchGap for the
+    // exact release conditions (a changed claim set, or research_received).
+    else if (isTopicHeldByResearchGap(activeResearchGapsBySlug[concept.topic_slug], v1Result.candidate_claim_ids)) {
+      eligible = false; ineligibleReason = 'RESEARCH_GAP_PENDING';
+    }
 
     return { topic_slug: concept.topic_slug, concept, v1_result: v1Result, opportunity, cannibalization, eligible, ineligible_reason: ineligibleReason };
   });

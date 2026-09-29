@@ -200,6 +200,77 @@ function mergePools(...pools) {
   check('CLUSTER_SCOPE', 'every returned candidate belongs to the active cluster', result.candidates.every((c) => memberSet.has(c.topic_slug)));
 })();
 
+// ─────────────────────────────────────────────────────────────────────────
+// RESEARCH-GAP FEEDBACK LOOP v1 (education-research-gap-queue.mjs's
+// isTopicHeldByResearchGap, wired in as options.activeResearchGapsBySlug).
+// F: a pending gap + unchanged candidate set makes the topic ineligible
+// with RESEARCH_GAP_PENDING. G: the selector still picks the next
+// eligible topic instead of returning nothing.
+// ─────────────────────────────────────────────────────────────────────────
+(function testPendingResearchGapWithUnchangedCandidateSetExcludesTheTopic() {
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  // First, without any gap, to capture alopecia-areata's REAL current
+  // candidate_claim_ids -- used as the gap's baseline so it matches
+  // exactly (the "unchanged" case).
+  const baseline = selectNextTopic(pool).candidates.find((c) => c.topic_slug === 'alopecia-areata').v1_result.candidate_claim_ids;
+
+  const activeResearchGapsBySlug = {
+    'alopecia-areata': { status: 'pending', extras: { baseline_candidate_claim_ids: baseline } },
+  };
+  const result = selectNextTopic(pool, { activeResearchGapsBySlug });
+  const aa = result.candidates.find((c) => c.topic_slug === 'alopecia-areata');
+  check('RESEARCH_GAP_PENDING', 'F: alopecia-areata is ineligible', aa.eligible === false);
+  check('RESEARCH_GAP_PENDING', 'F: reason is exactly RESEARCH_GAP_PENDING', aa.ineligible_reason === 'RESEARCH_GAP_PENDING', aa.ineligible_reason);
+  // G: per the originating request's own example ("the selector is free
+  // to evaluate the next eligible topic, such as androgenetic-alopecia
+  // or hair-loss") -- hair-loss is the umbrella of all three cluster
+  // topics, so it legitimately outscores either single topic once both
+  // feed evidence into it; either non-alopecia-areata pick proves the
+  // selector moved on rather than returning nothing.
+  check('RESEARCH_GAP_PENDING', 'G: the selector still selects a DIFFERENT eligible topic, never returns nothing', result.selected !== null && result.selected.topic_slug !== 'alopecia-areata', result.selected && result.selected.topic_slug);
+})();
+
+(function testClaimedResearchGapWithUnchangedCandidateSetAlsoExcludesTheTopic() {
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  const baseline = selectNextTopic(pool).candidates.find((c) => c.topic_slug === 'alopecia-areata').v1_result.candidate_claim_ids;
+  const activeResearchGapsBySlug = { 'alopecia-areata': { status: 'claimed', extras: { baseline_candidate_claim_ids: baseline } } };
+  const result = selectNextTopic(pool, { activeResearchGapsBySlug });
+  const aa = result.candidates.find((c) => c.topic_slug === 'alopecia-areata');
+  check('RESEARCH_GAP_PENDING', 'a CLAIMED gap (Rick is working it) with an unchanged baseline also holds the topic', aa.eligible === false && aa.ineligible_reason === 'RESEARCH_GAP_PENDING');
+})();
+
+(function testChangedCandidateSetReleasesTheTopicForReEvaluation() {
+  // H: even though the gap is still "pending", a DIFFERENT current
+  // candidate set (new evidence arrived) releases the topic.
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  const activeResearchGapsBySlug = {
+    'alopecia-areata': { status: 'pending', extras: { baseline_candidate_claim_ids: ['a-completely-different-claim-id'] } },
+  };
+  const result = selectNextTopic(pool, { activeResearchGapsBySlug });
+  const aa = result.candidates.find((c) => c.topic_slug === 'alopecia-areata');
+  check('RESEARCH_GAP_RELEASE', 'H: a changed candidate claim set releases the topic (still eligible)', aa.eligible === true, aa.ineligible_reason);
+})();
+
+(function testResearchReceivedStatusReleasesTheTopicEvenWithAnUnchangedBaseline() {
+  // I: research_received always releases the topic, regardless of
+  // whether the candidate set happens to still match the baseline.
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  const baseline = selectNextTopic(pool).candidates.find((c) => c.topic_slug === 'alopecia-areata').v1_result.candidate_claim_ids;
+  const activeResearchGapsBySlug = { 'alopecia-areata': { status: 'research_received', extras: { baseline_candidate_claim_ids: baseline } } };
+  const result = selectNextTopic(pool, { activeResearchGapsBySlug });
+  const aa = result.candidates.find((c) => c.topic_slug === 'alopecia-areata');
+  check('RESEARCH_GAP_RELEASE', 'I: research_received releases the topic even with an unchanged baseline', aa.eligible === true, aa.ineligible_reason);
+})();
+
+(function testResolvedGapNeverHoldsAndOmittedOptionIsByteForByteUnchanged() {
+  const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
+  const baseline = selectNextTopic(pool).candidates.find((c) => c.topic_slug === 'alopecia-areata').v1_result.candidate_claim_ids;
+  const withResolvedGap = selectNextTopic(pool, { activeResearchGapsBySlug: { 'alopecia-areata': { status: 'resolved', extras: { baseline_candidate_claim_ids: baseline } } } });
+  const withoutOption = selectNextTopic(pool);
+  check('RESEARCH_GAP_RELEASE', 'a resolved gap never holds anything', withResolvedGap.candidates.find((c) => c.topic_slug === 'alopecia-areata').eligible === true);
+  check('BACKWARD_COMPAT', 'omitting activeResearchGapsBySlug entirely produces the byte-identical result the loop-disabled path relies on', JSON.stringify(withoutOption) === JSON.stringify(selectNextTopic(pool, {})));
+})();
+
 // ---- Report ----
 const byFixture = new Map();
 for (const r of results) {

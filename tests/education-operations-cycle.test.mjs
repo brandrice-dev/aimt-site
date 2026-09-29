@@ -24,6 +24,7 @@ import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
   parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
+  isResearchGapLoopEnabled, RESEARCH_GAP_LOOP_ENV_VAR,
 } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
@@ -1352,6 +1353,255 @@ async function testHumanReviewStillMapsExactlyAsBeforeWithSanitizedCodesAlsoPres
   check('PE_VIOLATION_OBSERVABILITY', 'no raw claim id pair anywhere in the serialized run report', !JSON.stringify(report).includes(`${topicSlug}-c1->${topicSlug}-c2`));
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// RESEARCH-GAP FEEDBACK LOOP v1 (education-research-gap-queue.mjs wired
+// into runDecisionPipeline). THE FIX: Publication Editor's own VALID
+// governed HUMAN_REVIEW / EVIDENCE_INSUFFICIENCY result for
+// alopecia-areata should route to Rick (the research harvester), not to
+// the owner's human-review queue -- ordinary evidence acquisition is not
+// a scientific/safety/institutional exception. These tests prove: the
+// loop only ever fires when explicitly enabled; only EVIDENCE_
+// INSUFFICIENCY enters it (every other HUMAN_REVIEW reason_code is
+// completely unaffected); and Publication Editor progressing beyond
+// EVIDENCE_INSUFFICIENCY (AUTO_READY or a different reason) resolves a
+// pre-existing gap.
+// ─────────────────────────────────────────────────────────────────────────
+const FAKE_ENV_WITH_GAP_LOOP_ENABLED = { ...FAKE_ENV_WITH_CRED, [RESEARCH_GAP_LOOP_ENV_VAR]: 'true' };
+
+function evidenceInsufficiencySynthesizeFn(topicSlug, { reasonCode = 'EVIDENCE_INSUFFICIENCY', reason = 'Insufficient evidence for general presentation patterns.' } = {}) {
+  return async () => ({
+    status: 'HUMAN_REVIEW', stage: 'initial', reason: 'model_declared_human_review',
+    finalOutput: { human_review_justification: { reason_code: reasonCode, reason, related_claim_ids: [] } },
+    metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+  });
+}
+
+async function testEvidenceInsufficiencyWithLoopEnabledCreatesOneGap() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let upsertArgs = null;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug),
+      loadActiveResearchGapsBySlugFn: async () => ({}),
+      upsertEvidenceInsufficiencyGapFn: async (env, args) => {
+        upsertArgs = args;
+        return { row: { queue_id: `publication_evidence_gap:${topicSlug}`, extras: { attempt_count: 1 } }, action: 'QUEUED' };
+      },
+    },
+  });
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'A: final_state is RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.RESEARCH_GAP_QUEUED, report.final_state);
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'exactly one upsert call (one gap created)', !!upsertArgs);
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'upsert carries the correct topic/gap summary', upsertArgs.topicSlug === topicSlug && upsertArgs.gapSummary === 'Insufficient evidence for general presentation patterns.');
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'upsert carries the current candidate claim-id set as the baseline', Array.isArray(upsertArgs.baselineCandidateClaimIds) && upsertArgs.baselineCandidateClaimIds.length > 0);
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'CORRECTION 1: upsert carries the page concept\'s controlled_topics for the later relevance gate', Array.isArray(upsertArgs.controlledTopics) && upsertArgs.controlledTopics.includes(topicSlug), JSON.stringify(upsertArgs.controlledTopics));
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'research_gap_action reports QUEUED with the gap id and attempt_count', report.research_gap_action && report.research_gap_action.action === 'QUEUED' && report.research_gap_action.gap_id === `publication_evidence_gap:${topicSlug}` && report.research_gap_action.attempt_count === 1, JSON.stringify(report.research_gap_action));
+  check('EVIDENCE_INSUFFICIENCY_LOOP', 'never stores raw model output in validator_violation_codes (empty, this is not a validator failure)', JSON.stringify(report.publication_editor_result.validator_violation_codes) === '[]');
+}
+
+async function testRepeatedEvidenceInsufficiencyUpdatesTheSameGapNoDuplicate() {
+  // B, at the orchestrator level: an existing PENDING gap for this topic
+  // -- the loop must call upsert (which itself is responsible for
+  // updating the SAME row, tested exhaustively at the pure-logic level
+  // in education-research-gap-queue.test.mjs) rather than anything that
+  // looks like "create a second one".
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let upsertCallCount = 0;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug, { reason: 'Still insufficient, attempt 2.' }),
+      // A gap already exists, but its baseline DIFFERS from the current
+      // candidate set (otherwise the selector itself would have excluded
+      // this topic as RESEARCH_GAP_PENDING before ever reaching PE) --
+      // e.g. Rick submitted something that changed the pool, but it
+      // still wasn't enough.
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['some-other-claim-id'] } } }),
+      upsertEvidenceInsufficiencyGapFn: async () => { upsertCallCount += 1; return { row: { queue_id: `publication_evidence_gap:${topicSlug}`, extras: { attempt_count: 2 } }, action: 'UPDATED' }; },
+    },
+  });
+  check('REPEATED_INSUFFICIENCY_LOOP', 'exactly one upsert call, never two', upsertCallCount === 1);
+  check('REPEATED_INSUFFICIENCY_LOOP', 'research_gap_action reports UPDATED with the incremented attempt_count', report.research_gap_action.action === 'UPDATED' && report.research_gap_action.attempt_count === 2, JSON.stringify(report.research_gap_action));
+  check('REPEATED_INSUFFICIENCY_LOOP', 'final_state is still RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.RESEARCH_GAP_QUEUED);
+}
+
+async function testEvidenceInsufficiencyWithLoopDisabledPreservesExistingHumanReviewBehavior() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let upsertCalled = false;
+  let loadGapsCalled = false;
+  const report = await run(FAKE_ENV_WITH_CRED, { // loop NOT enabled
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug),
+      loadActiveResearchGapsBySlugFn: async () => { loadGapsCalled = true; return {}; },
+      upsertEvidenceInsufficiencyGapFn: async () => { upsertCalled = true; return { row: {}, action: 'QUEUED' }; },
+    },
+  });
+  check('LOOP_DISABLED', 'C: final_state is the ordinary HUMAN_REVIEW, exactly as before this feature existed', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+  check('LOOP_DISABLED', 'exception_reason carries the human_review_justification.reason exactly as before', report.exception_reason.includes('Insufficient evidence for general presentation patterns.'), report.exception_reason);
+  check('LOOP_DISABLED', 'the gap queue is never even read when the loop is disabled', loadGapsCalled === false);
+  check('LOOP_DISABLED', 'the gap queue is never written when the loop is disabled', upsertCalled === false);
+  check('LOOP_DISABLED', 'isResearchGapLoopEnabled(FAKE_ENV_WITH_CRED) is false', isResearchGapLoopEnabled(FAKE_ENV_WITH_CRED) === false);
+}
+
+async function testUnresolvedContradictionNeverGoesToRickEvenWithLoopEnabled() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let upsertCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug, { reasonCode: 'UNRESOLVED_CONTRADICTION', reason: 'Two sources genuinely disagree on a core finding for this topic.' }),
+      loadActiveResearchGapsBySlugFn: async () => ({}),
+      upsertEvidenceInsufficiencyGapFn: async () => { upsertCalled = true; return { row: {}, action: 'QUEUED' }; },
+    },
+  });
+  check('OTHER_REASON_CODES_STAY_HUMAN_REVIEW', 'D: UNRESOLVED_CONTRADICTION still maps to HUMAN_REVIEW, never RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+  check('OTHER_REASON_CODES_STAY_HUMAN_REVIEW', 'D: the gap queue is never written for this reason_code', upsertCalled === false);
+}
+
+async function testSafetyOrScopeConcernNeverGoesToRickEvenWithLoopEnabled() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let upsertCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug, { reasonCode: 'SAFETY_OR_SCOPE_CONCERN', reason: 'A genuine safety/scope concern requiring owner review.' }),
+      loadActiveResearchGapsBySlugFn: async () => ({}),
+      upsertEvidenceInsufficiencyGapFn: async () => { upsertCalled = true; return { row: {}, action: 'QUEUED' }; },
+    },
+  });
+  check('OTHER_REASON_CODES_STAY_HUMAN_REVIEW', 'E: SAFETY_OR_SCOPE_CONCERN still maps to HUMAN_REVIEW, never RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+  check('OTHER_REASON_CODES_STAY_HUMAN_REVIEW', 'E: the gap queue is never written for this reason_code', upsertCalled === false);
+}
+
+async function testAutoReadyResolvesAnExistingEvidenceGap() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let resolveArgs = null;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug), // AUTO_READY
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: async () => fakePassingReviewResult(),
+      // A gap for a DIFFERENT prior claim set exists (Rick submitted new
+      // evidence, releasing the topic for re-evaluation -- see the
+      // topic-selector tests for that release logic in isolation).
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 2, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async (env, slug) => { resolveArgs = slug; return { ok: true, reason: 'RESOLVED', row: {} }; },
+    },
+  });
+  check('AUTO_READY_RESOLVES_GAP', 'J: resolveResearchGapByTopic was called for the selected topic', resolveArgs === topicSlug, resolveArgs);
+  check('AUTO_READY_RESOLVES_GAP', 'J: research_gap_action reports RESOLVED', report.research_gap_action && report.research_gap_action.action === 'RESOLVED', JSON.stringify(report.research_gap_action));
+  check('AUTO_READY_RESOLVES_GAP', 'the run continues normally all the way to SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+}
+
+async function testADifferentHumanReviewReasonAlsoResolvesAnExistingEvidenceGap() {
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let resolveArgs = null;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug, { reasonCode: 'OTHER_SUBSTANTIVE_EXCEPTION', reason: 'A different, genuine substantive exception this time.' }),
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async (env, slug) => { resolveArgs = slug; return { ok: true, reason: 'RESOLVED', row: {} }; },
+    },
+  });
+  check('AUTO_READY_RESOLVES_GAP', 'Publication Editor progressing to a DIFFERENT HUMAN_REVIEW reason also resolves the gap', resolveArgs === topicSlug);
+  check('AUTO_READY_RESOLVES_GAP', 'final_state is the ordinary HUMAN_REVIEW for the new reason, not RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.HUMAN_REVIEW, report.final_state);
+}
+
+async function testSynthesisFailedDoesNotResolveAnActiveResearchGap() {
+  // G (CORRECTION 2): a mechanical/accounting SYNTHESIS_FAILED proves
+  // NOTHING about whether the original evidence insufficiency is
+  // resolved -- it must NEVER resolve a pre-existing gap. The gap must
+  // be preserved exactly as it was so the system does not lose the
+  // research-feedback state because of model/output infrastructure
+  // noise.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let resolveCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: async () => ({
+        status: 'SYNTHESIS_FAILED', stage: 'initial', reason: 'unresolved_mechanical_or_accounting_violation',
+        finalOutput: null, violations: ['LIMITATIONS_NOT_PRESERVED'],
+        metrics: { model_calls: 1, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 100, total_output_tokens: 100, model_info: {} },
+      }),
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async () => { resolveCalled = true; return { ok: true, reason: 'RESOLVED', row: {} }; },
+    },
+  });
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: final_state is the ordinary NO_OP_SUCCESS for SYNTHESIS_FAILED, unchanged', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: resolveResearchGapByTopic was NEVER called', resolveCalled === false);
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: research_gap_action is not set to RESOLVED (the gap is preserved, untouched)', !report.research_gap_action || report.research_gap_action.action !== 'RESOLVED', JSON.stringify(report.research_gap_action));
+}
+
+async function testGapUpsertFailureFailsClosedAsInfraReviewNotUncaughtThrow() {
+  // K (CORRECTION 3): a queue WRITE failure must never escape uncaught,
+  // must never be reported as if the gap were queued, and must produce
+  // a governed INFRA_REVIEW with the normal run report still persistable.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: evidenceInsufficiencySynthesizeFn(topicSlug),
+      loadActiveResearchGapsBySlugFn: async () => ({}),
+      upsertEvidenceInsufficiencyGapFn: async () => { throw new Error('simulated Supabase upsert failure'); },
+    },
+  });
+  check('QUEUE_WRITE_FAILURE', 'K: final_state is INFRA_REVIEW, never RESEARCH_GAP_QUEUED', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('QUEUE_WRITE_FAILURE', 'K: exception_reason names the upsert failure', report.exception_reason.includes('upsert failed') || report.exception_reason.includes('simulated Supabase upsert failure'), report.exception_reason);
+  check('QUEUE_WRITE_FAILURE', 'K: research_gap_action was never set to a successful action (the write never actually happened)', !report.research_gap_action, JSON.stringify(report.research_gap_action));
+  check('QUEUE_WRITE_FAILURE', 'K: a real, buildable run report was returned -- no uncaught throw escaped runDecisionPipeline', typeof report.run_id === 'string' && report.run_id.length > 0);
+}
+
+async function testGapResolveFailureFailsClosedAsInfraReviewNotUncaughtThrow() {
+  // L (CORRECTION 3): same fail-closed guarantee for the RESOLVE path
+  // (AUTO_READY release) -- and, per "No model retry", the run must stop
+  // here rather than continuing on to spend a Writer/Reviewer call.
+  const topicSlug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  let writeFnCalled = false;
+  const report = await run(FAKE_ENV_WITH_GAP_LOOP_ENABLED, {
+    fns: {
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug), // AUTO_READY
+      writeFn: async (env, args) => { writeFnCalled = true; return fakeWriterResult(topicSlug, args.clearedSnapshot); },
+      loadActiveResearchGapsBySlugFn: async () => ({ [topicSlug]: { queue_id: `publication_evidence_gap:${topicSlug}`, status: 'pending', extras: { attempt_count: 1, baseline_candidate_claim_ids: ['a-stale-claim-id'] } } }),
+      resolveResearchGapByTopicFn: async () => { throw new Error('simulated Supabase resolve failure'); },
+    },
+  });
+  check('QUEUE_WRITE_FAILURE', 'L: final_state is INFRA_REVIEW, never SHADOW_CANDIDATE_READY', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('QUEUE_WRITE_FAILURE', 'L: exception_reason names the resolve failure', report.exception_reason.includes('resolve failed') || report.exception_reason.includes('simulated Supabase resolve failure'), report.exception_reason);
+  check('QUEUE_WRITE_FAILURE', 'L: no model retry -- the Writer was never called after the queue-write failure', writeFnCalled === false);
+  check('QUEUE_WRITE_FAILURE', 'L: a real, buildable run report was returned -- no uncaught throw escaped runDecisionPipeline', typeof report.run_id === 'string' && report.run_id.length > 0);
+}
+
+function testResearchGapLoopSafetyInvariants() {
+  check('RESEARCH_GAP_SAFETY_INVARIANTS', 'S: AUTOPUBLISH is not enabled in either fake env used by these tests', isAutopublishEnabled(FAKE_ENV_WITH_CRED) === false && isAutopublishEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === false);
+  check('RESEARCH_GAP_SAFETY_INVARIANTS', 'T: --publish still unconditionally refuses regardless of the research-gap loop flag', runFullAutopublishRefusal().ok === false);
+  check('RESEARCH_GAP_SAFETY_INVARIANTS', 'the research-gap loop flag and AUTOPUBLISH are independent -- enabling one never implies the other', isResearchGapLoopEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === true && isAutopublishEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === false);
+}
+
 const tests = [
   testWeeklyCapBlocksTheWholeRun,
   testWeeklyCapRuntimeThresholds,
@@ -1396,6 +1646,17 @@ const tests = [
   testSynthesisFailedViolationsReachRunReportAsSanitizedCodes,
   testSynthesisFailedWithNoViolationsProducesAnEmptyArray,
   testHumanReviewStillMapsExactlyAsBeforeWithSanitizedCodesAlsoPresent,
+  testEvidenceInsufficiencyWithLoopEnabledCreatesOneGap,
+  testRepeatedEvidenceInsufficiencyUpdatesTheSameGapNoDuplicate,
+  testEvidenceInsufficiencyWithLoopDisabledPreservesExistingHumanReviewBehavior,
+  testUnresolvedContradictionNeverGoesToRickEvenWithLoopEnabled,
+  testSafetyOrScopeConcernNeverGoesToRickEvenWithLoopEnabled,
+  testAutoReadyResolvesAnExistingEvidenceGap,
+  testADifferentHumanReviewReasonAlsoResolvesAnExistingEvidenceGap,
+  testSynthesisFailedDoesNotResolveAnActiveResearchGap,
+  testGapUpsertFailureFailsClosedAsInfraReviewNotUncaughtThrow,
+  testGapResolveFailureFailsClosedAsInfraReviewNotUncaughtThrow,
+  testResearchGapLoopSafetyInvariants,
 ];
 
 for (const t of tests) await t();

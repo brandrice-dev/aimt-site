@@ -104,6 +104,10 @@
 import { resolveMcpAuth } from '../_lib/mcp/auth.mjs';
 import { wwwAuthenticateHeader } from '../_lib/mcp/discovery.mjs';
 import { processIngestionBatch, logIngestEvent } from '../_lib/research/ingest-request.mjs';
+import {
+  listActiveResearchGaps, claimResearchGapById, verifyResearchGapForSubmission, markGapResearchReceivedById,
+  hasRelevantVerifiedClaim,
+} from '../_lib/education-ops/education-research-gap-queue.mjs';
 
 const SOURCE = 'api/mcp';
 const SERVER_NAME = 'aimt-research-harvester';
@@ -115,6 +119,14 @@ const DEFAULT_LEGACY_PROTOCOL_VERSION = '2025-11-25'; // latest legacy version w
 const ALL_SUPPORTED_VERSIONS = [MODERN_PROTOCOL_VERSION, ...LEGACY_PROTOCOL_VERSIONS];
 
 const CANONICAL_ORIGIN = 'https://aimtrichology.com';
+
+const SERVER_INSTRUCTIONS =
+  'Use submit_research_batch to submit research sources/claims into the AIMT research library. ' +
+  'Submissions are validated and imported through AIMT\'s governed trust ladder; nothing submitted ' +
+  'here is ever automatically approved or published. Use list_research_gaps to check for an active, ' +
+  'high-priority publication evidence-gap request before ordinary horizon-scan research, ' +
+  'claim_research_gap to claim one, and submit_research_batch\'s optional research_gap_id to link a ' +
+  'targeted submission back to it.';
 
 const META_PROTOCOL_VERSION = 'io.modelcontextprotocol/protocolVersion';
 const META_CLIENT_CAPABILITIES = 'io.modelcontextprotocol/clientCapabilities';
@@ -178,6 +190,19 @@ const SUBMIT_TOOL = {
         type: 'array',
         items: { type: 'object' },
         description: 'Optional topic coverage rollup rows.'
+      },
+      research_gap_id: {
+        type: 'string',
+        description:
+          "Optional. The gap_id (queue_id) of an AIMT publication evidence-gap request this batch is targeted at " +
+          '(from list_research_gaps/claim_research_gap). Omitting this field behaves exactly as before -- an ordinary, ' +
+          'un-targeted submission. When supplied, AIMT verifies the gap is real, in the publication_evidence_gap lane, ' +
+          'and not already resolved; the research batch is ALWAYS processed through the exact same validation/import ' +
+          'pipeline regardless of that check. Only once ingestion actually accepts (inserts or updates) at least one ' +
+          'source or claim from this batch is the gap marked research_received -- a wholly rejected/quarantined batch ' +
+          'never falsely marks a gap as received. This never changes any trust-ladder rule: the highest verification ' +
+          'status this path can ever produce is still CLAIM_VERIFIED, and nothing here can resolve the gap itself -- ' +
+          "that happens separately once Education Operations re-evaluates the topic."
       }
     },
     required: ['batch_id']
@@ -190,11 +215,87 @@ const SUBMIT_TOOL = {
       accepted: { type: 'object', description: 'Counts of sources/claims that now exist in the library (inserted + updated).' },
       inserted: { type: 'object' },
       updated: { type: 'object' },
-      quarantined: { type: 'object', description: 'Counts of sources/claims/orphan_claims held for human review, not imported.' }
+      quarantined: { type: 'object', description: 'Counts of sources/claims/orphan_claims held for human review, not imported.' },
+      research_gap_transition: {
+        type: 'string',
+        description:
+          'Only present when research_gap_id was supplied. RESEARCH_RECEIVED only if this batch actually caused the ' +
+          'canonical ingestion pipeline to accept/import at least one CLAIM_VERIFIED claim relevant to the gap\'s own ' +
+          'topic(s); otherwise a SKIPPED_<reason> code (e.g. SKIPPED_NOT_LINKABLE, SKIPPED_NOTHING_ACCEPTED, ' +
+          'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM) explaining why the batch was still processed normally but not linked -- ' +
+          'an accepted but unrelated or merely-DISCOVERED claim never counts.'
+      }
     },
     required: ['batch_id', 'status']
   }
 };
+
+const LIST_RESEARCH_GAPS_TOOL = {
+  name: 'list_research_gaps',
+  title: 'List AIMT Publication Evidence-Gap Research Requests',
+  description:
+    "Returns AIMT Education Operations' currently ACTIVE (not yet resolved) publication evidence-gap requests -- " +
+    "topics where Publication Editor's deterministic governance validated that the research library does not yet " +
+    'have sufficient evidence to complete a page, and is asking the research harvester to prioritize targeted ' +
+    'research before ordinary horizon scanning. Returns ONLY what is needed for research prioritization: the gap ' +
+    "id, topic, page concept/intent/in-scope concepts, a governed plain-language summary of what's missing, " +
+    'priority, attempt count, status, and when it was requested. Never returns Publication Editor raw model ' +
+    'output, unrelated research_verification_queue lanes, or service credentials.',
+  inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+  outputSchema: {
+    type: 'object',
+    properties: {
+      gaps: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            gap_id: { type: 'string' },
+            topic_slug: { type: 'string' },
+            page_concept: { type: 'string' },
+            public_intent: { type: 'string' },
+            in_scope_concepts: { type: 'array', items: { type: 'string' } },
+            gap_summary: { type: 'string' },
+            priority: { type: 'number' },
+            attempt_count: { type: 'number' },
+            status: { type: 'string' },
+            requested_at: { type: 'string' }
+          }
+        }
+      }
+    },
+    required: ['gaps']
+  }
+};
+
+const CLAIM_RESEARCH_GAP_TOOL = {
+  name: 'claim_research_gap',
+  title: 'Claim an AIMT Publication Evidence-Gap Research Request',
+  description:
+    "Marks one publication evidence-gap request as claimed by the research harvester (grok-research-harvester), " +
+    'so Education Operations knows targeted research is already underway and will not repeatedly re-attempt ' +
+    'Publication Editor for that topic while it waits. Idempotent for an already-claimed gap (calling it twice is ' +
+    'safe). Returns a GOVERNED, non-error result (not a tool failure) if the gap is already resolved. Fails closed ' +
+    '(refuses) for an unknown/stale gap_id. Can never claim, resolve, or otherwise mutate any ' +
+    'research_verification_queue row outside the publication_evidence_gap lane.',
+  inputSchema: {
+    type: 'object',
+    properties: { gap_id: { type: 'string', description: 'The gap_id (queue_id) returned by list_research_gaps.' } },
+    required: ['gap_id']
+  },
+  outputSchema: {
+    type: 'object',
+    properties: {
+      ok: { type: 'boolean' },
+      reason: { type: 'string' },
+      gap_id: { type: 'string' },
+      status: { type: 'string' }
+    },
+    required: ['ok', 'reason']
+  }
+};
+
+const TOOLS = [SUBMIT_TOOL, LIST_RESEARCH_GAPS_TOOL, CLAIM_RESEARCH_GAP_TOOL];
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -282,17 +383,66 @@ function modernMeta() {
   return { [META_SERVER_INFO]: { name: SERVER_NAME, version: SERVER_VERSION } };
 }
 
-/* ── The tool's actual work, shared byte-for-byte between eras ──
-   "Do not change the tool's business behavior between eras" is true by
-   construction: both era's tools/call handlers call this one function. */
+/* ── The tools' actual work, shared byte-for-byte between eras ──
+   "Do not change a tool's business behavior between eras" is true by
+   construction: both era's tools/call handlers call these same
+   functions. */
 async function runSubmitResearchBatchTool(env, args) {
   const safeArgs = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
+  // RESEARCH-GAP FEEDBACK LOOP v1 (optional research_gap_id -- see
+  // SUBMIT_TOOL's own description). Verification NEVER blocks or alters
+  // the underlying ingestion call below -- it only decides whether a
+  // successful batch also gets linked back to a gap afterward.
+  const researchGapId = typeof safeArgs.research_gap_id === 'string' && safeArgs.research_gap_id.trim() ? safeArgs.research_gap_id.trim() : null;
+  let gapRow = null;
+  if (researchGapId) {
+    try {
+      const verification = await verifyResearchGapForSubmission(env, researchGapId);
+      if (verification.ok) gapRow = verification.row;
+      else await logIngestEvent(env, SOURCE, 'mcp_research_gap_link_skipped', `${researchGapId}_${verification.reason}`);
+    } catch (_err) {
+      gapRow = null;
+      await logIngestEvent(env, SOURCE, 'mcp_research_gap_link_skipped', `${researchGapId}_VERIFICATION_FAILED`);
+    }
+  }
+
   try {
     const result = await processIngestionBatch(env, safeArgs, { triggeredBy: 'mcp-connector' });
     if (!result.ok) {
       await logIngestEvent(env, SOURCE, 'mcp_tool_call_rejected', result.error);
       return toolTextResult({ error: result.error }, true);
     }
+
+    let researchGapTransition;
+    if (researchGapId) {
+      if (!gapRow) {
+        researchGapTransition = 'SKIPPED_NOT_LINKABLE';
+      } else if (!hasRelevantVerifiedClaim(result.processedClaims, gapRow.extras && gapRow.extras.controlled_topics)) {
+        // CORRECTION 1: "research_received" must mean the canonical
+        // ingestion pipeline actually accepted/imported at least one
+        // claim that is BOTH relevant to this gap's own controlled_topics
+        // AND CLAIM_VERIFIED -- never merely "something was accepted in
+        // the same batch" (an unrelated claim, a source with no relevant
+        // verified claim, DISCOVERED-only material, or a relevant claim
+        // that was itself quarantined/orphaned/rejected all land here,
+        // never falsely marking the gap received). result.processedClaims
+        // is INTERNAL ONLY -- never included in this tool's own response
+        // below. The gate is claim-based, so "accepted something" here
+        // means "accepted at least one CLAIM" -- an accepted SOURCE with
+        // zero accepted claims (test B) is "nothing accepted" for this
+        // purpose, not "the wrong kind of claim".
+        const acceptedAnyClaim = (result.accepted.claims || 0) > 0;
+        researchGapTransition = acceptedAnyClaim ? 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM' : 'SKIPPED_NOTHING_ACCEPTED';
+      } else {
+        try {
+          const marked = await markGapResearchReceivedById(env, researchGapId, { researchBatchId: result.batch_id });
+          researchGapTransition = marked.ok ? 'RESEARCH_RECEIVED' : `SKIPPED_${marked.reason}`;
+        } catch (_err) {
+          researchGapTransition = 'SKIPPED_TRANSITION_FAILED';
+        }
+      }
+    }
+
     await logIngestEvent(env, SOURCE, 'mcp_tool_call_complete', `batch_${result.batch_id}_status_${result.status}`);
     return toolTextResult({
       batch_id: result.batch_id,
@@ -300,12 +450,81 @@ async function runSubmitResearchBatchTool(env, args) {
       accepted: result.accepted,
       inserted: result.inserted,
       updated: result.updated,
-      quarantined: result.quarantined
+      quarantined: result.quarantined,
+      // NOTE: result.processedClaims (raw claim ids/topics) is
+      // deliberately NEVER included here -- see importer.mjs's own
+      // comment on why that field is internal-only.
+      ...(researchGapId ? { research_gap_transition: researchGapTransition } : {})
     });
   } catch (error) {
     const message = error && error.message ? error.message : 'unknown_error';
     await logIngestEvent(env, SOURCE, 'mcp_tool_call_failure', message);
     return toolTextResult({ error: 'processing_error' }, true);
+  }
+}
+
+/** list_research_gaps -- read-only, returns ONLY the fields Rick needs
+    (see LIST_RESEARCH_GAPS_TOOL's own description for exactly what is
+    and isn't included). Never reads any lane other than
+    publication_evidence_gap (listActiveResearchGaps() itself is scoped
+    to that lane only). */
+async function runListResearchGapsTool(env) {
+  try {
+    const rows = await listActiveResearchGaps(env);
+    const gaps = rows.map((row) => ({
+      gap_id: row.queue_id,
+      topic_slug: row.item_id,
+      page_concept: (row.extras && row.extras.page_concept) || null,
+      public_intent: (row.extras && row.extras.public_intent) || null,
+      in_scope_concepts: (row.extras && row.extras.in_scope_concepts) || [],
+      gap_summary: (row.extras && row.extras.gap_summary) || null,
+      priority: row.priority,
+      attempt_count: (row.extras && row.extras.attempt_count) || 0,
+      status: row.status,
+      requested_at: row.created_at
+    }));
+    return toolTextResult({ gaps });
+  } catch (error) {
+    const message = error && error.message ? error.message : 'unknown_error';
+    await logIngestEvent(env, SOURCE, 'mcp_tool_call_failure', message);
+    return toolTextResult({ error: 'processing_error' }, true);
+  }
+}
+
+/** claim_research_gap -- see CLAIM_RESEARCH_GAP_TOOL's own description.
+    claimResearchGapById() itself refuses (fails closed) for anything
+    outside the publication_evidence_gap lane; this wrapper only maps
+    its governed {ok, reason} result onto the tool response shape. */
+async function runClaimResearchGapTool(env, args) {
+  const gapId = args && typeof args.gap_id === 'string' ? args.gap_id.trim() : '';
+  if (!gapId) return toolTextResult({ ok: false, reason: 'GAP_ID_REQUIRED' }, true);
+  try {
+    const result = await claimResearchGapById(env, gapId, { claimedBy: 'grok-research-harvester' });
+    await logIngestEvent(env, SOURCE, 'mcp_claim_research_gap', `${gapId}_${result.reason}`);
+    // ALREADY_RESOLVED is a GOVERNED non-success (a well-formed request
+    // that legitimately cannot be satisfied), not a tool failure --
+    // isError stays false for it and for every ok:true outcome. Only a
+    // stale/invalid gap_id (NOT_FOUND/WRONG_LANE/NOT_CLAIMABLE_IN_
+    // CURRENT_STATUS) fails closed as isError:true.
+    const isError = !result.ok && result.reason !== 'ALREADY_RESOLVED';
+    return toolTextResult({ ok: result.ok, reason: result.reason, gap_id: gapId, status: result.row ? result.row.status : null }, isError);
+  } catch (error) {
+    const message = error && error.message ? error.message : 'unknown_error';
+    await logIngestEvent(env, SOURCE, 'mcp_tool_call_failure', message);
+    return toolTextResult({ ok: false, reason: 'processing_error' }, true);
+  }
+}
+
+async function runTool(env, name, args) {
+  switch (name) {
+    case SUBMIT_TOOL.name:
+      return runSubmitResearchBatchTool(env, args);
+    case LIST_RESEARCH_GAPS_TOOL.name:
+      return runListResearchGapsTool(env);
+    case CLAIM_RESEARCH_GAP_TOOL.name:
+      return runClaimResearchGapTool(env, args);
+    default:
+      return null;
   }
 }
 
@@ -359,10 +578,7 @@ async function handleModernServerDiscover(id) {
     supportedVersions: ALL_SUPPORTED_VERSIONS,
     capabilities: { tools: {} },
     _meta: modernMeta(),
-    instructions:
-      'Use submit_research_batch to submit research sources/claims into the AIMT research library. ' +
-      'Submissions are validated and imported through AIMT\'s governed trust ladder; nothing submitted ' +
-      'here is ever automatically approved or published.',
+    instructions: SERVER_INSTRUCTIONS,
     ttlMs: 0,
     cacheScope: 'private'
   });
@@ -371,7 +587,7 @@ async function handleModernServerDiscover(id) {
 async function handleModernToolsList(id) {
   return rpcResult(id, {
     resultType: 'complete',
-    tools: [SUBMIT_TOOL],
+    tools: TOOLS,
     _meta: modernMeta(),
     ttlMs: 0,
     cacheScope: 'private'
@@ -380,11 +596,9 @@ async function handleModernToolsList(id) {
 
 async function handleModernToolsCall(env, id, params) {
   const name = params && params.name;
-  if (name !== SUBMIT_TOOL.name) {
-    return rpcError(id, -32602, `Unknown tool: ${JSON.stringify(name)}`);
-  }
   const args = params && typeof params.arguments === 'object' && params.arguments !== null ? params.arguments : {};
-  const toolResult = await runSubmitResearchBatchTool(env, args);
+  const toolResult = await runTool(env, name, args);
+  if (!toolResult) return rpcError(id, -32602, `Unknown tool: ${JSON.stringify(name)}`);
   return rpcResult(id, { resultType: 'complete', ...toolResult, _meta: modernMeta() });
 }
 
@@ -428,24 +642,19 @@ async function handleLegacyInitialize(id, params) {
     protocolVersion,
     capabilities: { tools: {} },
     serverInfo: { name: SERVER_NAME, title: 'AIMT Research Harvester Connector', version: SERVER_VERSION },
-    instructions:
-      'Use submit_research_batch to submit research sources/claims into the AIMT research library. ' +
-      'Submissions are validated and imported through AIMT\'s governed trust ladder; nothing submitted ' +
-      'here is ever automatically approved or published.'
+    instructions: SERVER_INSTRUCTIONS
   });
 }
 
 async function handleLegacyToolsList(id) {
-  return rpcResult(id, { tools: [SUBMIT_TOOL] });
+  return rpcResult(id, { tools: TOOLS });
 }
 
 async function handleLegacyToolsCall(env, id, params) {
   const name = params && params.name;
-  if (name !== SUBMIT_TOOL.name) {
-    return rpcError(id, -32602, `Unknown tool: ${JSON.stringify(name)}`);
-  }
   const args = params && typeof params.arguments === 'object' && params.arguments !== null ? params.arguments : {};
-  const toolResult = await runSubmitResearchBatchTool(env, args);
+  const toolResult = await runTool(env, name, args);
+  if (!toolResult) return rpcError(id, -32602, `Unknown tool: ${JSON.stringify(name)}`);
   return rpcResult(id, toolResult);
 }
 
