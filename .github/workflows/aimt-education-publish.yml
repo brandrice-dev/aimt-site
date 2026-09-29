@@ -25,6 +25,7 @@ concurrency:
 # anything beyond that -- no admin, no workflow-file write, no packages.
 permissions:
   actions: read
+  checks: read
   contents: write
   pull-requests: write
   issues: write
