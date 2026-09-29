@@ -46,8 +46,12 @@
   --hair-strong: rgba(38,38,38,0.18);
   --card: #ffffff;
   --focus: #262626;
+  /* Payment zone surface: the AIMT accent (#a3968d) at 16% over the light
+     background — a warm stone derived from existing tokens, not a new hue. */
+  --stone: #ece8e4;
+  --stone: color-mix(in srgb, var(--accent) 16%, var(--paper));
 }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
 body {
   background: var(--paper);
   color: var(--ink);
@@ -90,7 +94,17 @@ a { color: inherit; }
   column-gap: 4.5rem;
 }
 .enroll-summary { grid-area: summary; }
-.enroll-payment { grid-area: payment; align-self: start; }
+.enroll-payment { grid-area: payment; align-self: stretch; position: relative; z-index: 0; }
+/* Desktop: the payment column is its own warm-stone zone, running the full
+   height of <main> (header rule → footer rule) and bleeding exactly to the
+   right edge of the viewport (html overflow-x: clip absorbs any scrollbar
+   rounding, so the bleed never creates horizontal scroll). */
+.enroll-payment::before {
+  content: ""; position: absolute; z-index: -1;
+  top: -3.5rem; bottom: -5rem; left: -2.25rem;
+  right: calc(-2rem - max(0px, (100vw - 1120px) / 2));
+  background: var(--stone);
+}
 .enroll-details { grid-area: details; }
 
 /* ── Summary ── */
@@ -159,7 +173,7 @@ a { color: inherit; }
   border: 0.5px solid var(--hair-strong);
   border-radius: var(--aimt-radius-md, 12px);
   padding: 1.6rem 1.6rem 1.4rem;
-  box-shadow: 0 1px 2px rgba(38,38,38,0.04), 0 12px 32px rgba(38,38,38,0.05);
+  box-shadow: 0 1px 2px rgba(38,38,38,0.06), 0 10px 30px rgba(38,38,38,0.08);
 }
 .enroll-payment-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
@@ -238,7 +252,10 @@ a { color: inherit; }
   }
   .enroll-summary { margin-bottom: 1.8rem; }
   .enroll-title { margin-bottom: 1.6rem; }
-  .enroll-details { padding-top: 2.6rem; }
+  /* Stacked: the payment zone becomes a full-bleed horizontal band. */
+  .enroll-payment { align-self: start; padding: 2rem 0; }
+  .enroll-payment::before { top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw); }
+  .enroll-details { padding-top: 3.2rem; }
 }
 
 /* ── Phone ── */
@@ -252,6 +269,8 @@ a { color: inherit; }
   .enroll-product-name { font-size: 1.08rem; }
   .enroll-price-value { font-size: 1.75rem; }
   .enroll-summary { margin-bottom: 1.4rem; }
+  .enroll-payment { padding: 1.25rem 0; }
+  .enroll-details { padding-top: 2.6rem; }
   /* Stripe renders its own padded form — keep the frame light so the
      iframe gets nearly full width on a 320px screen. */
   .enroll-payment-card { padding: 1.1rem 0.85rem 1rem; border-radius: 10px; }
