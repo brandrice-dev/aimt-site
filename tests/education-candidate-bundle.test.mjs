@@ -115,6 +115,7 @@ async function testBuildCandidateBundleCopiesTheExactArtifactFields() {
   check('BUILD_BUNDLE', 'source_ids copied from the record', JSON.stringify(bundle.source_ids) === JSON.stringify(preparedArtifact.record.source_ids));
   check('BUILD_BUNDLE', 'freshness_basis.selected_claim_ids matches key_claim_ids', JSON.stringify(bundle.freshness_basis.selected_claim_ids) === JSON.stringify(preparedArtifact.record.key_claim_ids));
   check('BUILD_BUNDLE', 'page_plan/writer_validation/review_result default to null', bundle.page_plan === null && bundle.writer_validation === null && bundle.review_result === null);
+  check('BUILD_BUNDLE', 'reviewer_framing_repair defaults to null', bundle.reviewer_framing_repair === null);
 }
 
 async function testAdvanceCandidateBundlePreservesUntouchedFieldsAndNeverMutatesTheOriginal() {
@@ -135,6 +136,13 @@ async function testAdvanceCandidateBundlePreservesUntouchedFieldsAndNeverMutates
   const advancedAgain = advanceCandidateBundle(advanced, { reviewResult: { outcome: 'PASS' } });
   check('ADVANCE_BUNDLE', 'a second advance preserves the page_plan/writer_validation set by the first', JSON.stringify(advancedAgain.page_plan) === JSON.stringify({ some: 'plan' }) && advancedAgain.writer_validation.valid === true);
   check('ADVANCE_BUNDLE', 'a second advance sets review_result', advancedAgain.review_result.outcome === 'PASS');
+
+  const withDeterministicRepair = advanceCandidateBundle(advancedAgain, { deterministicRepair: { attempted: true, repair_type: 'NUMERIC_TO_CLEARED_VERBATIM' } });
+  const withFramingRepair = advanceCandidateBundle(withDeterministicRepair, {
+    reviewerFramingRepair: { attempted: true, removed_unit_count: 3, deterministic_validation_passed: true, originating_review_summary: 's', resulting_review_outcome: 'PASS' },
+  });
+  check('ADVANCE_BUNDLE', 'reviewerFramingRepair sets reviewer_framing_repair', withFramingRepair.reviewer_framing_repair.removed_unit_count === 3);
+  check('ADVANCE_BUNDLE', 'setting reviewer_framing_repair never overwrites the separate deterministic_repair field', withFramingRepair.deterministic_repair.repair_type === 'NUMERIC_TO_CLEARED_VERBATIM');
 }
 
 // ─────────────────────────────────────────────────────────────────────────

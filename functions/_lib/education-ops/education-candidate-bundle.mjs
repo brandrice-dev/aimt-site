@@ -72,6 +72,7 @@ function isNonEmptyString(v) {
  *   intentPlan: object, preparedArtifact: object,
  *   pagePlan?: object|null, writerValidation?: object|null,
  *   deterministicRepair?: object|null, reviewResult?: object|null,
+ *   reviewerFramingRepair?: object|null,
  *   createdAt?: string,
  * }} args
  * @returns {object} a education-candidate-bundle-v1 bundle
@@ -79,6 +80,7 @@ function isNonEmptyString(v) {
 export function buildCandidateBundle({
   runId, topicSlug, cluster, route, intentPlan, preparedArtifact,
   pagePlan = null, writerValidation = null, deterministicRepair = null, reviewResult = null,
+  reviewerFramingRepair = null,
   createdAt = new Date().toISOString(),
 }) {
   const record = preparedArtifact.record;
@@ -99,6 +101,11 @@ export function buildCandidateBundle({
     writer_validation: writerValidation,
     deterministic_repair: deterministicRepair,
     review_result: reviewResult,
+    // Bounded FRAMING-removal repair state (education-reviewer-framing-
+    // repair.mjs) -- a SEPARATE field from deterministic_repair (the
+    // Writer numeric-fidelity repair above): different repair lane,
+    // different failure class, never overwrites or is overwritten by it.
+    reviewer_framing_repair: reviewerFramingRepair,
     // Self-contained freshness inputs -- deliberately copied out of
     // prepared_artifact.record here (rather than reached into later)
     // so a future bundle-shape change to how PE artifacts are stored
@@ -122,7 +129,7 @@ export function buildCandidateBundle({
  * `bundle`.
  *
  * @param {object} bundle
- * @param {{pagePlan?: object|null, writerValidation?: object|null, deterministicRepair?: object|null, reviewResult?: object|null}} updates
+ * @param {{pagePlan?: object|null, writerValidation?: object|null, deterministicRepair?: object|null, reviewResult?: object|null, reviewerFramingRepair?: object|null}} updates
  * @returns {object} a new bundle object
  */
 export function advanceCandidateBundle(bundle, updates) {
@@ -131,6 +138,7 @@ export function advanceCandidateBundle(bundle, updates) {
   if ('writerValidation' in updates) next.writer_validation = updates.writerValidation;
   if ('deterministicRepair' in updates) next.deterministic_repair = updates.deterministicRepair;
   if ('reviewResult' in updates) next.review_result = updates.reviewResult;
+  if ('reviewerFramingRepair' in updates) next.reviewer_framing_repair = updates.reviewerFramingRepair;
   return next;
 }
 
@@ -171,6 +179,7 @@ export function validateCandidateBundleShape(bundle) {
   if (bundle.page_plan !== null && bundle.page_plan !== undefined && typeof bundle.page_plan !== 'object') violations.push('INVALID_PAGE_PLAN_SHAPE');
   if (bundle.writer_validation != null && (typeof bundle.writer_validation !== 'object' || typeof bundle.writer_validation.valid !== 'boolean')) violations.push('INVALID_WRITER_VALIDATION_SHAPE');
   if (bundle.review_result != null && (typeof bundle.review_result !== 'object' || typeof bundle.review_result.outcome !== 'string')) violations.push('INVALID_REVIEW_RESULT_SHAPE');
+  if (bundle.reviewer_framing_repair != null && (typeof bundle.reviewer_framing_repair !== 'object' || typeof bundle.reviewer_framing_repair.attempted !== 'boolean')) violations.push('INVALID_REVIEWER_FRAMING_REPAIR_SHAPE');
 
   if (bundle.prepared_artifact && bundle.prepared_artifact.record && typeof bundle.prepared_artifact.record === 'object') {
     const record = bundle.prepared_artifact.record;
