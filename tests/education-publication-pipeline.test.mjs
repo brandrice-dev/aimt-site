@@ -9,7 +9,7 @@
 //
 // Run: node tests/education-publication-pipeline.test.mjs
 
-import { runPublicationPipeline, buildGhPrCreateArgs } from '../scripts/education-operations-cycle.mjs';
+import { runPublicationPipeline, buildGhPrCreateArgs, educationArticlePathFromRoute } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { PUBLICATION_STATE } from '../functions/_lib/education-ops/education-publication-state.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
@@ -97,12 +97,12 @@ function makeHappyIo({ manifestStore = new Map(), bundle, existingPr = null, exi
     verifyCandidateBundleIntegrityFn: async () => ({ valid: true, violations: [] }),
     resolveCandidateResumeFreshnessFn: () => ({ state: FRESHNESS_STATE.FRESH }),
     prepareLaunchArtifactsFn: () => ({
-      articlePath: `education${ROUTE}.html`, planArtifactPath: `functions/_data/education-page-plans/${TOPIC_SLUG}.json`,
+      articlePath: educationArticlePathFromRoute(ROUTE), planArtifactPath: `functions/_data/education-page-plans/${TOPIC_SLUG}.json`,
       hubPath: 'education/hair-loss.html', sitemapPath: 'sitemap.xml', allowlistResult: { valid: true, allowed: [], violations: [] },
     }),
     openLaunchPrFn: () => ({ branch: `education-ops/publish-${TOPIC_SLUG}`, prNumber: 100, prUrl: 'https://github.com/brandrice-dev/aimt-site/pull/100', headRefOid: HEAD_SHA }),
     ghPrListForBranchFn: () => existingPr,
-    ghPrViewFn: (n) => ({ number: n, state: 'OPEN', headRefOid: HEAD_SHA, files: [{ path: `education${ROUTE}.html` }, { path: 'sitemap.xml' }, { path: `functions/_data/education-page-plans/${TOPIC_SLUG}.json` }, { path: 'education/hair-loss.html' }] }),
+    ghPrViewFn: (n) => ({ number: n, state: 'OPEN', headRefOid: HEAD_SHA, files: [{ path: educationArticlePathFromRoute(ROUTE) }, { path: 'sitemap.xml' }, { path: `functions/_data/education-page-plans/${TOPIC_SLUG}.json` }, { path: 'education/hair-loss.html' }] }),
     ghPrMergeFn: (n) => ({ number: n, state: 'MERGED', mergeCommitOid: MERGE_SHA }),
     fetchClearanceRowFn: async () => clearanceRow,
     writeClearanceRecordFn: async (env, record) => { clearanceRow = { ...record, sitemap_eligible: false, published_at: null }; return [clearanceRow]; },
@@ -637,6 +637,25 @@ async function testPublishedWithDifferentGenerationHashFailsClosed() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// REGRESSION: canonical Education routes must map to exactly one
+// repository-level education/ prefix -- never education/education/... .
+// ─────────────────────────────────────────────────────────────────────────
+function testEducationArticlePathFromRouteNeverDoublesEducationPrefix() {
+  check(
+    'ARTICLE_PATH_FROM_ROUTE',
+    'maps canonical route to the exact repository HTML path',
+    educationArticlePathFromRoute('/education/hair-loss/alopecia-areata') === 'education/hair-loss/alopecia-areata.html',
+  );
+  let rejected = false;
+  try {
+    educationArticlePathFromRoute('/hair-loss/alopecia-areata');
+  } catch (_err) {
+    rejected = true;
+  }
+  check('ARTICLE_PATH_FROM_ROUTE', 'fails closed on a non-/education route', rejected === true);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // REGRESSION: `gh pr create` does NOT support --json (unlike `gh pr
 // view`/`gh pr list`) -- passing it is a runtime error, not a supported
 // interface. openLaunchPr() fetches structured identifiers via a
@@ -676,6 +695,7 @@ const tests = [
   testTrustedSiblingResolutionFailureFailsClosed,
   testPublishedWithNoManifestFailsClosed,
   testPublishedWithDifferentGenerationHashFailsClosed,
+  testEducationArticlePathFromRouteNeverDoublesEducationPrefix,
   testGhPrCreateArgsNeverIncludeTheUnsupportedJsonFlag,
 ];
 for (const t of tests) await t();
