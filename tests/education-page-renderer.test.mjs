@@ -41,6 +41,61 @@ function extractJsonLd(html) {
   return { raw: match[1], parsed: JSON.parse(match[1]) };
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// EMPTY-SECTION CORRECTION: a real generated Page Plan (alopecia-areata,
+// AIMT Education Publish Run #2) persisted a "human-side" section with
+// zero units -- the renderer used to emit the empty heading/section
+// anyway, and its TOC link, producing a visible defect on the live
+// page. The Page Plan itself is allowed to keep the zero-unit section
+// as an auditable artifact; only the RENDERED HTML/TOC must omit it.
+// ─────────────────────────────────────────────────────────────────────────
+function planWithEmptySection(overrides = {}) {
+  return baselinePlan({
+    sections: [
+      { section_id: 'overview', heading: 'Overview', units: [unit('PARAPHRASE', 'A neighboring, non-empty section.', ['c1'], ['Follicles cycle through phases.'])] },
+      { section_id: 'human-side', heading: 'The Human Side of a Visible Condition', units: [] },
+    ],
+    ...overrides,
+  });
+}
+
+(function testZeroUnitSectionHeadingAndBodyAreAbsent() {
+  const html = renderEducationPageHtml(planWithEmptySection());
+  check('EMPTY_SECTION', '1. zero-unit section heading is absent', !html.includes('The Human Side of a Visible Condition'));
+  check('EMPTY_SECTION', '2. zero-unit section body/tag is absent (no id="human-side" section at all)', !html.includes('id="human-side"'));
+})();
+
+(function testZeroUnitSectionTocLinkIsAbsent() {
+  const html = renderEducationPageHtml(planWithEmptySection());
+  check('EMPTY_SECTION', '3. zero-unit section TOC link is absent', !html.includes('<a href="#human-side">'));
+})();
+
+(function testNeighboringNonEmptySectionsStillRender() {
+  const html = renderEducationPageHtml(planWithEmptySection());
+  check('EMPTY_SECTION', '4. neighboring non-empty section heading renders', html.includes('Overview'));
+  check('EMPTY_SECTION', '4. neighboring non-empty section body renders', html.includes('A neighboring, non-empty section.'));
+  check('EMPTY_SECTION', '4. neighboring non-empty section TOC link renders', html.includes('<a href="#overview">Overview</a>'));
+})();
+
+(function testUnrelatedPageOutputRemainsUnchangedWithAnEmptySection() {
+  const withEmpty = renderEducationPageHtml(planWithEmptySection());
+  const withoutEmptySectionAtAll = renderEducationPageHtml(planWithEmptySection({
+    sections: [{ section_id: 'overview', heading: 'Overview', units: [unit('PARAPHRASE', 'A neighboring, non-empty section.', ['c1'], ['Follicles cycle through phases.'])] }],
+  }));
+  check('EMPTY_SECTION', '5. output is byte-identical whether the zero-unit section is present in the plan or omitted entirely from it', withEmpty === withoutEmptySectionAtAll);
+  check('EMPTY_SECTION', 'scope/limitations still render', withEmpty.includes('This page describes normal cycling only.'));
+  check('EMPTY_SECTION', 'key takeaways still render', withEmpty.includes('Key takeaways'));
+  check('EMPTY_SECTION', 'sources still render', withEmpty.includes('A Reference'));
+  check('EMPTY_SECTION', 'related links still render', withEmpty.includes('Education Library'));
+  check('EMPTY_SECTION', 'canonical link still renders', withEmpty.includes('<link rel="canonical"'));
+})();
+
+(function testAllSectionsEmptyOmitsEveryOneButKeepsRestOfPage() {
+  const html = renderEducationPageHtml(baselinePlan({ sections: [{ section_id: 'human-side', heading: 'The Human Side of a Visible Condition', units: [] }] }));
+  check('EMPTY_SECTION', 'a plan whose ONLY section is empty renders zero <section> tags for it', !html.includes('id="human-side"') && !html.includes('The Human Side of a Visible Condition'));
+  check('EMPTY_SECTION', 'the rest of the page (scope/takeaways/sources) still renders', html.includes('Key takeaways') && html.includes('A Reference'));
+})();
+
 (function testDefaultModeIsUnaffectedByTheNewOptionsParameter() {
   const html = renderEducationPageHtml(baselinePlan());
   check('LAUNCH_READY', 'default (no options) keeps the preview noindex tag exactly as before', html.includes('<meta name="robots" content="noindex, nofollow">'));

@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
   parseArgs, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
+  educationArticlePathFromRoute,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
   isResearchGapLoopEnabled, RESEARCH_GAP_LOOP_ENV_VAR,
 } from '../scripts/education-operations-cycle.mjs';
@@ -936,7 +937,13 @@ async function testPrepareRefusesToOverwriteAnExistingArticleFile() {
     check('PREPARE_ARTICLE_COLLISION', 'precondition: reached SHADOW_CANDIDATE_READY', false, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
     return;
   }
-  const articlePath = path.join(REPO_ROOT, `education${report.__internal.route}.html`);
+  // MUST match prepareGeneratedArtifacts()'s OWN path construction
+  // (educationArticlePathFromRoute) -- a hand-rolled `education${route}.html`
+  // template here computes a DIFFERENT (doubled education/education/...)
+  // path than the function under test actually checks/writes, which
+  // silently defeats this precondition and lets a real write through
+  // uncleaned. See the "Fix Education publish article path" correction.
+  const articlePath = path.join(REPO_ROOT, educationArticlePathFromRoute(report.__internal.route));
   if (existsSync(articlePath)) {
     check('PREPARE_ARTICLE_COLLISION', 'precondition: no real article already exists at this route (never touch real content)', false, articlePath);
     return;
@@ -987,7 +994,7 @@ async function testPrepareRefusesToOverwriteAnExistingPagePlanArtifact() {
     check('PREPARE_PLAN_ARTIFACT_COLLISION', 'names it as an INFRA_REVIEW-class problem', message.includes('INFRA_REVIEW'), message);
     // Also proves the article file was never written either -- the
     // artifact-existence check runs before EITHER write, not just its own.
-    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'the article file was never written for this run', !existsSync(path.join(REPO_ROOT, `education${report.__internal.route}.html`)));
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'the article file was never written for this run', !existsSync(path.join(REPO_ROOT, educationArticlePathFromRoute(report.__internal.route))));
   } finally {
     unlinkSync(planArtifactPath);
   }
