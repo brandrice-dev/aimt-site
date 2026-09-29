@@ -523,6 +523,53 @@ async function testPostDbWritePreManifestCrashResume() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Hard-crash recovery: the DB/live site are already correctly published,
+// but the latest durable manifest artifact is stale at PR_OPEN. This can
+// happen if the prior runner completed the publication and died before
+// its final artifact upload. The recovery path must verify the live row
+// + live page and fast-forward to PUBLISHED -- NEVER re-merge.
+// ─────────────────────────────────────────────────────────────────────────
+async function testAlreadyPublishedRowWithStalePrOpenManifestNeverRemerges() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  const { buildPublicationManifest, advancePublicationManifest, computePreparedArtifactDigest } = await import('../functions/_lib/education-ops/education-publication-state.mjs');
+  const digest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+  let seeded = buildPublicationManifest({
+    runId: 'prior-run', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER,
+    generationSourceHash: HASH, preparedArtifactDigest: digest,
+    candidateOriginatingRunId: bundle.originating_run_id,
+  });
+  seeded = advancePublicationManifest(seeded, {
+    state: PUBLICATION_STATE.PR_OPEN,
+    generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 100, pr_url: 'x', expected_head_sha: HEAD_SHA },
+  });
+  manifestStore.set(TOPIC_SLUG, seeded);
+
+  const publishedRow = {
+    topic_slug: TOPIC_SLUG, status: 'published', clearance_mode: 'AUTO_READY',
+    generation_source_hash: HASH, sitemap_eligible: true,
+    published_at: '2026-09-28T00:00:00.000Z',
+  };
+  const io = makeHappyIo({ bundle, manifestStore, existingClearanceRow: publishedRow });
+  const mergeSpy = spyFn(io.ghPrMergeFn);
+  io.ghPrMergeFn = mergeSpy;
+  const publishSpy = spyFn(io.publishClearanceRecordFn);
+  io.publishClearanceRecordFn = publishSpy;
+  const deploySpy = spyFn(io.waitForDeploymentFn);
+  io.waitForDeploymentFn = deploySpy;
+  const liveSpy = spyFn(io.fetchLiveArtifactsFn);
+  io.fetchLiveArtifactsFn = liveSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'finishes PUBLISHED from the already-correct DB/live state', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'never re-merges the stale recorded PR', mergeSpy.callCount === 0);
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'never calls publishClearanceRecord again', publishSpy.callCount === 0);
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'never waits for deployment again', deploySpy.callCount === 0);
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'does perform a fresh live-site verification', liveSpy.callCount === 1);
+  check('STALE_MANIFEST_PUBLISHED_ROW_RECOVERY', 'durably fast-forwards the manifest to PUBLISHED', manifestStore.get(TOPIC_SLUG).state === PUBLICATION_STATE.PUBLISHED && manifestStore.get(TOPIC_SLUG).db_publish.verified === true);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Trusted sibling resolution failure fails closed -- never silently
 // downgraded to "treat it as if nothing were published".
 // ─────────────────────────────────────────────────────────────────────────
@@ -625,6 +672,7 @@ const tests = [
   testRetriesDbPublishOnlyAfterReVerifyingLivePage,
   testRealPublishedSetIdempotentPublishedResume,
   testPostDbWritePreManifestCrashResume,
+  testAlreadyPublishedRowWithStalePrOpenManifestNeverRemerges,
   testTrustedSiblingResolutionFailureFailsClosed,
   testPublishedWithNoManifestFailsClosed,
   testPublishedWithDifferentGenerationHashFailsClosed,
