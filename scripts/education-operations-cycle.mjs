@@ -1824,6 +1824,78 @@ export async function runPublicationPipeline(env, options = {}) {
         exception_reason: `Existing clearance row for "${topicSlug}" conflicts with this publication (${rowConsistency.violations.join(', ')}) -- refusing to overwrite blindly.`,
       });
     }
+
+    // HARD-CRASH RECOVERY: the live DB may already be correctly
+    // published even when the latest downloadable manifest artifact is
+    // stale at PR_OPEN (for example, the prior runner died after the DB
+    // publish succeeded but before its final artifact upload). Never
+    // attempt to "catch the manifest up" by merging the recorded PR
+    // again. The routeAlreadyPublished branch above has already proven
+    // this manifest belongs to the SAME topic/route/hash/digest. From
+    // here, require the published row's own stored integrity AND a fresh
+    // custom-domain live verification; only then fast-forward the
+    // manifest to PUBLISHED idempotently.
+    if (rowConsistency.state === 'ALREADY_PUBLISHED') {
+      if (!routeAlreadyPublished) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `research_public_pages says "${topicSlug}" is published with the expected hash, but the live published-route state does not include ${bundle.route} -- refusing to reconcile inconsistent publication authorities.`,
+        });
+      }
+
+      const rowIntegrity = await io.verifyStoredClearanceIntegrityFn(existingRow);
+      const postWrite = verifyPostWritePublishedRow(existingRow, {
+        expectedTopicSlug: topicSlug,
+        expectedGenerationSourceHash: bundle.generation_source_hash,
+        storedIntegrityValid: rowIntegrity.valid,
+      });
+      if (!postWrite.ok) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `Existing published row failed idempotent recovery verification: ${postWrite.violations.join(', ')}.`,
+        });
+      }
+
+      let liveArtifacts;
+      try {
+        liveArtifacts = await io.fetchLiveArtifactsFn({ route: bundle.route, clusterKey });
+      } catch (err) {
+        return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Idempotent recovery live verification fetch failed: ${err.message}` });
+      }
+      const liveVerification = verifyLivePagePublication({
+        httpStatus: liveArtifacts.httpStatus,
+        html: liveArtifacts.html,
+        sitemapXml: liveArtifacts.sitemapXml,
+        hubHtml: liveArtifacts.hubHtml,
+        expectedRoute: bundle.route,
+        expectedGenerationSourceHash: bundle.generation_source_hash,
+      });
+      if (!liveVerification.ok) {
+        return finish({
+          final_state: RUN_FINAL_STATE.PUBLISH_FAILED,
+          exception_reason: `Existing published row could not be reconciled with the live site: ${liveVerification.violations.join(', ')}.`,
+        });
+      }
+
+      persistManifest({
+        state: PUBLICATION_STATE.PUBLISHED,
+        clearance: { persisted: true, mode: 'AUTO_READY', persisted_at: manifest.clearance.persisted_at || existingRow.published_at },
+        liveVerification: { passed: true, checked_at: new Date().toISOString(), checks: liveVerification.checks },
+        dbPublish: { attempted: true, verified: true, published_at: existingRow.published_at },
+        lastFailure: null,
+      });
+      return finish({
+        final_state: RUN_FINAL_STATE.PUBLISHED,
+        planned_route: bundle.route,
+        publication_action: {
+          pr_number: manifest.generated.pr_number,
+          merge_commit_sha: manifest.merge.merge_commit_sha,
+          published_at: existingRow.published_at,
+          idempotent_recovery_from_published_row: true,
+        },
+      });
+    }
+
     if (rowConsistency.state === 'NOT_FOUND') {
       try {
         await io.writeClearanceRecordFn(env, bundle.prepared_artifact.record);
