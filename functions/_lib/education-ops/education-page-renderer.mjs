@@ -94,12 +94,33 @@ function renderTakeaways(units) {
         </li>`).join('\n');
 }
 
+// The deterministic, safe (non-private) machine-readable marker live
+// verification (production publish lane, step 13) checks for -- a page
+// generated from a DIFFERENT prepared candidate has a different
+// generation_source_hash, so this alone proves "this live page
+// corresponds to the SAME prepared candidate" without exposing any
+// evidence text, claim id, or model output.
+export const GENERATION_MARKER_META_NAME = 'aimt-generation-source-hash';
+
 /**
  * @param {object} plan - a plan that has PASSED
  *   validateEducationPagePlan() (education-page-plan-validator.mjs)
+ * @param {{launchReady?: boolean, generationSourceHash?: string|null}} [options]
+ *   launchReady (default false): --prepare's existing owner-review HTML
+ *   keeps the noindex/nofollow tag exactly as before -- unchanged
+ *   default behavior, every existing caller/test is byte-for-byte
+ *   unaffected. Only the production publish lane's launch-ready commit
+ *   passes launchReady:true, which OMITS the noindex tag (the same,
+ *   narrow, deterministic "launch prep" transform the two hand-built
+ *   pages already went through by hand -- see education-sitemap-
+ *   updater.mjs's own header). generationSourceHash, when supplied,
+ *   embeds GENERATION_MARKER_META_NAME regardless of launchReady, so it
+ *   is available for verification during BOTH prepare-time preview and
+ *   publish-time launch.
  * @returns {string} a complete, production-shaped HTML document
  */
-export function renderEducationPageHtml(plan) {
+export function renderEducationPageHtml(plan, options = {}) {
+  const { launchReady = false, generationSourceHash = null } = options;
   const canonicalUrl = `${SITE_ORIGIN}${plan.route}`;
   const jsonLd = toSafeJsonLd({
     '@context': 'https://schema.org',
@@ -119,11 +140,11 @@ export function renderEducationPageHtml(plan) {
 <title>${escapeHtml(plan.title)}</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="description" content="${escapeHtml(plan.meta_description)}">
-<!-- AUTONOMOUSLY GENERATED (AIMT Education Operations v1). Preview-only
+${launchReady ? '' : `<!-- AUTONOMOUSLY GENERATED (AIMT Education Operations v1). Preview-only
      until owner review approves launch: this route is not yet in
      sitemap.xml and this tag remains until launch prep removes it. -->
 <meta name="robots" content="noindex, nofollow">
-<link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+`}${generationSourceHash ? `<meta name="${GENERATION_MARKER_META_NAME}" content="${escapeHtml(generationSourceHash)}">\n` : ''}<link rel="canonical" href="${escapeHtml(canonicalUrl)}">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="AIMT">
 <meta property="og:title" content="${escapeHtml(plan.h1)}">

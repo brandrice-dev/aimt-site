@@ -6,7 +6,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { buildHubCardHtml, insertHubCard, HubUpdateError } from '../functions/_lib/education-ops/education-hub-updater.mjs';
+import { buildHubCardHtml, insertHubCard, hubContainsRoute, HubUpdateError } from '../functions/_lib/education-ops/education-hub-updater.mjs';
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -86,6 +86,13 @@ const REAL_HUB_PATH = fileURLToPath(new URL('../education/hair-loss.html', impor
   check('ESCAPING', 'ampersand escaped', card.includes('A &amp; B'));
   check('ESCAPING', 'angle brackets escaped', !card.includes('<script>'));
   check('ESCAPING', 'quotes escaped in attribute-adjacent text', card.includes('&quot;quotes&quot;'));
+})();
+
+(function testHubContainsRoute() {
+  const hub = '<ul class="aimt-edu-card-grid">\n  <li><a href="/education/hair-loss/hair-growth-cycle">card</a></li>\n</ul>';
+  check('CONTAINS_ROUTE', 'true for a route already linked', hubContainsRoute(hub, '/education/hair-loss/hair-growth-cycle') === true);
+  check('CONTAINS_ROUTE', 'false for a route not linked', hubContainsRoute(hub, '/education/hair-loss/alopecia-areata') === false);
+  check('CONTAINS_ROUTE', 'false (never throws) for non-string input', hubContainsRoute(null, '/x') === false);
 })();
 
 // ---- Report ----
