@@ -319,8 +319,8 @@ a { color: inherit; }
       </div>
 
       <div class="enroll-notice" id="enrollPendingNotice" hidden>
-        <strong>Already paid from this browser?</strong>
-        A recent purchase here hasn't finished account setup yet. <a href="success.html" id="enrollPendingLink">Finish setting up your student access</a> instead of paying again.
+        <strong>Already completed payment?</strong>
+        If you’ve already completed payment on this device, continue your account setup instead of starting a new enrollment. <a href="success.html" id="enrollPendingLink">Continue account setup →</a>
       </div>
 
       <p class="sr-only" role="status" aria-live="polite" id="enrollStatus"></p>
@@ -331,19 +331,19 @@ a { color: inherit; }
       </div>
 
       <div class="enroll-error" id="enrollError" role="alert" hidden>
-        <p class="enroll-error-title" id="enrollErrorTitle">Checkout didn't load</p>
-        <p class="enroll-error-copy" id="enrollErrorCopy">Your card has not been charged. This is usually a brief connection issue — please try again.</p>
+        <p class="enroll-error-title" id="enrollErrorTitle">Checkout didn’t load</p>
+        <p class="enroll-error-copy" id="enrollErrorCopy">Your card has not been charged. Please try again.</p>
         <div class="enroll-error-actions">
           <button type="button" class="enroll-btn" id="enrollRetry">Try again</button>
           <a href="/head-spa-certification" class="enroll-btn enroll-btn-quiet">Return to course overview</a>
         </div>
-        <p class="enroll-error-help">If this keeps happening, contact <a href="mailto:support@aimtrichology.com">support@aimtrichology.com</a>.</p>
+        <p class="enroll-error-help">If this continues, contact <a href="mailto:support@aimtrichology.com">support@aimtrichology.com</a>.</p>
       </div>
 
       <div class="enroll-checkout" id="enrollCheckout"></div>
       <p class="enroll-slow" id="enrollSlowHint" hidden>Payment form not showing? <button type="button" class="enroll-link-btn" id="enrollReload">Reload secure checkout</button></p>
 
-      <p class="enroll-payment-foot">Payment information is entered in Stripe's secure form and sent directly to Stripe. AIMT does not receive or store your card details.</p>
+      <p class="enroll-payment-foot">Payment is securely processed by Stripe. AIMT does not receive or store your card details.</p>
     </div>
   </section>
 
@@ -351,32 +351,31 @@ a { color: inherit; }
     <section class="enroll-section" aria-labelledby="includedTitle">
       <h2 class="enroll-h2" id="includedTitle">Included with enrollment</h2>
       <ul class="enroll-includes">
-        <li>Complete head spa service training</li>
-        <li>Welcome Module + 12 numbered modules</li>
+        <li>Complete 13-module certification curriculum</li>
         <li>Cadence learning companion</li>
-        <li>Listen Mode</li>
         <li>AIMT Service Timer</li>
-        <li>Practitioner resource library</li>
-        <li>Applied checkpoints</li>
+        <li>Applied competency checkpoints</li>
+        <li>Verifiable AIMT credential upon certification</li>
+        <li>Listen Mode</li>
+        <li>Practitioner Resource Library</li>
         <li>Final Certification Assessment</li>
-        <li>Verifiable AIMT credential after passing</li>
         <li>Lifetime course access</li>
       </ul>
-      <p class="enroll-note">Certification is earned through required course progression and successful completion of the Final Certification Assessment — it is not issued automatically on purchase.</p>
+      <p class="enroll-note">Your AIMT certification is earned after completing the required course progression and passing the Final Certification Assessment.</p>
     </section>
 
     <section class="enroll-section" aria-labelledby="afterTitle">
       <h2 class="enroll-h2" id="afterTitle">After payment</h2>
       <ol class="enroll-steps">
-        <li><strong>You return to AIMT.</strong> Stripe confirms your payment and brings you straight back here.</li>
-        <li><strong>Set up your student account.</strong> Create your AIMT account — or sign in to an existing one — with the same email you use at checkout.</li>
-        <li><strong>Begin the course.</strong> Enter through Student Access and start with the Welcome Module.</li>
+        <li><strong>Payment confirmed.</strong> After checkout, you’ll return to AIMT to set up your student access.</li>
+        <li><strong>Create or sign in to your account.</strong> Use the same email address you entered at checkout.</li>
+        <li><strong>Begin the course.</strong> Open Student Access and start with the Welcome Module.</li>
       </ol>
     </section>
 
     <section class="enroll-section" aria-labelledby="policyTitle">
       <h2 class="enroll-h2" id="policyTitle">Refunds &amp; policies</h2>
-      <p class="enroll-policy">AIMT offers a full refund within a 7-day pre-access cancellation window, as long as you haven't accessed substantive course materials or downloadable practitioner resources.</p>
+      <p class="enroll-policy">If you change your mind before beginning the course, you may request a full refund within 7 calendar days of purchase, provided you have not accessed substantive course materials or practitioner downloads.</p>
       <div class="enroll-links">
         <a href="/refunds">Refund Policy</a>
         <a href="/terms">Terms</a>
@@ -466,11 +465,11 @@ a { color: inherit; }
     els.loading.hidden = true;
     els.mount.classList.remove('is-mounted');
     if (kind === 'unavailable') {
-      els.errorTitle.textContent = 'Enrollment is briefly unavailable';
-      els.errorCopy.textContent = 'Your card has not been charged. Secure checkout could not be prepared just now — please try again in a few minutes.';
+      els.errorTitle.textContent = 'Checkout is temporarily unavailable';
+      els.errorCopy.textContent = 'Your card has not been charged. Please try again in a few minutes.';
     } else {
-      els.errorTitle.textContent = "Checkout didn't load";
-      els.errorCopy.textContent = 'Your card has not been charged. This is usually a brief connection issue — please try again.';
+      els.errorTitle.textContent = 'Checkout didn’t load';
+      els.errorCopy.textContent = 'Your card has not been charged. Please try again.';
     }
     els.error.hidden = false;
     announce('');
