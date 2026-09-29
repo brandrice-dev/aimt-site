@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://js.stripe.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <!--
   ENROLLMENT CHECKOUT — Stripe Embedded Checkout inside AIMT.
@@ -100,9 +100,9 @@ a { color: inherit; }
   color: var(--muted); margin-bottom: 1.1rem;
 }
 .enroll-title {
-  font-family: var(--aimt-font-serif); font-weight: 500;
+  font-family: var(--aimt-font-mont); font-weight: 600;
   font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.12;
-  letter-spacing: -0.005em; color: var(--ink);
+  letter-spacing: -0.02em; color: var(--ink);
   margin-bottom: 2.2rem;
 }
 .enroll-product {
@@ -112,13 +112,13 @@ a { color: inherit; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem;
 }
 .enroll-product-label {
-  font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.16em;
+  font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.62rem; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem;
 }
-.enroll-product-name { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 1.22rem; line-height: 1.3; }
+.enroll-product-name { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 1.22rem; line-height: 1.3; letter-spacing: -0.01em; text-wrap: balance; }
 .enroll-product-sub { font-size: 0.86rem; color: var(--muted); margin-top: 0.3rem; }
 .enroll-price { text-align: right; flex: none; }
-.enroll-price-value { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 2.1rem; line-height: 1; }
+.enroll-price-value { font-family: var(--aimt-font-mont); font-weight: 700; font-size: 2.1rem; line-height: 1; letter-spacing: -0.03em; }
 .enroll-price-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }
 
 /* ── Details ── */
@@ -145,7 +145,7 @@ a { color: inherit; }
 .enroll-steps li::before {
   content: counter(step, decimal-leading-zero);
   position: absolute; left: 0; top: 0.1em;
-  font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
+  font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
 }
 .enroll-steps strong { font-weight: 500; color: var(--ink); }
 .enroll-policy { font-size: 0.86rem; color: var(--muted); line-height: 1.65; }
@@ -183,7 +183,7 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) { .enroll-skel span { animation: none; } }
 
 .enroll-error { padding: 0.4rem 0 0.6rem; }
-.enroll-error-title { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 1.15rem; margin-bottom: 0.5rem; }
+.enroll-error-title { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 1.15rem; margin-bottom: 0.5rem; }
 .enroll-error-copy { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: 1.3rem; }
 .enroll-error-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 .enroll-btn {
