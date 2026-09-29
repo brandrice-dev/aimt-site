@@ -53,6 +53,7 @@ jobs:
           ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
           AIMT_EDUCATION_AUTOPUBLISH_ENABLED: ${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}
           AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
+          AIMT_RESEARCH_GAP_LOOP_ENABLED: ${{ vars.AIMT_RESEARCH_GAP_LOOP_ENABLED }}
           GH_TOKEN: ${{ github.token }}
         run: node scripts/education-operations-cycle.mjs --shadow
 
