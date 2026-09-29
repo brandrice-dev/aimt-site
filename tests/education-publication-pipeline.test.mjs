@@ -9,7 +9,7 @@
 //
 // Run: node tests/education-publication-pipeline.test.mjs
 
-import { runPublicationPipeline } from '../scripts/education-operations-cycle.mjs';
+import { runPublicationPipeline, buildGhPrCreateArgs } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { PUBLICATION_STATE } from '../functions/_lib/education-ops/education-publication-state.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
@@ -80,9 +80,20 @@ function makeHappyIo({ manifestStore = new Map(), bundle, existingPr = null, exi
     loadPublicationManifestFn: (slug) => (manifestStore.has(slug) ? { found: true, manifest: manifestStore.get(slug) } : { found: false, manifest: null }),
     writePublicationManifestFn: (slug, manifest) => { manifestStore.set(slug, manifest); },
     fetchEvidenceFn: async () => ({ claims: [], sources: [] }),
-    fetchPublishedTopicSlugsFn: async () => [],
+    // REAL-STATE, never a hardcoded []: once the mocked DB write actually
+    // marks this topic published (see publishClearanceRecordFn below),
+    // subsequent calls truthfully report it as published -- exactly what
+    // the real fetchPublishedTopicSlugsLive() would do. Faking an
+    // eternally-empty published set here would hide the exact "excluded
+    // from candidacy after it legitimately publishes" defect this suite
+    // now covers.
+    fetchPublishedTopicSlugsFn: async () => (clearanceRow && clearanceRow.status === 'published' ? [TOPIC_SLUG] : []),
     countPagesPublishedThisWeekFn: async () => ({ count: 0 }),
-    resolveTrustedSiblingPagesFn: () => ({ ok: true, pages: [] }),
+    // REAL-STATE: maps whatever publishedTopicSlugs the caller passes
+    // (itself now real-state-driven, see fetchPublishedTopicSlugsFn
+    // above) to trusted route data -- exactly the shape
+    // resolveTrustedSiblingPages() itself returns.
+    resolveTrustedSiblingPagesFn: (slugs) => ({ ok: true, pages: slugs.map((slug) => ({ topic_slug: slug, route: ROUTE, label: 'Alopecia Areata' })) }),
     verifyCandidateBundleIntegrityFn: async () => ({ valid: true, violations: [] }),
     resolveCandidateResumeFreshnessFn: () => ({ state: FRESHNESS_STATE.FRESH }),
     prepareLaunchArtifactsFn: () => ({
@@ -415,7 +426,7 @@ async function testRetriesDbPublishOnlyAfterReVerifyingLivePage() {
   let seeded = buildPublicationManifest({ runId: 'prior-run', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER, generationSourceHash: HASH, preparedArtifactDigest: digest, candidateOriginatingRunId: bundle.originating_run_id });
   seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.PR_OPEN, generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 100, pr_url: 'x', expected_head_sha: HEAD_SHA } });
   seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.CLEARANCE_PERSISTED, clearance: { persisted: true, mode: 'AUTO_READY' } });
-  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.MERGED, merge: { merged: true, merge_commit_sha: MERGE_SHA }, deployment: { state: 'success', deployment_id: 1 } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.MERGED, merge: { merged: true, merge_commit_sha: MERGE_SHA }, deployment: { state: 'success', check_run_id: 1 } });
   // A PRIOR run already verified live once (stale) -- this must NEVER be
   // trusted for the retry; live verification must run again, fresh.
   seeded = advancePublicationManifest(seeded, { liveVerification: { passed: true, checked_at: '2026-09-27T00:00:00.000Z', checks: {} } });
@@ -432,6 +443,166 @@ async function testRetriesDbPublishOnlyAfterReVerifyingLivePage() {
   check('RETRY_AFTER_REVERIFY', 'live verification runs AGAIN, fresh, even though the manifest already had passed:true', liveVerifySpy.callCount === 1);
   check('RETRY_AFTER_REVERIFY', 'DB publish is attempted only after that fresh re-verify', publishSpy.callCount === 1);
   check('RETRY_AFTER_REVERIFY', 'reaches PUBLISHED', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// REAL-STATE resume: a manifest already PUBLISHED, and the live
+// published-topic loader genuinely includes this topic (never an
+// eternally-empty fake) -- same hash/digest -> idempotent PUBLISHED,
+// with zero merge/write/deploy duplication.
+// ─────────────────────────────────────────────────────────────────────────
+async function testRealPublishedSetIdempotentPublishedResume() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  const { buildPublicationManifest, advancePublicationManifest, computePreparedArtifactDigest } = await import('../functions/_lib/education-ops/education-publication-state.mjs');
+  const digest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+  let seeded = buildPublicationManifest({ runId: 'prior-run', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER, generationSourceHash: HASH, preparedArtifactDigest: digest, candidateOriginatingRunId: bundle.originating_run_id });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.PR_OPEN, generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 100, pr_url: 'x', expected_head_sha: HEAD_SHA } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.CLEARANCE_PERSISTED, clearance: { persisted: true, mode: 'AUTO_READY' } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.MERGED, merge: { merged: true, merge_commit_sha: MERGE_SHA }, deployment: { state: 'success', check_run_id: 1 } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.LIVE_VERIFIED, liveVerification: { passed: true, checked_at: '2026-09-28T00:00:00.000Z', checks: {} } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.PUBLISHED, dbPublish: { attempted: true, verified: true, published_at: '2026-09-28T00:00:00.000Z' } });
+  manifestStore.set(TOPIC_SLUG, seeded);
+
+  // The REAL published-topic loader now genuinely reports this topic --
+  // never faked empty. The route resolves to a trusted sibling page too.
+  const publishedRow = { topic_slug: TOPIC_SLUG, status: 'published', clearance_mode: 'AUTO_READY', generation_source_hash: HASH, sitemap_eligible: true, published_at: '2026-09-28T00:00:00.000Z' };
+  const io = makeHappyIo({ bundle, manifestStore, existingClearanceRow: publishedRow });
+  const openSpy = spyFn(io.openLaunchPrFn);
+  io.openLaunchPrFn = openSpy;
+  const mergeSpy = spyFn(io.ghPrMergeFn);
+  io.ghPrMergeFn = mergeSpy;
+  const writeClearanceSpy = spyFn(io.writeClearanceRecordFn);
+  io.writeClearanceRecordFn = writeClearanceSpy;
+  const publishSpy = spyFn(io.publishClearanceRecordFn);
+  io.publishClearanceRecordFn = publishSpy;
+  const deploySpy = spyFn(io.waitForDeploymentFn);
+  io.waitForDeploymentFn = deploySpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('REAL_PUBLISHED_SET_RESUME', 'reaches PUBLISHED even though the topic is genuinely in the live published set', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('REAL_PUBLISHED_SET_RESUME', 'never re-opens a PR, merges, writes clearance, publishes, or waits for deployment again', openSpy.callCount === 0 && mergeSpy.callCount === 0 && writeClearanceSpy.callCount === 0 && publishSpy.callCount === 0 && deploySpy.callCount === 0);
+  check('REAL_PUBLISHED_SET_RESUME', 'model_calls stays 0', report.model_calls.total_calls === 0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Crash recovery: DB write ALREADY succeeded (the live published-topic
+// set genuinely includes the topic) but the manifest never got to
+// record db_publish.verified before the process died -- a later run
+// must still finish PUBLISHED without duplicating the write.
+// ─────────────────────────────────────────────────────────────────────────
+async function testPostDbWritePreManifestCrashResume() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  const { buildPublicationManifest, advancePublicationManifest, computePreparedArtifactDigest } = await import('../functions/_lib/education-ops/education-publication-state.mjs');
+  const digest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+  // The manifest is stuck at LIVE_VERIFIED -- db_publish.verified was
+  // NEVER recorded, exactly as if the process died right after the real
+  // DB write succeeded but before persistManifest({state: PUBLISHED, ...}).
+  let seeded = buildPublicationManifest({ runId: 'prior-run', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER, generationSourceHash: HASH, preparedArtifactDigest: digest, candidateOriginatingRunId: bundle.originating_run_id });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.PR_OPEN, generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 100, pr_url: 'x', expected_head_sha: HEAD_SHA } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.CLEARANCE_PERSISTED, clearance: { persisted: true, mode: 'AUTO_READY' } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.MERGED, merge: { merged: true, merge_commit_sha: MERGE_SHA }, deployment: { state: 'success', check_run_id: 1 } });
+  seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.LIVE_VERIFIED, liveVerification: { passed: true, checked_at: '2026-09-28T00:00:00.000Z', checks: {} } });
+  manifestStore.set(TOPIC_SLUG, seeded);
+
+  // The DB row is ALREADY published -- the real write from the prior,
+  // crashed run genuinely succeeded.
+  const publishedRow = { topic_slug: TOPIC_SLUG, status: 'published', clearance_mode: 'AUTO_READY', generation_source_hash: HASH, sitemap_eligible: true, published_at: '2026-09-28T00:00:00.000Z' };
+  const io = makeHappyIo({ bundle, manifestStore, existingClearanceRow: publishedRow });
+  const publishSpy = spyFn(io.publishClearanceRecordFn);
+  io.publishClearanceRecordFn = publishSpy;
+  const mergeSpy = spyFn(io.ghPrMergeFn);
+  io.ghPrMergeFn = mergeSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('POST_DB_WRITE_CRASH_RESUME', 'a later run verifies the SAME publication and finishes PUBLISHED', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('POST_DB_WRITE_CRASH_RESUME', 'publishClearanceRecord is never called again -- the row is already correctly published', publishSpy.callCount === 0);
+  check('POST_DB_WRITE_CRASH_RESUME', 'never re-merges', mergeSpy.callCount === 0);
+  check('POST_DB_WRITE_CRASH_RESUME', 'the manifest is now durably advanced to PUBLISHED so a THIRD run never repeats this work', manifestStore.get(TOPIC_SLUG).state === PUBLICATION_STATE.PUBLISHED && manifestStore.get(TOPIC_SLUG).db_publish.verified === true);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Trusted sibling resolution failure fails closed -- never silently
+// downgraded to "treat it as if nothing were published".
+// ─────────────────────────────────────────────────────────────────────────
+async function testTrustedSiblingResolutionFailureFailsClosed() {
+  const bundle = makeReadyBundle();
+  const io = makeHappyIo({ bundle });
+  io.resolveTrustedSiblingPagesFn = () => ({ ok: false, violations: ['UNRESOLVABLE_PUBLISHED_ROUTE:some-other-topic:no valid artifact'] });
+  const prepareSpy = spyFn(io.prepareLaunchArtifactsFn);
+  io.prepareLaunchArtifactsFn = prepareSpy;
+  const openSpy = spyFn(io.openLaunchPrFn);
+  io.openLaunchPrFn = openSpy;
+  const writeClearanceSpy = spyFn(io.writeClearanceRecordFn);
+  io.writeClearanceRecordFn = writeClearanceSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('SIBLING_RESOLUTION_FAILS_CLOSED', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('SIBLING_RESOLUTION_FAILS_CLOSED', 'the reason includes the sanitized violation', report.exception_reason.includes('UNRESOLVABLE_PUBLISHED_ROUTE'), report.exception_reason);
+  check('SIBLING_RESOLUTION_FAILS_CLOSED', 'never prepares artifacts', prepareSpy.callCount === 0);
+  check('SIBLING_RESOLUTION_FAILS_CLOSED', 'never opens a PR', openSpy.callCount === 0);
+  check('SIBLING_RESOLUTION_FAILS_CLOSED', 'never writes clearance', writeClearanceSpy.callCount === 0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// DB says published but no matching manifest exists -> fail closed
+// (never treat an arbitrary already-published route as safe).
+// ─────────────────────────────────────────────────────────────────────────
+async function testPublishedWithNoManifestFailsClosed() {
+  const bundle = makeReadyBundle();
+  const publishedRow = { topic_slug: TOPIC_SLUG, status: 'published', clearance_mode: 'AUTO_READY', generation_source_hash: HASH, sitemap_eligible: true, published_at: '2026-09-28T00:00:00.000Z' };
+  // No manifestStore seeding at all -- manifest is null.
+  const io = makeHappyIo({ bundle, existingClearanceRow: publishedRow });
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('PUBLISHED_NO_MANIFEST_FAILS_CLOSED', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('PUBLISHED_NO_MANIFEST_FAILS_CLOSED', 'names the missing manifest', report.exception_reason.includes('no durable publication manifest exists'), report.exception_reason);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// DB says published with a DIFFERENT generation hash than this exact
+// candidate's manifest -> fail closed.
+// ─────────────────────────────────────────────────────────────────────────
+async function testPublishedWithDifferentGenerationHashFailsClosed() {
+  const bundle = makeReadyBundle(); // generation_source_hash === HASH
+  const manifestStore = new Map();
+  const { buildPublicationManifest, advancePublicationManifest, computePreparedArtifactDigest } = await import('../functions/_lib/education-ops/education-publication-state.mjs');
+  const digest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+  const OTHER_HASH = 'a-totally-different-generation-hash';
+  // A durable manifest exists for this topic/route, but it was built for
+  // a DIFFERENT generation_source_hash than the candidate bundle this
+  // run just loaded (e.g. the candidate was resynthesized since that
+  // publication) -- and the live row is consistently published under
+  // that SAME different hash.
+  let seeded = buildPublicationManifest({ runId: 'prior-run', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER, generationSourceHash: OTHER_HASH, preparedArtifactDigest: digest, candidateOriginatingRunId: bundle.originating_run_id });
+  seeded = advancePublicationManifest(seeded, {
+    state: PUBLICATION_STATE.PUBLISHED,
+    generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 100, pr_url: 'x', expected_head_sha: HEAD_SHA },
+    dbPublish: { attempted: true, verified: true, published_at: '2026-09-27T00:00:00.000Z' },
+  });
+  manifestStore.set(TOPIC_SLUG, seeded);
+
+  const publishedRow = { topic_slug: TOPIC_SLUG, status: 'published', clearance_mode: 'AUTO_READY', generation_source_hash: OTHER_HASH, sitemap_eligible: true, published_at: '2026-09-27T00:00:00.000Z' };
+  const io = makeHappyIo({ bundle, manifestStore, existingClearanceRow: publishedRow });
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('PUBLISHED_DIFFERENT_HASH_FAILS_CLOSED', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('PUBLISHED_DIFFERENT_HASH_FAILS_CLOSED', 'names the manifest/candidate mismatch', report.exception_reason.includes('does not match this exact candidate') && report.exception_reason.includes('GENERATION_SOURCE_HASH_MISMATCH'), report.exception_reason);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// REGRESSION: `gh pr create` does NOT support --json (unlike `gh pr
+// view`/`gh pr list`) -- passing it is a runtime error, not a supported
+// interface. openLaunchPr() fetches structured identifiers via a
+// SEPARATE `gh pr view` call instead; this pins the exact argument
+// array `gh pr create` is invoked with so the unsupported flag can
+// never silently return.
+// ─────────────────────────────────────────────────────────────────────────
+function testGhPrCreateArgsNeverIncludeTheUnsupportedJsonFlag() {
+  const args = buildGhPrCreateArgs({ topicSlug: TOPIC_SLUG, branch: `education-ops/publish-${TOPIC_SLUG}`, runId: 'run-1' });
+  check('GH_PR_CREATE_ARGS', 'never includes --json', !args.includes('--json'));
+  check('GH_PR_CREATE_ARGS', 'is a real "pr create" invocation', args[0] === 'pr' && args[1] === 'create');
+  check('GH_PR_CREATE_ARGS', 'targets main as the base', args.includes('--base') && args[args.indexOf('--base') + 1] === 'main');
+  check('GH_PR_CREATE_ARGS', 'targets the exact deterministic branch as the head', args.includes('--head') && args[args.indexOf('--head') + 1] === `education-ops/publish-${TOPIC_SLUG}`);
 }
 
 // ---- Report ----
@@ -452,6 +623,12 @@ const tests = [
   testAlreadyPublishedRunIsIdempotent,
   testResumesAtDeploymentWaitWhenAlreadyMergedButNotYetDeployed,
   testRetriesDbPublishOnlyAfterReVerifyingLivePage,
+  testRealPublishedSetIdempotentPublishedResume,
+  testPostDbWritePreManifestCrashResume,
+  testTrustedSiblingResolutionFailureFailsClosed,
+  testPublishedWithNoManifestFailsClosed,
+  testPublishedWithDifferentGenerationHashFailsClosed,
+  testGhPrCreateArgsNeverIncludeTheUnsupportedJsonFlag,
 ];
 for (const t of tests) await t();
 

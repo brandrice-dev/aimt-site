@@ -110,33 +110,51 @@ export function checkExistingClearanceRowConsistency(existingRow, { expectedTopi
   };
 }
 
+// CORRECTION (real repository inspection): this repo's actual Cloudflare
+// Pages Git integration does NOT create a usable GitHub Deployment
+// object -- the real, exposed signal is a GitHub CHECK RUN, posted by
+// the "Cloudflare Workers and Pages" GitHub App, named "Cloudflare
+// Pages", against the exact commit SHA, with `status`/`conclusion`
+// exactly like any other check run. Matched on BOTH the app slug and
+// the check name (never merely "some check succeeded") so a generic
+// GitHub Actions workflow's own success is never mistaken for it.
+const CLOUDFLARE_PAGES_CHECK_APP_SLUG = 'cloudflare-workers-and-pages';
+const CLOUDFLARE_PAGES_CHECK_NAME = 'Cloudflare Pages';
+
+function isCloudflarePagesCheckRun(checkRun) {
+  return !!checkRun && checkRun.name === CLOUDFLARE_PAGES_CHECK_NAME && checkRun.app && checkRun.app.slug === CLOUDFLARE_PAGES_CHECK_APP_SLUG;
+}
+
 /**
- * Step 12: is this a CONFIRMED PRODUCTION deployment for the merge
- * commit -- never a preview deployment, never generic workflow success,
- * never elapsed time, never an HTTP 200 from a stale deployment? The
- * orchestrator's I/O layer (education-cloudflare-deploy.mjs) is
- * responsible for actually finding the right GitHub Deployment(s) for
- * the commit SHA; this function only decides, given the deployment
- * objects GitHub's Deployments API returned, whether one of them counts.
+ * Step 12: has the Cloudflare Pages check run for the merge commit
+ * completed successfully -- never a check run for a different SHA
+ * (a stale/earlier deployment), never a generic GitHub Actions check's
+ * own success, never elapsed time? The orchestrator's I/O layer
+ * (scripts/_lib/education-cloudflare-deploy-io.mjs) is responsible for
+ * actually fetching the check runs for the commit SHA; this function
+ * only decides, given those check-run objects, whether one of them
+ * counts.
  *
- * @param {Array<{id: number, environment: string, sha: string}>} deployments
- * @param {Array<{deployment_id: number, state: string}>} latestStatusesByDeployment
- *   the most recent deployment_status for each deployment id
- * @param {string} commitSha - the merge commit this run is waiting on
- * @returns {{ok: boolean, matchedDeploymentId: number|null, violations: string[]}}
+ * @param {Array<{id: number, name: string, head_sha: string, status: string, conclusion: string|null, app: {slug: string}}>} checkRuns
+ *   GitHub's `GET /repos/{owner}/{repo}/commits/{ref}/check-runs` result,
+ *   already filtered/mapped by the caller to just the fields above.
+ * @param {string} expectedHeadSha - the merge commit this run is waiting on
+ * @returns {{ok: boolean, state: 'success'|'failure'|'pending', checkRunId: number|null, violations: string[]}}
  */
-export function checkProductionDeploymentSucceeded(deployments, latestStatusesByDeployment, commitSha) {
-  const productionForCommit = (deployments || []).filter((d) => d.sha === commitSha && typeof d.environment === 'string' && d.environment.toLowerCase() === 'production');
-  if (productionForCommit.length === 0) {
-    return { ok: false, matchedDeploymentId: null, violations: ['NO_PRODUCTION_DEPLOYMENT_FOR_COMMIT'] };
+export function checkCloudflarePagesCheckRunSucceeded(checkRuns, expectedHeadSha) {
+  const matching = (checkRuns || []).filter((c) => c && c.head_sha === expectedHeadSha && isCloudflarePagesCheckRun(c));
+  if (matching.length === 0) {
+    return { ok: false, state: 'pending', checkRunId: null, violations: ['NO_CLOUDFLARE_PAGES_CHECK_RUN_FOR_COMMIT'] };
   }
-  const statusById = new Map((latestStatusesByDeployment || []).map((s) => [s.deployment_id, s.state]));
-  const succeeded = productionForCommit.find((d) => statusById.get(d.id) === 'success');
-  if (!succeeded) {
-    const states = productionForCommit.map((d) => statusById.get(d.id) || 'pending');
-    return { ok: false, matchedDeploymentId: null, violations: [`NO_SUCCESSFUL_PRODUCTION_DEPLOYMENT:${states.join(',')}`] };
+  const succeeded = matching.find((c) => c.status === 'completed' && c.conclusion === 'success');
+  if (succeeded) {
+    return { ok: true, state: 'success', checkRunId: succeeded.id, violations: [] };
   }
-  return { ok: true, matchedDeploymentId: succeeded.id, violations: [] };
+  const completedNotSuccessful = matching.find((c) => c.status === 'completed' && c.conclusion !== 'success');
+  if (completedNotSuccessful) {
+    return { ok: false, state: 'failure', checkRunId: null, violations: [`CLOUDFLARE_PAGES_CHECK_RUN_CONCLUSION:${completedNotSuccessful.conclusion}`] };
+  }
+  return { ok: false, state: 'pending', checkRunId: null, violations: ['CLOUDFLARE_PAGES_CHECK_RUN_NOT_YET_COMPLETED'] };
 }
 
 /**

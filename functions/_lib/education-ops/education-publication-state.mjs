@@ -109,7 +109,7 @@ export function buildPublicationManifest({
     state: PUBLICATION_STATE.PREPARED,
     generated: { branch: null, pr_number: null, pr_url: null, expected_head_sha: null, article_path: null, plan_artifact_path: null, hub_path: null, sitemap_path: null },
     merge: { merged: false, merge_commit_sha: null, merged_at: null },
-    deployment: { state: null, deployment_id: null, checked_at: null },
+    deployment: { state: null, check_run_id: null, checked_at: null },
     live_verification: { passed: null, checked_at: null, checks: null },
     clearance: { persisted: false, mode: null, persisted_at: null },
     db_publish: { attempted: false, verified: false, published_at: null },

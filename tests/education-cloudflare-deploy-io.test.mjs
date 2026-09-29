@@ -1,7 +1,10 @@
 // AIMT Education Operations v1 — deterministic tests for the bounded
-// Cloudflare production-deployment poll (scripts/_lib/
+// Cloudflare Pages check-run poll (scripts/_lib/
 // education-cloudflare-deploy-io.mjs). Every gh-api call is injected --
-// NO real network call in this file.
+// NO real network call in this file. Check-run objects are shaped
+// exactly like this repository's real Cloudflare Pages GitHub
+// integration: name "Cloudflare Pages", app slug
+// "cloudflare-workers-and-pages".
 //
 // Run: node tests/education-cloudflare-deploy-io.test.mjs
 
@@ -13,6 +16,14 @@ function check(fixtureName, label, condition, detail) {
 }
 
 const SHA = 'a'.repeat(40);
+const OTHER_SHA = 'c'.repeat(40);
+
+function cloudflarePagesCheckRun(overrides = {}) {
+  return { id: 1, name: 'Cloudflare Pages', head_sha: SHA, status: 'completed', conclusion: 'success', app: { slug: 'cloudflare-workers-and-pages' }, ...overrides };
+}
+function genericActionsCheckRun(overrides = {}) {
+  return { id: 2, name: 'build', head_sha: SHA, status: 'completed', conclusion: 'success', app: { slug: 'github-actions' }, ...overrides };
+}
 
 function fakeClock() {
   let now = 0;
@@ -22,16 +33,18 @@ function fakeClock() {
   };
 }
 
-async function testSucceedsImmediatelyWhenProductionDeploymentIsAlreadySuccessful() {
+// ─────────────────────────────────────────────────────────────────────────
+// Real Cloudflare check-run shaped success.
+// ─────────────────────────────────────────────────────────────────────────
+async function testSucceedsImmediatelyOnARealCloudflarePagesCheckRunSuccess() {
   const clock = fakeClock();
   const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 60000, pollIntervalMs: 1000 }, {
     ...clock,
-    listDeploymentsFn: async () => [{ id: 1, environment: 'Production', sha: SHA }],
-    listStatusesFn: async () => [{ deployment_id: 1, state: 'success' }],
+    listCheckRunsFn: async () => [genericActionsCheckRun(), cloudflarePagesCheckRun()],
   });
-  check('IMMEDIATE_SUCCESS', 'ok is true', result.ok === true);
-  check('IMMEDIATE_SUCCESS', 'state is success', result.state === 'success');
-  check('IMMEDIATE_SUCCESS', 'deploymentId is the matched production deployment', result.deploymentId === 1);
+  check('CLOUDFLARE_CHECK_RUN_SUCCESS', 'ok is true', result.ok === true);
+  check('CLOUDFLARE_CHECK_RUN_SUCCESS', 'state is success', result.state === 'success');
+  check('CLOUDFLARE_CHECK_RUN_SUCCESS', 'checkRunId is the matched Cloudflare check run, not the generic one', result.checkRunId === 1);
 }
 
 async function testPollsThenSucceeds() {
@@ -39,51 +52,93 @@ async function testPollsThenSucceeds() {
   let call = 0;
   const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 60000, pollIntervalMs: 1000 }, {
     ...clock,
-    listDeploymentsFn: async () => { call += 1; return [{ id: 1, environment: 'Production', sha: SHA }]; },
-    listStatusesFn: async () => [{ deployment_id: 1, state: call < 3 ? 'pending' : 'success' }],
+    listCheckRunsFn: async () => { call += 1; return [cloudflarePagesCheckRun({ status: call < 3 ? 'in_progress' : 'completed', conclusion: call < 3 ? null : 'success' })]; },
   });
   check('POLL_THEN_SUCCESS', 'eventually succeeds', result.ok === true);
   check('POLL_THEN_SUCCESS', 'polled more than once before succeeding', call >= 3, call);
 }
 
-async function testTerminalFailureReturnsImmediatelyWithoutWaitingOutTheTimeout() {
-  const clock = fakeClock();
-  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 60000, pollIntervalMs: 1000 }, {
-    ...clock,
-    listDeploymentsFn: async () => [{ id: 1, environment: 'Production', sha: SHA }],
-    listStatusesFn: async () => [{ deployment_id: 1, state: 'failure' }],
-  });
-  check('TERMINAL_FAILURE', 'test #12: a failed deployment reports state failure', result.ok === false && result.state === 'failure');
-  check('TERMINAL_FAILURE', 'never waited out the full timeout for a terminal failure', clock.nowFn() < 60000);
-}
-
-async function testTimeoutWhenNeverSucceedsOrFails() {
-  const clock = fakeClock();
-  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 5000, pollIntervalMs: 1000 }, {
-    ...clock,
-    listDeploymentsFn: async () => [{ id: 1, environment: 'Production', sha: SHA }],
-    listStatusesFn: async () => [{ deployment_id: 1, state: 'pending' }],
-  });
-  check('TIMEOUT', 'test #13: reports state timeout, ok false', result.ok === false && result.state === 'timeout');
-  check('TIMEOUT', 'has a BOUNDED wait -- stopped at/after the timeout, not indefinitely', clock.nowFn() >= 5000);
-}
-
-async function testPreviewOnlyDeploymentIsNeverAcceptedAsProduction() {
+// ─────────────────────────────────────────────────────────────────────────
+// Cloudflare check for the WRONG SHA is never accepted.
+// ─────────────────────────────────────────────────────────────────────────
+async function testCloudflareCheckForWrongShaIsNeverAccepted() {
   const clock = fakeClock();
   const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 3000, pollIntervalMs: 1000 }, {
     ...clock,
-    listDeploymentsFn: async () => [{ id: 1, environment: 'Preview', sha: SHA }],
-    listStatusesFn: async () => [{ deployment_id: 1, state: 'success' }],
+    listCheckRunsFn: async () => [cloudflarePagesCheckRun({ head_sha: OTHER_SHA })],
   });
-  check('PREVIEW_NOT_ACCEPTED', 'test #14: a successful PREVIEW deployment alone never satisfies the wait', result.ok === false);
+  check('WRONG_SHA_REJECTED', 'a Cloudflare Pages success for a DIFFERENT commit never satisfies the wait', result.ok === false);
+  check('WRONG_SHA_REJECTED', 'times out rather than being satisfied', result.state === 'timeout');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// A generic (non-Cloudflare) successful check is never accepted.
+// ─────────────────────────────────────────────────────────────────────────
+async function testNonCloudflareSuccessfulCheckIsNeverAccepted() {
+  const clock = fakeClock();
+  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 3000, pollIntervalMs: 1000 }, {
+    ...clock,
+    listCheckRunsFn: async () => [genericActionsCheckRun()],
+  });
+  check('NON_CLOUDFLARE_REJECTED', 'a successful generic GitHub Actions check alone never satisfies the wait', result.ok === false);
+
+  const wrongAppResult = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 1000, pollIntervalMs: 500 }, {
+    ...fakeClock(),
+    listCheckRunsFn: async () => [{ id: 3, name: 'Cloudflare Pages', head_sha: SHA, status: 'completed', conclusion: 'success', app: { slug: 'some-other-app' } }],
+  });
+  check('NON_CLOUDFLARE_REJECTED', 'a check run with the RIGHT name but WRONG app is also never accepted', wrongAppResult.ok === false);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Cloudflare check failure / timeout.
+// ─────────────────────────────────────────────────────────────────────────
+async function testCloudflareCheckFailureRejected() {
+  const clock = fakeClock();
+  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 60000, pollIntervalMs: 1000 }, {
+    ...clock,
+    listCheckRunsFn: async () => [cloudflarePagesCheckRun({ conclusion: 'failure' })],
+  });
+  check('CLOUDFLARE_FAILURE_REJECTED', 'a completed Cloudflare check with conclusion=failure reports state failure', result.ok === false && result.state === 'failure');
+  check('CLOUDFLARE_FAILURE_REJECTED', 'never waited out the full timeout for a terminal failure', clock.nowFn() < 60000);
+}
+
+async function testCloudflareCheckCancelledRejected() {
+  const clock = fakeClock();
+  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 60000, pollIntervalMs: 1000 }, {
+    ...clock,
+    listCheckRunsFn: async () => [cloudflarePagesCheckRun({ conclusion: 'cancelled' })],
+  });
+  check('CLOUDFLARE_CANCELLED_REJECTED', 'a cancelled Cloudflare check reports state failure', result.ok === false && result.state === 'failure');
+}
+
+async function testCloudflareCheckTimeout() {
+  const clock = fakeClock();
+  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 5000, pollIntervalMs: 1000 }, {
+    ...clock,
+    listCheckRunsFn: async () => [cloudflarePagesCheckRun({ status: 'in_progress', conclusion: null })],
+  });
+  check('CLOUDFLARE_TIMEOUT', 'reports state timeout, ok false', result.ok === false && result.state === 'timeout');
+  check('CLOUDFLARE_TIMEOUT', 'has a BOUNDED wait -- stopped at/after the timeout, not indefinitely', clock.nowFn() >= 5000);
+}
+
+async function testNoCheckRunAtAllTimesOut() {
+  const clock = fakeClock();
+  const result = await waitForCloudflareProductionDeployment({ repo: 'x/y', commitSha: SHA, timeoutMs: 3000, pollIntervalMs: 1000 }, {
+    ...clock,
+    listCheckRunsFn: async () => [],
+  });
+  check('NO_CHECK_RUN_TIMES_OUT', 'no Cloudflare Pages check run at all eventually times out', result.ok === false && result.state === 'timeout');
 }
 
 const tests = [
-  testSucceedsImmediatelyWhenProductionDeploymentIsAlreadySuccessful,
+  testSucceedsImmediatelyOnARealCloudflarePagesCheckRunSuccess,
   testPollsThenSucceeds,
-  testTerminalFailureReturnsImmediatelyWithoutWaitingOutTheTimeout,
-  testTimeoutWhenNeverSucceedsOrFails,
-  testPreviewOnlyDeploymentIsNeverAcceptedAsProduction,
+  testCloudflareCheckForWrongShaIsNeverAccepted,
+  testNonCloudflareSuccessfulCheckIsNeverAccepted,
+  testCloudflareCheckFailureRejected,
+  testCloudflareCheckCancelledRejected,
+  testCloudflareCheckTimeout,
+  testNoCheckRunAtAllTimesOut,
 ];
 for (const t of tests) await t();
 

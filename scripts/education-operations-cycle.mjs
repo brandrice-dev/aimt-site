@@ -58,7 +58,8 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { fetchTopicEvidenceLive, PILOT_TOPIC_CONCEPTS } from '../functions/_lib/research/publication-readiness-loader.mjs';
+import { fetchTopicEvidenceLive, PILOT_TOPIC_CONCEPTS, selectTopicEvidenceFromRows } from '../functions/_lib/research/publication-readiness-loader.mjs';
+import { assessTopicReadiness } from '../functions/_lib/research/publication-readiness.mjs';
 import { selectNextTopic, ACTIVE_CLUSTERS, DEFAULT_ACTIVE_CLUSTER } from '../functions/_lib/education-ops/education-topic-selector.mjs';
 import { fetchPublishedTopicSlugsLive, countPagesPublishedThisWeekLive } from '../functions/_lib/education-ops/education-published-state-loader.mjs';
 import { checkEducationOpsCredential } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
@@ -1403,21 +1404,37 @@ export function prepareLaunchArtifacts({ preparedArtifact, plan, route }) {
  * ghPrListForBranch() and resume it, never opening a duplicate. Never
  * merges.
  */
+/**
+ * PURE command-argument construction for `gh pr create` -- separated
+ * from openLaunchPr()'s actual execFileSync calls specifically so a
+ * test can assert on the constructed argument array without shelling
+ * out. `gh pr create` does NOT support `--json` (unlike `gh pr view`/
+ * `gh pr list`) -- passing it is a runtime error, not a supported
+ * interface. This function must never include `--json` in its output;
+ * see the test asserting exactly that (the regression this guards
+ * against actually shipped once).
+ */
+export function buildGhPrCreateArgs({ topicSlug, branch, runId }) {
+  return [
+    'pr', 'create', '--base', 'main', '--head', branch,
+    '--title', `[Education Operations] Publish: ${topicSlug} (merges only when AUTOPUBLISH is enabled)`,
+    '--body', `Autonomously prepared for PRODUCTION PUBLICATION by AIMT Education Operations v1 (run ${runId}). Removes the preview noindex tag and adds the route to sitemap.xml. Merges ONLY when AIMT_EDUCATION_AUTOPUBLISH_ENABLED === "true"; the DB row is never marked published without a subsequent confirmed live-route verification.`,
+  ];
+}
+
 export function openLaunchPr({ topicSlug, articlePath, planArtifactPath, hubPath, sitemapPath, runId }) {
   const branch = publicationBranchName(topicSlug);
   execFileSync('git', ['checkout', '-b', branch], { cwd: ROOT, stdio: 'inherit' });
   execFileSync('git', ['add', articlePath, planArtifactPath, hubPath, sitemapPath], { cwd: ROOT, stdio: 'inherit' });
   execFileSync('git', ['commit', '-m', `Education Operations: publish ${topicSlug} (AUTOPUBLISH-gated, launch-ready)`], { cwd: ROOT, stdio: 'inherit' });
   execFileSync('git', ['push', '-u', 'origin', branch], { cwd: ROOT, stdio: 'inherit' });
-  const prJson = execFileSync('gh', [
-    'pr', 'create', '--base', 'main', '--head', branch,
-    '--title', `[Education Operations] Publish: ${topicSlug} (merges only when AUTOPUBLISH is enabled)`,
-    '--body', `Autonomously prepared for PRODUCTION PUBLICATION by AIMT Education Operations v1 (run ${runId}). Removes the preview noindex tag and adds the route to sitemap.xml. Merges ONLY when AIMT_EDUCATION_AUTOPUBLISH_ENABLED === "true"; the DB row is never marked published without a subsequent confirmed live-route verification.`,
-    '--json', 'number,url',
-  ], { cwd: ROOT, encoding: 'utf8' });
-  const { number, url } = JSON.parse(prJson);
-  const headRefOid = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
-  return { branch, prNumber: number, prUrl: url, headRefOid };
+  // `gh pr create` prints the created PR's URL as PLAIN TEXT on success
+  // (it has no --json support at all) -- the structured identifiers
+  // (number/headRefOid) are fetched via a SEPARATE, supported `gh pr
+  // view` call against that URL immediately afterward.
+  const prUrl = execFileSync('gh', buildGhPrCreateArgs({ topicSlug, branch, runId }), { cwd: ROOT, encoding: 'utf8' }).trim();
+  const created = ghPrView(prUrl);
+  return { branch, prNumber: created.number, prUrl: created.url || prUrl, headRefOid: created.headRefOid };
 }
 
 function publicationBranchName(topicSlug) {
@@ -1430,10 +1447,14 @@ function ghPrListForBranch(branch) {
   return rows[0] || null;
 }
 
-function ghPrView(prNumber) {
-  const out = execFileSync('gh', ['pr', 'view', String(prNumber), '--json', 'number,state,headRefOid,files,mergeCommit'], { cwd: ROOT, encoding: 'utf8' });
+/** `gh pr view` DOES support --json (unlike `gh pr create`, see
+    buildGhPrCreateArgs() below) -- accepts a PR number, URL, or branch
+    name interchangeably, so this same function serves both the
+    post-create lookup and every later re-view. */
+function ghPrView(prNumberOrUrl) {
+  const out = execFileSync('gh', ['pr', 'view', String(prNumberOrUrl), '--json', 'number,url,state,headRefOid,files,mergeCommit'], { cwd: ROOT, encoding: 'utf8' });
   const raw = JSON.parse(out);
-  return { number: raw.number, state: raw.state, headRefOid: raw.headRefOid, files: raw.files || [], mergeCommitOid: raw.mergeCommit ? raw.mergeCommit.oid : null };
+  return { number: raw.number, url: raw.url, state: raw.state, headRefOid: raw.headRefOid, files: raw.files || [], mergeCommitOid: raw.mergeCommit ? raw.mergeCommit.oid : null };
 }
 
 function ghPrMerge(prNumber) {
@@ -1480,6 +1501,38 @@ async function fetchLivePublicationArtifacts({ route, clusterKey }) {
 /** Real I/O for runPublicationPipeline() -- every field here is
     individually overridable via options.io in tests; none of these real
     implementations are ever invoked by this repo's own test suite. */
+/**
+ * Resolves the CURRENT candidate claim id set for ONE specific topic,
+ * completely independent of new-page eligibility. Deliberately never
+ * routed through selectNextTopic()/candidateConceptsForCluster()
+ * (education-topic-selector.mjs), which intentionally EXCLUDES any
+ * already-published topic from candidacy entirely -- calling THAT for
+ * an already-published topic returns no candidate entry at all, which
+ * would make a freshness check see an empty claim set and misreport
+ * "everything changed" for a topic whose evidence may not have moved at
+ * all. This calls the SAME underlying per-topic readiness computation
+ * (assessTopicReadiness) directly, for exactly the one topic asked
+ * about, regardless of its published status.
+ *
+ * @param {{claims: object[], sources: object[]}} evidencePool
+ * @param {string} clusterKey
+ * @param {string} topicSlug
+ * @returns {string[]} candidate_claim_ids, or [] if this topic has no
+ *   registered concept in this cluster (defensive; should be unreachable
+ *   given the caller already validated clusterKey/topicSlug membership)
+ */
+function resolveCurrentCandidateClaimIds(evidencePool, clusterKey, topicSlug) {
+  const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
+  const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === topicSlug && memberSet.has(c.topic_slug));
+  if (!concept) return [];
+  const { claims, sources } = selectTopicEvidenceFromRows(concept.controlled_topics, evidencePool);
+  const v1Result = assessTopicReadiness({
+    topic_slug: concept.topic_slug, seo_page_concept: concept.seo_page_concept,
+    controlled_topics: concept.controlled_topics, claims, sources,
+  });
+  return v1Result.candidate_claim_ids;
+}
+
 function buildRealPublishIo(env) {
   return {
     loadCandidateBundleFn: loadCandidateBundle,
@@ -1594,59 +1647,114 @@ export async function runPublicationPipeline(env, options = {}) {
   } catch (err) {
     return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Published-topic state query failed: ${err.message}` });
   }
-  // Reuses selectNextTopic()'s own per-candidate readiness computation to
-  // get this topic's CURRENT candidate claim id set for the freshness
-  // check below -- WITHOUT requiring this topic to be the run's overall
-  // "selected" winner (selectNextTopic scores every candidate, not just
-  // the one it ultimately picks).
-  const selection = selectNextTopic(evidencePool, { clusterKey, publishedTopicSlugs, activeResearchGapsBySlug: {} });
-  const candidateEntry = selection.candidates.find((c) => c.topic_slug === topicSlug);
-  const currentCandidateClaimIds = candidateEntry ? candidateEntry.v1_result.candidate_claim_ids : [];
-  const freshness = io.resolveCandidateResumeFreshnessFn(bundle, currentCandidateClaimIds);
 
+  // FAIL CLOSED (matches the shadow lane's own posture -- see
+  // resolveTrustedSiblingPages()'s own header and runDecisionPipeline()'s
+  // identical check above): a published DB state that cannot be mapped
+  // to trusted routes is an architecture-safety anomaly, never silently
+  // downgraded to "treat it as if nothing were published".
   const siblingResolution = io.resolveTrustedSiblingPagesFn(publishedTopicSlugs, clusterKey);
-  const trustedPublishedRoutes = siblingResolution.ok ? siblingResolution.pages.map((p) => p.route) : [];
+  if (!siblingResolution.ok) {
+    return finish({
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `Published DB state and trusted route/artifact state disagree: ${siblingResolution.violations.join(', ')} -- refusing to prepare/open a PR/write clearance/merge on an unresolved published-route set.`,
+    });
+  }
+  const trustedPublishedRoutes = siblingResolution.pages.map((p) => p.route);
   const routeGuard = checkRouteNotAlreadyPublished(bundle.route, trustedPublishedRoutes);
-
-  let pagesPublishedThisWeek;
-  try {
-    pagesPublishedThisWeek = (await io.countPagesPublishedThisWeekFn(env)).count;
-  } catch (err) {
-    return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Weekly publication count query failed: ${err.message}` });
-  }
-  const weeklyCap = checkWeeklyCap(pagesPublishedThisWeek, resolveMaxPagesPerWeek(env));
-
-  const eligibility = checkCandidateReadyForPublication({
-    integrityValid: integrity.valid, integrityViolations: integrity.violations,
-    resumeStage, freshnessState: freshness.state,
-    bundleTopicSlug: bundle.topic_slug, expectedTopicSlug: topicSlug,
-    bundleRoute: bundle.route, expectedRoute: bundle.route,
-    routeAlreadyPublished: !routeGuard.valid,
-    withinWeeklyCap: weeklyCap.withinCap,
-  });
-  if (!eligibility.ok) {
-    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route, exception_reason: `Candidate not ready for publication: ${eligibility.violations.join(', ')}` });
-  }
+  const routeAlreadyPublished = !routeGuard.valid;
 
   const preparedArtifactDigest = await computePreparedArtifactDigest(bundle.prepared_artifact);
 
-  if (manifest) {
+  // REAL-STATE RESUME CORRECTION: once this EXACT publication has
+  // actually reached status='published', the live published-topic set
+  // (routeAlreadyPublished, publishedTopicSlugs) legitimately includes
+  // it -- and that is NOT a reason to refuse resuming/re-verifying it.
+  // The full "new candidate" eligibility gate below (fresh, not already
+  // published, within the weekly cap) exists to decide whether it is
+  // SAFE to publish something NOT YET published; it does not apply once
+  // the DB has already legitimately moved to published for this exact
+  // route. Only the SAME durable manifest -- matched on topic_slug,
+  // route, generation_source_hash, and prepared_artifact_digest -- may
+  // take this path; an arbitrary already-published route is never
+  // treated as safe merely because a route matches.
+  if (routeAlreadyPublished) {
+    if (!manifest) {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `"${topicSlug}" (${bundle.route}) is already published live, but no durable publication manifest exists for it -- refusing to treat an arbitrary already-published route as this publication.`,
+      });
+    }
     const consistency = isManifestForSameCandidate(manifest, {
       topicSlug, route: bundle.route, generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
     });
     if (!consistency.matches) {
       return finish({
-        final_state: RUN_FINAL_STATE.INFRA_REVIEW,
-        exception_reason: `Publication manifest for "${topicSlug}" no longer matches the current candidate (${consistency.violations.join(', ')}) -- refusing to continue publishing a candidate that changed underneath it.`,
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `"${topicSlug}" (${bundle.route}) is already published live, but the durable manifest does not match this exact candidate (${consistency.violations.join(', ')}) -- refusing to resume a different publication under an already-published route.`,
       });
     }
+    if (!integrity.valid) {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `Candidate bundle integrity check failed while resuming an already-published manifest: ${integrity.violations.join(', ')}`,
+      });
+    }
+    // Falls through to the ordinary manifest-driven resume-stage
+    // dispatch below, which idempotently re-verifies and finishes
+    // PUBLISHED (or fails closed on a genuine post-write mismatch)
+    // without ever re-merging/re-writing/re-deploying -- see
+    // determinePublicationResumeStage()/the LIVE_VERIFIED tail block.
   } else {
-    manifest = buildPublicationManifest({
-      runId, topicSlug, route: bundle.route, cluster: clusterKey,
-      generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
-      candidateOriginatingRunId: bundle.originating_run_id,
+    // NOT-yet-published candidate: the full "new candidate" eligibility
+    // gate applies exactly as before. currentCandidateClaimIds is
+    // resolved for THIS SPECIFIC topic directly (assessTopicReadiness),
+    // never through selectNextTopic()/candidateConceptsForCluster(),
+    // which intentionally EXCLUDES already-published topics from
+    // candidacy entirely -- a freshness check must never see an empty
+    // claim set merely because a selector built for a DIFFERENT purpose
+    // (picking the next NEW page) doesn't consider this topic anymore.
+    const currentCandidateClaimIds = resolveCurrentCandidateClaimIds(evidencePool, clusterKey, topicSlug);
+    const freshness = io.resolveCandidateResumeFreshnessFn(bundle, currentCandidateClaimIds);
+
+    let pagesPublishedThisWeek;
+    try {
+      pagesPublishedThisWeek = (await io.countPagesPublishedThisWeekFn(env)).count;
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Weekly publication count query failed: ${err.message}` });
+    }
+    const weeklyCap = checkWeeklyCap(pagesPublishedThisWeek, resolveMaxPagesPerWeek(env));
+
+    const eligibility = checkCandidateReadyForPublication({
+      integrityValid: integrity.valid, integrityViolations: integrity.violations,
+      resumeStage, freshnessState: freshness.state,
+      bundleTopicSlug: bundle.topic_slug, expectedTopicSlug: topicSlug,
+      bundleRoute: bundle.route, expectedRoute: bundle.route,
+      routeAlreadyPublished,
+      withinWeeklyCap: weeklyCap.withinCap,
     });
-    io.writePublicationManifestFn(topicSlug, manifest);
+    if (!eligibility.ok) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route, exception_reason: `Candidate not ready for publication: ${eligibility.violations.join(', ')}` });
+    }
+
+    if (manifest) {
+      const consistency = isManifestForSameCandidate(manifest, {
+        topicSlug, route: bundle.route, generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
+      });
+      if (!consistency.matches) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `Publication manifest for "${topicSlug}" no longer matches the current candidate (${consistency.violations.join(', ')}) -- refusing to continue publishing a candidate that changed underneath it.`,
+        });
+      }
+    } else {
+      manifest = buildPublicationManifest({
+        runId, topicSlug, route: bundle.route, cluster: clusterKey,
+        generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
+        candidateOriginatingRunId: bundle.originating_run_id,
+      });
+      io.writePublicationManifestFn(topicSlug, manifest);
+    }
   }
 
   const persistManifest = (updates) => {
@@ -1765,7 +1873,7 @@ export async function runPublicationPipeline(env, options = {}) {
       persistManifest({ deployment: { state: deployResult.state }, lastFailure: { stage: 'DEPLOYMENT', reason: deployResult.violations.join(', '), at: new Date().toISOString() } });
       return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Cloudflare production deployment did not succeed (${deployResult.state}): ${deployResult.violations.join(', ')}` });
     }
-    persistManifest({ deployment: { state: 'success', deployment_id: deployResult.deploymentId, checked_at: new Date().toISOString() } });
+    persistManifest({ deployment: { state: 'success', check_run_id: deployResult.checkRunId, checked_at: new Date().toISOString() } });
   }
 
   // --- STEP 13-15: LIVE VERIFY (always fresh, never a cached result --

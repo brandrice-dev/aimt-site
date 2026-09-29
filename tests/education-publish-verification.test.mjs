@@ -6,7 +6,7 @@
 
 import {
   checkCandidateReadyForPublication, verifyGeneratedPrStillExpectedBeforeMerge,
-  checkExistingClearanceRowConsistency, checkProductionDeploymentSucceeded,
+  checkExistingClearanceRowConsistency, checkCloudflarePagesCheckRunSucceeded,
   verifyLivePagePublication, verifyPostWritePublishedRow,
 } from '../functions/_lib/education-ops/education-publish-verification.mjs';
 import { RESUME_STAGE } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
@@ -102,19 +102,26 @@ function testClearanceRowConsistency() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// checkProductionDeploymentSucceeded (step 12, tests #12-14)
+// checkCloudflarePagesCheckRunSucceeded (step 12, tests #12-14) -- the
+// REAL signal this repository's Cloudflare Pages Git integration
+// exposes: a GitHub check run named "Cloudflare Pages" from the
+// "cloudflare-workers-and-pages" GitHub App, never a Deployments-API
+// object.
 // ─────────────────────────────────────────────────────────────────────────
-function testDeploymentChecksDistinguishProductionFromPreview() {
+function cloudflarePagesCheckRun(overrides = {}) {
+  return { id: 1, name: 'Cloudflare Pages', head_sha: 'a'.repeat(40), status: 'completed', conclusion: 'success', app: { slug: 'cloudflare-workers-and-pages' }, ...overrides };
+}
+
+function testCloudflareCheckRunChecksAreExact() {
   const sha = 'a'.repeat(40);
-  const deployments = [
-    { id: 1, environment: 'Preview', sha },
-    { id: 2, environment: 'Production', sha },
-  ];
-  check('DEPLOYMENT_CHECK', 'a successful PRODUCTION deployment for the commit passes', checkProductionDeploymentSucceeded(deployments, [{ deployment_id: 1, state: 'success' }, { deployment_id: 2, state: 'success' }], sha).ok === true);
-  check('DEPLOYMENT_CHECK', 'test #14: a successful PREVIEW-only deployment is NOT accepted as production', checkProductionDeploymentSucceeded([{ id: 1, environment: 'Preview', sha }], [{ deployment_id: 1, state: 'success' }], sha).ok === false);
-  check('DEPLOYMENT_CHECK', 'test #12: a failed production deployment fails', checkProductionDeploymentSucceeded([{ id: 2, environment: 'Production', sha }], [{ deployment_id: 2, state: 'failure' }], sha).ok === false);
-  check('DEPLOYMENT_CHECK', 'no deployment at all for the commit fails', checkProductionDeploymentSucceeded([], [], sha).ok === false);
-  check('DEPLOYMENT_CHECK', 'a production deployment for a DIFFERENT commit is never mistaken for this one', checkProductionDeploymentSucceeded([{ id: 2, environment: 'Production', sha: 'b'.repeat(40) }], [{ deployment_id: 2, state: 'success' }], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'a completed, successful Cloudflare Pages check run for the exact commit passes', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun()], sha).ok === true);
+  check('CLOUDFLARE_CHECK_RUN', 'test #12: a completed Cloudflare check with conclusion=failure fails, state failure', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun({ conclusion: 'failure' })], sha).state === 'failure');
+  check('CLOUDFLARE_CHECK_RUN', 'a still-in-progress Cloudflare check reports state pending (never accepted yet)', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun({ status: 'in_progress', conclusion: null })], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'no check run at all for the commit fails', checkCloudflarePagesCheckRunSucceeded([], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'a Cloudflare Pages check for a DIFFERENT commit SHA is never mistaken for this one', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun({ head_sha: 'b'.repeat(40) })], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'test #14: a successful GENERIC (non-Cloudflare) check for the same SHA is never accepted', checkCloudflarePagesCheckRunSucceeded([{ id: 2, name: 'build', head_sha: sha, status: 'completed', conclusion: 'success', app: { slug: 'github-actions' } }], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'a check with the right NAME but wrong APP is never accepted', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun({ app: { slug: 'some-other-app' } })], sha).ok === false);
+  check('CLOUDFLARE_CHECK_RUN', 'a check with the right APP but wrong NAME is never accepted', checkCloudflarePagesCheckRunSucceeded([cloudflarePagesCheckRun({ name: 'Some Other Check' })], sha).ok === false);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -189,7 +196,7 @@ const tests = [
   testPrRevalidationPassesWhenUnchanged,
   testPrRevalidationFailsClosedOnDrift,
   testClearanceRowConsistency,
-  testDeploymentChecksDistinguishProductionFromPreview,
+  testCloudflareCheckRunChecksAreExact,
   testLiveVerificationPassesWhenEverythingMatches,
   testLiveVerificationFailsClosedOnEachIndividualCheck,
   testPostWriteVerificationPassesOnCorrectState,
