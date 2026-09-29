@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Your Enrollment — AIMT</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="Complete your enrollment in the AIMT Head Spa Certification Course. Secure payment processed by Stripe.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://js.stripe.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/aimt-design-system.css">
+<!--
+  ENROLLMENT CHECKOUT — Stripe Embedded Checkout inside AIMT.
+  Every "Begin Enrollment" CTA on the course page (startCheckout() in
+  headspa-mastery.html) now lands here instead of redirecting to
+  checkout.stripe.com. Payment still runs entirely inside Stripe's own
+  iframe; AIMT never sees card data.
+
+  Flow (unchanged downstream of payment):
+    POST /api/create-checkout-session { ui: 'embedded' }
+      → { clientSecret, publishableKey }  (or { url, fallback: 'hosted' }
+        if STRIPE_PUBLISHABLE_KEY isn't configured — then we redirect,
+        exactly like the old flow)
+    Stripe.js mounts the session in #enrollCheckout
+    On completion Stripe sends the whole page to
+      /success.html?session_id=cs_…   (return_url)
+    success.html → /api/claim-course-access verifies payment with Stripe
+    directly → Student Access. checkout.session.completed webhook writes
+    the entitlement independently, as before.
+
+  Light surface palette = the design system's existing light-surface
+  tokens (--aimt-color-light-bg / -light-text / -light-muted + accent).
+-->
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --paper: var(--aimt-color-light-bg, #faf8f5);
+  --ink: var(--aimt-color-light-text, #262626);
+  --ink-soft: #4a4440;
+  --muted: var(--aimt-color-light-muted, #7a6e66);
+  --accent: var(--aimt-color-accent, #a3968d);
+  --hair: rgba(38,38,38,0.11);
+  --hair-strong: rgba(38,38,38,0.18);
+  --card: #ffffff;
+  --focus: #262626;
+}
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--aimt-font-sans);
+  font-weight: 300;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ── Header ── */
+.enroll-header { border-bottom: 0.5px solid var(--hair); background: var(--paper); }
+.enroll-header-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 2rem;
+  height: var(--aimt-nav-height, 56px);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.enroll-brand { display: inline-flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--ink); min-width: 0; }
+.enroll-brand svg { width: 26px; height: 26px; flex: none; color: var(--ink); }
+.enroll-brand-name { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.22em; }
+.enroll-back {
+  font-family: var(--aimt-font-sans); font-size: 0.84rem; color: var(--muted);
+  text-decoration: none; padding: 0.6rem 0; white-space: nowrap;
+}
+.enroll-back:hover { color: var(--ink); }
+
+/* ── Layout ── */
+.enroll {
+  max-width: 1120px; margin: 0 auto;
+  padding: 3.5rem 2rem 5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 540px);
+  grid-template-areas:
+    "summary payment"
+    "details payment";
+  grid-template-rows: auto 1fr;
+  column-gap: 4.5rem;
+}
+.enroll-summary { grid-area: summary; }
+.enroll-payment { grid-area: payment; align-self: start; }
+.enroll-details { grid-area: details; }
+
+/* ── Summary ── */
+.enroll-eyebrow {
+  font-family: var(--aimt-font-mont); font-weight: 600;
+  font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1.1rem;
+}
+.enroll-title {
+  font-family: var(--aimt-font-serif); font-weight: 500;
+  font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.12;
+  letter-spacing: -0.005em; color: var(--ink);
+  margin-bottom: 2.2rem;
+}
+.enroll-product {
+  border-top: 0.5px solid var(--hair-strong);
+  border-bottom: 0.5px solid var(--hair-strong);
+  padding: 1.4rem 0;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem;
+}
+.enroll-product-label {
+  font-family: var(--aimt-font-mono); font-size: 0.62rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem;
+}
+.enroll-product-name { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 1.22rem; line-height: 1.3; }
+.enroll-product-sub { font-size: 0.86rem; color: var(--muted); margin-top: 0.3rem; }
+.enroll-price { text-align: right; flex: none; }
+.enroll-price-value { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 2.1rem; line-height: 1; }
+.enroll-price-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }
+
+/* ── Details ── */
+.enroll-details { padding-top: 2.6rem; }
+.enroll-section + .enroll-section { margin-top: 2.4rem; }
+.enroll-h2 {
+  font-family: var(--aimt-font-mont); font-weight: 600;
+  font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink); margin-bottom: 1rem;
+}
+.enroll-includes { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem 1.5rem; }
+.enroll-includes li { font-size: 0.92rem; color: var(--ink-soft); padding-left: 1.1rem; position: relative; line-height: 1.5; }
+.enroll-includes li::before {
+  content: ""; position: absolute; left: 0; top: 0.62em;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+}
+.enroll-note { font-size: 0.86rem; color: var(--muted); margin-top: 1.1rem; line-height: 1.65; }
+.enroll-steps { list-style: none; counter-reset: step; }
+.enroll-steps li {
+  counter-increment: step; position: relative;
+  padding: 0 0 1rem 2.2rem; font-size: 0.92rem; color: var(--ink-soft); line-height: 1.6;
+}
+.enroll-steps li:last-child { padding-bottom: 0; }
+.enroll-steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute; left: 0; top: 0.1em;
+  font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
+}
+.enroll-steps strong { font-weight: 500; color: var(--ink); }
+.enroll-policy { font-size: 0.86rem; color: var(--muted); line-height: 1.65; }
+.enroll-links { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin-top: 0.9rem; }
+.enroll-links a { font-size: 0.84rem; color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--hair-strong); padding: 0.25rem 0; }
+.enroll-links a:hover { text-decoration-color: var(--ink); }
+
+/* ── Payment ── */
+.enroll-payment-card {
+  background: var(--card);
+  border: 0.5px solid var(--hair-strong);
+  border-radius: var(--aimt-radius-md, 12px);
+  padding: 1.6rem 1.6rem 1.4rem;
+  box-shadow: 0 1px 2px rgba(38,38,38,0.04), 0 12px 32px rgba(38,38,38,0.05);
+}
+.enroll-payment-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.1rem; margin-bottom: 1.2rem; border-bottom: 0.5px solid var(--hair);
+}
+.enroll-payment-title { font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.enroll-secure { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.enroll-secure svg { width: 12px; height: 13px; flex: none; }
+
+.enroll-checkout { min-height: 0; }
+.enroll-checkout.is-mounted { min-height: 420px; }
+
+.enroll-loading { padding: 0.4rem 0 0.6rem; }
+.enroll-loading-text { font-size: 0.88rem; color: var(--muted); margin-bottom: 1.2rem; }
+.enroll-skel { display: grid; gap: 0.8rem; }
+.enroll-skel span { display: block; height: 44px; border-radius: 8px; background: #f3f0ec; animation: enrollPulse 1.6s ease-in-out infinite; }
+.enroll-skel span:nth-child(1) { height: 16px; width: 38%; }
+.enroll-skel span:nth-child(4) { height: 16px; width: 30%; margin-top: 0.6rem; }
+.enroll-skel span:nth-child(6) { height: 48px; background: #e9e5e0; margin-top: 0.6rem; }
+@keyframes enrollPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .enroll-skel span { animation: none; } }
+
+.enroll-error { padding: 0.4rem 0 0.6rem; }
+.enroll-error-title { font-family: var(--aimt-font-serif); font-weight: 500; font-size: 1.15rem; margin-bottom: 0.5rem; }
+.enroll-error-copy { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: 1.3rem; }
+.enroll-error-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.enroll-btn {
+  appearance: none; border: 0.5px solid var(--ink); background: var(--ink); color: #fff;
+  font-family: var(--aimt-font-mont); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 0.95rem 1.4rem; min-height: 48px; border-radius: var(--aimt-radius-pill, 980px); cursor: pointer;
+}
+.enroll-btn:hover { background: #111; }
+.enroll-btn-quiet { background: transparent; color: var(--ink); border-color: var(--hair-strong); text-decoration: none; display: inline-flex; align-items: center; }
+.enroll-btn-quiet:hover { background: rgba(38,38,38,0.04); }
+.enroll-error-help { font-size: 0.82rem; color: var(--muted); margin-top: 1.1rem; }
+
+.enroll-slow { font-size: 0.82rem; color: var(--muted); margin-top: 1rem; }
+.enroll-link-btn {
+  appearance: none; background: none; border: 0; padding: 0.35rem 0; font: inherit; color: var(--ink);
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hair-strong); cursor: pointer;
+}
+.enroll-link-btn:hover { text-decoration-color: var(--ink); }
+
+.enroll-notice {
+  border: 0.5px solid var(--hair-strong); background: #fbfaf7; border-radius: 10px;
+  padding: 0.95rem 1.05rem; margin-bottom: 1.2rem; font-size: 0.86rem; color: var(--ink-soft); line-height: 1.6;
+}
+.enroll-notice strong { font-weight: 500; color: var(--ink); display: block; margin-bottom: 0.2rem; }
+.enroll-notice a { color: var(--ink); text-underline-offset: 3px; }
+
+.enroll-payment-foot {
+  margin-top: 1.2rem; padding-top: 1rem; border-top: 0.5px solid var(--hair);
+  font-size: 0.8rem; color: var(--muted); line-height: 1.6;
+}
+
+[hidden] { display: none !important; }
+
+.enroll-footer { border-top: 0.5px solid var(--hair); }
+.enroll-footer-inner {
+  max-width: 1120px; margin: 0 auto; padding: 1.6rem 2rem 2.2rem;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 1.5rem;
+  font-size: 0.78rem; color: var(--muted);
+}
+.enroll-footer a { color: var(--muted); text-decoration: none; margin-left: 1.2rem; }
+.enroll-footer a:first-child { margin-left: 0; }
+.enroll-footer a:hover { color: var(--ink); }
+
+/* ── Tablet ── */
+@media (max-width: 980px) {
+  .enroll {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "summary" "payment" "details";
+    grid-template-rows: auto;
+    max-width: 640px;
+    padding: 2.6rem 1.5rem 4rem;
+  }
+  .enroll-summary { margin-bottom: 1.8rem; }
+  .enroll-title { margin-bottom: 1.6rem; }
+  .enroll-details { padding-top: 2.6rem; }
+}
+
+/* ── Phone ── */
+@media (max-width: 560px) {
+  .enroll-header-inner { padding: 0 1rem; }
+  .enroll-brand-name { font-size: 0.74rem; letter-spacing: 0.18em; }
+  .enroll { padding: 1.9rem 1rem 3.2rem; }
+  .enroll-eyebrow { font-size: 0.6rem; letter-spacing: 0.18em; margin-bottom: 0.8rem; }
+  .enroll-title { font-size: 1.75rem; margin-bottom: 1.3rem; }
+  .enroll-product { padding: 1.1rem 0; gap: 1rem; }
+  .enroll-product-name { font-size: 1.08rem; }
+  .enroll-price-value { font-size: 1.75rem; }
+  .enroll-summary { margin-bottom: 1.4rem; }
+  /* Stripe renders its own padded form — keep the frame light so the
+     iframe gets nearly full width on a 320px screen. */
+  .enroll-payment-card { padding: 1.1rem 0.85rem 1rem; border-radius: 10px; }
+  .enroll-checkout.is-mounted { margin: 0 -0.85rem; }
+  .enroll-payment-head { flex-direction: column; align-items: flex-start; gap: 0.35rem; margin-bottom: 1rem; padding-bottom: 0.9rem; }
+  .enroll-includes { grid-template-columns: 1fr; }
+  .enroll-error-actions .enroll-btn { width: 100%; justify-content: center; }
+  .enroll-footer-inner { padding: 1.4rem 1rem 2rem; flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6" fill="none"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3" fill="none"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2" fill="none"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+
+<header class="enroll-header">
+  <div class="enroll-header-inner">
+    <a href="/" class="enroll-brand" aria-label="AIMT home">
+      <svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
+      <span class="enroll-brand-name">AIMT</span>
+    </a>
+    <a href="/head-spa-certification" class="enroll-back">← Course overview</a>
+  </div>
+</header>
+
+<main class="enroll" id="main">
+  <section class="enroll-summary" aria-labelledby="enrollTitle">
+    <p class="enroll-eyebrow">American Institute of Modern Trichology</p>
+    <h1 class="enroll-title" id="enrollTitle">Complete your enrollment</h1>
+    <div class="enroll-product">
+      <div>
+        <p class="enroll-product-label">Enrolling in</p>
+        <p class="enroll-product-name">Head Spa Certification Course</p>
+        <p class="enroll-product-sub">Self-paced · Lifetime access</p>
+      </div>
+      <div class="enroll-price">
+        <p class="enroll-price-value"><span class="sr-only">Tuition: </span>$597</p>
+        <p class="enroll-price-note">One-time tuition</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="enroll-payment" aria-labelledby="paymentTitle">
+    <div class="enroll-payment-card">
+      <div class="enroll-payment-head">
+        <h2 class="enroll-payment-title" id="paymentTitle">Payment</h2>
+        <span class="enroll-secure">
+          <svg viewBox="0 0 12 13" fill="none" aria-hidden="true"><rect x="1" y="5.5" width="10" height="7" rx="1.5" stroke="currentColor"/><path d="M3.5 5.5V3.75a2.5 2.5 0 0 1 5 0V5.5" stroke="currentColor"/></svg>
+          Secure payment processed by Stripe
+        </span>
+      </div>
+
+      <div class="enroll-notice" id="enrollPendingNotice" hidden>
+        <strong>Already paid from this browser?</strong>
+        A recent purchase here hasn't finished account setup yet. <a href="success.html" id="enrollPendingLink">Finish setting up your student access</a> instead of paying again.
+      </div>
+
+      <p class="sr-only" role="status" aria-live="polite" id="enrollStatus"></p>
+
+      <div class="enroll-loading" id="enrollLoading">
+        <p class="enroll-loading-text">Preparing secure checkout…</p>
+        <div class="enroll-skel" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="enroll-error" id="enrollError" role="alert" hidden>
+        <p class="enroll-error-title" id="enrollErrorTitle">Checkout didn't load</p>
+        <p class="enroll-error-copy" id="enrollErrorCopy">Your card has not been charged. This is usually a brief connection issue — please try again.</p>
+        <div class="enroll-error-actions">
+          <button type="button" class="enroll-btn" id="enrollRetry">Try again</button>
+          <a href="/head-spa-certification" class="enroll-btn enroll-btn-quiet">Return to course overview</a>
+        </div>
+        <p class="enroll-error-help">If this keeps happening, contact <a href="mailto:support@aimtrichology.com">support@aimtrichology.com</a>.</p>
+      </div>
+
+      <div class="enroll-checkout" id="enrollCheckout"></div>
+      <p class="enroll-slow" id="enrollSlowHint" hidden>Payment form not showing? <button type="button" class="enroll-link-btn" id="enrollReload">Reload secure checkout</button></p>
+
+      <p class="enroll-payment-foot">Payment information is entered in Stripe's secure form and sent directly to Stripe. AIMT does not receive or store your card details.</p>
+    </div>
+  </section>
+
+  <div class="enroll-details">
+    <section class="enroll-section" aria-labelledby="includedTitle">
+      <h2 class="enroll-h2" id="includedTitle">Included with enrollment</h2>
+      <ul class="enroll-includes">
+        <li>Complete head spa service training</li>
+        <li>Welcome Module + 12 numbered modules</li>
+        <li>Cadence learning companion</li>
+        <li>Listen Mode</li>
+        <li>AIMT Service Timer</li>
+        <li>Practitioner resource library</li>
+        <li>Applied checkpoints</li>
+        <li>Final Certification Assessment</li>
+        <li>Verifiable AIMT credential after passing</li>
+        <li>Lifetime course access</li>
+      </ul>
+      <p class="enroll-note">Certification is earned through required course progression and successful completion of the Final Certification Assessment — it is not issued automatically on purchase.</p>
+    </section>
+
+    <section class="enroll-section" aria-labelledby="afterTitle">
+      <h2 class="enroll-h2" id="afterTitle">After payment</h2>
+      <ol class="enroll-steps">
+        <li><strong>You return to AIMT.</strong> Stripe confirms your payment and brings you straight back here.</li>
+        <li><strong>Set up your student account.</strong> Create your AIMT account — or sign in to an existing one — with the same email you use at checkout.</li>
+        <li><strong>Begin the course.</strong> Enter through Student Access and start with the Welcome Module.</li>
+      </ol>
+    </section>
+
+    <section class="enroll-section" aria-labelledby="policyTitle">
+      <h2 class="enroll-h2" id="policyTitle">Refunds &amp; policies</h2>
+      <p class="enroll-policy">AIMT offers a full refund within a 7-day pre-access cancellation window, as long as you haven't accessed substantive course materials or downloadable practitioner resources.</p>
+      <div class="enroll-links">
+        <a href="/refunds">Refund Policy</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="mailto:support@aimtrichology.com">support@aimtrichology.com</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="enroll-footer">
+  <div class="enroll-footer-inner">
+    <span>&copy; 2026 American Institute of Modern Trichology.</span>
+    <span><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/refunds">Refunds</a><a href="student-access.html">Student Access</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var STRIPE_JS_URL = 'https://js.stripe.com/dahlia/stripe.js';
+  var SESSION_ENDPOINT = '/api/create-checkout-session';
+  var REQUEST_TIMEOUT_MS = 20000;
+  /* Same public anon key + table success.html already logs to. */
+  var SUPABASE_URL = 'https://epcnkncyxqgscrejinwr.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwY25rbmN5eHFnc2NyZWppbndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTc5MDcsImV4cCI6MjA5MjIzMzkwN30.jB6JIr9sYwOAYQz7k1nJj2XVGp3q1kQU-jbfy4Z3mH0';
+  /* Written by success.html on load, cleared once the purchase is claimed. */
+  var PENDING_CLAIM_KEY = 'aimt_headspa_pending_checkout_session';
+
+  var els = {
+    status: document.getElementById('enrollStatus'),
+    loading: document.getElementById('enrollLoading'),
+    error: document.getElementById('enrollError'),
+    errorTitle: document.getElementById('enrollErrorTitle'),
+    errorCopy: document.getElementById('enrollErrorCopy'),
+    retry: document.getElementById('enrollRetry'),
+    mount: document.getElementById('enrollCheckout'),
+    pending: document.getElementById('enrollPendingNotice'),
+    pendingLink: document.getElementById('enrollPendingLink'),
+    slowHint: document.getElementById('enrollSlowHint'),
+    reload: document.getElementById('enrollReload')
+  };
+  /* Stripe renders failures (expired session, revoked key) inside its own
+     cross-origin frame with no callback to this page — so after a short
+     wait, offer a quiet, non-destructive way to start a fresh session. */
+  var SLOW_HINT_MS = 12000;
+  var slowHintTimer = null;
+
+  var embedded = null;
+  var starting = false;
+  var stripeJsPromise = null;
+
+  function logEvent(type, message) {
+    try {
+      fetch(SUPABASE_URL + '/rest/v1/aimt_logs', {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ event_type: type, source: 'enroll.html', message: String(message || '').slice(0, 500) })
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
+  function announce(text) { els.status.textContent = text; }
+
+  function showLoading() {
+    els.error.hidden = true;
+    els.loading.hidden = false;
+    els.mount.classList.remove('is-mounted');
+    announce('Preparing secure checkout.');
+  }
+
+  function showReady() {
+    els.loading.hidden = true;
+    els.error.hidden = true;
+    els.mount.classList.add('is-mounted');
+    announce('Secure checkout is ready.');
+  }
+
+  function showError(kind) {
+    els.loading.hidden = true;
+    els.mount.classList.remove('is-mounted');
+    if (kind === 'unavailable') {
+      els.errorTitle.textContent = 'Enrollment is briefly unavailable';
+      els.errorCopy.textContent = 'Your card has not been charged. Secure checkout could not be prepared just now — please try again in a few minutes.';
+    } else {
+      els.errorTitle.textContent = "Checkout didn't load";
+      els.errorCopy.textContent = 'Your card has not been charged. This is usually a brief connection issue — please try again.';
+    }
+    els.error.hidden = false;
+    announce('');
+    try { els.retry.focus({ preventScroll: true }); } catch (_) {}
+  }
+
+  function loadStripeJs() {
+    if (window.Stripe) return Promise.resolve(window.Stripe);
+    if (stripeJsPromise) return stripeJsPromise;
+    stripeJsPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = STRIPE_JS_URL;
+      script.async = true;
+      script.onload = function () { window.Stripe ? resolve(window.Stripe) : reject(new Error('stripe_js_missing_global')); };
+      script.onerror = function () { stripeJsPromise = null; script.remove(); reject(new Error('stripe_js_load_failed')); };
+      document.head.appendChild(script);
+    });
+    return stripeJsPromise;
+  }
+
+  function requestSession() {
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS) : null;
+    return fetch(SESSION_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded' }),
+      signal: controller ? controller.signal : undefined
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) {
+          var err = new Error('session_http_' + response.status);
+          err.kind = 'unavailable';
+          throw err;
+        }
+        return data;
+      });
+    }).finally(function () { if (timer) clearTimeout(timer); });
+  }
+
+  function teardown() {
+    clearTimeout(slowHintTimer);
+    els.slowHint.hidden = true;
+    if (embedded) {
+      try { embedded.destroy(); } catch (_) {}
+      embedded = null;
+    }
+    els.mount.innerHTML = '';
+  }
+
+  function start() {
+    if (starting) return;
+    starting = true;
+    teardown();
+    showLoading();
+
+    /* Stripe.js downloads in parallel with session creation. */
+    var stripeReady = loadStripeJs();
+    stripeReady.catch(function () {});
+
+    requestSession()
+      .then(function (data) {
+        if (data && data.fallback === 'hosted' && data.url) {
+          /* STRIPE_PUBLISHABLE_KEY not configured server-side — keep
+             enrollment working through the hosted page (the old flow). */
+          logEvent('enroll_checkout_hosted_fallback', 'server_returned_hosted_url');
+          announce('Opening secure checkout.');
+          window.location.assign(data.url);
+          return null;
+        }
+        if (!data || !/^cs_(live|test)_\S+_secret_\S+$/.test(String(data.clientSecret || '')) ||
+            !/^pk_(live|test)_\S+$/.test(String(data.publishableKey || ''))) {
+          var err = new Error('session_response_incomplete');
+          err.kind = 'unavailable';
+          throw err;
+        }
+        return stripeReady.then(function (StripeCtor) {
+          var stripe = StripeCtor(data.publishableKey);
+          var options = { fetchClientSecret: function () { return Promise.resolve(data.clientSecret); } };
+          var create = typeof stripe.createEmbeddedCheckoutPage === 'function'
+            ? stripe.createEmbeddedCheckoutPage
+            : stripe.initEmbeddedCheckout;
+          if (typeof create !== 'function') throw new Error('stripe_embedded_checkout_unsupported');
+          return create.call(stripe, options);
+        }).then(function (instance) {
+          embedded = instance;
+          instance.mount('#enrollCheckout');
+          showReady();
+          slowHintTimer = setTimeout(function () { els.slowHint.hidden = false; }, SLOW_HINT_MS);
+          return instance;
+        });
+      })
+      .catch(function (error) {
+        var message = (error && error.name === 'AbortError') ? 'session_request_timeout' : (error && error.message) || 'unknown';
+        logEvent('enroll_checkout_init_failure', message);
+        teardown();
+        showError(error && error.kind);
+      })
+      .finally(function () { starting = false; });
+  }
+
+  function showPendingPurchaseNotice() {
+    var pending = '';
+    try { pending = String(localStorage.getItem(PENDING_CLAIM_KEY) || '').trim(); } catch (_) {}
+    if (!pending || !/^cs_[A-Za-z0-9_]+$/.test(pending)) return;
+    els.pendingLink.href = 'success.html?session_id=' + encodeURIComponent(pending);
+    els.pending.hidden = false;
+  }
+
+  els.retry.addEventListener('click', start);
+  els.reload.addEventListener('click', start);
+
+  /* Back/forward cache would restore a stale, already-used Stripe
+     instance — start a fresh session instead. */
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) window.location.reload();
+  });
+
+  showPendingPurchaseNotice();
+  start();
+})();
+</script>
+</body>
+</html>

@@ -13672,40 +13672,10 @@ function setSignedInStudent(user) {
 }
 
 // ── CHECKOUT START ──
-async function startCheckout() {
-  const enrollButtons = Array.from(document.querySelectorAll('.lp-enroll-btn'));
-  const originalContent = enrollButtons.map((button) => button.innerHTML);
-
-  enrollButtons.forEach((button) => {
-    button.disabled = true;
-    button.style.opacity = '0.72';
-    button.style.cursor = 'wait';
-  });
-
-  try {
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ course: 'headspa-mastery' })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok || !data.url) {
-      throw new Error(data.error || 'Unable to start checkout.');
-    }
-
-    window.location.href = data.url;
-  } catch (error) {
-    enrollButtons.forEach((button, index) => {
-      button.disabled = false;
-      button.style.opacity = '';
-      button.style.cursor = '';
-      button.innerHTML = originalContent[index];
-    });
-
-    alert('Checkout is temporarily unavailable. Please try again in a moment.');
-  }
+// Enrollment completes on enroll.html (Stripe Embedded Checkout inside
+// AIMT); the Checkout Session is created there, not here.
+function startCheckout() {
+  window.location.href = '/enroll';
 }
 
 function applyCheckoutStatus() {

@@ -1,5 +1,82 @@
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const AIMT_LOGS_TABLE = 'aimt_logs';
+const GENERIC_CHECKOUT_ERROR = 'Unable to create checkout session';
+
+/* ── Embedded Checkout (enroll.html) ──
+   enroll.html POSTs { ui: 'embedded' } and mounts Stripe Embedded Checkout
+   inside AIMT instead of redirecting to checkout.stripe.com. Everything
+   downstream is unchanged: same price, same mode, same session id handed to
+   success.html (via return_url instead of success_url), same
+   checkout.session.completed webhook.
+
+   The API version is pinned on this one request because Stripe renamed the
+   ui_mode enum in 2026-03-25.dahlia ('embedded' → 'embedded_page'); pinning
+   keeps this independent of the account's default API version. It only
+   shapes this request/response — webhook event payloads keep the account's
+   own version.
+
+   Requires STRIPE_PUBLISHABLE_KEY (pk_live_… / pk_test_…, same mode as
+   STRIPE_SECRET_KEY). Publishable keys are designed to be public; it is
+   returned to the browser only so Stripe.js can mount the session. If it is
+   missing or mismatched, this falls back to the hosted redirect session so
+   enrollment never goes down on a config gap (logged for the owner). */
+const EMBEDDED_STRIPE_API_VERSION = '2026-03-25.dahlia';
+const EMBEDDED_BRANDING = {
+  'branding_settings[background_color]': '#ffffff',
+  'branding_settings[button_color]': '#262626',
+  'branding_settings[border_style]': 'rounded',
+  'branding_settings[font_family]': 'montserrat'
+};
+
+function stripeKeyMode(key) {
+  const match = /^(?:sk|rk|pk)_(live|test)_/.exec(String(key || ''));
+  return match ? match[1] : null;
+}
+
+function embeddedPublishableKey(env) {
+  const publishableKey = String(env.STRIPE_PUBLISHABLE_KEY || '').trim();
+  if (!publishableKey) return { key: null, reason: 'stripe_publishable_key_not_configured' };
+  if (!publishableKey.startsWith('pk_')) return { key: null, reason: 'stripe_publishable_key_invalid' };
+  if (stripeKeyMode(publishableKey) !== stripeKeyMode(env.STRIPE_SECRET_KEY)) {
+    return { key: null, reason: 'stripe_publishable_key_mode_mismatch' };
+  }
+  return { key: publishableKey, reason: null };
+}
+
+async function createStripeSession(stripeSecretKey, params, stripeVersion) {
+  const headers = {
+    Authorization: `Bearer ${stripeSecretKey}`,
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
+  if (stripeVersion) headers['Stripe-Version'] = stripeVersion;
+  const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers,
+    body: new URLSearchParams(params),
+  });
+  const session = await response.json().catch(() => ({}));
+  return { response, session };
+}
+
+async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin) {
+  const params = {
+    mode: 'payment',
+    ui_mode: 'embedded_page',
+    'line_items[0][price]': stripePriceId,
+    'line_items[0][quantity]': '1',
+    return_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+  };
+  let result = await createStripeSession(
+    stripeSecretKey, { ...params, ...EMBEDDED_BRANDING }, EMBEDDED_STRIPE_API_VERSION
+  );
+  /* Branding is presentation only — if Stripe rejects it, retry once
+     without it rather than blocking enrollment. */
+  const rejectedParam = String(result.session?.error?.param || '');
+  if (!result.response.ok && rejectedParam.startsWith('branding_settings')) {
+    result = await createStripeSession(stripeSecretKey, params, EMBEDDED_STRIPE_API_VERSION);
+  }
+  return result;
+}
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -77,6 +154,50 @@ export async function onRequestPost(context) {
     );
   }
 
+  const requestBody = await request.clone().json().catch(() => ({}));
+  const wantsEmbedded = !!requestBody && requestBody.ui === 'embedded';
+
+  if (wantsEmbedded) {
+    const { key: publishableKey, reason } = embeddedPublishableKey(env);
+    if (publishableKey) {
+      try {
+        const { response, session } = await createEmbeddedSession(stripeSecretKey, stripePriceId, origin);
+        if (!response.ok || !session.client_secret) {
+          await logAimtEvent('api_create_checkout_session_failure', {
+            supabaseUrl,
+            serviceRoleKey,
+            message: `embedded: ${session?.error?.message || `stripe_http_${response.status || 500}`}`
+          });
+          return new Response(JSON.stringify({ error: GENERIC_CHECKOUT_ERROR }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        /* Only what Stripe.js needs to mount — never the secret key or
+           any other server-side value. */
+        return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey }), {
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        });
+      } catch (error) {
+        await logAimtEvent('api_create_checkout_session_failure', {
+          supabaseUrl,
+          serviceRoleKey,
+          message: `embedded: ${error && error.message ? error.message : 'checkout_session_exception'}`
+        });
+        return new Response(JSON.stringify({ error: GENERIC_CHECKOUT_ERROR }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+    /* Config gap → hosted fallback below, flagged for the owner. */
+    await logAimtEvent('api_create_checkout_session_embedded_fallback', {
+      supabaseUrl,
+      serviceRoleKey,
+      message: reason
+    });
+  }
+
   const body = new URLSearchParams({
     mode: 'payment',
     'line_items[0][price]': stripePriceId,
@@ -104,7 +225,7 @@ export async function onRequestPost(context) {
         message: session?.error?.message || `stripe_http_${stripeResponse.status || 500}`
       });
       return new Response(
-        JSON.stringify({ error: session?.error?.message || 'Unable to create checkout session' }),
+        JSON.stringify({ error: GENERIC_CHECKOUT_ERROR }),
         {
           status: stripeResponse.status || 500,
           headers: { 'Content-Type': 'application/json' },
@@ -112,7 +233,7 @@ export async function onRequestPost(context) {
       );
     }
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify(wantsEmbedded ? { url: session.url, fallback: 'hosted' } : { url: session.url }), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
