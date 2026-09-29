@@ -277,6 +277,40 @@ This is a distinct mechanism from the Education Reviewer's `REPAIRABLE_FAIL` out
 
 **Retry policy (exact, as required):** `aggregateReviewOutcome()` classifies every possible failure combination. In v1, the set of "mechanically repairable" paraphrase verdicts is **empty by design** — every single failure mode (any non-ENTAILED paraphrase, any CARRIES_SCIENCE framing, any voice/scope FAIL) is `SUBSTANTIVE_FAIL`, which routes straight to `EDITORIAL_REVIEW`. The `REPAIRABLE_FAIL` outcome and its one-bounded-writer-repair mechanism exist in the type system and the orchestrator's branching is ready for it, but nothing in v1 can actually produce it — enabling a specific verdict as repairable is a deliberate, reviewable future code change, not something that can happen by accident. No failure is ever retried automatically more than the (currently zero) allowance, and nothing loops.
 
+## FRAMING-removal repair (deterministic, Reviewer-stage)
+
+The real Run #8 shadow failure (alopecia-areata): Publication Editor `AUTO_READY`, Writer deterministic validation `PASS`, Reviewer `SUBSTANTIVE_FAIL` with 0 paraphrase failures and 3 framing failures, every one `CARRIES_SCIENCE`, `voice_fail=false`, `scope_fail=false` — the Writer had smuggled unsupported factual language (a patchy-hair-loss-vs-ordinary-shedding comparison, a psychosocial implication) into units it had marked `FRAMING`. `education-page-plan-schema.mjs`'s own contract defines FRAMING as "non-factual editorial orientation that must be removable without changing scientific meaning" — so the safest repair is not another Writer generation, it is deterministic deletion of the optional FRAMING units.
+
+**`education-reviewer-framing-repair.mjs`** — pure, zero I/O, zero network, zero model calls:
+
+- `checkFramingRepairEligibility(reviewResult)` is **strict**: eligible only when `outcome === SUBSTANTIVE_FAIL`, `failing_paraphrases.length === 0`, `failing_framings.length > 0`, EVERY failing framing verdict is `CARRIES_SCIENCE`, and `voice_fail === false` and `scope_fail === false`. Any paraphrase failure, any voice/scope FAIL, or a mixed `NON_FACTUAL`/`CARRIES_SCIENCE` framing set is `NOT_REPAIRABLE` — preserves ordinary `EDITORIAL_REVIEW` behavior, never touched by this lane.
+- `removeSectionFramingUnits(plan)` removes **every** `FRAMING`-kind unit from every `section.units` array — not merely the units the Reviewer's own free-form `location` string happened to name. The Reviewer's `location` is never treated as an authoritative structural identifier (the same posture this codebase takes toward every other model-authored pointer into its own output); removing all section FRAMING is no less safe than removing only the flagged ones, since the content model's own contract says FRAMING is removable anywhere without loss of scientific content. `VERBATIM`/`PARAPHRASE` units, `answer_summary`, `limitations`, and `key_takeaways` are never touched, and a unit's `kind` is never converted to another kind.
+- If eligible but there is nothing to remove (the flagged framing lives outside any section), the repair fails closed (`NO_SECTION_FRAMING_UNITS_TO_REMOVE`) rather than wasting the one permitted Reviewer retry on an unchanged plan.
+
+**Orchestrator wiring (`scripts/education-operations-cycle.mjs#attemptReviewerFramingRepair()`)**, called from both the fresh-run `SUBSTANTIVE_FAIL` branch and the `RESUME_STAGE.EDITORIAL_REVIEW` resume branch:
+
+1. **One-attempt guard:** never runs if `bundle.reviewer_framing_repair.attempted === true` already — a candidate gets exactly one repair attempt, ever.
+2. **Model-call ceiling guard:** this repair may add at most one Reviewer call, and `MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN` (6) is never raised for it. In the rare compound worst case where Publication Editor's own bounded pipeline already spent its maximum 3 calls this run (1 intent + 3 PE + 1 writer + 1 reviewer = 6 already), there is no headroom left for a retry *this run* — the repair is simply not attempted (never marked `attempted: true`), so a LATER run resumes at `RESUME_STAGE.EDITORIAL_REVIEW` and completes the identical repair needing only that one call, comfortably inside the ceiling. Fresh-run worst case and resumed-run cost both stay ≤ 6.
+3. **Removal + full deterministic revalidation:** the repaired plan is re-run through the FULL `validateEducationPagePlan()`, from scratch, exactly like the numeric-fidelity repair above. If that fails, `EDITORIAL_REVIEW` is preserved with the ORIGINAL (pre-repair) `review_result` — the Reviewer is never called again.
+4. **Exactly one Reviewer retry** on the repaired plan, same cleared snapshot, same intent plan. A retry-call failure (infra/config) is never counted as a completed attempt (the one-attempt guard is not consumed, nothing is persisted) — identical posture to an ordinary Reviewer-call failure elsewhere in this pipeline. A retry that returns is aggregated normally: `PASS` → `SHADOW_CANDIDATE_READY` with the repaired plan persisted as canonical; anything else → `EDITORIAL_REVIEW`, with the repaired plan AND the second review result persisted, and no further retry.
+5. **Resume support:** a durable `RESUME_STAGE.EDITORIAL_REVIEW` bundle (Run #8's own shape) is repaired with ZERO Intent Planner / Publication Editor / Writer calls — `prepared_artifact` is never touched, byte-for-byte.
+
+**Persisted bundle field** (`education-candidate-bundle.mjs`) — a field separate from, and never overwriting, the Writer-stage `deterministic_repair`:
+
+```
+reviewer_framing_repair: {
+  attempted: true,
+  removed_unit_count: 3,
+  deterministic_validation_passed: true,
+  originating_review_summary: "0 paraphrase failure(s), 3 framing failure(s), voice_fail=false, scope_fail=false.",
+  resulting_review_outcome: "PASS" | "SUBSTANTIVE_FAIL" | "REPAIRABLE_FAIL" | null,
+}
+```
+
+`resulting_review_outcome` is `null` only when deterministic revalidation itself failed (no Reviewer retry was ever made). Once `attempted: true` is persisted, no future run retries this candidate again for framing — a still-failing candidate stays `EDITORIAL_REVIEW` permanently (parked, not looped on).
+
+This is a distinct mechanism from both the Reviewer's own (currently empty-by-design) `REPAIRABLE_FAIL` set and the Writer-stage numeric-fidelity repair above: it runs strictly AFTER a real Reviewer verdict, only ever removes FRAMING units, and never rewrites, infers, or asks a model which wording to use.
+
 ## Generic renderer
 
 `education-page-renderer.mjs`. Reuses `assets/css/aimt-education.css`, the existing nav/footer markup, and the existing orbital-mark SVG symbol exactly — same hero/badge/sticky-TOC/scope-callout/takeaways/sources/related-links structure as the two hand-built pages. No new CSS class anywhere in this module. If a topic's Page Plan needs something this renderer cannot express, that is by definition an `INFRA_REVIEW` — the renderer never invents a new visual pattern to route around a limitation.

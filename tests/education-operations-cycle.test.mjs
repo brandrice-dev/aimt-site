@@ -30,6 +30,8 @@ import { RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../funct
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
 import { EDUCATION_OPS_API_KEY_ENV_VAR } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
 import { RESUME_STAGE } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
+import { validateEducationPagePlan } from '../functions/_lib/education-ops/education-page-plan-validator.mjs';
+import { REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -169,6 +171,47 @@ function fakePassingReviewResult() {
       voice_verdict: 'PASS', voice_reason: 'Reads as AIMT voice.', scope_verdict: 'PASS', scope_reason: 'In scope.',
     },
   };
+}
+
+// ---- FRAMING-removal repair fixtures (fakeWriterResult's sections[0]
+// unit[0] is the ONE FRAMING unit these fixtures target) --------------
+function fakeFramingCarriesScienceReviewResult() {
+  return {
+    ok: true, usage: { input_tokens: 800, output_tokens: 400 },
+    output: {
+      paraphrase_reviews: [],
+      framing_reviews: [{ location: 'sections:overview:0', verdict: 'CARRIES_SCIENCE', reason: 'States a presentation pattern as fact.' }],
+      voice_verdict: 'PASS', voice_reason: 'Reads as AIMT voice.', scope_verdict: 'PASS', scope_reason: 'In scope.',
+    },
+  };
+}
+
+/** A SUBSTANTIVE_FAIL that is NOT framing-only (a paraphrase drift) --
+    used to prove a Reviewer retry that still fails routes to
+    EDITORIAL_REVIEW, and that a non-repairable verdict never retries. */
+function fakeParaphraseDriftReviewResult() {
+  return {
+    ok: true, usage: { input_tokens: 800, output_tokens: 400 },
+    output: {
+      paraphrase_reviews: [{ location: 'sections:overview:1', verdict: 'OUTSIDE_EVIDENCE', reason: 'Still drifting beyond the cleared evidence.' }],
+      framing_reviews: [],
+      voice_verdict: 'PASS', voice_reason: 'x', scope_verdict: 'PASS', scope_reason: 'x',
+    },
+  };
+}
+
+/** Returns a reviewFn that plays back one result per call (repeating the
+    last entry if called more times than results.length) and tracks
+    callCount, without needing a separate spyFn wrapper. */
+function makeSequencedReviewFn(results) {
+  let i = 0;
+  const fn = async (...args) => {
+    const entry = results[Math.min(i, results.length - 1)];
+    i += 1;
+    return typeof entry === 'function' ? entry(...args) : entry;
+  };
+  Object.defineProperty(fn, 'callCount', { get: () => i });
+  return fn;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1145,6 +1188,237 @@ async function testRepairedPagePlanPersistsAsTheCanonicalPlanInTheBundle() {
   check('REPAIRED_PLAN_PERSISTED', 'a resumed run reuses the repaired plan as READY_FOR_PREPARE with zero model calls', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.READY_FOR_PREPARE && runB.model_calls.total_calls === 0);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Bounded FRAMING-removal repair (docs/education/AIMT-EDUCATION-
+// OPERATIONS-v1.md, real Run #8/alopecia-areata shadow failure). Letters
+// refer to the originating task's own lettered test list.
+// ─────────────────────────────────────────────────────────────────────────
+
+// L: fresh framing-only failure can repair in the same run.
+async function testFreshFramingOnlyFailureRepairsInTheSameRun() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const reviewFn = makeSequencedReviewFn([fakeFramingCarriesScienceReviewResult(), fakePassingReviewResult()]);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn,
+    },
+  });
+  check('FRESH_FRAMING_REPAIR_PASS', 'Reviewer was called exactly twice (initial + one retry)', reviewFn.callCount === 2, reviewFn.callCount);
+  check('FRESH_FRAMING_REPAIR_PASS', 'final_state reaches SHADOW_CANDIDATE_READY via the retry', runA.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runA.final_state, reason: runA.exception_reason }));
+  check('FRESH_FRAMING_REPAIR_PASS', 'model_calls total is 5 (intent+PE+writer+2 reviewer calls), never re-deriving anything', runA.model_calls.total_calls === 5, runA.model_calls.total_calls);
+
+  const persisted = store.store.get(topicSlug);
+  check('FRESH_FRAMING_REPAIR_PASS', 'the FRAMING unit is gone from the persisted canonical plan', persisted.page_plan.sections[0].units.every((u) => u.kind !== 'FRAMING'));
+  check('FRESH_FRAMING_REPAIR_PASS', 'the PARAPHRASE unit survives byte-for-byte', persisted.page_plan.sections[0].units.some((u) => u.kind === 'PARAPHRASE'));
+  check('FRESH_FRAMING_REPAIR_PASS', 'reviewer_framing_repair is recorded with removed_unit_count 1 and resulting outcome PASS',
+    persisted.reviewer_framing_repair && persisted.reviewer_framing_repair.attempted === true && persisted.reviewer_framing_repair.removed_unit_count === 1 && persisted.reviewer_framing_repair.resulting_review_outcome === 'PASS',
+    JSON.stringify(persisted.reviewer_framing_repair));
+  // E: the repaired plan is verified against the FULL deterministic
+  // validator, not merely assumed valid because the retry passed.
+  const revalidation = validateEducationPagePlan(persisted.page_plan, persisted.fingerprint_input, { expectedTopicSlug: topicSlug, expectedCluster: 'hair-loss-shedding', expectedRoute: persisted.route });
+  check('FRESH_FRAMING_REPAIR_PASS', 'E: the persisted repaired plan independently passes validateEducationPagePlan()', revalidation.valid === true, JSON.stringify(revalidation.violations));
+}
+
+// H: one Reviewer retry FAIL -> EDITORIAL_REVIEW (fresh-run shape).
+async function testFreshFramingRepairRetryStillFailsRoutesToEditorialReview() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const reviewFn = makeSequencedReviewFn([fakeFramingCarriesScienceReviewResult(), fakeParaphraseDriftReviewResult()]);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn,
+    },
+  });
+  check('FRAMING_REPAIR_RETRY_FAIL', 'Reviewer was called exactly twice', reviewFn.callCount === 2, reviewFn.callCount);
+  check('FRAMING_REPAIR_RETRY_FAIL', 'final_state is EDITORIAL_REVIEW (the retry outcome, never PASS)', runA.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, JSON.stringify({ state: runA.final_state, reason: runA.exception_reason }));
+  check('FRAMING_REPAIR_RETRY_FAIL', 'review_result reflects the SECOND (retry) verdict -- a paraphrase failure, zero framing failures', runA.review_result.failing_paraphrases.length === 1 && runA.review_result.failing_framings.length === 0, JSON.stringify(runA.review_result));
+
+  const persisted = store.store.get(topicSlug);
+  check('FRAMING_REPAIR_RETRY_FAIL', 'the repaired (framing-removed) plan is persisted as canonical even though the retry failed', persisted.page_plan.sections[0].units.every((u) => u.kind !== 'FRAMING'));
+  check('FRAMING_REPAIR_RETRY_FAIL', 'reviewer_framing_repair records attempted:true with resulting_review_outcome SUBSTANTIVE_FAIL',
+    persisted.reviewer_framing_repair.attempted === true && persisted.reviewer_framing_repair.resulting_review_outcome === REVIEW_OUTCOME.SUBSTANTIVE_FAIL,
+    JSON.stringify(persisted.reviewer_framing_repair));
+
+  // I: a later run must NEVER retry again for this candidate.
+  const noRetrySpy = spyFn(async () => { throw new Error('reviewFn must never be called again once reviewer_framing_repair.attempted is true'); });
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: { loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn, fetchEvidenceFn: async () => pool, reviewFn: noRetrySpy },
+  });
+  check('NO_ENDLESS_RETRY', 'Reviewer is never called again once attempted:true is persisted', noRetrySpy.callCount === 0);
+  check('NO_ENDLESS_RETRY', 'final_state stays EDITORIAL_REVIEW, unchanged, on the later run', runB.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, runB.final_state);
+  check('NO_ENDLESS_RETRY', 'zero model calls on the later (already-attempted) run', runB.model_calls.total_calls === 0, runB.model_calls.total_calls);
+}
+
+// G/J/K: an EXISTING durable EDITORIAL_REVIEW bundle (Run #8 shape,
+// repair never yet attempted) resumes with ZERO Intent Planner/
+// Publication Editor/Writer calls and exactly ONE Reviewer call, and a
+// retry PASS reaches SHADOW_CANDIDATE_READY.
+async function testResumedDurableBundleRepairsWithOneReviewerCallAndReachesShadowCandidateReady() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+
+  // Run A: simulate the repair's OWN retry call failing (infra outage) so
+  // the one-attempt guard is never consumed -- the bundle is left stuck
+  // at EDITORIAL_REVIEW with reviewer_framing_repair still null, exactly
+  // like a real Run #8 that predates this repair existing at all.
+  const runAReviewFn = makeSequencedReviewFn([fakeFramingCarriesScienceReviewResult(), { ok: false, reason: 'simulated retry-call outage' }]);
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: runAReviewFn,
+    },
+  });
+  check('RUN8_SETUP', 'Run A ends CONFIG_BLOCKED on the failed retry call', runA.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED, runA.final_state);
+  const stuckBundle = store.store.get(topicSlug);
+  check('RUN8_SETUP', 'the ORIGINAL framing-only SUBSTANTIVE_FAIL review_result is durably persisted', stuckBundle.review_result.outcome === 'SUBSTANTIVE_FAIL' && stuckBundle.review_result.failing_framings.length === 1);
+  check('RUN8_SETUP', 'reviewer_framing_repair was never marked attempted (the retry call itself failed)', stuckBundle.reviewer_framing_repair === null);
+
+  // Run B: resume -- Intent Planner / Publication Editor / Writer must
+  // never be called; the repair completes with exactly one Reviewer call.
+  const planIntentSpy = spyFn(async () => fakeIntentResult(topicSlug));
+  const synthesizeSpy = spyFn(fakeSynthesizeFn(topicSlug));
+  const writeSpy = spyFn(async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot));
+  const reviewSpy = spyFn(async () => fakePassingReviewResult());
+  const preparedArtifactBefore = stuckBundle.prepared_artifact;
+
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: planIntentSpy, synthesizeFn: synthesizeSpy, writeFn: writeSpy, reviewFn: reviewSpy,
+    },
+  });
+  check('RESUMED_FRAMING_REPAIR', 'J: Intent Planner never called on resume', planIntentSpy.callCount === 0);
+  check('RESUMED_FRAMING_REPAIR', 'J: Publication Editor never called on resume', synthesizeSpy.callCount === 0);
+  check('RESUMED_FRAMING_REPAIR', 'J: Writer never called on resume', writeSpy.callCount === 0);
+  check('RESUMED_FRAMING_REPAIR', 'K: exactly ONE model call this run (the Reviewer retry)', runB.model_calls.total_calls === 1, runB.model_calls.total_calls);
+  check('RESUMED_FRAMING_REPAIR', 'K: that one call is a Reviewer call', reviewSpy.callCount === 1);
+  check('RESUMED_FRAMING_REPAIR', 'G: retry PASS reaches SHADOW_CANDIDATE_READY', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, JSON.stringify({ state: runB.final_state, reason: runB.exception_reason }));
+  check('RESUMED_FRAMING_REPAIR', 'candidate_resume reports resumed_from_stage EDITORIAL_REVIEW (the stage the bundle was actually resumed from)', runB.candidate_resume.resumed_from_stage === RESUME_STAGE.EDITORIAL_REVIEW, runB.candidate_resume.resumed_from_stage);
+
+  // Q: Publication Editor's exact artifact is never touched by any of this.
+  const persisted = store.store.get(topicSlug);
+  check('RESUMED_FRAMING_REPAIR', 'Q: prepared_artifact remains the EXACT same object/reference throughout', persisted.prepared_artifact === preparedArtifactBefore);
+  check('RESUMED_FRAMING_REPAIR', 'Q: prepared_artifact is byte-identical to before the repair', JSON.stringify(persisted.prepared_artifact) === JSON.stringify(preparedArtifactBefore));
+}
+
+// F: deterministic validation failure prevents a Reviewer retry.
+async function testDeterministicRevalidationFailurePreventsReviewerRetry() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const reviewFn = makeSequencedReviewFn([
+    fakeFramingCarriesScienceReviewResult(),
+    async () => { throw new Error('Reviewer must never be called again once deterministic revalidation fails'); },
+  ]);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn,
+      // Forces ONLY the repair's own post-removal revalidation to fail --
+      // the normal Writer-stage validation call is never routed through
+      // this override (it calls validateEducationPagePlan directly), so
+      // the Writer stage still succeeds normally on the unrepaired plan.
+      validateEducationPagePlanFn: () => ({ valid: false, violations: ['SIMULATED_FRAMING_REVALIDATION_FAILURE'] }),
+    },
+  });
+  check('DETERMINISTIC_REVALIDATION_BLOCKS_RETRY', 'Reviewer was called exactly once (never retried)', reviewFn.callCount === 1, reviewFn.callCount);
+  check('DETERMINISTIC_REVALIDATION_BLOCKS_RETRY', 'final_state is EDITORIAL_REVIEW', runA.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, runA.final_state);
+  check('DETERMINISTIC_REVALIDATION_BLOCKS_RETRY', 'the ORIGINAL (framing) review_result is preserved, not overwritten', runA.review_result.failing_framings.length === 1);
+
+  const persisted = store.store.get(topicSlug);
+  check('DETERMINISTIC_REVALIDATION_BLOCKS_RETRY', 'the canonical page_plan is unchanged (the invalid repaired plan is never persisted as canonical)', persisted.page_plan.sections[0].units.some((u) => u.kind === 'FRAMING'));
+  check('DETERMINISTIC_REVALIDATION_BLOCKS_RETRY', 'reviewer_framing_repair records attempted:true, deterministic_validation_passed:false, resulting_review_outcome:null',
+    persisted.reviewer_framing_repair.attempted === true && persisted.reviewer_framing_repair.deterministic_validation_passed === false && persisted.reviewer_framing_repair.resulting_review_outcome === null,
+    JSON.stringify(persisted.reviewer_framing_repair));
+}
+
+// M-style orchestrator-level sanity: a non-framing-only SUBSTANTIVE_FAIL
+// never even attempts a retry (proves the wiring honors the pure
+// module's eligibility gate end-to-end, not merely in isolation).
+async function testNonFramingOnlyFailureNeverAttemptsARetryEndToEnd() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const reviewSpy = spyFn(async () => fakeParaphraseDriftReviewResult());
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug),
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn: reviewSpy,
+    },
+  });
+  check('NOT_REPAIRABLE_END_TO_END', 'Reviewer called exactly once, no retry attempted', reviewSpy.callCount === 1, reviewSpy.callCount);
+  check('NOT_REPAIRABLE_END_TO_END', 'final_state is EDITORIAL_REVIEW', runA.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, runA.final_state);
+  check('NOT_REPAIRABLE_END_TO_END', 'reviewer_framing_repair stays null (never even attempted)', store.store.get(topicSlug).reviewer_framing_repair === null);
+}
+
+// R: model-call ceiling remains <= 6, including the compound worst case
+// where Publication Editor already spent its own maximum (3 calls) this
+// run -- there is no room left for the repair's one Reviewer retry, so
+// it is skipped (never marked attempted) THIS run rather than exceeding
+// the ceiling, and completes on a LATER resumed run for exactly 1 call.
+async function testModelCallCeilingNeverExceededEvenInTheCompoundWorstCase() {
+  const topicSlug = 'androgenetic-alopecia';
+  const store = makeInMemoryCandidateStore();
+  const pool = healthyPoolForSingleTopic(topicSlug);
+  const reviewFn = makeSequencedReviewFn([
+    fakeFramingCarriesScienceReviewResult(),
+    async () => { throw new Error('Reviewer retry must never be attempted when it would exceed the ceiling'); },
+  ]);
+
+  const runA = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async () => pool,
+      planIntentFn: async () => fakeIntentResult(topicSlug),
+      synthesizeFn: fakeSynthesizeFn(topicSlug, { modelCalls: 3 }), // PE's own maximum
+      writeFn: async (env, { clearedSnapshot }) => fakeWriterResult(topicSlug, clearedSnapshot),
+      reviewFn,
+    },
+  });
+  check('CEILING_GUARD', 'intent(1)+PE(3)+writer(1)+reviewer(1) already totals 6 -- the ceiling itself is never exceeded', runA.model_calls.total_calls === 6, runA.model_calls.total_calls);
+  check('CEILING_GUARD', 'Reviewer was called only ONCE this run -- the retry was skipped for lack of headroom', reviewFn.callCount === 1, reviewFn.callCount);
+  check('CEILING_GUARD', 'final_state falls back to ordinary EDITORIAL_REVIEW this run', runA.final_state === RUN_FINAL_STATE.EDITORIAL_REVIEW, runA.final_state);
+  check('CEILING_GUARD', 'reviewer_framing_repair stays null (never marked attempted, so a later run can still repair it)', store.store.get(topicSlug).reviewer_framing_repair === null);
+
+  // A LATER run resumes and completes the SAME repair for exactly 1 call.
+  const runB = await run(FAKE_ENV_WITH_CRED, {
+    fns: { loadCandidateBundleFn: store.loadCandidateBundleFn, writeCandidateBundleFn: store.writeCandidateBundleFn, fetchEvidenceFn: async () => pool, reviewFn: async () => fakePassingReviewResult() },
+  });
+  check('CEILING_GUARD', 'the later resumed run completes the repair for exactly 1 model call', runB.model_calls.total_calls === 1, runB.model_calls.total_calls);
+  check('CEILING_GUARD', 'the later resumed run reaches SHADOW_CANDIDATE_READY', runB.final_state === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, runB.final_state);
+}
+
 async function testStaleCandidateDueToNewEvidenceDoesNotResumeAndTriggersFreshSynthesis() {
   const topicSlug = 'androgenetic-alopecia';
   const store = makeInMemoryCandidateStore();
@@ -1637,6 +1911,12 @@ const tests = [
   testResumeAtNeedsReviewerSkipsPublicationEditorAndWriter,
   testResumeAtReadyForPrepareMakesZeroModelCallsAndNeverErasesAValidFreshCandidate,
   testRepairedPagePlanPersistsAsTheCanonicalPlanInTheBundle,
+  testFreshFramingOnlyFailureRepairsInTheSameRun,
+  testFreshFramingRepairRetryStillFailsRoutesToEditorialReview,
+  testResumedDurableBundleRepairsWithOneReviewerCallAndReachesShadowCandidateReady,
+  testDeterministicRevalidationFailurePreventsReviewerRetry,
+  testNonFramingOnlyFailureNeverAttemptsARetryEndToEnd,
+  testModelCallCeilingNeverExceededEvenInTheCompoundWorstCase,
   testStaleCandidateDueToNewEvidenceDoesNotResumeAndTriggersFreshSynthesis,
   testFreshnessCheckFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating,
   testIntegrityFailureFailsClosedAsInfraReviewWithoutResumingOrRegenerating,

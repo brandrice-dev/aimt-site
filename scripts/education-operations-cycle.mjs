@@ -70,10 +70,11 @@ import { validateEducationPagePlan } from '../functions/_lib/education-ops/educa
 import { repairDeterministicPagePlanViolations } from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
 import { reviewEducationPagePlan } from '../functions/_lib/education-ops/education-reviewer-client.mjs';
 import { aggregateReviewOutcome, REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
+import { repairReviewerFramingFailures } from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
 import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
 import { checkGeneratedDiffAllowlist } from '../functions/_lib/education-ops/education-diff-allowlist.mjs';
 import { checkAllPublishedTopicsFreshness, FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
-import { buildRunReport, RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
 import { writeClearanceRecord, replaceNonPublicClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { buildHubCardHtml, insertHubCard } from '../functions/_lib/education-ops/education-hub-updater.mjs';
@@ -274,6 +275,112 @@ export function resolveMaxPagesPerWeek(env) {
     the week is. */
 export function checkWeeklyCap(pagesPublishedThisWeek, maxPerWeek) {
   return { withinCap: pagesPublishedThisWeek < maxPerWeek, pagesPublishedThisWeek, maxPerWeek };
+}
+
+/** The SAME actual-call-counting rule buildRunReport() uses for the hard
+    ceiling -- duplicated here (not imported) because it must be checked
+    BEFORE modelCalls is handed to buildRunReport(), to decide whether
+    there is room left in THIS run's budget for the one Reviewer retry
+    the framing repair is permitted to spend. */
+function sumActualModelCalls(modelCalls) {
+  return modelCalls.reduce((sum, c) => sum + (typeof c.actual_call_count === 'number' ? c.actual_call_count : 1), 0);
+}
+
+/**
+ * ONE-TIME, BOUNDED framing-removal repair (docs/education/AIMT-
+ * EDUCATION-OPERATIONS-v1.md's "Deterministic FRAMING-removal repair").
+ * Called from exactly two places in runDecisionPipeline(): the
+ * RESUME_STAGE.EDITORIAL_REVIEW branch (resuming a durable candidate
+ * whose Reviewer verdict already failed in an EARLIER run) and the
+ * fresh-run SUBSTANTIVE_FAIL branch (the Reviewer just failed THIS run).
+ * Both call sites share identical eligibility/one-attempt/ceiling/
+ * revalidation/retry logic -- only what surrounds the call (which other
+ * model stages ran this run) differs.
+ *
+ * Never mutates `bundleDraft`; every outcome that persists state returns
+ * a NEW bundle (via advanceCandidateBundle) that the caller must adopt.
+ *
+ * @returns {
+ *   {attempted: false} |
+ *   {attempted: true, callFailed: true, exceptionReason: string} |
+ *   {attempted: true, bundleDraft: object, finalState: string, reviewResult: object, plan: object, exceptionReason?: string}
+ * }
+ */
+async function attemptReviewerFramingRepair(env, {
+  bundleDraft, plan, clearedSnapshot, validationContext, reviewFn, writeBundleFn, topicSlug, modelCalls, fns = {},
+}) {
+  const alreadyAttempted = !!(bundleDraft.reviewer_framing_repair && bundleDraft.reviewer_framing_repair.attempted === true);
+  if (alreadyAttempted) return { attempted: false };
+
+  const repairFn = fns.repairFramingFn || repairReviewerFramingFailures;
+  const repair = repairFn(plan, bundleDraft.review_result);
+  if (!repair.eligible) return { attempted: false };
+
+  // MODEL-CALL CEILING GUARD: this repair may add at most ONE Reviewer
+  // call, and the global ceiling (MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN)
+  // is never raised for it. In the rare compound worst case where
+  // Publication Editor's own bounded pipeline already spent its maximum
+  // 3 calls this run, there is no room left for a retry THIS run --
+  // rather than exceed the ceiling, the repair is simply not attempted
+  // (never marked attempted:true), so a LATER run resumes at
+  // RESUME_STAGE.EDITORIAL_REVIEW and performs the identical repair
+  // needing only this ONE call, comfortably inside the ceiling.
+  if (sumActualModelCalls(modelCalls) + 1 > MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN) {
+    return { attempted: false };
+  }
+
+  const validateFn = fns.validateEducationPagePlanFn || validateEducationPagePlan;
+  const revalidation = validateFn(repair.repairedPlan, clearedSnapshot, validationContext);
+  if (!revalidation.valid) {
+    const nextBundle = advanceCandidateBundle(bundleDraft, {
+      reviewerFramingRepair: {
+        attempted: true,
+        removed_unit_count: repair.removedUnitCount,
+        deterministic_validation_passed: false,
+        originating_review_summary: bundleDraft.review_result.summary,
+        resulting_review_outcome: null,
+      },
+    });
+    writeBundleFn(topicSlug, nextBundle);
+    return {
+      attempted: true,
+      bundleDraft: nextBundle,
+      finalState: RUN_FINAL_STATE.EDITORIAL_REVIEW,
+      reviewResult: nextBundle.review_result,
+      plan: nextBundle.page_plan,
+      exceptionReason: `Framing-removal repair produced an invalid Page Plan (${revalidation.violations.join(', ')}) -- preserving the original Reviewer verdict, no Reviewer retry.`,
+    };
+  }
+
+  const reviewRetry = await reviewFn(env, { plan: repair.repairedPlan, clearedSnapshot, intentPlan: bundleDraft.intent_plan });
+  if (!reviewRetry.ok) {
+    // Infra/config failure on the retry call itself -- never a completed
+    // repair attempt, so the one-attempt guard is NOT consumed and the
+    // bundle is left untouched, exactly like the existing (pre-repair)
+    // Reviewer-call-failure handling elsewhere in this pipeline.
+    return { attempted: true, callFailed: true, exceptionReason: `Reviewer retry call failed: ${reviewRetry.reason}` };
+  }
+  modelCalls.push({ role: 'education_reviewer_framing_retry', actual_call_count: 1, ...reviewRetry.usage });
+  const outcome2 = aggregateReviewOutcome(reviewRetry.output);
+  const nextBundle = advanceCandidateBundle(bundleDraft, {
+    pagePlan: repair.repairedPlan,
+    reviewResult: outcome2,
+    reviewerFramingRepair: {
+      attempted: true,
+      removed_unit_count: repair.removedUnitCount,
+      deterministic_validation_passed: true,
+      originating_review_summary: bundleDraft.review_result.summary,
+      resulting_review_outcome: outcome2.outcome,
+    },
+  });
+  writeBundleFn(topicSlug, nextBundle);
+  return {
+    attempted: true,
+    bundleDraft: nextBundle,
+    finalState: outcome2.outcome === REVIEW_OUTCOME.PASS ? RUN_FINAL_STATE.SHADOW_CANDIDATE_READY : RUN_FINAL_STATE.EDITORIAL_REVIEW,
+    reviewResult: outcome2,
+    plan: repair.repairedPlan,
+  };
 }
 
 /**
@@ -489,6 +596,10 @@ export async function runDecisionPipeline(env, options = {}) {
   const writeBundleFn = fns.writeCandidateBundleFn || writeCandidateBundle;
   const verifyBundleIntegrityFn = fns.verifyCandidateBundleIntegrityFn || verifyCandidateBundleIntegrity;
   const resolveBundleFreshnessFn = fns.resolveCandidateResumeFreshnessFn || resolveCandidateResumeFreshness;
+  // Hoisted above its first (resume-path) use so the bounded framing-
+  // removal repair can call the Reviewer without re-declaring this --
+  // reused, unchanged, by the fresh-run Reviewer call further below.
+  const reviewFn = fns.reviewFn || reviewEducationPagePlan;
 
   const candidateResume = {
     found: false, reused: false, contract_version: null, originating_run_id: null,
@@ -548,8 +659,48 @@ export async function runDecisionPipeline(env, options = {}) {
       candidateResume.resumed_from_stage = stage;
 
       if (stage === RESUME_STAGE.EDITORIAL_REVIEW) {
-        // A governed, non-PASS Reviewer verdict is already persisted --
-        // preserve it exactly, never auto-retry any model for it.
+        // BOUNDED FRAMING-REMOVAL REPAIR (docs/education/AIMT-EDUCATION-
+        // OPERATIONS-v1.md): a durable EDITORIAL_REVIEW candidate whose
+        // Reviewer verdict failed ONLY on removable FRAMING gets exactly
+        // one deterministic repair + one Reviewer retry here, with ZERO
+        // Intent Planner / Publication Editor / Writer calls -- this is
+        // precisely the "resume THIS existing durable bundle, finish the
+        // candidate already generated" case the repair exists for.
+        const framingRepairOutcome = await attemptReviewerFramingRepair(env, {
+          bundleDraft,
+          plan: bundleDraft.page_plan,
+          clearedSnapshot: bundleDraft.fingerprint_input,
+          validationContext: { expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: bundleDraft.route },
+          reviewFn, writeBundleFn, topicSlug: selected.topic_slug, modelCalls, fns,
+        });
+        if (framingRepairOutcome.callFailed) {
+          return finish({
+            candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+            publication_editor_result: { status: 'AUTO_READY', generation_source_hash: bundleDraft.generation_source_hash },
+            writer_result: { valid: true, ...(bundleDraft.deterministic_repair ? { deterministic_repair: bundleDraft.deterministic_repair } : {}) },
+            final_state: RUN_FINAL_STATE.CONFIG_BLOCKED,
+            exception_reason: framingRepairOutcome.exceptionReason,
+          });
+        }
+        if (framingRepairOutcome.attempted) {
+          bundleDraft = framingRepairOutcome.bundleDraft;
+          return finish({
+            candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+            publication_editor_result: { status: 'AUTO_READY', generation_source_hash: bundleDraft.generation_source_hash },
+            writer_result: { valid: true, ...(bundleDraft.deterministic_repair ? { deterministic_repair: bundleDraft.deterministic_repair } : {}) },
+            review_result: framingRepairOutcome.reviewResult,
+            final_state: framingRepairOutcome.finalState,
+            exception_reason: framingRepairOutcome.exceptionReason || framingRepairOutcome.reviewResult.summary,
+            ...(framingRepairOutcome.finalState === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY ? {
+              planned_route: bundleDraft.route,
+              __internal: { preparedArtifact: bundleDraft.prepared_artifact, plan: framingRepairOutcome.plan, intentPlan: bundleDraft.intent_plan, route: bundleDraft.route },
+            } : {}),
+          });
+        }
+
+        // Not repairable (or already attempted) -- a governed, non-PASS
+        // Reviewer verdict is already persisted; preserve it exactly,
+        // never auto-retry any model for it.
         return finish({
           candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
           publication_editor_result: { status: 'AUTO_READY', generation_source_hash: bundleDraft.generation_source_hash },
@@ -959,7 +1110,6 @@ export async function runDecisionPipeline(env, options = {}) {
   }
 
   // --- Education Reviewer --------------------------------------------------
-  const reviewFn = fns.reviewFn || reviewEducationPagePlan;
   const reviewResult = await reviewFn(env, { plan, clearedSnapshot, intentPlan });
   if (reviewResult.ok) modelCalls.push({ role: 'education_reviewer', actual_call_count: 1, ...reviewResult.usage });
   if (!reviewResult.ok) {
@@ -969,6 +1119,41 @@ export async function runDecisionPipeline(env, options = {}) {
   if (outcome.outcome !== REVIEW_OUTCOME.PASS) {
     bundleDraft = advanceCandidateBundle(bundleDraft, { reviewResult: outcome });
     writeBundleFn(selected.topic_slug, bundleDraft);
+
+    // FRESH-RUN FRAMING-REMOVAL REPAIR (section 8): the identical bounded
+    // repair as the EDITORIAL_REVIEW resume branch above, so a framing-
+    // only CARRIES_SCIENCE failure never needs a second GitHub Actions
+    // run just to perform this safe, deterministic removal.
+    const framingRepairOutcome = await attemptReviewerFramingRepair(env, {
+      bundleDraft,
+      plan,
+      clearedSnapshot,
+      validationContext: { expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route },
+      reviewFn, writeBundleFn, topicSlug: selected.topic_slug, modelCalls, fns,
+    });
+    if (framingRepairOutcome.callFailed) {
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) },
+        final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: framingRepairOutcome.exceptionReason,
+      });
+    }
+    if (framingRepairOutcome.attempted) {
+      bundleDraft = framingRepairOutcome.bundleDraft;
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) },
+        review_result: framingRepairOutcome.reviewResult,
+        final_state: framingRepairOutcome.finalState,
+        exception_reason: framingRepairOutcome.exceptionReason || framingRepairOutcome.reviewResult.summary,
+        ...(framingRepairOutcome.finalState === RUN_FINAL_STATE.SHADOW_CANDIDATE_READY ? {
+          selection_reason: selection.selection_reason, readiness_result: selected.v1_result.readiness_status,
+          planned_route: route,
+          __internal: { preparedArtifact, plan: framingRepairOutcome.plan, intentPlan, route },
+        } : {}),
+      });
+    }
+
     return finish({
       candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
       publication_editor_result: { status: 'AUTO_READY' }, writer_result: { valid: true, ...(deterministicRepair ? { deterministic_repair: deterministicRepair } : {}) },
