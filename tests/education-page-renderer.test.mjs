@@ -7,7 +7,7 @@
 //
 // Run: node tests/education-page-renderer.test.mjs
 
-import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
+import { renderEducationPageHtml, GENERATION_MARKER_META_NAME } from '../functions/_lib/education-ops/education-page-renderer.mjs';
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -40,6 +40,26 @@ function extractJsonLd(html) {
   if (!match) throw new Error('No ld+json script block found in rendered HTML.');
   return { raw: match[1], parsed: JSON.parse(match[1]) };
 }
+
+(function testDefaultModeIsUnaffectedByTheNewOptionsParameter() {
+  const html = renderEducationPageHtml(baselinePlan());
+  check('LAUNCH_READY', 'default (no options) keeps the preview noindex tag exactly as before', html.includes('<meta name="robots" content="noindex, nofollow">'));
+  check('LAUNCH_READY', 'default (no options) never emits a generation marker when no hash was given', !html.includes(GENERATION_MARKER_META_NAME));
+})();
+
+(function testLaunchReadyOmitsNoindex() {
+  const html = renderEducationPageHtml(baselinePlan(), { launchReady: true });
+  check('LAUNCH_READY', 'launchReady:true omits the noindex tag', !html.includes('noindex'));
+  check('LAUNCH_READY', 'launchReady:true still renders a canonical link', html.includes('<link rel="canonical"'));
+})();
+
+(function testGenerationMarkerEmbedsExactHashInBothModes() {
+  const previewHtml = renderEducationPageHtml(baselinePlan(), { generationSourceHash: 'abc123' });
+  const launchHtml = renderEducationPageHtml(baselinePlan(), { launchReady: true, generationSourceHash: 'abc123' });
+  check('GENERATION_MARKER', 'preview mode embeds the marker when a hash is supplied', previewHtml.includes(`<meta name="${GENERATION_MARKER_META_NAME}" content="abc123">`));
+  check('GENERATION_MARKER', 'launch-ready mode ALSO embeds the same marker', launchHtml.includes(`<meta name="${GENERATION_MARKER_META_NAME}" content="abc123">`));
+  check('GENERATION_MARKER', 'preview mode with a marker still keeps noindex (marker is independent of launchReady)', previewHtml.includes('noindex'));
+})();
 
 (function testPlainTitleRendersValidJsonLd() {
   const html = renderEducationPageHtml(baselinePlan());

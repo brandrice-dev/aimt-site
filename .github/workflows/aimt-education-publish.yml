@@ -1,0 +1,119 @@
+name: AIMT Education Publish
+
+# SEPARATE from AIMT Education Operations (the --shadow workflow), which
+# stays contents:read/no-PR-power. This workflow is the ONLY one with
+# merge/publish authority, and it is manual-dispatch only -- never a
+# cron -- while AIMT_EDUCATION_AUTOPUBLISH_ENABLED remains false. See
+# docs/education/AIMT-EDUCATION-OPERATIONS-v1.md's "Production publish
+# lane" section.
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'The already Reviewer-PASS candidate topic_slug to publish (e.g. alopecia-areata). Never guessed.'
+        required: true
+        type: string
+
+concurrency:
+  group: aimt-education-publish
+  cancel-in-progress: false
+
+# LEAST PRIVILEGE for what --publish actually does: it may push a
+# generated branch, open AND merge a PR (contents/pull-requests write),
+# read artifacts from the shadow workflow (actions:read), and file an
+# exception issue on PUBLISH_FAILED (issues:write). It never needs
+# anything beyond that -- no admin, no workflow-file write, no packages.
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  publish-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure git identity for the generated publish commit
+        run: |
+          git config user.name "aimt-education-ops[bot]"
+          git config user.email "aimt-education-ops@users.noreply.github.com"
+
+      - name: Restore durable candidate bundles (read-only -- never regenerated here)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p research-import/education-ops/candidates
+
+          latest_run_id="$(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=education-candidate-bundles&per_page=100" \
+              --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
+          )"
+
+          if [ -n "$latest_run_id" ]; then
+            echo "Restoring candidate bundles from workflow run $latest_run_id"
+            gh run download "$latest_run_id" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name education-candidate-bundles \
+              --dir research-import/education-ops/candidates
+          else
+            echo "No durable candidate bundle artifact found -- runPublicationPipeline will refuse (INFRA_REVIEW), never regenerate one."
+          fi
+
+      - name: Restore durable publication manifests (cross-run resume state)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p research-import/education-ops/publications
+
+          latest_run_id="$(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=education-publication-state&per_page=100" \
+              --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
+          )"
+
+          if [ -n "$latest_run_id" ]; then
+            echo "Restoring publication manifests from workflow run $latest_run_id"
+            gh run download "$latest_run_id" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name education-publication-state \
+              --dir research-import/education-ops/publications
+          else
+            echo "No prior publication manifest found; starting a fresh publication for this topic."
+          fi
+
+      - name: Run Education Operations production publish lane
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AIMT_EDUCATION_AUTOPUBLISH_ENABLED: ${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}
+          AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/education-operations-cycle.mjs --publish --topic="${{ inputs.topic }}"
+
+      - name: Upload run report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: education-ops-publish-${{ github.run_id }}
+          path: research-import/education-ops/runs/
+          retention-days: 30
+
+      - name: Upload durable publication manifests
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: education-publication-state
+          path: research-import/education-ops/publications/
+          retention-days: 90
+          if-no-files-found: ignore

@@ -69,3 +69,18 @@ export function insertHubCard(hubHtml, cardHtml) {
 
   return hubHtml.slice(0, closeIdx) + cardHtml + '\n  ' + hubHtml.slice(closeIdx);
 }
+
+/**
+ * PURE, read-only check used by live verification (step 13): does the
+ * CURRENT hub file contents already link to this route? Deliberately the
+ * same simple href substring check insertHubCard() itself already uses
+ * for its own dedup guard, exposed here for verification rather than
+ * insertion.
+ *
+ * @param {string} hubHtml
+ * @param {string} route
+ * @returns {boolean}
+ */
+export function hubContainsRoute(hubHtml, route) {
+  return typeof hubHtml === 'string' && hubHtml.includes(`href="${route}"`);
+}

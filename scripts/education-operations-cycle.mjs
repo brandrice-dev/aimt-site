@@ -58,7 +58,8 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { fetchTopicEvidenceLive, PILOT_TOPIC_CONCEPTS } from '../functions/_lib/research/publication-readiness-loader.mjs';
+import { fetchTopicEvidenceLive, PILOT_TOPIC_CONCEPTS, selectTopicEvidenceFromRows } from '../functions/_lib/research/publication-readiness-loader.mjs';
+import { assessTopicReadiness } from '../functions/_lib/research/publication-readiness.mjs';
 import { selectNextTopic, ACTIVE_CLUSTERS, DEFAULT_ACTIVE_CLUSTER } from '../functions/_lib/education-ops/education-topic-selector.mjs';
 import { fetchPublishedTopicSlugsLive, countPagesPublishedThisWeekLive } from '../functions/_lib/education-ops/education-published-state-loader.mjs';
 import { checkEducationOpsCredential } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
@@ -76,8 +77,19 @@ import { checkGeneratedDiffAllowlist } from '../functions/_lib/education-ops/edu
 import { checkAllPublishedTopicsFreshness, FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
 import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
-import { writeClearanceRecord, replaceNonPublicClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
-import { buildHubCardHtml, insertHubCard } from '../functions/_lib/education-ops/education-hub-updater.mjs';
+import { writeClearanceRecord, replaceNonPublicClearanceRecord, publishClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
+import { verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
+import { buildHubCardHtml, insertHubCard, hubContainsRoute } from '../functions/_lib/education-ops/education-hub-updater.mjs';
+import { insertSitemapRoute } from '../functions/_lib/education-ops/education-sitemap-updater.mjs';
+import {
+  PUBLICATION_STATE, buildPublicationManifest, advancePublicationManifest, validatePublicationManifestShape,
+  isManifestForSameCandidate, computePreparedArtifactDigest, determinePublicationResumeStage,
+} from '../functions/_lib/education-ops/education-publication-state.mjs';
+import {
+  checkCandidateReadyForPublication, verifyGeneratedPrStillExpectedBeforeMerge,
+  checkExistingClearanceRowConsistency, verifyLivePagePublication, verifyPostWritePublishedRow,
+} from '../functions/_lib/education-ops/education-publish-verification.mjs';
+import { waitForCloudflareProductionDeployment } from './_lib/education-cloudflare-deploy-io.mjs';
 import { buildTrustedSources } from '../functions/_lib/education-ops/education-source-authority.mjs';
 import { buildEducationRelatedLinks } from '../functions/_lib/education-ops/education-related-links.mjs';
 import { checkRouteNotAlreadyPublished } from '../functions/_lib/education-ops/education-route-guard.mjs';
@@ -1286,6 +1298,765 @@ export function openPreparedPr({ topicSlug, articlePath, planArtifactPath, hubPa
   return { branch, prUrl };
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCTION PUBLISH LANE (--publish)
+   ---------------------------------------------------------------
+   See docs/education/AIMT-EDUCATION-OPERATIONS-v1.md's "Production
+   publish lane" section for the full narrative. Summary: this is the
+   ONLY code in this file allowed to merge a PR, wait for a Cloudflare
+   production deployment, verify a live route, or call
+   publishClearanceRecord(). It NEVER imports the intent planner,
+   Publication Editor, Writer, or Reviewer client modules -- the durable
+   candidate bundle it loads read-only is the ONLY source of the plan,
+   Publication Editor's exact artifact, and the Reviewer PASS verdict.
+   runPublicationPipeline() is therefore structurally incapable of a
+   model call, regardless of what state it resumes from.
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Durable publication-manifest location -- same one-file-per-topic,
+    upload/download-as-a-named-GitHub-Actions-artifact pattern as
+    candidateBundlePath() above (see education-publication-state.mjs). */
+function publicationManifestPath(topicSlug) {
+  return path.join(ROOT, 'research-import', 'education-ops', 'publications', topicSlug, 'manifest.json');
+}
+
+export function loadPublicationManifest(topicSlug) {
+  const filePath = publicationManifestPath(topicSlug);
+  if (!existsSync(filePath)) return { found: false, manifest: null };
+  try {
+    return { found: true, manifest: JSON.parse(readFileSync(filePath, 'utf8')) };
+  } catch (err) {
+    return { found: true, manifest: null, parseError: err.message };
+  }
+}
+
+export function writePublicationManifest(topicSlug, manifest) {
+  const filePath = publicationManifestPath(topicSlug);
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, JSON.stringify(manifest, null, 2));
+  return filePath;
+}
+
+/**
+ * LAUNCH-READY generation -- same shape as prepareGeneratedArtifacts()
+ * above, but for the production publish lane: the article HTML omits
+ * the preview noindex tag and carries the deterministic generation
+ * marker (education-page-renderer.mjs), and sitemap.xml gains the route
+ * (education-sitemap-updater.mjs) -- a narrow, deterministic "launch
+ * prep" transform, never a redesign; every existing file-existence /
+ * generated-diff-allowlist guard applies exactly as it does for
+ * --prepare.
+ *
+ * @param {{preparedArtifact: object, plan: object, route: string}} args
+ * @returns {{articlePath: string, planArtifactPath: string, hubPath: string, sitemapPath: string, allowlistResult: object}}
+ */
+export function prepareLaunchArtifacts({ preparedArtifact, plan, route }) {
+  const relativeArticlePath = `education${route}.html`;
+  const articlePath = path.join(ROOT, relativeArticlePath);
+  const relativePlanPath = `functions/_data/education-page-plans/${plan.topic_slug}.json`;
+  const planArtifactPath = path.join(ROOT, relativePlanPath);
+  const relativeSitemapPath = 'sitemap.xml';
+  const sitemapPath = path.join(ROOT, relativeSitemapPath);
+
+  if (existsSync(articlePath)) {
+    throw new Error(`prepareLaunchArtifacts: INFRA_REVIEW -- target article file already exists, refusing to overwrite: ${relativeArticlePath}`);
+  }
+  if (existsSync(planArtifactPath)) {
+    throw new Error(`prepareLaunchArtifacts: INFRA_REVIEW -- target Page Plan artifact already exists, refusing to overwrite: ${relativePlanPath}`);
+  }
+
+  mkdirSync(path.dirname(articlePath), { recursive: true });
+  writeFileSync(articlePath, renderEducationPageHtml(plan, { launchReady: true, generationSourceHash: preparedArtifact.record.generation_source_hash }));
+
+  mkdirSync(path.dirname(planArtifactPath), { recursive: true });
+  writeFileSync(planArtifactPath, JSON.stringify({
+    topic_slug: plan.topic_slug,
+    page_plan_version: 'education-page-plan-v1',
+    plan,
+    generation_source_hash: preparedArtifact.record.generation_source_hash,
+    prepared_at: preparedArtifact.prepared_at,
+    writer_provenance: { contract_version: 'education-writer-v1' },
+  }, null, 2));
+
+  const clusterKey = Object.keys(ACTIVE_CLUSTERS).find((k) => route.startsWith(ACTIVE_CLUSTERS[k].route_prefix));
+  const relativeHubPath = `education${ACTIVE_CLUSTERS[clusterKey].route_prefix.replace('/education', '')}.html`;
+  const hubPath = path.join(ROOT, relativeHubPath);
+  const hubHtml = readFileSync(hubPath, 'utf8');
+  const cardHtml = buildHubCardHtml({ route, h1: plan.h1, meta_description: plan.meta_description, sourceCount: plan.sources.length });
+  writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml));
+
+  const sitemapXml = readFileSync(sitemapPath, 'utf8');
+  writeFileSync(sitemapPath, insertSitemapRoute(sitemapXml, route));
+
+  const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+  const allowlistResult = checkGeneratedDiffAllowlist(changedPaths);
+  if (!allowlistResult.valid) {
+    throw new Error(`prepareLaunchArtifacts: generated diff touched unexpected path(s), INFRA_REVIEW: ${allowlistResult.violations.join(', ')}`);
+  }
+
+  return { articlePath: relativeArticlePath, planArtifactPath: relativePlanPath, hubPath: relativeHubPath, sitemapPath: relativeSitemapPath, allowlistResult };
+}
+
+/**
+ * Opens the production publish PR on a DETERMINISTIC branch name (never
+ * runId-suffixed, unlike openPreparedPr() above) -- so a later, separate
+ * run can always find the SAME branch/PR for this topic via
+ * ghPrListForBranch() and resume it, never opening a duplicate. Never
+ * merges.
+ */
+/**
+ * PURE command-argument construction for `gh pr create` -- separated
+ * from openLaunchPr()'s actual execFileSync calls specifically so a
+ * test can assert on the constructed argument array without shelling
+ * out. `gh pr create` does NOT support `--json` (unlike `gh pr view`/
+ * `gh pr list`) -- passing it is a runtime error, not a supported
+ * interface. This function must never include `--json` in its output;
+ * see the test asserting exactly that (the regression this guards
+ * against actually shipped once).
+ */
+export function buildGhPrCreateArgs({ topicSlug, branch, runId }) {
+  return [
+    'pr', 'create', '--base', 'main', '--head', branch,
+    '--title', `[Education Operations] Publish: ${topicSlug} (merges only when AUTOPUBLISH is enabled)`,
+    '--body', `Autonomously prepared for PRODUCTION PUBLICATION by AIMT Education Operations v1 (run ${runId}). Removes the preview noindex tag and adds the route to sitemap.xml. Merges ONLY when AIMT_EDUCATION_AUTOPUBLISH_ENABLED === "true"; the DB row is never marked published without a subsequent confirmed live-route verification.`,
+  ];
+}
+
+export function openLaunchPr({ topicSlug, articlePath, planArtifactPath, hubPath, sitemapPath, runId }) {
+  const branch = publicationBranchName(topicSlug);
+  execFileSync('git', ['checkout', '-b', branch], { cwd: ROOT, stdio: 'inherit' });
+  execFileSync('git', ['add', articlePath, planArtifactPath, hubPath, sitemapPath], { cwd: ROOT, stdio: 'inherit' });
+  execFileSync('git', ['commit', '-m', `Education Operations: publish ${topicSlug} (AUTOPUBLISH-gated, launch-ready)`], { cwd: ROOT, stdio: 'inherit' });
+  execFileSync('git', ['push', '-u', 'origin', branch], { cwd: ROOT, stdio: 'inherit' });
+  // `gh pr create` prints the created PR's URL as PLAIN TEXT on success
+  // (it has no --json support at all) -- the structured identifiers
+  // (number/headRefOid) are fetched via a SEPARATE, supported `gh pr
+  // view` call against that URL immediately afterward.
+  const prUrl = execFileSync('gh', buildGhPrCreateArgs({ topicSlug, branch, runId }), { cwd: ROOT, encoding: 'utf8' }).trim();
+  const created = ghPrView(prUrl);
+  return { branch, prNumber: created.number, prUrl: created.url || prUrl, headRefOid: created.headRefOid };
+}
+
+function publicationBranchName(topicSlug) {
+  return `education-ops/publish-${topicSlug}`;
+}
+
+function ghPrListForBranch(branch) {
+  const out = execFileSync('gh', ['pr', 'list', '--head', branch, '--json', 'number,state,headRefOid,url', '--limit', '1'], { cwd: ROOT, encoding: 'utf8' });
+  const rows = JSON.parse(out);
+  return rows[0] || null;
+}
+
+/** `gh pr view` DOES support --json (unlike `gh pr create`, see
+    buildGhPrCreateArgs() below) -- accepts a PR number, URL, or branch
+    name interchangeably, so this same function serves both the
+    post-create lookup and every later re-view. */
+function ghPrView(prNumberOrUrl) {
+  const out = execFileSync('gh', ['pr', 'view', String(prNumberOrUrl), '--json', 'number,url,state,headRefOid,files,mergeCommit'], { cwd: ROOT, encoding: 'utf8' });
+  const raw = JSON.parse(out);
+  return { number: raw.number, url: raw.url, state: raw.state, headRefOid: raw.headRefOid, files: raw.files || [], mergeCommitOid: raw.mergeCommit ? raw.mergeCommit.oid : null };
+}
+
+function ghPrMerge(prNumber) {
+  execFileSync('gh', ['pr', 'merge', String(prNumber), '--merge', '--delete-branch'], { cwd: ROOT, stdio: 'inherit' });
+  return ghPrView(prNumber);
+}
+
+/** Direct PostgREST read -- the SAME read publishClearanceRecord() does
+    internally, exposed here so the pipeline can check idempotency
+    (step 9) and post-write integrity (step 15) without a second,
+    differently-shaped reader. Never writes anything. */
+async function fetchClearanceRowByTopicSlug(env, topicSlug) {
+  if (!env || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('fetchClearanceRowByTopicSlug: missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.');
+  }
+  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/research_public_pages?topic_slug=eq.${encodeURIComponent(topicSlug)}&select=*`, {
+    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` },
+  });
+  if (!res.ok) throw new Error(`fetchClearanceRowByTopicSlug: query failed (${res.status})`);
+  const rows = await res.json();
+  return rows[0] || null;
+}
+
+const LIVE_SITE_ORIGIN = 'https://aimtrichology.com';
+
+/** Real live-site fetch for step 13 -- the article route itself, the
+    live sitemap.xml, and the cluster hub page, all from the production
+    domain (never the local git checkout), so a PASS here proves the
+    ACTUAL deployed site reflects the publication, not merely that the
+    merge succeeded. */
+async function fetchLivePublicationArtifacts({ route, clusterKey }) {
+  const hubRoute = `${ACTIVE_CLUSTERS[clusterKey].route_prefix.replace('/education', '')}.html`;
+  const [articleRes, sitemapRes, hubRes] = await Promise.all([
+    fetch(`${LIVE_SITE_ORIGIN}${route}`),
+    fetch(`${LIVE_SITE_ORIGIN}/sitemap.xml`),
+    fetch(`${LIVE_SITE_ORIGIN}/education${hubRoute}`),
+  ]);
+  const html = await articleRes.text();
+  const sitemapXml = sitemapRes.ok ? await sitemapRes.text() : '';
+  const hubHtml = hubRes.ok ? await hubRes.text() : '';
+  return { httpStatus: articleRes.status, html, sitemapXml, hubHtml };
+}
+
+/** Real I/O for runPublicationPipeline() -- every field here is
+    individually overridable via options.io in tests; none of these real
+    implementations are ever invoked by this repo's own test suite. */
+/**
+ * Resolves the CURRENT candidate claim id set for ONE specific topic,
+ * completely independent of new-page eligibility. Deliberately never
+ * routed through selectNextTopic()/candidateConceptsForCluster()
+ * (education-topic-selector.mjs), which intentionally EXCLUDES any
+ * already-published topic from candidacy entirely -- calling THAT for
+ * an already-published topic returns no candidate entry at all, which
+ * would make a freshness check see an empty claim set and misreport
+ * "everything changed" for a topic whose evidence may not have moved at
+ * all. This calls the SAME underlying per-topic readiness computation
+ * (assessTopicReadiness) directly, for exactly the one topic asked
+ * about, regardless of its published status.
+ *
+ * @param {{claims: object[], sources: object[]}} evidencePool
+ * @param {string} clusterKey
+ * @param {string} topicSlug
+ * @returns {string[]} candidate_claim_ids, or [] if this topic has no
+ *   registered concept in this cluster (defensive; should be unreachable
+ *   given the caller already validated clusterKey/topicSlug membership)
+ */
+function resolveCurrentCandidateClaimIds(evidencePool, clusterKey, topicSlug) {
+  const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
+  const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === topicSlug && memberSet.has(c.topic_slug));
+  if (!concept) return [];
+  const { claims, sources } = selectTopicEvidenceFromRows(concept.controlled_topics, evidencePool);
+  const v1Result = assessTopicReadiness({
+    topic_slug: concept.topic_slug, seo_page_concept: concept.seo_page_concept,
+    controlled_topics: concept.controlled_topics, claims, sources,
+  });
+  return v1Result.candidate_claim_ids;
+}
+
+function buildRealPublishIo(env) {
+  return {
+    loadCandidateBundleFn: loadCandidateBundle,
+    loadPublicationManifestFn: loadPublicationManifest,
+    writePublicationManifestFn: writePublicationManifest,
+    fetchEvidenceFn: fetchTopicEvidenceLive,
+    fetchPublishedTopicSlugsFn: fetchPublishedTopicSlugsLive,
+    countPagesPublishedThisWeekFn: countPagesPublishedThisWeekLive,
+    resolveTrustedSiblingPagesFn: resolveTrustedSiblingPages,
+    verifyCandidateBundleIntegrityFn: verifyCandidateBundleIntegrity,
+    resolveCandidateResumeFreshnessFn: resolveCandidateResumeFreshness,
+    prepareLaunchArtifactsFn: prepareLaunchArtifacts,
+    openLaunchPrFn: openLaunchPr,
+    ghPrListForBranchFn: ghPrListForBranch,
+    ghPrViewFn: ghPrView,
+    ghPrMergeFn: ghPrMerge,
+    fetchClearanceRowFn: fetchClearanceRowByTopicSlug,
+    writeClearanceRecordFn: writeClearanceRecord,
+    publishClearanceRecordFn: publishClearanceRecord,
+    verifyStoredClearanceIntegrityFn: verifyStoredClearanceIntegrity,
+    waitForDeploymentFn: (args) => waitForCloudflareProductionDeployment(args, {}),
+    fetchLiveArtifactsFn: fetchLivePublicationArtifacts,
+  };
+}
+
+/**
+ * The production publish state machine (--publish). Enforces,
+ * mechanically, the exact order documented in docs/education/
+ * AIMT-EDUCATION-OPERATIONS-v1.md's "Production publish lane" section:
+ * verify the already-cleared durable candidate -> generate launch
+ * artifacts -> open/resume the generated PR -> (AUTOPUBLISH gate) ->
+ * persist non-public clearance -> revalidate -> merge -> wait for a
+ * confirmed Cloudflare PRODUCTION deployment -> live-verify -> guarded
+ * publishClearanceRecord() -> post-write integrity -> PUBLISHED.
+ *
+ * Idempotent and crash-tolerant: every stage transition is persisted to
+ * the durable publication manifest BEFORE the next stage runs, and
+ * determinePublicationResumeStage() (never a raw `state` string alone)
+ * decides where a later invocation actually continues from -- see
+ * education-publication-state.mjs's own header for why a PUBLISH_FAILED
+ * manifest must remain retryable rather than permanently parked.
+ *
+ * STRUCTURALLY incapable of a model call: it never imports the intent
+ * planner, Publication Editor, Writer, or Reviewer client modules --
+ * only an ALREADY-CLEARED durable candidate bundle (loaded read-only)
+ * feeds this function, and modelCalls therefore always stays [] here.
+ *
+ * @param {Object} env
+ * @param {{topicSlug: string, runId?: string, io?: object}} options
+ * @returns {Promise<object>} a buildRunReport()-shaped result
+ */
+export async function runPublicationPipeline(env, options = {}) {
+  const runId = options.runId || randomUUID();
+  const startedAt = new Date().toISOString();
+  const modelCalls = []; // NEVER populated -- see function header
+  const io = { ...buildRealPublishIo(env), ...(options.io || {}) };
+  const topicSlug = options.topicSlug;
+
+  const finish = (fields) => buildRunReport({
+    run_id: runId, started_at: startedAt, finished_at: new Date().toISOString(),
+    mode: 'publish', model_calls: modelCalls, selected_topic: topicSlug, ...fields,
+  });
+
+  if (!topicSlug) {
+    return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: '--publish requires --topic=<slug> -- refusing to guess which candidate to publish.' });
+  }
+
+  // --- Load + shape-check any existing durable publication manifest ----
+  const manifestLoaded = io.loadPublicationManifestFn(topicSlug);
+  if (manifestLoaded.found && !manifestLoaded.manifest) {
+    return finish({
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `Publication manifest for "${topicSlug}" could not be parsed (${manifestLoaded.parseError || 'invalid JSON'}) -- refusing to resume or silently regenerate over it.`,
+    });
+  }
+  let manifest = manifestLoaded.found ? manifestLoaded.manifest : null;
+  if (manifest) {
+    const shape = validatePublicationManifestShape(manifest);
+    if (!shape.valid) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Publication manifest for "${topicSlug}" failed shape validation: ${shape.violations.join(', ')}.` });
+    }
+  }
+
+  // --- STEPS 1-2: load + verify the SAME durable, already-cleared candidate ---
+  const loadedBundle = io.loadCandidateBundleFn(topicSlug);
+  if (!loadedBundle.found || !loadedBundle.bundle) {
+    return finish({
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `No durable candidate bundle found for "${topicSlug}" -- refusing to publish without an already Reviewer-PASS candidate. This never regenerates Intent Planner/Publication Editor/Writer to create one.`,
+    });
+  }
+  const bundle = loadedBundle.bundle;
+  const integrity = await io.verifyCandidateBundleIntegrityFn(bundle);
+  const resumeStage = determineResumeStage(bundle);
+
+  const clusterKey = Object.keys(ACTIVE_CLUSTERS).find((k) => ACTIVE_CLUSTERS[k].member_topic_slugs.includes(topicSlug));
+  if (!clusterKey) {
+    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Topic "${topicSlug}" is not a member of any active cluster.` });
+  }
+
+  let evidencePool;
+  try {
+    const clusterConcepts = ACTIVE_CLUSTERS[clusterKey].member_topic_slugs.map((slug) => PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug)).filter(Boolean);
+    const allControlledTopics = [...new Set(clusterConcepts.flatMap((c) => c.controlled_topics))];
+    evidencePool = await io.fetchEvidenceFn(env, allControlledTopics);
+  } catch (err) {
+    return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Evidence fetch failed: ${err.message}` });
+  }
+  let publishedTopicSlugs;
+  try {
+    publishedTopicSlugs = await io.fetchPublishedTopicSlugsFn(env);
+  } catch (err) {
+    return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Published-topic state query failed: ${err.message}` });
+  }
+
+  // FAIL CLOSED (matches the shadow lane's own posture -- see
+  // resolveTrustedSiblingPages()'s own header and runDecisionPipeline()'s
+  // identical check above): a published DB state that cannot be mapped
+  // to trusted routes is an architecture-safety anomaly, never silently
+  // downgraded to "treat it as if nothing were published".
+  const siblingResolution = io.resolveTrustedSiblingPagesFn(publishedTopicSlugs, clusterKey);
+  if (!siblingResolution.ok) {
+    return finish({
+      final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+      exception_reason: `Published DB state and trusted route/artifact state disagree: ${siblingResolution.violations.join(', ')} -- refusing to prepare/open a PR/write clearance/merge on an unresolved published-route set.`,
+    });
+  }
+  const trustedPublishedRoutes = siblingResolution.pages.map((p) => p.route);
+  const routeGuard = checkRouteNotAlreadyPublished(bundle.route, trustedPublishedRoutes);
+  const routeAlreadyPublished = !routeGuard.valid;
+
+  const preparedArtifactDigest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+
+  // REAL-STATE RESUME CORRECTION: once this EXACT publication has
+  // actually reached status='published', the live published-topic set
+  // (routeAlreadyPublished, publishedTopicSlugs) legitimately includes
+  // it -- and that is NOT a reason to refuse resuming/re-verifying it.
+  // The full "new candidate" eligibility gate below (fresh, not already
+  // published, within the weekly cap) exists to decide whether it is
+  // SAFE to publish something NOT YET published; it does not apply once
+  // the DB has already legitimately moved to published for this exact
+  // route. Only the SAME durable manifest -- matched on topic_slug,
+  // route, generation_source_hash, and prepared_artifact_digest -- may
+  // take this path; an arbitrary already-published route is never
+  // treated as safe merely because a route matches.
+  if (routeAlreadyPublished) {
+    if (!manifest) {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `"${topicSlug}" (${bundle.route}) is already published live, but no durable publication manifest exists for it -- refusing to treat an arbitrary already-published route as this publication.`,
+      });
+    }
+    const consistency = isManifestForSameCandidate(manifest, {
+      topicSlug, route: bundle.route, generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
+    });
+    if (!consistency.matches) {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `"${topicSlug}" (${bundle.route}) is already published live, but the durable manifest does not match this exact candidate (${consistency.violations.join(', ')}) -- refusing to resume a different publication under an already-published route.`,
+      });
+    }
+    if (!integrity.valid) {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route,
+        exception_reason: `Candidate bundle integrity check failed while resuming an already-published manifest: ${integrity.violations.join(', ')}`,
+      });
+    }
+    // Falls through to the ordinary manifest-driven resume-stage
+    // dispatch below, which idempotently re-verifies and finishes
+    // PUBLISHED (or fails closed on a genuine post-write mismatch)
+    // without ever re-merging/re-writing/re-deploying -- see
+    // determinePublicationResumeStage()/the LIVE_VERIFIED tail block.
+  } else {
+    // NOT-yet-published candidate: the full "new candidate" eligibility
+    // gate applies exactly as before. currentCandidateClaimIds is
+    // resolved for THIS SPECIFIC topic directly (assessTopicReadiness),
+    // never through selectNextTopic()/candidateConceptsForCluster(),
+    // which intentionally EXCLUDES already-published topics from
+    // candidacy entirely -- a freshness check must never see an empty
+    // claim set merely because a selector built for a DIFFERENT purpose
+    // (picking the next NEW page) doesn't consider this topic anymore.
+    const currentCandidateClaimIds = resolveCurrentCandidateClaimIds(evidencePool, clusterKey, topicSlug);
+    const freshness = io.resolveCandidateResumeFreshnessFn(bundle, currentCandidateClaimIds);
+
+    let pagesPublishedThisWeek;
+    try {
+      pagesPublishedThisWeek = (await io.countPagesPublishedThisWeekFn(env)).count;
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Weekly publication count query failed: ${err.message}` });
+    }
+    const weeklyCap = checkWeeklyCap(pagesPublishedThisWeek, resolveMaxPagesPerWeek(env));
+
+    const eligibility = checkCandidateReadyForPublication({
+      integrityValid: integrity.valid, integrityViolations: integrity.violations,
+      resumeStage, freshnessState: freshness.state,
+      bundleTopicSlug: bundle.topic_slug, expectedTopicSlug: topicSlug,
+      bundleRoute: bundle.route, expectedRoute: bundle.route,
+      routeAlreadyPublished,
+      withinWeeklyCap: weeklyCap.withinCap,
+    });
+    if (!eligibility.ok) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, planned_route: bundle.route, exception_reason: `Candidate not ready for publication: ${eligibility.violations.join(', ')}` });
+    }
+
+    if (manifest) {
+      const consistency = isManifestForSameCandidate(manifest, {
+        topicSlug, route: bundle.route, generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
+      });
+      if (!consistency.matches) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `Publication manifest for "${topicSlug}" no longer matches the current candidate (${consistency.violations.join(', ')}) -- refusing to continue publishing a candidate that changed underneath it.`,
+        });
+      }
+    } else {
+      manifest = buildPublicationManifest({
+        runId, topicSlug, route: bundle.route, cluster: clusterKey,
+        generationSourceHash: bundle.generation_source_hash, preparedArtifactDigest,
+        candidateOriginatingRunId: bundle.originating_run_id,
+      });
+      io.writePublicationManifestFn(topicSlug, manifest);
+    }
+  }
+
+  const persistManifest = (updates) => {
+    manifest = advancePublicationManifest(manifest, updates);
+    io.writePublicationManifestFn(topicSlug, manifest);
+    return manifest;
+  };
+  const stage = () => determinePublicationResumeStage(manifest);
+
+  // --- STEPS 3-8: prepare (ZERO model calls) + open/resume the generated PR ---
+  if (stage() === PUBLICATION_STATE.PREPARED) {
+    const branch = publicationBranchName(topicSlug);
+    const existingPr = io.ghPrListForBranchFn(branch);
+    if (existingPr) {
+      // CRASH RECOVERY: a prior run pushed the branch/opened the PR but
+      // died before persisting the manifest -- resume it, never open a
+      // duplicate.
+      persistManifest({
+        state: PUBLICATION_STATE.PR_OPEN,
+        generated: { branch, pr_number: existingPr.number, pr_url: existingPr.url, expected_head_sha: existingPr.headRefOid },
+      });
+    } else {
+      let artifacts;
+      let opened;
+      try {
+        artifacts = io.prepareLaunchArtifactsFn({ preparedArtifact: bundle.prepared_artifact, plan: bundle.page_plan, route: bundle.route });
+        opened = io.openLaunchPrFn({ topicSlug, ...artifacts, runId });
+      } catch (err) {
+        persistManifest({ lastFailure: { stage: 'PREPARE', reason: err.message, at: new Date().toISOString() } });
+        return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, planned_route: bundle.route, exception_reason: `Failed to generate launch artifacts / open the publish PR: ${err.message}` });
+      }
+      persistManifest({
+        state: PUBLICATION_STATE.PR_OPEN,
+        generated: {
+          branch: opened.branch, pr_number: opened.prNumber, pr_url: opened.prUrl, expected_head_sha: opened.headRefOid,
+          article_path: artifacts.articlePath, plan_artifact_path: artifacts.planArtifactPath, hub_path: artifacts.hubPath, sitemap_path: artifacts.sitemapPath,
+        },
+      });
+    }
+  }
+
+  // --- AUTOPUBLISH GATE: everything from here on is a real production
+  //     side effect (DB write, merge, deploy wait, live verify, DB
+  //     publish). Checked ONCE, upfront -- nothing past this point ever
+  //     runs unless the variable is EXACTLY "true". -----------------
+  if (!isAutopublishEnabled(env)) {
+    return finish({
+      final_state: RUN_FINAL_STATE.AUTOPUBLISH_GATE_CLOSED,
+      planned_route: bundle.route,
+      publication_action: { enabled: false, state: manifest.state, pr_number: manifest.generated.pr_number, pr_url: manifest.generated.pr_url },
+      exception_reason: `${AUTOPUBLISH_ENV_VAR} is not "true" -- candidate verified and PR ${manifest.generated.pr_number ? `#${manifest.generated.pr_number} ` : ''}is open, but clearance/merge/deploy/publish all stay blocked until the gate is explicitly enabled.`,
+    });
+  }
+
+  // --- STEP 9: persist the NON-PUBLIC clearance row, idempotently ------
+  if (stage() === PUBLICATION_STATE.PR_OPEN) {
+    let existingRow;
+    try {
+      existingRow = await io.fetchClearanceRowFn(env, topicSlug);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Pre-clearance-write read failed: ${err.message}` });
+    }
+    const rowConsistency = checkExistingClearanceRowConsistency(existingRow, { expectedTopicSlug: topicSlug, expectedGenerationSourceHash: bundle.generation_source_hash });
+    if (rowConsistency.state === 'CONFLICT') {
+      return finish({
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+        exception_reason: `Existing clearance row for "${topicSlug}" conflicts with this publication (${rowConsistency.violations.join(', ')}) -- refusing to overwrite blindly.`,
+      });
+    }
+
+    // HARD-CRASH RECOVERY: the live DB may already be correctly
+    // published even when the latest downloadable manifest artifact is
+    // stale at PR_OPEN (for example, the prior runner died after the DB
+    // publish succeeded but before its final artifact upload). Never
+    // attempt to "catch the manifest up" by merging the recorded PR
+    // again. The routeAlreadyPublished branch above has already proven
+    // this manifest belongs to the SAME topic/route/hash/digest. From
+    // here, require the published row's own stored integrity AND a fresh
+    // custom-domain live verification; only then fast-forward the
+    // manifest to PUBLISHED idempotently.
+    if (rowConsistency.state === 'ALREADY_PUBLISHED') {
+      if (!routeAlreadyPublished) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `research_public_pages says "${topicSlug}" is published with the expected hash, but the live published-route state does not include ${bundle.route} -- refusing to reconcile inconsistent publication authorities.`,
+        });
+      }
+
+      const rowIntegrity = await io.verifyStoredClearanceIntegrityFn(existingRow);
+      const postWrite = verifyPostWritePublishedRow(existingRow, {
+        expectedTopicSlug: topicSlug,
+        expectedGenerationSourceHash: bundle.generation_source_hash,
+        storedIntegrityValid: rowIntegrity.valid,
+      });
+      if (!postWrite.ok) {
+        return finish({
+          final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+          exception_reason: `Existing published row failed idempotent recovery verification: ${postWrite.violations.join(', ')}.`,
+        });
+      }
+
+      let liveArtifacts;
+      try {
+        liveArtifacts = await io.fetchLiveArtifactsFn({ route: bundle.route, clusterKey });
+      } catch (err) {
+        return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Idempotent recovery live verification fetch failed: ${err.message}` });
+      }
+      const liveVerification = verifyLivePagePublication({
+        httpStatus: liveArtifacts.httpStatus,
+        html: liveArtifacts.html,
+        sitemapXml: liveArtifacts.sitemapXml,
+        hubHtml: liveArtifacts.hubHtml,
+        expectedRoute: bundle.route,
+        expectedGenerationSourceHash: bundle.generation_source_hash,
+      });
+      if (!liveVerification.ok) {
+        return finish({
+          final_state: RUN_FINAL_STATE.PUBLISH_FAILED,
+          exception_reason: `Existing published row could not be reconciled with the live site: ${liveVerification.violations.join(', ')}.`,
+        });
+      }
+
+      persistManifest({
+        state: PUBLICATION_STATE.PUBLISHED,
+        clearance: { persisted: true, mode: 'AUTO_READY', persisted_at: manifest.clearance.persisted_at || existingRow.published_at },
+        liveVerification: { passed: true, checked_at: new Date().toISOString(), checks: liveVerification.checks },
+        dbPublish: { attempted: true, verified: true, published_at: existingRow.published_at },
+        lastFailure: null,
+      });
+      return finish({
+        final_state: RUN_FINAL_STATE.PUBLISHED,
+        planned_route: bundle.route,
+        publication_action: {
+          pr_number: manifest.generated.pr_number,
+          merge_commit_sha: manifest.merge.merge_commit_sha,
+          published_at: existingRow.published_at,
+          idempotent_recovery_from_published_row: true,
+        },
+      });
+    }
+
+    if (rowConsistency.state === 'NOT_FOUND') {
+      try {
+        await io.writeClearanceRecordFn(env, bundle.prepared_artifact.record);
+      } catch (err) {
+        persistManifest({ lastFailure: { stage: 'CLEARANCE_PERSIST', reason: err.message, at: new Date().toISOString() } });
+        return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Clearance write failed: ${err.message}` });
+      }
+    }
+    // MATCHES_EXPECTED (idempotent resume) or freshly written -- either
+    // way the non-public row is now confirmed in the expected state.
+    persistManifest({ state: PUBLICATION_STATE.CLEARANCE_PERSISTED, clearance: { persisted: true, mode: 'AUTO_READY', persisted_at: new Date().toISOString() } });
+  }
+
+  // --- STEP 10-11: revalidate, then merge (AUTOPUBLISH already confirmed true) ---
+  if (stage() === PUBLICATION_STATE.CLEARANCE_PERSISTED) {
+    let prInfo;
+    try {
+      prInfo = io.ghPrViewFn(manifest.generated.pr_number);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Could not read PR #${manifest.generated.pr_number}: ${err.message}` });
+    }
+    const revalidation = verifyGeneratedPrStillExpectedBeforeMerge(prInfo, manifest);
+    if (!revalidation.ok) {
+      persistManifest({ lastFailure: { stage: 'PRE_MERGE_REVALIDATION', reason: revalidation.violations.join(', '), at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Pre-merge revalidation failed: ${revalidation.violations.join(', ')}` });
+    }
+    let merged;
+    try {
+      merged = io.ghPrMergeFn(manifest.generated.pr_number);
+    } catch (err) {
+      persistManifest({ lastFailure: { stage: 'MERGE', reason: err.message, at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `PR merge failed: ${err.message}` });
+    }
+    if (!merged || !merged.mergeCommitOid) {
+      persistManifest({ lastFailure: { stage: 'MERGE', reason: 'merge reported success but no mergeCommit.oid was returned', at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: 'PR merge did not yield a merge commit SHA -- refusing to proceed to deployment wait without one.' });
+    }
+    persistManifest({ state: PUBLICATION_STATE.MERGED, merge: { merged: true, merge_commit_sha: merged.mergeCommitOid, merged_at: new Date().toISOString() } });
+  }
+
+  // --- STEP 12: wait for a CONFIRMED Cloudflare PRODUCTION deployment --
+  if (stage() === PUBLICATION_STATE.MERGED && manifest.deployment.state !== 'success') {
+    persistManifest({ state: PUBLICATION_STATE.DEPLOYING });
+    const repo = env.GITHUB_REPOSITORY || process.env.GITHUB_REPOSITORY;
+    const deployResult = await io.waitForDeploymentFn({ repo, commitSha: manifest.merge.merge_commit_sha });
+    if (!deployResult.ok) {
+      persistManifest({ deployment: { state: deployResult.state }, lastFailure: { stage: 'DEPLOYMENT', reason: deployResult.violations.join(', '), at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Cloudflare production deployment did not succeed (${deployResult.state}): ${deployResult.violations.join(', ')}` });
+    }
+    persistManifest({ deployment: { state: 'success', check_run_id: deployResult.checkRunId, checked_at: new Date().toISOString() } });
+  }
+
+  // --- STEP 13-15: LIVE VERIFY (always fresh, never a cached result --
+  //     see the crash-recovery rule "retry the guarded DB transition
+  //     only after re-verifying the live page") -> guarded
+  //     publishClearanceRecord() -> post-write integrity ---------------
+  if ((stage() === PUBLICATION_STATE.MERGED && manifest.deployment.state === 'success') || stage() === PUBLICATION_STATE.LIVE_VERIFIED) {
+    let liveArtifacts;
+    try {
+      liveArtifacts = await io.fetchLiveArtifactsFn({ route: bundle.route, clusterKey });
+    } catch (err) {
+      persistManifest({ lastFailure: { stage: 'LIVE_VERIFY', reason: err.message, at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Live verification fetch failed: ${err.message}` });
+    }
+    const liveVerification = verifyLivePagePublication({
+      httpStatus: liveArtifacts.httpStatus, html: liveArtifacts.html, sitemapXml: liveArtifacts.sitemapXml, hubHtml: liveArtifacts.hubHtml,
+      expectedRoute: bundle.route, expectedGenerationSourceHash: bundle.generation_source_hash,
+    });
+    if (!liveVerification.ok) {
+      persistManifest({
+        liveVerification: { passed: false, checked_at: new Date().toISOString(), checks: liveVerification.checks },
+        lastFailure: { stage: 'LIVE_VERIFY', reason: liveVerification.violations.join(', '), at: new Date().toISOString() },
+      });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Live verification failed: ${liveVerification.violations.join(', ')} -- the DB row is never published without this passing.` });
+    }
+    persistManifest({ state: PUBLICATION_STATE.LIVE_VERIFIED, liveVerification: { passed: true, checked_at: new Date().toISOString(), checks: liveVerification.checks } });
+
+    // Idempotency (test #25 / crash-recovery #6): a row already
+    // correctly published with the matching hash is NEVER re-submitted
+    // to publishClearanceRecord() (whose own precondition requires
+    // status='ready_for_page_builder' and would otherwise throw on a
+    // legitimate retry) -- it is simply re-verified.
+    let rowBeforePublish;
+    try {
+      rowBeforePublish = await io.fetchClearanceRowFn(env, topicSlug);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Pre-publish-transition read failed: ${err.message}` });
+    }
+    const alreadyPublishedWithMatchingHash = rowBeforePublish && rowBeforePublish.status === 'published' && rowBeforePublish.generation_source_hash === bundle.generation_source_hash;
+    if (!alreadyPublishedWithMatchingHash) {
+      try {
+        await io.publishClearanceRecordFn(env, topicSlug, { requireCurrentHash: bundle.generation_source_hash });
+      } catch (err) {
+        persistManifest({ dbPublish: { attempted: true }, lastFailure: { stage: 'DB_PUBLISH', reason: err.message, at: new Date().toISOString() } });
+        return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `publishClearanceRecord failed: ${err.message}` });
+      }
+    }
+    persistManifest({ dbPublish: { attempted: true } });
+
+    // STEP 15: post-write integrity -- a fresh re-read, never trusting
+    // the write call's own return value.
+    let freshRow;
+    try {
+      freshRow = await io.fetchClearanceRowFn(env, topicSlug);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Post-write re-read failed: ${err.message}` });
+    }
+    const rowIntegrity = freshRow ? await io.verifyStoredClearanceIntegrityFn(freshRow) : { valid: false, violations: ['ROW_NOT_FOUND'] };
+    const postWrite = verifyPostWritePublishedRow(freshRow, {
+      expectedTopicSlug: topicSlug, expectedGenerationSourceHash: bundle.generation_source_hash, storedIntegrityValid: rowIntegrity.valid,
+    });
+    if (!postWrite.ok) {
+      persistManifest({ lastFailure: { stage: 'POST_WRITE_INTEGRITY', reason: postWrite.violations.join(', '), at: new Date().toISOString() } });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Post-write integrity check failed: ${postWrite.violations.join(', ')} -- never reporting a false PUBLISHED.` });
+    }
+
+    let livePublishedTopicsIncludesTopic = null;
+    try {
+      livePublishedTopicsIncludesTopic = (await io.fetchPublishedTopicSlugsFn(env)).includes(topicSlug);
+    } catch (_err) {
+      livePublishedTopicsIncludesTopic = null; // observational only -- never fails an otherwise-verified publish
+    }
+
+    persistManifest({ state: PUBLICATION_STATE.PUBLISHED, dbPublish: { verified: true, published_at: freshRow.published_at } });
+    return finish({
+      final_state: RUN_FINAL_STATE.PUBLISHED,
+      planned_route: bundle.route,
+      publication_action: {
+        pr_number: manifest.generated.pr_number, merge_commit_sha: manifest.merge.merge_commit_sha,
+        published_at: freshRow.published_at, live_published_topic_loader_includes_topic: livePublishedTopicsIncludesTopic,
+      },
+    });
+  }
+
+  // --- Already PUBLISHED on a prior run -- idempotent re-verify --------
+  if (stage() === PUBLICATION_STATE.PUBLISHED) {
+    let freshRow;
+    try {
+      freshRow = await io.fetchClearanceRowFn(env, topicSlug);
+    } catch (err) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Idempotent re-verify read failed: ${err.message}` });
+    }
+    const rowIntegrity = freshRow ? await io.verifyStoredClearanceIntegrityFn(freshRow) : { valid: false, violations: ['ROW_NOT_FOUND'] };
+    const postWrite = verifyPostWritePublishedRow(freshRow, {
+      expectedTopicSlug: topicSlug, expectedGenerationSourceHash: bundle.generation_source_hash, storedIntegrityValid: rowIntegrity.valid,
+    });
+    if (!postWrite.ok) {
+      return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Manifest claims PUBLISHED but the live row no longer verifies: ${postWrite.violations.join(', ')}` });
+    }
+    return finish({
+      final_state: RUN_FINAL_STATE.PUBLISHED,
+      planned_route: bundle.route,
+      publication_action: { pr_number: manifest.generated.pr_number, merge_commit_sha: manifest.merge.merge_commit_sha, published_at: freshRow.published_at, idempotent_reverify: true },
+    });
+  }
+
+  // Unreachable -- every PUBLICATION_STATE value determinePublicationResumeStage()
+  // can return is handled above. Fail closed rather than returning nothing.
+  return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Unhandled publication resume stage for "${topicSlug}".` });
+}
+
 export function parseArgs(argv) {
   const args = { mode: 'shadow' };
   for (const a of argv) {
@@ -1294,32 +2065,9 @@ export function parseArgs(argv) {
     else if (a === '--persist-clearance') args.mode = 'persist-clearance';
     else if (a === '--publish') args.mode = 'publish';
     else if (a.startsWith('--from-prepared=')) args.fromPrepared = a.split('=')[1];
+    else if (a.startsWith('--topic=')) args.topic = a.split('=')[1];
   }
   return args;
-}
-
-/**
- * --publish is RESERVED for the future full autonomous-publication
- * state machine (merge -> Cloudflare wait -> live verification ->
- * publishClearanceRecord()). It is NOT IMPLEMENTED. This function
- * refuses UNCONDITIONALLY -- it does not even read
- * AIMT_EDUCATION_AUTOPUBLISH_ENABLED, because that variable does not
- * grant this capability yet and never implies one that doesn't exist.
- * No argument to this function could ever make it write anything.
- *
- * @returns {{ok: false, ran: false, reason: string}}
- */
-export function runFullAutopublishRefusal() {
-  return {
-    ok: false,
-    ran: false,
-    reason: 'Full autonomous publishing (--publish) is not implemented. '
-      + `${AUTOPUBLISH_ENV_VAR} does not grant this capability yet -- the merge / Cloudflare-wait / `
-      + 'live-route-verification / DB-publish state machine has not been built (see "Exact publication '
-      + 'ordering" in docs/education/AIMT-EDUCATION-OPERATIONS-v1.md). To persist an already-approved, '
-      + 'prepared AUTO_READY clearance record as a NON-PUBLIC ready_for_page_builder row (never sets '
-      + 'status=\'published\'), use --persist-clearance instead.',
-  };
 }
 
 /**
@@ -1394,9 +2142,22 @@ async function main() {
   console.log(`=== AIMT Education Operations v1 (mode: --${args.mode}) ===`);
 
   if (args.mode === 'publish') {
-    const refusal = runFullAutopublishRefusal();
-    console.log(refusal.reason);
-    process.exit(0);
+    if (!args.topic) {
+      console.log('--publish requires --topic=<slug> -- refusing to guess which already-cleared candidate to publish.');
+      process.exit(1);
+    }
+    const report = await runPublicationPipeline(process.env, { topicSlug: args.topic });
+    const reportPath = persistRunReport(report);
+    console.log(`[report] ${report.final_state} -- written to ${path.relative(ROOT, reportPath)}`);
+    console.log(JSON.stringify(report, null, 2));
+    try {
+      const io = buildGithubIssueIo();
+      const outcome = await surfaceExceptionIfNeeded(report, io);
+      if (outcome.action !== 'NONE') console.log(`[exception] ${outcome.action} issue for final_state=${report.final_state}: ${outcome.issue && outcome.issue.url}`);
+    } catch (err) {
+      console.warn(`[exception] surfacing failed (this never fails the run itself): ${err.message}`);
+    }
+    process.exit(report.final_state === RUN_FINAL_STATE.PUBLISH_FAILED || report.final_state === RUN_FINAL_STATE.INFRA_REVIEW || report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED ? 1 : 0);
   }
 
   if (args.mode === 'persist-clearance') {

@@ -22,7 +22,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
-  parseArgs, runFullAutopublishRefusal, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
+  parseArgs, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
   AUTOPUBLISH_ENV_VAR, DEFAULT_MAX_PAGES_PER_WEEK,
   isResearchGapLoopEnabled, RESEARCH_GAP_LOOP_ENV_VAR,
 } from '../scripts/education-operations-cycle.mjs';
@@ -581,27 +581,19 @@ async function testFreshnessInvokedAndIndependentOfNewPageLane() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Corrected CLI command semantics: --publish is reserved and always
-// refuses (full autonomous publishing is not implemented); the renamed
-// --persist-clearance is what the old --publish actually did, and stays
-// gated behind AUTOPUBLISH_ENABLED. Neither can ever mark a DB row
-// status='published' -- that column value doesn't exist on either path.
+// Corrected CLI command semantics: --publish now runs the production
+// publish state machine (runPublicationPipeline() -- see
+// tests/education-publication-pipeline.test.mjs for its full behavior);
+// --persist-clearance remains the separate, simpler non-public-clearance
+// write, still gated behind AUTOPUBLISH_ENABLED. Neither can ever mark a
+// DB row status='published' without runPublicationPipeline's own
+// merge/deploy/live-verify sequence completing first.
 // ─────────────────────────────────────────────────────────────────────────
 (function testParseArgsRecognizesBothFlags() {
   check('CLI_SEMANTICS', '--persist-clearance parses to mode "persist-clearance"', parseArgs(['--persist-clearance']).mode === 'persist-clearance');
-  check('CLI_SEMANTICS', '--publish still parses (reserved, always refuses)', parseArgs(['--publish']).mode === 'publish');
+  check('CLI_SEMANTICS', '--publish parses to mode "publish"', parseArgs(['--publish']).mode === 'publish');
+  check('CLI_SEMANTICS', '--topic=<slug> is parsed alongside --publish', parseArgs(['--publish', '--topic=alopecia-areata']).topic === 'alopecia-areata');
   check('CLI_SEMANTICS', '--from-prepared=<path> is still parsed alongside either flag', parseArgs(['--persist-clearance', '--from-prepared=/tmp/x.json']).fromPrepared === '/tmp/x.json');
-})();
-
-(function testPublishAlwaysRefusesRegardlessOfAutopublish() {
-  const refusalWithAutopublishOff = runFullAutopublishRefusal();
-  check('CLI_SEMANTICS', '--publish refuses when AUTOPUBLISH is off', refusalWithAutopublishOff.ran === false && refusalWithAutopublishOff.ok === false);
-  check('CLI_SEMANTICS', '--publish refusal names it as not implemented', refusalWithAutopublishOff.reason.includes('not implemented'), refusalWithAutopublishOff.reason);
-  check('CLI_SEMANTICS', '--publish refusal points to --persist-clearance instead', refusalWithAutopublishOff.reason.includes('--persist-clearance'));
-  // The function takes no env/args at all -- there is no way to make it
-  // "run" through any input, proving full autonomous publish is
-  // unconditionally unavailable, not just unavailable by default.
-  check('CLI_SEMANTICS', 'runFullAutopublishRefusal takes no arguments (cannot be parameterized into running)', runFullAutopublishRefusal.length === 0);
 })();
 
 async function testPersistClearanceRefusesWithoutAutopublishEnabled() {
@@ -617,10 +609,10 @@ async function testPersistClearanceRefusesWithoutFromPreparedPath() {
 }
 
 async function testNoCommandCanMarkStatusPublished() {
-  // --publish: structurally cannot write anything (no write path exists
-  // in the function at all).
-  const publishRefusal = runFullAutopublishRefusal();
-  check('NO_COMMAND_MARKS_PUBLISHED', '--publish has no write capability -- refusal carries no writeFn/result of any kind', !('result' in publishRefusal) && !('writeFn' in publishRefusal));
+  // --publish: with AUTOPUBLISH off, runPublicationPipeline() never even
+  // reaches a write-capable io function -- proven exhaustively in
+  // tests/education-publication-pipeline.test.mjs (AUTOPUBLISH_GATE
+  // fixture). Not re-proven here to avoid duplicating that suite.
 
   // --persist-clearance: publishPreparedArtifact() (education-synthesis-
   // cache.mjs) re-verifies the artifact's OWN integrity BEFORE ever
@@ -1552,7 +1544,6 @@ async function testLegacyRunWithNoCandidateBundleStillReachesShadowCandidateRead
 
 function testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume() {
   check('SAFETY_INVARIANTS', 'AUTOPUBLISH is not enabled in the fake env every resume test above uses', isAutopublishEnabled(FAKE_ENV_WITH_CRED) === false);
-  check('SAFETY_INVARIANTS', '--publish still unconditionally refuses regardless of any candidate-resume state', runFullAutopublishRefusal().ok === false);
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -1872,7 +1863,6 @@ async function testGapResolveFailureFailsClosedAsInfraReviewNotUncaughtThrow() {
 
 function testResearchGapLoopSafetyInvariants() {
   check('RESEARCH_GAP_SAFETY_INVARIANTS', 'S: AUTOPUBLISH is not enabled in either fake env used by these tests', isAutopublishEnabled(FAKE_ENV_WITH_CRED) === false && isAutopublishEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === false);
-  check('RESEARCH_GAP_SAFETY_INVARIANTS', 'T: --publish still unconditionally refuses regardless of the research-gap loop flag', runFullAutopublishRefusal().ok === false);
   check('RESEARCH_GAP_SAFETY_INVARIANTS', 'the research-gap loop flag and AUTOPUBLISH are independent -- enabling one never implies the other', isResearchGapLoopEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === true && isAutopublishEnabled(FAKE_ENV_WITH_GAP_LOOP_ENABLED) === false);
 }
 

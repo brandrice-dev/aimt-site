@@ -42,6 +42,15 @@ export const RUN_FINAL_STATE = Object.freeze({
   // the loop disabled, EVIDENCE_INSUFFICIENCY still maps to the ordinary
   // HUMAN_REVIEW state above, unchanged.
   RESEARCH_GAP_QUEUED: 'RESEARCH_GAP_QUEUED',
+  // PRODUCTION PUBLISH LANE: a publish run reached (or was already at)
+  // PR_OPEN -- candidate verified, artifacts generated, PR open/resumed
+  // -- and stopped there because AIMT_EDUCATION_AUTOPUBLISH_ENABLED is
+  // not exactly "true". This is a NORMAL, expected, routine stop (the
+  // whole point of the gate), never a failure -- deliberately absent
+  // from education-exception-reporter.mjs's FINAL_STATE_TO_LABEL map so
+  // it never creates a GitHub Issue, exactly like NO_OP_SUCCESS/
+  // SHADOW_CANDIDATE_READY/PUBLISHED.
+  AUTOPUBLISH_GATE_CLOSED: 'AUTOPUBLISH_GATE_CLOSED',
 });
 
 /**
