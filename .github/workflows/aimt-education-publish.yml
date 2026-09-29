@@ -1,11 +1,11 @@
 name: AIMT Education Publish
 
-# SEPARATE from AIMT Education Operations (the --shadow workflow), which
-# stays contents:read/no-PR-power. This workflow is the ONLY one with
-# merge/publish authority, and it is manual-dispatch only -- never a
-# cron -- while AIMT_EDUCATION_AUTOPUBLISH_ENABLED remains false. See
-# docs/education/AIMT-EDUCATION-OPERATIONS-v1.md's "Production publish
-# lane" section.
+# The production publisher remains separate from the read-only Education
+# Operations shadow workflow. Manual publishing still works exactly as
+# before. Scheduled publication may begin only from the exact successful,
+# scheduled AIMT Education Operations run on main in this repository, and
+# only when that exact run's report says SHADOW_CANDIDATE_READY.
+
 on:
   workflow_dispatch:
     inputs:
@@ -14,26 +14,134 @@ on:
         required: true
         type: string
 
+  workflow_run:
+    workflows: ["AIMT Education Operations"]
+    types: [completed]
+
 concurrency:
   group: aimt-education-publish
   cancel-in-progress: false
 
-# LEAST PRIVILEGE for what --publish actually does: it may push a
-# generated branch, open AND merge a PR (contents/pull-requests write),
-# read artifacts from the shadow workflow (actions:read), and file an
-# exception issue on PUBLISH_FAILED (issues:write). It never needs
-# anything beyond that -- no admin, no workflow-file write, no packages.
-permissions:
-  actions: read
-  checks: read
-  contents: write
-  pull-requests: write
-  issues: write
-
 jobs:
+  scheduled-handoff:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.name == 'AIMT Education Operations' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'schedule' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.repository.full_name == github.repository
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      actions: read
+      contents: read
+
+    outputs:
+      should_publish: ${{ steps.decide.outputs.should_publish }}
+      topic: ${{ steps.decide.outputs.topic }}
+      source_run_id: ${{ github.event.workflow_run.id }}
+
+    steps:
+      - name: Download run report from exact triggering shadow run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p research-import/education-ops/runs
+
+          gh run download "${{ github.event.workflow_run.id }}" \
+            --repo "${{ github.repository }}" \
+            --name "education-ops-shadow-${{ github.event.workflow_run.id }}" \
+            --dir research-import/education-ops/runs
+
+      - name: Decide scheduled publication from exact run report
+        id: decide
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t reports < <(
+            find research-import/education-ops/runs \
+              -type f \
+              -name '*.json' \
+              -print | sort
+          )
+
+          if [ "${#reports[@]}" -ne 1 ]; then
+            echo "Expected exactly one run-report JSON from the triggering shadow run; found ${#reports[@]}." >&2
+            exit 1
+          fi
+
+          report="${reports[0]}"
+
+          jq -e 'type == "object"' "$report" >/dev/null
+
+          final_state="$(
+            jq -er '.final_state | select(type == "string" and length > 0)' "$report"
+          )"
+
+          selected_topic="$(
+            jq -r '
+              if (.selected_topic | type) == "string"
+              then .selected_topic
+              else ""
+              end
+            ' "$report"
+          )"
+
+          case "$final_state" in
+            SHADOW_CANDIDATE_READY)
+              if [[ ! "$selected_topic" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+                echo "SHADOW_CANDIDATE_READY requires a valid selected_topic slug." >&2
+                exit 1
+              fi
+
+              echo "should_publish=true" >> "$GITHUB_OUTPUT"
+              echo "topic=$selected_topic" >> "$GITHUB_OUTPUT"
+
+              echo "Scheduled Education candidate ready: $selected_topic"
+              ;;
+
+            NO_OP_SUCCESS|CONFIG_BLOCKED|HUMAN_REVIEW|EDITORIAL_REVIEW|INFRA_REVIEW|FRESHNESS_FLAGGED|RESEARCH_GAP_QUEUED|PUBLISH_FAILED|PUBLISHED|AUTOPUBLISH_GATE_CLOSED)
+              echo "should_publish=false" >> "$GITHUB_OUTPUT"
+              echo "topic=" >> "$GITHUB_OUTPUT"
+
+              echo "Shadow run ended in $final_state; scheduled publication is an intentional no-op."
+              ;;
+
+            *)
+              echo "Unrecognized final_state '$final_state'; refusing scheduled handoff." >&2
+              exit 1
+              ;;
+          esac
+
   publish-cycle:
+    needs: [scheduled-handoff]
+
+    if: >-
+      always() &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'workflow_run' &&
+          needs.scheduled-handoff.result == 'success' &&
+          needs.scheduled-handoff.outputs.should_publish == 'true'
+        )
+      )
+
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    permissions:
+      actions: read
+      checks: read
+      contents: write
+      pull-requests: write
+      issues: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,29 +156,45 @@ jobs:
           git config user.name "aimt-education-ops[bot]"
           git config user.email "aimt-education-ops@users.noreply.github.com"
 
-      - name: Restore durable candidate bundles (read-only -- never regenerated here)
+      - name: Restore durable candidate bundles
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ needs.scheduled-handoff.outputs.source_run_id }}
         run: |
           set -euo pipefail
           mkdir -p research-import/education-ops/candidates
 
-          latest_run_id="$(
-            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=education-candidate-bundles&per_page=100" \
-              --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
-          )"
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            if [ -z "$SOURCE_RUN_ID" ]; then
+              echo "Missing exact source run ID for scheduled publication." >&2
+              exit 1
+            fi
 
-          if [ -n "$latest_run_id" ]; then
-            echo "Restoring candidate bundles from workflow run $latest_run_id"
-            gh run download "$latest_run_id" \
+            echo "Restoring candidate bundles from exact triggering Education Operations run $SOURCE_RUN_ID"
+
+            gh run download "$SOURCE_RUN_ID" \
               --repo "$GITHUB_REPOSITORY" \
               --name education-candidate-bundles \
               --dir research-import/education-ops/candidates
           else
-            echo "No durable candidate bundle artifact found -- runPublicationPipeline will refuse (INFRA_REVIEW), never regenerate one."
+            latest_run_id="$(
+              gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=education-candidate-bundles&per_page=100" \
+                --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
+            )"
+
+            if [ -n "$latest_run_id" ]; then
+              echo "Restoring candidate bundles from workflow run $latest_run_id"
+
+              gh run download "$latest_run_id" \
+                --repo "$GITHUB_REPOSITORY" \
+                --name education-candidate-bundles \
+                --dir research-import/education-ops/candidates
+            else
+              echo "No durable candidate bundle artifact found -- runPublicationPipeline will refuse (INFRA_REVIEW), never regenerate one."
+            fi
           fi
 
-      - name: Restore durable publication manifests (cross-run resume state)
+      - name: Restore durable publication manifests
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -84,6 +208,7 @@ jobs:
 
           if [ -n "$latest_run_id" ]; then
             echo "Restoring publication manifests from workflow run $latest_run_id"
+
             gh run download "$latest_run_id" \
               --repo "$GITHUB_REPOSITORY" \
               --name education-publication-state \
@@ -99,7 +224,8 @@ jobs:
           AIMT_EDUCATION_AUTOPUBLISH_ENABLED: ${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}
           AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/education-operations-cycle.mjs --publish --topic="${{ inputs.topic }}"
+          TOPIC_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.topic || needs.scheduled-handoff.outputs.topic }}
+        run: node scripts/education-operations-cycle.mjs --publish --topic="$TOPIC_INPUT"
 
       - name: Upload run report
         uses: actions/upload-artifact@v4
