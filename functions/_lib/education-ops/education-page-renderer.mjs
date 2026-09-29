@@ -55,9 +55,20 @@ function slugForToc(sectionId) {
   return escapeHtml(sectionId);
 }
 
+// EMPTY-SECTION CORRECTION: a Page Plan section with zero units is
+// content-free -- the Page Plan itself is allowed to retain it as an
+// auditable artifact (never mutated here to hide it), but the renderer
+// must never display an empty heading/section or link to it from the
+// TOC. Rendered TOC and rendered article sections must stay consistent
+// with each other, which is why both renderTocLinks() and
+// renderSections() share this exact same filter.
+function hasRenderableUnits(section) {
+  return Array.isArray(section.units) && section.units.length > 0;
+}
+
 function renderTocLinks(plan) {
   const links = [
-    ...plan.sections.map((s) => `<a href="#${slugForToc(s.section_id)}">${escapeHtml(s.heading)}</a>`),
+    ...plan.sections.filter(hasRenderableUnits).map((s) => `<a href="#${slugForToc(s.section_id)}">${escapeHtml(s.heading)}</a>`),
     `<a href="#scope">Scope &amp; limitations</a>`,
     `<a href="#key-takeaways">Key takeaways</a>`,
     `<a href="#sources">Sources</a>`,
@@ -67,7 +78,7 @@ function renderTocLinks(plan) {
 }
 
 function renderSections(plan) {
-  return plan.sections.map((s) => `
+  return plan.sections.filter(hasRenderableUnits).map((s) => `
     <section class="aimt-legal-doc__section" id="${slugForToc(s.section_id)}">
       <h2>${escapeHtml(s.heading)}</h2>
       ${s.units.map(renderUnit).join('\n      ')}

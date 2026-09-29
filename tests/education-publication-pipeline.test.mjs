@@ -26,6 +26,7 @@ const CLUSTER = 'hair-loss-shedding';
 const HASH = 'gsh-alopecia-areata-abc123';
 const HEAD_SHA = 'a'.repeat(40);
 const MERGE_SHA = 'b'.repeat(40);
+const REFRESHED_HEAD_SHA = 'd'.repeat(40);
 
 const FAKE_ENV_AUTOPUBLISH_OFF = { SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'fake', AIMT_EDUCATION_AUTOPUBLISH_ENABLED: 'false', GITHUB_REPOSITORY: 'brandrice-dev/aimt-site' };
 const FAKE_ENV_AUTOPUBLISH_ON = { ...FAKE_ENV_AUTOPUBLISH_OFF, AIMT_EDUCATION_AUTOPUBLISH_ENABLED: 'true' };
@@ -101,6 +102,15 @@ function makeHappyIo({ manifestStore = new Map(), bundle, existingPr = null, exi
       hubPath: 'education/hair-loss.html', sitemapPath: 'sitemap.xml', allowlistResult: { valid: true, allowed: [], violations: [] },
     }),
     openLaunchPrFn: () => ({ branch: `education-ops/publish-${TOPIC_SLUG}`, prNumber: 100, prUrl: 'https://github.com/brandrice-dev/aimt-site/pull/100', headRefOid: HEAD_SHA }),
+    // NEVER the real git-shelling implementation -- a test that forgets
+    // to override this must still never touch a real branch/remote.
+    // Defaults to the REALISTIC common case: regeneration produced
+    // byte-identical output (nothing to refresh), so the head SHA stays
+    // exactly what ghPrViewFn already reports -- this keeps every
+    // existing multi-run test's `manifest.generated.expected_head_sha`
+    // stable across repeated calls. Tests exercising an actual renderer
+    // change override this explicitly with changed:true.
+    refreshLaunchPrArticleFn: async () => ({ changed: false, headRefOid: HEAD_SHA, changedPaths: [] }),
     ghPrListForBranchFn: () => existingPr,
     ghPrViewFn: (n) => ({ number: n, state: 'OPEN', headRefOid: HEAD_SHA, files: [{ path: educationArticlePathFromRoute(ROUTE) }, { path: 'sitemap.xml' }, { path: `functions/_data/education-page-plans/${TOPIC_SLUG}.json` }, { path: 'education/hair-loss.html' }] }),
     ghPrMergeFn: (n) => ({ number: n, state: 'MERGED', mergeCommitOid: MERGE_SHA }),
@@ -671,6 +681,113 @@ function testGhPrCreateArgsNeverIncludeTheUnsupportedJsonFlag() {
   check('GH_PR_CREATE_ARGS', 'targets the exact deterministic branch as the head', args.includes('--head') && args[args.indexOf('--head') + 1] === `education-ops/publish-${TOPIC_SLUG}`);
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// PR_OPEN + AUTOPUBLISH-false REFRESH (empty-section renderer hotfix):
+// a deterministic renderer change reaches an ALREADY-OPEN generated PR
+// in place -- never a second PR, never a merge, never a clearance
+// write, never a model call.
+// ─────────────────────────────────────────────────────────────────────────
+function seedPrOpenManifest(bundle) {
+  return (async () => {
+    const { buildPublicationManifest, advancePublicationManifest, computePreparedArtifactDigest } = await import('../functions/_lib/education-ops/education-publication-state.mjs');
+    const digest = await computePreparedArtifactDigest(bundle.prepared_artifact);
+    let seeded = buildPublicationManifest({ runId: 'run-2', topicSlug: TOPIC_SLUG, route: ROUTE, cluster: CLUSTER, generationSourceHash: HASH, preparedArtifactDigest: digest, candidateOriginatingRunId: bundle.originating_run_id });
+    seeded = advancePublicationManifest(seeded, { state: PUBLICATION_STATE.PR_OPEN, generated: { branch: `education-ops/publish-${TOPIC_SLUG}`, pr_number: 42, pr_url: 'https://github.com/brandrice-dev/aimt-site/pull/42', expected_head_sha: HEAD_SHA } });
+    return seeded;
+  })();
+}
+
+async function testPrOpenRefreshUpdatesExistingPrInPlace() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  manifestStore.set(TOPIC_SLUG, await seedPrOpenManifest(bundle));
+
+  const io = makeHappyIo({ bundle, manifestStore });
+  const refreshSpy = spyFn(async (args) => { refreshSpy.lastCallArgs = args; return { changed: true, headRefOid: REFRESHED_HEAD_SHA, changedPaths: [educationArticlePathFromRoute(ROUTE)] }; });
+  io.refreshLaunchPrArticleFn = refreshSpy;
+  const openSpy = spyFn(io.openLaunchPrFn);
+  io.openLaunchPrFn = openSpy;
+  const mergeSpy = spyFn(io.ghPrMergeFn);
+  io.ghPrMergeFn = mergeSpy;
+  const writeClearanceSpy = spyFn(io.writeClearanceRecordFn);
+  io.writeClearanceRecordFn = writeClearanceSpy;
+  const ghPrListSpy = spyFn(io.ghPrListForBranchFn);
+  io.ghPrListForBranchFn = ghPrListSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_OFF, { topicSlug: TOPIC_SLUG, io });
+
+  check('PR_OPEN_REFRESH', 'test #4: regenerates via the deterministic renderer refresh path', refreshSpy.callCount === 1);
+  check('PR_OPEN_REFRESH', 'test #4: passes the SAME persisted plan/prepared-artifact through, never re-derived', refreshSpy.lastCallArgs.plan === bundle.page_plan && refreshSpy.lastCallArgs.preparedArtifact === bundle.prepared_artifact);
+  check('PR_OPEN_REFRESH', 'test #4: updates the existing PR branch (same branch, same PR number)', refreshSpy.lastCallArgs.branch === `education-ops/publish-${TOPIC_SLUG}` && refreshSpy.lastCallArgs.topicSlug === TOPIC_SLUG);
+  check('PR_OPEN_REFRESH', 'test #4: records the new head SHA on the manifest', manifestStore.get(TOPIC_SLUG).generated.expected_head_sha === REFRESHED_HEAD_SHA);
+  check('PR_OPEN_REFRESH', 'test #4: the SAME PR number is retained (never replaced)', manifestStore.get(TOPIC_SLUG).generated.pr_number === 42);
+  check('PR_OPEN_REFRESH', 'test #4: remains AUTOPUBLISH_GATE_CLOSED', report.final_state === RUN_FINAL_STATE.AUTOPUBLISH_GATE_CLOSED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
+  check('PR_OPEN_REFRESH', 'test #5: never opens a second PR', openSpy.callCount === 0);
+  check('PR_OPEN_REFRESH', 'test #5: never even lists for an adoptable PR (already recorded, not resuming PREPARED)', ghPrListSpy.callCount === 0);
+  check('PR_OPEN_REFRESH', 'test #6: zero model calls', report.model_calls.total_calls === 0);
+  check('PR_OPEN_REFRESH', 'test #7: never writes clearance', writeClearanceSpy.callCount === 0);
+  check('PR_OPEN_REFRESH', 'test #8: never merges', mergeSpy.callCount === 0);
+}
+
+async function testPrOpenRefreshIsANoOpWhenRegeneratedOutputIsUnchanged() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  manifestStore.set(TOPIC_SLUG, await seedPrOpenManifest(bundle));
+
+  const io = makeHappyIo({ bundle, manifestStore });
+  const refreshSpy = spyFn(async () => ({ changed: false, headRefOid: HEAD_SHA, changedPaths: [] }));
+  io.refreshLaunchPrArticleFn = refreshSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_OFF, { topicSlug: TOPIC_SLUG, io });
+  check('PR_OPEN_REFRESH_NOOP', 'regeneration was attempted', refreshSpy.callCount === 1);
+  check('PR_OPEN_REFRESH_NOOP', 'byte-identical output leaves expected_head_sha exactly as it was', manifestStore.get(TOPIC_SLUG).generated.expected_head_sha === HEAD_SHA);
+  check('PR_OPEN_REFRESH_NOOP', 'still reports AUTOPUBLISH_GATE_CLOSED', report.final_state === RUN_FINAL_STATE.AUTOPUBLISH_GATE_CLOSED);
+}
+
+// test #9: unrelated PR-head modification fails closed -- never blindly
+// blesses a changed PR head.
+async function testUnrelatedPrHeadModificationFailsClosed() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  manifestStore.set(TOPIC_SLUG, await seedPrOpenManifest(bundle));
+
+  const io = makeHappyIo({ bundle, manifestStore });
+  // A human (or anything else) pushed an unrelated commit to the SAME
+  // branch since expected_head_sha was last recorded.
+  io.ghPrViewFn = (n) => ({ number: n, state: 'OPEN', headRefOid: 'c'.repeat(40), files: [{ path: educationArticlePathFromRoute(ROUTE) }] });
+  const refreshSpy = spyFn(async () => ({ changed: true, headRefOid: REFRESHED_HEAD_SHA, changedPaths: [] }));
+  io.refreshLaunchPrArticleFn = refreshSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_OFF, { topicSlug: TOPIC_SLUG, io });
+  check('UNRELATED_HEAD_MOD_FAILS_CLOSED', 'test #9: final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('UNRELATED_HEAD_MOD_FAILS_CLOSED', 'test #9: regeneration is never attempted once the head has moved unexpectedly', refreshSpy.callCount === 0);
+  check('UNRELATED_HEAD_MOD_FAILS_CLOSED', 'the manifest expected_head_sha is left exactly as it was -- never blindly blessed', manifestStore.get(TOPIC_SLUG).generated.expected_head_sha === HEAD_SHA);
+}
+
+// test #10: candidate/hash/digest mismatch fails closed even at the
+// PR_OPEN refresh point (same structural protection
+// testPreparedArtifactDigestSurvivesAcrossRunsAndDriftFailsClosed proves
+// earlier in the pipeline -- proven again here specifically with a
+// PR_OPEN-stage manifest, since that is the exact stage this hotfix's
+// refresh path operates at).
+async function testCandidateDigestMismatchAtPrOpenFailsClosed() {
+  const bundle = makeReadyBundle();
+  const manifestStore = new Map();
+  manifestStore.set(TOPIC_SLUG, await seedPrOpenManifest(bundle));
+
+  // A DIFFERENT candidate bundle for the SAME topic_slug/route (as if
+  // the local candidate-bundle artifact were replaced/corrupted) --
+  // its prepared_artifact digest will not match the manifest's.
+  const mutatedBundle = makeReadyBundle({ prepared_artifact: { ...bundle.prepared_artifact, record: { ...bundle.prepared_artifact.record, publication_clearance: { fingerprint_input: { risk_tier: 'MODERATE' } } } } });
+  const io = makeHappyIo({ bundle: mutatedBundle, manifestStore });
+  const refreshSpy = spyFn(async () => ({ changed: true, headRefOid: REFRESHED_HEAD_SHA, changedPaths: [] }));
+  io.refreshLaunchPrArticleFn = refreshSpy;
+
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_OFF, { topicSlug: TOPIC_SLUG, io });
+  check('DIGEST_MISMATCH_AT_PR_OPEN', 'test #10: final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, report.final_state);
+  check('DIGEST_MISMATCH_AT_PR_OPEN', 'test #10: refresh is never attempted for a mismatched candidate', refreshSpy.callCount === 0);
+}
+
 // ---- Report ----
 const tests = [
   testFullHappyPathReachesPublishedWithZeroModelCalls,
@@ -697,6 +814,10 @@ const tests = [
   testPublishedWithDifferentGenerationHashFailsClosed,
   testEducationArticlePathFromRouteNeverDoublesEducationPrefix,
   testGhPrCreateArgsNeverIncludeTheUnsupportedJsonFlag,
+  testPrOpenRefreshUpdatesExistingPrInPlace,
+  testPrOpenRefreshIsANoOpWhenRegeneratedOutputIsUnchanged,
+  testUnrelatedPrHeadModificationFailsClosed,
+  testCandidateDigestMismatchAtPrOpenFailsClosed,
 ];
 for (const t of tests) await t();
 
