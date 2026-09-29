@@ -106,6 +106,9 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
+export const LIVE_VERIFY_MAX_ATTEMPTS = 12;
+export const LIVE_VERIFY_RETRY_DELAY_MS = 5 * 1000;
+
 /** Convert a canonical Education route to its repository HTML path.
  * Example: /education/hair-loss/alopecia-areata ->
  * education/hair-loss/alopecia-areata.html.
@@ -1708,6 +1711,53 @@ function buildRealPublishIo(env) {
     verifyStoredClearanceIntegrityFn: verifyStoredClearanceIntegrity,
     waitForDeploymentFn: (args) => waitForCloudflareProductionDeployment(args, {}),
     fetchLiveArtifactsFn: fetchLivePublicationArtifacts,
+    sleepFn: (ms) => new Promise((resolve) => { setTimeout(resolve, ms); }),
+  };
+}
+
+/**
+ * Bounded post-deploy live verification. Cloudflare's successful check
+ * run proves the exact merge commit finished deploying, but the custom
+ * domain's edge cache can still expose mixed propagation for a few
+ * seconds (for example, the new article + sitemap are current while the
+ * cluster hub is momentarily stale). Every attempt repeats the FULL
+ * verification contract; nothing is weakened or selectively waived.
+ * The DB remains non-public until one attempt passes every check.
+ */
+export async function waitForLivePublicationVerification({
+  fetchLiveArtifactsFn, sleepFn, route, clusterKey, expectedGenerationSourceHash,
+  maxAttempts = LIVE_VERIFY_MAX_ATTEMPTS, retryDelayMs = LIVE_VERIFY_RETRY_DELAY_MS,
+}) {
+  let lastVerification = null;
+  let lastFetchError = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const liveArtifacts = await fetchLiveArtifactsFn({ route, clusterKey });
+      lastFetchError = null;
+      lastVerification = verifyLivePagePublication({
+        httpStatus: liveArtifacts.httpStatus,
+        html: liveArtifacts.html,
+        sitemapXml: liveArtifacts.sitemapXml,
+        hubHtml: liveArtifacts.hubHtml,
+        expectedRoute: route,
+        expectedGenerationSourceHash,
+      });
+      if (lastVerification.ok) {
+        return { ok: true, attempts: attempt, verification: lastVerification, fetchError: null };
+      }
+    } catch (err) {
+      lastFetchError = err;
+    }
+
+    if (attempt < maxAttempts) await sleepFn(retryDelayMs);
+  }
+
+  return {
+    ok: false,
+    attempts: maxAttempts,
+    verification: lastVerification,
+    fetchError: lastFetchError,
   };
 }
 
@@ -2120,24 +2170,29 @@ export async function runPublicationPipeline(env, options = {}) {
   //     only after re-verifying the live page") -> guarded
   //     publishClearanceRecord() -> post-write integrity ---------------
   if ((stage() === PUBLICATION_STATE.MERGED && manifest.deployment.state === 'success') || stage() === PUBLICATION_STATE.LIVE_VERIFIED) {
-    let liveArtifacts;
-    try {
-      liveArtifacts = await io.fetchLiveArtifactsFn({ route: bundle.route, clusterKey });
-    } catch (err) {
-      persistManifest({ lastFailure: { stage: 'LIVE_VERIFY', reason: err.message, at: new Date().toISOString() } });
-      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Live verification fetch failed: ${err.message}` });
-    }
-    const liveVerification = verifyLivePagePublication({
-      httpStatus: liveArtifacts.httpStatus, html: liveArtifacts.html, sitemapXml: liveArtifacts.sitemapXml, hubHtml: liveArtifacts.hubHtml,
-      expectedRoute: bundle.route, expectedGenerationSourceHash: bundle.generation_source_hash,
+    const liveWait = await waitForLivePublicationVerification({
+      fetchLiveArtifactsFn: io.fetchLiveArtifactsFn,
+      sleepFn: io.sleepFn,
+      route: bundle.route,
+      clusterKey,
+      expectedGenerationSourceHash: bundle.generation_source_hash,
     });
-    if (!liveVerification.ok) {
+    if (!liveWait.ok) {
+      const liveVerification = liveWait.verification;
+      const reason = liveWait.fetchError && !liveVerification
+        ? `Live verification fetch failed after ${liveWait.attempts} attempt(s): ${liveWait.fetchError.message}`
+        : `Live verification failed after ${liveWait.attempts} attempt(s): ${(liveVerification && liveVerification.violations || []).join(', ')} -- the DB row is never published without this passing.`;
       persistManifest({
-        liveVerification: { passed: false, checked_at: new Date().toISOString(), checks: liveVerification.checks },
-        lastFailure: { stage: 'LIVE_VERIFY', reason: liveVerification.violations.join(', '), at: new Date().toISOString() },
+        liveVerification: {
+          passed: false,
+          checked_at: new Date().toISOString(),
+          checks: liveVerification ? liveVerification.checks : null,
+        },
+        lastFailure: { stage: 'LIVE_VERIFY', reason, at: new Date().toISOString() },
       });
-      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `Live verification failed: ${liveVerification.violations.join(', ')} -- the DB row is never published without this passing.` });
+      return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: reason });
     }
+    const liveVerification = liveWait.verification;
     persistManifest({ state: PUBLICATION_STATE.LIVE_VERIFIED, liveVerification: { passed: true, checked_at: new Date().toISOString(), checks: liveVerification.checks } });
 
     // Idempotency (test #25 / crash-recovery #6): a row already
