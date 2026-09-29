@@ -1,0 +1,308 @@
+{
+  "topic_slug": "alopecia-areata",
+  "page_plan_version": "education-page-plan-v1",
+  "plan": {
+    "topic_slug": "alopecia-areata",
+    "cluster": "hair-loss-shedding",
+    "route": "/education/hair-loss/alopecia-areata",
+    "title": "Alopecia Areata: A Practitioner Education Overview",
+    "meta_description": "A conceptual, non-diagnostic overview of alopecia areata as an immune-mediated hair loss condition, written to help beauty and scalp-care practitioners recognize when referral to dermatology is appropriate.",
+    "h1": "Alopecia Areata: A Practitioner Education Overview",
+    "answer_summary": {
+      "kind": "PARAPHRASE",
+      "text": "Alopecia areata is generally understood as an immune-mediated condition affecting the hair follicle, in which the follicle's normally protected immune status breaks down and allows immune activity to reach it.",
+      "supporting_claim_ids": [
+        "bertolini-hf-immune-privilege-aa-2020--c01",
+        "bertolini-hf-immune-privilege-aa-2020--c03",
+        "kiselev-immune-niches-hf-2024--c01",
+        "kiselev-immune-niches-hf-2024--c03"
+      ],
+      "source_statements": [
+        "Alopecia areata is generally understood as an immune-mediated condition in which the hair follicle's normally immune-privileged environment breaks down, allowing immune activity to affect the follicle."
+      ]
+    },
+    "sections": [
+      {
+        "section_id": "what-it-is",
+        "heading": "What Alopecia Areata Is",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Alopecia areata is generally understood as an immune-mediated condition in which the hair follicle's normally immune-privileged environment breaks down, allowing immune activity to affect the follicle.",
+            "supporting_claim_ids": [
+              "bertolini-hf-immune-privilege-aa-2020--c01",
+              "bertolini-hf-immune-privilege-aa-2020--c03",
+              "kiselev-immune-niches-hf-2024--c01",
+              "kiselev-immune-niches-hf-2024--c03"
+            ],
+            "source_statements": [
+              "Alopecia areata is generally understood as an immune-mediated condition in which the hair follicle's normally immune-privileged environment breaks down, allowing immune activity to affect the follicle."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "immune-privilege-breakdown",
+        "heading": "How the Immune Privilege Is Thought to Break Down",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "This immune privilege is thought to depend on mechanisms such as limited antigen presentation by follicle cells, and its disruption is associated with immune cell infiltration around affected follicles.",
+            "supporting_claim_ids": [
+              "bertolini-hf-immune-privilege-aa-2020--c02",
+              "bertolini-hf-immune-privilege-aa-2020--c04",
+              "kiselev-immune-niches-hf-2024--c02"
+            ],
+            "source_statements": [
+              "This immune privilege is thought to depend on mechanisms such as limited antigen presentation by follicle cells, and its disruption is associated with immune cell infiltration around affected follicles."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "active-research",
+        "heading": "What's Still Being Studied",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Researchers are actively studying related biological factors, such as scalp/gut microbiome associations and broader hair follicle cycling biology, as areas of ongoing interest rather than established interventions.",
+            "supporting_claim_ids": [
+              "20231001-carrington-gut-skin-microbiome-alopecia--c01",
+              "shah-scalp-microbiome-guide-2024--c03",
+              "tan-lim-lay-hf-modelling-2024--c01",
+              "tan-lim-lay-hf-modelling-2024--c02"
+            ],
+            "source_statements": [
+              "Researchers are actively studying related biological factors, such as scalp/gut microbiome associations and broader hair follicle cycling biology, as areas of ongoing interest rather than established interventions."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "referral-rationale",
+        "heading": "Why This Is a Referral, Not a Salon, Condition",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Alopecia areata is addressed through structured, evidence-graded, multidisciplinary clinical guidelines and patient resources, reflecting that this is a medically managed condition best handled through referral to dermatology rather than salon-based intervention.",
+            "supporting_claim_ids": [
+              "bad-aa-living-guideline-2025--c01",
+              "bad-aa-living-guideline-2025--c02",
+              "bad-aa-living-guideline-2025--c04"
+            ],
+            "source_statements": [
+              "Alopecia areata is addressed through structured, evidence-graded, multidisciplinary clinical guidelines and patient resources, reflecting that this is a medically managed condition best handled through referral to dermatology rather than salon-based intervention."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "human-side",
+        "heading": "The Human Side of a Visible Condition",
+        "units": []
+      }
+    ],
+    "scope_note": "This page is intended to give beauty and scalp-care practitioners a conceptual, non-diagnostic, non-treatment understanding of alopecia areata as an immune-mediated condition and to support appropriate referral to dermatology; it deliberately excludes diagnostic criteria, medication/treatment protocols, and product or procedural recommendations, which are outside AIMT's observational education scope for this page.",
+    "limitations": [
+      {
+        "kind": "VERBATIM",
+        "text": "Clinical guidance for alopecia areata is a living document oriented to a specific health system (UK NHS) and is expected to keep evolving as new evidence emerges, so general awareness content should not be read as fixed or universally applicable.",
+        "supporting_claim_ids": [
+          "bad-aa-living-guideline-2025--c05",
+          "bad-aa-living-guideline-2025--c06"
+        ],
+        "source_statements": [
+          "Clinical guidance for alopecia areata is a living document oriented to a specific health system (UK NHS) and is expected to keep evolving as new evidence emerges, so general awareness content should not be read as fixed or universally applicable."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Microbiome-alopecia association research is based on heterogeneous, largely small studies, and causality between microbiome changes and alopecia areata has not been established.",
+        "supporting_claim_ids": [
+          "20231001-carrington-gut-skin-microbiome-alopecia--c05"
+        ],
+        "source_statements": [
+          "Microbiome-alopecia association research is based on heterogeneous, largely small studies, and causality between microbiome changes and alopecia areata has not been established."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Much of the detailed knowledge about hair follicle biology and cycling comes from animal models and narrative reviews, with incomplete validation in humans.",
+        "supporting_claim_ids": [
+          "tan-lim-lay-hf-modelling-2024--c05"
+        ],
+        "source_statements": [
+          "Much of the detailed knowledge about hair follicle biology and cycling comes from animal models and narrative reviews, with incomplete validation in humans."
+        ]
+      }
+    ],
+    "key_takeaways": [
+      {
+        "kind": "VERBATIM",
+        "text": "Alopecia areata is generally understood as an immune-mediated condition in which the hair follicle's normally immune-privileged environment breaks down, allowing immune activity to affect the follicle.",
+        "supporting_claim_ids": [
+          "bertolini-hf-immune-privilege-aa-2020--c01",
+          "bertolini-hf-immune-privilege-aa-2020--c03",
+          "kiselev-immune-niches-hf-2024--c01",
+          "kiselev-immune-niches-hf-2024--c03"
+        ],
+        "source_statements": [
+          "Alopecia areata is generally understood as an immune-mediated condition in which the hair follicle's normally immune-privileged environment breaks down, allowing immune activity to affect the follicle."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Alopecia areata is addressed through structured, evidence-graded, multidisciplinary clinical guidelines and patient resources, reflecting that this is a medically managed condition best handled through referral to dermatology rather than salon-based intervention.",
+        "supporting_claim_ids": [
+          "bad-aa-living-guideline-2025--c01",
+          "bad-aa-living-guideline-2025--c02",
+          "bad-aa-living-guideline-2025--c04"
+        ],
+        "source_statements": [
+          "Alopecia areata is addressed through structured, evidence-graded, multidisciplinary clinical guidelines and patient resources, reflecting that this is a medically managed condition best handled through referral to dermatology rather than salon-based intervention."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Researchers are actively studying related biological factors, such as scalp/gut microbiome associations and broader hair follicle cycling biology, as areas of ongoing interest rather than established interventions.",
+        "supporting_claim_ids": [
+          "20231001-carrington-gut-skin-microbiome-alopecia--c01",
+          "shah-scalp-microbiome-guide-2024--c03",
+          "tan-lim-lay-hf-modelling-2024--c01",
+          "tan-lim-lay-hf-modelling-2024--c02"
+        ],
+        "source_statements": [
+          "Researchers are actively studying related biological factors, such as scalp/gut microbiome associations and broader hair follicle cycling biology, as areas of ongoing interest rather than established interventions."
+        ]
+      }
+    ],
+    "visual_recommendation": {
+      "recommendation": "DIAGRAM",
+      "rationale": "A simple conceptual diagram contrasting a follicle in its normal immune-privileged state with one where that privilege has collapsed and immune cells have infiltrated would make the core mechanism of this page easier to grasp at a glance than prose alone, without depicting any diagnostic or treatment content."
+    },
+    "sources": [
+      {
+        "source_id": "20231001-carrington-gut-skin-microbiome-alopecia",
+        "title": "The Gut and Skin Microbiome in Alopecia: Associations and Interventions",
+        "authors": [
+          "Alexis E. Carrington",
+          "Jessica Maloh",
+          "Yvonne Nong",
+          "Oma N. Agbai",
+          "Apple A. Bodemer",
+          "Raja K. Sivamani"
+        ],
+        "year": 2023,
+        "doi": null,
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10617895/"
+      },
+      {
+        "source_id": "bad-aa-living-guideline-2025",
+        "title": "British Association of Dermatologists living guideline for managing people with alopecia areata 2025",
+        "authors": [
+          "Matthew J. Harries",
+          "Alia Ahmed",
+          "Anna Ascott",
+          "Kashif Bhatti",
+          "Joseph Earley",
+          "Paul Farrant",
+          "Susan Holmes",
+          "Amy Johnson",
+          "Abby E. Macbeth",
+          "Andrew G. Messenger",
+          "Julian Pearce",
+          "Anita Takwale",
+          "Andrew R. Thompson",
+          "Maria Hashme",
+          "M. Firouz Mohd Mustapa",
+          "Alina M. Constantin"
+        ],
+        "year": 2026,
+        "doi": "10.1093/bjd/ljaf452",
+        "url": "https://doi.org/10.1093/bjd/ljaf452"
+      },
+      {
+        "source_id": "bertolini-hf-immune-privilege-aa-2020",
+        "title": "Hair follicle immune privilege and its collapse in alopecia areata",
+        "authors": [
+          "Marta Bertolini",
+          "Kevin McElwee",
+          "Amos Gilhar",
+          "Silvia Bulfone-Paus",
+          "Ralf Paus"
+        ],
+        "year": 2020,
+        "doi": "10.1111/exd.14155",
+        "url": "https://doi.org/10.1111/exd.14155"
+      },
+      {
+        "source_id": "kiselev-immune-niches-hf-2024",
+        "title": "Immune niches for hair follicle development and homeostasis",
+        "authors": [
+          "Artem Kiselev",
+          "Sangbum Park"
+        ],
+        "year": 2024,
+        "doi": "10.3389/fphys.2024.1397067",
+        "url": "https://doi.org/10.3389/fphys.2024.1397067"
+      },
+      {
+        "source_id": "shah-scalp-microbiome-guide-2024",
+        "title": "Scalp microbiome: a guide to better understanding scalp diseases and treatments",
+        "authors": [
+          "Rohan R. Shah",
+          "Jorge Larrondo",
+          "Thomas Dawson",
+          "Amy McMichael"
+        ],
+        "year": 2024,
+        "doi": "10.1007/s00403-024-03235-2",
+        "url": "https://doi.org/10.1007/s00403-024-03235-2"
+      },
+      {
+        "source_id": "tan-lim-lay-hf-modelling-2024",
+        "title": "Modelling Human Hair Follicles—Lessons from Animal Models and Beyond",
+        "authors": [
+          "Chew Teng Tan",
+          "Chin Yan Lim",
+          "Kenneth Lay"
+        ],
+        "year": 2024,
+        "doi": "10.3390/biology13050312",
+        "url": "https://www.mdpi.com/2079-7737/13/5/312"
+      }
+    ],
+    "related_links": [
+      {
+        "href": "/education/hair-loss",
+        "label": "Hair Loss & Shedding — AIMT Education Library",
+        "relation": "topic_hub"
+      },
+      {
+        "href": "/education",
+        "label": "AIMT Education Library",
+        "relation": "library_home"
+      },
+      {
+        "href": "/about/research-standards",
+        "label": "How AIMT reviews research and evidence",
+        "relation": "transparency"
+      },
+      {
+        "href": "/education/hair-loss/hair-growth-cycle",
+        "label": "The Hair Growth Cycle: A Practitioner Education Overview",
+        "relation": "related_topic"
+      },
+      {
+        "href": "/education/hair-loss/telogen-effluvium",
+        "label": "Telogen Effluvium: A Practitioner Education Overview",
+        "relation": "related_topic"
+      }
+    ]
+  },
+  "generation_source_hash": "163be857faee2093e8747b923a30eed6494da2b4389a8ef8ad2f250b251c38d3",
+  "prepared_at": "2026-09-29T02:37:05.413Z",
+  "writer_provenance": {
+    "contract_version": "education-writer-v1"
+  }
+}
