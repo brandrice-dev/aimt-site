@@ -4,7 +4,9 @@
    Authenticated server-to-server READ endpoint over the research
    library. Two intended callers, same data, different filters:
 
-     1. Cadence (headspa-proxy Worker) -- answering a student question:
+     1. Cadence -- answering a student question (NOTE: Cadence's own
+        future retrieval calls the shared helper in functions/_lib/
+        research/query.mjs directly, not this HTTP endpoint):
           student question -> query here for relevant evidence
           -> rank/synthesize in the Worker's own prompt
           -> cite the returned source_id/claim_id back to the student
@@ -50,10 +52,11 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { checkBearerAuth } from '../_lib/research/auth.mjs';
-
-const STATUS_RANK = { DISCOVERED: 0, SOURCE_VERIFIED: 1, CLAIM_VERIFIED: 2, AIMT_APPROVED: 3 };
-const DEFAULT_MIN_STATUS = 'CLAIM_VERIFIED';
-const MAX_LIMIT = 100;
+/* The query itself lives in the shared helper so Cadence's research
+   layer (functions/_lib/cadence/research-context.mjs) reuses this exact
+   implementation instead of a second one. This file keeps only the HTTP
+   concerns: method, config, bearer auth, param parsing, response shape. */
+import { queryResearchClaims, DEFAULT_MIN_STATUS } from '../_lib/research/query.mjs';
 
 async function parseParams(request) {
   if (request.method === 'POST') {
@@ -91,51 +94,18 @@ export async function onRequest(context) {
   }
 
   const params = await parseParams(request);
-  if (!STATUS_RANK.hasOwnProperty(params.minStatus)) {
-    return new Response(JSON.stringify({ error: 'invalid_min_status', allowed: Object.keys(STATUS_RANK) }), {
+  const result = await queryResearchClaims(env, params);
+  if (!result.ok && result.error === 'invalid_min_status') {
+    return new Response(JSON.stringify({ error: 'invalid_min_status', allowed: result.allowed }), {
       status: 400, headers: { 'Content-Type': 'application/json' }
     });
   }
-  const minRank = STATUS_RANK[params.minStatus];
-  const allowedStatuses = Object.keys(STATUS_RANK).filter((s) => STATUS_RANK[s] >= minRank);
-  const limit = Math.max(1, Math.min(MAX_LIMIT, Math.floor(params.limit) || 20));
-
-  const qs = new URLSearchParams();
-  qs.set('select', [
-    'claim_id', 'claim_text', 'claim_type', 'direction', 'topics',
-    'verification_status', 'verification_review_status', 'claim_origin',
-    'page_or_section_locator', 'use_status',
-    'source:research_sources(source_id,title,authors,year,doi,url,source_venue,evidence_type,source_role,verification_status)'
-  ].join(','));
-  qs.set('verification_status', `in.(${allowedStatuses.join(',')})`);
-  qs.set('limit', String(limit));
-  /* NOT ordered by verification_status text -- alphabetical order on that
-     column doesn't match the trust ladder (e.g. "AIMT_APPROVED" < "CLAIM_
-     VERIFIED" < "DISCOVERED" < "SOURCE_VERIFIED" alphabetically, which is
-     not the ladder order). Most-recently-verified first is the closest
-     meaningful ordering PostgREST can do without a rank column/view. */
-  qs.set('order', 'verified_on.desc.nullslast');
-  if (params.sourceId) qs.set('source_id', `eq.${params.sourceId}`);
-  if (params.topics.length) qs.set('topics', `ov.{${params.topics.map((t) => t.replace(/[{}",]/g, '')).join(',')}}`);
-  if (params.q && params.q.trim()) {
-    /* websearch_to_tsquery via PostgREST's fts operator against the
-       generated search_vector column (see the migration). */
-    qs.set('search_vector', `wfts.${params.q.trim()}`);
-  }
-
-  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/research_claims?${qs.toString()}`, {
-    headers: {
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
-    }
-  });
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    return new Response(JSON.stringify({ error: 'query_failed', detail: errBody.slice(0, 500) }), {
+  if (!result.ok) {
+    return new Response(JSON.stringify({ error: 'query_failed', detail: result.detail }), {
       status: 502, headers: { 'Content-Type': 'application/json' }
     });
   }
-  const claims = await res.json();
+  const claims = result.claims;
 
   return new Response(JSON.stringify({ query: params, count: claims.length, claims }), {
     headers: { 'Content-Type': 'application/json' }
