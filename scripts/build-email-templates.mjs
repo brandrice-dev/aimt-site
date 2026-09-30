@@ -67,7 +67,9 @@ export const SUPABASE_TEMPLATES = {
       content: [
         paragraph('We received a request to reset the password for your AIMT account. Use the link below to choose a new one.'),
         button({ label: 'Choose New Password', href: CONFIRMATION_URL, width: 250 }),
-        paragraph('This link can be used once and expires soon. If you didn’t request a reset, you can ignore this email; your password won’t change.', { top: 28, size: 13, color: COLORS.muted }),
+        paragraph('If the button doesn’t work, copy and paste the link below into your browser.', { top: 28, size: 13, color: COLORS.muted }),
+        rawLink(CONFIRMATION_URL),
+        paragraph('This link can be used once and expires soon. If you didn’t request a reset, you can ignore this email; your password won’t change.', { top: 18, size: 13, color: COLORS.muted }),
       ].join('\n      '),
     }),
   },

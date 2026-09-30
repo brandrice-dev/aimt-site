@@ -150,6 +150,10 @@ test('Supabase templates use the approved copy', () => {
   for (const s of ['Choose a new password for your AIMT account.', '>Password reset<', '>Reset your password</h1>', 'We received a request to reset the password for your AIMT account. Use the link below to choose a new one.', '>Choose New Password</a>', 'This link can be used once and expires soon. If you didn’t request a reset, you can ignore this email; your password won’t change.']) {
     assert.ok(r.includes(s), s);
   }
+  const fallbackAt = r.indexOf('If the button doesn’t work, copy and paste the link below into your browser.');
+  assert.ok(fallbackAt > r.indexOf('>Choose New Password</a>'), 'reset: fallback sentence sits below the CTA');
+  assert.ok(r.indexOf('>{{ .ConfirmationURL }}</a>', fallbackAt) > fallbackAt, 'reset: raw {{ .ConfirmationURL }} link follows the fallback sentence');
+  assert.ok(r.indexOf('This link can be used once and expires soon.') > r.indexOf('>{{ .ConfirmationURL }}</a>'), 'reset: approved secondary sentence stays last');
   assert.equal(SUPABASE_TEMPLATES['confirm-signup'].subject, 'Confirm your email for AIMT');
   assert.equal(SUPABASE_TEMPLATES['reset-password'].subject, 'Reset your AIMT password');
 });
