@@ -87,6 +87,23 @@ secrets set. `wrangler.toml` states this explicitly.
 
 ---
 
+## E. aimt-site — GitHub Actions secrets and variables
+
+Used by scheduled workflows in `.github/workflows/`, not by the Pages
+runtime. They are set in GitHub → Settings → Secrets and variables → Actions,
+and the System Health panel cannot see them.
+
+| Name | Kind | Used by | Notes |
+|---|---|---|---|
+| `SUPABASE_URL` | secret | Education Operations, Research Feed Ingest | Same value as the Pages copy |
+| `SUPABASE_SERVICE_ROLE_KEY` | secret | Education Operations, Research Feed Ingest | Same value as the Pages copy |
+| `ANTHROPIC_PUBLICATION_EDITOR_API_KEY` | secret | Education Operations | |
+| `ANTHROPIC_EDUCATION_WRITER_API_KEY` | secret | Education Operations | |
+| `RESEARCH_FEED_READ_TOKEN` | secret | Research Feed Ingest | **Owner action required.** A fine-grained PAT scoped ONLY to `brandrice-dev/aimt-research-feed` with **Contents: Read-only**. The workflow fails loudly until it is set. It is never used to write. |
+| `AIMT_EDUCATION_AUTOPUBLISH_ENABLED`, `AIMT_EDUCATION_MAX_PAGES_PER_WEEK`, `AIMT_RESEARCH_GAP_LOOP_ENABLED` | variables | Education Operations | |
+
+---
+
 ## Correction to prior documentation
 
 `DEPLOY-NOTES.md` (Session 1) states `ANTHROPIC_API_KEY` belongs only to
