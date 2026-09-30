@@ -15,9 +15,11 @@
 //     -> planResearchQuery()         fixed lexicon -> topics + search terms
 //     -> queryResearchClaims()       the ONE shared Research Library query
 //                                    (functions/_lib/research/query.mjs)
-//     -> selectEvidence()            trust re-check, relevance floor,
-//                                    dedupe, per-source cap, keep mixed
-//                                    evidence, cap 3-6 claims
+//     -> selectEvidence()            trust re-check, answer-usefulness
+//                                    gate (focus / intent / methods /
+//                                    off-question treatment), answer-value
+//                                    ranking, dedupe, per-source cap, keep
+//                                    mixed evidence, cap 3-6 claims
 //     -> structured, bounded context (never free text, never a verdict)
 //
 // AUTHORITY BOUNDARY: this module decides nothing about checkpoints,
@@ -33,10 +35,16 @@
 // context as today.
 //
 // INJECTION RESISTANCE: the student's text is never sent to the database.
-// Search terms and topics come only from the fixed lexicon below, and the
-// trust threshold is a module constant, not a parameter.
+// Search terms and topics come only from the fixed lexicon in
+// research-lexicon.mjs, and the trust threshold is a module constant, not
+// a parameter.
 
 import { queryResearchClaims, STATUS_RANK } from '../research/query.mjs';
+import {
+  RESEARCH_CONCEPTS, QUESTION_INTENTS, CLAIM_FACETS, INTENT_FACETS, CRUX_INTENTS,
+  RE_METHODS_DESIGN, RE_METHODS_OUTCOME, RE_DRUG_TREATMENT, RE_ENUMERATION,
+  RE_EXCLUSION_CUE, ALTERNATIVE_JOINERS, RE_TRIAL_ARM,
+} from './research-lexicon.mjs';
 
 /* ── Policy constants ─────────────────────────────────────────────── */
 
@@ -63,6 +71,7 @@ export const RESEARCH_CONTEXT_LIMITS = Object.freeze({
   HARD_MAX_CLAIMS: 6,     // absolute ceiling regardless of caller option
   CANDIDATE_POOL: 100,    // rows requested from the shared query (= its MAX_LIMIT)
   MAX_PER_SOURCE: 2,      // avoid one paper dominating the set
+  MAX_QUERIES: 3,         // parallel per-focus-unit queries (one round trip each)
   MAX_QUESTION_CHARS: 2000,
   TIMEOUT_MS: 2500,
 });
@@ -114,104 +123,17 @@ function termOccurs(term, paddedStemmedText) {
   return needle.trim().length > 0 && paddedStemmedText.includes(needle);
 }
 
-/* ── Concept lexicon ──────────────────────────────────────────────── */
-/* Each concept maps student phrasing (patterns) to the Research Library's
-   CONTROLLED_TOPICS (functions/_lib/research/schema.mjs) and a small set
-   of search terms, organized as synonym GROUPS. Terms are what the
-   database is searched for; the student's own words never are.
-
-   A group is an "anchor" for a question when the student literally used
-   one of its terms (after stemming). Anchored groups carry most of the
-   relevance weight, so "rosemary vs minoxidil" ranks rosemary/minoxidil
-   claims above generic essential-oil claims the same concept also finds. */
-const concept = (id, patterns, topics, groups) => Object.freeze({
-  id, patterns, topics, groups, terms: groups.flat(),
-});
-
-export const RESEARCH_CONCEPTS = Object.freeze([
-  concept('scalp-dysesthesia',
-    [/trichodyni/i, /dysesth/i, /paresthesi/i, /\bscalp (pain|burn\w*|tingl\w*|sore\w*|hurts?|ache\w*)/i, /\b(burning|tingling|painful|sore|tender) scalp/i, /\bhair (hurts?|roots? hurts?|pain)/i, /\broots? (hurt|ache)/i],
-    ['scalp-health', 'adjacent-dermatology', 'trichology', 'telogen-effluvium'],
-    [['trichodynia', 'dysesthesia', 'paresthesia', 'scalp pain'], ['burning', 'tingling']]),
-  concept('scalp-itch', [/\bitch\w*/i, /prurit/i],
-    ['scalp-health', 'dandruff', 'seborrheic-dermatitis', 'scalp-microbiome', 'psoriasis-scalp', 'adjacent-dermatology'],
-    [['itch', 'itching', 'pruritus']]),
-  concept('contact-sensitivity',
-    [/contact (dermatitis|allerg\w*|sensitiv\w*)/i, /\ballerg\w*/i, /\birritat\w*/i, /sensiti[sz]\w*/i, /patch test/i, /\breaction to\b/i, /\b(rash|hives|redness)\b/i],
-    ['cosmetic-ingredients', 'practitioner-safety', 'contraindications', 'surfactants', 'conditioning-agents', 'essential-oils-botanicals', 'adjacent-dermatology'],
-    [['allergic', 'allergy', 'contact dermatitis'], ['irritant', 'irritation'], ['sensitizer', 'sensitization', 'HRIPT']]),
-  concept('shedding',
-    [/\bshed\w*/i, /telogen effluvium/i, /\beffluvium\b/i, /hair (is )?(falling|fall(s)?) out/i, /losing (a lot of |so much )?hair/i, /hair in the (drain|shower|brush)/i],
-    ['telogen-effluvium', 'hair-cycle'],
-    [['shedding', 'effluvium'], ['telogen']]),
-  concept('hair-cycle',
-    [/hair (growth )?cycle/i, /\banagen\b/i, /\bcatagen\b/i, /\btelogen\b/i, /growth phase/i, /how (fast|long|quickly) (does )?hair grow/i],
-    ['hair-cycle', 'hair-biology'],
-    [['anagen'], ['catagen'], ['telogen'], ['hair cycle', 'cycling']]),
-  concept('follicle-biology', [/\bfollic(le|ular)\b/i, /dermal papilla/i, /stem cells?/i, /\bbulge\b/i],
-    ['hair-biology', 'hair-cycle'],
-    [['follicle'], ['papilla'], ['stem cell'], ['bulge']]),
-  concept('dandruff-seb-derm', [/dandruff/i, /\bflak\w*/i, /seborrh/i, /malassezia/i, /\byeast\b/i],
-    ['dandruff', 'seborrheic-dermatitis', 'scalp-microbiome'],
-    [['dandruff', 'flaking'], ['seborrheic'], ['malassezia']]),
-  concept('scalp-microbiome', [/microbiom/i, /\bbacteri\w*/i, /\bmicrob\w*/i, /\bflora\b/i, /cutibacterium/i],
-    ['scalp-microbiome'],
-    [['microbiome', 'microbial', 'bacterial'], ['malassezia'], ['cutibacterium'], ['staphylococcus']]),
-  concept('psoriasis', [/psoria/i], ['psoriasis-scalp'], [['psoriasis']]),
-  concept('folliculitis', [/folliculitis/i, /\bpustul\w*/i, /\bbumps? on (my |the |their )?scalp/i],
-    ['folliculitis', 'infection-control'], [['folliculitis'], ['pustule']]),
-  concept('androgenetic-alopecia',
-    [/androgen\w*/i, /pattern (hair loss|baldness)/i, /\bdht\b/i, /finasteride/i, /receding/i, /thinning (at|on) the (crown|top)/i],
-    ['androgenetic-alopecia'],
-    [['androgenetic', 'androgen', 'pattern hair loss', 'AGA', 'FPHL'], ['DHT'], ['finasteride']]),
-  concept('alopecia-areata', [/alopecia areata/i, /\bpatchy (hair )?loss/i, /bald (spot|patch)\w*/i],
-    ['alopecia-areata'], [['areata']]),
-  concept('minoxidil', [/minoxidil/i, /rogaine/i], ['actives-minoxidil'], [['minoxidil']]),
-  concept('antifungals', [/ketoconazole/i, /antifungal/i, /pyrithione/i, /selenium sulfide/i, /ciclopirox/i],
-    ['dandruff', 'seborrheic-dermatitis', 'androgenetic-alopecia', 'actives-other'],
-    [['ketoconazole'], ['antifungal'], ['pyrithione'], ['selenium sulfide'], ['ciclopirox']]),
-  concept('massage-circulation', [/massag\w*/i, /circulation/i, /blood flow/i, /scalp stimulat\w*/i],
-    ['massage-circulation', 'treatment-modalities'],
-    [['massage'], ['circulation', 'blood flow', 'perfusion']]),
-  concept('essential-oils', [/essential oils?/i, /rosemary/i, /tea tree/i, /peppermint/i, /lavender/i, /botanical/i],
-    ['essential-oils-botanicals', 'cosmetic-ingredients', 'actives-other'],
-    [['rosemary'], ['tea tree'], ['peppermint'], ['lavender'], ['essential oil', 'botanical']]),
-  concept('surfactants', [/sulfate/i, /\bsl[e]?s\b/i, /surfactant/i, /\bclarifying\b/i, /\bcleanser/i],
-    ['surfactants', 'cosmetic-ingredients'],
-    [['sulfate', 'laureth', 'lauryl'], ['surfactant', 'glucoside']]),
-  concept('conditioning-agents', [/silicone/i, /dimethicone/i, /conditioning agent/i, /\bconditioners?\b/i],
-    ['conditioning-agents'],
-    [['dimethicone', 'silicone', 'siloxane'], ['conditioning', 'cationic', 'polyquaternium']]),
-  concept('infection-control',
-    [/disinfect\w*/i, /sanitiz\w*/i, /sterili[sz]\w*/i, /\bhygiene\b/i, /cross.?contaminat\w*/i, /clean(ing)? (my |the )?(tools|combs|brushes|equipment)/i],
-    ['infection-control', 'practitioner-safety'],
-    [['disinfect', 'disinfection', 'disinfectant', 'sterilization'], ['hygiene'], ['contaminated']]),
-  concept('contraindications',
-    [/pregnan\w*/i, /contraindicat\w*/i, /breastfeed\w*/i, /blood thinner/i, /chemotherapy|\bchemo\b/i, /open (wound|sore)/i, /recent surgery/i],
-    ['contraindications', 'practitioner-safety'],
-    [['pregnancy', 'pregnant', 'lactation', 'breastfeeding'], ['contraindicated', 'contraindication']]),
-  concept('procedures-devices', [/\bprp\b/i, /platelet/i, /microneedl\w*/i, /\blasers?\b/i, /\blllt\b/i, /\b(red|led) light/i, /photobiomodulation/i],
-    ['treatment-modalities'],
-    [['PRP', 'platelet'], ['microneedling'], ['laser', 'LLLT', 'photobiomodulation']]),
-  concept('nutrition-stress', [/\bstress\w*/i, /\biron\b/i, /ferritin/i, /vitamin/i, /biotin/i, /nutrition\w*/i, /supplement\w*/i],
-    ['telogen-effluvium', 'hair-biology', 'actives-other'],
-    [['stress'], ['iron', 'ferritin'], ['vitamin'], ['biotin'], ['nutritional', 'supplement']]),
-  concept('sebum', [/\bsebum\b/i, /sebaceous/i, /oily scalp/i, /greasy/i, /oil production/i],
-    ['scalp-health', 'seborrheic-dermatitis'], [['sebum', 'sebaceous']]),
-  concept('tinea', [/\btinea\b/i, /ringworm/i, /fungal infection/i],
-    ['infection-control', 'adjacent-dermatology'], [['tinea', 'dermatophyte']]),
-  concept('traction', [/\btraction\b/i, /tight (braids|ponytails?|hairstyles?)/i, /extensions/i],
-    ['trichology', 'adjacent-dermatology'], [['traction']]),
-  concept('scalp-barrier', [/skin barrier|scalp barrier/i, /\btewl\b/i, /transepidermal/i],
-    ['scalp-health'], [['barrier'], ['TEWL', 'transepidermal']]),
-]);
+/* ── Vocabulary ───────────────────────────────────────────────────── */
+/* Concepts, intents and claim facets live in research-lexicon.mjs (pure
+   data). Re-exported so callers/tests have one import surface. */
+export { RESEARCH_CONCEPTS } from './research-lexicon.mjs';
 
 /* ── Retrieval decision ───────────────────────────────────────────── */
 
 const ACK_PHRASE = "(thanks?( you)?( so much)?|ty|ok(ay)?|got it|cool|great|awesome|perfect|nice|makes sense|that makes sense|that helps?|that'?s helpful|yes|no|yep|nope|sure|hi|hello|hey|good (morning|afternoon|evening))";
 const RE_ACK = new RegExp(`^\\s*(${ACK_PHRASE}[\\s!.,]*)+$`, 'i');
 const RE_NAV_ADMIN = /\b(where (do|can|should) i (find|go|click|see)|how do i (find|get to|access|unlock|download|reset|log ?in|sign ?in|start|open)|certificate|log ?in|sign ?in|password|refund|payment|billing|invoice|receipt|next module|unlock\w*|progress bar|my progress|button|won'?t (load|play)|can'?t (see|find|open|load)|my account|enroll\w*|due date|deadline)\b/i;
-const RE_RESTATE = /\b((explain|say|put) (that|this|it)( again| differently| another way| more simply| simpler)?|in (simpler|plain|other|easier) (terms|words|language)|rephrase|summari[sz]e (this|the|that) (lesson|module|section|paragraph)|what did (the|this) (lesson|module|section) (say|mean)|i don'?t (get|understand) (this|that|the) (paragraph|section|part|lesson|sentence)|can you simplify|eli5)\b|\b(explain|go over|walk me through|repeat|review)\b.*\b(again|more simply|simpler|differently|another way)\b/i;
+const RE_RESTATE = /\b((explain|say|put) (that|this|it)( again| differently| another way| more simply| simpler)?|in (simpler|plain|other|easier) (terms|words|language)|rephrase|summari[sz]e (this|the|that) (lesson|module|section|paragraph)|what did (the|this) (lesson|module|section) (say|mean)|i don'?t (get|understand) (this|that|the) (paragraph|section|part|lesson|sentence)|can you simplify|eli5|remind me( what| of| how)?|like the (lesson|module|section) (did|said|explained)|recap)\b|\b(explain|go over|walk me through|repeat|review)\b.*\b(again|more simply|simpler|differently|another way)\b/i;
 const RE_COURSE_HOWTO = /^\s*(how (do|should|can|would) (i|we)|what (should|do) (i|we) do|walk me through|show me how)\b/i;
 const RE_DEFINITION = /^\s*(what('?s| is| are| does)|define|meaning of|what do you mean by)\b[^?]{0,48}\??\s*$/i;
 /* Explicit request for evidence -- goes beyond what the course says, so
@@ -220,7 +142,7 @@ const RE_RESEARCH_CUE = /\b(research|stud(y|ies)|evidence|science|scientific(all
 /* Mechanism / safety / causal depth. Third-person "how does X ..." only:
    "how do I ..." / "how do we ..." is a course how-to, not a research
    question. */
-const RE_DEPTH = /\b(safe(ty|ly)?|risks?|harm(ful)?|mechanism|why (does|do|is|are|would|can)|how (does|do|can|would|might|much|many|long)\b(?! (i|we|you)\b)|caus(e|es|ed|ing)|linked|associated|associations?|contraindicat\w*|interact\w*|compared?|versus|\bvs\.?|difference between|what happens|contribut\w*)\b/i;
+const RE_DEPTH = /\b(safe(ty|ly)?|risks?|harm(ful)?|mechanism|why (does|do|is|are|would|can|might)|how (does|do|can|would|might|much|many|long|often|strong)\b(?! (i|we|you)\b)|caus(e|es|ed|ing)|linked|associated|associations?|contraindicat\w*|interact\w*|compared?|versus|\bvs\.?|difference between|differ from|what happens|contribut\w*|work(s)? better|better than|as effective|helps?\b(?! me| you)|reduc(e|es)|improv(e|es)|regrow\w*|allergen\w*|irritant|sensiti[sz]er|toxic|come(s)? back|recur\w*|lead to|connected|work(s)? for|does .{1,40}\bwork)\b/i;
 const RE_HIGH_STAKES = /\b(diagnos\w*|do i have|does (she|he|my client|the client|my guest|they) have|is (this|it) (cancer|serious|contagious|infect\w*)|prescri\w*|dosage|dose|mg\b|stop taking|should (i|she|he|they) (take|stop)|bleed\w*|lump|lesion|open wound|infect\w*|urgent|emergency)\b/i;
 const RE_INJECTION = /\b(ignore (all |any |the |your |previous |prior |aimt)|disregard|unverified|discovered claims?|raw (research|data|claims?)|all (the )?research|every claim|system prompt|jailbreak|developer mode|bypass|show me everything)\b/i;
 
@@ -254,8 +176,9 @@ export function decideResearchRetrieval(question, ctx = {}) {
     research_cue: RE_RESEARCH_CUE.test(q),
     depth_cue: RE_RESEARCH_CUE.test(q) || RE_DEPTH.test(q),
   };
+  const intents = detectIntents(q);
   const out = (eligible, useful, reason) => ({
-    eligible, useful, retrieve: eligible && useful, reason, concepts: conceptIds, signals,
+    eligible, useful, retrieve: eligible && useful, reason, concepts: conceptIds, intents, signals,
   });
 
   // ── Eligibility (hard policy; evaluated first, never overridden) ──
@@ -277,7 +200,7 @@ export function decideResearchRetrieval(question, ctx = {}) {
   // ── Usefulness (heuristic; conservative toward "no") ──
   if (RE_ACK.test(q)) return out(true, false, 'acknowledgment');
   if (RE_NAV_ADMIN.test(q) && !signals.research_cue) return out(true, false, 'navigation_or_admin');
-  if (!concepts.length) return out(true, false, 'no_library_concept');
+  if (!concepts.length || concepts.every((c) => c.role === 'outcome')) return out(true, false, 'no_library_concept');
   if (RE_RESTATE.test(q) && !signals.research_cue) return out(true, false, 'course_restatement');
   if (RE_COURSE_HOWTO.test(q) && !signals.research_cue && !signals.high_stakes) return out(true, false, 'course_how_to');
   if (RE_DEFINITION.test(q) && !signals.depth_cue) return out(true, false, 'terminology_clarification');
@@ -295,29 +218,178 @@ export function decideResearchRetrieval(question, ctx = {}) {
 
 /* ── Query planning ───────────────────────────────────────────────── */
 
+const CONCEPT_BY_ID = new Map(RESEARCH_CONCEPTS.map((c) => [c.id, c]));
+
+/** Pure: which QUESTION_INTENTS the question expresses. */
+export function detectIntents(question) {
+  const q = String(question || '');
+  return QUESTION_INTENTS.filter(([, re]) => re.test(q)).map(([id]) => id);
+}
+
 /**
- * Pure: turns a question into topics + lexicon search terms. The returned
- * `q` is websearch_to_tsquery syntax built ONLY from lexicon terms
- * ("a or b or \"two words\""), never from student text.
+ * Longest-match anchoring. Every lexicon term of every matched concept is
+ * located in the (stemmed) question; longer terms consume their token span
+ * first, so "telogen effluvium" anchors the shedding group and does not
+ * also anchor hair-cycle's bare "telogen". Groups anchored by the SAME span
+ * form one FOCUS UNIT ("rosemary" anchors both the rosemary group and the
+ * generic essential-oil group -- that is still one thing the student named).
+ */
+function anchorFocusUnits(question, concepts) {
+  const rawTokens = tokenize(question);
+  const qTokens = rawTokens.map(stem);
+  const groups = [];
+  for (const c of concepts) {
+    c.groups.forEach((terms, i) => groups.push({ key: `${c.id}#${i}`, concept: c.id, role: c.role, terms, spans: [] }));
+  }
+  const candidates = [];
+  for (const g of groups) {
+    for (const t of g.terms) {
+      const tt = stemmedTokens(t);
+      if (!tt.length) continue;
+      for (let i = 0; i + tt.length <= qTokens.length; i++) {
+        let ok = true;
+        for (let j = 0; j < tt.length; j++) if (qTokens[i + j] !== tt[j]) { ok = false; break; }
+        if (ok) candidates.push({ g, start: i, len: tt.length });
+      }
+    }
+  }
+  candidates.sort((a, b) => b.len - a.len || a.start - b.start);
+  const owner = new Array(qTokens.length).fill(null); // span id "start:len" owning each token
+  for (const cand of candidates) {
+    const id = `${cand.start}:${cand.len}`;
+    let free = true;
+    for (let k = cand.start; k < cand.start + cand.len; k++) if (owner[k] !== null && owner[k] !== id) { free = false; break; }
+    if (!free) continue;
+    for (let k = cand.start; k < cand.start + cand.len; k++) owner[k] = id;
+    if (!cand.g.spans.includes(id)) cand.g.spans.push(id);
+  }
+  // Union groups that share a span into focus units.
+  const anchored = groups.filter((g) => g.spans.length);
+  const parent = new Map(anchored.map((g) => [g.key, g.key]));
+  const find = (k) => (parent.get(k) === k ? k : find(parent.get(k)));
+  const union = (a, b) => { const ra = find(a); const rb = find(b); if (ra !== rb) parent.set(ra, rb); };
+  // Each span is represented by its MOST SPECIFIC group; spans whose most
+  // specific group is the same ("shedding" ... "telogen effluvium") are one
+  // focus, while "hair cycle" and "telogen" stay two separate foci.
+  const bySpan = new Map();
+  for (const g of anchored) for (const sp of g.spans) {
+    const cur = bySpan.get(sp);
+    if (!cur || g.terms.length < cur.terms.length) bySpan.set(sp, g);
+  }
+  const byGroup = new Map();
+  for (const [sp, g] of bySpan) {
+    if (byGroup.has(g.key)) union(g.key, byGroup.get(g.key)); else byGroup.set(g.key, g.key);
+  }
+  // Alternatives joined by "or" ("ketoconazole or antifungal shampoo") are
+  // ONE focus: either satisfies it. So are adjacent words of the same
+  // concept ("allergic reactions", "scalp psoriasis").
+  const spanList = [...bySpan.keys()].map((sp) => { const [st, ln] = sp.split(':').map(Number); return { sp, st, en: st + ln }; })
+    .sort((a, b) => a.st - b.st);
+  for (let i = 0; i + 1 < spanList.length; i++) {
+    const a = spanList[i]; const b = spanList[i + 1];
+    const between = rawTokens.slice(a.en, b.st);
+    const ga = bySpan.get(a.sp); const gb = bySpan.get(b.sp);
+    if ((between.length === 1 && ALTERNATIVE_JOINERS.includes(between[0]))
+      || (between.length === 0 && ga.concept === gb.concept)) union(ga.key, gb.key);
+  }
+  // A unit's evidence terms come from the MOST SPECIFIC group anchored by
+  // each of its spans: "rosemary" anchors both the rosemary group and the
+  // generic essential-oil group, but a claim only covers that unit if it
+  // mentions rosemary -- not any oil.
+  const representative = new Set([...bySpan.values()].map((g) => g.key));
+  const unitsByRoot = new Map();
+  for (const g of anchored) {
+    if (!representative.has(g.key)) continue;
+    const r = find(g.key);
+    if (!unitsByRoot.has(r)) unitsByRoot.set(r, { groups: [], roles: new Set(), concepts: new Set(), spans: new Set() });
+    const u = unitsByRoot.get(r);
+    u.groups.push(g); u.roles.add(g.role); u.concepts.add(g.concept);
+    for (const sp of g.spans) if (bySpan.get(sp) === g) u.spans.add(sp);
+  }
+  const rawUnits = [...unitsByRoot.values()];
+  const unitTerms = rawUnits.map((u) => {
+    // Within one unit, drop a generic group when a more specific group of
+    // the same unit is a subset of it ("allergic reactions" -> allergy).
+    const reps = [...new Set([...u.spans].map((sp) => bySpan.get(sp)))];
+    const kept = reps.filter((g) => !reps.some((h) => h !== g && h.terms.length < g.terms.length && h.terms.every((t) => g.terms.includes(t))));
+    return new Set(kept.flatMap((g) => g.terms));
+  });
+  // A generic unit ("hair cycle") must not be satisfiable by another
+  // unit's specific term ("telogen") alone.
+  unitTerms.forEach((terms, i) => {
+    const others = new Set(unitTerms.filter((_, j) => j !== i).flatMap((t) => [...t]));
+    const pruned = [...terms].filter((t) => !others.has(t));
+    if (pruned.length) unitTerms[i] = new Set(pruned);
+  });
+  const units = rawUnits.map((u, i) => {
+    const terms = unitTerms[i];
+    // "besides dandruff": the student is looking PAST this focus.
+    const firstStart = Math.min(...[...u.spans].map((sp) => Number(sp.split(':')[0])));
+    const excluded = RE_EXCLUSION_CUE.test(rawTokens.slice(0, firstStart).join(' '));
+    return {
+      id: `u${i}`,
+      excluded,
+      topics: [...new Set([...u.concepts].flatMap((cid) => CONCEPT_BY_ID.get(cid).topics))],
+      role: u.roles.has('population') ? 'population' : u.roles.has('treatment') ? 'treatment' : u.roles.has('subject') ? 'subject' : 'outcome',
+      concepts: [...u.concepts],
+      terms: [...terms],
+      anchored: true,
+      soft: u.groups.every((g) => CONCEPT_BY_ID.get(g.concept).soft === true),
+      conflicts: u.groups.map((g) => CONCEPT_BY_ID.get(g.concept).conflicts).find(Boolean) || null,
+      confirms: u.groups.map((g) => CONCEPT_BY_ID.get(g.concept).confirms).find(Boolean) || null,
+    };
+  });
+  return { groups, units };
+}
+
+/**
+ * Pure: turns a question into a governed query plan. `q` is
+ * websearch_to_tsquery syntax built ONLY from lexicon terms, never from
+ * student text. It searches the ANCHORED focus terms (what the student
+ * named), falling back to every matched concept's terms when nothing was
+ * named literally; outcome-only vocabulary ("hair", "density") is never
+ * searched on its own because it would flood the candidate pool.
  */
 export function planResearchQuery(question) {
   const concepts = matchConcepts(question);
-  const paddedQuestion = ' ' + stemmedTokens(question).join(' ') + ' ';
-  const topics = [...new Set(concepts.flatMap((c) => c.topics))];
-  const terms = [...new Set(concepts.flatMap((c) => c.terms))];
-  const groups = concepts.flatMap((c) => c.groups.map((g) => ({
-    concept: c.id,
-    terms: g,
-    anchored: g.some((t) => termOccurs(t, paddedQuestion)),
-  })));
-  const q = terms.map((t) => (t.includes(' ') ? `"${t}"` : t)).join(' or ');
+  const intents = detectIntents(question);
+  const { groups, units: anchoredUnits } = anchorFocusUnits(question, concepts);
+  // Concepts matched by phrasing but with no literal term anchored
+  // ("hair on my pillow" -> shedding) become implicit units.
+  // Only when the student named NO subject/treatment term literally.
+  const namedSubject = anchoredUnits.some((u) => (u.role === 'subject' || u.role === 'treatment') && !u.excluded);
+  const implicitUnits = namedSubject ? [] : concepts
+    .filter((c) => c.role === 'subject' || c.role === 'treatment')
+    .map((c, i) => ({ id: `i${i}`, role: c.role, concepts: [c.id], topics: c.topics, terms: c.terms, anchored: false, excluded: false }));
+  const units = [...anchoredUnits, ...implicitUnits];
+  // One query per focus unit (subject/treatment first; outcome/population
+  // only if nothing else), run in parallel. A single OR-query over every
+  // term truncates at the pool limit and loses claims that pair a rare term
+  // with a common one. Population/outcome vocabulary ("women", "growth")
+  // is never searched when a subject exists: it would flood the pool.
+  const searchable = (u) => !u.excluded && (u.role === 'subject' || u.role === 'treatment');
+  let searchUnits = units.filter(searchable);
+  if (!searchUnits.length) searchUnits = units.filter((u) => !u.excluded);
+  searchUnits = searchUnits
+    .slice()
+    .sort((a, b) => (a.role === 'treatment' ? 0 : 1) - (b.role === 'treatment' ? 0 : 1) || a.terms.length - b.terms.length)
+    .slice(0, RESEARCH_CONTEXT_LIMITS.MAX_QUERIES);
+  const ftsTerms = (terms) => terms.filter((t) => t.length > 2 || /^[A-Z]{2,}$/.test(t));
+  const toQ = (terms) => ftsTerms(terms).map((t) => (/[\s-]/.test(t) ? `"${t}"` : t)).join(' or ');
+  const queries = searchUnits
+    .map((u) => ({ unit: u.id, q: toQ(u.terms), topics: u.topics && u.topics.length ? u.topics : [...new Set(concepts.flatMap((c) => c.topics))] }))
+    .filter((qq) => qq.q && qq.topics.length);
+  const searchTerms = [...new Set(searchUnits.flatMap((u) => ftsTerms(u.terms)))];
   return {
     concepts: concepts.map((c) => c.id),
-    topics,
-    terms,
-    anchors: groups.filter((g) => g.anchored).flatMap((g) => g.terms),
-    groups,
-    q,
+    intents,
+    topics: [...new Set(queries.flatMap((qq) => qq.topics))],
+    terms: searchTerms,
+    anchors: anchoredUnits.flatMap((u) => u.terms),
+    units,
+    groups: groups.map((g) => ({ concept: g.concept, terms: g.terms, anchored: g.spans.length > 0 })),
+    queries,
+    q: queries.map((qq) => qq.q).join(' || '),
   };
 }
 
@@ -330,7 +402,10 @@ const DIRECTION_GROUP = {
   unclear: 'uncertain', limitation: 'uncertain', qualifies: 'uncertain',
   descriptive: 'descriptive', recommendation: 'descriptive',
 };
-const SYNTHESIS_EVIDENCE = new Set(['systematic_review', 'meta_analysis', 'clinical_guideline']);
+const EVIDENCE_WEIGHT = {
+  meta_analysis: 1, systematic_review: 1, clinical_guideline: 1, rct: 0.75, observational: 0.25,
+  professional_org: 0.5, technical_report: 0.25, narrative_review: 0, textbook_chapter: 0, other: 0,
+};
 
 function isGovernedClaim(c) {
   return !!c && typeof c === 'object'
@@ -347,6 +422,54 @@ function jaccard(a, b) {
   let inter = 0;
   for (const x of a) if (b.has(x)) inter++;
   return inter / (a.size + b.size - inter);
+}
+
+/* Multi-word lexicon terms, used to stop a shorter term from matching
+   inside a longer one that belongs to a different focus ("telogen" inside
+   "telogen effluvium", "blood" inside "blood flow"). */
+const MULTIWORD_TERMS = [...new Set(RESEARCH_CONCEPTS.flatMap((c) => c.terms))]
+  .map((t) => ({ t, st: stemmedTokens(t) })).filter((x) => x.st.length > 1);
+
+function unitCovered(unit, claimTokens) {
+  const own = new Set(unit.terms);
+  for (const term of unit.terms) {
+    const tt = stemmedTokens(term);
+    if (!tt.length) continue;
+    for (let i = 0; i + tt.length <= claimTokens.length; i++) {
+      let ok = true;
+      for (let j = 0; j < tt.length; j++) if (claimTokens[i + j] !== tt[j]) { ok = false; break; }
+      if (!ok) continue;
+      const masked = MULTIWORD_TERMS.some(({ t, st }) => {
+        if (own.has(t) || st.length <= tt.length) return false;
+        for (let k = 0; k + tt.length <= st.length; k++) {
+          const s0 = i - k;
+          if (s0 < 0 || s0 + st.length > claimTokens.length) continue;
+          let m = true;
+          for (let j = 0; j < st.length; j++) if (claimTokens[s0 + j] !== st[j]) { m = false; break; }
+          if (m) return true;
+        }
+        return false;
+      });
+      if (!masked) return true;
+    }
+  }
+  return false;
+}
+
+const TREATMENT_TERMS = [...new Set(RESEARCH_CONCEPTS.filter((c) => c.role === 'treatment').flatMap((c) => c.terms))];
+
+/** Pure: what kinds of statement a claim makes. */
+export function claimFacets(claim) {
+  const text = String(claim.claim_text || '');
+  const out = new Set();
+  for (const [id, re, meta = {}] of CLAIM_FACETS) {
+    if (re.test(text) || (meta.directions || []).includes(claim.direction) || (meta.claimTypes || []).includes(claim.claim_type)) out.add(id);
+  }
+  return out;
+}
+
+function isMethodsOnly(text) {
+  return RE_METHODS_DESIGN.test(text) && !RE_METHODS_OUTCOME.test(text.replace(RE_METHODS_DESIGN, ' '));
 }
 
 function projectClaim(c, scoreInfo) {
@@ -379,48 +502,135 @@ function projectClaim(c, scoreInfo) {
 }
 
 /**
- * Pure: filters, ranks, dedupes and bounds raw query rows.
+ * Pure: trust re-check, then the ANSWER-USEFULNESS GATE, then ranking,
+ * dedupe, per-source cap, bound, and mixed-evidence preservation.
+ *
+ * Gate (all must hold; failing claims are dropped, and if none survive the
+ * result is empty -- no research is preferred over topical noise):
+ *   1. focus coverage   every anchored population unit (e.g. "women",
+ *                       "pregnancy"), plus min(2, units) of the other
+ *                       focus units; for comparisons, every compared
+ *                       subject/treatment unit
+ *   2. not methods-only a claim that only describes study design/scope
+ *   3. intent match     when the question has an intent (why / does it
+ *                       work / is it safe / how often ...), the claim must
+ *                       make a matching kind of statement
+ *   4. on-question      specific drug-treatment claims are dropped unless
+ *                       the student asked about treatment or named one
+ *
  * @returns {{claims: object[], dropped: object, candidate_count: number, relevant_count: number, evidence_profile: object}}
  */
 export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONTEXT_LIMITS.MAX_CLAIMS } = {}) {
   const cap = Math.max(1, Math.min(RESEARCH_CONTEXT_LIMITS.HARD_MAX_CLAIMS, Math.floor(maxClaims) || RESEARCH_CONTEXT_LIMITS.MAX_CLAIMS));
-  const dropped = { malformed_or_ungoverned: 0, below_relevance_floor: 0, duplicate: 0, per_source_cap: 0 };
+  const dropped = {
+    malformed_or_ungoverned: 0, focus_incomplete: 0, methods_only: 0, intent_mismatch: 0,
+    off_question_treatment: 0, duplicate: 0, per_source_cap: 0,
+  };
+  const safePlan = plan && typeof plan === 'object' ? plan : {};
   const qStems = contentStems(question);
-  const planTopics = new Set(plan.topics || []);
-  const groups = Array.isArray(plan.groups) && plan.groups.length
-    ? plan.groups
-    : (plan.terms || []).map((t) => ({ concept: 'terms', terms: [t], anchored: false }));
-  const planHasAnchors = groups.some((g) => g.anchored);
+  const intents = Array.isArray(safePlan.intents) ? safePlan.intents : [];
+  let units = Array.isArray(safePlan.units) ? safePlan.units : [];
+  if (!units.length && Array.isArray(safePlan.terms) && safePlan.terms.length) {
+    units = [{ id: 'terms', role: 'subject', terms: safePlan.terms, anchored: false }];
+  }
+  const active = units.filter((u) => !u.excluded);
+  const populationUnits = active.filter((u) => u.role === 'population');
+  const subjectUnits = active.filter((u) => u.role === 'subject' || u.role === 'treatment');
+  const outcomeUnits = active.filter((u) => u.role === 'outcome');
+  const isComparison = intents.includes('comparison') && subjectUnits.length >= 2;
+  const allowedFacets = new Set(intents.flatMap((i) => INTENT_FACETS[i] || []));
+  const cruxFacets = intents.filter((i) => CRUX_INTENTS.includes(i)).flatMap((i) => INTENT_FACETS[i] || []);
+  const askedTreatment = intents.includes('treatment') || intents.includes('efficacy') || intents.includes('reversibility')
+    || subjectUnits.some((u) => u.role === 'treatment');
+  // Focus requirement:
+  //   comparison of 2+ subjects   -> every compared subject
+  //   2+ subjects                 -> any 2 of them
+  //   exactly 1 subject           -> it, plus one outcome/context unit if the
+  //                                  question named one ("... in a head spa")
+  //   no subject                  -> up to 2 outcome/context units
+  //   hard population units       -> always required
+  const focusOk = (hitIds) => {
+    const sHits = subjectUnits.filter((u) => hitIds.has(u.id)).length;
+    const oHits = outcomeUnits.filter((u) => hitIds.has(u.id)).length;
+    if (isComparison) return sHits === subjectUnits.length;
+    if (subjectUnits.length >= 2) return sHits >= 2;
+    if (subjectUnits.length === 1) return sHits === 1 && (outcomeUnits.length === 0 || oHits >= 1);
+    return outcomeUnits.length > 0 && oHits >= Math.min(2, outcomeUnits.length);
+  };
 
-  const scored = [];
+  const gated = [];
   for (const row of Array.isArray(rows) ? rows : []) {
     if (!isGovernedClaim(row)) { dropped.malformed_or_ungoverned++; continue; }
-    const padded = ' ' + stemmedTokens(row.claim_text).join(' ') + ' ';
-    const hitGroups = groups.filter((g) => g.terms.some((t) => termOccurs(t, padded)));
-    const matchedTerms = [...new Set(hitGroups.flatMap((g) => g.terms.filter((t) => termOccurs(t, padded))))];
-    const anchorHits = hitGroups.filter((g) => g.anchored).length;
-    const otherHits = hitGroups.length - anchorHits;
-    const conceptsHit = new Set(hitGroups.map((g) => g.concept)).size;
-    // Relevance floor, judged on the claim text itself (the DB match may
-    // have come from body_markdown only, which Cadence would never see or
-    // be able to cite precisely):
-    //   - it hits a group the student actually named (anchor), or
-    //   - it bridges two of the question's concepts, or
-    //   - the student named no lexicon term at all and it hits any group.
-    const passes = anchorHits >= 1 || conceptsHit >= 2 || (!planHasAnchors && hitGroups.length >= 1);
-    if (!passes) { dropped.below_relevance_floor++; continue; }
-    const claimStems = contentStems(row.claim_text);
+    const text = row.claim_text;
+    const claimTokens = stemmedTokens(text);
+    const hitUnits = active.filter((u) => unitCovered(u, claimTokens));
+    const hitIds = new Set(hitUnits.map((u) => u.id));
+    // 1. focus coverage
+    const popOk = populationUnits.every((u) => hitIds.has(u.id)
+      || (u.soft && !(u.conflicts && u.conflicts.test(text) && !(u.confirms && u.confirms.test(text)))));
+    if (!active.length || !popOk || !focusOk(hitIds)) { dropped.focus_incomplete++; continue; }
+    // 2. methods-only
+    if (isMethodsOnly(text)) { dropped.methods_only++; continue; }
+    // 3. intent match (crux intents are mandatory)
+    const facets = claimFacets(row);
+    const matchedFacets = [...facets].filter((f) => allowedFacets.has(f));
+    if (allowedFacets.size && !matchedFacets.length) { dropped.intent_mismatch++; continue; }
+    if (cruxFacets.length && !cruxFacets.some((f) => facets.has(f))) { dropped.intent_mismatch++; continue; }
+    // 4. off-question treatment: a claim about a drug, or about an
+    //    intervention the student did not name, answers a different
+    //    question unless the student asked about treatment/efficacy.
+    const namedTreatmentHit = hitUnits.some((u) => u.role === 'treatment');
+    const drugTreatment = RE_DRUG_TREATMENT.test(text) || RE_TRIAL_ARM.test(text)
+      || TREATMENT_TERMS.some((t) => termOccurs(t, ' ' + claimTokens.join(' ') + ' '));
+    if (drugTreatment && !askedTreatment && !namedTreatmentHit) { dropped.off_question_treatment++; continue; }
+    gated.push({ row, text, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems: contentStems(text) });
+  }
+
+  // IDF over the gated pool: question words that are rare among the
+  // surviving claims carry the answer ("phase", "last", "catagen").
+  const df = new Map();
+  for (const g of gated) for (const st of g.claimStems) if (qStems.has(st)) df.set(st, (df.get(st) || 0) + 1);
+  const idf = (st) => Math.log(1 + gated.length / (df.get(st) || gated.length || 1));
+  const idfTotal = [...qStems].filter((st) => df.has(st)).reduce((n, st) => n + idf(st), 0) || 1;
+
+  const scored = [];
+  for (const g of gated) {
+    const { row, text, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems } = g;
     let overlap = 0;
-    for (const s of qStems) if (claimStems.has(s)) overlap++;
-    const topicOverlap = (row.topics || []).filter((t) => planTopics.has(t)).length;
-    let score = 4 * anchorHits + 1.5 * otherHits + 2 * Math.max(0, conceptsHit - 1) + overlap + 0.5 * Math.min(topicOverlap, 3);
-    if (['finding', 'safety_conclusion', 'recommendation'].includes(row.claim_type)) score += 0.5;
-    if (row.claim_type === 'method_note' || row.claim_type === 'method') score -= 1;
-    if (SYNTHESIS_EVIDENCE.has(row.source.evidence_type)) score += 0.5;
-    if (row.verification_status === 'AIMT_APPROVED') score += 0.5;
-    scored.push({ row, claimStems, score: Math.round(score * 100) / 100, matchedTerms, overlap });
+    let idfHit = 0;
+    for (const st of qStems) if (claimStems.has(st)) { overlap++; idfHit += idf(st); }
+    const intentsSatisfied = intents.filter((i) => (INTENT_FACETS[i] || []).some((f) => facets.has(f))).length;
+    const specific = /\d/.test(text) ? 0.75 : 0;
+    const stats = /\b(CI|p ?[<=]|OR|SMD|RR|MD|n ?=)\b/.test(text) ? 0.5 : 0;
+    const enumeration = (text.match(/,/g) || []).length >= 4 && RE_ENUMERATION.test(text) ? -2 : 0;
+    let evidence = EVIDENCE_WEIGHT[row.source.evidence_type] ?? 0;
+    if (intents.includes('safety') && ['regulator_safety', 'regulatory_standard'].includes(row.source.source_role)) evidence += 0.75;
+    if (intents.includes('practice') && ['guideline', 'practice_guidance', 'regulatory_standard'].includes(row.source.source_role)) evidence += 0.75;
+    if (row.source.source_role === 'preclinical') evidence -= 0.5;
+    const offTreatmentPenalty = drugTreatment && !namedTreatmentHit && !intents.includes('treatment') ? -1.5 : 0;
+    const populationBonus = hitUnits.some((u) => u.soft) ? 3 : 0;
+    const skepticalBonus = intents.includes('skeptical') && facets.has('null') ? 3 : 0;
+    const score = 4 * hitUnits.filter((u) => !u.soft).length + populationBonus + 2.5 * Math.min(intentsSatisfied, 2)
+      + 4 * (idfHit / idfTotal) + specific + stats + evidence + enumeration + offTreatmentPenalty + skepticalBonus
+      + (row.direction ? 0.25 : 0) + (row.verification_status === 'AIMT_APPROVED' ? 0.25 : 0);
+    const padded = ' ' + stemmedTokens(text).join(' ') + ' ';
+    scored.push({
+      row, claimStems, score: Math.round(score * 100) / 100,
+      matchedTerms: [...new Set(hitUnits.flatMap((u) => u.terms.filter((t) => termOccurs(t, padded))))],
+      facets: [...facets], overlap,
+    });
   }
   scored.sort((a, b) => (b.score - a.score) || (a.row.claim_id < b.row.claim_id ? -1 : a.row.claim_id > b.row.claim_id ? 1 : 0));
+  // Soft population ("in women"): when at least two claims are explicitly
+  // about that population, prefer them over population-agnostic claims.
+  const softUnits = populationUnits.filter((u) => u.soft && u.confirms);
+  if (softUnits.length) {
+    const confirming = scored.filter((c) => softUnits.every((u) => u.confirms.test(c.row.claim_text)));
+    if (confirming.length >= 2) {
+      dropped.population_nonspecific = scored.length - confirming.length;
+      scored.splice(0, scored.length, ...confirming);
+    }
+  }
 
   // Dedupe (exact + near-duplicate) and per-source cap, in rank order.
   const kept = [];
@@ -438,25 +648,26 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     kept.push(cand);
   }
 
-  // Preserve disagreement: if relevant evidence points in a direction the
-  // selection doesn't represent (positive vs null/negative vs uncertain),
-  // swap the lowest-ranked selected claim for the best such claim rather
-  // than silently presenting one side.
-  const groupOf = (c) => DIRECTION_GROUP[c.row.direction] || 'unspecified';
+  // Preserve disagreement: if gated, on-question evidence points in a
+  // direction the selection doesn't represent (positive vs null/negative
+  // vs uncertain), swap the lowest-ranked claim of an over-represented
+  // direction for the best such claim rather than presenting one side.
+  const groupOf = (c) => DIRECTION_GROUP[c.row.direction]
+    || (c.facets.includes('null') ? 'uncertain' : 'unspecified');
   const CONTESTED = ['positive', 'null_or_negative', 'uncertain'];
   const selectedGroups = new Set(kept.map(groupOf));
   if (kept.length >= 2 && [...selectedGroups].some((g) => CONTESTED.includes(g))) {
     for (const g of CONTESTED) {
       if (selectedGroups.has(g)) continue;
-      // Only genuinely on-topic disagreement: at least 60% of the top
-      // claim's relevance, so a tangential null finding isn't promoted
-      // just to manufacture "balance".
-      const alt = relevant.find((c) => groupOf(c) === g && !kept.includes(c) && c.score >= 0.6 * kept[0].score);
+      const alt = relevant.find((c) => groupOf(c) === g && !kept.includes(c) && c.score >= 0.6 * kept[0].score
+        && (perSource.get(c.row.source.source_id) || 0) < RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE);
       if (!alt) continue;
-      // replace the lowest-ranked claim whose group is over-represented
       for (let i = kept.length - 1; i >= 0; i--) {
         const grp = groupOf(kept[i]);
         if (kept.filter((k) => groupOf(k) === grp).length > 1) {
+          const out = kept[i];
+          perSource.set(out.row.source.source_id, perSource.get(out.row.source.source_id) - 1);
+          perSource.set(alt.row.source.source_id, (perSource.get(alt.row.source.source_id) || 0) + 1);
           kept.splice(i, 1, alt);
           selectedGroups.add(g);
           break;
@@ -465,7 +676,10 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     }
   }
 
-  const claims = kept.map((c) => projectClaim(c.row, { score: c.score, matched_terms: c.matchedTerms, question_overlap: c.overlap }));
+  const claims = kept.map((c) => projectClaim(c.row, { score: c.score, matched_terms: c.matchedTerms, facets: c.facets, question_overlap: c.overlap }));
+  for (let i = 0; i < claims.length; i++) {
+    if (claims[i].direction_group === 'unspecified' && kept[i].facets.includes('null')) claims[i].direction_group = 'uncertain';
+  }
   const directionCounts = {};
   for (const c of claims) directionCounts[c.direction_group] = (directionCounts[c.direction_group] || 0) + 1;
   const relevantGroups = new Set(relevant.map(groupOf));
@@ -531,7 +745,7 @@ export async function retrieveCadenceResearchContext({
   if (!decision.retrieve && !force) return base('skipped', { decision });
 
   const plan = planResearchQuery(question);
-  if (!plan.terms.length || !plan.topics.length) return base('empty', { decision, plan });
+  if (!plan.terms.length || !plan.topics.length || !(plan.queries || []).length) return base('empty', { decision, plan, gate: 'no_search_terms' });
   if (!env || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     return base('error', { decision, plan, error_code: 'research_unconfigured' });
   }
@@ -540,16 +754,34 @@ export async function retrieveCadenceResearchContext({
   let result;
   try {
     const doQuery = queryImpl || queryResearchClaims;
-    result = await withTimeout(
-      Promise.resolve().then(() => doQuery(env, {
-        q: plan.q,
-        topics: plan.topics,
+    const queries = (Array.isArray(plan.queries) && plan.queries.length ? plan.queries : [{ q: plan.q, topics: plan.topics }])
+      .slice(0, RESEARCH_CONTEXT_LIMITS.MAX_QUERIES);
+    const results = await withTimeout(
+      Promise.all(queries.map((qq) => Promise.resolve().then(() => doQuery(env, {
+        q: qq.q,
+        topics: qq.topics,
         minStatus: CADENCE_RESEARCH_MIN_STATUS,
         limit: RESEARCH_CONTEXT_LIMITS.CANDIDATE_POOL,
-      }, { fetchImpl, signal: controller ? controller.signal : undefined })),
+      }, { fetchImpl, signal: controller ? controller.signal : undefined })))),
       Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : RESEARCH_CONTEXT_LIMITS.TIMEOUT_MS,
       controller,
     );
+    // All-or-nothing: a partial pool could silently drop one side of a
+    // relationship or disagreement, so any failed query fails the turn open.
+    const bad = results.find((r) => !r || typeof r !== 'object' || r.ok !== true || !Array.isArray(r.claims));
+    if (bad) {
+      result = bad;
+    } else {
+      const seen = new Set();
+      const merged = [];
+      for (const r of results) for (const c of r.claims) {
+        const id = c && typeof c === 'object' ? c.claim_id : undefined;
+        if (typeof id === 'string' && seen.has(id)) continue;
+        if (typeof id === 'string') seen.add(id);
+        merged.push(c);
+      }
+      result = { ok: true, claims: merged };
+    }
   } catch (e) {
     return base(e && e.code === 'timeout' ? 'timeout' : 'error', { decision, plan, error_code: e && e.code === 'timeout' ? 'timeout' : 'query_threw' });
   }
@@ -568,6 +800,8 @@ export async function retrieveCadenceResearchContext({
   return base(selection.claims.length ? 'ok' : 'empty', {
     decision,
     plan,
+    gate: selection.claims.length ? null
+      : (selection.candidate_count ? 'no_answer_useful_evidence' : 'no_matching_claims'),
     claims: selection.claims,
     evidence_profile: selection.evidence_profile,
     diagnostics: { candidate_count: selection.candidate_count, relevant_count: selection.relevant_count, dropped: selection.dropped },
