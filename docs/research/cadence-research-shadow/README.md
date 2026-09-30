@@ -4,6 +4,11 @@ Branch `feature/cadence-research-shadow` · 2026-09-30 · **shadow only**. No re
 student, a model prompt, or a transcript. Live Ask Cadence (`functions/api/cadence/ask.js`,
 `functions/_lib/cadence/ask-cadence.mjs`) is byte-identical to `main`.
 
+> **Update 2026-09-30 — quality pass:** see [`QUALITY-PASS-2026-09-30.md`](QUALITY-PASS-2026-09-30.md).
+> The live library equals the Sep 20 export, and an answer-usefulness gate plus intent-aware ranking
+> were added. Untouched hold-out v3: 96% decisions, **72% hand-judged usefulness** (target 85%),
+> 78% coverage. **Still NOT READY.** The sections below describe Stage 1 as first shipped.
+
 ## What was built
 
 | Piece | File | Role |
