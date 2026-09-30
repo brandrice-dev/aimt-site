@@ -3,16 +3,12 @@
 // functions/api/*.js Cloudflare Pages Functions rule from CLAUDE.md applies
 // here too: plain ES module, zero npm dependencies, Web Crypto + fetch only.
 //
-// Template source of truth: docs/email-templates/custom-resend/enrollment-confirmation.html
-// (see that file's own header comment + docs/stripe-and-email/AIMT-STRIPE-
-// EMAIL-BRANDING-AUDIT-2026-09-15.md item 5 for full design rationale). The
-// HTML below is that file's markup, unmodified, with its two {{PLACEHOLDER}}
-// tokens replaced by template interpolation — there is no bundler/build step
-// in this repo to import the .html file's text at request time, so it is
-// inlined here instead. Same approach as
-// functions/_lib/admin/manual-grant-invite-email.mjs, whose overall shape
-// (idempotency key, never-throw send, missing-key/failure result objects)
-// this module deliberately mirrors.
+// Rendering: the shared AIMT email shell (functions/_lib/email/
+// aimt-email-shell.mjs). renderEnrollmentHtml()/renderEnrollmentText()
+// below are the source of truth; docs/email-templates/custom-resend/
+// enrollment-confirmation.{html,txt} are generated FROM them by
+// scripts/build-email-templates.mjs (tests fail if the docs copies drift).
+// Every send carries an intentional plain-text part alongside the HTML.
 //
 // Idempotency: key = `enrollment/<checkoutSessionId>`, one per paid
 // checkout. Unlike the manual-grant helper (which leaves the dedupe lookup
@@ -37,11 +33,16 @@
 // of what this function returns.
 
 import { supabaseRest } from '../certification/auth.mjs';
+import {
+  renderEmail, paragraph, sectionLabel, bulletList, steps, button, divider,
+  link, textFooter, welcomeHeadline, welcomeHeadlineText, escapeHtml,
+  SUPPORT_LINK, SUPPORT_EMAIL, STUDENT_ACCESS_URL, COLORS,
+} from '../email/aimt-email-shell.mjs';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const SENDER = 'AIMT <no-reply@auth.aimtrichology.com>';
 const REPLY_TO = 'support@aimtrichology.com';
-const SUBJECT = 'Welcome to the Head Spa Certification Course';
+const SUBJECT = 'Your AIMT enrollment is confirmed';
 const AIMT_LOGS_TABLE = 'aimt_logs';
 const SENT_EVENT_TYPE = 'paid_enrollment_email_sent';
 
@@ -49,101 +50,77 @@ export function paidEnrollmentEmailIdempotencyKey(checkoutSessionId) {
   return `enrollment/${checkoutSessionId}`;
 }
 
-function escapeHtml(value) {
-  return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }[ch]));
+export const ENROLLMENT_SUBJECT = SUBJECT;
+
+const PREHEADER = 'Head Spa Certification Course: here’s how to begin.';
+const INCLUDED = [
+  '13-module certification curriculum',
+  'Cadence, your personal AI tutor',
+  'Final Certification Assessment',
+  'Lifetime course access',
+];
+const CERTIFICATION_NOTE = 'Your AIMT certification is earned after completing the required course progression and passing the Final Certification Assessment.';
+
+export function renderEnrollmentHtml({ firstName, courseEntryUrl }) {
+  const safeUrl = escapeHtml(courseEntryUrl);
+  return renderEmail({
+    title: SUBJECT,
+    preheader: PREHEADER,
+    eyebrow: 'Enrollment confirmed',
+    headline: welcomeHeadline(firstName),
+    content: [
+      paragraph('Your enrollment in the Head Spa Certification Course is confirmed.'),
+      sectionLabel('Included with enrollment'),
+      bulletList(INCLUDED),
+      paragraph(CERTIFICATION_NOTE, { top: 14, size: 14, color: COLORS.muted }),
+      divider(),
+      sectionLabel('How to begin'),
+      steps([
+        { heading: 'Set up your student access.', text: 'Use the same email address you entered at checkout.' },
+        { heading: 'Create your AIMT account or sign in.' },
+        { heading: 'Begin with the Welcome Module.' },
+      ]),
+      button({ label: 'Set Up Student Access', href: safeUrl, width: 260 }),
+      paragraph(`Already set up your account? Sign in through ${link(STUDENT_ACCESS_URL, 'Student Access')}.`, { top: 18, size: 14 }),
+      divider(),
+      paragraph(`Questions about your enrollment? Reply to this email or contact ${SUPPORT_LINK}.`, { top: 24, size: 14 }),
+      paragraph('Your payment receipt is sent separately by Stripe.', { top: 10, size: 13, color: COLORS.muted }),
+    ].join('\n      '),
+  });
 }
 
-// Mirrors docs/email-templates/custom-resend/enrollment-confirmation.html exactly.
-function renderEnrollmentHtml({ firstName, courseEntryUrl }) {
-  const safeFirstName = escapeHtml(firstName || 'there');
-  const safeUrl = escapeHtml(courseEntryUrl);
-  return `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>Welcome to Head Spa Certification Course</title>
-<!--[if mso]>
-<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
-<![endif]-->
-<style>
-  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-  img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-  body { margin: 0; padding: 0; width: 100% !important; background-color: #faf8f5; }
-  @media (prefers-color-scheme: dark) {
-    .aimt-bg { background-color: #1a1814 !important; }
-    .aimt-card { background-color: #262626 !important; border-color: rgba(255,255,255,0.08) !important; }
-    .aimt-h1, .aimt-body { color: #ffffff !important; }
-    .aimt-muted { color: rgba(255,255,255,0.5) !important; }
-    .aimt-btn-td { background-color: #f2eee8 !important; }
-    .aimt-btn-a { color: #1a1714 !important; }
-    .aimt-wordmark { color: #ffffff !important; }
-  }
-  @media screen and (max-width: 600px) {
-    .aimt-container { width: 100% !important; }
-    .aimt-pad { padding-left: 24px !important; padding-right: 24px !important; }
-  }
-</style>
-</head>
-<body class="aimt-bg" style="margin:0; padding:0; background-color:#faf8f5;">
-<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">Your enrollment is confirmed. Here's how to start the Head Spa Certification Course.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-<center class="aimt-bg" style="width:100%; background-color:#faf8f5;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding: 40px 16px;">
-<table role="presentation" class="aimt-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
-  <tr><td align="center" style="padding-bottom: 28px;">
-    <span class="aimt-wordmark" style="font-family:'Montserrat',Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:4px; color:#262626;">AIMT</span>
-  </td></tr>
-  <tr><td class="aimt-card" style="background:#ffffff; border:1px solid rgba(0,0,0,0.06); border-radius:16px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><td class="aimt-pad" style="padding: 44px 44px 8px;">
-        <div style="font-family:'SF Mono','Fira Code',Consolas,monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a3968d;">Enrollment confirmed</div>
-        <h1 class="aimt-h1" style="font-family:Georgia,'Playfair Display',serif; font-size:24px; line-height:1.3; color:#262626; font-weight:700; margin:10px 0 0;">Welcome to the Head Spa Certification Course, ${safeFirstName}</h1>
-      </td></tr>
-      <tr><td class="aimt-pad" style="padding: 18px 44px 0;">
-        <p class="aimt-body" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:15px; line-height:1.65; color:#262626; margin:0;">
-          You're enrolled. Your certification training — all 12 modules, your Cadence AI tutor, checkpoints, and your certificate on completion — is ready in My AIMT whenever you are.
-        </p>
-      </td></tr>
-      <tr><td align="left" class="aimt-pad" style="padding: 28px 44px 8px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-          <td class="aimt-btn-td" style="border-radius:999px; background:#262626;">
-            <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeUrl}" style="height:46px;v-text-anchor:middle;width:220px;" arcsize="50%" strokecolor="#262626" fillcolor="#262626">
-            <w:anchorlock/>
-            <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;letter-spacing:1.2px;">ENTER MY AIMT</center>
-            </v:roundrect>
-            <![endif]-->
-            <!--[if !mso]><!-->
-            <a href="${safeUrl}" class="aimt-btn-a" style="font-family:Arial,sans-serif; font-size:12px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#ffffff; text-decoration:none; padding:15px 32px; border-radius:999px; display:inline-block;">Enter My AIMT</a>
-            <!--<![endif]-->
-          </td>
-        </tr></table>
-      </td></tr>
-      <tr><td class="aimt-pad" style="padding: 8px 44px 44px;">
-        <p class="aimt-body aimt-muted" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:13px; line-height:1.6; color:#a3968d; margin:0;">
-          This is your AIMT welcome note, separate from your payment receipt from Stripe. Keep both for your records. Questions: <a href="mailto:support@aimtrichology.com" style="color:#5a4b3f;">support@aimtrichology.com</a>.
-        </p>
-      </td></tr>
-    </table>
-  </td></tr>
-  <tr><td align="center" style="padding: 28px 20px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:12px; line-height:1.7; color:#a3968d;">
-    AIMT — American Institute of Modern Trichology<br>
-    Questions? <a href="mailto:support@aimtrichology.com" style="color:#a3968d;">support@aimtrichology.com</a><br>
-    <a href="https://aimtrichology.com/terms.html" style="color:#a3968d;">Terms</a> &middot; <a href="https://aimtrichology.com/privacy.html" style="color:#a3968d;">Privacy</a> &middot; <a href="https://aimtrichology.com/refunds.html" style="color:#a3968d;">Refunds</a>
-  </td></tr>
-</table>
-</td></tr></table>
-</center>
-</body>
-</html>`;
+export function renderEnrollmentText({ firstName, courseEntryUrl }) {
+  return [
+    'AIMT',
+    '',
+    'ENROLLMENT CONFIRMED',
+    '',
+    welcomeHeadlineText(firstName),
+    '',
+    'Your enrollment in the Head Spa Certification Course is confirmed.',
+    '',
+    'INCLUDED WITH ENROLLMENT',
+    ...INCLUDED.map((item) => `- ${item}`),
+    '',
+    CERTIFICATION_NOTE,
+    '',
+    'HOW TO BEGIN',
+    '1. Set up your student access. Use the same email address you entered at checkout.',
+    '2. Create your AIMT account or sign in.',
+    '3. Begin with the Welcome Module.',
+    '',
+    'Set Up Student Access:',
+    courseEntryUrl,
+    '',
+    'Already set up your account? Sign in through Student Access:',
+    STUDENT_ACCESS_URL,
+    '',
+    `Questions about your enrollment? Reply to this email or contact ${SUPPORT_EMAIL}.`,
+    '',
+    'Your payment receipt is sent separately by Stripe.',
+    '',
+    textFooter(),
+  ].join('\n');
 }
 
 async function logOutcome(env, { eventType, email, message }) {
@@ -228,6 +205,7 @@ export async function sendPaidEnrollmentEmail(env, { checkoutSessionId, email, f
         reply_to: REPLY_TO,
         subject: SUBJECT,
         html: renderEnrollmentHtml({ firstName, courseEntryUrl }),
+        text: renderEnrollmentText({ firstName, courseEntryUrl }),
       }),
     });
 

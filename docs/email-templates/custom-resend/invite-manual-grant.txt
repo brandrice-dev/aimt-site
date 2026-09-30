@@ -1,0 +1,23 @@
+AIMT
+
+STUDENT ACCESS
+
+Welcome to AIMT, {{FIRST_NAME}}.
+
+An AIMT student account has been created for you with access to the Head Spa Certification Course. Set your password to sign in for the first time.
+
+1. Open Student Access.
+2. Select “Forgot your password?” and enter this email address.
+3. Use the link we send you to choose a password, then sign in.
+
+Open Student Access:
+https://aimtrichology.com/student-access
+
+Questions? Reply to this email or contact support@aimtrichology.com.
+
+—
+American Institute of Modern Trichology
+support@aimtrichology.com
+Terms: https://aimtrichology.com/terms
+Privacy: https://aimtrichology.com/privacy
+Refund Policy: https://aimtrichology.com/refunds

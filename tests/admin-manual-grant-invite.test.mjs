@@ -231,8 +231,11 @@ test('new account grant sends exactly one invite email with the deterministic ad
   assert.match(sent.body.from, /auth\.aimtrichology\.com/);
   assert.equal(sent.headers.Authorization, 'Bearer re_test_123');
   assert.equal(sent.headers['Idempotency-Key'], data.inviteEmail.idempotencyKey);
-  assert.match(sent.body.html, /Welcome to AIMT, New/);
-  assert.match(sent.body.html, /student-access\.html/);
+  assert.match(sent.body.html, /Welcome to AIMT, New\./);
+  // Canonical production Student Access URL — never the admin page's own origin.
+  assert.match(sent.body.html, /href="https:\/\/aimtrichology\.com\/student-access"/);
+  assert.doesNotMatch(sent.body.html, /student-access\.html/);
+  assert.match(sent.body.text, /https:\/\/aimtrichology\.com\/student-access\n/);
 
   // Exactly one admin_audit_log row for the whole grant — the invite result
   // is folded into it, not written as a second row (see module header notes
@@ -282,7 +285,6 @@ test('retrying the exact same idempotency key never sends a duplicate email', as
     grantId: 'admin-grant-staff-fixed-test-id',
     email: 'retry@example.com',
     firstName: 'Retry',
-    studentAccessUrl: 'https://aimtrichology.com/student-access.html',
   };
 
   const first = await sendManualGrantInviteEmail(env, params);
