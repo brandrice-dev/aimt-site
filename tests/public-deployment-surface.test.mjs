@@ -39,6 +39,9 @@ const isExcluded = (p) => routes.exclude.some((r) => ruleMatches(r, p));
 const reachesFunctions = (p) => routes.include.some((r) => ruleMatches(r, p)) && !isExcluded(p);
 
 const PUBLIC_DIRS = ['about', 'assets', 'education', 'oauth'];
+// Root .html files that are owner/dev-only: never served at their clean URL.
+// The .html form stays allowlisted only so its _redirects 301 → / applies.
+const INTERNAL_ROOT_PAGES = ['cadence-intro-preview'];
 const PUBLIC_ROOT_FILES = ['favicon.svg', 'robots.txt', 'sitemap.xml'];
 const INTERNAL_PREFIXES = ['docs/', 'tests/', 'scripts/', 'supabase/', '.github/', 'cadence-worker/', 'AIMT-Listen-Mode-Final/', 'functions/', 'research-import/'];
 
@@ -47,6 +50,7 @@ const INTERNAL_SAMPLES = [
   '/docs/AIMT-AUDIT-RULES.md', '/tests/admin-config-health.test.mjs', '/scripts/build-email-templates.mjs',
   '/supabase/migrations/20260420_create_course_entitlements.sql', '/.github/workflows/aimt-education-operations.yml',
   '/cadence-worker/worker.js', '/AIMT-Listen-Mode-Final/00-Welcome/README.md', '/NEW-INTERNAL-NOTES.md', '/some-new-dir/file.json',
+  '/cadence-intro-preview', '/cadence-intro-preview/',
 ];
 const PUBLIC_SAMPLES = [
   '/', '/head-spa-certification', '/enroll', '/student-access', '/my-aimt', '/education', '/education/hair-loss',
@@ -90,6 +94,7 @@ test('every public root page is served statically (clean, .html, and trailing-sl
   for (const page of pages) {
     if (page === 'index') { assert.ok(isExcluded('/') && isExcluded('/index.html')); continue; }
     if (page === '404') continue; // served by the catch-all itself
+    if (INTERNAL_ROOT_PAGES.includes(page)) continue; // covered by the internal-page test below
     for (const p of [`/${page}`, `/${page}.html`]) assert.ok(isExcluded(p), `${p} must be in _routes.json exclude`);
     if (!PUBLIC_DIRS.includes(page)) assert.ok(isExcluded(`/${page}/`), `/${page}/ must be in _routes.json exclude`);
   }
@@ -128,6 +133,17 @@ test('no internal tracked file is on the static allowlist', () => {
   }
 });
 
+test('owner/dev-only root pages are not served at their clean URLs; the .html redirect is kept', () => {
+  for (const page of INTERNAL_ROOT_PAGES) {
+    assert.ok(tracked.includes(`${page}.html`), `${page}.html stays in the repo for local review`);
+    for (const p of [`/${page}`, `/${page}/`]) {
+      assert.ok(!isExcluded(p) && reachesFunctions(p), `${p} must hit the default-deny 404`);
+    }
+    assert.ok(isExcluded(`/${page}.html`), `/${page}.html stays static so its _redirects rule applies`);
+  }
+  assert.match(read('_redirects'), /^\/cadence-intro-preview\.html \/ 301$/m);
+});
+
 // ── Live (opt-in) ─────────────────────────────────────────────────────────
 
 const BASE = process.env.AIMT_SURFACE_BASE_URL;
@@ -148,6 +164,9 @@ test('live: public resources and API routes still respond', { skip: !BASE && 'se
   }
   const png = await fetch(BASE + '/assets/brand/email/aimt-mark-email.png');
   assert.equal(png.headers.get('content-type'), 'image/png');
+  const cip = await fetch(BASE + '/cadence-intro-preview.html', { redirect: 'manual' });
+  assert.equal(cip.status, 301, '/cadence-intro-preview.html keeps its redirect');
+  assert.equal(new URL(cip.headers.get('location'), BASE).pathname, '/');
   const hsc = await fetch(BASE + '/head-spa-certification/', { redirect: 'manual' });
   assert.equal(hsc.status, 301, '/head-spa-certification/ keeps its documented 301');
   const get = await fetch(BASE + '/api/create-checkout-session');
