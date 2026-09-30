@@ -116,6 +116,9 @@ function packet(overrides = {}) {
   const other = packet({ batch_id: 'P-9', researched_at: '2026-09-23T00:00:00Z' });
   const s = findSuperseded([v2, v1, other]);
   check('explicit re-test supersedes the earlier packet', s.get('P-1') === 'P-1-v2' && s.size === 1);
+  const crossRef = findSuperseded([packet({ batch_id: 'SDYS', researched_at: '2026-09-21T00:00:00Z', research_topic: 'Scalp dysesthesia' }),
+    packet({ batch_id: 'SSCALP', researched_at: '2026-09-30T00:00:00Z', research_topic: 'Sensitive scalp', verification: { method: 'm', cross_checked: true, independent_sources_count: 2, notes: 'Dysesthesia is covered by packet SDYS.' } })]);
+  check('a cross-reference from a different topic never supersedes', crossRef.size === 0);
   const backwards = findSuperseded([packet({ batch_id: 'OLD', researched_at: '2026-09-21T00:00:00Z', research_reason: 'mentions NEW' }), packet({ batch_id: 'NEW', researched_at: '2026-09-22T00:00:00Z' })]);
   check('an earlier packet cannot supersede a later one', backwards.size === 0);
 }

@@ -102,13 +102,19 @@ export function validatePacket(packet) {
 /* ── Supersession ─────────────────────────────────────────────────── */
 
 /**
- * A packet is superseded when a LATER packet in the same inbox explicitly
- * names its batch_id in research_reason or verification.notes (the
- * worker's documented way of recording a re-test, e.g. "prior packet
- * AIMT-RF-2026-09-21-SDYS retained unchanged"). Superseded packets are
- * never ingested, so a weaker earlier verification pass cannot land.
+ * A packet is superseded when a LATER packet in the same inbox is a re-run
+ * of the SAME investigation -- identical research_topic (case/space
+ * insensitive) -- AND explicitly names the earlier batch_id in
+ * research_reason or verification.notes (the worker's documented way of
+ * recording a re-test, e.g. "prior packet AIMT-RF-2026-09-21-SDYS retained
+ * unchanged"). A mere cross-reference from a packet on a different topic
+ * ("dysesthesia is covered by packet X") never supersedes anything.
+ * Superseded packets are never ingested, so a weaker earlier verification
+ * pass cannot land.
  * @returns {Map<string,string>} superseded batch_id -> superseding batch_id
  */
+const normTopic = (t) => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 export function findSuperseded(packets) {
   const out = new Map();
   const ordered = packets.filter((p) => p && isStr(p.batch_id))
@@ -117,6 +123,7 @@ export function findSuperseded(packets) {
     const text = `${later.research_reason || ''} ${(later.verification && later.verification.notes) || ''}`;
     for (const earlier of ordered) {
       if (earlier === later || Date.parse(earlier.researched_at) >= Date.parse(later.researched_at)) continue;
+      if (normTopic(earlier.research_topic) !== normTopic(later.research_topic)) continue;
       if (text.includes(earlier.batch_id)) out.set(earlier.batch_id, later.batch_id);
     }
   }
