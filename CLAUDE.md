@@ -14,6 +14,12 @@ Currently pre-launch. Target: end of July 2026.
 - **Cloudflare Pages Functions** live in `functions/api/*.js` — plain ES
   modules, `onRequestPost(context)` pattern, **zero npm dependencies**
   (Web Crypto + fetch only). Keep it that way.
+- **Public surface is default-deny.** Pages publishes the repo root, so
+  `_routes.json` allowlists public paths (served statically) and
+  `functions/[[path]].js` 404s everything else (docs/, tests/, scripts/,
+  root .md files, …). A new public root page must be added to
+  `_routes.json` exclude as `/<page>`, `/<page>.html`, `/<page>/` or it
+  404s; `tests/public-deployment-surface.test.mjs` enforces this.
 - **Backend:** Supabase (auth + Postgres with RLS) + Stripe Checkout.
   SQL migrations live in `supabase/migrations/` — they are committed for
   record-keeping but MUST be run manually in the Supabase SQL editor.
