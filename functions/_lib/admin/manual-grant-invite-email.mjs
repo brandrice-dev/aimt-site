@@ -4,12 +4,12 @@
 // functions/api/*.js Cloudflare Pages Functions rule from CLAUDE.md applies
 // here too: plain ES module, zero npm dependencies, Web Crypto + fetch only.
 //
-// Template source of truth: docs/email-templates/custom-resend/invite-manual-grant.html
-// (see that file's own header comment + docs/email-templates/AIMT-EMAIL-TEMPLATES-SETUP.md
-// item 4 for full design rationale). The HTML below is that file's markup,
-// unmodified, with its two {{PLACEHOLDER}} tokens replaced by template
-// interpolation — there is no bundler/build step in this repo to import the
-// .html file's text at request time, so it is inlined here instead.
+// Rendering: the shared AIMT email shell (functions/_lib/email/
+// aimt-email-shell.mjs). renderInviteHtml()/renderInviteText() below are the
+// source of truth; docs/email-templates/custom-resend/invite-manual-grant.
+// {html,txt} are generated FROM them by scripts/build-email-templates.mjs.
+// The CTA always points at the canonical production Student Access URL —
+// never the origin of whatever domain the admin page happened to be open on.
 //
 // Idempotency (see AIMT-STRIPE-EMAIL-BRANDING-AUDIT-2026-09-15.md item 6):
 // key = `admin-grant/<grantId>`, one per manual-grant event. Before sending,
@@ -35,112 +35,64 @@
 // existing grant_course_access row keeps one manual grant = one audit row).
 
 import { supabaseRest } from '../certification/auth.mjs';
+import {
+  renderEmail, paragraph, steps, button, textFooter, welcomeHeadline,
+  welcomeHeadlineText, SUPPORT_LINK, SUPPORT_EMAIL, STUDENT_ACCESS_URL,
+} from '../email/aimt-email-shell.mjs';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const SENDER = 'AIMT <no-reply@auth.aimtrichology.com>';
 const REPLY_TO = 'support@aimtrichology.com';
-const SUBJECT = 'Your AIMT account is ready';
+const SUBJECT = 'Your AIMT student access is ready';
 const AUDIT_LOOKUP_ACTION = 'grant_course_access';
 
 export function manualGrantInviteIdempotencyKey(grantId) {
   return `admin-grant/${grantId}`;
 }
 
-function escapeHtml(value) {
-  return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }[ch]));
+export const INVITE_SUBJECT = SUBJECT;
+
+const INVITE_BODY = 'An AIMT student account has been created for you with access to the Head Spa Certification Course. Set your password to sign in for the first time.';
+const INVITE_STEPS = [
+  'Open Student Access.',
+  'Select “Forgot your password?” and enter this email address.',
+  'Use the link we send you to choose a password, then sign in.',
+];
+
+export function renderInviteHtml({ firstName }) {
+  return renderEmail({
+    title: SUBJECT,
+    preheader: 'Set your password to begin the Head Spa Certification Course.',
+    eyebrow: 'Student access',
+    headline: welcomeHeadline(firstName),
+    content: [
+      paragraph(INVITE_BODY),
+      steps(INVITE_STEPS.map((text) => ({ text })), { top: 18 }),
+      button({ label: 'Open Student Access', href: STUDENT_ACCESS_URL, width: 250 }),
+      paragraph(`Questions? Reply to this email or contact ${SUPPORT_LINK}.`, { top: 28, size: 14 }),
+    ].join('\n      '),
+  });
 }
 
-// Mirrors docs/email-templates/custom-resend/invite-manual-grant.html exactly.
-function renderInviteHtml({ firstName, studentAccessUrl }) {
-  const safeFirstName = escapeHtml(firstName || 'there');
-  const safeUrl = escapeHtml(studentAccessUrl);
-  return `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>Your AIMT account is ready</title>
-<!--[if mso]>
-<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
-<![endif]-->
-<style>
-  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-  img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-  body { margin: 0; padding: 0; width: 100% !important; background-color: #faf8f5; }
-  @media (prefers-color-scheme: dark) {
-    .aimt-bg { background-color: #1a1814 !important; }
-    .aimt-card { background-color: #262626 !important; border-color: rgba(255,255,255,0.08) !important; }
-    .aimt-h1, .aimt-body { color: #ffffff !important; }
-    .aimt-muted { color: rgba(255,255,255,0.5) !important; }
-    .aimt-btn-td { background-color: #f2eee8 !important; }
-    .aimt-btn-a { color: #1a1714 !important; }
-    .aimt-wordmark { color: #ffffff !important; }
-  }
-  @media screen and (max-width: 600px) {
-    .aimt-container { width: 100% !important; }
-    .aimt-pad { padding-left: 24px !important; padding-right: 24px !important; }
-  }
-</style>
-</head>
-<body class="aimt-bg" style="margin:0; padding:0; background-color:#faf8f5;">
-<div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">Your AIMT account has been created. Set your password to begin.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-<center class="aimt-bg" style="width:100%; background-color:#faf8f5;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding: 40px 16px;">
-<table role="presentation" class="aimt-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px;">
-  <tr><td align="center" style="padding-bottom: 28px;">
-    <span class="aimt-wordmark" style="font-family:'Montserrat',Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:4px; color:#262626;">AIMT</span>
-  </td></tr>
-  <tr><td class="aimt-card" style="background:#ffffff; border:1px solid rgba(0,0,0,0.06); border-radius:16px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><td class="aimt-pad" style="padding: 44px 44px 8px;">
-        <div style="font-family:'SF Mono','Fira Code',Consolas,monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a3968d;">Your account is ready</div>
-        <h1 class="aimt-h1" style="font-family:Georgia,'Playfair Display',serif; font-size:24px; line-height:1.3; color:#262626; font-weight:700; margin:10px 0 0;">Welcome to AIMT, ${safeFirstName}</h1>
-      </td></tr>
-      <tr><td class="aimt-pad" style="padding: 18px 44px 0;">
-        <p class="aimt-body" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:15px; line-height:1.65; color:#262626; margin:0;">
-          An AIMT account has been created for you. Before you can sign in, set your password: go to Student Access and select <strong>"Forgot your password?"</strong> — you'll get a secure link by email to choose your password, then you can sign in normally.
-        </p>
-      </td></tr>
-      <tr><td align="left" class="aimt-pad" style="padding: 28px 44px 8px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-          <td class="aimt-btn-td" style="border-radius:999px; background:#262626;">
-            <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeUrl}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="50%" strokecolor="#262626" fillcolor="#262626">
-            <w:anchorlock/>
-            <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;letter-spacing:1.2px;">GO TO STUDENT ACCESS</center>
-            </v:roundrect>
-            <![endif]-->
-            <!--[if !mso]><!-->
-            <a href="${safeUrl}" class="aimt-btn-a" style="font-family:Arial,sans-serif; font-size:12px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#ffffff; text-decoration:none; padding:15px 32px; border-radius:999px; display:inline-block;">Go to Student Access</a>
-            <!--<![endif]-->
-          </td>
-        </tr></table>
-      </td></tr>
-      <tr><td class="aimt-pad" style="padding: 8px 44px 44px;">
-        <p class="aimt-body aimt-muted" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:13px; line-height:1.6; color:#a3968d; margin:0;">
-          If the button doesn't work, visit ${safeUrl} directly. Questions about your enrollment: <a href="mailto:support@aimtrichology.com" style="color:#5a4b3f;">support@aimtrichology.com</a>.
-        </p>
-      </td></tr>
-    </table>
-  </td></tr>
-  <tr><td align="center" style="padding: 28px 20px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:12px; line-height:1.7; color:#a3968d;">
-    AIMT — American Institute of Modern Trichology<br>
-    Questions? <a href="mailto:support@aimtrichology.com" style="color:#a3968d;">support@aimtrichology.com</a><br>
-    <a href="https://aimtrichology.com/terms.html" style="color:#a3968d;">Terms</a> &middot; <a href="https://aimtrichology.com/privacy.html" style="color:#a3968d;">Privacy</a> &middot; <a href="https://aimtrichology.com/refunds.html" style="color:#a3968d;">Refunds</a>
-  </td></tr>
-</table>
-</td></tr></table>
-</center>
-</body>
-</html>`;
+export function renderInviteText({ firstName }) {
+  return [
+    'AIMT',
+    '',
+    'STUDENT ACCESS',
+    '',
+    welcomeHeadlineText(firstName),
+    '',
+    INVITE_BODY,
+    '',
+    ...INVITE_STEPS.map((text, i) => `${i + 1}. ${text}`),
+    '',
+    'Open Student Access:',
+    STUDENT_ACCESS_URL,
+    '',
+    `Questions? Reply to this email or contact ${SUPPORT_EMAIL}.`,
+    '',
+    textFooter(),
+  ].join('\n');
 }
 
 async function findPriorSuccessfulSend(env, idempotencyKey) {
@@ -168,7 +120,7 @@ async function findPriorSuccessfulSend(env, idempotencyKey) {
  *
  * @returns {Promise<{attempted:boolean, sent:boolean, idempotencyKey:string, deduped?:boolean, reason?:string, warning?:string, status?:number, errorMessage?:string}>}
  */
-export async function sendManualGrantInviteEmail(env, { grantId, email, firstName, studentAccessUrl }) {
+export async function sendManualGrantInviteEmail(env, { grantId, email, firstName }) {
   const idempotencyKey = manualGrantInviteIdempotencyKey(grantId);
 
   if (!env.RESEND_API_KEY) {
@@ -206,7 +158,8 @@ export async function sendManualGrantInviteEmail(env, { grantId, email, firstNam
         to: [email],
         reply_to: REPLY_TO,
         subject: SUBJECT,
-        html: renderInviteHtml({ firstName, studentAccessUrl }),
+        html: renderInviteHtml({ firstName }),
+        text: renderInviteText({ firstName }),
       }),
     });
 

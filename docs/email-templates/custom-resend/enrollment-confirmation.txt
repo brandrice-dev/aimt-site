@@ -1,0 +1,37 @@
+AIMT
+
+ENROLLMENT CONFIRMED
+
+Welcome to AIMT, {{FIRST_NAME}}.
+
+Your enrollment in the Head Spa Certification Course is confirmed.
+
+INCLUDED WITH ENROLLMENT
+- 13-module certification curriculum
+- Cadence, your personal AI tutor
+- Final Certification Assessment
+- Lifetime course access
+
+Your AIMT certification is earned after completing the required course progression and passing the Final Certification Assessment.
+
+HOW TO BEGIN
+1. Set up your student access. Use the same email address you entered at checkout.
+2. Create your AIMT account or sign in.
+3. Begin with the Welcome Module.
+
+Set Up Student Access:
+{{COURSE_ENTRY_URL}}
+
+Already set up your account? Sign in through Student Access:
+https://aimtrichology.com/student-access
+
+Questions about your enrollment? Reply to this email or contact support@aimtrichology.com.
+
+Your payment receipt is sent separately by Stripe.
+
+—
+American Institute of Modern Trichology
+support@aimtrichology.com
+Terms: https://aimtrichology.com/terms
+Privacy: https://aimtrichology.com/privacy
+Refund Policy: https://aimtrichology.com/refunds

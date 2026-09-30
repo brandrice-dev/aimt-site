@@ -208,7 +208,9 @@ test('a successful entitlement write sends exactly one enrollment email with the
   assert.match(sent.body.from, /auth\.aimtrichology\.com/);
   assert.equal(sent.headers['Idempotency-Key'], paidEnrollmentEmailIdempotencyKey('cs_test_123'));
   assert.equal(sent.headers['Idempotency-Key'], 'enrollment/cs_test_123');
-  assert.match(sent.body.html, /Welcome to the Head Spa Certification Course, Jamie/);
+  assert.match(sent.body.html, /Welcome to AIMT, Jamie\./);
+  assert.equal(sent.body.subject, 'Your AIMT enrollment is confirmed');
+  assert.match(sent.body.text, /https:\/\/aimtrichology\.com\/success\.html\?session_id=cs_test_123/);
   assert.match(sent.body.html, new RegExp(`${CANONICAL_SITE_URL.replace(/\./g, '\\.')}/success\\.html\\?session_id=cs_test_123`));
   assert.doesNotMatch(sent.body.html, /pages\.dev/, 'the CTA must never leak the webhook request origin into the email');
 

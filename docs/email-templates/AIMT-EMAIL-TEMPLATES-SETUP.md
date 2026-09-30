@@ -1,5 +1,27 @@
 # AIMT Transactional Email Templates — Setup Doc
 
+> **2026-09-29 redesign — supersedes the visual system described below.**
+> All active emails now share one shell: `functions/_lib/email/aimt-email-shell.mjs`
+> (ivory `#faf8f5` page, white card, `#e7e2dc` border, Montserrat/Helvetica
+> headings, system sans body, charcoal CTA, charcoal orbital mark from
+> `assets/brand/email/aimt-mark-email.png`). No Playfair, Georgia, or
+> monospace. Every `.html` (and `.txt`) file in this folder for the two
+> Resend sends and three Supabase templates is **generated** — edit the
+> renderers, then run `node scripts/build-email-templates.mjs`
+> (`--check` verifies; a test fails if they drift).
+>
+> - **Resend sends** (enrollment, manual-grant invite): live the moment the
+>   branch deploys. Both now include a plain-text part. No Resend Dashboard change.
+> - **Supabase Auth** (confirm signup, reset password, change email): paste
+>   each generated file into Dashboard → Authentication → Email Templates
+>   and set the subject shown in that file's header comment.
+> - Dormant templates (certification earned, review/remediation received,
+>   password changed) were intentionally **not** redesigned or wired; they
+>   still use the old styling and will be rebuilt on the new shell when
+>   their triggers exist.
+> - The "Design system used" and "AIMT mark for email" sections below
+>   describe the previous design and are kept only for history.
+
 Companion to
 `docs/stripe-and-email/AIMT-STRIPE-EMAIL-BRANDING-AUDIT-2026-09-15.md`
 (Part 2). This doc explains exactly where each template file gets pasted,

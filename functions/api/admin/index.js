@@ -253,12 +253,10 @@ async function grantAccess(env, actor, body, request) {
   let inviteEmail = null;
   if (account.created) {
     try {
-      const studentAccessUrl = `${new URL(request.url).origin}/student-access.html`;
       inviteEmail = await sendManualGrantInviteEmail(env, {
         grantId,
         email,
         firstName: body.firstName,
-        studentAccessUrl,
       });
     } catch (error) {
       inviteEmail = {
