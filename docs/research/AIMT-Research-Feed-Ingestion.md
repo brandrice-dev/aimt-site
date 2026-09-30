@@ -116,6 +116,49 @@ Every run went through `processIngestionBatch` and wrote a `research_ingestion_l
 The scheduled workflow is the same script. It cannot run until `RESEARCH_FEED_READ_TOKEN` is
 provisioned, and it only runs on `main` after merge.
 
+## One writer path (operating rule)
+
+- **Normal research delivery:** the research worker deposits one governed packet in
+  `aimt-research-feed/inbox/`. The scheduled feed ingester is the only routine writer into the
+  Research Library.
+- **Research gaps:** a packet answering an AIMT publication evidence-gap names the exact gap id
+  (`publication_evidence_gap:<topic>`) in `research_reason`. After canonical ingestion, the
+  ingester applies the same gate as MCP `submit_research_batch`, using the same
+  `education-research-gap-queue.mjs` functions. The gap is marked `research_received` only if a
+  relevant, accepted CLAIM_VERIFIED claim exists. DISCOVERED-only or off-topic claims never
+  close a gap.
+- **MCP** stays live for `list_research_gaps` / `claim_research_gap` and coordination.
+  `submit_research_batch` is unchanged and still available, but the worker is not instructed to
+  submit the same research through it as well (see the companion instruction PR in
+  `aimt-research-feed`).
+
+## Workflow security review (2026-09-30)
+
+| Check | Status |
+|---|---|
+| Permissions | `contents: read` only, at workflow level. The job never writes to either repo. |
+| Triggers | `schedule` and `workflow_dispatch` only; no `pull_request`, `pull_request_target`, `push`, or `workflow_run`. PR code never receives secrets. Dispatch requires write access to `aimt-site`. |
+| Feed credential | Only `RESEARCH_FEED_READ_TOKEN` (fine-grained, `aimt-research-feed` only, Contents: Read-only). A presence check fails the job before checkout, so there is no fallback to the default `GITHUB_TOKEN`. Both checkouts use `persist-credentials: false`. |
+| Secret printing | Secrets are only referenced via `env` and presence-tested; never echoed. The `dry_run` input reaches the shell via `env`, not template interpolation. |
+| **Public logs (fixed)** | `aimt-site` is public, so Actions logs and artifacts are world-readable, while the feed repo is private. The first version printed the full per-packet report (file names, batch ids, topics, errors) and uploaded it as an artifact. It now runs with `--quiet`: aggregate counts only, with no artifact. Per-packet provenance stays in `research_ingestion_log` and `aimt_logs`. |
+| **Superseded-packet resurrection (fixed)** | Supersession was judged only from what is in `inbox/`, so archiving a newer re-test would let the older packet ingest and overwrite the newer claims (e.g. re-verifying 5 claims SDYS-v2 downgraded). A claim-ownership guard now refuses any packet that would overwrite claims owned by another feed batch, unless it explicitly declares itself a re-test of that batch. Curated non-feed claims are never overwritten. Verified by live dry run: `skipped_claim_ownership_conflict`, 12 conflicts. |
+| Failure visibility | Infrastructure failures exit non-zero (red run). Invalid, rejected, or ownership-conflict packets emit a `::warning::` annotation (counts only) and an `aimt_logs` event. |
+| Canonical authority | All writes go through `processIngestionBatch`. Validation, quarantine, orphan checks and AIMT_APPROVED refusal/protection are unchanged. |
+| Idempotency / concurrency | Batches already in `research_ingestion_log` (success/partial) are skipped. A single-flight concurrency group is used, and in-progress runs are never cancelled. |
+
+## Post-merge canary procedure
+
+A `workflow_dispatch` workflow cannot be run until it exists on the default branch, so run
+this once after merging:
+
+1. Merge the PR into `main`, after the `RESEARCH_FEED_READ_TOKEN` Actions secret exists.
+2. Actions → **AIMT Research Feed Ingest** → Run workflow on `main` with **dry_run = true**.
+3. Confirm the "Check out research feed (read-only)" step succeeds, proving the token can read the private feed.
+4. Confirm the log shows `{"dry_run":true,"inbox_files":8,"summary":{"skipped_superseded":1,"skipped_already_ingested":7}}`, or the current equivalent, with no `would_ingest` for existing packets.
+5. Run it again with **dry_run = false**. Expect the same summary, a green run, and unchanged `research_sources` (280) / `research_claims` (1,137) counts. No new `research_ingestion_log` row should appear for skipped batches.
+6. Confirm no `::warning::` annotation, unless a packet genuinely needs attention.
+7. Leave the six-hourly schedule (`17 */6 * * *` UTC) running.
+
 ## Owner actions
 
 1. **Add `RESEARCH_FEED_READ_TOKEN`** as an Actions secret on `aimt-site`: a fine-grained PAT
@@ -124,10 +167,9 @@ provisioned, and it only runs on `main` after merge.
    token is expired and is not being refreshed. The alternative is the static
    `MCP_CONNECTOR_SECRET` path. Until this is fixed, gap claiming and gap-linked submissions
    can't work, though packets deposited to the inbox will still flow once item 1 is done.
-3. **Decide on the double-submission rule** in the feed repo's Grok instructions. If Grok both
-   deposits a packet and submits the same research via MCP, the two land as separate records
-   unless it uses the packet's `batch_id` as the MCP batch id and the same ids. Simplest option:
-   deposit only, and use MCP only for `list_research_gaps` / `claim_research_gap`.
+3. **Review the companion instruction PR in `aimt-research-feed`**, which implements the
+   one-writer rule: deposit only; MCP only for listing and claiming gaps; name the gap id in
+   `research_reason`.
 4. Merge this branch when ready. After that, the schedule runs every 6 hours.
 
 ## Cadence shadow re-evaluation (frozen retrieval code, updated library)

@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { validatePacket, findSuperseded, packetToBatch, topicsFor, FEED_SOURCE_SYSTEM } from '../functions/_lib/research/packet-adapter.mjs';
 import { partitionRecords } from '../functions/_lib/research/ingest-request.mjs';
 import { validateSource, validateClaim, mapClaimRow, mapSourceRow } from '../functions/_lib/research/schema.mjs';
-import { runFeedIngest } from '../scripts/research-feed-ingest.mjs';
+import { runFeedIngest, ownershipConflicts, quietLines, declaredResearchGapId, linkResearchGap } from '../scripts/research-feed-ingest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const results = [];
@@ -139,6 +139,7 @@ function packet(overrides = {}) {
     requests.push({ url: String(url), method: init.method || 'GET' });
     if (String(url).includes('research_ingestion_log')) return new Response(JSON.stringify([{ batch_id: 'P-DONE', status: 'success' }]), { status: 200 });
     if (String(url).includes('research_sources')) return new Response(JSON.stringify([{ source_id: 'existing-library-source', doi: '10.1/EXISTING' }]), { status: 200 });
+    if (String(url).includes('research_claims')) return new Response('[]', { status: 200 });
     return new Response('[]', { status: 200 });
   };
   const ingested = [];
@@ -163,6 +164,96 @@ function packet(overrides = {}) {
   const failing = async () => { throw new Error('db down'); };
   const failRep = await runFeedIngest({ env, inboxDir: inbox, fetchImpl, ingest: failing, log });
   check('infrastructure failure reported as failed (run exits non-zero in CLI)', failRep.packets.some((p) => p.action === 'failed'));
+}
+
+// ── Claim-ownership guard (superseded packet can never resurrect) ──
+{
+  const v1 = packet({ batch_id: 'P-1', researched_at: '2026-09-21T00:00:00Z' });
+  const v2 = packet({ batch_id: 'P-1-v2', researched_at: '2026-09-22T00:00:00Z', research_reason: 'Re-test; prior packet P-1 retained unchanged.' });
+  const b1 = packetToBatch(v1).batch;
+  const b2 = packetToBatch(v2).batch;
+  const ownedByV2 = new Map(b1.claims.map((c) => [c.claim_id, 'P-1-v2']));
+  check('older packet cannot overwrite claims owned by its superseder', ownershipConflicts(v1, b1, ownedByV2).length === b1.claims.length);
+  const ownedByV1 = new Map(b2.claims.map((c) => [c.claim_id, 'P-1']));
+  check('declared re-test may update the batch it names', ownershipConflicts(v2, b2, ownedByV1).length === 0);
+  check('a packet may update its own claims (idempotent re-run)', ownershipConflicts(v1, b1, new Map(b1.claims.map((c) => [c.claim_id, 'P-1']))).length === 0);
+  check('curated non-feed library claims are never overwritten', ownershipConflicts(v1, b1, new Map([[b1.claims[0].claim_id, null]])).length === 1);
+  check('new claims never conflict', ownershipConflicts(v1, b1, new Map()).length === 0);
+
+  // End to end: v2 archived (absent from inbox), v1 still present -> refused, nothing ingested.
+  const dir = mkdtempSync(path.join(tmpdir(), 'feed-own-'));
+  const inbox = path.join(dir, 'inbox'); mkdirSync(inbox);
+  writeFileSync(path.join(inbox, 'v1.json'), JSON.stringify(v1));
+  const ownerRows = b1.claims.map((c) => ({ claim_id: c.claim_id, owner: 'P-1-v2' }));
+  const fetchImpl = async (url) => {
+    const u = String(url);
+    if (u.includes('research_claims')) return new Response(JSON.stringify(ownerRows), { status: 200 });
+    return new Response('[]', { status: 200 });
+  };
+  const ingested = [];
+  const logs = [];
+  const rep = await runFeedIngest({ env: { SUPABASE_URL: 'https://x.co', SUPABASE_SERVICE_ROLE_KEY: 'k' }, inboxDir: inbox, fetchImpl,
+    ingest: async (e, b) => { ingested.push(b); return { ok: true }; }, log: async (e, s2, t) => logs.push(t) });
+  check('archived-superseder scenario: stale packet refused, zero writes', ingested.length === 0 && rep.summary.skipped_claim_ownership_conflict === 1 && logs.includes('research_feed_packet_ownership_conflict'), rep.summary);
+}
+
+// ── Quiet mode: no private feed detail in public CI logs ──
+{
+  const dir = mkdtempSync(path.join(tmpdir(), 'feed-quiet-'));
+  const inbox = path.join(dir, 'inbox'); mkdirSync(inbox);
+  writeFileSync(path.join(inbox, 'secret-topic-packet.json'), JSON.stringify(packet({ batch_id: 'PRIVATE-BATCH-ID', research_topic: 'Private topic name' })));
+  writeFileSync(path.join(inbox, 'broken-private.json'), JSON.stringify({ batch_id: 'PRIVATE-BROKEN' }));
+  const fetchImpl = async () => new Response('[]', { status: 200 });
+  const report = await runFeedIngest({ env: { SUPABASE_URL: 'https://x.co', SUPABASE_SERVICE_ROLE_KEY: 'k' }, inboxDir: inbox, fetchImpl,
+    ingest: async () => { throw new Error('boom: PRIVATE-BATCH-ID detail'); }, log: async () => {} });
+  const full = JSON.stringify(report);
+  const quiet = quietLines(report).join('\n');
+  check('full report does contain private detail (sanity)', /PRIVATE-BATCH-ID/.test(full) && /Private topic name/.test(full));
+  check('quiet output contains no file names, batch ids, topics or error text', !/PRIVATE|Private topic|secret-topic|broken-private|boom/.test(quiet), quiet);
+  check('quiet output surfaces failures/invalid packets as a warning annotation', /::warning::/.test(quiet) && /failed=1/.test(quiet) && /invalid=1/.test(quiet), quiet);
+}
+
+// ── Research-gap link via the feed (one-writer policy: no MCP double-submit) ──
+{
+  check('gap id parsed only from the deterministic id form', declaredResearchGapId(packet({ research_reason: 'Responds to AIMT gap publication_evidence_gap:alopecia-areata.' })) === 'publication_evidence_gap:alopecia-areata'
+    && declaredResearchGapId(packet()) === null);
+  const gapRow = { extras: { controlled_topics: ['telogen-effluvium'] } };
+  const ok = { batch_id: 'B', accepted: { claims: 2 }, processedClaims: [{ claim_id: 'x', topics: ['telogen-effluvium'], verification_status: 'CLAIM_VERIFIED' }] };
+  const marks = [];
+  const verify = async () => ({ ok: true, row: gapRow });
+  const mark = async (env, id, o) => { marks.push([id, o.researchBatchId]); return { ok: true }; };
+  check('relevant accepted CLAIM_VERIFIED -> RESEARCH_RECEIVED', await linkResearchGap({}, 'G', ok, { verify, mark }) === 'RESEARCH_RECEIVED' && marks[0][1] === 'B');
+  const discoveredOnly = { ...ok, processedClaims: [{ claim_id: 'x', topics: ['telogen-effluvium'], verification_status: 'DISCOVERED' }] };
+  check('DISCOVERED-only never closes a gap', await linkResearchGap({}, 'G', discoveredOnly, { verify, mark }) === 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM');
+  const offTopic = { ...ok, processedClaims: [{ claim_id: 'x', topics: ['psoriasis-scalp'], verification_status: 'CLAIM_VERIFIED' }] };
+  check('off-topic verified claim never closes a gap', await linkResearchGap({}, 'G', offTopic, { verify, mark }) === 'SKIPPED_NO_RELEVANT_VERIFIED_CLAIM');
+  check('unlinkable gap skipped', await linkResearchGap({}, 'G', ok, { verify: async () => ({ ok: false, reason: 'RESOLVED' }), mark }) === 'SKIPPED_RESOLVED');
+  check('verification error skipped, never thrown', await linkResearchGap({}, 'G', ok, { verify: async () => { throw new Error('x'); }, mark }) === 'SKIPPED_VERIFICATION_FAILED');
+  // End to end: gap link runs only AFTER canonical ingestion, and never for skipped packets.
+  const dir = mkdtempSync(path.join(tmpdir(), 'feed-gap-'));
+  const inbox = path.join(dir, 'inbox'); mkdirSync(inbox);
+  writeFileSync(path.join(inbox, 'g.json'), JSON.stringify(packet({ batch_id: 'P-GAP', research_reason: 'Responds to publication_evidence_gap:telogen-effluvium.' })));
+  const calls = [];
+  const rep = await runFeedIngest({ env: { SUPABASE_URL: 'https://x.co', SUPABASE_SERVICE_ROLE_KEY: 'k' }, inboxDir: inbox,
+    fetchImpl: async () => new Response('[]', { status: 200 }),
+    ingest: async (e, b) => { calls.push('ingest'); return { ok: true, batch_id: b.batch_id, status: 'ok', accepted: { claims: 1 }, processedClaims: [] }; },
+    gapLink: async (e, gid) => { calls.push(`link:${gid}`); return 'SKIPPED_NOTHING_ACCEPTED'; }, log: async () => {} });
+  check('feed packet with declared gap: ingest first, then gap link', JSON.stringify(calls) === '["ingest","link:publication_evidence_gap:telogen-effluvium"]' && rep.packets[0].research_gap_transition === 'SKIPPED_NOTHING_ACCEPTED');
+}
+
+// ── Workflow static security checks ──
+{
+  const wf = readFileSync(path.join(ROOT, '.github/workflows/aimt-research-feed-ingest.yml'), 'utf8');
+  const onBlock = wf.slice(wf.indexOf('\non:'), wf.indexOf('\nconcurrency:'));
+  check('triggers: schedule + workflow_dispatch only (no pull_request / pull_request_target / push)', /schedule:/.test(onBlock) && /workflow_dispatch:/.test(onBlock) && !/pull_request|push:|workflow_run|repository_dispatch/.test(onBlock));
+  check('permissions: exactly contents: read', /\npermissions:\n  contents: read\n\njobs:/.test(wf));
+  check('feed checkout uses only RESEARCH_FEED_READ_TOKEN, credentials not persisted', /repository: brandrice-dev\/aimt-research-feed\n\s+token: \$\{\{ secrets\.RESEARCH_FEED_READ_TOKEN \}\}/.test(wf) && (wf.match(/persist-credentials: false/g) || []).length === 2);
+  check('no fallback to github.token / GITHUB_TOKEN', !/github\.token|GITHUB_TOKEN/.test(wf));
+  check('missing feed token fails before checkout', wf.indexOf('Require read-only feed token') < wf.indexOf('Check out research feed'));
+  check('no secret echoed; only presence tested', !/echo[^\n]*\$(FEED_TOKEN|SUPABASE|\{\{ secrets)/.test(wf));
+  check('public logs: --quiet and no report artifact upload', /--quiet/.test(wf) && !/upload-artifact/.test(wf));
+  check('user input reaches the shell only via env (no ${{ inputs }} in run scripts)', !/run: \|[\s\S]*\$\{\{ inputs/.test(wf.replace(/DRY_RUN: \$\{\{ inputs\.dry_run \}\}/, '')));
+  check('single-flight concurrency, never cancel an in-progress ingest', /group: aimt-research-feed-ingest\n\s+cancel-in-progress: false/.test(wf));
 }
 
 // ── Boundaries ──

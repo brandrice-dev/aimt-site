@@ -36,6 +36,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Require read-only feed token
         env:
@@ -67,13 +69,8 @@ jobs:
           set -euo pipefail
           FLAGS=""
           if [ "${DRY_RUN:-false}" = "true" ]; then FLAGS="--dry-run"; fi
-          node scripts/research-feed-ingest.mjs --inbox research-feed/inbox --json-out research-feed-ingest-report.json $FLAGS
-
-      - name: Upload run report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: research-feed-ingest-report
-          path: research-feed-ingest-report.json
-          if-no-files-found: ignore
-          retention-days: 30
+          # --quiet: aimt-site is PUBLIC, so its Actions logs are world-readable
+          # while the feed repo is private. Only aggregate counts are printed and
+          # no report artifact is uploaded; per-packet provenance is recorded in
+          # research_ingestion_log / aimt_logs.
+          node scripts/research-feed-ingest.mjs --inbox research-feed/inbox --quiet $FLAGS
