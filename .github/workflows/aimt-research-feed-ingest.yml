@@ -1,0 +1,79 @@
+name: AIMT Research Feed Ingest
+
+# Moves finished research packets from the (private) aimt-research-feed
+# repository's inbox/ into the live Research Library through the SAME
+# canonical ingestion pipeline /api/research-ingest and the MCP connector
+# use (functions/_lib/research/ingest-request.mjs#processIngestionBatch).
+# See scripts/research-feed-ingest.mjs. Idempotent: packets already in
+# research_ingestion_log are skipped, so every run is safe to repeat.
+#
+# Secrets:
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  existing (Education Operations)
+#   RESEARCH_FEED_READ_TOKEN                 NEW, owner-provisioned: a
+#     fine-grained PAT scoped to brandrice-dev/aimt-research-feed ONLY,
+#     permission "Contents: Read-only". Never used to write.
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (translate + report, no writes)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: aimt-research-feed-ingest
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require read-only feed token
+        env:
+          FEED_TOKEN: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
+        run: |
+          if [ -z "$FEED_TOKEN" ]; then
+            echo "::error::RESEARCH_FEED_READ_TOKEN is not set. Owner action: create a fine-grained PAT for brandrice-dev/aimt-research-feed with Contents: Read-only and add it as an Actions secret on aimt-site."
+            exit 1
+          fi
+
+      - name: Check out research feed (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: brandrice-dev/aimt-research-feed
+          token: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
+          path: research-feed
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ingest new research packets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          FLAGS=""
+          if [ "${DRY_RUN:-false}" = "true" ]; then FLAGS="--dry-run"; fi
+          node scripts/research-feed-ingest.mjs --inbox research-feed/inbox --json-out research-feed-ingest-report.json $FLAGS
+
+      - name: Upload run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-feed-ingest-report
+          path: research-feed-ingest-report.json
+          if-no-files-found: ignore
+          retention-days: 30
