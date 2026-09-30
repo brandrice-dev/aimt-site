@@ -438,14 +438,16 @@ a { color: inherit; }
     slowHint: document.getElementById('enrollSlowHint'),
     reload: document.getElementById('enrollReload')
   };
-  /* Stripe renders failures (expired session, revoked key) inside its own
-     cross-origin frame with no callback to this page — so after a short
-     wait, offer a quiet, non-destructive way to start a fresh session. */
+  /* If loading is still unresolved after a short wait (session request or
+     Stripe.js stalled, form never mounted), offer a quiet way to start a
+     fresh session. Cancelled the moment the form mounts, so it never sits
+     beneath a working payment form. */
   var SLOW_HINT_MS = 12000;
   var slowHintTimer = null;
 
   var embedded = null;
   var starting = false;
+  var attemptSeq = 0;
   var stripeJsPromise = null;
 
   function logEvent(type, message) {
@@ -539,11 +541,16 @@ a { color: inherit; }
     els.mount.innerHTML = '';
   }
 
-  function start() {
-    if (starting) return;
+  /* force === true lets "Reload secure checkout" supersede a stalled
+     attempt; results from a superseded attempt are ignored. */
+  function start(force) {
+    if (starting && force !== true) return;
     starting = true;
+    var attempt = ++attemptSeq;
+    var stale = function () { return attempt !== attemptSeq; };
     teardown();
     showLoading();
+    slowHintTimer = setTimeout(function () { els.slowHint.hidden = false; }, SLOW_HINT_MS);
 
     /* Stripe.js downloads in parallel with session creation. */
     var stripeReady = loadStripeJs();
@@ -551,6 +558,7 @@ a { color: inherit; }
 
     requestSession()
       .then(function (data) {
+        if (stale()) return null;
         if (data && data.fallback === 'hosted' && data.url) {
           /* STRIPE_PUBLISHABLE_KEY not configured server-side — keep
              enrollment working through the hosted page (the old flow). */
@@ -566,6 +574,7 @@ a { color: inherit; }
           throw err;
         }
         return stripeReady.then(function (StripeCtor) {
+          if (stale()) return null;
           var stripe = StripeCtor(data.publishableKey);
           var options = { fetchClientSecret: function () { return Promise.resolve(data.clientSecret); } };
           var create = typeof stripe.createEmbeddedCheckoutPage === 'function'
@@ -574,20 +583,24 @@ a { color: inherit; }
           if (typeof create !== 'function') throw new Error('stripe_embedded_checkout_unsupported');
           return create.call(stripe, options);
         }).then(function (instance) {
+          if (!instance) return null;
+          if (stale()) { try { instance.destroy(); } catch (_) {} return null; }
           embedded = instance;
           instance.mount('#enrollCheckout');
           showReady();
-          slowHintTimer = setTimeout(function () { els.slowHint.hidden = false; }, SLOW_HINT_MS);
+          clearTimeout(slowHintTimer);
+          els.slowHint.hidden = true;
           return instance;
         });
       })
       .catch(function (error) {
+        if (stale()) return;
         var message = (error && error.name === 'AbortError') ? 'session_request_timeout' : (error && error.message) || 'unknown';
         logEvent('enroll_checkout_init_failure', message);
         teardown();
         showError(error && error.kind);
       })
-      .finally(function () { starting = false; });
+      .finally(function () { if (!stale()) starting = false; });
   }
 
   function showPendingPurchaseNotice() {
@@ -599,7 +612,7 @@ a { color: inherit; }
   }
 
   els.retry.addEventListener('click', start);
-  els.reload.addEventListener('click', start);
+  els.reload.addEventListener('click', function () { start(true); });
 
   /* Back/forward cache would restore a stale, already-used Stripe
      instance — start a fresh session instead. */

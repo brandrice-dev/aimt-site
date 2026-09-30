@@ -280,7 +280,12 @@ test('enroll.html has recoverable, accessible loading and error states', () => {
   assert.match(enrollSrc, /\[hidden\] \{ display: none !important; \}/, 'hidden attribute wins over class display rules');
   assert.match(enrollSrc, /data\.fallback === 'hosted' && data\.url/, 'hosted fallback is honored when the server returns it');
   assert.match(enrollSrc, /event\.persisted/, 'bfcache restore starts a fresh session');
-  assert.match(enrollSrc, /els\.reload\.addEventListener\('click', start\)/, 'quiet reload offered if Stripe fails inside its own frame');
+  assert.match(enrollSrc, /els\.reload\.addEventListener\('click', function \(\) \{ start\(true\); \}\)/, 'reload can supersede a stalled attempt');
+  assert.match(enrollSrc, /if \(starting && force !== true\) return;/, 'retry (event arg) still respects the in-flight guard');
+  assert.match(enrollSrc, /if \(stale\(\)\) \{ try \{ instance\.destroy\(\); \} catch \(_\) \{\} return null; \}/, 'a superseded attempt never leaves a second Stripe instance');
+  assert.match(enrollSrc, /showLoading\(\);\s*\n\s*slowHintTimer = setTimeout/, 'reload hint is armed only when loading begins');
+  assert.match(enrollSrc, /instance\.mount\('#enrollCheckout'\);\s*\n\s*showReady\(\);\s*\n\s*clearTimeout\(slowHintTimer\);\s*\n\s*els\.slowHint\.hidden = true;/, 'a successful mount cancels and hides the reload hint');
+  assert.equal((enrollSrc.match(/slowHintTimer = setTimeout/g) || []).length, 1, 'no timer re-armed after mount');
   assert.match(enrollSrc, /\.enroll-checkout\.is-mounted \{ margin: 0 -0\.85rem; \}/, 'Stripe frame spans the card on phones');
   assert.doesNotMatch(enrollSrc, /error\.message\s*\)\s*;?\s*\n\s*els\.errorCopy/, 'raw error text is never shown to the buyer');
 });
