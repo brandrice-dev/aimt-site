@@ -43,7 +43,7 @@ import { queryResearchClaims, STATUS_RANK } from '../research/query.mjs';
 import {
   RESEARCH_CONCEPTS, QUESTION_INTENTS, CLAIM_FACETS, INTENT_FACETS, CRUX_INTENTS,
   RE_METHODS_DESIGN, RE_METHODS_OUTCOME, RE_DRUG_TREATMENT, RE_ENUMERATION,
-  RE_EXCLUSION_CUE, ALTERNATIVE_JOINERS, RE_TRIAL_ARM,
+  RE_EXCLUSION_CUE, ALTERNATIVE_JOINERS, RE_TRIAL_ARM, RE_SCOPE_ONLY,
 } from './research-lexicon.mjs';
 
 /* ── Policy constants ─────────────────────────────────────────────── */
@@ -316,8 +316,11 @@ function anchorFocusUnits(question, concepts) {
   });
   // A generic unit ("hair cycle") must not be satisfiable by another
   // unit's specific term ("telogen") alone.
+  // Only the MORE GENERIC unit gives up shared terms; the specific unit
+  // keeps them ("AGA" stays with androgenetic alopecia, not "hair loss").
+  const original = unitTerms.map((t) => new Set(t));
   unitTerms.forEach((terms, i) => {
-    const others = new Set(unitTerms.filter((_, j) => j !== i).flatMap((t) => [...t]));
+    const others = new Set(original.filter((t, j) => j !== i && t.size < original[i].size).flatMap((t) => [...t]));
     const pruned = [...terms].filter((t) => !others.has(t));
     if (pruned.length) unitTerms[i] = new Set(pruned);
   });
@@ -337,6 +340,13 @@ function anchorFocusUnits(question, concepts) {
       soft: u.groups.every((g) => CONCEPT_BY_ID.get(g.concept).soft === true),
       conflicts: u.groups.map((g) => CONCEPT_BY_ID.get(g.concept).conflicts).find(Boolean) || null,
       confirms: u.groups.map((g) => CONCEPT_BY_ID.get(g.concept).confirms).find(Boolean) || null,
+      outcomeTopics: [...new Set(u.groups.flatMap((g) => CONCEPT_BY_ID.get(g.concept).outcomeTopics || []))],
+      // "vitamin D or iron": each alternative the student named, so the
+      // selection can represent every one the library can speak to.
+      alternatives: (() => {
+        const reps = [...new Set([...u.spans].map((sp) => bySpan.get(sp)))];
+        return reps.length > 1 ? reps.map((g) => g.terms) : [];
+      })(),
     };
   });
   return { groups, units };
@@ -537,14 +547,14 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   const populationUnits = active.filter((u) => u.role === 'population');
   const subjectUnits = active.filter((u) => u.role === 'subject' || u.role === 'treatment');
   const outcomeUnits = active.filter((u) => u.role === 'outcome');
-  const isComparison = intents.includes('comparison') && subjectUnits.length >= 2;
+  const isComparison = (intents.includes('comparison') || intents.includes('distinction')) && subjectUnits.length >= 2;
   const allowedFacets = new Set(intents.flatMap((i) => INTENT_FACETS[i] || []));
-  const cruxFacets = intents.filter((i) => CRUX_INTENTS.includes(i)).flatMap((i) => INTENT_FACETS[i] || []);
+  const cruxIntents = intents.filter((i) => CRUX_INTENTS.includes(i));
   const askedTreatment = intents.includes('treatment') || intents.includes('efficacy') || intents.includes('reversibility')
     || subjectUnits.some((u) => u.role === 'treatment');
   // Focus requirement:
   //   comparison of 2+ subjects   -> every compared subject
-  //   2+ subjects                 -> any 2 of them
+  //   2-3 subjects                -> all of them (4+: any 3)
   //   exactly 1 subject           -> it, plus one outcome/context unit if the
   //                                  question named one ("... in a head spa")
   //   no subject                  -> up to 2 outcome/context units
@@ -553,7 +563,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     const sHits = subjectUnits.filter((u) => hitIds.has(u.id)).length;
     const oHits = outcomeUnits.filter((u) => hitIds.has(u.id)).length;
     if (isComparison) return sHits === subjectUnits.length;
-    if (subjectUnits.length >= 2) return sHits >= 2;
+    if (subjectUnits.length >= 2) return sHits >= Math.min(3, subjectUnits.length);
     if (subjectUnits.length === 1) return sHits === 1 && (outcomeUnits.length === 0 || oHits >= 1);
     return outcomeUnits.length > 0 && oHits >= Math.min(2, outcomeUnits.length);
   };
@@ -563,19 +573,26 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     if (!isGovernedClaim(row)) { dropped.malformed_or_ungoverned++; continue; }
     const text = row.claim_text;
     const claimTokens = stemmedTokens(text);
-    const hitUnits = active.filter((u) => unitCovered(u, claimTokens));
+    const claimTopics = Array.isArray(row.topics) ? row.topics : [];
+    const textHits = active.filter((u) => unitCovered(u, claimTokens));
+    // A claim about a NAMED intervention that is governed-topic-tagged as a
+    // hair-loss claim covers the hair-outcome unit even if its sentence does
+    // not restate the outcome ("... not recommended by the panel").
+    const treatmentHit = textHits.some((u) => u.role === 'treatment');
+    const hitUnits = active.filter((u) => textHits.includes(u)
+      || (treatmentHit && u.role === 'outcome' && (u.outcomeTopics || []).some((t) => claimTopics.includes(t))));
     const hitIds = new Set(hitUnits.map((u) => u.id));
     // 1. focus coverage
     const popOk = populationUnits.every((u) => hitIds.has(u.id)
       || (u.soft && !(u.conflicts && u.conflicts.test(text) && !(u.confirms && u.confirms.test(text)))));
     if (!active.length || !popOk || !focusOk(hitIds)) { dropped.focus_incomplete++; continue; }
-    // 2. methods-only
-    if (isMethodsOnly(text)) { dropped.methods_only++; continue; }
+    // 2. methods-only / scope-only
+    if (isMethodsOnly(text) || RE_SCOPE_ONLY.test(text)) { dropped.methods_only++; continue; }
     // 3. intent match (crux intents are mandatory)
     const facets = claimFacets(row);
     const matchedFacets = [...facets].filter((f) => allowedFacets.has(f));
     if (allowedFacets.size && !matchedFacets.length) { dropped.intent_mismatch++; continue; }
-    if (cruxFacets.length && !cruxFacets.some((f) => facets.has(f))) { dropped.intent_mismatch++; continue; }
+    if (cruxIntents.some((i) => !(INTENT_FACETS[i] || []).some((f) => facets.has(f)))) { dropped.intent_mismatch++; continue; }
     // 4. off-question treatment: a claim about a drug, or about an
     //    intervention the student did not name, answers a different
     //    question unless the student asked about treatment/efficacy.
@@ -583,7 +600,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     const drugTreatment = RE_DRUG_TREATMENT.test(text) || RE_TRIAL_ARM.test(text)
       || TREATMENT_TERMS.some((t) => termOccurs(t, ' ' + claimTokens.join(' ') + ' '));
     if (drugTreatment && !askedTreatment && !namedTreatmentHit) { dropped.off_question_treatment++; continue; }
-    gated.push({ row, text, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems: contentStems(text) });
+    gated.push({ row, text, claimTokens, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems: contentStems(text) });
   }
 
   // IDF over the gated pool: question words that are rare among the
@@ -595,7 +612,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
 
   const scored = [];
   for (const g of gated) {
-    const { row, text, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems } = g;
+    const { row, text, claimTokens, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems } = g;
     let overlap = 0;
     let idfHit = 0;
     for (const st of qStems) if (claimStems.has(st)) { overlap++; idfHit += idf(st); }
@@ -615,7 +632,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
       + (row.direction ? 0.25 : 0) + (row.verification_status === 'AIMT_APPROVED' ? 0.25 : 0);
     const padded = ' ' + stemmedTokens(text).join(' ') + ' ';
     scored.push({
-      row, claimStems, score: Math.round(score * 100) / 100,
+      row, claimStems, claimTokens, score: Math.round(score * 100) / 100,
       matchedTerms: [...new Set(hitUnits.flatMap((u) => u.terms.filter((t) => termOccurs(t, padded))))],
       facets: [...facets], overlap,
     });
@@ -646,6 +663,29 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     if ((perSource.get(sid) || 0) >= RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE) { dropped.per_source_cap++; continue; }
     perSource.set(sid, (perSource.get(sid) || 0) + 1);
     kept.push(cand);
+  }
+
+  // Represent every alternative the student named ("vitamin D or iron"):
+  // if an alternative has on-question evidence but no selected claim, swap
+  // it in for the lowest-ranked claim of an over-represented alternative.
+  for (const u of active.filter((x) => x.alternatives && x.alternatives.length > 1)) {
+    const altOf = (c) => u.alternatives.findIndex((terms) => unitCovered({ terms }, c.claimTokens));
+    for (let a = 0; a < u.alternatives.length; a++) {
+      if (kept.some((c) => altOf(c) === a)) continue;
+      const cand = relevant.find((c) => !kept.includes(c) && altOf(c) === a
+        && (perSource.get(c.row.source.source_id) || 0) < RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE);
+      if (!cand) continue;
+      if (kept.length < cap) { kept.push(cand); perSource.set(cand.row.source.source_id, (perSource.get(cand.row.source.source_id) || 0) + 1); continue; }
+      for (let i = kept.length - 1; i >= 0; i--) {
+        const ai = altOf(kept[i]);
+        if (kept.filter((k) => altOf(k) === ai).length > 1) {
+          perSource.set(kept[i].row.source.source_id, perSource.get(kept[i].row.source.source_id) - 1);
+          perSource.set(cand.row.source.source_id, (perSource.get(cand.row.source.source_id) || 0) + 1);
+          kept.splice(i, 1, cand);
+          break;
+        }
+      }
+    }
   }
 
   // Preserve disagreement: if gated, on-question evidence points in a

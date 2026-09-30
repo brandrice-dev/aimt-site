@@ -31,6 +31,7 @@ import { createLocalResearchFetch } from '../scripts/cadence-research-shadow/loc
 import { EVAL_CASES } from '../scripts/cadence-research-shadow/eval-cases.mjs';
 import { runShadowEval } from '../scripts/cadence-research-shadow-eval.mjs';
 import { HOLDOUT_V2_CASES } from '../scripts/cadence-research-shadow/eval-holdout-v2.mjs';
+import { HOLDOUT_V3_CASES } from '../scripts/cadence-research-shadow/eval-holdout-v3.mjs';
 import { createReadOnlyFetch } from '../scripts/cadence-research-shadow/read-only-fetch.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -333,9 +334,15 @@ async function run() {
 
   // 12. Shadow harness contract (fixture library; no model, no writes)
   {
-    check('eval set size >= 80 in total', EVAL_CASES.length + HOLDOUT_V2_CASES.length >= 80, EVAL_CASES.length + HOLDOUT_V2_CASES.length);
-    check('hold-out v2 is meaningful and disjoint from dev', HOLDOUT_V2_CASES.length >= 20
-      && !HOLDOUT_V2_CASES.some((h) => EVAL_CASES.some((d) => d.id === h.id || d.question === h.question)));
+    check('eval set size >= 80 in total', EVAL_CASES.length + HOLDOUT_V2_CASES.length + HOLDOUT_V3_CASES.length >= 80, EVAL_CASES.length + HOLDOUT_V2_CASES.length + HOLDOUT_V3_CASES.length);
+    const sets = [EVAL_CASES, HOLDOUT_V2_CASES, HOLDOUT_V3_CASES];
+    const allCases = sets.flat();
+    check('hold-outs are meaningful (>=20 each)', HOLDOUT_V2_CASES.length >= 20 && HOLDOUT_V3_CASES.length >= 20);
+    // Within dev the same question legitimately recurs under different
+    // checkpoint/Module 12 contexts; ACROSS sets nothing may repeat.
+    const overlap = (a, b) => a.some((x) => b.some((y) => x.id === y.id || x.question === y.question));
+    check('dev / hold-out v2 / hold-out v3 are pairwise disjoint', new Set(allCases.map((c) => c.id)).size === allCases.length
+      && !overlap(sets[0], sets[1]) && !overlap(sets[0], sets[2]) && !overlap(sets[1], sets[2]));
     const cats = new Set(EVAL_CASES.map((c) => c.category));
     check('eval covers required categories', ['course_only', 'deep_knowledge', 'scalp_condition', 'ambiguous', 'high_stakes', 'conflicting', 'no_result', 'prompt_injection', 'checkpoint_open', 'module12'].every((c) => cats.has(c)), [...cats]);
     const report = await runShadowEval({ env: ENV, fetchImpl: createLocalResearchFetch(LIB).fetchImpl });

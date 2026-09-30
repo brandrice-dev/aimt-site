@@ -23,7 +23,8 @@
        [--live]
        [--export-dir <dir>]   default: research-import/unpacked/aimt-research-library-export-2026-09-20
        [--out-dir <dir>]      default: research-import/cadence-research-shadow
-       [--holdout]            score the frozen hold-out v2 set instead of dev
+       [--holdout]            score hold-out v2 (frozen before round 1; now reviewed)
+       [--holdout-v3]         score hold-out v3 (frozen before round 2; untouched)
        [--repeats <n>]        repeat each retrieval n times (latency sampling)
    ═══════════════════════════════════════════════════════════════ */
 
@@ -33,6 +34,7 @@ import { fileURLToPath } from 'node:url';
 import { retrieveCadenceResearchContext, decideResearchRetrieval, planResearchQuery } from '../functions/_lib/cadence/research-context.mjs';
 import { EVAL_CASES } from './cadence-research-shadow/eval-cases.mjs';
 import { HOLDOUT_V2_CASES } from './cadence-research-shadow/eval-holdout-v2.mjs';
+import { HOLDOUT_V3_CASES } from './cadence-research-shadow/eval-holdout-v3.mjs';
 import { loadResearchExport, createLocalResearchFetch } from './cadence-research-shadow/local-postgrest.mjs';
 import { createReadOnlyFetch } from './cadence-research-shadow/read-only-fetch.mjs';
 
@@ -51,7 +53,8 @@ function parseArgs(argv) {
     if (argv[i] === '--live') args.live = true;
     else if (argv[i] === '--export-dir') args.exportDir = path.resolve(ROOT, argv[++i]);
     else if (argv[i] === '--out-dir') args.outDir = path.resolve(ROOT, argv[++i]);
-    else if (argv[i] === '--holdout') args.holdout = true;
+    else if (argv[i] === '--holdout') args.holdout = 'v2';
+    else if (argv[i] === '--holdout-v3') args.holdout = 'v3';
     else if (argv[i] === '--repeats') args.repeats = Math.max(1, Number(argv[++i]) || 1);
   }
   return args;
@@ -286,20 +289,21 @@ async function main() {
     mode = `local export ${path.basename(args.exportDir)} (${data.claims.length} claims / ${data.sources.length} sources; FTS approximated)`;
     oracleClaims = data.claims;
   }
-  const cases = args.holdout ? HOLDOUT_V2_CASES : EVAL_CASES;
+  const cases = args.holdout === 'v3' ? HOLDOUT_V3_CASES : args.holdout === 'v2' ? HOLDOUT_V2_CASES : EVAL_CASES;
+  const setName = args.holdout ? `holdout-${args.holdout}` : 'dev';
   const report = await runShadowEval({ env, fetchImpl, cases, oracleClaims, repeats: args.repeats });
   if (report.cases.some((r) => r.error_code === 'query_threw')) {
     console.error('NOTE: at least one retrieval threw (a read-only guard refusal would surface here); inspect the report.');
   }
   const generatedAt = new Date().toISOString();
   mkdirSync(args.outDir, { recursive: true });
-  const stamp = generatedAt.slice(0, 10) + (args.live ? '-live' : '-export') + (args.holdout ? '-holdout-v2' : '-dev');
+  const stamp = generatedAt.slice(0, 10) + (args.live ? '-live' : '-export') + `-${setName}`;
   const jsonPath = path.join(args.outDir, `cadence-research-shadow-report-${stamp}.json`);
   const mdPath = path.join(args.outDir, `cadence-research-shadow-report-${stamp}.md`);
-  writeFileSync(jsonPath, JSON.stringify({ generated_at: generatedAt, mode, set: args.holdout ? 'holdout-v2' : 'dev', ...report }, null, 2));
-  writeFileSync(mdPath, renderMarkdown(report, { mode: `${mode} · set: ${args.holdout ? 'HOLD-OUT v2 (frozen)' : 'dev'}`, generatedAt }));
+  writeFileSync(jsonPath, JSON.stringify({ generated_at: generatedAt, mode, set: setName, ...report }, null, 2));
+  writeFileSync(mdPath, renderMarkdown(report, { mode: `${mode} · set: ${setName}`, generatedAt }));
   const s = report.summary;
-  console.log(`set=${args.holdout ? 'holdout-v2' : 'dev'} cases=${s.cases} decision=${pct(s.decision_accuracy)} usefulness=${pct(s.answer_usefulness_precision)} (${s.useful_selected}/${s.labeled_selected}) topical=${pct(s.topical_precision)} coverage=${pct(s.augmentation_coverage)}/${s.answerable_cases} abstain=${pct(s.correct_abstention_rate)}/${s.unanswerable_cases} governed=${s.every_claim_governed} bypasses=${s.boundary_cases_retrieved.length} latency_med=${s.latency.median_ms}ms p95=${s.latency.p95_ms}ms timeouts=${s.latency.timeouts}`);
+  console.log(`set=${setName} cases=${s.cases} decision=${pct(s.decision_accuracy)} usefulness=${pct(s.answer_usefulness_precision)} (${s.useful_selected}/${s.labeled_selected}) topical=${pct(s.topical_precision)} coverage=${pct(s.augmentation_coverage)}/${s.answerable_cases} abstain=${pct(s.correct_abstention_rate)}/${s.unanswerable_cases} governed=${s.every_claim_governed} bypasses=${s.boundary_cases_retrieved.length} latency_med=${s.latency.median_ms}ms p95=${s.latency.p95_ms}ms timeouts=${s.latency.timeouts}`);
   if (s.decisions_wrong.length) console.log(`decision mismatches: ${s.decisions_wrong.join(', ')}`);
   if (s.answerable_missed.length) console.log(`answerable but missed: ${s.answerable_missed.join(', ')}`);
   if (s.unanswerable_but_returned.length) console.log(`unanswerable but returned: ${s.unanswerable_but_returned.join(', ')}`);
