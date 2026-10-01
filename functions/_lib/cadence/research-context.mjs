@@ -74,6 +74,8 @@ export const RESEARCH_CONTEXT_LIMITS = Object.freeze({
   MAX_QUERIES: 3,         // parallel per-focus-unit queries (one round trip each)
   MAX_QUESTION_CHARS: 2000,
   TIMEOUT_MS: 2500,
+  MAX_JUDGE_CANDIDATES: 15,       // shadow judge: bound on candidates shown to it
+  MAX_PER_SOURCE_CANDIDATES: 3,
 });
 
 export const RESEARCH_EVIDENCE_NOTICE =
@@ -530,7 +532,8 @@ function projectClaim(c, scoreInfo) {
  *
  * @returns {{claims: object[], dropped: object, candidate_count: number, relevant_count: number, evidence_profile: object}}
  */
-export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONTEXT_LIMITS.MAX_CLAIMS } = {}) {
+export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONTEXT_LIMITS.MAX_CLAIMS, candidateLimit = 0 } = {}) {
+  const candLimit = Math.max(0, Math.min(RESEARCH_CONTEXT_LIMITS.MAX_JUDGE_CANDIDATES, Math.floor(candidateLimit) || 0));
   const cap = Math.max(1, Math.min(RESEARCH_CONTEXT_LIMITS.HARD_MAX_CLAIMS, Math.floor(maxClaims) || RESEARCH_CONTEXT_LIMITS.MAX_CLAIMS));
   const dropped = {
     malformed_or_ungoverned: 0, focus_incomplete: 0, methods_only: 0, intent_mismatch: 0,
@@ -569,6 +572,10 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   };
 
   const gated = [];
+  // Shadow judge only (candidateLimit > 0): claims that passed trust, focus
+  // and methods checks but failed the intent or off-question-treatment
+  // heuristics. They never enter the deterministic selection below.
+  const relaxed = [];
   for (const row of Array.isArray(rows) ? rows : []) {
     if (!isGovernedClaim(row)) { dropped.malformed_or_ungoverned++; continue; }
     const text = row.claim_text;
@@ -591,15 +598,17 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     // 3. intent match (crux intents are mandatory)
     const facets = claimFacets(row);
     const matchedFacets = [...facets].filter((f) => allowedFacets.has(f));
-    if (allowedFacets.size && !matchedFacets.length) { dropped.intent_mismatch++; continue; }
-    if (cruxIntents.some((i) => !(INTENT_FACETS[i] || []).some((f) => facets.has(f)))) { dropped.intent_mismatch++; continue; }
+    const keepRelaxed = (g) => { if (candLimit) relaxed.push(g); };
+    const base = { row, text, claimTokens, hitUnits, facets, claimStems: contentStems(text) };
+    if (allowedFacets.size && !matchedFacets.length) { dropped.intent_mismatch++; keepRelaxed({ ...base, drugTreatment: false, namedTreatmentHit: false }); continue; }
+    if (cruxIntents.some((i) => !(INTENT_FACETS[i] || []).some((f) => facets.has(f)))) { dropped.intent_mismatch++; keepRelaxed({ ...base, drugTreatment: false, namedTreatmentHit: false }); continue; }
     // 4. off-question treatment: a claim about a drug, or about an
     //    intervention the student did not name, answers a different
     //    question unless the student asked about treatment/efficacy.
     const namedTreatmentHit = hitUnits.some((u) => u.role === 'treatment');
     const drugTreatment = RE_DRUG_TREATMENT.test(text) || RE_TRIAL_ARM.test(text)
       || TREATMENT_TERMS.some((t) => termOccurs(t, ' ' + claimTokens.join(' ') + ' '));
-    if (drugTreatment && !askedTreatment && !namedTreatmentHit) { dropped.off_question_treatment++; continue; }
+    if (drugTreatment && !askedTreatment && !namedTreatmentHit) { dropped.off_question_treatment++; keepRelaxed({ ...base, drugTreatment, namedTreatmentHit }); continue; }
     gated.push({ row, text, claimTokens, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems: contentStems(text) });
   }
 
@@ -610,8 +619,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   const idf = (st) => Math.log(1 + gated.length / (df.get(st) || gated.length || 1));
   const idfTotal = [...qStems].filter((st) => df.has(st)).reduce((n, st) => n + idf(st), 0) || 1;
 
-  const scored = [];
-  for (const g of gated) {
+  const scoreOne = (g) => {
     const { row, text, claimTokens, hitUnits, facets, drugTreatment, namedTreatmentHit, claimStems } = g;
     let overlap = 0;
     let idfHit = 0;
@@ -631,12 +639,13 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
       + 4 * (idfHit / idfTotal) + specific + stats + evidence + enumeration + offTreatmentPenalty + skepticalBonus
       + (row.direction ? 0.25 : 0) + (row.verification_status === 'AIMT_APPROVED' ? 0.25 : 0);
     const padded = ' ' + stemmedTokens(text).join(' ') + ' ';
-    scored.push({
+    return {
       row, claimStems, claimTokens, score: Math.round(score * 100) / 100,
       matchedTerms: [...new Set(hitUnits.flatMap((u) => u.terms.filter((t) => termOccurs(t, padded))))],
       facets: [...facets], overlap,
-    });
-  }
+    };
+  };
+  const scored = gated.map(scoreOne);
   scored.sort((a, b) => (b.score - a.score) || (a.row.claim_id < b.row.claim_id ? -1 : a.row.claim_id > b.row.claim_id ? 1 : 0));
   // Soft population ("in women"): when at least two claims are explicitly
   // about that population, prefer them over population-agnostic claims.
@@ -717,6 +726,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   }
 
   const claims = kept.map((c) => projectClaim(c.row, { score: c.score, matched_terms: c.matchedTerms, facets: c.facets, question_overlap: c.overlap }));
+  const candidates = candLimit ? buildJudgeCandidates(relevant, relaxed.map(scoreOne), candLimit, groupOf) : undefined;
   for (let i = 0; i < claims.length; i++) {
     if (claims[i].direction_group === 'unspecified' && kept[i].facets.includes('null')) claims[i].direction_group = 'uncertain';
   }
@@ -730,7 +740,32 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     has_caution: !!directionCounts.caution || claims.some((c) => c.claim_type === 'safety_conclusion'),
     distinct_sources: new Set(claims.map((c) => c.source.source_id)).size,
   };
-  return { claims, dropped, candidate_count: Array.isArray(rows) ? rows.length : 0, relevant_count: relevant.length, evidence_profile };
+  return { claims, dropped, candidate_count: Array.isArray(rows) ? rows.length : 0, relevant_count: relevant.length, evidence_profile, ...(candidates ? { candidates } : {}) };
+}
+
+/* Shadow judge only: the bounded, already-governed candidate list a
+   relevance judge may choose from. Fully gated claims first (rank order),
+   then relaxed ones (passed trust/focus/methods, failed only the intent or
+   off-question heuristics), deduped across both, at most
+   MAX_PER_SOURCE_CANDIDATES per source. Every entry passed isGovernedClaim. */
+function buildJudgeCandidates(relevant, relaxedScored, limit, groupOf) {
+  const out = [];
+  const perSource = new Map();
+  relaxedScored.sort((a, b) => (b.score - a.score) || (a.row.claim_id < b.row.claim_id ? -1 : 1));
+  const tiers = [...relevant.map((c) => [c, 'gated']), ...relaxedScored.map((c) => [c, 'relaxed'])];
+  const taken = [];
+  for (const [cand, tier] of tiers) {
+    if (out.length >= limit) break;
+    if (taken.some((k) => jaccard(k.claimStems, cand.claimStems) >= 0.6)) continue;
+    const sid = cand.row.source.source_id;
+    if ((perSource.get(sid) || 0) >= RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE_CANDIDATES) continue;
+    perSource.set(sid, (perSource.get(sid) || 0) + 1);
+    taken.push(cand);
+    const p = projectClaim(cand.row, { score: cand.score, matched_terms: cand.matchedTerms, facets: cand.facets, question_overlap: cand.overlap, tier });
+    p.direction_group = groupOf(cand);
+    out.push(p);
+  }
+  return out;
 }
 
 /* ── Orchestration (fail-open) ────────────────────────────────────── */
@@ -763,7 +798,7 @@ function withTimeout(promise, ms, controller) {
  * @param {Function} [args.queryImpl]            test seam, defaults to queryResearchClaims
  */
 export async function retrieveCadenceResearchContext({
-  question, env, decisionContext = {}, force = false, maxClaims, timeoutMs, fetchImpl, queryImpl,
+  question, env, decisionContext = {}, force = false, maxClaims, timeoutMs, fetchImpl, queryImpl, candidateLimit = 0,
 } = {}) {
   const started = Date.now();
   const base = (status, extra = {}) => ({
@@ -833,7 +868,7 @@ export async function retrieveCadenceResearchContext({
 
   let selection;
   try {
-    selection = selectEvidence(result.claims, plan, question, { maxClaims });
+    selection = selectEvidence(result.claims, plan, question, { maxClaims, candidateLimit });
   } catch {
     return base('error', { decision, plan, error_code: 'selection_failed' });
   }
@@ -845,5 +880,6 @@ export async function retrieveCadenceResearchContext({
     claims: selection.claims,
     evidence_profile: selection.evidence_profile,
     diagnostics: { candidate_count: selection.candidate_count, relevant_count: selection.relevant_count, dropped: selection.dropped },
+    ...(selection.candidates ? { judge_candidates: selection.candidates } : {}),
   });
 }
