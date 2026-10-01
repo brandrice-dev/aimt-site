@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-10-01T11:29:28.189Z",
+  "results_generated_at": "2026-10-01T11:29:12.553Z",
+  "model": "claude-haiku-4-5-20251001",
+  "prompt_version": "judge-v2-sufficiency",
+  "messages_available": 98,
+  "by_mode": {
+    "checkpoint": 96,
+    "ask_cadence": 2
+  },
+  "family_A": {
+    "cases": 0,
+    "routed_to_family": 0,
+    "routed_elsewhere": [],
+    "selected_claims": 0,
+    "useful_claims": 0,
+    "usefulness": null,
+    "answerable": 0,
+    "covered": 0,
+    "coverage": null,
+    "decision_accuracy": null,
+    "decisions_wrong": [],
+    "unanswerable": 0,
+    "abstention_accuracy": null,
+    "all_governed": true,
+    "mixed_needed": [],
+    "per_case": []
+  },
+  "family_B": {
+    "cases": 0,
+    "routed_to_family": 0,
+    "routed_elsewhere": [],
+    "selected_claims": 0,
+    "useful_claims": 0,
+    "usefulness": null,
+    "answerable": 0,
+    "covered": 0,
+    "coverage": null,
+    "decision_accuracy": null,
+    "decisions_wrong": [],
+    "unanswerable": 0,
+    "abstention_accuracy": null,
+    "all_governed": true,
+    "mixed_needed": [],
+    "per_case": []
+  },
+  "controls": {
+    "cases": 2,
+    "by_kind": {
+      "general_medical_referral": 1,
+      "course_navigation_technical": 1
+    },
+    "research_used": [],
+    "false_positive_rate": 0,
+    "routed_into_family": []
+  },
+  "boundary": {
+    "ineligible_cases": 96,
+    "reasons": {
+      "checkpoint_open": 96
+    },
+    "any_research": false
+  },
+  "injection_suspected": [],
+  "trust": {
+    "every_final_claim_governed": true,
+    "every_pool_claim_governed": true
+  },
+  "judge": {
+    "calls": 0,
+    "failures": [],
+    "budget_skips": 0,
+    "latency_ms": {
+      "median": null,
+      "p95": null
+    }
+  },
+  "cost": {
+    "usd": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "calls": 0,
+    "cap_usd": 1
+  }
+}
