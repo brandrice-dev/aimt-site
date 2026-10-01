@@ -20,7 +20,6 @@
 
   var PROGRAM_NAME = 'Head Spa Certification Course';
   var INSTITUTE_NAME = 'American Institute of Modern Trichology';
-  var VERIFY_DISPLAY = 'aimtrichology.com/verify';
   /* Same shape check verify-credential.js applies server-side. */
   var CREDENTIAL_ID_PATTERN = /^AIMT-[A-Z]{2,6}-\d{4}-[A-Z2-9]{4,10}$/;
 
@@ -61,46 +60,56 @@
       studentName: studentName,
       date: date,
       program: PROGRAM_NAME,
-      institute: INSTITUTE_NAME,
-      verifyDisplay: VERIFY_DISPLAY
+      institute: INSTITUTE_NAME
     };
   }
 
-  function renderCertificateMarkup(view, crestSrc) {
+  /* Fixed production artwork (1491x1055). Everything static — institute
+     line, title, "This certifies that", the certification statement, the
+     Date / Credential ID / Issued by AIMT labels, the crest, the border — is
+     part of this image and is never re-drawn in HTML. Only the three
+     credential fields below are overlaid. */
+  var TEMPLATE_SRC = '/assets/certificates/aimt-head-spa-certificate-template.png';
+  var TEMPLATE_WIDTH = 1491;
+  var TEMPLATE_HEIGHT = 1055;
+
+  /* Overlay boxes, measured in template pixels from the artwork's own blank
+     rules (name rule y=507 x277-1212; Date rule y=772 x118-347; Credential
+     ID rule y=772 x449-658). Each box sits on its rule; text is positioned
+     by its bottom edge so it rests just above the line. */
+  var FIELD_BOXES = {
+    student_name: { left: 277, right: 1212, rule: 507, gap: 9 },
+    completed_at: { left: 118, right: 347, rule: 772, gap: 8 },
+    /* Extends past its rule's right end (into the empty gap before the
+       Issued-by rule) so a full AIMT-HS-YYYY-XXXXXX never wraps. */
+    credential_id: { left: 449, right: 784, rule: 772, gap: 8 }
+  };
+
+  function pct(value, total) { return (Math.round(value / total * 100000) / 1000) + '%'; }
+
+  function boxStyle(box) {
+    return 'left:' + pct(box.left, TEMPLATE_WIDTH) +
+      ';width:' + pct(box.right - box.left, TEMPLATE_WIDTH) +
+      ';bottom:' + pct(TEMPLATE_HEIGHT - box.rule + box.gap, TEMPLATE_HEIGHT);
+  }
+
+  function renderCertificateMarkup(view) {
     if (!view || view.status !== 'active') return '';
     return '' +
-      '<article class="cert" aria-label="AIMT certificate for ' + esc(view.studentName) + '">' +
-        '<div class="cert-frame" aria-hidden="true"></div>' +
-        '<header class="cert-head">' +
-          '<div class="cert-eyebrow"><span class="cert-rule"></span>AIMT Certified<span class="cert-rule"></span></div>' +
-          '<h1 class="cert-title">' + esc(view.program) + '</h1>' +
-          '<div class="cert-institute">' + esc(view.institute) + '</div>' +
-        '</header>' +
-        '<section class="cert-body">' +
-          '<div class="cert-presented">This certifies that</div>' +
-          '<div class="cert-name" data-cert-field="student_name">' + esc(view.studentName) + '</div>' +
-          '<p class="cert-statement">has completed the required coursework and met the AIMT certification standard ' +
-            'on the Final Certification Assessment for the ' + esc(view.program) + '.</p>' +
-        '</section>' +
-        '<footer class="cert-foot">' +
-          '<div class="cert-foot-spacer" aria-hidden="true"></div>' +
-          '<div class="cert-foot-center">' +
-            '<dl class="cert-meta">' +
-              '<div class="cert-meta-item"><dt>Date</dt><dd data-cert-field="completed_at">' + esc(view.date) + '</dd></div>' +
-              '<div class="cert-meta-item"><dt>Program</dt><dd>' + esc(view.program) + '</dd></div>' +
-              '<div class="cert-meta-item"><dt>Issued by</dt><dd>AIMT</dd></div>' +
-            '</dl>' +
-            '<div class="cert-verify">Credential ID <span class="cert-id" data-cert-field="credential_id">' + esc(view.credentialId) + '</span>' +
-              ' &middot; Verify at ' + esc(view.verifyDisplay) + '</div>' +
-          '</div>' +
-          '<div class="cert-seal"><img class="cert-crest" src="' + esc(crestSrc || '/assets/brand/aimt-badge-600.png') + '" alt="AIMT crest"></div>' +
-        '</footer>' +
+      '<article class="cert" aria-label="AIMT ' + esc(view.program) + ' certificate for ' + esc(view.studentName) +
+        ', issued ' + esc(view.date) + ', credential ID ' + esc(view.credentialId) + '">' +
+        '<img class="cert-template" src="' + TEMPLATE_SRC + '" width="' + TEMPLATE_WIDTH + '" height="' + TEMPLATE_HEIGHT + '" alt="">' +
+        '<div class="cert-field cert-field--name" style="' + boxStyle(FIELD_BOXES.student_name) + '" data-cert-field="student_name">' + esc(view.studentName) + '</div>' +
+        '<div class="cert-field cert-field--date" style="' + boxStyle(FIELD_BOXES.completed_at) + '" data-cert-field="completed_at">' + esc(view.date) + '</div>' +
+        '<div class="cert-field cert-field--id" style="' + boxStyle(FIELD_BOXES.credential_id) + '" data-cert-field="credential_id">' + esc(view.credentialId) + '</div>' +
       '</article>';
   }
 
   var api = {
     PROGRAM_NAME: PROGRAM_NAME,
     INSTITUTE_NAME: INSTITUTE_NAME,
+    TEMPLATE_SRC: TEMPLATE_SRC,
+    FIELD_BOXES: FIELD_BOXES,
     normalizeCredentialId: normalizeCredentialId,
     formatDate: formatDate,
     buildCertificateView: buildCertificateView,

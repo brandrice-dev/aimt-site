@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <!--
   Dedicated AIMT certificate view — the one certificate students AND
   AIMT Admin open/print. Replaces the old in-course #certOverlay +
@@ -84,95 +84,60 @@
   [data-view]:not(.is-shown) { display: none !important; }
 
   /* ── The certificate ──
-     Every size is in container-query units (cqw = 1% of the certificate's
-     width), so the identical layout scales from a phone preview to the
-     printed 11in page without reflowing. */
+     The fixed production artwork (assets/certificates/
+     aimt-head-spa-certificate-template.png) is the certificate; only the
+     graduate name, date, and credential ID are overlaid on its blank rules
+     (positions live in assets/js/aimt-certificate.js). Overlay type is in
+     container-query units (cqw = 1% of the certificate's width) so it scales
+     with the artwork from a phone preview to the printed page. */
   .stage {
     container-type: inline-size;
-    width: min(1056px, calc(100vw - 32px));
+    width: min(1120px, calc(100vw - 32px));
     margin: 0 auto;
   }
   .cert {
     position: relative;
     width: 100%;
-    aspect-ratio: 11 / 8.5;
+    aspect-ratio: 1491 / 1055;
     overflow: hidden;
-    background: var(--paper);
-    color: var(--ink);
-    display: flex; flex-direction: column; align-items: center;
-    padding: 7.4cqw 9cqw 5.2cqw;
-    text-align: center;
+    background: #f9f7f0;
     box-shadow: 0 30px 80px rgba(0,0,0,0.45);
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  /* Fine double-line institutional border */
-  .cert-frame, .cert-frame::after { position: absolute; pointer-events: none; }
-  .cert-frame { inset: 2.1cqw; border: max(1px, 0.13cqw) solid var(--frame); }
-  .cert-frame::after { content: ''; inset: 0.55cqw; border: max(0.5px, 0.06cqw) solid var(--frame); }
+  .cert-template { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cert-field {
+    position: absolute;
+    color: #231d1d;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .cert-field--name {
+    text-align: center;
+    font-style: italic; font-weight: 500;
+    font-size: 4.3cqw;
+  }
+  .cert-field--date,
+  .cert-field--id {
+    text-align: left;
+    font-weight: 600;
+    font-size: 1.45cqw;
+    letter-spacing: 0.03em;
+    font-variant-numeric: lining-nums;
+  }
+  .cert-field--id { font-size: 1.3cqw; letter-spacing: 0.04em; }
 
-  .cert-head { position: relative; }
-  .cert-eyebrow {
-    display: flex; align-items: center; justify-content: center; gap: 1.4cqw;
-    font-family: var(--mont); font-weight: 600; font-size: 0.98cqw;
-    letter-spacing: 0.34em; text-transform: uppercase; color: var(--taupe);
-    padding-left: 0.34em; /* optically re-centre the tracked caps */
-  }
-  .cert-rule { display: block; width: 4.2cqw; height: max(0.5px, 0.07cqw); background: var(--frame); }
-  .cert-title {
-    font-family: var(--serif); font-weight: 400; font-size: 5.5cqw;
-    line-height: 1.08; letter-spacing: -0.01em; color: var(--ink);
-    margin-top: 2.3cqw;
-  }
-  .cert-institute {
-    font-family: var(--sans); font-weight: 400; font-size: 1.12cqw;
-    letter-spacing: 0.3em; text-transform: uppercase; color: var(--taupe);
-    margin-top: 1.6cqw; padding-left: 0.3em;
-  }
-
-  .cert-body { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .cert-presented {
-    font-family: var(--sans); font-weight: 400; font-size: 0.98cqw;
-    letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-faint);
-  }
-  .cert-name {
-    font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 4.5cqw;
-    line-height: 1.15; color: var(--ink);
-    margin-top: 1.3cqw; padding: 0 2cqw 1.3cqw;
-    border-bottom: max(0.5px, 0.07cqw) solid var(--frame);
-    min-width: 38cqw; max-width: 74cqw; overflow-wrap: anywhere;
-  }
-  .cert-statement {
-    font-family: var(--sans); font-weight: 300; font-size: 1.36cqw; line-height: 1.7;
-    color: var(--ink-soft); max-width: 56cqw; margin-top: 1.9cqw;
-  }
-
-  .cert-foot {
-    position: relative; width: 100%;
-    display: grid; grid-template-columns: 13cqw 1fr 13cqw; align-items: end; gap: 2cqw;
-  }
-  .cert-meta { display: flex; justify-content: center; gap: 6.5cqw; }
-  .cert-meta-item { display: flex; flex-direction: column; align-items: center; gap: 0.55cqw; }
-  .cert-meta dt {
-    font-family: var(--sans); font-weight: 400; font-size: 0.86cqw;
-    letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint);
-  }
-  .cert-meta dd { font-family: var(--serif); font-size: 1.42cqw; color: var(--ink); }
-  .cert-verify {
-    margin-top: 2.1cqw; padding-top: 1.3cqw; border-top: max(0.5px, 0.06cqw) solid rgba(38,38,38,0.12);
-    font-family: var(--sans); font-weight: 400; font-size: 0.9cqw; letter-spacing: 0.06em; color: var(--ink-faint);
-  }
-  .cert-id { font-family: 'SF Mono', 'Fira Code', Menlo, monospace; letter-spacing: 0.08em; color: var(--ink-soft); }
-  .cert-seal { display: flex; justify-content: flex-end; }
-  .cert-crest { display: block; width: 11.6cqw; height: auto; }
-
-  /* ── Print: one US Letter landscape page, certificate only ── */
-  @page { size: letter landscape; margin: 0; }
+  /* ── Print: one US Letter landscape page, certificate only ──
+     The artwork's 1491:1055 ratio is wider than Letter, so it prints at
+     10.5in wide (7.43in tall), centred inside printer-safe margins. */
+  @page { size: letter landscape; margin: 0.25in; }
   @media print {
-    html, body { background: var(--paper) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { min-height: 0; height: 8.5in; overflow: hidden; }
+    html, body { background: #fff !important; }
+    body { min-height: 0; height: 8in; overflow: hidden; }
     .toolbar, .status, .hint { display: none !important; }
-    .stage { width: 11in; height: calc(8.5in - 2px); margin: 0; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
-    .cert { aspect-ratio: auto; width: 100%; height: 100%; box-shadow: none; }
+    main, [data-view="active"].is-shown { height: 8in; display: flex; align-items: center; justify-content: center; }
+    .stage { width: 10.5in; margin: 0; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
+    .cert { box-shadow: none; }
   }
 </style>
 </head>
@@ -227,6 +192,18 @@
     }));
   }
 
+  /* A long name shrinks to stay on its rule instead of overflowing it. */
+  function fitName(stage) {
+    var el = stage.querySelector('.cert-field--name');
+    if (!el) return;
+    var size = 4.3;
+    el.style.fontSize = '';
+    while (el.scrollWidth > el.clientWidth && size > 2.2) {
+      size -= 0.1;
+      el.style.fontSize = size.toFixed(1) + 'cqw';
+    }
+  }
+
   async function load() {
     if (!credentialId) { show('not_found'); return; }
     document.getElementById('verifyLink').href = '/verify?id=' + encodeURIComponent(credentialId);
@@ -243,16 +220,17 @@
     if (view.status !== 'active') { show(view.status); return; }
 
     var stage = document.getElementById('certStage');
-    stage.innerHTML = Cert.renderCertificateMarkup(view, '/assets/brand/aimt-badge-600.png');
+    stage.innerHTML = Cert.renderCertificateMarkup(view);
     document.title = view.studentName + ' — ' + view.program + ' | AIMT';
     show('active');
 
-    /* Print is only offered once the real data, the fonts, and the crest
+    /* Print is only offered once the real data, the fonts, and the template
        are all in place — never against a half-rendered certificate. */
     await Promise.all([
       document.fonts && document.fonts.ready ? document.fonts.ready.catch(function () {}) : Promise.resolve(),
       whenImagesLoaded(stage)
     ]);
+    fitName(stage);
     printBtn.disabled = false;
     if (autoPrint) window.print();
   }

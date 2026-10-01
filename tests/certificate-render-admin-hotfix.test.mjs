@@ -118,32 +118,36 @@ const STUDENT = { id: 'student-1', email: 'gabby@example.test', user_metadata: {
 
 // ── Renderer ────────────────────────────────────────────────────────────
 
-test('renderer: authoritative fields produce the certificate with current AIMT wording', () => {
+test('renderer: overlays exactly the name, date, and credential ID on the fixed template', () => {
   const Cert = loadRenderer();
   const view = Cert.buildCertificateView(ACTIVE);
   assert.equal(view.status, 'active');
-  const html = Cert.renderCertificateMarkup(view, '/assets/brand/aimt-badge-600.png');
+  const html = Cert.renderCertificateMarkup(view);
+  assert.match(html, /<img class="cert-template" src="\/assets\/certificates\/aimt-head-spa-certificate-template\.png" width="1491" height="1055"/);
   assert.match(html, /data-cert-field="student_name">Jane Doe</);
   assert.match(html, /data-cert-field="credential_id">AIMT-HS-2026-ABC234</);
   assert.match(html, new RegExp(`data-cert-field="completed_at">${Cert.formatDate(ACTIVE.completed_at)}<`));
-  assert.match(html, /<h1 class="cert-title">Head Spa Certification Course<\/h1>/);
-  assert.match(html, /American Institute of Modern Trichology/);
-  assert.match(html, /AIMT Certified/);
-  assert.match(html, /met the AIMT certification standard/);
-  assert.match(html, /Verify at aimtrichology\.com\/verify/);
-  assert.doesNotMatch(html, /HeadSpa Mastery|Certificate of Completion/);
-  assert.doesNotMatch(html, /licens|medical/i, 'no licensure / medical-authority implication');
+  const fields = [...html.matchAll(/data-cert-field="([a-z_]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(fields, ['student_name', 'completed_at', 'credential_id'], 'only these three fields are overlaid');
+  // Static wording lives in the artwork and is never re-drawn in HTML.
+  const visibleText = html.replace(/<[^>]+>/g, ' ');
+  assert.doesNotMatch(visibleText, /Head Spa Certification Course|This certifies that|American Institute|Issued by|HeadSpa Mastery|Certificate of Completion/);
 });
 
-test('renderer: hierarchy — title first, crest is the last element (bottom-right seal)', () => {
+test('template artwork is the committed production file and overlay boxes sit on its rules', () => {
   const Cert = loadRenderer();
-  const html = Cert.renderCertificateMarkup(Cert.buildCertificateView(ACTIVE));
-  const order = ['cert-eyebrow', 'cert-title', 'cert-institute', 'cert-presented', 'cert-name', 'cert-statement', 'cert-meta', 'cert-verify', 'cert-crest']
-    .map((cls) => html.indexOf(`class="${cls}"`));
-  assert.ok(order.every((i) => i >= 0), 'all sections present');
-  assert.deepEqual([...order].sort((a, b) => a - b), order, 'sections render in the owner-requested order');
-  assert.match(certPage, /\.cert-seal \{ display: flex; justify-content: flex-end; \}/, 'crest column is right-aligned');
-  assert.match(certPage, /grid-template-columns: 13cqw 1fr 13cqw/, 'footer reserves a right-hand seal column');
+  const png = readFileSync(path.join(ROOT, 'assets/certificates/aimt-head-spa-certificate-template.png'));
+  assert.equal(png.readUInt32BE(16), 1491, 'template width');
+  assert.equal(png.readUInt32BE(20), 1055, 'template height');
+  // Measured blank rules in the artwork (see aimt-certificate.js).
+  assert.deepEqual({ ...Cert.FIELD_BOXES.student_name }, { left: 277, right: 1212, rule: 507, gap: 9 });
+  assert.equal(Cert.FIELD_BOXES.completed_at.left, 118);
+  assert.equal(Cert.FIELD_BOXES.completed_at.rule, 772);
+  assert.equal(Cert.FIELD_BOXES.credential_id.left, 449);
+  assert.equal(Cert.FIELD_BOXES.credential_id.rule, 772);
+  assert.ok(Cert.FIELD_BOXES.credential_id.right < 799, 'ID box stops before the Issued-by rule');
+  assert.match(certPage, /aspect-ratio: 1491 \/ 1055;/, 'certificate box keeps the artwork ratio');
+  assert.doesNotMatch(certJs, /aimt-badge/, 'the crest is not re-drawn — it is part of the artwork');
 });
 
 test('renderer: student-entered name is escaped', () => {
@@ -183,19 +187,21 @@ test('certificate page reads only the authoritative verify endpoint and never is
 
 test('print stylesheet: one landscape page, controls hidden, certificate is in normal flow', () => {
   const print = certPage.slice(certPage.indexOf('@media print'));
-  assert.match(certPage, /@page \{ size: letter landscape; margin: 0; \}/);
+  assert.match(certPage, /@page \{ size: letter landscape; margin: 0\.25in; \}/);
   assert.match(print, /\.toolbar, \.status, \.hint \{ display: none !important; \}/);
-  assert.match(print, /\.stage \{ width: 11in; height: calc\(8\.5in - 2px\);[^}]*overflow: hidden;[^}]*break-inside: avoid/);
-  assert.match(print, /body \{[^}]*height: 8\.5in; overflow: hidden;/, 'no spill-over second page');
+  assert.match(print, /\.stage \{ width: 10\.5in;[^}]*overflow: hidden;[^}]*break-inside: avoid/);
+  assert.match(print, /body \{[^}]*height: 8in; overflow: hidden;/, 'no spill-over second page');
   assert.match(certPage, /print-color-adjust: exact/);
   assert.doesNotMatch(certPage, /position:\s*fixed/, 'nothing printed is a fixed overlay');
   assert.doesNotMatch(certPageCode, /certOverlay|body > \*:not/, 'no hide-everything-but-X print rule');
   // The stage that holds the certificate is a plain descendant of <main>,
   // never inside an element the print CSS hides.
   assert.match(certPage, /<div data-view="active">\s*<div class="stage" id="certStage"><\/div>/);
-  // Print is only enabled after data + fonts + crest are ready.
+  // Print is only enabled after data + fonts + template image are ready,
+  // and after a long name has been fitted to its rule.
   assert.match(certPage, /id="printBtn" type="button" disabled/);
   assert.ok(certPage.indexOf('printBtn.disabled = false') > certPage.indexOf('document.fonts.ready'));
+  assert.ok(certPage.indexOf('printBtn.disabled = false') > certPage.indexOf('fitName(stage);'));
 });
 
 // ── Course (Module 12) ─────────────────────────────────────────────────
