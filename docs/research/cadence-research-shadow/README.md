@@ -4,6 +4,12 @@ Branch `feature/cadence-research-shadow` · 2026-09-30 · **shadow only**. No re
 student, a model prompt, or a transcript. Live Ask Cadence (`functions/api/cadence/ask.js`,
 `functions/_lib/cadence/ask-cadence.mjs`) is byte-identical to `main`.
 
+> **Update 2026-10-01 — FINAL shadow pass (hold-out v5, stop-loss):** see
+> [`judge/FINAL-PASS-V5-2026-10-01.md`](judge/FINAL-PASS-V5-2026-10-01.md). Broadened governed
+> recall + sufficiency judge: useful claims 36% -> 75% (gate 85%), coverage 59% -> 82%, candidate
+> recall 76% -> 93%. **NOT READY — recommend narrow activation** (ingredient safety / contact
+> reactions and named-treatment evidence: 94.7% useful, full coverage on v5).
+
 > **Update 2026-10-01 — model relevance judge (branch `feature/cadence-research-judge-shadow`):** see
 > [`judge/JUDGE-SHADOW-2026-10-01.md`](judge/JUDGE-SHADOW-2026-10-01.md). Untouched hold-out v4:
 > usefulness 38% → 62% with the Haiku 4.5 judge (target 85%), coverage 63% → 67% (target 75%).
