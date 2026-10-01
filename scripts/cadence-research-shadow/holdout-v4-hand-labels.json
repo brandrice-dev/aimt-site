@@ -1,0 +1,628 @@
+{
+ "frozen_at": "2026-10-01T03:56:13.650Z",
+ "labeled_before_judge_run_on_v4": true,
+ "labeler": "Claude (hand-judged against each case need rubric; not keyword overlap)",
+ "library": {
+  "sources": 280,
+  "claims": 1137,
+  "claim_verified": 1019,
+  "discovered": 118,
+  "aimt_approved": 0,
+  "snapshot_utc": "2026-10-01T03:42:06Z"
+ },
+ "cases": {
+  "v4-01": {
+   "answerable": true,
+   "pool_size": 14,
+   "claims": {
+    "galal-postpartum-te-unmasking-2024--c01": false,
+    "gupta-glp1-hair-loss-sr-2026--c03": false,
+    "rf-claim-nu-001": false,
+    "middleton-alopecia-serology-consensus-2025--c03": false,
+    "galal-postpartum-te-unmasking-2024--c04": false,
+    "rf-claim-pp-004": false,
+    "galal-postpartum-te-unmasking-2024--c03": false,
+    "yongpisarn-vitd-alopecia-srma-2024--c03": false,
+    "oh-guide-hf-cycling-2016--c01": false,
+    "yongpisarn-vitd-alopecia-srma-2024--c01": false,
+    "schneider-paus-hf-miniorgan-2009--c01": false,
+    "stenn-paus-hf-cycling-2001--c01": false,
+    "20230123-natarelli-hair-growth-cycle--c03": false,
+    "liu-oral-minoxidil-alopecia-srma-2025--c07": false,
+    "rf-claim-sdys-008": true,
+    "rf-claim-ssc-006": true
+   },
+   "out_of_pool_useful": [
+    "rf-claim-sdys-008",
+    "rf-claim-ssc-006"
+   ]
+  },
+  "v4-02": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "cir-inositol-2024--c04": false,
+    "cir-glycerin-2019--c03": false,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-sodium-lauryl-sulfate-1983--c03": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "cir-alkyl-glucosides-2011--c04": false,
+    "sccs-alkyl-trimethylammonium-2009--c02": false,
+    "cir-dimethicone-methicone-2003--c03": false,
+    "sccs-alkyl-trimethylammonium-2009--c05": false,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-methicones-amended-2022--c01": false,
+    "cir-alkyl-betaines-2013--c03": false,
+    "cir-alkyl-betaines-2013--c05": false,
+    "deng-scalp-microbiome-dandruff-2026--c03": false,
+    "mysore-te-consensus-india-2019--c05": false,
+    "rf-claim-ssc-001": true,
+    "rf-claim-sdys-001": true
+   },
+   "out_of_pool_useful": [
+    "rf-claim-ssc-001",
+    "rf-claim-sdys-001"
+   ]
+  },
+  "v4-03": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "gooderham-roflumilast-scalp-rct-2025--c04": false,
+    "londono-latam-psoriasis-severity-2025--c02": false,
+    "binrubaian-rosemary-natural-aga-2024--c01": false,
+    "aleissa-spironolactone-fphl-srma-2023--c03": false,
+    "panahi-rosemary-minoxidil-2015--c04": false,
+    "panahi-rosemary-minoxidil-2015--c05": false,
+    "mysore-te-consensus-india-2019--c05": false,
+    "kobayashi-hair-washing-scalp-2016--c01": false,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-methicones-amended-2022--c01": false,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "cir-sodium-lauryl-sulfate-1983--c03": false,
+    "cir-alkyl-betaines-2013--c03": false,
+    "cir-alkyl-betaines-2013--c05": false,
+    "rf-claim-sdys-011": true
+   },
+   "out_of_pool_useful": [
+    "rf-claim-sdys-011"
+   ],
+   "note": "Only sdys-011 (no controlled trials; small case series) answers, as uncertainty; treatment claims sdys-005/006/012 are DISCOVERED."
+  },
+  "v4-04": {
+   "answerable": true,
+   "pool_size": 7,
+   "claims": {
+    "rf-claim-ssc-003": true,
+    "rf-claim-ta-003": true,
+    "rf-claim-sdys-001": true,
+    "rf-claim-ssc-001": true,
+    "rf-claim-sdys-008": true,
+    "rambhia-fd-therapeutics-sr-2019--c01": false,
+    "yuan-prp-female-hair-srma-2024--c04": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-05": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "rf-claim-ssc-002": true,
+    "rf-claim-ssc-001": false,
+    "rf-claim-cd-001": false,
+    "rf-claim-ssc-004": false,
+    "fda-propecia-label-2021--c05": false,
+    "mysore-te-consensus-india-2019--c05": false,
+    "rf-claim-ssc-007": false,
+    "rf-claim-cd-002": false,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-glycerin-2019--c03": false,
+    "cir-inositol-2024--c04": false,
+    "cir-methicones-amended-2022--c01": false,
+    "zhou-dutasteride-finasteride-ma-2019--c05": false,
+    "rf-claim-ssc-003": false,
+    "cir-alkyl-glucosides-2011--c05": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-06": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "rf-claim-ssc-001": false,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "cir-alkyl-glucosides-2011--c04": false,
+    "sccs-alkyl-trimethylammonium-2009--c05": false,
+    "deng-scalp-microbiome-dandruff-2026--c03": false,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-glycerin-2019--c03": false,
+    "cir-inositol-2024--c04": false,
+    "cir-methicones-amended-2022--c01": false,
+    "cir-sodium-lauryl-sulfate-1983--c03": false,
+    "cir-alkyl-betaines-2013--c03": false,
+    "cir-alkyl-betaines-2013--c05": false,
+    "cir-dimethicone-methicone-2003--c03": false,
+    "sccs-alkyl-trimethylammonium-2009--c02": false,
+    "rf-claim-sdys-003": true,
+    "rf-claim-sdys-011": true
+   },
+   "out_of_pool_useful": [
+    "rf-claim-sdys-003",
+    "rf-claim-sdys-011"
+   ]
+  },
+  "v4-07": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "cir-capb-2012--c03": false,
+    "rf-claim-cd-003": true,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "rf-claim-cd-001": true,
+    "rf-claim-cd-002": false,
+    "cir-alkyl-glucosides-2011--c04": false,
+    "sccs-alkyl-trimethylammonium-2009--c05": false,
+    "cir-alkyl-glucosides-2011--c05": false,
+    "fda-propecia-label-2021--c05": false,
+    "rf-claim-cd-004": false,
+    "mysore-te-consensus-india-2019--c05": false,
+    "cir-alkyl-betaines-2013--c03": false,
+    "zhou-dutasteride-finasteride-ma-2019--c05": false,
+    "cir-alkyl-glucosides-2013--c01": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-08": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "cir-dimethicone-methicone-2003--c03": false,
+    "rf-claim-cd-002": true,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-glycerin-2019--c03": false,
+    "cir-inositol-2024--c04": false,
+    "cir-methicones-amended-2022--c01": false,
+    "cir-alkyl-glucosides-2011--c05": false,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-capb-2012--c01": true,
+    "cir-capb-2012--c03": false,
+    "cir-fatty-amphocarboxylates-2025--c04": false,
+    "cir-mci-mi-amended-2021--c04": true,
+    "cir-melaleuca-tea-tree-2021--c02": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "cir-sodium-lauryl-sulfate-1983--c03": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-09": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "rf-claim-cd-005": true,
+    "rf-claim-cd-001": false,
+    "rf-claim-cd-002": false,
+    "sccs-alkyl-trimethylammonium-2009--c03": false,
+    "cir-alkyl-glucosides-2013--c01": false,
+    "cir-glycerin-2019--c03": false,
+    "cir-inositol-2024--c04": false,
+    "cir-methicones-amended-2022--c01": false,
+    "cir-sodium-laureth-sulfate-2010--c02": false,
+    "cir-mci-mi-amended-2021--c04": false,
+    "cir-melaleuca-tea-tree-2021--c02": false,
+    "cir-alkyl-glucosides-2011--c05": false,
+    "cir-dimethicone-methicone-2003--c03": false,
+    "sccs-alkyl-trimethylammonium-2009--c05": false,
+    "rf-claim-cd-003": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-10": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "gupta-scalp-psoriasis-immuno-nma-2026--c01": false,
+    "zhang-il17-il23-difficult-psoriasis-nma-2026--c02": false,
+    "mcmichael-visible-guselkumab-scalp-2025--c04": false,
+    "londono-latam-psoriasis-severity-2025--c02": true,
+    "kobayashi-hair-washing-scalp-2016--c01": false,
+    "shah-scalp-microbiome-guide-2024--c03": false,
+    "rf-claim-ssc-008": false,
+    "rf-claim-pso-001": false,
+    "lai-scalp-psoriasis-nma-2026--c01": false,
+    "mcmichael-visible-guselkumab-scalp-2025--c01": false,
+    "mosca-scalp-psoriasis-review-2021--c06": false,
+    "mosca-scalp-psoriasis-review-2021--c04": false,
+    "elmets-aad-npf-psoriasis-topical-2021--c01": true,
+    "elmets-aad-npf-psoriasis-topical-2021--c02": true,
+    "elmets-aad-npf-psoriasis-topical-2021--c03": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-11": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "gupta-scalp-psoriasis-immuno-nma-2026--c01": false,
+    "zhang-il17-il23-difficult-psoriasis-nma-2026--c02": false,
+    "mcmichael-visible-guselkumab-scalp-2025--c04": false,
+    "londono-latam-psoriasis-severity-2025--c02": false,
+    "elmets-aad-npf-psoriasis-topical-2021--c02": true,
+    "zhang-il17-il23-difficult-psoriasis-nma-2026--c04": false,
+    "kobayashi-hair-washing-scalp-2016--c01": false,
+    "elmets-aad-npf-psoriasis-topical-2021--c03": true,
+    "elmets-aad-npf-psoriasis-topical-2021--c05": false,
+    "lai-scalp-psoriasis-nma-2026--c01": false,
+    "mcmichael-visible-guselkumab-scalp-2025--c01": false,
+    "gupta-scalp-psoriasis-immuno-nma-2026--c04": false,
+    "lai-scalp-psoriasis-nma-2026--c07": false,
+    "mosca-scalp-psoriasis-review-2021--c06": false,
+    "mosca-scalp-psoriasis-review-2021--c01": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-12": {
+   "answerable": true,
+   "pool_size": 7,
+   "claims": {
+    "rf-claim-ta-002": true,
+    "rf-claim-ta-003": false,
+    "moola-traction-minoxidil-sr-2026--c04": false,
+    "moola-traction-minoxidil-sr-2026--c02": false,
+    "galal-postpartum-te-unmasking-2024--c02": false,
+    "rf-claim-pp-004": false,
+    "rf-claim-ta-001": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-13": {
+   "answerable": true,
+   "pool_size": 7,
+   "claims": {
+    "moola-traction-minoxidil-sr-2026--c02": true,
+    "galal-postpartum-te-unmasking-2024--c02": false,
+    "moola-traction-minoxidil-sr-2026--c04": true,
+    "rf-claim-pp-004": false,
+    "rf-claim-ta-001": false,
+    "rf-claim-ta-002": false,
+    "rf-claim-ta-003": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-14": {
+   "answerable": false,
+   "pool_size": 4,
+   "claims": {
+    "galal-postpartum-te-unmasking-2024--c01": false,
+    "rf-claim-pp-004": false,
+    "galal-postpartum-te-unmasking-2024--c04": false,
+    "rf-claim-pp-002": false
+   },
+   "out_of_pool_useful": [],
+   "note": "Only governed time-course claim is absent; rf-claim-pp-003 (2-5 months) is DISCOVERED and correctly withheld."
+  },
+  "v4-15": {
+   "answerable": true,
+   "pool_size": 4,
+   "claims": {
+    "galal-postpartum-te-unmasking-2024--c01": false,
+    "galal-postpartum-te-unmasking-2024--c04": false,
+    "rf-claim-pp-004": false,
+    "rf-claim-pp-002": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-16": {
+   "answerable": false,
+   "pool_size": 2,
+   "claims": {
+    "rf-claim-nu-001": false,
+    "te-trace-elements-srma-2026--c02": false
+   },
+   "out_of_pool_useful": [],
+   "note": "Ferritin cut-off claim rf-claim-nu-003 is DISCOVERED; governed claims give only group-mean associations."
+  },
+  "v4-17": {
+   "answerable": false,
+   "pool_size": 2,
+   "claims": {
+    "te-trace-elements-srma-2026--c02": false,
+    "rf-claim-nu-001": false
+   },
+   "out_of_pool_useful": [],
+   "note": "rf-claim-nu-002 concerns people WITHOUT confirmed deficiency, not iron-deficient non-anaemic people; judged not answering."
+  },
+  "v4-18": {
+   "answerable": true,
+   "pool_size": 1,
+   "claims": {
+    "rf-claim-nu-004": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-19": {
+   "answerable": false,
+   "pool_size": 8,
+   "claims": {
+    "kuczara-trichoscopy-aga-sr-2024--c05": false,
+    "mysore-te-consensus-india-2019--c04": false,
+    "te-trace-elements-srma-2026--c05": false,
+    "yongpisarn-vitd-alopecia-srma-2024--c04": false,
+    "rf-claim-nu-002": false,
+    "zhang-chen-hfsc-niche-2023--c02": false,
+    "20230123-natarelli-hair-growth-cycle--c02": false,
+    "rf-claim-nu-004": false
+   },
+   "out_of_pool_useful": [],
+   "note": "Immunoassay interference claim rf-claim-nu-006 is DISCOVERED."
+  },
+  "v4-20": {
+   "answerable": true,
+   "pool_size": 6,
+   "claims": {
+    "panahi-rosemary-minoxidil-2015--c01": true,
+    "panahi-rosemary-minoxidil-2015--c05": true,
+    "binrubaian-rosemary-natural-aga-2024--c01": true,
+    "binrubaian-rosemary-natural-aga-2024--c02": true,
+    "panahi-rosemary-minoxidil-2015--c04": false,
+    "landells-canadian-aga-consensus-2025--c03": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-21": {
+   "answerable": true,
+   "pool_size": 3,
+   "claims": {
+    "binrubaian-rosemary-natural-aga-2024--c01": true,
+    "panahi-rosemary-minoxidil-2015--c05": true,
+    "panahi-rosemary-minoxidil-2015--c04": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-22": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "panahi-rosemary-minoxidil-2015--c04": true
+   },
+   "out_of_pool_useful": [
+    "panahi-rosemary-minoxidil-2015--c04"
+   ],
+   "note": "Pool empty; the rubric counts pruritus as a minoxidil local adverse effect, so the rosemary-trial itching claims answer it."
+  },
+  "v4-23": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "yuan-prp-female-hair-srma-2024--c02": true,
+    "chuo-lllt-aga-nma-2025--c03": false,
+    "chuo-lllt-aga-nma-2025--c05": false,
+    "yuan-prp-female-hair-srma-2024--c05": false,
+    "deoliveira-prp-aga-srma-2024--c02": false,
+    "umar-prp-vs-minoxidil-srma-2025--c02": false,
+    "zhang-prp-aga-srma-2023--c02": false,
+    "zhang-prp-aga-srma-2023--c03": false,
+    "umar-prp-vs-minoxidil-srma-2025--c01": false,
+    "umar-prp-vs-minoxidil-srma-2025--c03": false,
+    "behrangi-regenerative-aga-sr-2026--c03": false,
+    "anitua-prp-alopecia-srma-2025--c02": false,
+    "anitua-prp-alopecia-srma-2025--c03": false,
+    "anitua-prp-alopecia-srma-2025--c04": false,
+    "yuan-prp-female-hair-srma-2024--c03": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-24": {
+   "answerable": true,
+   "pool_size": 15,
+   "claims": {
+    "chuo-lllt-aga-nma-2025--c03": false,
+    "deoliveira-prp-aga-srma-2024--c02": true,
+    "zhang-prp-aga-srma-2023--c02": true,
+    "zhang-prp-aga-srma-2023--c03": true,
+    "umar-prp-vs-minoxidil-srma-2025--c01": true,
+    "anitua-prp-alopecia-srma-2025--c02": true,
+    "anitua-prp-alopecia-srma-2025--c04": true,
+    "yuan-prp-female-hair-srma-2024--c02": true,
+    "yuan-prp-female-hair-srma-2024--c03": true,
+    "yuan-prp-female-hair-srma-2024--c05": true,
+    "zhang-prp-aga-srma-2023--c05": true,
+    "umar-prp-vs-minoxidil-srma-2025--c04": true,
+    "umar-prp-vs-minoxidil-srma-2025--c02": false,
+    "behrangi-regenerative-aga-sr-2026--c03": false,
+    "anitua-prp-alopecia-srma-2025--c05": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-25": {
+   "answerable": true,
+   "pool_size": 2,
+   "claims": {
+    "cir-melaleuca-tea-tree-2021--c02": true,
+    "sccs-tea-tree-oil-2025--c03": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-26": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "sccs-tea-tree-oil-2025--c03": true
+   },
+   "out_of_pool_useful": [
+    "sccs-tea-tree-oil-2025--c03"
+   ]
+  },
+  "v4-27": {
+   "answerable": true,
+   "pool_size": 14,
+   "claims": {
+    "english-ssm-aga-survey-2019--c02": true,
+    "english-ssm-aga-survey-2019--c04": true,
+    "koyama-scalp-massage-2016--c02": true,
+    "koyama-scalp-massage-2016--c08": true,
+    "hay-aromatherapy-aa-rct-1998--c01": false,
+    "english-ssm-aga-survey-2019--c01": false,
+    "soga-scalp-massage-bloodflow-2014--c02": false,
+    "soga-scalp-massage-bloodflow-2014--c03": false,
+    "hay-aromatherapy-aa-rct-1998--c02": false,
+    "hay-aromatherapy-aa-rct-1998--c04": true,
+    "koyama-scalp-massage-2016--c01": true,
+    "soga-scalp-massage-bloodflow-2014--c01": false,
+    "panahi-rosemary-minoxidil-2015--c09": true,
+    "panahi-rosemary-minoxidil-2015--c01": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-28": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "osha-nail-salon-biological-hazards--c05": true
+   },
+   "out_of_pool_useful": [
+    "osha-nail-salon-biological-hazards--c05"
+   ]
+  },
+  "v4-29": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "starace-sfs-algorithm-2023--c02": true
+   },
+   "out_of_pool_useful": [
+    "starace-sfs-algorithm-2023--c02"
+   ]
+  },
+  "v4-30": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "rf-claim-ssc-004": true
+   },
+   "out_of_pool_useful": [
+    "rf-claim-ssc-004"
+   ]
+  },
+  "v4-31": {
+   "answerable": false,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": [],
+   "note": "No governed claim on essential oils in pregnancy."
+  },
+  "v4-32": {
+   "answerable": true,
+   "pool_size": 0,
+   "claims": {
+    "bellani-hf-regeneration-pathways-2025--c01": true
+   },
+   "out_of_pool_useful": [
+    "bellani-hf-regeneration-pathways-2025--c01"
+   ]
+  },
+  "v4-33": {
+   "answerable": true,
+   "pool_size": 6,
+   "claims": {
+    "jourdain-squalene-peroxide-dandruff-2016--c03": true,
+    "20120601-turner-stratum-corneum-dandruff--c01": true,
+    "tao-microbiome-sd-dandruff-2021--c03": false,
+    "20071201-dawson-malassezia-genome--c01": true,
+    "deng-scalp-microbiome-dandruff-2026--c01": false,
+    "20181004-saxena-scalp-microbiome-dandruff--c02": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-34": {
+   "answerable": true,
+   "pool_size": 5,
+   "claims": {
+    "koyama-scalp-massage-2016--c03": false,
+    "lee-choi-hfsc-dynamics-2024--c05": false,
+    "20230123-natarelli-hair-growth-cycle--c02": true,
+    "20231001-carrington-gut-skin-microbiome-alopecia--c04": false,
+    "landells-canadian-te-algorithm-2025--c01": true
+   },
+   "out_of_pool_useful": [],
+   "note": "Lenient: claims 3 and 5 state that stress shifts follicles anagen->telogen but give no cortisol/HPA mechanism."
+  },
+  "v4-35": {
+   "answerable": false,
+   "pool_size": 1,
+   "claims": {
+    "sccs-zinc-pyrithione-2020--c01": false
+   },
+   "out_of_pool_useful": [],
+   "note": "Governed ZPT claims are regulatory safety only; rubric asks for efficacy/mechanism."
+  },
+  "v4-36": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-37": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-38": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-39": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-40": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-41": {
+   "answerable": true,
+   "pool_size": 3,
+   "claims": {
+    "landells-canadian-aga-consensus-2025--c02": true,
+    "fields-ketoconazole-aga-sr-2020--c04": true,
+    "fields-ketoconazole-aga-sr-2020--c01": false
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-42": {
+   "answerable": true,
+   "pool_size": 1,
+   "claims": {
+    "rf-claim-nu-004": true
+   },
+   "out_of_pool_useful": []
+  },
+  "v4-43": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-44": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  },
+  "v4-45": {
+   "answerable": null,
+   "pool_size": 0,
+   "claims": {},
+   "out_of_pool_useful": []
+  }
+ }
+}
