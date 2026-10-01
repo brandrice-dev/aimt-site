@@ -53,10 +53,19 @@ function matches(row, params) {
   return true;
 }
 
-function world({ attempts = [], completions = [], progressScore = 1200, progressState = {}, users = [STUDENT], failCompletionInserts = false, entitled = true } = {}) {
+// Synced course state with Modules 0–11 marked complete, except `except`.
+// Module 12 is deliberately absent: the instructional completion gate is
+// Modules 0–11 only; Module 12 is satisfied by the authoritative PASS.
+function modulesComplete(except = []) {
+  const progress = {};
+  for (let m = 0; m <= 11; m++) progress[String(m)] = { complete: !except.includes(m) };
+  return progress;
+}
+
+function world({ attempts = [], completions = [], progressScore = 1200, progress = modulesComplete(), progressState = {}, users = [STUDENT], failCompletionInserts = false, entitled = true } = {}) {
   const db = {
     course_entitlements: entitled ? [{ checkout_session_id: 'cs_live_1', course_slug: SLUG, purchaser_email: STUDENT.email, user_id: STUDENT.id, granted_at: '2026-08-01T00:00:00Z' }] : [],
-    course_progress: [{ user_id: STUDENT.id, course_slug: SLUG, progress_score: progressScore, state: progressState, updated_at: '2026-09-20T00:00:00Z' }],
+    course_progress: [{ user_id: STUDENT.id, course_slug: SLUG, progress_score: progressScore, state: { progress, ...progressState }, updated_at: '2026-09-20T00:00:00Z' }],
     certification_attempts: attempts.map((a) => ({ user_id: STUDENT.id, course_slug: SLUG, ...a })),
     certification_remediation_assignments: [],
     certification_review_requests: [],
@@ -182,8 +191,11 @@ test('one shared issuance authority: every path calls ensureCertificateIssued, o
   assert.match(issuanceSrc, /supabaseRest\(env, 'completions', \{\s*method: 'POST'/);
   assert.match(issuanceSrc, /certification_decision: 'eq\.pass'/);
   assert.match(issuanceSrc, /isEntitled\(env, user, courseSlug\)/);
-  assert.match(issuanceSrc, /score < REQUIRED_SCORE/);
-  assert.match(issuanceSrc, /export const REQUIRED_SCORE = 1200;/);
+  // Completion = the authoritative module-by-module helper, never the
+  // numeric progress_score (which also counts checkpoint/intro points).
+  assert.match(issuanceSrc, /await hasCompletedInstructionalModules\(env, user\.id, courseSlug\)/);
+  assert.doesNotMatch(issuanceSrc, /REQUIRED_SCORE|select: '[^']*progress_score/);
+  assert.doesNotMatch(issuanceSrc, /for \(let moduleId|moduleId <= 11/, 'module loop is not re-implemented here');
   assert.doesNotMatch(issueEndpointSrc, /request\.json\(\)/, 'client body (student_name) is never read');
 });
 
@@ -341,7 +353,7 @@ test('in-progress attempt, modules-only completion, and unscored high component 
 });
 
 test('incomplete course progress or missing entitlement blocks issuance even with a PASS', async () => {
-  const incomplete = world({ attempts: [scoredPass()], progressScore: 1100 });
+  const incomplete = world({ attempts: [scoredPass()], progress: modulesComplete([7]) });
   assert.equal((await callIssue(incomplete)).body.status, 'incomplete');
   assert.equal((await callFinalize(incomplete)).body.certificate.status, 'pending');
   assert.equal(incomplete.db.completions.length, 0);
@@ -365,6 +377,71 @@ test('revoked credential is never silently replaced', async () => {
   assert.equal(w.db.completions.length, 1);
   assert.equal(w.db.completions[0].revoked, true);
   assert.equal(completionWrites(w).length, 0);
+});
+
+// ── Completion gate: Modules 0–11 individually, not progress_score ────
+
+test('high numeric progress_score with an incomplete module does NOT issue', async () => {
+  // 11 modules complete (1100) + 22 passed checkpoints (110) + intro (10)
+  // = 1220 under assets/js/aimt-progress-sync.js#computeScore, yet Module 4
+  // is not complete.
+  const progress = modulesComplete([4]);
+  for (const m of Object.keys(progress)) {
+    progress[m].checkpointMeta = { [`m${m}cp1`]: { status: 'passed' }, [`m${m}cp2`]: { status: 'passed' } };
+  }
+  const w = world({ attempts: [scoredPass()], progressScore: 1220, progress, progressState: { student: { introComplete: true } } });
+  assert.ok(w.db.course_progress[0].progress_score >= 1200);
+
+  const i = await callIssue(w);
+  assert.equal(i.status, 409);
+  assert.equal(i.body.status, 'incomplete');
+  const f = await callFinalize(w);
+  assert.equal(f.body.decision, 'pass', 'PASS untouched');
+  assert.deepEqual(f.body.certificate, { status: 'pending', reason: 'incomplete' });
+  const a = await callAdminIssue(w);
+  assert.equal(a.status, 409);
+  assert.equal(a.body.status, 'incomplete');
+  assert.equal(w.db.completions.length, 0);
+  assert.equal(completionWrites(w).length, 0);
+});
+
+test('a module marked complete:"yes"/missing is not complete — only complete === true counts', async () => {
+  const progress = modulesComplete();
+  progress['9'] = { complete: 'yes' };
+  delete progress['10'];
+  const w = world({ attempts: [scoredPass()], progressScore: 5000, progress });
+  assert.equal((await callIssue(w)).body.status, 'incomplete');
+  assert.equal(w.db.completions.length, 0);
+});
+
+test('Modules 0–11 individually complete + PASS issues, regardless of progress_score; Module 12 state not required', async () => {
+  const w = world({ attempts: [scoredPass()], progressScore: 0, progress: modulesComplete() });
+  assert.equal(w.db.course_progress[0].state.progress['12'], undefined, 'no Module 12 local completion');
+  const i = await callIssue(w);
+  assert.equal(i.status, 200);
+  assert.equal(i.body.already_issued, false);
+  assert.equal(w.db.completions.length, 1);
+
+  const progressWith12Incomplete = { ...modulesComplete(), 12: { complete: false } };
+  const w2 = world({ attempts: [lockedAttempt()], progress: progressWith12Incomplete });
+  const f = await callFinalize(w2);
+  assert.equal(f.body.certificate.status, 'issued');
+  assert.equal(w2.db.completions.length, 1);
+});
+
+test('existing credential still wins when progress data is later missing or regressed', async () => {
+  const EXISTING = { credential_id: 'AIMT-HS-2026-GBY7K2', student_name: 'Gabriela Example', completed_at: '2026-09-18T21:04:00Z', revoked: false };
+  for (const mutate of [(w) => { w.db.course_progress.length = 0; }, (w) => { w.db.course_progress[0].state.progress['3'].complete = false; }]) {
+    const w = world({ attempts: [scoredPass()], completions: [EXISTING] });
+    mutate(w);
+    const i = await callIssue(w);
+    assert.equal(i.status, 200);
+    assert.equal(i.body.credential_id, EXISTING.credential_id);
+    assert.equal(i.body.student_name, EXISTING.student_name);
+    assert.equal(i.body.already_issued, true);
+    assert.equal((await callFinalize(w)).body.certificate.credentialId, EXISTING.credential_id);
+    assert.equal(completionWrites(w).length, 0);
+  }
 });
 
 // ── Official name ──────────────────────────────────────────────────────

@@ -114,6 +114,7 @@ async function withFetch(fn, run) {
 }
 
 const ENV = { SUPABASE_URL: 'https://db.aimt.test', SUPABASE_SERVICE_ROLE_KEY: 'service-role-test' };
+const ALL_MODULES_COMPLETE = Object.fromEntries(Array.from({ length: 12 }, (_, m) => [String(m), { complete: true }]));
 const STUDENT = { id: 'student-1', email: 'gabby@example.test', user_metadata: { first_name: 'Gabby' } };
 
 // ── Renderer ────────────────────────────────────────────────────────────
@@ -229,7 +230,7 @@ test('existing credential is reused: same ID, no second completions row', async 
   const { onRequestPost } = await import('../functions/api/issue-certificate.js');
   const tables = {
     course_entitlements: [{ checkout_session_id: 'cs_1', course_slug: 'headspa-mastery', user_id: STUDENT.id, purchaser_email: STUDENT.email }],
-    course_progress: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', progress_score: 1200 }],
+    course_progress: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', progress_score: 1200, state: { progress: ALL_MODULES_COMPLETE } }],
     certification_attempts: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', attempt_number: 3, certification_decision: 'pass' }],
     completions: [{ credential_id: 'AIMT-HS-2026-ABC234', user_id: STUDENT.id, course_slug: 'headspa-mastery', student_name: 'Gabby Example', completed_at: '2026-09-20T17:00:00Z', revoked: false }],
   };
@@ -250,7 +251,7 @@ test('a not-yet-passed attempt still cannot create an official completion', asyn
   const { onRequestPost } = await import('../functions/api/issue-certificate.js');
   const tables = {
     course_entitlements: [{ checkout_session_id: 'cs_1', course_slug: 'headspa-mastery', user_id: STUDENT.id, purchaser_email: STUDENT.email }],
-    course_progress: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', progress_score: 1200 }],
+    course_progress: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', progress_score: 1200, state: { progress: ALL_MODULES_COMPLETE } }],
     certification_attempts: [{ user_id: STUDENT.id, course_slug: 'headspa-mastery', attempt_number: 1, certification_decision: 'not_yet_passed' }],
     completions: [],
   };

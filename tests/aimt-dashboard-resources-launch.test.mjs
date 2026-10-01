@@ -394,8 +394,8 @@ const certificateStateTestsDone = (function certificateStateTests() {
   const contentBankSrc = readFileSync(path.join(ROOT, 'functions/_lib/certification/content-bank.mjs'), 'utf8');
   check('Q. MODULE 12 STANDARDS UNCHANGED', 'bankVersion is unchanged',
     /export const bankVersion = 'headspa-fe-bank-v1-2026-08-26'/.test(contentBankSrc));
-  check('Q. MODULE 12 STANDARDS UNCHANGED', 'issue-certificate.js\'s REQUIRED_SCORE (modules 0-11 complete gate) is unchanged',
-    /const REQUIRED_SCORE = 1200;/.test(issueCertSrc));
+  check('Q. MODULE 12 STANDARDS UNCHANGED', 'Certificate issuance still requires Modules 0-11 complete -- via the authoritative module-by-module hasCompletedInstructionalModules() gate (not the numeric progress_score, which also counts checkpoint/intro points)',
+    /await hasCompletedInstructionalModules\(env, user\.id, courseSlug\)/.test(issueCertSrc) && /for \(let moduleId = 0; moduleId <= 11; moduleId\+\+\)/.test(issueCertSrc) && !/REQUIRED_SCORE/.test(issueCertSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

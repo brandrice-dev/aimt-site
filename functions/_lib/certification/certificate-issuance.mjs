@@ -14,7 +14,11 @@
      1. An active credential already exists → return it unchanged, no write.
      2. A revoked credential exists → never silently replaced.
      3. Active entitlement for the course.
-     4. Server-synced course completion (modules 0–11 = progress_score 1200).
+     4. Server-synced course completion: every Module 0–11 individually
+        marked complete (hasCompletedInstructionalModules — the same gate
+        that unlocks the Module 12 assessment). The numeric progress_score
+        is NOT used: it also counts checkpoint and intro points, so it can
+        reach 1200 with a module still incomplete.
      5. Authoritative certification_attempts row with decision = 'pass'
         (written only by finalize-assessment.js; client scores never read).
      6. Official name resolved server-side (never the email address).
@@ -27,14 +31,9 @@
    decides how to degrade (finalize keeps the PASS and reports "pending").
    ═══════════════════════════════════════════════════════════════ */
 
-import { COURSE_SLUG, isEntitled, supabaseRest } from './auth.mjs';
+import { COURSE_SLUG, hasCompletedInstructionalModules, isEntitled, supabaseRest } from './auth.mjs';
 
 export const CREDENTIAL_PREFIX = 'AIMT-HS';
-/* Module 11 → 12 structural relocation (course-audit-build): the
-   Course Completion & Certification screen lives at technical slot 12, so
-   modules 0–11 complete = 12 x 100 in the progress score. See
-   docs/course-audit/modules/module-11.md. */
-export const REQUIRED_SCORE = 1200;
 /* Unambiguous alphabet: no 0/O, 1/I/L */
 const ID_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 const MAX_NAME_LENGTH = 120;
@@ -117,15 +116,17 @@ async function hasAuthoritativePass(env, userId, courseSlug) {
   return res.body.length > 0;
 }
 
-async function readProgress(env, userId, courseSlug) {
+/* Synced course state — read ONLY for the official-name fallback
+   (state.student.name). Never used to decide eligibility. */
+async function readProgressState(env, userId, courseSlug) {
   const params = new URLSearchParams({
-    select: 'progress_score,state',
+    select: 'state',
     user_id: `eq.${userId}`,
     course_slug: `eq.${courseSlug}`,
     limit: '1',
   });
   const res = await supabaseRest(env, `course_progress?${params}`);
-  return res.ok && Array.isArray(res.body) && res.body.length ? res.body[0] : null;
+  return res.ok && Array.isArray(res.body) && res.body.length ? res.body[0].state || null : null;
 }
 
 /**
@@ -153,10 +154,10 @@ export async function ensureCertificateIssued(env, user, { courseSlug = COURSE_S
     return { ok: false, status: 'not_entitled', message: 'No active enrollment found.' };
   }
 
-  /* 4. Server-synced course completion. */
-  const progress = await readProgress(env, user.id, courseSlug);
-  const score = progress ? Number(progress.progress_score) || 0 : 0;
-  if (score < REQUIRED_SCORE) {
+  /* 4. Server-synced course completion: Modules 0–11 each complete. The
+     Module 12 local course state is deliberately not required — the
+     authoritative PASS below is what Module 12 requires. */
+  if (!(await hasCompletedInstructionalModules(env, user.id, courseSlug))) {
     return { ok: false, status: 'incomplete', message: 'Course not yet complete. Finish all modules, let your progress sync, then try again.' };
   }
 
@@ -168,7 +169,7 @@ export async function ensureCertificateIssued(env, user, { courseSlug = COURSE_S
   }
 
   /* 6. Official name — never the email, never a placeholder. */
-  const studentName = resolveCertificateName(user, progress && progress.state);
+  const studentName = resolveCertificateName(user, await readProgressState(env, user.id, courseSlug));
   if (!studentName) {
     return { ok: false, status: 'name_required', message: 'A full name is required on the student account before the certificate can be issued.' };
   }
