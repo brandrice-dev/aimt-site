@@ -4,6 +4,11 @@ Branch `feature/cadence-research-shadow` · 2026-09-30 · **shadow only**. No re
 student, a model prompt, or a transcript. Live Ask Cadence (`functions/api/cadence/ask.js`,
 `functions/_lib/cadence/ask-cadence.mjs`) is byte-identical to `main`.
 
+> **Update 2026-10-01 — model relevance judge (branch `feature/cadence-research-judge-shadow`):** see
+> [`judge/JUDGE-SHADOW-2026-10-01.md`](judge/JUDGE-SHADOW-2026-10-01.md). Untouched hold-out v4:
+> usefulness 38% → 62% with the Haiku 4.5 judge (target 85%), coverage 63% → 67% (target 75%).
+> **Still NOT READY.**
+
 > **Update 2026-09-30 — quality pass:** see [`QUALITY-PASS-2026-09-30.md`](QUALITY-PASS-2026-09-30.md).
 > The live library equals the Sep 20 export, and an answer-usefulness gate plus intent-aware ranking
 > were added. Untouched hold-out v3: 96% decisions, **72% hand-judged usefulness** (target 85%),
