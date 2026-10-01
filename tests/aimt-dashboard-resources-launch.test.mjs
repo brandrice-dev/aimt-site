@@ -305,8 +305,8 @@ const certificateStateTestsDone = (function certificateStateTests() {
       /certification path is in progress/i.test(revokedHtml) && !/is-active">Certified/.test(revokedHtml));
     check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders the Certified card with the real credential ID and student name',
       /is-active">Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
-    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View & Download Certificate" link deep-links into the course with &cert=1 (direct Module 12 access, not just the course entry)',
-      /href="head-spa-certification\?enter=1&cert=1"/.test(certifiedHtml));
+    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View Certificate" link opens the dedicated /certificate view for the existing credential ID (not the old in-course overlay)',
+      /href="\/certificate\?id=AIMT-HS-2026-ABC123">View Certificate/.test(certifiedHtml));
     check('I. CERT ACCESS FOR PASS', 'The certified card still links to the independent verify.html verification page',
       /href="verify\.html"/.test(certifiedHtml));
   }).then(() => {

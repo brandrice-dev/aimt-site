@@ -3089,157 +3089,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 
 
 /* ══════════════════════════════
-   COMPLETION CERTIFICATE
-══════════════════════════════ */
-#certOverlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 2000;
-  background: rgba(10,8,8,0.92);
-  align-items: center; justify-content: center;
-  padding: 0;
-  overflow-y: auto;
-}
-#certOverlay.show { display: flex; }
-
-.cert-sheet {
-  width: 100%; max-width: 620px;
-  min-height: 100vh;
-  background: #faf8f5;
-  border-radius: 0;
-  padding: 3rem 2.5rem 3rem;
-  position: relative;
-  display: flex; flex-direction: column; align-items: center;
-  margin: auto;
-}
-
-/* Border frame */
-.cert-sheet::before {
-  content: '';
-  position: absolute; inset: 12px;
-  border: 0.5px solid rgba(38,38,38,0.15);
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-.cert-close {
-  position: absolute; top: 1rem; right: 1rem;
-  background: none; border: none; cursor: pointer;
-  font-family: var(--aimt-font-sans); font-size: 0.65rem; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: rgba(38,38,38,0.3); transition: color 0.2s; padding: 0.25rem;
-}
-.cert-close:hover { color: rgba(38,38,38,0.7); }
-
-.cert-brand {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 2.5rem;
-}
-.cert-brand-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: #a3968d;
-}
-.cert-brand-name {
-  font-family: var(--aimt-font-sans); font-size: 0.58rem; font-weight: 400;
-  letter-spacing: 0.22em; text-transform: uppercase; color: rgba(38,38,38,0.4);
-}
-
-.cert-eyebrow {
-  font-family: var(--aimt-font-sans); font-size: 0.6rem; font-weight: 400;
-  letter-spacing: 0.2em; text-transform: uppercase; color: #a3968d;
-  margin-bottom: 1.25rem; text-align: center;
-}
-
-.cert-title {
-  font-family: var(--aimt-font-serif); font-size: clamp(1.5rem, 5vw, 2.25rem);
-  font-weight: 400; color: #262626; letter-spacing: -0.01em;
-  text-align: center; line-height: 1.2; margin-bottom: 0.5rem;
-}
-
-.cert-subtitle {
-  font-family: var(--aimt-font-serif); font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-  font-style: italic; color: #a3968d; text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.cert-divider {
-  width: 40px; height: 0.5px; background: #cdc8bc;
-  margin: 0 auto 2.5rem;
-}
-
-.cert-presented {
-  font-family: var(--aimt-font-sans); font-size: 0.68rem; font-weight: 400;
-  letter-spacing: 0.15em; text-transform: uppercase;
-  color: rgba(38,38,38,0.4); margin-bottom: 0.75rem; text-align: center;
-}
-
-.cert-name {
-  font-family: var(--aimt-font-serif); font-size: clamp(1.75rem, 6vw, 2.75rem);
-  font-weight: 400; font-style: italic; color: #262626;
-  letter-spacing: -0.01em; text-align: center; margin-bottom: 2.5rem;
-  line-height: 1.1;
-}
-
-.cert-body {
-  font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 300;
-  line-height: 1.7; color: rgba(38,38,38,0.6);
-  text-align: center; max-width: 420px; margin-bottom: 2.5rem;
-}
-
-.cert-divider2 {
-  width: 100%; height: 0.5px; background: rgba(38,38,38,0.1);
-  margin-bottom: 2rem;
-}
-
-.cert-meta {
-  display: flex; justify-content: space-between; width: 100%;
-  max-width: 380px; margin-bottom: 2.5rem;
-}
-.cert-meta-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.cert-meta-label {
-  font-family: var(--aimt-font-sans); font-size: 0.58rem; font-weight: 400;
-  letter-spacing: 0.15em; text-transform: uppercase; color: rgba(38,38,38,0.35);
-}
-.cert-meta-value {
-  font-family: var(--aimt-font-serif); font-size: 0.9rem; color: #262626;
-}
-
-.cert-mark {
-  width: 48px; height: 48px; border-radius: 50%;
-  border: 0.5px solid rgba(38,38,38,0.15);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 2.5rem;
-}
-.cert-mark-inner {
-  width: 8px; height: 8px; border-radius: 50%; background: #a3968d;
-}
-
-.cert-actions {
-  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
-  width: 100%;
-}
-.cert-download-btn {
-  width: 100%; max-width: 320px;
-  background: #262626; color: white; border: none;
-  border-radius: var(--aimt-radius-sm); padding: 0.85rem;
-  font-family: var(--aimt-font-sans); font-size: 0.8rem; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  cursor: pointer; transition: opacity 0.2s;
-}
-.cert-download-btn:hover { opacity: 0.85; }
-.cert-dismiss-btn {
-  background: none; border: none; cursor: pointer;
-  font-family: var(--aimt-font-sans); font-size: 0.72rem; font-weight: 300;
-  color: rgba(38,38,38,0.35); transition: color 0.2s;
-}
-.cert-dismiss-btn:hover { color: rgba(38,38,38,0.7); }
-
-@media print {
-  body > *:not(#certOverlay) { display: none !important; }
-  #certOverlay { position: fixed !important; background: white !important; padding: 0 !important; }
-  .cert-sheet { max-height: none !important; box-shadow: none !important; border-radius: 0 !important; animation: none !important; }
-  .cert-close, .cert-actions { display: none !important; }
-}
-
-/* ══════════════════════════════
    RESPONSIVE FIXES
 ══════════════════════════════ */
 
@@ -3445,16 +3294,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 /* ── Scalp anatomy SVG diagram ── */
 @media (max-width: 480px) {
   [style*="width:100%;border-radius:16px"] { border-radius: 10px !important; }
-}
-
-/* ── Certificate on small screens ── */
-@media (max-width: 480px) {
-  #certOverlay { padding: 0; }
-  .cert-sheet { padding: 2rem 1.5rem 2.5rem; border-radius: 0; min-height: 100vh; }
-  .cert-sheet::before { inset: 8px; }
-  .cert-title { font-size: 1.4rem; }
-  .cert-name { font-size: clamp(1.4rem, 8vw, 2rem); }
-  .cert-meta { flex-wrap: wrap; justify-content: center; gap: 1.25rem; max-width: 100%; }
 }
 
 /* ── Landing page — safe area ── */
@@ -10669,7 +10508,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="cn-label">From Cadence</div>
         <div class="cn-text">"The practitioners who do this work well are the ones who never stopped being curious about it. Keep asking questions. Keep refining. Keep showing up with the same intention you brought to this course. The foundation is yours — what you build on top of it is entirely up to you. I'll be here."</div>
         
-      <button class="lc-btn" style="margin-top:1.5rem;" onclick="showCertificate()">View &amp; Download Certificate</button>
+      <button class="lc-btn" style="margin-top:1.5rem;" onclick="showCertificate(this)">View Certificate</button>
       <button class="lc-btn" style="margin-top:0.5rem;background:rgba(255,255,255,0.08);" onclick="showHome()">Return to course home</button>
     </div>
 
@@ -14134,7 +13973,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ══ COMPLETION CERTIFICATE ══
-function showCertificate() {
+function showCertificate(btn) {
   // Course Review Mode: never issue a certificate or create eligibility.
   if (window.ReviewMode && window.ReviewMode.isActive()) {
     alert('Certificate issuance is disabled in Course Review Mode.');
@@ -14158,19 +13997,28 @@ function showCertificate() {
   // Note: renderHomeProgress() intentionally NOT called here — it triggers
   // view animations that create stacking contexts and hide the overlay
 
-  // Populate cert fields
-  const overlay = document.getElementById('certOverlay');
-  const nameEl = document.getElementById('certStudentName');
-  const dateEl = document.getElementById('certDate');
+  // Resolve the student's server-issued credential, then open the dedicated
+  // certificate view (certificate.html) — the one renderer students and
+  // Admin share. The old in-page #certOverlay + window.print() printed blank
+  // (the overlay was nested inside the display:none'd #module12Wrap that its
+  // own print rule hid). issue-certificate.js is idempotent: an already
+  // issued credential is returned unchanged, never reissued.
   const name = (APP_STATE.data.student && APP_STATE.data.student.name) || '';
-  if (nameEl) nameEl.textContent = name || 'Graduate';
-  if (dateEl) dateEl.textContent = dateStr;
-
-  // Server-issued verifiable credential
+  const buttons = btn ? [btn] : [];
+  const setStatus = (msg) => buttons.forEach(b => {
+    let el = b.parentNode && b.parentNode.querySelector('.m12-cert-status');
+    if (!el && b.parentNode) {
+      el = document.createElement('div');
+      el.className = 'm12-cert-status';
+      el.setAttribute('role', 'status');
+      el.style.cssText = 'margin-top:0.75rem;font-size:0.8rem;opacity:0.75;';
+      b.insertAdjacentElement('afterend', el);
+    }
+    if (el) el.textContent = msg;
+  });
+  buttons.forEach(b => { b.disabled = true; });
+  setStatus('Preparing your certificate…');
   (async () => {
-    const credEl = document.getElementById('certCredentialId');
-    if (!credEl) return;
-    credEl.textContent = 'Issuing credential…';
     try {
       const { data } = await supabaseClient.auth.getSession();
       const token = data?.session?.access_token || '';
@@ -14184,46 +14032,16 @@ function showCertificate() {
       });
       const result = await r.json();
       if (r.ok && result.credential_id) {
-        credEl.textContent = 'Credential ID: ' + result.credential_id + ' · verify at aimtrichology.com/verify.html';
-      } else {
-        credEl.textContent = result.error || 'Credential could not be issued — contact support.';
+        setStatus('Opening your certificate…');
+        window.location.href = '/certificate?id=' + encodeURIComponent(result.credential_id);
+        return;
       }
+      setStatus(result.error || 'Your certificate could not be opened — contact support.');
     } catch (_) {
-      credEl.textContent = 'Credential could not be issued — check your connection and reopen this certificate.';
+      setStatus('Your certificate could not be opened — check your connection and try again.');
     }
+    buttons.forEach(b => { b.disabled = false; });
   })();
-
-  if (!overlay) return;
-  overlay.style.display = 'flex';
-  // Force reflow before adding show class
-  overlay.offsetHeight;
-  overlay.classList.add('show');
-}
-
-
-function closeCert() {
-  const overlay = document.getElementById('certOverlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  setTimeout(() => { overlay.style.display = 'none'; }, 300);
-  document.body.style.overflow = '';
-}
-
-function downloadCert() {
-  // Use browser print dialog — user saves as PDF
-  // First hide the actions so they don't appear in print
-  const actions = document.querySelector('.cert-actions');
-  const closeBtn = document.querySelector('.cert-close');
-  if (actions) actions.style.display = 'none';
-  if (closeBtn) closeBtn.style.display = 'none';
-
-  window.print();
-
-  // Restore after print dialog closes
-  setTimeout(() => {
-    if (actions) actions.style.display = '';
-    if (closeBtn) closeBtn.style.display = '';
-  }, 1000);
 }
 
 // ══ STREAK MOMENT ══
@@ -15122,60 +14940,6 @@ function m8TimerRestart() {
 }
 
 </script>
-
-<!-- ══ COMPLETION CERTIFICATE OVERLAY ══ -->
-<div id="certOverlay">
-  <div class="cert-sheet" id="certSheet">
-    <button class="cert-close" onclick="closeCert()">Close</button>
-
-    <div class="cert-brand">
-      <div class="cert-brand-dot"></div>
-      <span class="cert-brand-name">AIMT &middot; HeadSpa Mastery</span>
-    </div>
-
-    <img src="assets/brand/aimt-badge-240.png" alt="AIMT seal" style="width:110px;height:auto;display:block;margin:0 auto 0.8rem;">
-    <div class="cert-eyebrow">Certificate of Completion</div>
-
-    <div class="cert-title">HeadSpa Mastery</div>
-    <div class="cert-subtitle">American Institute of Modern Trichology</div>
-
-    <div class="cert-divider"></div>
-
-    <div class="cert-presented">This certifies that</div>
-    <div class="cert-name" id="certStudentName">Graduate</div>
-
-    <div class="cert-body">
-      has successfully completed the HeadSpa Mastery professional training program —
-      covering scalp science, assessment, treatment protocols, client experience,
-      sanitation systems, and pricing strategy.
-    </div>
-
-    <div class="cert-divider2"></div>
-
-    <div class="cert-meta">
-      <div class="cert-meta-item">
-        <span class="cert-meta-label">Date</span>
-        <span class="cert-meta-value" id="certDate">—</span>
-        <div id="certCredentialId" style="font-family: var(--aimt-font-mono, monospace); font-size: 0.62rem; letter-spacing: 0.08em; opacity: 0.65; margin-top: 0.9rem;"></div>
-      </div>
-      <div class="cert-meta-item">
-        <span class="cert-meta-label">Program</span>
-        <span class="cert-meta-value">HeadSpa Mastery</span>
-      </div>
-      <div class="cert-meta-item">
-        <span class="cert-meta-label">Issued by</span>
-        <span class="cert-meta-value">AIMT</span>
-      </div>
-    </div>
-
-    <img src="assets/brand/aimt-badge-240.png" alt="AIMT seal" style="width:48px;height:48px;display:block;margin:0 auto 2.5rem;">
-
-    <div class="cert-actions">
-      <button class="cert-download-btn" onclick="downloadCert()">Download Certificate</button>
-      <button class="cert-dismiss-btn" onclick="closeCert()">Return to course</button>
-    </div>
-  </div>
-</div>
 
 <footer style="text-align: center; padding: 2rem 1rem; font-family: var(--aimt-font-mono); font-size: 0.65rem; letter-spacing: 0.05em; color: var(--muted2);">
   <a href="/terms" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Terms</a>

@@ -921,7 +921,7 @@ function renderCertification(slugs, progressBySlug, certBySlug) {
         '<div class="meta">' + c.student_name + ' · completed ' + date + '</div>' +
         '<div class="cred-line">Credential ID · ' + c.credential_id + '</div>' +
         '<div class="cert-panel-actions">' +
-        '<a class="btn" href="' + course.entry + '&cert=1">View &amp; Download Certificate →</a>' +
+        '<a class="btn" href="/certificate?id=' + encodeURIComponent(c.credential_id) + '">View Certificate →</a>' +
         '<a class="btn ghost" href="verify.html">Verify Credential →</a>' +
         '</div></div></div></div>';
     }

@@ -93,6 +93,12 @@ async function readAllCoreData(env) {
 
 function buildStudentSummaries(data) {
   const usersById = new Map(data.users.map((u) => [u.id, u]));
+  // An entitlement row written by email only (user_id null — e.g. a Stripe
+  // webhook row never linked by claim-course-access) must still resolve to
+  // the student's account, the same way handleStudent() falls back to an
+  // email lookup. Otherwise the list showed no account and "not certified"
+  // for a student whose completions row (keyed by user_id) already exists.
+  const usersByEmail = new Map(data.users.map((u) => [normalizeEmail(u.email), u]));
   const progressById = new Map(data.progress.map((r) => [r.user_id, r]));
   const completionById = new Map(data.completions.map((r) => [r.user_id, r]));
   const attemptsById = new Map();
@@ -103,7 +109,9 @@ function buildStudentSummaries(data) {
 
   const byIdentity = new Map();
   for (const entitlement of data.entitlements) {
-    const user = entitlement.user_id ? usersById.get(entitlement.user_id) : null;
+    const user = (entitlement.user_id && usersById.get(entitlement.user_id))
+      || usersByEmail.get(normalizeEmail(entitlement.purchaser_email))
+      || null;
     const email = normalizeEmail(user?.email || entitlement.purchaser_email);
     if (!email) continue;
     const key = user?.id || `email:${email}`;
