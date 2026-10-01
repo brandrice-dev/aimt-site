@@ -74,8 +74,11 @@ export const RESEARCH_CONTEXT_LIMITS = Object.freeze({
   MAX_QUERIES: 3,         // parallel per-focus-unit queries (one round trip each)
   MAX_QUESTION_CHARS: 2000,
   TIMEOUT_MS: 2500,
-  MAX_JUDGE_CANDIDATES: 15,       // shadow judge: bound on candidates shown to it
+  MAX_JUDGE_CANDIDATES: 20,       // shadow judge: bound on candidates shown to it
   MAX_PER_SOURCE_CANDIDATES: 3,
+  // Per-tier quotas inside the judge pool (unused quota is refilled in
+  // tier order), so lower tiers are not starved by a large gated tier.
+  JUDGE_TIER_QUOTA: Object.freeze({ gated: 12, relaxed: 4, loose: 4 }),
 });
 
 export const RESEARCH_EVIDENCE_NOTICE =
@@ -576,6 +579,11 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   // and methods checks but failed the intent or off-question-treatment
   // heuristics. They never enter the deterministic selection below.
   const relaxed = [];
+  // ...and claims that failed only FOCUS coverage but still name at least
+  // one subject/treatment the student asked about ("loose" tier).
+  const loose = [];
+  // "women ... men": a sex COMPARISON, so a claim about men is on-question.
+  const bothSexes = /\b(men|man|male|males)\b/i.test(String(question || '')) && /\b(women|woman|female|females)\b/i.test(String(question || ''));
   for (const row of Array.isArray(rows) ? rows : []) {
     if (!isGovernedClaim(row)) { dropped.malformed_or_ungoverned++; continue; }
     const text = row.claim_text;
@@ -591,8 +599,15 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     const hitIds = new Set(hitUnits.map((u) => u.id));
     // 1. focus coverage
     const popOk = populationUnits.every((u) => hitIds.has(u.id)
-      || (u.soft && !(u.conflicts && u.conflicts.test(text) && !(u.confirms && u.confirms.test(text)))));
-    if (!active.length || !popOk || !focusOk(hitIds)) { dropped.focus_incomplete++; continue; }
+      || (u.soft && (bothSexes || !(u.conflicts && u.conflicts.test(text) && !(u.confirms && u.confirms.test(text))))));
+    if (!active.length || !popOk || !focusOk(hitIds)) {
+      dropped.focus_incomplete++;
+      if (candLimit && popOk && hitUnits.some((u) => u.role === 'subject' || u.role === 'treatment')
+        && !isMethodsOnly(text) && !RE_SCOPE_ONLY.test(text)) {
+        loose.push({ row, text, claimTokens, hitUnits, facets: claimFacets(row), claimStems: contentStems(text), drugTreatment: false, namedTreatmentHit: false });
+      }
+      continue;
+    }
     // 2. methods-only / scope-only
     if (isMethodsOnly(text) || RE_SCOPE_ONLY.test(text)) { dropped.methods_only++; continue; }
     // 3. intent match (crux intents are mandatory)
@@ -642,7 +657,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
     return {
       row, claimStems, claimTokens, score: Math.round(score * 100) / 100,
       matchedTerms: [...new Set(hitUnits.flatMap((u) => u.terms.filter((t) => termOccurs(t, padded))))],
-      facets: [...facets], overlap,
+      facets: [...facets], overlap, unitIds: hitUnits.filter((u) => u.role === 'subject' || u.role === 'treatment').map((u) => u.id),
     };
   };
   const scored = gated.map(scoreOne);
@@ -726,7 +741,7 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
   }
 
   const claims = kept.map((c) => projectClaim(c.row, { score: c.score, matched_terms: c.matchedTerms, facets: c.facets, question_overlap: c.overlap }));
-  const candidates = candLimit ? buildJudgeCandidates(relevant, relaxed.map(scoreOne), candLimit, groupOf) : undefined;
+  const candidates = candLimit ? buildJudgeCandidates(relevant, relaxed.map(scoreOne), loose.map(scoreOne), candLimit, groupOf) : undefined;
   for (let i = 0; i < claims.length; i++) {
     if (claims[i].direction_group === 'unspecified' && kept[i].facets.includes('null')) claims[i].direction_group = 'uncertain';
   }
@@ -748,24 +763,51 @@ export function selectEvidence(rows, plan, question, { maxClaims = RESEARCH_CONT
    then relaxed ones (passed trust/focus/methods, failed only the intent or
    off-question heuristics), deduped across both, at most
    MAX_PER_SOURCE_CANDIDATES per source. Every entry passed isGovernedClaim. */
-function buildJudgeCandidates(relevant, relaxedScored, limit, groupOf) {
+function buildJudgeCandidates(relevant, relaxedScored, looseScored, limit, groupOf) {
   const out = [];
   const perSource = new Map();
-  relaxedScored.sort((a, b) => (b.score - a.score) || (a.row.claim_id < b.row.claim_id ? -1 : 1));
-  const tiers = [...relevant.map((c) => [c, 'gated']), ...relaxedScored.map((c) => [c, 'relaxed'])];
+  const byScore = (a, b) => (b.score - a.score) || (a.row.claim_id < b.row.claim_id ? -1 : 1);
+  relaxedScored.sort(byScore);
+  // Loose tier: claims covering a subject the gated tier does not cover at
+  // all come first (the other half of a two-subject question).
+  // Then interleave by subject: a claim's key is its best rank within any
+  // unit it covers, so a two-subject question gets both sides early.
+  const gatedUnits = new Set(relevant.flatMap((c) => c.unitIds || []));
+  const novel = (c) => ((c.unitIds || []).some((u) => !gatedUnits.has(u)) ? 0 : 1);
+  looseScored.sort(byScore);
+  const unitRank = new Map();
+  const perUnit = new Map();
+  for (const c of looseScored) {
+    let best = Infinity;
+    for (const u of c.unitIds || []) { const r = perUnit.get(u) || 0; perUnit.set(u, r + 1); best = Math.min(best, r); }
+    unitRank.set(c, best);
+  }
+  looseScored.sort((a, b) => novel(a) - novel(b) || unitRank.get(a) - unitRank.get(b) || byScore(a, b));
+  const tiers = [['gated', relevant], ['relaxed', relaxedScored], ['loose', looseScored]];
   const taken = [];
-  for (const [cand, tier] of tiers) {
-    if (out.length >= limit) break;
-    if (taken.some((k) => jaccard(k.claimStems, cand.claimStems) >= 0.6)) continue;
+  const used = new Set();
+  const tryAdd = (cand, tier) => {
+    if (out.length >= limit || used.has(cand)) return false;
+    if (taken.some((k) => jaccard(k.claimStems, cand.claimStems) >= 0.6)) { used.add(cand); return false; }
     const sid = cand.row.source.source_id;
-    if ((perSource.get(sid) || 0) >= RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE_CANDIDATES) continue;
+    if ((perSource.get(sid) || 0) >= RESEARCH_CONTEXT_LIMITS.MAX_PER_SOURCE_CANDIDATES) { used.add(cand); return false; }
     perSource.set(sid, (perSource.get(sid) || 0) + 1);
     taken.push(cand);
+    used.add(cand);
     const p = projectClaim(cand.row, { score: cand.score, matched_terms: cand.matchedTerms, facets: cand.facets, question_overlap: cand.overlap, tier });
     p.direction_group = groupOf(cand);
     out.push(p);
+    return true;
+  };
+  // Pass 1: each tier up to its quota; pass 2: refill in tier order.
+  for (const [tier, list] of tiers) {
+    let n = 0;
+    for (const cand of list) { if (n >= RESEARCH_CONTEXT_LIMITS.JUDGE_TIER_QUOTA[tier]) break; if (tryAdd(cand, tier)) n++; }
   }
-  return out;
+  for (const [tier, list] of tiers) for (const cand of list) tryAdd(cand, tier);
+  // Present in tier-then-rank order (gated first).
+  const rank = { gated: 0, relaxed: 1, loose: 2 };
+  return out.sort((a, b) => rank[a.relevance.tier] - rank[b.relevance.tier]);
 }
 
 /* ── Orchestration (fail-open) ────────────────────────────────────── */

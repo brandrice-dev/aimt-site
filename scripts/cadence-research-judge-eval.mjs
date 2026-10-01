@@ -32,25 +32,26 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { retrieveCadenceResearchContext, RESEARCH_CONTEXT_LIMITS } from '../functions/_lib/cadence/research-context.mjs';
+import { pathToFileURL } from 'node:url';
 import { judgeResearchCandidates, buildJudgeRequest, JUDGE_MODEL_DEFAULT, JUDGE_PROMPT_VERSION, JUDGE_LIMITS } from '../functions/_lib/cadence/research-judge.mjs';
 import { EVAL_CASES } from './cadence-research-shadow/eval-cases.mjs';
 import { HOLDOUT_V2_CASES } from './cadence-research-shadow/eval-holdout-v2.mjs';
 import { HOLDOUT_V3_CASES } from './cadence-research-shadow/eval-holdout-v3.mjs';
 import { HOLDOUT_V4_CASES } from './cadence-research-shadow/eval-holdout-v4.mjs';
+import { HOLDOUT_V5_CASES } from './cadence-research-shadow/eval-holdout-v5.mjs';
 import { loadResearchExport, createLocalResearchFetch } from './cadence-research-shadow/local-postgrest.mjs';
 import { createReadOnlyFetch } from './cadence-research-shadow/read-only-fetch.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WORK = path.join(ROOT, 'research-import/cadence-research-judge');
-const SETS = { dev: EVAL_CASES, v2: HOLDOUT_V2_CASES, v3: HOLDOUT_V3_CASES, v4: HOLDOUT_V4_CASES };
+const SETS = { dev: EVAL_CASES, v2: HOLDOUT_V2_CASES, v3: HOLDOUT_V3_CASES, v4: HOLDOUT_V4_CASES, v5: HOLDOUT_V5_CASES };
 // Claude Haiku 4.5 list price, USD per token.
 const PRICE = { input: 1 / 1e6, output: 5 / 1e6 };
 const GOVERNED = new Set(['CLAIM_VERIFIED', 'AIMT_APPROVED']);
 const CONTESTED = ['positive', 'null_or_negative', 'uncertain'];
 
 function parseArgs(argv) {
-  const a = { set: 'dev', live: false, judge: true, poolSheet: false, labels: null, budget: 2, outDir: WORK, mixedGuard: true };
+  const a = { set: 'dev', live: false, judge: true, poolSheet: false, labels: null, budget: 2, outDir: WORK, mixedGuard: true, codeRoot: ROOT, tag: '' };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (k === '--set') a.set = argv[++i];
@@ -61,6 +62,10 @@ function parseArgs(argv) {
     else if (k === '--budget-usd') a.budget = Number(argv[++i]);
     else if (k === '--out-dir') a.outDir = path.resolve(ROOT, argv[++i]);
     else if (k === '--no-mixed-guard') a.mixedGuard = false;
+    // Retrieval code to evaluate (e.g. a worktree of the pre-v5 baseline);
+    // the judge always comes from this checkout.
+    else if (k === '--code-root') a.codeRoot = path.resolve(argv[++i]);
+    else if (k === '--tag') a.tag = argv[++i];
   }
   if (!SETS[a.set]) throw new Error(`unknown --set ${a.set}`);
   if (!(a.budget > 0 && a.budget <= 2)) throw new Error('--budget-usd must be in (0, 2]');
@@ -126,6 +131,8 @@ async function budgetedJudge({ question, candidates, apiKey, ledger, budget, mix
 const regexUseful = (c, text) => Array.isArray(c.useful) && c.useful.length > 0 && c.useful.every((re) => re.test(text));
 
 function labelFor(c, claim, hand) {
+  // v5: library-wide hand labels; anything not listed is not useful.
+  if (Array.isArray(c.useful_ids)) return c.useful_ids.includes(claim.claim_id);
   if (hand) {
     const v = hand.cases?.[c.id]?.claims?.[claim.claim_id];
     return v === undefined ? null : v === true;
@@ -176,7 +183,7 @@ export function scoreArms(rows) {
       avg_claims_when_returned: withClaims.length ? withClaims.reduce((n, r) => n + r[key].claims.length, 0) / withClaims.length : 0,
       max_claims: Math.max(0, ...rows.map((r) => r[key].claims.length)),
       all_governed: rows.every((r) => r[key].claims.every((c) => GOVERNED.has(c.verification_status))),
-      boundary_leaks: rows.filter((r) => ['checkpoint_open', 'module12'].includes(r.expect.reason ? (r.expect.reason.startsWith('module12') ? 'module12' : 'checkpoint_open') : '') && r[key].claims.length).map((r) => r.id),
+      boundary_leaks: rows.filter((r) => r.expect.reason && (r.expect.reason === 'checkpoint_open' || r.expect.reason.startsWith('module12')) && r[key].claims.length).map((r) => r.id),
       mixed_cases: rows.filter((r) => r.expect.mixed).map((r) => {
         const groups = (cls) => CONTESTED.filter((g) => cls.some((c) => c.direction_group === g));
         const poolUsefulGroups = groups(r.pool.filter((c) => c.useful));
@@ -185,6 +192,20 @@ export function scoreArms(rows) {
       }),
     };
   };
+  // Candidate recall (labels that cover the whole library only, i.e. v5):
+  // did the pool shown to the judge contain the useful governed claims?
+  const recallRows = rows.filter((r) => r.useful_ids && r.useful_ids.length && r.expect.retrieve !== false && !r.gap);
+  const poolIds = (r) => new Set(r.pool.map((p) => p.claim_id));
+  const candidate_recall = recallRows.length ? {
+    cases_with_useful_in_pool: recallRows.filter((r) => r.useful_ids.some((id) => poolIds(r).has(id))).length,
+    cases: recallRows.length,
+    case_level: recallRows.filter((r) => r.useful_ids.some((id) => poolIds(r).has(id))).length / recallRows.length,
+    useful_claims_in_pool: recallRows.reduce((n, r) => n + r.useful_ids.filter((id) => poolIds(r).has(id)).length, 0),
+    useful_claims: recallRows.reduce((n, r) => n + r.useful_ids.length, 0),
+    missed_cases: recallRows.filter((r) => !r.useful_ids.some((id) => poolIds(r).has(id))).map((r) => r.id),
+  } : null;
+  if (candidate_recall) candidate_recall.claim_level = candidate_recall.useful_claims_in_pool / candidate_recall.useful_claims;
+  const governance_gaps = rows.filter((r) => r.gap).map((r) => ({ id: r.id, gap_ids: r.gap_ids, A_returned: r.A.claims.length, B_returned: r.B.claims.length }));
   const judgeRows = rows.filter((r) => r.judge.called);
   const ms = judgeRows.filter((r) => !r.judge.cached_only).map((r) => r.judge.elapsed_ms).sort((a, b) => a - b);
   const retrMs = rows.filter((r) => r.retrieval_ms !== null).map((r) => r.retrieval_ms).sort((a, b) => a - b);
@@ -206,6 +227,9 @@ export function scoreArms(rows) {
         ungoverned: r.B.claims.filter((c) => !GOVERNED.has(c.verification_status)).length })),
     },
     retrieval_latency_ms: { median: quantile(retrMs, 0.5), p95: quantile(retrMs, 0.95) },
+    candidate_recall,
+    governance_gaps,
+    avg_pool: rows.filter((r) => r.decision.retrieve).length ? rows.filter((r) => r.decision.retrieve).reduce((n, r) => n + r.pool.length, 0) / rows.filter((r) => r.decision.retrieve).length : 0,
   };
 }
 
@@ -228,6 +252,8 @@ async function main() {
   const hand = args.labels ? JSON.parse(readFileSync(args.labels, 'utf8')) : null;
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY || '';
   if (args.judge && !apiKey) { console.error('judge run needs a locally configured Anthropic key; none found. Stopping.'); process.exit(2); }
+  const ctxMod = await import(pathToFileURL(path.join(args.codeRoot, 'functions/_lib/cadence/research-context.mjs')).href);
+  const { retrieveCadenceResearchContext, RESEARCH_CONTEXT_LIMITS } = ctxMod;
   const ledger = loadLedger();
   const startUsd = ledger.usd;
   const model = JUDGE_MODEL_DEFAULT;
@@ -252,7 +278,9 @@ async function main() {
         id: c.id, category: c.category, question: c.question, need: c.need || null, injection: !!c.injection,
         expect: c.expect, decision: { retrieve: decision.retrieve, reason: decision.reason, intents: decision.intents || [], signals: decision.signals || null },
         status: r.status, gate: r.gate || null, retrieval_ms, pool,
-        answerable: hand ? (hand.cases?.[c.id]?.answerable ?? (pool.some((p) => p.useful) || null)) : (c.useful ? pool.some((p) => p.useful) || null : null),
+        answerable: Array.isArray(c.useful_ids) ? c.useful_ids.length > 0
+          : hand ? (hand.cases?.[c.id]?.answerable ?? (pool.some((p) => p.useful) || null)) : (c.useful ? pool.some((p) => p.useful) || null : null),
+        useful_ids: c.useful_ids || null, gap: c.gap || null, gap_ids: c.gap_ids || null,
         A: { claims: A, mixed_in_selection: r.evidence_profile?.mixed_in_selection ?? null },
       };
     }
@@ -265,8 +293,8 @@ async function main() {
   const summary = scoreArms(rows.filter((r) => r.B));
   const generatedAt = new Date().toISOString();
   mkdirSync(args.outDir, { recursive: true });
-  const tag = `${args.set}${args.judge ? '' : '-nojudge'}${args.mixedGuard ? '' : '-noguard'}`;
-  const out = { generated_at: generatedAt, mode, set: args.set, model, prompt_version: JUDGE_PROMPT_VERSION, labels: args.labels ? path.relative(ROOT, args.labels) : 'regex (dev only)',
+  const tag = `${args.set}${args.judge ? '' : '-nojudge'}${args.mixedGuard ? '' : '-noguard'}${args.tag ? '-' + args.tag : ''}`;
+  const out = { generated_at: generatedAt, mode, set: args.set, code_root: path.relative(ROOT, args.codeRoot) || '.', model, prompt_version: JUDGE_PROMPT_VERSION, labels: args.labels ? path.relative(ROOT, args.labels) : 'regex (dev only)',
     spend: { this_run_usd: ledger.usd - startUsd, ledger_total_usd: ledger.usd, ledger_calls: ledger.calls, cap_usd: args.budget }, summary, cases: rows };
   writeFileSync(path.join(args.outDir, `judge-eval-${tag}.json`), JSON.stringify(out, null, 2));
   if (args.poolSheet) writeFileSync(path.join(args.outDir, `pool-sheet-${args.set}.md`), renderPoolSheet(rows));
@@ -278,6 +306,7 @@ async function main() {
     if (s.coverage_missed.length) console.log(`   coverage missed: ${s.coverage_missed.join(', ')}`);
   }
   const j = summary.judge;
+  if (summary.candidate_recall) console.log(`candidate recall: cases ${summary.candidate_recall.cases_with_useful_in_pool}/${summary.candidate_recall.cases} claims ${summary.candidate_recall.useful_claims_in_pool}/${summary.candidate_recall.useful_claims} avg_pool=${summary.avg_pool.toFixed(1)} missed=${summary.candidate_recall.missed_cases.join(',')}`);
   console.log(`judge: calls=${j.calls} statuses=${JSON.stringify(j.statuses)} lat med=${j.latency_ms.median} p95=${j.latency_ms.p95} avg_cand=${j.avg_candidates.toFixed(1)} guard=${j.guard_added.join(',') || 'none'} run_cost=$${(ledger.usd - startUsd).toFixed(4)} ledger=$${ledger.usd.toFixed(4)}`);
   console.log(`wrote ${path.relative(ROOT, path.join(args.outDir, `judge-eval-${tag}.json`))}`);
 }
