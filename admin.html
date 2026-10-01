@@ -86,7 +86,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="section-head"><div><h2>Weekly AIMT Growth Scoreboard</h2><p>Monday–Sunday (UTC). First column is the current week to date.</p></div><button class="btn" id="copyScoreboardBtn" type="button">Copy as text</button></div>
         <div class="card table-wrap" id="scoreboardBody"><div class="loading">Loading scoreboard…</div></div>
       </div>
-      <p class="growth-foot">First-party, privacy-limited measurement. Revenue comes only from Stripe-verified enrollments; staff, owner, test, complimentary and manual enrollments are never counted as paid. Definitions: docs/growth/AIMT-Growth-Measurement.md.</p>
+      <p class="growth-foot">First-party, privacy-limited measurement. Revenue comes only from Stripe-verified enrollments (full-price and discounted purchases, at the amount actually paid); staff, owner, test, complimentary, scholarship, manual and $0 enrollments are never counted as paid. Definitions: docs/growth/AIMT-Growth-Measurement.md.</p>
     </section>
 
     <section class="view" id="view-config-health">
@@ -185,7 +185,8 @@ function growthCard(label,m,kind,sub){const v=fmtValue(m,kind);const status=m?m.
 const notes=[];if(sub)notes.push(sub);if(kind==='pct'&&m&&m.denominator)notes.push(`${fmtCount(m.numerator)} of ${fmtCount(m.denominator)}`);if(m&&m.note)notes.push(m.note);
 return `<div class="${cls}" data-growth-status="${esc(status)}"><div class="metric-label">${esc(label)}</div><div class="metric-value">${esc(text)}</div>${notes.length?`<div class="metric-sub">${notes.map(esc).join('<br>')}</div>`:''}</div>`;}
 function growthSection(title,desc,cards){return `<div class="growth-section"><h2>${esc(title)}</h2>${desc?`<p>${esc(desc)}</p>`:''}<div class="metrics growth-metrics">${cards.join('')}</div></div>`;}
-const KIND_LABELS={promo:'promo',owner_test:'owner/staff purchase',test:'Stripe test',staff:'staff',complimentary:'complimentary',manual:'manual',unknown:'unrecognized'};
+const KIND_LABELS={zero_cost:'$0 checkout',owner_test:'owner/staff purchase',test:'Stripe test',staff:'staff',complimentary:'complimentary',scholarship:'scholarship',manual:'manual grant',unknown:'unrecognized'};
+function paidMixLabel(p){return p&&p.fullPrice!=null?`${fmtCount(p.fullPrice)} full price · ${fmtCount(p.discounted)} discounted`:'';}
 function excludedLabel(ex){const parts=Object.entries(ex||{}).map(([k,n])=>`${n} ${KIND_LABELS[k]||k}`);return parts.length?`Excluded: ${parts.join(', ')}`:'No non-paid enrollments in range';}
 function attributionTable(rows,dim){if(!rows||!rows.length)return '<div class="empty">No attributed activity in this period.</div>';
 const head=dim==='creative'?'<th>Source</th><th>Creative (utm_content)</th>':dim==='campaign'?'<th>Source / medium</th><th>Campaign</th>':'<th>Source</th><th>Medium</th>';
@@ -205,7 +206,7 @@ growthCard('Readiness Audit starts',l.readinessStarts,'count'),growthCard('Readi
 growthCard('Leads',l.leads,'count',l.leads&&l.leads.withMarketingConsent!=null?`${fmtCount(l.leads.withMarketingConsent)} with marketing consent`:'')]);
 html+=growthSection('Sales','Paid = Stripe-verified enrollment only.',[
 growthCard('Checkout starts',s.checkoutStarts,'count',s.checkoutStarts&&s.checkoutStarts.checkoutSessions!=null?`${plural(s.checkoutStarts.checkoutSessions,'checkout session')} created`:''),
-growthCard('Paid enrollments',s.paidEnrollments,'count',excludedLabel(s.paidEnrollments.excludedByKind)),
+growthCard('Paid enrollments',s.paidEnrollments,'count',[paidMixLabel(s.paidEnrollments),excludedLabel(s.paidEnrollments.excludedByKind)].filter(Boolean).join(' · ')),
 growthCard('Revenue',s.revenue,'money'),
 growthCard('Visit → paid',s.visitToPaid,'pct'),growthCard('Checkout → paid',s.checkoutToPaid,'pct'),growthCard('Lead → paid',s.leadToPurchase,'pct')]);
 html+=growthSection('Students','Cohort = paid students who enrolled in this period.',[
