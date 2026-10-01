@@ -20,10 +20,13 @@ SQL.
    Revenue comes from the `paid_enrollment` record that the same webhook
    writes from Stripe's own `amount_total`. Browser events can never create a
    checkout, a purchase, or revenue: the collector rejects them.
-2. **Only legitimate paid enrollments count as paid.** Staff, owner/admin
-   purchases, Stripe test mode, complimentary/scholarship, manual grants and
-   discounted (partner/promo) purchases are classified separately and never
-   enter paid-acquisition or revenue metrics.
+2. **Every legitimate paid enrollment counts as paid. Nothing else does.** A
+   live Stripe purchase with a positive amount paid is paid, at full price or
+   discounted by a coupon or promotion, and counts in paid conversion, gross
+   revenue (the amount actually paid) and attribution. It's segmented as full
+   price vs discounted. Staff, owner/admin purchases, Stripe test mode,
+   complimentary, scholarship, manual grants and $0 checkouts are classified
+   separately and never enter paid metrics.
 3. **Uninstrumented ≠ zero.** A metric the system can't measure shows
    *Not yet measurable* or *Insufficient data*, never `0`. A range that
    starts before tracking began is marked *partial* ("Measured since …").
@@ -189,17 +192,24 @@ creative format" (still counted).
 
 | Entitlement | Kind | In paid metrics? |
 |---|---|---|
-| `cs_live_…`, buyer is not an admin account, no discount | **paid** | **Yes** |
-| `cs_live_…` with `amount_discount > 0` | promo | No (shown as excluded) |
+| `cs_live_…`, buyer is not an admin account, no discount | **paid** (full price) | **Yes** |
+| `cs_live_…`, `amount_total > 0` and `amount_discount > 0` (or `amount_total < amount_subtotal`) | **paid_discounted** | **Yes** (gross = amount actually paid) |
+| `cs_live_…` with `amount_total = 0` (e.g. 100% coupon) | zero_cost | No |
 | `cs_live_…` bought by an `admin_users` account/email | owner_test | No |
 | `cs_test_…` or Stripe `livemode=false` | test | No |
 | `admin-grant-staff-…`, legacy `staff-grant-…` | staff | No |
-| `admin-grant-complimentary-…` / `-scholarship-…` | complimentary | No |
+| `admin-grant-complimentary-…` | complimentary | No |
+| `admin-grant-scholarship-…` | scholarship | No |
 | `admin-grant-manual-…` | manual | No |
 | anything else | unknown | No |
 
-Revenue = Σ `amount_total` (USD cents) of `paid_enrollment` records whose
-entitlement is `paid`. It's **gross**: refunds aren't deducted (no refund
+Revenue = Σ `amount_total` (USD cents, the amount actually charged) of
+`paid_enrollment` records whose entitlement is `paid` or `paid_discounted`.
+A paid entitlement with no Stripe record yet is treated as full price until
+reconciliation reads its real amounts. A discounted Stripe *Price* can't
+create an entitlement today, because the webhook only accepts
+`STRIPE_PRICE_ID`. Coupons and promotions on that price are the discount
+path. It's **gross**: refunds aren't deducted (no refund
 webhook exists yet). Paid enrollments with no Stripe record are counted
 and flagged. **Reconcile revenue from Stripe** in Admin backfills them by
 reading each Checkout Session from Stripe with the server key (25 per run,
@@ -231,7 +241,7 @@ excluded throughout.
 | Readiness completions | Sessions that revealed a score | `readiness_audit_complete` | count distinct `session_id` | Directional |
 | Leads | Visitors who submitted the Readiness contact gate | `lead_created` | count distinct `visitor_id` | **Contact details aren't stored** (delivery endpoint unwired), so leads are countable but not addressable |
 | Checkout starts | Distinct visitors (or Checkout Sessions when no visitor id) for whom Stripe created a live Checkout Session | `checkout_start` (server) | count distinct `visitor_id ∨ cs:id`; raw session count shown separately | Each `/enroll` load creates a session, so raw sessions > starters |
-| Paid enrollments | Legitimate paid entitlements granted in the period | course_entitlements + classifyEnrollment | count `kind = paid` by `granted_at` | Includes purchases from before growth tracking |
+| Paid enrollments | Legitimate paid entitlements granted in the period | course_entitlements + classifyEnrollment | count `kind ∈ {paid, paid_discounted}` by `granted_at` (Admin shows full price vs discounted) | Includes purchases from before growth tracking |
 | Revenue | Gross USD from Stripe for those enrollments | `paid_enrollment` (webhook / reconciliation) | Σ `amount_total` | Gross, not net of refunds. Unreconciled enrollments flagged. |
 | Site → purchase | Paid enrollments per qualified visitor in the period | both above | paid ÷ visitors | A ratio of the same period, not a cohort. Not measurable if visitors aren't. |
 | Lead → purchase | Share of the period's leads whose visitor later started a checkout that became a paid enrollment | lead_created + checkout_start + entitlement | converted leads ÷ leads | Same-browser only. A lead who buys on another device isn't linked (no email link, by design). |
@@ -271,8 +281,8 @@ numbers, IP addresses, user agents, full URLs or query strings.
   fails the build if any of these appear.
 - Staff/test exclusion: Admin sign-in marks that browser internal.
   `?aimt_internal=1` marks any browser (`?aimt_internal=0` clears). Admin
-  accounts are internal server-side. Owner purchases, Stripe test mode and
-  manual grants are never paid.
+  accounts are internal server-side. Owner purchases, Stripe test mode, $0 checkouts and
+  staff/complimentary/scholarship/manual grants are never paid.
 - Payment security unchanged: the Stripe request, price validation,
   signature verification, entitlement write and webhook response are
   untouched. Growth writes run after them, in the background, and can't

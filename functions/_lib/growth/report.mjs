@@ -23,7 +23,7 @@
 import { supabaseRest, COURSE_SLUG } from '../certification/auth.mjs';
 import { hasCourseActivity } from '../admin/course-progress.mjs';
 import { GROWTH_TABLE } from './record.mjs';
-import { channelFor, classifyEnrollment, parseCreativeId } from './taxonomy.mjs';
+import { channelFor, classifyEnrollment, isPaidKind, parseCreativeId } from './taxonomy.mjs';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 1000;
@@ -106,7 +106,7 @@ function ts(value) {
   return Number.isFinite(t) ? t : null;
 }
 
-const KIND_PRIORITY = ['paid', 'promo', 'owner_test', 'test', 'staff', 'complimentary', 'manual', 'unknown'];
+const KIND_PRIORITY = ['paid', 'paid_discounted', 'zero_cost', 'owner_test', 'test', 'staff', 'complimentary', 'scholarship', 'manual', 'unknown'];
 
 // ── Preparation shared by every range ─────────────────────────────────
 
@@ -311,9 +311,13 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
   // Sales — paid authority is the entitlement; revenue authority is the
   // Stripe-verified paid_enrollment record.
   const enrollmentsInRange = prepared.enrollments.filter((en) => inRange(en.grantedAt, start, end));
-  const paidInRange = enrollmentsInRange.filter((en) => en.kind === 'paid');
+  const paidInRange = enrollmentsInRange.filter((en) => isPaidKind(en.kind));
+  const paidByKind = { paid: 0, paid_discounted: 0 };
   const excludedByKind = {};
-  for (const en of enrollmentsInRange) if (en.kind !== 'paid') excludedByKind[en.kind] = (excludedByKind[en.kind] || 0) + 1;
+  for (const en of enrollmentsInRange) {
+    if (isPaidKind(en.kind)) paidByKind[en.kind] += 1;
+    else excludedByKind[en.kind] = (excludedByKind[en.kind] || 0) + 1;
+  }
   const revenueByCurrency = {};
   let unrecorded = 0;
   for (const en of paidInRange) {
@@ -321,7 +325,7 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
     if (p && Number.isInteger(p.amount_total) && p.currency) revenueByCurrency[p.currency] = (revenueByCurrency[p.currency] || 0) + p.amount_total;
     else unrecorded++;
   }
-  const paidEnrollments = metric(paidInRange.length, { excludedByKind });
+  const paidEnrollments = metric(paidInRange.length, { fullPrice: paidByKind.paid, discounted: paidByKind.paid_discounted, excludedByKind });
   const revenue = paidInRange.length && unrecorded === paidInRange.length
     ? notMeasurable(`${unrecorded} paid enrollment${unrecorded === 1 ? '' : 's'} with no Stripe revenue record yet — use “Reconcile revenue from Stripe”.`)
     : metric(revenueByCurrency.usd || 0, {
@@ -333,7 +337,7 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
 
   const checkoutEvents = byName('checkout_start').filter((e) => e.props?.livemode !== false);
   const checkoutKey = (e) => e.visitor_id || `cs:${e.checkout_session_id}`;
-  const paidIds = new Set(prepared.enrollments.filter((en) => en.kind === 'paid').map((en) => en.id));
+  const paidIds = new Set(prepared.enrollments.filter((en) => isPaidKind(en.kind)).map((en) => en.id));
   const starterKeys = new Set(checkoutEvents.map(checkoutKey));
   const convertedStarters = new Set(checkoutEvents.filter((e) => paidIds.has(e.checkout_session_id)).map(checkoutKey));
   const checkoutStarts = !tableOk
@@ -350,12 +354,12 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
 
   // Lead → purchase: lead visitors in range who (at any time) started a
   // checkout that became a paid enrollment.
-  const paidVisitors = new Set(prepared.enrollments.filter((en) => en.kind === 'paid' && en.checkoutStart?.visitor_id).map((en) => en.checkoutStart.visitor_id));
+  const paidVisitors = new Set(prepared.enrollments.filter((en) => isPaidKind(en.kind) && en.checkoutStart?.visitor_id).map((en) => en.checkoutStart.visitor_id));
   const leadVisitors = new Set(leadEvents.map((e) => e.visitor_id).filter(Boolean));
   const leadToPurchase = leads.value === null ? notMeasurable('Leads are not measurable for this period.') : ratio([...leadVisitors].filter((v) => paidVisitors.has(v)).length, leadVisitors.size);
 
   // Students — cohort = paid students who enrolled in the range.
-  const paidStudents = prepared.students.filter((s) => s.kind === 'paid');
+  const paidStudents = prepared.students.filter((s) => isPaidKind(s.kind));
   const cohort = paidStudents.filter((s) => inRange(s.enrolledAt, start, end));
   const activatedCohort = cohort.filter((s) => s.activated);
   const certifiedCohort = cohort.filter((s) => s.certifiedAt !== null);

@@ -282,27 +282,40 @@ export function dedupeKeyFor(eventName, ctx = {}) {
 }
 
 // ── Enrollment classification (revenue authority) ────────────────────
-// Only `paid` belongs in paid-acquisition and revenue metrics. Everything
-// is classified from server-written data: the entitlement id prefix that
-// the webhook / Admin grant flow wrote, the admin_users table, and the
+// A legitimate live Stripe purchase with a positive amount paid is a paid
+// enrollment — full price or discounted (coupon/promotion) alike — and
+// counts in paid conversion, gross revenue and attribution. Only zero-cost,
+// non-customer and internal enrollments are excluded. Everything is
+// classified from server-written data: the entitlement id prefix that the
+// webhook / Admin grant flow wrote, the admin_users table, and the
 // Stripe-verified paid_enrollment record. Browser data never decides it.
 export const ENROLLMENT_KINDS = Object.freeze({
-  paid: 'Paid customer',
-  promo: 'Paid with discount (partner/promo)',
+  paid: 'Paid — full price',
+  paid_discounted: 'Paid — discounted / promotional',
+  zero_cost: 'Live checkout, $0 paid',
   owner_test: 'Owner / staff purchase',
   test: 'Stripe test mode',
   staff: 'Staff access',
-  complimentary: 'Complimentary / scholarship',
+  complimentary: 'Complimentary',
+  scholarship: 'Scholarship',
   manual: 'Manual grant',
   unknown: 'Unrecognized source',
 });
+
+// The kinds that count as paid enrollments in every paid metric.
+export const PAID_KINDS = Object.freeze(new Set(['paid', 'paid_discounted']));
+
+export function isPaidKind(kind) {
+  return PAID_KINDS.has(kind);
+}
 
 export function classifyEnrollment(entitlement, ctx = {}) {
   const id = String(entitlement?.checkout_session_id || '');
   if (id.startsWith('admin-grant-')) {
     const source = id.slice('admin-grant-'.length).split('-')[0];
     if (source === 'staff') return 'staff';
-    if (source === 'complimentary' || source === 'scholarship') return 'complimentary';
+    if (source === 'complimentary') return 'complimentary';
+    if (source === 'scholarship') return 'scholarship';
     return 'manual';
   }
   if (id.startsWith('staff-grant-')) return 'staff';
@@ -314,8 +327,10 @@ export function classifyEnrollment(entitlement, ctx = {}) {
       || (ctx.resolvedUserId && ctx.adminUserIds?.has(ctx.resolvedUserId))) return 'owner_test';
     const paid = ctx.paidRecord?.props || null;
     if (paid && paid.livemode === false) return 'test';
-    if (paid && Number(paid.amount_discount) > 0) return 'promo';
-    return 'paid';
+    if (paid && Number.isInteger(paid.amount_total) && paid.amount_total <= 0) return 'zero_cost';
+    const discounted = paid && (Number(paid.amount_discount) > 0
+      || (Number.isInteger(paid.amount_subtotal) && Number.isInteger(paid.amount_total) && paid.amount_total < paid.amount_subtotal));
+    return discounted ? 'paid_discounted' : 'paid';
   }
   return 'unknown';
 }

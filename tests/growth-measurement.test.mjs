@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   STORED_EVENTS, DERIVED_EVENTS, BROWSER_EVENTS, sanitizeTouch, sanitizePath, sanitizeToken,
-  channelFor, parseCreativeId, classifyEnrollment, dedupeKeyFor,
+  channelFor, parseCreativeId, classifyEnrollment, dedupeKeyFor, isPaidKind,
 } from '../functions/_lib/growth/taxonomy.mjs';
 import { buildGrowthRow } from '../functions/_lib/growth/record.mjs';
 import { prepareGrowthData, computeGrowthReport, computeScoreboard, weekStartUtc } from '../functions/_lib/growth/report.mjs';
@@ -191,12 +191,12 @@ test('taxonomy: channel resolution and creative convention', () => {
   assert.equal(parseCreativeId('my cool video').conforming, false);
 });
 
-test('taxonomy: enrollment classification keeps staff/manual/test/owner out of paid', () => {
+test('taxonomy: enrollment classification — full-price and discounted live purchases are paid; staff/manual/comp/test are not', () => {
   const ctx = { adminUserIds: new Set(['admin-1']), adminEmails: new Set(['owner@aimt.test']) };
   const k = (id, extra = {}, c = ctx) => classifyEnrollment({ checkout_session_id: id, purchaser_email: 'buyer@x.com', ...extra }, c);
   assert.equal(k('admin-grant-staff-abc'), 'staff');
   assert.equal(k('admin-grant-complimentary-abc'), 'complimentary');
-  assert.equal(k('admin-grant-scholarship-abc'), 'complimentary');
+  assert.equal(k('admin-grant-scholarship-abc'), 'scholarship');
   assert.equal(k('admin-grant-manual-abc'), 'manual');
   assert.equal(k('staff-grant-brandmrice'), 'staff');
   assert.equal(k('cs_test_abc'), 'test');
@@ -204,7 +204,13 @@ test('taxonomy: enrollment classification keeps staff/manual/test/owner out of p
   assert.equal(k('cs_live_abc', { purchaser_email: 'owner@aimt.test' }), 'owner_test');
   assert.equal(k('cs_live_abc', { user_id: 'admin-1' }), 'owner_test');
   assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { livemode: false } } }), 'test');
-  assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { amount_discount: 10000 } } }), 'promo');
+  assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { amount_total: 59700, amount_subtotal: 59700, amount_discount: 0, livemode: true } } }), 'paid');
+  assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { amount_total: 49700, amount_subtotal: 59700, amount_discount: 10000, livemode: true } } }), 'paid_discounted');
+  assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { amount_total: 39700, amount_subtotal: 59700, livemode: true } } }), 'paid_discounted', 'lower total than subtotal is a discount even without a discount field');
+  assert.equal(k('cs_live_abc', {}, { ...ctx, paidRecord: { props: { amount_total: 0, amount_subtotal: 59700, amount_discount: 59700, livemode: true } } }), 'zero_cost', '100% coupon = $0 paid, not a paid enrollment');
+  assert.equal(k('cs_live_abc', { purchaser_email: 'owner@aimt.test' }, { ...ctx, paidRecord: { props: { amount_total: 49700, amount_discount: 10000 } } }), 'owner_test', 'internal buyers stay excluded even when discounted');
+  for (const kind of ['staff', 'complimentary', 'scholarship', 'manual', 'test', 'zero_cost', 'owner_test', 'unknown']) assert.equal(isPaidKind(kind), false, kind);
+  for (const kind of ['paid', 'paid_discounted']) assert.equal(isPaidKind(kind), true, kind);
   assert.equal(k('something-else'), 'unknown');
 });
 
@@ -418,6 +424,7 @@ test('report: the full funnel with attribution surviving to revenue; non-paid en
   assert.equal(r.sales.checkoutStarts.value, 2);
   assert.equal(r.sales.paidEnrollments.value, 1, 'owner purchase, staff, complimentary and Stripe test are not paid');
   assert.deepEqual(r.sales.paidEnrollments.excludedByKind, { owner_test: 1, staff: 1, complimentary: 1, test: 1 });
+  assert.deepEqual([r.sales.paidEnrollments.fullPrice, r.sales.paidEnrollments.discounted], [1, 0]);
   assert.equal(r.sales.revenue.value, 59700, 'owner purchase revenue is excluded');
   assert.equal(r.sales.checkoutToPaid.value, 0.5);
   assert.equal(r.sales.leadToPurchase.value, 1);
@@ -570,4 +577,43 @@ test('static: growth client is wired where the funnel happens', () => {
 test('static: headspa-mastery.html change is the single script tag', () => {
   const src = read('headspa-mastery.html');
   assert.equal((src.match(/aimt-growth/g) || []).length, 1);
+});
+
+// ── Discounted purchases are paid (Step 1 closeout) ────────────────────
+
+test('webhook: a discounted live purchase records the actual gross amount paid', async (t) => {
+  const db = makeDb();
+  installFetch(t, db);
+  const event = paidEvent('cs_live_discount');
+  Object.assign(event.data.object, { amount_total: 49700, amount_subtotal: 59700, total_details: { amount_discount: 10000 } });
+  const res = await webhook({ request: await signedWebhook(event), env: env() });
+  assert.equal(res.status, 200);
+  const paid = db.growth.find((r) => r.event_name === 'paid_enrollment');
+  assert.equal(paid.props.amount_total, 49700);
+  assert.equal(paid.props.amount_discount, 10000);
+  assert.equal(db.entitlements.length, 1, 'payment authority unchanged: entitlement written exactly as before');
+});
+
+test('report: full-price and discounted live purchases are both paid, at actual gross; non-customer grants are not', () => {
+  const data = fixture();
+  data.events.push(
+    ev('checkout_start', 2, { visitor_id: '00000000-0000-4000-8000-000000000009', session_id: '10000000-0000-4000-8000-000000000009', checkout_session_id: 'cs_live_disc', first_touch: { source: 'partner_salon', medium: 'partner', content: 'link_partner-intro_code-a_v1' }, props: { livemode: true } }),
+    ev('paid_enrollment', 2, { checkout_session_id: 'cs_live_disc', props: { amount_total: 49700, amount_subtotal: 59700, amount_discount: 10000, currency: 'usd', livemode: true } }),
+    ev('paid_enrollment', 1, { checkout_session_id: 'cs_live_free', props: { amount_total: 0, amount_subtotal: 59700, amount_discount: 59700, currency: 'usd', livemode: true } }),
+  );
+  data.entitlements.push(
+    { checkout_session_id: 'cs_live_disc', purchaser_email: 'disc@x.com', user_id: null, granted_at: new Date(NOW - 2 * DAY).toISOString() },
+    { checkout_session_id: 'cs_live_free', purchaser_email: 'free@x.com', user_id: null, granted_at: new Date(NOW - 1 * DAY).toISOString() },
+    { checkout_session_id: 'admin-grant-scholarship-1', purchaser_email: 'sch@x.com', user_id: null, granted_at: new Date(NOW - 1 * DAY).toISOString() },
+    { checkout_session_id: 'admin-grant-manual-1', purchaser_email: 'man@x.com', user_id: null, granted_at: new Date(NOW - 1 * DAY).toISOString() },
+  );
+  const r = computeGrowthReport(prepareGrowthData(data), { start: NOW - 30 * DAY, end: NOW, model: 'first', now: NOW });
+  assert.equal(r.sales.paidEnrollments.value, 2, 'full-price + discounted');
+  assert.deepEqual([r.sales.paidEnrollments.fullPrice, r.sales.paidEnrollments.discounted], [1, 1]);
+  assert.equal(r.sales.revenue.value, 59700 + 49700, 'gross revenue uses the amount actually paid');
+  assert.deepEqual(r.sales.paidEnrollments.excludedByKind, { owner_test: 1, staff: 1, complimentary: 1, scholarship: 1, manual: 1, test: 1, zero_cost: 1 });
+  assert.equal(r.sales.checkoutToPaid.value, 2 / 3, 'discounted buyer counts as a converted checkout');
+  const partner = r.attribution.creative.find((x) => x.content === 'link_partner-intro_code-a_v1');
+  assert.deepEqual([partner.paid, partner.revenue], [1, 49700], 'discounted purchase is attributed to its acquisition source');
+  assert.equal(r.students.cohortSize.value, 2, 'discounted buyer is a paid student');
 });
