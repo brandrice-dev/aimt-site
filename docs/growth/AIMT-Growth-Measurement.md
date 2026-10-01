@@ -289,6 +289,10 @@ numbers, IP addresses, user agents, full URLs or query strings.
   throw.
 - Privacy policy (`privacy.html` §1, §2, §4) updated to describe this before
   it's enabled, as that policy promised.
+- Cloudflare Web Analytics (cookie-free RUM beacon injected at the edge by
+  the Cloudflare Pages project setting) was already enabled before this
+  step. It's not part of this system, but the privacy policy now discloses
+  it accurately.
 
 ## 11. Known limitations
 
