@@ -159,7 +159,7 @@ for (const [moduleId, elementId] of Object.entries(STANDARD_MODULE_COMPLETION_ID
 // ─────────────────────────────────────────────────────────────────────────
 (function module12ExemptionTests() {
   const m12Card = extractCompletionCard('m12Complete');
-  check('D. MODULE 12 EXEMPTION', 'm12Complete exists and is genuinely different from the standard pattern (course-completion/certificate screen, not a "next module" card)', !!m12Card && !m12Card.includes('lc-next') && m12Card.includes('showCertificate()'));
+  check('D. MODULE 12 EXEMPTION', 'm12Complete exists and is genuinely different from the standard pattern (course-completion/certificate screen, not a "next module" card)', !!m12Card && !m12Card.includes('lc-next') && m12Card.includes('showCertificate('));
   check('D. MODULE 12 EXEMPTION', 'm12Complete is rendered by the certification state machine (Module12Cert.render), not the plain STATIC_MODULES clone-and-reveal path other modules use', /Module12Cert\.render\(wrap\)/.test(courseSrc));
   check('D. MODULE 12 EXEMPTION', 'this test does not require m12Complete to match the standard structure (no A/B/C checks ran against it above)', !Object.prototype.hasOwnProperty.call(STANDARD_MODULE_COMPLETION_IDS, 12));
 })();

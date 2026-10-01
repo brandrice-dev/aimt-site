@@ -2,6 +2,8 @@ import { supabaseRest } from '../../_lib/certification/auth.mjs';
 import { adminJson, requireAdminRole, resolveAdmin, writeAdminAudit } from '../../_lib/admin/auth.mjs';
 import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite-email.mjs';
 import { computeConfigHealth } from '../../_lib/admin/config-health.mjs';
+import { hasCourseActivity, instructionalProgress } from '../../_lib/admin/course-progress.mjs';
+import { ensureCertificateIssued, resolveCertificateName } from '../../_lib/certification/certificate-issuance.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const MANUAL_PREFIX = 'admin-grant-';
@@ -82,7 +84,7 @@ async function readAllCoreData(env) {
   const [users, entitlements, progress, completions, attempts, reviews, educatorRequests] = await Promise.all([
     listAuthUsers(env, 1000),
     readRows(env, 'course_entitlements', new URLSearchParams({ select: 'checkout_session_id,course_slug,purchaser_email,user_id,granted_at', course_slug: `eq.${COURSE_SLUG}`, order: 'granted_at.desc', limit: '2000' })),
-    readRows(env, 'course_progress', new URLSearchParams({ select: 'user_id,course_slug,progress_score,updated_at,state', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
+    readRows(env, 'course_progress', new URLSearchParams({ select: 'user_id,course_slug,updated_at,state', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
     readRows(env, 'completions', new URLSearchParams({ select: 'credential_id,user_id,course_slug,student_name,completed_at,revoked', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
     readRows(env, 'certification_attempts', new URLSearchParams({ select: 'id,user_id,course_slug,attempt_number,status,knowledge_score,applied_cases_score,interview_score,overall_score,certification_decision,decision_at,updated_at', course_slug: `eq.${COURSE_SLUG}`, order: 'updated_at.desc', limit: '2000' })),
     readRows(env, 'certification_review_requests', new URLSearchParams({ select: 'id,user_id,course_slug,attempt_id,status,created_at,resolved_at', course_slug: `eq.${COURSE_SLUG}`, order: 'created_at.desc', limit: '1000' })),
@@ -93,6 +95,12 @@ async function readAllCoreData(env) {
 
 function buildStudentSummaries(data) {
   const usersById = new Map(data.users.map((u) => [u.id, u]));
+  // An entitlement row written by email only (user_id null — e.g. a Stripe
+  // webhook row never linked by claim-course-access) must still resolve to
+  // the student's account, the same way handleStudent() falls back to an
+  // email lookup. Otherwise the list showed no account and "not certified"
+  // for a student whose completions row (keyed by user_id) already exists.
+  const usersByEmail = new Map(data.users.map((u) => [normalizeEmail(u.email), u]));
   const progressById = new Map(data.progress.map((r) => [r.user_id, r]));
   const completionById = new Map(data.completions.map((r) => [r.user_id, r]));
   const attemptsById = new Map();
@@ -103,7 +111,9 @@ function buildStudentSummaries(data) {
 
   const byIdentity = new Map();
   for (const entitlement of data.entitlements) {
-    const user = entitlement.user_id ? usersById.get(entitlement.user_id) : null;
+    const user = (entitlement.user_id && usersById.get(entitlement.user_id))
+      || usersByEmail.get(normalizeEmail(entitlement.purchaser_email))
+      || null;
     const email = normalizeEmail(user?.email || entitlement.purchaser_email);
     if (!email) continue;
     const key = user?.id || `email:${email}`;
@@ -119,7 +129,10 @@ function buildStudentSummaries(data) {
         entitlementIds: [],
         sources: [],
         grantedAt: entitlement.granted_at || null,
-        progressScore: progress?.progress_score ?? 0,
+        // Modules 0–11 completed out of 12 — never course_progress.progress_score,
+        // which is an internal sync-ranking metric, not a percentage.
+        courseProgress: instructionalProgress(progress?.state),
+        started: hasCourseActivity(progress?.state),
         lastActivity: progress?.updated_at || null,
         certified: !!completion && completion.revoked !== true,
         credentialId: completion?.credential_id || null,
@@ -177,7 +190,7 @@ async function handleStudent(env, userId, email) {
   if (user?.id) {
     const uid = encodeURIComponent(user.id);
     [progress, completions, attempts, remediation, reviews, educatorRequests] = await Promise.all([
-      readRows(env, 'course_progress', `select=course_slug,progress_score,updated_at,state&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
+      readRows(env, 'course_progress', `select=course_slug,updated_at,state&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
       readRows(env, 'completions', `select=credential_id,student_name,completed_at,revoked&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
       readRows(env, 'certification_attempts', `select=id,attempt_number,status,knowledge_score,applied_cases_score,interview_score,overall_score,critical_domain_results,certification_decision,decision_at,updated_at&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}&order=attempt_number.desc`),
       readRows(env, 'certification_remediation_assignments', `select=id,attempt_id,competency_area,critical_domain,module_ref,section_ref,remediation_activity,required_before_next_attempt,completed,completed_at,created_at&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}&order=created_at.desc`),
@@ -185,6 +198,16 @@ async function handleStudent(env, userId, email) {
       readRows(env, 'certification_educator_requests', `select=id,attempt_id,status,educator_notes,attempt4_authorized,authorized_by,authorized_at,requested_at&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}&order=requested_at.desc`),
     ]);
   }
+
+  // Recovery hint for the exceptional "PASS recorded, no active credential"
+  // state (normally impossible: finalize-assessment issues automatically).
+  // Tells Admin up front whether issuance would be blocked by a missing
+  // official name, using the same resolver the issuance authority uses.
+  const activeCompletion = completions.find((c) => c.revoked !== true) || null;
+  const hasPass = attempts.some((a) => a.certification_decision === 'pass');
+  const certificateIssuance = user?.id && hasPass && !activeCompletion && !completions.length
+    ? { needed: true, nameResolved: !!resolveCertificateName(user, progress[0]?.state) }
+    : { needed: false };
 
   return adminJson({
     student: {
@@ -197,7 +220,9 @@ async function handleStudent(env, userId, email) {
     },
     entitlements: entitlements.map((e) => ({ ...e, source: e.checkout_session_id.startsWith(MANUAL_PREFIX) ? 'manual' : 'stripe' })),
     progress: progress[0] || null,
-    completion: completions[0] || null,
+    courseProgress: progress[0] ? instructionalProgress(progress[0].state) : null,
+    completion: activeCompletion || completions[0] || null,
+    certificateIssuance,
     attempts,
     remediation,
     reviews,
@@ -311,6 +336,35 @@ async function revokeManualAccess(env, actor, body) {
     details: { grantId },
   });
   return adminJson({ ok: true });
+}
+
+// Owner/admin recovery for a student whose authoritative PASS has no active
+// credential (e.g. a transient failure during automatic issuance). Calls the
+// SAME issuance authority as finalize-assessment.js and issue-certificate.js,
+// so every trust gate is re-run against server data: it can never
+// manufacture a PASS, never duplicate or replace an existing credential, and
+// never replace a revoked one. The target is resolved server-side by user id.
+async function issueCertificate(env, actor, body) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  const userId = String(body.userId || '').trim();
+  if (!userId) return adminJson({ error: 'A student account is required.' }, 400);
+  const user = await getAuthUser(env, userId);
+  if (!user?.id) return adminJson({ error: 'Student account not found.' }, 404);
+
+  const result = await ensureCertificateIssued(env, user);
+
+  await writeAdminAudit(env, actor, 'issue_certificate', {
+    targetUserId: user.id,
+    targetEmail: user.email,
+    courseSlug: COURSE_SLUG,
+    details: { outcome: result.status, credentialId: result.credential?.credential_id || null },
+  });
+
+  if (!result.ok) {
+    const status = result.status === 'error' ? 500 : 409;
+    return adminJson({ error: result.message, status: result.status }, status);
+  }
+  return adminJson({ ok: true, status: result.status, credential: result.credential });
 }
 
 async function findRevokedManualGrant(env, grantId) {
@@ -434,6 +488,7 @@ export async function onRequestPost(context) {
     if (action === 'grant_access') return await grantAccess(env, actor, body, request);
     if (action === 'revoke_manual_access') return await revokeManualAccess(env, actor, body);
     if (action === 'reactivate_manual_access') return await reactivateManualAccess(env, actor, body);
+    if (action === 'issue_certificate') return await issueCertificate(env, actor, body);
     return adminJson({ error: 'Unknown admin action.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to complete AIMT admin action.' }, 500);

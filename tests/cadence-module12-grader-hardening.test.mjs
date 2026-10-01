@@ -534,6 +534,9 @@ test('cadence-grader.mjs imports the shared Anthropic infrastructure rather than
 // ---------------------------------------------------------------------------
 
 test('issue-certificate.js still hard-gates on a server-authoritative certification_decision=pass row', () => {
-  const src = readFileSync(path.join(REPO_ROOT, 'functions/api/issue-certificate.js'), 'utf8');
+  // The gate lives in the shared issuance authority every issuance path calls.
+  const endpoint = readFileSync(path.join(REPO_ROOT, 'functions/api/issue-certificate.js'), 'utf8');
+  assert.match(endpoint, /ensureCertificateIssued/);
+  const src = readFileSync(path.join(REPO_ROOT, 'functions/_lib/certification/certificate-issuance.mjs'), 'utf8');
   assert.match(src, /certification_decision:\s*'eq\.pass'/);
 });

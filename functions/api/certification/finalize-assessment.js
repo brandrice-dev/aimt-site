@@ -22,6 +22,27 @@ import {
 } from '../../_lib/certification/scoring.mjs';
 import { buildRemediationAssignments, collectWeakCompetencyAreas } from '../../_lib/certification/attempt-ladder.mjs';
 import { casPatchSucceeded } from '../../_lib/cadence/turn-lock.mjs';
+import { ensureCertificateIssued } from '../../_lib/certification/certificate-issuance.mjs';
+
+// Automatic credential issuance on an authoritative PASS, via the ONE shared
+// issuance authority (certificate-issuance.mjs re-runs every trust gate and
+// is idempotent: an existing credential is returned unchanged). Called on
+// every path whose decision is PASS -- first scoring, a CAS loser, and a
+// repeat call on an already-scored attempt -- so a transient failure is
+// healed by the next finalize call. The PASS is never rolled back or
+// altered because a credential could not be written: issuance problems are
+// reported as `certificate.status` alongside the unchanged decision.
+async function certificateForPass(env, user, decision) {
+  if (decision !== 'pass') return undefined;
+  try {
+    const result = await ensureCertificateIssued(env, user);
+    if (result.ok) return { status: 'issued', credentialId: result.credential.credential_id };
+    if (result.status === 'name_required') return { status: 'name_required', reason: result.message };
+    return { status: 'pending', reason: result.status };
+  } catch (_) {
+    return { status: 'pending', reason: 'issuance_unavailable' };
+  }
+}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -45,7 +66,8 @@ export async function onRequestPost(context) {
   const attempt = res.body[0];
 
   if (attempt.status === 'scored') {
-    return json({ alreadyScored: true, decision: attempt.certification_decision, overallScore: attempt.overall_score });
+    const certificate = await certificateForPass(env, user, attempt.certification_decision);
+    return json({ alreadyScored: true, decision: attempt.certification_decision, overallScore: attempt.overall_score, certificate });
   }
   if (attempt.status !== 'part3_locked') {
     return json({ error: 'All three parts must be submitted before finalizing.' }, 409);
@@ -120,10 +142,13 @@ export async function onRequestPost(context) {
     const refetchParams = new URLSearchParams({ select: 'certification_decision,overall_score', id: `eq.${attemptId}`, user_id: `eq.${user.id}`, limit: '1' });
     const refetch = await supabaseRest(env, `certification_attempts?${refetchParams}`);
     const row = refetch.ok && Array.isArray(refetch.body) && refetch.body.length ? refetch.body[0] : null;
+    const decision = row ? row.certification_decision : decisionResult.decision;
+    const certificate = await certificateForPass(env, user, decision);
     return json({
       alreadyScored: true,
-      decision: row ? row.certification_decision : decisionResult.decision,
+      decision,
       overallScore: row ? row.overall_score : decisionResult.overallPercent,
+      certificate,
     });
   }
 
@@ -189,9 +214,12 @@ export async function onRequestPost(context) {
     }
   }
 
+  const certificate = await certificateForPass(env, user, decisionResult.decision);
+
   return json({
     alreadyScored: false,
     decision: decisionResult.decision,
+    certificate,
     overallScore: decisionResult.overallPercent,
     componentScores: {
       knowledge: attempt.knowledge_score,

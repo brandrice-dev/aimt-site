@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIMT Certificate | American Institute of Modern Trichology</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<!--
+  Dedicated AIMT certificate view — the one certificate students AND
+  AIMT Admin open/print. Replaces the old in-course #certOverlay +
+  window.print() flow, which printed blank (see
+  tests/certificate-render-admin-hotfix.test.mjs for the root cause).
+
+  /certificate?id=AIMT-HS-YYYY-XXXXXX           view
+  /certificate?id=AIMT-HS-YYYY-XXXXXX&print=1   view, then open the print dialog
+
+  Data comes only from GET /api/verify-credential (the authoritative
+  `completions` row). This page never issues or reissues a credential.
+
+  Print architecture: the certificate is an ordinary in-flow element (not a
+  fixed/hidden overlay), sized to exactly one US Letter landscape page; the
+  toolbar and status text are the only things hidden for print.
+-->
+<style>
+  :root {
+    --page-bg: #141210;
+    --page-text: rgba(255,255,255,0.92);
+    --page-muted: rgba(255,255,255,0.55);
+    --page-line: rgba(255,255,255,0.1);
+    --accent: #a3968d;
+    --paper: #faf7f1;
+    --ink: #262626;
+    --ink-soft: rgba(38,38,38,0.62);
+    --ink-faint: rgba(38,38,38,0.42);
+    --taupe: #8f8176;
+    --frame: #b8ab9d;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Outfit', -apple-system, system-ui, sans-serif;
+    --mont: 'Montserrat', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--page-bg); }
+  body {
+    color: var(--page-text);
+    font-family: var(--sans);
+    font-weight: 300;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Screen chrome (never printed) ── */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+    max-width: 1120px; margin: 0 auto; padding: 18px 16px;
+  }
+  .brand {
+    font-family: var(--mont); font-size: 0.66rem; font-weight: 600;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--page-text);
+    text-decoration: none;
+  }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 42px; padding: 0 18px; border-radius: 999px;
+    border: 1px solid var(--page-line); background: transparent; color: var(--page-text);
+    font: 500 0.78rem var(--sans); letter-spacing: 0.04em; text-decoration: none; cursor: pointer;
+  }
+  .btn:hover { border-color: rgba(255,255,255,0.24); }
+  .btn.primary { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .status {
+    max-width: 560px; margin: 12vh auto 0; padding: 0 16px; text-align: center;
+  }
+  .status h1 { font-family: var(--serif); font-weight: 400; font-size: 1.8rem; margin-bottom: 0.7rem; }
+  .status p { color: var(--page-muted); font-size: 0.92rem; line-height: 1.65; }
+  .status a { color: var(--page-text); }
+  .hint { text-align: center; color: var(--page-muted); font-size: 0.74rem; padding: 14px 16px 40px; }
+  [data-view]:not(.is-shown) { display: none !important; }
+
+  /* ── The certificate ──
+     The fixed production artwork (assets/certificates/
+     aimt-head-spa-certificate-template.png) is the certificate; only the
+     graduate name, date, and credential ID are overlaid on its blank rules
+     (positions live in assets/js/aimt-certificate.js). Overlay type is in
+     container-query units (cqw = 1% of the certificate's width) so it scales
+     with the artwork from a phone preview to the printed page. */
+  .stage {
+    container-type: inline-size;
+    width: min(1120px, calc(100vw - 32px));
+    margin: 0 auto;
+  }
+  .cert {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1491 / 1055;
+    overflow: hidden;
+    background: #f9f7f0;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .cert-template { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .cert-field {
+    position: absolute;
+    color: #231d1d;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .cert-field--name {
+    text-align: center;
+    font-style: italic; font-weight: 500;
+    font-size: 4.3cqw;
+  }
+  .cert-field--date,
+  .cert-field--id {
+    text-align: left;
+    font-weight: 600;
+    font-size: 1.45cqw;
+    letter-spacing: 0.03em;
+    font-variant-numeric: lining-nums;
+  }
+  .cert-field--id { font-size: 1.3cqw; letter-spacing: 0.04em; }
+
+  /* ── Print: one US Letter landscape page, certificate only ──
+     The artwork's 1491:1055 ratio is wider than Letter, so it prints at
+     10.5in wide (7.43in tall), centred inside printer-safe margins. */
+  @page { size: letter landscape; margin: 0.25in; }
+  @media print {
+    html, body { background: #fff !important; }
+    body { min-height: 0; height: 8in; overflow: hidden; }
+    .toolbar, .status, .hint { display: none !important; }
+    main, [data-view="active"].is-shown { height: 8in; display: flex; align-items: center; justify-content: center; }
+    .stage { width: 10.5in; margin: 0; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
+    .cert { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<nav class="toolbar" aria-label="Certificate actions">
+  <a class="brand" href="/my-aimt">&larr; My AIMT</a>
+  <div class="actions">
+    <a class="btn" id="verifyLink" href="/verify">Verify Credential</a>
+    <button class="btn primary" id="printBtn" type="button" disabled>Print / Save as PDF</button>
+  </div>
+</nav>
+
+<main>
+  <div class="status is-shown" data-view="loading" role="status"><p>Loading certificate&hellip;</p></div>
+  <div class="status" data-view="not_found">
+    <h1>Certificate not found</h1>
+    <p>No issued AIMT credential matches this link. Check the credential ID, or open your certificate from <a href="/my-aimt">My AIMT</a>.</p>
+  </div>
+  <div class="status" data-view="revoked">
+    <h1>This credential has been revoked</h1>
+    <p>This AIMT credential is no longer active, so no certificate can be shown for it. Questions can be directed to AIMT.</p>
+  </div>
+  <div class="status" data-view="unavailable">
+    <h1>Certificate unavailable</h1>
+    <p>The certificate could not be loaded right now. Please check your connection and reload this page.</p>
+  </div>
+  <div data-view="active">
+    <div class="stage" id="certStage"></div>
+    <p class="hint">Use &ldquo;Print / Save as PDF&rdquo; and choose landscape for a full-size copy.</p>
+  </div>
+</main>
+
+<script src="/assets/js/aimt-certificate.js"></script>
+<script>
+(function () {
+  var Cert = window.AIMTCertificate;
+  var params = new URLSearchParams(window.location.search);
+  var credentialId = Cert.normalizeCredentialId(params.get('id'));
+  var autoPrint = params.get('print') === '1';
+  var printBtn = document.getElementById('printBtn');
+
+  function show(view) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (el) {
+      el.classList.toggle('is-shown', el.getAttribute('data-view') === view);
+    });
+  }
+
+  function whenImagesLoaded(root) {
+    return Promise.all(Array.prototype.map.call(root.querySelectorAll('img'), function (img) {
+      if (img.complete) return Promise.resolve();
+      return new Promise(function (resolve) { img.onload = img.onerror = resolve; });
+    }));
+  }
+
+  /* A long name shrinks to stay on its rule instead of overflowing it. */
+  function fitName(stage) {
+    var el = stage.querySelector('.cert-field--name');
+    if (!el) return;
+    var size = 4.3;
+    el.style.fontSize = '';
+    while (el.scrollWidth > el.clientWidth && size > 2.2) {
+      size -= 0.1;
+      el.style.fontSize = size.toFixed(1) + 'cqw';
+    }
+  }
+
+  async function load() {
+    if (!credentialId) { show('not_found'); return; }
+    document.getElementById('verifyLink').href = '/verify?id=' + encodeURIComponent(credentialId);
+
+    var view;
+    try {
+      var res = await fetch('/api/verify-credential?id=' + encodeURIComponent(credentialId), { cache: 'no-store' });
+      var data = await res.json().catch(function () { return null; });
+      view = res.ok ? Cert.buildCertificateView(data) : { status: 'unavailable' };
+    } catch (_) {
+      view = { status: 'unavailable' };
+    }
+
+    if (view.status !== 'active') { show(view.status); return; }
+
+    var stage = document.getElementById('certStage');
+    stage.innerHTML = Cert.renderCertificateMarkup(view);
+    document.title = view.studentName + ' — ' + view.program + ' | AIMT';
+    show('active');
+
+    /* Print is only offered once the real data, the fonts, and the template
+       are all in place — never against a half-rendered certificate. */
+    await Promise.all([
+      document.fonts && document.fonts.ready ? document.fonts.ready.catch(function () {}) : Promise.resolve(),
+      whenImagesLoaded(stage)
+    ]);
+    fitName(stage);
+    printBtn.disabled = false;
+    if (autoPrint) window.print();
+  }
+
+  printBtn.addEventListener('click', function () { window.print(); });
+  load();
+})();
+</script>
+</body>
+</html>

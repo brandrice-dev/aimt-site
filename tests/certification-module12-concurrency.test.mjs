@@ -491,11 +491,16 @@ async function certificateChecks() {
   function certEnvAndMock({ decision, progressScore = 1200 }) {
     const tables = {
       course_entitlements: { rows: [{ checkout_session_id: 'cs_1', course_slug: 'headspa-mastery', user_id: USER.id, purchaser_email: USER.email }] },
-      course_progress: { rows: [{ user_id: USER.id, course_slug: 'headspa-mastery', progress_score: progressScore }] },
+      // Completion gate is Modules 0-11 individually complete (shared
+      // hasCompletedInstructionalModules), not the numeric progress_score.
+      course_progress: { rows: [{ user_id: USER.id, course_slug: 'headspa-mastery', progress_score: progressScore, state: { progress: Object.fromEntries(Array.from({ length: 12 }, (_, m) => [String(m), { complete: progressScore >= 1200 }])) } }] },
       certification_attempts: { rows: decision ? [{ id: 'attempt-1', user_id: USER.id, course_slug: 'headspa-mastery', certification_decision: decision }] : [] },
       completions: { rows: [], uniqueKey: ['user_id', 'course_slug'] },
     };
-    const mock = buildMockFetch({ users: { [TOKEN]: USER }, tables, anthropicHandler: anthropicOkCase });
+    // The official certificate name is resolved server-side from Auth
+    // metadata (certificate-issuance.mjs), never from the posted body.
+    const certUser = { ...USER, user_metadata: { first_name: 'Jane', last_name: 'Doe' } };
+    const mock = buildMockFetch({ users: { [TOKEN]: certUser }, tables, anthropicHandler: anthropicOkCase });
     return { env: buildMockEnv(), mock, tables };
   }
 

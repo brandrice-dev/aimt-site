@@ -36,7 +36,12 @@ const courseSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
 const dashboardSrc = readFileSync(path.join(ROOT, 'my-aimt.html'), 'utf8');
 const registrySrc = readFileSync(path.join(ROOT, 'assets/js/aimt-course-resources.js'), 'utf8');
 const m12Src = readFileSync(path.join(ROOT, 'assets/js/module12-certification.js'), 'utf8');
-const issueCertSrc = readFileSync(path.join(ROOT, 'functions/api/issue-certificate.js'), 'utf8');
+// The issuance trust gates live in the ONE shared authority
+// (certificate-issuance.mjs) that issue-certificate.js, finalize-assessment.js
+// and Admin recovery all call -- checked together with the endpoint.
+const issueCertSrc = readFileSync(path.join(ROOT, 'functions/api/issue-certificate.js'), 'utf8') + '\n' +
+  readFileSync(path.join(ROOT, 'functions/_lib/certification/certificate-issuance.mjs'), 'utf8') + '\n' +
+  readFileSync(path.join(ROOT, 'functions/_lib/certification/auth.mjs'), 'utf8');
 const claimAccessSrc = readFileSync(path.join(ROOT, 'functions/api/claim-course-access.js'), 'utf8');
 const turnLockSrc = readFileSync(path.join(ROOT, 'functions/_lib/cadence/turn-lock.mjs'), 'utf8');
 const submitCaseSrc = readFileSync(path.join(ROOT, 'functions/api/certification/submit-case.js'), 'utf8');
@@ -305,8 +310,8 @@ const certificateStateTestsDone = (function certificateStateTests() {
       /certification path is in progress/i.test(revokedHtml) && !/is-active">Certified/.test(revokedHtml));
     check('I. CERT ACCESS FOR PASS', 'An active (non-revoked) completions row renders the Certified card with the real credential ID and student name',
       /is-active">Certified/.test(certifiedHtml) && /AIMT-HS-2026-ABC123/.test(certifiedHtml) && /Jane Doe/.test(certifiedHtml));
-    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View & Download Certificate" link deep-links into the course with &cert=1 (direct Module 12 access, not just the course entry)',
-      /href="head-spa-certification\?enter=1&cert=1"/.test(certifiedHtml));
+    check('I. CERT ACCESS FOR PASS', 'The certified card\'s "View Certificate" link opens the dedicated /certificate view for the existing credential ID (not the old in-course overlay)',
+      /href="\/certificate\?id=AIMT-HS-2026-ABC123">View Certificate/.test(certifiedHtml));
     check('I. CERT ACCESS FOR PASS', 'The certified card still links to the independent verify.html verification page',
       /href="verify\.html"/.test(certifiedHtml));
   }).then(() => {
@@ -389,8 +394,8 @@ const certificateStateTestsDone = (function certificateStateTests() {
   const contentBankSrc = readFileSync(path.join(ROOT, 'functions/_lib/certification/content-bank.mjs'), 'utf8');
   check('Q. MODULE 12 STANDARDS UNCHANGED', 'bankVersion is unchanged',
     /export const bankVersion = 'headspa-fe-bank-v1-2026-08-26'/.test(contentBankSrc));
-  check('Q. MODULE 12 STANDARDS UNCHANGED', 'issue-certificate.js\'s REQUIRED_SCORE (modules 0-11 complete gate) is unchanged',
-    /const REQUIRED_SCORE = 1200;/.test(issueCertSrc));
+  check('Q. MODULE 12 STANDARDS UNCHANGED', 'Certificate issuance still requires Modules 0-11 complete -- via the authoritative module-by-module hasCompletedInstructionalModules() gate (not the numeric progress_score, which also counts checkpoint/intro points)',
+    /await hasCompletedInstructionalModules\(env, user\.id, courseSlug\)/.test(issueCertSrc) && /for \(let moduleId = 0; moduleId <= 11; moduleId\+\+\)/.test(issueCertSrc) && !/REQUIRED_SCORE/.test(issueCertSrc));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
