@@ -27,6 +27,9 @@ import {
 } from '../functions/_lib/cadence/research-judge.mjs';
 import { retrieveCadenceResearchContext, RESEARCH_CONTEXT_LIMITS } from '../functions/_lib/cadence/research-context.mjs';
 import { createLocalResearchFetch } from '../scripts/cadence-research-shadow/local-postgrest.mjs';
+import { classifyResearchScope } from '../functions/_lib/cadence/research-scope.mjs';
+import { decideResearchRetrieval } from '../functions/_lib/cadence/research-context.mjs';
+import { createTranscriptReadOnlyFetch } from '../scripts/cadence-research-real-traffic.mjs';
 import { HOLDOUT_V4_CASES } from '../scripts/cadence-research-shadow/eval-holdout-v4.mjs';
 import { HOLDOUT_V5_CASES } from '../scripts/cadence-research-shadow/eval-holdout-v5.mjs';
 import { EVAL_CASES } from '../scripts/cadence-research-shadow/eval-cases.mjs';
@@ -229,12 +232,54 @@ async function run() {
     check('v5: frozen object', Object.isFrozen(HOLDOUT_V5_CASES));
   }
 
+  // 7c. Narrow scope router (synthetic questions only)
+  {
+    const S = (q, ctx = {}) => classifyResearchScope(q, decideResearchRetrieval(q, ctx)).family;
+    check('scope A: contact reaction', S('Could my client be allergic to the fragrance in this shampoo?') === 'A');
+    check('scope A: named product safety', S('Is tea tree oil safe to use on a sensitive client?') === 'A');
+    check('scope B: named intervention evidence', S('Does PRP actually work for thinning hair?') === 'B');
+    check('scope B: named supplement evidence', S('Is there evidence biotin helps hair growth?') === 'B');
+    check('scope off: scalp sensation', S('Why does my scalp burn when nothing looks wrong?') === null);
+    check('scope off: infection / referral', S('There is pus draining from a bump on her scalp, what is it?') === null);
+    check('scope off: sex comparison', S('Does PRP work better for men than for women?') === null);
+    check('scope off: traction prognosis', S('Is traction alopecia permanent or can it reverse?') === null);
+    check('scope off: course navigation / ack / definition', [S('Where do I find the Module 4 quiz?'), S('Thanks!'), S('What does "anagen" mean?')].every((f) => f === null));
+    check('scope off: checkpoint open', S('Does PRP actually work for thinning hair?', { activeCheckpointId: 'x', verifiedCheckpointStatus: 'unknown' }) === null);
+    check('scope off: Module 12 unverified', S('Does PRP actually work for thinning hair?', { moduleId: 12 }) === null);
+    check('scope off: high stakes', S('Should my client stop taking minoxidil because of a lesion that is bleeding?') === null);
+    const tro = createTranscriptReadOnlyFetch('https://example.supabase.co', async () => ({ ok: true }));
+    const refused = async (u, i) => { try { await tro(u, i); return false; } catch (e) { return e.code === 'read_only_violation'; } };
+    check('transcript guard: GET cadence_messages allowed', (await tro('https://example.supabase.co/rest/v1/cadence_messages?select=id', {})).ok);
+    check('transcript guard: refuses writes, bodies, other tables, RPC, other origins', await refused('https://example.supabase.co/rest/v1/cadence_messages', { method: 'PATCH' })
+      && await refused('https://example.supabase.co/rest/v1/cadence_messages', { body: '{}' }) && await refused('https://example.supabase.co/rest/v1/course_progress', {})
+      && await refused('https://example.supabase.co/rest/v1/rpc/x', {}) && await refused('https://evil.example/rest/v1/cadence_messages', {})
+      && await refused('https://example.supabase.co/rest/v1/cadence_messages', { headers: { Prefer: 'return=representation' } }));
+  }
+
   // 8. Import boundary: the judge is unreachable from live Ask Cadence
   {
     const JUDGE = path.join(ROOT, 'functions/_lib/cadence/research-judge.mjs');
     const walk = (d) => readdirSync(d).flatMap((f) => { const p = path.join(d, f); return statSync(p).isDirectory() ? walk(p) : /\.(m?js)$/.test(f) ? [p] : []; });
     const importers = walk(path.join(ROOT, 'functions')).filter((f) => f !== JUDGE && /research-judge/.test(readFileSync(f, 'utf8')));
     check('boundary: nothing under functions/ imports the judge', importers.length === 0, importers.map((f) => path.relative(ROOT, f)));
+    const SCOPE = path.join(ROOT, 'functions/_lib/cadence/research-scope.mjs');
+    const scopeImporters = walk(path.join(ROOT, 'functions')).filter((f) => f !== SCOPE && /research-scope/.test(readFileSync(f, 'utf8')));
+    check('boundary: nothing under functions/ imports the scope router', scopeImporters.length === 0, scopeImporters.map((f) => path.relative(ROOT, f)));
+    check('boundary: scope router imports nothing', !/^\s*import\s/m.test(readFileSync(SCOPE, 'utf8')));
+    // Live Ask Cadence import graph: follow relative imports from ask.js and
+    // never reach any shadow research module.
+    const seen = new Set();
+    const stack = [path.join(ROOT, 'functions/api/cadence/ask.js')];
+    while (stack.length) {
+      const f = stack.pop();
+      if (seen.has(f) || !/\.(m?js)$/.test(f)) continue;
+      seen.add(f);
+      let src = '';
+      try { src = readFileSync(f, 'utf8'); } catch { continue; }
+      for (const m of src.matchAll(/(?:import|export)[^'"]*?from\s*['"](\.[^'"]+)['"]|import\(\s*['"](\.[^'"]+)['"]\s*\)/g)) stack.push(path.resolve(path.dirname(f), m[1] || m[2]));
+    }
+    const shadowHit = [...seen].filter((f) => /research-(context|judge|scope|lexicon)\.mjs$|_lib\/research\//.test(f));
+    check(`boundary: live ask.js import graph (${seen.size} files) never reaches a shadow research module`, seen.size > 3 && shadowHit.length === 0, shadowHit);
     const judgeSrc = readFileSync(JUDGE, 'utf8');
     check('boundary: judge imports nothing', !/^\s*import\s/m.test(judgeSrc));
     const code = judgeSrc.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
