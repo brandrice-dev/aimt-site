@@ -633,6 +633,7 @@ body.timer-open{overflow:hidden}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/aimt-growth.js"></script>
 <script>
 /*
   AIMT SERVICE TIMER — ACCESS GATE
@@ -1120,6 +1121,7 @@ function startTreatment(){
   ALL.pauseBtn.disabled=false;
   captureRingBaseline();
   renderStep(false); updateClocks(); startTicker();
+  if (window.AIMTGrowth) window.AIMTGrowth.track('service_timer_used', { protocol: session.protocol.key });
   announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
 }
 
