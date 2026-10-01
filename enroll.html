@@ -412,6 +412,7 @@ a { color: inherit; }
   </div>
 </footer>
 
+<script src="assets/js/aimt-growth.js"></script>
 <script>
 (function () {
   'use strict';
@@ -517,7 +518,8 @@ a { color: inherit; }
     return fetch(SESSION_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded' }),
+      /* growth: first-party attribution only (functions/_lib/growth) — no effect on price or payment. */
+      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded', growth: window.AIMTGrowth ? window.AIMTGrowth.checkoutPayload() : null }),
       signal: controller ? controller.signal : undefined
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
