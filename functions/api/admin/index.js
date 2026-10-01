@@ -2,6 +2,7 @@ import { supabaseRest } from '../../_lib/certification/auth.mjs';
 import { adminJson, requireAdminRole, resolveAdmin, writeAdminAudit } from '../../_lib/admin/auth.mjs';
 import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite-email.mjs';
 import { computeConfigHealth } from '../../_lib/admin/config-health.mjs';
+import { hasCourseActivity, instructionalProgress } from '../../_lib/admin/course-progress.mjs';
 import { ensureCertificateIssued, resolveCertificateName } from '../../_lib/certification/certificate-issuance.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
@@ -83,7 +84,7 @@ async function readAllCoreData(env) {
   const [users, entitlements, progress, completions, attempts, reviews, educatorRequests] = await Promise.all([
     listAuthUsers(env, 1000),
     readRows(env, 'course_entitlements', new URLSearchParams({ select: 'checkout_session_id,course_slug,purchaser_email,user_id,granted_at', course_slug: `eq.${COURSE_SLUG}`, order: 'granted_at.desc', limit: '2000' })),
-    readRows(env, 'course_progress', new URLSearchParams({ select: 'user_id,course_slug,progress_score,updated_at,state', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
+    readRows(env, 'course_progress', new URLSearchParams({ select: 'user_id,course_slug,updated_at,state', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
     readRows(env, 'completions', new URLSearchParams({ select: 'credential_id,user_id,course_slug,student_name,completed_at,revoked', course_slug: `eq.${COURSE_SLUG}`, limit: '2000' })),
     readRows(env, 'certification_attempts', new URLSearchParams({ select: 'id,user_id,course_slug,attempt_number,status,knowledge_score,applied_cases_score,interview_score,overall_score,certification_decision,decision_at,updated_at', course_slug: `eq.${COURSE_SLUG}`, order: 'updated_at.desc', limit: '2000' })),
     readRows(env, 'certification_review_requests', new URLSearchParams({ select: 'id,user_id,course_slug,attempt_id,status,created_at,resolved_at', course_slug: `eq.${COURSE_SLUG}`, order: 'created_at.desc', limit: '1000' })),
@@ -128,7 +129,10 @@ function buildStudentSummaries(data) {
         entitlementIds: [],
         sources: [],
         grantedAt: entitlement.granted_at || null,
-        progressScore: progress?.progress_score ?? 0,
+        // Modules 0–11 completed out of 12 — never course_progress.progress_score,
+        // which is an internal sync-ranking metric, not a percentage.
+        courseProgress: instructionalProgress(progress?.state),
+        started: hasCourseActivity(progress?.state),
         lastActivity: progress?.updated_at || null,
         certified: !!completion && completion.revoked !== true,
         credentialId: completion?.credential_id || null,
@@ -186,7 +190,7 @@ async function handleStudent(env, userId, email) {
   if (user?.id) {
     const uid = encodeURIComponent(user.id);
     [progress, completions, attempts, remediation, reviews, educatorRequests] = await Promise.all([
-      readRows(env, 'course_progress', `select=course_slug,progress_score,updated_at,state&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
+      readRows(env, 'course_progress', `select=course_slug,updated_at,state&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
       readRows(env, 'completions', `select=credential_id,student_name,completed_at,revoked&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}`),
       readRows(env, 'certification_attempts', `select=id,attempt_number,status,knowledge_score,applied_cases_score,interview_score,overall_score,critical_domain_results,certification_decision,decision_at,updated_at&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}&order=attempt_number.desc`),
       readRows(env, 'certification_remediation_assignments', `select=id,attempt_id,competency_area,critical_domain,module_ref,section_ref,remediation_activity,required_before_next_attempt,completed,completed_at,created_at&user_id=eq.${uid}&course_slug=eq.${COURSE_SLUG}&order=created_at.desc`),
@@ -216,6 +220,7 @@ async function handleStudent(env, userId, email) {
     },
     entitlements: entitlements.map((e) => ({ ...e, source: e.checkout_session_id.startsWith(MANUAL_PREFIX) ? 'manual' : 'stripe' })),
     progress: progress[0] || null,
+    courseProgress: progress[0] ? instructionalProgress(progress[0].state) : null,
     completion: activeCompletion || completions[0] || null,
     certificateIssuance,
     attempts,

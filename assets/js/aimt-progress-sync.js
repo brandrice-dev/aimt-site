@@ -37,7 +37,15 @@
   }
 
   /* Progress score: monotonic measure of real progress.
-     Completed modules dominate; passed checkpoints refine. */
+     Completed modules dominate; passed checkpoints refine.
+
+     course_progress.progress_score is an INTERNAL cross-device
+     sync-ranking metric only (merge rule: higher score wins). It is NOT a
+     percentage (a fully complete student scores ~1320), not a grade, and
+     not a completion/certification/entitlement authority. Module
+     completion is read module-by-module from state.progress — see
+     functions/_lib/certification/auth.mjs#hasCompletedInstructionalModules
+     and functions/_lib/admin/course-progress.mjs. */
   function computeScore(state) {
     var score = 0;
     try {
