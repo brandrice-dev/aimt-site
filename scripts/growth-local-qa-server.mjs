@@ -13,6 +13,7 @@
      - Stripe: checkout returns a hosted URL pointing at /__qa/stripe, whose
        "Pay" button signs a checkout.session.completed event and delivers it
        to the real webhook handler
+     - /__qa/growth-table?missing=1|0  simulate the migration not yet run
      - /__qa/state           JSON dump of the mock tables (growth_events etc.)
      - /__qa/seed-activity   simulates course activity, a Cadence message and
                              a certificate for the QA student (these come from
@@ -73,6 +74,7 @@ const db = {
     aimt_logs: [],
   },
   stripeSessions: {},
+  growthTableMissing: false, // /__qa/growth-table?missing=1 simulates "migration not yet run"
 };
 
 // ── Mock PostgREST / GoTrue ───────────────────────────────────────────
@@ -153,6 +155,7 @@ async function supabaseMock(url, init = {}) {
   }
 
   const table = p.replace('/rest/v1/', '');
+  if (table === 'growth_events' && db.growthTableMissing) return json({ code: 'PGRST205', message: "Could not find the table 'public.growth_events'" }, 404);
   const rows = db.tables[table];
   if (!rows) return json([]);
   if (method === 'POST') {
@@ -226,7 +229,7 @@ async function signedWebhookRequest(event) {
 const STRIPE_PAGE = (cs) => `<!doctype html><html><head><meta charset="utf-8"><title>Local QA — simulated Stripe</title>
 <style>body{font-family:system-ui;background:#141210;color:#eee;display:grid;place-items:center;min-height:100vh;margin:0}form{background:#1d1a17;padding:28px;border-radius:14px;width:360px}input,button{width:100%;padding:10px;margin-top:10px;font:inherit;box-sizing:border-box}button{cursor:pointer}</style></head>
 <body><form method="post" action="/__qa/pay"><h1>Simulated Stripe (local QA)</h1><p>No real payment. Checkout Session <code>${cs}</code>.</p>
-<input type="hidden" name="cs" value="${cs}"><label>Buyer email<input name="email" value="qa-student@aimt.test"></label><button id="qaPay" type="submit">Pay $597 (simulated)</button></form></body></html>`;
+<input type="hidden" name="cs" value="${cs}"><label>Buyer email<input name="email" value="qa-student@aimt.test"></label><label>Coupon discount (cents)<input name="discount" value="0" inputmode="numeric"></label><button id="qaPay" type="submit">Pay $597 (simulated)</button></form></body></html>`;
 
 async function handleQa(req, url, bodyText) {
   if (url.pathname === '/__qa/stripe') return new Response(STRIPE_PAGE(url.searchParams.get('cs') || ''), { headers: { 'Content-Type': 'text/html' } });
@@ -235,10 +238,12 @@ async function handleQa(req, url, bodyText) {
     const cs = form.get('cs');
     const s = db.stripeSessions[cs];
     if (!s) return new Response('unknown session', { status: 404 });
-    Object.assign(s, { payment_status: 'paid', status: 'complete', customer_details: { email: form.get('email'), name: 'QA Student' } });
+    const discount = Math.max(0, Math.min(59700, Number(form.get('discount')) || 0));
+    Object.assign(s, { payment_status: 'paid', status: 'complete', amount_total: 59700 - discount, total_details: { amount_discount: discount }, customer_details: { email: form.get('email'), name: 'QA Student' } });
     const res = await webhook({ request: await signedWebhookRequest({ type: 'checkout.session.completed', data: { object: s } }), env: ENV, waitUntil: () => {} });
     return new Response(`<!doctype html><meta charset="utf-8"><body style="font-family:system-ui;background:#141210;color:#eee;padding:40px"><h1 id="qaPaid">Webhook ${res.status}</h1><p>Session ${cs} paid (simulated).</p></body>`, { headers: { 'Content-Type': 'text/html' } });
   }
+  if (url.pathname === '/__qa/growth-table') { db.growthTableMissing = url.searchParams.get('missing') === '1'; return json({ growthTableMissing: db.growthTableMissing }); }
   if (url.pathname === '/__qa/state') return json({ tables: db.tables, stripeSessions: db.stripeSessions });
   if (url.pathname === '/__qa/seed-activity') {
     const now = Date.now();
