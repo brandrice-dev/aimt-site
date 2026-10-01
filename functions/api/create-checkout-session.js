@@ -1,3 +1,5 @@
+import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
+
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
 const AIMT_LOGS_TABLE = 'aimt_logs';
 const GENERIC_CHECKOUT_ERROR = 'Unable to create checkout session';
@@ -124,6 +126,29 @@ async function logAimtEvent(type, payload) {
   }
 }
 
+/* AIMT Growth: record `checkout_start` once a Stripe Checkout Session
+   really exists (keyed by its id, so a reload that creates a new session is
+   a new start, and a retry of the same session is not). The browser's
+   optional `growth` object only carries its first-party visitor/session ids
+   and attribution snapshot; it is sanitized by recordGrowthEvent and has no
+   influence on the Stripe request, the price, or the response. Runs in the
+   background and never throws. */
+function recordCheckoutStart(context, requestBody, sessionId, ui, stripeSecretKey) {
+  const growth = requestBody && typeof requestBody.growth === 'object' && requestBody.growth ? requestBody.growth : {};
+  return recordGrowthEventInBackground(context, {
+    eventName: 'checkout_start',
+    origin: 'server',
+    checkoutSessionId: sessionId,
+    visitorId: growth.visitor_id,
+    sessionId: growth.session_id,
+    isInternal: growth.internal === true,
+    pagePath: growth.path,
+    firstTouch: growth.first_touch,
+    lastTouch: growth.last_touch,
+    props: { ui, livemode: stripeKeyMode(stripeSecretKey) === 'live' },
+  }).catch(() => {});
+}
+
 export async function onRequestGet() {
   return new Response('GET route working');
 }
@@ -173,6 +198,7 @@ export async function onRequestPost(context) {
             headers: { 'Content-Type': 'application/json' },
           });
         }
+        await recordCheckoutStart(context, requestBody, session.id, 'embedded', stripeSecretKey);
         /* Only what Stripe.js needs to mount — never the secret key or
            any other server-side value. */
         return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey }), {
@@ -233,6 +259,7 @@ export async function onRequestPost(context) {
       );
     }
 
+    await recordCheckoutStart(context, requestBody, session.id, 'hosted', stripeSecretKey);
     return new Response(JSON.stringify(wantsEmbedded ? { url: session.url, fallback: 'hosted' } : { url: session.url }), {
       headers: { 'Content-Type': 'application/json' },
     });
