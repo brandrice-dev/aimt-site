@@ -36,7 +36,12 @@ const courseSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
 const dashboardSrc = readFileSync(path.join(ROOT, 'my-aimt.html'), 'utf8');
 const registrySrc = readFileSync(path.join(ROOT, 'assets/js/aimt-course-resources.js'), 'utf8');
 const m12Src = readFileSync(path.join(ROOT, 'assets/js/module12-certification.js'), 'utf8');
-const issueCertSrc = readFileSync(path.join(ROOT, 'functions/api/issue-certificate.js'), 'utf8');
+// The issuance trust gates live in the ONE shared authority
+// (certificate-issuance.mjs) that issue-certificate.js, finalize-assessment.js
+// and Admin recovery all call -- checked together with the endpoint.
+const issueCertSrc = readFileSync(path.join(ROOT, 'functions/api/issue-certificate.js'), 'utf8') + '\n' +
+  readFileSync(path.join(ROOT, 'functions/_lib/certification/certificate-issuance.mjs'), 'utf8') + '\n' +
+  readFileSync(path.join(ROOT, 'functions/_lib/certification/auth.mjs'), 'utf8');
 const claimAccessSrc = readFileSync(path.join(ROOT, 'functions/api/claim-course-access.js'), 'utf8');
 const turnLockSrc = readFileSync(path.join(ROOT, 'functions/_lib/cadence/turn-lock.mjs'), 'utf8');
 const submitCaseSrc = readFileSync(path.join(ROOT, 'functions/api/certification/submit-case.js'), 'utf8');

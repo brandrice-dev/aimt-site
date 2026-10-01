@@ -495,7 +495,10 @@ async function certificateChecks() {
       certification_attempts: { rows: decision ? [{ id: 'attempt-1', user_id: USER.id, course_slug: 'headspa-mastery', certification_decision: decision }] : [] },
       completions: { rows: [], uniqueKey: ['user_id', 'course_slug'] },
     };
-    const mock = buildMockFetch({ users: { [TOKEN]: USER }, tables, anthropicHandler: anthropicOkCase });
+    // The official certificate name is resolved server-side from Auth
+    // metadata (certificate-issuance.mjs), never from the posted body.
+    const certUser = { ...USER, user_metadata: { first_name: 'Jane', last_name: 'Doe' } };
+    const mock = buildMockFetch({ users: { [TOKEN]: certUser }, tables, anthropicHandler: anthropicOkCase });
     return { env: buildMockEnv(), mock, tables };
   }
 

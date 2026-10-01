@@ -2,6 +2,7 @@ import { supabaseRest } from '../../_lib/certification/auth.mjs';
 import { adminJson, requireAdminRole, resolveAdmin, writeAdminAudit } from '../../_lib/admin/auth.mjs';
 import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite-email.mjs';
 import { computeConfigHealth } from '../../_lib/admin/config-health.mjs';
+import { ensureCertificateIssued, resolveCertificateName } from '../../_lib/certification/certificate-issuance.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const MANUAL_PREFIX = 'admin-grant-';
@@ -194,6 +195,16 @@ async function handleStudent(env, userId, email) {
     ]);
   }
 
+  // Recovery hint for the exceptional "PASS recorded, no active credential"
+  // state (normally impossible: finalize-assessment issues automatically).
+  // Tells Admin up front whether issuance would be blocked by a missing
+  // official name, using the same resolver the issuance authority uses.
+  const activeCompletion = completions.find((c) => c.revoked !== true) || null;
+  const hasPass = attempts.some((a) => a.certification_decision === 'pass');
+  const certificateIssuance = user?.id && hasPass && !activeCompletion && !completions.length
+    ? { needed: true, nameResolved: !!resolveCertificateName(user, progress[0]?.state) }
+    : { needed: false };
+
   return adminJson({
     student: {
       userId: user?.id || null,
@@ -205,7 +216,8 @@ async function handleStudent(env, userId, email) {
     },
     entitlements: entitlements.map((e) => ({ ...e, source: e.checkout_session_id.startsWith(MANUAL_PREFIX) ? 'manual' : 'stripe' })),
     progress: progress[0] || null,
-    completion: completions[0] || null,
+    completion: activeCompletion || completions[0] || null,
+    certificateIssuance,
     attempts,
     remediation,
     reviews,
@@ -319,6 +331,35 @@ async function revokeManualAccess(env, actor, body) {
     details: { grantId },
   });
   return adminJson({ ok: true });
+}
+
+// Owner/admin recovery for a student whose authoritative PASS has no active
+// credential (e.g. a transient failure during automatic issuance). Calls the
+// SAME issuance authority as finalize-assessment.js and issue-certificate.js,
+// so every trust gate is re-run against server data: it can never
+// manufacture a PASS, never duplicate or replace an existing credential, and
+// never replace a revoked one. The target is resolved server-side by user id.
+async function issueCertificate(env, actor, body) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  const userId = String(body.userId || '').trim();
+  if (!userId) return adminJson({ error: 'A student account is required.' }, 400);
+  const user = await getAuthUser(env, userId);
+  if (!user?.id) return adminJson({ error: 'Student account not found.' }, 404);
+
+  const result = await ensureCertificateIssued(env, user);
+
+  await writeAdminAudit(env, actor, 'issue_certificate', {
+    targetUserId: user.id,
+    targetEmail: user.email,
+    courseSlug: COURSE_SLUG,
+    details: { outcome: result.status, credentialId: result.credential?.credential_id || null },
+  });
+
+  if (!result.ok) {
+    const status = result.status === 'error' ? 500 : 409;
+    return adminJson({ error: result.message, status: result.status }, status);
+  }
+  return adminJson({ ok: true, status: result.status, credential: result.credential });
 }
 
 async function findRevokedManualGrant(env, grantId) {
@@ -442,6 +483,7 @@ export async function onRequestPost(context) {
     if (action === 'grant_access') return await grantAccess(env, actor, body, request);
     if (action === 'revoke_manual_access') return await revokeManualAccess(env, actor, body);
     if (action === 'reactivate_manual_access') return await reactivateManualAccess(env, actor, body);
+    if (action === 'issue_certificate') return await issueCertificate(env, actor, body);
     return adminJson({ error: 'Unknown admin action.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to complete AIMT admin action.' }, 500);

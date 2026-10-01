@@ -278,15 +278,15 @@ test('verify-credential: active row returns certificate fields; revoked row is i
 // ── Admin ───────────────────────────────────────────────────────────────
 
 function loadCertificateCard() {
-  const start = adminHtml.indexOf('function certificateCard(c,attempts){');
-  const end = adminHtml.indexOf('\nasync function openStudent', start);
+  const start = adminHtml.indexOf('function certificateCard(c,attempts,issuance){');
+  const end = adminHtml.indexOf('\nasync function issueCertificate', start);
   const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   const fmtDate = (v) => (v ? 'DATE' : '—');
-  return new Function('esc', 'fmtDate', `${adminHtml.slice(start, end)}; return certificateCard;`)(esc, fmtDate);
+  return (canMutate = true) => new Function('esc', 'fmtDate', 'canMutate', `${adminHtml.slice(start, end)}; return certificateCard;`)(esc, fmtDate, () => canMutate);
 }
 
 test('Admin drawer: issued certificate shows ID with View/Print on the shared renderer', () => {
-  const card = loadCertificateCard();
+  const card = loadCertificateCard()();
   const html = card({ credential_id: 'AIMT-HS-2026-ABC234', student_name: 'Jane Doe', completed_at: '2026-09-20', revoked: false }, [{ attempt_number: 3, certification_decision: 'pass' }]);
   assert.match(html, /Issued · AIMT-HS-2026-ABC234/);
   assert.match(html, /href="\/certificate\?id=AIMT-HS-2026-ABC234"[^>]*>View Certificate</);
@@ -295,9 +295,9 @@ test('Admin drawer: issued certificate shows ID with View/Print on the shared re
 });
 
 test('Admin drawer: pass-without-row, no pass, and revoked states', () => {
-  const card = loadCertificateCard();
-  const passNoRow = card(null, [{ attempt_number: 3, certification_decision: 'pass' }, { attempt_number: 2, certification_decision: 'not_yet_passed' }]);
-  assert.match(passNoRow, /Not issued yet/);
+  const card = loadCertificateCard()();
+  const passNoRow = card(null, [{ attempt_number: 3, certification_decision: 'pass' }, { attempt_number: 2, certification_decision: 'not_yet_passed' }], { needed: true, nameResolved: true });
+  assert.match(passNoRow, /Pass recorded · credential needs issuance/);
   assert.match(passNoRow, /attempt 3/);
   assert.doesNotMatch(passNoRow, /\/certificate\?id=/);
   const noPass = card(null, [{ attempt_number: 1, certification_decision: 'not_yet_passed' }]);
@@ -306,7 +306,7 @@ test('Admin drawer: pass-without-row, no pass, and revoked states', () => {
   const revoked = card({ credential_id: 'AIMT-HS-2026-OLD999', revoked: true }, []);
   assert.match(revoked, /Revoked/);
   assert.doesNotMatch(revoked, /\/certificate\?id=|View Certificate/);
-  assert.match(adminHtml, /\$\{certificateCard\(completion,d\.attempts\)\}/, 'drawer renders the card from the authoritative completion');
+  assert.match(adminHtml, /\$\{certificateCard\(completion,d\.attempts,d\.certificateIssuance\)\}/, 'drawer renders the card from the authoritative completion');
 });
 
 async function adminGet(view, { entitlementUserId }) {
