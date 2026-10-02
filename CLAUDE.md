@@ -46,6 +46,11 @@ Currently pre-launch. Target: end of July 2026.
   user account (validates payment status AND price ID).
 - `functions/api/stripe-webhook.js` — `checkout.session.completed` → writes
   entitlement server-side. Verifies Stripe signatures via Web Crypto.
+- `functions/_lib/growth/*`, `functions/api/growth/collect.js`,
+  `assets/js/aimt-growth.js` — first-party growth measurement + attribution
+  (`growth_events`, Admin → Growth). Definitions and privacy boundary:
+  `docs/growth/AIMT-Growth-Measurement.md`. Never add third-party pixels or
+  write private learning content to growth events.
 
 ## Data model (Supabase)
 - `course_entitlements` — (checkout_session_id PK, course_slug,

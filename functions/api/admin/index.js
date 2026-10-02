@@ -4,6 +4,8 @@ import { sendManualGrantInviteEmail } from '../../_lib/admin/manual-grant-invite
 import { computeConfigHealth } from '../../_lib/admin/config-health.mjs';
 import { hasCourseActivity, instructionalProgress } from '../../_lib/admin/course-progress.mjs';
 import { ensureCertificateIssued, resolveCertificateName } from '../../_lib/certification/certificate-issuance.mjs';
+import { computeGrowthReport, computeScoreboard, loadGrowthData, prepareGrowthData, resolveRange } from '../../_lib/growth/report.mjs';
+import { recordGrowthEvent } from '../../_lib/growth/record.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const MANUAL_PREFIX = 'admin-grant-';
@@ -248,6 +250,82 @@ function handleConfigHealth(env, actor) {
   return adminJson(computeConfigHealth(env));
 }
 
+// ── Growth (owner/admin only) ─────────────────────────────────────────
+// Revenue and acquisition data are business-sensitive, so the support role
+// is excluded, same narrowing pattern as handleConfigHealth(). All numbers
+// come from functions/_lib/growth/report.mjs; see
+// docs/growth/AIMT-Growth-Measurement.md for every definition.
+async function handleGrowth(env, actor, url) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  const now = Date.now();
+  const { key, start, end } = resolveRange(url.searchParams.get('range') || '30d', now);
+  const model = url.searchParams.get('model') === 'last' ? 'last' : 'first';
+  const prepared = prepareGrowthData(await loadGrowthData(env, { listAuthUsers }));
+  return adminJson({ rangeKey: key, ...computeGrowthReport(prepared, { start, end, model, now }) });
+}
+
+async function handleGrowthScoreboard(env, actor, url) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  const weeks = Math.max(1, Math.min(26, Number(url.searchParams.get('weeks')) || 8));
+  const model = url.searchParams.get('model') === 'last' ? 'last' : 'first';
+  const prepared = prepareGrowthData(await loadGrowthData(env, { listAuthUsers }));
+  return adminJson(computeScoreboard(prepared, { weeks, model, now: Date.now() }));
+}
+
+// Backfills the authoritative paid_enrollment revenue record for Stripe
+// entitlements that have none (purchases made before growth tracking, or a
+// transient write failure). Reads each Checkout Session from Stripe with
+// the server's secret key — never from the browser — and records only a
+// session Stripe reports as paid. Idempotent (same dedupe key as the
+// webhook); never touches the entitlement itself.
+const RECONCILE_LIMIT = 25;
+async function reconcileGrowthRevenue(env, actor) {
+  if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
+  if (!env.STRIPE_SECRET_KEY) return adminJson({ error: 'Stripe is not configured.' }, 503);
+  const keyMode = /^(?:sk|rk)_(live|test)_/.exec(String(env.STRIPE_SECRET_KEY))?.[1] || null;
+
+  const [entitlements, paidRows] = await Promise.all([
+    readRows(env, 'course_entitlements', `select=checkout_session_id&course_slug=eq.${COURSE_SLUG}&checkout_session_id=like.cs_*&limit=2000`),
+    readRows(env, 'growth_events', 'select=checkout_session_id&event_name=eq.paid_enrollment&limit=5000'),
+  ]);
+  const recorded = new Set(paidRows.map((r) => r.checkout_session_id));
+  const pending = entitlements
+    .map((e) => e.checkout_session_id)
+    .filter((id) => !recorded.has(id) && keyMode && id.startsWith(`cs_${keyMode}_`));
+
+  const result = { checked: 0, recorded: 0, skipped: 0, failed: 0, remaining: Math.max(0, pending.length - RECONCILE_LIMIT) };
+  for (const id of pending.slice(0, RECONCILE_LIMIT)) {
+    result.checked++;
+    try {
+      const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+      });
+      const session = await res.json().catch(() => ({}));
+      if (!res.ok || session.payment_status !== 'paid') { result.skipped++; continue; }
+      const write = await recordGrowthEvent(env, {
+        eventName: 'paid_enrollment',
+        origin: 'server',
+        checkoutSessionId: session.id,
+        now: Number.isFinite(session.created) ? session.created * 1000 : undefined,
+        props: {
+          amount_total: session.amount_total,
+          amount_subtotal: session.amount_subtotal,
+          amount_discount: session.total_details?.amount_discount ?? 0,
+          currency: session.currency,
+          livemode: session.livemode === true,
+          course_slug: COURSE_SLUG,
+          reconciled: true,
+        },
+      });
+      if (write.ok) result.recorded++; else result.failed++;
+    } catch {
+      result.failed++;
+    }
+  }
+  await writeAdminAudit(env, actor, 'growth_reconcile_revenue', { courseSlug: COURSE_SLUG, details: result });
+  return adminJson({ ok: true, ...result });
+}
+
 async function grantAccess(env, actor, body, request) {
   if (!requireAdminRole(actor, ['owner', 'admin'])) return adminJson({ error: 'Owner or admin access required.' }, 403);
   const email = normalizeEmail(body.email);
@@ -471,6 +549,8 @@ export async function onRequestGet(context) {
     if (view === 'student') return await handleStudent(env, url.searchParams.get('userId'), url.searchParams.get('email'));
     if (view === 'audit') return await handleAudit(env);
     if (view === 'config-health') return handleConfigHealth(env, actor);
+    if (view === 'growth') return await handleGrowth(env, actor, url);
+    if (view === 'growth-scoreboard') return await handleGrowthScoreboard(env, actor, url);
     return adminJson({ error: 'Unknown admin view.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to load AIMT admin data.' }, 500);
@@ -489,6 +569,7 @@ export async function onRequestPost(context) {
     if (action === 'revoke_manual_access') return await revokeManualAccess(env, actor, body);
     if (action === 'reactivate_manual_access') return await reactivateManualAccess(env, actor, body);
     if (action === 'issue_certificate') return await issueCertificate(env, actor, body);
+    if (action === 'growth_reconcile_revenue') return await reconcileGrowthRevenue(env, actor);
     return adminJson({ error: 'Unknown admin action.' }, 400);
   } catch (error) {
     return adminJson({ error: error?.message || 'Unable to complete AIMT admin action.' }, 500);

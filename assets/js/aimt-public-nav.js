@@ -3,7 +3,20 @@
    (index.html) — the same toggle for every page instead of a
    copy-pasted variant per page. No page-specific behavior lives here;
    this only wires up whichever .aimt-public-nav-hamburger /
-   .aimt-public-nav-mobile-menu pair exists on the current page. */
+   .aimt-public-nav-mobile-menu pair exists on the current page.
+
+   It also loads AIMT's first-party growth measurement
+   (assets/js/aimt-growth.js) once, so every public page that carries
+   the shared nav — including generated /education/* pages — is
+   measured without editing each page. */
+(function () {
+  if (window.AIMTGrowth || document.querySelector('script[src$="/aimt-growth.js"],script[src="assets/js/aimt-growth.js"]')) return;
+  const s = document.createElement('script');
+  s.src = '/assets/js/aimt-growth.js';
+  s.defer = true;
+  document.head.appendChild(s);
+})();
+
 (function () {
   const btn = document.getElementById('navHamburger');
   const menu = document.getElementById('navMobileMenu');

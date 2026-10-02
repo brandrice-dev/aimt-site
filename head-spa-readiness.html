@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
 <script src="assets/js/aimt-metric-ring.js"></script>
 <script src="assets/js/aimt-readiness-config.js"></script>
+<script src="assets/js/aimt-growth.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -355,6 +356,7 @@ document.querySelectorAll('.ra-stage-btn').forEach((btn) => {
 });
 
 document.getElementById('raStartBtn').addEventListener('click', () => {
+  if (window.AIMTGrowth) window.AIMTGrowth.track('readiness_audit_start');
   state.currentQuestion = 0;
   showPanel('raQuestionsPanel');
   renderQuestion();
@@ -405,6 +407,7 @@ document.getElementById('raNextBtn').addEventListener('click', () => {
     computeScore();
     showPanel('raScorePanel');
     revealScore();
+    if (window.AIMTGrowth) window.AIMTGrowth.track('readiness_audit_complete');
   }
 });
 
@@ -550,6 +553,8 @@ document.getElementById('raGateForm').addEventListener('submit', (e) => {
 
   saveLocalReadinessProfile(payload);
   submitReadinessProfile(payload); // fire-and-forget; never blocks the handoff below
+  /* Growth: counts the lead only — never the name, email, score, or answers. */
+  if (window.AIMTGrowth) window.AIMTGrowth.track('lead_created', { marketing_consent: !!marketingConsent });
   window.location.href = 'my-aimt.html?preview=readiness';
 });
 </script>

@@ -20,6 +20,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { sendPaidEnrollmentEmail } from '../_lib/enrollment/paid-enrollment-email.mjs';
+import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
 
 const ENTITLEMENTS_TABLE = 'course_entitlements';
 const AIMT_LOGS_TABLE = 'aimt_logs';
@@ -263,6 +264,27 @@ export async function onRequestPost(context) {
       email: purchaserEmail,
       message: `session_${session.id}_course_${courseSlug}`
     });
+
+    /* AIMT Growth: the authoritative revenue record for this enrollment —
+       amounts come only from this signature-verified Stripe event, never
+       from the browser. Strictly after the entitlement write, keyed by the
+       Checkout Session id (Stripe redeliveries are ignored as duplicates),
+       no email or name stored, and it never throws or changes this
+       response. Paid vs owner/test/promo is classified at report time
+       (functions/_lib/growth/taxonomy.mjs#classifyEnrollment). */
+    await recordGrowthEventInBackground(context, {
+      eventName: 'paid_enrollment',
+      origin: 'server',
+      checkoutSessionId: session.id,
+      props: {
+        amount_total: session.amount_total,
+        amount_subtotal: session.amount_subtotal,
+        amount_discount: session.total_details?.amount_discount ?? 0,
+        currency: session.currency,
+        livemode: session.livemode === true,
+        course_slug: courseSlug
+      }
+    }).catch(() => {});
 
     /* Paid-enrollment welcome email — strictly after the entitlement write
        above, and never allowed to affect this response. sendPaidEnrollmentEmail
