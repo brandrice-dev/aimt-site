@@ -431,8 +431,8 @@ test('report: the full funnel with attribution surviving to revenue; non-paid en
   assert.equal(r.sales.visitToPaid.value, 0.5);
   assert.equal(r.students.cohortSize.value, 1);
   assert.equal(r.students.activationRate.value, 1);
-  assert.equal(r.students.certifications.value, 1);
-  assert.equal(r.students.certifications.allStudents, 2);
+  assert.equal(r.students.certifications.value, 2, 'headline counts every valid credential');
+  assert.equal(r.students.certifications.paidStudents, 1);
   assert.equal(r.students.medianDaysToCertification.value, 3);
   assert.equal(r.adoption.cadenceUsers.value, 1);
   assert.equal(r.adoption.serviceTimerUsers.value, 1);
@@ -616,4 +616,71 @@ test('report: full-price and discounted live purchases are both paid, at actual 
   const partner = r.attribution.creative.find((x) => x.content === 'link_partner-intro_code-a_v1');
   assert.deepEqual([partner.paid, partner.revenue], [1, 49700], 'discounted purchase is attributed to its acquisition source');
   assert.equal(r.students.cohortSize.value, 2, 'discounted buyer is a paid student');
+});
+
+// ── Certifications issued = every valid credential (hotfix) ────────────
+
+function certFixture({ completions, entitlements, users }) {
+  return {
+    growthTable: 'present', events: [], adminUsers: [], progress: [], cadenceMessages: [], cadenceTable: 'present',
+    entitlements, users, completions,
+  };
+}
+const iso = (daysAgo) => new Date(NOW - daysAgo * DAY).toISOString();
+
+test('certifications: a staff/manual credential with no paid credential still counts as issued; rate stays paid-cohort', () => {
+  const data = certFixture({
+    users: [{ id: 'u-staff', email: 'staff@aimt.test' }, { id: 'u-buyer', email: 'buyer@x.com' }],
+    entitlements: [
+      { checkout_session_id: 'admin-grant-staff-1', purchaser_email: 'staff@aimt.test', user_id: 'u-staff', granted_at: iso(20) },
+      { checkout_session_id: 'cs_live_buyer', purchaser_email: 'buyer@x.com', user_id: 'u-buyer', granted_at: iso(10) },
+    ],
+    completions: [{ user_id: 'u-staff', completed_at: iso(2), revoked: false }],
+  });
+  const r = computeGrowthReport(prepareGrowthData(data), { start: NOW - 30 * DAY, end: NOW, now: NOW });
+  assert.equal(r.students.certifications.value, 1);
+  assert.equal(r.students.certifications.paidStudents, 0);
+  assert.equal(r.students.certificationRate.value, 0, 'rate = paid cohort certified / paid cohort');
+  assert.deepEqual([r.students.certificationRate.numerator, r.students.certificationRate.denominator], [0, 1]);
+  assert.equal(r.students.medianDaysToCertification.status, 'insufficient', 'median stays paid-only');
+});
+
+test('certifications: one paid + one non-paid credential → headline 2, paid subset 1', () => {
+  const data = certFixture({
+    users: [{ id: 'u-comp', email: 'comp@x.com' }, { id: 'u-buyer', email: 'buyer@x.com' }],
+    entitlements: [
+      { checkout_session_id: 'admin-grant-complimentary-1', purchaser_email: 'comp@x.com', user_id: 'u-comp', granted_at: iso(20) },
+      { checkout_session_id: 'cs_live_buyer', purchaser_email: 'buyer@x.com', user_id: 'u-buyer', granted_at: iso(10) },
+    ],
+    completions: [
+      { user_id: 'u-comp', completed_at: iso(3), revoked: false },
+      { user_id: 'u-buyer', completed_at: iso(1), revoked: false },
+    ],
+  });
+  const r = computeGrowthReport(prepareGrowthData(data), { start: NOW - 30 * DAY, end: NOW, now: NOW });
+  assert.equal(r.students.certifications.value, 2);
+  assert.equal(r.students.certifications.paidStudents, 1);
+  assert.deepEqual([r.students.certificationRate.numerator, r.students.certificationRate.denominator], [1, 1]);
+  assert.equal(r.students.medianDaysToCertification.n, 1);
+});
+
+test('certifications: revoked credentials and credentials outside the range do not count', () => {
+  const data = certFixture({
+    users: [{ id: 'u-a', email: 'a@x.com' }, { id: 'u-b', email: 'b@x.com' }, { id: 'u-c', email: 'c@x.com' }],
+    entitlements: [
+      { checkout_session_id: 'cs_live_a', purchaser_email: 'a@x.com', user_id: 'u-a', granted_at: iso(40) },
+      { checkout_session_id: 'admin-grant-manual-b', purchaser_email: 'b@x.com', user_id: 'u-b', granted_at: iso(40) },
+    ],
+    completions: [
+      { user_id: 'u-a', completed_at: iso(2), revoked: true },
+      { user_id: 'u-b', completed_at: iso(2), revoked: true },
+      { user_id: 'u-c', completed_at: iso(20), revoked: false }, // valid, but outside 7d
+    ],
+  });
+  const prepared = prepareGrowthData(data);
+  const r7 = computeGrowthReport(prepared, { start: NOW - 7 * DAY, end: NOW, now: NOW });
+  assert.equal(r7.students.certifications.value, 0);
+  assert.equal(r7.students.certifications.paidStudents, 0);
+  const r30 = computeGrowthReport(prepared, { start: NOW - 30 * DAY, end: NOW, now: NOW });
+  assert.equal(r30.students.certifications.value, 1, 'a valid credential counts even with no matching entitlement row');
 });
