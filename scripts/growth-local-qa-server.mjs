@@ -14,6 +14,7 @@
        "Pay" button signs a checkout.session.completed event and delivers it
        to the real webhook handler
      - /__qa/growth-table?missing=1|0  simulate the migration not yet run
+     - /__qa/student-name?first=&last=  fictional display name for proof captures
      - /__qa/state           JSON dump of the mock tables (growth_events etc.)
      - /__qa/seed-activity   simulates course activity, a Cadence message and
                              a certificate for the QA student (these come from
@@ -242,6 +243,12 @@ async function handleQa(req, url, bodyText) {
     Object.assign(s, { payment_status: 'paid', status: 'complete', amount_total: 59700 - discount, total_details: { amount_discount: discount }, customer_details: { email: form.get('email'), name: 'QA Student' } });
     const res = await webhook({ request: await signedWebhookRequest({ type: 'checkout.session.completed', data: { object: s } }), env: ENV, waitUntil: () => {} });
     return new Response(`<!doctype html><meta charset="utf-8"><body style="font-family:system-ui;background:#141210;color:#eee;padding:40px"><h1 id="qaPaid">Webhook ${res.status}</h1><p>Session ${cs} paid (simulated).</p></body>`, { headers: { 'Content-Type': 'text/html' } });
+  }
+  if (url.pathname === '/__qa/student-name') {
+    // Fictional display name for product-proof captures of the QA student.
+    const student = db.users.find((u) => u.id === STUDENT_ID);
+    student.user_metadata = { ...student.user_metadata, first_name: (url.searchParams.get('first') || 'QA').slice(0, 40), last_name: (url.searchParams.get('last') || 'Student').slice(0, 40) };
+    return json({ ok: true, user_metadata: student.user_metadata });
   }
   if (url.pathname === '/__qa/growth-table') { db.growthTableMissing = url.searchParams.get('missing') === '1'; return json({ growthTableMissing: db.growthTableMissing }); }
   if (url.pathname === '/__qa/state') return json({ tables: db.tables, stripeSessions: db.stripeSessions });
