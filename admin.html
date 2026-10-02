@@ -211,7 +211,7 @@ growthCard('Revenue',s.revenue,'money'),
 growthCard('Visit → paid',s.visitToPaid,'pct'),growthCard('Checkout → paid',s.checkoutToPaid,'pct'),growthCard('Lead → paid',s.leadToPurchase,'pct')]);
 html+=growthSection('Students','Cohort = paid students who enrolled in this period.',[
 growthCard('Paid students (cohort)',st.cohortSize,'count'),growthCard('Course activations',st.activations,'count'),growthCard('Activation rate',st.activationRate,'pct'),
-growthCard('Certifications issued',st.certifications,'count',st.certifications.allStudents!=null?`${fmtCount(st.certifications.allStudents)} incl. non-paid students`:''),
+growthCard('Certifications issued',st.certifications,'count',st.certifications.paidStudents!=null?`${fmtCount(st.certifications.paidStudents)} from paid students`:''),
 growthCard('Certification rate',st.certificationRate,'pct'),growthCard('Median enrollment → certification',st.medianDaysToCertification,'days',st.medianDaysToCertification.n?`n = ${st.medianDaysToCertification.n}`:''),
 growthCard('Module completions',st.moduleCompletions,'count')]);
 html+=growthSection('Product adoption',`Share of paid students who have started the course (${fmtCount(ad.base.value)}) and used each tool in this period.`,[

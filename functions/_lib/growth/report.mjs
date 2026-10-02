@@ -230,9 +230,18 @@ export function prepareGrowthData(data) {
     };
   });
 
+  // Every valid credential AIMT has issued, straight from its authority
+  // (completions), whatever the holder's enrollment path — and even if no
+  // entitlement row can be matched to them.
+  const credentials = (data.completions || [])
+    .filter((c) => c.revoked !== true)
+    .map((c) => ({ userId: c.user_id, t: ts(c.completed_at) }))
+    .filter((c) => c.t !== null);
+
   return {
     growthTable: data.growthTable || 'present',
     growthTruncated: !!data.growthTruncated,
+    credentials,
     cadenceTable: data.cadenceTable || 'present',
     events,
     isInternalEvent,
@@ -364,7 +373,8 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
   const activatedCohort = cohort.filter((s) => s.activated);
   const certifiedCohort = cohort.filter((s) => s.certifiedAt !== null);
   const certsInRange = paidStudents.filter((s) => inRange(s.certifiedAt, start, end));
-  const allCertsInRange = prepared.students.filter((s) => inRange(s.certifiedAt, start, end));
+  const paidUserIds = new Set(paidStudents.map((s) => s.userId).filter(Boolean));
+  const credentialsInRange = (prepared.credentials || []).filter((c) => inRange(c.t, start, end));
   const daysToCert = certsInRange.filter((s) => s.enrolledAt !== null && s.certifiedAt >= s.enrolledAt).map((s) => (s.certifiedAt - s.enrolledAt) / DAY_MS);
   const moduleCompletionsInRange = paidStudents.reduce((n, s) => n + s.moduleCompletions.filter((t) => inRange(t, start, end)).length, 0);
 
@@ -374,7 +384,12 @@ export function computeGrowthReport(prepared, { start, end, model = 'first', now
       note: 'Students whose first recorded course activity falls in this period.',
     }),
     activationRate: ratio(activatedCohort.length, cohort.length, { note: 'Of paid students who enrolled in this period, share who have started the course.' }),
-    certifications: metric(certsInRange.length, { allStudents: allCertsInRange.length }),
+    // Headline = every valid credential issued in the period (paid, staff,
+    // manual, complimentary, scholarship alike); the paid subset is kept for
+    // marketing. Certification rate and median below stay paid-cohort only.
+    certifications: metric(credentialsInRange.length, {
+      paidStudents: credentialsInRange.filter((c) => paidUserIds.has(c.userId)).length,
+    }),
     certificationRate: ratio(certifiedCohort.length, cohort.length, { note: 'Of paid students who enrolled in this period, share certified so far (young cohorts will read low).' }),
     medianDaysToCertification: daysToCert.length ? metric(median(daysToCert), { n: daysToCert.length }) : insufficient('No paid student certified in this period.'),
     moduleCompletions: metric(moduleCompletionsInRange),
