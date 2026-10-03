@@ -58,9 +58,12 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { fetchTopicEvidenceLive, PILOT_TOPIC_CONCEPTS, selectTopicEvidenceFromRows } from '../functions/_lib/research/publication-readiness-loader.mjs';
+import { fetchTopicEvidenceLive, selectTopicEvidenceFromRows } from '../functions/_lib/research/publication-readiness-loader.mjs';
 import { assessTopicReadiness } from '../functions/_lib/research/publication-readiness.mjs';
-import { selectNextTopic, ACTIVE_CLUSTERS, DEFAULT_ACTIVE_CLUSTER } from '../functions/_lib/education-ops/education-topic-selector.mjs';
+import { selectNextTopic } from '../functions/_lib/education-ops/education-topic-selector.mjs';
+import {
+  PUBLICATION_CLUSTERS, PUBLICATION_CONCEPTS, getPublicationConcept, publicationRouteFor, controlledTopicsForConcepts,
+} from '../functions/_lib/education-ops/education-publication-registry.mjs';
 import { fetchPublishedTopicSlugsLive, countPagesPublishedThisWeekLive } from '../functions/_lib/education-ops/education-published-state-loader.mjs';
 import { checkEducationOpsCredential } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
 import { planPageIntent } from '../functions/_lib/education-ops/education-intent-planner-client.mjs';
@@ -79,8 +82,8 @@ import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN 
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
 import { writeClearanceRecord, replaceNonPublicClearanceRecord, publishClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
-import { buildHubCardHtml, insertHubCard, hubContainsRoute } from '../functions/_lib/education-ops/education-hub-updater.mjs';
-import { insertSitemapRoute } from '../functions/_lib/education-ops/education-sitemap-updater.mjs';
+import { buildHubCardHtml, insertHubCard, hubContainsRoute, resolveHubForRoute, isEmptyHub } from '../functions/_lib/education-ops/education-hub-updater.mjs';
+import { insertSitemapRoute, sitemapContainsRoute } from '../functions/_lib/education-ops/education-sitemap-updater.mjs';
 import {
   PUBLICATION_STATE, buildPublicationManifest, advancePublicationManifest, validatePublicationManifestShape,
   isManifestForSameCandidate, computePreparedArtifactDigest, determinePublicationResumeStage,
@@ -218,11 +221,19 @@ export function writeCandidateBundle(topicSlug, bundle) {
  * artifact, or the whole resolution fails (see readEducationPageArtifact
  * above for exactly what "valid" requires). Two published topics
  * resolving to the SAME route is also a failure, never a silent
- * dedup. A topic outside the active cluster is ignored normally --
- * this function's job is scoped to the active cluster only.
+ * dedup.
+ *
+ * MULTI-CLUSTER: with clusterKey null/omitted (what the orchestrator now
+ * passes), EVERY registered concept in EVERY cluster is resolved, so
+ * route-collision protection and duplicate-route detection cover the
+ * whole public Education surface, not one cluster. A published slug
+ * that is not a registered publication concept at all is ignored, as an
+ * out-of-cluster slug always was. Each returned page carries its
+ * registered `cluster`, so callers can narrow sibling context to one
+ * cluster without re-resolving.
  *
  * @param {string[]} publishedTopicSlugs - the LIVE published set (any cluster)
- * @param {string} clusterKey
+ * @param {string|null} [clusterKey] - optional: narrow to one cluster
  * @param {{getPageBuilderRouteFn?: Function, readArtifactFn?: Function}} [io]
  *   test-only overrides; the real caller never supplies them
  * @returns {{ok: true, pages: Array<{topic_slug: string, route: string, label: string}>} | {ok: false, violations: string[]}}
@@ -230,18 +241,17 @@ export function writeCandidateBundle(topicSlug, bundle) {
 export function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey, io = {}) {
   const getRoute = io.getPageBuilderRouteFn || getPageBuilderRoute;
   const readArtifact = io.readArtifactFn || readEducationPageArtifact;
-  const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
-
   const resolved = [];
   const violations = [];
 
   for (const slug of publishedTopicSlugs) {
-    if (!memberSet.has(slug)) continue; // outside the active cluster -- not this function's concern
+    const concept = getPublicationConcept(slug);
+    if (!concept) continue; // not a registered publication concept -- not this function's concern
+    if (clusterKey && concept.cluster !== clusterKey) continue; // explicitly narrowed to another cluster
 
     try {
       const { route } = getRoute(slug);
-      const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug);
-      resolved.push({ topic_slug: slug, route, label: concept ? concept.seo_page_concept : slug });
+      resolved.push({ topic_slug: slug, cluster: concept.cluster, route, label: concept.seo_page_concept });
       continue;
     } catch (_err) {
       // Not in the legacy registry -- fall through to a persisted Page
@@ -253,7 +263,7 @@ export function resolveTrustedSiblingPages(publishedTopicSlugs, clusterKey, io =
       violations.push(`UNRESOLVABLE_PUBLISHED_ROUTE:${slug}:${artifactResult.reason}`);
       continue;
     }
-    resolved.push({ topic_slug: slug, route: artifactResult.route, label: artifactResult.h1 });
+    resolved.push({ topic_slug: slug, cluster: concept.cluster, route: artifactResult.route, label: artifactResult.h1 });
   }
 
   // Duplicate-route detection across everything that DID resolve --
@@ -445,7 +455,11 @@ export async function runDecisionPipeline(env, options = {}) {
   const runId = options.runId || randomUUID();
   const startedAt = new Date().toISOString();
   const modelCalls = [];
-  const clusterKey = options.clusterKey || DEFAULT_ACTIVE_CLUSTER;
+  // MULTI-CLUSTER: no default cluster. Every registered cluster is
+  // evaluated unless a test/diagnostic explicitly narrows it; the
+  // selected candidate's own registered cluster drives everything after
+  // selection (intent, route, hub, related links, research gap).
+  const clusterKeys = options.clusterKeys || (options.clusterKey ? [options.clusterKey] : null);
   const fns = options.fns || {};
   const common = {};
 
@@ -492,7 +506,10 @@ export async function runDecisionPipeline(env, options = {}) {
   // silently continuing with an incomplete published-route set. See
   // resolveTrustedSiblingPages()'s own header comment.
   const resolveSiblingPages = fns.resolveTrustedSiblingPagesFn || resolveTrustedSiblingPages;
-  const siblingResolution = resolveSiblingPages(publishedTopicSlugs, clusterKey);
+  // Resolved across ALL clusters (clusterKey null): route-collision
+  // protection must see every live Education route, not just the
+  // selected candidate's cluster.
+  const siblingResolution = resolveSiblingPages(publishedTopicSlugs, null);
   if (!siblingResolution.ok) {
     return finish({
       final_state: RUN_FINAL_STATE.INFRA_REVIEW,
@@ -501,8 +518,8 @@ export async function runDecisionPipeline(env, options = {}) {
       credential_available: null,
     });
   }
-  const trustedSiblingPages = siblingResolution.pages;
-  const trustedPublishedRoutes = trustedSiblingPages.map((p) => p.route);
+  const allTrustedPublishedPages = siblingResolution.pages;
+  const trustedPublishedRoutes = allTrustedPublishedPages.map((p) => p.route);
 
   // --- 2. Live weekly publication count -------------------------------
   let pagesPublishedThisWeek;
@@ -535,13 +552,11 @@ export async function runDecisionPipeline(env, options = {}) {
   const fetchEvidence = fns.fetchEvidenceFn || fetchTopicEvidenceLive;
   let evidencePool;
   try {
-    // Fetch the union of every cluster-member topic's controlled_topics
-    // in one pass so selectNextTopic() can assess every candidate.
-    const clusterConcepts = ACTIVE_CLUSTERS[clusterKey].member_topic_slugs
-      .map((slug) => PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug))
-      .filter(Boolean);
-    const allControlledTopics = [...new Set(clusterConcepts.flatMap((c) => c.controlled_topics))];
-    evidencePool = await fetchEvidence(env, allControlledTopics);
+    // Fetch the union of every evaluated registered concept's
+    // controlled_topics (all clusters) in one pass so selectNextTopic()
+    // can assess every candidate across clusters.
+    const evaluatedConcepts = clusterKeys ? PUBLICATION_CONCEPTS.filter((c) => clusterKeys.includes(c.cluster)) : PUBLICATION_CONCEPTS;
+    evidencePool = await fetchEvidence(env, controlledTopicsForConcepts(evaluatedConcepts));
   } catch (err) {
     return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Evidence fetch failed: ${err.message}`, stopped_before_model_stage: true, credential_available: null });
   }
@@ -563,8 +578,8 @@ export async function runDecisionPipeline(env, options = {}) {
     }
   }
 
-  const selection = selectNextTopic(evidencePool, { clusterKey, publishedTopicSlugs, activeResearchGapsBySlug });
-  const candidateTopics = selection.candidates.map((c) => ({ topic_slug: c.topic_slug, eligible: c.eligible, reason: c.ineligible_reason, risk_tier: c.v1_result.risk_tier, opportunity_score: c.opportunity.score }));
+  const selection = selectNextTopic(evidencePool, { clusterKeys, publishedTopicSlugs, activeResearchGapsBySlug });
+  const candidateTopics = selection.candidates.map((c) => ({ topic_slug: c.topic_slug, cluster: c.cluster, eligible: c.eligible, reason: c.ineligible_reason, risk_tier: c.v1_result.risk_tier, opportunity_score: c.opportunity.score }));
 
   if (!selection.selected) {
     // RESEARCH-GAP FEEDBACK LOOP observability: make it obvious when the
@@ -589,6 +604,15 @@ export async function runDecisionPipeline(env, options = {}) {
 
   const selected = selection.selected;
   const existingGapForSelectedTopic = activeResearchGapsBySlug[selected.topic_slug] || null;
+
+  // The selected concept's REGISTERED cluster and route -- never chosen
+  // by a model, never derived from a research packet.
+  const clusterKey = selected.concept.cluster;
+  const cluster = PUBLICATION_CLUSTERS[clusterKey];
+  const registeredRoute = publicationRouteFor(selected.topic_slug);
+  // Same-cluster published pages only: Writer/planner sibling context
+  // and related links stay within the candidate's own cluster.
+  const trustedSiblingPages = allTrustedPublishedPages.filter((p) => p.cluster === clusterKey);
 
   // --- 6. Education Ops credential check -- the FIRST point a model is
   //        genuinely needed. Everything above is preserved in `common`
@@ -660,6 +684,18 @@ export async function runDecisionPipeline(env, options = {}) {
         candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
         final_state: RUN_FINAL_STATE.INFRA_REVIEW,
         exception_reason: `Durable candidate bundle for "${selected.topic_slug}" failed integrity verification (${integrity.violations.join(', ')}) -- refusing to resume or silently regenerate over it.`,
+      });
+    }
+
+    // REGISTRY CONSISTENCY: a durable candidate must still target the
+    // selected concept's registered cluster and route. A bundle whose
+    // cluster/route disagrees with the registry (e.g. created before a
+    // registry edit) is never resumed or silently overwritten.
+    if (loaded.bundle.cluster !== clusterKey || loaded.bundle.route !== registeredRoute) {
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+        exception_reason: `Durable candidate bundle for "${selected.topic_slug}" targets ${loaded.bundle.cluster} ${loaded.bundle.route}, but the publication registry assigns ${clusterKey} ${registeredRoute} -- refusing to resume or silently regenerate over it.`,
       });
     }
 
@@ -780,7 +816,8 @@ export async function runDecisionPipeline(env, options = {}) {
       seoPageConcept: selected.concept.seo_page_concept,
       riskTier: selected.v1_result.risk_tier,
       cluster: clusterKey,
-      routePrefix: ACTIVE_CLUSTERS[clusterKey].route_prefix,
+      routePrefix: cluster.route_prefix,
+      registeredRouteSlug: selected.concept.route_slug,
       candidateEvidenceInventory,
       existingClusterPages,
     });
@@ -793,10 +830,26 @@ export async function runDecisionPipeline(env, options = {}) {
       expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey,
     });
     if (!intentValidation.valid) {
-      return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, final_state: RUN_FINAL_STATE.HUMAN_REVIEW, exception_reason: `Intent plan requested unsupported scope: ${intentValidation.violations.join(', ')}` });
+      // A planner reaching outside the publication registry (a topic,
+      // cluster, or route the registry did not assign) is an
+      // architecture-safety failure -- INFRA_REVIEW, same class as the
+      // route-collision guard below -- never a content-scope judgment.
+      const registryBoundaryCodes = ['UNREGISTERED_PUBLICATION_CONCEPT', 'CLUSTER_NOT_REGISTERED_FOR_TOPIC', 'ROUTE_SLUG_NOT_REGISTERED'];
+      const isRegistryBoundary = intentValidation.violations.some((v) => registryBoundaryCodes.includes(v));
+      return finish({
+        candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier,
+        final_state: isRegistryBoundary ? RUN_FINAL_STATE.INFRA_REVIEW : RUN_FINAL_STATE.HUMAN_REVIEW,
+        exception_reason: isRegistryBoundary
+          ? `Intent plan reached outside the publication registry: ${intentValidation.violations.join(', ')}`
+          : `Intent plan requested unsupported scope: ${intentValidation.violations.join(', ')}`,
+      });
     }
     intentPlan = intentResult.output;
-    route = `${ACTIVE_CLUSTERS[clusterKey].route_prefix}/${intentPlan.route_slug}`;
+    // The registry's deterministic route; validateIntentPlan() has
+    // already required intentPlan.route_slug to equal the registered
+    // route_slug, so this is the same value -- but the authority is the
+    // registry, never the model's echo.
+    route = registeredRoute;
 
     // --- ROUTE-COLLISION GUARD (before spending a synthesis call) --------
     // A planner choosing a route_slug that happens to match a CURRENTLY
@@ -1046,8 +1099,8 @@ export async function runDecisionPipeline(env, options = {}) {
       ...writerResult.output,
       sources: buildTrustedSources(clearedSnapshot),
       related_links: buildEducationRelatedLinks({
-        clusterLabel: ACTIVE_CLUSTERS[clusterKey].label,
-        clusterRoutePrefix: ACTIVE_CLUSTERS[clusterKey].route_prefix,
+        clusterLabel: cluster.label,
+        clusterRoutePrefix: cluster.route_prefix,
         siblingPages: trustedSiblingPages,
       }),
     };
@@ -1273,14 +1326,14 @@ export function prepareGeneratedArtifacts(report) {
     writer_provenance: { contract_version: 'education-writer-v1' },
   }, null, 2));
 
-  // Cluster hub: derive its repo-relative path from the route prefix
-  // (e.g. /education/hair-loss/<slug> -> education/hair-loss.html).
-  const clusterKey = Object.keys(ACTIVE_CLUSTERS).find((k) => route.startsWith(ACTIVE_CLUSTERS[k].route_prefix));
-  const relativeHubPath = `education${ACTIVE_CLUSTERS[clusterKey].route_prefix.replace('/education', '')}.html`;
+  // Cluster hub: resolved from the publication registry for this
+  // route's cluster (e.g. /education/scalp-health/<slug> ->
+  // education/scalp-health.html) -- never string surgery on the route.
+  const { hubFile: relativeHubPath, hubRoute } = resolveHubForRoute(route);
   const hubPath = path.join(ROOT, relativeHubPath);
   const hubHtml = readFileSync(hubPath, 'utf8');
   const cardHtml = buildHubCardHtml({ route, h1: plan.h1, meta_description: plan.meta_description, sourceCount: plan.sources.length });
-  writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml));
+  writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml, { hubRoute }));
 
   const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
   const allowlistResult = checkGeneratedDiffAllowlist(changedPaths);
@@ -1392,14 +1445,20 @@ export function prepareLaunchArtifacts({ preparedArtifact, plan, route }) {
     writer_provenance: { contract_version: 'education-writer-v1' },
   }, null, 2));
 
-  const clusterKey = Object.keys(ACTIVE_CLUSTERS).find((k) => route.startsWith(ACTIVE_CLUSTERS[k].route_prefix));
-  const relativeHubPath = `education${ACTIVE_CLUSTERS[clusterKey].route_prefix.replace('/education', '')}.html`;
+  const { hubFile: relativeHubPath, hubRoute } = resolveHubForRoute(route);
   const hubPath = path.join(ROOT, relativeHubPath);
   const hubHtml = readFileSync(hubPath, 'utf8');
+  const hubWasEmpty = isEmptyHub(hubHtml);
   const cardHtml = buildHubCardHtml({ route, h1: plan.h1, meta_description: plan.meta_description, sourceCount: plan.sources.length });
-  writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml));
+  writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml, { hubRoute }));
 
-  const sitemapXml = readFileSync(sitemapPath, 'utf8');
+  let sitemapXml = readFileSync(sitemapPath, 'utf8');
+  // A cluster hub that was empty (noindex) until this card becomes
+  // indexable with it (insertHubCard removes the marker) -- list it in
+  // the sitemap in the same commit, exactly as the Hair Loss hub is.
+  if (hubWasEmpty && !sitemapContainsRoute(sitemapXml, hubRoute)) {
+    sitemapXml = insertSitemapRoute(sitemapXml, hubRoute);
+  }
   writeFileSync(sitemapPath, insertSitemapRoute(sitemapXml, route));
 
   const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
@@ -1641,11 +1700,11 @@ const LIVE_SITE_ORIGIN = 'https://aimtrichology.com';
     ACTUAL deployed site reflects the publication, not merely that the
     merge succeeded. */
 async function fetchLivePublicationArtifacts({ route, clusterKey }) {
-  const hubRoute = `${ACTIVE_CLUSTERS[clusterKey].route_prefix.replace('/education', '')}.html`;
+  const hubFile = PUBLICATION_CLUSTERS[clusterKey].hub_file;
   const [articleRes, sitemapRes, hubRes] = await Promise.all([
     fetch(`${LIVE_SITE_ORIGIN}${route}`),
     fetch(`${LIVE_SITE_ORIGIN}/sitemap.xml`),
-    fetch(`${LIVE_SITE_ORIGIN}/education${hubRoute}`),
+    fetch(`${LIVE_SITE_ORIGIN}/${hubFile}`),
   ]);
   const html = await articleRes.text();
   const sitemapXml = sitemapRes.ok ? await sitemapRes.text() : '';
@@ -1677,9 +1736,8 @@ async function fetchLivePublicationArtifacts({ route, clusterKey }) {
  *   given the caller already validated clusterKey/topicSlug membership)
  */
 function resolveCurrentCandidateClaimIds(evidencePool, clusterKey, topicSlug) {
-  const memberSet = new Set(ACTIVE_CLUSTERS[clusterKey].member_topic_slugs);
-  const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === topicSlug && memberSet.has(c.topic_slug));
-  if (!concept) return [];
+  const concept = getPublicationConcept(topicSlug);
+  if (!concept || concept.cluster !== clusterKey) return [];
   const { claims, sources } = selectTopicEvidenceFromRows(concept.controlled_topics, evidencePool);
   const v1Result = assessTopicReadiness({
     topic_slug: concept.topic_slug, seo_page_concept: concept.seo_page_concept,
@@ -1831,16 +1889,23 @@ export async function runPublicationPipeline(env, options = {}) {
   const integrity = await io.verifyCandidateBundleIntegrityFn(bundle);
   const resumeStage = determineResumeStage(bundle);
 
-  const clusterKey = Object.keys(ACTIVE_CLUSTERS).find((k) => ACTIVE_CLUSTERS[k].member_topic_slugs.includes(topicSlug));
-  if (!clusterKey) {
-    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Topic "${topicSlug}" is not a member of any active cluster.` });
+  const registeredConcept = getPublicationConcept(topicSlug);
+  if (!registeredConcept) {
+    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Topic "${topicSlug}" is not a registered publication concept in any cluster.` });
+  }
+  const clusterKey = registeredConcept.cluster;
+  // The durable candidate must target exactly the registry's cluster and
+  // route for this topic -- a bundle whose route was chosen any other way
+  // is never published.
+  const registeredRoute = publicationRouteFor(topicSlug);
+  if (bundle.cluster !== clusterKey || bundle.route !== registeredRoute) {
+    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: `Durable candidate bundle for "${topicSlug}" targets ${bundle.cluster} ${bundle.route}, but the publication registry assigns ${clusterKey} ${registeredRoute} -- refusing to publish.` });
   }
 
   let evidencePool;
   try {
-    const clusterConcepts = ACTIVE_CLUSTERS[clusterKey].member_topic_slugs.map((slug) => PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === slug)).filter(Boolean);
-    const allControlledTopics = [...new Set(clusterConcepts.flatMap((c) => c.controlled_topics))];
-    evidencePool = await io.fetchEvidenceFn(env, allControlledTopics);
+    const clusterConcepts = PUBLICATION_CONCEPTS.filter((c) => c.cluster === clusterKey);
+    evidencePool = await io.fetchEvidenceFn(env, controlledTopicsForConcepts(clusterConcepts));
   } catch (err) {
     return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Evidence fetch failed: ${err.message}` });
   }
@@ -1856,7 +1921,8 @@ export async function runPublicationPipeline(env, options = {}) {
   // identical check above): a published DB state that cannot be mapped
   // to trusted routes is an architecture-safety anomaly, never silently
   // downgraded to "treat it as if nothing were published".
-  const siblingResolution = io.resolveTrustedSiblingPagesFn(publishedTopicSlugs, clusterKey);
+  // All clusters: route-collision protection covers every live route.
+  const siblingResolution = io.resolveTrustedSiblingPagesFn(publishedTopicSlugs, null);
   if (!siblingResolution.ok) {
     return finish({
       final_state: RUN_FINAL_STATE.INFRA_REVIEW,

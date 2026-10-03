@@ -27,12 +27,12 @@ function check(fixtureName, label, condition, detail) {
 
 function baselineV1Result(overrides = {}) {
   return {
-    topic_slug: 'x-topic',
+    topic_slug: 'hair-biology',
     risk_tier: 'MODERATE',
     readiness_status: 'NEEDS_SYNTHESIS',
     metrics: { candidate_claim_count: 2, distinct_source_count: 2 },
     synthesis_packet: {
-      controlled_topics: ['x-topic'],
+      controlled_topics: ['hair-biology'],
       candidate_claim_ids: ['c1', 'c2'],
       candidate_source_ids: ['s1'],
       safety_claim_ids: [],
@@ -45,8 +45,8 @@ function baselineV1Result(overrides = {}) {
 function baselineEvidenceRows() {
   return {
     claims: [
-      { claim_id: 'c1', source_id: 's1', claim_type: 'finding', claim_text: 'A finding.', direction: 'descriptive', verification_status: 'CLAIM_VERIFIED', use_status: 'provisional', topics: ['x-topic'], population_or_scope: null, page_or_section_locator: null, claim_origin: 'primary_text' },
-      { claim_id: 'c2', source_id: 's1', claim_type: 'limitation', claim_text: 'A limitation.', direction: 'descriptive', verification_status: 'CLAIM_VERIFIED', use_status: 'provisional', topics: ['x-topic'], population_or_scope: null, page_or_section_locator: null, claim_origin: 'primary_text' },
+      { claim_id: 'c1', source_id: 's1', claim_type: 'finding', claim_text: 'A finding.', direction: 'descriptive', verification_status: 'CLAIM_VERIFIED', use_status: 'provisional', topics: ['hair-biology'], population_or_scope: null, page_or_section_locator: null, claim_origin: 'primary_text' },
+      { claim_id: 'c2', source_id: 's1', claim_type: 'limitation', claim_text: 'A limitation.', direction: 'descriptive', verification_status: 'CLAIM_VERIFIED', use_status: 'provisional', topics: ['hair-biology'], population_or_scope: null, page_or_section_locator: null, claim_origin: 'primary_text' },
     ],
     sources: [
       { source_id: 's1', title: 'Source One', authors: ['A. Author'], year: 2023, doi: '10.1/one', evidence_type: 'systematic_review', source_role: 'primary' },
@@ -60,7 +60,7 @@ function baselinePageIntent() {
 
 function autoReadyOutput() {
   return {
-    topic_slug: 'x-topic', page_concept: 'X Topic Overview', recommended_disposition: 'AUTO_READY', confidence: 'high',
+    topic_slug: 'hair-biology', page_concept: 'X Topic Overview', recommended_disposition: 'AUTO_READY', confidence: 'high',
     page_scope: { include: ['x'], exclude: ['treatment'] },
     selected_claims: [{ claim_id: 'c1', role: 'core_finding', reason: 'ok' }, { claim_id: 'c2', role: 'limitation', reason: 'ok' }],
     excluded_claims: [],
@@ -84,7 +84,7 @@ function mockSynthesizeFn(output) {
 
 async function buildRealPreparedArtifact() {
   const result = await prepareTopicArtifact({}, {
-    topicSlug: 'x-topic', controlledTopic: 'x-topic', v1Result: baselineV1Result(),
+    topicSlug: 'hair-biology', controlledTopic: 'hair-biology', v1Result: baselineV1Result(),
     pageIntent: baselinePageIntent(), evidenceRows: baselineEvidenceRows(),
   }, { synthesizeFn: mockSynthesizeFn(autoReadyOutput()) });
   if (!result.ok) throw new Error(`Fixture setup failed: ${result.reason}`);
@@ -93,8 +93,8 @@ async function buildRealPreparedArtifact() {
 
 function baselineBundleArgs(preparedArtifact) {
   return {
-    runId: 'run-1', topicSlug: 'x-topic', cluster: 'hair-loss-shedding', route: '/education/hair-loss/x-topic',
-    intentPlan: { topic_slug: 'x-topic', page_concept: 'X Topic Overview', public_intent: 'Explain x for practitioners.', route_slug: 'x-topic', practitioner_relevance: 'Relevant.', cluster: 'hair-loss-shedding', risk_context: 'MODERATE.', in_scope_concepts: ['what x is'], out_of_scope_concepts: ['diagnosis of an individual case', 'treatment or medication protocols'] },
+    runId: 'run-1', topicSlug: 'hair-biology', cluster: 'trichology-fundamentals', route: '/education/trichology/hair-biology',
+    intentPlan: { topic_slug: 'hair-biology', page_concept: 'X Topic Overview', public_intent: 'Explain x for practitioners.', route_slug: 'hair-biology', practitioner_relevance: 'Relevant.', cluster: 'trichology-fundamentals', risk_context: 'MODERATE.', in_scope_concepts: ['what x is'], out_of_scope_concepts: ['diagnosis of an individual case', 'treatment or medication protocols'] },
     preparedArtifact,
   };
 }

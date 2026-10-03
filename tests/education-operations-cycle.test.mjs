@@ -797,8 +797,14 @@ async function testPlannerChoosingExistingPublishedSlugFailsAsInfraReview() {
     },
   });
   check('ROUTE_COLLISION_PLANNER', 'final_state is INFRA_REVIEW', report.final_state === RUN_FINAL_STATE.INFRA_REVIEW, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
-  check('ROUTE_COLLISION_PLANNER', 'exception names the collision rule', report.exception_reason.includes('ROUTE_COLLIDES_WITH_PUBLISHED_PAGE'), report.exception_reason);
-  check('ROUTE_COLLISION_PLANNER', 'exception names the exact colliding route', report.exception_reason.includes('/education/hair-loss/telogen-effluvium'), report.exception_reason);
+  // MULTI-CLUSTER REGISTRY BOUNDARY: the planner no longer chooses a
+  // route at all -- a route_slug other than the registry's is rejected
+  // before the route is even computed (stronger than the collision
+  // guard it used to reach; that guard is still covered in
+  // education-route-guard.test.mjs and
+  // education-multicluster-publication.test.mjs).
+  check('ROUTE_COLLISION_PLANNER', 'exception names the registry route rule', report.exception_reason.includes('ROUTE_SLUG_NOT_REGISTERED'), report.exception_reason);
+  check('ROUTE_COLLISION_PLANNER', 'the colliding live route is never computed as this page\'s route', !report.exception_reason.includes('ROUTE_COLLIDES_WITH_PUBLISHED_PAGE'), report.exception_reason);
   check('ROUTE_COLLISION_PLANNER', 'caught BEFORE any synthesis/writer/reviewer call -- only the intent planner call happened', report.model_calls.actual_model_call_count === 1, report.model_calls.actual_model_call_count);
 }
 
