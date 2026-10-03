@@ -96,7 +96,8 @@ function requireSupabaseEnv(env, fnName) {
  *   baselineCandidateClaimIds: string[], controlledTopics: string[],
  * }} observed - `controlledTopics` (CORRECTION 1) is the page concept's
  *   own controlled research topics (`selected.concept.controlled_topics`
- *   -- deterministic from the topic_slug via PILOT_TOPIC_CONCEPTS, so it
+ *   -- deterministic from the topic_slug via the publication registry
+ *   (education-publication-registry.mjs), in any cluster, so it
  *   is stored "at creation time" but is simply the same value on every
  *   later re-observation too), used to gate whether a later targeted
  *   research submission is actually RELEVANT to this gap -- see

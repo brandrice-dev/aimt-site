@@ -24,7 +24,8 @@
    ever triggers a re-synthesis automatically.
    ═══════════════════════════════════════════════════════════════ */
 
-import { PILOT_TOPIC_CONCEPTS, selectTopicEvidenceFromRows, fetchTopicEvidenceLive } from '../research/publication-readiness-loader.mjs';
+import { selectTopicEvidenceFromRows, fetchTopicEvidenceLive } from '../research/publication-readiness-loader.mjs';
+import { getPublicationConcept } from './education-publication-registry.mjs';
 import { assessTopicReadiness } from '../research/publication-readiness.mjs';
 
 export const FRESHNESS_STATE = Object.freeze({
@@ -86,16 +87,17 @@ export function computeFreshnessDelta(clearanceRow, currentCandidateClaimIds) {
  * delegates to computeFreshnessDelta(). Never writes anything.
  *
  * @param {Object} env - SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
- * @param {string} topicSlug - must have a PILOT_TOPIC_CONCEPTS entry
+ * @param {string} topicSlug - must be a registered publication concept
+ *   (education-publication-registry.mjs), in any cluster
  * @returns {Promise<object>} a freshness report (see FRESHNESS_STATE);
  *   FRESHNESS_CHECK_FAILED with a `reason` field on any fetch/shape error
  */
 export async function checkTopicFreshness(env, topicSlug) {
   const checkedAt = new Date().toISOString();
   try {
-    const concept = PILOT_TOPIC_CONCEPTS.find((c) => c.topic_slug === topicSlug);
+    const concept = getPublicationConcept(topicSlug);
     if (!concept) {
-      return { topic: topicSlug, state: FRESHNESS_STATE.FRESHNESS_CHECK_FAILED, reason: `No PILOT_TOPIC_CONCEPTS entry for "${topicSlug}".`, checked_at: checkedAt };
+      return { topic: topicSlug, state: FRESHNESS_STATE.FRESHNESS_CHECK_FAILED, reason: `No registered publication concept for "${topicSlug}".`, checked_at: checkedAt };
     }
 
     const clearanceRes = await fetch(

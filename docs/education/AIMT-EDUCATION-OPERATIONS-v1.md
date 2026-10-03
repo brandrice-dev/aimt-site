@@ -1,8 +1,59 @@
 # AIMT Education Operations v1
 
-Status as of this writing: **the orchestration CODE exists and is wired end-to-end and IS installed as a GitHub Actions workflow, but its cron schedule is currently disabled (manual `workflow_dispatch` only -- see "Scheduler cadence" below), and AUTOPUBLISH is OFF.** Real shadow runs have reached Publication Editor/Writer/Reviewer (see "Durable candidate persistence + resume" below for the exact regression that phase fixes), but nothing in this document describes a system that publishes anything autonomously. `--prepare`/`--persist-clearance`/`--publish` remain exercised only with fixtures/mocks and live, read-only dry runs — never a real write.
+Status (2026-10-03): **Education Operations is a live, scheduled, governed multi-cluster publication system.** The weekday `AIMT Education Operations` workflow runs the full decision pipeline against the live Research Library; when that exact scheduled run on `main` reports `SHADOW_CANDIDATE_READY`, the separate `AIMT Education Publish` workflow is handed that exact run and drives the existing autonomous publisher (PR → merge → Cloudflare exact-commit verification → live verification → guarded DB publication). Whether the publisher may merge/publish is decided by the repository variable `AIMT_EDUCATION_AUTOPUBLISH_ENABLED` (anything other than literal `true` stops at `AUTOPUBLISH_GATE_CLOSED`); the weekly ceiling is `AIMT_EDUCATION_MAX_PAGES_PER_WEEK` (default 4 — a ceiling, never a quota). Code changes never set either variable.
+
+The current end-to-end flow:
+
+```
+Rick research (aimt-research-feed inbox packet)
+  → scheduled Research Feed ingest → live Research Library (claims/sources, controlled-topic tags)
+  → Education Operations: governed MULTI-CLUSTER selector (every registered concept, every cluster, at most ONE page per run)
+  → existing Intent Planner → Publication Editor → Writer → Reviewer → durable candidate
+  → existing autonomous publisher → PR → merge → Cloudflare → live verification → guarded DB publication
+```
+
+See **"Governed multi-cluster publication"** directly below for how the public topic universe is defined. Sections further down that describe the original single-cluster pilot, a disabled cron, shadow-only operation, or AUTOPUBLISH being off are **historical** and are labeled as such.
 
 **Trust-boundary correction applied:** a final review found the model was trusted with several things it should never have been -- authoring source metadata (title/authors/year/doi/url) and related-link destinations, and a route/file collision path that the generated-diff allowlist alone could not catch. Both are now closed mechanically (never by discipline alone) -- see "Route-collision guard" and "Source and related-link authority" below.
+
+## Governed multi-cluster publication (current architecture)
+
+**Authoritative registry:** `functions/_lib/education-ops/education-publication-registry.mjs` — pure, static configuration, validated at module load (an invalid registry throws). It is the ONE place that defines AIMT's public Education universe; the selector, cannibalization, route generation, hub routing, the generated-diff allowlist, the freshness monitor, and the backwards-compatible `PILOT_TOPIC_CONCEPTS` export are all derived from it.
+
+**Public clusters** (`PUBLICATION_CLUSTERS`):
+
+| Cluster key | Label | Route prefix / hub |
+|---|---|---|
+| `trichology-fundamentals` | Trichology Fundamentals | `/education/trichology` (`education/trichology.html`) |
+| `hair-loss-shedding` | Hair Loss & Shedding | `/education/hair-loss` (`education/hair-loss.html`) — unchanged |
+| `scalp-health` | Scalp Health & Conditions | `/education/scalp-health` |
+| `product-science` | Product Science | `/education/product-science` |
+| `head-spa-techniques` | Head Spa Techniques | `/education/head-spa-techniques` |
+| `practitioner-safety` | Practitioner Safety & Scope | `/education/safety` |
+
+**Publication concepts** (`PUBLICATION_CONCEPTS`) each declare `topic_slug`, a page-concept title seed, `controlled_topics`, `cluster`, a deterministic `route_slug`, `mapping_type` (+ `mapping_rationale` for every constructed concept), and `autonomously_selectable`. Routes are always `${cluster.route_prefix}/${route_slug}`; existing live routes are preserved exactly (`hair-cycle` → `/education/hair-loss/hair-growth-cycle`, `telogen-effluvium`, `alopecia-areata`). Examples: `scalp-barrier-ph` → `/education/scalp-health/scalp-barrier-ph`; `massage-circulation` → `/education/head-spa-techniques/massage-circulation`; `surfactants` → `/education/product-science/surfactants`.
+
+**Controlled vocabulary is not redefined.** Every `controlled_topics` value must be in `functions/_lib/research/schema.mjs#CONTROLLED_TOPICS`, and every one of the 24 controlled topics must be used by at least one registered concept (`CONTROLLED_TOPIC_ACCOUNTING`). `adjacent-dermatology` is registered but `autonomously_selectable: false` (a catch-all research tag, not one coherent page intent).
+
+**`scalp-barrier-ph`** (constructed): `Scalp Barrier and pH: A Practitioner Education Overview`, controlled topics `scalp-health`, `cosmetic-ingredients`, `surfactants`. `practitioner-safety` is deliberately excluded: its baseline is HIGH, and a concept's risk is the most severe of its constituents, so including it would make the concept permanently non-autonomous. The risk engine itself is unchanged.
+
+**Registration is not permission.** Every registered concept still goes through the unchanged readiness/risk engine (`publication-readiness.mjs`), cluster-aware cannibalization, research-gap holds, Publication Editor, Writer, Reviewer and every publisher gate. HIGH-risk concepts (`actives-minoxidil`, `actives-other`, `practitioner-safety`, `infection-control`, `contraindications`) are registered so the universe is accounted for, and are excluded by `HIGH_RISK_NEVER_AUTONOMOUS` exactly as before.
+
+**Research packets are evidence, not page commands.** A packet entering the Research Library contributes claims/sources tagged with controlled topics. Those claims become candidate evidence for every registered concept whose `controlled_topics` they match. A packet's own title or topic string is never read by Education Operations and can never become a `topic_slug`, a page title, or a URL. Example: the 2026-10-03 `AIMT-RF-2026-10-03-BARRIER` packet strengthens `scalp-barrier-ph` (and the direct `scalp-health` / `surfactants` / `cosmetic-ingredients` concepts) only through its claim tags; it becomes a page only if readiness and every later gate pass.
+
+**Global selection.** Each run evaluates every `autonomously_selectable`, not-yet-published concept in every cluster against one evidence pool (paginated, GET-only fetch of every registered controlled topic), applies the unchanged HIGH / HUMAN_REVIEW / NOT_READY / evidence-gap / cannibalization / research-gap rules, scores with the explicitly-labeled `SEARCH_OPPORTUNITY_HEURISTIC`, and selects AT MOST ONE (highest score; ties by `topic_slug`). The selected concept's registered cluster then drives intent planning, route, hub, related links and any research gap.
+
+**Cluster-aware cannibalization.** A candidate is redundant only when (1) within its OWN cluster it is fully composed of live concepts that are each narrower-or-equal to it (the original pilot case: `shedding-vs-hair-loss` when `hair-cycle` and `telogen-effluvium` are live), or (2) a live concept in ANY cluster has the identical controlled-topic set. Shared evidence across clusters (e.g. Product Science `surfactants` vs. a live Scalp Health `scalp-barrier-ph`) is reported as `shared_evidence_with` for observability and never blocks.
+
+**Intent Planner boundary.** The planner is given the registered cluster, route prefix and `route_slug` and must echo them. `validateIntentPlan()` rejects an unregistered topic (`UNREGISTERED_PUBLICATION_CONCEPT`), a cluster other than the registered one (`CLUSTER_NOT_REGISTERED_FOR_TOPIC`), and any other route slug (`ROUTE_SLUG_NOT_REGISTERED`); the orchestrator treats these as `INFRA_REVIEW` before any synthesis call. A durable candidate bundle (or a publish-lane bundle) whose cluster/route disagrees with the registry is never resumed or published.
+
+**Hubs.** Each cluster has a hub file built from the Hair Loss hub's exact markup. A new hub ships with `<meta name="robots" content="noindex, follow" data-aimt-empty-hub>`; `insertHubCard()` removes that marker when the first article card is inserted, and the launch commit then also adds the hub route to `sitemap.xml`. Hub insertion is resolved from the registry (`resolveHubForRoute`) and refuses a card outside the hub's cluster prefix or a hub file whose canonical belongs to another cluster.
+
+**Generated-diff allowlist.** `education/` paths are allowed only when they are a registered cluster's hub file or one article file directly inside a registered cluster directory.
+
+**Research-gap loop.** Unchanged and generic: an `EVIDENCE_INSUFFICIENCY` for any cluster's concept creates `publication_evidence_gap:<topic_slug>` (e.g. `publication_evidence_gap:scalp-barrier-ph`), visible to Rick through `list_research_gaps`, and holds that topic until its candidate claim set changes.
+
+**Adding a cluster or concept** is an owner edit to the registry (plus, for a new cluster, its hub file and a card on `/education`), covered by `tests/education-multicluster-publication.test.mjs`. No run, model, or research packet can do it.
 
 ## What this is
 
@@ -43,7 +94,7 @@ functions/_lib/education-ops/
 
 ## Scheduler cadence
 
-**Installed as a shadow-only workflow, SCHEDULE CURRENTLY DISABLED.** `.github/workflows/aimt-education-operations.yml`'s `cron: '0 14 * * 1-5'` trigger is commented out for this phase (see "Durable candidate persistence + resume" below) -- only a manual `workflow_dispatch` (bare, no mode inputs) runs it today. The cron will be re-enabled only once the final publish/deploy/verify lane is connected. The workflow's only operational command is still:
+**Current:** `.github/workflows/aimt-education-operations.yml` runs on its weekday `cron: '0 14 * * 1-5'` schedule (plus manual `workflow_dispatch`). Its own job still has no content/PR write power; publication is handed off to `aimt-education-publish.yml` via `workflow_run` for the exact successful scheduled run on `main` (see "Workflow" in the publish-lane section). *(Historical: during the durable-candidate-resume phase the cron was commented out and the workflow ran only by manual dispatch.)* The Operations workflow's command is:
 
 ```
 node scripts/education-operations-cycle.mjs --shadow
@@ -148,7 +199,7 @@ Every run resolves to exactly one of (`education-run-ledger.mjs`'s `RUN_FINAL_ST
 | `FRESHNESS_FLAGGED` | A published topic's freshness scan found `POTENTIAL_EVIDENCE_CHANGE`. |
 | `AUTOPUBLISH_GATE_CLOSED` | `--publish`-only: the candidate was verified and the generated publish PR is open/resumed, but `AIMT_EDUCATION_AUTOPUBLISH_ENABLED` is not exactly `"true"` — a normal, expected, non-exception stop (never creates a GitHub Issue), exactly the point of the gate. |
 | `PUBLISH_FAILED` | `--publish`-only: any step from pre-merge revalidation through post-write integrity failed — a moved PR head, an unexpected diff, a merge failure, a Cloudflare deployment failure/timeout, a live-verification failure, or a post-write row mismatch. The DB row is never marked published in this case, and the failure is always safely retryable on a later run (see "Production publish lane"). |
-| `PUBLISHED` | The full 17-step order (see above) completed and the DB row is confirmed published, with a fresh post-write re-read proving it. `runPublicationPipeline()` can reach this in tests; has never occurred in production — AUTOPUBLISH is off. |
+| `PUBLISHED` | The full 17-step order (see above) completed and the DB row is confirmed published, with a fresh post-write re-read proving it. Reached in production by this publisher (e.g. `alopecia-areata`). *(Historical: at the time this table was written AUTOPUBLISH was off and this state had only been reached in tests.)* |
 
 ## Weekly ceiling / model-call budget
 
@@ -162,7 +213,7 @@ Every run resolves to exactly one of (`education-run-ledger.mjs`'s `RUN_FINAL_ST
 
 ## Topic selection
 
-`education-topic-selector.mjs`. Restricted to the ONE active cluster registered for v1 — **Hair Loss & Shedding** (`ACTIVE_CLUSTERS['hair-loss-shedding']`). Activating a second cluster is an explicit future owner/strategy decision, not something this selector or a future run can do on its own.
+`education-topic-selector.mjs`. **Current:** evaluates every registered cluster in one run and selects at most one topic — see "Governed multi-cluster publication" above. *(Historical: v1 was restricted to the ONE pilot cluster, Hair Loss & Shedding, and the six `PILOT_TOPIC_CONCEPTS`; the rest of this section describes that pilot-era behavior, which still holds within the Hair Loss & Shedding cluster.)*
 
 **The published-topic set used for exclusion and cannibalization is LIVE, not hardcoded.** `education-topic-selector.mjs`'s own `PUBLISHED_TOPIC_SLUGS` constant (`['hair-cycle', 'telogen-effluvium']`) is now explicitly documented as a **fixture/history default for pure unit tests only** — every function that uses it (`candidateConceptsForCluster`, `checkCannibalization`, `selectNextTopic`) accepts an explicit `publishedTopicSlugs` parameter, and the real orchestrator (`scripts/education-operations-cycle.mjs`) always resolves this live from `research_public_pages` (`status='published' AND sitemap_eligible=true`) via `education-published-state-loader.mjs#fetchPublishedTopicSlugsLive()` and passes it through explicitly. This means a newly published page (a future Page #3) is excluded from new-page selection, folded into cannibalization checks, and included in the freshness scan automatically on the very next run — **with no code change required.** Proven in `tests/education-topic-selector.test.mjs`'s `DYNAMIC_PUBLISHED_SET` fixture and `tests/education-operations-cycle.test.mjs`'s `DYNAMIC_PUBLISHED_EXCLUSION` fixture, both of which inject a published set that does NOT match the constant and confirm the selector still excludes correctly.
 
@@ -366,7 +417,7 @@ The remaining state machine `docs/education/AIMT-EDUCATION-OPERATIONS-v1.md` use
 
 **Resume is decided by the manifest's own sub-fields, never a bare `state` string** (`determinePublicationResumeStage()`) — a `PUBLISH_FAILED` manifest (a deployment timeout, a failed live check, a merge not yet attempted) is **always retryable** from exactly where it actually got to; it is never a permanent park (contrast the Reviewer framing-repair one-attempt guard, which deliberately IS permanent — a publishing failure here is infrastructure/timing, not a content judgment). Crash/retry behavior this enables: a job that dies mid-`--prepare` resumes without duplicating a PR; a merged-but-undeployed run resumes at the deployment wait without re-merging; a deployed-but-unpublished run **always re-verifies the live page fresh** before retrying the guarded DB transition (never trusts a stale cached `live_verification.passed`); an already-`PUBLISHED` run re-verifies idempotently and reports `PUBLISHED` again without touching anything.
 
-**Workflow**: a separate `.github/workflows/aimt-education-publish.yml`, `workflow_dispatch`-only (never a cron), taking a required `topic` input. Kept entirely separate from the shadow workflow (`aimt-education-operations.yml`, unchanged, still `contents: read`, no PR/merge power) — this new workflow alone carries `contents: write` / `pull-requests: write` (to push the generated branch and merge the PR) alongside `actions: read` (artifact restore) and `issues: write` (exception surfacing on `PUBLISH_FAILED`). Least-privilege: the shadow job is never given merge power it doesn't use.
+**Workflow**: a separate `.github/workflows/aimt-education-publish.yml`, never a cron of its own. It runs either by manual `workflow_dispatch` with a required `topic` input, or by the exact-run `workflow_run` handoff from a successful scheduled `AIMT Education Operations` run on `main` whose report says `SHADOW_CANDIDATE_READY` (the topic is taken from that exact run's report, never guessed). *(Historical: it was originally `workflow_dispatch`-only.)* Kept entirely separate from the shadow workflow (`aimt-education-operations.yml`, unchanged, still `contents: read`, no PR/merge power) — this new workflow alone carries `contents: write` / `pull-requests: write` (to push the generated branch and merge the PR) alongside `actions: read` (artifact restore) and `issues: write` (exception surfacing on `PUBLISH_FAILED`). Least-privilege: the shadow job is never given merge power it doesn't use.
 
 ## Prepared-artifact durability — current limit (documented, not built out further)
 

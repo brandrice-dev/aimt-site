@@ -22,71 +22,30 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { readFileSync, existsSync } from 'node:fs';
+import { PUBLICATION_CONCEPTS } from '../education-ops/education-publication-registry.mjs';
 
 /* ── STEP 7: pilot topic/publication concepts ───────────────────────────
-   A "topic_slug" here is a PUBLICATION concept (what an SEO page would be
-   about), which is not always one research_topics.topic value. Where the
-   originating request's pilot list names a concept that is not literally
-   in CONTROLLED_TOPICS (functions/_lib/research/schema.mjs), the mapping
-   below constructs it conservatively from the controlled topics it is
-   actually built from, and says so in mapping_rationale -- never invented
-   silently. This registry is intentionally reusable: a future page
-   generator or SEO priority loop can import PILOT_TOPIC_CONCEPTS (or its
-   own equivalent list built the same way) instead of hardcoding topic
-   strings again. */
-export const PILOT_TOPIC_CONCEPTS = Object.freeze([
-  {
-    topic_slug: 'hair-loss',
-    seo_page_concept: 'Hair Loss: A Practitioner Education Overview',
-    controlled_topics: ['androgenetic-alopecia', 'telogen-effluvium', 'alopecia-areata'],
-    mapping_type: 'constructed_multi_topic_umbrella',
-    mapping_rationale: '"hair-loss" is not itself a value in CONTROLLED_TOPICS. Constructed as the union '
-      + 'of the three controlled topics that are literally named hair-loss conditions '
-      + '(androgenetic-alopecia, telogen-effluvium, alopecia-areata). hair-cycle/hair-biology '
-      + '(general physiology, LOWER risk) are deliberately NOT folded in here -- they are their own '
-      + 'concept (#6, hair-cycle) below -- so this umbrella is not diluted toward a lower risk tier '
-      + "than its condition-specific content actually warrants."
-  },
-  {
-    topic_slug: 'shedding-vs-hair-loss',
-    seo_page_concept: 'Shedding vs. Hair Loss: A Practitioner Differential Framing',
-    controlled_topics: ['telogen-effluvium', 'hair-cycle'],
-    mapping_type: 'constructed_differential_framing',
-    mapping_rationale: '"shedding-vs-hair-loss" is not a literal CONTROLLED_TOPICS value. Constructed '
-      + 'conservatively from telogen-effluvium (the shedding-pattern condition) plus hair-cycle (the '
-      + 'normal-shedding physiological baseline the differential depends on) -- a "shedding vs. hair '
-      + 'loss" explainer is inherently a look-alike/differential-framing concept per the originating '
-      + "request's own MODERATE-risk examples. androgenetic-alopecia is intentionally NOT included, "
-      + 'even though it is the other side of many real differentials in practice, so this concept\'s '
-      + 'candidate evidence set stays exactly what a "shedding vs. hair loss" page is built from; a page '
-      + 'that also wants to rule in/out androgenetic-alopecia should compose with concept #3 rather than '
-      + 'this concept silently absorbing it.'
-  },
-  {
-    topic_slug: 'androgenetic-alopecia',
-    seo_page_concept: 'Androgenetic Alopecia: A Practitioner Education Overview',
-    controlled_topics: ['androgenetic-alopecia'],
-    mapping_type: 'direct'
-  },
-  {
-    topic_slug: 'telogen-effluvium',
-    seo_page_concept: 'Telogen Effluvium: A Practitioner Education Overview',
-    controlled_topics: ['telogen-effluvium'],
-    mapping_type: 'direct'
-  },
-  {
-    topic_slug: 'alopecia-areata',
-    seo_page_concept: 'Alopecia Areata: A Practitioner Education Overview',
-    controlled_topics: ['alopecia-areata'],
-    mapping_type: 'direct'
-  },
-  {
-    topic_slug: 'hair-cycle',
-    seo_page_concept: 'The Hair Growth Cycle: A Practitioner Education Overview',
-    controlled_topics: ['hair-cycle'],
-    mapping_type: 'direct'
-  }
-]);
+   HISTORICAL / BACKWARDS-COMPATIBLE EXPORT. PILOT_TOPIC_CONCEPTS was the
+   original single-cluster (Hair Loss & Shedding) pilot registry. It is
+   NO LONGER the operational ceiling on what Education Operations may
+   publish: the authoritative, multi-cluster registry is
+   functions/_lib/education-ops/education-publication-registry.mjs
+   (PUBLICATION_CONCEPTS). This export is now a filtered projection of
+   that registry -- the Hair Loss & Shedding cluster's concepts, with
+   exactly the original fields and order -- so the two can never drift
+   apart. The original mapping rationales live, unchanged, in the
+   registry. Kept for older scripts/tests that still import it. */
+export const PILOT_TOPIC_CONCEPTS = Object.freeze(
+  PUBLICATION_CONCEPTS
+    .filter((c) => c.cluster === 'hair-loss-shedding')
+    .map((c) => Object.freeze({
+      topic_slug: c.topic_slug,
+      seo_page_concept: c.seo_page_concept,
+      controlled_topics: c.controlled_topics,
+      mapping_type: c.mapping_type,
+      ...(c.mapping_rationale ? { mapping_rationale: c.mapping_rationale } : {}),
+    }))
+);
 
 /* claim_text and page_or_section_locator are included for Publication
    Editor v2 (functions/_lib/research/publication-synthesis-evidence.mjs's
@@ -137,6 +96,10 @@ export function loadExportFromDisk(exportDir) {
   return { claims, sources };
 }
 
+export const EVIDENCE_PAGE_SIZE = 1000;
+export const EVIDENCE_MAX_ROWS = 20000;
+export const SOURCE_ID_CHUNK_SIZE = 100;
+
 /** Read-only: live Supabase fetch over PostgREST, mirroring the exact
     service-role-over-fetch pattern functions/api/research-query.js
     already uses (apikey + Authorization: Bearer <service role key>,
@@ -151,36 +114,58 @@ export async function fetchTopicEvidenceLive(env, controlledTopics) {
   };
   const topicsFilter = `ov.{${controlledTopics.map((t) => t.replace(/[{}",]/g, '')).join(',')}}`;
 
-  const claimsQs = new URLSearchParams();
-  claimsQs.set('select', CLAIM_SELECT_FIELDS.join(','));
-  claimsQs.set('topics', topicsFilter);
-  claimsQs.set('limit', '2000');
+  // MULTI-CLUSTER CORRECTION: Education Operations now fetches evidence
+  // for every registered concept's controlled topics in one run, which
+  // can exceed a single page of rows. Claims are read in stable
+  // claim_id order, one page at a time, until a short page -- never
+  // silently truncated at a fixed limit (a truncated pool would make
+  // candidate claim sets flicker between runs). Still GET-only.
+  const claims = [];
+  for (let offset = 0; ; offset += EVIDENCE_PAGE_SIZE) {
+    if (offset >= EVIDENCE_MAX_ROWS) {
+      throw new Error(`fetchTopicEvidenceLive: research_claims exceeded ${EVIDENCE_MAX_ROWS} rows -- refusing to continue on a possibly truncated evidence pool.`);
+    }
+    const claimsQs = new URLSearchParams();
+    claimsQs.set('select', CLAIM_SELECT_FIELDS.join(','));
+    claimsQs.set('topics', topicsFilter);
+    claimsQs.set('order', 'claim_id.asc');
+    claimsQs.set('limit', String(EVIDENCE_PAGE_SIZE));
+    claimsQs.set('offset', String(offset));
 
-  const claimsRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_claims?${claimsQs.toString()}`, {
-    method: 'GET',
-    headers
-  });
-  if (!claimsRes.ok) {
-    throw new Error(`fetchTopicEvidenceLive: research_claims fetch failed (${claimsRes.status}): ${(await claimsRes.text().catch(() => '')).slice(0, 500)}`);
+    const claimsRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_claims?${claimsQs.toString()}`, {
+      method: 'GET',
+      headers
+    });
+    if (!claimsRes.ok) {
+      throw new Error(`fetchTopicEvidenceLive: research_claims fetch failed (${claimsRes.status}): ${(await claimsRes.text().catch(() => '')).slice(0, 500)}`);
+    }
+    const page = await claimsRes.json();
+    claims.push(...page);
+    if (page.length < EVIDENCE_PAGE_SIZE) break;
   }
-  const claims = await claimsRes.json();
 
   const sourceIds = [...new Set(claims.map((c) => c.source_id))];
   if (sourceIds.length === 0) return { claims, sources: [] };
 
-  const sourcesQs = new URLSearchParams();
-  sourcesQs.set('select', SOURCE_SELECT_FIELDS.join(','));
-  sourcesQs.set('source_id', `in.(${sourceIds.map((id) => `"${String(id).replace(/"/g, '\\"')}"`).join(',')})`);
-  sourcesQs.set('limit', '2000');
+  // Source ids are requested in bounded chunks so the in.(...) filter
+  // never produces an oversized request URL.
+  const sources = [];
+  for (let i = 0; i < sourceIds.length; i += SOURCE_ID_CHUNK_SIZE) {
+    const chunk = sourceIds.slice(i, i + SOURCE_ID_CHUNK_SIZE);
+    const sourcesQs = new URLSearchParams();
+    sourcesQs.set('select', SOURCE_SELECT_FIELDS.join(','));
+    sourcesQs.set('source_id', `in.(${chunk.map((id) => `"${String(id).replace(/"/g, '\\"')}"`).join(',')})`);
+    sourcesQs.set('limit', String(SOURCE_ID_CHUNK_SIZE));
 
-  const sourcesRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_sources?${sourcesQs.toString()}`, {
-    method: 'GET',
-    headers
-  });
-  if (!sourcesRes.ok) {
-    throw new Error(`fetchTopicEvidenceLive: research_sources fetch failed (${sourcesRes.status}): ${(await sourcesRes.text().catch(() => '')).slice(0, 500)}`);
+    const sourcesRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_sources?${sourcesQs.toString()}`, {
+      method: 'GET',
+      headers
+    });
+    if (!sourcesRes.ok) {
+      throw new Error(`fetchTopicEvidenceLive: research_sources fetch failed (${sourcesRes.status}): ${(await sourcesRes.text().catch(() => '')).slice(0, 500)}`);
+    }
+    sources.push(...await sourcesRes.json());
   }
-  const sources = await sourcesRes.json();
 
   return { claims, sources };
 }

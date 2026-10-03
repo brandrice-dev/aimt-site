@@ -187,17 +187,18 @@ function mergePools(...pools) {
 })();
 
 // ─────────────────────────────────────────────────────────────────────────
-// Cluster scoping: only the active cluster's registered topic_slugs are
-// ever considered -- no accidental topic outside the cluster appears.
+// Cluster scoping (MULTI-CLUSTER): the v1 single-cluster restriction is
+// retired -- every registered cluster is evaluated, and every returned
+// candidate belongs to the registered cluster it claims. (Historical v1
+// assertion "only one active cluster is registered" replaced by this.)
 // ─────────────────────────────────────────────────────────────────────────
 (function testClusterScoping() {
   const cluster = ACTIVE_CLUSTERS[DEFAULT_ACTIVE_CLUSTER];
-  check('CLUSTER_SCOPE', 'only one active cluster is registered for v1', Object.keys(ACTIVE_CLUSTERS).length === 1);
-  check('CLUSTER_SCOPE', 'the active cluster is Hair Loss & Shedding', cluster.label === 'Hair Loss & Shedding');
+  check('CLUSTER_SCOPE', 'more than one publication cluster is registered', Object.keys(ACTIVE_CLUSTERS).length > 1);
+  check('CLUSTER_SCOPE', 'the legacy default cluster is still Hair Loss & Shedding', cluster.label === 'Hair Loss & Shedding');
   const pool = mergePools(healthyEvidenceFor('androgenetic-alopecia'), healthyEvidenceFor('alopecia-areata'));
   const result = selectNextTopic(pool);
-  const memberSet = new Set(cluster.member_topic_slugs);
-  check('CLUSTER_SCOPE', 'every returned candidate belongs to the active cluster', result.candidates.every((c) => memberSet.has(c.topic_slug)));
+  check('CLUSTER_SCOPE', 'every returned candidate belongs to the registered cluster it reports', result.candidates.every((c) => ACTIVE_CLUSTERS[c.cluster] && ACTIVE_CLUSTERS[c.cluster].member_topic_slugs.includes(c.topic_slug)));
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

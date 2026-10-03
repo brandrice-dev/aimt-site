@@ -8,7 +8,18 @@
    outside the requested cluster) fails closed to HUMAN_REVIEW rather
    than being silently accepted -- see the originating task's explicit
    "If the planner requests unsupported scope: FAIL / HUMAN_REVIEW."
+
+   REGISTRY BOUNDARY (multi-cluster publication): the planner may plan
+   page SCOPE for a concept that is already registered in the
+   authoritative publication registry (education-publication-
+   registry.mjs) -- it may never introduce a new topic, a new cluster, a
+   new route, or a new public section. The expected topic must be a
+   registered concept, the expected cluster must be that concept's
+   registered cluster, and the plan's route_slug must be exactly the
+   registry's deterministic route_slug for it. Any mismatch fails closed.
    ═══════════════════════════════════════════════════════════════ */
+
+import { getPublicationConcept } from './education-publication-registry.mjs';
 
 const HAS_DIGIT = /\d/;
 
@@ -41,6 +52,15 @@ export function validateIntentPlanSemantics(plan, context) {
   if (plan.cluster !== context.expectedCluster) violations.push('CLUSTER_MISMATCH');
 
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(plan.route_slug)) violations.push('ROUTE_SLUG_NOT_URL_SAFE');
+
+  // Registry boundary -- see this module's header.
+  const registered = getPublicationConcept(context.expectedTopicSlug);
+  if (!registered) {
+    violations.push('UNREGISTERED_PUBLICATION_CONCEPT');
+  } else {
+    if (registered.cluster !== context.expectedCluster) violations.push('CLUSTER_NOT_REGISTERED_FOR_TOPIC');
+    if (plan.route_slug !== registered.route_slug) violations.push('ROUTE_SLUG_NOT_REGISTERED');
+  }
 
   // Never state a specific number/percentage/statistic in a scope
   // description -- that is evidence content this planner was never

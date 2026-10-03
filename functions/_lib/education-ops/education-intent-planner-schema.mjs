@@ -48,7 +48,14 @@ export const INTENT_PLAN_JSON_SCHEMA = {
  *     the planner never authors a route/href from this,
  * }} args
  */
-export function buildIntentPlanningInstruction({ topicSlug, seoPageConcept, riskTier, cluster, routePrefix, candidateEvidenceInventory, existingClusterPages }) {
+export function buildIntentPlanningInstruction({ topicSlug, seoPageConcept, riskTier, cluster, routePrefix, registeredRouteSlug, candidateEvidenceInventory, existingClusterPages }) {
+  // registeredRouteSlug comes from the authoritative publication
+  // registry (education-publication-registry.mjs). When supplied, the
+  // planner must echo it -- it never chooses a URL of its own; the
+  // validator rejects any other value.
+  const routeSlugInstruction = registeredRouteSlug
+    ? `route_slug (echo EXACTLY "${registeredRouteSlug}" -- the route is fixed by AIMT's publication registry; you never choose or change it)`
+    : `route_slug (the final path segment under ${routePrefix}/, lowercase, hyphenated, no leading/trailing slash)`;
   return [
     `You are AIMT's Education Page Intent Planner. Your ONLY job is to define the SCOPE of one new Education page -- what it is about, what it includes, what it deliberately excludes -- for AIMT's professional beauty/scalp-care practitioner audience. You are NOT writing scientific claims and you are NOT summarizing evidence content. You are given only a candidate evidence INVENTORY (claim IDs, claim types, and topic tags -- never the claim text itself), because scope decisions must not be made by reading and paraphrasing evidence; that is a later, separately-governed step.`,
     ``,
@@ -62,7 +69,7 @@ export function buildIntentPlanningInstruction({ topicSlug, seoPageConcept, risk
     `CANDIDATE EVIDENCE INVENTORY for this topic (claim_id/claim_type/topics only -- NOT the claim text):`,
     JSON.stringify(candidateEvidenceInventory, null, 2),
     ``,
-    `Produce: topic_slug (echo it back exactly), page_concept (a clear working title), public_intent (one sentence describing what this page explains and for whom), route_slug (the final path segment under ${routePrefix}/, lowercase, hyphenated, no leading/trailing slash), in_scope_concepts (an array of CONCEPT AREAS this page covers -- categories of information, never specific numbers, statistics, or claims), out_of_scope_concepts (an array explicitly excluding diagnosis, treatment/medication protocols, and any other named condition this page is not about), practitioner_relevance (one sentence on why this matters for a working practitioner), cluster (echo the cluster name), risk_context (one sentence restating the risk tier and what that means for this page's posture -- observational/educational, never diagnostic or prescriptive).`,
+    `Produce: topic_slug (echo it back exactly), page_concept (a clear working title), public_intent (one sentence describing what this page explains and for whom), ${routeSlugInstruction}, in_scope_concepts (an array of CONCEPT AREAS this page covers -- categories of information, never specific numbers, statistics, or claims), out_of_scope_concepts (an array explicitly excluding diagnosis, treatment/medication protocols, and any other named condition this page is not about), practitioner_relevance (one sentence on why this matters for a working practitioner), cluster (echo the cluster name), risk_context (one sentence restating the risk tier and what that means for this page's posture -- observational/educational, never diagnostic or prescriptive).`,
     `Hard rules: never state a specific number, percentage, or statistic anywhere in your output -- that is evidence content, which this step does not have access to and must not invent. Never claim a treatment is effective or ineffective. Never describe this page's scope in a way that would require diagnosing an individual case. If the candidate evidence inventory looks too thin or too narrowly clustered around treatment/diagnosis claim types for a genuine practitioner-education page to be built from it, say so plainly in public_intent and keep in_scope_concepts minimal rather than inventing scope the evidence likely cannot support.`,
   ].join('\n');
 }
