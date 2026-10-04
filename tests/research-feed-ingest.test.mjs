@@ -21,7 +21,7 @@ import { mkdtempSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validatePacket, findSuperseded, packetToBatch, topicsFor, FEED_SOURCE_SYSTEM } from '../functions/_lib/research/packet-adapter.mjs';
+import { validatePacket, findSuperseded, packetToBatch, topicsFor, controlledTopicFromPacketCategory, FEED_SOURCE_SYSTEM } from '../functions/_lib/research/packet-adapter.mjs';
 import { partitionRecords } from '../functions/_lib/research/ingest-request.mjs';
 import { validateSource, validateClaim, mapClaimRow, mapSourceRow } from '../functions/_lib/research/schema.mjs';
 import { runFeedIngest, ownershipConflicts, quietLines, declaredResearchGapId, linkResearchGap } from '../scripts/research-feed-ingest.mjs';
@@ -93,6 +93,39 @@ function packet(overrides = {}) {
   check('contradiction text preserved on the claim', /C disputes efficacy/.test(batch.claims[1].body_markdown));
   check('topics are controlled vocabulary only', batch.claims.every((c) => c.topics.length > 0) && stats.topics.includes('telogen-effluvium') && stats.topics.includes('trichology'));
   check('topicsFor never emits uncontrolled topics', topicsFor('scalp dysesthesia contact dermatitis nonsense').every((t) => typeof t === 'string'));
+
+  // Explicit packet category -> controlled topic. This is the correction
+  // for packets such as AIMT-RF-2026-10-04-LLLT: Rick already classified
+  // individual claims as treatment-modalities, but the adapter previously
+  // discarded that field and tried to rediscover topic tags from prose.
+  check('exact controlled packet category is accepted', controlledTopicFromPacketCategory('treatment-modalities') === 'treatment-modalities');
+  check('legacy/free-text packet category is not trusted as a controlled topic', controlledTopicFromPacketCategory('Scalp conditions') === null);
+
+  const lllt = packet({
+    research_topic: 'Photobiomodulation evidence review',
+    claims: [{
+      ...packet().claims[0],
+      claim_id: 'CLAIM-LLLT-TREATMENT',
+      statement: 'Repeated light-device use improved the measured endpoint versus sham in several controlled studies.',
+      category: 'treatment-modalities',
+    }],
+  });
+  const llltBatch = packetToBatch(lllt).batch;
+  check('claim category treatment-modalities survives ingestion even when prose has no topic keyword',
+    llltBatch.claims[0].topics.includes('treatment-modalities'), llltBatch.claims[0].topics);
+
+  const legacyCategory = packet({
+    research_topic: 'Neutral bounded research topic',
+    claims: [{
+      ...packet().claims[0],
+      claim_id: 'CLAIM-LEGACY-CATEGORY',
+      statement: 'A neutral statement without a controlled-topic keyword.',
+      category: 'Scalp conditions',
+    }],
+  });
+  const legacyCategoryBatch = packetToBatch(legacyCategory).batch;
+  check('uncontrolled legacy claim category is ignored rather than becoming a topic',
+    !legacyCategoryBatch.claims[0].topics.includes('Scalp conditions'), legacyCategoryBatch.claims[0].topics);
 
   const s = partitionRecords(batch.sources, validateSource, 'source_id');
   const c = partitionRecords(batch.claims, validateClaim, 'claim_id');
