@@ -164,6 +164,16 @@ export function topicsFor(...texts) {
   return [...out].filter((t) => CONTROLLED_TOPICS.includes(t));
 }
 
+/** A research-feed claim may already carry one of AIMT's exact controlled
+    topic values in its packet-level `category` field. Preserve that
+    explicit governed classification when (and ONLY when) it exactly
+    matches CONTROLLED_TOPICS. Legacy/free-text categories remain ignored
+    here and continue through the existing text-inference fallback. */
+export function controlledTopicFromPacketCategory(category) {
+  const value = typeof category === 'string' ? category.trim() : '';
+  return CONTROLLED_TOPICS.includes(value) ? value : null;
+}
+
 /* ── Field mapping ────────────────────────────────────────────────── */
 
 export function feedId(kind, rawId) {
@@ -243,7 +253,12 @@ export function packetToBatch(packet, { existingSourceIdByDoi = new Map(), packe
   }
 
   const claims = packet.claims.map((c) => {
-    const topics = [...new Set([...packetTopics, ...topicsFor(c.statement)])];
+    const explicitControlledTopic = controlledTopicFromPacketCategory(c.category);
+    const topics = [...new Set([
+      ...packetTopics,
+      ...(explicitControlledTopic ? [explicitControlledTopic] : []),
+      ...topicsFor(c.statement),
+    ])];
     const notes = c.notes || null;
     const contradicting = c.source_ids_contradicting || [];
     return {
