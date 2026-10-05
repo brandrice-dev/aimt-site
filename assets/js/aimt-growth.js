@@ -21,7 +21,9 @@
    Pages that already load assets/js/aimt-public-nav.js get this script
    from there; other pages include it directly. Page code may call:
      AIMTGrowth.track('readiness_audit_start' | 'readiness_audit_complete'
-                      | 'lead_created' | 'service_timer_used', props?)
+                      | 'lead_created' | 'service_timer_used'
+                      | 'readiness_prompt_shown' | 'readiness_prompt_dismissed'
+                      | 'readiness_prompt_clicked', props?)
      AIMTGrowth.checkoutPayload()  → attribution for create-checkout-session
      AIMTGrowth.markInternal(true) → staff/owner browser, excluded from reports
    ═══════════════════════════════════════════════════════════════ */
@@ -37,6 +39,8 @@
   var CAMPAIGN_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'];
   var USER_BOUND = { service_timer_used: true, resource_used: true };
+  // Sales-page Readiness prompt (assets/js/aimt-readiness-prompt.js): no props.
+  var READINESS_PROMPT_EVENTS = { readiness_prompt_shown: true, readiness_prompt_dismissed: true, readiness_prompt_clicked: true };
 
   // Course / account / tool surfaces are product usage, not acquisition:
   // no site_visit there (attribution is still preserved).
@@ -204,6 +208,7 @@
 
   function track(eventName, props) {
     if (eventName === 'readiness_audit_start' || eventName === 'readiness_audit_complete') return sendOncePerSession(eventName, props);
+    if (READINESS_PROMPT_EVENTS[eventName]) return sendOncePerSession(eventName);
     if (eventName === 'lead_created' || eventName === 'service_timer_used' || eventName === 'resource_used') return send(eventName, props);
   }
 
