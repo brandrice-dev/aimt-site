@@ -102,6 +102,7 @@
 
   var state = { shown: false, cancelled: false, lastEnrollTouch: 0 };
   var el = null;
+  var backdrop = null;
   var returnFocus = null;
 
   // ── Enrollment-CTA awareness: never interrupt someone about to enroll ──
@@ -124,12 +125,38 @@
   }
 
   // ── Markup ──
+  /* Readiness ring preview: the exact AIMT metric ring the Readiness
+     result uses (assets/js/aimt-metric-ring.js, already loaded by the
+     sales page), with "?" in the center — never a number. The short arc
+     is a decorative, continuously rotating "not yet measured" sweep (see
+     the CSS); under reduced motion only the empty track shows. */
+  var RING_ARC = 22;
+  function buildRing() {
+    var wrap = document.createElement('div');
+    wrap.className = 'aimt-rp-ring';
+    var html = '';
+    try {
+      if (window.AIMTMetricRing && typeof window.AIMTMetricRing.render === 'function') {
+        html = window.AIMTMetricRing.render({
+          value: RING_ARC,
+          display: '?',
+          label: '',
+          statusText: 'Your Readiness Score',
+          accessibleText: 'Your Readiness Score, not yet calculated.'
+        });
+      }
+    } catch (_) { html = ''; }
+    if (!html) return null;
+    wrap.innerHTML = html;
+    return wrap;
+  }
+
   function build() {
     var card = document.createElement('div');
     card.className = 'aimt-rp';
     card.id = 'aimtReadinessPrompt';
     card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-modal', 'false');
+    card.setAttribute('aria-modal', 'true');
     card.setAttribute('aria-labelledby', 'aimtRpTitle');
     card.setAttribute('aria-describedby', 'aimtRpBody');
     card.setAttribute('tabindex', '-1');
@@ -168,7 +195,9 @@
 
     actions.appendChild(cta);
     actions.appendChild(later);
+    var ring = buildRing();
     card.appendChild(close);
+    if (ring) card.appendChild(ring);
     card.appendChild(title);
     card.appendChild(body);
     card.appendChild(actions);
@@ -179,7 +208,18 @@
       suppress('cta');
       track('readiness_prompt_clicked');
     });
+    card._focusables = [close, cta, later];
     return card;
+  }
+
+  function buildBackdrop() {
+    var b = document.createElement('div');
+    b.className = 'aimt-rp-backdrop';
+    b.id = 'aimtReadinessPromptBackdrop';
+    b.setAttribute('aria-hidden', 'true');
+    // Clicking outside the card is one more way out, never a trap.
+    b.addEventListener('click', function () { dismiss(); });
+    return b;
   }
 
   // Mobile: sit above the sticky "Enroll · $597" bar while it is showing,
@@ -199,20 +239,34 @@
   }
 
   function onKeydown(e) {
-    if (e.key === 'Escape' || e.key === 'Esc') dismiss();
+    if (e.key === 'Escape' || e.key === 'Esc') { dismiss(); return; }
+    // Keep Tab inside the open dialog (its own × / Not now / Escape /
+    // backdrop are always one step away, so this never locks anyone in).
+    if (e.key === 'Tab' && el && el._focusables) {
+      var f = el._focusables;
+      var first = f[0];
+      var last = f[f.length - 1];
+      var a = document.activeElement;
+      if (e.shiftKey && (a === first || a === el)) { if (e.preventDefault) e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && a === last) { if (e.preventDefault) e.preventDefault(); first.focus(); }
+      else if (f.indexOf(a) === -1 && a !== el) { if (e.preventDefault) e.preventDefault(); first.focus(); }
+    }
   }
 
   function show() {
     if (state.shown || state.cancelled || blocked() || !landingVisible()) return false;
     state.shown = true;
     markShownThisSession();
+    backdrop = buildBackdrop();
     el = build();
+    document.body.appendChild(backdrop);
     document.body.appendChild(el);
     placeAboveStickyBar();
     returnFocus = document.activeElement;
     // Next frame so the slide-up transition runs from the hidden state.
     var reveal = function () {
       if (!el) return;
+      if (backdrop) backdrop.classList.add('is-open');
       el.classList.add('is-open');
       try { el.focus({ preventScroll: true }); } catch (_) { try { el.focus(); } catch (__) {} }
     };
@@ -226,7 +280,9 @@
   function teardown() {
     document.removeEventListener('keydown', onKeydown);
     if (el && el.parentNode) el.parentNode.removeChild(el);
+    if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
     el = null;
+    backdrop = null;
     try {
       if (returnFocus && typeof returnFocus.focus === 'function' && returnFocus !== document.body) returnFocus.focus({ preventScroll: true });
     } catch (_) {}

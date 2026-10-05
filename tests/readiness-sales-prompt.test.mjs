@@ -20,6 +20,7 @@ const read = (p) => readFileSync(path.join(ROOT, p), 'utf8');
 const SRC = read('assets/js/aimt-readiness-prompt.js');
 const CSS = read('assets/css/aimt-readiness-prompt.css');
 const SALES = read('headspa-mastery.html');
+const RING_SRC = read('assets/js/aimt-metric-ring.js');
 
 const DAY = 24 * 60 * 60 * 1000;
 const PROFILE = JSON.stringify({ version: 1, score: 62, band: 'Building', pillar_scores: { a: 1 } });
@@ -82,6 +83,7 @@ function load({
   hasLanding = true,
   clock = { now: Date.UTC(2026, 9, 4, 12) },
   growth = true,
+  ring = true,
 } = {}) {
   const tracked = [];
   let timers = [];
@@ -129,6 +131,12 @@ function load({
     setTimeout: (fn, ms) => { seq += 1; timers.push({ id: seq, fn, at: clock.now + (ms || 0) }); return seq; },
     clearTimeout: (id) => { timers = timers.filter((t) => t.id !== id); },
   };
+  if (ring) {
+    window.matchMedia = () => ({ matches: false });
+    sandbox.requestAnimationFrame = () => {};
+    vm.runInNewContext(RING_SRC, sandbox);
+    window.AIMTMetricRing = sandbox.window.AIMTMetricRing;
+  }
   vm.runInNewContext(SRC, sandbox);
 
   function advance(ms) {
@@ -153,6 +161,7 @@ function load({
     },
     setVisibility(v) { document.visibilityState = v; fire('visibilitychange'); },
     pressKey(key) { (docListeners.keydown || []).slice().forEach((fn) => fn({ type: 'keydown', key })); },
+    pressTab(shiftKey) { (docListeners.keydown || []).slice().forEach((fn) => fn({ type: 'keydown', key: 'Tab', shiftKey, preventDefault() {} })); },
     find: (action) => all(prompt()).filter((e) => e.getAttribute('data-rp-action') === action),
   };
 }
@@ -424,13 +433,17 @@ test('mobile: compact bottom sheet that cannot overflow the viewport', () => {
   assert.match(mobile, /max-height:\s*calc\(100dvh/);
   assert.match(CSS, /\.aimt-rp \{[^}]*box-sizing:\s*border-box/);
   assert.match(CSS, /\.aimt-rp \{[^}]*overflow-y:\s*auto/);
-  assert.match(CSS, /width:\s*min\(380px, calc\(100vw - 48px\)\)/);
-  assert.doesNotMatch(CSS, /(?<![-\w])width:\s*\d{3,}px/, 'no fixed pixel width wider than a phone');
+  assert.match(CSS, /width:\s*min\(432px, calc\(100vw - 48px\)\)/);
+  assert.doesNotMatch(CSS, /(?<![-\w])width:\s*([4-9]\d{2}|\d{4,})px/, 'no fixed pixel width wider than a phone');
   assert.match(mobile, /var\(--aimt-rp-offset/, 'sits above the sticky enroll bar');
 });
 
 test('respects reduced motion and the existing AIMT type/colour system', () => {
-  assert.match(CSS, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.aimt-rp \{ transition: none; transform: none; \}/);
+  const reduced = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: reduce) {'));
+  assert.match(reduced, /\.aimt-rp \{ transition: none; transform: none; \}/);
+  assert.match(reduced, /\.aimt-rp-backdrop \{ transition: none; \}/);
+  assert.match(reduced, /\.aimt-metric-ring-svg \{ animation: none; \}/);
+  assert.match(reduced, /\.aimt-metric-ring-fill \{ display: none; \}/, 'no static arc that could read as a score');
   assert.doesNotMatch(CSS, /Playfair|font-serif/);
   assert.match(CSS, /var\(--aimt-font-mont\)/);
   assert.match(CSS, /var\(--aimt-font-sans\)/);
@@ -463,4 +476,83 @@ test('enrollment and checkout behaviour are unchanged', () => {
   assert.doesNotMatch(code, /startCheckout\(|location\.href\s*=|\$597|stripe|create-checkout/i);
   assert.doesNotMatch(code, /href\s*=\s*['"]\/enroll/);
   assert.equal((code.match(/\.href = /g) || []).length, 1, 'the only link it creates is the Readiness CTA');
+});
+
+// ── Focused presentation: ring preview + backdrop ──────────────────────
+
+test('ring preview reuses the AIMT metric ring with "?" and never a number', () => {
+  const p = load();
+  p.advance(31 * 1000);
+  const ring = all(p.prompt()).find((e) => e.className === 'aimt-rp-ring');
+  assert.ok(ring, 'ring preview present');
+  assert.match(ring.innerHTML, /class="aimt-metric-ring"/, 'the shared metric-ring markup');
+  assert.match(ring.innerHTML, /<div class="aimt-metric-ring-value">\?<\/div>/);
+  assert.match(ring.innerHTML, /<div class="aimt-metric-ring-status" aria-hidden="true">Your Readiness Score<\/div>/);
+  assert.match(ring.innerHTML, /aria-label="Your Readiness Score, not yet calculated\."/);
+  const visibleText = ring.innerHTML.replace(/<[^>]+>/g, ' ');
+  assert.doesNotMatch(visibleText, /\d/, 'no digits shown anywhere in the ring');
+  assert.match(SALES, /assets\/js\/aimt-metric-ring\.js/, 'sales page already loads the ring primitive');
+  assert.match(SALES, /assets\/css\/aimt-metric-ring\.css/);
+  // Order: ring → headline → body → actions.
+  const order = p.prompt().children.map((c) => c.className);
+  assert.deepEqual(order, ['aimt-rp-close', 'aimt-rp-ring', 'aimt-rp-title', 'aimt-rp-body', 'aimt-rp-actions']);
+
+  const noRing = load({ ring: false });
+  noRing.advance(31 * 1000);
+  assert.ok(noRing.prompt(), 'still works if the ring primitive is unavailable');
+  assert.ok(!all(noRing.prompt()).some((e) => e.className === 'aimt-rp-ring'));
+});
+
+test('modal backdrop opens with the dialog; clicking it dismisses like Not now', () => {
+  const local = makeStorage();
+  const p = load({ local });
+  p.advance(31 * 1000);
+  const backdrop = p.document.getElementById('aimtReadinessPromptBackdrop');
+  assert.ok(backdrop && backdrop.classList.contains('is-open'));
+  assert.equal(backdrop.getAttribute('aria-hidden'), 'true');
+  assert.equal(p.prompt().getAttribute('aria-modal'), 'true');
+  backdrop.click();
+  assert.equal(p.prompt(), null);
+  assert.equal(p.document.getElementById('aimtReadinessPromptBackdrop'), null, 'backdrop removed with the card');
+  assert.equal(JSON.parse(local.getItem('aimt_readiness_prompt_v1')).reason, 'dismiss');
+  assert.deepEqual(p.tracked.map((t) => t.name), ['readiness_prompt_shown', 'readiness_prompt_dismissed']);
+
+  for (const how of ['close', 'later', 'escape']) {
+    const q = load();
+    q.advance(31 * 1000);
+    if (how === 'escape') q.pressKey('Escape'); else q.find('dismiss')[how === 'close' ? 0 : 1].click();
+    assert.equal(q.document.getElementById('aimtReadinessPromptBackdrop'), null, `${how} removes the backdrop`);
+  }
+});
+
+test('focus: moves into the dialog, Tab cycles its controls, and returns on close', () => {
+  const p = load();
+  const before = p.document.createElement('a');
+  before.focus();
+  p.advance(31 * 1000);
+  assert.equal(p.document.activeElement, p.prompt());
+  const [close, later] = p.find('dismiss');
+  const [cta] = p.find('cta');
+  later.focus();
+  p.pressTab(false);
+  assert.equal(p.document.activeElement, close, 'Tab from the last control wraps to ×');
+  p.pressTab(true);
+  assert.equal(p.document.activeElement, later, 'Shift+Tab from × wraps to Not now');
+  cta.focus();
+  p.pressTab(false);
+  assert.equal(p.document.activeElement, cta, 'middle controls tab natively');
+  later.click();
+  assert.equal(p.document.activeElement, before, 'focus restored to where it was');
+});
+
+test('desktop: small centered modal; mobile keeps the bottom sheet', () => {
+  const base = CSS.slice(CSS.indexOf('.aimt-rp {'), CSS.indexOf('.aimt-rp.is-open'));
+  assert.match(base, /top:\s*50%/);
+  assert.match(base, /left:\s*50%/);
+  assert.match(CSS, /\.aimt-rp\.is-open \{ opacity: 1; transform: translate\(-50%, -50%\) scale\(1\); \}/);
+  const mobile = CSS.slice(CSS.indexOf('@media (max-width: 640px)'), CSS.indexOf('@media (prefers-reduced-motion'));
+  assert.match(mobile, /top:\s*auto/);
+  assert.match(mobile, /bottom:\s*calc\(12px \+ var\(--aimt-rp-offset/);
+  assert.match(CSS, /\.aimt-rp-backdrop \{[^}]*position:\s*fixed;[^}]*inset:\s*0/);
+  assert.match(CSS, /backdrop-filter:\s*blur\(/);
 });
