@@ -480,17 +480,17 @@ test('enrollment and checkout behaviour are unchanged', () => {
 
 // ── Focused presentation: ring preview + backdrop ──────────────────────
 
-test('ring preview reuses the AIMT metric ring with "?" and never a number', () => {
+test('ring preview reuses the AIMT metric ring with "?/100" and never a score', () => {
   const p = load();
   p.advance(31 * 1000);
   const ring = all(p.prompt()).find((e) => e.className === 'aimt-rp-ring');
   assert.ok(ring, 'ring preview present');
   assert.match(ring.innerHTML, /class="aimt-metric-ring"/, 'the shared metric-ring markup');
-  assert.match(ring.innerHTML, /<div class="aimt-metric-ring-value">\?<\/div>/);
+  assert.match(ring.innerHTML, /<div class="aimt-metric-ring-value">\?<span class="aimt-metric-ring-max">\/100<\/span><\/div>/);
   assert.match(ring.innerHTML, /<div class="aimt-metric-ring-status" aria-hidden="true">Your Readiness Score<\/div>/);
   assert.match(ring.innerHTML, /aria-label="Your Readiness Score, not yet calculated\."/);
-  const visibleText = ring.innerHTML.replace(/<[^>]+>/g, ' ');
-  assert.doesNotMatch(visibleText, /\d/, 'no digits shown anywhere in the ring');
+  const visibleText = ring.innerHTML.replace(/<[^>]+>/g, ' ').replace('/100', '');
+  assert.doesNotMatch(visibleText, /\d/, 'no score digits — only the /100 scale');
   assert.match(SALES, /assets\/js\/aimt-metric-ring\.js/, 'sales page already loads the ring primitive');
   assert.match(SALES, /assets\/css\/aimt-metric-ring\.css/);
   // Order: ring → headline → body → actions.

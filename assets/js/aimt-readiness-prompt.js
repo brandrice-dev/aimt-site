@@ -127,7 +127,8 @@
   // ── Markup ──
   /* Readiness ring preview: the exact AIMT metric ring the Readiness
      result uses (assets/js/aimt-metric-ring.js, already loaded by the
-     sales page), with "?" in the center — never a number. The short arc
+     sales page), with "?/100" in the center — an unrevealed readout,
+     never a number. The short arc
      is a decorative, continuously rotating "not yet measured" sweep (see
      the CSS); under reduced motion only the empty track shows. */
   var RING_ARC = 22;
@@ -139,7 +140,7 @@
       if (window.AIMTMetricRing && typeof window.AIMTMetricRing.render === 'function') {
         html = window.AIMTMetricRing.render({
           value: RING_ARC,
-          display: '?',
+          display: '?<span class="aimt-metric-ring-max">/100</span>',
           label: '',
           statusText: 'Your Readiness Score',
           accessibleText: 'Your Readiness Score, not yet calculated.'
