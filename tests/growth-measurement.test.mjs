@@ -154,16 +154,20 @@ const basePayload = (extra = {}) => ({
 
 // ── Taxonomy ────────────────────────────────────────────────────────────
 
-test('taxonomy: stored and derived events are disjoint and match the canonical 13', () => {
+test('taxonomy: stored and derived events are disjoint and match the canonical 16', () => {
   const canonical = ['site_visit', 'headspa_sales_view', 'readiness_audit_start', 'readiness_audit_complete', 'lead_created',
     'checkout_start', 'paid_enrollment', 'course_activated', 'module_completed', 'cadence_used', 'service_timer_used',
-    'resource_used', 'certification_issued'];
+    'resource_used', 'certification_issued', 'readiness_prompt_shown', 'readiness_prompt_dismissed', 'readiness_prompt_clicked'];
   const all = [...STORED_EVENTS, ...Object.keys(DERIVED_EVENTS)];
   assert.deepEqual([...all].sort(), [...canonical].sort());
   for (const d of Object.keys(DERIVED_EVENTS)) assert.ok(!STORED_EVENTS.includes(d));
   assert.ok(!BROWSER_EVENTS.has('checkout_start') && !BROWSER_EVENTS.has('paid_enrollment'), 'browser can never assert checkout or purchase');
-  const migration = read('supabase/migrations/20261001_create_growth_events.sql');
+  // The newest migration that (re)defines growth_events_name_check is the
+  // one production runs last, so it must list every stored event.
+  const migration = read('supabase/migrations/20261004_add_readiness_prompt_growth_events.sql');
+  assert.match(migration, /add constraint growth_events_name_check/);
   for (const e of STORED_EVENTS) assert.match(migration, new RegExp(`'${e}'`));
+  assert.doesNotMatch(migration, /drop\s+table/i);
   for (const d of Object.keys(DERIVED_EVENTS)) assert.doesNotMatch(migration, new RegExp(`^\\s*'${d}'`, 'm'));
 });
 

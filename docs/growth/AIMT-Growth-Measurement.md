@@ -99,6 +99,9 @@ them).
 | 11 | `service_timer_used` | stored, browser, signed-in | A treatment clock was **started** (`startTreatment`), not just page opened. | student × UTC day | growth_events |
 | 12 | `resource_used` | stored, browser, signed-in | Click on a `download` entry from `assets/js/aimt-course-resources.js` (key = file basename). | student × resource × UTC day | growth_events |
 | 13 | `certification_issued` | derived | Non-revoked `completions` row; time = `completed_at`. | student | completions |
+| 14 | `readiness_prompt_shown` | stored, browser | The sales-page Readiness prompt (`assets/js/aimt-readiness-prompt.js`) became visible on `/head-spa-certification` with the sales landing showing. No props. | browsing session | growth_events |
+| 15 | `readiness_prompt_dismissed` | stored, browser | That prompt was closed (×, **Not now**, or Escape). No props. | browsing session | growth_events |
+| 16 | `readiness_prompt_clicked` | stored, browser | **Take the Free Readiness Score →** in that prompt was clicked (navigates to `/head-spa-readiness`). No props. | browsing session | growth_events |
 
 Future: `referral_*` and next-program enrollment. Neither has an
 underlying system yet, so neither event exists. The scoreboard shows
@@ -325,6 +328,9 @@ numbers, IP addresses, user agents, full URLs or query strings.
           has_table_privilege('authenticated', 'public.growth_events', 'INSERT'),
           has_table_privilege('authenticated', 'public.growth_events', 'SELECT');           -- f, f, f, f
    ```
+   Then run `supabase/migrations/20261004_add_readiness_prompt_growth_events.sql`
+   (widens the event-name check for the three `readiness_prompt_*` events;
+   until it runs those inserts are rejected and dropped silently).
 3. **Merge/deploy** the branch (Pages). No new environment variables are
    needed: it reuses `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
    `STRIPE_SECRET_KEY`.

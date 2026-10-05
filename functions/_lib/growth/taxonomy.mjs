@@ -23,6 +23,9 @@ export const STORED_EVENTS = Object.freeze([
   'paid_enrollment',
   'service_timer_used',
   'resource_used',
+  'readiness_prompt_shown',
+  'readiness_prompt_dismissed',
+  'readiness_prompt_clicked',
 ]);
 
 export const DERIVED_EVENTS = Object.freeze({
@@ -43,6 +46,9 @@ export const BROWSER_EVENTS = Object.freeze(new Set([
   'lead_created',
   'service_timer_used',
   'resource_used',
+  'readiness_prompt_shown',
+  'readiness_prompt_dismissed',
+  'readiness_prompt_clicked',
 ]));
 
 export const SERVER_EVENTS = Object.freeze(new Set(['checkout_start', 'paid_enrollment']));
@@ -252,7 +258,8 @@ export function utcDay(date) {
 /**
  * Server-computed dedupe key — the definition of "counts once":
  *   site_visit / headspa_sales_view / readiness_audit_start /
- *   readiness_audit_complete       → once per browsing session
+ *   readiness_audit_complete /
+ *   readiness_prompt_*             → once per browsing session
  *   lead_created                     → once per visitor, ever
  *   checkout_start / paid_enrollment → once per Stripe Checkout Session
  *   service_timer_used               → once per student per UTC day
@@ -266,6 +273,9 @@ export function dedupeKeyFor(eventName, ctx = {}) {
     case 'headspa_sales_view':
     case 'readiness_audit_start':
     case 'readiness_audit_complete':
+    case 'readiness_prompt_shown':
+    case 'readiness_prompt_dismissed':
+    case 'readiness_prompt_clicked':
       return isUuid(ctx.sessionId) ? `s:${ctx.sessionId.toLowerCase()}` : null;
     case 'lead_created':
       return isUuid(ctx.visitorId) ? `v:${ctx.visitorId.toLowerCase()}` : null;
