@@ -62,7 +62,7 @@ async function logAimtEvent(type, payload) {
    Prevents a checkout session for a cheaper future product from
    granting HeadSpa Mastery access. */
 async function sessionMatchesCoursePrice(sessionId, stripeSecretKey, expectedPriceId) {
-  if (!expectedPriceId) return true; // no price configured — skip check
+  if (!expectedPriceId) throw new Error('Stripe course price is not configured.');
   const response = await fetch(
     `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}/line_items?limit=10`,
     { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
@@ -126,6 +126,7 @@ export async function onRequestPost(context) {
        used to decide whose entitlement gets written. */
     const clientReportedEmail = normalizeEmail(body.email);
     const stripeSecretKey = env.STRIPE_SECRET_KEY;
+    const expectedPriceId = typeof env.STRIPE_PRICE_ID === 'string' ? env.STRIPE_PRICE_ID.trim() : '';
     const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
     const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -146,6 +147,13 @@ export async function onRequestPost(context) {
         message: 'stripe_not_configured'
       });
       return json({ error: 'Stripe is not configured.' }, 500);
+    }
+    if (!expectedPriceId) {
+      await logAimtEvent('api_claim_course_access_failure', {
+        supabaseUrl, serviceRoleKey, email: clientReportedEmail,
+        message: 'stripe_price_not_configured'
+      });
+      return json({ error: 'Stripe course price is not configured.' }, 500);
     }
     if (!serviceRoleKey) {
       await logAimtEvent('api_claim_course_access_failure', {
@@ -191,7 +199,7 @@ export async function onRequestPost(context) {
     const priceMatches = await sessionMatchesCoursePrice(
       session.id,
       stripeSecretKey,
-      env.STRIPE_PRICE_ID
+      expectedPriceId
     );
     if (!priceMatches) {
       await logAimtEvent('api_claim_course_access_failure', {
