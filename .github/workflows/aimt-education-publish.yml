@@ -105,7 +105,14 @@ jobs:
               echo "Scheduled Education candidate ready: $selected_topic"
               ;;
 
-            NO_OP_SUCCESS|CONFIG_BLOCKED|HUMAN_REVIEW|EDITORIAL_REVIEW|INFRA_REVIEW|FRESHNESS_FLAGGED|RESEARCH_GAP_QUEUED|PUBLISH_FAILED|PUBLISHED|AUTOPUBLISH_GATE_CLOSED)
+            PROVIDER_FAILED|INVALID_RESPONSE|SYNTHESIS_FAILED|CONFIG_BLOCKED|INFRA_REVIEW|PUBLISH_FAILED)
+              echo "should_publish=false" >> "$GITHUB_OUTPUT"
+              echo "topic=" >> "$GITHUB_OUTPUT"
+              echo "Shadow run failed in $final_state; refusing scheduled publication." >&2
+              exit 1
+              ;;
+
+            NO_OP_SUCCESS|HUMAN_REVIEW|EDITORIAL_REVIEW|FRESHNESS_FLAGGED|RESEARCH_GAP_QUEUED|PUBLISHED|AUTOPUBLISH_GATE_CLOSED)
               echo "should_publish=false" >> "$GITHUB_OUTPUT"
               echo "topic=" >> "$GITHUB_OUTPUT"
 

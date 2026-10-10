@@ -20,13 +20,17 @@ const REAL_HUB_PATH = fileURLToPath(new URL('../education/hair-loss.html', impor
   // never writes it back), proving the matcher actually finds the real
   // markup shape, not just a synthetic fixture shaped to fit it.
   const realHub = readFileSync(REAL_HUB_PATH, 'utf8');
-  const card = buildHubCardHtml({ route: '/education/hair-loss/alopecia-areata', h1: 'Alopecia Areata: A Practitioner Education Overview', meta_description: 'An overview of alopecia areata.', sourceCount: 8 });
+  let route = '/education/hair-loss/phase2a-test-fixture';
+  while (hubContainsRoute(realHub, route)) route += '-next';
+  const card = buildHubCardHtml({ route, h1: 'Alopecia Areata: A Practitioner Education Overview', meta_description: 'An overview of alopecia areata.', sourceCount: 8 });
   const updated = insertHubCard(realHub, card);
-  check('REAL_HUB_FILE', 'the new card is present', updated.includes('/education/hair-loss/alopecia-areata'));
+  const originalRoutes = [...realHub.matchAll(/href="(\/education\/hair-loss\/[^"?#]+)"/g)].map((match) => match[1]);
+  check('REAL_HUB_FILE', 'all existing published cards are preserved', originalRoutes.every((existingRoute) => hubContainsRoute(updated, existingRoute)));
+  check('REAL_HUB_FILE', 'the new card is present', updated.includes(route));
   check('REAL_HUB_FILE', 'the existing hair-growth-cycle card is preserved', updated.includes('/education/hair-loss/hair-growth-cycle'));
   check('REAL_HUB_FILE', 'the existing telogen-effluvium card is preserved', updated.includes('/education/hair-loss/telogen-effluvium'));
   check('REAL_HUB_FILE', 'exactly one grid still opens', (updated.match(/<ul class="aimt-edu-card-grid">/g) || []).length === 1);
-  check('REAL_HUB_FILE', 'new card appears before the grid closes', updated.indexOf('/education/hair-loss/alopecia-areata') < updated.indexOf('</ul>'));
+  check('REAL_HUB_FILE', 'new card appears before the grid closes', updated.indexOf(route) < updated.indexOf('</ul>'));
 })();
 
 (function testThrowsWhenGridMarkupMissing() {
