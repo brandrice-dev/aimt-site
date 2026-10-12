@@ -1,0 +1,505 @@
+{
+  "topic_slug": "scalp-microbiome",
+  "page_plan_version": "education-page-plan-v1",
+  "plan": {
+    "topic_slug": "scalp-microbiome",
+    "cluster": "scalp-health",
+    "route": "/education/scalp-health/scalp-microbiome",
+    "title": "The Scalp Microbiome: A Practitioner Education Overview",
+    "meta_description": "A conceptual overview of the scalp microbiome for practitioners — its microbial composition, the balance/dysbiosis concept, and its relationship to flaking, oiliness, and barrier function.",
+    "h1": "The Scalp Microbiome: A Practitioner Education Overview",
+    "answer_summary": {
+      "kind": "PARAPHRASE",
+      "text": "The scalp microbiome refers to the community of bacteria and fungi that naturally live on the scalp, including bacteria such as Cutibacterium (Propionibacterium) acnes and Staphylococcus epidermidis, and fungi such as Malassezia globosa and M. restricta.",
+      "supporting_claim_ids": [
+        "20071201-dawson-malassezia-genome--c02",
+        "20120306-clavaud-dandruff-disequilibrium--c01",
+        "tao-microbiome-sd-dandruff-2021--c02"
+      ],
+      "source_statements": [
+        "The scalp hosts a community of bacteria (such as Cutibacterium/Propionibacterium acnes and Staphylococcus epidermidis) and fungi (notably Malassezia species such as M. globosa and M. restricta), together referred to as the scalp microbiome."
+      ]
+    },
+    "sections": [
+      {
+        "section_id": "research-context",
+        "heading": "How Scientists Study the Scalp Microbiome",
+        "units": [
+          {
+            "kind": "FRAMING",
+            "text": "Before looking at what the scalp microbiome does, it helps to understand how we know about it at all.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "The scalp microbiome is an active area of research, studied using modern sequencing and metagenomic methods across a range of populations and study designs.",
+            "supporting_claim_ids": [
+              "izdebska-sd-microbiome-sr-2026--c01",
+              "park-scalp-microbiome-network-2017--c01",
+              "tao-microbiome-sd-dandruff-2021--c01",
+              "yu-oily-scalp-dandruff-omics-2025--c01"
+            ],
+            "source_statements": [
+              "The scalp microbiome is an active area of research studied using modern sequencing and metagenomic methods across varied populations and study designs."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "balance-and-dysbiosis",
+        "heading": "Microbial Balance and the Concept of Dysbiosis",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Flaking-type scalp presentations are conceptually linked to a shift in the balance among these microbes — often described as dysbiosis — rather than to any single organism acting alone.",
+            "supporting_claim_ids": [
+              "20120306-clavaud-dandruff-disequilibrium--c03",
+              "izdebska-sd-microbiome-sr-2026--c02",
+              "park-scalp-microbiome-network-2017--c02",
+              "rf-claim-clm-sd-02"
+            ],
+            "source_statements": [
+              "Flaking-type scalp presentations are conceptually linked to a shift in the balance among these microbes — often called dysbiosis — rather than to any single organism acting alone."
+            ]
+          },
+          {
+            "kind": "FRAMING",
+            "text": "This framing — balance versus imbalance — underpins much of how scalp microbiome science is discussed.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          }
+        ]
+      },
+      {
+        "section_id": "mechanism-sebum-malassezia",
+        "heading": "Sebum, Malassezia, and Scalp Irritation",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Mechanistically, Malassezia yeasts metabolize scalp sebum, and this metabolic activity is thought to contribute to irritation and flaking.",
+            "supporting_claim_ids": [
+              "20071201-dawson-malassezia-genome--c03",
+              "deng-scalp-microbiome-dandruff-2026--c03",
+              "jourdain-squalene-peroxide-dandruff-2016--c03"
+            ],
+            "source_statements": [
+              "Mechanistically, Malassezia yeasts metabolize scalp sebum, and this metabolic activity is thought to contribute to irritation and flaking."
+            ]
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "Oiliness is part of this ecological picture: research comparing oily and non-oily, dandruff and non-dandruff scalps has observed differing microbial compositions.",
+            "supporting_claim_ids": [
+              "yu-oily-scalp-dandruff-omics-2025--c02"
+            ],
+            "source_statements": [
+              "Oiliness is part of this ecological picture: research comparing oily and non-oily, dandruff and non-dandruff scalps has observed differing microbial compositions."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "barrier-function",
+        "heading": "Barrier Function and Microbial Ecology",
+        "units": [
+          {
+            "kind": "FRAMING",
+            "text": "Microbes don't act in isolation — they interact with the physical structure of the scalp itself.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "Scalp barrier function (such as transepidermal water loss and lipid composition) and microbial ecology are conceptually interrelated, with barrier changes and microbial shifts potentially influencing one another.",
+            "supporting_claim_ids": [
+              "20181004-saxena-scalp-microbiome-dandruff--c04",
+              "galizia-sd-microbiome-barrier-2024--c02",
+              "izdebska-sd-microbiome-sr-2026--c03"
+            ],
+            "source_statements": [
+              "Scalp barrier function (such as transepidermal water loss and lipid composition) and microbial ecology are conceptually interrelated, with barrier changes and microbial shifts potentially influencing one another."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "follicular-niche",
+        "heading": "The Hair Follicle as a Distinct Microbial Habitat",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Scalp hair follicles form distinct, deeper niches compared to the surface skin, suggesting the follicular environment may be a separate microbial habitat worth practitioner awareness.",
+            "supporting_claim_ids": [
+              "20190411-polak-witka-microbiome-scalp-hf--c01"
+            ],
+            "source_statements": [
+              "Scalp hair follicles form distinct, deeper niches compared to the surface skin, suggesting the follicular environment may be a separate microbial habitat worth practitioner awareness."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "practitioner-relevance",
+        "heading": "Why This Matters for Practitioners",
+        "units": [
+          {
+            "kind": "FRAMING",
+            "text": "None of this is about diagnosing a client — it's about understanding the ecology behind what you're observing.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          }
+        ]
+      }
+    ],
+    "scope_note": "This page is intended as a conceptual overview for beauty and scalp-care practitioners, describing general scalp microbiome composition, the balance/imbalance (dysbiosis) concept, and its conceptual relationship to flaking and oiliness and to barrier function. It does not provide diagnostic criteria, treatment protocols, medication or probiotic recommendations, or specific clinical outcome statistics, and it excludes content centered on specific diagnosed conditions (e.g., alopecia subtypes, Malassezia folliculitis, psoriasis) beyond general conceptual mention.",
+    "limitations": [
+      {
+        "kind": "VERBATIM",
+        "text": "Causal relationships between scalp microbes and hair-follicle cycling or immune processes remain largely hypothesized rather than firmly established.",
+        "supporting_claim_ids": [
+          "20190411-polak-witka-microbiome-scalp-hf--c06"
+        ],
+        "source_statements": [
+          "Causal relationships between scalp microbes and hair-follicle cycling or immune processes remain largely hypothesized rather than firmly established."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Much of the evidence comes from relatively small, observational studies that demonstrate association rather than proven cause-and-effect relationships.",
+        "supporting_claim_ids": [
+          "20120306-clavaud-dandruff-disequilibrium--c05",
+          "20181004-saxena-scalp-microbiome-dandruff--c05",
+          "izdebska-sd-microbiome-sr-2026--c04"
+        ],
+        "source_statements": [
+          "Much of the evidence comes from relatively small, observational studies that demonstrate association rather than proven cause-and-effect relationships."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Observed microbial differences between healthy and flaking scalp groups often show relatively small effect sizes, indicating host and environmental factors also play a substantial role.",
+        "supporting_claim_ids": [
+          "izdebska-sd-microbiome-sr-2026--c04"
+        ],
+        "source_statements": [
+          "Observed microbial differences between healthy and flaking scalp groups often show relatively small effect sizes, indicating host and environmental factors also play a substantial role."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Several foundational studies were conducted in specific populations or were industry-funded, which may limit how broadly the findings generalize.",
+        "supporting_claim_ids": [
+          "20120306-clavaud-dandruff-disequilibrium--c06",
+          "20120306-clavaud-dandruff-disequilibrium--c07",
+          "20181004-saxena-scalp-microbiome-dandruff--c06",
+          "20181004-saxena-scalp-microbiome-dandruff--c07"
+        ],
+        "source_statements": [
+          "Several foundational studies were conducted in specific populations or were industry-funded, which may limit how broadly the findings generalize."
+        ]
+      }
+    ],
+    "key_takeaways": [
+      {
+        "kind": "VERBATIM",
+        "text": "The scalp hosts a community of bacteria (such as Cutibacterium/Propionibacterium acnes and Staphylococcus epidermidis) and fungi (notably Malassezia species such as M. globosa and M. restricta), together referred to as the scalp microbiome.",
+        "supporting_claim_ids": [
+          "20071201-dawson-malassezia-genome--c02",
+          "20120306-clavaud-dandruff-disequilibrium--c01",
+          "tao-microbiome-sd-dandruff-2021--c02"
+        ],
+        "source_statements": [
+          "The scalp hosts a community of bacteria (such as Cutibacterium/Propionibacterium acnes and Staphylococcus epidermidis) and fungi (notably Malassezia species such as M. globosa and M. restricta), together referred to as the scalp microbiome."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Flaking-type scalp presentations are conceptually linked to a shift in the balance among these microbes — often called dysbiosis — rather than to any single organism acting alone.",
+        "supporting_claim_ids": [
+          "20120306-clavaud-dandruff-disequilibrium--c03",
+          "izdebska-sd-microbiome-sr-2026--c02",
+          "park-scalp-microbiome-network-2017--c02",
+          "rf-claim-clm-sd-02"
+        ],
+        "source_statements": [
+          "Flaking-type scalp presentations are conceptually linked to a shift in the balance among these microbes — often called dysbiosis — rather than to any single organism acting alone."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Mechanistically, Malassezia yeasts metabolize scalp sebum, and this metabolic activity is thought to contribute to irritation and flaking.",
+        "supporting_claim_ids": [
+          "20071201-dawson-malassezia-genome--c03",
+          "deng-scalp-microbiome-dandruff-2026--c03",
+          "jourdain-squalene-peroxide-dandruff-2016--c03"
+        ],
+        "source_statements": [
+          "Mechanistically, Malassezia yeasts metabolize scalp sebum, and this metabolic activity is thought to contribute to irritation and flaking."
+        ]
+      }
+    ],
+    "visual_recommendation": {
+      "recommendation": "DIAGRAM",
+      "rationale": "A simple labeled diagram showing the scalp surface versus the follicular niche, with representative bacteria and fungi positioned at each level, would help practitioners grasp the spatial and ecological relationships (surface microbiome vs. follicular habitat, sebum-Malassezia interaction, barrier layer) far more quickly than prose alone, without requiring any clinical or diagnostic detail."
+    },
+    "sources": [
+      {
+        "source_id": "20071201-dawson-malassezia-genome",
+        "title": "Malassezia globosa and restricta: Breakthrough Understanding of the Etiology and Treatment of Dandruff and Seborrheic Dermatitis through Whole-Genome Analysis",
+        "authors": [
+          "Thomas L. Dawson Jr."
+        ],
+        "year": 2007,
+        "doi": "10.1038/sj.jidsymp.5650049",
+        "url": "https://doi.org/10.1038/sj.jidsymp.5650049"
+      },
+      {
+        "source_id": "20120306-clavaud-dandruff-disequilibrium",
+        "title": "Dandruff Is Associated with Disequilibrium in the Proportion of the Major Bacterial and Fungal Populations Colonizing the Scalp",
+        "authors": [
+          "Cécile Clavaud",
+          "Roland Jourdain",
+          "Avner Bar-Hen",
+          "Magali Tichit",
+          "Christiane Bouchier",
+          "Florence Pouradier",
+          "Charles El Rawadi",
+          "Jacques Guillot",
+          "Florence Ménard-Szczebara",
+          "Lionel Breton",
+          "Jean-Paul Latgé",
+          "Isabelle Mouyna"
+        ],
+        "year": 2013,
+        "doi": "10.1371/journal.pone.0058203",
+        "url": "https://doi.org/10.1371/journal.pone.0058203"
+      },
+      {
+        "source_id": "20181004-saxena-scalp-microbiome-dandruff",
+        "title": "Comparison of Healthy and Dandruff Scalp Microbiome Reveals the Role of Commensals in Scalp Health",
+        "authors": [
+          "Rituja Saxena",
+          "Parul Mittal",
+          "Cécile Clavaud",
+          "Darshan B. Dhakan",
+          "Prashant Hegde",
+          "Mahesh M. Veeranagaiah",
+          "Subarna Saha",
+          "Luc Souverain",
+          "Nita Roy",
+          "Lionel Breton",
+          "Namita Misra",
+          "Vineet K. Sharma"
+        ],
+        "year": 2018,
+        "doi": "10.3389/fcimb.2018.00346",
+        "url": "https://doi.org/10.3389/fcimb.2018.00346"
+      },
+      {
+        "source_id": "20190411-polak-witka-microbiome-scalp-hf",
+        "title": "The role of the microbiome in scalp hair follicle biology and disease",
+        "authors": [
+          "Katarzyna Polak-Witka",
+          "Lidia Rudnicka",
+          "Ulrike Blume-Peytavi",
+          "Annika Vogt"
+        ],
+        "year": 2020,
+        "doi": "10.1111/exd.13935",
+        "url": "https://doi.org/10.1111/exd.13935"
+      },
+      {
+        "source_id": "20210501-lousada-hf-microbiome",
+        "title": "Exploring the human hair follicle microbiome",
+        "authors": [
+          "M.B. Lousada",
+          "T. Lachnit",
+          "J. Edelkamp",
+          "T. Rouillé",
+          "D. Ajdic",
+          "Y. Uchida",
+          "A. Di Nardo",
+          "T.C.G. Bosch",
+          "R. Paus"
+        ],
+        "year": 2021,
+        "doi": "10.1111/bjd.19461",
+        "url": "https://doi.org/10.1111/bjd.19461"
+      },
+      {
+        "source_id": "deng-scalp-microbiome-dandruff-2026",
+        "title": "Advances in Scalp Microbiome Research: Molecular Insights into the Metabolism-Inflammation-Barrier Axis and Dandruff Pathogenesis",
+        "authors": [
+          "Le Deng",
+          "Xiao Ling",
+          "Li Li",
+          "Youjie He",
+          "Miaomiao Guo"
+        ],
+        "year": 2026,
+        "doi": "10.3390/molecules31122093",
+        "url": "https://doi.org/10.3390/molecules31122093"
+      },
+      {
+        "source_id": "galizia-sd-microbiome-barrier-2024",
+        "title": "Seborrheic Dermatitis: From Microbiome and Skin Barrier Involvement to Emerging Approaches in Dermocosmetic Treatment",
+        "authors": [
+          "Giulia Galizia",
+          "Anna Belloni Fortina",
+          "Alessandra Semenzato"
+        ],
+        "year": 2024,
+        "doi": "10.3390/cosmetics11060208",
+        "url": "https://doi.org/10.3390/cosmetics11060208"
+      },
+      {
+        "source_id": "gupta-malassezia-staph-scalp-sd-2026",
+        "title": "Malassezia and Staphylococcus are associated with scalp seborrheic dermatitis",
+        "authors": [
+          "Jyoti Gupta",
+          "Amit Arora",
+          "Sunil Dogra",
+          "Arunaloke Chakrabarti",
+          "Archana Angrup",
+          "Sendhil Kumaran",
+          "Harsimran Kaur",
+          "Anup K Ghosh",
+          "Shivaprakash M Rudramurthy"
+        ],
+        "year": 2026,
+        "doi": "10.1093/mmy/myag005",
+        "url": "https://doi.org/10.1093/mmy/myag005"
+      },
+      {
+        "source_id": "izdebska-sd-microbiome-sr-2026",
+        "title": "Interplay between microbiome, immunity, and skin barrier in seborrheic dermatitis",
+        "authors": [
+          "Andrea Izdebska",
+          "Adriana Błaszczyk-Windak",
+          "Ewelina Knapczyk",
+          "Wiktoria Turczyn"
+        ],
+        "year": 2026,
+        "doi": "10.5603/fd.112242",
+        "url": "https://doi.org/10.5603/fd.112242"
+      },
+      {
+        "source_id": "jourdain-squalene-peroxide-dandruff-2016",
+        "title": "Exploration of scalp surface lipids reveals squalene peroxide as a potential actor in dandruff condition",
+        "authors": [
+          "Roland Jourdain",
+          "Alain Moga",
+          "Philippe Vingler",
+          "Charles El Rawadi",
+          "Florence Pouradier",
+          "Luc Souverain",
+          "Philippe Bastien",
+          "Nicolas Amalric",
+          "Lionel Breton"
+        ],
+        "year": 2016,
+        "doi": "10.1007/s00403-016-1623-1",
+        "url": "https://doi.org/10.1007/s00403-016-1623-1"
+      },
+      {
+        "source_id": "park-scalp-microbiome-network-2017",
+        "title": "Collapse of human scalp microbiome network in dandruff and seborrhoeic dermatitis",
+        "authors": [
+          "Taehun Park",
+          "Hye-Jin Kim",
+          "Nu Ri Myeong",
+          "Hyun Gee Lee",
+          "Ilyoung Kwack",
+          "John-Hwan Lee",
+          "Byung Jun Kim",
+          "Woo Jun Sul",
+          "Susun An"
+        ],
+        "year": 2017,
+        "doi": "10.1111/exd.13293",
+        "url": "https://doi.org/10.1111/exd.13293"
+      },
+      {
+        "source_id": "shah-scalp-microbiome-guide-2024",
+        "title": "Scalp microbiome: a guide to better understanding scalp diseases and treatments",
+        "authors": [
+          "Rohan R. Shah",
+          "Jorge Larrondo",
+          "Thomas Dawson",
+          "Amy McMichael"
+        ],
+        "year": 2024,
+        "doi": "10.1007/s00403-024-03235-2",
+        "url": "https://doi.org/10.1007/s00403-024-03235-2"
+      },
+      {
+        "source_id": "tao-microbiome-sd-dandruff-2021",
+        "title": "Skin microbiome alterations in seborrheic dermatitis and dandruff: A systematic review",
+        "authors": [
+          "Rong Tao",
+          "Ruoyu Li",
+          "Ruojun Wang"
+        ],
+        "year": 2021,
+        "doi": "10.1111/exd.14450",
+        "url": "https://doi.org/10.1111/exd.14450"
+      },
+      {
+        "source_id": "vorapreechapanich-sd-microbiome-2025",
+        "title": "Perturbations in the skin microbiome of infantile and adult seborrheic dermatitis and new treatment options based on restoring a healthy skin microbiome",
+        "authors": [
+          "Akira Vorapreechapanich",
+          "Arsa Thammahong",
+          "Tanittha Chatsuwan",
+          "Steven W. Edwards",
+          "Chanat Kumtornrut",
+          "Karaked Chantawarangul",
+          "Susheera Chatproedprai",
+          "Siriwan Wananukul",
+          "Direkrit Chiewchengchol"
+        ],
+        "year": 2025,
+        "doi": "10.1111/ijd.17568",
+        "url": "https://doi.org/10.1111/ijd.17568"
+      },
+      {
+        "source_id": "yu-oily-scalp-dandruff-omics-2025",
+        "title": "Dysbiosis and genomic plasticity in the oily scalp microbiome: a multi-omics analysis of dandruff pathogenesis",
+        "authors": [
+          "Han Yu",
+          "Jiayi Li",
+          "Yan Wang",
+          "Tongze Zhang",
+          "Tahir Mehmood",
+          "Olivier Habimana"
+        ],
+        "year": 2025,
+        "doi": "10.3389/fmicb.2025.1595030",
+        "url": "https://doi.org/10.3389/fmicb.2025.1595030"
+      }
+    ],
+    "related_links": [
+      {
+        "href": "/education/scalp-health",
+        "label": "Scalp Health & Conditions — AIMT Education Library",
+        "relation": "topic_hub"
+      },
+      {
+        "href": "/education",
+        "label": "AIMT Education Library",
+        "relation": "library_home"
+      },
+      {
+        "href": "/about/research-standards",
+        "label": "How AIMT reviews research and evidence",
+        "relation": "transparency"
+      }
+    ]
+  },
+  "generation_source_hash": "3ab7319f8c91ec471e59929037ddbcbac16d4862763324e1c4ef2bb0ca23597a",
+  "prepared_at": "2026-10-12T14:55:15.093Z",
+  "writer_provenance": {
+    "contract_version": "education-writer-v1"
+  }
+}
