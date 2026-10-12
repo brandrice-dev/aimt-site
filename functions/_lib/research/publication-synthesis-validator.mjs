@@ -156,8 +156,8 @@ export function validateSynthesisSemantics({ v1Result, evidenceBundle, aiOutput 
     return { valid: false, violations: ['NO_SYNTHESIS_PACKET_ON_V1_RESULT'] };
   }
 
-  // Rule 13: cannot elevate a non-NEEDS_SYNTHESIS v1 result.
-  if (v1Result.readiness_status !== READINESS_STATUS.NEEDS_SYNTHESIS) {
+  // Rule 13: only evidence-complete READY/NEEDS_SYNTHESIS results may proceed.
+  if (![READINESS_STATUS.READY, READINESS_STATUS.NEEDS_SYNTHESIS].includes(v1Result.readiness_status)) {
     violations.push('V1_RESULT_NOT_NEEDS_SYNTHESIS');
   }
   // Rule 10 (part 1 of "all v1 evidence-completeness requirements still

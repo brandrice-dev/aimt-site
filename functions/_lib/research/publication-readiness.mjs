@@ -530,7 +530,8 @@ export function assessTopicReadiness({ topic_slug, seo_page_concept, controlled_
     reasons.push('All deterministic readiness checks passed: verified substantive claims, sufficient independent corroboration, limitations captured, citations resolve, LOWER/MODERATE risk, no synthesis signal or unresolved exception.');
   }
 
-  const synthesis_packet = readiness_status === READINESS_STATUS.NEEDS_SYNTHESIS
+  // READY still receives the same governed page-synthesis validation before clearance.
+  const synthesis_packet = [READINESS_STATUS.READY, READINESS_STATUS.NEEDS_SYNTHESIS].includes(readiness_status)
     ? buildSynthesisPacket({
       seo_page_concept,
       topic_slug,
@@ -579,7 +580,7 @@ export function assessTopicReadiness({ topic_slug, seo_page_concept, controlled_
     /* STEP D placeholder -- identical to candidate_claim_ids in v1; see
        comment above where it's computed. */
     synthesis_candidate_claim_ids: synthesisCandidateClaimIds,
-    /* STEP E -- only populated for NEEDS_SYNTHESIS results. */
+    /* STEP E -- populated for eligible READY and NEEDS_SYNTHESIS results. */
     synthesis_packet
   };
 }

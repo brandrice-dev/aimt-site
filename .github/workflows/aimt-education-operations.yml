@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 14 * * 1-5'
   workflow_dispatch:
+    inputs:
+      diagnostic:
+        description: "Approved bounded model diagnostic: shadow only, no database writes, issues, PRs, or publishing (up to 6 requests, $2 cost reservation, scalp-microbiome)."
+        type: boolean
+        default: false
+        required: false
 
 concurrency:
   group: aimt-education-operations
@@ -28,12 +34,15 @@ jobs:
       - name: Restore durable candidate bundles
         env:
           GH_TOKEN: ${{ github.token }}
+          DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
         run: |
           set -euo pipefail
           mkdir -p research-import/education-ops/candidates
 
+          bundle_name="education-candidate-bundles"
+          if [ "$DIAGNOSTIC" = "true" ]; then bundle_name="education-candidate-bundles-diagnostic"; fi
           latest_run_id="$(
-            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=education-candidate-bundles&per_page=100" \
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${bundle_name}&per_page=100" \
               --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
           )"
 
@@ -41,7 +50,7 @@ jobs:
             echo "Restoring candidate bundles from workflow run $latest_run_id"
             gh run download "$latest_run_id" \
               --repo "$GITHUB_REPOSITORY" \
-              --name education-candidate-bundles \
+              --name "$bundle_name" \
               --dir research-import/education-ops/candidates
           else
             echo "No prior durable candidate bundle artifact found; starting without a resume candidate."
@@ -57,7 +66,13 @@ jobs:
           AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
           AIMT_RESEARCH_GAP_LOOP_ENABLED: ${{ vars.AIMT_RESEARCH_GAP_LOOP_ENABLED }}
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/education-operations-cycle.mjs --shadow
+          DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
+        run: |
+          if [ "$DIAGNOSTIC" = "true" ]; then
+            node scripts/education-publication-diagnostic.mjs --allow-model-calls
+          else
+            node scripts/education-operations-cycle.mjs --shadow
+          fi
 
       - name: Upload run report
         uses: actions/upload-artifact@v4
@@ -71,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: education-candidate-bundles
+          name: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic && 'education-candidate-bundles-diagnostic' || 'education-candidate-bundles' }}
           path: research-import/education-ops/candidates/
           retention-days: 90
           if-no-files-found: ignore

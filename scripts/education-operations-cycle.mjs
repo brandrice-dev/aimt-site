@@ -68,6 +68,10 @@ import { fetchPublishedTopicSlugsLive, countPagesPublishedThisWeekLive } from '.
 import { checkEducationOpsCredential } from '../functions/_lib/education-ops/education-ops-model-config.mjs';
 import { planPageIntent } from '../functions/_lib/education-ops/education-intent-planner-client.mjs';
 import { validateIntentPlan } from '../functions/_lib/education-ops/education-intent-planner-validator.mjs';
+import { createPublicationCostControl } from '../functions/_lib/research/publication-cost-control.mjs';
+import { waitForCandidateHeadTests } from './_lib/education-candidate-checks.mjs';
+import { topicAttemptFingerprint, topicAttemptHold, reserveTopicAttempt, loadTopicAttempt, writeTopicAttempt, loadTopicIntent, writeTopicIntent } from './_lib/education-topic-attempts.mjs';
+import { sanitizePublicationDiagnostics } from '../functions/_lib/research/publication-anthropic-transport.mjs';
 import { prepareTopicArtifact, publishPreparedArtifact } from '../functions/_lib/education-ops/education-synthesis-cache.mjs';
 import { writeEducationPagePlan } from '../functions/_lib/education-ops/education-writer-client.mjs';
 import { validateEducationPagePlan } from '../functions/_lib/education-ops/education-page-plan-validator.mjs';
@@ -78,7 +82,7 @@ import { repairReviewerFramingFailures } from '../functions/_lib/education-ops/e
 import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
 import { checkGeneratedDiffAllowlist } from '../functions/_lib/education-ops/education-diff-allowlist.mjs';
 import { checkAllPublishedTopicsFreshness, FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
-import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN, synthesisFailureFinalState, runExitCode } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
 import { writeClearanceRecord, replaceNonPublicClearanceRecord, publishClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
@@ -452,6 +456,8 @@ async function attemptReviewerFramingRepair(env, {
  * @returns {Promise<object>} a buildRunReport() result
  */
 export async function runDecisionPipeline(env, options = {}) {
+  const costControl = createPublicationCostControl();
+  env = { ...env, publicationCostControl: costControl };
   const runId = options.runId || randomUUID();
   const startedAt = new Date().toISOString();
   const modelCalls = [];
@@ -462,6 +468,10 @@ export async function runDecisionPipeline(env, options = {}) {
   const clusterKeys = options.clusterKeys || (options.clusterKey ? [options.clusterKey] : null);
   const fns = options.fns || {};
   const common = {};
+  let attemptRecord = null, attemptSlug = null;
+  const attemptRoot = path.join(ROOT, 'research-import', 'education-ops', 'candidates');
+  const loadAttempt = fns.loadTopicAttemptFn || ((slug) => loadTopicAttempt(attemptRoot, slug));
+  const writeAttempt = fns.writeTopicAttemptFn || ((slug, record) => writeTopicAttempt(attemptRoot, slug, record));
 
   // NOTE: __internal is deliberately NOT part of buildRunReport()'s
   // typed field list (it's the SHADOW_CANDIDATE_READY case's own
@@ -472,9 +482,19 @@ export async function runDecisionPipeline(env, options = {}) {
   // through it (passing it through would silently drop it).
   const finish = (fields) => {
     const { __internal, ...reportFields } = fields;
+    if (attemptRecord) {
+      try {
+        writeAttempt(attemptSlug, { ...attemptRecord, state: reportFields.final_state,
+          finished_at: new Date().toISOString(), cost_control: costControl.summary() });
+      } catch {
+        reportFields.exception_reason = `Durable attempt outcome write failed; original outcome: ${reportFields.final_state}. ${reportFields.exception_reason || ''}`;
+        reportFields.final_state = RUN_FINAL_STATE.INFRA_REVIEW;
+      }
+    }
+
     const report = buildRunReport({
       run_id: runId, started_at: startedAt, finished_at: new Date().toISOString(),
-      mode: options.mode || 'shadow', model_calls: modelCalls, ...common, ...reportFields,
+      mode: options.mode || 'shadow', model_calls: modelCalls, cost_control: costControl.summary(), ...common, ...reportFields,
     });
     if (__internal) report.__internal = __internal;
     return report;
@@ -578,7 +598,22 @@ export async function runDecisionPipeline(env, options = {}) {
     }
   }
 
-  const selection = selectNextTopic(evidencePool, { clusterKeys, publishedTopicSlugs, activeResearchGapsBySlug });
+  const concepts = PUBLICATION_CONCEPTS;
+  if (options.topicSlug && !concepts.some((c) => c.topic_slug === options.topicSlug)) return finish({ final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: 'Diagnostic topic is not registered.', stopped_before_model_stage: true });
+  const attemptHoldsBySlug = {}, attemptsBySlug = {}, fingerprintsBySlug = {};
+  try {
+    for (const concept of concepts) {
+      const evidence = selectTopicEvidenceFromRows(concept.controlled_topics, evidencePool);
+      const fingerprint = topicAttemptFingerprint(concept, evidence);
+      fingerprintsBySlug[concept.topic_slug] = fingerprint;
+      const previous = loadAttempt(concept.topic_slug);
+      attemptsBySlug[concept.topic_slug] = previous;
+      attemptHoldsBySlug[concept.topic_slug] = topicAttemptHold(previous, fingerprint);
+    }
+  } catch {
+    return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'Durable topic attempt history could not be verified.', stopped_before_model_stage: true });
+  }
+  const selection = selectNextTopic(evidencePool, { clusterKeys, publishedTopicSlugs, activeResearchGapsBySlug, concepts, attemptHoldsBySlug, topicSlug: options.topicSlug });
   const candidateTopics = selection.candidates.map((c) => ({ topic_slug: c.topic_slug, cluster: c.cluster, eligible: c.eligible, reason: c.ineligible_reason, risk_tier: c.v1_result.risk_tier, opportunity_score: c.opportunity.score }));
 
   if (!selection.selected) {
@@ -604,6 +639,19 @@ export async function runDecisionPipeline(env, options = {}) {
 
   const selected = selection.selected;
   const existingGapForSelectedTopic = activeResearchGapsBySlug[selected.topic_slug] || null;
+  function beginAttempt() {
+    if (attemptRecord) return null;
+    try {
+      const reserved = reserveTopicAttempt(attemptsBySlug[selected.topic_slug], fingerprintsBySlug[selected.topic_slug]);
+      writeAttempt(selected.topic_slug, reserved);
+      attemptRecord = reserved;
+      attemptSlug = selected.topic_slug;
+      return null;
+    } catch {
+      return finish({ selected_topic: selected.topic_slug, final_state: RUN_FINAL_STATE.INFRA_REVIEW,
+        exception_reason: 'Topic attempt reservation failed; no model request authorized.', stopped_before_model_stage: true });
+    }
+  }
 
   // The selected concept's REGISTERED cluster and route -- never chosen
   // by a model, never derived from a research packet.
@@ -728,6 +776,8 @@ export async function runDecisionPipeline(env, options = {}) {
         // Intent Planner / Publication Editor / Writer calls -- this is
         // precisely the "resume THIS existing durable bundle, finish the
         // candidate already generated" case the repair exists for.
+        const reservationFailure = beginAttempt();
+        if (reservationFailure) return reservationFailure;
         const framingRepairOutcome = await attemptReviewerFramingRepair(env, {
           bundleDraft,
           plan: bundleDraft.page_plan,
@@ -804,6 +854,8 @@ export async function runDecisionPipeline(env, options = {}) {
     // above never calling Publication Editor again in the first place).
   }
 
+  const reservationFailure = beginAttempt();
+  if (reservationFailure) return reservationFailure;
   let intentPlan, route, preparedArtifact, clearedSnapshot;
 
   if (!bundleDraft) {
@@ -811,7 +863,13 @@ export async function runDecisionPipeline(env, options = {}) {
     const planIntentFn = fns.planIntentFn || planPageIntent;
     const candidateEvidenceInventory = selected.v1_result.candidate_claim_ids.map((id) => ({ claim_id: id }));
 
-    const intentResult = await planIntentFn(env, {
+    let cachedIntent;
+    try {
+      cachedIntent = (fns.loadTopicIntentFn || ((slug, fingerprint) => loadTopicIntent(attemptRoot, slug, fingerprint)))(selected.topic_slug, fingerprintsBySlug[selected.topic_slug]);
+    } catch {
+      return finish({ selected_topic: selected.topic_slug, final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'Durable intent could not be verified.' });
+    }
+    const intentResult = cachedIntent ? { ok: true, output: cachedIntent, reused: true } : await planIntentFn(env, {
       topicSlug: selected.topic_slug,
       seoPageConcept: selected.concept.seo_page_concept,
       riskTier: selected.v1_result.risk_tier,
@@ -821,8 +879,9 @@ export async function runDecisionPipeline(env, options = {}) {
       candidateEvidenceInventory,
       existingClusterPages,
     });
-    if (intentResult.ok) modelCalls.push({ role: 'intent_planner', actual_call_count: 1, ...intentResult.usage });
+    if (intentResult.ok && !intentResult.reused) modelCalls.push({ role: 'intent_planner', actual_call_count: 1, ...intentResult.usage });
     if (!intentResult.ok) {
+      common.provider_request_diagnostics = sanitizePublicationDiagnostics(intentResult.diagnostics);
       return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Intent planner call failed: ${intentResult.reason}` });
     }
 
@@ -845,6 +904,13 @@ export async function runDecisionPipeline(env, options = {}) {
       });
     }
     intentPlan = intentResult.output;
+    if (!intentResult.reused) {
+      try {
+        (fns.writeTopicIntentFn || ((slug, fingerprint, plan) => writeTopicIntent(attemptRoot, slug, fingerprint, plan)))(selected.topic_slug, fingerprintsBySlug[selected.topic_slug], intentPlan);
+      } catch {
+        return finish({ selected_topic: selected.topic_slug, final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'Validated intent could not be durably saved; refusing synthesis.' });
+      }
+    }
     // The registry's deterministic route; validateIntentPlan() has
     // already required intentPlan.route_slug to equal the registered
     // route_slug, so this is the same value -- but the authority is the
@@ -1018,10 +1084,11 @@ export async function runDecisionPipeline(env, options = {}) {
         publication_editor_result: {
           status: synthesisResult.status,
           reason: synthesisResult.reason,
+          diagnostics: sanitizePublicationDiagnostics(synthesisResult.diagnostics),
           validator_violation_codes: sanitizePublicationValidatorViolations(synthesisResult.violations),
           human_review_justification: synthesisResult.humanReviewJustification,
         },
-        final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : RUN_FINAL_STATE.NO_OP_SUCCESS,
+        final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : synthesisFailureFinalState(synthesisResult.reason),
         exception_reason: isHumanReview ? `HUMAN_REVIEW: ${synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason}` : synthesisResult.reason,
       });
     }
@@ -1084,6 +1151,7 @@ export async function runDecisionPipeline(env, options = {}) {
     const writerResult = await writeFn(env, { intentPlan, clearedSnapshot, route, cluster: clusterKey, existingClusterPages });
     if (writerResult.ok) modelCalls.push({ role: 'education_writer', actual_call_count: 1, ...writerResult.usage });
     if (!writerResult.ok) {
+      common.provider_request_diagnostics = sanitizePublicationDiagnostics(writerResult.diagnostics);
       return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Writer call failed: ${writerResult.reason}` });
     }
 
@@ -1286,16 +1354,16 @@ export function persistRunReport(report) {
  * @param {object} report - a SHADOW_CANDIDATE_READY runDecisionPipeline() result
  * @returns {{articlePath: string, planArtifactPath: string, hubPath: string, allowlistResult: object}}
  */
-export function prepareGeneratedArtifacts(report) {
+export function prepareGeneratedArtifacts(report, { root = ROOT } = {}) {
   if (report.final_state !== RUN_FINAL_STATE.SHADOW_CANDIDATE_READY || !report.__internal) {
     throw new Error('prepareGeneratedArtifacts: report is not a SHADOW_CANDIDATE_READY result.');
   }
   const { preparedArtifact, plan, route } = report.__internal;
 
   const relativeArticlePath = educationArticlePathFromRoute(route);
-  const articlePath = path.join(ROOT, relativeArticlePath);
+  const articlePath = path.join(root, relativeArticlePath);
   const relativePlanPath = `functions/_data/education-page-plans/${plan.topic_slug}.json`;
-  const planArtifactPath = path.join(ROOT, relativePlanPath);
+  const planArtifactPath = path.join(root, relativePlanPath);
 
   // ROUTE-COLLISION CORRECTION (file-existence gate, checked BEFORE any
   // write): runDecisionPipeline() already checked the computed route
@@ -1330,12 +1398,12 @@ export function prepareGeneratedArtifacts(report) {
   // route's cluster (e.g. /education/scalp-health/<slug> ->
   // education/scalp-health.html) -- never string surgery on the route.
   const { hubFile: relativeHubPath, hubRoute } = resolveHubForRoute(route);
-  const hubPath = path.join(ROOT, relativeHubPath);
+  const hubPath = path.join(root, relativeHubPath);
   const hubHtml = readFileSync(hubPath, 'utf8');
   const cardHtml = buildHubCardHtml({ route, h1: plan.h1, meta_description: plan.meta_description, sourceCount: plan.sources.length });
   writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml, { hubRoute }));
 
-  const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+  const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
   const allowlistResult = checkGeneratedDiffAllowlist(changedPaths);
   if (!allowlistResult.valid) {
     throw new Error(`prepareGeneratedArtifacts: generated diff touched unexpected path(s), INFRA_REVIEW: ${allowlistResult.violations.join(', ')}`);
@@ -1546,8 +1614,13 @@ function ghPrView(prNumberOrUrl) {
   return { number: raw.number, url: raw.url, state: raw.state, headRefOid: raw.headRefOid, files: raw.files || [], mergeCommitOid: raw.mergeCommit ? raw.mergeCommit.oid : null };
 }
 
-function ghPrMerge(prNumber) {
-  execFileSync('gh', ['pr', 'merge', String(prNumber), '--merge', '--delete-branch'], { cwd: ROOT, stdio: 'inherit' });
+export function buildGhPrMergeArgs(prNumber, expectedHeadSha) {
+  if (!/^[a-f0-9]{40}$/.test(expectedHeadSha || '')) throw new Error('An exact expected PR head SHA is required for merge.');
+  return ['pr', 'merge', String(prNumber), '--merge', '--delete-branch', '--match-head-commit', expectedHeadSha];
+}
+
+function ghPrMerge(prNumber, expectedHeadSha) {
+  execFileSync('gh', buildGhPrMergeArgs(prNumber, expectedHeadSha), { cwd: ROOT, stdio: 'inherit' });
   return ghPrView(prNumber);
 }
 
@@ -1763,6 +1836,7 @@ function buildRealPublishIo(env) {
     ghPrListForBranchFn: ghPrListForBranch,
     ghPrViewFn: ghPrView,
     ghPrMergeFn: ghPrMerge,
+    checkCandidateHeadTestsFn: waitForCandidateHeadTests,
     fetchClearanceRowFn: fetchClearanceRowByTopicSlug,
     writeClearanceRecordFn: writeClearanceRecord,
     publishClearanceRecordFn: publishClearanceRecord,
@@ -2092,6 +2166,20 @@ export async function runPublicationPipeline(env, options = {}) {
     });
   }
 
+  // Passing tests must belong to this exact candidate PR head, from the
+  // trusted publication workflow. Fail before any new production DB write.
+  if (!routeAlreadyPublished && [PUBLICATION_STATE.PR_OPEN, PUBLICATION_STATE.CLEARANCE_PERSISTED].includes(stage())) {
+    let checks;
+    try {
+      checks = await io.checkCandidateHeadTestsFn({ repo: env.GITHUB_REPOSITORY,
+        headSha: manifest.generated.expected_head_sha, prNumber: manifest.generated.pr_number });
+    } catch {
+      checks = { ok: false, violations: ['CANDIDATE_HEAD_TEST_QUERY_FAILED'] };
+    }
+    if (!checks.ok) return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED,
+      planned_route: bundle.route, exception_reason: `Exact candidate-head tests block publication: ${checks.violations.join(', ')}` });
+  }
+
   // --- STEP 9: persist the NON-PUBLIC clearance row, idempotently ------
   if (stage() === PUBLICATION_STATE.PR_OPEN) {
     let existingRow;
@@ -2207,7 +2295,7 @@ export async function runPublicationPipeline(env, options = {}) {
     }
     let merged;
     try {
-      merged = io.ghPrMergeFn(manifest.generated.pr_number);
+      merged = io.ghPrMergeFn(manifest.generated.pr_number, manifest.generated.expected_head_sha);
     } catch (err) {
       persistManifest({ lastFailure: { stage: 'MERGE', reason: err.message, at: new Date().toISOString() } });
       return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED, exception_reason: `PR merge failed: ${err.message}` });
@@ -2445,7 +2533,7 @@ async function main() {
     } catch (err) {
       console.warn(`[exception] surfacing failed (this never fails the run itself): ${err.message}`);
     }
-    process.exit(report.final_state === RUN_FINAL_STATE.PUBLISH_FAILED || report.final_state === RUN_FINAL_STATE.INFRA_REVIEW || report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED ? 1 : 0);
+    process.exit(runExitCode(report));
   }
 
   if (args.mode === 'persist-clearance') {
@@ -2504,6 +2592,7 @@ async function main() {
     console.log(`[prepare] opened branch "${branch}": ${prUrl}`);
     console.log('[prepare] DO NOT MERGE without owner review. No research_public_pages write has occurred.');
   }
+  process.exitCode = runExitCode(report);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

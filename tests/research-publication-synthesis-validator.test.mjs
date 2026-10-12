@@ -359,7 +359,7 @@ function baselineAiOutput(overrides = {}) {
 })();
 
 (function testNonNeedsSynthesisV1ResultRejected() {
-  const v1Result = baselineV1Result({ readiness_status: READINESS_STATUS.READY });
+  const v1Result = baselineV1Result({ readiness_status: READINESS_STATUS.NOT_READY });
   const evidenceBundle = baselineBundle();
   const aiOutput = baselineAiOutput();
   const validation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput });

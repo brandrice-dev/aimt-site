@@ -12,7 +12,8 @@
    back to Cadence's or Publication Editor's own key.
    ═══════════════════════════════════════════════════════════════ */
 
-import { fetchAnthropicMessages, extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
+import { extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
+import { fetchPublicationMessages, sanitizePublicationDiagnostics } from '../research/publication-anthropic-transport.mjs';
 import { resolveEducationOpsModel, checkEducationOpsCredential, EDUCATION_OPS_API_KEY_ENV_VAR } from './education-ops-model-config.mjs';
 
 export function failure(reason, detail) {
@@ -41,10 +42,11 @@ export async function callEducationOpsModel(env, { role, system, userContent, sc
 
   const modelInfo = resolveEducationOpsModel(env, role);
 
-  let data;
+  let data, diagnostics;
   try {
-    data = await fetchAnthropicMessages({
+    ({ data, diagnostics } = await fetchPublicationMessages({
       apiKey: env[EDUCATION_OPS_API_KEY_ENV_VAR],
+      costControl: env.publicationCostControl,
       body: {
         model: modelInfo.modelName,
         max_tokens: maxTokens,
@@ -53,9 +55,9 @@ export async function callEducationOpsModel(env, { role, system, userContent, sc
         thinking: { type: 'adaptive' },
         output_config: { effort, format: { type: 'json_schema', schema } },
       },
-    });
+    }));
   } catch (err) {
-    return failure('request_failed', `${callLabel}: ${String((err && err.message) || err)}`);
+    return { ...failure(['SPEND_LIMIT', 'TOKEN_LIMIT'].includes(err.diagnostics?.code) ? 'budget_exceeded' : 'request_failed', `${callLabel}: provider request failed or blocked by preflight.`), diagnostics: sanitizePublicationDiagnostics(err.diagnostics) };
   }
 
   if (data && data.stop_reason === 'max_tokens') {
@@ -67,5 +69,5 @@ export async function callEducationOpsModel(env, { role, system, userContent, sc
   if (!parsed) return failure('unparseable_output', `${callLabel} response was not valid JSON and no fenced JSON block fallback was found.`);
 
   const usage = data && data.usage ? { input_tokens: data.usage.input_tokens ?? null, output_tokens: data.usage.output_tokens ?? null } : null;
-  return { ok: true, output: parsed, rawText, modelInfo, usage };
+  return { ok: true, output: parsed, rawText, modelInfo, usage, diagnostics };
 }

@@ -476,6 +476,10 @@ function runPipeline(env, options = {}) {
       checkFreshnessFn: async () => [],
       loadCandidateBundleFn: () => ({ found: false, bundle: null }),
       writeCandidateBundleFn: () => {},
+      loadTopicAttemptFn: () => null,
+      writeTopicAttemptFn: () => {},
+      loadTopicIntentFn: () => null,
+      writeTopicIntentFn: () => {},
       ...(options.fns || {}),
     },
   });
@@ -668,6 +672,7 @@ async function testPublisherAcceptsNewClusterWithZeroModelCalls() {
     refreshLaunchPrArticleFn: async () => ({ changed: false, headRefOid: HEAD, changedPaths: [] }),
     ghPrListForBranchFn: () => null,
     ghPrViewFn: (n) => ({ number: n, state: 'OPEN', headRefOid: HEAD, files: [{ path: educationArticlePathFromRoute(ROUTE) }, { path: 'sitemap.xml' }, { path: `functions/_data/education-page-plans/${TOPIC}.json` }, { path: 'education/scalp-health.html' }] }),
+    checkCandidateHeadTestsFn: () => ({ ok: true, violations: [] }),
     ghPrMergeFn: (n) => ({ number: n, state: 'MERGED', mergeCommitOid: 'b'.repeat(40) }),
     fetchClearanceRowFn: async () => clearanceRow,
     writeClearanceRecordFn: async (e, record) => { clearanceRow = { ...record, sitemap_eligible: false, published_at: null }; return [clearanceRow]; },

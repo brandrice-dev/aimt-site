@@ -19,8 +19,8 @@
                                           reconciliation itself found a
                                           material change is needed
 
+   Uses publication-anthropic-transport.mjs for bounded streaming POSTs.
    Reuses functions/_lib/cadence/anthropic-response.mjs's
-   fetchAnthropicMessages() (bounded-retry POST) and
    extractAnthropicTextSafe() (content-block-safe text extraction) --
    generic Anthropic Messages API HTTP utilities with zero Cadence
    business logic, imported read-only. See publication-editor-model-
@@ -48,7 +48,8 @@
    estimation, no guessing.
    ═══════════════════════════════════════════════════════════════ */
 
-import { fetchAnthropicMessages, extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
+import { extractAnthropicTextSafe } from '../cadence/anthropic-response.mjs';
+import { fetchPublicationMessages, sanitizePublicationDiagnostics } from './publication-anthropic-transport.mjs';
 import { resolvePublicationEditorSynthesisModel, PublicationEditorModelConfigError } from './publication-editor-model-config.mjs';
 import { SYNTHESIS_OUTPUT_JSON_SCHEMA, SYNTHESIS_OUTPUT_CONTRACT_VERSION, buildSynthesisInstruction } from './publication-synthesis-schema.mjs';
 import { RECONCILIATION_OUTPUT_JSON_SCHEMA, buildReconciliationInstruction, buildFullRetryInstruction, buildHumanReviewJustificationRetryInstruction } from './publication-synthesis-reconciliation.mjs';
@@ -110,17 +111,18 @@ function parseStructuredOutput(rawText) {
 /** Shared call plumbing for all three call shapes. Never throws for an
     ordinary request/parse/truncation failure -- always returns a tagged
     result (STEP 12). */
-async function callStructured(env, { system, userContent, schema, maxTokens, effort, callLabel }) {
+async function callStructured(env, { system, userContent, schema, maxTokens, effort, callLabel, claimCount, sourceCount }) {
   if (!env || !env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY) {
     return failure('missing_api_key', 'ANTHROPIC_PUBLICATION_EDITOR_API_KEY not configured in this environment.');
   }
 
   const modelInfo = resolvePublicationEditorSynthesisModel(env);
 
-  let data;
+  let data, diagnostics;
   try {
-    data = await fetchAnthropicMessages({
+    ({ data, diagnostics } = await fetchPublicationMessages({
       apiKey: env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY,
+      costControl: env.publicationCostControl,
       body: {
         model: modelInfo.modelName,
         max_tokens: maxTokens,
@@ -129,23 +131,24 @@ async function callStructured(env, { system, userContent, schema, maxTokens, eff
         thinking: { type: 'adaptive' },
         output_config: { effort, format: { type: 'json_schema', schema } },
       },
-    });
+    }));
   } catch (err) {
-    return failure('request_failed', `${callLabel}: ${String((err && err.message) || err)}`);
+    return { ...failure(['SPEND_LIMIT', 'TOKEN_LIMIT'].includes(err.diagnostics?.code) ? 'budget_exceeded' : 'request_failed', `${callLabel}: provider request failed or blocked by preflight.`),
+      diagnostics: sanitizePublicationDiagnostics({ ...err.diagnostics, claim_count: claimCount, source_count: sourceCount }), modelInfo };
   }
 
   if (data && data.stop_reason === 'max_tokens') {
-    return failure('truncated', `${callLabel} response was truncated by the token ceiling (max_tokens=${maxTokens}) before it finished.`);
+    return { ...failure('truncated', `${callLabel} response was truncated by the token ceiling (max_tokens=${maxTokens}) before it finished.`), diagnostics };
   }
 
   const rawText = extractAnthropicTextSafe(data);
   const parsed = parseStructuredOutput(rawText);
   if (!parsed) {
-    return failure('unparseable_output', `${callLabel} response was not valid JSON and no fenced JSON block fallback was found.`);
+    return { ...failure('unparseable_output', `${callLabel} response was not valid JSON and no fenced JSON block fallback was found.`), diagnostics };
   }
 
   const usage = data && data.usage ? { input_tokens: data.usage.input_tokens ?? null, output_tokens: data.usage.output_tokens ?? null } : null;
-  return { ok: true, output: parsed, rawText, modelInfo, usage };
+  return { ok: true, output: parsed, rawText, modelInfo, usage, diagnostics };
 }
 
 /**
@@ -185,7 +188,7 @@ export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageInt
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
     maxTokens: SYNTHESIS_MAX_TOKENS,
     effort: SYNTHESIS_EFFORT,
-    callLabel: 'Synthesis',
+    callLabel: 'Synthesis', claimCount: evidenceBundle.claims.length, sourceCount: evidenceBundle.sources.length,
   });
   if (!result.ok) return result;
   return { ...result, contractVersion: SYNTHESIS_OUTPUT_CONTRACT_VERSION };

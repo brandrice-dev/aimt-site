@@ -34,8 +34,8 @@ function healthyEvidenceFor(topic, { n = 6 } = {}) {
     // A safety_conclusion claim is what actually triggers NEEDS_SYNTHESIS
     // (see publication-readiness.mjs's readiness-status priority order) --
     // without one (or a mixed-direction conflict), otherwise-clean
-    // evidence resolves straight to READY, which has no synthesis_packet
-    // and is out of scope for this selector/pipeline (see module header).
+    // evidence resolves straight to READY. Both statuses are eligible; this
+    // fixture specifically exercises the synthesis-required lane.
     makeClaim(`${topic}-safety`, topic, `${topic}-s1`, { claim_type: 'safety_conclusion' }),
   ];
   for (let i = 0; i < n; i++) {
