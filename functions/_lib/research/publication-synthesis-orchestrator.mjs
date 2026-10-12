@@ -56,12 +56,14 @@ import {
   mergeReconciliationIntoSynthesis,
 } from './publication-synthesis-reconciliation.mjs';
 
+import { sanitizePublicationDiagnostics } from './publication-anthropic-transport.mjs';
+
 function emptyMetrics() {
   return { model_calls: 0, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 0, total_output_tokens: 0, calls: [], model_info: null };
 }
 
 function recordCall(metrics, label, callResult) {
-  metrics.model_calls += 1;
+  metrics.model_calls += Number.isInteger(callResult?.diagnostics?.attempts) ? callResult.diagnostics.attempts : 1;
   const usage = callResult && callResult.ok ? callResult.usage : null;
   metrics.total_input_tokens += (usage && usage.input_tokens) || 0;
   metrics.total_output_tokens += (usage && usage.output_tokens) || 0;
@@ -69,6 +71,7 @@ function recordCall(metrics, label, callResult) {
     label,
     ok: !!(callResult && callResult.ok),
     reason: callResult && !callResult.ok ? callResult.reason : null,
+    diagnostics: sanitizePublicationDiagnostics(callResult?.diagnostics),
     input_tokens: usage ? usage.input_tokens : null,
     output_tokens: usage ? usage.output_tokens : null,
   });
@@ -147,7 +150,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   const initial = await synthesizeFn(env, { topic_slug, evidenceBundle, pageIntent });
   recordCall(metrics, 'initial_synthesis', initial);
   if (!initial.ok) {
-    return { status: 'SYNTHESIS_FAILED', reason: initial.reason, stage: 'initial', finalOutput: null, reconciliation: null, initial: null, metrics };
+    return { status: 'SYNTHESIS_FAILED', reason: initial.reason, diagnostics: sanitizePublicationDiagnostics(initial.diagnostics), stage: 'initial', finalOutput: null, reconciliation: null, initial: null, metrics };
   }
 
   // Kept on every return from here on (STEP 8 reporting requirement:
@@ -181,7 +184,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
       // the top level too, not just nested under `initial`, so a
       // caller can read `pipelineResult.violations` uniformly regardless
       // of which stage ultimately failed.
-      return { status: 'SYNTHESIS_FAILED', reason: justifyResult.reason, stage: 'human_review_justification_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
+      return { status: 'SYNTHESIS_FAILED', reason: justifyResult.reason, diagnostics: sanitizePublicationDiagnostics(justifyResult.diagnostics), stage: 'human_review_justification_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
     }
     const justifyValidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: justifyResult.output });
     if (!justifyValidation.schemaValid) {
@@ -211,7 +214,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   if (!reconcileResult.ok) {
     // DIAGNOSTIC PRESERVATION: see the identical note on the
     // human_review_justification_retry call-failure branch above.
-    return { status: 'SYNTHESIS_FAILED', reason: reconcileResult.reason, stage: 'reconciliation', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
+    return { status: 'SYNTHESIS_FAILED', reason: reconcileResult.reason, diagnostics: sanitizePublicationDiagnostics(reconcileResult.diagnostics), stage: 'reconciliation', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: null, initial: initialSummary, metrics };
   }
 
   const shape = validateReconciliationShape(reconcileResult.output, missingClaimIds);
@@ -248,7 +251,7 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   if (!retryResult.ok) {
     // DIAGNOSTIC PRESERVATION: see the identical note on the
     // human_review_justification_retry call-failure branch above.
-    return { status: 'SYNTHESIS_FAILED', reason: retryResult.reason, stage: 'full_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: reconcileResult.output, initial: initialSummary, metrics };
+    return { status: 'SYNTHESIS_FAILED', reason: retryResult.reason, diagnostics: sanitizePublicationDiagnostics(retryResult.diagnostics), stage: 'full_retry', finalOutput: initial.output, violations: initialValidation.violations, reconciliation: reconcileResult.output, initial: initialSummary, metrics };
   }
 
   const retryValidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: retryResult.output });

@@ -476,6 +476,10 @@ function runPipeline(env, options = {}) {
       checkFreshnessFn: async () => [],
       loadCandidateBundleFn: () => ({ found: false, bundle: null }),
       writeCandidateBundleFn: () => {},
+      loadTopicAttemptFn: () => null,
+      writeTopicAttemptFn: () => {},
+      loadTopicIntentFn: () => null,
+      writeTopicIntentFn: () => {},
       ...(options.fns || {}),
     },
   });

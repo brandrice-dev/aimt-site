@@ -233,7 +233,7 @@ export function selectNextTopic(evidencePool, options = {}) {
   const publishedTopicSlugs = options.publishedTopicSlugs || PUBLISHED_TOPIC_SLUGS;
   const activeResearchGapsBySlug = options.activeResearchGapsBySlug || {};
   const registryConcepts = options.concepts || PUBLICATION_CONCEPTS;
-  const concepts = candidateConceptsForSelection({ publishedTopicSlugs, clusterKeys, concepts: registryConcepts });
+  const concepts = candidateConceptsForSelection({ publishedTopicSlugs, clusterKeys, concepts: registryConcepts }).filter((c) => !options.topicSlug || c.topic_slug === options.topicSlug);
   const clustersEvaluated = clusterKeys ? [...clusterKeys] : Object.keys(PUBLICATION_CLUSTERS);
 
   const candidates = concepts.map((concept) => {
@@ -256,7 +256,7 @@ export function selectNextTopic(evidencePool, options = {}) {
     else if (v1Result.readiness_status === READINESS_STATUS.HUMAN_REVIEW) { eligible = false; ineligibleReason = 'HUMAN_REVIEW_NEVER_AUTONOMOUS'; }
     else if (v1Result.readiness_status === READINESS_STATUS.NOT_READY) { eligible = false; ineligibleReason = 'NOT_READY_SKIP'; }
     else if (Array.isArray(v1Result.evidence_gaps) && v1Result.evidence_gaps.length > 0) { eligible = false; ineligibleReason = 'EVIDENCE_GAPS_SKIP'; }
-    else if (v1Result.readiness_status !== READINESS_STATUS.NEEDS_SYNTHESIS) { eligible = false; ineligibleReason = `UNEXPECTED_READINESS_STATUS:${v1Result.readiness_status}`; }
+    else if (![READINESS_STATUS.READY, READINESS_STATUS.NEEDS_SYNTHESIS].includes(v1Result.readiness_status)) { eligible = false; ineligibleReason = `UNEXPECTED_READINESS_STATUS:${v1Result.readiness_status}`; }
     else if (cannibalization.cannibalizes) { eligible = false; ineligibleReason = `CANNIBALIZES_PUBLISHED:${cannibalization.overlapping_with.join(',')}`; }
     // RESEARCH-GAP FEEDBACK LOOP (checked LAST -- never overrides any of
     // the safety/readiness/cannibalization reasons above; only excludes
@@ -267,6 +267,10 @@ export function selectNextTopic(evidencePool, options = {}) {
     // exact release conditions (a changed claim set, or research_received).
     else if (isTopicHeldByResearchGap(activeResearchGapsBySlug[concept.topic_slug], v1Result.candidate_claim_ids)) {
       eligible = false; ineligibleReason = 'RESEARCH_GAP_PENDING';
+    }
+
+    if (eligible && options.attemptHoldsBySlug?.[concept.topic_slug]) {
+      eligible = false; ineligibleReason = options.attemptHoldsBySlug[concept.topic_slug];
     }
 
     return { topic_slug: concept.topic_slug, cluster: concept.cluster, concept, v1_result: v1Result, opportunity, cannibalization, eligible, ineligible_reason: ineligibleReason };

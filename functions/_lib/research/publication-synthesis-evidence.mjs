@@ -71,7 +71,7 @@ function projectSource(source) {
  * `claims` itself, so this function can never accidentally widen the
  * candidate set beyond what v1 already decided was in-bounds.
  *
- * @param {object} packet - a NEEDS_SYNTHESIS result's `synthesis_packet`
+ * @param {object} packet - an eligible READY/NEEDS_SYNTHESIS result's `synthesis_packet`
  * @param {object[]} claims - the full claims array v1 was run against
  *   (topic-scoped, any status -- same input assessTopicReadiness received)
  * @param {object[]} sources - the full sources array v1 was run against
@@ -79,7 +79,7 @@ function projectSource(source) {
  */
 export function buildSynthesisEvidenceBundle(packet, { claims = [], sources = [] } = {}) {
   if (!packet || typeof packet !== 'object') {
-    throw new Error('buildSynthesisEvidenceBundle: a synthesis_packet is required (only NEEDS_SYNTHESIS results have one).');
+    throw new Error('buildSynthesisEvidenceBundle: a synthesis_packet is required (eligible READY/NEEDS_SYNTHESIS results have one).');
   }
   const candidateClaimIds = new Set(packet.candidate_claim_ids || []);
   const candidateSourceIds = new Set(packet.candidate_source_ids || []);

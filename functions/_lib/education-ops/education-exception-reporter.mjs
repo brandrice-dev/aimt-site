@@ -15,6 +15,8 @@
    than opening a duplicate.
    ═══════════════════════════════════════════════════════════════ */
 
+import { sanitizePublicationDiagnostics } from '../research/publication-anthropic-transport.mjs';
+
 export const EXCEPTION_LABELS = Object.freeze({
   RISK_OR_HUMAN_REVIEW: 'education-review',
   INFRA: 'education-infra',
@@ -32,6 +34,9 @@ const FINAL_STATE_TO_LABEL = Object.freeze({
   FRESHNESS_FLAGGED: EXCEPTION_LABELS.FRESHNESS,
   CONFIG_BLOCKED: EXCEPTION_LABELS.CONFIG,
   PUBLISH_FAILED: EXCEPTION_LABELS.INFRA,
+  PROVIDER_FAILED: EXCEPTION_LABELS.INFRA,
+  INVALID_RESPONSE: EXCEPTION_LABELS.INFRA,
+  SYNTHESIS_FAILED: EXCEPTION_LABELS.INFRA,
 });
 
 export class ExceptionReporterError extends Error {
@@ -76,11 +81,13 @@ export async function surfaceExceptionIfNeeded(report, io) {
   const violationCodes = (report.publication_editor_result && Array.isArray(report.publication_editor_result.validator_violation_codes))
     ? report.publication_editor_result.validator_violation_codes
     : [];
+  const diagnostics = sanitizePublicationDiagnostics(report.publication_editor_result?.diagnostics || report.provider_request_diagnostics);
   const body = [
     `**Run:** ${report.run_id}`,
     `**Final state:** ${report.final_state}`,
     `**Selected topic:** ${report.selected_topic || 'n/a'}`,
     `**Exception reason:** ${report.exception_reason || 'n/a'}`,
+    ...(diagnostics ? [`**Publication request diagnostics:** ${JSON.stringify(diagnostics)}`] : []),
     `**Selection reason:** ${report.selection_reason || 'n/a'}`,
     ...(violationCodes.length > 0 ? ['', 'Publication Editor validator codes:', ...violationCodes.map((code) => `- ${code}`)] : []),
     '',

@@ -75,7 +75,7 @@ function source(overrides = {}) {
   check('LOWER_CLEAN_READY', 'readiness_status is READY', result.readiness_status === READINESS_STATUS.READY, result.readiness_status);
   check('LOWER_CLEAN_READY', 'no conflict flags', result.conflict_flags.length === 0, JSON.stringify(result.conflict_flags));
   check('LOWER_CLEAN_READY', 'no evidence gaps', result.evidence_gaps.length === 0, JSON.stringify(result.evidence_gaps));
-  check('LOWER_CLEAN_READY', 'no synthesis packet on a READY result', result.synthesis_packet === null);
+  check('LOWER_CLEAN_READY', 'READY retains exact candidate IDs for governed synthesis', JSON.stringify(result.synthesis_packet.candidate_claim_ids) === JSON.stringify(result.candidate_claim_ids) && result.synthesis_packet.synthesis_required_flags.length === 0);
 })();
 
 // ─────────────────────────────────────────────────────────────────────────

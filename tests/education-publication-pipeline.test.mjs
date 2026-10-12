@@ -9,7 +9,7 @@
 //
 // Run: node tests/education-publication-pipeline.test.mjs
 
-import { runPublicationPipeline, buildGhPrCreateArgs, educationArticlePathFromRoute } from '../scripts/education-operations-cycle.mjs';
+import { runPublicationPipeline, buildGhPrCreateArgs, buildGhPrMergeArgs, educationArticlePathFromRoute } from '../scripts/education-operations-cycle.mjs';
 import { RUN_FINAL_STATE } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { PUBLICATION_STATE } from '../functions/_lib/education-ops/education-publication-state.mjs';
 import { FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
@@ -144,6 +144,7 @@ async function testFullHappyPathReachesPublishedWithZeroModelCalls() {
   check('HAPPY_PATH', 'test #24: final_state is PUBLISHED', report.final_state === RUN_FINAL_STATE.PUBLISHED, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
   check('HAPPY_PATH', 'test #1/#26: model_calls.total_calls is exactly 0', report.model_calls.total_calls === 0, report.model_calls.total_calls);
   check('HAPPY_PATH', 'merge was actually invoked (test #5: AUTOPUBLISH true is required for merge, and here it is honored)', mergeSpy.callCount === 1);
+  check('HAPPY_PATH', 'merge atomically binds the validated head', mergeSpy.lastArgs[1] === HEAD_SHA && buildGhPrMergeArgs(100, HEAD_SHA).includes('--match-head-commit'));
   check('HAPPY_PATH', 'test #22: publishClearanceRecord received the EXACT generation hash', publishSpy.lastArgs[2].requireCurrentHash === HASH);
   check('HAPPY_PATH', 'publication_action reports the PR number and merge commit', report.publication_action.pr_number === 100 && report.publication_action.merge_commit_sha === MERGE_SHA);
 }

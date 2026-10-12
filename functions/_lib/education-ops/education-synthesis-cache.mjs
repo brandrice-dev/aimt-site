@@ -94,6 +94,7 @@ export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = n
       preparedArtifact: null,
       pipelineMetrics: pipelineResult.metrics,
       reason: pipelineResult.reason || null,
+      diagnostics: pipelineResult.diagnostics || null,
       violations: pipelineResult.violations || null,
       humanReviewJustification: pipelineResult.finalOutput ? pipelineResult.finalOutput.human_review_justification : null,
     };
