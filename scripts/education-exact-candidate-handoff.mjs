@@ -6,6 +6,7 @@ import { restoreExactScalpCandidate, verifyScalpCandidate, verifyScalpFreshness,
 import { fetchTopicEvidenceLive } from '../functions/_lib/research/publication-readiness-loader.mjs';
 import { fetchPublishedTopicSlugsLive, countPagesPublishedThisWeekLive } from '../functions/_lib/education-ops/education-published-state-loader.mjs';
 import { runPublicationPipeline, resolveTrustedSiblingPages, resolveMaxPagesPerWeek, AUTOPUBLISH_ENV_VAR } from './education-operations-cycle.mjs';
+import { reconcileScalpPrHead } from './_lib/education-pr-head-reconciliation.mjs';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 export function requireExplicitPublicationApproval(env) {
@@ -29,6 +30,7 @@ export async function runExactCandidateHandoff(env, overrides = {}) {
     fetchRoute: fetch,
     checkoutHead: () => execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(),
     publish: runPublicationPipeline,
+    reconcile: (env, bundle) => reconcileScalpPrHead(ROOT, env, bundle),
     writeReport: (name, report) => {
       const directory = path.join(ROOT, 'research-import', 'education-ops', 'runs');
       mkdirSync(directory, { recursive: true });
@@ -68,6 +70,7 @@ export async function runExactCandidateHandoff(env, overrides = {}) {
     // or the repository variable; scheduled publication retains its own gate.
     requireExplicitPublicationApproval(env);
     if (io.checkoutHead() !== env.RELEASE_HEAD) throw new Error('EXACT_RELEASE_CHECKOUT_MISMATCH');
+    await io.reconcile(env, bundle);
     const result = await io.publish({ ...env, [AUTOPUBLISH_ENV_VAR]: 'true' }, { topicSlug: bundle.topic_slug });
     io.writeReport('exact-candidate-publication.json', result);
     return result;
