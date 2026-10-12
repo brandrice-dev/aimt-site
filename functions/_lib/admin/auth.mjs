@@ -48,7 +48,7 @@ async function bootstrapOwnerIfAllowed(env, user) {
   return res.body[0];
 }
 
-export async function resolveAdmin(env, request, allowedRoles = ['owner', 'admin', 'support']) {
+export async function resolveAdmin(env, request, allowedRoles = ['owner', 'admin', 'support'], { bootstrap = true } = {}) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     return { errorResponse: json({ error: 'Admin service is not configured.' }, 503) };
   }
@@ -58,7 +58,7 @@ export async function resolveAdmin(env, request, allowedRoles = ['owner', 'admin
   const user = identity.user;
 
   let admin = await readAdminRow(env, user.id);
-  if (!admin) admin = await bootstrapOwnerIfAllowed(env, user);
+  if (!admin && bootstrap) admin = await bootstrapOwnerIfAllowed(env, user);
 
   if (!admin || admin.active !== true || !allowedRoles.includes(admin.role)) {
     return { errorResponse: json({ error: 'Admin access required.' }, 403) };
