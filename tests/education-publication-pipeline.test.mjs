@@ -113,6 +113,7 @@ function makeHappyIo({ manifestStore = new Map(), bundle, existingPr = null, exi
     refreshLaunchPrArticleFn: async () => ({ changed: false, headRefOid: HEAD_SHA, changedPaths: [] }),
     ghPrListForBranchFn: () => existingPr,
     ghPrViewFn: (n) => ({ number: n, state: 'OPEN', headRefOid: HEAD_SHA, files: [{ path: educationArticlePathFromRoute(ROUTE) }, { path: 'sitemap.xml' }, { path: `functions/_data/education-page-plans/${TOPIC_SLUG}.json` }, { path: 'education/hair-loss.html' }] }),
+    checkCandidateHeadTestsFn: () => ({ ok: true, violations: [] }),
     ghPrMergeFn: (n) => ({ number: n, state: 'MERGED', mergeCommitOid: MERGE_SHA }),
     fetchClearanceRowFn: async () => clearanceRow,
     writeClearanceRecordFn: async (env, record) => { clearanceRow = { ...record, sitemap_eligible: false, published_at: null }; return [clearanceRow]; },
@@ -147,6 +148,17 @@ async function testFullHappyPathReachesPublishedWithZeroModelCalls() {
   check('HAPPY_PATH', 'merge atomically binds the validated head', mergeSpy.lastArgs[1] === HEAD_SHA && buildGhPrMergeArgs(100, HEAD_SHA).includes('--match-head-commit'));
   check('HAPPY_PATH', 'test #22: publishClearanceRecord received the EXACT generation hash', publishSpy.lastArgs[2].requireCurrentHash === HASH);
   check('HAPPY_PATH', 'publication_action reports the PR number and merge commit', report.publication_action.pr_number === 100 && report.publication_action.merge_commit_sha === MERGE_SHA);
+}
+
+// Required-head test rejection blocks merge AND the pre-publication DB write.
+{
+  const io = makeHappyIo({ bundle: makeReadyBundle() });
+  let writes = 0, merges = 0;
+  io.checkCandidateHeadTestsFn = () => ({ ok: false, violations: ['CANDIDATE_HEAD_TESTS_MISSING'] });
+  io.writeClearanceRecordFn = async () => { writes++; };
+  io.ghPrMergeFn = () => { merges++; };
+  const report = await runPublicationPipeline(FAKE_ENV_AUTOPUBLISH_ON, { topicSlug: TOPIC_SLUG, io });
+  check('HEAD_TEST_GATE', 'missing tests fail publication before production mutation', report.final_state === RUN_FINAL_STATE.PUBLISH_FAILED && writes === 0 && merges === 0, report.exception_reason);
 }
 
 // ─────────────────────────────────────────────────────────────────────────

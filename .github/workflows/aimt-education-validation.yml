@@ -1,0 +1,29 @@
+name: AIMT Education Validation
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  publication-tests:
+    name: Publication candidate tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Verify exact candidate head
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Run focused publication tests without production credentials
+        run: |
+          env -i PATH="$PATH" NODE_OPTIONS="--import=$PWD/tests/support/education-offline-only.mjs" \
+            node --test tests/education-*.test.mjs tests/research-publication-*.test.mjs tests/publication-anthropic-transport.test.mjs tests/publication-violation-sanitizer.test.mjs

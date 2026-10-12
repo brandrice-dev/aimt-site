@@ -69,6 +69,7 @@ import { checkEducationOpsCredential } from '../functions/_lib/education-ops/edu
 import { planPageIntent } from '../functions/_lib/education-ops/education-intent-planner-client.mjs';
 import { validateIntentPlan } from '../functions/_lib/education-ops/education-intent-planner-validator.mjs';
 import { createPublicationCostControl } from '../functions/_lib/research/publication-cost-control.mjs';
+import { waitForCandidateHeadTests } from './_lib/education-candidate-checks.mjs';
 import { topicAttemptFingerprint, topicAttemptHold, reserveTopicAttempt, loadTopicAttempt, writeTopicAttempt, loadTopicIntent, writeTopicIntent } from './_lib/education-topic-attempts.mjs';
 import { sanitizePublicationDiagnostics } from '../functions/_lib/research/publication-anthropic-transport.mjs';
 import { prepareTopicArtifact, publishPreparedArtifact } from '../functions/_lib/education-ops/education-synthesis-cache.mjs';
@@ -1835,6 +1836,7 @@ function buildRealPublishIo(env) {
     ghPrListForBranchFn: ghPrListForBranch,
     ghPrViewFn: ghPrView,
     ghPrMergeFn: ghPrMerge,
+    checkCandidateHeadTestsFn: waitForCandidateHeadTests,
     fetchClearanceRowFn: fetchClearanceRowByTopicSlug,
     writeClearanceRecordFn: writeClearanceRecord,
     publishClearanceRecordFn: publishClearanceRecord,
@@ -2162,6 +2164,20 @@ export async function runPublicationPipeline(env, options = {}) {
       publication_action: { enabled: false, state: manifest.state, pr_number: manifest.generated.pr_number, pr_url: manifest.generated.pr_url },
       exception_reason: `${AUTOPUBLISH_ENV_VAR} is not "true" -- candidate verified and PR ${manifest.generated.pr_number ? `#${manifest.generated.pr_number} ` : ''}is open, but clearance/merge/deploy/publish all stay blocked until the gate is explicitly enabled.`,
     });
+  }
+
+  // Passing tests must belong to this exact candidate PR head, from the
+  // trusted publication workflow. Fail before any new production DB write.
+  if (!routeAlreadyPublished && [PUBLICATION_STATE.PR_OPEN, PUBLICATION_STATE.CLEARANCE_PERSISTED].includes(stage())) {
+    let checks;
+    try {
+      checks = await io.checkCandidateHeadTestsFn({ repo: env.GITHUB_REPOSITORY,
+        headSha: manifest.generated.expected_head_sha, prNumber: manifest.generated.pr_number });
+    } catch {
+      checks = { ok: false, violations: ['CANDIDATE_HEAD_TEST_QUERY_FAILED'] };
+    }
+    if (!checks.ok) return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED,
+      planned_route: bundle.route, exception_reason: `Exact candidate-head tests block publication: ${checks.violations.join(', ')}` });
   }
 
   // --- STEP 9: persist the NON-PUBLIC clearance row, idempotently ------

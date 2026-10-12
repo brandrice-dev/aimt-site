@@ -13,6 +13,24 @@ on:
         description: 'The already Reviewer-PASS candidate topic_slug to publish (e.g. alopecia-areata). Never guessed.'
         required: true
         type: string
+      operation:
+        description: 'verify reads current evidence only; publish requires exact release approval.'
+        type: choice
+        options: [verify, publish]
+        default: verify
+      source_run_id:
+        description: 'Exact successful diagnostic run (Scalp Microbiome: 38265572713).'
+        type: string
+      candidate_artifact_id:
+        description: 'Exact candidate artifact (Scalp Microbiome: 11754847436).'
+        type: string
+      approve_publication:
+        description: 'Owner approval to execute publication; leave false for verification.'
+        type: boolean
+        default: false
+      release_head:
+        description: 'Exact approved main commit SHA. Required only for publication.'
+        type: string
 
   workflow_run:
     workflows: ["AIMT Education Operations"]
@@ -158,12 +176,23 @@ jobs:
         with:
           node-version: 20
 
+      - name: Verify explicit manual release approval
+        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'publish'
+        env:
+          APPROVE_PUBLICATION: ${{ inputs.approve_publication }}
+          RELEASE_HEAD: ${{ inputs.release_head }}
+        run: |
+          test "$APPROVE_PUBLICATION" = "true"
+          test "$GITHUB_REF_NAME" = "main"
+          test "$RELEASE_HEAD" = "$GITHUB_SHA"
+
       - name: Configure git identity for the generated publish commit
         run: |
           git config user.name "aimt-education-ops[bot]"
           git config user.email "aimt-education-ops@users.noreply.github.com"
 
       - name: Restore durable candidate bundles
+        if: github.event_name != 'workflow_dispatch' || (inputs.topic != 'scalp-microbiome' && inputs.operation == 'publish')
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_RUN_ID: ${{ needs.scheduled-handoff.outputs.source_run_id }}
@@ -202,6 +231,7 @@ jobs:
           fi
 
       - name: Restore durable publication manifests
+        if: github.event_name != 'workflow_dispatch' || inputs.operation == 'publish'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -225,6 +255,7 @@ jobs:
           fi
 
       - name: Run Education Operations production publish lane
+        if: github.event_name != 'workflow_dispatch' || (inputs.topic != 'scalp-microbiome' && inputs.operation == 'publish')
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -233,6 +264,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TOPIC_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.topic || needs.scheduled-handoff.outputs.topic }}
         run: node scripts/education-operations-cycle.mjs --publish --topic="$TOPIC_INPUT"
+
+      - name: Verify or publish the exact owner-selected Scalp Microbiome artifact
+        if: github.event_name == 'workflow_dispatch' && inputs.topic == 'scalp-microbiome'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AIMT_EDUCATION_AUTOPUBLISH_ENABLED: ${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}
+          AIMT_EDUCATION_MAX_PAGES_PER_WEEK: ${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}
+          GH_TOKEN: ${{ github.token }}
+          TOPIC_INPUT: ${{ inputs.topic }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          CANDIDATE_ARTIFACT_ID: ${{ inputs.candidate_artifact_id }}
+          PUBLICATION_OPERATION: ${{ inputs.operation }}
+          APPROVE_PUBLICATION: ${{ inputs.approve_publication }}
+          RELEASE_HEAD: ${{ inputs.release_head }}
+        run: node scripts/education-exact-candidate-handoff.mjs
 
       - name: Upload run report
         uses: actions/upload-artifact@v4
