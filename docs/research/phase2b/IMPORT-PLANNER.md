@@ -63,7 +63,7 @@ All inputs detach before asynchronous hashing; results are recursively frozen. `
 
 `checkImportPlanHeads(plan, currentHeads)` checks all read dependencies and detects stale versions, including ABA. A successful pure check is not a lock. Future persistence must repeat these conditions atomically; plans must not be trusted solely because a caller supplied `ok: true`.
 
-## Validation on Node 20
+## Initial validation on Node 20 (commit 8027eb2)
 
 Official local Node v20.20.2, empty credential environment, external fetch/socket guard, synthetic fixtures and local mocks/fixture servers only.
 
@@ -102,3 +102,8 @@ Compatibility tests cover packet validation/adapter IDs, canonical ingestion par
 6. The complete verified history is held in memory and may be large. Bound retrieval and snapshot size before runtime integration; do not truncate history/evidence silently. Effective required-check enforcement and inherited test-fixture failures remain upstream release prerequisites.
 
 Only the new planner, synthetic tests and this integration report are added. Existing packet adapter, importer, scientific contract, evidence projections, schema, approval writers, public publishing, student courses and Cadence remain unchanged. No migrations, live research writes, model calls, agents, schedules, merge or deployment commands. Stop at the draft review PR before persistence implementation.
+
+
+## Real-packet compatibility correction
+
+The [real-packet compatibility gate](REAL-PACKET-COMPATIBILITY.md) records the follow-up read-only sample, aggregate missing requirements, planner v2 contradiction-binding correction and current tests. Its results supersede the initial synthetic-only readiness assessment. Packet-first typed edges now need explicit description bindings; narrative-only adapter batches remain incomplete. Failure results include original private input and unresolved evidence, so downstream reporting must retain the existing aggregate-only public-log boundary. No persistence or enrichment workflow is activated.

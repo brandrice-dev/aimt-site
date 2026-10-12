@@ -9,7 +9,7 @@ import {
 import { validatePacket, packetToBatch, feedId } from './packet-adapter.mjs';
 import { validateSource, validateClaim } from './schema.mjs';
 
-export const IMPORT_PLANNER_VERSION = 'aimt-revision-import-planner-v1';
+export const IMPORT_PLANNER_VERSION = 'aimt-revision-import-planner-v2';
 const own = (o, k) => Object.hasOwn(o, k);
 const copy = (v) => JSON.parse(json(v));
 const fail = (code, path, message) => { throw new ScientificContractError(code, path, message); };
@@ -175,16 +175,65 @@ function packetRows(packet, library, identities) {
   return batch;
 }
 
+/** Packet descriptions identify involved sources, not their directed roles.
+ * Require explicit descriptor-to-edge bindings; never infer contradiction or
+ * qualification from narrative, co-occurrence, or the supporting-source list.
+ */
+function bindPacketContradictions(packet, batch, row, relationships, identities) {
+  const rawClaim = packet.claims.find((c) => (identities.claims?.[c.claim_id] ?? feedId('claim', c.claim_id)) === row.claim_id);
+  const sourceIds = new Map(packet.sources.map((s, i) => [s.source_id, batch.sources[i].source_id]));
+  const relevant = packet.contradictions.map((descriptor, index) => ({ descriptor, index }))
+    .filter(({ descriptor }) => descriptor.related_claim_ids.includes(rawClaim.claim_id));
+  const bound = new Map();
+  const edges = relationships.map((edge) => {
+    const indices = own(edge.provenance ?? {}, 'packet_contradiction_indices') ? edge.provenance.packet_contradiction_indices : [];
+    if (!Array.isArray(indices) || indices.some((i) => !Number.isInteger(i) || !relevant.some((d) => d.index === i))) {
+      fail('INVALID_CONTRADICTION_BINDING', row.claim_id, 'indices must name descriptions related to this packet claim');
+    }
+    const descriptors = [...new Set(indices)].sort((a, b) => a - b).map((i) => {
+      const descriptor = packet.contradictions[i];
+      if (!own(edge, 'source_id') || !descriptor.source_ids_involved.some((id) => sourceIds.get(id) === edge.source_id)) {
+        fail('INVALID_CONTRADICTION_BINDING', row.claim_id, 'edge source must be explicitly involved in the bound description');
+      }
+      if (!bound.has(i)) bound.set(i, []);
+      bound.get(i).push(edge);
+      return descriptor;
+    });
+    if (!descriptors.length) return edge;
+    // Preserve original qualification shape/value, and bind the exact narrative
+    // as scientific context. It is never converted into a fabricated quotation.
+    return { ...edge, qualifications: {
+      ...(own(edge, 'qualifications') ? { original_qualifications: edge.qualifications } : {}),
+      packet_contradictions: descriptors,
+    } };
+  });
+  const unresolved = [];
+  for (const { descriptor, index } of relevant) {
+    const bindings = bound.get(index) ?? [];
+    const missingSourceIds = descriptor.source_ids_involved.map((id) => sourceIds.get(id))
+      .filter((id) => !bindings.some((e) => e.source_id === id));
+    if (missingSourceIds.length || !bindings.some((e) => ['contradicts', 'qualifies'].includes(e.relation))) {
+      unresolved.push({ code: 'UNRESOLVED_PACKET_CONTRADICTION', claim_id: row.claim_id, contradiction_index: index,
+        descriptor, missing_source_ids: missingSourceIds,
+        reason: 'Explicit source roles and scoped contradiction/qualification bindings required; narrative is not a typed disposition.' });
+    }
+  }
+  return { relationships: edges, unresolved };
+}
+
 /** Input is an existing packet OR sources/claims import batch, a complete
  * caller-supplied library snapshot, explicit evidence and expected head tokens.
  * All-or-nothing: rejected/incomplete/conflicting results have empty append.
  * Candidates remain available for private review, never receive decisions.
  */
 export async function planResearchImport(input) {
-  let candidates = [], preconditions = [], retainedHistory = null;
+  let candidates = [], preconditions = [], retainedHistory = null, inputObservation = null;
+  const unresolvedEvidence = [];
+  const problems = [];
   const empty = () => ({ source_revisions: [], claim_revisions: [], evidence_edges: [], provenance: [] });
   try {
     input = copy(input); // synchronous lossless detach before first await
+    inputObservation = input?.packet ?? input?.batch ?? null;
     const { library, expected_heads, evidence = {}, identity_map = {} } = input;
     for (const key of Object.keys(input)) if (!['library', 'expected_heads', 'evidence', 'identity_map', 'packet', 'batch'].includes(key)) fail('UNCLASSIFIED_FIELD', key, 'unknown planner input');
     for (const key of Object.keys(evidence)) if (!['relationships', 'related_claims'].includes(key)) fail('UNCLASSIFIED_FIELD', `evidence.${key}`, 'unknown evidence input');
@@ -252,7 +301,6 @@ export async function planResearchImport(input) {
       if (previous) for (const key of Object.keys(previous.content)) if (!own(candidate.content, key)) fail('INCOMPLETE_SOURCE_SNAPSHOT', row.source_id, `omitted scientific field ${key}`);
       sourceCandidates.set(row.source_id, candidate);
     }
-    const problems = [];
     for (const row of claims.values()) {
       const validation = validateClaim(row);
       if (validation.errors.length) fail('INVALID_CLAIM', row.claim_id, validation.errors.join('; '));
@@ -260,7 +308,13 @@ export async function planResearchImport(input) {
       const claimGuard = guard('claims', row.claim_id);
       const declared = declarations(row);
       const { content, provenance } = await claimContent(row);
-      const relationships = evidence.relationships?.[row.claim_id] ?? Object.entries(declared).flatMap(([type, ids]) => ids.map((id) => ({
+      if (input.batch && provenance.packet_batch_id && /(?:^|\n)## Recorded contradictions\n/.test(content.body_markdown ?? '')) {
+        const unresolved = { code: 'UNRESOLVED_LEGACY_PACKET_CONTRADICTION', claim_id: row.claim_id,
+          reason: 'Adapter narrative lacks original source-role bindings; supply the original packet with explicit typed evidence.' };
+        problems.push(unresolved);
+        unresolvedEvidence.push({ ...unresolved, original_evidence: content.body_markdown });
+      }
+      let relationships = evidence.relationships?.[row.claim_id] ?? Object.entries(declared).flatMap(([type, ids]) => ids.map((id) => ({
         source_id: id, relation: { supports: 'supports', contradicts: 'contradicts', qualifies: 'qualifies' }[type],
         scope: content.population_or_scope || { status: 'unknown', reason: 'scope not supplied' },
         locator: content.page_or_section_locator || content.locator || { status: 'unknown', reason: 'locator not supplied' },
@@ -268,6 +322,12 @@ export async function planResearchImport(input) {
       for (const [type, ids] of Object.entries(declared)) for (const id of ids) {
         const relation = { supports: 'supports', contradicts: 'contradicts', qualifies: 'qualifies' }[type];
         if (!relationships.some((e) => e.source_id === id && e.relation === relation)) fail('INCOMPLETE_RELATIONSHIP', row.claim_id, `declared ${relation} ${id} missing`);
+      }
+      if (input.packet) {
+        const binding = bindPacketContradictions(input.packet, batch, row, relationships, identity_map);
+        relationships = binding.relationships;
+        unresolvedEvidence.push(...binding.unresolved);
+        problems.push(...binding.unresolved.map(({ descriptor, ...reason }) => reason));
       }
       const sourceIds = new Set(relationships.filter((e) => own(e, 'source_id')).map((e) => e.source_id));
       const sources = [];
@@ -317,7 +377,8 @@ export async function planResearchImport(input) {
     for (const id of rows.keys()) if (!candidates.some((r) => r.sources.some((s) => s.source_id === id))) fail('UNUSED_ENDPOINT', id, 'source not referenced by any incoming claim');
     preconditions = [...guards.values()].sort((a, b) => json(a) < json(b) ? -1 : json(a) > json(b) ? 1 : 0);
     if (problems.length) return freeze({ ok: false, status: 'incomplete', planner_version: IMPORT_PLANNER_VERSION, reasons: problems,
-      candidates, preconditions, append: empty(), retained_history: retainedHistory });
+      candidates, preconditions, append: empty(), retained_history: retainedHistory,
+      unresolved_evidence: unresolvedEvidence, input_observation: inputObservation });
     const append = empty();
     const plannedSources = new Set();
     const outcomes = [];
@@ -359,8 +420,9 @@ export async function planResearchImport(input) {
       if (!(e instanceof TypeError)) throw e;
       e = new ScientificContractError('INVALID_INPUT', 'input', 'malformed planner input');
     }
-    const status = e.code === 'STALE_HEAD' || e.code === 'CONFLICTING_IDENTITY' ? 'conflicting' : 'rejected';
+    const status = e.code === 'STALE_HEAD' || e.code === 'CONFLICTING_IDENTITY' ? 'conflicting' : e.code === 'INCOMPLETE_CONTRADICTION' ? 'incomplete' : 'rejected';
     return freeze({ ok: false, status, planner_version: IMPORT_PLANNER_VERSION,
-      reasons: [{ code: e.code, path: e.path, message: e.message }], candidates, preconditions, append: empty(), retained_history: retainedHistory });
+      reasons: [{ code: e.code, path: e.path, message: e.message }, ...problems], candidates, preconditions, append: empty(), retained_history: retainedHistory,
+      unresolved_evidence: unresolvedEvidence, input_observation: inputObservation });
   }
 }

@@ -378,3 +378,119 @@ test('lossy feed IDs cannot collide with identities declared by prior library pa
   const g = packetInput(); g.library.claims = [{ claim_id: 'rf-claim-c1', extras: { packet_claim_id: 'C1!' } }];
   noWrites(await planResearchImport(g), 'AMBIGUOUS_IDENTITY');
 });
+
+// Fictional structural fixtures only; no private feed text/IDs/locators.
+function contradictionFixture() {
+  const f = packetInput();
+  f.packet.sources.push({ ...clone(f.packet.sources[0]), source_id: 'S2', doi: '10.synthetic/other', title: 'Another synthetic report', study_family_id: 'study-B' });
+  f.packet.claims[0].source_ids_supporting.push('S2');
+  f.packet.contradictions = [{ description: 'Synthetic reports concern different conditions; direction remains unassigned.', related_claim_ids: ['C1'], source_ids_involved: ['S1', 'S2'] }];
+  f.library.heads.sources['rf-src-s2'] = absent(); f.expected_heads = clone(f.library.heads);
+  f.evidence.relationships['rf-claim-c1'].push({ source_id: 'rf-src-s2', relation: 'supports', scope: 'synthetic adults', locator: 'Synthetic results' });
+  return f;
+}
+function bindContradictionFixture(f) {
+  const edges = f.evidence.relationships['rf-claim-c1'];
+  edges[0].provenance = { packet_contradiction_indices: [0] };
+  edges.push({ source_id: 'rf-src-s2', relation: 'qualifies', scope: 'Different synthetic condition', locator: 'Synthetic limitations',
+    qualifications: ['Original synthetic qualification.'], provenance: { packet_contradiction_indices: [0] } });
+  return f;
+}
+
+test('packet descriptions with supporting-only arrays remain unresolved; no negative relationship is inferred', async () => {
+  const f = contradictionFixture(), original = clone(f);
+  const p = await planResearchImport(f);
+  noWrites(p, 'UNRESOLVED_PACKET_CONTRADICTION'); assert.equal(p.status, 'incomplete');
+  assert.deepEqual(p.unresolved_evidence[0].descriptor, f.packet.contradictions[0]);
+  assert.deepEqual(p.input_observation, f.packet); assert.deepEqual(f, original);
+  assert.equal(p.candidates[0].relationships.filter((e) => e.relation !== 'supports').length, 0);
+  assert.deepEqual(p.candidates[0].content.body_sections.recorded_contradictions, f.packet.contradictions);
+});
+
+test('description sources absent from one focal graph are retained unresolved even if cited by another claim', async () => {
+  const f = contradictionFixture(); f.packet.claims[0].source_ids_supporting = ['S1'];
+  f.evidence.relationships['rf-claim-c1'].pop();
+  f.packet.claims.push({ ...clone(f.packet.claims[0]), claim_id: 'C2', source_ids_supporting: ['S2'] });
+  f.library.heads.claims['rf-claim-c2'] = absent(); f.expected_heads = clone(f.library.heads);
+  f.evidence.relationships['rf-claim-c2'] = [{ source_id: 'rf-src-s2', relation: 'supports', scope: 'synthetic adults', locator: 'Synthetic results' }];
+  const p = await planResearchImport(f); noWrites(p, 'UNRESOLVED_PACKET_CONTRADICTION');
+  assert.ok(p.unresolved_evidence[0].missing_source_ids.includes('rf-src-s2'));
+  assert.equal(p.candidates[0].sources.length, 1); // no fabricated relationship to the missing focal source
+  assert.equal(p.input_observation.sources.length, 2);
+});
+
+test('explicit scoped bindings preserve original description in typed scientific edges, never as invented quotation', async () => {
+  const f = bindContradictionFixture(contradictionFixture()), p = await planResearchImport(f);
+  assert.equal(p.ok, true, JSON.stringify(p.reasons));
+  const edge = p.candidates[0].relationships.find((e) => e.relation === 'qualifies');
+  assert.deepEqual(edge.qualifications.original_qualifications, ['Original synthetic qualification.']);
+  assert.deepEqual(edge.qualifications.packet_contradictions, f.packet.contradictions);
+  assert.equal(edge.quote, undefined); assert.equal(p.candidates[0].status, undefined);
+  assert.deepEqual(p.decisions_to_append, []);
+  assert.deepEqual(await verifyScientificRevision(clone(p.candidates[0])), p.candidates[0]);
+  f.packet.contradictions[0].description += ' Additional synthetic limitation.';
+  const changed = await planResearchImport(f);
+  assert.equal(changed.ok, true);
+  assert.notEqual(changed.candidates[0].graph_digest, p.candidates[0].graph_digest);
+  assert.notEqual(changed.candidates[0].scientific_digest, p.candidates[0].scientific_digest);
+});
+
+test('typed negative edges without exact description bindings cannot silently resolve narrative contradictions', async () => {
+  const f = bindContradictionFixture(contradictionFixture());
+  delete f.evidence.relationships['rf-claim-c1'][2].provenance;
+  noWrites(await planResearchImport(f), 'UNRESOLVED_PACKET_CONTRADICTION');
+  const g = bindContradictionFixture(contradictionFixture());
+  delete g.evidence.relationships['rf-claim-c1'][0].provenance;
+  noWrites(await planResearchImport(g), 'UNRESOLVED_PACKET_CONTRADICTION');
+});
+
+test('invalid descriptor bindings reject with preserved input, no cross-claim or cross-source inference', async () => {
+  for (const indices of [[3], [-1], ['0'], '0']) {
+    const f = bindContradictionFixture(contradictionFixture());
+    f.evidence.relationships['rf-claim-c1'][0].provenance.packet_contradiction_indices = indices;
+    const p = await planResearchImport(f); noWrites(p, 'INVALID_CONTRADICTION_BINDING');
+    assert.deepEqual(p.input_observation, f.packet);
+  }
+  const g = bindContradictionFixture(contradictionFixture());
+  g.packet.contradictions[0].source_ids_involved = ['S2'];
+  noWrites(await planResearchImport(g), 'INVALID_CONTRADICTION_BINDING');
+});
+
+test('each description and each focal claim requires its own explicit typed disposition', async () => {
+  const f = bindContradictionFixture(contradictionFixture());
+  f.packet.contradictions.push({ ...clone(f.packet.contradictions[0]), description: 'A separate synthetic comparison.' });
+  const p = await planResearchImport(f); noWrites(p, 'UNRESOLVED_PACKET_CONTRADICTION');
+  assert.equal(p.unresolved_evidence.length, 1); assert.equal(p.unresolved_evidence[0].contradiction_index, 1);
+  const g = bindContradictionFixture(contradictionFixture());
+  g.packet.claims.push({ ...clone(g.packet.claims[0]), claim_id: 'C2' });
+  g.packet.contradictions[0].related_claim_ids.push('C2');
+  g.library.heads.claims['rf-claim-c2'] = absent(); g.expected_heads = clone(g.library.heads);
+  g.evidence.relationships['rf-claim-c2'] = clone(g.evidence.relationships['rf-claim-c1'].slice(0, 2)).map(({ provenance, ...e }) => e);
+  const q = await planResearchImport(g); noWrites(q, 'UNRESOLVED_PACKET_CONTRADICTION');
+  assert.equal(q.unresolved_evidence[0].claim_id, 'rf-claim-c2');
+});
+
+test('schema-valid empty contradiction endpoints stay explicit incomplete with original evidence retained', async () => {
+  const f = contradictionFixture(); f.packet.contradictions[0].related_claim_ids = [];
+  const p = await planResearchImport(f); noWrites(p, 'INCOMPLETE_CONTRADICTION');
+  assert.equal(p.status, 'incomplete'); assert.deepEqual(p.input_observation.contradictions, f.packet.contradictions);
+});
+
+test('an unrelated bibliography source still blocks append; rejected output preserves its original record', async () => {
+  const f = packetInput(); f.packet.sources.push({ ...clone(f.packet.sources[0]), source_id: 'S2', doi: '10.synthetic/context' });
+  f.library.heads.sources['rf-src-s2'] = absent(); f.expected_heads = clone(f.library.heads);
+  const p = await planResearchImport(f); noWrites(p, 'UNUSED_ENDPOINT');
+  assert.deepEqual(p.input_observation.sources[1], f.packet.sources[1]);
+});
+
+test('existing packetToBatch contradiction narrative cannot bypass the packet-first typed completeness gate', async () => {
+  const f = contradictionFixture();
+  const { batch } = packetToBatch(f.packet);
+  // Fictional primary evidence enriches canonical import rows, never real feed data.
+  for (const row of batch.sources) Object.assign(row, { study_family_id: `synthetic-${row.source_id}`, evidence_text: 'Synthetic primary evidence.' });
+  const input = { batch, library: f.library, expected_heads: f.expected_heads, evidence: f.evidence };
+  const p = await planResearchImport(input); noWrites(p, 'UNRESOLVED_LEGACY_PACKET_CONTRADICTION');
+  assert.equal(p.status, 'incomplete');
+  assert.equal(p.unresolved_evidence[0].original_evidence, batch.claims[0].body_markdown);
+  assert.deepEqual(p.input_observation, batch);
+});
