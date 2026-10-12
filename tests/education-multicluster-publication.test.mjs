@@ -324,6 +324,16 @@ const LIVE_HAIR_LOSS = ['hair-cycle', 'telogen-effluvium', 'alopecia-areata'];
 // ═════════════════════════════════════════════════════════════════════════
 // Hubs, sitemap, canonical, route collision, allowlist
 // ═════════════════════════════════════════════════════════════════════════
+// Pre-publication transforms must not depend on how many pages the repository
+// has already published. These fixtures deliberately describe an empty state.
+function emptyHubFixture(hubRoute) {
+  return `<!doctype html><html><head>
+<link rel="canonical" href="https://aimtrichology.com${hubRoute}">
+${EMPTY_HUB_ROBOTS_META}
+</head><body><ul class="aimt-edu-card-grid"></ul></body></html>`;
+}
+const EMPTY_SITEMAP_FIXTURE = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>';
+
 function planFor(topicSlug) {
   const u = (kind, text, ids = [], stmts = []) => ({ kind, text, supporting_claim_ids: ids, source_statements: stmts });
   const concept = getPublicationConcept(topicSlug);
@@ -359,9 +369,9 @@ function planFor(topicSlug) {
   }
   check('HUB', 'existing hair-loss hub is NOT marked empty/noindex', !isEmptyHub(readRepo('education/hair-loss.html')));
 
-  // Insert into the real (read-only) Scalp Health hub contents.
-  const hubHtml = readRepo('education/scalp-health.html');
-  check('HUB', 'new Scalp Health hub starts empty (noindex, follow)', isEmptyHub(hubHtml));
+  // Exercise first-card behavior against an explicit empty hub fixture.
+  const hubHtml = emptyHubFixture(hub.hubRoute);
+  check('HUB', 'synthetic Scalp Health hub starts empty (noindex, follow)', isEmptyHub(hubHtml));
   const card = buildHubCardHtml({ route, h1: 'Scalp Barrier and pH', meta_description: 'About the barrier.', sourceCount: 9 });
   const updated = insertHubCard(hubHtml, card, { hubRoute: hub.hubRoute });
   check('HUB', 'card inserted into the scalp-health hub', hubContainsRoute(updated, route));
@@ -379,11 +389,11 @@ function planFor(topicSlug) {
 
 (function testSitemapAndCanonical() {
   const route = publicationRouteFor('scalp-barrier-ph');
-  const sitemap = readRepo('sitemap.xml');
-  check('SITEMAP', 'route not yet in sitemap.xml (nothing published during implementation)', !sitemapContainsRoute(sitemap, route));
+  const sitemap = EMPTY_SITEMAP_FIXTURE;
+  check('SITEMAP', 'route absent from explicit pre-publication sitemap', !sitemapContainsRoute(sitemap, route));
   const updated = insertSitemapRoute(sitemap, route);
   check('SITEMAP', '#21 sitemap receives /education/scalp-health/scalp-barrier-ph', updated.includes('<loc>https://aimtrichology.com/education/scalp-health/scalp-barrier-ph</loc>'));
-  check('SITEMAP', 'empty new hubs are not in sitemap.xml yet', Object.values(PUBLICATION_CLUSTERS).filter((c) => c.key !== 'hair-loss-shedding').every((c) => !sitemapContainsRoute(sitemap, c.route_prefix)));
+  check('SITEMAP', 'empty hubs are absent from explicit pre-publication sitemap', Object.values(PUBLICATION_CLUSTERS).filter((c) => c.key !== 'hair-loss-shedding').every((c) => !sitemapContainsRoute(sitemap, c.route_prefix)));
 
   const html = renderEducationPageHtml(planFor('scalp-barrier-ph'), { launchReady: true, generationSourceHash: 'gsh-barrier' });
   check('CANONICAL', '#22 canonical uses the scalp-health route', html.includes('<link rel="canonical" href="https://aimtrichology.com/education/scalp-health/scalp-barrier-ph">'));
@@ -391,11 +401,34 @@ function planFor(topicSlug) {
   check('CANONICAL', 'launch-ready page has no noindex', !html.includes('noindex'));
   check('CANONICAL', 'repo file path follows the route', educationArticlePathFromRoute(route) === 'education/scalp-health/scalp-barrier-ph.html');
 
-  const hubAfter = insertHubCard(readRepo('education/scalp-health.html'), buildHubCardHtml({ route, h1: 'x', meta_description: 'y', sourceCount: 1 }), { hubRoute: '/education/scalp-health' });
+  const hubAfter = insertHubCard(emptyHubFixture('/education/scalp-health'), buildHubCardHtml({ route, h1: 'x', meta_description: 'y', sourceCount: 1 }), { hubRoute: '/education/scalp-health' });
   const live = verifyLivePagePublication({ httpStatus: 200, html, sitemapXml: updated, hubHtml: hubAfter, expectedRoute: route, expectedGenerationSourceHash: 'gsh-barrier' });
   check('LIVE_VERIFY', 'the unchanged live verifier passes for a new-cluster page', live.ok, JSON.stringify(live.violations));
   const liveWrongHub = verifyLivePagePublication({ httpStatus: 200, html, sitemapXml: updated, hubHtml: readRepo('education/hair-loss.html'), expectedRoute: route, expectedGenerationSourceHash: 'gsh-barrier' });
   check('LIVE_VERIFY', 'live verification fails if the card is not in the correct hub', !liveWrongHub.ok && liveWrongHub.violations.includes('HUB_MISSING_ROUTE'));
+})();
+
+
+(function testPopulatedScalpHealthHubAndSitemap() {
+  const route = publicationRouteFor('scalp-microbiome');
+  const hubRoute = '/education/scalp-health';
+  const populated = insertHubCard(emptyHubFixture(hubRoute), buildHubCardHtml({
+    route, h1: 'Scalp Microbiome', meta_description: 'Fixture card.', sourceCount: 15,
+  }), { hubRoute });
+  const sitemap = insertSitemapRoute(insertSitemapRoute(EMPTY_SITEMAP_FIXTURE, route), hubRoute);
+  check('POPULATED_SCALP_HUB', 'populated fixture links to the exact registered article', hubContainsRoute(populated, route));
+  check('POPULATED_SCALP_HUB', 'populated fixture is indexable', !isEmptyHub(populated) && !populated.includes('noindex'));
+  check('POPULATED_SCALP_HUB', 'populated fixture hub and article are in the sitemap', sitemapContainsRoute(sitemap, hubRoute) && sitemapContainsRoute(sitemap, route));
+
+  // Validate the actual generated publication too, without assuming the page
+  // must already exist on main. These implications become mandatory when its
+  // card/route is present; no test is skipped on an unpublished checkout.
+  const repoHub = readRepo('education/scalp-health.html');
+  const repoSitemap = readRepo('sitemap.xml');
+  const containsArticle = hubContainsRoute(repoHub, route);
+  check('POPULATED_SCALP_HUB', 'repository article card implies an indexable hub', !containsArticle || (!isEmptyHub(repoHub) && !repoHub.includes('noindex')));
+  check('POPULATED_SCALP_HUB', 'repository article card implies hub and article sitemap entries', !containsArticle || (sitemapContainsRoute(repoSitemap, hubRoute) && sitemapContainsRoute(repoSitemap, route)));
+  check('POPULATED_SCALP_HUB', 'repository article sitemap entry implies its hub card exists', !sitemapContainsRoute(repoSitemap, route) || containsArticle);
 })();
 
 (function testRouteCollisionAcrossClusters() {

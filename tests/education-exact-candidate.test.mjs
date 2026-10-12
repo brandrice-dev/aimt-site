@@ -82,6 +82,7 @@ function handoffFixture(envChanges = {}, ioChanges = {}) {
     resolveSiblings: () => ({ ok: true, pages: [] }), countWeekly: async () => ({ count: 0 }),
     fetchRoute: async () => { calls.push('route'); return { status: 404 }; },
     checkoutHead: () => { calls.push('checkout'); return env.RELEASE_HEAD; },
+    reconcile: async () => {},
     publish: async (localEnv, options) => { calls.push('publisher'); return { final_state: 'PUBLISHED', localEnv, options }; },
     writeReport: () => {}, ...ioChanges,
   };
