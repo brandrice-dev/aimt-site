@@ -307,6 +307,33 @@ async function runChecks() {
 await runChecks();
 
 // ─────────────────────────────────────────────────────────────────────────
+// Price configuration must fail closed without disturbing manual grants.
+await (async function priceConfigurationChecks() {
+  const { onRequestPost } = await import('../functions/api/claim-course-access.js');
+  const user = { id: 'fixture-user', email: 'fixture@example.com' };
+  for (const price of [undefined, null, '', '   ', 42]) {
+    const manualGrant = { user_id: user.id, course_slug: 'headspa-mastery', grant_type: 'manual' };
+    const store = [manualGrant];
+    const capture = {};
+    const res = await withMockFetch(buildMockFetch({ users: { token: user }, stripeSessions: {}, entitlementsStore: store, capture }), () =>
+      onRequestPost({ request: makePostRequest({ sessionId: 'cs_fixture' }, 'token'), env: buildMockEnv({ STRIPE_PRICE_ID: price }) }));
+    check('MISSING_PRICE', `missing/invalid configuration ${JSON.stringify(price)} fails with a clear 500`, res.status === 500 && (await res.json()).error === 'Stripe course price is not configured.');
+    check('MISSING_PRICE', 'no purchase lookup or entitlement mutation occurs', !capture.calls.some((url) => url.includes('stripe.com') || url.includes('course_entitlements')) && store[0] === manualGrant && store.length === 1);
+  }
+  for (const [name, configuredPrice, purchasedPrice, discounted, expectedStatus] of [
+    ['incorrect configuration', 'price_wrong', 'price_headspa_mastery', false, 400],
+    ['legitimate price', 'price_headspa_mastery', 'price_headspa_mastery', false, 200],
+    ['authorized full discount', 'price_headspa_mastery', 'price_headspa_mastery', true, 200],
+  ]) {
+    const session = paidSession({ id: 'cs_fixture', email: user.email, priceId: purchasedPrice });
+    if (discounted) Object.assign(session, { payment_status: 'no_payment_required', amount_total: 0 });
+    const store = [];
+    const res = await withMockFetch(buildMockFetch({ users: { token: user }, stripeSessions: { cs_fixture: session }, entitlementsStore: store }), () =>
+      onRequestPost({ request: makePostRequest({ sessionId: 'cs_fixture' }, 'token'), env: buildMockEnv({ STRIPE_PRICE_ID: configuredPrice }) }));
+    check('CONFIGURED_PRICE', name, res.status === expectedStatus && Object.keys(store).length === (expectedStatus === 200 ? 1 : 0));
+  }
+})();
+
 // Static structural checks
 // ─────────────────────────────────────────────────────────────────────────
 (function staticServerChecks() {

@@ -17,9 +17,9 @@
 //
 // Run: node tests/education-operations-cycle.test.mjs
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync, mkdtempSync, rmSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
 import {
   runDecisionPipeline, checkWeeklyCap, isAutopublishEnabled, resolveMaxPagesPerWeek,
   parseArgs, runPersistClearanceAction, prepareGeneratedArtifacts, persistRunReport,
@@ -33,8 +33,6 @@ import { EDUCATION_OPS_API_KEY_ENV_VAR } from '../functions/_lib/education-ops/e
 import { RESUME_STAGE } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
 import { validateEducationPagePlan } from '../functions/_lib/education-ops/education-page-plan-validator.mjs';
 import { REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
-
-const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 const results = [];
 function check(fixtureName, label, condition, detail) {
@@ -949,18 +947,15 @@ async function testPrepareRefusesToOverwriteAnExistingArticleFile() {
   // path than the function under test actually checks/writes, which
   // silently defeats this precondition and lets a real write through
   // uncleaned. See the "Fix Education publish article path" correction.
-  const articlePath = path.join(REPO_ROOT, educationArticlePathFromRoute(report.__internal.route));
-  if (existsSync(articlePath)) {
-    check('PREPARE_ARTICLE_COLLISION', 'precondition: no real article already exists at this route (never touch real content)', false, articlePath);
-    return;
-  }
+  const fixtureRoot = mkdtempSync(path.join(tmpdir(), 'aimt-education-collision-'));
+  const articlePath = path.join(fixtureRoot, educationArticlePathFromRoute(report.__internal.route));
   mkdirSync(path.dirname(articlePath), { recursive: true });
   writeFileSync(articlePath, '<html>a stale file from a prior, never-merged --prepare run</html>');
   try {
     let threw = false;
     let message = '';
     try {
-      prepareGeneratedArtifacts(report);
+      prepareGeneratedArtifacts(report, { root: fixtureRoot });
     } catch (e) {
       threw = true;
       message = e.message;
@@ -969,7 +964,7 @@ async function testPrepareRefusesToOverwriteAnExistingArticleFile() {
     check('PREPARE_ARTICLE_COLLISION', 'names it as an INFRA_REVIEW-class problem', message.includes('INFRA_REVIEW'), message);
     check('PREPARE_ARTICLE_COLLISION', 'the stale file is untouched (still the original content)', readFileSync(articlePath, 'utf8').includes('stale file from a prior'));
   } finally {
-    unlinkSync(articlePath);
+    rmSync(fixtureRoot, { recursive: true, force: true });
   }
 }
 
@@ -980,18 +975,15 @@ async function testPrepareRefusesToOverwriteAnExistingPagePlanArtifact() {
     check('PREPARE_PLAN_ARTIFACT_COLLISION', 'precondition: reached SHADOW_CANDIDATE_READY', false, JSON.stringify({ state: report.final_state, reason: report.exception_reason }));
     return;
   }
-  const planArtifactPath = path.join(REPO_ROOT, 'functions/_data/education-page-plans', `${topicSlug}.json`);
-  if (existsSync(planArtifactPath)) {
-    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'precondition: no real Page Plan artifact already exists for this topic', false, planArtifactPath);
-    return;
-  }
+  const fixtureRoot = mkdtempSync(path.join(tmpdir(), 'aimt-education-collision-'));
+  const planArtifactPath = path.join(fixtureRoot, 'functions/_data/education-page-plans', `${topicSlug}.json`);
   mkdirSync(path.dirname(planArtifactPath), { recursive: true });
   writeFileSync(planArtifactPath, JSON.stringify({ stale: true }));
   try {
     let threw = false;
     let message = '';
     try {
-      prepareGeneratedArtifacts(report);
+      prepareGeneratedArtifacts(report, { root: fixtureRoot });
     } catch (e) {
       threw = true;
       message = e.message;
@@ -1000,9 +992,9 @@ async function testPrepareRefusesToOverwriteAnExistingPagePlanArtifact() {
     check('PREPARE_PLAN_ARTIFACT_COLLISION', 'names it as an INFRA_REVIEW-class problem', message.includes('INFRA_REVIEW'), message);
     // Also proves the article file was never written either -- the
     // artifact-existence check runs before EITHER write, not just its own.
-    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'the article file was never written for this run', !existsSync(path.join(REPO_ROOT, educationArticlePathFromRoute(report.__internal.route))));
+    check('PREPARE_PLAN_ARTIFACT_COLLISION', 'the article file was never written for this run', !existsSync(path.join(fixtureRoot, educationArticlePathFromRoute(report.__internal.route))));
   } finally {
-    unlinkSync(planArtifactPath);
+    rmSync(fixtureRoot, { recursive: true, force: true });
   }
 }
 
@@ -1567,8 +1559,7 @@ function testAutopublishRemainsFalseAndPublishStillUnimplementedThroughoutResume
 // zero visibility into WHICH deterministic validator rule(s) actually
 // fired. These tests prove the sanitized codes now reach the run
 // report, with zero raw claim IDs, and that the existing terminal-state
-// mapping (SYNTHESIS_FAILED -> NO_OP_SUCCESS, HUMAN_REVIEW -> HUMAN_REVIEW)
-// is completely unchanged.
+// mapping reports invalid synthesis as failure and preserves HUMAN_REVIEW.
 // ─────────────────────────────────────────────────────────────────────────
 async function testSynthesisFailedViolationsReachRunReportAsSanitizedCodes() {
   const topicSlug = 'androgenetic-alopecia';
@@ -1585,7 +1576,7 @@ async function testSynthesisFailedViolationsReachRunReportAsSanitizedCodes() {
       }),
     },
   });
-  check('PE_VIOLATION_OBSERVABILITY', 'final_state is NO_OP_SUCCESS -- the existing SYNTHESIS_FAILED mapping is unchanged', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('PE_VIOLATION_OBSERVABILITY', 'invalid synthesis is never a successful no-op', report.final_state === RUN_FINAL_STATE.INVALID_RESPONSE, report.final_state);
   check('PE_VIOLATION_OBSERVABILITY', 'publication_editor_result.status is SYNTHESIS_FAILED', report.publication_editor_result.status === 'SYNTHESIS_FAILED');
   check('PE_VIOLATION_OBSERVABILITY', 'publication_editor_result.reason is preserved exactly', report.publication_editor_result.reason === 'unresolved_mechanical_or_accounting_violation');
   check('PE_VIOLATION_OBSERVABILITY', 'validator_violation_codes carries the sanitized, deduplicated codes in order', JSON.stringify(report.publication_editor_result.validator_violation_codes) === JSON.stringify(['LIMITATIONS_NOT_PRESERVED', 'SUPPORTING_CLAIM_NOT_SELECTED']), JSON.stringify(report.publication_editor_result.validator_violation_codes));
@@ -1825,7 +1816,7 @@ async function testSynthesisFailedDoesNotResolveAnActiveResearchGap() {
       resolveResearchGapByTopicFn: async () => { resolveCalled = true; return { ok: true, reason: 'RESOLVED', row: {} }; },
     },
   });
-  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: final_state is the ordinary NO_OP_SUCCESS for SYNTHESIS_FAILED, unchanged', report.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: invalid synthesis fails while retaining the research gap', report.final_state === RUN_FINAL_STATE.INVALID_RESPONSE, report.final_state);
   check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: resolveResearchGapByTopic was NEVER called', resolveCalled === false);
   check('SYNTHESIS_FAILED_PRESERVES_GAP', 'G: research_gap_action is not set to RESOLVED (the gap is preserved, untouched)', !report.research_gap_action || report.research_gap_action.action !== 'RESOLVED', JSON.stringify(report.research_gap_action));
 }
@@ -1943,6 +1934,31 @@ const tests = [
 ];
 
 for (const t of tests) await t();
+
+// Tagged client failures must survive the Publication Editor bridge and
+// orchestrator as failures, without writer/reviewer calls or recovery erasure.
+for (const [reason, expected] of [
+  ['request_failed', RUN_FINAL_STATE.PROVIDER_FAILED],
+  ['unparseable_output', RUN_FINAL_STATE.INVALID_RESPONSE],
+  ['truncated', RUN_FINAL_STATE.INVALID_RESPONSE],
+  ['invalid_schema', RUN_FINAL_STATE.INVALID_RESPONSE],
+  ['invalid_reconciliation_output', RUN_FINAL_STATE.INVALID_RESPONSE],
+  ['missing_api_key', RUN_FINAL_STATE.CONFIG_BLOCKED],
+  ['unknown_failure', RUN_FINAL_STATE.SYNTHESIS_FAILED],
+]) {
+  const slug = 'androgenetic-alopecia';
+  let downstreamCalls = 0;
+  const report = await run(FAKE_ENV_WITH_CRED, { fns: {
+    fetchEvidenceFn: async () => healthyPoolForSingleTopic(slug),
+    planIntentFn: async () => fakeIntentResult(slug),
+    synthesizeFn: async () => ({ status: 'SYNTHESIS_FAILED', reason, finalOutput: null,
+      metrics: { model_calls: 1, total_input_tokens: 0, total_output_tokens: 0 } }),
+    writeFn: async () => { downstreamCalls++; throw new Error('must not write'); },
+    reviewFn: async () => { downstreamCalls++; throw new Error('must not review'); },
+  }});
+  check('SYNTHESIS_FAILURE_REPORTING', reason, report.final_state === expected && report.final_state !== RUN_FINAL_STATE.NO_OP_SUCCESS, report.final_state);
+  check('SYNTHESIS_FAILURE_REPORTING', 'does not continue after failure', downstreamCalls === 0);
+}
 
 // ---- Report ----
 const byFixture = new Map();

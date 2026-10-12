@@ -38,34 +38,67 @@ function supabaseHeaders(env, extra = {}) {
   };
 }
 
+// Every database operation must be acknowledged before dependent work or
+// a successful report. Do not echo provider bodies, URLs or credentials.
+async function checkedFetch(url, options) {
+  const table = new URL(url).pathname.split('/').pop();
+  const operation = `${options?.method || 'GET'} ${table}`;
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (_) {
+    throw new Error(`${operation} failed: transport error`);
+  }
+  if (!res.ok) throw new Error(`${operation} failed: HTTP ${res.status}`);
+  if (options?.method === 'PATCH') {
+    const rows = await res.clone().json().catch(() => null);
+    if (!Array.isArray(rows) || rows.length !== 1) {
+      throw new Error(`${operation} failed: expected one updated row`);
+    }
+  }
+  return res;
+}
+
 async function upsert(env, table, rows, onConflict, { returnRepresentation = false } = {}) {
   if (!rows.length) return [];
-  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/${table}?on_conflict=${encodeURIComponent(onConflict)}`, {
+  const res = await checkedFetch(`${env.SUPABASE_URL}/rest/v1/${table}?on_conflict=${encodeURIComponent(onConflict)}`, {
     method: 'POST',
     headers: supabaseHeaders(env, {
       Prefer: `resolution=merge-duplicates,return=${returnRepresentation ? 'representation' : 'minimal'}`
     }),
     body: JSON.stringify(rows)
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`upsert ${table} failed: HTTP ${res.status} ${body.slice(0, 500)}`);
-  }
   return returnRepresentation ? res.json() : [];
 }
 
 async function selectIds(env, table, idColumn, extraQuery = '') {
-  const res = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/${table}?select=${idColumn}${extraQuery}`,
-    { headers: supabaseHeaders(env) }
-  );
-  if (!res.ok) throw new Error(`select ${table} failed: HTTP ${res.status}`);
-  const rows = await res.json();
-  return new Set(rows.map((r) => r[idColumn]));
+  const ids = new Set();
+  let offset = 0;
+  // Approved-ID reads previously silently stopped at the REST row limit.
+  // Bound the scan and fail rather than pretending an incomplete set is complete.
+  for (let page = 0; page < 100; page++) {
+    const res = await checkedFetch(
+      `${env.SUPABASE_URL}/rest/v1/${table}?select=${idColumn}${extraQuery}&order=${idColumn}.asc&limit=1000&offset=${offset}`,
+      { headers: supabaseHeaders(env, { Prefer: 'count=exact' }) }
+    );
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error(`select ${table} failed: invalid row response`);
+    for (const row of rows) ids.add(row[idColumn]);
+    offset += rows.length;
+    const totalText = res.headers.get('content-range')?.split('/')[1];
+    const total = totalText && totalText !== '*' ? Number(totalText) : null;
+    if (Number.isFinite(total)) {
+      if (offset >= total) return ids;
+      if (!rows.length) throw new Error(`select ${table} failed: incomplete pagination`);
+    } else if (rows.length < 1000) {
+      return ids;
+    }
+  }
+  throw new Error(`select ${table} failed: pagination limit exceeded`);
 }
 
 async function countTable(env, table) {
-  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, {
+  const res = await checkedFetch(`${env.SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, {
     headers: supabaseHeaders(env, { Prefer: 'count=exact' })
   });
   const range = res.headers.get('content-range'); // "0-0/219"
@@ -84,7 +117,7 @@ async function insertQuarantine(env, batchId, recordType, rejectedRows) {
     validation_errors: r.errors
   }));
   for (const c of chunk(rows, 200)) {
-    await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_quarantine`, {
+    await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_quarantine`, {
       method: 'POST',
       headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
       body: JSON.stringify(c)
@@ -107,7 +140,7 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
   const countsBefore = {};
   for (const t of LOGGED_TABLES) countsBefore[t] = await countTable(env, t);
 
-  const logRes = await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log`, {
+  const logRes = await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log`, {
     method: 'POST',
     headers: supabaseHeaders(env, { Prefer: 'return=representation' }),
     body: JSON.stringify([{
@@ -115,8 +148,8 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       dry_run: false, status: 'running', counts_before: countsBefore
     }])
   });
-  if (!logRes.ok) throw new Error(`could not open research_ingestion_log: HTTP ${logRes.status}`);
   const [logRow] = await logRes.json();
+  if (!logRow?.id) throw new Error('research_ingestion_log did not return a record id');
 
   try {
     /* 1. Topics -- TWO-STAGE upsert so a batch that doesn't report topic
@@ -156,9 +189,9 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       if ('source_count_observed' in t) patch.source_count_observed = t.source_count_observed;
       if ('claim_count_observed' in t) patch.claim_count_observed = t.claim_count_observed;
       if (Object.keys(patch).length === 0) continue;
-      await fetch(`${env.SUPABASE_URL}/rest/v1/research_topics?topic=eq.${encodeURIComponent(t.topic)}`, {
+      await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_topics?topic=eq.${encodeURIComponent(t.topic)}`, {
         method: 'PATCH',
-        headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
+        headers: supabaseHeaders(env, { Prefer: 'return=representation' }),
         body: JSON.stringify(patch)
       });
     }
@@ -178,7 +211,7 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
     const sourceTopicRows = [];
     for (const s of loaded.sources) for (const t of (s.topics || [])) sourceTopicRows.push({ source_id: s.source_id, topic: t });
     for (const c of chunk(sourceTopicRows, chunkSize)) {
-      await fetch(`${env.SUPABASE_URL}/rest/v1/research_source_topics?on_conflict=source_id,topic`, {
+      await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_source_topics?on_conflict=source_id,topic`, {
         method: 'POST', headers: supabaseHeaders(env, { Prefer: 'resolution=ignore-duplicates,return=minimal' }),
         body: JSON.stringify(c)
       });
@@ -251,7 +284,7 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
     const claimTopicRows = [];
     for (const c of claimsToProcess) for (const t of (c.topics || [])) claimTopicRows.push({ claim_id: c.claim_id, topic: t });
     for (const c of chunk(claimTopicRows, chunkSize)) {
-      await fetch(`${env.SUPABASE_URL}/rest/v1/research_claim_topics?on_conflict=claim_id,topic`, {
+      await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_claim_topics?on_conflict=claim_id,topic`, {
         method: 'POST', headers: supabaseHeaders(env, { Prefer: 'resolution=ignore-duplicates,return=minimal' }),
         body: JSON.stringify(c)
       });
@@ -288,9 +321,9 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
     for (const t of LOGGED_TABLES) countsAfter[t] = await countTable(env, t);
 
     const rejectedTotal = loaded.rejected.sources.length + allRejectedClaims.length;
-    await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
+    await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
       method: 'PATCH',
-      headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
+      headers: supabaseHeaders(env, { Prefer: 'return=representation' }),
       body: JSON.stringify({
         status: rejectedTotal > 0 ? 'partial' : 'success',
         finished_at: new Date().toISOString(),
@@ -319,11 +352,16 @@ export async function runImport(env, { loaded, batchId, sourceSystem = 'grok-res
       processedClaims: claimsToProcess.map((c) => ({ claim_id: c.claim_id, topics: [...(c.topics || [])], verification_status: c.verification_status })),
     };
   } catch (err) {
-    await fetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
-      method: 'PATCH',
-      headers: supabaseHeaders(env, { Prefer: 'return=minimal' }),
-      body: JSON.stringify({ status: 'failed', finished_at: new Date().toISOString(), error_summary: String(err && err.message || err) })
-    });
+    try {
+      await checkedFetch(`${env.SUPABASE_URL}/rest/v1/research_ingestion_log?id=eq.${logRow.id}`, {
+        method: 'PATCH',
+        headers: supabaseHeaders(env, { Prefer: 'return=representation' }),
+        body: JSON.stringify({ status: 'failed', finished_at: new Date().toISOString(), error_summary: String(err && err.message || err) })
+      });
+    } catch (logError) {
+      // Preserve the original failure and explicitly report lost observability.
+      err.message += `; failure reporting also failed: ${logError.message}`;
+    }
     throw err;
   }
 }

@@ -26,6 +26,9 @@ export const RUN_FINAL_STATE = Object.freeze({
   NO_OP_SUCCESS: 'NO_OP_SUCCESS',
   SHADOW_CANDIDATE_READY: 'SHADOW_CANDIDATE_READY',
   CONFIG_BLOCKED: 'CONFIG_BLOCKED',
+  PROVIDER_FAILED: 'PROVIDER_FAILED',
+  INVALID_RESPONSE: 'INVALID_RESPONSE',
+  SYNTHESIS_FAILED: 'SYNTHESIS_FAILED',
   HUMAN_REVIEW: 'HUMAN_REVIEW',
   EDITORIAL_REVIEW: 'EDITORIAL_REVIEW',
   INFRA_REVIEW: 'INFRA_REVIEW',
@@ -52,6 +55,49 @@ export const RUN_FINAL_STATE = Object.freeze({
   // SHADOW_CANDIDATE_READY/PUBLISHED.
   AUTOPUBLISH_GATE_CLOSED: 'AUTOPUBLISH_GATE_CLOSED',
 });
+
+// Operational outcome is independent of publication progress: a prepared
+// candidate or open PR is partial completion, never a completed publication.
+export const OPERATIONAL_OUTCOME = Object.freeze({
+  NO_OP: 'NO_OP', COMPLETED: 'COMPLETED', PROVIDER_FAILURE: 'PROVIDER_FAILURE',
+  INVALID_RESPONSE: 'INVALID_RESPONSE', CONFIGURATION_FAILURE: 'CONFIGURATION_FAILURE',
+  PARTIAL_COMPLETION: 'PARTIAL_COMPLETION', REVIEW_REQUIRED: 'REVIEW_REQUIRED',
+  UNCLASSIFIED_FAILURE: 'UNCLASSIFIED_FAILURE',
+  INFRASTRUCTURE_FAILURE: 'INFRASTRUCTURE_FAILURE', PUBLICATION_FAILURE: 'PUBLICATION_FAILURE',
+});
+
+export function synthesisFailureFinalState(reason) {
+  if (reason === 'missing_api_key') return RUN_FINAL_STATE.CONFIG_BLOCKED;
+  if (reason === 'request_failed') return RUN_FINAL_STATE.PROVIDER_FAILED;
+  if (['truncated', 'unparseable_output', 'unresolved_mechanical_or_accounting_violation',
+    'human_review_justification_retry_still_invalid'].includes(reason) || String(reason).startsWith('invalid_')) {
+    return RUN_FINAL_STATE.INVALID_RESPONSE;
+  }
+  // Unknown failures remain failures; they require infrastructure review.
+  return RUN_FINAL_STATE.SYNTHESIS_FAILED;
+}
+
+export function operationalOutcome(finalState) {
+  if (finalState === RUN_FINAL_STATE.NO_OP_SUCCESS) return OPERATIONAL_OUTCOME.NO_OP;
+  if (finalState === RUN_FINAL_STATE.PUBLISHED) return OPERATIONAL_OUTCOME.COMPLETED;
+  if (finalState === RUN_FINAL_STATE.PROVIDER_FAILED) return OPERATIONAL_OUTCOME.PROVIDER_FAILURE;
+  if (finalState === RUN_FINAL_STATE.INVALID_RESPONSE) return OPERATIONAL_OUTCOME.INVALID_RESPONSE;
+  if (finalState === RUN_FINAL_STATE.CONFIG_BLOCKED) return OPERATIONAL_OUTCOME.CONFIGURATION_FAILURE;
+  if (finalState === RUN_FINAL_STATE.SYNTHESIS_FAILED) return OPERATIONAL_OUTCOME.UNCLASSIFIED_FAILURE;
+  if (finalState === RUN_FINAL_STATE.INFRA_REVIEW) return OPERATIONAL_OUTCOME.INFRASTRUCTURE_FAILURE;
+  if (finalState === RUN_FINAL_STATE.PUBLISH_FAILED) return OPERATIONAL_OUTCOME.PUBLICATION_FAILURE;
+  if ([RUN_FINAL_STATE.SHADOW_CANDIDATE_READY, RUN_FINAL_STATE.AUTOPUBLISH_GATE_CLOSED,
+    RUN_FINAL_STATE.RESEARCH_GAP_QUEUED].includes(finalState)) return OPERATIONAL_OUTCOME.PARTIAL_COMPLETION;
+  if ([RUN_FINAL_STATE.HUMAN_REVIEW, RUN_FINAL_STATE.EDITORIAL_REVIEW,
+    RUN_FINAL_STATE.FRESHNESS_FLAGGED].includes(finalState)) return OPERATIONAL_OUTCOME.REVIEW_REQUIRED;
+  throw new Error(`operationalOutcome: unrecognized final_state "${finalState}".`);
+}
+
+export function runExitCode(report) {
+  return [RUN_FINAL_STATE.PROVIDER_FAILED, RUN_FINAL_STATE.INVALID_RESPONSE,
+    RUN_FINAL_STATE.SYNTHESIS_FAILED, RUN_FINAL_STATE.CONFIG_BLOCKED,
+    RUN_FINAL_STATE.INFRA_REVIEW, RUN_FINAL_STATE.PUBLISH_FAILED].includes(report.final_state) ? 1 : 0;
+}
 
 /**
  * @param {object} fields - see FINAL REPORT fields in the originating
@@ -148,6 +194,7 @@ export function buildRunReport(fields) {
     candidate_resume,
     research_gap_action,
     final_state,
+    operational_outcome: operationalOutcome(final_state),
     exception_reason,
   };
 }

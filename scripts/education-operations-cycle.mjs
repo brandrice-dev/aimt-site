@@ -78,7 +78,7 @@ import { repairReviewerFramingFailures } from '../functions/_lib/education-ops/e
 import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
 import { checkGeneratedDiffAllowlist } from '../functions/_lib/education-ops/education-diff-allowlist.mjs';
 import { checkAllPublishedTopicsFreshness, FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
-import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN } from '../functions/_lib/education-ops/education-run-ledger.mjs';
+import { buildRunReport, RUN_FINAL_STATE, MAX_EDUCATION_OPS_MODEL_CALLS_PER_RUN, synthesisFailureFinalState, runExitCode } from '../functions/_lib/education-ops/education-run-ledger.mjs';
 import { surfaceExceptionIfNeeded } from '../functions/_lib/education-ops/education-exception-reporter.mjs';
 import { writeClearanceRecord, replaceNonPublicClearanceRecord, publishClearanceRecord } from '../functions/_lib/research/publication-clearance-writer.mjs';
 import { verifyStoredClearanceIntegrity } from '../functions/_lib/research/publication-clearance-fingerprint.mjs';
@@ -1021,7 +1021,7 @@ export async function runDecisionPipeline(env, options = {}) {
           validator_violation_codes: sanitizePublicationValidatorViolations(synthesisResult.violations),
           human_review_justification: synthesisResult.humanReviewJustification,
         },
-        final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : RUN_FINAL_STATE.NO_OP_SUCCESS,
+        final_state: isHumanReview ? RUN_FINAL_STATE.HUMAN_REVIEW : synthesisFailureFinalState(synthesisResult.reason),
         exception_reason: isHumanReview ? `HUMAN_REVIEW: ${synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason}` : synthesisResult.reason,
       });
     }
@@ -1286,16 +1286,16 @@ export function persistRunReport(report) {
  * @param {object} report - a SHADOW_CANDIDATE_READY runDecisionPipeline() result
  * @returns {{articlePath: string, planArtifactPath: string, hubPath: string, allowlistResult: object}}
  */
-export function prepareGeneratedArtifacts(report) {
+export function prepareGeneratedArtifacts(report, { root = ROOT } = {}) {
   if (report.final_state !== RUN_FINAL_STATE.SHADOW_CANDIDATE_READY || !report.__internal) {
     throw new Error('prepareGeneratedArtifacts: report is not a SHADOW_CANDIDATE_READY result.');
   }
   const { preparedArtifact, plan, route } = report.__internal;
 
   const relativeArticlePath = educationArticlePathFromRoute(route);
-  const articlePath = path.join(ROOT, relativeArticlePath);
+  const articlePath = path.join(root, relativeArticlePath);
   const relativePlanPath = `functions/_data/education-page-plans/${plan.topic_slug}.json`;
-  const planArtifactPath = path.join(ROOT, relativePlanPath);
+  const planArtifactPath = path.join(root, relativePlanPath);
 
   // ROUTE-COLLISION CORRECTION (file-existence gate, checked BEFORE any
   // write): runDecisionPipeline() already checked the computed route
@@ -1330,12 +1330,12 @@ export function prepareGeneratedArtifacts(report) {
   // route's cluster (e.g. /education/scalp-health/<slug> ->
   // education/scalp-health.html) -- never string surgery on the route.
   const { hubFile: relativeHubPath, hubRoute } = resolveHubForRoute(route);
-  const hubPath = path.join(ROOT, relativeHubPath);
+  const hubPath = path.join(root, relativeHubPath);
   const hubHtml = readFileSync(hubPath, 'utf8');
   const cardHtml = buildHubCardHtml({ route, h1: plan.h1, meta_description: plan.meta_description, sourceCount: plan.sources.length });
   writeFileSync(hubPath, insertHubCard(hubHtml, cardHtml, { hubRoute }));
 
-  const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+  const changedPaths = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
   const allowlistResult = checkGeneratedDiffAllowlist(changedPaths);
   if (!allowlistResult.valid) {
     throw new Error(`prepareGeneratedArtifacts: generated diff touched unexpected path(s), INFRA_REVIEW: ${allowlistResult.violations.join(', ')}`);
@@ -2445,7 +2445,7 @@ async function main() {
     } catch (err) {
       console.warn(`[exception] surfacing failed (this never fails the run itself): ${err.message}`);
     }
-    process.exit(report.final_state === RUN_FINAL_STATE.PUBLISH_FAILED || report.final_state === RUN_FINAL_STATE.INFRA_REVIEW || report.final_state === RUN_FINAL_STATE.CONFIG_BLOCKED ? 1 : 0);
+    process.exit(runExitCode(report));
   }
 
   if (args.mode === 'persist-clearance') {
@@ -2504,6 +2504,7 @@ async function main() {
     console.log(`[prepare] opened branch "${branch}": ${prUrl}`);
     console.log('[prepare] DO NOT MERGE without owner review. No research_public_pages write has occurred.');
   }
+  process.exitCode = runExitCode(report);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
