@@ -25,7 +25,15 @@ http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,`http://127.0.0.1:${PORT}`);
     if(url.pathname==='/api/admin/office'){
-      const result=await onRequest({env,request:new Request(url,{method:req.method,headers:req.headers})});res.writeHead(result.status,Object.fromEntries(result.headers));res.end(await result.text());return;
+      const result=await onRequest({env,request:new Request(url,{method:req.method,headers:req.headers})});res.writeHead(result.status,Object.fromEntries(result.headers));const body=await result.json();
+      if(result.ok){
+        body.previewContext='Local QA: synthetic owner; private sources intentionally isolated; public GitHub reads only.';
+        for(const source of body.sources.filter(s=>s.id.startsWith('research_'))){
+          source.note='Private data is intentionally unavailable in this local preview. This is not evidence of a live integration defect.';
+          source.diagnostic={code:'LOCAL_PREVIEW_ISOLATION',httpStatus:503,explanation:source.note,nextStep:'Verify these existing projections in an authorized preview with the existing Supabase bindings and owner session.'};
+        }
+      }
+      res.end(JSON.stringify(body));return;
     }
     if(url.pathname==='/api/admin'){
       res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');

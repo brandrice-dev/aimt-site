@@ -19,11 +19,11 @@ Research MCP already provides bounded ingestion/retrieval interfaces; Office nei
 
 ## Implemented sections
 
-Office Overview: snapshot-based morning briefing, recent ingestion/workflow/page outcomes, currently reported workflow executions, recorded exceptions, uncertain running flags, and recent research/development.
+Office Overview: department accomplishments first, followed by verifiable current work, owner attention and major development proposals. Repeated runs are grouped by responsibility, workflow and branch. Original evidence is expandable; successful routine runs never become delivered research. Project summaries bind checks to the exact PR head and distinguish draft proposals, incomplete checks, reported check failures and unverified preview/release status.
 
-Employee Directory: all seven requested departments, with dedicated responsibility views showing mandate, existing systems, source-derived last activity, outputs/references and outstanding work. These are responsibility definitions, not an employee activation registry.
+Employee Directory: all seven requested departments, with dedicated responsibility views showing mandate, existing systems, source-derived last activity, recent deliverables, work availability and outstanding work. The directory is a primary navigation destination with a prominent entry from the welcome panel. These are responsibility definitions, not an employee activation registry.
 
-Work Activity: newest-first records with exact original statuses, local-time timestamps, source labels, references/artifact metadata and safe source links. Source filter supports drill-down.
+Operations contains the preserved Work Activity and Development Activity views plus Source Connections. Work Activity retains newest-first records with exact original statuses, local-time timestamps, source labels, references/artifact metadata and safe source links. Source filter supports drill-down. Detailed commits, raw workflow records, API coverage and diagnostic reporting stay in Operations.
 
 Decision Desk: pending quarantined records, existing `education-review` / `education-infra` issues, and failure/partial/timeout/action-required outcomes. Research work queue rows are not automatically treated as human approval needs. No approval controls.
 
@@ -37,7 +37,7 @@ Supabase projections: `research_ingestion_log`, `research_verification_queue`, `
 
 GitHub: unauthenticated read-only public API, fixed `brandrice-dev/aimt-site` repository. Up to 30 workflows, PRs, issues and artifact metadata; five deployments, with status lookup for the latest two; current checks/statuses for the latest two open PRs. Issues are filtered to existing education exception labels after the bounded read, so older issues may fall outside the sample. Artifacts expose metadata and run links only; no download or report body. No private-repository token is added. GitHub rate limiting is surfaced as unavailable; refresh is manual, with no background polling. Empty successful reads are distinct from source errors.
 
-Requests to each operational source have a six-second timeout and fail independently. Fetch/HTTP/malformed responses produce **Activity unavailable**, not fabricated records. Unconfigured assignments/communication show **Not connected**. Authorized source URLs are limited to HTTPS GitHub, AIMT and Pages preview hosts. All displayed source strings are escaped. Refresh failures discard the previous snapshot; sign-out clears records and invalidates in-flight loads.
+Requests to each operational source have a six-second timeout and fail independently. Owner-only diagnostics distinguish access rejection, missing/schema-cache relations, missing projection columns, HTTP failures, malformed responses, request timeout and explicit GitHub rate limits. Diagnostics contain only curated codes, HTTP status and next steps; provider error bodies and credentials are never copied into the response. Fetch/HTTP/malformed responses produce **Activity unavailable**, not fabricated records. Unconfigured assignments/communication show **Not connected**. Authorized source URLs are limited to HTTPS GitHub, AIMT and Pages preview hosts. All displayed source strings are escaped. Refresh failures discard the previous snapshot; sign-out clears records and invalidates in-flight loads.
 
 No percentage progress, revenue or AI cost estimate is added. Count cards describe records in the available sample, not total company throughput. Workflow execution is unavailable when that source cannot be read. Stalls cannot be determined without heartbeat/deadline evidence; database `running` is explicitly unverified execution, never an active employee.
 
@@ -51,7 +51,7 @@ The local review snapshot showed historical workflow records for Scientific Inte
 
 ## Verification and preview
 
-Node 20 targeted Office/Admin/growth/surface tests and local browser QA are recorded in the delivery evidence. Two pre-existing live public-surface checks are skipped; this is not production authentication or deployment certification.
+Node 20 targeted Office/owner-experience/Admin/growth/surface tests: 136 passed, zero failed, two existing live checks skipped. Local browser QA at 1440×1000 and 390×844 verified briefing priority order, all seven departments, expandable evidence, Operations subviews and filters, no horizontal page overflow, hostile text escaping, owner-nav visibility, failed-refresh clearing and sign-out clearing. Two pre-existing live public-surface checks are skipped; this is not production authentication or deployment certification.
 
 Local preview:
 
@@ -72,3 +72,25 @@ For a configured branch preview, open `/admin`, sign in with the existing owner 
 5. Preserve scientific revision/approval work as the separate Phase 2B dependency. Assignment or communication permission must never imply scientific approval, certificate issuance or production release authority.
 
 Stop for review. Merge and production deployment are not authorized by this implementation.
+
+
+## Owner experience refinement — source investigation
+
+The initial and refined local snapshots each show **9 of 14 source entries connected**, four unavailable and one not connected. The fraction is a count of source checks, including separate PR-head checks/statuses, not a count of functioning employees or delivered outputs. Successful empty reads still count as connected.
+
+| Unavailable entry | Local cause | Integration conclusion |
+|---|---|---|
+| Research ingestion (`research_ingestion_log`) | The QA fetch boundary intentionally returns HTTP 503 for the private table. | Selected columns/order match declared schema. No live defect established. |
+| Research work queue (`research_verification_queue`) | Same intentional local isolation. | Selected columns/order match declared schema. No live defect established. |
+| Ingestion exceptions (`research_ingestion_quarantine`) | Same intentional local isolation. | Selected columns/order and pending filter match declared schema. No live defect established. |
+| Education page records (`research_public_pages`) | Same intentional local isolation. | Selected columns/order match declared schema. No live defect established. |
+| Assignments and communication | No existing connected feed. | Remains **Not connected**; no new store or agent was introduced. |
+
+The local server uses `office-qa.invalid` and a synthetic owner, and returns a read-only local `LOCAL_PREVIEW_ISOLATION` explanation. It does not read production Supabase. The audit found no Supabase URL/service-role bindings in this shell and no tracked local preview binding configuration. Those facts do not establish the configuration of Cloudflare production or a hosted preview. Effective live schema, server binding validity, private-table permissions and owner-authorized reads remain unverified until an authenticated configured preview is checked. Anonymous reads or reduced permissions are not substituted.
+
+A real configured environment will report curated HTTP/schema/network diagnostics. The original broad unavailable message obscured the local cause; this has been corrected without broadening data access or replacing a table. No actual private-source integration defect was reproduced. New tests exercise synthetic denied access, missing relation/column, timeout, malformed response and rate limiting separately from the clearly labeled local preview limitation.
+
+Owner summaries retain original evidence in disclosure panels. Education issue codes and workflow artifact run IDs are translated to readable labels, while original issue titles, names, IDs, timestamps, statuses, URLs and commit references remain inspectable. Unread artifact contents are never described as reviewed deliverables. Drafts and successful checks do not establish active development, deployment, or a mandatory release blocker. Work capacity and employee assignments remain unavailable. The unchanged `GET /api/admin/office` owner check still executes before all source reads.
+
+
+The audit also found a presentation defect: Cloudflare Pages check runs were categorized as ordinary checks, even though their provider supplies preview evidence. They are now categorized separately when identified by the Cloudflare Pages app/name, preserving their source conclusion and candidate SHA. A successful provider preview check is not a passing test, successful production deployment, or independent route verification. This is a GitHub presentation correction, not a private Supabase integration defect.

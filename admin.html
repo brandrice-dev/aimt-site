@@ -240,6 +240,6 @@ document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('clic
 $('grantModal').addEventListener('click',e=>{if(e.target===$('grantModal'))closeGrant()});$('studentDrawer').addEventListener('click',e=>{if(e.target===$('studentDrawer'))$('drawerClose').click()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGrant();$('drawerClose').click();}});
 (async()=>{const {data}=await supabaseClient.auth.getSession();if(data?.session)await verifyAdmin();else $('loginWrap').classList.add('show');})();
 </script>
-<script src="assets/js/aimt-office.js"></script>
+<script type="module" src="assets/js/aimt-office.js"></script>
 </body>
 </html>
