@@ -5,7 +5,7 @@ import {repairRoutinePagePlanViolations} from '../functions/_lib/education-ops/e
 import {verifiedAbstractBatch,researchAssignment,executeResearchGap,discoverResearchNeed} from '../scripts/_lib/education-research-gap-executor.mjs';
 import {repairReviewerEvidenceFailures} from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
 import {classifyRecovery,runAutonomousCycle} from '../scripts/education-autonomous-cycle.mjs';
-import {ensureCandidateHeadTests,verifyCandidateHeadTests,PUBLICATION_TEST_WORKFLOW,PUBLICATION_TEST_JOB} from '../scripts/_lib/education-candidate-checks.mjs';
+import {ensureCandidateHeadTests,verifyCandidateHeadTests,requiresWorkflowApproval,PUBLICATION_TEST_WORKFLOW,PUBLICATION_TEST_JOB} from '../scripts/_lib/education-candidate-checks.mjs';
 import {PUBLICATION_CONCEPTS} from '../functions/_lib/education-ops/education-publication-registry.mjs';
 const body={model:'claude-sonnet-5',max_tokens:1000};
 test('cost reservations survive a crash or new workflow; subscriptions persist before a request',()=>{
@@ -118,3 +118,13 @@ test('primary-source scarcity is derived from live record roles, never invented 
  pool.sources[0].source_role='primary_research';
  assert.equal(discoverResearchNeed(pool,published),undefined);
 });
+
+ test('GitHub completed action-required conclusions halt alternate CI and publication',async()=>{
+ const run={id:123,status:'completed',conclusion:'action_required',html_url:'https://github.com/brandrice-dev/aimt-site/actions/runs/123'};
+ assert.equal(requiresWorkflowApproval(run),true);
+ const gated=verifyCandidateHeadTests(run,[],{});
+ assert.deepEqual(gated.violations,['GITHUB_WORKFLOW_APPROVAL_REQUIRED']);
+ assert.equal(gated.run_url,run.html_url);
+ const result=await ensureCandidateHeadTests({}, {readFn:()=>gated,dispatchFn:()=>{throw Error('approval bypass')}});
+ assert.equal(result,gated);
+ });

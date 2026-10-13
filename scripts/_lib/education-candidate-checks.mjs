@@ -2,9 +2,11 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 export const PUBLICATION_TEST_WORKFLOW = '.github/workflows/aimt-education-validation.yml';
 export const PUBLICATION_TEST_JOB = 'Publication candidate tests';
+export const requiresWorkflowApproval = (run) => run?.status === 'action_required' || run?.conclusion === 'action_required';
 
 export function verifyCandidateHeadTests(run, jobs, { repo, headSha, prNumber }, proof = null) {
   const violations = [];
+  if (requiresWorkflowApproval(run)) return {ok:false,violations:['GITHUB_WORKFLOW_APPROVAL_REQUIRED'],run_url:run.html_url,run_id:run.id};
   const prEvent = run?.event === 'pull_request' && run.head_sha === headSha
     && run.pull_requests?.some((p) => p.number === prNumber && p.head?.sha === headSha);
   const dispatch = run?.event === 'workflow_dispatch' && run.head_branch === 'main'
@@ -30,7 +32,7 @@ export function readCandidateHeadTests({ repo, headSha, prNumber, dispatchRunId 
     if (!artifact) {
       if (dispatchRunId) {
         const pending=gh(['api',`repos/${repo}/actions/runs/${dispatchRunId}`]);
-        if (pending.status === 'action_required') return {ok:false,violations:['GITHUB_WORKFLOW_APPROVAL_REQUIRED'],run_url:pending.html_url};
+        if (requiresWorkflowApproval(pending)) return {ok:false,violations:['GITHUB_WORKFLOW_APPROVAL_REQUIRED'],run_url:pending.html_url};
         if (pending.status === 'completed' && pending.conclusion !== 'success') return {ok:false,violations:['CANDIDATE_TEST_RUN_NOT_SUCCESSFUL'],run_url:pending.html_url};
       }
       return { ok: false, violations: ['CANDIDATE_HEAD_TESTS_MISSING'] };
@@ -45,7 +47,7 @@ export function readCandidateHeadTests({ repo, headSha, prNumber, dispatchRunId 
     return verifyCandidateHeadTests(run,jobs.jobs,{repo,headSha,prNumber},proof);
   }
   const run = gh(['api', `repos/${repo}/actions/runs/${listed[0].databaseId}`]);
-  if (run.status === 'action_required') return {ok:false,violations:['GITHUB_WORKFLOW_APPROVAL_REQUIRED'],run_url:run.html_url};
+  if (requiresWorkflowApproval(run)) return {ok:false,violations:['GITHUB_WORKFLOW_APPROVAL_REQUIRED'],run_url:run.html_url};
   const jobs = gh(['api', `repos/${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`]);
   return verifyCandidateHeadTests(run, jobs.jobs, { repo, headSha, prNumber });
 }
