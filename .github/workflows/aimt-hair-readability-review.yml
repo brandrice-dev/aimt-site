@@ -1,0 +1,49 @@
+name: AIMT Hair Biology Editorial Review
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Exact editorial update PR
+        type: string
+        required: true
+      candidate_head:
+        description: Exact proposal commit SHA
+        type: string
+        required: true
+      approve_review:
+        description: Separate owner-approved $0.50 / two-request readability allowance
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+concurrency:
+  group: aimt-hair-readability-review
+  cancel-in-progress: false
+jobs:
+  independent-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Review data-only proposal against the original cleared snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          CANDIDATE_HEAD: ${{ inputs.candidate_head }}
+          APPROVE_REVIEW: ${{ inputs.approve_review }}
+        run: node scripts/education-hair-readability-review.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hair-biology-readability-review
+          path: research-import/hair-readability-review/
+          if-no-files-found: error
+          retention-days: 90

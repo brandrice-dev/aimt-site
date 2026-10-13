@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://aimtrichology.com/sitemap.xml
+
+Sitemap: https://aimtrichology.com/research/sitemap.xml
