@@ -1,0 +1,60 @@
+{
+  "task": "hair-readability-2026-10-13",
+  "head_sha": "e860dfccc14f2a31e976697bfc7a2dbe4c2b63f1",
+  "plan_sha256": "6bb610353af2f222eb03bb593877120628e642c2cb20205b339ca649d31a16ae",
+  "generation_source_hash": "597215d0f01f0f5e6e6313dc81a3f8645184060a575e0879a9b5b2fddb759b7b",
+  "original_candidate_artifact": 11848689625,
+  "original_snapshot_unchanged": true,
+  "deterministic_validation": {
+    "valid": true,
+    "shapeValid": true,
+    "violations": []
+  },
+  "verdict": {
+    "outcome": "PASS",
+    "failing_paraphrases": [],
+    "failing_framings": [],
+    "voice_fail": false,
+    "scope_fail": false,
+    "summary": "All units ENTAILED/NON_FACTUAL; voice and scope PASS."
+  },
+  "model": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "education-ops-model-registry-v1",
+    "role": "EDUCATION_REVIEWER_MODEL",
+    "source": "candidate-default"
+  },
+  "usage": {
+    "input_tokens": 24753,
+    "output_tokens": 2831
+  },
+  "run_id": "38473398027",
+  "reviewed_at": "2026-10-13T21:49:54.109Z",
+  "review_run_url": "https://github.com/brandrice-dev/aimt-site/actions/runs/38473398027",
+  "paraphrase_locations": [
+    "answer_summary",
+    "section:understanding-the-science:0",
+    "section:understanding-the-science:1",
+    "section:understanding-the-science:2",
+    "section:stem-cell-niche:0",
+    "section:stem-cell-niche:2",
+    "section:immune-privilege-microbiome:0",
+    "section:immune-privilege-microbiome:2",
+    "section:mechanical-factors:0"
+  ],
+  "reviewer_contract": "education-reviewer-v1",
+  "cost_control": {
+    "budget_usd": 0.5,
+    "reserved_cost_estimate_usd": 0.198228,
+    "reported_usage_cost_estimate_usd": 0.077816,
+    "requests": 1,
+    "requests_with_unknown_usage": 0,
+    "input_token_limit": 256000,
+    "output_token_limit": 64000,
+    "cost_basis": "Standard Sonnet 5 token rates; estimate, not provider invoice. Failed-request usage may be unknown.",
+    "request_limit": 2,
+    "task": "hair-readability-2026-10-13"
+  }
+}
