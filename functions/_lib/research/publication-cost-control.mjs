@@ -10,9 +10,24 @@ export function estimatedTokenCost(inputTokens, outputTokens) {
   return (inputTokens * 2 + outputTokens * 10) / 1000000;
 }
 
-export function createPublicationCostControl() {
+export function createPublicationCostControl({ previous = null, persist = () => {} } = {}) {
   let reserved = 0, measured = 0, requests = 0, unknownUsage = 0;
-  return {
+  const restore = (state) => {
+    if (!state) return;
+    for (const key of ['reserved_cost_estimate_usd', 'reported_usage_cost_estimate_usd', 'requests', 'requests_with_unknown_usage']) {
+      if (!Number.isFinite(state[key]) || state[key] < 0) throw new Error('INVALID_DURABLE_COST_STATE');
+    }
+    if (!Number.isSafeInteger(state.requests) || !Number.isSafeInteger(state.requests_with_unknown_usage)
+      || state.requests_with_unknown_usage > state.requests) throw new Error('INVALID_DURABLE_COST_STATE');
+    reserved = Math.max(reserved, state.reserved_cost_estimate_usd);
+    measured = Math.max(measured, state.reported_usage_cost_estimate_usd);
+    requests = Math.max(requests, state.requests);
+    unknownUsage = Math.max(unknownUsage, state.requests_with_unknown_usage);
+  };
+  restore(previous);
+  const control = {
+    resume: restore,
+    setPersistence(fn) { const previousPersist = persist; persist = (summary) => { previousPersist(summary); fn(summary); }; },
     reserve(body) {
       // UTF-8 byte count plus schema overhead allowance is a conservative
       // local input estimate; no paid token-counting request is made.
@@ -29,13 +44,15 @@ export function createPublicationCostControl() {
       reserved += estimate;
       requests++;
       unknownUsage++;
+      persist(control.summary()); // Durable reservation BEFORE any paid request.
       return estimate;
     },
     recordUsage(usage) {
       if (Number.isSafeInteger(usage?.input_tokens) && Number.isSafeInteger(usage?.output_tokens)
         && usage.input_tokens >= 0 && usage.output_tokens >= 0) {
         measured += estimatedTokenCost(usage.input_tokens, usage.output_tokens);
-        unknownUsage--;
+        unknownUsage = Math.max(0, unknownUsage - 1);
+        persist(control.summary());
       }
     },
     summary() { return { budget_usd: PUBLICATION_ATTEMPT_BUDGET_USD,
@@ -45,4 +62,5 @@ export function createPublicationCostControl() {
       input_token_limit: PUBLICATION_INPUT_TOKEN_LIMIT, output_token_limit: PUBLICATION_OUTPUT_TOKEN_LIMIT,
       cost_basis: 'Standard Sonnet 5 token rates; estimate, not provider invoice. Failed-request usage may be unknown.' }; },
   };
+  return control;
 }

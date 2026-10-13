@@ -52,10 +52,10 @@ test('verification workflow supplies no model credentials and requires explicit 
   assert.match(workflow, /test "\$GITHUB_REF_NAME" = "main"/);
   assert.match(workflow, /test "\$RELEASE_HEAD" = "\$GITHUB_SHA"/);
   const ci = readFileSync('.github/workflows/aimt-education-validation.yml', 'utf8');
-  assert.match(ci, /ref: \$\{\{ github.event.pull_request.head.sha \}\}/);
+  assert.match(ci, /ref: \$\{\{ inputs.candidate_head \|\| github.event.pull_request.head.sha \}\}/);
   assert.match(ci, /contents: read/);
   assert.match(ci, /env -i/);
-  assert.doesNotMatch(ci, /secrets\.|contents: write|pull_request_target|workflow_dispatch/);
+  assert.doesNotMatch(ci, /secrets\.|contents: write|pull_request_target/);
 });
 
  test('candidate test wait is bounded and never dispatches or accepts stale-head checks', async () => {

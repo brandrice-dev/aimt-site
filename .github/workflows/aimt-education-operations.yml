@@ -11,12 +11,17 @@ on:
         default: false
         required: false
 
+      source_run_id:
+        description: 'Exact continuation source run; must be the latest durable candidate archive. Empty starts from latest saved work.'
+        type: string
+        required: false
+
 concurrency:
   group: aimt-education-operations
   cancel-in-progress: false
 
 permissions:
-  actions: read
+  actions: write
   contents: read
   issues: write
 
@@ -32,31 +37,15 @@ jobs:
           node-version: 20
 
       - name: Restore durable candidate bundles
+        id: restore
         env:
           GH_TOKEN: ${{ github.token }}
           DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
-        run: |
-          set -euo pipefail
-          mkdir -p research-import/education-ops/candidates
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: node scripts/education-candidate-state-restore.mjs
 
-          bundle_name="education-candidate-bundles"
-          if [ "$DIAGNOSTIC" = "true" ]; then bundle_name="education-candidate-bundles-diagnostic"; fi
-          latest_run_id="$(
-            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${bundle_name}&per_page=100" \
-              --jq '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | reverse | .[0].workflow_run.id // empty'
-          )"
-
-          if [ -n "$latest_run_id" ]; then
-            echo "Restoring candidate bundles from workflow run $latest_run_id"
-            gh run download "$latest_run_id" \
-              --repo "$GITHUB_REPOSITORY" \
-              --name "$bundle_name" \
-              --dir research-import/education-ops/candidates
-          else
-            echo "No prior durable candidate bundle artifact found; starting without a resume candidate."
-          fi
-
-      - name: Run Education Operations shadow cycle
+      - name: Run Education Operations autonomous cycle
+        id: cycle
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -71,7 +60,7 @@ jobs:
           if [ "$DIAGNOSTIC" = "true" ]; then
             node scripts/education-publication-diagnostic.mjs --allow-model-calls
           else
-            node scripts/education-operations-cycle.mjs --shadow
+            node scripts/education-autonomous-cycle.mjs
           fi
 
       - name: Upload run report
@@ -84,9 +73,15 @@ jobs:
 
       - name: Upload durable candidate bundles
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.restore.outputs.restored == 'true'
         with:
           name: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic && 'education-candidate-bundles-diagnostic' || 'education-candidate-bundles' }}
           path: research-import/education-ops/candidates/
           retention-days: 90
           if-no-files-found: ignore
+
+      - name: Continue saved work after the durable checkpoint is uploaded
+        if: success() && steps.cycle.outputs.continue == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run aimt-education-operations.yml --repo "$GITHUB_REPOSITORY" --ref main -f "source_run_id=$GITHUB_RUN_ID"
