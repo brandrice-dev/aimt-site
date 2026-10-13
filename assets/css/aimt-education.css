@@ -318,3 +318,14 @@ a.aimt-edu-card:hover, a.aimt-edu-card:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .aimt-edu-badge, .aimt-edu-related a, a.aimt-edu-card { transition: none !important; }
 }
+
+/* Keep anchored section headings visible beneath the sticky public nav. */
+.aimt-edu-article section[id] { scroll-margin-top: calc(var(--aimt-nav-height, 56px) + 1.5rem); }
+.aimt-edu-search { max-width: 760px; padding: 22px; border: 1px solid rgba(163,150,141,.3); border-radius: var(--aimt-radius-card,18px); background: var(--aimt-card-bg,rgba(255,255,255,.02)); }
+.aimt-edu-search label { display: block; font: 500 14px var(--aimt-font-sans,sans-serif); }
+.aimt-edu-search-row { display: flex; gap: 12px; margin-top: 12px; }
+.aimt-edu-search input,.aimt-edu-search button { font: inherit; padding: 14px; min-height: 48px; border: 1px solid rgba(163,150,141,.5); border-radius: 6px; }
+.aimt-edu-search input { flex: 1; min-width: 0; color: inherit; background: rgba(255,255,255,.03); }
+.aimt-edu-search button { color: #171a18; background: var(--aimt-color-accent,#a3968d); cursor: pointer; font-weight: 600; }
+.aimt-edu-search :focus-visible { outline: 3px solid var(--aimt-color-accent,#a3968d); outline-offset: 3px; }
+@media(max-width: 600px) { .aimt-edu-search-row { flex-direction: column; } }
