@@ -295,3 +295,10 @@ hand-authored/hand-reviewed — there is still no real, deterministic (or
 model-assisted) entailment check standing in for the human editorial
 review this page received. Generalizing beyond hair-cycle requires that
 safeguard first, not just copying this template shape onto a new topic.
+
+
+## Plain-language scientific explanation
+
+Teach the meaning of technical vocabulary as it is introduced. For dense topics, provide an accessible explanation under a natural, topic-appropriate heading; a genuinely simple topic may not need a separate section. No fixed heading is required. Introductions and explanations should sound like a knowledgeable colleague speaking to a beauty or scalp-care professional.
+
+Substantive explanations are PARAPHRASE units grounded in the existing cleared statements, carrying their exact supporting claim IDs and source statements. A definition or analogy is a scientific claim if it adds meaning: the independent Reviewer must verify it. Preserve uncertainty, population and model restrictions, scope, limitations, citations, and detailed scientific information. Readability never authorizes stronger conclusions or invented service or treatment advice.

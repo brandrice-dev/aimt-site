@@ -90,7 +90,8 @@ function renderSources(sources) {
     const authors = s.authors && s.authors.length ? escapeHtml(s.authors.join(', ')) + '. ' : '';
     const linked = s.url ? `<a href="${escapeHtml(s.url)}" rel="noopener">${escapeHtml(s.title)}</a>` : escapeHtml(s.title);
     const meta = [s.year, s.doi ? `doi: ${escapeHtml(s.doi)}` : null].filter(Boolean).join(' · ');
-    return `        <li class="aimt-edu-source"><span><span class="aimt-edu-source-title">${authors}${linked}</span><span class="aimt-edu-source-meta">${meta}</span></span></li>`;
+    const studyLink = (s.doi || s.url) ? ` <a href="/research?source=${encodeURIComponent(s.doi || s.url)}">Study details &amp; related education</a>` : '';
+    return `        <li class="aimt-edu-source"><span><span class="aimt-edu-source-title">${authors}${linked}</span><span class="aimt-edu-source-meta">${meta}${studyLink}</span></span></li>`;
   }).join('\n');
 }
 

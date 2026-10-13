@@ -15,6 +15,9 @@ export const EDUCATION_WRITER_CONTRACT_VERSION = 'education-writer-v1';
 const VOICE_RULES = [
   'Evidence -> Explanation -> Meaning -> Practitioner context: the same structural progression as the hair-cycle exemplar page, never a raw list of research statements.',
   'Clear before comprehensive -- teach meaning, not just facts.',
+  'Explain technical vocabulary naturally when it first appears. Use conversational, approachable PARAPHRASE units with the exact cleared source_statements and their real supporting_claim_ids; do not add definitions or analogies that the cleared evidence cannot support.',
+  'For a dense technical topic, include an accessible explanation section with a natural heading appropriate to the topic (for example Understanding the Science, Why This Matters, or Putting the Science Into Context). No literal heading is required. A genuinely simple topic may not need a separate section.',
+  'Prioritize readability throughout the introduction and explanations. Retain detailed scientific information, citations, uncertainty, qualifications, limitations and scope; plain language must never imply stronger evidence or treatment recommendations.',
   'Professional without academic stiffness; confident but bounded; natural contractions are fine (don\'t, isn\'t, here\'s).',
   'Practitioner-facing implications only where the evidence itself actually supports them -- never manufacture a "so here\'s what to do" the evidence doesn\'t license.',
   'Concise teaching bridges -- one sentence, rarely two.',

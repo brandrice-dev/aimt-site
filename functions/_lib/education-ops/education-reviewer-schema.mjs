@@ -76,6 +76,7 @@ export function buildReviewerInstruction({ plan, clearedSnapshot, intentPlan }) 
     `- NON_FACTUAL: correctly non-factual editorial orientation -- removable from the page without losing any scientific meaning.`,
     `- CARRIES_SCIENCE: the framing unit actually introduces or summarizes a biological fact, mechanism, timing, causal relationship, prevalence, or diagnostic/treatment implication -- it should have been VERBATIM or PARAPHRASE with real claim IDs instead, or removed entirely.`,
     ``,
+    `Check every substantive plain-language explanation, introduced technical definition and analogy against its own cleared source statements. Readability is expected throughout: dense topics need an accessible explanation with a topic-appropriate heading, while simple topics may not need a separate section. A literal heading is never required. If a technical term cannot be explained from the cleared evidence, the page must acknowledge that boundary rather than invent a definition.`,
     `Also assess VOICE (does the page read as AIMT Education voice -- clear before comprehensive, teaches meaning, professional without academic stiffness, no SEO sludge, no journal-abstract tone, no unsupported practitioner implication -- PASS or FAIL) and SCOPE (does the page stay strictly within its page_intent's in_scope_concepts and respect its out_of_scope_concepts, with no diagnosis/treatment drift -- PASS or FAIL).`,
     ``,
     `PAGE INTENT (the approved scope):`,
