@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export function restorePublicationState(root, env, { gh = (...args) => execFileSync('gh', args, { maxBuffer: 16 * 1024 * 1024 }) } = {}) {
   const repo = `repos/${env.GITHUB_REPOSITORY}`;
   const pages = JSON.parse(gh('api', '--paginate', '--slurp', `${repo}/actions/artifacts?name=education-publication-state&per_page=100`));
-  const artifact = pages.flatMap((p) => p.artifacts).filter((a) => !a.expired).sort((a, b) => b.id - a.id)[0];
+  const artifact = pages.flatMap((p) => p.artifacts).filter((a) => !a.expired).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id)[0];
   const directory = path.join(root, 'research-import/education-ops/publications');
   mkdirSync(directory, { recursive: true });
   if (!artifact) {
