@@ -1,0 +1,651 @@
+{
+  "topic_slug": "hair-biology",
+  "page_plan_version": "education-page-plan-v1",
+  "plan": {
+    "topic_slug": "hair-biology",
+    "cluster": "trichology-fundamentals",
+    "route": "/education/trichology/hair-biology",
+    "title": "Hair Biology: A Practitioner Education Overview",
+    "meta_description": "A practitioner-level overview of hair follicle anatomy, the growth cycle, stem cell niches, and scalp ecosystem factors, grounded in peer-reviewed research.",
+    "h1": "Hair Biology: A Practitioner Education Overview",
+    "answer_summary": {
+      "kind": "VERBATIM",
+      "text": "The hair follicle is often described as a dynamic mini-organ with distinct anatomical compartments (infundibulum, isthmus, bulb, dermal papilla) that undergo coordinated structural changes.",
+      "supporting_claim_ids": [
+        "20220512-lin-hair-follicle-morphogenesis--c01",
+        "schneider-paus-hf-miniorgan-2009--c01",
+        "schneider-paus-hf-miniorgan-2009--c02",
+        "stenn-paus-hf-cycling-2001--c01",
+        "stenn-paus-hf-cycling-2001--c02"
+      ],
+      "source_statements": [
+        "The hair follicle is often described as a dynamic mini-organ with distinct anatomical compartments (infundibulum, isthmus, bulb, dermal papilla) that undergo coordinated structural changes."
+      ]
+    },
+    "sections": [
+      {
+        "section_id": "follicle-anatomy",
+        "heading": "The Follicle as a Mini-Organ",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "The dermal papilla functions as a signalling center that helps regulate follicle growth, shape, size, and pigmentation across embryonic development and the adult cycle.",
+            "supporting_claim_ids": [
+              "zhang-qiu-liao-dermal-papilla-2024--c01",
+              "zhang-qiu-liao-dermal-papilla-2024--c02",
+              "zhang-qiu-liao-dermal-papilla-2024--c03"
+            ],
+            "source_statements": [
+              "The dermal papilla functions as a signalling center that helps regulate follicle growth, shape, size, and pigmentation across embryonic development and the adult cycle."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "growth-cycle",
+        "heading": "The Hair Growth Cycle",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Hair follicles cycle through growth (anagen), regression (catagen), rest (telogen), and shedding (exogen) phases, with approximate human timing described in the literature.",
+            "supporting_claim_ids": [
+              "20220512-lin-hair-follicle-morphogenesis--c02",
+              "20230123-natarelli-hair-growth-cycle--c01",
+              "oh-guide-hf-cycling-2016--c01",
+              "tan-lim-lay-hf-modelling-2024--c01"
+            ],
+            "source_statements": [
+              "Hair follicles cycle through growth (anagen), regression (catagen), rest (telogen), and shedding (exogen) phases, with approximate human timing described in the literature."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "stem-cell-niche",
+        "heading": "Stem Cells, Signalling, and the Niche",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Follicle cycling and regeneration are governed by conserved signalling pathways including Wnt/β-catenin, Sonic hedgehog, Notch, and BMP, which regulate hair follicle stem cell fate.",
+            "supporting_claim_ids": [
+              "20220512-lin-hair-follicle-morphogenesis--c03",
+              "bellani-hf-regeneration-pathways-2025--c02",
+              "bellani-hf-regeneration-pathways-2025--c03",
+              "hu-hfsc-signalling-2021--c02",
+              "lee-choi-hfsc-dynamics-2024--c04",
+              "zou-wnt10b-hf-2025--c01",
+              "zou-wnt10b-hf-2025--c02"
+            ],
+            "source_statements": [
+              "Follicle cycling and regeneration are governed by conserved signalling pathways including Wnt/β-catenin, Sonic hedgehog, Notch, and BMP, which regulate hair follicle stem cell fate."
+            ]
+          },
+          {
+            "kind": "VERBATIM",
+            "text": "Hair follicle stem cells reside in a specialized niche that integrates local cellular/matrix signals and systemic inputs, alongside adjacent melanocyte and sebaceous stem cell populations.",
+            "supporting_claim_ids": [
+              "jiang-collagen-niche-hair-2026--c03",
+              "lee-choi-hfsc-dynamics-2024--c01",
+              "lee-choi-hfsc-dynamics-2024--c02",
+              "lee-choi-hfsc-dynamics-2024--c03",
+              "zhang-chen-hfsc-niche-2023--c01",
+              "zhang-chen-hfsc-niche-2023--c02",
+              "zhang-chen-hfsc-niche-2023--c03"
+            ],
+            "source_statements": [
+              "Hair follicle stem cells reside in a specialized niche that integrates local cellular/matrix signals and systemic inputs, alongside adjacent melanocyte and sebaceous stem cell populations."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "immune-privilege-microbiome",
+        "heading": "Immune Privilege and the Scalp Microbiome",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "The hair follicle maintains a relative immune-privileged microenvironment, supported by reduced antigen-presentation machinery and local regulatory T cell activity.",
+            "supporting_claim_ids": [
+              "20190411-polak-witka-microbiome-scalp-hf--c01",
+              "bertolini-hf-immune-privilege-aa-2020--c01",
+              "bertolini-hf-immune-privilege-aa-2020--c02",
+              "cohen-treg-hfsc-niche-2024--c01",
+              "cohen-treg-hfsc-niche-2024--c03",
+              "kiselev-immune-niches-hf-2024--c01",
+              "kiselev-immune-niches-hf-2024--c02",
+              "kiselev-immune-niches-hf-2024--c03"
+            ],
+            "source_statements": [
+              "The hair follicle maintains a relative immune-privileged microenvironment, supported by reduced antigen-presentation machinery and local regulatory T cell activity."
+            ]
+          },
+          {
+            "kind": "VERBATIM",
+            "text": "The scalp hosts a distinct follicular microbiome, differing between the surface and the deeper follicular niche, with host antimicrobial peptides helping shape its composition.",
+            "supporting_claim_ids": [
+              "20190411-polak-witka-microbiome-scalp-hf--c02",
+              "20210501-lousada-hf-microbiome--c01",
+              "20210501-lousada-hf-microbiome--c03"
+            ],
+            "source_statements": [
+              "The scalp hosts a distinct follicular microbiome, differing between the surface and the deeper follicular niche, with host antimicrobial peptides helping shape its composition."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "mechanical-factors",
+        "heading": "Mechanical and Circulatory Factors",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Mechanical forces such as stretch, scalp massage, and PIEZO1-mediated mechanotransduction are studied as research factors that may influence follicle stem cell behaviour and dermal papilla gene expression.",
+            "supporting_claim_ids": [
+              "chu-mechanical-stretch-macrophages-2019--c01",
+              "koyama-scalp-massage-2016--c02",
+              "wang-piezo1-hfsc-quiescence-2025--c01",
+              "wang-sms-circulation-2020--c01"
+            ],
+            "source_statements": [
+              "Mechanical forces such as stretch, scalp massage, and PIEZO1-mediated mechanotransduction are studied as research factors that may influence follicle stem cell behaviour and dermal papilla gene expression."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "research-methods",
+        "heading": "How This Biology Is Studied",
+        "units": [
+          {
+            "kind": "VERBATIM",
+            "text": "Much of this mechanistic understanding comes from animal models, in vitro systems, and bioengineered follicle models used as research tools to study human follicle biology.",
+            "supporting_claim_ids": [
+              "oh-guide-hf-cycling-2016--c03",
+              "schneider-paus-hf-miniorgan-2009--c03",
+              "tan-lim-lay-hf-modelling-2024--c04"
+            ],
+            "source_statements": [
+              "Much of this mechanistic understanding comes from animal models, in vitro systems, and bioengineered follicle models used as research tools to study human follicle biology."
+            ]
+          }
+        ]
+      }
+    ],
+    "scope_note": "This page is restricted to general, conceptual hair follicle biology intended for practitioner education -- including structure, the growth cycle, stem cell niches, signalling concepts, the dermal papilla, scalp microbiome, immune privilege, and mechanical/circulatory research factors. It does not cover diagnosis of any hair loss condition, treatment or supplement protocols, named conditions such as androgenetic alopecia or alopecia areata as diagnostic categories, product or device recommendations, gut-skin axis clinical associations, or prognosis for individual cases; evidence touching those topics was excluded as out of scope rather than treated as contradicting this page's content.",
+    "limitations": [
+      {
+        "kind": "VERBATIM",
+        "text": "Key developmental signalling pathways must remain tightly regulated; sustained overactivation of some pathways (e.g., Wnt10b) has been associated with cellular transformation risk in research models.",
+        "supporting_claim_ids": [
+          "zou-wnt10b-hf-2025--c04"
+        ],
+        "source_statements": [
+          "Key developmental signalling pathways must remain tightly regulated; sustained overactivation of some pathways (e.g., Wnt10b) has been associated with cellular transformation risk in research models."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Much of the molecular and signalling detail in this field derives from murine developmental biology, and human clinical translation remains incomplete or uneven.",
+        "supporting_claim_ids": [
+          "20220512-lin-hair-follicle-morphogenesis--c05",
+          "stenn-paus-hf-cycling-2001--c04",
+          "tan-lim-lay-hf-modelling-2024--c05",
+          "zhang-chen-hfsc-niche-2023--c05"
+        ],
+        "source_statements": [
+          "Much of the molecular and signalling detail in this field derives from murine developmental biology, and human clinical translation remains incomplete or uneven."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Relationships between the scalp microbiome and hair cycle regulation remain largely hypothesized rather than established as causal.",
+        "supporting_claim_ids": [
+          "20190411-polak-witka-microbiome-scalp-hf--c06",
+          "20210501-lousada-hf-microbiome--c05"
+        ],
+        "source_statements": [
+          "Relationships between the scalp microbiome and hair cycle regulation remain largely hypothesized rather than established as causal."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Research on mechanical scalp stimulation often involves small samples, non-hair-growth proxy endpoints, and limited replication, so findings should not be read as proof of clinically meaningful regrowth.",
+        "supporting_claim_ids": [
+          "koyama-scalp-massage-2016--c06",
+          "koyama-scalp-massage-2016--c07",
+          "koyama-scalp-massage-2016--c08",
+          "koyama-scalp-massage-2016--c09",
+          "wang-sms-circulation-2020--c05"
+        ],
+        "source_statements": [
+          "Research on mechanical scalp stimulation often involves small samples, non-hair-growth proxy endpoints, and limited replication, so findings should not be read as proof of clinically meaningful regrowth."
+        ]
+      }
+    ],
+    "key_takeaways": [
+      {
+        "kind": "VERBATIM",
+        "text": "Hair follicles cycle through growth (anagen), regression (catagen), rest (telogen), and shedding (exogen) phases, with approximate human timing described in the literature.",
+        "supporting_claim_ids": [
+          "20220512-lin-hair-follicle-morphogenesis--c02",
+          "20230123-natarelli-hair-growth-cycle--c01",
+          "oh-guide-hf-cycling-2016--c01",
+          "tan-lim-lay-hf-modelling-2024--c01"
+        ],
+        "source_statements": [
+          "Hair follicles cycle through growth (anagen), regression (catagen), rest (telogen), and shedding (exogen) phases, with approximate human timing described in the literature."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "Follicle cycling and regeneration are governed by conserved signalling pathways including Wnt/β-catenin, Sonic hedgehog, Notch, and BMP, which regulate hair follicle stem cell fate.",
+        "supporting_claim_ids": [
+          "20220512-lin-hair-follicle-morphogenesis--c03",
+          "bellani-hf-regeneration-pathways-2025--c02",
+          "bellani-hf-regeneration-pathways-2025--c03",
+          "hu-hfsc-signalling-2021--c02",
+          "lee-choi-hfsc-dynamics-2024--c04",
+          "zou-wnt10b-hf-2025--c01",
+          "zou-wnt10b-hf-2025--c02"
+        ],
+        "source_statements": [
+          "Follicle cycling and regeneration are governed by conserved signalling pathways including Wnt/β-catenin, Sonic hedgehog, Notch, and BMP, which regulate hair follicle stem cell fate."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "The hair follicle maintains a relative immune-privileged microenvironment, supported by reduced antigen-presentation machinery and local regulatory T cell activity.",
+        "supporting_claim_ids": [
+          "20190411-polak-witka-microbiome-scalp-hf--c01",
+          "bertolini-hf-immune-privilege-aa-2020--c01",
+          "bertolini-hf-immune-privilege-aa-2020--c02",
+          "cohen-treg-hfsc-niche-2024--c01",
+          "cohen-treg-hfsc-niche-2024--c03",
+          "kiselev-immune-niches-hf-2024--c01",
+          "kiselev-immune-niches-hf-2024--c02",
+          "kiselev-immune-niches-hf-2024--c03"
+        ],
+        "source_statements": [
+          "The hair follicle maintains a relative immune-privileged microenvironment, supported by reduced antigen-presentation machinery and local regulatory T cell activity."
+        ]
+      }
+    ],
+    "visual_recommendation": {
+      "recommendation": "DIAGRAM",
+      "rationale": "A labelled cross-section of the follicle showing its compartments (infundibulum, isthmus, bulb, dermal papilla) alongside a simple cycle diagram of anagen/catagen/telogen/exogen phases would let practitioners grasp the spatial and temporal structure of this biology far faster than prose alone, without implying any diagnostic or treatment claim."
+    },
+    "sources": [
+      {
+        "source_id": "20190411-polak-witka-microbiome-scalp-hf",
+        "title": "The role of the microbiome in scalp hair follicle biology and disease",
+        "authors": [
+          "Katarzyna Polak-Witka",
+          "Lidia Rudnicka",
+          "Ulrike Blume-Peytavi",
+          "Annika Vogt"
+        ],
+        "year": 2020,
+        "doi": "10.1111/exd.13935",
+        "url": "https://doi.org/10.1111/exd.13935"
+      },
+      {
+        "source_id": "20210501-lousada-hf-microbiome",
+        "title": "Exploring the human hair follicle microbiome",
+        "authors": [
+          "M.B. Lousada",
+          "T. Lachnit",
+          "J. Edelkamp",
+          "T. Rouillé",
+          "D. Ajdic",
+          "Y. Uchida",
+          "A. Di Nardo",
+          "T.C.G. Bosch",
+          "R. Paus"
+        ],
+        "year": 2021,
+        "doi": "10.1111/bjd.19461",
+        "url": "https://doi.org/10.1111/bjd.19461"
+      },
+      {
+        "source_id": "20220512-lin-hair-follicle-morphogenesis",
+        "title": "Morphogenesis, Growth Cycle and Molecular Regulation of Hair Follicles",
+        "authors": [
+          "Xiangyu Lin",
+          "Liang Zhu",
+          "Jing He"
+        ],
+        "year": 2022,
+        "doi": "10.3389/fcell.2022.899095",
+        "url": "https://doi.org/10.3389/fcell.2022.899095"
+      },
+      {
+        "source_id": "20230123-natarelli-hair-growth-cycle",
+        "title": "Integrative and Mechanistic Approach to the Hair Growth Cycle and Hair Loss",
+        "authors": [
+          "Nicole Natarelli",
+          "Nimrit Gahoonia",
+          "Raja K. Sivamani"
+        ],
+        "year": 2023,
+        "doi": "10.3390/jcm12030893",
+        "url": "https://doi.org/10.3390/jcm12030893"
+      },
+      {
+        "source_id": "bellani-hf-regeneration-pathways-2025",
+        "title": "Pathophysiological mechanisms of hair follicle regeneration and potential therapeutic strategies",
+        "authors": [
+          "Bellani D",
+          "Patil R",
+          "Prabhughate A",
+          "Shahare R",
+          "Gold M",
+          "Kapoor R",
+          "Shome D"
+        ],
+        "year": 2025,
+        "doi": "10.1186/s13287-025-04420-4",
+        "url": "https://stemcellres.biomedcentral.com/articles/10.1186/s13287-025-04420-4"
+      },
+      {
+        "source_id": "bertolini-hf-immune-privilege-aa-2020",
+        "title": "Hair follicle immune privilege and its collapse in alopecia areata",
+        "authors": [
+          "Marta Bertolini",
+          "Kevin McElwee",
+          "Amos Gilhar",
+          "Silvia Bulfone-Paus",
+          "Ralf Paus"
+        ],
+        "year": 2020,
+        "doi": "10.1111/exd.14155",
+        "url": "https://doi.org/10.1111/exd.14155"
+      },
+      {
+        "source_id": "chu-mechanical-stretch-macrophages-2019",
+        "title": "Mechanical stretch induces hair regeneration through the alternative activation of macrophages",
+        "authors": [
+          "Szu-Ying Chu",
+          "Chih-Hung Chou",
+          "Hsien-Da Huang",
+          "Meng-Hua Yen",
+          "Hsiao-Chin Hong",
+          "Po-Han Chao",
+          "Yu-Hsuan Wang",
+          "Po-Yu Chen",
+          "Shi-Xin Nian",
+          "Yu-Ru Chen",
+          "Li-Ying Liou",
+          "Yu-Chen Liu",
+          "Hui-Mei Chen",
+          "Feng-Mao Lin",
+          "Yun-Ting Chang",
+          "Chih-Chiang Chen",
+          "Oscar K. Lee"
+        ],
+        "year": 2019,
+        "doi": "10.1038/s41467-019-09402-8",
+        "url": "https://doi.org/10.1038/s41467-019-09402-8"
+      },
+      {
+        "source_id": "cohen-treg-hfsc-niche-2024",
+        "title": "Regulatory T cells in skin mediate immune privilege of the hair follicle stem cell niche",
+        "authors": [
+          "Jarish N. Cohen",
+          "Victoire Gouirand",
+          "Courtney E. Macon",
+          "Margaret M. Lowe",
+          "Ian C. Boothby",
+          "Joshua M. Moreau",
+          "Iris K. Gratz",
+          "Angelika Stoecklinger",
+          "Casey T. Weaver",
+          "Arlene H. Sharpe",
+          "Roberto R. Ricardo-Gonzalez",
+          "Michael D. Rosenblum"
+        ],
+        "year": 2024,
+        "doi": "10.1126/sciimmunol.adh0152",
+        "url": "https://doi.org/10.1126/sciimmunol.adh0152"
+      },
+      {
+        "source_id": "hu-hfsc-signalling-2021",
+        "title": "A systematic summary of survival and death signalling during the life of hair follicle stem cells",
+        "authors": [
+          "Xi-Min Hu",
+          "Zhi-Xin Li",
+          "Dan-Yi Zhang",
+          "Yi-Chao Yang",
+          "Shen-ao Fu",
+          "Zai-Qiu Zhang",
+          "Rong-Hua Yang",
+          "Kun Xiong"
+        ],
+        "year": 2021,
+        "doi": "10.1186/s13287-021-02527-y",
+        "url": "https://doi.org/10.1186/s13287-021-02527-y"
+      },
+      {
+        "source_id": "jiang-collagen-niche-hair-2026",
+        "title": "From a stem-cell–centered to a niche-centered view: the core role of collagen networks in hair loss and hair follicle miniaturization",
+        "authors": [
+          "Zhounan Jiang",
+          "Ye Xu",
+          "Yu Lou"
+        ],
+        "year": 2026,
+        "doi": "10.3389/fcell.2026.1824126",
+        "url": "https://doi.org/10.3389/fcell.2026.1824126"
+      },
+      {
+        "source_id": "kiselev-immune-niches-hf-2024",
+        "title": "Immune niches for hair follicle development and homeostasis",
+        "authors": [
+          "Artem Kiselev",
+          "Sangbum Park"
+        ],
+        "year": 2024,
+        "doi": "10.3389/fphys.2024.1397067",
+        "url": "https://doi.org/10.3389/fphys.2024.1397067"
+      },
+      {
+        "source_id": "koyama-scalp-massage-2016",
+        "title": "Standardized Scalp Massage Results in Increased Hair Thickness by Inducing Stretching Forces to Dermal Papilla Cells in the Subcutaneous Tissue",
+        "authors": [
+          "Koyama T",
+          "Kobayashi K",
+          "Hama T",
+          "Murakami K",
+          "Ogawa R"
+        ],
+        "year": 2016,
+        "doi": null,
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4740347/"
+      },
+      {
+        "source_id": "lee-choi-hfsc-dynamics-2024",
+        "title": "Deciphering the molecular mechanisms of stem cell dynamics in hair follicle regeneration",
+        "authors": [
+          "Jung Hyun Lee",
+          "Sekyu Choi"
+        ],
+        "year": 2024,
+        "doi": "10.1038/s12276-023-01151-5",
+        "url": "https://doi.org/10.1038/s12276-023-01151-5"
+      },
+      {
+        "source_id": "nam-mechano-hair-regeneration-2025",
+        "title": "Hair regeneration: Mechano-activation and related therapeutic approaches",
+        "authors": [
+          "Sun Young Nam",
+          "Shreyas Kumar Jain",
+          "Amal George Kurian",
+          "Ishik Jeong",
+          "Byung Cheol Park",
+          "Kiwon Ban",
+          "Jonathan C. Knowles",
+          "Hae-Won Kim"
+        ],
+        "year": 2025,
+        "doi": "10.1177/20417314251362398",
+        "url": "https://doi.org/10.1177/20417314251362398"
+      },
+      {
+        "source_id": "oh-guide-hf-cycling-2016",
+        "title": "A Guide to Studying Human Hair Follicle Cycling In Vivo",
+        "authors": [
+          "Ji Won Oh",
+          "Jennifer Kloepper",
+          "Ewan A. Langan",
+          "Yongsoo Kim",
+          "Joongyeub Yeo",
+          "Min Ji Kim",
+          "Tsai-Ching Hsi",
+          "Christian Rose",
+          "Ghil Suk Yoon",
+          "Seok-Jong Lee",
+          "John Seykora",
+          "Jung Chul Kim",
+          "Young Kwan Sung",
+          "Moonkyu Kim",
+          "Ralf Paus",
+          "Maksim V. Plikus"
+        ],
+        "year": 2016,
+        "doi": "10.1038/jid.2015.354",
+        "url": "https://doi.org/10.1038/jid.2015.354"
+      },
+      {
+        "source_id": "schneider-paus-hf-miniorgan-2009",
+        "title": "The Hair Follicle as a Dynamic Miniorgan",
+        "authors": [
+          "Marlon R. Schneider",
+          "Ruth Schmidt-Ullrich",
+          "Ralf Paus"
+        ],
+        "year": 2009,
+        "doi": "10.1016/j.cub.2008.12.005",
+        "url": "https://doi.org/10.1016/j.cub.2008.12.005"
+      },
+      {
+        "source_id": "stenn-paus-hf-cycling-2001",
+        "title": "Controls of Hair Follicle Cycling",
+        "authors": [
+          "Kurt S. Stenn",
+          "Ralf Paus"
+        ],
+        "year": 2001,
+        "doi": "10.1152/physrev.2001.81.1.449",
+        "url": "https://doi.org/10.1152/physrev.2001.81.1.449"
+      },
+      {
+        "source_id": "tan-lim-lay-hf-modelling-2024",
+        "title": "Modelling Human Hair Follicles—Lessons from Animal Models and Beyond",
+        "authors": [
+          "Chew Teng Tan",
+          "Chin Yan Lim",
+          "Kenneth Lay"
+        ],
+        "year": 2024,
+        "doi": "10.3390/biology13050312",
+        "url": "https://www.mdpi.com/2079-7737/13/5/312"
+      },
+      {
+        "source_id": "wang-piezo1-hfsc-quiescence-2025",
+        "title": "PIEZO1-mediated calcium signaling reinforces mechanical properties of hair follicle stem cells to promote quiescence",
+        "authors": [
+          "Jingjing Wang",
+          "Chaoyu Fu",
+          "Sophie Chang",
+          "Christopher Stephens",
+          "Haimin Li",
+          "Dongmei Wang",
+          "Yuheng C Fu",
+          "Kathleen J Green",
+          "Jie Yan",
+          "Rui Yi"
+        ],
+        "year": 2025,
+        "doi": "10.1126/sciadv.adt2771",
+        "url": "https://doi.org/10.1126/sciadv.adt2771"
+      },
+      {
+        "source_id": "wang-sms-circulation-2020",
+        "title": "Mechanical stimulation of the scalp improves the extra- and intracranial blood circulation in humans and mice",
+        "authors": [
+          "Yan Tan",
+          "Fang He",
+          "Ce Zhang",
+          "Jiani Zhang",
+          "Ziwei Chen",
+          "Xu Wang",
+          "Peng Wei",
+          "Yinan Nan",
+          "Louis Lei Jin",
+          "Qian Hua"
+        ],
+        "year": 2020,
+        "doi": "10.1016/j.jtcms.2020.10.001",
+        "url": "https://doi.org/10.1016/j.jtcms.2020.10.001"
+      },
+      {
+        "source_id": "zhang-chen-hfsc-niche-2023",
+        "title": "Local and systemic mechanisms that control the hair follicle stem cell niche",
+        "authors": [
+          "Bing Zhang",
+          "Ting Chen"
+        ],
+        "year": 2023,
+        "doi": "10.1038/s41580-023-00662-3",
+        "url": "https://doi.org/10.1038/s41580-023-00662-3"
+      },
+      {
+        "source_id": "zhang-qiu-liao-dermal-papilla-2024",
+        "title": "Dermal Papilla Cells: From Basic Research to Translational Applications",
+        "authors": [
+          "He-Li Zhang",
+          "Xi-Xi Qiu",
+          "Xin-Hua Liao"
+        ],
+        "year": 2024,
+        "doi": "10.3390/biology13100842",
+        "url": "https://doi.org/10.3390/biology13100842"
+      },
+      {
+        "source_id": "zou-wnt10b-hf-2025",
+        "title": "Wnt10b Regulation of Hair Follicle Development, Regeneration, and Skin Diseases",
+        "authors": [
+          "Yi Zou",
+          "Fangqi Tang",
+          "Peiwen Li",
+          "Weiming Qiu",
+          "Mingxing Lei"
+        ],
+        "year": 2025,
+        "doi": "10.1007/s12015-025-10898-5",
+        "url": "https://doi.org/10.1007/s12015-025-10898-5"
+      }
+    ],
+    "related_links": [
+      {
+        "href": "/education/trichology",
+        "label": "Trichology Fundamentals — AIMT Education Library",
+        "relation": "topic_hub"
+      },
+      {
+        "href": "/education",
+        "label": "AIMT Education Library",
+        "relation": "library_home"
+      },
+      {
+        "href": "/about/research-standards",
+        "label": "How AIMT reviews research and evidence",
+        "relation": "transparency"
+      }
+    ]
+  },
+  "generation_source_hash": "597215d0f01f0f5e6e6313dc81a3f8645184060a575e0879a9b5b2fddb759b7b",
+  "prepared_at": "2026-10-12T22:05:32.532Z",
+  "writer_provenance": {
+    "contract_version": "education-writer-v1"
+  }
+}
