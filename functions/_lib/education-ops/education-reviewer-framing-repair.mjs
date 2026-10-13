@@ -124,3 +124,28 @@ export function repairReviewerFramingFailures(plan, reviewResult) {
 
   return { eligible: true, repairedPlan, removedUnitCount, reason: null };
 }
+
+// A proposal for re-review, never an override of a scientific verdict. Only
+// exact, uniquely cleared statements can replace failed paraphrases; all
+// optional section framing is removed. Scope and limitations remain intact.
+export function repairReviewerEvidenceFailures(plan, snapshot, review) {
+  const no = () => ({eligible:false,repairedPlan:structuredClone(plan),removedUnitCount:0,reason:'NO_UNAMBIGUOUS_CLEARED_REPAIR'});
+  if (review?.outcome !== REVIEW_OUTCOME.SUBSTANTIVE_FAIL || review.voice_fail !== false
+    || !review.failing_paraphrases?.length || !review.failing_paraphrases.every(f=>['TOO_STRONG','OUTSIDE_EVIDENCE','CAUSALITY_DRIFT','NUMERIC_DRIFT'].includes(f.verdict))
+    || !Array.isArray(review.failing_framings) || !review.failing_framings.every(f=>f.verdict==='CARRIES_SCIENCE')) return no();
+  const points=[...(snapshot.core_factual_points||[]),...(snapshot.limitations||[])];
+  const {repairedPlan,removedUnitCount}=removeSectionFramingUnits(plan);
+  const locations=new Map([['answer_summary',repairedPlan.answer_summary],
+    ...repairedPlan.sections.flatMap(s=>s.units.map((u,i)=>[`section:${s.section_id}:${i}`,u])),
+    ...repairedPlan.key_takeaways.map((u,i)=>[`key_takeaway:${i}`,u])]);
+  const repairedLocations=[];
+  for(const failure of review.failing_paraphrases){
+    const unit=locations.get(failure.location);
+    if(!unit || unit.kind!=='PARAPHRASE' || unit.source_statements?.length!==1)return no();
+    const matches=points.filter(p=>p.statement===unit.source_statements[0]
+      && JSON.stringify([...(p.supporting_claim_ids||[])].sort())===JSON.stringify([...unit.supporting_claim_ids].sort()));
+    if(matches.length!==1)return no();
+    unit.kind='VERBATIM';unit.text=matches[0].statement;repairedLocations.push(failure.location);
+  }
+  return {eligible:true,repairedPlan,removedUnitCount,repairedLocations,reason:null};
+}

@@ -78,7 +78,7 @@ import { validateEducationPagePlan } from '../functions/_lib/education-ops/educa
 import { repairDeterministicPagePlanViolations, repairRoutinePagePlanViolations } from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
 import { reviewEducationPagePlan } from '../functions/_lib/education-ops/education-reviewer-client.mjs';
 import { aggregateReviewOutcome, REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
-import { repairReviewerFramingFailures } from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
+import { repairReviewerFramingFailures, repairReviewerEvidenceFailures } from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
 import { renderEducationPageHtml } from '../functions/_lib/education-ops/education-page-renderer.mjs';
 import { checkGeneratedDiffAllowlist } from '../functions/_lib/education-ops/education-diff-allowlist.mjs';
 import { checkAllPublishedTopicsFreshness, FRESHNESS_STATE } from '../functions/_lib/education-ops/education-freshness-monitor.mjs';
@@ -353,7 +353,8 @@ async function attemptReviewerFramingRepair(env, {
   if (alreadyAttempted) return { attempted: false };
 
   const repairFn = fns.repairFramingFn || repairReviewerFramingFailures;
-  const repair = repairFn(plan, bundleDraft.review_result);
+  let repair = repairFn(plan, bundleDraft.review_result);
+  if (!repair.eligible) repair = repairReviewerEvidenceFailures(plan, clearedSnapshot, bundleDraft.review_result);
   if (!repair.eligible) return { attempted: false };
 
   // MODEL-CALL CEILING GUARD: this repair may add at most ONE Reviewer
@@ -370,7 +371,13 @@ async function attemptReviewerFramingRepair(env, {
   }
 
   const validateFn = fns.validateEducationPagePlanFn || validateEducationPagePlan;
-  const revalidation = validateFn(repair.repairedPlan, clearedSnapshot, validationContext);
+  let revalidation = validateFn(repair.repairedPlan, clearedSnapshot, validationContext);
+  if (!revalidation.valid && revalidation.violations.every(v=>v.startsWith('DUPLICATE_FACTUAL_TEXT:'))) {
+    const duplicateRepair=repairRoutinePagePlanViolations(repair.repairedPlan,clearedSnapshot,revalidation.violations);
+    repair.repairedPlan=duplicateRepair.repairedPlan;
+    repair.duplicateRemovals=duplicateRepair.repairReport.repaired_locations;
+    revalidation=validateFn(repair.repairedPlan,clearedSnapshot,validationContext);
+  }
   if (!revalidation.valid) {
     const nextBundle = advanceCandidateBundle(bundleDraft, {
       reviewerFramingRepair: {
@@ -378,6 +385,9 @@ async function attemptReviewerFramingRepair(env, {
         removed_unit_count: repair.removedUnitCount,
         deterministic_validation_passed: false,
         originating_review_summary: bundleDraft.review_result.summary,
+        original_review_result: bundleDraft.review_result,
+        replaced_paraphrase_locations: repair.repairedLocations || [],
+        duplicate_removals: repair.duplicateRemovals || [],
         resulting_review_outcome: null,
       },
     });
@@ -392,7 +402,7 @@ async function attemptReviewerFramingRepair(env, {
     };
   }
 
-  const reviewRetry = await reviewFn(env, { plan: repair.repairedPlan, clearedSnapshot, intentPlan: bundleDraft.intent_plan });
+  const reviewRetry = await reviewFn(env, { plan: repair.repairedPlan, clearedSnapshot, intentPlan: bundleDraft.intent_plan, fitRemainingBudget: true });
   if (!reviewRetry.ok) {
     // Infra/config failure on the retry call itself -- never a completed
     // repair attempt, so the one-attempt guard is NOT consumed and the
@@ -410,6 +420,9 @@ async function attemptReviewerFramingRepair(env, {
       removed_unit_count: repair.removedUnitCount,
       deterministic_validation_passed: true,
       originating_review_summary: bundleDraft.review_result.summary,
+        original_review_result: bundleDraft.review_result,
+        replaced_paraphrase_locations: repair.repairedLocations || [],
+        duplicate_removals: repair.duplicateRemovals || [],
       resulting_review_outcome: outcome2.outcome,
     },
   });
