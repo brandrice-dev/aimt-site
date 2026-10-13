@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, appendFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { repairReviewerEvidenceFailures } from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
 import { createHash } from 'node:crypto';
 import { runDecisionPipeline, persistRunReport, loadCandidateBundle } from './education-operations-cycle.mjs';
 import { fetchPublishedTopicSlugsLive } from '../functions/_lib/education-ops/education-published-state-loader.mjs';
@@ -56,7 +57,17 @@ export async function runAutonomousCycle(env, overrides = {}) {
       }
     }
   }
-  if (state.next_topic && (await io.published(env)).includes(state.next_topic)) {
+  const published = await io.published(env);
+  for (const concept of PUBLICATION_CONCEPTS) {
+    if (published.includes(concept.topic_slug)) continue;
+    const saved=io.loadBundle(concept.topic_slug);
+    if (saved.bundle?.page_plan && !saved.bundle.reviewer_framing_repair?.attempted
+      && (await verifyCandidateBundleIntegrity(saved.bundle)).valid
+      && repairReviewerEvidenceFailures(saved.bundle.page_plan,saved.bundle.fingerprint_input,saved.bundle.review_result).eligible) {
+      state.next_topic=concept.topic_slug;delete state.deferred[concept.topic_slug];break;
+    }
+  }
+  if (state.next_topic && published.includes(state.next_topic)) {
     state.next_topic = null; state.next_action = 'SELECT_NEXT_TOPIC';
   }
   while (state.not_before && Date.parse(state.not_before) > Date.now()) {

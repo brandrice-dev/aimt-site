@@ -28,6 +28,11 @@ export function createPublicationCostControl({ previous = null, persist = () => 
   const control = {
     resume: restore,
     setPersistence(fn) { const previousPersist = persist; persist = (summary) => { previousPersist(summary); fn(summary); }; },
+    maxAffordableOutputTokens(body, ceiling) {
+      if (requests >= 6) return 0;
+      const input = new TextEncoder().encode(JSON.stringify({...body,stream:true})).length + 1024;
+      return Math.max(0, Math.min(ceiling, Math.floor((PUBLICATION_ATTEMPT_BUDGET_USD - reserved - estimatedTokenCost(input,0)) * 100000)));
+    },
     reserve(body) {
       // UTF-8 byte count plus schema overhead allowance is a conservative
       // local input estimate; no paid token-counting request is made.

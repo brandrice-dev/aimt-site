@@ -6,7 +6,7 @@ const e=process.env, repo=`repos/${e.GITHUB_REPOSITORY}`;
 const gh=(...args)=>execFileSync('gh',args,{maxBuffer:32*1024*1024});
 const name=e.DIAGNOSTIC==='true'?'education-candidate-bundles-diagnostic':'education-candidate-bundles';
 const pages=JSON.parse(gh('api','--paginate','--slurp',`${repo}/actions/artifacts?name=${name}&per_page=100`));
-const artifact=pages.flatMap(p=>p.artifacts).filter(a=>!a.expired).sort((a,b)=>b.id-a.id)[0];
+const artifact=pages.flatMap(p=>p.artifacts).filter(a=>!a.expired).sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id-a.id)[0];
 if(e.SOURCE_RUN_ID && String(artifact?.workflow_run.id)!==e.SOURCE_RUN_ID)throw new Error('STALE_CONTINUATION_SOURCE_REJECTED');
 if(artifact){
  const run=JSON.parse(gh('api',`${repo}/actions/runs/${artifact.workflow_run.id}`));

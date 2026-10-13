@@ -65,7 +65,7 @@ export async function reconcileScalpPrHead(root, env, bundle, overrides = {}) {
     readMain: () => gh(`repos/${repo}/git/ref/heads/main`).object.sha,
     readLatestArtifact: () => {
       const pages = JSON.parse(execFileSync('gh', ['api', '--paginate', '--slurp', `repos/${repo}/actions/artifacts?name=education-publication-state&per_page=100`], { encoding: 'utf8' }));
-      return pages.flatMap((p) => p.artifacts).filter((a) => !a.expired).sort((a, b) => b.id - a.id)[0]?.id;
+      return pages.flatMap((p) => p.artifacts).filter((a) => !a.expired).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id)[0]?.id;
     },
     readProof: (pr) => {
       // Fetches objects only; never checks out, regenerates or pushes content.

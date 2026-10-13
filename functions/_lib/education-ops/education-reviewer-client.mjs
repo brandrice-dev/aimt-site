@@ -25,6 +25,7 @@ export async function reviewEducationPagePlan(env, args) {
     maxTokens: REVIEWER_MAX_TOKENS,
     effort: REVIEWER_EFFORT,
     callLabel: 'EducationReviewer',
+    fitRemainingBudget: args.fitRemainingBudget === true,
   });
   if (!result.ok) return result;
   return { ...result, contractVersion: REVIEWER_CONTRACT_VERSION };

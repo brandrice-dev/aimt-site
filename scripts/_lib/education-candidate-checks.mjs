@@ -26,7 +26,7 @@ export function readCandidateHeadTests({ repo, headSha, prNumber, dispatchRunId 
   listed.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.databaseId - a.databaseId);
   if (!listed.length) {
     const artifacts = gh(['api', '--paginate', '--slurp', `repos/${repo}/actions/artifacts?name=education-head-tests-${prNumber}-${headSha}&per_page=100`]);
-    const artifact = artifacts.flatMap(p=>p.artifacts).filter(a=>!a.expired).sort((a,b)=>b.id-a.id)[0];
+    const artifact = artifacts.flatMap(p=>p.artifacts).filter(a=>!a.expired).sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id-a.id)[0];
     if (!artifact) {
       if (dispatchRunId) {
         const pending=gh(['api',`repos/${repo}/actions/runs/${dispatchRunId}`]);

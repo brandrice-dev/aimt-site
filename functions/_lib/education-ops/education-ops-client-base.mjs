@@ -36,32 +36,34 @@ function parseStructuredOutput(rawText) {
  * @param {Object} env
  * @param {{role: string, system: string, userContent: string, schema: object, maxTokens: number, effort: string, callLabel: string}} args
  */
-export async function callEducationOpsModel(env, { role, system, userContent, schema, maxTokens, effort, callLabel }) {
+export async function callEducationOpsModel(env, { role, system, userContent, schema, maxTokens, effort, callLabel, fitRemainingBudget = false }) {
   const credCheck = checkEducationOpsCredential(env);
   if (!credCheck.ok) return failure('missing_api_key', credCheck.reason);
 
   const modelInfo = resolveEducationOpsModel(env, role);
 
   let data, diagnostics;
+  let requestedMaxTokens=maxTokens;
   try {
+    const body = {
+      model: modelInfo.modelName, max_tokens: maxTokens, system,
+      messages: [{ role: 'user', content: userContent }], thinking: { type: 'adaptive' },
+      output_config: { effort, format: { type: 'json_schema', schema } },
+    };
+    if (fitRemainingBudget && env.publicationCostControl?.maxAffordableOutputTokens) {
+      body.max_tokens = env.publicationCostControl.maxAffordableOutputTokens(body, maxTokens);
+      requestedMaxTokens=body.max_tokens;
+      if (body.max_tokens < 1024) return { ...failure('budget_exceeded','Remaining reservation cannot fund a complete independent review.'), diagnostics:{code:'SPEND_LIMIT'} };
+    }
     ({ data, diagnostics } = await fetchPublicationMessages({
-      apiKey: env[EDUCATION_OPS_API_KEY_ENV_VAR],
-      costControl: env.publicationCostControl,
-      body: {
-        model: modelInfo.modelName,
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: userContent }],
-        thinking: { type: 'adaptive' },
-        output_config: { effort, format: { type: 'json_schema', schema } },
-      },
+      apiKey: env[EDUCATION_OPS_API_KEY_ENV_VAR], costControl: env.publicationCostControl, body,
     }));
   } catch (err) {
     return { ...failure(['SPEND_LIMIT', 'TOKEN_LIMIT'].includes(err.diagnostics?.code) ? 'budget_exceeded' : 'request_failed', `${callLabel}: provider request failed or blocked by preflight.`), diagnostics: sanitizePublicationDiagnostics(err.diagnostics) };
   }
 
   if (data && data.stop_reason === 'max_tokens') {
-    return failure('truncated', `${callLabel} response was truncated by the token ceiling (max_tokens=${maxTokens}) before it finished.`);
+    return failure('truncated', `${callLabel} response was truncated by the token ceiling (max_tokens=${requestedMaxTokens}) before it finished.`);
   }
 
   const rawText = extractAnthropicTextSafe(data);

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createPublicationCostControl} from '../functions/_lib/research/publication-cost-control.mjs';
 import {repairRoutinePagePlanViolations} from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
-import {verifiedAbstractBatch,researchAssignment,executeResearchGap} from '../scripts/_lib/education-research-gap-executor.mjs';
+import {verifiedAbstractBatch,researchAssignment,executeResearchGap,discoverResearchNeed} from '../scripts/_lib/education-research-gap-executor.mjs';
+import {repairReviewerEvidenceFailures} from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
 import {classifyRecovery,runAutonomousCycle} from '../scripts/education-autonomous-cycle.mjs';
 import {ensureCandidateHeadTests,verifyCandidateHeadTests,PUBLICATION_TEST_WORKFLOW,PUBLICATION_TEST_JOB} from '../scripts/_lib/education-candidate-checks.mjs';
 import {PUBLICATION_CONCEPTS} from '../functions/_lib/education-ops/education-publication-registry.mjs';
@@ -65,7 +66,7 @@ test('a resumed controller retains cumulative spend and a precise next action in
  const previous=createPublicationCostControl();previous.reserve(body);let checkpoint;
  const state={version:'education-continuation-v1',chain_id:'first',executions:1,cost_control:previous.summary(),deferred:{},research:{},history:[],next_topic:'hair-biology'};
  const report=await runAutonomousCycle({GITHUB_REPOSITORY:'brandrice-dev/aimt-site',GITHUB_REF:'refs/heads/main',GITHUB_RUN_ID:'second',AIMT_EDUCATION_AUTOPUBLISH_ENABLED:'false'},
-  {readState:()=>state,writeState:s=>{checkpoint=structuredClone(s)},published:async()=>[],
+  {loadBundle:()=>({found:false}),readState:()=>state,writeState:s=>{checkpoint=structuredClone(s)},published:async()=>[],
    run:async(e,o)=>{assert.equal(o.costControl.summary().requests,1);o.costControl.reserve(body);return{final_state:'EDITORIAL_REVIEW',selected_topic:'hair-biology',writer_result:{valid:false}}},
    research:async()=>({state:'NO_RESEARCH_GAP'}),report:()=>{}});
  assert.equal(checkpoint.cost_control.requests,2);assert.equal(report.autonomous_controller.next_action,'REPAIR_WRITER');
@@ -85,4 +86,35 @@ test('dispatch attestation must identify the trusted main workflow, successful j
  assert.equal(verifyCandidateHeadTests(run,jobs,args,proof).ok,true);
  for(const changes of [{head_sha:'c'.repeat(40)},{run_id:11},{workflow_ref:'untrusted'},{pr_number:81}])assert.equal(verifyCandidateHeadTests(run,jobs,args,{...proof,...changes}).ok,false);
  assert.equal(verifyCandidateHeadTests(run,[{...jobs[0],conclusion:'skipped'}],args,proof).ok,false);
+});
+
+test('Reviewer failures may be proposed for re-review only using exact uniquely cleared statements',()=>{
+ const point={statement:'The follicle is often described as a mini-organ.',supporting_claim_ids:['c1']};
+ const plan={answer_summary:{kind:'PARAPHRASE',text:'The follicle is a mini-organ.',supporting_claim_ids:['c1'],source_statements:[point.statement]},
+   sections:[{section_id:'s',units:[{kind:'FRAMING',text:'It manages microbial life.',supporting_claim_ids:[],source_statements:[]}]}],limitations:[],key_takeaways:[]};
+ const verdict={outcome:'SUBSTANTIVE_FAIL',voice_fail:false,scope_fail:true,failing_paraphrases:[{location:'answer_summary',verdict:'TOO_STRONG'}],failing_framings:[{verdict:'CARRIES_SCIENCE'}]};
+ const result=repairReviewerEvidenceFailures(plan,{core_factual_points:[point]},verdict);
+ assert.equal(result.eligible,true);assert.equal(result.repairedPlan.answer_summary.kind,'VERBATIM');assert.equal(result.repairedPlan.answer_summary.text,point.statement);
+ assert.equal(result.removedUnitCount,1);assert.equal(verdict.scope_fail,true);assert.equal(plan.answer_summary.kind,'PARAPHRASE');
+ assert.equal(repairReviewerEvidenceFailures(plan,{core_factual_points:[]},verdict).eligible,false);
+ assert.equal(repairReviewerEvidenceFailures(plan,{core_factual_points:[point]}, {...verdict,failing_paraphrases:[{location:'guessed',verdict:'TOO_STRONG'}]}).eligible,false);
+});
+test('a bounded re-review can fit remaining reservations by reducing output ceiling, without changing the spend or request cap',()=>{
+ const c=createPublicationCostControl({previous:{reserved_cost_estimate_usd:1.86674,reported_usage_cost_estimate_usd:.63,requests:5,requests_with_unknown_usage:0}});
+ const max=c.maxAffordableOutputTokens(body,16000);assert.ok(max>1024 && max<16000);
+ c.reserve({...body,max_tokens:max});assert.ok(c.summary().reserved_cost_estimate_usd<=2);
+ assert.throws(()=>c.reserve(body),e=>e.code==='SPEND_LIMIT');
+});
+
+test('primary-source scarcity is derived from live record roles, never invented or used to weaken publication risk gates',()=>{
+ const target=PUBLICATION_CONCEPTS.find(c=>c.topic_slug==='surfactants');
+ const published=PUBLICATION_CONCEPTS.filter(c=>c.topic_slug!==target.topic_slug).map(c=>c.topic_slug);
+ const pool={claims:Array.from({length:8},(_,i)=>({claim_id:`c${i}`,source_id:`s${i}`,topics:target.controlled_topics,
+   claim_type:i===7?'limitation':'finding',claim_text:'A source-specific surfactant finding.',claim_origin:'primary_text',verification_status:'CLAIM_VERIFIED',use_status:'active'})),
+ sources:Array.from({length:8},(_,i)=>({source_id:`s${i}`,title:'Independent surfactant review',year:2025,authors:['Author'],doi:`10.1000/${i}`,url:`https://example.org/${i}`,source_role:'synthesis',evidence_type:'systematic_review',verification_status:'SOURCE_VERIFIED',use_status:'active'}))};
+ const missing=discoverResearchNeed(pool,published);
+ assert.equal(missing.topic_slug,target.topic_slug);assert.equal(missing.primary_source_count,0);
+ assert.match(missing.research_reason,/0 documented verified/);
+ pool.sources[0].source_role='primary_research';
+ assert.equal(discoverResearchNeed(pool,published),undefined);
 });
