@@ -174,7 +174,7 @@ ${jsonLd}
 <link rel="stylesheet" href="/assets/css/aimt-design-system.css">
 <link rel="stylesheet" href="/assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
-<link rel="stylesheet" href="/assets/css/aimt-education.css">
+<link rel="stylesheet" href="/assets/css/aimt-education.css?v=20261013">
 </head>
 <body class="aimt-legal-body">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
