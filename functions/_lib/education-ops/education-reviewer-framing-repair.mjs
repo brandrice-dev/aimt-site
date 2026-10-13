@@ -134,7 +134,7 @@ export function repairReviewerEvidenceFailures(plan, snapshot, review) {
     || !review.failing_paraphrases?.length || !review.failing_paraphrases.every(f=>['TOO_STRONG','OUTSIDE_EVIDENCE','CAUSALITY_DRIFT','NUMERIC_DRIFT'].includes(f.verdict))
     || !Array.isArray(review.failing_framings) || !review.failing_framings.every(f=>f.verdict==='CARRIES_SCIENCE')) return no();
   const points=[...(snapshot.core_factual_points||[]),...(snapshot.limitations||[])];
-  const {repairedPlan,removedUnitCount}=removeSectionFramingUnits(plan);
+  const repairedPlan=structuredClone(plan);
   const locations=new Map([['answer_summary',repairedPlan.answer_summary],
     ...repairedPlan.sections.flatMap(s=>s.units.map((u,i)=>[`section:${s.section_id}:${i}`,u])),
     ...repairedPlan.key_takeaways.map((u,i)=>[`key_takeaway:${i}`,u])]);
@@ -147,5 +147,6 @@ export function repairReviewerEvidenceFailures(plan, snapshot, review) {
     if(matches.length!==1)return no();
     unit.kind='VERBATIM';unit.text=matches[0].statement;repairedLocations.push(failure.location);
   }
-  return {eligible:true,repairedPlan,removedUnitCount,repairedLocations,reason:null};
+  const removed=removeSectionFramingUnits(repairedPlan);
+  return {eligible:true,repairedPlan:removed.repairedPlan,removedUnitCount:removed.removedUnitCount,repairedLocations,reason:null};
 }

@@ -22,7 +22,7 @@ export function researchAssignment(gap) {
   return { key, topic: concept.topic_slug, gap_id: gap.queue_id, questions: gap.extras?.gap_summary || gap.notes,
     required_source_types: ['primary study', 'systematic review', 'professional guideline'],
     controlled_topics: concept.controlled_topics,
-    query: `(${terms.map((t) => `"${t}"`).join(' OR ')}) AND (TITLE_ABS:scalp OR TITLE_ABS:hair OR TITLE_ABS:shampoo OR TITLE_ABS:cosmetic OR TITLE_ABS:skin) AND SRC:MED AND HAS_ABSTRACT:Y NOT PUB_TYPE:"Retracted Publication"`,
+    query: `(${terms.map((t) => `"${t}"`).join(' OR ')}) AND (TITLE_ABS:scalp OR TITLE_ABS:hair OR TITLE_ABS:shampoo OR TITLE_ABS:cosmetic OR TITLE_ABS:skin) AND SRC:MED AND HAS_ABSTRACT:Y NOT PUB_TYPE:"Retracted Publication"${/Primary-evidence coverage gap/.test(gap.extras?.gap_summary || gap.notes || '') ? ' AND (PUB_TYPE:"Clinical Trial" OR PUB_TYPE:"Observational Study" OR PUB_TYPE:"Comparative Study" OR PUB_TYPE:"Evaluation Study" OR PUB_TYPE:"Guideline")' : ''}`,
     scope: 'Exact abstract statements only; no invented synthesis, treatment recommendations or institutional approval.' };
 }
 function abstractText(value) {
@@ -37,12 +37,13 @@ export function verifiedAbstractBatch(records, assignment, knownDois = new Map()
       || paper.isRetracted === 'Y' || (paper.pubTypeList?.pubType || []).some((p) => /retract|editorial|letter|comment/i.test(p))) continue;
     const abstract = abstractText(paper.abstractText), pmid = paper.id;
     const sourceId = knownDois.get(paper.doi.toLowerCase()) || `epmc-med-${pmid}`;
-    const types = (paper.pubTypeList?.pubType || []).join(' '), review = /review/i.test(types);
+    const types = (paper.pubTypeList?.pubType || []).join(' '), review = /review|meta.analysis/i.test(types);
+    const guideline=/guideline/i.test(types), primary=/clinical (trial|study)|observational study|comparative study|evaluation study|validation study|randomized controlled/i.test(types);
     if (!knownDois.has(paper.doi.toLowerCase())) sources.push({ record_type: 'source', source_id: sourceId, title: abstractText(paper.title),
       authors: (paper.authorList?.author || []).map((a) => a.fullName).filter(Boolean), year: Number(paper.pubYear), doi: paper.doi,
       pmid, url: `https://europepmc.org/article/MED/${pmid}`, topics: assignment.controlled_topics,
-      evidence_type: /systematic review/i.test(types) ? 'systematic_review' : /meta.analysis/i.test(types) ? 'meta_analysis' : review ? 'narrative_review' : /randomized controlled/i.test(types) ? 'rct' : 'other',
-      source_role: review ? 'synthesis' : 'primary_research', verification_status: 'SOURCE_VERIFIED', verification_depth: paper.verified_limitations ? 'full_text' : 'abstract',
+      evidence_type: guideline ? 'clinical_guideline' : /systematic review/i.test(types) ? 'systematic_review' : /meta.analysis/i.test(types) ? 'meta_analysis' : review ? 'narrative_review' : /randomized controlled/i.test(types) ? 'rct' : 'other',
+      source_role: guideline ? 'guideline' : review ? 'synthesis' : primary ? 'primary_research' : 'other', verification_status: 'SOURCE_VERIFIED', verification_depth: paper.verified_limitations ? 'full_text' : 'abstract',
       use_status: 'active', full_text_held: false, verified_on: now, verification_review_status: 'not_reviewed',
       verification_notes: 'PubMed-indexed metadata and complete author abstract retrieved directly from Europe PMC. Any full-text limitation claim is an exact author-titled section with a verified article identity and retrieval digest. No scientific or institutional approval is claimed.',
       body_sections: { abstract, ...(paper.verified_limitations ? {author_limitations:paper.verified_limitations} : {}) }, acquisition: { query: assignment.query, gap_id: assignment.gap_id, abstract_sha256: digest(abstract) } });
@@ -53,7 +54,7 @@ export function verifiedAbstractBatch(records, assignment, knownDois = new Map()
       claim_text_fidelity: 'verbatim_quote', claim_origin: 'abstract', extraction_basis: 'abstract',
       topics: assignment.controlled_topics, population_or_scope: 'Author abstract as a whole; preserve the stated population, methods, outcomes and limitations. No full-text verification.',
       direction: 'unclear', extraction_confidence: 'high', use_status: 'active', verification_status: 'CLAIM_VERIFIED',
-      verified_against_primary_source: !review, verified_on: now, page_or_section_locator: 'Abstract (complete)',
+      verified_against_primary_source: primary || guideline, verified_on: now, page_or_section_locator: 'Abstract (complete)',
       verification_review_status: 'not_reviewed', reviewed_by: null,
       acquisition: { pmid, doi: paper.doi, query: assignment.query, abstract_sha256: digest(abstract), gap_id: assignment.gap_id,
         verification_method: 'exact complete abstract from PubMed-indexed source record', scientific_review_required: true } });
