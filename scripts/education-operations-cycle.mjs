@@ -69,13 +69,13 @@ import { checkEducationOpsCredential } from '../functions/_lib/education-ops/edu
 import { planPageIntent } from '../functions/_lib/education-ops/education-intent-planner-client.mjs';
 import { validateIntentPlan } from '../functions/_lib/education-ops/education-intent-planner-validator.mjs';
 import { createPublicationCostControl } from '../functions/_lib/research/publication-cost-control.mjs';
-import { waitForCandidateHeadTests } from './_lib/education-candidate-checks.mjs';
+import { waitForCandidateHeadTests, ensureCandidateHeadTests } from './_lib/education-candidate-checks.mjs';
 import { topicAttemptFingerprint, topicAttemptHold, reserveTopicAttempt, loadTopicAttempt, writeTopicAttempt, loadTopicIntent, writeTopicIntent } from './_lib/education-topic-attempts.mjs';
 import { sanitizePublicationDiagnostics } from '../functions/_lib/research/publication-anthropic-transport.mjs';
 import { prepareTopicArtifact, publishPreparedArtifact } from '../functions/_lib/education-ops/education-synthesis-cache.mjs';
 import { writeEducationPagePlan } from '../functions/_lib/education-ops/education-writer-client.mjs';
 import { validateEducationPagePlan } from '../functions/_lib/education-ops/education-page-plan-validator.mjs';
-import { repairDeterministicPagePlanViolations } from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
+import { repairDeterministicPagePlanViolations, repairRoutinePagePlanViolations } from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
 import { reviewEducationPagePlan } from '../functions/_lib/education-ops/education-reviewer-client.mjs';
 import { aggregateReviewOutcome, REVIEW_OUTCOME } from '../functions/_lib/education-ops/education-reviewer-validator.mjs';
 import { repairReviewerFramingFailures } from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
@@ -456,7 +456,7 @@ async function attemptReviewerFramingRepair(env, {
  * @returns {Promise<object>} a buildRunReport() result
  */
 export async function runDecisionPipeline(env, options = {}) {
-  const costControl = createPublicationCostControl();
+  const costControl = options.costControl || createPublicationCostControl();
   env = { ...env, publicationCostControl: costControl };
   const runId = options.runId || randomUUID();
   const startedAt = new Date().toISOString();
@@ -608,7 +608,8 @@ export async function runDecisionPipeline(env, options = {}) {
       fingerprintsBySlug[concept.topic_slug] = fingerprint;
       const previous = loadAttempt(concept.topic_slug);
       attemptsBySlug[concept.topic_slug] = previous;
-      attemptHoldsBySlug[concept.topic_slug] = topicAttemptHold(previous, fingerprint);
+      attemptHoldsBySlug[concept.topic_slug] = options.deferredFingerprints?.[concept.topic_slug] === fingerprint
+        ? 'CONTINUATION_TOPIC_DEFERRED' : topicAttemptHold(previous, fingerprint);
     }
   } catch {
     return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'Durable topic attempt history could not be verified.', stopped_before_model_stage: true });
@@ -642,7 +643,11 @@ export async function runDecisionPipeline(env, options = {}) {
   function beginAttempt() {
     if (attemptRecord) return null;
     try {
-      const reserved = reserveTopicAttempt(attemptsBySlug[selected.topic_slug], fingerprintsBySlug[selected.topic_slug]);
+      const previous = attemptsBySlug[selected.topic_slug];
+      const resuming = options.continuation === true && previous && previous.fingerprint === fingerprintsBySlug[selected.topic_slug];
+      const reserved = resuming ? { ...previous, state: 'STARTED' } : reserveTopicAttempt(previous, fingerprintsBySlug[selected.topic_slug]);
+      if (resuming) costControl.resume(previous.cost_control);
+      costControl.setPersistence((summary) => writeAttempt(selected.topic_slug, { ...reserved, cost_control: summary }));
       writeAttempt(selected.topic_slug, reserved);
       attemptRecord = reserved;
       attemptSlug = selected.topic_slug;
@@ -1148,8 +1153,14 @@ export async function runDecisionPipeline(env, options = {}) {
     deterministicRepair = bundleDraft.deterministic_repair || null;
   } else {
     const writeFn = fns.writeFn || writeEducationPagePlan;
-    const writerResult = await writeFn(env, { intentPlan, clearedSnapshot, route, cluster: clusterKey, existingClusterPages });
-    if (writerResult.ok) modelCalls.push({ role: 'education_writer', actual_call_count: 1, ...writerResult.usage });
+    const savedRepair = bundleDraft.page_plan && !bundleDraft.writer_validation?.valid
+      ? repairRoutinePagePlanViolations(bundleDraft.page_plan, clearedSnapshot, bundleDraft.writer_validation?.violations || []) : null;
+    const savedValidation = savedRepair && validateEducationPagePlan(savedRepair.repairedPlan, clearedSnapshot, {
+      expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route });
+    const writerResult = savedValidation?.valid ? { ok: true, reused: true, output: savedRepair.repairedPlan }
+      : await writeFn(env, { intentPlan, clearedSnapshot, route, cluster: clusterKey, existingClusterPages,
+        previousViolations: bundleDraft.writer_validation?.violations || [] });
+    if (writerResult.ok && !writerResult.reused) modelCalls.push({ role: 'education_writer', actual_call_count: 1, ...writerResult.usage });
     if (!writerResult.ok) {
       common.provider_request_diagnostics = sanitizePublicationDiagnostics(writerResult.diagnostics);
       return finish({ candidate_topics: candidateTopics, selected_topic: selected.topic_slug, risk_tier: selected.v1_result.risk_tier, publication_editor_result: { status: 'AUTO_READY' }, final_state: RUN_FINAL_STATE.CONFIG_BLOCKED, exception_reason: `Writer call failed: ${writerResult.reason}` });
@@ -1204,8 +1215,8 @@ export async function runDecisionPipeline(env, options = {}) {
       // pure/zero-network) and never weakens the validator: the repaired
       // plan is re-validated in full, from scratch, by the same
       // validateEducationPagePlan() used everywhere else.
-      const allNumericFidelity = planValidation.violations.every((v) => v.startsWith('UNSUPPORTED_NUMERIC_CLAIM:'));
-      const repairFn = fns.repairFn || repairDeterministicPagePlanViolations;
+      const allNumericFidelity = planValidation.violations.every((v) => v.startsWith('UNSUPPORTED_NUMERIC_CLAIM:') || v.startsWith('DUPLICATE_FACTUAL_TEXT:'));
+      const repairFn = fns.repairFn || repairRoutinePagePlanViolations;
       const repairOutcome = allNumericFidelity ? repairFn(plan, clearedSnapshot, planValidation.violations) : null;
       const revalidation = repairOutcome ? validateEducationPagePlan(repairOutcome.repairedPlan, clearedSnapshot, {
         expectedTopicSlug: selected.topic_slug, expectedCluster: clusterKey, expectedRoute: route,
@@ -1220,7 +1231,7 @@ export async function runDecisionPipeline(env, options = {}) {
         // stays null, writer_validation records the failure) so a LATER
         // run retries ONLY the Writer, never Publication Editor again.
         bundleDraft = advanceCandidateBundle(bundleDraft, {
-          pagePlan: null,
+          pagePlan: plan,
           writerValidation: {
             valid: false,
             violations: (revalidation || planValidation).violations,
@@ -1836,7 +1847,7 @@ function buildRealPublishIo(env) {
     ghPrListForBranchFn: ghPrListForBranch,
     ghPrViewFn: ghPrView,
     ghPrMergeFn: ghPrMerge,
-    checkCandidateHeadTestsFn: waitForCandidateHeadTests,
+    checkCandidateHeadTestsFn: ensureCandidateHeadTests,
     fetchClearanceRowFn: fetchClearanceRowByTopicSlug,
     writeClearanceRecordFn: writeClearanceRecord,
     publishClearanceRecordFn: publishClearanceRecord,
@@ -2172,12 +2183,17 @@ export async function runPublicationPipeline(env, options = {}) {
     let checks;
     try {
       checks = await io.checkCandidateHeadTestsFn({ repo: env.GITHUB_REPOSITORY,
-        headSha: manifest.generated.expected_head_sha, prNumber: manifest.generated.pr_number });
+        headSha: manifest.generated.expected_head_sha, prNumber: manifest.generated.pr_number,
+        dispatchRequested: manifest.generated.ci_dispatch_head_sha === manifest.generated.expected_head_sha,
+        dispatchRunId: manifest.generated.ci_dispatch_run_id,
+        recordDispatch: ({runId}) => persistManifest({generated:{ci_dispatch_head_sha:manifest.generated.expected_head_sha,
+          ...(runId ? {ci_dispatch_run_id:runId} : {})}}) });
     } catch {
       checks = { ok: false, violations: ['CANDIDATE_HEAD_TEST_QUERY_FAILED'] };
     }
     if (!checks.ok) return finish({ final_state: RUN_FINAL_STATE.PUBLISH_FAILED,
-      planned_route: bundle.route, exception_reason: `Exact candidate-head tests block publication: ${checks.violations.join(', ')}` });
+      planned_route: bundle.route, exception_reason: `Exact candidate-head tests block publication: ${checks.violations.join(', ')}${checks.run_url ? ' '+checks.run_url : ''}` });
+    persistManifest({generated:{ci_verified_run_id:checks.run_id,ci_verified_head_sha:manifest.generated.expected_head_sha}});
   }
 
   // --- STEP 9: persist the NON-PUBLIC clearance row, idempotently ------

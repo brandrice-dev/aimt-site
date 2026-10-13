@@ -20,7 +20,8 @@ export const WRITER_EFFORT = 'medium';
  *   before validation/rendering.
  */
 export async function writeEducationPagePlan(env, args) {
-  const system = buildWriterInstruction(args);
+  const system = buildWriterInstruction(args) + (args.previousViolations?.length
+    ? '\nA previous draft failed deterministic validation. Rewrite only within this same cleared evidence. Avoid exact repeated factual sentences between summary and sections. Retain all required limitations, claim support and scope. Prior validator codes: ' + JSON.stringify(args.previousViolations) : '');
   const userContent = JSON.stringify({ topic_slug: args.intentPlan.topic_slug, request: 'write_page_plan' });
 
   const result = await callEducationOpsModel(env, {
@@ -28,7 +29,7 @@ export async function writeEducationPagePlan(env, args) {
     system,
     userContent,
     schema: EDUCATION_WRITER_OUTPUT_JSON_SCHEMA,
-    maxTokens: WRITER_MAX_TOKENS,
+    maxTokens: args.previousViolations?.length ? Math.min(WRITER_MAX_TOKENS, 16000) : WRITER_MAX_TOKENS,
     effort: WRITER_EFFORT,
     callLabel: 'EducationWriter',
   });

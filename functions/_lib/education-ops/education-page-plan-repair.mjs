@@ -133,3 +133,26 @@ export function repairDeterministicPagePlanViolations(plan, clearedSnapshot, vio
     },
   };
 }
+
+/** Remove only an identical, identically-grounded factual section unit.
+ * Never remove scope, limitations, summaries, or required claim coverage.
+ * Full deterministic validation and independent Reviewer still follow. */
+export function repairRoutinePagePlanViolations(plan, snapshot, violations) {
+  const allowed = violations.every((v) => v.startsWith('UNSUPPORTED_NUMERIC_CLAIM:') || v.startsWith('DUPLICATE_FACTUAL_TEXT:'));
+  if (!allowed) return { repairedPlan: structuredClone(plan), repairReport: { attempted: false, repaired_locations: [], unresolved_locations: violations, repair_type: null } };
+  let result = repairDeterministicPagePlanViolations(plan, snapshot, violations);
+  const next = result.repairedPlan, remove = new Set(), repaired = [...result.repairReport.repaired_locations];
+  const units = new Map(collectAllProseUnits(next).map((entry) => [entry.location, entry.unit]));
+  for (const v of violations.filter((v) => v.startsWith('DUPLICATE_FACTUAL_TEXT:'))) {
+    const [location, original] = v.slice('DUPLICATE_FACTUAL_TEXT:'.length).split('==');
+    const a = units.get(location), b = units.get(original);
+    if (!location.startsWith('section:') || !a || !b || a.kind === 'FRAMING' || b.kind === 'FRAMING'
+      || a.text !== b.text || !claimIdSetsEqual(a.supporting_claim_ids, b.supporting_claim_ids)
+      || JSON.stringify(a.source_statements) !== JSON.stringify(b.source_statements)) continue;
+    remove.add(location); repaired.push(location);
+  }
+  next.sections = next.sections.map((section) => ({ ...section,
+    units: section.units.filter((_, index) => !remove.has(`section:${section.section_id}:${index}`)) })).filter((section) => section.units.length);
+  return { repairedPlan: next, repairReport: { ...result.repairReport, attempted: repaired.length > 0,
+    repaired_locations: repaired, repair_type: remove.size ? 'EXACT_DUPLICATE_REMOVAL' : result.repairReport.repair_type } };
+}

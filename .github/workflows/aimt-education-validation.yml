@@ -3,17 +3,56 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      candidate_pr:
+        required: true
+        type: string
+      candidate_head:
+        required: true
+        type: string
+concurrency:
+  group: education-head-tests-${{ inputs.candidate_pr || github.event.pull_request.number }}-${{ inputs.candidate_head || github.event.pull_request.head.sha }}
+  cancel-in-progress: false
 permissions:
   contents: read
+  pull-requests: read
 jobs:
   publication-tests:
     name: Publication candidate tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    env:
+      EXPECTED_HEAD: ${{ inputs.candidate_head || github.event.pull_request.head.sha }}
+      PR_NUMBER: ${{ inputs.candidate_pr || github.event.pull_request.number }}
     steps:
+      - name: Validate same-repository publication dispatch before checkout
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module - <<'JS'
+          import { execFileSync } from 'node:child_process';
+          import assert from 'node:assert/strict';
+          const {EXPECTED_HEAD:sha,PR_NUMBER:number,GITHUB_REPOSITORY:repo}=process.env;
+          assert.match(sha,/^[a-f0-9]{40}$/);assert.match(number,/^[1-9][0-9]*$/);
+          const gh=(endpoint)=>JSON.parse(execFileSync('gh',['api',endpoint],{encoding:'utf8'}));
+          const pr=gh(`repos/${repo}/pulls/${number}`);
+          assert.equal(pr.state,'open');assert.equal(pr.merged,false);assert.equal(pr.draft,false);
+          assert.equal(pr.base.ref,'main');assert.equal(pr.base.repo.full_name,repo);
+          assert.equal(pr.head.repo.full_name,repo);assert.equal(pr.head.sha,sha);
+          assert.match(pr.head.ref,/^education-ops\/publish-[a-z0-9-]+$/);
+          const paths=gh(`repos/${repo}/pulls/${number}/files?per_page=100`).map(f=>f.filename);
+          assert.equal(paths.length,4);
+          const article=paths.find(p=>/^education\/[^/]+\/[^/]+\.html$/.test(p));assert.ok(article);
+          assert.ok(paths.includes(article.split('/').slice(0,-1).join('/')+'.html'));
+          assert.ok(paths.includes('sitemap.xml'));
+          assert.ok(paths.includes('functions/_data/education-page-plans/'+pr.head.ref.replace('education-ops/publish-','')+'.json'));
+          JS
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ inputs.candidate_head || github.event.pull_request.head.sha }}
           persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -21,9 +60,34 @@ jobs:
           node-version: 20
       - name: Verify exact candidate head
         env:
-          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_HEAD: ${{ inputs.candidate_head || github.event.pull_request.head.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
       - name: Run focused publication tests without production credentials
         run: |
           env -i PATH="$PATH" NODE_OPTIONS="--import=$PWD/tests/support/education-offline-only.mjs" \
-            node --test tests/education-*.test.mjs tests/research-publication-*.test.mjs tests/publication-anthropic-transport.test.mjs tests/publication-violation-sanitizer.test.mjs
+            node --test tests/education-*.test.mjs tests/research-publication-*.test.mjs tests/publication-anthropic-transport.test.mjs tests/publication-violation-sanitizer.test.mjs tests/research-feed-ingest.test.mjs
+      - name: Attest successful dispatch tests on the unchanged exact PR head
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module - <<'JS'
+          import {execFileSync} from 'node:child_process';
+          import {writeFileSync,mkdirSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const e=process.env;
+          assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),e.EXPECTED_HEAD);
+          const pr=JSON.parse(execFileSync('gh',['api',`repos/${e.GITHUB_REPOSITORY}/pulls/${e.PR_NUMBER}`],{encoding:'utf8'}));
+          assert.equal(pr.state,'open');assert.equal(pr.head.sha,e.EXPECTED_HEAD);assert.equal(pr.head.repo.full_name,e.GITHUB_REPOSITORY);
+          mkdirSync(e.RUNNER_TEMP+'/publication-proof',{recursive:true});
+          writeFileSync(e.RUNNER_TEMP+'/publication-proof/candidate-head.json',JSON.stringify({
+            version:'education-head-tests-v1',repository:e.GITHUB_REPOSITORY,pr_number:Number(e.PR_NUMBER),head_sha:e.EXPECTED_HEAD,
+            run_id:Number(e.GITHUB_RUN_ID),workflow_source_sha:e.GITHUB_SHA,workflow_ref:e.GITHUB_WORKFLOW_REF}));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: education-head-tests-${{ inputs.candidate_pr }}-${{ inputs.candidate_head }}
+          path: ${{ runner.temp }}/publication-proof/candidate-head.json
+          if-no-files-found: error
+          retention-days: 30
