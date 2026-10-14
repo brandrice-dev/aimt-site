@@ -659,7 +659,10 @@ export async function runDecisionPipeline(env, options = {}) {
       const previous = attemptsBySlug[selected.topic_slug];
       const resuming = options.continuation === true && previous && previous.fingerprint === fingerprintsBySlug[selected.topic_slug];
       const reserved = resuming ? { ...previous, state: 'STARTED' } : reserveTopicAttempt(previous, fingerprintsBySlug[selected.topic_slug]);
-      if (resuming) costControl.resume(previous.cost_control);
+      // Legacy reservations are already carried by the restored controller.
+      // A topic's older window must not exhaust a legitimately later schedule.
+      if (resuming && (!options.budgetWindow || previous.budget_window === options.budgetWindow)) costControl.resume(previous.cost_control);
+      reserved.budget_window = options.budgetWindow || previous?.budget_window || null;
       costControl.setPersistence((summary) => writeAttempt(selected.topic_slug, { ...reserved, cost_control: summary }));
       writeAttempt(selected.topic_slug, reserved);
       attemptRecord = reserved;

@@ -1,7 +1,8 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, appendFileSync, readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { trustedBudgetStartedAt } from './education-autonomous-cycle.mjs';
 const e=process.env, repo=`repos/${e.GITHUB_REPOSITORY}`;
 const gh=(...args)=>execFileSync('gh',args,{maxBuffer:32*1024*1024});
 const name=e.DIAGNOSTIC==='true'?'education-candidate-bundles-diagnostic':'education-candidate-bundles';
@@ -25,5 +26,21 @@ with zipfile.ZipFile(sys.argv[1]) as z:
  for n in names:
   p=pathlib.Path(sys.argv[2])/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(z.read(n))`,zip,root]);
  appendFileSync(e.GITHUB_ENV,`CANDIDATE_STATE_ARTIFACT_ID=${artifact.id}\n`);
+}
+// GitHub's trusted run metadata supplies budget authority, never dispatch inputs.
+// A rerun has the same created_at and therefore cannot mint a second window.
+const trustedStart=(id,scheduled=false)=>{
+ const run=JSON.parse(gh('api',`${repo}/actions/runs/${id}`));
+ return trustedBudgetStartedAt(run,e.GITHUB_REPOSITORY,scheduled);
+};
+const statePath='research-import/education-ops/candidates/continuation.json';
+if(e.DIAGNOSTIC!=='true' && existsSync(statePath)){
+ const state=JSON.parse(readFileSync(statePath));
+ if(!state.budget_window){
+  appendFileSync(e.GITHUB_ENV,`EDUCATION_LEGACY_BUDGET_STARTED_AT=${trustedStart(state.chain_id)}\n`);
+ }
+}
+if(e.DIAGNOSTIC!=='true' && e.GITHUB_EVENT_NAME==='schedule'){
+ appendFileSync(e.GITHUB_ENV,`EDUCATION_SCHEDULED_BUDGET_STARTED_AT=${trustedStart(e.GITHUB_RUN_ID,true)}\n`);
 }
 appendFileSync(e.GITHUB_OUTPUT,'restored=true\n');

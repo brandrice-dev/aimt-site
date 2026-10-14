@@ -4,10 +4,50 @@ import {createPublicationCostControl} from '../functions/_lib/research/publicati
 import {repairRoutinePagePlanViolations} from '../functions/_lib/education-ops/education-page-plan-repair.mjs';
 import {verifiedAbstractBatch,researchAssignment,executeResearchGap,discoverResearchNeed} from '../scripts/_lib/education-research-gap-executor.mjs';
 import {repairReviewerEvidenceFailures} from '../functions/_lib/education-ops/education-reviewer-framing-repair.mjs';
-import {classifyRecovery,runAutonomousCycle} from '../scripts/education-autonomous-cycle.mjs';
+import {classifyRecovery,runAutonomousCycle,budgetWindow,trustedBudgetStartedAt} from '../scripts/education-autonomous-cycle.mjs';
 import {ensureCandidateHeadTests,verifyCandidateHeadTests,requiresWorkflowApproval,PUBLICATION_TEST_WORKFLOW,PUBLICATION_TEST_JOB} from '../scripts/_lib/education-candidate-checks.mjs';
 import {PUBLICATION_CONCEPTS} from '../functions/_lib/education-ops/education-publication-registry.mjs';
 const body={model:'claude-sonnet-5',max_tokens:1000};
+test('new budget authority requires GitHub metadata for a scheduled main run in the exact workflow and repository',()=>{
+ const repo='brandrice-dev/aimt-site',run={repository:{full_name:repo},path:'.github/workflows/aimt-education-operations.yml',
+  head_branch:'main',event:'schedule',created_at:'2026-10-14T17:00:00Z'};
+ assert.equal(trustedBudgetStartedAt(run,repo,true),run.created_at);
+ for(const change of [{repository:{full_name:'attacker/repo'}},{path:'other'},{head_branch:'feature'},
+  {event:'workflow_dispatch'},{created_at:'invalid'}])assert.throws(()=>trustedBudgetStartedAt({...run,...change},repo,true));
+});
+test('budget windows follow existing weekday schedule, including delayed schedules and reruns',()=>{
+ assert.equal(budgetWindow('2026-10-14T20:00:00Z'),'2026-10-14T14:00:00.000Z');
+ assert.equal(budgetWindow('2026-10-14T13:59:00Z'),'2026-10-13T14:00:00.000Z');
+ assert.equal(budgetWindow('2026-10-18T20:00:00Z'),'2026-10-16T14:00:00.000Z');
+ assert.throws(()=>budgetWindow('invalid'),/INVALID_BUDGET_WINDOW/);
+});
+test('only a later trusted schedule opens an allowance; dispatches, reruns and missing legacy authority retain spend',async()=>{
+ const exhausted=createPublicationCostControl();for(let i=0;i<6;i++)exhausted.reserve(body);
+ const prior=exhausted.summary(), window='2026-10-13T14:00:00.000Z';
+ for(const [event,started,budget_window,expected] of [
+  ['workflow_dispatch','2026-10-14T16:00:00Z',window,6],
+  ['schedule','2026-10-13T20:00:00Z',window,6],
+  ['schedule','2026-10-12T20:00:00Z',window,6],
+  ['schedule','2026-10-14T16:00:00Z',null,6],
+  ['schedule','2026-10-14T16:00:00Z',window,0],
+ ]){
+  let saved;
+  const state={version:'education-continuation-v1',chain_id:'original',executions:3,cost_control:prior,
+   budget_window,deferred:{unsafe:'fingerprint'},research:{retained:{searches:2}},history:[],next_topic:null};
+  const report=await runAutonomousCycle({GITHUB_REPOSITORY:'brandrice-dev/aimt-site',GITHUB_REF:'refs/heads/main',
+   GITHUB_RUN_ID:'current',GITHUB_EVENT_NAME:event,EDUCATION_SCHEDULED_BUDGET_STARTED_AT:started},
+   {readState:()=>state,writeState:s=>{saved=structuredClone(s)},loadBundle:()=>({found:false}),published:async()=>['hair-biology'],
+    learningGaps:async()=>({}),research:async()=>({state:'NO_RESEARCH_GAP'}),report:()=>{},
+    run:async(e,o)=>{assert.equal(o.costControl.summary().requests,expected);
+     if(expected===6)assert.throws(()=>o.costControl.reserve(body),e=>e.code==='SPEND_LIMIT');
+     else for(let i=0;i<6;i++)o.costControl.reserve(body);
+     assert.throws(()=>o.costControl.reserve(body),e=>e.code==='SPEND_LIMIT');
+     return{final_state:'CONFIG_BLOCKED',exception_reason:'budget_exceeded',selected_topic:'trichology'};}});
+  assert.equal(saved.cost_control.requests,6);assert.deepEqual(saved.deferred,{unsafe:'fingerprint'});
+  assert.deepEqual(saved.research,{retained:{searches:2}});assert.equal(report.autonomous_controller.next_action,'BUDGET_PAUSED');
+  if(expected===0){assert.deepEqual(saved.history[0].cost_control,prior);assert.equal(saved.chain_id,'current');}
+ }
+});
 test('cost reservations survive a crash or new workflow; subscriptions persist before a request',()=>{
  let saved,order=[];
  const first=createPublicationCostControl({persist:s=>{saved=s;order.push('chain');}});

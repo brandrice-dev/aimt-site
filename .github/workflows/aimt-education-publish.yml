@@ -290,7 +290,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Return to saved research and topic selection after publication
-        if: always() && github.event_name == 'workflow_run' && steps.publication-state.outputs.restored == 'true'
+        if: always() && steps.publication-state.outputs.restored == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_RUN_ID: ${{ needs.scheduled-handoff.outputs.source_run_id }}
@@ -301,5 +301,10 @@ jobs:
           const dir='research-import/education-ops/runs';
           const reports=readdirSync(dir).filter(f=>f.endsWith('.json')).map(f=>JSON.parse(readFileSync(`${dir}/${f}`)));
           const recoverable=reports.some(r=>r.final_state==='PUBLISH_FAILED' && /deployment did not succeed \(pending\)|Live verification fetch failed|CANDIDATE_HEAD_TESTS_MISSING/.test(r.exception_reason||''));
-          if(reports.some(r=>r.final_state==='PUBLISHED') || recoverable)execFileSync('gh',['workflow','run','aimt-education-operations.yml','--repo',process.env.GITHUB_REPOSITORY,'--ref','main','-f',`source_run_id=${process.env.SOURCE_RUN_ID}`],{stdio:'inherit'});
+          if(reports.some(r=>r.final_state==='PUBLISHED') || recoverable){
+            const pages=JSON.parse(execFileSync('gh',['api','--paginate','--slurp',`repos/${process.env.GITHUB_REPOSITORY}/actions/artifacts?name=education-candidate-bundles&per_page=100`],{encoding:'utf8'}));
+            const latest=pages.flatMap(p=>p.artifacts).filter(a=>!a.expired).sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id-a.id)[0];
+            if(!latest)throw new Error('MISSING_CONTINUATION_SOURCE');
+            execFileSync('gh',['workflow','run','aimt-education-operations.yml','--repo',process.env.GITHUB_REPOSITORY,'--ref','main','-f',`source_run_id=${latest.workflow_run.id}`],{stdio:'inherit'});
+          }
           JS
