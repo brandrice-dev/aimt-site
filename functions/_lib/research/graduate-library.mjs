@@ -5,8 +5,8 @@ import { safeSourceUrl } from '../public-research/catalog.mjs';
 
 export const EVIDENCE_TYPES = ['systematic_review','meta_analysis','rct','clinical_guideline','observational','narrative_review','textbook_chapter','professional_org','technical_report','other'];
 export const SOURCE_ROLES = ['primary_research','synthesis','guideline','regulator_safety','practice_guidance','preclinical','regulatory_standard','other'];
-const CLAIM_FIELDS = 'claim_id,source_id,claim_text,claim_type,direction,topics,population_or_scope,claim_text_fidelity,extraction_basis,claim_origin,page_or_section_locator,locator,verification_status,verification_review_status,verified_on';
-const SOURCE_FIELDS = 'source_id,title,authors,year,doi,url,pmid,pmcid,source_venue,evidence_type,source_role,topics,verification_status,verification_depth,verification_review_status,rights_access_status';
+const CLAIM_FIELDS = 'claim_id,source_id,claim_text,claim_type,direction,topics,population_or_scope,claim_text_fidelity,extraction_basis,claim_origin,page_or_section_locator,locator,verification_status,verification_review_status,verified_on,use_status';
+const SOURCE_FIELDS = 'source_id,title,authors,year,doi,url,pmid,pmcid,source_venue,evidence_type,source_role,topics,verification_status,verification_depth,verification_review_status,rights_access_status,use_status';
 export const protectedJson = (body,status=200) => Response.json(body,{status,headers:{'Cache-Control':'private, no-store','Vary':'Authorization','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex'}});
 
 export async function requireGraduate(env,request) {
@@ -39,13 +39,16 @@ export function searchExpression(q) {
  const words=q.toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
  return words.filter(w=>!stop.has(w)).map(w=>`"${w}"`).join(' ');
 }
+// Existing AIMT scientific policy treats provisional as current verified
+// evidence awaiting institutional review (publication-readiness.mjs).
+// needs_review/excluded/superseded and missing use statuses stay ineligible.
 function sourceGates(qs,prefix='') {
- qs.set(`${prefix}use_status`,'eq.active');qs.set(`${prefix}verification_status`,'eq.SOURCE_VERIFIED');
+ qs.set(`${prefix}use_status`,'in.(active,provisional)');qs.set(`${prefix}verification_status`,'eq.SOURCE_VERIFIED');
  qs.set(`${prefix}rights_access_status`,'in.(open,paywalled,unknown)');
  qs.set(`${prefix}verification_review_status`,'in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)');
 }
 export async function queryGraduateLibrary(env,p) {
- const qs=new URLSearchParams({select:`${CLAIM_FIELDS},source:research_sources!inner(${SOURCE_FIELDS})`,verification_status:p.verification?`eq.${p.verification}`:'in.(CLAIM_VERIFIED,AIMT_APPROVED)',use_status:'eq.active',verified_against_primary_source:'eq.true',claim_origin:'in.(primary_text,full_text,abstract)',verification_review_status:'in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)',order:'verified_on.desc.nullslast,claim_id.asc',limit:'21',offset:String((p.page-1)*20)});
+ const qs=new URLSearchParams({select:`${CLAIM_FIELDS},source:research_sources!inner(${SOURCE_FIELDS})`,verification_status:p.verification?`eq.${p.verification}`:'in.(CLAIM_VERIFIED,AIMT_APPROVED)',use_status:'in.(active,provisional)',verified_against_primary_source:'eq.true',claim_origin:'in.(primary_text,full_text,abstract)',verification_review_status:'in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)',order:'verified_on.desc.nullslast,claim_id.asc',limit:'21',offset:String((p.page-1)*20)});
  sourceGates(qs,'source.');
  if(p.source_id)qs.set('source_id',`eq.${p.source_id}`);
  if(p.claim_id)qs.set('claim_id',`eq.${p.claim_id}`);

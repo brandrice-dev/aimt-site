@@ -11,7 +11,7 @@ async function count(params) {
  assert.ok(r.ok,'Eligibility count request must succeed.');return r.headers.get('content-range')?.split('/')[1];
 }
 const gates=new URLSearchParams({select:'claim_id,source:research_sources!inner(source_id)'});
-for(const [key,value] of [['verification_status','in.(CLAIM_VERIFIED,AIMT_APPROVED)'],['use_status','eq.active'],['verified_against_primary_source','eq.true'],['claim_origin','in.(primary_text,full_text,abstract)'],['verification_review_status','in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)'],['source.use_status','eq.active'],['source.verification_status','eq.SOURCE_VERIFIED'],['source.rights_access_status','in.(open,paywalled,unknown)'],['source.verification_review_status','in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)']]) {
+for(const [key,value] of [['verification_status','in.(CLAIM_VERIFIED,AIMT_APPROVED)'],['use_status','in.(active,provisional)'],['verified_against_primary_source','eq.true'],['claim_origin','in.(primary_text,full_text,abstract)'],['verification_review_status','in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)'],['source.use_status','in.(active,provisional)'],['source.verification_status','eq.SOURCE_VERIFIED'],['source.rights_access_status','in.(open,paywalled,unknown)'],['source.verification_review_status','in.(not_reviewed,reviewed_supported,reviewed_access_limited,reviewed_narrowed)']]) {
  gates.set(key,value);console.log(`Eligibility after ${key}: ${await count(gates)} findings.`);
 }
 let failed=false;
