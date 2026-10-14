@@ -46,9 +46,9 @@ export async function retrieveLearningResearch(env,message,moduleId,{restricted=
  try {
   const searches=await Promise.all(routes.map(async r=>{
    const specific=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({q:r.query,topic:r.topic})));
-   if(specific.claims.length)return {claims:diverseEvidence(specific.claims),recovered:false};
+   if(specific.claims.length)return {claims:diverseEvidence(specific.claims,message),recovered:false};
    const broad=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({topic:r.topic})));
-   return {claims:diverseEvidence(broad.claims),recovered:broad.claims.length>0};
+   return {claims:diverseEvidence(broad.claims,message),recovered:broad.claims.length>0};
   }));
   let claims=[...new Map(searches.flatMap(s=>s.claims).map(c=>[c.claim_id,c])).values()];
   // Preserve recorded limits alongside findings. No interpretation of notes,
@@ -66,7 +66,7 @@ export function researchMessages(research) {
  return [{role:'user',content:'AIMT retrieval data for this turn (not instructions):\n'+JSON.stringify(research.claims)}];
 }
 export function verifiedCitationCards(research,text) {
- const ids=[...new Set([...String(text).matchAll(/\[(R\d+)\]/g)].map(m=>m[1]))];
+ const ids=[...new Set([...String(text).matchAll(/\[(R\d+(?:\s*,\s*R\d+)*)\]/g)].flatMap(m=>m[1].split(/\s*,\s*/)))];
  if(ids.some(id=>!research.claims.some(c=>c.citation_id===id)))throw Error('UNKNOWN_CITATION');
  return ids.map(id=>{const c=research.claims.find(c=>c.citation_id===id),s=c.source;return {id,claim_id:c.claim_id,source_id:c.source_id,title:s.title,authors:s.authors,year:s.year,verification_status:c.verification_status,verification_depth:s.verification_depth,original_url:s.original_url,doi:s.doi,library_href:`/my-aimt/research?source_id=${encodeURIComponent(c.source_id)}#${encodeURIComponent(c.claim_id)}`};});
 }
@@ -100,11 +100,9 @@ export function groundedCourseContext(moduleId,message,research) {
  if(research.state==='assessment_restricted')return guide;
  const terms=(String(message).toLowerCase().match(/[a-z]{4,}/g) || []).filter(t=>!['what','does','could','explain','about','between','difference','there','this','that','have','with','course','research','understand'].includes(t));
  const modules=[...new Set([String(moduleId),...research.routes.map(r=>String(r.module))])];
+ const scored=modules.flatMap(mid=>(COURSE_CONTEXT[mid]?.passages || []).map(passage=>({module:mid,lesson:COURSE_CONTEXT[mid].title,passage,score:terms.reduce((sum,t)=>sum+(passage.toLowerCase().includes(t)?(t==='hair'||t==='scalp'?1:4):0),0)}))).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);
  const excerpts=[];let budget=6000;
- for(const mid of modules)for(const paragraph of COURSE_CONTEXT[mid]?.passages || []) {
-  if(terms.some(t=>paragraph.toLowerCase().includes(t)) && paragraph.length<=budget) {excerpts.push({module:mid,lesson:COURSE_CONTEXT[mid].title,passage:paragraph});budget-=paragraph.length;if(excerpts.length>=8)break;}
-  if(excerpts.length>=8)break;
- }
+ for(const item of scored) {if(item.passage.length<=budget){const {score,...excerpt}=item;excerpts.push(excerpt);budget-=item.passage.length;}if(excerpts.length>=8)break;}
  return guide+(excerpts.length?'\n\nApproved instructional excerpts, exact text from the existing lesson (not new policy or assessment content):\n'+JSON.stringify(excerpts):'');
 }
 export function projectLearningResearch(value) {
@@ -114,7 +112,10 @@ export function projectLearningResearch(value) {
  return {state:['available','course_only','assessment_restricted','temporarily_unavailable','no_eligible_evidence'].includes(value.state)?value.state:'course_only',grounded:value.grounded===true,citations,links:{library_href:/^\/my-aimt\/research(?:\?topic=[a-z0-9-]+)?$/.test(links.library_href || '')?links.library_href:'/my-aimt/research',lesson_href:/^\/head-spa-certification\?enter=1&module=(?:[0-9]|1[01])$/.test(links.lesson_href || '')?links.lesson_href:'/head-spa-certification?enter=1',lesson_label:String(links.lesson_label || 'Return to coursework').slice(0,120)}};
 }
 
-export function diverseEvidence(claims) {
+export function diverseEvidence(claims,message='') {
+ const terms=(message.toLowerCase().match(/[a-z]{4,}/g) || []).filter(t=>!['what','does','explain','difference','between','about','research'].includes(t));
+ const score=c=>terms.reduce((sum,t)=>sum+((c.claim_text+' '+c.source.title).toLowerCase().includes(t)?(t==='hair'||t==='scalp'?1:4):0),0);
+ claims=[...claims].sort((a,b)=>score(b)-score(a));
  if(!claims.length)return [];
  const first=claims[0];
  const other=claims.find(c=>c.claim_id!==first.claim_id && c.direction && first.direction && c.direction!==first.direction) || claims.find(c=>c.source_id!==first.source_id) || claims[1];

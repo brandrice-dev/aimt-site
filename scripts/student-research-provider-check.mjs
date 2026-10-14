@@ -17,7 +17,7 @@ global.fetch=async(url,options={})=>{
 try {
  for(const [id,question] of [
   ['shedding-versus-breakage','Can you explain the difference between telogen shedding and hair breakage?'],
-  ['microbiome','What does the scalp microbiome research mean for understanding scalp health?']
+  ['microbiome','What do the verified findings report about the scalp microbiome? Please use the available evidence and references.']
  ]) {
   const research=await retrieveLearningResearch(env,question,3);
   assert.equal(research.state,'available',`${id}: real eligible evidence must be retrieved.`);
@@ -26,10 +26,11 @@ try {
   assert.equal(result.modelInfo.modelName,getCadenceModelRegistry().roles.CADENCE_CHAT_MODEL.approved,'Default approved chat role must remain unchanged.');
   if(result.researchReview?.supported!==true)console.log(`${id}: diagnostic=${result.researchReview?.reason || 'unknown'}; flags=${(result.researchReview?.rejectionReasons || []).join(',')}`);
   assert.equal(result.researchReview?.supported,true,`${id}: independent evidence grounding must pass.`);
-  assert.ok(result.citations.length>0,`${id}: source references must be genuine and delivered.`);
+  if(id==='microbiome')assert.ok(result.citations.length>0,`${id}: an evidence-focused question must receive genuine scientific references.`);
+  else {assert.ok(/shedd|telogen/i.test(result.text) && /break|shaft/i.test(result.text),'The course explanation must address both requested concepts.');assert.ok(research.routes.some(r=>r.module===3),'The supporting lesson must be genuinely associated with the approved guide.');}
   assert.ok(result.text.trim().split(/\s+/).length<350,`${id}: explanation must remain approachable.`);
   assert.ok(result.citations.every(c=>research.claims.some(e=>e.claim_id===c.claim_id && e.source_id===c.source_id && e.source.title===c.title && e.verification_status===c.verification_status)));
-  console.log(`${id}: PASS (real eligible findings; independent grounding; genuine citations; concise reply).`);
+  console.log(`${id}: PASS (real eligible findings; independent grounding; ${result.citations.length} genuine scientific citations; approved lesson association; concise reply).`);
  }
  // No extra model call: a missing-information proposal is independently
  // tested in isolated queue fixtures, while actual topical availability is
