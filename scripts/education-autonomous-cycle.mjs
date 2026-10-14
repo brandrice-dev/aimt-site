@@ -31,7 +31,9 @@ export function trustedBudgetStartedAt(run, repository, scheduled = false) {
 export function classifyRecovery(report) {
   if (report.final_state === 'SHADOW_CANDIDATE_READY') return 'WAIT_PUBLICATION';
   if (report.final_state === 'PUBLISHED') return 'SELECT_NEXT_TOPIC';
-  if (/budget|SPEND_LIMIT|TOKEN_LIMIT/.test(report.exception_reason || '') || report.provider_request_diagnostics?.code === 'SPEND_LIMIT') return 'BUDGET_PAUSED';
+  const diagnostic = report.provider_request_diagnostics || report.publication_editor_result?.diagnostics;
+  if (diagnostic?.code === 'TOKEN_LIMIT' || /token_limit|TOKEN_LIMIT/.test(report.exception_reason || '')) return 'EVIDENCE_SIZE_BLOCKED';
+  if (/budget|SPEND_LIMIT/.test(report.exception_reason || '') || diagnostic?.code === 'SPEND_LIMIT') return 'BUDGET_PAUSED';
   if (['CONFIG_BLOCKED', 'PROVIDER_FAILED'].includes(report.final_state)) {
     if (report.provider_request_diagnostics?.http_status === 401 || report.provider_request_diagnostics?.http_status === 403
       || /missing.*key|credential/i.test(report.exception_reason || '')) return 'AUTHORIZATION_REQUIRED';

@@ -16,6 +16,12 @@ on:
         type: string
         required: false
 
+      evidence_preflight:
+        description: 'Read-only Trichology evidence-size check against exact saved intent/budget. Zero model calls or production writes.'
+        type: boolean
+        default: false
+        required: false
+
 concurrency:
   group: aimt-education-operations
   cancel-in-progress: false
@@ -40,7 +46,7 @@ jobs:
         id: restore
         env:
           GH_TOKEN: ${{ github.token }}
-          DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
+          DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic && !inputs.evidence_preflight }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
         run: node scripts/education-candidate-state-restore.mjs
 
@@ -56,8 +62,11 @@ jobs:
           AIMT_RESEARCH_GAP_LOOP_ENABLED: ${{ vars.AIMT_RESEARCH_GAP_LOOP_ENABLED }}
           GH_TOKEN: ${{ github.token }}
           DIAGNOSTIC: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
+          EVIDENCE_PREFLIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.evidence_preflight }}
         run: |
-          if [ "$DIAGNOSTIC" = "true" ]; then
+          if [ "$EVIDENCE_PREFLIGHT" = "true" ]; then
+            node scripts/education-publication-diagnostic.mjs --evidence-preflight
+          elif [ "$DIAGNOSTIC" = "true" ]; then
             node scripts/education-publication-diagnostic.mjs --allow-model-calls
           else
             node scripts/education-autonomous-cycle.mjs
@@ -73,7 +82,7 @@ jobs:
 
       - name: Upload durable candidate bundles
         uses: actions/upload-artifact@v4
-        if: always() && steps.restore.outputs.restored == 'true'
+        if: always() && steps.restore.outputs.restored == 'true' && inputs.evidence_preflight != true
         with:
           name: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic && 'education-candidate-bundles-diagnostic' || 'education-candidate-bundles' }}
           path: research-import/education-ops/candidates/
