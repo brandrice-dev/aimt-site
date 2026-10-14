@@ -8,7 +8,7 @@ import {buildSynthesisRequest,buildPublicationRequestBody,synthesizeTopic} from 
 import {createPublicationCostControl,PUBLICATION_INPUT_TOKEN_LIMIT} from '../functions/_lib/research/publication-cost-control.mjs';
 import {validateSynthesisOutput} from '../functions/_lib/research/publication-synthesis-validator.mjs';
 import {runSynthesisPipeline} from '../functions/_lib/research/publication-synthesis-orchestrator.mjs';
-import {classifyRecovery} from '../scripts/education-autonomous-cycle.mjs';
+import {classifyRecovery,runAutonomousCycle} from '../scripts/education-autonomous-cycle.mjs';
 import {writeTopicIntent,loadTopicIntent,topicAttemptFingerprint} from '../scripts/_lib/education-topic-attempts.mjs';
 import {getPublicationConcept} from '../functions/_lib/education-ops/education-publication-registry.mjs';
 import {runEvidencePreflight} from '../scripts/education-publication-diagnostic.mjs';
@@ -118,4 +118,17 @@ test('technical size failures are distinct from financial, provider, validation 
  assert.equal(classifyRecovery({final_state:'PROVIDER_FAILED',exception_reason:'request_failed'}),'RETRY_PROVIDER');
  assert.equal(classifyRecovery({final_state:'INVALID_RESPONSE'}),'SAFETY_REVIEW');
  assert.equal(classifyRecovery({final_state:'HUMAN_REVIEW'}),'DEFER_TOPIC');
+});
+test('technical blocking preserves the saved topic, research and remaining window budget without declaring readiness or financial exhaustion',async()=>{
+ const cost=createPublicationCostControl({previous:{reserved_cost_estimate_usd:.144914,reported_usage_cost_estimate_usd:.03909,requests:1,requests_with_unknown_usage:0}}).summary();
+ let checkpoint;
+ const state={version:'education-continuation-v1',chain_id:'scheduled',budget_window:'2026-10-14T14:00:00.000Z',executions:1,cost_control:cost,
+  history:[],deferred:{},research:{preserved:{searches:1}},next_topic:'trichology'};
+ const report=await runAutonomousCycle({GITHUB_REPOSITORY:'brandrice-dev/aimt-site',GITHUB_REF:'refs/heads/main',GITHUB_RUN_ID:'continuation',GITHUB_EVENT_NAME:'workflow_dispatch'},
+  {readState:()=>state,writeState:s=>{checkpoint=structuredClone(s)},loadBundle:()=>({found:false}),published:async()=>[],
+   learningGaps:async()=>({}),research:async()=>({state:'NO_RESEARCH_GAP'}),report:()=>{},
+   run:async()=>({final_state:'SYNTHESIS_FAILED',selected_topic:'trichology',exception_reason:'token_limit',publication_editor_result:{diagnostics:{code:'TOKEN_LIMIT',attempts:0}}})});
+ assert.equal(report.autonomous_controller.next_action,'EVIDENCE_SIZE_BLOCKED');assert.equal(checkpoint.next_topic,'trichology');
+ assert.deepEqual(checkpoint.cost_control,cost);assert.deepEqual(checkpoint.research,{preserved:{searches:1}});
+ assert.equal(checkpoint.budget_window,state.budget_window);assert.equal(report.final_state,'SYNTHESIS_FAILED');
 });
