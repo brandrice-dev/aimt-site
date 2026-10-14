@@ -24,6 +24,7 @@ try {
   const guide=groundedCourseContext(3,question,research);
   const result=await askCadenceServerSide(env,{guideSystemPrompt:guide,boundedContext:[],studentMessage:question,activeCheckpointGuardrailText:null,research});
   assert.equal(result.modelInfo.modelName,getCadenceModelRegistry().roles.CADENCE_CHAT_MODEL.approved,'Default approved chat role must remain unchanged.');
+  if(result.researchReview?.supported!==true)console.log(`${id}: diagnostic=${result.researchReview?.reason || 'unknown'}; flags=${(result.researchReview?.rejectionReasons || []).join(',')}`);
   assert.equal(result.researchReview?.supported,true,`${id}: independent evidence grounding must pass.`);
   assert.ok(result.citations.length>0,`${id}: source references must be genuine and delivered.`);
   assert.ok(result.text.trim().split(/\s+/).length<350,`${id}: explanation must remain approachable.`);
