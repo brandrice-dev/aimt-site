@@ -103,3 +103,11 @@ test('specific educational concepts are retained without raw student text or sci
  await recordLearningGap(env,{research:{...research,routes:routed},moduleId:6,type:'course_coverage_incomplete',concept:learningConcept(text,routed)});
  assert.equal(row.extras.educational_concept,'scalp-bacteriophage-ecology');assert.ok(!JSON.stringify(row).includes('personal story'));
 });
+
+test('Cadence authentication failures use private no-store responses before any data access',async t=>{
+ const {onRequestGet}=await import('../functions/api/cadence/get-thread.js');
+ mock(t,async()=>assert.fail('Anonymous request must not access data'));
+ const request=new Request('https://local.test/api/cadence/ask',{method:'POST',body:'{}'});
+ const ask=await onRequestPost({env,request});assert.equal(ask.status,401);assert.match(ask.headers.get('cache-control'),/private, no-store/);assert.equal(ask.headers.get('vary'),'Authorization');
+ const history=await onRequestGet({env,request:new Request('https://local.test/api/cadence/get-thread?moduleId=3')});assert.equal(history.status,401);assert.match(history.headers.get('cache-control'),/no-store/);
+});

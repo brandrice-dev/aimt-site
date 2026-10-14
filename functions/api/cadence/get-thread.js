@@ -26,7 +26,11 @@ export async function onRequestGet(context) {
   if (!hasSupabaseEnv(env)) return json({ error: 'Misconfigured' }, 500);
 
   const { user, errorResponse } = await resolveUser(env, request);
-  if (errorResponse) return errorResponse;
+  if (errorResponse) {
+    errorResponse.headers.set('Cache-Control','private, no-store');
+    errorResponse.headers.set('Vary','Authorization');
+    return errorResponse;
+  }
 
   const entitled = await isEntitled(env, user, COURSE_SLUG);
   if (!entitled) return json({ error: 'No active enrollment found for this account.' }, 403);
