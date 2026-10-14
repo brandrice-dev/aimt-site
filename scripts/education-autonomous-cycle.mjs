@@ -13,6 +13,21 @@ import { executeResearchGap } from './_lib/education-research-gap-executor.mjs';
 import {triageStudentLearningGaps} from './_lib/student-learning-gap-triage.mjs';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const hash = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+// Latest occurrence of the existing weekday 14:00 UTC schedule. No new cadence.
+export function budgetWindow(startedAt) {
+  const time = Date.parse(startedAt);
+  if (!Number.isFinite(time)) throw new Error('INVALID_BUDGET_WINDOW');
+  const slot = new Date(time); slot.setUTCHours(14, 0, 0, 0);
+  if (slot.getTime() > time) slot.setUTCDate(slot.getUTCDate() - 1);
+  while ([0, 6].includes(slot.getUTCDay())) slot.setUTCDate(slot.getUTCDate() - 1);
+  return slot.toISOString();
+}
+export function trustedBudgetStartedAt(run, repository, scheduled = false) {
+  if (run.repository?.full_name !== repository || run.path !== '.github/workflows/aimt-education-operations.yml'
+    || run.head_branch !== 'main' || (scheduled && run.event !== 'schedule')) throw new Error('UNTRUSTED_BUDGET_WINDOW_SOURCE');
+  budgetWindow(run.created_at);
+  return run.created_at;
+}
 export function classifyRecovery(report) {
   if (report.final_state === 'SHADOW_CANDIDATE_READY') return 'WAIT_PUBLICATION';
   if (report.final_state === 'PUBLISHED') return 'SELECT_NEXT_TOPIC';
@@ -58,6 +73,15 @@ export async function runAutonomousCycle(env, overrides = {}) {
       }
     }
   }
+  state.budget_window ||= env.EDUCATION_LEGACY_BUDGET_STARTED_AT ? budgetWindow(env.EDUCATION_LEGACY_BUDGET_STARTED_AT) : null;
+  const scheduledWindow = env.GITHUB_EVENT_NAME === 'schedule' && env.EDUCATION_SCHEDULED_BUDGET_STARTED_AT
+    ? budgetWindow(env.EDUCATION_SCHEDULED_BUDGET_STARTED_AT) : null;
+  if (scheduledWindow && (!state.cost_control || (state.budget_window && scheduledWindow > state.budget_window))) {
+    state.history.push({ action: 'SCHEDULED_BUDGET_WINDOW', previous_window: state.budget_window,
+      cost_control: state.cost_control, run_id: env.GITHUB_RUN_ID });
+    state.cost_control = null; state.budget_window = scheduledWindow;
+    state.chain_id = env.GITHUB_RUN_ID; state.executions = 0; state.retry_count = 0;
+  }
   const published = await io.published(env);
   for (const concept of PUBLICATION_CONCEPTS) {
     if (published.includes(concept.topic_slug)) continue;
@@ -81,11 +105,11 @@ export async function runAutonomousCycle(env, overrides = {}) {
   // Existing request/spend ceiling remains cumulative across this continuation
   // chain, including a topic switch. Free research can still make progress.
   const result = await io.run(env, { continuation: true, costControl: cost, topicSlug: state.next_topic || undefined,
-    deferredFingerprints: state.deferred, mode: 'autonomous' });
+    deferredFingerprints: state.deferred, budgetWindow: state.budget_window, mode: 'autonomous' });
   const action = classifyRecovery(result);
   state.cost_control = cost.summary();
   state.history.push({ run_id: env.GITHUB_RUN_ID, topic: result.selected_topic, state: result.final_state,
-    action, cost_control: state.cost_control, candidate_reused: result.candidate_resume?.reused === true });
+    action, budget_window: state.budget_window, cost_control: state.cost_control, candidate_reused: result.candidate_resume?.reused === true });
   state.next_action = action; state.next_topic = result.selected_topic;
   if (action === 'DEFER_TOPIC') {
     const attempt = io.loadAttempt(result.selected_topic); if (attempt) state.deferred[result.selected_topic] = attempt.fingerprint;
@@ -109,7 +133,7 @@ export async function runAutonomousCycle(env, overrides = {}) {
   persist();
   result.autonomous_controller = { version: state.version, chain_id: state.chain_id, executions: state.executions,
     next_action: state.next_action, next_topic: state.next_topic, cost_control: state.cost_control,
-    state_sha256: hash(state), governed_publication_authorized: env.AIMT_EDUCATION_AUTOPUBLISH_ENABLED === 'true' };
+    budget_window: state.budget_window, state_sha256: hash(state), governed_publication_authorized: env.AIMT_EDUCATION_AUTOPUBLISH_ENABLED === 'true' };
   io.report(result);
   return result;
 }
