@@ -272,7 +272,7 @@ async function testModernDiscoverAndToolsList() {
     assert(list.json.result.resultType === 'complete', 'tools/list result has resultType: complete');
     assert(list.json.result.ttlMs === 0 && list.json.result.cacheScope === 'private', 'tools/list uses conservative caching (ttlMs:0, cacheScope:private)');
     const tools = list.json.result.tools;
-    assert(Array.isArray(tools) && tools.length === 3, `exactly three tools exposed (got ${tools && tools.length})`);
+    assert(Array.isArray(tools) && tools.length === 4, `exactly four tools exposed (got ${tools && tools.length})`);
     const toolNames = tools.map((t) => t.name);
     assert(toolNames.includes('submit_research_batch'), 'submit_research_batch is exposed');
     assert(toolNames.includes('list_research_gaps'), 'list_research_gaps is exposed (research-gap feedback loop)');

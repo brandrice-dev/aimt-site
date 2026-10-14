@@ -13,10 +13,13 @@
    instruction.
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled } from '../../_lib/certification/auth.mjs';
+import { json as baseJson, hasSupabaseEnv, resolveUser, isEntitled } from '../../_lib/certification/auth.mjs';
 import { getOrCreateThread, getThreadMessages } from '../../_lib/cadence/threads.mjs';
 
+import {projectLearningResearch} from '../../_lib/cadence/learning-research.mjs';
+
 const COURSE_SLUG = 'headspa-mastery';
+const json=(body,status=200)=>{const response=baseJson(body,status);response.headers.set('Cache-Control','private, no-store');response.headers.set('Vary','Authorization');return response;};
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -47,6 +50,7 @@ export async function onRequestGet(context) {
       content: m.content,
       checkpointId: m.checkpoint_id,
       createdAt: m.created_at,
+      research: m.mode==='ask_cadence'?projectLearningResearch(m.grading_metadata?.learningResearch):null,
       // grading_metadata is intentionally omitted from this client-facing
       // shape — it may include rubric-adjacent evidence labels that
       // shouldn't be assumed safe to display verbatim; a future UI that

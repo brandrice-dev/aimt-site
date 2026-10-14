@@ -10,13 +10,13 @@ const credential={credential_id:'AIMT-HS-2026-ABC234',course_slug:'headspa-maste
 const source={source_id:'study-1',title:'Source title',authors:['Author'],year:2024,doi:'10.1000/study',url:'javascript:bad()',topics:['hair-biology'],evidence_type:'observational',source_role:'primary_research',verification_status:'SOURCE_VERIFIED',verification_depth:'abstract',verification_review_status:'not_reviewed',rights_access_status:'paywalled',private_notes:'PRIVATE_SOURCE_NOTES'};
 const claim={claim_id:'claim-1',source_id:'study-1',claim_text:'Verified scientific statement.',claim_type:'finding',verification_status:'CLAIM_VERIFIED',verification_review_status:'not_reviewed',direction:'association',topics:['hair-biology'],source,extras:'PRIVATE_EXTRAS',body_markdown:'PRIVATE_BODY'};
 function mock(t,fn) {const original=global.fetch;global.fetch=async(...args)=>fn(...args);t.after(()=>{global.fetch=original;});}
-function authMock(rows,rest=()=>new Response('[]')) {return (url,options)=>{const u=new URL(url);if(u.pathname==='/auth/v1/user'){assert.equal(options.headers.Authorization,'Bearer user-session');return Response.json({id:'user-1'});}if(u.pathname==='/rest/v1/completions'){assert.equal(u.searchParams.get('user_id'),'eq.user-1');assert.equal(u.searchParams.get('revoked'),'eq.false');return Response.json(rows);}return rest(u,options);};}
+function authMock(rows,rest=()=>new Response('[]')) {return (url,options)=>{const u=new URL(url);if(u.pathname==='/auth/v1/user'){assert.equal(options.headers.Authorization,'Bearer user-session');return Response.json({id:'user-1'});}if(u.pathname==='/rest/v1/course_entitlements')return Response.json([]);if(u.pathname==='/rest/v1/completions'){assert.equal(u.searchParams.get('user_id'),'eq.user-1');assert.equal(u.searchParams.get('revoked'),'eq.false');return Response.json(rows);}return rest(u,options);};}
 test('anonymous and expired sessions cannot query research; no shared secret bypass',async t=>{
  let calls=0;mock(t,()=>{calls++;return new Response('{}',{status:401});});
  const anonymous=await onRequest({env,request:new Request('https://aimtrichology.com/api/graduate-research?source_id=study-1')});assert.equal(anonymous.status,401);assert.equal(calls,0);
  assert.equal((await onRequest({env,request:request('?action=filters')})).status,401);assert.equal(calls,1);
 });
-for(const [name,rows] of [['enrolled but uncertified',[]],['revoked',[{...credential,revoked:true}]],['null revocation',[{...credential,revoked:null}]],['unissued',[{...credential,credential_id:null}]],['future credential',[{...credential,completed_at:'2999-01-01'}]]])test(`${name} cannot enter, search, filter, or directly retrieve findings`,async t=>{
+for(const [name,rows] of [['former student with no active entitlement',[]],['revoked',[{...credential,revoked:true}]],['null revocation',[{...credential,revoked:null}]],['unissued',[{...credential,credential_id:null}]],['future credential',[{...credential,completed_at:'2999-01-01'}]]])test(`${name} cannot enter, search, filter, or directly retrieve findings`,async t=>{
  mock(t,authMock(rows,()=>{assert.fail('Research must not be touched');}));
  for(const path of ['','?q=hair','?source_id=study-1','?action=filters','?action=access']){const r=await onRequest({env,request:request(path)});assert.equal(r.status,403);assert.match(r.headers.get('cache-control'),/no-store/);}
 });
@@ -70,4 +70,14 @@ test('caller-supplied user or credential identifiers cannot grant access, and wr
  assert.equal((await onRequest({env,request:request('?user_id=graduate-user&credential_id=AIMT-HS-2026-ABC234')})).status,403);
  const post=new Request('https://aimtrichology.com/api/graduate-research',{method:'POST',headers:{Authorization:'Bearer user-session'},body:'{}'});
  assert.equal((await onRequest({env,request:post})).status,405);
+});
+test('active enrolled but uncertified student accesses research, then loses access when entitlement is removed',async t=>{
+ let entitled=true;mock(t,(url,options)=>{
+  const u=new URL(url);
+  if(u.pathname.endsWith('course_entitlements'))return Response.json(entitled?[{checkout_session_id:'synthetic-entitlement',course_slug:'headspa-mastery'}]:[]);
+  return authMock([],()=>Response.json([claim]))(url,options);
+ });
+ const entry=await onRequest({env,request:request('?action=access')});assert.equal(entry.status,200);assert.equal((await entry.json()).access_type,'student');
+ assert.equal((await onRequest({env,request:request('?q=Hair+Biology')})).status,200);
+ entitled=false;assert.equal((await onRequest({env,request:request('?source_id=study-1')})).status,403);
 });

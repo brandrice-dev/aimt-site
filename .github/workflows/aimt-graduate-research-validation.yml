@@ -1,9 +1,21 @@
-name: AIMT Graduate Research Validation
+name: AIMT Student Research Validation
 on:
   pull_request:
     branches: [main]
     paths:
       - 'functions/_lib/research/graduate-*.mjs'
+      - 'functions/_lib/cadence/**'
+      - 'functions/api/cadence/**'
+      - 'assets/js/cadence-shell.js'
+      - 'assets/js/aimt-learning-links.js'
+      - 'assets/css/cadence-shell.css'
+      - 'headspa-mastery.html'
+      - 'tests/student-learning-research.test.mjs'
+      - 'scripts/student-research-provider-check.mjs'
+      - 'scripts/build-cadence-course-context.mjs'
+      - 'scripts/_lib/cadence-course-excerpts.py'
+      - 'scripts/_lib/student-learning-gap-triage.mjs'
+      - 'functions/_lib/education-ops/student-learning-gaps.mjs'
       - 'functions/api/graduate-research.js'
       - 'functions/my-aimt/research.js'
       - 'assets/js/aimt-graduate-research.js'
@@ -12,6 +24,12 @@ on:
       - 'scripts/graduate-research-live-check.mjs'
       - '.github/workflows/aimt-graduate-research-validation.yml'
   workflow_dispatch:
+    inputs:
+      qa_scenario:
+        type: choice
+        options: [core, missing_information]
+        default: core
+        description: 'Controlled read-only provider QA, maximum six calls per run'
 permissions:
   contents: read
 jobs:
@@ -26,10 +44,17 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 20
-      - run: node --test tests/graduate-research-library.test.mjs tests/education-public-research.test.mjs tests/public-deployment-surface.test.mjs
+      - run: node --test tests/graduate-research-library.test.mjs tests/education-public-research.test.mjs tests/public-deployment-surface.test.mjs tests/student-learning-research.test.mjs tests/cadence-phase3-ask-cadence.test.mjs tests/cadence-chat-scenario-gate.test.mjs tests/cadence-chat-trust-precision.test.mjs tests/cadence-thread-api.test.mjs tests/education-autonomous-recovery.test.mjs
       - run: node scripts/research-library-rls-check.mjs
       - name: Read-only real research and anonymous RLS check
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/graduate-research-live-check.mjs
+      - name: Bounded read-only real-provider research teaching QA
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
+          AIMT_LEARNING_QA_SCENARIO: ${{ inputs.qa_scenario || 'core' }}
+        run: node scripts/student-research-provider-check.mjs

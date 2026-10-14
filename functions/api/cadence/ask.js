@@ -5,18 +5,10 @@
    Headers: Authorization: Bearer <supabase access token>
    Body: { moduleId, message, requestId, guideSystemPrompt, activeCheckpointId? }
 
-   guideSystemPrompt is the client-supplied module-aware guide system
-   string (headspa-mastery.html's MODULE_GUIDE_SYSTEMS + tone constants —
-   the same "client supplies content, server supplies authority" trust
-   boundary evaluate-checkpoint.js already uses for rubric text, since
-   this flat-HTML site has no server-importable copy of that content —
-   see CLAUDE.md's "no build step" constraint). Ask Cadence has NO
-   decision to protect (unlike checkpoint grading), so a client-influenced
-   system prompt carries no authority risk here: this endpoint can never
-   submit a checkpoint evaluation, alter checkpoint pass, alter
-   certification, unlock content, or mutate any attempt/progress state —
-   it only ever calls askCadenceServerSide() and appends a transcript
-   message. No decision function exists in this path to bypass.
+   guideSystemPrompt remains in the request for compatibility, but is not
+   trusted as course authority. Server context is generated from the existing
+   approved course guide constants and non-assessment lesson paragraphs.
+   This endpoint can never grade, unlock modules or issue a certification.
 
    activeCheckpointId, if supplied, is used only to look up a
    SERVER-VERIFIED (course_progress) checkpoint status — the client's own
@@ -32,12 +24,15 @@
    thread per (student, module), messages tagged mode='ask_cadence'.
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled } from '../../_lib/certification/auth.mjs';
+import { json as baseJson, hasSupabaseEnv, resolveUser, isEntitled } from '../../_lib/certification/auth.mjs';
 import { getOrCreateThread, appendMessage, findMessageByIdempotencyKey, getThreadMessages, buildBoundedContext } from '../../_lib/cadence/threads.mjs';
 import { askCadenceServerSide, getVerifiedCheckpointStatus, isModule12AssessmentActive, buildActiveCheckpointGuardrail } from '../../_lib/cadence/ask-cadence.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
 
+import {groundedCourseContext,assessmentContext,retrieveLearningResearch,safeLearningLinks,classifyLearningGap,recordLearningGap,projectLearningResearch,learningConcept} from '../../_lib/cadence/learning-research.mjs';
+
 const COURSE_SLUG = 'headspa-mastery';
+const json=(body,status=200)=>{const response=baseJson(body,status);response.headers.set('Cache-Control','private, no-store');response.headers.set('Vary','Authorization');return response;};
 
 // Generous but tighter than checkpoint submission -- Ask Cadence is
 // optional back-and-forth chat, not an occasional graded submit.
@@ -78,6 +73,8 @@ export async function onRequestPost(context) {
     return json({ error: 'Invalid request.' }, 400);
   }
 
+  if(!/^(?:[0-9]|1[0-2])$/.test(String(moduleId)) || message.length>4000 || requestId.length>160)return json({error:'Invalid request.'},400);
+
   // Module 12 exam integrity (Section 21) -- server-side guard, not just a
   // hidden pill. Checked before any thread/message write.
   if (String(moduleId) === '12') {
@@ -86,6 +83,11 @@ export async function onRequestPost(context) {
       return json({ error: 'Ask Cadence is unavailable during an active certification assessment.' }, 403);
     }
   }
+
+  let assessment;
+  try {assessment=await assessmentContext(env,user.id,moduleId);}catch {return json({error:'Could not verify assessment state. Please retry.'},503);}
+  // Research is disabled for unresolved required checkpoints, including when a
+  // caller omits or falsifies the active-checkpoint hint, and during any exam.
 
   const threadResult = await getOrCreateThread(env, { userId: user.id, courseSlug: COURSE_SLUG, moduleId });
   if (!threadResult.ok) return json({ error: 'Could not open conversation thread. Please retry.' }, 500);
@@ -97,7 +99,7 @@ export async function onRequestPost(context) {
   const assistantKey = requestId + ':assistant';
   const existingAssistant = await findMessageByIdempotencyKey(env, thread.id, assistantKey);
   if (existingAssistant) {
-    return json({ reply: existingAssistant.content, modelInfo: (existingAssistant.grading_metadata || {}).modelInfo || null, replayed: true });
+    return json({ reply: existingAssistant.content, modelInfo: (existingAssistant.grading_metadata || {}).modelInfo || null, research:projectLearningResearch((existingAssistant.grading_metadata || {}).learningResearch), replayed: true });
   }
 
   // Bounded context is read BEFORE this turn's student message is
@@ -113,6 +115,11 @@ export async function onRequestPost(context) {
     if (status !== 'passed') activeCheckpointGuardrailText = buildActiveCheckpointGuardrail(activeCheckpointId);
   }
 
+  if(assessment.unresolvedCheckpoint && !activeCheckpointGuardrailText)activeCheckpointGuardrailText=buildActiveCheckpointGuardrail(assessment.unresolvedCheckpoint);
+  const priorResearch=[...(existingMessagesResult.body || [])].reverse().find(m=>m.role==='assistant' && m.mode==='ask_cadence')?.grading_metadata?.learningResearch || null;
+  const research=await retrieveLearningResearch(env,message,moduleId,{restricted:assessment.restricted,priorResearch});
+  const courseGuide=groundedCourseContext(moduleId,message,research);
+
   // Persist the student's turn first (durable regardless of what happens
   // next) — idempotent on requestId, so a retry never duplicates it.
   const studentMsg = await appendMessage(env, {
@@ -126,12 +133,14 @@ export async function onRequestPost(context) {
   });
   if (!studentMsg.ok) return json({ error: 'Could not save your message. Please retry.' }, 500);
 
-  let reply, modelInfo, scenarioGate;
+  let reply, modelInfo, scenarioGate, learningResearch, gapType;
   try {
-    const result = await askCadenceServerSide(env, { guideSystemPrompt, boundedContext, studentMessage: message, activeCheckpointGuardrailText });
+    const result = await askCadenceServerSide(env, { guideSystemPrompt:courseGuide, boundedContext, studentMessage: message, activeCheckpointGuardrailText, research });
     reply = result.text;
     modelInfo = result.modelInfo;
     scenarioGate = result.scenarioGate;
+    learningResearch={state:research.state,citations:result.citations || [],links:safeLearningLinks(research,moduleId),grounded:result.researchReview?.supported===true};
+    gapType=classifyLearningGap({research,message,reviewGap:result.researchReview?.gapType});
   } catch (e) {
     // Preserve-on-failure: the student message is already durably saved
     // above; no assistant message is written. A retry with the same
@@ -147,7 +156,7 @@ export async function onRequestPost(context) {
     role: 'assistant',
     mode: 'ask_cadence',
     content: reply,
-    gradingMetadata: { modelInfo, scenarioGate }, // diagnostic only, per threads.mjs -- never authoritative
+    gradingMetadata: { modelInfo, scenarioGate, learningResearch }, // diagnostic only, per threads.mjs -- never authoritative
     idempotencyKey: assistantKey,
   });
   if (!assistantMsg.ok) {
@@ -155,8 +164,9 @@ export async function onRequestPost(context) {
     // write failed -- same disclosed trade-off evaluate-checkpoint.js
     // makes: a retry with the same requestId simply re-generates and
     // (in the common case) succeeds on the write the second time.
-    return json({ reply, modelInfo });
+    return json({ reply, modelInfo, research:learningResearch });
   }
 
-  return json({ reply, modelInfo });
+  if(gapType) {try {await recordLearningGap(env,{research,moduleId,type:gapType,concept:learningConcept(message,research.routes)});}catch {/* Gap feedback never blocks the student's answer. */}}
+  return json({ reply, modelInfo, research:learningResearch });
 }

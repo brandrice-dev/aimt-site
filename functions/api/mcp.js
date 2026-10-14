@@ -1,3 +1,4 @@
+import {listStudentLearningGaps} from '../_lib/education-ops/student-learning-gaps.mjs';
 /* ═══════════════════════════════════════════════════════════════
    AIMT Research Harvester — MCP connector (dual-era, stateless)
    ---------------------------------------------------------------
@@ -295,7 +296,12 @@ const CLAIM_RESEARCH_GAP_TOOL = {
   }
 };
 
-const TOOLS = [SUBMIT_TOOL, LIST_RESEARCH_GAPS_TOOL, CLAIM_RESEARCH_GAP_TOOL];
+const LIST_LEARNING_GAPS_TOOL = {
+ name:'list_learning_gaps',title:'List bounded AIMT educational-improvement proposals',
+ description:'Read-only proposals from recurring controlled-topic learning gaps. Contains no student identity, conversation or assessment answers. These are review candidates, never research claims or authorized course changes. Check existing course coverage and evidence before taking improvement action.',
+ inputSchema:{type:'object',properties:{},additionalProperties:false}
+};
+const TOOLS = [SUBMIT_TOOL, LIST_RESEARCH_GAPS_TOOL, CLAIM_RESEARCH_GAP_TOOL,LIST_LEARNING_GAPS_TOOL];
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -516,6 +522,7 @@ async function runClaimResearchGapTool(env, args) {
 }
 
 async function runTool(env, name, args) {
+  if(name===LIST_LEARNING_GAPS_TOOL.name) {try {return toolTextResult({gaps:await listStudentLearningGaps(env)});}catch {return toolTextResult({error:'Learning gap proposals temporarily unavailable.'},true);}}
   switch (name) {
     case SUBMIT_TOOL.name:
       return runSubmitResearchBatchTool(env, args);

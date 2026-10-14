@@ -10,6 +10,7 @@ import { PUBLICATION_CONCEPTS } from '../functions/_lib/education-ops/education-
 import { verifyCandidateBundleIntegrity, determineResumeStage } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
 import { loadTopicAttempt } from './_lib/education-topic-attempts.mjs';
 import { executeResearchGap } from './_lib/education-research-gap-executor.mjs';
+import {triageStudentLearningGaps} from './_lib/student-learning-gap-triage.mjs';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const hash = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export function classifyRecovery(report) {
@@ -38,7 +39,7 @@ export async function runAutonomousCycle(env, overrides = {}) {
   const io = { readState: () => existsSync(file) ? JSON.parse(readFileSync(file)) : null,
     writeState: (value) => atomic(file, value), run: runDecisionPipeline, loadBundle: loadCandidateBundle,
     published: fetchPublishedTopicSlugsLive,
-    loadAttempt: (slug) => loadTopicAttempt(directory, slug), research: executeResearchGap, report: persistRunReport, ...overrides };
+    learningGaps: triageStudentLearningGaps, loadAttempt: (slug) => loadTopicAttempt(directory, slug), research: executeResearchGap, report: persistRunReport, ...overrides };
   if (env.GITHUB_REPOSITORY !== 'brandrice-dev/aimt-site' || env.GITHUB_REF !== 'refs/heads/main') throw new Error('AUTONOMOUS_TRUSTED_MAIN_REQUIRED');
   let state = io.readState();
   if (state && state.version !== 'education-continuation-v1') throw new Error('UNTRUSTED_CONTINUATION_STATE');
@@ -92,6 +93,7 @@ export async function runAutonomousCycle(env, overrides = {}) {
   }
   // Preserve clearance freshness: free research excludes the active publication's
   // controlled topics until its current publication completes.
+  try {result.student_learning_gaps=await io.learningGaps(env);}catch {result.student_learning_gaps={state:'RETRY_NEXT_CYCLE'};}
   const exclude = PUBLICATION_CONCEPTS.find((c) => c.topic_slug === result.selected_topic)?.controlled_topics || [];
   try { result.autonomous_research = await io.research(env, state.research, persist, { excludedTopics: exclude }); }
   catch (error) { result.autonomous_research = { state: 'RESEARCH_RETRY', error: error.message.split(':')[0] }; }

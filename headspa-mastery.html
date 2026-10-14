@@ -13550,6 +13550,8 @@ function shouldOpenStudentSignIn() {
    Captured once at parse time (not read on demand) because
    shouldEnterPurchasedCourse() below strips the whole query string via
    history.replaceState before enterPurchasedCourseHome() ever runs. */
+// Navigation hint only; entitlement and module sequencing remain authoritative.
+const RESEARCH_MODULE_REQUESTED_ON_LOAD = new URLSearchParams(window.location.search).get('module');
 const CERT_VIEW_REQUESTED_ON_LOAD = new URLSearchParams(window.location.search).get('cert') === '1';
 function shouldOpenCertificateView() {
   return CERT_VIEW_REQUESTED_ON_LOAD;
@@ -13673,6 +13675,7 @@ async function enterPurchasedCourseHome() {
   const landingPage = document.getElementById('landingPage');
   const introScreen = document.getElementById('introScreen');
   const openCertificateView = shouldOpenCertificateView();
+  const researchModule = /^(?:[0-9]|1[01])$/.test(RESEARCH_MODULE_REQUESTED_ON_LOAD || '') ? Number(RESEARCH_MODULE_REQUESTED_ON_LOAD) : null;
   const canSync = !!(window.AIMT_SYNC && window.supabaseClient);
 
   hidePublicNav();
@@ -13681,7 +13684,7 @@ async function enterPurchasedCourseHome() {
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 
-  if (openCertificateView && canSync) {
+  if ((openCertificateView || researchModule !== null) && canSync) {
     // Hydrate real server progress first so a fresh device's empty local
     // APP_STATE can't wrongly block an already-certified/attempted student
     // from the Module 12 deep link below (canAccessModule(12) reads local
@@ -13701,6 +13704,8 @@ async function enterPurchasedCourseHome() {
     openModuleById(12);
   } else if (shouldShowOrientation()) {
     showHowAimtWorks();
+  } else if (researchModule !== null && APP_STATE.canAccessModule(researchModule)) {
+    openModuleById(researchModule, { restoreScroll: true });
   } else {
     document.getElementById('courseHome').classList.add('active');
     APP_STATE.setCurrentView('home');
@@ -14950,5 +14955,6 @@ function m8TimerRestart() {
   <a href="/refunds" style="color: inherit; text-decoration: none; margin: 0 0.6rem;">Refunds</a>
 </footer>
 
+<script src="/assets/js/aimt-learning-links.js"></script>
 </body>
 </html>
