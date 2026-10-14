@@ -50,3 +50,24 @@ test('public shell has no findings, no indexing, accessible controls and separat
  const html=graduateShell();assert.ok(!html.includes('Verified scientific statement.'));assert.match(html,/noindex,nofollow/);assert.match(html,/role="search"/);assert.match(html,/aria-live="polite"/);assert.match(html,/name="evidence_type"/);assert.match(readFileSync('my-aimt.html','utf8'),/href="\/my-aimt\/research"/);
  const js=readFileSync('assets/js/aimt-graduate-research.js','utf8');assert.match(js,/SIGNED_OUT/);assert.match(js,/pagehide/);assert.match(js,/Separately|separately validated/);assert.ok(!js.includes(env.SUPABASE_SERVICE_ROLE_KEY));
 });
+test('isolated graduate session can search, filter, and retrieve exact cited evidence through the API',async t=>{
+ const touched=[];
+ mock(t,authMock([credential],u=>{
+  touched.push(u.pathname);
+  if(u.pathname.endsWith('research_sources'))return Response.json([{source_id:'study-1'}]);
+  if(u.pathname.endsWith('research_topics'))return Response.json([{topic:'hair-biology'}]);
+  assert.equal(u.pathname,'/rest/v1/research_claims');return Response.json([claim]);
+ }));
+ for(const path of ['?q=Hair+Biology','?q=Scalp+Microbiome','?source_id=study-1&claim_id=claim-1','?year=2024&verification=CLAIM_VERIFIED']){
+  const response=await onRequest({env,request:request(path)});assert.equal(response.status,200);
+  const body=await response.json();assert.equal(body.claims[0].claim_id,'claim-1');assert.equal(body.claims[0].source.source_id,'study-1');assert.ok(!JSON.stringify(body).includes('PRIVATE'));
+ }
+ const filters=await onRequest({env,request:request('?action=filters')});assert.equal(filters.status,200);assert.deepEqual((await filters.json()).topics,['hair-biology']);
+ assert.ok(!touched.some(p=>/course_entitlements|certification_attempts|course_progress/.test(p)));
+});
+test('caller-supplied user or credential identifiers cannot grant access, and writes are rejected',async t=>{
+ mock(t,authMock([],()=>assert.fail('No protected data access')));
+ assert.equal((await onRequest({env,request:request('?user_id=graduate-user&credential_id=AIMT-HS-2026-ABC234')})).status,403);
+ const post=new Request('https://aimtrichology.com/api/graduate-research',{method:'POST',headers:{Authorization:'Bearer user-session'},body:'{}'});
+ assert.equal((await onRequest({env,request:post})).status,405);
+});
