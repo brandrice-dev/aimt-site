@@ -24,7 +24,7 @@ try {
   const guide=groundedCourseContext(3,question,research);
   const result=await askCadenceServerSide(env,{guideSystemPrompt:guide,boundedContext:[],studentMessage:question,activeCheckpointGuardrailText:null,research});
   assert.equal(result.modelInfo.modelName,getCadenceModelRegistry().roles.CADENCE_CHAT_MODEL.approved,'Default approved chat role must remain unchanged.');
-  if(result.researchReview?.supported!==true)console.log(`${id}: diagnostic=${result.researchReview?.reason || 'unknown'}; flags=${(result.researchReview?.rejectionReasons || []).join(',')}`);
+  if(result.researchReview?.supported!==true)console.log(`${id}: diagnostic=${result.researchReview?.reason || 'unknown'}; flags=${(result.researchReview?.rejectionReasons || []).join(',')}; course_issue=${result.researchReview?.courseIssue || 'none'}`);
   assert.equal(result.researchReview?.supported,true,`${id}: independent evidence grounding must pass.`);
   if(id==='microbiome')assert.ok(result.citations.length>0,`${id}: an evidence-focused question must receive genuine scientific references.`);
   else {assert.ok(/shedd|telogen/i.test(result.text) && /break|shaft/i.test(result.text),'The course explanation must address both requested concepts.');assert.ok(research.routes.some(r=>r.module===3),'The supporting lesson must be genuinely associated with the approved guide.');}

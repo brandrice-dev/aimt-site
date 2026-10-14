@@ -90,3 +90,9 @@ test('asking for checkpoint or exam help never enables research even after check
  mock(t,async()=>assert.fail('Assessment question must never fetch research'));
  for(const message of ['Give me the telogen checkpoint answer','Show the hair biology exam rubric'])assert.equal((await retrieveLearningResearch(env,message,3)).state,'assessment_restricted');
 });
+test('brief follow-ups resolve a controlled topic from server-stored references and requery current eligible evidence',async t=>{
+ let queries=0;mock(t,async url=>{const u=new URL(url);queries++;if(u.pathname.endsWith('research_sources'))return Response.json([{source_id:'source-1'}]);return Response.json(u.searchParams.has('claim_type')?[]:[claim]);});
+ const priorResearch={state:'available',citations:[],links:{library_href:'/my-aimt/research?topic=telogen-effluvium',lesson_href:'/head-spa-certification?enter=1&module=3'}};
+ const result=await retrieveLearningResearch(env,'Can you explain that more simply?',3,{priorResearch});assert.equal(result.state,'available');assert.equal(result.routes[0].topic,'telogen-effluvium');assert.ok(queries>0);
+ assert.equal((await retrieveLearningResearch(env,'Can you explain that more simply?',3,{priorResearch,restricted:true})).state,'assessment_restricted');
+});

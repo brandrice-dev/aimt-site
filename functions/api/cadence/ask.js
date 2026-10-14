@@ -116,7 +116,8 @@ export async function onRequestPost(context) {
   }
 
   if(assessment.unresolvedCheckpoint && !activeCheckpointGuardrailText)activeCheckpointGuardrailText=buildActiveCheckpointGuardrail(assessment.unresolvedCheckpoint);
-  const research=await retrieveLearningResearch(env,message,moduleId,{restricted:assessment.restricted});
+  const priorResearch=[...(existingMessagesResult.body || [])].reverse().find(m=>m.role==='assistant' && m.mode==='ask_cadence')?.grading_metadata?.learningResearch || null;
+  const research=await retrieveLearningResearch(env,message,moduleId,{restricted:assessment.restricted,priorResearch});
   const courseGuide=groundedCourseContext(moduleId,message,research);
 
   // Persist the student's turn first (durable regardless of what happens
