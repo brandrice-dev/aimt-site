@@ -35,7 +35,7 @@ export function parseGraduateQuery(params) {
 }
 // websearch syntax is constructed from words, never PostgREST expressions.
 export function searchExpression(q) {
- const stop=new Set('what how does do is are the a an of to in on for and with about can tell me research evidence suggest suggests'.split(' '));
+ const stop=new Set('what how does do is are the a an of to in on for and with about can tell me research evidence suggest suggests study studies say says show shows explain learn know find regarding scientific available current latest it its this that there we our you your'.split(' '));
  const words=q.toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
  return words.filter(w=>!stop.has(w)).map(w=>`"${w}"`).join(' ');
 }

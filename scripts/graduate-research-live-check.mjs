@@ -23,7 +23,19 @@ for(const q of ['Hair Biology','Scalp Microbiome']) {
   assert.ok(['CLAIM_VERIFIED','AIMT_APPROVED'].includes(c.verification_status));
   assert.ok(c.source.title && c.source.year && c.source.original_url,'Citation metadata must resolve.');
  }
- console.log(`${q}: PASS (${r.claims.length} eligible findings on first page; more=${r.has_more}).`);
+ const first=r.claims[0];
+ const drill=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({source_id:first.source_id,claim_id:first.claim_id})));
+ assert.equal(drill.claims.length,1);assert.equal(drill.claims[0].claim_id,first.claim_id);assert.equal(drill.claims[0].source.source_id,first.source_id);
+ const filtered=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({source_id:first.source_id,year:String(first.source.year),verification:first.verification_status})));
+ assert.ok(filtered.claims.length>0);assert.ok(filtered.claims.every(c=>c.source.year===first.source.year && c.verification_status===first.verification_status));
+ const title=first.source.title.slice(0,200);
+ const byTitle=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({q:title,source_id:first.source_id})));
+ assert.ok(byTitle.claims.length>0,'Study-title search must return its eligible findings.');
+ if(r.has_more) {
+  const next=await queryGraduateLibrary(env,parseGraduateQuery(new URLSearchParams({q,page:'2'})));
+  assert.ok(next.claims.length>0);assert.ok(!next.claims.some(c=>r.claims.some(prev=>prev.claim_id===c.claim_id)),'Pagination must not repeat stable records.');
+ }
+ console.log(`${q}: PASS (${r.claims.length} eligible findings on first page; more=${r.has_more}; title, citation drill-down, year, verification filter, pagination pass).`);
 }
 const anon=readFileSync('assets/js/aimt-graduate-research.js','utf8').match(/const SUPABASE_ANON_KEY = '([^']+)'/)[1];
 for(const table of ['research_claims','research_sources','research_topics']) {

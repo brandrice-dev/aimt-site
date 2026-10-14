@@ -3,7 +3,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id),form=$('graduate-search');
 const e=value=>String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const label=value=>String(value || 'Not recorded').replaceAll('_',' ');
+const readableLabels={rct:'Randomized controlled trial',not_reviewed:'Independent review pending',reviewed_supported:'Independently reviewed: supported',reviewed_narrowed:'Independently reviewed: narrowed',reviewed_access_limited:'Independent review limited by source access',association:'Association (does not establish causation)',unclear:'Unclear or mixed findings',primary_text:'Primary source text'};
+const label=value=>readableLabels[value] || String(value || 'Not recorded').replaceAll('_',' ');
 let page=1,sourceId='',requestSerial=0;
 function clearProtected() { requestSerial++;$('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('graduate-library').hidden=true; }
 async function api(params) {
@@ -59,6 +60,10 @@ async function search({historyMode='push'}={}) {
    $('graduate-results').innerHTML=result.claims.map(c=>`<li class="research-result"><span class="research-kind">${c.verification_status==='AIMT_APPROVED'?'AIMT approved':'Claim verified'} · ${e(label(c.source.evidence_type))}</span><h2><a href="${e(sourceLink(c.source_id))}">${e(c.source.title || 'Scientific source')}</a></h2><p class="research-meta">${e((c.source.authors || []).join(', '))} · ${e(c.source.year || 'Year not recorded')}</p><p>${e(c.claim_text)}</p><p class="graduate-provenance">${e(label(c.direction))} · ${e(label(c.verification_review_status))} · ${e(label(c.source.verification_depth))} source verification</p><p>${topicLinks(c.topics)}</p><a href="${e(findingLink(c))}">Examine evidence and provenance →</a></li>`).join('');
   }
   $('previous-page').hidden=page<=1;$('next-page').hidden=!result.has_more;$('page-label').textContent=`Page ${page}`;
+  if(!sourceId || !location.hash) {
+   const focus=sourceId?$('study-detail'):$('result-status');focus.tabIndex=-1;focus.focus({preventScroll:true});
+   if(historyMode!=='none')focus.scrollIntoView({block:'start'});
+  }
  }catch(error){if(serial!==requestSerial)return;if(error.status===401 || error.status===403)accessFailure(error);else $('result-status').textContent=error.message;}
  finally {if(serial===requestSerial)for(const button of document.querySelectorAll('#graduate-library button'))button.disabled=false;}
 }

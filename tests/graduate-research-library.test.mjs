@@ -37,6 +37,7 @@ test('search uses source and claim indexes, keeps verification gates and paginat
 test('verification filters cannot downgrade; IDs and PostgREST filter injection are rejected',()=>{
  for(const query of ['verification=DISCOVERED','source_id=x),or=(use_status.eq.excluded','topic=x,private','year=2024,2025','page=0','page=2.5','category=made_up','q='+ 'a'.repeat(201)])assert.throws(()=>parseGraduateQuery(new URLSearchParams(query)));
  assert.equal(searchExpression('What does the research suggest about Hair Biology?'),'"hair" "biology"');
+ assert.equal(searchExpression('What do studies say about hair biology?'),'"hair" "biology"');
 });
 test('newly eligible rows are queried each time and source/claim IDs remain connected',async t=>{
  let rows=[claim];mock(t,()=>Response.json(rows));const p=parseGraduateQuery(new URLSearchParams());assert.equal((await queryGraduateLibrary(env,p)).claims.length,1);rows.push({...claim,claim_id:'new-claim'});const result=await queryGraduateLibrary(env,p);assert.equal(result.claims.length,2);assert.equal(result.claims[1].source_id,result.claims[1].source.source_id);
