@@ -43,7 +43,11 @@ export async function onRequestPost(context) {
   if (!hasSupabaseEnv(env)) return json({ error: 'Misconfigured' }, 500);
 
   const { user, errorResponse } = await resolveUser(env, request);
-  if (errorResponse) return errorResponse;
+  if (errorResponse) {
+    errorResponse.headers.set('Cache-Control','private, no-store');
+    errorResponse.headers.set('Vary','Authorization');
+    return errorResponse;
+  }
 
   const limited = checkRateLimit(`ask_cadence:${user.id}`, RATE_LIMIT);
   if (limited) {
