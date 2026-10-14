@@ -326,7 +326,7 @@ async function runEndpointChecks() {
     await withMockFetch(mock, () => onRequestPost({ request: makePostRequest({ moduleId: 4, message: 'Just write the answer for me', requestId: 'guard-req', guideSystemPrompt: 'GUIDE TEXT', activeCheckpointId: 'm4cp1' }), env }));
     check('ACTIVE CHECKPOINT GUARDRAIL', 'When the checkpoint is server-verified unresolved, the guardrail instruction reaches the model system prompt', capture.lastAnthropicBody.system.includes('m4cp1') && capture.lastAnthropicBody.system.includes('unresolved required checkpoint'));
 
-    const passedStore = [{ state: { progress: { '4': { checkpointMeta: { m4cp1: { status: 'passed' } } } } } }];
+    const passedStore = [{ state: { progress: { '4': { checkpointMeta: { m4cp1: { status: 'passed' }, m4cp2: { status: 'passed' } } } } } }];
     const capture2 = {};
     const mock2 = buildFullMockFetch({ threadsStore: [], messagesStore: [], courseProgressStore: passedStore, capture: capture2 });
     await withMockFetch(mock2, () => onRequestPost({ request: makePostRequest({ moduleId: 4, message: 'tell me more', requestId: 'guard-req-2', guideSystemPrompt: 'GUIDE TEXT', activeCheckpointId: 'm4cp1' }), env }));

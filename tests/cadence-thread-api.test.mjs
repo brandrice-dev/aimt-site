@@ -213,7 +213,7 @@ async function runGetThreadEndpointChecks() {
     const body = await res.json();
     check('GET-THREAD ENDPOINT', 'Returns the thread and its messages', res.status === 200 && body.thread.moduleId === '1' && body.messages.length === 1);
     check('GET-THREAD ENDPOINT', 'grading_metadata (diagnostic/rubric-adjacent) is never exposed in the client-facing message shape', !('grading_metadata' in body.messages[0]) && !('gradingMetadata' in body.messages[0]));
-    check('GET-THREAD ENDPOINT', 'Message shape exposes only safe display fields', Object.keys(body.messages[0]).sort().join(',') === 'checkpointId,content,createdAt,id,mode,role');
+    check('GET-THREAD ENDPOINT', 'Message shape exposes only safe display fields', Object.keys(body.messages[0]).sort().join(',') === 'checkpointId,content,createdAt,id,mode,research,role');
   }
 
   {

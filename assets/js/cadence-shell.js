@@ -770,7 +770,7 @@
         appendDivider('Ask Cadence');
         lastCpId = null;
       }
-      appendMessageEl(m.role === 'user' ? 'user' : 'assistant', m.content);
+      appendMessageEl(m.role === 'user' ? 'user' : 'assistant', m.content, m.research);
     });
   }
 
@@ -815,7 +815,7 @@
     }
     renderTyping(false);
     session.busy = false;
-    appendMessageEl('assistant', data.reply || '');
+    appendMessageEl('assistant', data.reply || '', data.research);
     renderComposerLocked(false);
     scrollToBottomIfNearEnd(true);
   }
@@ -835,7 +835,7 @@
         appendDivider(otherLabel);
         lastCpId = m.checkpointId;
       }
-      appendMessageEl(m.role === 'user' ? 'user' : 'assistant', m.content);
+      appendMessageEl(m.role === 'user' ? 'user' : 'assistant', m.content, m.research);
     });
     if (currentCpId && lastCpId !== currentCpId) {
       appendDivider(session.label || 'This checkpoint');
@@ -849,7 +849,7 @@
     dom.transcriptInner.appendChild(div);
   }
 
-  function appendMessageEl(role, text) {
+  function appendMessageEl(role, text, research) {
     const row = document.createElement('div');
     row.className = 'cshell-msg ' + role;
     // Each new Cadence message is its own small polite live region (matching
@@ -868,10 +868,37 @@
     bub.setAttribute('role', 'group');
     bub.setAttribute('aria-label', role === 'assistant' ? 'Cadence' : 'You');
     bub.innerHTML = multilineHtml(text);
+    if(role==='assistant' && research && research.state!=='assessment_restricted' && research.state!=='course_only')appendResearchReferences(bub,research);
     row.appendChild(av);
     row.appendChild(bub);
     dom.transcriptInner.appendChild(row);
     return row;
+  }
+
+  function appendResearchReferences(bubble, research) {
+    const refs = document.createElement('div'); refs.className = 'cshell-research';
+    function addLink(text, href) {
+      try {
+        const url = new URL(href, location.origin);
+        if (url.origin !== location.origin || !['/my-aimt/research','/head-spa-certification'].includes(url.pathname)) return;
+        if (url.pathname === '/my-aimt/research' && session && /^(?:[0-9]|1[01])$/.test(String(session.moduleId))) url.searchParams.set('return_module', String(session.moduleId));
+        const link = document.createElement('a'); link.textContent = text; link.href = url.href;
+        link.target = '_blank'; link.rel = 'noopener'; refs.appendChild(link);
+      } catch (_) {}
+    }
+    (research.citations || []).slice(0,8).forEach(c => {
+      const paragraph = document.createElement('p');
+      paragraph.textContent = '[' + c.id + '] ' + c.title + (c.year ? ' · ' + c.year : '') + ' · ' + (c.verification_status === 'AIMT_APPROVED' ? 'AIMT approved' : 'Claim verified') + (c.verification_depth ? ' · ' + c.verification_depth.replaceAll('_',' ') : '');
+      refs.appendChild(paragraph); addLink('Examine this finding →', c.library_href);
+      try { const url = new URL(c.original_url); if(url.protocol==='https:' && !url.username && !url.password) {
+        const original = document.createElement('a'); original.href=url.href; original.textContent='Original scientific source ↗'; original.target='_blank'; original.rel='noopener noreferrer'; refs.appendChild(original);
+      }} catch (_) {}
+    });
+    if (research.citations && research.citations.length) {
+      const note = document.createElement('p'); note.textContent = 'Cadence provides a teaching explanation. Open the verified findings to inspect their evidence and limitations.'; refs.appendChild(note);
+    }
+    if(research.links) { addLink('Explore the Research →', research.links.library_href); addLink(research.links.lesson_label || 'Return to coursework', research.links.lesson_href); }
+    if(refs.childNodes.length)bubble.appendChild(refs);
   }
 
   function appendAssistantSystemNote(text) {

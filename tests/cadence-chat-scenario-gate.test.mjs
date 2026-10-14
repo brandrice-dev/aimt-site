@@ -254,8 +254,8 @@ await (async function failClosedRobustnessTests() {
   check('I. ONLY FINAL RESPONSE PERSISTS', 'ask.js contains exactly one assistant-role appendMessage call', assistantAppendCalls === 1, `found ${assistantAppendCalls}`);
   check('I. ONLY FINAL RESPONSE PERSISTS', 'The persisted assistant content is the single `reply` variable (askCadenceServerSide\'s one final result.text), not a concatenation of multiple candidates',
     /content:\s*reply,/.test(askSrc));
-  check('I. ONLY FINAL RESPONSE PERSISTS', 'The rejected draft / verifier verdict / regeneration instruction are never written to the persisted content -- only scenarioGate flags reach gradingMetadata',
-    /gradingMetadata:\s*\{\s*modelInfo,\s*scenarioGate\s*\}/.test(askSrc) && !/verdict|rejected|regenerationInstruction/i.test(askSrc));
+  check('I. ONLY FINAL RESPONSE PERSISTS', 'The rejected draft / verifier verdict / regeneration instruction are never written to the persisted content -- only scenarioGate flags and projected learning references reach gradingMetadata',
+    /gradingMetadata:\s*\{\s*modelInfo,\s*scenarioGate,\s*learningResearch\s*\}/.test(askSrc) && !/verdict|rejected|regenerationInstruction/i.test(askSrc));
   const gateSrc = readFileSync(path.join(ROOT, 'functions/_lib/cadence/scenario-fact-gate.mjs'), 'utf8');
   check('I. ONLY FINAL RESPONSE PERSISTS', 'logScenarioGateEvent only logs boolean/enum/string fields, never response text (no student-visible content leaks into logs)',
     !/gate\.(text|responseText|regenText|originalText)/.test(gateSrc));
