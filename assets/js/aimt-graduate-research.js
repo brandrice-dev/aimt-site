@@ -6,6 +6,9 @@ const e=value=>String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 const readableLabels={rct:'Randomized controlled trial',not_reviewed:'Independent review pending',reviewed_supported:'Independently reviewed: supported',reviewed_narrowed:'Independently reviewed: narrowed',reviewed_access_limited:'Independent review limited by source access',association:'Association (does not establish causation)',unclear:'Unclear or mixed findings',primary_text:'Primary source text'};
 const label=value=>readableLabels[value] || String(value || 'Not recorded').replaceAll('_',' ');
 let page=1,sourceId='',requestSerial=0;
+const requestedReturn=new URLSearchParams(location.search).get('return_module');
+const returnModule=/^(?:[0-9]|1[01])$/.test(requestedReturn || '')?requestedReturn:null;
+if(returnModule)$('return-course').href='/head-spa-certification?enter=1&module='+returnModule;
 function clearProtected() { requestSerial++;$('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('graduate-library').hidden=true; }
 async function api(params) {
  const {data:{session}}=await client.auth.getSession();
@@ -19,7 +22,7 @@ const findingLink=c=>`${sourceLink(c.source_id)}#${encodeURIComponent(c.claim_id
 function metadata(s) {return `<p class="research-meta">${e((s.authors || []).join(', ') || 'Authors not recorded')} · ${e(s.year || 'Year not recorded')} · ${e(s.source_venue || '')}</p><p class="graduate-provenance">${e(label(s.evidence_type))} · ${e(label(s.source_role))}<br>Source verified · ${e(label(s.verification_depth))} verification · ${e(label(s.verification_review_status))}</p>${s.original_url?`<p><a href="${e(s.original_url)}" target="_blank" rel="noopener noreferrer">Open original scientific source ↗</a>${s.doi_url?` · <a href="${e(s.doi_url)}" target="_blank" rel="noopener noreferrer">DOI: ${e(s.doi)}</a>`:''}</p>`:'<p>Original source link not recorded.</p>'}<p class="research-meta">Source use status: ${e(label(s.use_status))}. Source access: ${e(label(s.rights_access_status))}. A publisher may require a subscription.</p>`;}
 function topicLinks(topics) {return (topics || []).map(t=>`<a href="/my-aimt/research?topic=${encodeURIComponent(t)}">${e(label(t).replaceAll('-',' '))}</a>`).join(' · ');}
 function finding(c) {return `<article class="graduate-finding" id="${e(c.claim_id)}"><span class="research-kind">${c.verification_status==='AIMT_APPROVED'?'AIMT approved':'Claim verified'} · ${e(label(c.claim_type))}</span><blockquote>${e(c.claim_text)}</blockquote><p class="graduate-provenance">Finding: ${e(c.claim_id)} · Source: ${e(c.source_id)}<br>Origin: ${e(label(c.claim_origin))} · Extraction: ${e(label(c.extraction_basis))} · Fidelity: ${e(label(c.claim_text_fidelity))}<br>Locator: ${e(c.page_or_section_locator || c.locator || 'Not recorded')} · Verified: ${e(c.verified_on || 'Date not recorded')}<br>Scientific review: ${e(label(c.verification_review_status))} · Use status: ${e(label(c.use_status))} · Direction: ${e(label(c.direction))}</p>${c.population_or_scope?`<p>Recorded population or scope: ${e(c.population_or_scope)}</p>`:''}<p>${topicLinks(c.topics)}</p><a href="${e(findingLink(c))}">Link to this finding</a></article>`;}
-function paramsFromForm() {const params=new URLSearchParams(new FormData(form));for(const [k,v] of [...params])if(!v)params.delete(k);if(sourceId)params.set('source_id',sourceId);if(page>1)params.set('page',String(page));return params;}
+function paramsFromForm() {const params=new URLSearchParams(new FormData(form));for(const [k,v] of [...params])if(!v)params.delete(k);if(sourceId)params.set('source_id',sourceId);if(page>1)params.set('page',String(page));if(returnModule)params.set('return_module',returnModule);return params;}
 function syncForm(params) {for(const key of ['q','topic','year','evidence_type','verification','category'])form.elements[key].value=params.get(key) || '';page=Number(params.get('page')) || 1;sourceId=params.get('source_id') || '';}
 async function relatedEducation(source,serial) {
  try {
@@ -72,7 +75,7 @@ $('previous-page').addEventListener('click',()=>{page--;search();});$('next-page
 $('clear-search').addEventListener('click',()=>{form.reset();sourceId='';page=1;search();});
 for(const button of document.querySelectorAll('[data-query]'))button.addEventListener('click',()=>{form.reset();form.elements.q.value=button.dataset.query;sourceId='';page=1;search();});
 // Keep navigation within the authenticated experience without full reloads.
-document.addEventListener('click',event=>{const link=event.target.closest('a');if(!link || event.ctrlKey || event.metaKey || event.shiftKey || event.button!==0)return;const url=new URL(link.href);if(url.origin!==location.origin || url.pathname!=='/my-aimt/research')return;event.preventDefault();syncForm(url.searchParams);history.pushState({},'',url.href);search({historyMode:'none'});});
+document.addEventListener('click',event=>{const link=event.target.closest('a');if(!link || event.ctrlKey || event.metaKey || event.shiftKey || event.button!==0)return;const url=new URL(link.href);if(url.origin!==location.origin || url.pathname!=='/my-aimt/research')return;event.preventDefault();if(returnModule)url.searchParams.set('return_module',returnModule);syncForm(url.searchParams);history.pushState({},'',url.href);search({historyMode:'none'});});
 window.addEventListener('popstate',()=>{syncForm(new URLSearchParams(location.search));search({historyMode:'none'});});
 client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')accessFailure(Error('Sign in to My AIMT to continue.'));});
 // Remove protected content from a browser back/forward cache before restoration.
@@ -83,7 +86,7 @@ async function init() {
   await api(new URLSearchParams({action:'access'}));
   const filters=await api(new URLSearchParams({action:'filters'}));
   for(const [key,values] of [['topic',filters.topics],['evidence_type',filters.evidence_types],['category',filters.categories]])for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=label(value).replaceAll('-',' ');form.elements[key].append(option);}
-  $('access-status').textContent='Graduate access verified.';$('access-help').hidden=true;$('graduate-library').hidden=false;
+  $('access-status').textContent='Research access verified.';$('access-help').hidden=true;$('graduate-library').hidden=false;
   syncForm(new URLSearchParams(location.search));await search({historyMode:'none'});
  }catch(error){accessFailure(error);}
 }

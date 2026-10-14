@@ -61,13 +61,15 @@ export async function resolveUser(env, request) {
 export async function isEntitled(env, user, courseSlug = COURSE_SLUG) {
   const email = String(user.email || '').trim().toLowerCase();
   const params = new URLSearchParams({
-    select: 'checkout_session_id',
-    course_slug: `eq.${courseSlug}`,
+    select: courseSlug === null ? 'checkout_session_id,course_slug' : 'checkout_session_id',
     or: `(user_id.eq.${user.id},purchaser_email.eq.${email})`,
     limit: '1',
   });
+  // null is an explicit server-only opt-in for the included Research Library.
+  // Existing course, assessment and Cadence callers retain their scoped gate.
+  if(courseSlug !== null)params.set('course_slug',`eq.${courseSlug}`);
   const ent = await supabaseRest(env, `course_entitlements?${params}`);
-  return ent.ok && Array.isArray(ent.body) && ent.body.length > 0;
+  return ent.ok && Array.isArray(ent.body) && ent.body.some(row=>courseSlug !== null || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(row.course_slug || ''));
 }
 
 /**

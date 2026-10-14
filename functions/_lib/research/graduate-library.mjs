@@ -1,6 +1,6 @@
-// Graduate read boundary, reusable by a future citation consumer. No ingestion,
+// Student and graduate research read boundary, reusable by a future citation consumer. No ingestion,
 // promotion, synthesis, or changes to the internal research-query endpoint.
-import { resolveUser, hasSupabaseEnv } from '../certification/auth.mjs';
+import { resolveUser, hasSupabaseEnv, isEntitled } from '../certification/auth.mjs';
 import { safeSourceUrl } from '../public-research/catalog.mjs';
 
 export const EVIDENCE_TYPES = ['systematic_review','meta_analysis','rct','clinical_guideline','observational','narrative_review','textbook_chapter','professional_org','technical_report','other'];
@@ -9,16 +9,17 @@ const CLAIM_FIELDS = 'claim_id,source_id,claim_text,claim_type,direction,topics,
 const SOURCE_FIELDS = 'source_id,title,authors,year,doi,url,pmid,pmcid,source_venue,evidence_type,source_role,topics,verification_status,verification_depth,verification_review_status,rights_access_status,use_status';
 export const protectedJson = (body,status=200) => Response.json(body,{status,headers:{'Cache-Control':'private, no-store','Vary':'Authorization','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex'}});
 
-export async function requireGraduate(env,request) {
+export async function requireResearchMember(env,request) {
   if (!hasSupabaseEnv(env)) return { response: protectedJson({error:'Library temporarily unavailable.'},503) };
   const identity = await resolveUser(env,request);
   if (identity.errorResponse) return { response: protectedJson({error:'Sign in to My AIMT to continue.'},401) };
+  if (await isEntitled(env,identity.user,null)) return {user:identity.user,accessType:'student'};
   const params = new URLSearchParams({select:'credential_id,course_slug,completed_at,revoked',user_id:`eq.${identity.user.id}`,revoked:'eq.false',credential_id:'not.is.null',completed_at:'not.is.null'});
   const rows = await read(env,`completions?${params}`);
   // Match the registry's currently issued AIMT credential convention. Enrollment
   // and client-supplied IDs never participate in the decision.
   const eligible = rows.some(r => r.revoked === false && /^AIMT-[A-Z]{2,6}-\d{4}-[A-Z2-9]{4,10}$/.test(r.credential_id) && r.course_slug && r.completed_at && Date.parse(r.completed_at) <= Date.now());
-  return eligible ? {user:identity.user} : {response:protectedJson({error:'A valid, non-revoked AIMT certification is required.',code:'certification_required'},403)};
+  return eligible ? {user:identity.user,accessType:'graduate'} : {response:protectedJson({error:'Active AIMT course enrollment or a valid, non-revoked AIMT certification is required.',code:'research_access_required'},403)};
 }
 async function read(env,path,headers={}) {
   const response=await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`,{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,...headers},signal:AbortSignal.timeout(10000)});
@@ -52,6 +53,7 @@ export async function queryGraduateLibrary(env,p) {
  sourceGates(qs,'source.');
  if(p.source_id)qs.set('source_id',`eq.${p.source_id}`);
  if(p.claim_id)qs.set('claim_id',`eq.${p.claim_id}`);
+ if(p.claim_type==='limitation')qs.set('claim_type','eq.limitation');
  if(p.topic)qs.set('topics',`cs.{${p.topic}}`);
  if(p.year)qs.set('source.year',`eq.${p.year}`);
  if(p.evidence_type)qs.set('source.evidence_type',`eq.${p.evidence_type}`);
@@ -83,3 +85,6 @@ export async function graduateTopics(env) {
  const rows=await read(env,'research_topics?select=topic&order=topic.asc&limit=1000');
  return rows.map(r=>r.topic).filter(t=>/^[a-zA-Z0-9_-]{1,160}$/.test(t));
 }
+
+// Compatibility for existing server consumers; policy is now student OR graduate.
+export const requireGraduate = requireResearchMember;
