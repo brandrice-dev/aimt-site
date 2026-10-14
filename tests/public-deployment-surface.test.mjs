@@ -106,7 +106,12 @@ test('every public root page is served statically (clean, .html, and trailing-sl
 test('every sitemap URL and every _redirects source is served statically', () => {
   const locs = [...read('sitemap.xml').matchAll(/<loc>https:\/\/aimtrichology\.com([^<]*)<\/loc>/g)].map((m) => m[1] || '/');
   assert.ok(locs.length > 5);
-  for (const p of locs) assert.ok(isExcluded(p), `sitemap ${p}`);
+  for (const p of locs) {
+    if (p === '/research') {
+      assert.ok(reachesFunctions(p), 'public research is rendered dynamically');
+      assert.ok(existsSync(path.join(ROOT, 'functions/research/[[path]].js')));
+    } else assert.ok(isExcluded(p), `sitemap ${p}`);
+  }
   const sources = read('_redirects').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).map((l) => l.split(/\s+/)[0]);
   for (const p of sources) assert.ok(isExcluded(p), `_redirects source ${p} (redirects only apply to static requests)`);
 });

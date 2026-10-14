@@ -1,0 +1,35 @@
+name: AIMT Graduate Research Validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'functions/_lib/research/graduate-*.mjs'
+      - 'functions/api/graduate-research.js'
+      - 'functions/my-aimt/research.js'
+      - 'assets/js/aimt-graduate-research.js'
+      - 'assets/css/aimt-graduate-research.css'
+      - 'tests/graduate-research-library.test.mjs'
+      - 'scripts/graduate-research-live-check.mjs'
+      - '.github/workflows/aimt-graduate-research-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  graduate-research:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - run: node --test tests/graduate-research-library.test.mjs tests/education-public-research.test.mjs tests/public-deployment-surface.test.mjs
+      - run: node scripts/research-library-rls-check.mjs
+      - name: Read-only real research and anonymous RLS check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/graduate-research-live-check.mjs
