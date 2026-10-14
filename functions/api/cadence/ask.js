@@ -29,7 +29,7 @@ import { getOrCreateThread, appendMessage, findMessageByIdempotencyKey, getThrea
 import { askCadenceServerSide, getVerifiedCheckpointStatus, isModule12AssessmentActive, buildActiveCheckpointGuardrail } from '../../_lib/cadence/ask-cadence.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
 
-import {groundedCourseContext,assessmentContext,retrieveLearningResearch,safeLearningLinks,classifyLearningGap,recordLearningGap,projectLearningResearch} from '../../_lib/cadence/learning-research.mjs';
+import {groundedCourseContext,assessmentContext,retrieveLearningResearch,safeLearningLinks,classifyLearningGap,recordLearningGap,projectLearningResearch,learningConcept} from '../../_lib/cadence/learning-research.mjs';
 
 const COURSE_SLUG = 'headspa-mastery';
 const json=(body,status=200)=>{const response=baseJson(body,status);response.headers.set('Cache-Control','private, no-store');response.headers.set('Vary','Authorization');return response;};
@@ -167,6 +167,6 @@ export async function onRequestPost(context) {
     return json({ reply, modelInfo, research:learningResearch });
   }
 
-  if(gapType) {try {await recordLearningGap(env,{research,moduleId,type:gapType});}catch {/* Gap feedback never blocks the student's answer. */}}
+  if(gapType) {try {await recordLearningGap(env,{research,moduleId,type:gapType,concept:learningConcept(message,research.routes)});}catch {/* Gap feedback never blocks the student's answer. */}}
   return json({ reply, modelInfo, research:learningResearch });
 }

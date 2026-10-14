@@ -2,7 +2,7 @@
 // No auth account, entitlement, certification, transcript or queue mutation.
 // Public logs contain aggregate checks, never source text, IDs or model replies.
 import assert from 'node:assert/strict';
-import {retrieveLearningResearch,groundedCourseContext,classifyLearningGap} from '../functions/_lib/cadence/learning-research.mjs';
+import {retrieveLearningResearch,groundedCourseContext,classifyLearningGap,learningConcept} from '../functions/_lib/cadence/learning-research.mjs';
 import {askCadenceServerSide} from '../functions/_lib/cadence/ask-cadence.mjs';
 import {getCadenceModelRegistry} from '../functions/_lib/cadence/model-config.mjs';
 const env=process.env;
@@ -18,7 +18,7 @@ try {
  for(const [id,question] of [
   ['shedding-versus-breakage','Can you explain the difference between telogen shedding and hair breakage?'],
   ['microbiome','What do the verified findings report about the scalp microbiome? Please use the available evidence and references.']
- ]) {
+ ].filter(([id])=>env.AIMT_LEARNING_QA_SCENARIO!=='missing_information')) {
   const research=await retrieveLearningResearch(env,question,3);
   assert.equal(research.state,'available',`${id}: real eligible evidence must be retrieved.`);
   const guide=groundedCourseContext(3,question,research);
@@ -31,6 +31,16 @@ try {
   assert.ok(result.text.trim().split(/\s+/).length<350,`${id}: explanation must remain approachable.`);
   assert.ok(result.citations.every(c=>research.claims.some(e=>e.claim_id===c.claim_id && e.source_id===c.source_id && e.source.title===c.title && e.verification_status===c.verification_status)));
   console.log(`${id}: PASS (real eligible findings; independent grounding; ${result.citations.length} genuine scientific citations; approved lesson association; concise reply).`);
+ }
+ if(env.AIMT_LEARNING_QA_SCENARIO==='missing_information') {
+  const question='How do bacteriophages shape the scalp microbiome? I cannot find this explanation in the course.';
+  const research=await retrieveLearningResearch(env,question,6);
+  const result=await askCadenceServerSide(env,{guideSystemPrompt:groundedCourseContext(6,question,research),boundedContext:[],studentMessage:question,activeCheckpointGuardrailText:null,research});
+  const type=classifyLearningGap({research,message:question,reviewGap:result.researchReview?.gapType});
+  assert.ok(['course_coverage_incomplete','retrieval_difficulty','additional_research_needed','unclear_explanation'].includes(type),'Missing information must create a bounded review proposal, never a manufactured fact.');
+  assert.equal(learningConcept(question,research.routes),'scalp-bacteriophage-ecology');
+  assert.ok(result.researchReview?.supported===true || result.citations.length===0,'Unverified science must not be delivered with supporting references.');
+  console.log(`Missing-information QA: PASS (category=${type}; controlled concept retained; grounded reply or safe fallback; no production queue write).`);
  }
  // No extra model call: a missing-information proposal is independently
  // tested in isolated queue fixtures, while actual topical availability is

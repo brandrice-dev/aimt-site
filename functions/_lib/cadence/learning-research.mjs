@@ -86,18 +86,20 @@ export function classifyLearningGap({research,message,reviewGap=null}) {
  if(research.lookupRecovered)return 'retrieval_difficulty';
  if(reviewGap==='additional_research_needed')return research.claims.length?'retrieval_difficulty':'additional_research_needed';
  if(GAP_TYPES.includes(reviewGap))return reviewGap;
+ if(/cannot find|can't find|not covered|isn't covered|doesn't explain|not explained/i.test(message))return 'course_coverage_incomplete';
  if(/don't understand|do not understand|unclear|confus|not explain|isn't explained/i.test(message))return 'unclear_explanation';
  return null;
 }
 const GAP_NOTES={unclear_explanation:'Review how the existing course explains this controlled topic.',retrieval_difficulty:'Relevant evidence exists; improve retrieval or its educational presentation before assigning research.',course_coverage_incomplete:'Review existing course coverage and appropriate lesson associations.',additional_research_needed:'No eligible evidence was retrieved. Independently assess existing evidence and readiness before assigning research.',outside_scope:'Outside professional/course scope; do not assign scientific research or change practice guidance.'};
-export async function recordLearningGap(env,{research,moduleId,type}) {
+export async function recordLearningGap(env,{research,moduleId,type,concept=null}) {
  if(!GAP_TYPES.includes(type) || research.state==='assessment_restricted')return {state:'not_queued'};
  const topic=research.routes[0]?.topic;if(!topic)return {state:'not_queued'};
- const queueId=`student_learning_gap:headspa-mastery:${moduleId}:${topic}:${type}`;
+ const educationalConcept=LEARNING_CONCEPTS.includes(concept)?concept:topic;
+ const queueId=`student_learning_gap:headspa-mastery:${moduleId}:${topic}:${educationalConcept}:${type}`;
  const query=new URLSearchParams({queue_id:`eq.${queueId}`,select:'queue_id',limit:'1'});
  const found=await supabaseRest(env,`research_verification_queue?${query}`);if(!found.ok)return {state:'unavailable'};
  if(found.body?.length)return {state:'deduplicated'};
- const row={queue_id:queueId,lane:'student_learning_gap',item_type:'course_topic',item_id:topic,status:'pending_review',priority:3,enqueued_on:new Date().toISOString().slice(0,10),topics_raw:topic,notes:GAP_NOTES[type],extras:{contract_version:'student-learning-gap-v1',course_slug:'headspa-mastery',module_id:String(moduleId),topic,gap_type:type,retrieval_state:research.state,evidence_checked:true,candidate_claim_ids:research.claims.map(c=>c.claim_id)}};
+ const row={queue_id:queueId,lane:'student_learning_gap',item_type:'course_topic',item_id:topic,status:'pending_review',priority:3,enqueued_on:new Date().toISOString().slice(0,10),topics_raw:topic,notes:GAP_NOTES[type],extras:{contract_version:'student-learning-gap-v1',course_slug:'headspa-mastery',module_id:String(moduleId),topic,educational_concept:educationalConcept,gap_type:type,retrieval_state:research.state,evidence_checked:true,candidate_claim_ids:research.claims.map(c=>c.claim_id)}};
  const saved=await supabaseRest(env,'research_verification_queue',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates'},body:JSON.stringify(row)});
  return {state:saved.ok?'queued':'unavailable'};
 }
@@ -127,4 +129,15 @@ export function diverseEvidence(claims,message='') {
  const first=claims[0];
  const other=claims.find(c=>c.claim_id!==first.claim_id && c.direction && first.direction && c.direction!==first.direction) || claims.find(c=>c.source_id!==first.source_id) || claims[1];
  return other?[first,other]:[first];
+}
+
+// Controlled educational facets retain the nature of a coverage question
+// without storing free-form student wording or making scientific assertions.
+export const LEARNING_CONCEPTS=['shedding-versus-breakage','postpartum-shedding','hair-cycle','scalp-microbiome-ecology','scalp-bacteriophage-ecology','cosmetic-cleansing','hair-conditioning','massage-evidence','sanitation-principles'];
+export function learningConcept(message,routes=[]) {
+ const text=String(message || '');
+ if(/shedding|telogen/i.test(text) && /breakage|hair shaft/i.test(text))return 'shedding-versus-breakage';
+ if(/postpartum/i.test(text))return 'postpartum-shedding';
+ if(/bacteriophage|phage/i.test(text) && /scalp|microbiome/i.test(text))return 'scalp-bacteriophage-ecology';
+ return {'telogen-effluvium':'hair-cycle','hair-biology':'hair-cycle','scalp-microbiome':'scalp-microbiome-ecology','surfactants':'cosmetic-cleansing','conditioning-agents':'hair-conditioning','massage-circulation':'massage-evidence','infection-control':'sanitation-principles'}[routes[0]?.topic] || routes[0]?.topic || null;
 }

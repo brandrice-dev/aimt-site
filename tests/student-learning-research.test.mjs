@@ -96,3 +96,10 @@ test('brief follow-ups resolve a controlled topic from server-stored references 
  const result=await retrieveLearningResearch(env,'Can you explain that more simply?',3,{priorResearch});assert.equal(result.state,'available');assert.equal(result.routes[0].topic,'telogen-effluvium');assert.ok(queries>0);
  assert.equal((await retrieveLearningResearch(env,'Can you explain that more simply?',3,{priorResearch,restricted:true})).state,'assessment_restricted');
 });
+test('specific educational concepts are retained without raw student text or scientific assertions',async t=>{
+ const {learningConcept}=await import('../functions/_lib/cadence/learning-research.mjs');
+ const text='My personal story: why do bacteriophages matter in the scalp microbiome?';const routed=routeLearningQuestion(text);assert.equal(learningConcept(text,routed),'scalp-bacteriophage-ecology');
+ let row;mock(t,async(url,options={})=>{if(options.method==='POST')row=JSON.parse(options.body);return Response.json([]);});
+ await recordLearningGap(env,{research:{...research,routes:routed},moduleId:6,type:'course_coverage_incomplete',concept:learningConcept(text,routed)});
+ assert.equal(row.extras.educational_concept,'scalp-bacteriophage-ecology');assert.ok(!JSON.stringify(row).includes('personal story'));
+});

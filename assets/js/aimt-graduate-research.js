@@ -17,10 +17,10 @@ async function api(params) {
  const body=await response.json();if(!response.ok)throw Object.assign(Error(body.error || 'Unable to load the library.'),{status:response.status});return body;
 }
 function accessFailure(error) {clearProtected();$('access-status').textContent=error.message;$('access-help').hidden=false;}
-const sourceLink=id=>`/my-aimt/research?source_id=${encodeURIComponent(id)}`;
+const sourceLink=id=>`/my-aimt/research?source_id=${encodeURIComponent(id)}${returnModule?'&return_module='+returnModule:''}`;
 const findingLink=c=>`${sourceLink(c.source_id)}#${encodeURIComponent(c.claim_id)}`;
 function metadata(s) {return `<p class="research-meta">${e((s.authors || []).join(', ') || 'Authors not recorded')} · ${e(s.year || 'Year not recorded')} · ${e(s.source_venue || '')}</p><p class="graduate-provenance">${e(label(s.evidence_type))} · ${e(label(s.source_role))}<br>Source verified · ${e(label(s.verification_depth))} verification · ${e(label(s.verification_review_status))}</p>${s.original_url?`<p><a href="${e(s.original_url)}" target="_blank" rel="noopener noreferrer">Open original scientific source ↗</a>${s.doi_url?` · <a href="${e(s.doi_url)}" target="_blank" rel="noopener noreferrer">DOI: ${e(s.doi)}</a>`:''}</p>`:'<p>Original source link not recorded.</p>'}<p class="research-meta">Source use status: ${e(label(s.use_status))}. Source access: ${e(label(s.rights_access_status))}. A publisher may require a subscription.</p>`;}
-function topicLinks(topics) {return (topics || []).map(t=>`<a href="/my-aimt/research?topic=${encodeURIComponent(t)}">${e(label(t).replaceAll('-',' '))}</a>`).join(' · ');}
+function topicLinks(topics) {return (topics || []).map(t=>`<a href="/my-aimt/research?topic=${encodeURIComponent(t)}${returnModule?'&return_module='+returnModule:''}">${e(label(t).replaceAll('-',' '))}</a>`).join(' · ');}
 function finding(c) {return `<article class="graduate-finding" id="${e(c.claim_id)}"><span class="research-kind">${c.verification_status==='AIMT_APPROVED'?'AIMT approved':'Claim verified'} · ${e(label(c.claim_type))}</span><blockquote>${e(c.claim_text)}</blockquote><p class="graduate-provenance">Finding: ${e(c.claim_id)} · Source: ${e(c.source_id)}<br>Origin: ${e(label(c.claim_origin))} · Extraction: ${e(label(c.extraction_basis))} · Fidelity: ${e(label(c.claim_text_fidelity))}<br>Locator: ${e(c.page_or_section_locator || c.locator || 'Not recorded')} · Verified: ${e(c.verified_on || 'Date not recorded')}<br>Scientific review: ${e(label(c.verification_review_status))} · Use status: ${e(label(c.use_status))} · Direction: ${e(label(c.direction))}</p>${c.population_or_scope?`<p>Recorded population or scope: ${e(c.population_or_scope)}</p>`:''}<p>${topicLinks(c.topics)}</p><a href="${e(findingLink(c))}">Link to this finding</a></article>`;}
 function paramsFromForm() {const params=new URLSearchParams(new FormData(form));for(const [k,v] of [...params])if(!v)params.delete(k);if(sourceId)params.set('source_id',sourceId);if(page>1)params.set('page',String(page));if(returnModule)params.set('return_module',returnModule);return params;}
 function syncForm(params) {for(const key of ['q','topic','year','evidence_type','verification','category'])form.elements[key].value=params.get(key) || '';page=Number(params.get('page')) || 1;sourceId=params.get('source_id') || '';}
@@ -44,7 +44,7 @@ async function search({historyMode='push'}={}) {
  if(historyMode==='push')history.pushState({},'',`/my-aimt/research${params.size?`?${params}`:''}${sourceId?location.hash:''}`);
  try {
   const result=await api(params);if(serial!==requestSerial)return;
-  $('result-status').textContent=result.claims.length?`${result.claims.length} verified findings on page ${result.page}.`:'No eligible verified findings match this search. Try a broader phrase or clear a filter.';
+  $('result-status').textContent=result.claims.length?`${result.claims.length} verified finding${result.claims.length===1?'':'s'} on page ${result.page}.`:'No eligible verified findings match this search. Try a broader phrase or clear a filter.';
   if(sourceId && result.claims.length) {
    const source=result.claims[0].source;
    const cited=decodeURIComponent(location.hash.slice(1));
