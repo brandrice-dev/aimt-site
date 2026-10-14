@@ -138,7 +138,7 @@ test('checkpoint feedback tone instruction is delivered without changing grading
   assert.equal(revise.rubricVersion,rubricVersionTag(rubric));
   assert.equal(captures.length,3);
   for(const body of captures){
-    assert.equal(body.system,rubric+'\\n\\n'+CHECKPOINT_EVAL_INSTRUCTION);
+    assert.equal(body.system,rubric+'\n\n'+CHECKPOINT_EVAL_INSTRUCTION);
     assert.deepEqual(body.output_config.format.schema,CHECKPOINT_EVALUATION_JSON_SCHEMA);
     assert.match(body.system,/Feedback tone \(student-facing/);
     assert.match(body.system,/Do not answer the checkpoint in revision feedback/);
