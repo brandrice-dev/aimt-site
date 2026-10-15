@@ -109,7 +109,9 @@ function publicCitations(cards) {
 
 export async function onRequestPost({request,env}) {
  if(request.method!=='POST')return protectedJson({error:'Method not allowed.'},405);
- const membership=await requireResearchMember(env,request);
+ let membership;
+ try{membership=await requireResearchMember(env,request);}
+ catch{return protectedJson({error:'Research membership could not be verified. Please retry.'},503);}
  if(membership.response)return membership.response;
  const limited=checkRateLimit('research_companion:'+membership.user.id,MEMBER_LIMITS);
  if(limited)return protectedJson({error:limited==='minute'?'Too many questions at once. Try again in a minute.':'Daily Cadence research question limit reached.'},429);
