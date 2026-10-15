@@ -477,14 +477,14 @@ body.timer-open{overflow:hidden}
 
           <div>
             <div class="read-list">
-              <div class="read-item"><div class="read-index">01</div><div><h4>Service remaining</h4><p>A separate clock showing real treatment time remaining in the 60- or 90-minute reference. Manual Advance does not subtract skipped minutes or artificially change elapsed time.</p></div></div>
+              <div class="read-item"><div class="read-index">01</div><div><h4>Service remaining</h4><p>Time remaining to complete unfinished steps at their reference durations. Manual Advance deducts the current step’s unused time, while Elapsed continues to track actual time worked.</p></div></div>
               <div class="read-item"><div class="read-index">02</div><div><h4>Current-step clock</h4><p>Shows the allotted time for the current step. It starts counting down when you reach that step, including after a manual Advance.</p></div></div>
               <div class="read-item"><div class="read-index">03</div><div><h4>Phase</h4><p>Provides quick orientation within the larger service flow without adding another task for the practitioner to manage.</p></div></div>
               <div class="read-item"><div class="read-index">04</div><div><h4>Up next</h4><p>Lets you anticipate the next transition before the current block ends, especially when equipment, water, products or positioning need to change.</p></div></div>
               <div class="read-item"><div class="read-index">05</div><div><h4>Communication cues</h4><p><strong>Say when needed</strong> is reserved for positioning, temperature, pressure, comfort or a meaningful transition. <strong>If they ask</strong> gives you a short answer for a direct client question; it is not an instruction to narrate the service.</p></div></div>
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
-            <div class="pacing-note"><strong>Manual Advance</strong><p>Advance means you are beginning the next step now. Its countdown resets to that step’s reference duration, while the overall service clock continues uninterrupted. Skipping or repeating steps may finish the sequence earlier or later than the 60- or 90-minute reference; the completion screen shows actual elapsed treatment time.</p></div>
+            <div class="pacing-note"><strong>Manual Advance</strong><p>Advance begins the next step immediately with its full reference countdown. Only unused time left in the step you skipped is deducted from Service remaining. For example, advancing with 5 minutes left deducts 5 minutes, not the entire step. Elapsed always tracks real time worked; Back restarts the previous step and adds its full reference time back. Completion shows actual treatment time.</p></div>
             <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
@@ -941,7 +941,18 @@ function getElapsed(){
   if(!session || !session.treatmentStarted || session.serviceStartMs===null) return 0;
   return Math.max(0,(nowForService()-session.serviceStartMs-session.pausedAccumMs)/1000);
 }
-function getServiceRemaining(){ return Math.max(0,session.protocol.totalSeconds-getElapsed()); }
+// Service remaining = current step remainder + reference time of future
+// steps. Advance deducts ONLY unspent time; real elapsed is separate.
+function getServiceRemaining(){
+  if(!session)return 0;
+  if(!session.treatmentStarted || session.currentIndex<timedOffset())
+    return session.protocol.totalSeconds;
+  const currentRemaining=stepRemainingForGlobalIndex(session.currentIndex);
+  const futureIndex=session.currentIndex-timedOffset()+1;
+  const futureSeconds=session.protocol.timed.slice(futureIndex)
+    .reduce((sum,step)=>sum+step.duration,0);
+  return Math.max(0,currentRemaining || 0)+futureSeconds;
+}
 
 // The overall service clock always reflects real active elapsed time.
 // Each timed step independently receives its own reference duration on
@@ -1051,9 +1062,9 @@ function renderStep(fromAuto=false){
     ALL.pauseBtn.disabled=false;
     ALL.next.disabled=session.currentIndex>=steps.length-1;
     ALL.next.textContent=ALL.next.disabled ? 'Complete at 0:00' : 'Advance →';
-    ALL.hint.textContent='Auto-advances at 0:00 · Advance starts the next step now';
+    ALL.hint.textContent='Auto-next at 0:00 · Advance skips unused time';
     if(session.lastTransition==='manual'){
-      ALL.status.textContent='Moved to this step early. Its reference countdown starts now; the overall service clock is unchanged.';
+      ALL.status.textContent='Advanced to this step. Only unused time from the previous step was deducted from service remaining; elapsed time is unchanged.';
       ALL.status.classList.add('show');
     }
   }
@@ -1075,11 +1086,13 @@ function updateClocks(){
   }
 
   const elapsed=getElapsed();
-  const remaining=Math.max(0,session.protocol.totalSeconds-elapsed);
-  ALL.serviceLabel.textContent=elapsed>session.protocol.totalSeconds?'Service over by':'Service remaining';
-  ALL.serviceRemaining.textContent=fmt(elapsed>session.protocol.totalSeconds?elapsed-session.protocol.totalSeconds:remaining);
+  const remaining=getServiceRemaining();
+  ALL.serviceLabel.textContent='Service remaining';
+  ALL.serviceRemaining.textContent=fmt(remaining);
   ALL.serviceElapsed.textContent=fmt(elapsed);
-  setProgress((elapsed/session.protocol.totalSeconds)*100);
+  // The progress track reflects completed OR intentionally skipped steps.
+  // The elapsed clock still reports real time and never jumps when skipping.
+  setProgress(((session.protocol.totalSeconds-remaining)/session.protocol.totalSeconds)*100);
 
   if(session.currentIndex>=timedOffset()){
     const planned=plannedDurationForGlobalIndex(session.currentIndex);
@@ -1115,17 +1128,24 @@ function startTreatment(){
 }
 
 function manualNext(){
-  if(!session || session.completed) return;
+  if(!session || session.completed)return;
   const steps=stepsFor();
   const isPre=session.currentIndex<timedOffset();
-  if(!session.treatmentStarted && !isPre){ startTreatment(); return; }
-  if(session.currentIndex>=steps.length-1) return;
+  if(!session.treatmentStarted && !isPre){startTreatment();return;}
+  if(session.currentIndex>=steps.length-1)return;
+  // Snapshot actual active elapsed ONCE. Never subtract the original
+  // duration when the technician already worked part of this step.
+  const transitionElapsed=session.treatmentStarted?getElapsed():0;
+  const unused=session.treatmentStarted
+    ? Math.max(0,(session.stepDeadlineElapsed ?? transitionElapsed)-transitionElapsed)
+    : 0;
   session.currentIndex++;
   if(session.treatmentStarted){
-    startStepAtElapsed(getElapsed());
+    startStepAtElapsed(transitionElapsed);
     session.lastTransition='manual';
   }
   renderStep(false); updateClocks();
+  if(session.treatmentStarted)showToast(`Skipped ${fmt(unused)} · service time adjusted`);
   announce(`${steps[session.currentIndex].title}.`);
 }
 
