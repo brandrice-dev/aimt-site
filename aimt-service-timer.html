@@ -488,7 +488,7 @@ body.timer-open{overflow:hidden}
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
             <div class="pacing-note"><strong>Manual Advance</strong><p>Advance begins the next step immediately with its full reference countdown. Only unused time left in the step you skipped is deducted from Service remaining. For example, advancing with 5 minutes left deducts 5 minutes, not the entire step. Elapsed always tracks real time worked; Back restarts the previous step and adds its full reference time back. Completion shows actual treatment time.</p></div>
-            <div class="pacing-note"><strong>Hands-free auto-scroll</strong><p>On phones and narrow tablets, the timer gently moves down through each step, pauses for reading, and slowly returns to the top. It restarts from the top at every new step. Turn Auto-scroll off using the control beneath the timer, or scroll manually to pause movement for a short period. This reading feature never changes service timing and respects your device’s Reduce Motion preference.</p></div>
+            <div class="pacing-note"><strong>Hands-free auto-scroll</strong><p>Every service starts in hands-free mode on phones, tablets and desktop screens. When content does not fit, the timer gently moves down through the step, pauses for reading, and slowly returns to the top. It restarts from the top at every new step. Turn Auto-scroll off using the control beneath the timer, or scroll manually to pause movement for a short period. This reading feature never changes service timing and respects your device’s Reduce Motion preference.</p></div>
             <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
@@ -827,7 +827,8 @@ let screenWakeLockPending=false;
 
 // Hands-free reading is deliberately independent of the service clock.
 // Only #timer-main moves; its header, footer, pause and time calculations
-// remain untouched. Auto-pan is opt-out on phone/tablet and opt-in elsewhere.
+// remain untouched. Auto-pan defaults ON on every screen size.
+// The technician can opt out; OS Reduce Motion is respected.
 const AUTO_SCROLL_PX_PER_SEC=18;
 const AUTO_SCROLL_EDGE_DWELL_MS=7500;
 const AUTO_SCROLL_STEP_DWELL_MS=6500;
@@ -838,8 +839,7 @@ let autoScrollEnabled=false,autoScrollFrame=null,autoScrollPreviousMs=null;
 let autoScrollDirection=1,autoScrollWaitUntil=0,autoScrollUserHoldUntil=0;
 let autoScrollSession=null,autoScrollStepIndex=null;
 function defaultAutoScrollEnabled(){
-  return !reducedMotionQuery?.matches && typeof window.matchMedia==='function'
-    && window.matchMedia('(max-width: 859px)').matches;
+  return !reducedMotionQuery?.matches;
 }
 function updateAutoScrollControl(){
   ALL.scrollBtn.textContent='Auto-scroll '+(autoScrollEnabled?'On':'Off');
@@ -1332,8 +1332,13 @@ function resetToNewService(){
   stopTicker(); stopAutoScroll(); releaseScreenAwake();
   const key=session ? session.protocolKey : 'core';
   session=makeSession(key);
+  // Every NEW service resets to hands-free by default. An opt-out stays
+  // respected within an active session, including pause and resume.
+  autoScrollEnabled=defaultAutoScrollEnabled();
+  updateAutoScrollControl();
   ALL.complete.classList.remove('show'); ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
-  render(); startTicker(); announce(`${session.protocol.label} reset. Step 01 Opening Rituals + Microscopy.`);
+  render(); startTicker(); ensureAutoScroll();
+  announce(`${session.protocol.label} reset. Step 01 Opening Rituals + Microscopy.`);
 }
 
 function discardSession(){
