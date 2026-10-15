@@ -814,6 +814,44 @@ let session=null;
 let ticker=null;
 let toastTimer=null;
 let resumeAfterExitCancel=false;
+let screenWakeLock=null;
+let screenWakeLockPending=false;
+
+// Prevent screen sleep during treatment where supported. Timing does not
+// depend on this optional feature; the wall-clock remains authoritative.
+async function keepScreenAwake(){
+  if(screenWakeLock || screenWakeLockPending || !('wakeLock' in navigator) || document.hidden ||
+     !session || !session.treatmentStarted || session.paused || session.completed ||
+     !ALL.timer.classList.contains('active')) return;
+  const activeSession=session;
+  screenWakeLockPending=true;
+  try{
+    const lock=await navigator.wakeLock.request('screen');
+    if(session!==activeSession || document.hidden || session.paused || session.completed ||
+       !ALL.timer.classList.contains('active')){
+      await lock.release();
+    }else{
+      screenWakeLock=lock;
+      lock.addEventListener('release',()=>{ if(screenWakeLock===lock) screenWakeLock=null; });
+    }
+  }catch(_){ /* Unsupported/denied: automatic advancement still works. */ }
+  finally{screenWakeLockPending=false;}
+}
+function releaseScreenAwake(){
+  const lock=screenWakeLock;
+  screenWakeLock=null;
+  if(lock) lock.release().catch(()=>{});
+}
+
+// iOS/iPadOS and other mobile browsers may suspend intervals. pagehide also
+// stops ours intentionally. On return, catch up using Date.now immediately.
+function recoverRunningTimer(){
+  if(!session || !session.treatmentStarted || session.paused || session.completed ||
+     !ALL.timer.classList.contains('active')) return;
+  tick();
+  if(!session.completed && !ticker) startTicker();
+  if(!session.completed) keepScreenAwake();
+}
 
 function makeSession(key){
   const protocol=PROTOCOLS[key];
@@ -869,6 +907,7 @@ function openTimer(key, existing=false){
 
 function closeTimerToPage(){
   stopTicker();
+  releaseScreenAwake();
   ALL.timer.classList.remove('active');
   ALL.timer.setAttribute('aria-hidden','true');
   document.body.classList.remove('timer-open');
@@ -1023,7 +1062,7 @@ function renderStep(fromAuto=false){
     ALL.next.disabled=false;
     ALL.next.textContent=session.currentIndex===timedOffset()-1 ? `Step 03 →` : 'Next →';
     ALL.pauseBtn.disabled=true;
-    ALL.hint.textContent='Pre-timer opening · no treatment time running';
+    ALL.hint.textContent='Manual setup · timed steps auto-advance after Start';
     ALL.stepTime.textContent='PRE';
     ALL.stepTimeLabel.textContent='Treatment clock not running';
     ALL.stepMeta.textContent='';
@@ -1034,7 +1073,7 @@ function renderStep(fromAuto=false){
     ALL.next.disabled=false;
     ALL.next.textContent=`Start ${fmt(session.protocol.totalSeconds)}`;
     ALL.pauseBtn.disabled=true;
-    ALL.hint.textContent='Step 03 starts the overall treatment clock';
+    ALL.hint.textContent='Press Start once · timed steps auto-advance';
     ALL.status.textContent=`${session.protocol.label} treatment clock begins here at ${fmt(session.protocol.totalSeconds)}.`;
     ALL.status.classList.add('show');
     const planned=plannedDurationForGlobalIndex(session.currentIndex);
@@ -1047,7 +1086,7 @@ function renderStep(fromAuto=false){
     ALL.pauseBtn.disabled=false;
     ALL.next.disabled=session.currentIndex>=steps.length-1;
     ALL.next.textContent=ALL.next.disabled ? 'Complete at 0:00' : 'Advance →';
-    ALL.hint.textContent='Overall service clock continues through step navigation';
+    ALL.hint.textContent='Timed steps auto-advance · Advance is optional';
     const scheduled=scheduledGlobalIndex();
     if(session.currentIndex<scheduled){
       ALL.status.textContent='This reference landmark has already passed. The overall service clock is still running.';
@@ -1120,7 +1159,7 @@ function startTreatment(){
   session.paused=false; session.pausedAccumMs=0; session.pauseStartMs=null;
   ALL.pauseBtn.disabled=false;
   captureRingBaseline();
-  renderStep(false); updateClocks(); startTicker();
+  renderStep(false); updateClocks(); startTicker(); keepScreenAwake();
   if (window.AIMTGrowth) window.AIMTGrowth.track('service_timer_used', { protocol: session.protocol.key });
   announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
 }
@@ -1158,6 +1197,7 @@ function pauseSession(showOverlay=true){
   session.paused=true; session.pauseStartMs=Date.now();
   ALL.pauseBtn.textContent='Resume'; ALL.pauseBtn.setAttribute('aria-pressed','true');
   if(showOverlay) ALL.pauseOverlay.classList.add('show');
+  releaseScreenAwake();
   updateClocks(); announce('Service timer paused.');
 }
 function resumeSession(){
@@ -1167,7 +1207,7 @@ function resumeSession(){
   session.pauseStartMs=null; session.paused=false;
   ALL.pauseOverlay.classList.remove('show');
   ALL.pauseBtn.textContent='Pause'; ALL.pauseBtn.setAttribute('aria-pressed','false');
-  renderStep(false); updateClocks(); startTicker(); announce('Service timer resumed.');
+  renderStep(false); updateClocks(); startTicker(); keepScreenAwake(); announce('Service timer resumed.');
 }
 function togglePause(){ if(!session || !session.treatmentStarted || session.completed) return; session.paused?resumeSession():pauseSession(true); }
 
@@ -1196,7 +1236,7 @@ function confirmExit(){
 
 function completeService(){
   if(!session || session.completed) return;
-  session.completed=true; session.paused=false; stopTicker();
+  session.completed=true; session.paused=false; stopTicker(); releaseScreenAwake();
   ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
   ALL.serviceRemaining.textContent='0:00'; ALL.serviceElapsed.textContent=fmt(session.protocol.totalSeconds); setProgress(100);
   ALL.completeTime.textContent=`${session.protocol.label} · ${fmt(session.protocol.totalSeconds)} timed treatment`;
@@ -1206,7 +1246,7 @@ function completeService(){
 }
 
 function resetToNewService(){
-  stopTicker();
+  stopTicker(); releaseScreenAwake();
   const key=session ? session.protocolKey : 'core';
   session=makeSession(key);
   ALL.complete.classList.remove('show'); ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
@@ -1214,7 +1254,7 @@ function resetToNewService(){
 }
 
 function discardSession(){
-  stopTicker(); session=null; hideResumeBar();
+  stopTicker(); releaseScreenAwake(); session=null; hideResumeBar();
 }
 
 function escapeHTML(value){
@@ -1251,7 +1291,11 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Escape'){ e.preventDefault(); openExitDialog(); }
 });
 
-window.addEventListener('pagehide',()=>stopTicker());
+window.addEventListener('pagehide',()=>{ stopTicker(); releaseScreenAwake(); });
+window.addEventListener('pageshow',recoverRunningTimer);
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden) recoverRunningTimer();
+});
 </script>
 </body>
 </html>
