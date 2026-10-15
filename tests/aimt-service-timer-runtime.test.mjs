@@ -10,9 +10,10 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
 const timerScript=scripts.at(-1)?.[1];
 assert.ok(timerScript?.includes('function tick()'),'Expected live inline service timer script');
 
-function harness(format='extended'){
+function harness(format='extended',{mobile=true,reducedMotion=false}={}){
  let ms=0,nextTimer=0;
- const events=new Map(),nodes=new Map(),intervals=new Map();
+ const events=new Map(),nodes=new Map(),intervals=new Map(),animations=new Map();
+ const motion={value:reducedMotion,listeners:[]};
  class ClassList {
   values=new Set();
   add(...names){for(const name of names)this.values.add(name);}
@@ -21,11 +22,14 @@ function harness(format='extended'){
   toggle(name,force){const wants=force??!this.values.has(name);if(wants)this.values.add(name);else this.values.delete(name);return wants;}
  }
  function el(id) {
-  if(!nodes.has(id)) nodes.set(id,{
+  if(!nodes.has(id))nodes.set(id,{
    id,style:{},classList:new ClassList(),textContent:'',innerHTML:'',
+   scrollHeight:id==='timer-main'?1500:0,
+   clientHeight:id==='timer-main'?600:0,scrollTop:0,
    disabled:false,attributes:{},setAttribute(k,v){this.attributes[k]=String(v);},
    addEventListener(name,fn){events.set(id+':'+name,fn);},
-   focus(){},scrollTo(){},scrollIntoView(){},getAttribute(k){return this.attributes[k];}
+   focus(){},scrollTo({top}){this.scrollTop=top;},scrollIntoView(){},
+   getAttribute(k){return this.attributes[k];}
   });
   return nodes.get(id);
  }
@@ -33,12 +37,19 @@ function harness(format='extended'){
   getElementById:el,querySelectorAll:()=>[],addEventListener:(name,fn)=>events.set('document:'+name,fn),
   body:el('body'),documentElement:{requestFullscreen:()=>Promise.resolve()},hidden:false,fullscreenElement:null
  };
- const window={addEventListener:(name,fn)=>events.set('window:'+name,fn)};
+ const window={
+  addEventListener:(name,fn)=>events.set('window:'+name,fn),
+  matchMedia:(query)=>query.includes('prefers-reduced-motion')
+    ? {get matches(){return motion.value;},addEventListener:(_,fn)=>motion.listeners.push(fn)}
+    : {matches:mobile}
+ };
  class FakeDate extends Date {static now(){return ms;}}
  const sandbox={window,document,navigator:{},Date:FakeDate,console,
   setInterval:(cb)=>{const id=++nextTimer;intervals.set(id,cb);return id;},
   clearInterval:id=>intervals.delete(id),
-  setTimeout:()=>++nextTimer,clearTimeout:()=>{},
+  requestAnimationFrame:fn=>{const id=++nextTimer;animations.set(id,fn);return id;},
+  cancelAnimationFrame:id=>animations.delete(id),
+  setTimeout:()=>++nextTimer,clearTimeout:()=>{}
  };
  const ctx=vm.createContext(sandbox);
  vm.runInContext(timerScript,ctx,{filename:'aimt-service-timer.html'});
@@ -49,12 +60,19 @@ function harness(format='extended'){
  function advance(seconds){ms+=seconds*1000;run('tick()');}
  function begin(){run("openTimer('"+format+"');manualNext();manualNext();manualNext()");assert.equal(state().treatmentStarted,true);}
  function currentStep(){return run('stepsFor()[session.currentIndex].id');}
- return {run,state,clock,advance,begin,currentStep,el,events,intervals,
+ function drawFrame(msPassed=100){
+  ms+=msPassed;
+  const pending=[...animations.values()];animations.clear();
+  for(const fn of pending)fn(ms);
+ }
+ function drawFrames(count,msPassed=100){for(let i=0;i<count;i++)drawFrame(msPassed);}
+ function setReducedMotion(value){motion.value=value;for(const fn of motion.listeners)fn({matches:value});}
+ return {run,state,clock,advance,begin,currentStep,el,events,intervals,animations,
+  drawFrame,drawFrames,setReducedMotion,
   addWallSeconds(seconds){ms+=seconds*1000;},
   get now(){return ms;}
  };
 }
-
 test('the protocols preserve exactly their approved 60- and 90-minute allocations',()=>{
  for(const format of ['core','extended']){
   const t=harness(format);t.begin();
@@ -201,4 +219,111 @@ test('pause freezes projected remaining even after an early manual advance',()=>
  t.run('resumeSession()');t.advance(60);
  assert.equal(t.clock().overall,'74:00');
  assert.equal(t.clock().elapsed,'11:00');
+});
+
+
+test('phone enables optional hands-free mode and gently scrolls both directions',()=>{
+ const t=harness('core');
+ t.run("openTimer('core')");
+ const content=t.el('timer-main'),toggle=t.el('auto-scroll-btn');
+ assert.equal(toggle.textContent,'Auto-scroll On');
+ assert.equal(toggle.getAttribute('aria-pressed'),'true');
+ assert.equal(content.scrollTop,0);
+ t.drawFrames(60);assert.equal(content.scrollTop,0); // initial dwell
+ t.drawFrames(30);assert.ok(content.scrollTop>0 && content.scrollTop<100);
+ let reachedBottom=false,reversed=false;
+ for(let i=0;i<700;i++){
+  const old=content.scrollTop;t.drawFrame();
+  if(content.scrollTop===900)reachedBottom=true;
+  if(reachedBottom && content.scrollTop<old)reversed=true;
+ }
+ assert.ok(reachedBottom,'It reaches the bottom of the real overflow');
+ assert.ok(reversed,'After a dwell it reverses back toward the top');
+});
+test('manual and automatic step changes restart hands-free reading from top',()=>{
+ const t=harness('extended');t.begin();
+ t.drawFrames(85);assert.ok(t.el('timer-main').scrollTop>0);
+ t.run('manualNext()');
+ assert.equal(t.el('timer-main').scrollTop,0);
+ assert.equal(t.currentStep(),'04');
+ t.drawFrames(85);assert.ok(t.el('timer-main').scrollTop>0);
+ t.advance(300);assert.equal(t.currentStep(),'05');
+ assert.equal(t.el('timer-main').scrollTop,0);
+ assert.equal(t.clock().step,'10:00');
+ assert.equal(t.clock().overall,'70:00');
+});
+test('pause and resume halt and restore scrolling without resetting the reading position',()=>{
+ const t=harness('core');t.begin();t.drawFrames(90);
+ const content=t.el('timer-main'),position=content.scrollTop;
+ assert.ok(position>0);
+ t.run('pauseSession()');assert.equal(t.animations.size,0);
+ t.drawFrames(300);assert.equal(content.scrollTop,position);
+ t.run('resumeSession()');assert.equal(content.scrollTop,position);
+ t.drawFrames(30);assert.ok(content.scrollTop>position);
+});
+test('manual scrolling pauses the motion temporarily without disabling the mode',()=>{
+ const t=harness('core');t.run("openTimer('core')");t.drawFrames(90);
+ const content=t.el('timer-main');const position=content.scrollTop;
+ t.events.get('timer-main:wheel')();
+ t.drawFrames(160);assert.equal(content.scrollTop,position);
+ t.drawFrames(40);assert.ok(content.scrollTop>position);
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+});
+test('auto scroll can be disabled, and respects the device reduced-motion setting',()=>{
+ const t=harness('core');t.run("openTimer('core')");
+ t.run('toggleAutoScroll()');assert.equal(t.el('auto-scroll-btn').textContent,'Auto-scroll Off');
+ assert.equal(t.animations.size,0);
+ t.drawFrames(100);assert.equal(t.el('timer-main').scrollTop,0);
+ t.run('toggleAutoScroll()');t.drawFrames(85);
+ assert.ok(t.el('timer-main').scrollTop>0);
+ t.setReducedMotion(true);
+ assert.equal(t.animations.size,0);
+ assert.equal(t.el('auto-scroll-btn').disabled,true);
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
+ const previous=t.el('timer-main').scrollTop;t.drawFrames(100);
+ assert.equal(t.el('timer-main').scrollTop,previous);
+ const preferred=harness('core',{reducedMotion:true});
+ preferred.run("openTimer('core')");
+ assert.equal(preferred.el('auto-scroll-btn').disabled,true);
+ assert.equal(preferred.animations.size,0);
+});
+test('desktop starts stationary and a page too short to scroll is left alone',()=>{
+ const t=harness('core',{mobile:false});t.run("openTimer('core')");
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
+ assert.equal(t.animations.size,0);
+ t.el('timer-main').scrollHeight=400;
+ t.run('toggleAutoScroll()');
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+ assert.equal(t.animations.size,0);
+});
+test('page hide/return restores hands-free motion without jumping forward',()=>{
+ const t=harness();t.run("openTimer('extended')");t.drawFrames(85);
+ const content=t.el('timer-main'),before=content.scrollTop;
+ assert.ok(before>0);
+ t.events.get('window:pagehide')();
+ assert.equal(t.animations.size,0);
+ t.addWallSeconds(120);
+ t.events.get('window:pageshow')();
+ assert.ok(t.animations.size>0);
+ t.drawFrame(100);
+ assert.ok(content.scrollTop>=before && content.scrollTop-before<1);
+});
+test('completion, exit and discard never leave a hidden motion loop running',()=>{
+ const t=harness('core');t.begin();
+ assert.ok(t.animations.size>0);
+ t.run('openExitDialog()');assert.equal(t.animations.size,0);
+ t.run('cancelExit()');assert.ok(t.animations.size>0);
+ t.run('confirmExit()');assert.equal(t.animations.size,0);
+ t.run("openTimer('core',true)");
+ t.run('resumeSession()');
+ t.advance(3600);assert.equal(t.state().completed,true);
+ assert.equal(t.animations.size,0);
+ t.run('discardSession()');assert.equal(t.animations.size,0);
+});
+test('hands-free movement is confined to content and never changes service timing functions',()=>{
+ assert.match(html,/id="auto-scroll-btn"/);
+ assert.match(html,/Hands-free auto-scroll/);
+ assert.match(timerScript,/ALL\.main\.scrollTop=/);
+ assert.doesNotMatch(timerScript,/document\.documentElement\.scrollTop=/);
+ assert.match(timerScript,/AUTO_SCROLL_EDGE_DWELL_MS/);
 });
