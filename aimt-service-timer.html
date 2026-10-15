@@ -302,6 +302,9 @@ body.timer-open{overflow:hidden}
 .timer-bottom button:hover:not(:disabled){border-color:var(--w32)}
 .timer-bottom .next-btn{background:var(--paper);color:var(--surface-2);border-color:var(--paper)}
 .timer-bottom .next-btn:hover:not(:disabled){background:var(--warm);border-color:var(--warm);color:var(--bg)}
+.bottom-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0}
+.timer-bottom .auto-scroll-btn{height:36px;min-width:144px;padding:0 14px;border-radius:999px;font-size:10px}
+.timer-bottom .auto-scroll-btn[aria-pressed="true"]{border-color:var(--warm);background:var(--a12);color:var(--w94)}
 .bottom-hint{text-align:center;font-family:var(--font-mono);font-size:9px;line-height:1.35;color:var(--w32);letter-spacing:.06em;text-transform:uppercase}
 
 .pause-overlay,.exit-dialog,.complete-screen{position:absolute;inset:0;z-index:30;background:rgba(15,13,11,.92);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;text-align:center;padding:28px}
@@ -337,7 +340,7 @@ body.timer-open{overflow:hidden}
   .timer-controls button{padding:0 10px}
   .timer-bottom{grid-template-columns:1fr 1fr}
   .timer-bottom button{width:100%;padding:0 10px}
-  .bottom-hint{grid-column:1/-1;grid-row:2}
+  .bottom-center{grid-column:1/-1;grid-row:2}
   .comm-row{grid-template-columns:1fr;gap:6px;padding:11px 0}
 }
 @media (max-width:360px){
@@ -485,6 +488,7 @@ body.timer-open{overflow:hidden}
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
             <div class="pacing-note"><strong>Manual Advance</strong><p>Advance begins the next step immediately with its full reference countdown. Only unused time left in the step you skipped is deducted from Service remaining. For example, advancing with 5 minutes left deducts 5 minutes, not the entire step. Elapsed always tracks real time worked; Back restarts the previous step and adds its full reference time back. Completion shows actual treatment time.</p></div>
+            <div class="pacing-note"><strong>Hands-free auto-scroll</strong><p>Every service starts in hands-free mode on phones, tablets and desktop screens. When content does not fit, the timer gently moves down through the step, pauses for reading, and slowly returns to the top. It restarts from the top at every new step. Turn Auto-scroll off using the control beneath the timer, or scroll manually to pause movement for a short period. This reading feature never changes service timing and respects your device’s Reduce Motion preference.</p></div>
             <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
@@ -596,7 +600,10 @@ body.timer-open{overflow:hidden}
 
   <div class="timer-bottom">
     <button type="button" id="back-btn">← Back</button>
-    <div class="bottom-hint" id="bottom-hint">Pre-timer opening · no treatment time running</div>
+    <div class="bottom-center">
+      <button type="button" class="auto-scroll-btn" id="auto-scroll-btn" aria-pressed="false" aria-label="Hands-free auto-scroll">Auto-scroll Off</button>
+      <div class="bottom-hint" id="bottom-hint">Pre-timer opening · no treatment time running</div>
+    </div>
     <button type="button" class="next-btn" id="next-btn">Next →</button>
   </div>
 
@@ -800,7 +807,7 @@ const ALL = {
   stepTime:document.getElementById('step-time'), stepTimeLabel:document.getElementById('step-time-label'), stepMeta:document.getElementById('step-meta'), phase:document.getElementById('phase-pill'),
   eyebrow:document.getElementById('step-eyebrow'), title:document.getElementById('step-title'), purpose:document.getElementById('step-purpose'),
   guide:document.getElementById('guide-text'), comm:document.getElementById('comm-box'), upNext:document.getElementById('up-next'), nextStrip:document.getElementById('next-strip'),
-  back:document.getElementById('back-btn'), next:document.getElementById('next-btn'), hint:document.getElementById('bottom-hint'),
+  back:document.getElementById('back-btn'), next:document.getElementById('next-btn'), hint:document.getElementById('bottom-hint'), scrollBtn:document.getElementById('auto-scroll-btn'),
   pauseOverlay:document.getElementById('pause-overlay'), resumeOverlayBtn:document.getElementById('resume-overlay-btn'),
   exitDialog:document.getElementById('exit-dialog'), exitCopy:document.getElementById('exit-copy'), cancelExit:document.getElementById('cancel-exit'), confirmExit:document.getElementById('confirm-exit'),
   complete:document.getElementById('complete-screen'), completeTime:document.getElementById('complete-time'), newService:document.getElementById('new-service-btn'), completeExit:document.getElementById('complete-exit-btn'),
@@ -817,6 +824,94 @@ let toastTimer=null;
 let resumeAfterExitCancel=false;
 let screenWakeLock=null;
 let screenWakeLockPending=false;
+
+// Hands-free reading is deliberately independent of the service clock.
+// Only #timer-main moves; its header, footer, pause and time calculations
+// remain untouched. Auto-pan defaults ON on every screen size.
+// The technician can opt out; OS Reduce Motion is respected.
+const AUTO_SCROLL_PX_PER_SEC=18;
+const AUTO_SCROLL_EDGE_DWELL_MS=7500;
+const AUTO_SCROLL_STEP_DWELL_MS=6500;
+const AUTO_SCROLL_MANUAL_HOLD_MS=18000;
+const reducedMotionQuery=typeof window.matchMedia==='function'
+  ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+let autoScrollEnabled=false,autoScrollFrame=null,autoScrollPreviousMs=null;
+let autoScrollDirection=1,autoScrollWaitUntil=0,autoScrollUserHoldUntil=0;
+let autoScrollSession=null,autoScrollStepIndex=null;
+function defaultAutoScrollEnabled(){
+  return !reducedMotionQuery?.matches;
+}
+function updateAutoScrollControl(){
+  ALL.scrollBtn.textContent='Auto-scroll '+(autoScrollEnabled?'On':'Off');
+  ALL.scrollBtn.setAttribute('aria-pressed',String(autoScrollEnabled));
+  ALL.scrollBtn.disabled=Boolean(reducedMotionQuery?.matches);
+  ALL.scrollBtn.title=reducedMotionQuery?.matches
+    ? 'Auto-scroll is disabled by your device Reduce Motion setting'
+    : 'Gently pan through the current step without touching the screen';
+}
+function autoScrollShouldRun(){
+  return autoScrollEnabled && !reducedMotionQuery?.matches && !document.hidden
+    && session && !session.paused && !session.exited && !session.completed
+    && ALL.timer.classList.contains('active')
+    && !ALL.pauseOverlay.classList.contains('show')
+    && !ALL.exitDialog.classList.contains('show')
+    && !ALL.complete.classList.contains('show');
+}
+function stopAutoScroll(){
+  if(autoScrollFrame!==null){cancelAnimationFrame(autoScrollFrame);autoScrollFrame=null;}
+  autoScrollPreviousMs=null;
+}
+function ensureAutoScroll(){
+  if(autoScrollFrame!==null || !autoScrollShouldRun())return;
+  if(ALL.main.scrollHeight-ALL.main.clientHeight<=2)return;
+  autoScrollFrame=requestAnimationFrame(autoScrollFrameTick);
+}
+function autoScrollFrameTick(){
+  autoScrollFrame=null;
+  if(!autoScrollShouldRun())return;
+  const max=Math.max(0,ALL.main.scrollHeight-ALL.main.clientHeight);
+  if(max<=2){autoScrollPreviousMs=null;return;}
+  const now=Date.now();
+  // Capping delta avoids an abrupt jump when a browser tab wakes up.
+  const dt=autoScrollPreviousMs===null ? 0 : Math.min(150,Math.max(0,now-autoScrollPreviousMs));
+  autoScrollPreviousMs=now;
+  if(now>=autoScrollWaitUntil && now>=autoScrollUserHoldUntil && dt>0){
+    const target=ALL.main.scrollTop+autoScrollDirection*AUTO_SCROLL_PX_PER_SEC*dt/1000;
+    if(target>=max || target<=0){
+      ALL.main.scrollTop=autoScrollDirection>0?max:0;
+      autoScrollDirection*=-1;
+      autoScrollWaitUntil=now+AUTO_SCROLL_EDGE_DWELL_MS;
+    }else ALL.main.scrollTop=target;
+  }
+  ensureAutoScroll();
+}
+function resetAutoScrollForStep(force=false){
+  if(!session)return;
+  if(!force && autoScrollSession===session && autoScrollStepIndex===session.currentIndex){
+    ensureAutoScroll();return;
+  }
+  autoScrollSession=session;
+  autoScrollStepIndex=session.currentIndex;
+  stopAutoScroll();
+  ALL.main.scrollTop=0;
+  autoScrollDirection=1;
+  autoScrollWaitUntil=Date.now()+AUTO_SCROLL_STEP_DWELL_MS;
+  autoScrollUserHoldUntil=0;
+  ensureAutoScroll();
+}
+function toggleAutoScroll(){
+  if(reducedMotionQuery?.matches)return;
+  autoScrollEnabled=!autoScrollEnabled;
+  updateAutoScrollControl();
+  if(!autoScrollEnabled){stopAutoScroll();return;}
+  autoScrollWaitUntil=Date.now()+AUTO_SCROLL_STEP_DWELL_MS;
+  autoScrollUserHoldUntil=0;
+  ensureAutoScroll();
+}
+function holdAutoScrollForManualReading(){
+  if(autoScrollEnabled)autoScrollUserHoldUntil=Date.now()+AUTO_SCROLL_MANUAL_HOLD_MS;
+}
+
 
 // Prevent screen sleep during treatment where supported. Timing does not
 // depend on this optional feature; the wall-clock remains authoritative.
@@ -847,11 +942,12 @@ function releaseScreenAwake(){
 // iOS/iPadOS and other mobile browsers may suspend intervals. pagehide also
 // stops ours intentionally. On return, catch up using Date.now immediately.
 function recoverRunningTimer(){
-  if(!session || !session.treatmentStarted || session.paused || session.completed ||
-     !ALL.timer.classList.contains('active')) return;
+  if(!session || !ALL.timer.classList.contains('active') || document.hidden)return;
+  if(!session.paused && !session.completed)ensureAutoScroll();
+  if(!session.treatmentStarted || session.paused || session.completed)return;
   tick();
-  if(!session.completed && !ticker) startTicker();
-  if(!session.completed) keepScreenAwake();
+  if(!session.completed && !ticker)startTicker();
+  if(!session.completed)keepScreenAwake();
 }
 
 function makeSession(key){
@@ -892,8 +988,12 @@ function requestImmersiveFullscreen(){
 function exitBrowserFullscreen(){ if(document.fullscreenElement && document.exitFullscreen){ document.exitFullscreen().catch(()=>{}); } }
 
 function openTimer(key, existing=false){
-  if(!existing) session=makeSession(key);
-  if(!session) return;
+  if(!existing){
+    session=makeSession(key);
+    autoScrollEnabled=defaultAutoScrollEnabled();
+  }
+  if(!session)return;
+  updateAutoScrollControl();
   session.exited=false;
   document.body.classList.add('timer-open');
   ALL.timer.classList.add('active');
@@ -901,6 +1001,7 @@ function openTimer(key, existing=false){
   requestImmersiveFullscreen();
   render();
   startTicker();
+  ensureAutoScroll();
   if(session.treatmentStarted && !session.paused && !session.completed)keepScreenAwake();
   setTimeout(()=>ALL.main.focus({preventScroll:true}),30);
   announce(`${session.protocol.label} timer opened. Step 01 Opening Rituals + Microscopy. Treatment clock has not started.`);
@@ -908,6 +1009,7 @@ function openTimer(key, existing=false){
 
 function closeTimerToPage(){
   stopTicker();
+  stopAutoScroll();
   releaseScreenAwake();
   ALL.timer.classList.remove('active');
   ALL.timer.setAttribute('aria-hidden','true');
@@ -1069,7 +1171,9 @@ function renderStep(fromAuto=false){
     }
   }
 
-  if(!fromAuto) ALL.main.scrollTo({top:0,behavior:'auto'});
+  // Reset the reading position on real step changes (including automatic
+  // ones), but preserve position when re-rendering the same step on resume.
+  resetAutoScrollForStep();
 }
 
 function updateClocks(){
@@ -1122,7 +1226,8 @@ function startTreatment(){
   ALL.pauseBtn.disabled=false;
   session.lastTransition='automatic';
   startStepAtElapsed(0);
-  renderStep(false); updateClocks(); startTicker(); keepScreenAwake();
+  renderStep(false); resetAutoScrollForStep(true);
+  updateClocks(); startTicker(); keepScreenAwake();
   if (window.AIMTGrowth) window.AIMTGrowth.track('service_timer_used', { protocol: session.protocol.key });
   announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
 }
@@ -1169,6 +1274,7 @@ function pauseSession(showOverlay=true){
   session.paused=true; session.pauseStartMs=Date.now();
   ALL.pauseBtn.textContent='Resume'; ALL.pauseBtn.setAttribute('aria-pressed','true');
   if(showOverlay) ALL.pauseOverlay.classList.add('show');
+  stopAutoScroll();
   releaseScreenAwake();
   updateClocks(); announce('Service timer paused.');
 }
@@ -1179,7 +1285,7 @@ function resumeSession(){
   session.pauseStartMs=null; session.paused=false;
   ALL.pauseOverlay.classList.remove('show');
   ALL.pauseBtn.textContent='Pause'; ALL.pauseBtn.setAttribute('aria-pressed','false');
-  renderStep(false); updateClocks(); startTicker(); keepScreenAwake(); announce('Service timer resumed.');
+  renderStep(false); updateClocks(); startTicker(); keepScreenAwake(); ensureAutoScroll(); announce('Service timer resumed.');
 }
 function togglePause(){ if(!session || !session.treatmentStarted || session.completed) return; session.paused?resumeSession():pauseSession(true); }
 
@@ -1192,12 +1298,14 @@ function openExitDialog(){
     ? 'Your active service will remain paused and can be resumed from this page.'
     : 'You can return to this format from the resource page at any time.';
   ALL.exitDialog.classList.add('show');
+  stopAutoScroll();
   ALL.cancelExit.focus();
 }
 function cancelExit(){
   ALL.exitDialog.classList.remove('show');
   if(resumeAfterExitCancel) resumeSession();
   else if(session && session.paused && session.treatmentStarted) ALL.pauseOverlay.classList.add('show');
+  else ensureAutoScroll();
   resumeAfterExitCancel=false;
 }
 function confirmExit(){
@@ -1208,7 +1316,7 @@ function confirmExit(){
 
 function completeService(){
   if(!session || session.completed) return;
-  session.completed=true; session.paused=false; stopTicker(); releaseScreenAwake();
+  session.completed=true; session.paused=false; stopTicker(); stopAutoScroll(); releaseScreenAwake();
   ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
   const actualElapsed=getElapsed();
   ALL.serviceRemaining.textContent=fmt(Math.max(0,session.protocol.totalSeconds-actualElapsed));
@@ -1221,15 +1329,20 @@ function completeService(){
 }
 
 function resetToNewService(){
-  stopTicker(); releaseScreenAwake();
+  stopTicker(); stopAutoScroll(); releaseScreenAwake();
   const key=session ? session.protocolKey : 'core';
   session=makeSession(key);
+  // Every NEW service resets to hands-free by default. An opt-out stays
+  // respected within an active session, including pause and resume.
+  autoScrollEnabled=defaultAutoScrollEnabled();
+  updateAutoScrollControl();
   ALL.complete.classList.remove('show'); ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
-  render(); startTicker(); announce(`${session.protocol.label} reset. Step 01 Opening Rituals + Microscopy.`);
+  render(); startTicker(); ensureAutoScroll();
+  announce(`${session.protocol.label} reset. Step 01 Opening Rituals + Microscopy.`);
 }
 
 function discardSession(){
-  stopTicker(); releaseScreenAwake(); session=null; hideResumeBar();
+  stopTicker(); stopAutoScroll(); releaseScreenAwake(); session=null; hideResumeBar();
 }
 
 function escapeHTML(value){
@@ -1241,6 +1354,15 @@ for(const btn of document.querySelectorAll('[data-start-format]')){
 }
 ALL.next.addEventListener('click',manualNext);
 ALL.back.addEventListener('click',manualBack);
+ALL.scrollBtn.addEventListener('click',toggleAutoScroll);
+ALL.main.addEventListener('touchstart',holdAutoScrollForManualReading,{passive:true});
+ALL.main.addEventListener('wheel',holdAutoScrollForManualReading,{passive:true});
+ALL.main.addEventListener('pointerdown',holdAutoScrollForManualReading,{passive:true});
+window.addEventListener('resize',ensureAutoScroll);
+if(reducedMotionQuery?.addEventListener)reducedMotionQuery.addEventListener('change',()=>{
+  if(reducedMotionQuery.matches){autoScrollEnabled=false;stopAutoScroll();}
+  updateAutoScrollControl();
+});
 ALL.pauseBtn.addEventListener('click',togglePause);
 ALL.resumeOverlayBtn.addEventListener('click',resumeSession);
 ALL.exitBtn.addEventListener('click',openExitDialog);
@@ -1266,10 +1388,11 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Escape'){ e.preventDefault(); openExitDialog(); }
 });
 
-window.addEventListener('pagehide',()=>{ stopTicker(); releaseScreenAwake(); });
+window.addEventListener('pagehide',()=>{ stopTicker(); stopAutoScroll(); releaseScreenAwake(); });
 window.addEventListener('pageshow',recoverRunningTimer);
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden) recoverRunningTimer();
+  if(document.hidden)stopAutoScroll();
+  else recoverRunningTimer();
 });
 </script>
 </body>
