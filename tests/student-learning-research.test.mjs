@@ -8,6 +8,7 @@ import {askCadenceServerSide} from '../functions/_lib/cadence/ask-cadence.mjs';
 import {onRequestPost} from '../functions/api/cadence/ask.js';
 import {_resetRateLimitBucketsForTests} from '../functions/_lib/cadence/rate-limit.mjs';
 import {triageStudentLearningGaps} from '../scripts/_lib/student-learning-gap-triage.mjs';
+import {onRequestPost as researchCompanionPost,companionRoute,chooseCompanionClaims} from '../functions/api/research-cadence.js';
 const env={SUPABASE_URL:'https://isolated.test',SUPABASE_SERVICE_ROLE_KEY:'PRIVATE_TEST_KEY',ANTHROPIC_API_KEY:'PRIVATE_PROVIDER_KEY',CADENCE_CHAT_MODEL:'claude-sonnet-5'};
 const source={source_id:'source-1',title:'Synthetic source title',authors:['Fixture Author'],year:2024,original_url:'https://example.org/study',url:'https://example.org/study',verification_status:'SOURCE_VERIFIED',verification_depth:'abstract',evidence_type:'observational',topics:['telogen-effluvium'],private_notes:'PRIVATE'};
 const claim={claim_id:'claim-1',source_id:'source-1',claim_text:'An observation about hair shedding.',verification_status:'CLAIM_VERIFIED',claim_type:'finding',direction:'association',source,topics:['telogen-effluvium']};
@@ -110,4 +111,77 @@ test('Cadence authentication failures use private no-store responses before any 
  const request=new Request('https://local.test/api/cadence/ask',{method:'POST',body:'{}'});
  const ask=await onRequestPost({env,request});assert.equal(ask.status,401);assert.match(ask.headers.get('cache-control'),/private, no-store/);assert.equal(ask.headers.get('vary'),'Authorization');
  const history=await onRequestGet({env,request:new Request('https://local.test/api/cadence/get-thread?moduleId=3')});assert.equal(history.status,401);assert.match(history.headers.get('cache-control'),/no-store/);
+});
+
+
+test('research companion routes source questions and retains limitations without promoting verification',()=>{
+ assert.equal(companionRoute('What does scalp psoriasis research say?').topic,'psoriasis-scalp');
+ assert.equal(companionRoute('How do surfactants cleanse hair?').topic,'surfactants');
+ const limitations={...claim,claim_id:'limit-1',claim_type:'limitation',claim_text:'The study does not establish causation.'};
+ const selected=chooseCompanionClaims([claim,limitations],question);
+ assert.ok(selected.some(c=>c.claim_type==='limitation'));assert.deepEqual(selected.map(c=>c.citation_id),['R1','R2']);
+});
+test('research companion rejects an unauthenticated question without invoking the model',async t=>{
+ let calls=0;mock(t,async()=>{calls++;return new Response('{}',{status:401});});
+ const response=await researchCompanionPost({env,request:new Request('https://local.test/api/research-cadence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})})});
+ assert.equal(response.status,401);assert.equal(calls,0);
+});
+test('research companion explains only eligible source-linked findings and returns proof links',async t=>{
+ _resetRateLimitBucketsForTests();let providers=0;const accessed=[];
+ mock(t,async(url,options={})=>{
+  const u=new URL(url);accessed.push(u.pathname);
+  if(u.pathname==='/auth/v1/user')return Response.json({id:'student-research-1',email:'student@example.test'});
+  if(u.pathname.endsWith('/course_entitlements'))return Response.json([{course_slug:'headspa-mastery'}]);
+  if(u.pathname.endsWith('/certification_attempts'))return Response.json([]);
+  if(u.pathname.endsWith('/research_claims')) {
+   assert.equal(u.searchParams.get('verified_against_primary_source'),'eq.true');
+   assert.equal(u.searchParams.get('source.verification_status'),'eq.SOURCE_VERIFIED');
+   return Response.json([claim]);
+  }
+  if(u.hostname==='api.anthropic.com')return reply(++providers===1?'The synthetic observation reports an association, not a cause [R1].':'{"supported":true,"rejection_reasons":[],"course_issue":null,"gap_type":null}');
+  assert.fail('Unexpected request '+u.pathname);
+ });
+ const r=await researchCompanionPost({env,request:new Request('https://local.test/api/research-cadence',{method:'POST',headers:{Authorization:'Bearer isolated-session','Content-Type':'application/json'},body:JSON.stringify({question,source_id:'source-1'})})});
+ assert.equal(r.status,200);const data=await r.json();
+ assert.equal(data.coverage,'verified_findings');assert.equal(data.citations[0].verification_status,'CLAIM_VERIFIED');
+ assert.match(data.citations[0].library_href,/^\/my-aimt\/research\?source_id=/);
+ assert.equal(providers,2);assert.ok(!JSON.stringify(data).includes('PRIVATE'));
+ assert.ok(!accessed.includes('/rest/v1/course_progress'));
+});
+test('research companion labels missing evidence and creates a privacy-safe triage signal, not an approved scientific claim',async t=>{
+ _resetRateLimitBucketsForTests();let providers=0;let saved=null;const q='Why do bacteriophages matter for the scalp microbiome?';
+ mock(t,async(url,options={})=>{
+  const u=new URL(url);
+  if(u.pathname==='/auth/v1/user')return Response.json({id:'student-research-2',email:'student@example.test'});
+  if(u.pathname.endsWith('/course_entitlements'))return Response.json([{course_slug:'headspa-mastery'}]);
+  if(u.pathname.endsWith('/certification_attempts'))return Response.json([]);
+  if(u.pathname.endsWith('/research_claims')||u.pathname.endsWith('/research_sources'))return Response.json([]);
+  if(u.pathname.endsWith('/research_verification_queue')){
+   if(options.method==='POST'){saved=JSON.parse(options.body);return Response.json([]);}
+   return Response.json([]);
+  }
+  if(u.hostname==='api.anthropic.com')return reply(++providers===1?'Microbial communities can interact with their local environment.':'{"supported":true,"rejection_reasons":[],"course_issue":null,"gap_type":null}');
+  assert.fail('Unexpected request '+u.pathname);
+ });
+ const r=await researchCompanionPost({env,request:new Request('https://local.test/api/research-cadence',{method:'POST',headers:{Authorization:'Bearer isolated-session','Content-Type':'application/json'},body:JSON.stringify({question:q})})});
+ assert.equal(r.status,200);const data=await r.json();
+ assert.equal(data.coverage,'general_background');assert.equal(data.citations.length,0);
+ assert.match(data.answer,/does not currently have a matching eligible verified finding/);
+ assert.equal(saved.lane,'student_learning_gap');assert.equal(saved.extras.module_id,'library');
+ assert.equal(saved.extras.gap_type,'additional_research_needed');
+ assert.equal(saved.extras.educational_concept,'scalp-bacteriophage-ecology');
+ assert.ok(!JSON.stringify(saved).includes(q));assert.equal(providers,2);
+});
+test('research companion blocks questions while a final assessment is active',async t=>{
+ _resetRateLimitBucketsForTests();let calledModel=false;
+ mock(t,async(url)=>{
+  const u=new URL(url);
+  if(u.pathname==='/auth/v1/user')return Response.json({id:'student-final-exam',email:'student@example.test'});
+  if(u.pathname.endsWith('/course_entitlements'))return Response.json([{course_slug:'headspa-mastery'}]);
+  if(u.pathname.endsWith('/certification_attempts'))return Response.json([{attempt_number:1,status:'in_progress'}]);
+  if(u.hostname==='api.anthropic.com'){calledModel=true;assert.fail('Must not call model during exam');}
+  assert.fail('Unexpected request '+u.pathname);
+ });
+ const r=await researchCompanionPost({env,request:new Request('https://local.test/api/research-cadence',{method:'POST',headers:{Authorization:'Bearer isolated-session','Content-Type':'application/json'},body:JSON.stringify({question})})});
+ assert.equal(r.status,403);assert.equal(calledModel,false);
 });
