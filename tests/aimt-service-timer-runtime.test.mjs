@@ -289,13 +289,18 @@ test('auto scroll can be disabled, and respects the device reduced-motion settin
  assert.equal(preferred.el('auto-scroll-btn').disabled,true);
  assert.equal(preferred.animations.size,0);
 });
-test('desktop starts stationary and a page too short to scroll is left alone',()=>{
+test('desktop starts hands free by default but avoids scrolling if nothing overflows',()=>{
  const t=harness('core',{mobile:false});t.run("openTimer('core')");
- assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
- assert.equal(t.animations.size,0);
- t.el('timer-main').scrollHeight=400;
- t.run('toggleAutoScroll()');
  assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+ assert.equal(t.el('auto-scroll-btn').textContent,'Auto-scroll On');
+ assert.ok(t.animations.size>0);
+ t.el('timer-main').scrollHeight=400;
+ t.drawFrame();
+ assert.equal(t.animations.size,0);
+ assert.equal(t.el('timer-main').scrollTop,0);
+ t.run('toggleAutoScroll()');
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
+ assert.equal(t.el('auto-scroll-btn').textContent,'Auto-scroll Off');
  assert.equal(t.animations.size,0);
 });
 test('page hide/return restores hands-free motion without jumping forward',()=>{
@@ -328,4 +333,20 @@ test('hands-free movement is confined to content and never changes service timin
  assert.match(timerScript,/ALL\.main\.scrollTop=/);
  assert.doesNotMatch(timerScript,/document\.documentElement\.scrollTop=/);
  assert.match(timerScript,/AUTO_SCROLL_EDGE_DWELL_MS/);
+});
+
+test('each new service restores the hands-free default after opt-out',()=>{
+ const t=harness('core',{mobile:false});
+ t.begin();
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+ t.run('toggleAutoScroll()');
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
+ t.run('manualNext()');
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'false');
+ t.advance(3600);
+ assert.equal(t.state().completed,true);
+ t.run('resetToNewService()');
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+ assert.equal(t.el('auto-scroll-btn').textContent,'Auto-scroll On');
+ assert.ok(t.animations.size>0);
 });
