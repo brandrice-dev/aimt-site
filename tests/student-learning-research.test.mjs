@@ -183,5 +183,5 @@ test('research companion blocks questions while a final assessment is active',as
   assert.fail('Unexpected request '+u.pathname);
  });
  const r=await researchCompanionPost({env,request:new Request('https://local.test/api/research-cadence',{method:'POST',headers:{Authorization:'Bearer isolated-session','Content-Type':'application/json'},body:JSON.stringify({question})})});
- assert.equal(r.status,403);assert.equal(calledModel,false);
+ assert.equal(r.status,409);assert.equal(calledModel,false);
 });
