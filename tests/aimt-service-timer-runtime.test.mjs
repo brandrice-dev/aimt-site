@@ -247,7 +247,9 @@ test('manual and automatic step changes restart hands-free reading from top',()=
  assert.equal(t.el('timer-main').scrollTop,0);
  assert.equal(t.currentStep(),'04');
  t.drawFrames(85);assert.ok(t.el('timer-main').scrollTop>0);
- t.advance(300);assert.equal(t.currentStep(),'05');
+ // 8.5 seconds of the step passed while reading the panel, so
+ // advance by exactly the 291.5 seconds still remaining in this step.
+ t.advance(291.5);assert.equal(t.currentStep(),'05');
  assert.equal(t.el('timer-main').scrollTop,0);
  assert.equal(t.clock().step,'10:00');
  assert.equal(t.clock().overall,'70:00');
