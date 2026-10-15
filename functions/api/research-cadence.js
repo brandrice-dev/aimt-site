@@ -123,7 +123,7 @@ export async function onRequestPost({request,env}) {
    return protectedJson({answer:'I can explain the underlying scientific concept, but not give checkpoint or exam answers.',coverage:'assessment_restricted',citations:[]});
  try {
    if(await isModule12AssessmentActive(env,membership.user.id))
-     return protectedJson({error:'Cadence research explanations are unavailable during an active final assessment.'},403);
+     return protectedJson({error:'Cadence research explanations are unavailable during an active final assessment.'},409);
  }catch{return protectedJson({error:'Could not check assessment status. Please retry.'},503);}
  let research;
  try{research=await findCompanionResearch(env,question,sourceId);}
