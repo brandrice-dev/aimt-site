@@ -409,7 +409,7 @@ body.timer-open{overflow:hidden}
         <h1>Your Service,<br>In Real Time.</h1>
         <div class="hero-copy">
           <p class="hero-lead">A live pacing companion for the AIMT Core and Extended head spa protocols.</p>
-          <p class="hero-note">Follow each phase, timing landmark, practitioner cue, and transition while the service is in progress.</p>
+          <p class="hero-note">Follow each phase and its own countdown, with an uninterrupted overall service clock and clear manual transitions.</p>
         </div>
         <div class="hero-actions">
           <a class="btn-primary" href="#launch">Open a Protocol</a>
@@ -477,13 +477,14 @@ body.timer-open{overflow:hidden}
 
           <div>
             <div class="read-list">
-              <div class="read-item"><div class="read-index">01</div><div><h4>Service remaining</h4><p>The primary overall landmark. It matches the remaining-time positions used on the companion service map: 75, 70, 60, 30 and so on.</p></div></div>
-              <div class="read-item"><div class="read-index">02</div><div><h4>Current-step clock</h4><p>Shows how much time remains until the next reference landmark for the technique or operational block you are in.</p></div></div>
+              <div class="read-item"><div class="read-index">01</div><div><h4>Service remaining</h4><p>Time remaining to complete unfinished steps at their reference durations. Manual Advance deducts the current step’s unused time, while Elapsed continues to track actual time worked.</p></div></div>
+              <div class="read-item"><div class="read-index">02</div><div><h4>Current-step clock</h4><p>Shows the allotted time for the current step. It starts counting down when you reach that step, including after a manual Advance.</p></div></div>
               <div class="read-item"><div class="read-index">03</div><div><h4>Phase</h4><p>Provides quick orientation within the larger service flow without adding another task for the practitioner to manage.</p></div></div>
               <div class="read-item"><div class="read-index">04</div><div><h4>Up next</h4><p>Lets you anticipate the next transition before the current block ends, especially when equipment, water, products or positioning need to change.</p></div></div>
               <div class="read-item"><div class="read-index">05</div><div><h4>Communication cues</h4><p><strong>Say when needed</strong> is reserved for positioning, temperature, pressure, comfort or a meaningful transition. <strong>If they ask</strong> gives you a short answer for a direct client question; it is not an instruction to narrate the service.</p></div></div>
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
+            <div class="pacing-note"><strong>Manual Advance</strong><p>Advance begins the next step immediately with its full reference countdown. Only unused time left in the step you skipped is deducted from Service remaining. For example, advancing with 5 minutes left deducts 5 minutes, not the entire step. Elapsed always tracks real time worked; Back restarts the previous step and adds its full reference time back. Completion shows actual treatment time.</p></div>
             <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
@@ -866,12 +867,11 @@ function makeSession(key){
     pausedAccumMs:0,
     completed:false,
     exited:false,
-    // Presentational only — the ring's stable visual denominator for the
-    // current timed step (see captureRingBaseline). Never read by any
-    // timing/state calculation; safe to ignore for backward-compat if a
-    // future persistence layer ever serializes session state without it.
-    ringBaselineIndex:null,
-    ringBaselineSeconds:0
+    // Both values are expressed as active SERVICE elapsed seconds, not
+    // Date.now(). Pause, resume and browser suspension cannot distort them.
+    stepEnteredElapsed:null,
+    stepDeadlineElapsed:null,
+    lastTransition:'automatic'
   };
 }
 
@@ -901,6 +901,7 @@ function openTimer(key, existing=false){
   requestImmersiveFullscreen();
   render();
   startTicker();
+  if(session.treatmentStarted && !session.paused && !session.completed)keepScreenAwake();
   setTimeout(()=>ALL.main.focus({preventScroll:true}),30);
   announce(`${session.protocol.label} timer opened. Step 01 Opening Rituals + Microscopy. Treatment clock has not started.`);
 }
@@ -940,82 +941,57 @@ function getElapsed(){
   if(!session || !session.treatmentStarted || session.serviceStartMs===null) return 0;
   return Math.max(0,(nowForService()-session.serviceStartMs-session.pausedAccumMs)/1000);
 }
-function getServiceRemaining(){ return Math.max(0,session.protocol.totalSeconds-getElapsed()); }
-
-function cumulativeEndSeconds(timedIndex){
-  let total=0;
-  for(let i=0;i<=timedIndex;i++) total+=session.protocol.timed[i].duration;
-  return total;
-}
-function timedIndexForElapsed(elapsed){
-  let total=0;
-  for(let i=0;i<session.protocol.timed.length;i++){
-    total+=session.protocol.timed[i].duration;
-    if(elapsed<total) return i;
-  }
-  return session.protocol.timed.length-1;
-}
-function scheduledGlobalIndex(){ return timedOffset()+timedIndexForElapsed(getElapsed()); }
-
-function stepRemainingForGlobalIndex(globalIndex){
-  if(globalIndex<timedOffset()) return null;
-  const timedIndex=globalIndex-timedOffset();
-  const targetEnd=cumulativeEndSeconds(timedIndex);
-  return Math.max(0,targetEnd-getElapsed());
-}
-function plannedDurationForGlobalIndex(globalIndex){
-  if(globalIndex<timedOffset()) return null;
-  return session.protocol.timed[globalIndex-timedOffset()].duration;
-}
-function landmarkRemainingAfterStep(globalIndex){
-  if(globalIndex<timedOffset()) return session.protocol.totalSeconds;
-  const timedIndex=globalIndex-timedOffset();
-  return Math.max(0,session.protocol.totalSeconds-cumulativeEndSeconds(timedIndex));
+// Service remaining = current step remainder + reference time of future
+// steps. Advance deducts ONLY unspent time; real elapsed is separate.
+function getServiceRemaining(){
+  if(!session)return 0;
+  if(!session.treatmentStarted || session.currentIndex<timedOffset())
+    return session.protocol.totalSeconds;
+  const currentRemaining=stepRemainingForGlobalIndex(session.currentIndex);
+  const futureIndex=session.currentIndex-timedOffset()+1;
+  const futureSeconds=session.protocol.timed.slice(futureIndex)
+    .reduce((sum,step)=>sum+step.duration,0);
+  return Math.max(0,currentRemaining || 0)+futureSeconds;
 }
 
-/*
-  Ring visual baseline — presentational only, never fed back into any
-  timing/state calculation.
-
-  Root cause this exists to fix: the ring's fill fraction used to be
-  computed as stepRemaining / max(plannedDuration, stepRemaining) every
-  tick. When a step is entered EARLY (the AIMT pacing rule: unused time
-  from a skipped/shortened block carries forward, service landmarks do
-  not move), stepRemaining can exceed that step's own nominal
-  plannedDuration for a while. Recomputing the denominator from that
-  same shrinking stepRemaining value every tick made it track the
-  numerator 1:1 — pct stayed pinned at 1 (ring visually frozen full)
-  until stepRemaining finally dropped below plannedDuration, at which
-  point the ring would suddenly jump instead of depleting smoothly the
-  whole time.
-
-  Fix: capture the actual time available in a step ONCE, at the moment
-  it becomes the current active step, and hold that value stable for as
-  long as the practitioner stays on that step. The service clock, the
-  displayed Step Remaining number, and the reference landmarks are
-  completely unaffected — this only changes what the RING divides by.
-*/
-function captureRingBaseline(){
-  if(!session || session.currentIndex<timedOffset()) return;
-  const available = session.treatmentStarted
-    ? stepRemainingForGlobalIndex(session.currentIndex)
-    : plannedDurationForGlobalIndex(session.currentIndex);
-  session.ringBaselineIndex=session.currentIndex;
-  session.ringBaselineSeconds=Math.max(available,1);
+// The overall service clock always reflects real active elapsed time.
+// Each timed step independently receives its own reference duration on
+// entry. Manual Advance must NEVER use a far-future reference landmark as
+// this step's remaining time (the source of the reported 62:01 / 3:00 bug).
+function plannedDurationForGlobalIndex(index){
+  if(index<timedOffset())return null;
+  return session.protocol.timed[index-timedOffset()].duration;
+}
+function startStepAtElapsed(activeElapsed){
+  if(!session?.treatmentStarted || session.currentIndex<timedOffset())return;
+  session.stepEnteredElapsed=activeElapsed;
+  session.stepDeadlineElapsed=activeElapsed+plannedDurationForGlobalIndex(session.currentIndex);
+}
+function stepRemainingForGlobalIndex(index){
+  if(!session?.treatmentStarted || index!==session.currentIndex || session.stepDeadlineElapsed===null)return null;
+  return Math.max(0,session.stepDeadlineElapsed-getElapsed());
 }
 
 function tick(){
-  if(!session || !session.treatmentStarted || session.paused || session.completed) return;
+  if(!session || !session.treatmentStarted || session.paused || session.completed)return;
   const elapsed=getElapsed();
-  if(elapsed>=session.protocol.totalSeconds){ completeService(); return; }
-
-  const scheduled=scheduledGlobalIndex();
-  if(scheduled>session.currentIndex){
-    session.currentIndex=scheduled;
-    captureRingBaseline();
+  const steps=stepsFor();
+  let advanced=false;
+  // Catch up over one or several completed steps after browser suspension.
+  // Auto transitions start at the prior step deadline, never at the late
+  // interval callback's wall time, so scheduled durations stay accurate.
+  while(session.stepDeadlineElapsed!==null && elapsed>=session.stepDeadlineElapsed){
+    if(session.currentIndex>=steps.length-1){completeService();return;}
+    const nextStart=session.stepDeadlineElapsed;
+    session.currentIndex++;
+    startStepAtElapsed(nextStart);
+    session.lastTransition='automatic';
+    advanced=true;
+  }
+  if(advanced){
     renderStep(true);
-    showToast(`Up next · ${stepsFor()[scheduled].title}`);
-    announce(`Advanced to ${stepsFor()[scheduled].title}.`);
+    showToast(`Up next · ${steps[session.currentIndex].title}`);
+    announce(`Advanced to ${steps[session.currentIndex].title}.`);
   }
   updateClocks();
 }
@@ -1086,13 +1062,9 @@ function renderStep(fromAuto=false){
     ALL.pauseBtn.disabled=false;
     ALL.next.disabled=session.currentIndex>=steps.length-1;
     ALL.next.textContent=ALL.next.disabled ? 'Complete at 0:00' : 'Advance →';
-    ALL.hint.textContent='Timed steps auto-advance · Advance is optional';
-    const scheduled=scheduledGlobalIndex();
-    if(session.currentIndex<scheduled){
-      ALL.status.textContent='This reference landmark has already passed. The overall service clock is still running.';
-      ALL.status.classList.add('show');
-    } else if(session.currentIndex>scheduled){
-      ALL.status.textContent='Ahead of the reference transition. Extra time is available in this block; service landmarks haven’t moved.';
+    ALL.hint.textContent='Auto-next at 0:00 · Advance skips unused time';
+    if(session.lastTransition==='manual'){
+      ALL.status.textContent='Advanced to this step. Only unused time from the previous step was deducted from service remaining; elapsed time is unchanged.';
       ALL.status.classList.add('show');
     }
   }
@@ -1113,34 +1085,24 @@ function updateClocks(){
     return;
   }
 
-  const elapsed=Math.min(session.protocol.totalSeconds,getElapsed());
-  const remaining=Math.max(0,session.protocol.totalSeconds-elapsed);
+  const elapsed=getElapsed();
+  const remaining=getServiceRemaining();
   ALL.serviceLabel.textContent='Service remaining';
   ALL.serviceRemaining.textContent=fmt(remaining);
   ALL.serviceElapsed.textContent=fmt(elapsed);
-  setProgress((elapsed/session.protocol.totalSeconds)*100);
+  // The progress track reflects completed OR intentionally skipped steps.
+  // The elapsed clock still reports real time and never jumps when skipping.
+  setProgress(((session.protocol.totalSeconds-remaining)/session.protocol.totalSeconds)*100);
 
   if(session.currentIndex>=timedOffset()){
     const planned=plannedDurationForGlobalIndex(session.currentIndex);
     const stepRemaining=stepRemainingForGlobalIndex(session.currentIndex);
-    const targetLandmark=landmarkRemainingAfterStep(session.currentIndex);
     ALL.stepTime.textContent=fmt(stepRemaining);
     ALL.stepTimeLabel.textContent='Step remaining';
-    ALL.stepMeta.innerHTML=`Next landmark · <strong>${fmt(targetLandmark)} remaining</strong> · reference ${fmt(planned)}`;
-    // Defensive fallback: every real step-change path already calls
-    // captureRingBaseline() explicitly, so this is normally a no-op —
-    // it only self-heals a baseline that's missing or stale for the
-    // current step (e.g. an unanticipated entry path).
-    if(session.ringBaselineIndex!==session.currentIndex) captureRingBaseline();
-    const pct=Math.min(1,Math.max(0,stepRemaining/session.ringBaselineSeconds));
-    // Negative dashoffset (rather than the positive CIRC*(1-pct) used
-    // before) is the actual direction fix: it moves the painted arc to
-    // the END of the circle's path instead of the start, so the
-    // depleting edge sweeps CLOCKWISE away from 12 o'clock as pct
-    // shrinks, instead of counterclockwise. Nothing else about the
-    // ring/SVG/text changes.
+    ALL.stepMeta.innerHTML=`This step · <strong>${fmt(planned)} reference</strong> · auto-advances at 0:00`;
+    const pct=Math.min(1,Math.max(0,stepRemaining/Math.max(planned,1)));
     ALL.ringFill.style.strokeDashoffset=String(-(CIRC*(1-pct)));
-    ALL.ringWrap.classList.toggle('urgent', stepRemaining<=10 && stepRemaining>0);
+    ALL.ringWrap.classList.toggle('urgent',stepRemaining<=10 && stepRemaining>0);
   }
   ALL.pauseBtn.textContent=session.paused?'Resume':'Pause';
   ALL.pauseBtn.setAttribute('aria-pressed',session.paused?'true':'false');
@@ -1158,36 +1120,46 @@ function startTreatment(){
   session.serviceStartMs=Date.now();
   session.paused=false; session.pausedAccumMs=0; session.pauseStartMs=null;
   ALL.pauseBtn.disabled=false;
-  captureRingBaseline();
+  session.lastTransition='automatic';
+  startStepAtElapsed(0);
   renderStep(false); updateClocks(); startTicker(); keepScreenAwake();
   if (window.AIMTGrowth) window.AIMTGrowth.track('service_timer_used', { protocol: session.protocol.key });
   announce(`${session.protocol.label} treatment clock started at ${fmt(session.protocol.totalSeconds)}. ${stepsFor()[session.currentIndex].title}.`);
 }
 
 function manualNext(){
-  if(!session || session.completed) return;
+  if(!session || session.completed)return;
   const steps=stepsFor();
   const isPre=session.currentIndex<timedOffset();
-  if(!session.treatmentStarted && !isPre){ startTreatment(); return; }
-  if(session.currentIndex>=steps.length-1) return;
+  if(!session.treatmentStarted && !isPre){startTreatment();return;}
+  if(session.currentIndex>=steps.length-1)return;
+  // Snapshot actual active elapsed ONCE. Never subtract the original
+  // duration when the technician already worked part of this step.
+  const transitionElapsed=session.treatmentStarted?getElapsed():0;
+  const unused=session.treatmentStarted
+    ? Math.max(0,(session.stepDeadlineElapsed ?? transitionElapsed)-transitionElapsed)
+    : 0;
   session.currentIndex++;
-  captureRingBaseline();
+  if(session.treatmentStarted){
+    startStepAtElapsed(transitionElapsed);
+    session.lastTransition='manual';
+  }
   renderStep(false); updateClocks();
+  if(session.treatmentStarted)showToast(`Skipped ${fmt(unused)} · service time adjusted`);
   announce(`${steps[session.currentIndex].title}.`);
 }
 
 function manualBack(){
   if(!session || session.currentIndex===0 || session.completed) return;
-  if(session.treatmentStarted){
-    const scheduled=scheduledGlobalIndex();
-    if(session.currentIndex-1<scheduled){
-      showToast('That reference landmark has already passed');
-      announce('Previous reference landmark has already passed. Overall service clock continues.');
-      return;
-    }
+  if(session.treatmentStarted && session.currentIndex-1<timedOffset()){
+    showToast('Pre-timer opening cannot be revisited during a timed treatment');
+    return;
   }
   session.currentIndex--;
-  captureRingBaseline();
+  if(session.treatmentStarted){
+    startStepAtElapsed(getElapsed());
+    session.lastTransition='manual';
+  }
   renderStep(false); updateClocks();
   announce(`${stepsFor()[session.currentIndex].title}.`);
 }
@@ -1238,8 +1210,11 @@ function completeService(){
   if(!session || session.completed) return;
   session.completed=true; session.paused=false; stopTicker(); releaseScreenAwake();
   ALL.pauseOverlay.classList.remove('show'); ALL.exitDialog.classList.remove('show');
-  ALL.serviceRemaining.textContent='0:00'; ALL.serviceElapsed.textContent=fmt(session.protocol.totalSeconds); setProgress(100);
-  ALL.completeTime.textContent=`${session.protocol.label} · ${fmt(session.protocol.totalSeconds)} timed treatment`;
+  const actualElapsed=getElapsed();
+  ALL.serviceRemaining.textContent=fmt(Math.max(0,session.protocol.totalSeconds-actualElapsed));
+  ALL.serviceElapsed.textContent=fmt(actualElapsed);
+  setProgress((actualElapsed/session.protocol.totalSeconds)*100);
+  ALL.completeTime.textContent=`${session.protocol.label} · Actual ${fmt(actualElapsed)} · Reference ${fmt(session.protocol.totalSeconds)}`;
   ALL.complete.classList.add('show');
   hideResumeBar();
   announce('Treatment complete.');
