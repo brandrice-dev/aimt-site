@@ -14,3 +14,23 @@
 #study-detail h2 { margin-top: 32px; }
 [hidden] { display: none !important; }
 @media(max-width:640px) { .graduate-filters { grid-template-columns: 1fr; gap: 18px; } .graduate-pagination { gap: 12px; flex-wrap: wrap; } }
+
+
+/* Cadence Research Companion — quiet source-linked answer surface. */
+#ask-cadence{background:var(--aimt-color-bg-secondary);color:var(--aimt-color-text-strong);border:1px solid var(--aimt-border-accent-strong);white-space:nowrap}
+#ask-cadence:hover{border-color:var(--aimt-color-accent)}
+.cadence-research-answer{margin:22px 0 32px;padding:clamp(20px,4vw,34px);border:1px solid var(--aimt-border-accent-strong);border-radius:var(--aimt-radius-card);background:var(--aimt-surface-1);max-width:980px}
+.cadence-answer-heading{padding-bottom:16px;border-bottom:1px solid var(--aimt-border-default)}
+.cadence-answer-heading h2{margin:10px 0 0;font-size:clamp(1.2rem,2.5vw,1.7rem);font-weight:500}
+#cadence-answer-status{font-size:.85rem;margin:16px 0}
+#cadence-answer-body{font-size:clamp(1rem,1.9vw,1.125rem);line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+.cadence-answer-note,.cadence-answer-disclosure{font-size:.83rem;color:var(--aimt-color-text-body)}
+.cadence-answer-note{margin-top:16px}
+#cadence-answer-sources h3{font-family:var(--aimt-font-mont);font-size:1rem;margin:22px 0 10px}
+.cadence-source-links{list-style:none;margin:0;padding:0}
+.cadence-source-links li{padding:12px 0;border-bottom:1px solid var(--aimt-border-default)}
+.cadence-source-links a{display:block;overflow-wrap:anywhere}
+.cadence-source-links small{display:block;margin-top:5px;color:var(--aimt-color-text-body);font-size:.76rem}
+.cadence-answer-disclosure{border-top:1px solid var(--aimt-border-default);margin-top:20px;padding-top:14px}
+.cadence-explain-source{margin:18px 0}
+@media(max-width:640px){#ask-cadence{width:100%}.cadence-research-answer{padding:20px 16px}}
