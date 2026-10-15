@@ -57,7 +57,40 @@ function projectSource(source) {
     url: source.url ?? null,
     evidence_type: source.evidence_type ?? null,
     source_role: source.source_role ?? null,
+    verification_status: source.verification_status ?? null,
+    use_status: source.use_status ?? null,
+    verification_depth: source.verification_depth ?? null,
   };
+}
+
+// Lossless wire representation only. The original bundle remains the
+// validator/fingerprint authority; no claim selection or text shortening.
+export const EVIDENCE_TABLE_INSTRUCTION = '\nEvidence tables use encoding="evidence-tables-v1". Each table has columns and rows: row[i] is the value of columns[i]. absent pairs [row_index,column_index] identify missing fields, not null values. Decode every row as the original evidence record. All claims require selected/excluded dispositions under the unchanged output schema. Retain all source links, verification, contradictions, limitations and scope. This encoding changes no scientific rule.';
+function encodeTable(records) {
+  const columns = [...new Set(records.flatMap(record => Object.keys(record)))];
+  const absent = [];
+  const rows = records.map((record, row) => columns.map((column, col) => {
+    if (!Object.hasOwn(record, column)) { absent.push([row, col]); return null; }
+    return record[column];
+  }));
+  return { columns, rows, ...(absent.length ? { absent } : {}) };
+}
+export function encodeEvidenceBundle(bundle) {
+  const normalized = JSON.parse(JSON.stringify(bundle));
+  return { ...normalized, encoding: 'evidence-tables-v1',
+    claims: encodeTable(normalized.claims), sources: encodeTable(normalized.sources) };
+}
+export function decodeEvidenceBundle(bundle) {
+  if (bundle.encoding !== 'evidence-tables-v1') throw new Error('INVALID_EVIDENCE_ENCODING');
+  const decode = table => {
+    const absent = new Set((table.absent || []).map(([row, col]) => `${row}:${col}`));
+    return table.rows.map((row, index) => {
+      if (row.length !== table.columns.length) throw new Error('INVALID_EVIDENCE_ROW');
+      return Object.fromEntries(table.columns.flatMap((col, i) => absent.has(`${index}:${i}`) ? [] : [[col, row[i]]]));
+    });
+  };
+  const { encoding, ...original } = bundle;
+  return { ...original, claims: decode(bundle.claims), sources: decode(bundle.sources) };
 }
 
 /**
@@ -90,6 +123,13 @@ export function buildSynthesisEvidenceBundle(packet, { claims = [], sources = []
   const bundleSources = sources
     .filter((s) => s && candidateSourceIds.has(s.source_id))
     .map(projectSource);
+
+  if (bundleClaims.length !== candidateClaimIds.size || bundleSources.length !== candidateSourceIds.size
+    || new Set(bundleClaims.map(c => c.claim_id)).size !== bundleClaims.length
+    || new Set(bundleSources.map(s => s.source_id)).size !== bundleSources.length
+    || bundleClaims.some(c => !candidateSourceIds.has(c.source_id))) {
+    throw new Error('EVIDENCE_ACCOUNTING_MISMATCH');
+  }
 
   return {
     claims: bundleClaims,

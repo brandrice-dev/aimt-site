@@ -54,6 +54,7 @@ import { resolvePublicationEditorSynthesisModel, PublicationEditorModelConfigErr
 import { SYNTHESIS_OUTPUT_JSON_SCHEMA, SYNTHESIS_OUTPUT_CONTRACT_VERSION, buildSynthesisInstruction } from './publication-synthesis-schema.mjs';
 import { RECONCILIATION_OUTPUT_JSON_SCHEMA, buildReconciliationInstruction, buildFullRetryInstruction, buildHumanReviewJustificationRetryInstruction } from './publication-synthesis-reconciliation.mjs';
 import { resolvePageSynthesisIntent } from './publication-page-intent.mjs';
+import { encodeEvidenceBundle, EVIDENCE_TABLE_INSTRUCTION } from './publication-synthesis-evidence.mjs';
 
 // Generous headroom for a topic-wide candidate set the size hair-cycle's
 // (128 candidate claims) -- see checkpoint-evaluation.mjs's own
@@ -123,17 +124,10 @@ async function callStructured(env, { system, userContent, schema, maxTokens, eff
     ({ data, diagnostics } = await fetchPublicationMessages({
       apiKey: env.ANTHROPIC_PUBLICATION_EDITOR_API_KEY,
       costControl: env.publicationCostControl,
-      body: {
-        model: modelInfo.modelName,
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: userContent }],
-        thinking: { type: 'adaptive' },
-        output_config: { effort, format: { type: 'json_schema', schema } },
-      },
+      body: buildPublicationRequestBody(env, { system, userContent, schema, maxTokens, effort }),
     }));
   } catch (err) {
-    return { ...failure(['SPEND_LIMIT', 'TOKEN_LIMIT'].includes(err.diagnostics?.code) ? 'budget_exceeded' : 'request_failed', `${callLabel}: provider request failed or blocked by preflight.`),
+    return { ...failure(err.diagnostics?.code === 'SPEND_LIMIT' ? 'budget_exceeded' : err.diagnostics?.code === 'TOKEN_LIMIT' ? 'token_limit' : 'request_failed', `${callLabel}: provider request failed or blocked by preflight.`),
       diagnostics: sanitizePublicationDiagnostics({ ...err.diagnostics, claim_count: claimCount, source_count: sourceCount }), modelInfo };
   }
 
@@ -149,6 +143,12 @@ async function callStructured(env, { system, userContent, schema, maxTokens, eff
 
   const usage = data && data.usage ? { input_tokens: data.usage.input_tokens ?? null, output_tokens: data.usage.output_tokens ?? null } : null;
   return { ok: true, output: parsed, rawText, modelInfo, usage, diagnostics };
+}
+
+export function buildPublicationRequestBody(env, { system, userContent, schema, maxTokens, effort }) {
+  return { model: resolvePublicationEditorSynthesisModel(env).modelName, max_tokens: maxTokens,
+    system, messages: [{ role: 'user', content: userContent }], thinking: { type: 'adaptive' },
+    output_config: { effort, format: { type: 'json_schema', schema } } };
 }
 
 /**
@@ -172,7 +172,7 @@ async function callStructured(env, { system, userContent, schema, maxTokens, eff
  *   existing registry exactly as before -- see
  *   publication-page-intent.mjs#resolvePageSynthesisIntent.
  */
-export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageIntent = null }) {
+export function buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent = null }) {
   const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const system = buildSynthesisInstruction({
     pageConcept: intent.page_concept,
@@ -180,14 +180,15 @@ export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageInt
     inScopeConcepts: intent.in_scope_concepts,
     outOfScopeConcepts: intent.out_of_scope_concepts,
   });
-  const userContent = JSON.stringify({ topic_slug, page_concept: intent.page_concept, evidence_bundle: evidenceBundle });
+  return { system: system + EVIDENCE_TABLE_INSTRUCTION,
+    userContent: JSON.stringify({ topic_slug, page_concept: intent.page_concept, evidence_bundle: encodeEvidenceBundle(evidenceBundle) }),
+    schema: SYNTHESIS_OUTPUT_JSON_SCHEMA, maxTokens: SYNTHESIS_MAX_TOKENS, effort: SYNTHESIS_EFFORT };
+}
+
+export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageIntent = null }) {
 
   const result = await callStructured(env, {
-    system,
-    userContent,
-    schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
-    maxTokens: SYNTHESIS_MAX_TOKENS,
-    effort: SYNTHESIS_EFFORT,
+    ...buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent }),
     callLabel: 'Synthesis', claimCount: evidenceBundle.claims.length, sourceCount: evidenceBundle.sources.length,
   });
   if (!result.ok) return result;
@@ -235,13 +236,12 @@ export async function reconcileMissingClaims(env, { topic_slug, evidenceBundle, 
     topic_slug,
     page_concept: intent.page_concept,
     missing_claim_ids: missingClaimIds,
-    missing_claims: missingClaims,
-    missing_claim_sources: missingClaimSources,
+    missing_evidence: encodeEvidenceBundle({ claims: missingClaims, sources: missingClaimSources }),
     existing_synthesis: existingSynthesisSummary,
   });
 
   return callStructured(env, {
-    system,
+    system: system + EVIDENCE_TABLE_INSTRUCTION,
     userContent,
     schema: RECONCILIATION_OUTPUT_JSON_SCHEMA,
     maxTokens: RECONCILIATION_MAX_TOKENS,
@@ -276,13 +276,13 @@ export async function retrySynthesisWithReconciliation(env, { topic_slug, eviden
   const userContent = JSON.stringify({
     topic_slug,
     page_concept: intent.page_concept,
-    evidence_bundle: evidenceBundle,
+    evidence_bundle: encodeEvidenceBundle(evidenceBundle),
     previous_synthesis_attempt: previousOutput,
     reconciliation_findings: reconciliation,
   });
 
   const result = await callStructured(env, {
-    system,
+    system: system + EVIDENCE_TABLE_INSTRUCTION,
     userContent,
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
     maxTokens: SYNTHESIS_MAX_TOKENS,
@@ -321,12 +321,12 @@ export async function retrySynthesisForJustification(env, { topic_slug, evidence
   const userContent = JSON.stringify({
     topic_slug,
     page_concept: intent.page_concept,
-    evidence_bundle: evidenceBundle,
+    evidence_bundle: encodeEvidenceBundle(evidenceBundle),
     previous_synthesis_attempt: previousOutput,
   });
 
   const result = await callStructured(env, {
-    system,
+    system: system + EVIDENCE_TABLE_INSTRUCTION,
     userContent,
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
     maxTokens: SYNTHESIS_MAX_TOKENS,
