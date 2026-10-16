@@ -488,7 +488,7 @@ body.timer-open{overflow:hidden}
             </div>
             <div class="pacing-note"><strong>Explain intentionally, not continuously</strong><p>The Head Spa service is relaxation-first and may remain intentionally quiet. Intake establishes the plan; the service executes it. Speak when the client needs information to stay comfortable, when a transition genuinely benefits from orientation, or when they ask you a direct question.</p></div>
             <div class="pacing-note"><strong>Manual Advance</strong><p>Advance begins the next step immediately with its full reference countdown. Only unused time left in the step you skipped is deducted from Service remaining. For example, advancing with 5 minutes left deducts 5 minutes, not the entire step. Elapsed always tracks real time worked; Back restarts the previous step and adds its full reference time back. Completion shows actual treatment time.</p></div>
-            <div class="pacing-note"><strong>Hands-free auto-scroll</strong><p>Every service starts in hands-free mode on phones, tablets and desktop screens. When content does not fit, the timer gently moves down through the step, pauses for reading, and slowly returns to the top. It restarts from the top at every new step. Turn Auto-scroll off using the control beneath the timer, or scroll manually to pause movement for a short period. This reading feature never changes service timing and respects your device’s Reduce Motion preference.</p></div>
+            <div class="pacing-note"><strong>Hands-free auto-scroll</strong><p>Every service starts in hands-free mode on phones, tablets and desktop screens. When content extends beyond the available screen, the timer begins scrolling after a brief two-second reading pause, then gently moves down through the step, pauses and returns to the top. It restarts from the top at every new step. Turn Auto-scroll off using the control beneath the timer, or scroll manually to pause movement for a short period. This reading feature never changes service timing and respects your device’s Reduce Motion preference.</p></div>
             <div class="pacing-note"><strong>Before the clock</strong><p>Opening Rituals + Microscopy and Client Positioning + Comfort are part of the protocol but occur before the treatment timer begins. The treatment clock starts with Dry Brushing + Hair Play at 60:00 in Core or 90:00 in Extended.</p></div>
           </div>
         </div>
@@ -829,15 +829,18 @@ let screenWakeLockPending=false;
 // Only #timer-main moves; its header, footer, pause and time calculations
 // remain untouched. Auto-pan defaults ON on every screen size.
 // The technician can opt out; OS Reduce Motion is respected.
-const AUTO_SCROLL_PX_PER_SEC=18;
-const AUTO_SCROLL_EDGE_DWELL_MS=7500;
-const AUTO_SCROLL_STEP_DWELL_MS=6500;
-const AUTO_SCROLL_MANUAL_HOLD_MS=18000;
+// Readable, visibly moving pace: a 600px overflow traverses in ~13s,
+// instead of over 33s. Long holds previously made scrolling look broken.
+const AUTO_SCROLL_PX_PER_SEC=45;
+const AUTO_SCROLL_EDGE_DWELL_MS=4000;
+const AUTO_SCROLL_STEP_DWELL_MS=2000;
+const AUTO_SCROLL_MANUAL_HOLD_MS=5000;
 const reducedMotionQuery=typeof window.matchMedia==='function'
   ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 let autoScrollEnabled=false,autoScrollFrame=null,autoScrollPreviousMs=null;
 let autoScrollDirection=1,autoScrollWaitUntil=0,autoScrollUserHoldUntil=0;
 let autoScrollSession=null,autoScrollStepIndex=null;
+let autoScrollResizeObserver=null;
 function defaultAutoScrollEnabled(){
   return !reducedMotionQuery?.matches;
 }
@@ -863,8 +866,24 @@ function stopAutoScroll(){
 }
 function ensureAutoScroll(){
   if(autoScrollFrame!==null || !autoScrollShouldRun())return;
-  if(ALL.main.scrollHeight-ALL.main.clientHeight<=2)return;
+  if(ALL.main.scrollHeight-ALL.main.clientHeight<=2){
+    autoScrollPreviousMs=null;
+    return;
+  }
   autoScrollFrame=requestAnimationFrame(autoScrollFrameTick);
+}
+// Fonts, rotation, address-bar changes and conditional cue blocks can turn a
+// previously non-scrollable panel into an overflowing one without a new step.
+// The old loop stopped forever at max<=2 until something else restarted it.
+// A ResizeObserver rechecks whenever the actual scrollable content changes.
+function observeAutoScrollLayout(){
+  if(typeof ResizeObserver!=='function')return;
+  if(!autoScrollResizeObserver){
+    autoScrollResizeObserver=new ResizeObserver(()=>ensureAutoScroll());
+    autoScrollResizeObserver.observe(ALL.main);
+    const inner=ALL.main.firstElementChild;
+    if(inner)autoScrollResizeObserver.observe(inner);
+  }
 }
 function autoScrollFrameTick(){
   autoScrollFrame=null;
@@ -994,6 +1013,7 @@ function openTimer(key, existing=false){
   }
   if(!session)return;
   updateAutoScrollControl();
+  observeAutoScrollLayout();
   session.exited=false;
   document.body.classList.add('timer-open');
   ALL.timer.classList.add('active');
