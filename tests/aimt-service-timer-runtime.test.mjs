@@ -12,7 +12,7 @@ assert.ok(timerScript?.includes('function tick()'),'Expected live inline service
 
 function harness(format='extended',{mobile=true,reducedMotion=false}={}){
  let ms=0,nextTimer=0;
- const events=new Map(),nodes=new Map(),intervals=new Map(),animations=new Map();
+ const events=new Map(),nodes=new Map(),intervals=new Map(),animations=new Map(),observers=[];
  const motion={value:reducedMotion,listeners:[]};
  class ClassList {
   values=new Set();
@@ -44,7 +44,12 @@ function harness(format='extended',{mobile=true,reducedMotion=false}={}){
     : {matches:mobile}
  };
  class FakeDate extends Date {static now(){return ms;}}
- const sandbox={window,document,navigator:{},Date:FakeDate,console,
+ class FakeResizeObserver {
+   constructor(callback){this.callback=callback;this.observed=[];observers.push(this);}
+   observe(element){this.observed.push(element);}
+   disconnect(){this.observed=[];}
+ }
+ const sandbox={window,document,navigator:{},Date:FakeDate,console,ResizeObserver:FakeResizeObserver,
   setInterval:(cb)=>{const id=++nextTimer;intervals.set(id,cb);return id;},
   clearInterval:id=>intervals.delete(id),
   requestAnimationFrame:fn=>{const id=++nextTimer;animations.set(id,fn);return id;},
@@ -67,8 +72,9 @@ function harness(format='extended',{mobile=true,reducedMotion=false}={}){
  }
  function drawFrames(count,msPassed=100){for(let i=0;i<count;i++)drawFrame(msPassed);}
  function setReducedMotion(value){motion.value=value;for(const fn of motion.listeners)fn({matches:value});}
- return {run,state,clock,advance,begin,currentStep,el,events,intervals,animations,
-  drawFrame,drawFrames,setReducedMotion,
+ function notifyLayout(){for(const ob of observers)ob.callback(ob.observed.map(target=>({target})),ob);}
+ return {run,state,clock,advance,begin,currentStep,el,events,intervals,animations,observers,
+  drawFrame,drawFrames,setReducedMotion,notifyLayout,
   addWallSeconds(seconds){ms+=seconds*1000;},
   get now(){return ms;}
  };
@@ -229,8 +235,8 @@ test('phone enables optional hands-free mode and gently scrolls both directions'
  assert.equal(toggle.textContent,'Auto-scroll On');
  assert.equal(toggle.getAttribute('aria-pressed'),'true');
  assert.equal(content.scrollTop,0);
- t.drawFrames(60);assert.equal(content.scrollTop,0); // initial dwell
- t.drawFrames(30);assert.ok(content.scrollTop>0 && content.scrollTop<100);
+ t.drawFrames(18);assert.equal(content.scrollTop,0); // two-second reading pause
+ t.drawFrames(12);assert.ok(content.scrollTop>0 && content.scrollTop<100);
  let reachedBottom=false,reversed=false;
  for(let i=0;i<700;i++){
   const old=content.scrollTop;t.drawFrame();
@@ -267,8 +273,8 @@ test('manual scrolling pauses the motion temporarily without disabling the mode'
  const t=harness('core');t.run("openTimer('core')");t.drawFrames(90);
  const content=t.el('timer-main');const position=content.scrollTop;
  t.events.get('timer-main:wheel')();
- t.drawFrames(160);assert.equal(content.scrollTop,position);
- t.drawFrames(40);assert.ok(content.scrollTop>position);
+ t.drawFrames(45);assert.equal(content.scrollTop,position);
+ t.drawFrames(20);assert.ok(content.scrollTop>position);
  assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
 });
 test('auto scroll can be disabled, and respects the device reduced-motion setting',()=>{
@@ -349,4 +355,27 @@ test('each new service restores the hands-free default after opt-out',()=>{
  assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
  assert.equal(t.el('auto-scroll-btn').textContent,'Auto-scroll On');
  assert.ok(t.animations.size>0);
+});
+
+
+test('a two-second pause leads to visible scrolling while the actual service clock is independent',()=>{
+ const t=harness('core');t.begin();
+ const start=t.clock(),main=t.el('timer-main');
+ t.drawFrames(18);assert.equal(main.scrollTop,0);
+ t.drawFrames(20);assert.ok(main.scrollTop>5 && main.scrollTop<100);
+ assert.equal(t.clock().step,start.step); // The harness only ticks the service clock on tick()
+ assert.equal(t.el('auto-scroll-btn').getAttribute('aria-pressed'),'true');
+});
+test('real layout observer restarts scrolling when text begins to overflow after initial render',()=>{
+ const t=harness('extended');
+ const main=t.el('timer-main');
+ main.scrollHeight=main.clientHeight;
+ t.run("openTimer('extended')");
+ assert.equal(t.animations.size,0);
+ assert.equal(t.observers.length,1);
+ main.scrollHeight=main.clientHeight+500;
+ t.notifyLayout();
+ assert.ok(t.animations.size>0,'A resize/layout change must restart scrolling');
+ t.drawFrames(30);
+ assert.ok(main.scrollTop>0,'Scrolling becomes visible after the two-second dwell');
 });
