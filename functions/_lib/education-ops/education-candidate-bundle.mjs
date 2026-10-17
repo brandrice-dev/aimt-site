@@ -80,7 +80,7 @@ function isNonEmptyString(v) {
 export function buildCandidateBundle({
   runId, topicSlug, cluster, route, intentPlan, preparedArtifact,
   pagePlan = null, writerValidation = null, deterministicRepair = null, reviewResult = null,
-  reviewerFramingRepair = null,
+  reviewerFramingRepair = null, writerRevision = null,
   createdAt = new Date().toISOString(),
 }) {
   const record = preparedArtifact.record;
@@ -106,6 +106,9 @@ export function buildCandidateBundle({
     // Writer numeric-fidelity repair above): different repair lane,
     // different failure class, never overwrites or is overwritten by it.
     reviewer_framing_repair: reviewerFramingRepair,
+    // One bounded Writer revision of an independently rejected page, kept
+    // separate from scientific clearance and the one-time framing repair.
+    writer_revision: writerRevision,
     // Self-contained freshness inputs -- deliberately copied out of
     // prepared_artifact.record here (rather than reached into later)
     // so a future bundle-shape change to how PE artifacts are stored
@@ -139,6 +142,7 @@ export function advanceCandidateBundle(bundle, updates) {
   if ('deterministicRepair' in updates) next.deterministic_repair = updates.deterministicRepair;
   if ('reviewResult' in updates) next.review_result = updates.reviewResult;
   if ('reviewerFramingRepair' in updates) next.reviewer_framing_repair = updates.reviewerFramingRepair;
+  if ('writerRevision' in updates) next.writer_revision = updates.writerRevision;
   return next;
 }
 
@@ -180,6 +184,7 @@ export function validateCandidateBundleShape(bundle) {
   if (bundle.writer_validation != null && (typeof bundle.writer_validation !== 'object' || typeof bundle.writer_validation.valid !== 'boolean')) violations.push('INVALID_WRITER_VALIDATION_SHAPE');
   if (bundle.review_result != null && (typeof bundle.review_result !== 'object' || typeof bundle.review_result.outcome !== 'string')) violations.push('INVALID_REVIEW_RESULT_SHAPE');
   if (bundle.reviewer_framing_repair != null && (typeof bundle.reviewer_framing_repair !== 'object' || typeof bundle.reviewer_framing_repair.attempted !== 'boolean')) violations.push('INVALID_REVIEWER_FRAMING_REPAIR_SHAPE');
+  if (bundle.writer_revision != null && (typeof bundle.writer_revision !== 'object' || typeof bundle.writer_revision.attempted !== 'boolean')) violations.push('INVALID_WRITER_REVISION_SHAPE');
 
   if (bundle.prepared_artifact && bundle.prepared_artifact.record && typeof bundle.prepared_artifact.record === 'object') {
     const record = bundle.prepared_artifact.record;
@@ -283,4 +288,22 @@ export function determineResumeStage(bundle) {
     return RESUME_STAGE.READY_FOR_PREPARE;
   }
   return RESUME_STAGE.EDITORIAL_REVIEW;
+}
+
+/**
+ * One factual/voice Writer revision per exact cleared candidate. It never
+ * changes the Publication Editor's decisions or waives independent review.
+ * Scope violations, framing science, and unknown reviewer failure types
+ * remain human editorial concerns, not automated rewriting opportunities.
+ */
+export function canReviseReviewerRejectedDraft(bundle) {
+  if (!bundle || bundle.writer_revision?.attempted === true ||
+      !bundle.page_plan || bundle.writer_validation?.valid !== true) return false;
+  const r = bundle.review_result;
+  if (!r || r.outcome !== 'SUBSTANTIVE_FAIL' || r.scope_fail !== false ||
+      !Array.isArray(r.failing_paraphrases) || !Array.isArray(r.failing_framings) ||
+      r.failing_framings.length !== 0) return false;
+  const repairable = new Set(['TOO_STRONG','OUTSIDE_EVIDENCE','CAUSALITY_DRIFT','NUMERIC_DRIFT']);
+  if (r.failing_paraphrases.some(x => !repairable.has(x?.verdict))) return false;
+  return r.voice_fail === true || r.failing_paraphrases.length > 0;
 }
