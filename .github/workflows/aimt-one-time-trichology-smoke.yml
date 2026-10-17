@@ -1,0 +1,85 @@
+name: AIMT One-Time Trichology Live Smoke
+
+# One authorized, isolated scientific pipeline check (October 17, 2026).
+# Never scheduled, never merged to main, and never auto-publishes.
+on:
+  push:
+    branches:
+      - test/education-real-smoke-20261017
+    paths:
+      - '.github/workflows/aimt-one-time-trichology-smoke.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aimt-single-approved-trichology-live-smoke-20261017
+  cancel-in-progress: false
+
+jobs:
+  isolated-test:
+    if: github.repository == 'brandrice-dev/aimt-site' && github.event.head_commit.message == 'Trigger one-time AIMT publishing smoke test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ANTHROPIC_PUBLICATION_EDITOR_API_KEY: ${{ secrets.ANTHROPIC_PUBLICATION_EDITOR_API_KEY }}
+      ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
+      AIMT_EDUCATION_AUTOPUBLISH_ENABLED: 'false'
+      AIMT_RESEARCH_GAP_LOOP_ENABLED: 'false'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Real provider execution, existing strict $2 and 6-call maximum
+        id: diagnostic
+        shell: bash
+        run: |
+          set +e
+          node scripts/education-publication-diagnostic.mjs --allow-model-calls --topic=trichology
+          code=$?
+          echo "diagnostic_exit=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Check final state and prove budget ceiling
+        if: always()
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,readdirSync,existsSync} from 'node:fs';
+          const dir='research-import/education-ops/runs';
+          if(!existsSync(dir))throw Error('MISSING_ISOLATED_RUN_REPORT');
+          const files=readdirSync(dir).filter(x=>x.endsWith('.json'));
+          if(files.length!==1)throw Error('EXPECTED_EXACTLY_ONE_ISOLATED_REPORT');
+          const r=JSON.parse(readFileSync(dir+'/'+files[0],'utf8'));
+          const cost=r.cost_control||{};
+          console.log(JSON.stringify({
+            mode:'one_time_isolated_shadow',
+            selected_topic:r.selected_topic,
+            final_state:r.final_state,
+            publication_editor_status:r.publication_editor_result?.status||null,
+            publication_editor_reason:r.publication_editor_result?.reason||null,
+            writer_valid:r.writer_result?.valid??null,
+            reviewer_outcome:r.review_result?.outcome||null,
+            authorized_budget_usd:cost.budget_usd,
+            estimated_reserved_usd:cost.reserved_cost_estimate_usd,
+            provider_estimated_usage_usd:cost.reported_usage_cost_estimate_usd,
+            requests:cost.requests,
+            model_calls:r.model_calls?.actual_model_call_count??null,
+            published:false,
+          },null,2));
+          if(cost.budget_usd!==2||cost.requests>6||cost.reserved_cost_estimate_usd>2.000001)throw Error('COST_GUARDRAIL_BREACH');
+          if(r.final_state!=='SHADOW_CANDIDATE_READY')process.exitCode=1;
+          JS
+      - name: Preserve bounded diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aimt-isolated-trichology-smoke-20261017
+          path: research-import/education-ops/runs/*.json
+          retention-days: 14
+          if-no-files-found: warn
