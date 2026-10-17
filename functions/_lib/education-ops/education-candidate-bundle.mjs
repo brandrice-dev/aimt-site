@@ -305,5 +305,7 @@ export function canReviseReviewerRejectedDraft(bundle) {
       r.failing_framings.length !== 0) return false;
   const repairable = new Set(['TOO_STRONG','OUTSIDE_EVIDENCE','CAUSALITY_DRIFT','NUMERIC_DRIFT']);
   if (r.failing_paraphrases.some(x => !repairable.has(x?.verdict))) return false;
-  return r.voice_fail === true || r.failing_paraphrases.length > 0;
+  // Keep historical paraphrase-only/framing retry ceilings unchanged;
+  // this lane addresses the demonstrated concurrent VOICE failure.
+  return r.voice_fail === true;
 }
