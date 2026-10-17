@@ -101,6 +101,8 @@ test('routine content/provider errors advance, while auth, scientific and spend 
  assert.equal(classifyRecovery({final_state:'CONFIG_BLOCKED',exception_reason:'Writer call failed: budget_exceeded'}),'BUDGET_PAUSED');
  assert.equal(classifyRecovery({final_state:'CONFIG_BLOCKED',provider_request_diagnostics:{http_status:401}}),'AUTHORIZATION_REQUIRED');
  assert.equal(classifyRecovery({final_state:'INFRA_REVIEW'}),'SAFETY_REVIEW');
+ assert.equal(classifyRecovery({final_state:'INVALID_RESPONSE',exception_reason:'truncated'}),'RETRY_NEXT_SCHEDULE');
+ assert.equal(classifyRecovery({final_state:'INVALID_RESPONSE',exception_reason:'unresolved_mechanical_or_accounting_violation'}),'SAFETY_REVIEW');
 });
 test('a resumed controller retains cumulative spend and a precise next action instead of starting a new allowance',async()=>{
  const previous=createPublicationCostControl();previous.reserve(body);let checkpoint;
