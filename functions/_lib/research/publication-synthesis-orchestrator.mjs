@@ -48,12 +48,14 @@ import {
   reconcileMissingClaims as defaultReconcileMissingClaims,
   retrySynthesisWithReconciliation as defaultRetrySynthesisWithReconciliation,
   retrySynthesisForJustification as defaultRetrySynthesisForJustification,
+  reconcileRequiredSynthesisSignals as defaultReconcileRequiredSynthesisSignals,
 } from './publication-synthesis-client.mjs';
 import {
   classifyValidatorViolations,
   validateReconciliationShape,
   determineReconciliationOutcome,
   mergeReconciliationIntoSynthesis,
+  mergeRequiredSignalRepair,
 } from './publication-synthesis-reconciliation.mjs';
 
 import { sanitizePublicationDiagnostics } from './publication-anthropic-transport.mjs';
@@ -145,9 +147,11 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   const reconcileFn = fns.reconcileFn || defaultReconcileMissingClaims;
   const retryFn = fns.retryFn || defaultRetrySynthesisWithReconciliation;
   const justifyRetryFn = fns.justifyRetryFn || defaultRetrySynthesisForJustification;
+  const signalFn = fns.signalFn || defaultReconcileRequiredSynthesisSignals;
   const metrics = emptyMetrics();
 
-  const initial = await synthesizeFn(env, { topic_slug, evidenceBundle, pageIntent });
+  const requiredFlags = v1Result.synthesis_packet?.synthesis_required_flags || [];
+  const initial = await synthesizeFn(env, { topic_slug, evidenceBundle, pageIntent, synthesisRequiredFlags: requiredFlags });
   recordCall(metrics, 'initial_synthesis', initial);
   if (!initial.ok) {
     return { status: 'SYNTHESIS_FAILED', reason: initial.reason, diagnostics: sanitizePublicationDiagnostics(initial.diagnostics), stage: 'initial', finalOutput: null, reconciliation: null, initial: null, metrics };
@@ -167,6 +171,56 @@ export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidence
   }
 
   const classification = classifyValidatorViolations(initialValidation.violations);
+
+  // The October 16 production output accounted for the scientific evidence
+  // but left the pre-existing conflict/safety signal discussion empty.
+  // Recover only this ONE mechanical omission with one smaller, scoped model
+  // check of the original evidence. Never alter per-claim dispositions.
+  if (initialValidation.violations.length === 1 &&
+      initialValidation.violations[0] === 'SYNTHESIS_SIGNAL_NOT_ADDRESSED') {
+    const signalResult = await signalFn(env, {
+      topic_slug, evidenceBundle, existingOutput: initial.output,
+      synthesisRequiredFlags: requiredFlags, pageIntent,
+    });
+    recordCall(metrics, 'required_signal_reconciliation', signalResult);
+    metrics.reconciliation_calls += 1;
+    if (!signalResult.ok) return {
+      status: 'SYNTHESIS_FAILED', reason: signalResult.reason,
+      diagnostics: sanitizePublicationDiagnostics(signalResult.diagnostics),
+      violations: initialValidation.violations, stage: 'required_signal_reconciliation',
+      finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics,
+    };
+
+    let amended;
+    try {
+      amended = mergeRequiredSignalRepair(
+        initial.output, signalResult.output, requiredFlags, evidenceBundle,
+        v1Result.synthesis_packet
+      );
+    } catch (_) {
+      return {
+        status: 'SYNTHESIS_FAILED', reason: 'invalid_required_signal_repair',
+        violations: initialValidation.violations, stage: 'required_signal_reconciliation',
+        finalOutput: initial.output, reconciliation: null, initial: initialSummary, metrics,
+      };
+    }
+
+    const revalidation = validateSynthesisOutput({ v1Result, evidenceBundle, aiOutput: amended });
+    if (!revalidation.valid) {
+      const mapped = revalidation.schemaValid
+        ? mapViolationsToTerminalStatus(revalidation.violations)
+        : { status: 'SYNTHESIS_FAILED', reason: 'invalid_schema_after_signal_repair' };
+      return {
+        ...mapped, violations: revalidation.violations,
+        stage: 'required_signal_reconciliation', finalOutput: amended,
+        reconciliation: null, initial: initialSummary, metrics,
+      };
+    }
+    return {
+      ...successMapping(v1Result, amended), stage: 'required_signal_reconciliation',
+      finalOutput: amended, reconciliation: null, initial: initialSummary, metrics,
+    };
+  }
 
   // ── GOVERNANCE FIX: bare, unjustified HUMAN_REVIEW is retryable, not
   // terminal. Checked BEFORE the generic substantive/mechanical fallback
