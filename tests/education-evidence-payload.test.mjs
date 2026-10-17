@@ -154,7 +154,7 @@ test('second real-shaped signal-only request fits the same $2 allowance after a 
     {type:'message_delta',delta:{stop_reason:'end_turn'},usage:{output_tokens:100}},
     {type:'message_stop'}
   ];
-  return new Response(events.map(x=>'data: '+JSON.stringify(x)+'\\n\\n').join(''),{headers:{'Content-Type':'text/event-stream'}});
+  return new Response(events.map(x=>'data: '+JSON.stringify(x)+'\n\n').join(''),{headers:{'Content-Type':'text/event-stream'}});
  };
  try{
   const result=await reconcileRequiredSynthesisSignals({ANTHROPIC_PUBLICATION_EDITOR_API_KEY:'test',publicationCostControl:cost},{
