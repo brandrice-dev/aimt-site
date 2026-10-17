@@ -93,7 +93,7 @@ export const BOUNDED_SYNTHESIS_OUTPUT_INSTRUCTION = [
   'For uncertainty, safety, conflicting findings and materially relevant limitations, give as much precise reasoning as needed; brevity never excuses missing science or incomplete accounting.',
   'Every supplied claim still needs exactly one selected/excluded disposition. Do not drop claims to shorten output.',
   'Every flag named in synthesis_required_flags MUST be explicitly addressed in resolved_synthesis_signals with genuine evidence claim IDs. If you cannot resolve a safety or conflict signal, explain it under unresolved_issues and choose HUMAN_REVIEW rather than inventing certainty.'
-].join('\\n');
+].join('\n');
 
 /** Never throws -- returns a tagged failure object instead, per STEP 12. */
 function failure(reason, detail) {
@@ -401,7 +401,7 @@ export async function reconcileRequiredSynthesisSignals(env, {
     'If evidence reveals an unresolved material contradiction, safety concern or missing evidence, set requires_human_review=true and give a specific reason and supporting claim IDs.',
     'If there is no material conflict, explain the actual difference in population, intervention or endpoint that makes the apparently opposite findings compatible.',
     'Never silently upgrade scientific certainty; never turn a concern into approval by omitting it.',
-  ].join('\\n') + EVIDENCE_TABLE_INSTRUCTION;
+  ].join('\n') + EVIDENCE_TABLE_INSTRUCTION;
   return callStructured(env, {
     system,
     userContent: JSON.stringify({
