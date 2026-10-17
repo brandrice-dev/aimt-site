@@ -84,6 +84,17 @@ export const SYNTHESIS_EFFORT = 'medium';
 export const RECONCILIATION_MAX_TOKENS = 8000;
 export const RECONCILIATION_EFFORT = 'medium';
 
+// Complete the existing 64k-token response instead of spending on a verbose
+// 401-claim essay. Reasons must remain meaningful, especially for conflicts.
+export const BOUNDED_SYNTHESIS_OUTPUT_INSTRUCTION = [
+  '',
+  'OUTPUT BUDGET: This page can have 400+ eligible claims. Use a concise, complete structured result, never a truncated one.',
+  'For ROUTINE selected/excluded claims give one specific, short reason, normally 6-16 words. Do not quote the claim, repeat the source title, or restate page scope on every row.',
+  'For uncertainty, safety, conflicting findings and materially relevant limitations, give as much precise reasoning as needed; brevity never excuses missing science or incomplete accounting.',
+  'Every supplied claim still needs exactly one selected/excluded disposition. Do not drop claims to shorten output.',
+  'Every flag named in synthesis_required_flags MUST be explicitly addressed in resolved_synthesis_signals with genuine evidence claim IDs. If you cannot resolve a safety or conflict signal, explain it under unresolved_issues and choose HUMAN_REVIEW rather than inventing certainty.'
+].join('\n');
+
 /** Never throws -- returns a tagged failure object instead, per STEP 12. */
 function failure(reason, detail) {
   return { ok: false, reason, detail: detail || null };
@@ -172,7 +183,7 @@ export function buildPublicationRequestBody(env, { system, userContent, schema, 
  *   existing registry exactly as before -- see
  *   publication-page-intent.mjs#resolvePageSynthesisIntent.
  */
-export function buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent = null }) {
+export function buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent = null, synthesisRequiredFlags = [] }) {
   const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
   const system = buildSynthesisInstruction({
     pageConcept: intent.page_concept,
@@ -180,15 +191,15 @@ export function buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageInt
     inScopeConcepts: intent.in_scope_concepts,
     outOfScopeConcepts: intent.out_of_scope_concepts,
   });
-  return { system: system + EVIDENCE_TABLE_INSTRUCTION,
-    userContent: JSON.stringify({ topic_slug, page_concept: intent.page_concept, evidence_bundle: encodeEvidenceBundle(evidenceBundle) }),
+  return { system: system + EVIDENCE_TABLE_INSTRUCTION + BOUNDED_SYNTHESIS_OUTPUT_INSTRUCTION,
+    userContent: JSON.stringify({ topic_slug, page_concept: intent.page_concept, synthesis_required_flags: synthesisRequiredFlags, evidence_bundle: encodeEvidenceBundle(evidenceBundle) }),
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA, maxTokens: SYNTHESIS_MAX_TOKENS, effort: SYNTHESIS_EFFORT };
 }
 
-export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageIntent = null }) {
+export async function synthesizeTopic(env, { topic_slug, evidenceBundle, pageIntent = null, synthesisRequiredFlags = [] }) {
 
   const result = await callStructured(env, {
-    ...buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent }),
+    ...buildSynthesisRequest(env, { topic_slug, evidenceBundle, pageIntent, synthesisRequiredFlags }),
     callLabel: 'Synthesis', claimCount: evidenceBundle.claims.length, sourceCount: evidenceBundle.sources.length,
   });
   if (!result.ok) return result;
@@ -282,7 +293,7 @@ export async function retrySynthesisWithReconciliation(env, { topic_slug, eviden
   });
 
   const result = await callStructured(env, {
-    system: system + EVIDENCE_TABLE_INSTRUCTION,
+    system: system + EVIDENCE_TABLE_INSTRUCTION + BOUNDED_SYNTHESIS_OUTPUT_INSTRUCTION,
     userContent,
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
     maxTokens: SYNTHESIS_MAX_TOKENS,
@@ -326,7 +337,7 @@ export async function retrySynthesisForJustification(env, { topic_slug, evidence
   });
 
   const result = await callStructured(env, {
-    system: system + EVIDENCE_TABLE_INSTRUCTION,
+    system: system + EVIDENCE_TABLE_INSTRUCTION + BOUNDED_SYNTHESIS_OUTPUT_INSTRUCTION,
     userContent,
     schema: SYNTHESIS_OUTPUT_JSON_SCHEMA,
     maxTokens: SYNTHESIS_MAX_TOKENS,
@@ -335,4 +346,76 @@ export async function retrySynthesisForJustification(env, { topic_slug, evidence
   });
   if (!result.ok) return result;
   return { ...result, contractVersion: SYNTHESIS_OUTPUT_CONTRACT_VERSION };
+}
+
+/**
+ * One narrowly-scoped, independently validated repair when a full, otherwise
+ * schema-valid synthesis neglected REQUIRED scientific signal discussion.
+ * This does not change any selected/excluded dispositions or page facts.
+ * The orchestrator runs the COMPLETE original validator again afterward.
+ */
+export const REQUIRED_SIGNAL_REPAIR_SCHEMA = {
+  type: 'object',
+  properties: {
+    resolved_synthesis_signals: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          signal: { type: 'string' },
+          resolution: { type: 'string' },
+          claim_ids: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['signal', 'resolution', 'claim_ids'],
+        additionalProperties: false,
+      },
+    },
+    requires_human_review: { type: 'boolean' },
+    concern_reason_code: { type: 'string', enum: ['NOT_APPLICABLE', 'UNRESOLVED_CONTRADICTION', 'SAFETY_OR_SCOPE_CONCERN', 'EVIDENCE_INSUFFICIENCY'] },
+    concern_reason: { type: 'string' },
+    related_claim_ids: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['resolved_synthesis_signals', 'requires_human_review', 'concern_reason_code', 'concern_reason', 'related_claim_ids'],
+  additionalProperties: false,
+};
+
+export async function reconcileRequiredSynthesisSignals(env, {
+  topic_slug, evidenceBundle, existingOutput, synthesisRequiredFlags = [], pageIntent = null,
+}) {
+  const intent = resolvePageSynthesisIntent(topic_slug, pageIntent);
+  // Full evidence is retained, but the existing 400+ long disposition reasons
+  // are not resent. Only their IDs and the scientific public framing matter.
+  const summary = {
+    disposition: existingOutput.recommended_disposition,
+    page_scope: existingOutput.page_scope,
+    selected_claim_ids: (existingOutput.selected_claims || []).map(c => c.claim_id),
+    excluded_claim_ids: (existingOutput.excluded_claims || []).map(c => c.claim_id),
+    public_framing: existingOutput.public_framing,
+    unresolved_issues: existingOutput.unresolved_issues,
+  };
+  const system = [
+    'You are AIMT\'s independent Publication Editor signal-reconciliation pass, NOT a fresh synthesis.',
+    'Review the supplied complete VERIFIED evidence for the explicitly required scientific safety/conflict signals.',
+    'The existing per-claim selected/excluded decisions and public framing are frozen. Do not rewrite them or invent supporting evidence.',
+    'Return a separate, evidence-grounded resolution for EACH required signal with actual candidate claim IDs; do not supply an empty or generic resolution.',
+    'If evidence reveals an unresolved material contradiction, safety concern or missing evidence, set requires_human_review=true and give a specific reason and supporting claim IDs.',
+    'If there is no material conflict, explain the actual difference in population, intervention or endpoint that makes the apparently opposite findings compatible.',
+    'Never silently upgrade scientific certainty; never turn a concern into approval by omitting it.',
+  ].join('\n') + EVIDENCE_TABLE_INSTRUCTION;
+  return callStructured(env, {
+    system,
+    userContent: JSON.stringify({
+      topic_slug, page_concept: intent.page_concept,
+      public_intent: intent.public_intent,
+      synthesis_required_flags: synthesisRequiredFlags,
+      existing_synthesis: summary,
+      evidence_bundle: encodeEvidenceBundle(evidenceBundle),
+    }),
+    schema: REQUIRED_SIGNAL_REPAIR_SCHEMA,
+    maxTokens: RECONCILIATION_MAX_TOKENS,
+    effort: RECONCILIATION_EFFORT,
+    callLabel: 'Required scientific signal reconciliation',
+    claimCount: evidenceBundle.claims.length,
+    sourceCount: evidenceBundle.sources.length,
+  });
 }

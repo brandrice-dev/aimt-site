@@ -39,6 +39,9 @@ export function classifyRecovery(report) {
       || /missing.*key|credential/i.test(report.exception_reason || '')) return 'AUTHORIZATION_REQUIRED';
     return 'RETRY_PROVIDER';
   }
+  // Technical model output failure is not a scientific safety judgment.
+  // Preserve the topic, do not retry the huge paid request in this window.
+  if (report.final_state === 'INVALID_RESPONSE' && /^(truncated|unparseable_output)$/.test(report.exception_reason || '')) return 'RETRY_NEXT_SCHEDULE';
   if (report.final_state === 'INFRA_REVIEW') return 'SAFETY_REVIEW';
   if (['EDITORIAL_REVIEW', 'HUMAN_REVIEW'].includes(report.final_state)) {
     if (report.writer_result?.valid === false) return 'REPAIR_WRITER';

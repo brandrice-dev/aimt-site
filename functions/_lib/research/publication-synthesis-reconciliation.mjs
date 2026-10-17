@@ -322,3 +322,60 @@ export function buildHumanReviewJustificationRetryInstruction(base) {
     `This is your ONE bounded retry -- there will not be another. Reconsider the full evidence bundle below. If the evidence genuinely supports AUTO_READY, set recommended_disposition to AUTO_READY (with human_review_justification.reason_code "NOT_APPLICABLE", reason "Not applicable", related_claim_ids []). If you still believe this page genuinely needs human review, you MUST set human_review_justification.reason_code to one of HIGH_RISK_CONTENT, UNRESOLVED_CONTRADICTION, SAFETY_OR_SCOPE_CONCERN, EVIDENCE_INSUFFICIENCY, or OTHER_SUBSTANTIVE_EXCEPTION, write a SPECIFIC reason naming what exactly could not be resolved and why, and list the specific claim_id(s) involved in related_claim_ids. A bare or generic HUMAN_REVIEW will not be accepted a second time -- if you cannot articulate a specific reason, that itself indicates the evidence probably supports AUTO_READY.`,
   ].join('\n');
 }
+
+/**
+ * Fail-closed, deterministic merge of a bounded model-produced scientific
+ * signal check into an otherwise COMPLETE full synthesis. No per-claim
+ * disposition or public factual text may change in this lane.
+ */
+export function mergeRequiredSignalRepair(original, repair, requiredFlags, evidenceBundle, packet = {}) {
+  const bad = () => { throw new Error('INVALID_REQUIRED_SIGNAL_REPAIR'); };
+  const flags = [...new Set(requiredFlags || [])];
+  const claimIds = new Set((evidenceBundle.claims || []).map(c => c.claim_id));
+  if (!flags.length || !repair || typeof repair !== 'object' ||
+      !Array.isArray(repair.resolved_synthesis_signals) ||
+      repair.resolved_synthesis_signals.length !== flags.length ||
+      typeof repair.requires_human_review !== 'boolean' ||
+      !Array.isArray(repair.related_claim_ids)) bad();
+  const seen = new Set();
+  for (const item of repair.resolved_synthesis_signals) {
+    if (!item || !flags.includes(item.signal) || seen.has(item.signal) ||
+        typeof item.resolution !== 'string' || item.resolution.trim().length < 25 ||
+        !Array.isArray(item.claim_ids) || item.claim_ids.length === 0 ||
+        item.claim_ids.some(id => !claimIds.has(id))) bad();
+    seen.add(item.signal);
+    if (item.signal === 'SAFETY_CONCLUSION_PRESENT' && (packet.safety_claim_ids || []).length &&
+      !item.claim_ids.some(id => packet.safety_claim_ids.includes(id))) bad();
+    if (item.signal === 'POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS') {
+      for (const side of ['supports_effect_claim_ids','no_effect_claim_ids']) {
+        if ((packet[side] || []).length && !item.claim_ids.some(id => packet[side].includes(id))) bad();
+      }
+    }
+  }
+  if (flags.some(flag => !seen.has(flag))) bad();
+
+  const idsAreValid = repair.related_claim_ids.every(id => claimIds.has(id));
+  if (!idsAreValid) bad();
+  if (repair.requires_human_review) {
+    if (!['UNRESOLVED_CONTRADICTION','SAFETY_OR_SCOPE_CONCERN','EVIDENCE_INSUFFICIENCY'].includes(repair.concern_reason_code) ||
+        typeof repair.concern_reason !== 'string' || repair.concern_reason.trim().length < 25 ||
+        repair.related_claim_ids.length === 0) bad();
+  } else if (repair.concern_reason_code !== 'NOT_APPLICABLE' ||
+             repair.related_claim_ids.length !== 0) bad();
+
+  const merged = {
+    ...original,
+    resolved_synthesis_signals: [...original.resolved_synthesis_signals, ...repair.resolved_synthesis_signals],
+  };
+  if (repair.requires_human_review) {
+    merged.recommended_disposition = 'HUMAN_REVIEW';
+    merged.confidence = 'low';
+    merged.unresolved_issues = [...original.unresolved_issues, repair.concern_reason];
+    merged.human_review_justification = {
+      reason_code: repair.concern_reason_code,
+      reason: repair.concern_reason,
+      related_claim_ids: repair.related_claim_ids,
+    };
+  }
+  return merged;
+}
