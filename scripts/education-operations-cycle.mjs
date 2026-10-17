@@ -103,7 +103,7 @@ import { checkRouteNotAlreadyPublished } from '../functions/_lib/education-ops/e
 import { getPageBuilderRoute } from '../functions/_lib/page-builder/page-builder-route-registry.mjs';
 import {
   buildCandidateBundle, advanceCandidateBundle, verifyCandidateBundleIntegrity,
-  resolveCandidateResumeFreshness, determineResumeStage, RESUME_STAGE,
+  resolveCandidateResumeFreshness, determineResumeStage, RESUME_STAGE, canReviseReviewerRejectedDraft,
 } from '../functions/_lib/education-ops/education-candidate-bundle.mjs';
 import { sanitizePublicationValidatorViolations } from '../functions/_lib/research/publication-violation-sanitizer.mjs';
 import {
@@ -790,6 +790,7 @@ export async function runDecisionPipeline(env, options = {}) {
       candidateResume.resumed_from_stage = stage;
 
       if (stage === RESUME_STAGE.EDITORIAL_REVIEW) {
+        let revisedForReview = false;
         // BOUNDED FRAMING-REMOVAL REPAIR (docs/education/AIMT-EDUCATION-
         // OPERATIONS-v1.md): a durable EDITORIAL_REVIEW candidate whose
         // Reviewer verdict failed ONLY on removable FRAMING gets exactly
@@ -831,6 +832,96 @@ export async function runDecisionPipeline(env, options = {}) {
           });
         }
 
+
+        // ONE bounded Writer revision of an independently rejected,
+        // previously-valid Page Plan. Reuses the exact persisted clearance:
+        // zero Intent Planner / Publication Editor calls. Never bypasses
+        // the complete deterministic Page Plan validator or Reviewer.
+        if (canReviseReviewerRejectedDraft(bundleDraft)) {
+          const oldReview = bundleDraft.review_result;
+          const previousPlan = bundleDraft.page_plan;
+          // Mark before paid work to avoid repeating an ambiguous failed
+          // model call after a crash or workflow rerun.
+          bundleDraft = advanceCandidateBundle(bundleDraft, {
+            writerRevision: { attempted: true, status: 'started' },
+          });
+          writeBundleFn(selected.topic_slug, bundleDraft);
+          const revisionFn = fns.writeFn || writeEducationPagePlan;
+          const revised = await revisionFn(env, {
+            intentPlan: bundleDraft.intent_plan,
+            clearedSnapshot: bundleDraft.fingerprint_input,
+            route: bundleDraft.route,
+            cluster: clusterKey,
+            existingClusterPages,
+            previousPagePlan: previousPlan,
+            reviewerFeedback: oldReview,
+          });
+          if (!revised.ok) {
+            // A local SPEND_LIMIT preflight never contacted the provider.
+            // Re-enable the same single permitted rewrite only in that case;
+            // the next legitimate scheduled budget window can execute it.
+            const notSent = revised.reason === 'budget_exceeded'
+              && revised.diagnostics?.code === 'SPEND_LIMIT'
+              && revised.diagnostics?.attempts === 0;
+            bundleDraft = advanceCandidateBundle(bundleDraft, {
+              writerRevision: { attempted: !notSent, status: notSent ? 'await_budget' : 'provider_failed' },
+            });
+            writeBundleFn(selected.topic_slug, bundleDraft);
+            return finish({
+              candidate_topics: candidateTopics, selected_topic: selected.topic_slug,
+              risk_tier: selected.v1_result.risk_tier,
+              publication_editor_result: { status: 'AUTO_READY', generation_source_hash: bundleDraft.generation_source_hash },
+              writer_result: { valid: true },
+              review_result: oldReview,
+              final_state: RUN_FINAL_STATE.CONFIG_BLOCKED,
+              exception_reason: 'Bounded editorial revision unavailable: ' + String(revised.reason || 'provider_error'),
+            });
+          }
+          modelCalls.push({ role: 'education_writer_revision', actual_call_count: 1, ...revised.usage });
+          const revisedPlan = {
+            ...revised.output,
+            sources: buildTrustedSources(bundleDraft.fingerprint_input),
+            related_links: buildEducationRelatedLinks({
+              clusterLabel: cluster.label,
+              clusterRoutePrefix: cluster.route_prefix,
+              siblingPages: trustedSiblingPages,
+            }),
+          };
+          const validation = validateEducationPagePlan(revisedPlan, bundleDraft.fingerprint_input, {
+            expectedTopicSlug: selected.topic_slug,
+            expectedCluster: clusterKey,
+            expectedRoute: bundleDraft.route,
+          });
+          if (!validation.valid) {
+            // Keep the last known deterministic-valid Page Plan unchanged.
+            bundleDraft = advanceCandidateBundle(bundleDraft, {
+              writerRevision: { attempted: true, status: 'failed_validation' },
+            });
+            writeBundleFn(selected.topic_slug, bundleDraft);
+            return finish({
+              candidate_topics: candidateTopics, selected_topic: selected.topic_slug,
+              risk_tier: selected.v1_result.risk_tier,
+              publication_editor_result: { status: 'AUTO_READY', generation_source_hash: bundleDraft.generation_source_hash },
+              writer_result: { valid: false, violations: validation.violations },
+              review_result: oldReview,
+              final_state: RUN_FINAL_STATE.EDITORIAL_REVIEW,
+              exception_reason: 'Bounded Writer revision failed deterministic validation.',
+            });
+          }
+          // Persist the new deterministic-valid draft BEFORE the new Reviewer
+          // call. A budget/provider interruption resumes at NEEDS_REVIEWER
+          // without repeating the Writer revision.
+          bundleDraft = advanceCandidateBundle(bundleDraft, {
+            pagePlan: revisedPlan,
+            writerValidation: { valid: true },
+            reviewResult: null,
+            writerRevision: { attempted: true, status: 'ready_for_reviewer' },
+          });
+          writeBundleFn(selected.topic_slug, bundleDraft);
+          revisedForReview = true;
+        }
+
+        if (!revisedForReview) {
         // Not repairable (or already attempted) -- a governed, non-PASS
         // Reviewer verdict is already persisted; preserve it exactly,
         // never auto-retry any model for it.
@@ -842,6 +933,7 @@ export async function runDecisionPipeline(env, options = {}) {
           final_state: RUN_FINAL_STATE.EDITORIAL_REVIEW,
           exception_reason: bundleDraft.review_result.summary,
         });
+        }
       }
       if (stage === RESUME_STAGE.READY_FOR_PREPARE) {
         // Reviewer PASS is already persisted -- ZERO further model

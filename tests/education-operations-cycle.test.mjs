@@ -2030,6 +2030,67 @@ for (const [reason, expected] of [
   check('DURABLE_TOPIC_BOUNDS', 'failed topic history persists its terminal failure and attempt bound', attempts.get(slug).state === 'PROVIDER_FAILED' && attempts.get(slug).attempts === 2);
 }
 
+
+async function testBoundedVoiceEditorialRecovery() {
+  const slug = 'androgenetic-alopecia';
+  const pool = healthyPoolForSingleTopic(slug);
+  const store = makeInMemoryCandidateStore();
+  const reviewerFailure = {
+    ok: true, usage: { input_tokens: 80, output_tokens: 50 },
+    output: {
+      paraphrase_reviews: [{
+        location: 'answer_summary', verdict: 'OUTSIDE_EVIDENCE',
+        reason: 'The opening invented a contrast the supporting statement never made.',
+      }],
+      framing_reviews: [],
+      voice_verdict: 'FAIL', voice_reason: 'Abstract, stiff, not accessible.',
+      scope_verdict: 'PASS', scope_reason: 'Within the approved scope.',
+    },
+  };
+  const first = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn,
+      writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async()=>pool,
+      planIntentFn: async()=>fakeIntentResult(slug),
+      synthesizeFn: fakeSynthesizeFn(slug),
+      writeFn: async (_env, {clearedSnapshot})=>fakeWriterResult(slug,clearedSnapshot),
+      reviewFn: async()=>reviewerFailure,
+    },
+  });
+  check('VOICE_EDITORIAL_REVISION', 'run A persists the original Reviewer rejection',first.final_state===RUN_FINAL_STATE.EDITORIAL_REVIEW && store.store.get(slug)?.review_result?.voice_fail===true);
+  const firstBundle=store.store.get(slug), authority=firstBundle.prepared_artifact;
+  const writerSpy=spyFn(async (_env,args)=>{
+    check('VOICE_EDITORIAL_REVISION','writer sees original reviewer facts and draft, not a regenerated clearance', args.previousPagePlan===firstBundle.page_plan && args.reviewerFeedback===firstBundle.review_result);
+    return fakeWriterResult(slug,args.clearedSnapshot);
+  });
+  const reviewerSpy=spyFn(async()=>fakePassingReviewResult());
+  const plannerSpy=spyFn(async()=>fakeIntentResult(slug));
+  const synthSpy=spyFn(fakeSynthesizeFn(slug));
+  const second = await run(FAKE_ENV_WITH_CRED, {
+    fns: {
+      loadCandidateBundleFn: store.loadCandidateBundleFn,
+      writeCandidateBundleFn: store.writeCandidateBundleFn,
+      fetchEvidenceFn: async()=>pool,
+      planIntentFn:plannerSpy,synthesizeFn:synthSpy,writeFn:writerSpy,reviewFn:reviewerSpy,
+    },
+  });
+  check('VOICE_EDITORIAL_REVISION','run B passes after one separately reviewed revision', second.final_state===RUN_FINAL_STATE.SHADOW_CANDIDATE_READY && reviewerSpy.callCount===1);
+  check('VOICE_EDITORIAL_REVISION','one and only one revised Writer call',writerSpy.callCount===1 && second.model_calls.total_calls===2);
+  check('VOICE_EDITORIAL_REVISION','prior scientific synthesis and intent are never regenerated',plannerSpy.callCount===0 && synthSpy.callCount===0);
+  const latest=store.store.get(slug);
+  check('VOICE_EDITORIAL_REVISION','exact scientific clearance never altered',latest.prepared_artifact===authority);
+  check('VOICE_EDITORIAL_REVISION','bounded revision saved and passed independent review',latest.writer_revision?.attempted===true && latest.review_result?.outcome==='PASS');
+  const noMoreReview=spyFn(async()=>{throw Error('PASS must never re-review');});
+  const third=await run(FAKE_ENV_WITH_CRED,{fns:{
+    loadCandidateBundleFn:store.loadCandidateBundleFn,writeCandidateBundleFn:store.writeCandidateBundleFn,
+    fetchEvidenceFn:async()=>pool,reviewFn:noMoreReview
+  }});
+  check('VOICE_EDITORIAL_REVISION','subsequent resume reuses completed reviewer PASS',third.candidate_resume.resumed_from_stage===RESUME_STAGE.READY_FOR_PREPARE && noMoreReview.callCount===0);
+}
+
+await testBoundedVoiceEditorialRecovery();
+
 // ---- Report ----
 const byFixture = new Map();
 for (const r of results) {
