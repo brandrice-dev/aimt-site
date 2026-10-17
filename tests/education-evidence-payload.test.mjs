@@ -4,7 +4,7 @@ import {mkdtempSync,rmSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {buildSynthesisEvidenceBundle,encodeEvidenceBundle,decodeEvidenceBundle,EVIDENCE_TABLE_INSTRUCTION} from '../functions/_lib/research/publication-synthesis-evidence.mjs';
-import {buildSynthesisRequest,buildPublicationRequestBody,synthesizeTopic} from '../functions/_lib/research/publication-synthesis-client.mjs';
+import {buildSynthesisRequest,buildPublicationRequestBody,synthesizeTopic,reconcileRequiredSynthesisSignals} from '../functions/_lib/research/publication-synthesis-client.mjs';
 import {createPublicationCostControl,PUBLICATION_INPUT_TOKEN_LIMIT} from '../functions/_lib/research/publication-cost-control.mjs';
 import {validateSynthesisOutput} from '../functions/_lib/research/publication-synthesis-validator.mjs';
 import {runSynthesisPipeline} from '../functions/_lib/research/publication-synthesis-orchestrator.mjs';
@@ -131,4 +131,38 @@ test('technical blocking preserves the saved topic, research and remaining windo
  assert.equal(report.autonomous_controller.next_action,'EVIDENCE_SIZE_BLOCKED');assert.equal(checkpoint.next_topic,'trichology');
  assert.deepEqual(checkpoint.cost_control,cost);assert.deepEqual(checkpoint.research,{preserved:{searches:1}});
  assert.equal(checkpoint.budget_window,state.budget_window);assert.equal(report.final_state,'SYNTHESIS_FAILED');
+});
+
+test('second real-shaped signal-only request fits the same $2 allowance after a 401-claim synthesis',async()=>{
+ const {bundle}=fixture(),output=proposal(bundle);output.resolved_synthesis_signals=[];
+ const initial={reserved_cost_estimate_usd:1.07682,reported_usage_cost_estimate_usd:.781282,requests:1,requests_with_unknown_usage:0};
+ const cost=createPublicationCostControl({previous:initial});let captured;
+ const before=globalThis.fetch;
+ globalThis.fetch=async(_url,init)=>{
+  captured=JSON.parse(init.body);
+  assert.ok(bytes(captured)+1024<PUBLICATION_INPUT_TOKEN_LIMIT,'Signal audit input must fit same unchanged ceiling');
+  assert.equal(JSON.parse(captured.messages[0].content).evidence_bundle.claims.rows.length,401);
+  assert.equal(JSON.parse(captured.messages[0].content).evidence_bundle.sources.rows.length,101);
+  assert.deepEqual(JSON.parse(captured.messages[0].content).synthesis_required_flags,['POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS']);
+  const reply={resolved_synthesis_signals:[{signal:'POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS',
+   resolution:'These study findings differ in their measured populations and do not establish a causal treatment effect.',claim_ids:['verified-claim-1','verified-claim-2']}],
+   requires_human_review:false,concern_reason_code:'NOT_APPLICABLE',concern_reason:'Not applicable',related_claim_ids:[]};
+  const events=[
+    {type:'message_start',message:{usage:{input_tokens:10000,output_tokens:1}}},
+    {type:'content_block_start',index:0,content_block:{type:'text',text:JSON.stringify(reply)}},
+    {type:'content_block_stop',index:0},
+    {type:'message_delta',delta:{stop_reason:'end_turn'},usage:{output_tokens:100}},
+    {type:'message_stop'}
+  ];
+  return new Response(events.map(x=>'data: '+JSON.stringify(x)+'\\n\\n').join(''),{headers:{'Content-Type':'text/event-stream'}});
+ };
+ try{
+  const result=await reconcileRequiredSynthesisSignals({ANTHROPIC_PUBLICATION_EDITOR_API_KEY:'test',publicationCostControl:cost},{
+   topic_slug:'trichology',evidenceBundle:bundle,existingOutput:output,
+   synthesisRequiredFlags:['POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS'],pageIntent});
+  assert.equal(result.ok,true,JSON.stringify(result));
+  assert.equal(result.output.resolved_synthesis_signals.length,1);
+  assert.equal(cost.summary().requests,2);
+  assert.ok(cost.summary().reserved_cost_estimate_usd<2);
+ }finally{globalThis.fetch=before;}
 });
