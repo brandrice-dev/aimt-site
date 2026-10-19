@@ -59,6 +59,7 @@ import {
 } from './publication-synthesis-reconciliation.mjs';
 
 import { sanitizePublicationDiagnostics } from './publication-anthropic-transport.mjs';
+import {BATCH_SYNTHESIS_THRESHOLD,runBatchedSynthesisPipeline} from './publication-synthesis-batches.mjs';
 
 function emptyMetrics() {
   return { model_calls: 0, reconciliation_calls: 0, full_retries: 0, total_input_tokens: 0, total_output_tokens: 0, calls: [], model_info: null };
@@ -142,7 +143,13 @@ function mapViolationsToTerminalStatus(violations) {
  *   metrics: object
  * }>}
  */
-export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidenceBundle, pageIntent = null, fns = {} }) {
+export async function runSynthesisPipeline(env, { topic_slug, v1Result, evidenceBundle, pageIntent = null, batchIo = null, fns = {} }) {
+  // Production corpora with many claims must never be sent through the old
+  // one-shot 64k-response lane again. Injected synthesizeFn is used ONLY
+  // by legacy small-fixture tests and cannot authorize production output.
+  if(evidenceBundle.claims.length >= BATCH_SYNTHESIS_THRESHOLD && !fns.synthesizeFn) {
+    return runBatchedSynthesisPipeline(env,{topic_slug,v1Result,evidenceBundle,pageIntent,batchIo,fns});
+  }
   const synthesizeFn = fns.synthesizeFn || defaultSynthesizeTopic;
   const reconcileFn = fns.reconcileFn || defaultReconcileMissingClaims;
   const retryFn = fns.retryFn || defaultRetrySynthesisWithReconciliation;

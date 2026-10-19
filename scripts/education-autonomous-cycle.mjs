@@ -31,6 +31,15 @@ export function trustedBudgetStartedAt(run, repository, scheduled = false) {
 export function classifyRecovery(report) {
   if (report.final_state === 'SHADOW_CANDIDATE_READY') return 'WAIT_PUBLICATION';
   if (report.final_state === 'PUBLISHED') return 'SELECT_NEXT_TOPIC';
+  if (report.final_state === 'SYNTHESIS_IN_PROGRESS') {
+    // Reuse the SAME reserved window on a continued job, at most the
+    // original six calls/$2 cumulatively. If insufficient allowance,
+    // preserve the checkpoint for the NEXT trusted scheduled renewal.
+    const c=report.cost_control||{};
+    const room=(c.budget_usd||2)-(c.reserved_cost_estimate_usd||0);
+    return report.publication_editor_result?.reason!=='budget_pause' &&
+      c.requests<5 && room>=0.35 ? 'CONTINUE_BATCHES' : 'WAIT_NEXT_BUDGET_WINDOW';
+  }
   const diagnostic = report.provider_request_diagnostics || report.publication_editor_result?.diagnostics;
   if (diagnostic?.code === 'TOKEN_LIMIT' || /token_limit|TOKEN_LIMIT/.test(report.exception_reason || '')) return 'EVIDENCE_SIZE_BLOCKED';
   if (/budget|SPEND_LIMIT/.test(report.exception_reason || '') || diagnostic?.code === 'SPEND_LIMIT') return 'BUDGET_PAUSED';
@@ -146,5 +155,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const report = await runAutonomousCycle(process.env);
   console.log(JSON.stringify({ ...report, __internal: undefined }, null, 2));
   const action = report.autonomous_controller.next_action;
-  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `continue=${['REPAIR_WRITER','RETRY_PROVIDER','RESEARCH','SELECT_NEXT_TOPIC'].includes(action)}\n`);
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `continue=${['CONTINUE_BATCHES','REPAIR_WRITER','RETRY_PROVIDER','RESEARCH','SELECT_NEXT_TOPIC'].includes(action)}\n`);
 }

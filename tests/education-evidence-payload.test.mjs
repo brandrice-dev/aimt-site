@@ -60,10 +60,13 @@ test('complete streamed proposal over compact evidence is validated against all 
    {type:'message_stop'}];
   return new Response(events.map(e=>`data: ${JSON.stringify(e)}\n\n`).join(''),{headers:{'Content-Type':'text/event-stream'}});
  };
- try{const result=await runSynthesisPipeline({ANTHROPIC_PUBLICATION_EDITOR_API_KEY:'fixture',publicationCostControl:budget},
-  {topic_slug:'trichology',v1Result:{topic_slug:'trichology',risk_tier:'LOWER',readiness_status:'NEEDS_SYNTHESIS',synthesis_packet:packet},evidenceBundle:bundle,pageIntent});
-  assert.equal(result.status,'AUTO_READY');assert.equal(result.finalOutput.selected_claims.length,401);
-  assert.equal(calls,1);assert.equal(result.metrics.model_calls,1);assert.equal(budget.summary().requests,2);
+ try{const result=await synthesizeTopic({ANTHROPIC_PUBLICATION_EDITOR_API_KEY:'fixture',publicationCostControl:budget},
+  {topic_slug:'trichology',evidenceBundle:bundle,pageIntent});
+  assert.equal(result.ok,true);
+  const v1={topic_slug:'trichology',risk_tier:'LOWER',readiness_status:'NEEDS_SYNTHESIS',synthesis_packet:packet};
+  assert.equal(validateSynthesisOutput({v1Result:v1,evidenceBundle:bundle,aiOutput:result.output}).valid,true);
+  assert.equal(result.output.selected_claims.length,401);
+  assert.equal(calls,1);assert.equal(budget.summary().requests,2);
  }finally{globalThis.fetch=originalFetch;}
 });
 test('full original evidence remains validator authority; missing disposition, lost limitation and one-sided conflict block readiness',()=>{
