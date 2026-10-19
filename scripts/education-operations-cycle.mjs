@@ -69,6 +69,8 @@ import { checkEducationOpsCredential } from '../functions/_lib/education-ops/edu
 import { planPageIntent } from '../functions/_lib/education-ops/education-intent-planner-client.mjs';
 import { validateIntentPlan } from '../functions/_lib/education-ops/education-intent-planner-validator.mjs';
 import { createPublicationCostControl } from '../functions/_lib/research/publication-cost-control.mjs';
+import {BATCH_SYNTHESIS_CONTRACT,BATCH_SYNTHESIS_THRESHOLD} from '../functions/_lib/research/publication-synthesis-batches.mjs';
+import {createSynthesisProgressIo,hasSynthesisProgress} from './_lib/education-synthesis-progress.mjs';
 import { waitForCandidateHeadTests, ensureCandidateHeadTests } from './_lib/education-candidate-checks.mjs';
 import { topicAttemptFingerprint, topicAttemptHold, reserveTopicAttempt, loadTopicAttempt, writeTopicAttempt, loadTopicIntent, writeTopicIntent } from './_lib/education-topic-attempts.mjs';
 import { sanitizePublicationDiagnostics } from '../functions/_lib/research/publication-anthropic-transport.mjs';
@@ -621,8 +623,18 @@ export async function runDecisionPipeline(env, options = {}) {
       fingerprintsBySlug[concept.topic_slug] = fingerprint;
       const previous = loadAttempt(concept.topic_slug);
       attemptsBySlug[concept.topic_slug] = previous;
+      // Bounded synthesis spanning trusted budget windows is ONE topic
+      // attempt, not a new paid retry each day. A single migration from
+      // legacy all-at-once INVALID_RESPONSE may start the new protocol.
+      const large=evidence.claims.length>=BATCH_SYNTHESIS_THRESHOLD;
+      const hasProgress=(fns.hasSynthesisProgressFn||((slug)=>hasSynthesisProgress(attemptRoot,slug)))(concept.topic_slug);
+      const resumingBatch=large && previous?.fingerprint===fingerprint &&
+        previous?.batch_protocol===BATCH_SYNTHESIS_CONTRACT &&
+        previous.state==='SYNTHESIS_IN_PROGRESS' && hasProgress;
+      const migratingLegacy=large && previous?.fingerprint===fingerprint &&
+        previous?.state==='INVALID_RESPONSE' && !previous.batch_protocol;
       attemptHoldsBySlug[concept.topic_slug] = options.deferredFingerprints?.[concept.topic_slug] === fingerprint
-        ? 'CONTINUATION_TOPIC_DEFERRED' : topicAttemptHold(previous, fingerprint);
+        ? 'CONTINUATION_TOPIC_DEFERRED' : (resumingBatch||migratingLegacy?null:topicAttemptHold(previous,fingerprint));
     }
   } catch {
     return finish({ final_state: RUN_FINAL_STATE.INFRA_REVIEW, exception_reason: 'Durable topic attempt history could not be verified.', stopped_before_model_stage: true });
@@ -657,8 +669,15 @@ export async function runDecisionPipeline(env, options = {}) {
     if (attemptRecord) return null;
     try {
       const previous = attemptsBySlug[selected.topic_slug];
-      const resuming = options.continuation === true && previous && previous.fingerprint === fingerprintsBySlug[selected.topic_slug];
-      const reserved = resuming ? { ...previous, state: 'STARTED' } : reserveTopicAttempt(previous, fingerprintsBySlug[selected.topic_slug]);
+      const fp=fingerprintsBySlug[selected.topic_slug];
+      const large=selected.v1_result.candidate_claim_ids.length>=BATCH_SYNTHESIS_THRESHOLD;
+      const migratingLegacy=large && previous?.fingerprint===fp &&
+        previous.state==='INVALID_RESPONSE' && !previous.batch_protocol;
+      const resuming = options.continuation === true && previous &&
+        previous.fingerprint === fp && !migratingLegacy;
+      const reserved = resuming ? { ...previous, state: 'STARTED' }
+        : reserveTopicAttempt(migratingLegacy?null:previous, fp);
+      if(large)reserved.batch_protocol=BATCH_SYNTHESIS_CONTRACT;
       // Legacy reservations are already carried by the restored controller.
       // A topic's older window must not exhaust a legitimately later schedule.
       if (resuming && (!options.budgetWindow || previous.budget_window === options.budgetWindow)) costControl.resume(previous.cost_control);
@@ -1066,6 +1085,7 @@ export async function runDecisionPipeline(env, options = {}) {
         v1Result: selected.v1_result,
         pageIntent: { page_concept: intentPlan.page_concept, public_intent: intentPlan.public_intent, in_scope_concepts: intentPlan.in_scope_concepts, out_of_scope_concepts: intentPlan.out_of_scope_concepts },
         evidenceRows: evidencePool,
+        batchIo: (fns.createSynthesisProgressIoFn||createSynthesisProgressIo)(attemptRoot),
       }, fns);
     } catch (err) {
       const isConfigError = err && (err.name === 'PublicationEditorModelConfigError' || err.name === 'EducationOpsModelConfigError');
@@ -1092,6 +1112,15 @@ export async function runDecisionPipeline(env, options = {}) {
     }
 
     if (!synthesisResult.ok) {
+      if(synthesisResult.status==='SYNTHESIS_IN_PROGRESS') {
+        return finish({
+          candidate_topics:candidateTopics,selected_topic:selected.topic_slug,
+          risk_tier:selected.v1_result.risk_tier,
+          publication_editor_result:{status:'SYNTHESIS_IN_PROGRESS',
+            reason:synthesisResult.reason,progress:synthesisResult.progress},
+          final_state:RUN_FINAL_STATE.SYNTHESIS_IN_PROGRESS,
+        });
+      }
       const isHumanReview = synthesisResult.status === 'HUMAN_REVIEW';
       const humanReviewReasonCode = synthesisResult.humanReviewJustification && synthesisResult.humanReviewJustification.reason_code;
       const isEvidenceInsufficiency = isHumanReview && humanReviewReasonCode === 'EVIDENCE_INSUFFICIENCY';
