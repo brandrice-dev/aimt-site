@@ -69,7 +69,7 @@ export class SynthesisCacheError extends Error {
  *   reason: string|null
  * }>}
  */
-export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = null, v1Result, pageIntent, evidenceRows }, fns = {}) {
+export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = null, v1Result, pageIntent, evidenceRows, batchIo = null }, fns = {}) {
   const synthesizeFn = fns.synthesizeFn || runSynthesisPipeline;
 
   const evidenceBundle = buildSynthesisEvidenceBundle(v1Result.synthesis_packet, evidenceRows || { claims: [], sources: [] });
@@ -85,7 +85,7 @@ export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = n
   // guarantees one validated intent governs both synthesis and the
   // resulting clearance brief/fingerprint, never two independently-derived
   // scope definitions.
-  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle, pageIntent });
+  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle, pageIntent, batchIo });
 
   if (pipelineResult.status !== 'AUTO_READY') {
     return {
@@ -97,6 +97,7 @@ export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = n
       diagnostics: pipelineResult.diagnostics || null,
       violations: pipelineResult.violations || null,
       humanReviewJustification: pipelineResult.finalOutput ? pipelineResult.finalOutput.human_review_justification : null,
+      progress: pipelineResult.progress || null,
     };
   }
 
