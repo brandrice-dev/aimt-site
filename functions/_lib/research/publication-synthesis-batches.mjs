@@ -228,6 +228,7 @@ export async function runBatchedSynthesisPipeline(env,{
     await persist();
     const result=await chunkFn(env,{
       topic_slug,pageIntent,chunk:current,requiredFlags:v1Result.synthesis_packet?.synthesis_required_flags||[],
+      schema:BATCH_DECISIONS_SCHEMA,
     });
     account(metrics,'evidence_batch_'+current.index,result);
     if(!result?.ok) {
@@ -260,6 +261,7 @@ export async function runBatchedSynthesisPipeline(env,{
     await persist();
     const result=await globalFn(env,{
       topic_slug,pageIntent,evidenceBundle,v1Result,completed:progress.completed,
+      schema:GLOBAL_SYNTHESIS_SCHEMA,
     });
     account(metrics,'global_scientific_synthesis',result);
     if(!result?.ok) {
