@@ -20,7 +20,7 @@ if(artifact){
 with zipfile.ZipFile(sys.argv[1]) as z:
  names=z.namelist();assert len(names)==len(set(names))
  for i in z.infolist():
-  assert re.fullmatch(r'(?:[a-z0-9]+(?:-[a-z0-9]+)*/(?:candidate|attempts|intent)\\.json|continuation\\.json)',i.filename)
+  assert re.fullmatch(r'(?:[a-z0-9]+(?:-[a-z0-9]+)*/(?:candidate|attempts|intent|synthesis-progress)\\.json|continuation\\.json)',i.filename)
   assert not stat.S_ISLNK(i.external_attr>>16)
   json.loads(z.read(i))
  for n in names:
