@@ -658,7 +658,7 @@ async function testAutopublishAndCeilingUnchanged() {
   check('LIMITS', '#29 at 4/4 the run is NO_OP_SUCCESS before any selection or model call', capped.final_state === RUN_FINAL_STATE.NO_OP_SUCCESS && capped.model_calls.actual_model_call_count === 0, capped.selection_reason);
   const ops = readRepo('.github/workflows/aimt-education-operations.yml');
   const pub = readRepo('.github/workflows/aimt-education-publish.yml');
-  check('LIMITS', 'paid Education Operations weekday schedule on cost safety hold; manual dispatch still available', !ops.includes("- cron: '0 14 * * 1-5'") && ops.includes('workflow_dispatch:') && ops.includes('COST SAFETY HOLD'));
+  check('LIMITS', 'weekday schedule restored only with bounded durable batching and original dispatch', ops.includes("- cron: '0 14 * * 1-5'") && ops.includes('workflow_dispatch:') && ops.includes('durable') && ops.includes('$2 and six-request ceiling'));
   check('LIMITS', 'workflows still read AUTOPUBLISH/MAX_PAGES from repository variables', ops.includes('${{ vars.AIMT_EDUCATION_AUTOPUBLISH_ENABLED }}') && pub.includes('${{ vars.AIMT_EDUCATION_MAX_PAGES_PER_WEEK }}'));
   check('LIMITS', '#32 exact-run workflow handoff unchanged (workflow_run from scheduled main Operations run)', pub.includes("github.event.workflow_run.name == 'AIMT Education Operations'") && pub.includes("github.event.workflow_run.event == 'schedule'") && pub.includes("github.event.workflow_run.head_branch == 'main'"));
 }

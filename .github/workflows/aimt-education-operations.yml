@@ -1,12 +1,14 @@
 name: AIMT Education Operations
 
-# COST SAFETY HOLD (October 19, 2026): The weekday paid publication cycle
-# repeatedly reached max_tokens on the same Trichology evidence and produced
-# zero new articles. No automatic paid model calls until bounded, durable
-# synthesis is demonstrated. Existing manual dispatch and the separate
-# Research Feed Ingest workflow remain available. Restore cron only after
-# an approved end-to-end, fail-closed validation of that change.
+# Cost-safe production restart (PR #107): large corpora are processed in
+# independently validated 40-claim batches with tamper-evident durable
+# checkpoints. Each run makes at most two Publication Editor calls. Every
+# trusted weekday window keeps the existing $2 and six-request ceiling.
+# Repeated invalid batches have a hard retry ceiling; no partial evidence
+# can publish, and independent Writer/Reviewer gates remain unchanged.
 on:
+  schedule:
+    - cron: '0 14 * * 1-5'
   workflow_dispatch:
     inputs:
       diagnostic:
