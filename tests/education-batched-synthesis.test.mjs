@@ -11,6 +11,10 @@ import {
 import {buildPublicationRequestBody,buildEvidenceBatchRequest,buildGlobalEvidenceRequest} from '../functions/_lib/research/publication-synthesis-client.mjs';
 import {createPublicationCostControl,PUBLICATION_INPUT_TOKEN_LIMIT} from '../functions/_lib/research/publication-cost-control.mjs';
 import {createSynthesisProgressIo} from '../scripts/_lib/education-synthesis-progress.mjs';
+import {runDecisionPipeline} from '../scripts/education-operations-cycle.mjs';
+import {getPublicationConcept} from '../functions/_lib/education-ops/education-publication-registry.mjs';
+import {selectTopicEvidenceFromRows} from '../functions/_lib/research/publication-readiness-loader.mjs';
+import {topicAttemptFingerprint} from '../scripts/_lib/education-topic-attempts.mjs';
 
 const flag='POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS';
 const pageIntent={
@@ -226,4 +230,62 @@ test('failed batch calls are capped; a preflight financial block consumes zero a
  assert.equal(preflight.status,'SYNTHESIS_IN_PROGRESS');
  assert.equal(preflight.reason,'budget_pause');
  assert.equal(fresh.state.failures['0'],0);
+});
+
+test('production orchestration migrates failed 401-claim attempt and resumes checkpoint without new planner calls',async()=>{
+ const f=fixture();
+ const pool={claims:f.evidenceBundle.claims.map(c=>({...c,topics:[v1Topic]})),sources:f.evidenceBundle.sources};
+ const concept=getPublicationConcept(v1Topic);
+ const fingerprint=topicAttemptFingerprint(concept,selectTopicEvidenceFromRows(concept.controlled_topics,pool));
+ let savedAttempt={version:'education-topic-attempt-v1',fingerprint,attempts:2,
+   state:'INVALID_RESPONSE',cooldown_until:'2030-01-01T00:00:00.000Z'};
+ const batchIo=makeIo();
+ const intent={topic_slug:v1Topic,page_concept:pageIntent.page_concept,
+   public_intent:pageIntent.public_intent,route_slug:concept.route_slug,
+   in_scope_concepts:pageIntent.in_scope_concepts,
+   out_of_scope_concepts:['diagnosis of an individual case','treatment or medication protocols'],
+   practitioner_relevance:'Scientific knowledge for professional observation.',
+   cluster:concept.cluster,risk_context:'LOWER risk, education only.'};
+ let chunkCalls=0,plannerCalls=0;
+ const opts={topicSlug:v1Topic,publishedTopicSlugs:[],pagesPublishedThisWeek:0,
+   mode:'autonomous',continuation:true,budgetWindow:'2026-10-20T14:00:00.000Z',fns:{
+     checkFreshnessFn:async()=>[],
+     fetchEvidenceFn:async()=>pool,
+     loadTopicAttemptFn:()=>savedAttempt,
+     writeTopicAttemptFn:(_slug,doc)=>{savedAttempt=structuredClone(doc)},
+     loadTopicIntentFn:()=>intent,
+     loadCandidateBundleFn:()=>({found:false,bundle:null}),
+     writeCandidateBundleFn:()=>{},
+     hasSynthesisProgressFn:()=>!!batchIo.state,
+     createSynthesisProgressIoFn:()=>batchIo,
+     planIntentFn:async()=>{plannerCalls++;throw Error('validated saved intent must be reused')},
+     chunkFn:async(_env,{chunk})=>{
+       chunkCalls++;
+       return {ok:true,modelInfo:{modelName:'claude-sonnet-5'},diagnostics:{attempts:1},
+         usage:{input_tokens:1000,output_tokens:300},
+         output:{selected_claims:chunk.evidence.claims.map(c=>({
+           claim_id:c.claim_id,role:c.claim_type==='limitation'?'limitation':'supporting_context',
+           reason:'Original evidence reviewed, source and uncertainty retained.'})),excluded_claims:[]}};
+     },
+   }};
+ const env={ANTHROPIC_EDUCATION_WRITER_API_KEY:'fake-model',ANTHROPIC_PUBLICATION_EDITOR_API_KEY:'fake-model',
+   SUPABASE_URL:'https://example.invalid',SUPABASE_SERVICE_ROLE_KEY:'fake'};
+ const run1=await runDecisionPipeline(env,opts);
+ assert.equal(run1.final_state,'SYNTHESIS_IN_PROGRESS',JSON.stringify({
+   state:run1.final_state,reason:run1.exception_reason,selection:run1.selection_reason,
+   candidates:run1.candidate_topics.slice(0,3)
+ }));
+ assert.equal(run1.publication_editor_result.progress.completed,2);
+ assert.equal(savedAttempt.attempts,1,'legacy 2 failures migrate just once, not a perpetual allowance');
+ assert.equal(savedAttempt.batch_protocol,'publication-batches-v1');
+ assert.equal(savedAttempt.state,'SYNTHESIS_IN_PROGRESS');
+ assert.equal(chunkCalls,2);
+ assert.equal(plannerCalls,0);
+ const run2=await runDecisionPipeline(env,{...opts,budgetWindow:'2026-10-21T14:00:00.000Z'});
+ assert.equal(run2.final_state,'SYNTHESIS_IN_PROGRESS');
+ assert.equal(run2.publication_editor_result.progress.completed,4);
+ assert.equal(savedAttempt.attempts,1);
+ assert.equal(chunkCalls,4);
+ assert.equal(batchIo.state.completed.length,4);
+ assert.equal(new Set(batchIo.state.completed.flatMap(x=>x.claim_ids)).size,160);
 });
