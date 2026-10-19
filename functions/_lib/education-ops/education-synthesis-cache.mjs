@@ -85,7 +85,11 @@ export async function prepareTopicArtifact(env, { topicSlug, controlledTopic = n
   // guarantees one validated intent governs both synthesis and the
   // resulting clearance brief/fingerprint, never two independently-derived
   // scope definitions.
-  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle, pageIntent, batchIo });
+  const pipelineResult = await synthesizeFn(env, { topic_slug: topicSlug, v1Result, evidenceBundle, pageIntent, batchIo,
+    // Test-only model dependency injection for the NEW batched path; the
+    // production path still uses its dedicated Publication Editor client.
+    ...(fns.synthesizeFn ? {} : { fns: { chunkFn: fns.chunkFn, globalFn: fns.globalFn } }),
+  });
 
   if (pipelineResult.status !== 'AUTO_READY') {
     return {
