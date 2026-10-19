@@ -159,9 +159,22 @@ export function assembleBatchSynthesis({topic_slug,pageIntent,v1Result,evidenceB
   const required=v1Result.synthesis_packet?.synthesis_required_flags||[];
   const signals=globalOutput.resolved_synthesis_signals;
   const evidenceIds=new Set(evidenceBundle.claims.map(c=>c.claim_id));
-  if(!Array.isArray(signals) || (required.length>0 && required.some(flag=>
-    !signals.some(s=>s.signal===flag&&validText(s.resolution)&&s.claim_ids?.length>0 &&
-     s.claim_ids.every(id=>evidenceIds.has(id))))))throw Error('UNADDRESSED_GLOBAL_SCIENTIFIC_SIGNAL');
+  if(!Array.isArray(signals))throw Error('UNADDRESSED_GLOBAL_SCIENTIFIC_SIGNAL');
+  const packet=v1Result.synthesis_packet||{};
+  for(const flag of required) {
+    const addressed=signals.find(s=>s.signal===flag&&validText(s.resolution)&&
+      Array.isArray(s.claim_ids)&&s.claim_ids.length>0&&
+      s.claim_ids.every(id=>evidenceIds.has(id)));
+    if(!addressed)throw Error('UNADDRESSED_GLOBAL_SCIENTIFIC_SIGNAL');
+    const sides=flag==='POTENTIAL_CONFLICT_REQUIRES_SYNTHESIS'
+      ? ['supports_effect_claim_ids','no_effect_claim_ids']
+      : flag==='SAFETY_CONCLUSION_PRESENT'?['safety_claim_ids']:[];
+    for(const key of sides) {
+      if((packet[key]||[]).length &&
+        !addressed.claim_ids.some(id=>packet[key].includes(id)))
+        throw Error('INCOMPLETE_GLOBAL_SCIENTIFIC_SIGNAL');
+    }
+  }
 
   const {disposition_adjustments: ignore, ...globalFields}=globalOutput;
   const finalOutput={
