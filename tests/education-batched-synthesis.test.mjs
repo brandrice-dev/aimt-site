@@ -8,7 +8,7 @@ import {
   BATCH_SYNTHESIS_THRESHOLD,BATCH_CLAIMS,BATCH_MAX_CALLS_PER_RUN,
   runBatchedSynthesisPipeline,
 } from '../functions/_lib/research/publication-synthesis-batches.mjs';
-import {buildPublicationRequestBody,buildEvidenceBatchRequest,buildGlobalEvidenceRequest} from '../functions/_lib/research/publication-synthesis-client.mjs';
+import {buildPublicationRequestBody,buildEvidenceBatchRequest,buildGlobalEvidenceRequest,buildSynthesisRequest} from '../functions/_lib/research/publication-synthesis-client.mjs';
 import {createPublicationCostControl,PUBLICATION_INPUT_TOKEN_LIMIT} from '../functions/_lib/research/publication-cost-control.mjs';
 import {createSynthesisProgressIo} from '../scripts/_lib/education-synthesis-progress.mjs';
 import {runDecisionPipeline} from '../scripts/education-operations-cycle.mjs';
@@ -288,4 +288,34 @@ test('production orchestration migrates failed 401-claim attempt and resumes che
  assert.equal(chunkCalls,4);
  assert.equal(batchIo.state.completed.length,4);
  assert.equal(new Set(batchIo.state.completed.flatMap(x=>x.claim_ids)).size,160);
+});
+
+test('global review fits original input ceiling at actual 217386-byte Trichology evidence scale',()=>{
+ const f=fixture(),encode=()=>buildPublicationRequestBody({},buildSynthesisRequest({},{
+  topic_slug:f.topic_slug,pageIntent:f.pageIntent,evidenceBundle:f.evidenceBundle,
+  synthesisRequiredFlags:[flag],
+ }));
+ const wire=body=>new TextEncoder().encode(JSON.stringify({...body,stream:true})).length;
+ const originalSize=wire(encode()),target=217386;
+ const padding=Math.max(0,target-originalSize);
+ for(let i=0;i<f.evidenceBundle.claims.length;i++){
+  const amount=Math.floor(padding/401)+(i<padding%401?1:0);
+  f.evidenceBundle.claims[i].claim_text+='x'.repeat(amount);
+ }
+ assert.ok(wire(encode())>=target);
+ const chunks=splitSynthesisEvidence(f.evidenceBundle);
+ const completed=chunks.map(chunk=>({index:chunk.index,claim_ids:chunk.claim_ids,
+  output:{selected_claims:chunk.evidence.claims.map(c=>({claim_id:c.claim_id,
+   role:c.claim_type==='limitation'?'limitation':'supporting_context',
+   reason:'Study source, population and uncertainty preserved.'})),excluded_claims:[]}}));
+ const global=buildPublicationRequestBody({},buildGlobalEvidenceRequest({
+  ...f,completed,schema:{type:'object',properties:{},required:[]},
+ }));
+ const bytes=wire(global);
+ assert.ok(bytes+1024<PUBLICATION_INPUT_TOKEN_LIMIT,
+   'The original complete global evidence request must fit unchanged preflight, got '+bytes);
+ const budget=createPublicationCostControl();
+ budget.reserve({...global,stream:true});
+ assert.equal(budget.summary().requests,1);
+ console.log('Full-corpus global analysis input bytes at real evidence scale: '+bytes);
 });
