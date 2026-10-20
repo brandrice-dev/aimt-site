@@ -1,14 +1,14 @@
 name: AIMT Education Operations
 
-# Cost-safe production restart (PR #107): large corpora are processed in
-# independently validated 40-claim batches with tamper-evident durable
-# checkpoints. Each run makes at most two Publication Editor calls. Every
-# trusted weekday window keeps the existing $2 and six-request ceiling.
-# Repeated invalid batches have a hard retry ceiling; no partial evidence
-# can publish, and independent Writer/Reviewer gates remain unchanged.
+# COST SAFETY HOLD — October 20, 2026, after live run #39472804292.
+# First production run of PR #107's 40-claim batching path again truncated
+# at max_tokens (9,000) and ended SYNTHESIS_FAILED; the publisher correctly
+# refused to publish. Automatic paid model calls must NOT repeat tomorrow.
+# Manual dispatch remains available ONLY with explicit owner authorization.
+# Separate AIMT Research Feed Ingest schedule is unchanged.
+# Restore weekday cron only after a new owner-approved, bounded root-cause
+# correction and representative end-to-end pilot, not another blind retry.
 on:
-  schedule:
-    - cron: '0 14 * * 1-5'
   workflow_dispatch:
     inputs:
       diagnostic:
