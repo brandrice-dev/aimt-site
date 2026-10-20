@@ -66,6 +66,10 @@ jobs:
         run: |
           env -i PATH="$PATH" NODE_OPTIONS="--import=$PWD/tests/support/education-offline-only.mjs" \
             node --test tests/education-*.test.mjs tests/research-publication-*.test.mjs tests/publication-anthropic-transport.test.mjs tests/publication-violation-sanitizer.test.mjs tests/research-feed-ingest.test.mjs
+      - name: Verify AI delivery instructions are consistent (no provider access)
+        run: |
+          env -i PATH="$PATH" NODE_OPTIONS="--import=$PWD/tests/support/education-offline-only.mjs" \
+            node --test tests/ai-delivery-standard.test.mjs
       - name: Attest successful dispatch tests on the unchanged exact PR head
         if: github.event_name == 'workflow_dispatch'
         env:
