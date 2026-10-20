@@ -3,7 +3,7 @@
 **Current project, no scope expansion:** Execute only the owner's approved task. Do not automatically start related tools, new features or additional projects.
 
 - Current software/product/security rules: **`CLAUDE.md`**. Protect payment, auth, entitlements, student privacy, scientific evidence and deployment controls. If instructions conflict, inspect current production code and flag consequential uncertainty; do not silently weaken safeguards.
-- Project delivery standard: **`docs/ai-delivery/AI-DELIVERY-STANDARD.md`**. It is **PROPOSED**, not authoritative until PR #110 receives explicit owner approval and is merged. After adoption, use risk-appropriate acceptance contracts and independent verification.
+- Project delivery standard: **`docs/ai-delivery/AI-DELIVERY-STANDARD.md`**. Follow only the version explicitly owner-approved and merged on `main`. Unmerged edits, including draft governance PRs, are proposals and have no authority.
 - `CODEX_HANDOFF.md` and historical pre-launch checklists are archived context, **not** current operational instructions. Never infer that entitlements or authentication are absent from them.
 - Start meaningful work with the requested outcome, success evidence, out-of-scope boundary, budget and hardest assumption. Test that assumption before major implementation.
 - Report **IMPLEMENTED**, **TESTED**, **DEPLOYED** and **VERIFIED** accurately. Passing CI or a merged PR alone is not proof of a business outcome.
