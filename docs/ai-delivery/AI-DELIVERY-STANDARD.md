@@ -1,6 +1,6 @@
 # AI Delivery Standard — AIMT adoption v1.0
 
-**Status:** PROPOSED. This document is not authoritative until the owner explicitly approves it and PR #110 is merged.
+**Activation:** A copy in a draft PR is only a proposal. This version becomes governing for AIMT only after explicit owner approval recorded on its adoption PR and merge to `main`; no unmerged or unapproved revision has authority.
 **Scope:** AI-assisted development, research automation, education, content, and operating systems in AIMT. Future projects may adopt a pinned version intentionally; this file does not automatically govern unrelated repositories.
 **Evidence:** Independent Codex design challenge (October 20, 2026), separate ChatGPT design, and AIMT production failures. Do not treat AI agreement as proof of correctness.
 
