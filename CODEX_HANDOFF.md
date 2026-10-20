@@ -1,3 +1,12 @@
+> **ARCHIVED — HISTORICAL HANDOFF, NOT CURRENT INSTRUCTIONS (October 2026).**
+> The pre-launch `KNOWN LIMITS` claims below, including "No entitlement
+> system", "No full auth gating", and incomplete sign-in, are obsolete.
+> AIMT now has authenticated course access and a separate entitlement system.
+> For current work, use root `AGENTS.md`, `CLAUDE.md`, the current repository
+> and (after owner approval and merge) `docs/ai-delivery/AI-DELIVERY-STANDARD.md`.
+> Retained solely to explain past architectural decisions; do not revive
+> its unfinished tasks or override newer security rules.
+
 ## AIMT CODEX HANDOFF (CLEAN)
 
 You are working on the AIMT (American Institute of Modern Trichology) site.
