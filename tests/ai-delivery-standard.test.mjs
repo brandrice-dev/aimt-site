@@ -13,8 +13,8 @@ const standardPath='docs/ai-delivery/AI-DELIVERY-STANDARD.md';
 const standard=read(standardPath);
 
 test('one proposed core standard, not competing current policies',()=>{
-  assert.ok(standard.includes('**Status:** PROPOSED.'));
-  assert.ok(standard.includes('explicitly approves'));
+  assert.ok(standard.includes('**Activation:**'));
+  assert.ok(standard.includes('explicit owner approval'));
   assert.equal(existsSync(path.join(root,'docs/ai-delivery/PROPOSED-DELIVERY-SYSTEM.md')),false);
 });
 
