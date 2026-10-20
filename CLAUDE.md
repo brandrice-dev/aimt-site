@@ -7,11 +7,11 @@ practitioner certification with an AI tutor named **Cadence**. Owner: Brandon.
 Deployed on **Cloudflare Pages** (auto-deploys on push to main).
 AIMT launched in September 2026. Verify today's production status from live evidence; this file is **not** a running task list.
 
-## AI delivery governance (pending owner approval in PR #110)
+## AI delivery governance
 
-Read `docs/ai-delivery/AI-DELIVERY-STANDARD.md` before substantial work; until the
-owner explicitly approves and merges PR #110, it is a PROPOSAL, not an active
-production policy. Keep changes inside the owner-approved current project.
+Read the owner-approved, `main`-merged version of
+`docs/ai-delivery/AI-DELIVERY-STANDARD.md` before substantial work. Draft
+revisions are not active until separately approved and merged. Keep changes inside the owner-approved current project.
 Document a measurable acceptance criterion, the hardest assumption, spending
 authorization and independent verification for consequential work. Never label
 TESTED/DEPLOYED as VERIFIED. Do not start adjacent projects without permission.
