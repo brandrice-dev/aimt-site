@@ -5,7 +5,18 @@ Production site for AIMT (American Institute of Modern Trichology) — an online
 certification platform. First course: **HeadSpa Mastery** ($597), a head spa
 practitioner certification with an AI tutor named **Cadence**. Owner: Brandon.
 Deployed on **Cloudflare Pages** (auto-deploys on push to main).
-Currently pre-launch. Target: end of July 2026.
+AIMT launched in September 2026. Verify today's production status from live evidence; this file is **not** a running task list.
+
+## AI delivery governance (pending owner approval in PR #110)
+
+Read `docs/ai-delivery/AI-DELIVERY-STANDARD.md` before substantial work; until the
+owner explicitly approves and merges PR #110, it is a PROPOSAL, not an active
+production policy. Keep changes inside the owner-approved current project.
+Document a measurable acceptance criterion, the hardest assumption, spending
+authorization and independent verification for consequential work. Never label
+TESTED/DEPLOYED as VERIFIED. Do not start adjacent projects without permission.
+Continue to follow all security, payment, student-data and design constraints
+below.
 
 ## Architecture — respect these rules
 - **Flat HTML site. No frameworks, no build step, no bundler.** Each page is a
@@ -88,20 +99,10 @@ process — treat these as governing, not just reference: `AIMT-Design-Audit-Cha
 `AIMT-AUDIT-RULES.md` (standing rename rule + copy directive for the ongoing
 design/copy audit), and the full 22-item `AIMT-Launch-Audit.md`.
 
-## Current launch plan status
-- ✅ Domain live at aimtrichology.com.
-- ✅ Sessions 1–4 deployed: stripe-webhook.js + claim price validation +
-  course_progress sync (Session 1); verifiable certificates + legal pages +
-  allowlist removal (Session 2); My AIMT dashboard + SEO pack + Coming Soon
-  cards (Session 3); claims hygiene + badge propagation + rename-proofing
-  (Session 4).
-- ✅ Legacy admin panel removed (leaked credential, nonfunctional demo data).
-- ✅ Certificate accuracy sweep done (signatory, dates, claims — see b70c82e).
-- ⏳ Safe Browsing review pending on the pages.dev domain.
-- ⏳ Next: Pass 1 consistency audit → design elevation pass (remaining
-  certificate work is visual/design-only from here).
-- ⏳ Rolling: Vimeo IDs into STEP_VIDEO_IDS (12 slots, Module 8); optimized
-  images (WebP) replacing the 6.9MB hero PNG.
-- ⏳ Post-launch roadmap: Owner's Console — proper admin.html behind Supabase
-  auth (owner account only), real enrollment/completion/revenue metrics.
-  Replaces removed legacy panel.
+## Historical launch notes — not the current roadmap
+
+The previous pre-launch checklist in this file has been retired because it
+contained superseded status claims and could lead agents to repeat completed
+work. Refer to the current source code, production evidence, owner-approved
+delivery records and `LAUNCH-READINESS.md` only as historical context.
+Do not automatically create work from an old checklist.
