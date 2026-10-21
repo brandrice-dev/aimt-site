@@ -7,7 +7,7 @@
    Headers: Authorization: Bearer <supabase access token>
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
+import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
 import { getAssessmentConfig, getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
 
@@ -40,7 +40,20 @@ export async function onRequestGet(context) {
     decision: r.certification_decision || null,
     criticalDomainResults: r.critical_domain_results || [],
   }));
-  const ladder = determineNextAttemptEligibility({ attempts: ladderInput, config });
+  const gate = await fetchLadderGateRows(env, user.id);
+  const ladder = determineNextAttemptEligibility({
+    attempts: ladderInput,
+    remediationAssignments: gate.remediationAssignments,
+    educatorRequests: gate.educatorRequests,
+    config,
+  });
+  // Certified (C) and in-progress (B) resolve before the ladder reads any
+  // gate row, so they stay valid. Anything else computed from unreadable
+  // gate rows could advertise a retake or a missing educator authorization
+  // that isn't real -- refuse instead of guessing.
+  if (!gate.ok && !ladder.alreadyCertified && ladder.resumeAttemptNumber == null) {
+    return json({ error: 'We couldn’t verify your certification status right now. Please try again in a moment.', retryable: true }, 503);
+  }
 
   let state = 'A';
   if (ladder.alreadyCertified) state = 'C';
@@ -60,30 +73,12 @@ export async function onRequestGet(context) {
     // and then also failed Attempt 2 must still see and be able to complete
     // those older items -- otherwise Attempt 3 would stay locked for a
     // reason the Remediation Plan screen never showed them.
-    const remRes = await supabaseRest(
-      env,
-      `certification_remediation_assignments?${new URLSearchParams({
-        select: 'id,competency_area,critical_domain,module_ref,section_ref,remediation_activity,required_before_next_attempt,completed',
-        user_id: `eq.${user.id}`,
-        course_slug: `eq.${COURSE_SLUG}`,
-      })}`
-    );
-    remediation = remRes.ok && Array.isArray(remRes.body) ? remRes.body : [];
+    remediation = gate.remediationAssignments;
   }
 
   let educatorRequest = null;
   if (ladder.blockedReason === 'educator_authorization_required' || ladder.blockedReason === 'individual_aimt_review') {
-    const eduRes = await supabaseRest(
-      env,
-      `certification_educator_requests?${new URLSearchParams({
-        select: 'status,attempt4_authorized,requested_at',
-        user_id: `eq.${user.id}`,
-        course_slug: `eq.${COURSE_SLUG}`,
-        order: 'requested_at.desc',
-        limit: '1',
-      })}`
-    );
-    educatorRequest = eduRes.ok && Array.isArray(eduRes.body) && eduRes.body.length ? eduRes.body[0] : null;
+    educatorRequest = gate.educatorRequests[0] || null; // newest first
   }
 
   return json({

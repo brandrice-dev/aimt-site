@@ -117,3 +117,32 @@ export async function fetchAttemptSummaries(env, userId, courseSlug = COURSE_SLU
     status: row.status,
   }));
 }
+
+/**
+ * Fetches the remediation assignments and educator requests the attempt
+ * ladder gates on (standard Section 8): every row for this student/course,
+ * not just the latest attempt's. `ok` is false if either read failed -- an
+ * empty list would silently open the Attempt 3 remediation gate, so a
+ * caller that STARTS attempts must refuse rather than proceed on it.
+ */
+export async function fetchLadderGateRows(env, userId, courseSlug = COURSE_SLUG) {
+  const scope = { user_id: `eq.${userId}`, course_slug: `eq.${courseSlug}` };
+  const [remRes, eduRes] = await Promise.all([
+    supabaseRest(env, `certification_remediation_assignments?${new URLSearchParams({
+      select: 'id,competency_area,critical_domain,module_ref,section_ref,remediation_activity,required_before_next_attempt,completed',
+      ...scope,
+    })}`),
+    supabaseRest(env, `certification_educator_requests?${new URLSearchParams({
+      select: 'status,attempt4_authorized,requested_at',
+      ...scope,
+      order: 'requested_at.desc',
+    })}`),
+  ]);
+  const remOk = remRes.ok && Array.isArray(remRes.body);
+  const eduOk = eduRes.ok && Array.isArray(eduRes.body);
+  return {
+    ok: remOk && eduOk,
+    remediationAssignments: remOk ? remRes.body : [],
+    educatorRequests: eduOk ? eduRes.body : [],
+  };
+}
