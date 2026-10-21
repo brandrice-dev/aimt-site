@@ -286,6 +286,93 @@ test('fails closed: no new attempt is started when remediation or educator rows 
   }
 });
 
+// ---- get-status never reports eligibility it couldn't verify -------------
+
+const GATE_TABLES = ['certification_remediation_assignments', 'certification_educator_requests'];
+
+function assertUnverified(res, label) {
+  assert.equal(res.status, 503, label);
+  assert.equal(res.body.retryable, true, label);
+  assert.match(res.body.error, /try again/i, label);
+  assert.equal(res.body.ladder, undefined, `${label}: no eligibility is advertised`);
+  assert.equal(res.body.educatorRequest, undefined, `${label}: no authorization state is reported`);
+}
+
+test('get-status returns 503 (not a retake) when remediation rows cannot be read before Attempt 3', async () => {
+  // With [] as a fallback this student would be shown Attempt 3 as available.
+  for (const table of GATE_TABLES) {
+    const db = createDb();
+    addAttempt(db, 1, 'not_yet_passed');
+    addAttempt(db, 2, 'not_yet_passed');
+    addRemediation(db, { competency_area: 'Scalp assessment' });
+    db.failTables.add(table);
+    assertUnverified(await call(db, getStatus, STUDENT), table);
+  }
+});
+
+test('get-status returns 503 (not "authorization required") when educator rows cannot be read before Attempt 4', async () => {
+  // With [] as a fallback an authorized student would be told authorization is missing.
+  for (const table of GATE_TABLES) {
+    const db = createDb();
+    [1, 2, 3].forEach((n) => addAttempt(db, n, 'not_yet_passed'));
+    db.tables.certification_educator_requests.push({ id: 'edu-1', user_id: STUDENT.id, course_slug: COURSE, attempt_id: 'a3', status: 'completed', attempt4_authorized: true, requested_at: '2026-10-01T00:00:00Z' });
+    db.failTables.add(table);
+    assertUnverified(await call(db, getStatus, STUDENT), table);
+  }
+});
+
+test('get-status returns 503 for a failed critical domain when gate rows cannot be read', async () => {
+  for (const table of GATE_TABLES) {
+    const db = createDb();
+    addAttempt(db, 1, 'not_yet_passed', D2_FAILED);
+    addRemediation(db, { critical_domain: 'D2', completed: true });
+    db.failTables.add(table);
+    assertUnverified(await call(db, getStatus, STUDENT), table);
+  }
+});
+
+test('get-status still reports certified and in-progress states while gate rows are unreadable', async () => {
+  for (const table of GATE_TABLES) {
+    const certified = createDb();
+    addAttempt(certified, 1, 'not_yet_passed');
+    addAttempt(certified, 2, 'pass');
+    certified.failTables.add(table);
+    const c = await call(certified, getStatus, STUDENT);
+    assert.equal(c.status, 200, table);
+    assert.equal(c.body.state, 'C');
+    assert.equal(c.body.ladder.alreadyCertified, true);
+
+    const inProgress = createDb();
+    addAttempt(inProgress, 1, 'not_yet_passed');
+    addAttempt(inProgress, 2, null);
+    inProgress.failTables.add(table);
+    const b = await call(inProgress, getStatus, STUDENT);
+    assert.equal(b.status, 200, table);
+    assert.equal(b.body.state, 'B');
+    assert.equal(b.body.ladder.resumeAttemptNumber, 2);
+    assert.equal(b.body.inProgressAttempt.attemptNumber, 2);
+  }
+});
+
+test('get-status recovers with the correct ladder once the gate tables are readable again', async () => {
+  for (const table of GATE_TABLES) {
+    const db = createDb();
+    [1, 2, 3].forEach((n) => addAttempt(db, n, 'not_yet_passed'));
+    db.tables.certification_educator_requests.push({ id: 'edu-1', user_id: STUDENT.id, course_slug: COURSE, attempt_id: 'a3', status: 'completed', attempt4_authorized: true, requested_at: '2026-10-01T00:00:00Z' });
+    db.failTables.add(table);
+    assert.equal((await call(db, getStatus, STUDENT)).status, 503, table);
+
+    db.failTables.delete(table);
+    const recovered = await call(db, getStatus, STUDENT);
+    assert.equal(recovered.status, 200, table);
+    assert.equal(recovered.body.state, 'D');
+    assert.deepEqual(recovered.body.ladder, { canStartNewAttempt: true, nextAttemptNumber: 4 });
+    const started = await call(db, startAttempt, STUDENT);
+    assert.equal(started.status, 200, `${table}: ${JSON.stringify(started.body)}`);
+    assert.equal(started.body.attempt.attemptNumber, 4);
+  }
+});
+
 test('first attempt and certified students are unaffected', async () => {
   const fresh = createDb();
   const first = await call(fresh, startAttempt, STUDENT);

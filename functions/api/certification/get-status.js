@@ -40,8 +40,6 @@ export async function onRequestGet(context) {
     decision: r.certification_decision || null,
     criticalDomainResults: r.critical_domain_results || [],
   }));
-  // Display-only here (start-attempt is the authority and fails closed);
-  // a failed read degrades to [] like the attempts read above.
   const gate = await fetchLadderGateRows(env, user.id);
   const ladder = determineNextAttemptEligibility({
     attempts: ladderInput,
@@ -49,6 +47,13 @@ export async function onRequestGet(context) {
     educatorRequests: gate.educatorRequests,
     config,
   });
+  // Certified (C) and in-progress (B) resolve before the ladder reads any
+  // gate row, so they stay valid. Anything else computed from unreadable
+  // gate rows could advertise a retake or a missing educator authorization
+  // that isn't real -- refuse instead of guessing.
+  if (!gate.ok && !ladder.alreadyCertified && ladder.resumeAttemptNumber == null) {
+    return json({ error: 'We couldn’t verify your certification status right now. Please try again in a moment.', retryable: true }, 503);
+  }
 
   let state = 'A';
   if (ladder.alreadyCertified) state = 'C';

@@ -113,8 +113,18 @@ pure ladder (`attempt-ladder.mjs`) is correct. Only its integration was wrong:
   in-progress attempt is never blocked by this.
 * `get-status.js`: uses the same rows for the ladder and for its existing
   `remediation` / `educatorRequest` fields, replacing two duplicate queries.
-  The response shape is unchanged. A failed read degrades to `[]`, as the
-  attempts read already did; `start-attempt` remains the authority.
+  The response shape is unchanged when the rows are readable. **Also fails
+  closed** (corrected after Codex review): if either gate table can't be
+  read, it returns `503 { error: "…Please try again in a moment.",
+  retryable: true }`. It never computes eligibility from empty fallbacks,
+  so it can't advertise a retake that isn't verified or report a missing
+  educator authorization that only failed to load. The exceptions are
+  certified (state C) and in-progress (state B) students: the ladder
+  resolves those before reading any gate row, so they still get a normal
+  200. The existing Module 12 client already shows `body.error` for any
+  non-OK status, so no client change was needed. This applies to every
+  other state, including a student with no attempts yet; the same is
+  already true of `start-attempt`.
 * Weights, thresholds, exam content, ladder rules and the client UI are not
   touched.
 
@@ -137,10 +147,25 @@ handlers against an in-memory PostgREST mock:
    written.
 8. An in-progress attempt resumes even when gate reads fail.
 9. Fail-closed: either gate table erroring returns 503 and writes no row.
-10. First attempt and already-certified students are unaffected.
+10. `get-status`, before Attempt 3, with either table failing: 503 and
+    `retryable`, no `ladder` (the old fallback showed Attempt 3 as
+    available).
+11. `get-status`, before Attempt 4 with authorization on record, with either
+    table failing: 503, no `ladder`/`educatorRequest` (the old fallback
+    reported authorization as missing).
+12. `get-status`, failed critical domain, with either table failing: 503.
+13. `get-status`, certified and in-progress, with either table failing: still
+    200 with state C / B.
+14. Recovery: once the failing table is readable again, `get-status` returns
+    the correct ladder (Attempt 4 available) and `start-attempt` inserts
+    Attempt 4.
+15. First attempt and already-certified students are unaffected.
 
-**Against the original endpoint code, tests 1, 3, 4, 5 and 9 fail**, which
-confirms the defect. All 10 pass with the fix.
+**Against the original endpoint code (`ade9602`), tests 1, 3, 4, 5 and 9
+fail**, which confirms the defect. **Against the first fix commit
+(`8c19203`), tests 10, 11, 12 and 14 fail**, which confirms Codex's
+`get-status` blocker. Test 13 passes on both by design: it guards against
+over-correcting. All 15 pass now.
 
 Two existing tests were adjusted, with intent preserved:
 `certification-module12-concurrency` (its strict mock now lists the two gate
@@ -228,7 +253,7 @@ Full suite (`node --test tests/*.test.mjs tests/*.test.js`), with
 | | tests | pass | fail | skipped |
 |---|---|---|---|---|
 | `main` @ `ade9602` (baseline) | 556 | 551 | 3 | 2 |
-| this branch | 574 | 569 | 3 | 2 |
+| this branch (incl. Codex `get-status` correction) | 579 | 574 | 3 | 2 |
 
 The 3 failures are identical on both and pre-existing:
 `aimt-listen-mode-capcut-production`, `aimt-listen-mode-module1-pilot` and
