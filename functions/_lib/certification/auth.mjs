@@ -9,7 +9,7 @@
 // server-side -> entitlement check via course_entitlements. No parallel auth
 // system is introduced; this only factors the existing pattern out for reuse.
 
-import { requiredModulesForFinalAssessment } from '../courses/registry.mjs';
+import { requiredModulesForFinalAssessment, resolveAttemptContent } from '../courses/registry.mjs';
 
 export const COURSE_SLUG = 'headspa-mastery';
 
@@ -18,6 +18,18 @@ export function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * The rules + content banks an EXISTING attempt is held to, derived only
+ * from its own persisted row (course_slug / assessment_version /
+ * bank_version). Returns `{ content }` or a ready 409 `{ errorResponse }` --
+ * an unresolvable attempt is never served or scored with other content.
+ */
+export function resolveAttemptContentOrError(attempt) {
+  const content = resolveAttemptContent(attempt);
+  if (content.ok) return { content };
+  return { errorResponse: json({ error: 'This attempt’s assessment version is not recognized.', reason: content.reason }, 409) };
 }
 
 export async function supabaseRest(env, path, options = {}) {

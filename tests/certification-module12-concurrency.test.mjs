@@ -56,6 +56,7 @@ async function withMockFetch(mockImpl, fn) {
 
 function makeRequest(body, authToken) {
   return {
+    url: 'https://aimtrichology.com/api/certification/x',
     headers: { get: (name) => (name === 'Authorization' && authToken ? `Bearer ${authToken}` : null) },
     json: async () => body,
   };
@@ -194,7 +195,7 @@ function baseAttempt(overrides = {}) {
     user_id: USER.id,
     course_slug: 'headspa-mastery',
     // NOT NULL on every real row; finalize scores under this stored version.
-    assessment_version: 'headspa-fe-assessment-v1',
+    assessment_version: 'headspa-fe-assessment-v1', bank_version: 'headspa-fe-bank-v1-2026-08-26',
     attempt_number: 1,
     status: 'part1_locked',
     part1_selected_ids: [],

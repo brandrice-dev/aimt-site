@@ -17,9 +17,12 @@
 
 import { getAssessmentConfig, ASSESSMENT_VERSION_V1 } from '../certification/assessment-config.mjs';
 import { CRITICAL_DOMAIN_CONFIG_VERSION } from '../certification/critical-domains.mjs';
+import { lookupBank as lookupInstalledBank } from '../certification/bank-catalog.mjs';
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const STATUSES = new Set(['active', 'draft']);
+// Must stay within verify-credential.js's public ID shape check.
+const CREDENTIAL_PREFIX_PATTERN = /^AIMT-[A-Z]{2,6}$/;
 
 /**
  * @typedef {Object} CourseDefinition
@@ -27,7 +30,7 @@ const STATUSES = new Set(['active', 'draft']);
  * @property {string} title                Credential/verification display name.
  * @property {'active'|'draft'} status     Only 'active' courses resolve for shared infrastructure.
  * @property {{ ids:number[], requiredForFinalAssessment:number[], finalAssessment:number }} modules
- * @property {{ current:string, versions:string[], criticalDomainConfigVersion:string, bankVersion:string }} assessment
+ * @property {{ current:string, versions:string[], criticalDomainConfigVersion:string, bankVersion:string, bankVersions:string[] }} assessment
  * @property {{ coursePage:string, progressStorageKey:string, credentialPrefix:string }} resources
  */
 
@@ -49,6 +52,8 @@ const HEADSPA_MASTERY = {
     versions: [ASSESSMENT_VERSION_V1],
     criticalDomainConfigVersion: CRITICAL_DOMAIN_CONFIG_VERSION,
     bankVersion: 'headspa-fe-bank-v1-2026-08-26',
+    // Every content bank ever used by a Head Spa attempt. Append only.
+    bankVersions: ['headspa-fe-bank-v1-2026-08-26'],
   },
   resources: {
     coursePage: '/headspa-mastery.html',
@@ -65,7 +70,7 @@ function deepFreeze(value) {
   return value;
 }
 
-function validateCourse(def, lookupAssessmentConfig) {
+function validateCourse(def, lookupAssessmentConfig, lookupBank) {
   const where = `course ${JSON.stringify(def && def.slug)}`;
   const fail = (msg) => { throw new Error(`Invalid ${where}: ${msg}`); };
   if (!def || typeof def !== 'object') fail('definition must be an object');
@@ -98,29 +103,49 @@ function validateCourse(def, lookupAssessmentConfig) {
   if (current.criticalDomainConfigVersion !== a.criticalDomainConfigVersion) fail('criticalDomainConfigVersion disagrees with the current config');
   if (current.bankVersion !== a.bankVersion) fail('bankVersion disagrees with the current config');
 
+  if (!Array.isArray(a.bankVersions) || !a.bankVersions.length || new Set(a.bankVersions).size !== a.bankVersions.length) {
+    fail('assessment.bankVersions must be a non-empty unique list');
+  }
+  for (const bankVersion of a.bankVersions) {
+    let banks;
+    try { banks = lookupBank(bankVersion); } catch (_) { banks = null; }
+    if (!banks || banks.bankVersion !== bankVersion) fail(`content bank ${bankVersion} is not installed`);
+  }
+  for (const version of a.versions) {
+    if (!a.bankVersions.includes(lookupAssessmentConfig(version).bankVersion)) {
+      fail(`assessment version ${version} uses a bank not listed in assessment.bankVersions`);
+    }
+  }
+
   const r = def.resources || {};
   for (const key of ['coursePage', 'progressStorageKey', 'credentialPrefix']) {
     if (typeof r[key] !== 'string' || !r[key]) fail(`resources.${key} is required`);
   }
+  if (!CREDENTIAL_PREFIX_PATTERN.test(r.credentialPrefix)) fail('resources.credentialPrefix must match AIMT-[A-Z]{2,6}');
 }
 
 /**
  * Builds a validated, frozen registry. Exported so tests (and the next
  * course) can prove a new entry slots in without touching existing ones.
  * @param {CourseDefinition[]} definitions
- * @param {{ lookupAssessmentConfig?: (version:string) => any }} [options]
+ * @param {{ lookupAssessmentConfig?: (version:string) => any, lookupBank?: (bankVersion:string) => any }} [options]
  */
-export function createCourseRegistry(definitions, { lookupAssessmentConfig = getAssessmentConfig } = {}) {
+export function createCourseRegistry(definitions, { lookupAssessmentConfig = getAssessmentConfig, lookupBank = lookupInstalledBank } = {}) {
   const bySlug = new Map();
   const prefixes = new Set();
   const versionOwners = new Map();
+  const bankOwners = new Map();
   for (const def of definitions) {
-    validateCourse(def, lookupAssessmentConfig);
+    validateCourse(def, lookupAssessmentConfig, lookupBank);
     if (bySlug.has(def.slug)) throw new Error(`Duplicate course slug: ${def.slug}`);
     if (prefixes.has(def.resources.credentialPrefix)) throw new Error(`Duplicate credential prefix: ${def.resources.credentialPrefix}`);
     for (const v of def.assessment.versions) {
       if (versionOwners.has(v)) throw new Error(`Assessment version ${v} is claimed by ${versionOwners.get(v)} and ${def.slug}`);
       versionOwners.set(v, def.slug);
+    }
+    for (const b of def.assessment.bankVersions) {
+      if (bankOwners.has(b)) throw new Error(`Content bank ${b} is claimed by ${bankOwners.get(b)} and ${def.slug}`);
+      bankOwners.set(b, def.slug);
     }
     prefixes.add(def.resources.credentialPrefix);
     bySlug.set(def.slug, deepFreeze(structuredClone(def)));
@@ -150,12 +175,63 @@ export function createCourseRegistry(definitions, { lookupAssessmentConfig = get
     return { ok: true, course, config };
   }
 
+  function resolveCurrentAssessmentConfig(slug) {
+    const course = getCourse(slug);
+    return course ? resolveAssessmentConfig(slug, course.assessment.current) : { ok: false, reason: 'unknown_course' };
+  }
+
+  function bankFor(course, bankVersion) {
+    if (typeof bankVersion !== 'string' || !bankVersion) return { ok: false, reason: 'missing_bank_version' };
+    if (!course.assessment.bankVersions.includes(bankVersion)) return { ok: false, reason: 'bank_version_not_for_course' };
+    let banks;
+    try { banks = lookupBank(bankVersion); } catch (_) { banks = null; }
+    if (!banks || banks.bankVersion !== bankVersion) return { ok: false, reason: 'bank_unavailable' };
+    return { ok: true, banks };
+  }
+
+  /**
+   * Everything an EXISTING attempt is held to -- course, rules (config,
+   * incl. critical domains) and content banks -- taken only from the
+   * attempt row's own persisted course_slug / assessment_version /
+   * bank_version. Never "current", never another course's.
+   * @returns {{ ok:true, course, config, banks } | { ok:false, reason:string }}
+   */
+  function resolveAttemptContent(attempt) {
+    if (!attempt || typeof attempt !== 'object') return { ok: false, reason: 'missing_attempt' };
+    const rules = resolveAssessmentConfig(attempt.course_slug, attempt.assessment_version);
+    if (!rules.ok) return rules;
+    if (attempt.standard_version != null && attempt.standard_version !== rules.config.standardVersion) {
+      return { ok: false, reason: 'standard_version_mismatch' };
+    }
+    const bank = bankFor(rules.course, attempt.bank_version);
+    if (!bank.ok) return bank;
+    return { ok: true, course: rules.course, config: rules.config, banks: bank.banks };
+  }
+
+  /** Current rules + content for a NEW attempt on an active course. */
+  function resolveNewAttemptContent(slug) {
+    const rules = resolveCurrentAssessmentConfig(slug);
+    if (!rules.ok) return rules;
+    const bank = bankFor(rules.course, rules.config.bankVersion);
+    if (!bank.ok) return bank;
+    return { ok: true, course: rules.course, config: rules.config, banks: bank.banks };
+  }
+
   return Object.freeze({
     getCourse,
     resolveAssessmentConfig,
-    resolveCurrentAssessmentConfig(slug) {
+    resolveCurrentAssessmentConfig,
+    resolveAttemptContent,
+    resolveNewAttemptContent,
+    /** Credential ID prefix for an active course, or null. */
+    credentialPrefixFor(slug) {
       const course = getCourse(slug);
-      return course ? resolveAssessmentConfig(slug, course.assessment.current) : { ok: false, reason: 'unknown_course' };
+      return course ? course.resources.credentialPrefix : null;
+    },
+    /** Certificate / public-verification course title for an active course, or null. */
+    certificateTitleFor(slug) {
+      const course = getCourse(slug);
+      return course ? course.title : null;
     },
     /** Module ids that must be complete before the final assessment, or null for an unknown course. */
     requiredModulesForFinalAssessment(slug) {
@@ -168,5 +244,42 @@ export function createCourseRegistry(definitions, { lookupAssessmentConfig = get
   });
 }
 
+/** The production registry. Head Spa is the only course. */
 export const courseRegistry = createCourseRegistry([HEADSPA_MASTERY]);
-export const { getCourse, resolveAssessmentConfig, resolveCurrentAssessmentConfig, requiredModulesForFinalAssessment, listCourses } = courseRegistry;
+
+let activeRegistry = courseRegistry;
+
+/**
+ * TEST SEAM ONLY -- lets endpoint tests run against a registry that also
+ * holds a synthetic second course. Production code must never call this
+ * (enforced by tests/course-registry-phase2a.test.mjs). Returns a restore fn.
+ */
+export function __useCourseRegistryForTests(registry) {
+  const previous = activeRegistry;
+  activeRegistry = registry;
+  return () => { activeRegistry = previous; };
+}
+
+// Shared infrastructure calls these; they delegate to the active registry.
+export const getCourse = (...args) => activeRegistry.getCourse(...args);
+export const resolveAssessmentConfig = (...args) => activeRegistry.resolveAssessmentConfig(...args);
+export const resolveCurrentAssessmentConfig = (...args) => activeRegistry.resolveCurrentAssessmentConfig(...args);
+export const resolveAttemptContent = (...args) => activeRegistry.resolveAttemptContent(...args);
+export const resolveNewAttemptContent = (...args) => activeRegistry.resolveNewAttemptContent(...args);
+export const credentialPrefixFor = (...args) => activeRegistry.credentialPrefixFor(...args);
+export const certificateTitleFor = (...args) => activeRegistry.certificateTitleFor(...args);
+export const requiredModulesForFinalAssessment = (...args) => activeRegistry.requiredModulesForFinalAssessment(...args);
+export const listCourses = (...args) => activeRegistry.listCourses(...args);
+
+/**
+ * Course named explicitly by a request (body/query), for shared endpoints.
+ * Absent (undefined/null) -> Head Spa, for compatibility with the existing
+ * client, which sends none. Anything else must be an active registry slug;
+ * an explicit invalid value NEVER falls back to Head Spa.
+ * @returns {{ ok:true, slug:string } | { ok:false, reason:'unknown_course' }}
+ */
+export function resolveRequestedCourse(requested) {
+  if (requested === undefined || requested === null) return { ok: true, slug: HEADSPA_MASTERY.slug };
+  const course = getCourse(requested);
+  return course ? { ok: true, slug: course.slug } : { ok: false, reason: 'unknown_course' };
+}

@@ -12,9 +12,8 @@
    of Part I (never a correct choice, rationale, or rubric).
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchAttemptSummaries, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { resolveCurrentAssessmentConfig } from '../../_lib/courses/registry.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchAttemptSummaries, fetchLadderGateRows, supabaseRest, resolveAttemptContentOrError } from '../../_lib/certification/auth.mjs';
+import { resolveRequestedCourse, resolveNewAttemptContent } from '../../_lib/courses/registry.mjs';
 import { assembleAttempt } from '../../_lib/certification/randomization.mjs';
 import { projectKnowledgeItemForClient } from '../../_lib/certification/content-schema.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
@@ -26,19 +25,26 @@ export async function onRequestPost(context) {
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
 
-  const entitled = await isEntitled(env, user);
+  // Course identity: absent -> Head Spa (the existing client sends `{}`);
+  // an explicit value must be an active registry course -- never a fallback.
+  const body = await request.json().catch(() => ({}));
+  const requested = resolveRequestedCourse(body && typeof body === 'object' ? body.courseSlug : undefined);
+  if (!requested.ok) return json({ error: 'Unknown course.', reason: requested.reason }, 400);
+  const courseSlug = requested.slug;
+
+  const entitled = await isEntitled(env, user, courseSlug);
   if (!entitled) return json({ error: 'No active enrollment found.' }, 403);
 
-  const eligible = await hasCompletedInstructionalModules(env, user.id);
+  const eligible = await hasCompletedInstructionalModules(env, user.id, courseSlug);
   if (!eligible) {
     return json({ error: 'Complete Modules 1-11 before starting the final certification assessment.' }, 409);
   }
 
-  const resolved = resolveCurrentAssessmentConfig(COURSE_SLUG);
+  const resolved = resolveNewAttemptContent(courseSlug);
   if (!resolved.ok) return json({ error: 'Assessment configuration unavailable.' }, 500);
-  const config = resolved.config;
-  const attempts = await fetchAttemptSummaries(env, user.id);
-  const gate = await fetchLadderGateRows(env, user.id);
+  const { config, banks } = resolved;
+  const attempts = await fetchAttemptSummaries(env, user.id, courseSlug);
+  const gate = await fetchLadderGateRows(env, user.id, courseSlug);
   const ladder = determineNextAttemptEligibility({
     attempts,
     remediationAssignments: gate.remediationAssignments,
@@ -53,7 +59,10 @@ export async function onRequestPost(context) {
     const existing = attempts.find((a) => a.attemptNumber === ladder.resumeAttemptNumber);
     const row = await fetchAttemptRow(env, existing.id, user.id);
     if (!row) return json({ error: 'Could not resume attempt.' }, 500);
-    return json({ resumed: true, attempt: projectAttemptForClient(row) });
+    // Resumed with its OWN persisted content, never the current bank.
+    const { content, errorResponse: contentError } = resolveAttemptContentOrError(row);
+    if (contentError) return contentError;
+    return json({ resumed: true, attempt: projectAttemptForClient(row, content.banks) });
   }
   // Fail closed: a new attempt is never started on unverified gate rows.
   if (!gate.ok) return json({ error: 'Could not verify attempt eligibility. Please try again.' }, 503);
@@ -61,10 +70,10 @@ export async function onRequestPost(context) {
     return json({ error: 'Next attempt is not yet available.', blockedReason: ladder.blockedReason, details: ladder }, 409);
   }
 
-  // Retake-overlap minimization: avoid items this student has already seen.
-  const priorSelectedIds = await fetchPriorSelectedIds(env, user.id);
+  // Retake-overlap minimization: avoid items this student has already seen
+  // in THIS course (item ids are only meaningful within one course's bank).
+  const priorSelectedIds = await fetchPriorSelectedIds(env, user.id, courseSlug);
 
-  const banks = getProductionBanks();
   const assembled = assembleAttempt(banks, config, {
     seenKnowledgeIds: priorSelectedIds.knowledge,
     seenCaseIds: priorSelectedIds.cases,
@@ -84,10 +93,10 @@ export async function onRequestPost(context) {
 
   const insertBody = {
     user_id: user.id,
-    course_slug: COURSE_SLUG,
+    course_slug: courseSlug,
     assessment_version: config.assessmentVersion,
     standard_version: config.standardVersion,
-    bank_version: config.bankVersion,
+    bank_version: banks.bankVersion,
     attempt_number: ladder.nextAttemptNumber,
     status: 'in_progress',
     part1_selected_ids: assembled.partI.map((i) => i.id),
@@ -109,7 +118,7 @@ export async function onRequestPost(context) {
     return json({ error: 'Could not start a new attempt.' }, 500);
   }
 
-  return json({ resumed: false, attempt: projectAttemptForClient(inserted.body[0], assembled.partI) });
+  return json({ resumed: false, attempt: projectAttemptForClient(inserted.body[0], banks, assembled.partI) });
 }
 
 async function fetchAttemptRow(env, attemptId, userId) {
@@ -119,10 +128,11 @@ async function fetchAttemptRow(env, attemptId, userId) {
   return res.body[0];
 }
 
-async function fetchPriorSelectedIds(env, userId) {
+async function fetchPriorSelectedIds(env, userId, courseSlug) {
   const params = new URLSearchParams({
     select: 'part1_selected_ids,part2_selected_ids,part3_selected_ids',
     user_id: `eq.${userId}`,
+    course_slug: `eq.${courseSlug}`,
   });
   const res = await supabaseRest(env, `certification_attempts?${params}`);
   const rows = res.ok && Array.isArray(res.body) ? res.body : [];
@@ -133,8 +143,7 @@ async function fetchPriorSelectedIds(env, userId) {
   };
 }
 
-function projectAttemptForClient(row, fullKnowledgeItems) {
-  const banks = getProductionBanks();
+function projectAttemptForClient(row, banks, fullKnowledgeItems) {
   const knowledgeItems =
     fullKnowledgeItems || (row.part1_selected_ids || []).map((id) => banks.knowledgeBank.find((k) => k.id === id)).filter(Boolean);
   return {

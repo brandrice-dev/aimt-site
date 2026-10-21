@@ -122,7 +122,7 @@ function fnBody(src, name) {
 // harness mock, Review Mode fixture), never a client-invented number
 // ─────────────────────────────────────────────────────────────────────────
 (function thresholdsAreReal() {
-  check('E. THRESHOLDS', 'get-status.js resolves thresholds via getAssessmentConfig(assessment_version) -- the SPECIFIC version the attempt was scored under, not just "whatever is current"', /resolveAssessmentConfig\(COURSE_SLUG, latestFinalized\.assessment_version\)/.test(getStatusSrc));
+  check('E. THRESHOLDS', 'get-status.js resolves thresholds via getAssessmentConfig(assessment_version) -- the SPECIFIC version the attempt was scored under, not just "whatever is current"', /resolveAssessmentConfig\(courseSlug, latestFinalized\.assessment_version\)/.test(getStatusSrc));
   check('E. THRESHOLDS', 'get-status.js selects assessment_version from the attempts table so that resolution is possible', /assessment_version/.test(getStatusSrc) && /select:\s*'[^']*assessment_version/.test(getStatusSrc));
   check('E. THRESHOLDS', 'get-status.js never hardcodes a minimums/weights object inline (only via the imported config)', !/minimums:\s*\{\s*knowledge:\s*0\.75/.test(getStatusSrc));
 
