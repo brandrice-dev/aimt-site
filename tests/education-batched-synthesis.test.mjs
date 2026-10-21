@@ -8,7 +8,8 @@ import {
   BATCH_SYNTHESIS_THRESHOLD,BATCH_CLAIMS,BATCH_MAX_CALLS_PER_RUN,
   runBatchedSynthesisPipeline,
 } from '../functions/_lib/research/publication-synthesis-batches.mjs';
-import {buildPublicationRequestBody,buildEvidenceBatchRequest,buildGlobalEvidenceRequest,buildSynthesisRequest} from '../functions/_lib/research/publication-synthesis-client.mjs';
+import {buildPublicationRequestBody,buildEvidenceBatchRequest,buildGlobalEvidenceRequest,buildSynthesisRequest,
+  BATCH_SCIENTIFIC_MAX_TOKENS,GLOBAL_SCIENTIFIC_MAX_TOKENS} from '../functions/_lib/research/publication-synthesis-client.mjs';
 import {createPublicationCostControl,PUBLICATION_INPUT_TOKEN_LIMIT} from '../functions/_lib/research/publication-cost-control.mjs';
 import {createSynthesisProgressIo} from '../scripts/_lib/education-synthesis-progress.mjs';
 import {runDecisionPipeline} from '../scripts/education-operations-cycle.mjs';
@@ -112,6 +113,70 @@ test('401 original verified claims partition into exact disjoint source-grounded
  assert.equal(validateBatchDecisions(good,chunks[0]).valid,true);
  assert.equal(validateBatchDecisions({...good,selected_claims:good.selected_claims.slice(1)},chunks[0]).valid,false);
  assert.equal(validateBatchDecisions({...good,excluded_claims:[{claim_id:'invented',reason_code:'OTHER',reason:'Untrusted',related_conflict_claim_ids:[]}]},chunks[0]).valid,false);
+});
+
+test('live token truncation fix keeps valid v1 checkpoint partition and bounded financial reservations',()=>{
+  const f=fixture(),chunks=splitSynthesisEvidence(f.evidenceBundle);
+  assert.equal(BATCH_CLAIMS,40,'never silently abandon a paid-for 40-claim v1 checkpoint');
+  assert.equal(BATCH_SCIENTIFIC_MAX_TOKENS,24000);
+  assert.equal(GLOBAL_SCIENTIFIC_MAX_TOKENS,24000);
+  const spend=createPublicationCostControl();
+  for(const chunk of chunks.slice(0,2)){
+    const req=buildEvidenceBatchRequest({...f,chunk,requiredFlags:[flag],schema:{type:'object',properties:{},required:[]}});
+    const body=buildPublicationRequestBody({},req);
+    assert.equal(body.max_tokens,24000,'failed 9k ceiling must not be reused');
+    assert.deepEqual(body.thinking,{type:'adaptive'},'retain scientific reasoning quality');
+    assert.equal(req.effort,'medium');
+    spend.reserve({...body,stream:true});
+  }
+  const summary=spend.summary();
+  assert.equal(summary.requests,2);
+  assert.ok(summary.reserved_cost_estimate_usd<=summary.budget_usd,
+    'conservative reservation must enforce the existing $2 window, not add spending');
+  assert.match(buildEvidenceBatchRequest({...f,chunk:chunks[0],schema:{type:'object',properties:{},required:[]}}).system,
+    /substantive uncertainty\/conflict explanations longer as needed/i);
+});
+
+test('real-shaped paused checkpoint resumes after second 40-claim truncation without replaying 40 accepted claims',async()=>{
+  const f=fixture(),chunks=splitSynthesisEvidence(f.evidenceBundle),io=makeIo();
+  const first=chunks[0];
+  const savedOutput={
+    selected_claims:first.evidence.claims.slice(0,7).map(c=>({
+      claim_id:c.claim_id,role:'supporting_context',
+      reason:'This claim addresses relevant study findings within its specific evidence boundaries.'
+    })),
+    excluded_claims:first.evidence.claims.slice(7).map(c=>({
+      claim_id:c.claim_id,reason_code:'INSUFFICIENT_RELEVANCE_TO_PAGE_INTENT',
+      reason:'This is not within the public scientific education page purpose or scope.',
+      related_conflict_claim_ids:[]
+    })),
+  };
+  assert.equal(validateBatchDecisions(savedOutput,first).valid,true);
+  // Exactly the shape of the Oct 20 production archive: 1 of 11 chunks
+  // saved, second chunk failed once, 7 selected/33 excluded in chunk 0.
+  await io.save({topic_slug:f.topic_slug,fingerprint:'a'.repeat(64),progress:{
+    version:'publication-batches-v1',fingerprint:'a'.repeat(64),total:11,
+    completed:[{index:0,claim_ids:first.claim_ids,output:savedOutput,modelInfo:{modelName:'claude-sonnet-5'}}],
+    failures:{'1':1},global:null,
+  }});
+  const attempts=[];
+  const answer=await runBatchedSynthesisPipeline({}, {...f,batchIo:io,fns:{
+    chunkFn:async(_env,{chunk})=>{
+      attempts.push(chunk.index);
+      return {ok:true,modelInfo:{modelName:'claude-sonnet-5'},diagnostics:{attempts:1},
+        usage:{input_tokens:6000,output_tokens:6500},
+        output:{selected_claims:chunk.evidence.claims.map(c=>({
+          claim_id:c.claim_id,role:'supporting_context',
+          reason:'This study finding remains within the included scientific observation scope.'
+        })),excluded_claims:[]}};
+    },
+  }});
+  assert.equal(answer.status,'SYNTHESIS_IN_PROGRESS');
+  assert.deepEqual(attempts,[1,2],'never call the model for the already-reviewed first 40');
+  assert.deepEqual(io.state.completed[0].output,savedOutput,'original selected/excluded scientific decisions unchanged');
+  assert.deepEqual(io.state.failures,{},'successful retry consumes no more failure allowance');
+  assert.equal(io.state.completed.length,3);
+  assert.equal(io.state.completed.reduce((n,c)=>n+c.claim_ids.length,0),120);
 });
 
 test('full 401 claim analysis resumes over budget windows; never restarts finished batches',async()=>{
