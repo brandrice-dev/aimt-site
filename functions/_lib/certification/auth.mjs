@@ -9,6 +9,8 @@
 // server-side -> entitlement check via course_entitlements. No parallel auth
 // system is introduced; this only factors the existing pattern out for reuse.
 
+import { requiredModulesForFinalAssessment } from '../courses/registry.mjs';
+
 export const COURSE_SLUG = 'headspa-mastery';
 
 export function json(data, status = 200) {
@@ -74,11 +76,14 @@ export async function isEntitled(env, user, courseSlug = COURSE_SLUG) {
 
 /**
  * Reads the student's synced course_progress.state and reports whether
- * Modules 0-11 are all marked complete server-side — the eligibility gate
- * for starting the Module 12 final assessment. Never trusts a client-passed
- * completion flag.
+ * every module the course registry requires before its final assessment
+ * (Head Spa: Modules 0-11) is marked complete server-side — the eligibility
+ * gate for starting the final assessment. Never trusts a client-passed
+ * completion flag. An unknown course is never eligible.
  */
 export async function hasCompletedInstructionalModules(env, userId, courseSlug = COURSE_SLUG) {
+  const requiredModules = requiredModulesForFinalAssessment(courseSlug);
+  if (!requiredModules) return false;
   const params = new URLSearchParams({
     select: 'state',
     user_id: `eq.${userId}`,
@@ -89,7 +94,7 @@ export async function hasCompletedInstructionalModules(env, userId, courseSlug =
   if (!res.ok || !Array.isArray(res.body) || !res.body.length) return false;
   const state = res.body[0].state || {};
   const progress = state.progress || {};
-  for (let moduleId = 0; moduleId <= 11; moduleId++) {
+  for (const moduleId of requiredModules) {
     const mod = progress[String(moduleId)];
     if (!mod || mod.complete !== true) return false;
   }

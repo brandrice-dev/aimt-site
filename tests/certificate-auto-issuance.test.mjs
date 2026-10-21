@@ -66,7 +66,8 @@ function world({ attempts = [], completions = [], progressScore = 1200, progress
   const db = {
     course_entitlements: entitled ? [{ checkout_session_id: 'cs_live_1', course_slug: SLUG, purchaser_email: STUDENT.email, user_id: STUDENT.id, granted_at: '2026-08-01T00:00:00Z' }] : [],
     course_progress: [{ user_id: STUDENT.id, course_slug: SLUG, progress_score: progressScore, state: { progress, ...progressState }, updated_at: '2026-09-20T00:00:00Z' }],
-    certification_attempts: attempts.map((a) => ({ user_id: STUDENT.id, course_slug: SLUG, ...a })),
+    // assessment_version is NOT NULL on real rows; finalize scores under it.
+    certification_attempts: attempts.map((a) => ({ user_id: STUDENT.id, course_slug: SLUG, assessment_version: 'headspa-fe-assessment-v1', ...a })),
     certification_remediation_assignments: [],
     certification_review_requests: [],
     certification_educator_requests: [],

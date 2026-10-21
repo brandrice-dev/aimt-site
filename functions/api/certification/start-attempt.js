@@ -13,7 +13,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchAttemptSummaries, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
+import { resolveCurrentAssessmentConfig } from '../../_lib/courses/registry.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { assembleAttempt } from '../../_lib/certification/randomization.mjs';
 import { projectKnowledgeItemForClient } from '../../_lib/certification/content-schema.mjs';
@@ -34,7 +34,9 @@ export async function onRequestPost(context) {
     return json({ error: 'Complete Modules 1-11 before starting the final certification assessment.' }, 409);
   }
 
-  const config = getCurrentAssessmentConfig();
+  const resolved = resolveCurrentAssessmentConfig(COURSE_SLUG);
+  if (!resolved.ok) return json({ error: 'Assessment configuration unavailable.' }, 500);
+  const config = resolved.config;
   const attempts = await fetchAttemptSummaries(env, user.id);
   const gate = await fetchLadderGateRows(env, user.id);
   const ladder = determineNextAttemptEligibility({
