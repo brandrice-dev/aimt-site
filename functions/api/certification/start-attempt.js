@@ -12,7 +12,7 @@
    of Part I (never a correct choice, rationale, or rubric).
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchAttemptSummaries, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
+import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchAttemptSummaries, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
 import { getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import { assembleAttempt } from '../../_lib/certification/randomization.mjs';
@@ -36,7 +36,13 @@ export async function onRequestPost(context) {
 
   const config = getCurrentAssessmentConfig();
   const attempts = await fetchAttemptSummaries(env, user.id);
-  const ladder = determineNextAttemptEligibility({ attempts, config });
+  const gate = await fetchLadderGateRows(env, user.id);
+  const ladder = determineNextAttemptEligibility({
+    attempts,
+    remediationAssignments: gate.remediationAssignments,
+    educatorRequests: gate.educatorRequests,
+    config,
+  });
 
   if (ladder.alreadyCertified) {
     return json({ state: 'certified', message: 'Certification has already been earned.' }, 409);
@@ -47,6 +53,8 @@ export async function onRequestPost(context) {
     if (!row) return json({ error: 'Could not resume attempt.' }, 500);
     return json({ resumed: true, attempt: projectAttemptForClient(row) });
   }
+  // Fail closed: a new attempt is never started on unverified gate rows.
+  if (!gate.ok) return json({ error: 'Could not verify attempt eligibility. Please try again.' }, 503);
   if (!ladder.canStartNewAttempt) {
     return json({ error: 'Next attempt is not yet available.', blockedReason: ladder.blockedReason, details: ladder }, 409);
   }

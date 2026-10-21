@@ -469,6 +469,9 @@ async function startAttemptChecks() {
     course_entitlements: { rows: [{ checkout_session_id: 'cs_1', course_slug: 'headspa-mastery', user_id: USER.id, purchaser_email: USER.email }] },
     course_progress: { rows: [{ user_id: USER.id, course_slug: 'headspa-mastery', state: { progress } }] },
     certification_attempts: { rows: [], uniqueKey: ['user_id', 'course_slug', 'attempt_number'] },
+    // Read by the ladder gate (fetchLadderGateRows) before any new attempt.
+    certification_remediation_assignments: { rows: [] },
+    certification_educator_requests: { rows: [] },
   };
   const capture = {};
   const mock = buildMockFetch({ users: { [TOKEN]: USER }, tables, anthropicHandler: anthropicOkCase, capture });
