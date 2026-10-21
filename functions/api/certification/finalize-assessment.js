@@ -11,7 +11,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
+import { resolveAssessmentConfig } from '../../_lib/courses/registry.mjs';
 import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
 import {
   scoreKnowledgeResponses,
@@ -73,7 +73,12 @@ export async function onRequestPost(context) {
     return json({ error: 'All three parts must be submitted before finalizing.' }, 409);
   }
 
-  const config = getCurrentAssessmentConfig();
+  // Score under the version this attempt was started with, for its own
+  // course -- never "whatever is current" (standard Section 15). Nothing is
+  // written if that can't be resolved.
+  const resolved = resolveAssessmentConfig(attempt.course_slug, attempt.assessment_version);
+  if (!resolved.ok) return json({ error: 'This attempt cannot be scored under a recognized assessment version.', reason: resolved.reason }, 409);
+  const config = resolved.config;
   const banks = getProductionBanks();
 
   // Recompute Part I evidence points from the authoritative stored responses

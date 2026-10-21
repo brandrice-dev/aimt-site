@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { getAssessmentConfig, getCurrentAssessmentConfig } from '../../_lib/certification/assessment-config.mjs';
+import { resolveAssessmentConfig, resolveCurrentAssessmentConfig } from '../../_lib/courses/registry.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
 
 export async function onRequestGet(context) {
@@ -34,7 +34,9 @@ export async function onRequestGet(context) {
   );
   const rows = attemptsRes.ok && Array.isArray(attemptsRes.body) ? attemptsRes.body : [];
 
-  const config = getCurrentAssessmentConfig();
+  const current = resolveCurrentAssessmentConfig(COURSE_SLUG);
+  if (!current.ok) return json({ error: 'Assessment configuration unavailable.' }, 500);
+  const config = current.config;
   const ladderInput = rows.map((r) => ({
     attemptNumber: r.attempt_number,
     decision: r.certification_decision || null,
@@ -107,7 +109,11 @@ export async function onRequestGet(context) {
           // can show "you needed X%, you got Y%" from real data instead of
           // a client-side hardcoded duplicate.
           thresholds: (function () {
-            var cfg = getAssessmentConfig(latestFinalized.assessment_version);
+            // Fails closed (as the unknown-version throw always did) rather
+            // than showing another version's or another course's numbers.
+            var scoredUnder = resolveAssessmentConfig(COURSE_SLUG, latestFinalized.assessment_version);
+            if (!scoredUnder.ok) throw new Error('Unresolvable assessment version: ' + latestFinalized.assessment_version);
+            var cfg = scoredUnder.config;
             return { weights: cfg.weights, minimums: cfg.minimums };
           })(),
           criticalDomainResults: latestFinalized.critical_domain_results,
