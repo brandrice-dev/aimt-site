@@ -8,7 +8,8 @@
    Body: { attemptId, studentExplanation, disputedRef?: { part, itemId } }
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
+import { json, hasSupabaseEnv, resolveUser, isEntitled, supabaseRest } from '../../_lib/certification/auth.mjs';
+import { getCourse } from '../../_lib/courses/registry.mjs';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -16,9 +17,6 @@ export async function onRequestPost(context) {
 
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
-
-  const entitled = await isEntitled(env, user);
-  if (!entitled) return json({ error: 'No active enrollment found.' }, 403);
 
   let body;
   try {
@@ -33,19 +31,26 @@ export async function onRequestPost(context) {
 
   const attemptCheck = await supabaseRest(
     env,
-    `certification_attempts?${new URLSearchParams({ select: 'id,assessment_version', id: `eq.${attemptId}`, user_id: `eq.${user.id}`, limit: '1' })}`
+    `certification_attempts?${new URLSearchParams({ select: 'id,course_slug,assessment_version', id: `eq.${attemptId}`, user_id: `eq.${user.id}`, limit: '1' })}`
   );
   if (!attemptCheck.ok || !Array.isArray(attemptCheck.body) || !attemptCheck.body.length) {
     return json({ error: 'Attempt not found.' }, 404);
   }
   const assessmentVersion = attemptCheck.body[0].assessment_version;
 
+  // The review belongs to the attempt's own course; entitlement is checked
+  // for that course, never assumed to be Head Spa.
+  const course = getCourse(attemptCheck.body[0].course_slug);
+  if (!course) return json({ error: 'This attempt’s course is not recognized.', reason: 'unknown_course' }, 409);
+  const entitled = await isEntitled(env, user, course.slug);
+  if (!entitled) return json({ error: 'No active enrollment found.' }, 403);
+
   const inserted = await supabaseRest(env, 'certification_review_requests', {
     method: 'POST',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify({
       user_id: user.id,
-      course_slug: COURSE_SLUG,
+      course_slug: course.slug,
       attempt_id: attemptId,
       assessment_version: assessmentVersion,
       disputed_ref: disputedRef || null,

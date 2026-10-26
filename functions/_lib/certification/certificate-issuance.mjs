@@ -32,21 +32,24 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { COURSE_SLUG, hasCompletedInstructionalModules, isEntitled, supabaseRest } from './auth.mjs';
+import { courseRegistry, getCourse } from '../courses/registry.mjs';
 
-export const CREDENTIAL_PREFIX = 'AIMT-HS';
+/* Head Spa's prefix ('AIMT-HS'), kept as an export for existing callers.
+   Each course's prefix now lives in the course registry. */
+export const CREDENTIAL_PREFIX = courseRegistry.getCourse(COURSE_SLUG).resources.credentialPrefix;
 /* Unambiguous alphabet: no 0/O, 1/I/L */
 const ID_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 const MAX_NAME_LENGTH = 120;
 /* Placeholders the course UI has historically used for a missing name. */
 const PLACEHOLDER_NAMES = new Set(['graduate', 'student', 'learner', 'name', 'your name']);
 
-export function generateCredentialId() {
+export function generateCredentialId(prefix = CREDENTIAL_PREFIX) {
   const year = new Date().getUTCFullYear();
   const bytes = new Uint8Array(6);
   crypto.getRandomValues(bytes);
   let suffix = '';
   for (const b of bytes) suffix += ID_ALPHABET[b % ID_ALPHABET.length];
-  return `${CREDENTIAL_PREFIX}-${year}-${suffix}`;
+  return `${prefix}-${year}-${suffix}`;
 }
 
 function usableName(value) {
@@ -135,11 +138,18 @@ async function readProgressState(env, userId, courseSlug) {
  * Supabase Auth user ({ id, email, user_metadata }).
  *
  * status: 'already_issued' | 'issued'          (ok: true, credential set)
- *         'revoked' | 'not_entitled' | 'incomplete' | 'not_passed'
+ *         'unknown_course' | 'revoked' | 'not_entitled' | 'incomplete' | 'not_passed'
  *         | 'name_required' | 'error'           (ok: false)
  */
 export async function ensureCertificateIssued(env, user, { courseSlug = COURSE_SLUG } = {}) {
   if (!user || !user.id) return { ok: false, status: 'error', message: 'Unknown student.' };
+
+  /* 0. Only an active registry course can issue, and only its own prefix.
+     Every gate below (entitlement, completion, PASS, existing/revoked
+     credential) is scoped to this same course, so a pass in one course can
+     never issue another course's credential. */
+  const course = getCourse(courseSlug);
+  if (!course) return { ok: false, status: 'unknown_course', message: 'Unknown course.' };
 
   /* 1–2. Existing credential always wins; a revoked one is never replaced. */
   const rows = await readCompletions(env, user.id, courseSlug);
@@ -181,7 +191,7 @@ export async function ensureCertificateIssued(env, user, { courseSlug = COURSE_S
       method: 'POST',
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
-        credential_id: generateCredentialId(),
+        credential_id: generateCredentialId(course.resources.credentialPrefix),
         user_id: user.id,
         course_slug: courseSlug,
         student_name: studentName,

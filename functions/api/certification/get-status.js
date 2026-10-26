@@ -7,8 +7,8 @@
    Headers: Authorization: Bearer <supabase access token>
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchLadderGateRows, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { resolveAssessmentConfig, resolveCurrentAssessmentConfig } from '../../_lib/courses/registry.mjs';
+import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchLadderGateRows, supabaseRest } from '../../_lib/certification/auth.mjs';
+import { resolveAssessmentConfig, resolveCurrentAssessmentConfig, resolveRequestedCourse, requestedCourseFromQuery } from '../../_lib/courses/registry.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
 
 export async function onRequestGet(context) {
@@ -18,23 +18,29 @@ export async function onRequestGet(context) {
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
 
-  const entitled = await isEntitled(env, user);
+  // ?courseSlug= absent -> Head Spa (existing client); explicit -> must be an
+  // active registry course, never a fallback.
+  const requested = resolveRequestedCourse(requestedCourseFromQuery(new URL(request.url).searchParams));
+  if (!requested.ok) return json({ error: 'Unknown course.', reason: requested.reason }, 400);
+  const courseSlug = requested.slug;
+
+  const entitled = await isEntitled(env, user, courseSlug);
   if (!entitled) return json({ error: 'No active enrollment found.' }, 403);
 
-  const eligible = await hasCompletedInstructionalModules(env, user.id);
+  const eligible = await hasCompletedInstructionalModules(env, user.id, courseSlug);
 
   const attemptsRes = await supabaseRest(
     env,
     `certification_attempts?${new URLSearchParams({
       select: 'id,attempt_number,status,certification_decision,critical_domain_results,knowledge_score,applied_cases_score,interview_score,overall_score,decision_at,started_at,assessment_version',
       user_id: `eq.${user.id}`,
-      course_slug: `eq.${COURSE_SLUG}`,
+      course_slug: `eq.${courseSlug}`,
       order: 'attempt_number.asc',
     })}`
   );
   const rows = attemptsRes.ok && Array.isArray(attemptsRes.body) ? attemptsRes.body : [];
 
-  const current = resolveCurrentAssessmentConfig(COURSE_SLUG);
+  const current = resolveCurrentAssessmentConfig(courseSlug);
   if (!current.ok) return json({ error: 'Assessment configuration unavailable.' }, 500);
   const config = current.config;
   const ladderInput = rows.map((r) => ({
@@ -42,7 +48,7 @@ export async function onRequestGet(context) {
     decision: r.certification_decision || null,
     criticalDomainResults: r.critical_domain_results || [],
   }));
-  const gate = await fetchLadderGateRows(env, user.id);
+  const gate = await fetchLadderGateRows(env, user.id, courseSlug);
   const ladder = determineNextAttemptEligibility({
     attempts: ladderInput,
     remediationAssignments: gate.remediationAssignments,
@@ -111,7 +117,7 @@ export async function onRequestGet(context) {
           thresholds: (function () {
             // Fails closed (as the unknown-version throw always did) rather
             // than showing another version's or another course's numbers.
-            var scoredUnder = resolveAssessmentConfig(COURSE_SLUG, latestFinalized.assessment_version);
+            var scoredUnder = resolveAssessmentConfig(courseSlug, latestFinalized.assessment_version);
             if (!scoredUnder.ok) throw new Error('Unresolvable assessment version: ' + latestFinalized.assessment_version);
             var cfg = scoredUnder.config;
             return { weights: cfg.weights, minimums: cfg.minimums };
