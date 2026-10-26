@@ -108,6 +108,7 @@ async function call(db, handler, user, body) {
       url: 'https://aimtrichology.com/api/certification/x',
       headers: { get: (n) => (n === 'Authorization' ? `Bearer ${user.id}` : null) },
       json: async () => body || {},
+      text: async () => JSON.stringify(body || {}),
     };
     const res = await handler({ request, env: ENV });
     return { status: res.status, body: await res.json() };

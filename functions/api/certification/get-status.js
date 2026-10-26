@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 import { json, hasSupabaseEnv, resolveUser, isEntitled, hasCompletedInstructionalModules, fetchLadderGateRows, supabaseRest } from '../../_lib/certification/auth.mjs';
-import { resolveAssessmentConfig, resolveCurrentAssessmentConfig, resolveRequestedCourse } from '../../_lib/courses/registry.mjs';
+import { resolveAssessmentConfig, resolveCurrentAssessmentConfig, resolveRequestedCourse, requestedCourseFromQuery } from '../../_lib/courses/registry.mjs';
 import { determineNextAttemptEligibility } from '../../_lib/certification/attempt-ladder.mjs';
 
 export async function onRequestGet(context) {
@@ -20,7 +20,7 @@ export async function onRequestGet(context) {
 
   // ?courseSlug= absent -> Head Spa (existing client); explicit -> must be an
   // active registry course, never a fallback.
-  const requested = resolveRequestedCourse(new URL(request.url).searchParams.get('courseSlug'));
+  const requested = resolveRequestedCourse(requestedCourseFromQuery(new URL(request.url).searchParams));
   if (!requested.ok) return json({ error: 'Unknown course.', reason: requested.reason }, 400);
   const courseSlug = requested.slug;
 

@@ -59,6 +59,7 @@ function makeRequest(body, authToken) {
     url: 'https://aimtrichology.com/api/certification/x',
     headers: { get: (name) => (name === 'Authorization' && authToken ? `Bearer ${authToken}` : null) },
     json: async () => body,
+    text: async () => (body === undefined ? '' : JSON.stringify(body)),
   };
 }
 

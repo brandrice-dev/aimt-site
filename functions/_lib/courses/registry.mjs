@@ -130,6 +130,8 @@ function validateCourse(def, lookupAssessmentConfig, lookupBank) {
  * @param {CourseDefinition[]} definitions
  * @param {{ lookupAssessmentConfig?: (version:string) => any, lookupBank?: (bankVersion:string) => any }} [options]
  */
+const builtRegistries = new WeakSet();
+
 export function createCourseRegistry(definitions, { lookupAssessmentConfig = getAssessmentConfig, lookupBank = lookupInstalledBank } = {}) {
   const bySlug = new Map();
   const prefixes = new Set();
@@ -217,7 +219,7 @@ export function createCourseRegistry(definitions, { lookupAssessmentConfig = get
     return { ok: true, course: rules.course, config: rules.config, banks: bank.banks };
   }
 
-  return Object.freeze({
+  const registry = Object.freeze({
     getCourse,
     resolveAssessmentConfig,
     resolveCurrentAssessmentConfig,
@@ -242,6 +244,8 @@ export function createCourseRegistry(definitions, { lookupAssessmentConfig = get
       return [...bySlug.values()].filter((c) => includeDraft || c.status === 'active');
     },
   });
+  builtRegistries.add(registry);
+  return registry;
 }
 
 /** The production registry. Head Spa is the only course. */
@@ -255,6 +259,9 @@ let activeRegistry = courseRegistry;
  * (enforced by tests/course-registry-phase2a.test.mjs). Returns a restore fn.
  */
 export function __useCourseRegistryForTests(registry) {
+  // Only a validated registry from createCourseRegistry -- never an ad hoc
+  // object that would skip the construction checks above.
+  if (!builtRegistries.has(registry)) throw new Error('__useCourseRegistryForTests requires a registry from createCourseRegistry');
   const previous = activeRegistry;
   activeRegistry = registry;
   return () => { activeRegistry = previous; };
@@ -273,13 +280,26 @@ export const listCourses = (...args) => activeRegistry.listCourses(...args);
 
 /**
  * Course named explicitly by a request (body/query), for shared endpoints.
- * Absent (undefined/null) -> Head Spa, for compatibility with the existing
- * client, which sends none. Anything else must be an active registry slug;
- * an explicit invalid value NEVER falls back to Head Spa.
+ * Genuinely omitted (undefined) -> Head Spa, for compatibility with the
+ * existing client, which sends none. Anything else -- including an explicit
+ * null -- must be an active registry slug; an explicit invalid value NEVER
+ * falls back to Head Spa.
  * @returns {{ ok:true, slug:string } | { ok:false, reason:'unknown_course' }}
  */
 export function resolveRequestedCourse(requested) {
-  if (requested === undefined || requested === null) return { ok: true, slug: HEADSPA_MASTERY.slug };
+  if (requested === undefined) return { ok: true, slug: HEADSPA_MASTERY.slug };
   const course = getCourse(requested);
   return course ? { ok: true, slug: course.slug } : { ok: false, reason: 'unknown_course' };
+}
+
+/**
+ * `?courseSlug=` as resolveRequestedCourse expects it: undefined only when
+ * the parameter is genuinely absent. An empty or repeated parameter is
+ * passed through as explicit (and so rejected), never treated as absent.
+ * @param {URLSearchParams} searchParams
+ */
+export function requestedCourseFromQuery(searchParams) {
+  if (!searchParams.has('courseSlug')) return undefined;
+  const values = searchParams.getAll('courseSlug');
+  return values.length === 1 ? values[0] : values;
 }

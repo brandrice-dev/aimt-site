@@ -22,7 +22,7 @@
 
 import { json, hasSupabaseEnv, resolveUser } from '../_lib/certification/auth.mjs';
 import { ensureCertificateIssued } from '../_lib/certification/certificate-issuance.mjs';
-import { resolveRequestedCourse } from '../_lib/courses/registry.mjs';
+import { resolveRequestedCourse, requestedCourseFromQuery } from '../_lib/courses/registry.mjs';
 
 const STATUS_HTTP = {
   unknown_course: 400,
@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
   // ?courseSlug= absent -> Head Spa (the existing client sends none); an
   // explicit invalid value is rejected, never defaulted. Taken from the
   // query string so the request body (incl. any student_name) stays unread.
-  const requested = resolveRequestedCourse(new URL(request.url).searchParams.get('courseSlug'));
+  const requested = resolveRequestedCourse(requestedCourseFromQuery(new URL(request.url).searchParams));
   if (!requested.ok) return json({ error: 'Unknown course.', status: requested.reason }, 400);
 
   let result;

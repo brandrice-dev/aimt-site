@@ -179,7 +179,7 @@ function installFetch(db) {
   return () => { globalThis.fetch = original; };
 }
 
-async function call(db, handler, user, { body, query = '' } = {}) {
+async function call(db, handler, user, { body, rawBody, query = '' } = {}) {
   const restore = installFetch(db);
   try {
     const res = await handler({
@@ -187,6 +187,7 @@ async function call(db, handler, user, { body, query = '' } = {}) {
         url: `https://aimtrichology.com/api/x${query}`,
         headers: { get: (n) => (n === 'Authorization' ? `Bearer ${user.id}` : null) },
         json: async () => (body === undefined ? {} : body),
+        text: async () => (rawBody !== undefined ? rawBody : JSON.stringify(body === undefined ? {} : body)),
       },
       env: ENV,
     });
@@ -272,6 +273,42 @@ test('explicit invalid course identifiers are rejected and never default to Head
   }
   assert.equal(db.tables.certification_attempts.length, 0);
   assert.equal(db.tables.completions.length, 0);
+});
+
+test('only a genuinely omitted courseSlug means Head Spa: explicit null, empty and repeated values are rejected', async () => {
+  const db = createDb();
+  const start = await call(db, startAttempt, USERS.both, { body: { courseSlug: null } });
+  assert.equal(start.status, 400, 'body courseSlug: null');
+  assert.equal(start.body.reason, 'unknown_course');
+  for (const query of ['?courseSlug', '?courseSlug=', '?courseSlug=null', `?courseSlug=${HS}&courseSlug=${HS}`, `?courseSlug=${HS}&courseSlug=${EX}`]) {
+    assert.equal((await call(db, getStatus, USERS.both, { query })).status, 400, `status ${query}`);
+    assert.equal((await call(db, issueCertificate, USERS.both, { query })).status, 400, `cert ${query}`);
+  }
+  assert.equal(db.tables.certification_attempts.length, 0);
+  assert.equal(db.tables.completions.length, 0);
+});
+
+test('a malformed or non-object start-attempt body is rejected, never read as "no course"', async () => {
+  const db = createDb();
+  for (const rawBody of ['{', '{"courseSlug":', 'not json', 'null', '[]', '"headspa-mastery"', '42', 'true']) {
+    const res = await call(db, startAttempt, USERS.both, { rawBody });
+    assert.equal(res.status, 400, `body ${rawBody}`);
+    assert.equal(res.body.reason, 'malformed_body', rawBody);
+  }
+  assert.equal(db.tables.certification_attempts.length, 0);
+});
+
+test('Head Spa compatibility: an empty body, `{}` or an explicit Head Spa slug all start a Head Spa attempt', async () => {
+  for (const opts of [{ rawBody: '' }, { rawBody: '  ' }, { rawBody: '{}' }, { body: { courseSlug: HS } }, { body: { unrelated: 1 } }]) {
+    const db = createDb();
+    const res = await call(db, startAttempt, USERS.both, opts);
+    assert.equal(res.status, 200, JSON.stringify(opts));
+    assert.equal(db.tables.certification_attempts.length, 1);
+    assert.equal(db.tables.certification_attempts[0].course_slug, HS);
+  }
+  const db = createDb();
+  assert.equal((await call(db, getStatus, USERS.both, { query: `?courseSlug=${HS}` })).status, 200);
+  assert.equal((await call(db, getStatus, USERS.both, { query: '?other=1' })).status, 200, 'unrelated params leave courseSlug omitted');
 });
 
 // ---- 3. Records and content isolation ------------------------------------------
@@ -489,6 +526,14 @@ test('only tests use the registry override seam', () => {
   walk(new URL('../functions', import.meta.url).pathname);
   walk(new URL('../cadence-worker', import.meta.url).pathname);
   assert.deepEqual(offenders, []);
+});
+
+test('the registry override seam accepts only a registry built by createCourseRegistry', () => {
+  for (const bogus of [undefined, null, {}, { getCourse: () => ({ slug: 'x', status: 'active' }) }]) {
+    assert.throws(() => __useCourseRegistryForTests(bogus), /createCourseRegistry/);
+  }
+  assert.equal(getCourse('draft-course'), null, 'a rejected override leaves the active registry in place');
+  assert.equal(getCourse(EX).slug, EX);
 });
 
 test('the production registry still holds only Head Spa', async () => {

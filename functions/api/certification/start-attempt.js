@@ -25,10 +25,13 @@ export async function onRequestPost(context) {
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
 
-  // Course identity: absent -> Head Spa (the existing client sends `{}`);
+  // Course identity: omitted -> Head Spa (the existing client sends `{}`);
   // an explicit value must be an active registry course -- never a fallback.
-  const body = await request.json().catch(() => ({}));
-  const requested = resolveRequestedCourse(body && typeof body === 'object' ? body.courseSlug : undefined);
+  // An empty body counts as omitted; malformed JSON or a non-object body is
+  // rejected rather than read as "no course".
+  const body = await readJsonObjectBody(request);
+  if (!body.ok) return json({ error: 'Malformed request body.', reason: 'malformed_body' }, 400);
+  const requested = resolveRequestedCourse(Object.hasOwn(body.value, 'courseSlug') ? body.value.courseSlug : undefined);
   if (!requested.ok) return json({ error: 'Unknown course.', reason: requested.reason }, 400);
   const courseSlug = requested.slug;
 
@@ -126,6 +129,16 @@ async function fetchAttemptRow(env, attemptId, userId) {
   const res = await supabaseRest(env, `certification_attempts?${params}`);
   if (!res.ok || !Array.isArray(res.body) || !res.body.length) return null;
   return res.body[0];
+}
+
+async function readJsonObjectBody(request) {
+  let text;
+  try { text = await request.text(); } catch (_) { return { ok: false }; }
+  if (!text || !text.trim()) return { ok: true, value: {} };
+  let value;
+  try { value = JSON.parse(text); } catch (_) { return { ok: false }; }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { ok: false };
+  return { ok: true, value };
 }
 
 async function fetchPriorSelectedIds(env, userId, courseSlug) {
