@@ -86,6 +86,14 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       </div>
       <div id="growthBody"><div class="loading">Loading growth…</div></div>
       <div class="growth-section">
+        <div class="section-head"><div><h2>Readiness leads</h2><p>Private contact records from submitted Readiness Profiles. A completed quiz alone is not a contactable lead. Only opted-in contacts can receive promotional follow-ups.</p></div><button class="btn" id="refreshReadinessLeadsBtn" type="button">Refresh leads</button></div>
+        <div id="readinessLeadsBody" class="card table-wrap"><div class="loading">Open Growth to load leads…</div></div>
+      </div>
+      <div class="growth-section">
+        <div class="section-head"><div><h2>Checkout diagnostics</h2><p>Read-only check of up to 20 recent Stripe Checkout Sessions: open, expired, paid, and whether course access was granted. No payments are created.</p></div><button class="btn" id="runCheckoutDiagnosticsBtn" type="button">Check Stripe sessions</button></div>
+        <div id="checkoutDiagnosticsBody" class="card table-wrap"><div class="loading">Select “Check Stripe sessions” to inspect recorded checkout attempts.</div></div>
+      </div>
+      <div class="growth-section">
         <div class="section-head"><div><h2>Weekly AIMT Growth Scoreboard</h2><p>Monday–Sunday (UTC). First column is the current week to date.</p></div><button class="btn" id="copyScoreboardBtn" type="button">Copy as text</button></div>
         <div class="card table-wrap" id="scoreboardBody"><div class="loading">Loading scoreboard…</div></div>
       </div>
@@ -195,6 +203,49 @@ function attributionTable(rows,dim){if(!rows||!rows.length)return '<div class="e
 const head=dim==='creative'?'<th>Source</th><th>Creative (utm_content)</th>':dim==='campaign'?'<th>Source / medium</th><th>Campaign</th>':'<th>Source</th><th>Medium</th>';
 const cell=r=>dim==='creative'?`<td>${esc(r.source)}</td><td>${esc(r.content)}${r.creative&&r.creative.conforming?`<span class="sub">${esc(r.creative.format)} · ${esc(r.creative.topic)} · ${esc(r.creative.hook)} · v${esc(r.creative.version)}</span>`:(r.content&&r.content!=='(none)'?'<span class="sub">Not in AIMT creative format</span>':'')}</td>`:dim==='campaign'?`<td>${esc(r.source)} / ${esc(r.medium)}</td><td>${esc(r.campaign)}</td>`:`<td>${esc(r.source)}</td><td>${esc(r.medium)}</td>`;
 return `<table class="table growth-table"><thead><tr>${head}<th class="num">Visitors</th><th class="num">Leads</th><th class="num">Paid students</th><th class="num">Revenue</th></tr></thead><tbody>${rows.map(r=>`<tr>${cell(r)}<td class="num">${fmtCount(r.visitors)}</td><td class="num">${fmtCount(r.leads)}</td><td class="num">${fmtCount(r.paid)}</td><td class="num">${fmtMoney(r.revenue)}</td></tr>`).join('')}</tbody></table>`;}
+
+async function loadReadinessLeads(){
+  const target=$('readinessLeadsBody');
+  target.innerHTML='<div class="loading">Loading submitted leads…</div>';
+  try{
+    const data=await api('/readiness-leads');
+    if(!Array.isArray(data.leads)||!data.leads.length){
+      target.innerHTML='<div class="loading">No saved Readiness leads yet. Prior quiz completions without a submitted email cannot be recovered from anonymous analytics.</div>';return;
+    }
+    const rows=data.leads.map(l=>{
+      const consent=l.marketing_consent===true;
+      const email=esc(l.email);
+      const contact=consent?'<a href="mailto:'+encodeURIComponent(l.email)+'?subject='+encodeURIComponent('AIMT Head Spa Readiness follow-up')+'">Email follow-up</a>':'No promotional follow-up';
+      return '<tr><td>'+esc(l.first_name)+'<span class="sub">'+email+'</span></td><td>'+esc(l.score)+'/100<span class="sub">'+esc(l.band)+'</span></td><td>'+esc(l.priority_pillar||'—')+'</td><td>'+(consent?'<span class="pill good">Opted in</span>':'<span class="pill">No marketing consent</span>')+'</td><td>'+esc(fmtDate(l.last_submitted_at))+'</td><td>'+contact+'</td></tr>';
+    }).join('');
+    target.innerHTML='<div style="padding:12px 16px;color:var(--muted);font-size:.76rem">'+esc(data.count)+' recent saved profiles · '+esc(data.withMarketingConsent)+' opted in · emails are restricted to owners/admins</div><table><thead><tr><th>Lead</th><th>Score</th><th>Priority</th><th>Consent</th><th>Submitted</th><th>Follow-up</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){target.innerHTML='<div class="notice show error">'+esc(e.message)+'</div>';}
+}
+async function loadCheckoutDiagnostics(){
+  const target=$('checkoutDiagnosticsBody'),btn=$('runCheckoutDiagnosticsBtn');
+  btn.disabled=true;btn.textContent='Checking Stripe…';
+  target.innerHTML='<div class="loading">Reading Stripe session outcomes…</div>';
+  try{
+    const data=await api('/checkout-diagnostics');
+    if(!data.sessions||!data.sessions.length){target.innerHTML='<div class="loading">No recorded checkout sessions in the latest reporting window.</div>';return;}
+    const labels={
+      paid_access_granted:'Paid · access granted',
+      paid_missing_access:'PAID · ACCESS MISSING',
+      expired_unpaid:'Expired · unpaid',
+      open_unpaid:'Open · unpaid',
+      completed_not_paid:'Completed · not yet paid',
+      unverified:'Not verified'
+    };
+    const rows=data.sessions.map(x=>{
+      const isAlert=x.outcome==='paid_missing_access';
+      const status=labels[x.outcome]||'Not verified';
+      return '<tr><td>'+esc(fmtDate(x.startedAt))+'<span class="sub">'+esc(x.sessionId)+'</span></td><td>'+esc(x.ui||'—')+'</td><td><span class="pill '+(isAlert?'bad':x.paymentStatus==='paid'?'good':'')+'">'+esc(status)+'</span><span class="sub">'+esc(x.stripeStatus)+' / '+esc(x.paymentStatus)+'</span></td><td>'+(x.hasEntitlement?'Yes':'No')+'</td><td>'+esc(x.error||'—')+'</td></tr>';
+    }).join('');
+    target.innerHTML='<div style="padding:12px 16px;color:var(--muted);font-size:.76rem">'+esc(data.note||'')+'</div><table><thead><tr><th>Started · session</th><th>Checkout</th><th>Stripe outcome</th><th>Access</th><th>Lookup issue</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){target.innerHTML='<div class="notice show error">'+esc(e.message)+'</div>';}
+  finally{btn.disabled=false;btn.textContent='Check Stripe sessions';}
+}
+
 async function loadGrowth(){document.querySelectorAll('[data-growth-range]').forEach(b=>b.classList.toggle('active',b.dataset.growthRange===growthState.range));document.querySelectorAll('[data-growth-model]').forEach(b=>b.classList.toggle('active',b.dataset.growthModel===growthState.model));
 $('growthBody').innerHTML='<div class="loading">Loading growth…</div>';
 try{const d=await api(`?view=growth&range=${encodeURIComponent(growthState.range)}&model=${encodeURIComponent(growthState.model)}`);const a=d.acquisition,l=d.leads,s=d.sales,st=d.students,ad=d.adoption;
@@ -235,8 +286,10 @@ growthState.scoreboardText=lines.join('\n');$('scoreboardBody').innerHTML=`<tabl
 async function reconcileRevenue(btn){btn.disabled=true;btn.textContent='Reconciling…';try{const r=await api('',{method:'POST',body:JSON.stringify({action:'growth_reconcile_revenue'})});showNotice($('globalNotice'),`Stripe reconciliation: ${r.recorded} recorded, ${r.skipped} not paid, ${r.failed} failed${r.remaining?`, ${r.remaining} remaining — run again`:''}.`);await loadGrowth();}catch(e){showNotice($('globalNotice'),e.message,true);btn.disabled=false;btn.textContent='Reconcile revenue from Stripe';}}
 document.querySelectorAll('[data-growth-range]').forEach(b=>b.addEventListener('click',()=>{growthState.range=b.dataset.growthRange;loadGrowth();}));
 document.querySelectorAll('[data-growth-model]').forEach(b=>b.addEventListener('click',()=>{growthState.model=b.dataset.growthModel;loadGrowth();}));
+$('refreshReadinessLeadsBtn').addEventListener('click',loadReadinessLeads);
+$('runCheckoutDiagnosticsBtn').addEventListener('click',loadCheckoutDiagnostics);
 $('copyScoreboardBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(growthState.scoreboardText);showNotice($('globalNotice'),'Scoreboard copied.');}catch(_){showNotice($('globalNotice'),'Copy failed — select the table instead.',true);}});
-document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth')loadGrowth();if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth'){loadGrowth();loadReadinessLeads();}if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
 $('grantModal').addEventListener('click',e=>{if(e.target===$('grantModal'))closeGrant()});$('studentDrawer').addEventListener('click',e=>{if(e.target===$('studentDrawer'))$('drawerClose').click()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGrant();$('drawerClose').click();}});
 (async()=>{const {data}=await supabaseClient.auth.getSession();if(data?.session)await verifyAdmin();else $('loginWrap').classList.add('show');})();
 </script>
