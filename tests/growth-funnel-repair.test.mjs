@@ -5,6 +5,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import vm from 'node:vm';
 import { normalizeSubmission, onRequestPost as submitReadiness } from '../functions/api/readiness/submit.js';
 import { onRequest as listLeads } from '../functions/api/admin/readiness-leads.js';
 import { onRequest as diagnoseCheckout } from '../functions/api/admin/checkout-diagnostics.js';
@@ -126,4 +127,16 @@ test('readiness config is enabled, client counts a lead only after successful st
   const source=read('head-spa-readiness.html');
   assert.ok(source.indexOf('await submitReadinessProfile(payload)')<source.lastIndexOf("track('lead_created'"));
   assert.match(read('admin.html'),/id="checkoutDiagnosticsBody"/);
+});
+
+test('all modified HTML inline scripts parse as JavaScript', () => {
+  for (const page of ['head-spa-readiness.html', 'my-aimt.html', 'admin.html']) {
+    const source=read(page);
+    const scripts=[...source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
+      .map(match=>match[1]).filter(code=>code.trim().length);
+    assert.ok(scripts.length, page + ' has inline scripts');
+    for (const code of scripts) {
+      assert.doesNotThrow(()=>new vm.Script(code,{filename:page}),page+' inline script syntax');
+    }
+  }
 });
