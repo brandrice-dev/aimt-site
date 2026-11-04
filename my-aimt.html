@@ -18,6 +18,9 @@
 <script src="assets/js/aimt-course-resources.js"></script>
 <script src="assets/js/aimt-metric-ring.js"></script>
 <script src="assets/js/aimt-readiness-config.js"></script>
+<link rel="stylesheet" href="assets/css/aimt-social-sharing.css">
+<script src="assets/js/aimt-certificate.js"></script>
+<script src="assets/js/aimt-social-sharing.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -410,6 +413,8 @@
 
     <span class="section-label" id="certLabel"><span class="section-num">02</span>Certification</span>
     <div id="certArea"></div>
+
+    <section id="socialSharing" hidden aria-label="Share Your Progress"></section>
 
     <span class="section-label" id="toolsLabel"><span class="section-num">03</span>Practitioner Tools</span>
     <div class="tool-list" id="toolsArea"></div>
@@ -808,6 +813,15 @@ async function init() {
   renderContinueLearning(slugs, progressBySlug, certBySlug);
   renderCertification(slugs, progressBySlug, certBySlug);
   loadResources(slugs);
+  // Optional presentation only; access remains owned by the existing account reads.
+  window.AIMTSocialSharing.mount(document.getElementById('socialSharing'), async function () {
+    const { data } = await supabaseClient.auth.getUser();
+    if (!data || !data.user || data.user.id !== currentUser.id) return { enrolled: false };
+    const access = await loadEntitlements(email);
+    if (access.errored || !access.slugs.includes('headspa-mastery')) return { enrolled: false };
+    const states = await loadCertificationState(['headspa-mastery']);
+    return { enrolled: true, credential: states['headspa-mastery'].credential || null };
+  }).catch(function () { /* Sharing never blocks the dashboard. */ });
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
