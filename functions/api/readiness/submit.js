@@ -103,8 +103,8 @@ function renderResult(row) {
 }
 
 async function sendResult(env, row) {
-  if (!env.RESEND_API_KEY) return false;
-  if (row.result_email_sent_at && Date.now() - Date.parse(row.result_email_sent_at) < 24 * 60 * 60 * 1000) return true;
+  if (!env.RESEND_API_KEY) return { sent: false };
+  if (row.result_email_sent_at && Date.now() - Date.parse(row.result_email_sent_at) < 5 * 60 * 1000) return { sent: false, recentlySent: true };
   const copy = renderResult(row);
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -115,13 +115,13 @@ async function sendResult(env, row) {
         subject: 'Your AIMT Head Spa Readiness Profile', ...copy,
       }),
     });
-    if (!res.ok) return false;
+    if (!res.ok) return { sent: false };
     await supabaseRest(env, 'readiness_leads?id=eq.' + encodeURIComponent(row.id), {
       method: 'PATCH', headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({ result_email_sent_at: new Date().toISOString() }),
     });
-    return true;
-  } catch (_) { return false; }
+    return { sent: true };
+  } catch (_) { return { sent: false }; }
 }
 
 export async function onRequestPost({ request, env }) {
@@ -138,6 +138,11 @@ export async function onRequestPost({ request, env }) {
     if (body.website || body.company) return response({ saved: true, emailSent: false }); // invisible spam honeypot
     const row = normalizeSubmission(body);
     if (!row) return response({ error: 'Please review the readiness form.' }, 400);
+    // A re-send from the Readiness Preview is not a consent update.
+    if (body.source === 'my-aimt-readiness-preview') {
+      delete row.marketing_consent;
+      delete row.marketing_consented_at;
+    }
     const result = await supabaseRest(env, 'readiness_leads?on_conflict=email', {
       method: 'POST',
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
@@ -146,8 +151,8 @@ export async function onRequestPost({ request, env }) {
     if (!result.ok || !Array.isArray(result.body) || !result.body[0]?.id) {
       return response({ error: 'Your profile could not be saved. Please retry.' }, 503);
     }
-    const emailSent = await sendResult(env, result.body[0]);
-    return response({ saved: true, emailSent });
+    const delivery = await sendResult(env, result.body[0]);
+    return response({ saved: true, emailSent: delivery.sent, recentlySent: delivery.recentlySent === true });
   } catch (_) {
     return response({ error: 'Your profile could not be saved. Please retry.' }, 503);
   }
