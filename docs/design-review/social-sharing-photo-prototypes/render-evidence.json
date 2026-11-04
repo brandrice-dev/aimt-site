@@ -1,0 +1,50 @@
+[
+  {
+    "prototype": "enrollment",
+    "width": 1080,
+    "height": 1920,
+    "photo": "/assets/images/social-sharing/source/head-spa-halo-rinse.png",
+    "headline": "EXPERIENCE\nISN'T WHERE\nI STOP.",
+    "copy": "American Institute of\nModern Trichology\nEXPERIENCE\nISN'T WHERE\nI STOP.\n\nContinuing my education in scalp science and professional head spa practice.\n\nCURRENTLY PURSUING AIMT\nHEAD SPA CERTIFICATION.",
+    "bounds": [
+      {
+        "left": 96,
+        "right": 428.703125,
+        "top": 265,
+        "bottom": 347
+      },
+      {
+        "left": 96,
+        "right": 984,
+        "top": 1040,
+        "bottom": 1591.234375
+      }
+    ],
+    "pngSha256": "05202e61c5a79316b3f345e968c6d1a76f58bab3466817104082be009a073056",
+    "photoSha256": "6c0d5a69db36318e69021977c28ddee5be3f3be8c17449085ddb074beb661465"
+  },
+  {
+    "prototype": "graduate",
+    "width": 1080,
+    "height": 1920,
+    "photo": "/assets/images/social-sharing/source/dark-lather-macro.png",
+    "headline": "THE STANDARD\nKEEPS RISING.",
+    "copy": "THE STANDARD\nKEEPS RISING.\n\nAIMT Head Spa Certification — Earned.\n\nReview Student\n\nCompleted November 1, 2026\n\nAIMT-HS-2026-ABC234\n\naimtrichology.com/verify?id=AIMT-HS-2026-ABC234\n\nSAMPLE CREDENTIAL · DESIGN REVIEW ONLY",
+    "bounds": [
+      {
+        "left": 345,
+        "right": 735,
+        "top": 335,
+        "bottom": 733.546875
+      },
+      {
+        "left": 96,
+        "right": 984,
+        "top": 855,
+        "bottom": 1523.078125
+      }
+    ],
+    "pngSha256": "ba9c74e23881d7dee4df020d8dfa3c6dd29d4fcfb11b5200c18f738ca2346ed3",
+    "photoSha256": "508fe374b93b09d507b393eacdd0af3e39d547df78673e7dc868d28487352e63"
+  }
+]
