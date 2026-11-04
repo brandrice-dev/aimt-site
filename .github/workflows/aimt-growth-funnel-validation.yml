@@ -1,0 +1,36 @@
+name: AIMT Growth Funnel Validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'functions/api/readiness/**'
+      - 'functions/api/admin/readiness-leads.js'
+      - 'functions/api/admin/checkout-diagnostics.js'
+      - 'head-spa-readiness.html'
+      - 'my-aimt.html'
+      - 'admin.html'
+      - 'assets/js/aimt-readiness-config.js'
+      - 'tests/growth-funnel-repair.test.mjs'
+      - '.github/workflows/aimt-growth-funnel-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Run offline growth, readiness, checkout regression tests
+        run: |
+          env -i PATH="$PATH" node --test \
+            tests/growth-funnel-repair.test.mjs \
+            tests/growth-measurement.test.mjs \
+            tests/growth-client.test.mjs \
+            tests/embedded-enrollment-checkout.test.mjs \
+            tests/readiness-sales-prompt.test.mjs

@@ -1177,12 +1177,15 @@ function setupResendAction(profile) {
       marketing_consent: false
     });
     try {
-      await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      document.getElementById('rpResendForm').outerHTML = '<p class="rp-resend-confirm" id="rpResendForm">Sent — check your inbox.</p>';
+      const response = await res.json().catch(() => ({}));
+      if (!res.ok || !response.saved || (!response.emailSent && !response.recentlySent)) throw new Error('Email unavailable');
+      document.getElementById('rpResendForm').outerHTML = '<p class="rp-resend-confirm" id="rpResendForm">' +
+        (response.recentlySent ? 'Your profile was emailed recently. Please check your inbox.' : 'Sent — check your inbox.') + '</p>';
     } catch (_) {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Try again';

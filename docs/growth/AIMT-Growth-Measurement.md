@@ -90,7 +90,7 @@ them).
 | 2 | `headspa_sales_view` | stored, browser | Same as `site_visit`, on `/head-spa-certification` with the sales landing visible (not an enrolled student inside the course app). | browsing session | growth_events |
 | 3 | `readiness_audit_start` | stored, browser | Visitor clicked **Start the Free Score** (first scored question shown). | browsing session | growth_events |
 | 4 | `readiness_audit_complete` | stored, browser | All 15 answered and the score revealed. | browsing session | growth_events |
-| 5 | `lead_created` | stored, browser | Readiness name+email gate submitted. Records **only** `marketing_consent` (true/false). | visitor, ever | growth_events |
+| 5 | `lead_created` | stored, browser | Readiness name+email gate **confirmed saved to the private lead endpoint**. Analytics still records **only** `marketing_consent` (true/false), never email or score. | visitor, ever | growth_events |
 | 6 | `checkout_start` | stored, **server** | `create-checkout-session` received a real Stripe Checkout Session id. | Checkout Session id | growth_events |
 | 7 | `paid_enrollment` | stored, **server** | Signature-verified `checkout.session.completed`, paid, price matched, entitlement written; or Admin's Stripe reconciliation read the session from Stripe as `paid`. | Checkout Session id | Stripe → growth_events; enrollment itself = course_entitlements |
 | 8 | `course_activated` | derived | `hasCourseActivity(state)`: intro complete, any module started/complete, or any checkpoint attempted. Time = earliest module `startedAt`/`completedAt`. | student | course_progress |
@@ -344,3 +344,16 @@ Local end-to-end QA (no production traffic):
 `node scripts/growth-local-qa-server.mjs 8791`. It runs the real handlers
 against in-memory Supabase/Stripe stand-ins and rewrites the production
 Supabase URL in served pages to the local mock.
+
+## November 4, 2026 funnel repair (PR #119; deploy only after migration/QA)
+
+The earlier audit table records historical launch state. This repair adds a **separate** private contact database without putting PII into anonymous growth events.
+
+- Migration: `supabase/migrations/20261104_create_readiness_leads.sql`. A GitHub commit does not execute this migration. Run it in the correct Supabase project **before** deploying the new form endpoint.
+- Public POST `/api/readiness/submit`: validates email, name, and five assessment pillar scores; computes stage and highest/lowest categories server-side; upserts a private profile; optionally sends the requested transactional score summary through existing Resend. It never sends personal data to `growth_events`.
+- The form emits `lead_created` only after successful server storage. `readiness_audit_complete` still means score revealed, NOT lead captured. Prior anonymous completions have no recoverable email by design.
+- `Admin → Growth → Readiness leads` shows saved contacts, stage, score, priority, and marketing consent to owner/admin only. Promotional follow-up must be limited to explicit opt-ins. Transactional result delivery is allowed when the recipient requested that result.
+- `Admin → Growth → Checkout diagnostics` reads at most 20 recent Stripe Checkout Sessions via the existing server-side Stripe secret. It displays Stripe session and payment status and whether AIMT granted access. It does not create sessions, change payments, or touch entitlements. An open/unpaid session is not evidence checkout is defective; several sessions may come from one person.
+- Private Readiness profiles can be requested for deletion via the support address listed in Privacy Policy. Consent must not be changed by the My AIMT 'Email My Profile Again' transactional action.
+
+Do not equate the new contact table count with the historical `growth_events.lead_created` count until endpoint and database have both been deployed and verified.
