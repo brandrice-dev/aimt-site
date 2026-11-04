@@ -557,7 +557,7 @@ document.getElementById('raGateForm').addEventListener('submit', async (e) => {
     saveLocalReadinessProfile(payload);
     // Only count a lead after the private record was actually saved.
     if (window.AIMTGrowth) window.AIMTGrowth.track('lead_created', { marketing_consent: !!marketingConsent });
-    if (result.emailSent) {
+    if (result.emailSent || result.recentlySent) {
       window.location.href = 'my-aimt.html?preview=readiness';
       return;
     }
