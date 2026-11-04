@@ -122,10 +122,15 @@ test('checkout diagnostics reconcile Stripe payment status with entitlements wit
   assert.deepEqual(data.sessions.map(x=>x.outcome),['open_unpaid','paid_access_granted']);
   assert.equal(calls.every(method=>method==='GET'),true);
 });
-test('readiness config is enabled, client counts a lead only after successful storage',()=>{
-  assert.match(read('assets/js/aimt-readiness-config.js'),/READINESS_DELIVERY_ENDPOINT:\s*'\/api\/readiness\/submit'/);
-  const source=read('head-spa-readiness.html');
-  assert.ok(source.indexOf('await submitReadinessProfile(payload)')<source.lastIndexOf("track('lead_created'"));
+test('readiness submission uses same-origin endpoint without a cached configuration script',()=>{
+  for (const file of ['head-spa-readiness.html','my-aimt.html']) {
+    const source=read(file);
+    assert.match(source,/const endpoint = '\/api\/readiness\/submit';/,file);
+    assert.doesNotMatch(source,/<script src="assets\/js\/aimt-readiness-config\.js"><\/script>/,file);
+    assert.doesNotMatch(source,/if \(!endpoint\) throw new Error\('Readiness submission is not available right now\.'\)/,file);
+  }
+  const readiness=read('head-spa-readiness.html');
+  assert.ok(readiness.indexOf('await submitReadinessProfile(payload)') < readiness.lastIndexOf("track('lead_created'"));
   assert.match(read('admin.html'),/id="checkoutDiagnosticsBody"/);
 });
 
