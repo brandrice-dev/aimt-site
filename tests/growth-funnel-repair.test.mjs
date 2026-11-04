@@ -65,7 +65,16 @@ test('profile is saved privately before reporting success, transactional email i
   assert.equal(stored.marketing_consent,false);
   assert.equal(stored.email,'alex@example.com');
   assert.equal(seen.some(c=>c.url.includes('growth_events')),false);
-  assert.equal(seen.some(c=>c.url.includes('api.resend.com')),true);
+  const sentRequest=seen.find(c=>c.url.includes('api.resend.com'));
+  assert.ok(sentRequest,'sends requested profile via Resend');
+  const sent=JSON.parse(sentRequest.body);
+  assert.match(sent.html,/aimt-mark-email\.png/);
+  assert.match(sent.html,/Explore Practitioner Education/);
+  assert.doesNotMatch(sent.html,/Explore Head Spa Certification/);
+  assert.doesNotMatch(sent.html,/head-spa-certification/);
+  assert.match(sent.text,/THREE PRACTICAL MOVES/);
+  assert.equal(sent.reply_to,'support@aimtrichology.com');
+
 });
 test('database unavailable does not claim lead saved or send email',async t=>{
   t.mock.method(globalThis,'fetch',async()=>json({code:'42P01'},404));

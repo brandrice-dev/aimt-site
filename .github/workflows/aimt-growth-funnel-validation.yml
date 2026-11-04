@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'functions/api/readiness/**'
+      - 'functions/_lib/readiness/**'
+      - 'functions/_lib/email/aimt-email-shell.mjs'
+      - 'tests/readiness-profile-email.test.mjs'
       - 'functions/api/admin/readiness-leads.js'
       - 'functions/api/admin/checkout-diagnostics.js'
       - 'head-spa-readiness.html'
@@ -29,6 +32,7 @@ jobs:
       - name: Run offline growth, readiness, checkout regression tests
         run: |
           env -i PATH="$PATH" node --test \
+            tests/readiness-profile-email.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
             tests/growth-client.test.mjs \
