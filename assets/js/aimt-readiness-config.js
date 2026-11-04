@@ -8,7 +8,7 @@
      - my-aimt.html              (Readiness Preview's "Email My Profile
                                    Again" action — hidden while unset)
 
-   Until READINESS_DELIVERY_ENDPOINT is set, delivery is skipped
+   The private /api/readiness/submit endpoint stores submitted profiles and can email results when Resend is configured. Until the database migration is applied, delivery is unavailable
    everywhere that reads it. Nothing else breaks: the local browser
    profile still saves, the My AIMT Readiness Preview still opens, and
    no fake "sent" confirmation is ever shown in the meantime.
@@ -19,5 +19,5 @@
    and only gate on this value.
    ═══════════════════════════════════════════════════════════════ */
 window.AIMT_READINESS_CONFIG = {
-  READINESS_DELIVERY_ENDPOINT: null
+  READINESS_DELIVERY_ENDPOINT: '/api/readiness/submit'
 };
