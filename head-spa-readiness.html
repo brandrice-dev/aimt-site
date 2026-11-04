@@ -15,7 +15,6 @@
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
 <link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
 <script src="assets/js/aimt-metric-ring.js"></script>
-<script src="assets/js/aimt-readiness-config.js"></script>
 <script src="assets/js/aimt-growth.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -251,12 +250,8 @@ a { color: inherit; }
    ---------------------------------------------------------------
    Front-end complete, client-side scored. On gate submission this
    saves a versioned local profile (see READINESS_PROFILE_KEY below)
-   and hands the prospect into my-aimt.html?preview=readiness — see
-   submitReadinessProfile() near the bottom of this script for the
-   one email-delivery seam (reads window.AIMT_READINESS_CONFIG from
-   assets/js/aimt-readiness-config.js). Delivery is inert until that
-   config is set at launch; local profile + preview handoff work fully
-   either way. See the owner report for what remains to wire up.
+   and hands the prospect into my-aimt.html?preview=readiness after
+   /api/readiness/submit confirms the private record is saved.
    ═══════════════════════════════════════════════════════════════ */
 const PILLARS = [
   { key: 'scope', name: 'Professional Foundation & Scope' },
@@ -522,8 +517,8 @@ function saveLocalReadinessProfile(payload) {
 /* Save to AIMT's private server before advancing. The former fire-and-
    forget navigation could lose an email and still count it as a lead. */
 async function submitReadinessProfile(payload) {
-  const endpoint = window.AIMT_READINESS_CONFIG && window.AIMT_READINESS_CONFIG.READINESS_DELIVERY_ENDPOINT;
-  if (!endpoint) throw new Error('Readiness submission is not available right now.');
+  const endpoint = '/api/readiness/submit'; // Same-origin production Pages Function; no cached config dependency
+  
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
