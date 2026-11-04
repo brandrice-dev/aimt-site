@@ -519,43 +519,58 @@ function saveLocalReadinessProfile(payload) {
   }
 }
 
-/* Centralized delivery seam — the ONE place that would call a real
-   endpoint. window.AIMT_READINESS_CONFIG (assets/js/aimt-readiness-config.js)
-   is null until launch; this stays a no-op until then, fires the
-   request with keepalive so it survives the immediate navigation below,
-   and never blocks or fakes a confirmation either way. */
+/* Save to AIMT's private server before advancing. The former fire-and-
+   forget navigation could lose an email and still count it as a lead. */
 async function submitReadinessProfile(payload) {
   const endpoint = window.AIMT_READINESS_CONFIG && window.AIMT_READINESS_CONFIG.READINESS_DELIVERY_ENDPOINT;
-  if (!endpoint) return { delivered: false, configured: false };
-  try {
-    await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true
-    });
-    return { delivered: true, configured: true };
-  } catch (_) {
-    return { delivered: false, configured: true };
-  }
+  if (!endpoint) throw new Error('Readiness submission is not available right now.');
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.saved) throw new Error(data.error || 'We could not save your profile. Please try again.');
+  return data;
 }
 
-document.getElementById('raGateForm').addEventListener('submit', (e) => {
+document.getElementById('raGateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('raSubmitBtn');
   btn.disabled = true;
-  btn.textContent = 'Opening your profile…';
-
+  btn.textContent = 'Saving your profile…';
+  let notice = document.getElementById('raSubmitStatus');
+  if (!notice) {
+    notice = document.createElement('p');
+    notice.id = 'raSubmitStatus';
+    notice.setAttribute('role', 'status');
+    notice.style.cssText = 'font-size:0.82rem;line-height:1.5;margin-top:0.8rem;color:#e0c9b5;';
+    btn.insertAdjacentElement('afterend', notice);
+  }
+  notice.textContent = '';
   const firstName = document.getElementById('raFirstName').value.trim();
   const email = document.getElementById('raEmail').value.trim();
   const marketingConsent = document.getElementById('raConsent').checked;
   const payload = buildReadinessPayload({ firstName, email, marketingConsent });
-
-  saveLocalReadinessProfile(payload);
-  submitReadinessProfile(payload); // fire-and-forget; never blocks the handoff below
-  /* Growth: counts the lead only — never the name, email, score, or answers. */
-  if (window.AIMTGrowth) window.AIMTGrowth.track('lead_created', { marketing_consent: !!marketingConsent });
-  window.location.href = 'my-aimt.html?preview=readiness';
+  try {
+    const result = await submitReadinessProfile(payload);
+    saveLocalReadinessProfile(payload);
+    // Only count a lead after the private record was actually saved.
+    if (window.AIMTGrowth) window.AIMTGrowth.track('lead_created', { marketing_consent: !!marketingConsent });
+    if (result.emailSent) {
+      window.location.href = 'my-aimt.html?preview=readiness';
+      return;
+    }
+    notice.textContent = 'Your profile was saved, but its email copy could not be sent right now. You can still view your results here.';
+    btn.disabled = false;
+    btn.type = 'button';
+    btn.textContent = 'View My Full Profile →';
+    btn.addEventListener('click', () => { window.location.href = 'my-aimt.html?preview=readiness'; }, { once: true });
+  } catch (err) {
+    notice.textContent = err.message || 'Unable to save your profile. Check your connection and try again.';
+    btn.disabled = false;
+    btn.textContent = 'Try again →';
+  }
 });
 </script>
 </body>
