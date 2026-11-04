@@ -1,5 +1,5 @@
 -- AIMT Growth: persist submitted Readiness Profiles separately from anonymous analytics.
--- Apply through Supabase SQL editor before deploying the Pages Function.
+-- Apply in Supabase as a migration before deploying the Pages Function.
 -- Personal contact data never belongs in growth_events.
 create table if not exists public.readiness_leads (
   id uuid primary key default gen_random_uuid(),
@@ -26,5 +26,7 @@ create index if not exists readiness_leads_marketing_idx on public.readiness_lea
 alter table public.readiness_leads enable row level security;
 revoke all on table public.readiness_leads from anon;
 revoke all on table public.readiness_leads from authenticated;
+-- Grant only the server-side role used by AIMT Pages Functions.
+grant select, insert, update, delete on table public.readiness_leads to service_role;
 -- There are deliberately no client RLS policies. Service-role Pages Functions
 -- alone write validated submissions and read them for owner/admin reporting.
