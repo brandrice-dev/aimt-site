@@ -81,7 +81,6 @@ function renderResult(row) {
     'Priority to strengthen: ' + LABELS[row.priority_pillar],
     'Strongest area: ' + LABELS[row.strongest_pillar], '',
     'These scores are a self-assessment, not a professional license, diagnosis or certificate.',
-    'Head Spa Certification: https://aimtrichology.com/head-spa-certification',
     'Questions? ' + REPLY_TO,
   ].join('\n');
   const rows = FIELDS.map(key =>
@@ -97,7 +96,6 @@ function renderResult(row) {
     '<p><strong>Priority:</strong> ' + escapeHtml(LABELS[row.priority_pillar]) + '</p>' +
     '<p><strong>Strongest area:</strong> ' + escapeHtml(LABELS[row.strongest_pillar]) + '</p>' +
     '<p style="font-size:12px;color:#666">A professional self-assessment, not a license, diagnosis, or certificate.</p>' +
-    '<p><a href="https://aimtrichology.com/head-spa-certification">Explore AIMT Head Spa Certification</a></p>' +
     '<p>Questions? Reply to this email.</p></main></body></html>';
   return { text, html };
 }
