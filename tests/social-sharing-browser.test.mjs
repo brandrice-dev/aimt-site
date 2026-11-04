@@ -2,7 +2,7 @@
 // NODE_PATH=<bundled node_modules> node tests/social-sharing-browser.test.mjs
 import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -44,13 +44,13 @@ try {
   await student.locator('#socialSharing img').first().waitFor();
   assert.equal(await student.locator('#socialSharing img').count(), 2);
   assert.match(await student.locator('#socialSharing').innerText(), /Graduate announcement · Locked/);
-  assert.match(await student.locator('#socialSharing textarea').inputValue(), /Currently training toward/);
+  assert.match(await student.locator('#socialSharing textarea').inputValue(), /currently pursuing AIMT Head Spa Certification/);
   await student.locator('#socialSharing').screenshot({ path: out + '/student-desktop.png' });
   await student.screenshot({ path: out + '/dashboard-desktop.png', fullPage: true });
   const dlPromise = student.waitForEvent('download');
   await student.getByRole('button', { name: 'Download PNG' }).first().click();
-  const dl = await dlPromise; await dl.saveAs(out + '/student-charcoal.png');
-  const png = await readFile(out + '/student-charcoal.png');
+  const dl = await dlPromise; await dl.saveAs(out + '/student-a.png');
+  const png = await readFile(out + '/student-a.png');
   assert.equal(png.readUInt32BE(16), 1080); assert.equal(png.readUInt32BE(20), 1920);
   // Clipboard denied: the visible selectable textarea is still usable.
   await student.evaluate(() => Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw Error('denied'); } }, configurable: true }));
@@ -62,6 +62,42 @@ try {
   assert.match(await grad.locator('#socialSharing textarea').nth(1).inputValue(), /AIMT-HS-2026-ABC234/);
   assert.match(await grad.locator('.sharing-verify').getAttribute('href'), /\/verify\?id=AIMT-HS-2026-ABC234$/);
   await grad.locator('#socialSharing').screenshot({ path: out + '/graduate-desktop.png' });
+  // Exercise the real Canvas renderer and inspect the text actually painted.
+  const proof = await grad.evaluate(async () => {
+    const credential = await AIMTSocialSharing.verifyCredential(window.qa.credential, fetch);
+    const result = [];
+    for (const view of [null, credential]) for (const variant of [0, 1]) {
+      const calls = [];
+      const original = CanvasRenderingContext2D.prototype.fillText;
+      CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
+        const metrics = this.measureText(text);
+        const width = Math.min(metrics.width, maxWidth);
+        const left = this.textAlign === 'center' ? x - width / 2 : x;
+        calls.push({ text, left, right: left + width, top: y - metrics.actualBoundingBoxAscent, bottom: y + metrics.actualBoundingBoxDescent });
+        return original.call(this, text, x, y, maxWidth);
+      };
+      try {
+        await AIMTSocialSharing.drawStory(document.createElement('canvas'), variant, view);
+      } finally { CanvasRenderingContext2D.prototype.fillText = original; }
+      result.push({ concept: AIMTSocialSharing.storyConcept(variant, view), calls, credential: !!view });
+    }
+    return result;
+  });
+  for (const item of proof) {
+    const painted = item.calls.map(call => call.text).join(' ');
+    assert.ok(painted.includes(item.concept.headline), painted);
+    assert.ok(painted.includes(item.concept.supporting), painted);
+    if (item.concept.status) assert.ok(painted.includes(item.concept.status), painted);
+    if (item.credential) {
+      assert.ok(painted.includes(credential.student_name));
+      assert.ok(painted.includes(credential.credential_id));
+      assert.ok(painted.includes('aimtrichology.com/verify?id=' + credential.credential_id));
+    }
+    for (const bounds of item.calls) {
+      assert.ok(bounds.left >= 60 && bounds.right <= 1010 && bounds.top >= 180 && bounds.bottom <= 1820, JSON.stringify(bounds));
+    }
+  }
+  await writeFile(out + '/render-proof.json', JSON.stringify(proof, null, 2));
   // Export every variant and inspect the actual PNG headers.
   for (let i = 0; i < 4; i++) {
     const promise = grad.waitForEvent('download');
@@ -114,5 +150,17 @@ try {
   const preview = await open({}, false, '?preview=readiness');
   await preview.locator('#previewModeRoot').waitFor({ state: 'visible' });
   assert.equal(await preview.locator('#socialSharing').isVisible(), false);
+  // Review sheet uses the actual downloaded files, without altering the PNGs.
+  const sheet = await browser.newPage({ viewport: { width: 1520, height: 820 }, deviceScaleFactor: 1 });
+  const files = ['aimt-student-a.png', 'aimt-student-b.png', 'aimt-graduate-a.png', 'aimt-graduate-b.png'];
+  const cards = await Promise.all(files.map(async (file, i) => {
+    const png = await readFile(out + '/' + file);
+    const title = ['Enrolled A · Experience', 'Enrolled B · Service', 'Graduate A · Standard', 'Graduate B · Knowledge'][i];
+    return '<figure><figcaption>' + title + '</figcaption><img src="data:image/png;base64,' + png.toString('base64') + '"></figure>';
+  }));
+  await sheet.setContent('<html><head><style>body{margin:0;padding:30px;background:#e9e2da;color:#262626;font:16px Arial}header{margin-bottom:22px}main{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}figure{margin:0}figcaption{margin-bottom:14px}img{width:100%;height:auto;display:block}</style></head><body><header>AIMT · Professional sharing kit · Owner review / synthetic credential</header><main>' + cards.join('') + '</main></body></html>');
+  await sheet.locator('img').last().waitFor();
+  await sheet.screenshot({ path: out + '/four-concepts.png', fullPage: true });
+  await sheet.close();
   console.log('PASS: student/graduate exports, all four 1080×1920 PNGs, revoked/error states, clipboard fallback, mobile layout, unenrolled/signed-out and readiness isolation.\nScreenshots: ' + out);
 } finally { await browser.close(); server.close(); }

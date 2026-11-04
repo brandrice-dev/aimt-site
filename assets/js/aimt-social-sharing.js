@@ -4,7 +4,19 @@
 (function (root) {
   'use strict';
   const VERIFY_ORIGIN = 'https://aimtrichology.com';
-  const STUDENT_CAPTION = 'Taking the next step in my career. Currently training toward AIMT Head Spa Certification at the American Institute of Modern Trichology. #AIMT #HeadSpaTraining';
+  const STUDENT_CAPTION = 'I’m continuing my education in scalp science and professional head spa practice, and currently pursuing AIMT Head Spa Certification. I keep investing in my knowledge because the work behind every service matters to me.';
+  const STORY_CONCEPTS = {
+    student: [
+      { label: 'Enrolled A · Experience', headline: "Experience isn't where I stop.", supporting: 'Continuing my education in scalp science and professional head spa practice.', status: 'Currently pursuing AIMT Head Spa Certification.' },
+      { label: 'Enrolled B · Service', headline: 'The work behind the service matters.', supporting: 'Investing in the knowledge behind the experience—not just what clients see.', status: 'Training toward AIMT Head Spa Certification.' }
+    ],
+    graduate: [
+      { label: 'Graduate A · Standard', headline: 'The standard keeps rising.', supporting: 'AIMT Head Spa Certification — Earned.' },
+      { label: 'Graduate B · Knowledge', headline: 'More knowledge behind every service.', supporting: 'AIMT Head Spa Certification earned through assessment.' }
+    ]
+  };
+  function storyConcept(variant, view) { return STORY_CONCEPTS[view ? 'graduate' : 'student'][variant]; }
+  function studentCaption() { return STUDENT_CAPTION; }
 
   async function verifyCredential(credential, request) {
     if (!credential || credential.course_slug !== 'headspa-mastery' || credential.revoked !== false) return null;
@@ -19,17 +31,25 @@
 
   function verificationUrl(view) { return VERIFY_ORIGIN + '/verify?id=' + encodeURIComponent(view.credentialId); }
   function graduateCaption(view) {
-    return 'I’ve earned AIMT Head Spa Certification from the American Institute of Modern Trichology. Completed ' + view.date + '. Verify my credential: ' + verificationUrl(view) + ' #AIMT #HeadSpaCertification';
+    return 'I’ve earned AIMT Head Spa Certification through assessment. I keep investing in my knowledge because the care and thought behind every service matter to me. I completed the certification on ' + view.date + '. You can verify it here: ' + verificationUrl(view);
   }
 
   async function drawStory(canvas, variant, view) {
-    await Promise.allSettled([document.fonts.load('400 82px Montserrat'), document.fonts.load('400 46px Outfit')]);
+    await Promise.allSettled([
+      document.fonts.load('400 110px "Playfair Display"'),
+      document.fonts.load('300 92px Montserrat'),
+      document.fonts.load('400 42px Outfit')
+    ]);
     await document.fonts.ready;
-    // Reuse the dashboard's canonical inline geometry. The reference SVG file
-    // has legacy XML comments that image decoders reject; it is not edited here.
+    const concept = storyConcept(variant, view);
+    const layout = (view ? 'graduate-' : 'student-') + variant;
+    const light = layout === 'student-1' || layout === 'graduate-0';
+    const ink = light ? '#262626' : '#faf8f5';
+    const muted = light ? '#695d55' : '#c4b9b0';
+    // Clone the dashboard's working canonical geometry, without redrawing it.
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 44 44'); svg.setAttribute('width', '100'); svg.setAttribute('height', '100');
-    svg.setAttribute('fill', 'none'); svg.setAttribute('color', variant === 1 ? '#262626' : '#faf8f5');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('color', ink);
     const symbol = document.getElementById('aimtOrbitalMark');
     if (!symbol) throw new Error('AIMT mark unavailable');
     Array.from(symbol.children).forEach(node => svg.append(node.cloneNode(true)));
@@ -38,50 +58,88 @@
     await mark.decode();
     canvas.width = 1080; canvas.height = 1920;
     const ctx = canvas.getContext('2d');
-    const light = variant === 1;
-    const ink = light ? '#262626' : '#faf8f5';
-    const muted = light ? '#695d55' : '#c4b9b0';
     ctx.fillStyle = light ? '#faf8f5' : '#1a1814'; ctx.fillRect(0, 0, 1080, 1920);
-    ctx.strokeStyle = '#a3968d'; ctx.lineWidth = 2;
-    ctx.strokeRect(52, 52, 976, 1816);
-    ctx.beginPath(); ctx.moveTo(100, 530); ctx.lineTo(980, 530); ctx.stroke();
-    ctx.drawImage(mark, light ? 490 : 96, 178, 100, 100);
     ctx.textBaseline = 'top';
-    ctx.textAlign = light ? 'center' : 'left';
-    function line(text, y, size, family, color) {
-      ctx.fillStyle = color || ink; ctx.font = size + 'px ' + family;
-      ctx.fillText(text, light ? 540 : 100, y, 860);
+    const serif = '"Playfair Display", Georgia, serif';
+    const sans = 'Montserrat, Arial, sans-serif';
+    const body = 'Outfit, Arial, sans-serif';
+    function line(text, x, y, size, family, color, width, align, weight) {
+      ctx.textAlign = align || 'left'; ctx.fillStyle = color || ink;
+      ctx.font = (weight || '400') + ' ' + size + 'px ' + family;
+      ctx.fillText(text, x, y, width || 880);
     }
-    function wrap(text, y, size, family, color) {
-      ctx.font = size + 'px ' + family;
+    function wrap(text, x, y, size, family, width, color, align, leading, weight) {
+      ctx.font = (weight || '400') + ' ' + size + 'px ' + family;
       let row = '';
-      const words = text.split(/\s+/);
-      words.forEach(word => {
+      text.split(/\s+/).forEach(word => {
         const next = row ? row + ' ' + word : word;
-        if (ctx.measureText(next).width > 860 && row) { line(row, y, size, family, color); y += size * 1.3; row = word; }
-        else row = next;
+        if (ctx.measureText(next).width > width && row) {
+          line(row, x, y, size, family, color, width, align, weight); y += leading || size * 1.35; row = word;
+        } else row = next;
       });
-      if (row) line(row, y, size, family, color);
-      return y + size * 1.3;
+      if (row) line(row, x, y, size, family, color, width, align, weight);
+      return y + (leading || size * 1.35);
     }
-    line('AIMT', 318, 70, 'Montserrat, Arial');
-    line(view ? 'CERTIFICATION EARNED' : 'A NEW CHAPTER', 440, 26, 'Outfit, Arial', muted);
-    wrap(view ? 'The next chapter. Earned.' : 'Taking the next step in my career.', 660, 82, 'Montserrat, Arial');
-    wrap(view ? 'AIMT Head Spa Certification' : 'Currently training toward AIMT Head Spa Certification.', 1080, 46, 'Outfit, Arial', muted);
-    if (view) {
-      let size = 38;
-      ctx.font = size + 'px Outfit, Arial';
-      while (ctx.measureText(view.studentName).width > 860 && size > 16) { size--; ctx.font = size + 'px Outfit, Arial'; }
-      line(view.studentName, 1320, size, 'Outfit, Arial');
-      line(view.date, 1390, 28, 'Outfit, Arial', muted);
-      line(view.credentialId, 1450, 28, 'Outfit, Arial', muted);
-      line('Verify this credential at', 1540, 25, 'Outfit, Arial', muted);
-      line('aimtrichology.com/verify', 1580, 30, 'Outfit, Arial');
+    function rule(x, y, width, color) {
+      ctx.fillStyle = color || '#a3968d'; ctx.fillRect(x, y, width, 1);
+    }
+    function institution(center) {
+      const y = 1690;
+      ctx.drawImage(mark, center ? 508 : 100, y, 64, 64);
+      if (center) {
+        line('American Institute of Modern Trichology', 540, y + 95, 26, body, muted, 880, 'center');
+      } else {
+        line('American Institute of', 192, y + 1, 26, body, muted);
+        line('Modern Trichology', 192, y + 36, 26, body, muted);
+      }
+    }
+    function credential(x, y, width, center, color, secondary) {
+      const align = center ? 'center' : 'left';
+      // Verified identity only; fit long names inside the credential area.
+      let nameSize = 52;
+      ctx.font = nameSize + 'px ' + body;
+      while (ctx.measureText(view.studentName).width > width && nameSize > 22) {
+        nameSize--; ctx.font = nameSize + 'px ' + body;
+      }
+      line(view.studentName, x, y, nameSize, body, color, width, align);
+      line('Completed ' + view.date, x, y + 100, 28, body, secondary, width, align);
+      line(view.credentialId, x, y + 150, 30, body, secondary, width, align);
+      line('Verify credential', x, y + 235, 24, body, secondary, width, align);
+      line(verificationUrl(view).replace('https://', ''), x, y + 275, 24, body, color, width, align);
+    }
+    if (layout === 'student-0') {
+      // Open editorial page: a marginal rule and a large serif statement.
+      ctx.fillStyle = '#a3968d'; ctx.fillRect(60, 300, 2, 700);
+      wrap(concept.headline, 100, 350, 116, serif, 830, ink, 'left', 148);
+      wrap(concept.supporting, 100, 1030, 44, body, 790, muted);
+      rule(100, 1370, 90);
+      wrap(concept.status, 100, 1420, 34, body, 800, ink);
+      institution(false);
+    } else if (layout === 'student-1') {
+      // Asymmetric ivory page, with the service statement framed as a column.
+      ctx.fillStyle = '#e9e2da'; ctx.fillRect(990, 0, 90, 1920);
+      rule(100, 230, 780);
+      wrap(concept.headline, 100, 340, 96, sans, 750, ink, 'left', 124, '300');
+      rule(100, 925, 780);
+      wrap(concept.supporting, 100, 1010, 44, body, 760, muted);
+      wrap(concept.status, 100, 1430, 34, body, 760, ink);
+      institution(false);
+    } else if (layout === 'graduate-0') {
+      // Centered earned announcement: name and credential anchor the lower half.
+      rule(490, 230, 100);
+      wrap(concept.headline, 540, 400, 118, serif, 880, ink, 'center', 152);
+      wrap(concept.supporting, 540, 900, 42, body, 760, muted, 'center');
+      rule(370, 1130, 340);
+      credential(540, 1220, 880, true, ink, muted);
+      institution(true);
     } else {
-      line('Professional development, in progress.', 1450, 30, 'Outfit, Arial', muted);
+      // Dark typographic cover with a separate, light credential folio.
+      wrap(concept.headline, 100, 260, 94, sans, 850, ink, 'left', 122, '300');
+      wrap(concept.supporting, 100, 870, 40, body, 810, muted);
+      ctx.fillStyle = '#ece6de'; ctx.fillRect(70, 1130, 940, 480);
+      credential(115, 1190, 850, false, '#262626', '#695d55');
+      institution(false);
     }
-    line('American Institute of', 1700, 32, 'Outfit, Arial');
-    line('Modern Trichology', 1746, 32, 'Outfit, Arial');
     return canvas;
   }
 
@@ -121,15 +179,16 @@
         const url = URL.createObjectURL(blob); if (isGraduate) urls.add(url);
         const figure = document.createElement('figure');
         const image = document.createElement('img'); image.src = url; image.width = 1080; image.height = 1920;
-        image.alt = (isGraduate ? 'Graduate' : 'Student') + ' announcement — ' + (variant ? 'Ivory' : 'Charcoal');
-        const label = document.createElement('figcaption'); label.textContent = variant ? 'Ivory' : 'Charcoal';
+        const concept = storyConcept(variant, view);
+        image.alt = concept.label + ': ' + concept.headline + ' ' + concept.supporting + (concept.status ? ' ' + concept.status : '');
+        const label = document.createElement('figcaption'); label.textContent = concept.label;
         const download = document.createElement('button'); download.type = 'button'; download.className = 'btn ghost'; download.textContent = 'Download PNG';
         download.onclick = async () => {
           download.disabled = true;
           try {
             if (isGraduate && !(await stillActive(view))) return;
             const a = document.createElement('a'); a.href = url;
-            a.download = 'aimt-' + (isGraduate ? 'graduate' : 'student') + '-' + (variant ? 'ivory' : 'charcoal') + '.png';
+            a.download = 'aimt-' + (isGraduate ? 'graduate' : 'student') + '-' + (variant ? 'b' : 'a') + '.png';
             document.body.append(a); a.click(); a.remove();
             message(panel, 'PNG ready. On mobile, you can also touch and hold the preview to save it to Photos.');
           } catch (_) { message(panel, 'Download unavailable. Please try again.'); }
@@ -190,5 +249,5 @@
     root.addEventListener('pagehide', () => { lock(); });
     root.addEventListener('pageshow', event => { if (event.persisted) refreshGraduate(); });
   }
-  root.AIMTSocialSharing = { mount, verifyCredential, verificationUrl, graduateCaption, drawStory };
+  root.AIMTSocialSharing = { mount, verifyCredential, verificationUrl, studentCaption, graduateCaption, storyConcept, drawStory };
 })(typeof window !== 'undefined' ? window : globalThis);

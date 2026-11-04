@@ -48,3 +48,25 @@ test('unenrolled or failed access leaves the kit hidden without credential reque
     assert.equal(container.hidden, true); assert.equal(container.innerHTML, '');
   }
 });
+
+test('four owner-approved concepts use accurate training and earned language', () => {
+  const expected = [
+    [null, 0, "Experience isn't where I stop.", 'Continuing my education in scalp science and professional head spa practice.', 'Currently pursuing AIMT Head Spa Certification.'],
+    [null, 1, 'The work behind the service matters.', 'Investing in the knowledge behind the experience—not just what clients see.', 'Training toward AIMT Head Spa Certification.'],
+    [record, 0, 'The standard keeps rising.', 'AIMT Head Spa Certification — Earned.'],
+    [record, 1, 'More knowledge behind every service.', 'AIMT Head Spa Certification earned through assessment.']
+  ];
+  for (const [view, variant, headline, supporting, status] of expected) {
+    const concept = api.storyConcept(variant, view);
+    assert.equal(concept.headline, headline);
+    assert.equal(concept.supporting, supporting);
+    assert.equal(concept.status, status);
+  }
+  assert.match(api.studentCaption(), /currently pursuing AIMT Head Spa Certification/);
+  assert.doesNotMatch(api.studentCaption(), /earned|certified|#/i);
+  const caption = api.graduateCaption({ date: 'November 1, 2026', credentialId: credential.credential_id });
+  assert.match(caption, /earned AIMT Head Spa Certification through assessment/);
+  assert.doesNotMatch(caption, /#/);
+  const source = readFileSync(new URL('../assets/js/aimt-social-sharing.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /Taking the next step|A NEW CHAPTER|The next chapter|Professional development, in progress/);
+});
