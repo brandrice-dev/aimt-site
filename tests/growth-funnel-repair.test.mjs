@@ -99,12 +99,13 @@ function authMock(role, overrides={}){
   };
 }
 test('owner can read saved leads while support cannot',async t=>{
-  t.mock.method(globalThis,'fetch',authMock('owner'));
+  let role='owner';
+  t.mock.method(globalThis,'fetch',(...args)=>authMock(role)(...args));
   const ctx={request:request('https://aimtrichology.com/api/admin/readiness-leads','GET',null,{Authorization:'Bearer mock'}),env:ENV};
   const result=await listLeads(ctx);
   assert.equal(result.status,200);
   assert.equal((await result.json()).leads[0].email,'alex@example.com');
-  globalThis.fetch=authMock('support');
+  role='support';
   const denied=await listLeads(ctx);
   assert.equal(denied.status,403);
 });
