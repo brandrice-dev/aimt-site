@@ -2,15 +2,9 @@
 // Never writes PII to growth_events, and never trusts client-provided consent
 // or score metadata without validation. No npm/Node dependencies.
 import { supabaseRest } from '../../_lib/certification/auth.mjs';
+import { renderReadinessHtml, renderReadinessText, READINESS_RESULT_SUBJECT } from '../../_lib/readiness/readiness-profile-email.mjs';
 
 const FIELDS = ['scope', 'assessment', 'service', 'communication', 'business'];
-const LABELS = {
-  scope: 'Professional foundation & scope',
-  assessment: 'Scalp observation & assessment',
-  service: 'Service flow & adaptation',
-  communication: 'Client communication & experience',
-  business: 'Operations & business systems',
-};
 const REPLY_TO = 'support@aimtrichology.com';
 const FROM = 'AIMT <no-reply@auth.aimtrichology.com>';
 
@@ -34,10 +28,6 @@ function bandFor(score) {
     : score >= 70 ? 'Strong Foundation'
     : score >= 50 ? 'Developing System' : 'Foundation Building';
 }
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
 export function normalizeSubmission(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
   const email = asText(body.email, 255).toLowerCase();
@@ -70,47 +60,17 @@ export function normalizeSubmission(body) {
   };
 }
 
-function renderResult(row) {
-  const lines = FIELDS.map(key => LABELS[key] + ': ' + row.pillar_scores[key] + '/6');
-  const text = [
-    'Your AIMT Head Spa Readiness Profile', '',
-    'Hi ' + row.first_name + ',',
-    'Your score: ' + row.score + '/100',
-    'Your stage: ' + row.band, '',
-    'Your self-assessment by area:', ...lines, '',
-    'Priority to strengthen: ' + LABELS[row.priority_pillar],
-    'Strongest area: ' + LABELS[row.strongest_pillar], '',
-    'These scores are a self-assessment, not a professional license, diagnosis or certificate.',
-    'Questions? ' + REPLY_TO,
-  ].join('\n');
-  const rows = FIELDS.map(key =>
-    '<tr><td style="padding:7px 0;border-bottom:1px solid #e8e2db">' + escapeHtml(LABELS[key]) +
-    '</td><td style="text-align:right;border-bottom:1px solid #e8e2db">' + row.pillar_scores[key] + '/6</td></tr>'
-  ).join('');
-  const html = '<!doctype html><html lang="en"><body style="background:#f3efe9;color:#241d1a;font-family:Arial,sans-serif;padding:28px">' +
-    '<main style="max-width:580px;margin:0 auto;background:#fff;padding:32px;border-radius:10px">' +
-    '<p style="letter-spacing:2px;font-size:12px">AMERICAN INSTITUTE OF MODERN TRICHOLOGY</p>' +
-    '<h1>Your Readiness Profile</h1><p>Hi ' + escapeHtml(row.first_name) + ',</p>' +
-    '<p style="font-size:26px"><strong>' + row.score + '/100</strong> · ' + escapeHtml(row.band) + '</p>' +
-    '<table style="border-collapse:collapse;width:100%;font-size:14px">' + rows + '</table>' +
-    '<p><strong>Priority:</strong> ' + escapeHtml(LABELS[row.priority_pillar]) + '</p>' +
-    '<p><strong>Strongest area:</strong> ' + escapeHtml(LABELS[row.strongest_pillar]) + '</p>' +
-    '<p style="font-size:12px;color:#666">A professional self-assessment, not a license, diagnosis, or certificate.</p>' +
-    '<p>Questions? Reply to this email.</p></main></body></html>';
-  return { text, html };
-}
-
 async function sendResult(env, row) {
   if (!env.RESEND_API_KEY) return { sent: false };
   if (row.result_email_sent_at && Date.now() - Date.parse(row.result_email_sent_at) < 5 * 60 * 1000) return { sent: false, recentlySent: true };
-  const copy = renderResult(row);
+  const copy = { html: renderReadinessHtml(row), text: renderReadinessText(row) };
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: FROM, to: [row.email], reply_to: REPLY_TO,
-        subject: 'Your AIMT Head Spa Readiness Profile', ...copy,
+        subject: READINESS_RESULT_SUBJECT, ...copy,
       }),
     });
     if (!res.ok) return { sent: false };
