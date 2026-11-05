@@ -14,7 +14,7 @@ export async function mountFounderReview({container,getToken}){
   const data=initial.data,card=el('section');card.className='empty-card';
   card.setAttribute('aria-labelledby','founderReviewTitle');
   const title=el('h3','Founder review');title.id='founderReviewTitle';card.append(title);
-  card.append(el('p','Your private 45-minute review is reserved.'));
+  card.append(el('p','Your private 45-minute review is reserved. Your materials are only used to prepare for this review.'));
   const status=el('p');status.className='meta';status.setAttribute('role','status');card.append(status);
   container.replaceChildren(card);container.hidden=false;
   if(!data.certified){status.textContent='Complete your certification, then return here with your First-Service Blueprint.';return;}
@@ -50,6 +50,22 @@ export async function mountFounderReview({container,getToken}){
     event.preventDefault();save.disabled=true;
     try{const result=await api('/questions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({questions:questions.value})});if(!result.response.ok)throw Error(result.data.error||'Could not save questions.');uploadStatus.textContent='Your questions were saved.';}catch(error){uploadStatus.textContent=error.message;}finally{save.disabled=false;}
   });
-  // Booking link is deliberately absent until the separate scheduling flow is verified.
-  const booking=el('p','Scheduling will be available here once booking is connected.');booking.className='meta';card.append(booking);
+  const booking=el('button','Choose a time');booking.type='button';booking.className='btn';
+  const panel=el('div');panel.hidden=true;panel.style.marginTop='1rem';
+  card.append(el('p','After uploading your Blueprint, choose a time. Use the same email as your AIMT account. Google Meet details arrive from Google after booking.'),booking,panel);
+  booking.addEventListener('click',async()=>{
+    booking.disabled=true;panel.hidden=true;
+    try{
+      const result=await api('/booking',{method:'POST'});if(!result.response.ok)throw Error(result.data.error||'Booking unavailable.');
+      const url=new URL(result.data.url);
+      if(url.origin!=='https://calendar.google.com'||url.pathname!=='/calendar/appointments/schedules/AcZssZ1tNgOWBWQFYBczptBaUliONhU_l0xwWb97qNJ4gffg4B-iCCZZXo8a8RSlcdlZ-ea9pcr6s-zN'||url.search!=='?gv=true')throw Error('Booking unavailable.');
+      const frame=el('iframe');frame.src=url.href;frame.title='Choose a time for your founder review';
+      frame.style.cssText='width:100%;height:780px;border:0;border-radius:12px;background:white';
+      frame.referrerPolicy='strict-origin-when-cross-origin';
+      // Navigation stays inside this panel; do not grant popup/top-navigation.
+      frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms');
+      panel.replaceChildren(frame);panel.hidden=false;uploadStatus.textContent=result.data.note;
+      panel.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(error){uploadStatus.textContent=error.message;}finally{booking.disabled=false;}
+  });
 }

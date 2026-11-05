@@ -561,6 +561,11 @@ a { color: inherit; }
     requestSession()
       .then(function (data) {
         if (stale()) return null;
+        if(data && typeof data.founderReview==='boolean'){
+          var bonusNote=document.getElementById('founderCheckoutNote');
+          if(!bonusNote){bonusNote=document.createElement('p');bonusNote.id='founderCheckoutNote';bonusNote.setAttribute('role','status');els.mount.parentNode.insertBefore(bonusNote,els.mount);}
+          bonusNote.textContent=data.founderReview?'Your enrollment includes one private 45-minute founder review after certification.':'A founder review is not included with this enrollment; the limited allocation is currently reserved.';
+        }
         if (data && data.fallback === 'hosted' && data.url) {
           /* STRIPE_PUBLISHABLE_KEY not configured server-side — keep
              enrollment working through the hosted page (the old flow). */

@@ -1,3 +1,4 @@
+import {fulfillReview} from '../_lib/founder-review/purchase.mjs';
 import { resolveUser } from '../_lib/certification/auth.mjs';
 
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
@@ -246,6 +247,8 @@ export async function onRequestPost(context) {
       purchaserEmail: sessionEmail,
       userId: authenticatedUserId
     });
+
+    await fulfillReview(env,session);
 
     await logAimtEvent('api_claim_course_access_success', {
       supabaseUrl,

@@ -1,3 +1,4 @@
+import {holdReview,applyHold,bindHold,releaseRejectedHold} from '../_lib/founder-review/purchase.mjs';
 import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
 
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
@@ -60,7 +61,7 @@ async function createStripeSession(stripeSecretKey, params, stripeVersion) {
   return { response, session };
 }
 
-async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin) {
+async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin, hold, activeOffer=false) {
   const params = {
     mode: 'payment',
     ui_mode: 'embedded_page',
@@ -68,6 +69,7 @@ async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin) {
     'line_items[0][quantity]': '1',
     return_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
   };
+  applyHold(params,hold,activeOffer);
   let result = await createStripeSession(
     stripeSecretKey, { ...params, ...EMBEDDED_BRANDING }, EMBEDDED_STRIPE_API_VERSION
   );
@@ -181,13 +183,17 @@ export async function onRequestPost(context) {
 
   const requestBody = await request.clone().json().catch(() => ({}));
   const wantsEmbedded = !!requestBody && requestBody.ui === 'embedded';
+  let founderHold=null;
+  try{founderHold=await holdReview(env);}catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
+
 
   if (wantsEmbedded) {
     const { key: publishableKey, reason } = embeddedPublishableKey(env);
     if (publishableKey) {
       try {
-        const { response, session } = await createEmbeddedSession(stripeSecretKey, stripePriceId, origin);
+        const { response, session } = await createEmbeddedSession(stripeSecretKey, stripePriceId, origin, founderHold, env.FOUNDER_REVIEW_SALES_ENABLED==='true');
         if (!response.ok || !session.client_secret) {
+          await releaseRejectedHold(env,founderHold,response);
           await logAimtEvent('api_create_checkout_session_failure', {
             supabaseUrl,
             serviceRoleKey,
@@ -198,10 +204,11 @@ export async function onRequestPost(context) {
             headers: { 'Content-Type': 'application/json' },
           });
         }
+        await bindHold(env,founderHold,session);
         await recordCheckoutStart(context, requestBody, session.id, 'embedded', stripeSecretKey);
         /* Only what Stripe.js needs to mount — never the secret key or
            any other server-side value. */
-        return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey }), {
+        return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey, ...(env.FOUNDER_REVIEW_SALES_ENABLED==='true'?{founderReview:!!founderHold}:{}) }), {
           headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
         });
       } catch (error) {
@@ -232,6 +239,7 @@ export async function onRequestPost(context) {
     cancel_url: `${origin}/courses.html?checkout=canceled`,
   });
 
+  const holdParams={};applyHold(holdParams,founderHold,env.FOUNDER_REVIEW_SALES_ENABLED==='true');for(const [key,value] of Object.entries(holdParams))body.set(key,value);
   try {
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -245,6 +253,7 @@ export async function onRequestPost(context) {
     const session = await stripeResponse.json();
 
     if (!stripeResponse.ok || !session.url) {
+      await releaseRejectedHold(env,founderHold,stripeResponse);
       await logAimtEvent('api_create_checkout_session_failure', {
         supabaseUrl,
         serviceRoleKey,
@@ -259,6 +268,7 @@ export async function onRequestPost(context) {
       );
     }
 
+    await bindHold(env,founderHold,session);
     await recordCheckoutStart(context, requestBody, session.id, 'hosted', stripeSecretKey);
     return new Response(JSON.stringify(wantsEmbedded ? { url: session.url, fallback: 'hosted' } : { url: session.url }), {
       headers: { 'Content-Type': 'application/json' },

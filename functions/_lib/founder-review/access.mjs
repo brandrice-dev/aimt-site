@@ -13,7 +13,12 @@ export async function requireReview(env,request,{certified=false}={}){
   if(!await isEntitled(env,user))return {response:reply({error:'Active enrollment required.'},403)};
   // Never accept a user, reservation, completion flag or file path from the caller.
   const params=new URLSearchParams({select:'id,status,appointment_at,questions',user_id:`eq.${user.id}`,course_slug:`eq.${COURSE_SLUG}`,limit:'1'});
-  const reservation=await supabaseRest(env,`founder_review_reservations?${params}`);
+  let reservation=await supabaseRest(env,`founder_review_reservations?${params}`);
+  if(reservation.ok&&!reservation.body?.length&&user.email_confirmed_at&&user.email){
+    const linked=await supabaseRest(env,'rpc/founder_review_link',{method:'POST',body:JSON.stringify({p_user:user.id,p_email:user.email})});
+    if(!linked.ok)return {response:reply({error:'Review availability could not be checked.'},503)};
+    reservation=await supabaseRest(env,`founder_review_reservations?${params}`);
+  }
   if(!reservation.ok)return {response:reply({error:'Review availability could not be checked.'},503)};
   const row=reservation.body?.[0];
   if(!row)return {response:reply({error:'No founder review is reserved for this account.'},403)};

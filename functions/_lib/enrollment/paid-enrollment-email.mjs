@@ -61,7 +61,7 @@ const INCLUDED = [
 ];
 const CERTIFICATION_NOTE = 'Your AIMT certification is earned after completing the required course progression and passing the Final Certification Assessment.';
 
-export function renderEnrollmentHtml({ firstName, courseEntryUrl }) {
+export function renderEnrollmentHtml({ firstName, courseEntryUrl, founderReview=false }) {
   const safeUrl = escapeHtml(courseEntryUrl);
   return renderEmail({
     title: SUBJECT,
@@ -72,6 +72,7 @@ export function renderEnrollmentHtml({ firstName, courseEntryUrl }) {
       paragraph('Your enrollment in the Head Spa Certification Course is confirmed.'),
       sectionLabel('Included with enrollment'),
       bulletList(INCLUDED),
+      ...(founderReview?[sectionLabel('Your founder review is reserved'),paragraph('Your enrollment includes one private 45-minute founder review. After certification, open My AIMT to upload your service plan and choose a time. Your review stays reserved while you study.')]:[]),
       paragraph(CERTIFICATION_NOTE, { top: 14, size: 14, color: COLORS.muted }),
       divider(),
       sectionLabel('How to begin'),
@@ -89,7 +90,7 @@ export function renderEnrollmentHtml({ firstName, courseEntryUrl }) {
   });
 }
 
-export function renderEnrollmentText({ firstName, courseEntryUrl }) {
+export function renderEnrollmentText({ firstName, courseEntryUrl, founderReview=false }) {
   return [
     'AIMT',
     '',
@@ -103,6 +104,7 @@ export function renderEnrollmentText({ firstName, courseEntryUrl }) {
     ...INCLUDED.map((item) => `- ${item}`),
     '',
     CERTIFICATION_NOTE,
+    ...(founderReview?['','YOUR FOUNDER REVIEW IS RESERVED','Your enrollment includes one private 45-minute founder review. After certification, open My AIMT to upload your service plan and choose a time. Your review stays reserved while you study.']:[]),
     '',
     'HOW TO BEGIN',
     '1. Set up your student access. Use the same email address you entered at checkout.',
@@ -168,7 +170,7 @@ async function wasAlreadySent(env, idempotencyKey) {
  *
  * @returns {Promise<{attempted:boolean, sent:boolean, idempotencyKey:string, deduped?:boolean, reason?:string, status?:number, errorMessage?:string}>}
  */
-export async function sendPaidEnrollmentEmail(env, { checkoutSessionId, email, firstName, courseEntryUrl }) {
+export async function sendPaidEnrollmentEmail(env, { checkoutSessionId, email, firstName, courseEntryUrl, founderReview=false }) {
   const idempotencyKey = paidEnrollmentEmailIdempotencyKey(checkoutSessionId);
 
   if (!env.RESEND_API_KEY) {
@@ -204,8 +206,8 @@ export async function sendPaidEnrollmentEmail(env, { checkoutSessionId, email, f
         to: [email],
         reply_to: REPLY_TO,
         subject: SUBJECT,
-        html: renderEnrollmentHtml({ firstName, courseEntryUrl }),
-        text: renderEnrollmentText({ firstName, courseEntryUrl }),
+        html: renderEnrollmentHtml({ firstName, courseEntryUrl, founderReview }),
+        text: renderEnrollmentText({ firstName, courseEntryUrl, founderReview }),
       }),
     });
 

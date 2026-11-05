@@ -19,6 +19,7 @@
      Copy the signing secret → STRIPE_WEBHOOK_SECRET
    ═══════════════════════════════════════════════════════════════ */
 
+import {fulfillReview,releaseExpiredReview} from '../_lib/founder-review/purchase.mjs';
 import { sendPaidEnrollmentEmail } from '../_lib/enrollment/paid-enrollment-email.mjs';
 import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
 
@@ -206,7 +207,11 @@ export async function onRequestPost(context) {
     return new Response('Bad payload', { status: 400 });
   }
 
-  if (event.type !== 'checkout.session.completed') {
+  if(event.type==='checkout.session.expired'){
+    try{await releaseExpiredReview(env,event.data?.object||{});return Response.json({received:true});}
+    catch{return new Response('Reservation release failed',{status:500});}
+  }
+  if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') {
     return new Response(JSON.stringify({ received: true, ignored: event.type }), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -260,6 +265,8 @@ export async function onRequestPost(context) {
       purchaserEmail
     });
 
+    const founderReview=await fulfillReview(env,session);
+
     await logEvent(env, 'webhook_entitlement_written', {
       email: purchaserEmail,
       message: `session_${session.id}_course_${courseSlug}`
@@ -299,6 +306,7 @@ export async function onRequestPost(context) {
         checkoutSessionId: session.id,
         email: purchaserEmail,
         firstName,
+        founderReview,
         courseEntryUrl: resolveCourseEntryUrl(session)
       });
     } catch (error) {

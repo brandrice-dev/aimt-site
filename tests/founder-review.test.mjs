@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {onRequestGet} from '../functions/api/founder-review/index.js';
 import {onRequestPut} from '../functions/api/founder-review/material.js';
 import {onRequestPost} from '../functions/api/founder-review/questions.js';
+import {onRequestPost as booking} from '../functions/api/founder-review/booking.js';
+import {validReviewTime} from '../functions/_lib/founder-review/schedule.mjs';
 import {onRequestGet as ownerGet} from '../functions/api/admin/founder-reviews.js';
 import {MAX_BYTES,objectPath} from '../functions/_lib/founder-review/access.mjs';
 const env={FOUNDER_REVIEW_ENABLED:'true',SUPABASE_URL:'https://test.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'server-only'};
@@ -10,7 +12,7 @@ const id='11111111-1111-4111-8111-111111111111';
 const reservation={id,status:'reserved',questions:'My service question'};
 const credential={credential_id:'AIMT-HS-2026-ABC234',revoked:false,completed_at:'2026-01-01'};
 function request(path='',options={}){return new Request('https://aimtrichology.com/api/founder-review'+path,{...options,headers:{Authorization:'Bearer student-token',...options.headers}});}
-function setup(t,{graduate=true,recipient=true,entitled=true,dbFail=false,status='reserved',uploadFail=false,owner=false}={}){
+function setup(t,{graduate=true,recipient=true,entitled=true,dbFail=false,status='reserved',uploadFail=false,owner=false,materials=['blueprint']}={}){
   const calls=[];const original=global.fetch;t.after(()=>global.fetch=original);
   global.fetch=async(url,options={})=>{
     const u=new URL(url);calls.push([u,options]);
@@ -26,7 +28,7 @@ function setup(t,{graduate=true,recipient=true,entitled=true,dbFail=false,status
       assert.equal(u.searchParams.get('user_id'),'eq.student-1');assert.equal(u.searchParams.get('revoked'),'eq.false');
       return Response.json(graduate?[credential]:[]);
     }
-    if(u.pathname.startsWith('/storage/v1/object/list/'))return Response.json([{name:'blueprint.pdf'}]);
+    if(u.pathname.startsWith('/storage/v1/object/list/'))return Response.json(materials.map(slot=>({name:slot+'.pdf'})));
     if(u.pathname.startsWith('/storage/v1/object/sign/'))return Response.json({signedURL:'/object/sign/founder-review-materials/'+id+'/blueprint.pdf?token=test'});
     if(u.pathname.startsWith('/storage/v1/object/'))return Response.json(uploadFail?{}:{Key:'saved'}, {status:uploadFail?500:200});
     throw Error('Unexpected URL '+url);
@@ -77,4 +79,19 @@ test('owner links are no-store and expire in 60 seconds',async t=>{
   const calls=setup(t,{owner:true});const r=await ownerGet({env,request:request()});assert.equal(r.status,200);assert.equal(r.headers.get('Cache-Control'),'no-store');
   const [,options]=calls.find(([u])=>u.pathname.includes('/object/sign/'));assert.equal(JSON.parse(options.body).expiresIn,60);
   assert.equal((await r.json()).reviews.length,1);
+});
+
+test('booking stays inline and requires an uploaded Blueprint',async t=>{
+ setup(t,{});const response=await booking({env,request:request('/booking',{method:'POST'})});assert.equal(response.status,200);const data=await response.json();assert.match(data.url,/^https:\/\/calendar.google.com\/calendar\/appointments\/schedules\//);assert.match(data.url,/gv=true$/);
+});
+test('review schedule uses Eastern time across daylight saving boundaries',()=>{
+ assert.equal(validReviewTime('2026-11-09T09:00:00-05:00'),true);
+ assert.equal(validReviewTime('2026-07-06T13:15:00-04:00'),true);
+ assert.equal(validReviewTime('2026-11-09T13:30:00-05:00'),false);
+ assert.equal(validReviewTime('2026-11-11T09:00:00-05:00'),false);
+ assert.equal(validReviewTime('2026-11-09T08:45:00-05:00'),false);
+});
+
+test('booking is blocked until the Blueprint is actually received',async t=>{
+ setup(t,{materials:[]});assert.equal((await booking({env,request:request('/booking',{method:'POST'})})).status,409);
 });
