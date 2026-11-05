@@ -90,6 +90,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div id="readinessLeadsBody" class="card table-wrap"><div class="loading">Open Growth to load leads…</div></div>
       </div>
       <div class="growth-section">
+        <div class="section-head">
+          <div><h2>Readiness email follow-ups</h2><p>Two emails only: first after 48 hours, second five days after the first. Opted-in new leads only. Stop on purchase or unsubscribe.</p></div>
+          <button class="btn" id="refreshReadinessFollowupsBtn" type="button">Refresh status</button>
+        </div>
+        <div class="card" id="readinessFollowupBody"><div class="loading">Open Growth to check the email program…</div></div>
+      </div>
+      <div class="growth-section">
         <div class="section-head"><div><h2>Checkout diagnostics</h2><p>Read-only check of up to 20 recent Stripe Checkout Sessions: open, expired, paid, and whether course access was granted. No payments are created.</p></div><button class="btn" id="runCheckoutDiagnosticsBtn" type="button">Check Stripe sessions</button></div>
         <div id="checkoutDiagnosticsBody" class="card table-wrap"><div class="loading">Select “Check Stripe sessions” to inspect recorded checkout attempts.</div></div>
       </div>
@@ -204,6 +211,66 @@ const head=dim==='creative'?'<th>Source</th><th>Creative (utm_content)</th>':dim
 const cell=r=>dim==='creative'?`<td>${esc(r.source)}</td><td>${esc(r.content)}${r.creative&&r.creative.conforming?`<span class="sub">${esc(r.creative.format)} · ${esc(r.creative.topic)} · ${esc(r.creative.hook)} · v${esc(r.creative.version)}</span>`:(r.content&&r.content!=='(none)'?'<span class="sub">Not in AIMT creative format</span>':'')}</td>`:dim==='campaign'?`<td>${esc(r.source)} / ${esc(r.medium)}</td><td>${esc(r.campaign)}</td>`:`<td>${esc(r.source)}</td><td>${esc(r.medium)}</td>`;
 return `<table class="table growth-table"><thead><tr>${head}<th class="num">Visitors</th><th class="num">Leads</th><th class="num">Paid students</th><th class="num">Revenue</th></tr></thead><tbody>${rows.map(r=>`<tr>${cell(r)}<td class="num">${fmtCount(r.visitors)}</td><td class="num">${fmtCount(r.leads)}</td><td class="num">${fmtCount(r.paid)}</td><td class="num">${fmtMoney(r.revenue)}</td></tr>`).join('')}</tbody></table>`;}
 
+async function loadReadinessFollowups(){
+  const target=$('readinessFollowupBody');
+  target.innerHTML='<div class="loading">Checking scheduled follow-ups…</div>';
+  try {
+    const d=await api('/readiness-followups');
+    const stats=d.stats||{};
+    const status=d.enabled
+      ? '<span class="pill good">Active · New leads only</span>'
+      : '<span class="pill warn">Paused · No marketing emails being sent</span>';
+    let html='<div style="padding:20px;line-height:1.8;font-size:.84rem">'
+      +'<div style="margin-bottom:15px">'+status+'</div>'
+      +'<p style="color:var(--muted);margin-bottom:10px">'
+      +esc(stats.sent||0)+' sent · '+esc(stats.needsReview||0)+' needing review · '
+      +esc(d.totalReserved||0)+' of '+esc(d.maxTotalEmails||0)+' total reservations used</p>';
+    if(d.enabled){
+      html+='<p style="color:var(--muted)">Started '+esc(fmtDate(d.activatedAt))+' · '
+        +esc(d.maxDailyEmails)+' daily maximum. New enrollments or unsubscribes stop future messages.</p>';
+      if(d.ownerCanConfigure)html+='<button class="btn" id="pauseFollowupsBtn" type="button" style="margin-top:16px">Pause follow-ups</button>';
+    }else if(d.ownerCanConfigure){
+      html+='<p style="color:var(--muted);margin-bottom:14px">To activate, enter AIMT’s valid business mailing address and authorize both limits. The address appears in every marketing email. No prior test leads are backfilled.</p>'
+        +'<form id="activateFollowupsForm" style="display:grid;gap:12px;max-width:570px">'
+        +'<div class="field"><label for="followupPostal">Business mailing address</label>'
+        +'<textarea id="followupPostal" required rows="2" maxlength="400" placeholder="Business name, street or registered PO Box, city, state, ZIP"></textarea></div>'
+        +'<div class="form-grid"><div class="field"><label for="followupDaily">Maximum emails per day</label><input id="followupDaily" type="number" min="1" max="100" required placeholder="Daily limit"></div>'
+        +'<div class="field"><label for="followupTotal">Maximum emails for this campaign</label><input id="followupTotal" type="number" min="1" max="10000" required placeholder="Total campaign limit"></div></div>'
+        +'<label style="color:var(--muted);font-size:.78rem"><input type="checkbox" id="followupApprove" required> I authorize these campaign send limits and confirm this is AIMT’s valid postal address.</label>'
+        +'<button class="btn primary" type="submit" id="activateFollowupsBtn">Activate two-email follow-ups</button>'
+        +'</form>';
+    }
+    html+='<div id="followupNotice" class="notice" role="status"></div></div>';
+    target.innerHTML=html;
+    if(d.enabled&&d.ownerCanConfigure){
+      $('pauseFollowupsBtn').addEventListener('click',async()=>{
+        if(!confirm('Pause new AIMT Readiness follow-up emails?'))return;
+        const btn=$('pauseFollowupsBtn');btn.disabled=true;
+        try{
+          await api('/readiness-followups',{method:'POST',body:JSON.stringify({action:'pause'})});
+          await loadReadinessFollowups();
+        }catch(e){showNotice($('followupNotice'),e.message,true);btn.disabled=false;}
+      });
+    }
+    if(!d.enabled&&d.ownerCanConfigure){
+      $('activateFollowupsForm').addEventListener('submit',async e=>{
+        e.preventDefault();
+        const postalAddress=$('followupPostal').value.trim();
+        const maxDailyEmails=Number($('followupDaily').value);
+        const maxTotalEmails=Number($('followupTotal').value);
+        if(!$('followupApprove').checked)return;
+        if(!confirm('Activate two AIMT marketing follow-ups for NEW opted-in leads only? Limits: '+maxDailyEmails+'/day and '+maxTotalEmails+' total.'))return;
+        const btn=$('activateFollowupsBtn');btn.disabled=true;
+        try {
+          await api('/readiness-followups',{method:'POST',body:JSON.stringify({
+            action:'activate',postalAddress,maxDailyEmails,maxTotalEmails,ownerAcknowledged:true
+          })});
+          await loadReadinessFollowups();
+        }catch(err){showNotice($('followupNotice'),err.message,true);btn.disabled=false;}
+      });
+    }
+  }catch(err){target.innerHTML='<div class="notice show error">'+esc(err.message)+'</div>';}
+}
 async function loadReadinessLeads(){
   const target=$('readinessLeadsBody');
   target.innerHTML='<div class="loading">Loading submitted leads…</div>';
@@ -302,9 +369,10 @@ async function reconcileRevenue(btn){btn.disabled=true;btn.textContent='Reconcil
 document.querySelectorAll('[data-growth-range]').forEach(b=>b.addEventListener('click',()=>{growthState.range=b.dataset.growthRange;loadGrowth();}));
 document.querySelectorAll('[data-growth-model]').forEach(b=>b.addEventListener('click',()=>{growthState.model=b.dataset.growthModel;loadGrowth();}));
 $('refreshReadinessLeadsBtn').addEventListener('click',loadReadinessLeads);
+$('refreshReadinessFollowupsBtn').addEventListener('click',loadReadinessFollowups);
 $('runCheckoutDiagnosticsBtn').addEventListener('click',loadCheckoutDiagnostics);
 $('copyScoreboardBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(growthState.scoreboardText);showNotice($('globalNotice'),'Scoreboard copied.');}catch(_){showNotice($('globalNotice'),'Copy failed — select the table instead.',true);}});
-document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth'){loadGrowth();loadReadinessLeads();}if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth'){loadGrowth();loadReadinessLeads();loadReadinessFollowups();}if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
 $('grantModal').addEventListener('click',e=>{if(e.target===$('grantModal'))closeGrant()});$('studentDrawer').addEventListener('click',e=>{if(e.target===$('studentDrawer'))$('drawerClose').click()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGrant();$('drawerClose').click();}});
 (async()=>{const {data}=await supabaseClient.auth.getSession();if(data?.session)await verifyAdmin();else $('loginWrap').classList.add('show');})();
 </script>
