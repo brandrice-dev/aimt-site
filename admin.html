@@ -29,6 +29,39 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .growth-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:22px}.chips{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}.chip{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:7px 13px;font-size:.74rem}.chip.active{background:rgba(255,255,255,.08);color:var(--text)}
 .growth-section{margin-top:30px}.growth-section:first-of-type{margin-top:0}.growth-section>h2{font-size:1rem;font-weight:500;margin-bottom:4px}.growth-section>p{font-size:.74rem;color:var(--muted);margin-bottom:12px;line-height:1.5}.growth-metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:0}.metric-sub{margin-top:6px;font-size:.66rem;color:var(--muted);line-height:1.45}.metric.unmeasured .metric-value{font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:500;color:var(--muted)}
 .growth-table td.num,.growth-table th.num{text-align:right;font-variant-numeric:tabular-nums}.growth-table{min-width:640px}.scoreboard th:first-child,.scoreboard td:first-child{position:sticky;left:0;background:var(--panel);min-width:220px}.scoreboard td.na{color:var(--muted);font-size:.68rem}.growth-foot{margin-top:18px;font-size:.72rem;color:var(--muted);line-height:1.6}
+
+/* Readiness leads — use the standard admin table rhythm; mobile becomes compact cards. */
+.readiness-leads-summary{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:.72rem;color:var(--muted);line-height:1.5}
+.readiness-leads-summary strong{font-weight:600;color:var(--text)}
+.readiness-leads-table{min-width:850px;table-layout:fixed}
+.readiness-leads-table th,.readiness-leads-table td{padding:15px 16px}
+.readiness-leads-table th:nth-child(1){width:25%}
+.readiness-leads-table th:nth-child(2){width:12%}
+.readiness-leads-table th:nth-child(3){width:17%}
+.readiness-leads-table th:nth-child(4){width:14%}
+.readiness-leads-table th:nth-child(5){width:14%}
+.readiness-leads-table th:nth-child(6){width:18%}
+.readiness-leads-table td{font-size:.76rem;line-height:1.5}
+.readiness-leads-table .readiness-name{font-weight:500;font-size:.83rem;color:var(--text)}
+.readiness-leads-table .sub{line-height:1.5;overflow-wrap:anywhere;margin-top:4px}
+.readiness-leads-table .readiness-score{font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.readiness-leads-table .readiness-date{font-variant-numeric:tabular-nums;white-space:nowrap}
+.readiness-leads-table .readiness-followup-action{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 12px;border:1px solid rgba(163,150,141,.24);border-radius:999px;color:var(--text);background:var(--panel2);text-decoration:none;font-size:.71rem;font-weight:500;line-height:1.3;white-space:nowrap}
+.readiness-leads-table .readiness-followup-action:hover,.readiness-leads-table .readiness-followup-action:focus-visible{border-color:rgba(163,150,141,.55);background:rgba(163,150,141,.12)}
+.readiness-leads-table .readiness-muted{color:var(--muted);font-size:.7rem}
+@media(max-width:700px){
+  .readiness-leads-summary{padding:13px 15px;gap:5px 14px;font-size:.69rem}
+  .readiness-leads-table{display:block;min-width:0;width:100%}
+  .readiness-leads-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .readiness-leads-table tbody{display:block;padding:0 12px 12px}
+  .readiness-leads-table tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:7px 3px}
+  .readiness-leads-table td{display:block;min-width:0;border-bottom:0;padding:8px 12px;font-size:.76rem}
+  .readiness-leads-table td::before{content:attr(data-label);display:block;margin-bottom:5px;font-family:'Montserrat',sans-serif;font-size:.57rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .readiness-leads-table td:nth-child(1),.readiness-leads-table td:nth-child(6){grid-column:1/-1}
+  .readiness-leads-table td:nth-child(1){padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:3px}
+  .readiness-leads-table td:nth-child(6){padding-top:12px;border-top:1px solid var(--line);margin-top:5px}
+  .readiness-leads-table .readiness-followup-action{min-height:40px}
+}
 @media(max-width:980px){.growth-metrics{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:980px){.metrics{grid-template-columns:repeat(2,1fr)}.shell{grid-template-columns:minmax(0,1fr)}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}.brand-sub{margin-bottom:12px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.side-foot{position:static;margin-top:12px;display:flex;gap:10px;align-items:center}.signout{width:auto;margin:0}.main{padding-top:24px}}
 @media(max-width:600px){.metrics{grid-template-columns:1fr 1fr}.top{flex-direction:column}.detail-grid,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.score-row{grid-template-columns:1fr 1fr}}
@@ -297,10 +330,30 @@ async function loadReadinessLeads(){
         'AIMT'
       ].join('\n');
       const mailto='mailto:'+encodeURIComponent(l.email)+'?subject='+encodeURIComponent('Your AIMT Readiness Profile — next step')+'&body='+encodeURIComponent(followupBody);
-      const contact=consent?'<a href="'+esc(mailto)+'">Draft follow-up email</a>':'No promotional follow-up';
-      return '<tr><td>'+esc(l.first_name)+'<span class="sub">'+email+'</span></td><td>'+esc(l.score)+'/100<span class="sub">'+esc(l.band)+'</span></td><td>'+esc(l.priority_pillar||'—')+'</td><td>'+(consent?'<span class="pill good">Opted in</span>':'<span class="pill">No marketing consent</span>')+'</td><td>'+esc(fmtDate(l.last_submitted_at))+'</td><td>'+contact+'</td></tr>';
+      const contact=consent
+        ? '<a class="readiness-followup-action" href="'+esc(mailto)+'">Draft follow-up email →</a>'
+        : '<span class="readiness-muted">Not opted in</span>';
+      const priorityLabels={
+        scope:'Professional scope',assessment:'Scalp assessment',service:'Service flow',
+        communication:'Client communication',business:'Business systems'
+      };
+      const priority=priorityLabels[l.priority_pillar]||l.priority_pillar||'—';
+      return '<tr>'
+        +'<td data-label="Lead"><span class="readiness-name">'+esc(l.first_name)+'</span><span class="sub">'+email+'</span></td>'
+        +'<td data-label="Score"><span class="readiness-score">'+esc(l.score)+'/100</span><span class="sub">'+esc(l.band)+'</span></td>'
+        +'<td data-label="Priority">'+esc(priority)+'</td>'
+        +'<td data-label="Consent">'+(consent?'<span class="pill good">Opted in</span>':'<span class="pill">Not opted in</span>')+'</td>'
+        +'<td data-label="Submitted"><span class="readiness-date">'+esc(fmtDate(l.last_submitted_at))+'</span></td>'
+        +'<td data-label="Follow-up">'+contact+'</td></tr>';
     }).join('');
-    target.innerHTML='<div style="padding:12px 16px;color:var(--muted);font-size:.76rem">'+esc(data.count)+' recent saved profiles · '+esc(data.withMarketingConsent)+' opted in · emails are restricted to owners/admins</div><table><thead><tr><th>Lead</th><th>Score</th><th>Priority</th><th>Consent</th><th>Submitted</th><th>Follow-up</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    target.innerHTML='<div class="readiness-leads-summary">'
+      +'<span><strong>'+esc(data.count)+'</strong> saved '+(Number(data.count)===1?'profile':'profiles')+'</span>'
+      +'<span><strong>'+esc(data.withMarketingConsent)+'</strong> opted in</span>'
+      +'<span>Contact details visible to admins only</span>'
+      +'</div><table class="table readiness-leads-table"><thead><tr>'
+      +'<th scope="col">Lead</th><th scope="col">Score</th><th scope="col">Priority</th>'
+      +'<th scope="col">Consent</th><th scope="col">Submitted</th><th scope="col">Follow-up</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){target.innerHTML='<div class="notice show error">'+esc(e.message)+'</div>';}
 }
 async function loadCheckoutDiagnostics(){
