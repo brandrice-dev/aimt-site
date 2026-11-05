@@ -38,7 +38,7 @@ No production launch, migrations, sends, real bookings, or paid provider calls a
 
 The integration test runs actual checkout, signed webhook, claim, graduation gate, upload, booking, owner reschedule/completion and signed retention cleanup handlers against local PostgreSQL. Auth, Stripe, Storage and email are simulated. It checks that completed-but-unpaid sessions do not grant access, paid-event replay is idempotent, checkout reloads reuse the held session, and a sixth purchase receives no founder bonus. Transactional email suites pass after correcting the stale allowlist for existing readiness senders.
 
-Hosted verification remains incomplete: the connected Stripe account is live and the only Supabase project is production. Automatic approval review blocked creating a temporary Stripe sandbox with the owner name/email pending explicit permission. No hosted migration, production flag activation, real booking, payment or email send occurred.
+Hosted verification remains incomplete: the only connected Supabase project is production. The owner explicitly authorized sandbox-only Stripe setup on 2026-11-05; a separate free, temporary Stripe sandbox was created. No hosted migration, production flag activation, real booking, live payment or email send occurred.
 
 ## Launch configuration (not activated)
 
@@ -48,3 +48,17 @@ Hosted verification remains incomplete: the connected Stripe account is live and
 4. Set FOUNDER_REVIEW_ENABLED for review endpoints, activate the five-slot database campaign, then enable FOUNDER_REVIEW_SALES_ENABLED only for the approved launch.
 5. Enable FOUNDER_REVIEW_CLEANUP_ENABLED in repository variables and confirm a dry-run followed by a due-record cleanup. The workflow uses the existing service-role secret only as an HMAC key.
 6. Owner verifies Google appointments before confirming them in AIMT. Keep both course eligibility and the fixed five-recipient ledger authoritative.
+
+
+## Stripe sandbox receipt — 2026-11-05
+
+Owner authorized sandbox only. A separate temporary sandbox expires 2026-11-12; no credentials or claim links are stored in the repository. A synthetic $597 price and synthetic purchaser details were used. External API traffic was restricted to Stripe with a test-only key; local PostgreSQL handled the database and Auth/Storage/email remained simulated.
+
+- Actual production checkout handler created six hosted sandbox sessions: five had review holds, the sixth had no bonus. Reusing a request key returned the same session. Amount and hold expiration matched the contract.
+- Expired an open Stripe session, replayed expiration locally twice and verified one release; replacement checkout received the available allocation.
+- Completed one hosted sandbox checkout using Stripe's 4242 test card, with Link saving disabled. Stripe confirmed status complete, payment_status paid, amount 59700 USD and livemode false. The success redirect intentionally targeted a synthetic .invalid origin, so no production success/claim page was invoked.
+- Retrieved Stripe's actual completed event and replayed it through the webhook handler with a local test signing secret. Verified one course entitlement, one reserved review and one simulated email; replay did not duplicate any of them. This does not verify deployed webhook delivery/signing configuration.
+- Stripe's new temporary restricted rkcs_test key initially fell back to hosted checkout because key-mode detection did not recognize it. Added explicit support and a regression test; actual embedded_page creation then succeeded with a bonus hold. No real secret appears in the test.
+- Expired all remaining open test sessions and replayed actual expiration events. Only the paid bonus remained reserved locally. No real funds, production tables or student messages were affected.
+
+Still required: hosted isolated Supabase Auth/Storage/RLS and multi-connection checks, deployed sandbox webhook delivery, complete embedded enrollment UI, actual Google appointment confirmation, and independent payment/privacy review. The sandbox receipt does not authorize launch or production changes.

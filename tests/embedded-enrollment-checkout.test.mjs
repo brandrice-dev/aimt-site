@@ -109,6 +109,17 @@ test('embedded request creates an embedded_page session for the configured $597 
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
 });
 
+test('temporary Stripe sandbox restricted keys support embedded checkout without exposing the key', async (t) => {
+  const state = installFetchMock(t, embeddedOk);
+  const temporaryKey = 'rkcs_test_SANDBOXONLY123';
+  const { response, data, text } = await postCreate(makeEnv({ STRIPE_SECRET_KEY: temporaryKey }), { ui: 'embedded' });
+  assert.equal(response.status, 200);
+  assert.equal(state.stripeCalls[0].params.get('ui_mode'), 'embedded_page');
+  assert.equal(state.stripeCalls[0].headers.Authorization, `Bearer ${temporaryKey}`);
+  assert.equal(data.publishableKey, PUBLISHABLE_KEY);
+  assert.ok(!text.includes(temporaryKey));
+});
+
 test('embedded response never exposes server-side secrets', async (t) => {
   installFetchMock(t, embeddedOk);
   const { text } = await postCreate(makeEnv(), { ui: 'embedded' });

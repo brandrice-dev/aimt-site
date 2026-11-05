@@ -32,7 +32,7 @@ const EMBEDDED_BRANDING = {
 };
 
 function stripeKeyMode(key) {
-  const match = /^(?:sk|rk|pk)_(live|test)_/.exec(String(key || ''));
+  const match = /^(?:sk|rk|rkcs|pk)_(live|test)_/.exec(String(key || ''));
   return match ? match[1] : null;
 }
 
