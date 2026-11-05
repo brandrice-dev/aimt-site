@@ -35,8 +35,12 @@ function localWorkHour(now) {
 async function candidates(env,cfg,now) {
   if(!cfg?.activated_at)return [];
   const eligible=[];
-  const since=Date.parse(cfg.activated_at);
-  if(!Number.isFinite(since))return eligible;
+  const activated=Date.parse(cfg.activated_at);
+  if(!Number.isFinite(activated))return eligible;
+  // Restrict the paginated scan to the live 14-day follow-up window.
+  // Otherwise historical leads eventually fill the first 600 rows and
+  // newly opted-in subscribers are never reached.
+  const since=Math.max(activated,now-14*DAY_MS);
   const sendRows=await readRows(env,'readiness_followup_sends',{
     select:'lead_id,stage,status,sent_at',limit:'2000',order:'reserved_at.desc',
   });
@@ -76,7 +80,9 @@ async function stillUnpaid(env,email) {
   // reservation; purchasing can happen while a scheduled run is underway.
   const rows=await readRows(env,'course_entitlements',{
     select:'checkout_session_id',course_slug:'eq.'+COURSE_SLUG,
-    purchaser_email:'eq.'+email,limit:'1'
+    // Case-insensitive exact comparison, like the atomic SQL claim.
+    // Escape SQL LIKE wildcards in email addresses (e.g. underscore).
+    purchaser_email:'ilike.'+String(email).replace(/[\\%_]/g,'\\    purchaser_email:'eq.'+email,limit:'1''),limit:'1'
   });
   return rows.length===0;
 }
