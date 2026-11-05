@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {holdReview,applyHold,bindHold,fulfillReview,releaseExpiredReview} from '../functions/_lib/founder-review/purchase.mjs';
+import {holdReview,applyHold,bindHold,fulfillReview,releaseExpiredReview,releaseRejectedHold} from '../functions/_lib/founder-review/purchase.mjs';
 import {onRequestPost as checkout} from '../functions/api/create-checkout-session.js';
 import {onRequestPost as webhook} from '../functions/api/stripe-webhook.js';
 const id='11111111-1111-4111-8111-111111111111';
@@ -53,4 +53,14 @@ for(const type of ['checkout.session.completed','checkout.session.async_payment_
  });
  const response=await webhook({env,request:await signedEvent({type,data:{object:{id:'cs_test_1',payment_status:'paid',status:'complete',customer_email:'student@example.com',metadata:{founder_review_hold:id}}}})});
  assert.equal(response.status,200);assert.deepEqual(order,['entitlement','bonus']);
+});
+
+test('uncertain Stripe failures preserve the held bonus until actual expiration',async t=>{
+ let calls=0;mock(t,async()=>{calls++;return Response.json(true);});
+ for(const status of [408,409,425,429,500,503])await releaseRejectedHold(env,hold,Response.json({error:{type:'invalid_request_error'}},{status}));
+ await releaseRejectedHold(env,hold,Response.json({error:{type:'idempotency_error'}},{status:400}));
+ await releaseRejectedHold(env,hold,new Response('unknown rejection',{status:400}));
+ assert.equal(calls,0);
+ await releaseRejectedHold(env,hold,Response.json({error:{type:'invalid_request_error',param:'line_items[0][price]'}},{status:400}));
+ assert.equal(calls,1);
 });

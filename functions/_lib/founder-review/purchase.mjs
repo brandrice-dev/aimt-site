@@ -35,8 +35,11 @@ export async function releaseExpiredReview(env,session){
 }
 
 export async function releaseRejectedHold(env,hold,response){
- if(hold&&response.status>=400&&response.status<500){
-  await rpc(env,'founder_review_release',{p_id:hold.id,p_session:null});
- }
- // Never release on timeout/5xx: Stripe may have created a payable session.
+ if(!hold||response.status<400||response.status>=500||[408,409,425,429].includes(response.status))return;
+ // Conflicting/retried idempotent requests are not proof that no session exists.
+ let error;try{error=(await response.clone().json())?.error;}catch{return;}
+ if(error?.type==='idempotency_error')return;
+ if(error?.type!=='invalid_request_error'&&error?.type!=='authentication_error'&&error?.type!=='permission_error')return;
+ await rpc(env,'founder_review_release',{p_id:hold.id,p_session:null});
+ // Never release on timeout, conflict, rate limit or 5xx: a session may exist.
 }

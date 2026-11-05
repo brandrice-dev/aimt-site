@@ -79,3 +79,8 @@ Google booking was completed inside the existing AIMT iframe for the test name A
 Cleanup: the temporary Stripe webhook was disabled; all new test checkout sessions were expired; the test calendar appointment was cancelled; Supabase confirmed branch deletion. Only the original production/main branch remains. The quoted database rate was $0.01344/hour plus usage; final provider billing was not independently reconciled, so no exact spend is claimed. The temporary branch is not left running.
 
 Result: functional hosted backend checks and real inline Google booking/cancellation passed. This does not activate the offer or establish a production release. Remaining release work is independent payment/privacy review, production migration and environment/webhook configuration, removal of the draft-only preview, and an authorized production smoke check.
+
+
+## Final release preparation — 2026-11-05
+
+The owner authorized completing the remaining work needed to launch, with escalation only for decisions/approvals. Removed both draft preview sources (functions/founder-review-preview.js and functions/_lib/founder-review/offer-preview.mjs). A review found that 408/409/429 and idempotency/unknown errors were not definitive proof of session-create rejection. Holds now remain occupied for those cases; only a recognized definitive rejection can release an unbound hold. Regression verifies preservation and valid-rejection release. Final broad local validation: 205 tests, 203 passed, two live-only checks skipped.
