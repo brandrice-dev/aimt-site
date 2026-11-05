@@ -77,7 +77,7 @@ const READING_PATH = Object.freeze({
   business: '/education',
 });
 const ATTRIBUTION = '?utm_source=email&utm_medium=email&utm_campaign=202611_readiness_results';
-export const CERTIFICATION_URL = SITE_URL + '/head-spa-certification' + ATTRIBUTION + '&utm_content=email_headspa-certification_readiness-next-step_v1';
+export const CERTIFICATION_URL = SITE_URL + '/readiness-enroll' + ATTRIBUTION + '&utm_content=email_final-decision_readiness-next-step_v1';
 export function educationUrlFor(priority) {
   return SITE_URL + (READING_PATH[priority] || '/education') + ATTRIBUTION + '&utm_content=email_practitioner-education_readiness-resources_v1';
 }
@@ -143,7 +143,7 @@ export function renderReadinessHtml(data) {
     row('<h2 style="margin:0;font-family:' + FONT_HEAD + ';font-size:19px;font-weight:700;line-height:1.35;color:' + COLORS.ink + ';">' + escapeHtml(AREAS[priority]) + '</h2>', {top:9}),
     paragraph(escapeHtml(focus.affects), {top:8,size:14}),
     optedIn
-      ? button({label:'Explore Head Spa Certification',href:escapeHtml(CERTIFICATION_URL),width:300,top:23})
+      ? button({label:'See Your Next Step',href:escapeHtml(CERTIFICATION_URL),width:300,top:23})
       : button({label:'Explore Practitioner Education',href:resourceHref,width:292,top:23}),
     optedIn
       ? paragraph('Or begin with our ' + link(resourceHref,'free practitioner education library') + '.', {top:14,size:13,color:COLORS.muted})
@@ -189,7 +189,7 @@ export function renderReadinessText(data) {
     'THREE PRACTICAL MOVES',
     ...PRIORITY_CONTENT[priority].actions.map((step,index)=>(index+1)+'. '+step),
     '',
-    optedIn ? 'Explore AIMT Head Spa Certification:' : 'Explore free practitioner education:',
+    optedIn ? 'See your next step:' : 'Explore free practitioner education:',
     optedIn ? CERTIFICATION_URL : educationUrlFor(priority),
     ...(optedIn ? ['', 'Free practitioner education:', educationUrlFor(priority)] : []),
     '',
