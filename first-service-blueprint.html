@@ -88,13 +88,13 @@
   <p class="ft-intro">Turn your training into one clear head spa service plan. You decide what the service includes, what it costs, and which checks still need to be resolved. Save a local copy and return to it as you learn.</p>
   <div class="bp-meta ft-no-print"><span>Two-page working plan</span><span>Self-completed · No AI-generated advice</span><span>No client information</span></div>
   <div class="ft-actions ft-no-print">
-    <button class="ft-btn ft-btn-primary" id="bpExport" type="button">Save my plan</button>
+    <button class="ft-btn ft-btn-primary" id="bpExport" type="button">Download editable copy</button>
     <button class="ft-btn" id="bpPrint" type="button">Print / Save PDF</button>
     <label class="ft-btn" for="bpImport">Open saved plan</label>
     <input type="file" id="bpImport" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
     <button class="ft-btn" id="bpClear" type="button">Clear form</button>
   </div>
-  <p class="bp-status ft-no-print" id="bpStatus" role="status" aria-live="polite">Nothing is stored online. Save your plan to keep your work.</p>
+  <p class="bp-status ft-no-print" id="bpStatus" role="status" aria-live="polite">Drafts save in this browser on this device. Nothing is uploaded to AIMT.</p>
   <div class="ft-note ft-no-print">Business notes only. Do not enter client names, photos, medical details or confidential information. A completed Blueprint does not mean AIMT has approved your service, that you are certified, or that local rules allow the service.</div>
   <form id="bpForm" autocomplete="off">
     <section class="bp-page" aria-labelledby="bpPage1Title">
@@ -151,7 +151,7 @@
       <p class="bp-print-page-label">2 / 2</p>
     </section>
   </form>
-  <p class="ft-tiny ft-no-print">Save a JSON copy to edit later, or print/save a PDF for reference. This form doesn't auto-save; closing the page without exporting loses your work.</p>
+  <p class="ft-tiny ft-no-print">Your draft saves in this browser on this device. Download an editable copy for backup or another device, or save a PDF for your review. Clearing browser data removes the saved draft.</p>
 </main>
 <footer class="ft-footer ft-no-print"><div class="ft-shell ft-footer-inner"><span>AIMT · Practitioner planning companion</span><div class="ft-footer-links"><a href="/my-aimt">My AIMT</a><a href="/privacy">Privacy</a></div></div></footer>
 <script type="module">
@@ -159,7 +159,27 @@ import {blueprintPayload,normalizeBlueprint,BLUEPRINT_FIELDS} from '/assets/js/a
 const form=document.getElementById('bpForm'),status=document.getElementById('bpStatus');
 const pick=id=>document.getElementById(id);
 let dirty=false;
-form.addEventListener('input',()=>{dirty=true;status.textContent='Unsaved changes. Save your plan to keep your work.';});
+const draftKey='aimt-first-service-blueprint-draft-v1';
+function saveDraft(){
+  dirty=true;
+  try{
+    localStorage.setItem(draftKey,JSON.stringify(blueprintPayload(currentValues())));
+    dirty=false;status.textContent='Draft saved in this browser on this device. Nothing is uploaded to AIMT.';
+    return true;
+  }catch(_){
+    status.textContent='This browser could not save your draft. Download an editable copy before leaving.';
+    return false;
+  }
+}
+try{
+  const saved=localStorage.getItem(draftKey);
+  if(saved){
+    const data=normalizeBlueprint(JSON.parse(saved));
+    for(const [key,value] of Object.entries(data.fields))if(form.elements[key])form.elements[key].value=value;
+    status.textContent='Your saved draft was restored from this browser. Nothing is uploaded to AIMT.';
+  }
+}catch(_){status.textContent='The saved draft could not be restored. Open a downloaded copy or start a new plan.';}
+form.addEventListener('input',saveDraft);
 function currentValues(){
   const values={};
   for(const key of Object.keys(BLUEPRINT_FIELDS))values[key]=form.elements[key]?.value||'';
@@ -183,13 +203,14 @@ pick('bpImport').addEventListener('change',async event=>{
     for(const [key,value] of Object.entries(data.fields)){
       if(form.elements[key])form.elements[key].value=value;
     }
-    dirty=false;status.textContent='Saved plan opened. You can continue editing.';
+    saveDraft();
   }catch(_){status.textContent='This file could not be opened. Please use a saved AIMT Blueprint JSON file.';}
   event.target.value='';
 });
 pick('bpClear').addEventListener('click',()=>{
-  if(dirty&&!window.confirm('Clear this plan? Unsaved changes will be lost.'))return;
-  form.reset();dirty=false;status.textContent='Your form was cleared.';
+  if(Object.values(currentValues()).some(Boolean)&&!window.confirm('Clear this plan and its saved draft on this device?'))return;
+  try{localStorage.removeItem(draftKey);}catch(_){status.textContent='This browser could not remove the saved draft. Clear browser data to remove it.';return;}
+  form.reset();dirty=false;status.textContent='Your form and saved draft on this device were cleared.';
 });
 pick('bpPrint').addEventListener('click',()=>window.print());
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
