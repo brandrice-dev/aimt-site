@@ -85,7 +85,7 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
 
 /* ── Programs intro ── */
 .programs-intro { background: var(--aimt-color-bg-primary); padding: 5rem 2rem 0; }
-.programs-intro-inner { max-width: 1100px; margin: 0 auto; }
+.programs-intro-inner { max-width: 1036px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
 .programs-intro h2 { font-family: var(--aimt-font-mont); font-size: clamp(1.75rem, 3.2vw, 2.35rem); font-weight: 600; letter-spacing: -0.02em; color: white; margin: 0.85rem 0 0.9rem; max-width: 22ch; }
 .programs-intro p { font-family: var(--aimt-font-sans); font-size: 0.9rem; font-weight: 300; color: rgba(255,255,255,0.5); line-height: 1.75; max-width: 56ch; }
 
@@ -117,7 +117,8 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
 
 /* ── Coming Next ── */
 .upcoming-wrap { background: var(--aimt-color-bg-primary); padding: 4.5rem 2rem 5rem; }
-.upcoming-card { max-width: 1100px; margin: 0 auto; position: relative; overflow: hidden; border-radius: var(--aimt-radius-panel); border: 0.5px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, rgba(163,150,141,0.07), rgba(255,255,255,0.015)); padding: 2.75rem clamp(1.5rem, 4vw, 3rem); }
+.upcoming-grid { max-width: 1036px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.upcoming-card { min-width: 0; margin: 0; position: relative; overflow: hidden; border-radius: var(--aimt-radius-panel); border: 0.5px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, rgba(163,150,141,0.07), rgba(255,255,255,0.015)); padding: 2.75rem clamp(1.5rem, 4vw, 3rem); }
 .upcoming-mark { position: absolute; top: -54px; right: -54px; width: 230px; height: 230px; opacity: 0.055; pointer-events: none; color: #a3968d; }
 .upcoming-eyebrow { font-family: var(--aimt-font-mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(163,150,141,0.65); margin-bottom: 1rem; display: block; }
 .upcoming-card h3 { font-family: var(--aimt-font-mont); font-size: clamp(1.3rem, 2.4vw, 1.7rem); font-weight: 700; letter-spacing: -0.015em; text-transform: uppercase; color: rgba(255,255,255,0.94); margin-bottom: 0.9rem; max-width: 20ch; position: relative; }
@@ -160,6 +161,7 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
    dashboard (ring, remaining/elapsed, cue, Client Communication, top+bottom
    nav) that a cropped `cover` fit was cutting most of off. `contain` on the
    product's own dark surface keeps the whole screenshot legible instead. */
+.gallery-trigger-course img { object-fit: contain; background: #f8f7f4; }
 .gallery-trigger-timer img { object-fit: contain; background: #0f0d0b; }
 .gallery-card-title { font-family: var(--aimt-font-mont); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: #262626; margin: 0.9rem 0 0.4rem; }
 .gallery-card-body { font-family: var(--aimt-font-sans); font-size: 0.76rem; font-weight: 300; color: #7a6e66; line-height: 1.62; }
@@ -180,17 +182,6 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
 .gallery-lightbox-close { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 501; width: 44px; height: 44px; border-radius: 50%; border: 0.5px solid rgba(255,255,255,0.2); background: rgba(20,17,13,0.7); backdrop-filter: blur(8px); color: white; font-size: 1.1rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .gallery-lightbox-close:hover, .gallery-lightbox-close:focus-visible { background: rgba(255,255,255,0.16); }
 
-/* ── Compressed AIMT Model ── */
-.model-wrap { background: rgba(255,255,255,0.03); border-top: 0.5px solid rgba(255,255,255,0.07); border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 4rem 2rem; }
-.model-inner { max-width: 1100px; margin: 0 auto; }
-.model-lead { font-family: var(--aimt-font-serif); font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.68); margin-bottom: 2rem; max-width: 44ch; }
-.model-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-.model-item { padding: 0 2rem 0 0; border-right: 0.5px solid rgba(255,255,255,0.07); }
-.model-item:last-child { border-right: none; padding-right: 0; padding-left: 2rem; }
-.model-item:nth-child(2) { padding-left: 2rem; }
-.model-item-title { font-family: var(--aimt-font-mont); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 0.5rem; }
-.model-item-body { font-family: var(--aimt-font-sans); font-size: 0.78rem; font-weight: 300; color: rgba(255,255,255,0.46); line-height: 1.62; }
-
 /* ── Final CTA ── */
 .close-band { background: var(--aimt-color-bg-primary); padding: 5rem 2rem; text-align: center; }
 .close-inner { max-width: 640px; margin: 0 auto; }
@@ -206,15 +197,12 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
   .flagship-media img { object-position: 50% 22%; }
   .pillars-grid { grid-template-columns: repeat(2, 1fr); }
   .ai-block { grid-template-columns: 1fr; gap: 1.25rem; }
-  .model-grid { grid-template-columns: 1fr; }
-  .model-item { border-right: none; border-bottom: 0.5px solid rgba(255,255,255,0.07); padding: 1.5rem 0 !important; }
-  .model-item:first-child { padding-top: 0 !important; }
-  .model-item:last-child { border-bottom: none; }
 }
 @media (max-width: 720px) {
   .gallery-grid { grid-template-columns: 1fr; gap: 2rem; }
 }
 @media (max-width: 700px) {
+  .programs-intro-inner, .upcoming-grid { grid-template-columns: 1fr; gap: 1rem; }
   .programs-intro, .learning-wrap, .close-band { padding: 2.75rem 1.25rem; }
   .programs-intro { padding-bottom: 0; }
   .flagship-wrap { margin-top: 1.5rem; }
@@ -229,8 +217,6 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
   .ai-block { margin-top: 2rem; padding-top: 2rem; }
   .inside-wrap { padding-top: 2.75rem; padding-bottom: 2.75rem; }
   .inside-head { margin-bottom: 1.75rem; }
-  .model-wrap { padding: 2.5rem 1.25rem; }
-  .model-lead { margin-bottom: 1.5rem; }
   .flagship-meta-row { gap: 1.1rem; }
   .gallery-lightbox { padding: 3.75rem 1.25rem 2.25rem; }
   .gallery-lightbox-inner img { max-height: 36vh; }
@@ -318,9 +304,8 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
 <!-- ══ AIMT PROGRAMS ══ -->
 <div class="programs-intro" id="programs">
   <div class="programs-intro-inner">
-    <span class="aimt-sp-eyebrow">AIMT Programs</span>
-    <h2>What you can study — and what's coming next.</h2>
-    <p>One certification available today, built inside a catalog designed to grow. Every AIMT program will follow the same standard: real curriculum, modern learning, and a credential that means something.</p>
+    <h2>Find your next course.</h2>
+    <p>Start with Head Spa Certification. Explore the training available now and see what we’re developing next.</p>
   </div>
 </div>
 
@@ -367,15 +352,22 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
 </div>
 
 <!-- Coming Next -->
-<div class="upcoming-wrap">
-  <div class="upcoming-card">
-    <svg class="upcoming-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="#aimtOrbitalMark"/></svg>
-    <span class="upcoming-eyebrow">Coming Next · Advanced Training</span>
-    <h3>Advanced Head Spa Training</h3>
-    <p>A future hands-on, advanced training experience for practitioners who want to go further after certification. Format, timing, and requirements are still being finalized — the Head Spa Certification Course remains the place to start.</p>
-    <span class="upcoming-meta">Details to be announced</span>
+<section class="upcoming-wrap" aria-label="Courses in development">
+  <div class="upcoming-grid">
+    <article class="upcoming-card">
+      <span class="upcoming-eyebrow">In development</span>
+      <h3>Hair Loss Specialist</h3>
+      <p>Deeper education in hair loss, scalp assessment, and responsible practitioner support.</p>
+      <span class="upcoming-meta">Not yet open for enrollment</span>
+    </article>
+    <article class="upcoming-card">
+      <span class="upcoming-eyebrow">In development</span>
+      <h3>Advanced Hands-On Head Spa Training</h3>
+      <p>Practical, hands-on training for practitioners ready to develop their head spa skills further.</p>
+      <span class="upcoming-meta">Not yet open for enrollment</span>
+    </article>
   </div>
-</div>
+</section>
 
 <!-- ══ THE AIMT LEARNING SYSTEM ══ -->
 <div class="learning-wrap" id="learning-system">
@@ -436,8 +428,8 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
     </div>
     <div class="gallery-grid">
       <div class="gallery-card">
-        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/course-module-4-editorial.webp" data-alt="A real AIMT course module, Microscopy &amp; Scalp Assessment, open on a laptop" data-title="The Course">
-          <img src="assets/images/marketing/course-module-4-editorial.webp" alt="A real AIMT course module, Microscopy &amp; Scalp Assessment, open on a laptop" width="1448" height="1086" loading="lazy">
+        <button type="button" class="gallery-trigger gallery-trigger-course" data-full="assets/images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp" data-alt="An AIMT Microscopy &amp; Scalp Assessment lesson showing an illustrative magnified scalp example" data-title="The Course">
+          <img src="assets/images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp" alt="An AIMT Microscopy &amp; Scalp Assessment lesson showing an illustrative magnified scalp example" width="1080" height="1080" loading="lazy">
         </button>
         <div class="gallery-card-title">The Course</div>
         <p class="gallery-card-body">Structured instruction is only the beginning.</p>
@@ -448,11 +440,11 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
         </template>
       </div>
       <div class="gallery-card">
-        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/cadence-conversation.webp" data-alt="The Ask Cadence panel open over a dimmed course module, phone-like and centered" data-title="Cadence">
+        <button type="button" class="gallery-trigger" data-full="assets/images/marketing/cadence-conversation.webp" data-alt="The Ask Cadence panel open over a dimmed course module, phone-like and centered" data-title="Your personal AI tutor">
           <img src="assets/images/marketing/cadence-conversation.webp" alt="The Ask Cadence panel open over a dimmed course module, phone-like and centered" width="1600" height="1240" loading="lazy">
         </button>
-        <div class="gallery-card-title">Cadence</div>
-        <p class="gallery-card-body">A learning companion built into the curriculum.</p>
+        <div class="gallery-card-title">Your personal AI tutor</div>
+        <p class="gallery-card-body">Personal guidance, built into every module.</p>
         <template class="gallery-detail-template">
           <p><strong>A learning companion built into the curriculum.</strong> Cadence lives inside the AIMT learning environment rather than sending the student away to search for answers somewhere else.</p>
           <p>Students can ask questions about the module they are studying, work through uncertainty, reconsider an idea, and receive guidance tied to the AIMT curriculum.</p>
@@ -502,28 +494,6 @@ section, .aimt-public-nav-mobile-menu, .gallery-lightbox { scroll-margin-top: ca
           </ul>
           <p>AIMT credentials receive a unique credential ID that can be independently checked through AIMT's verification system.</p>
         </template>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ COMPRESSED AIMT MODEL ══ -->
-<div class="model-wrap" id="model">
-  <div class="model-inner">
-    <span class="aimt-sp-eyebrow">The AIMT Model</span>
-    <p class="model-lead">A modern service deserves modern training.</p>
-    <div class="model-grid">
-      <div class="model-item">
-        <div class="model-item-title">Built from Practice</div>
-        <p class="model-item-body">Programs are designed around real professional decisions, not just the steps of a ritual.</p>
-      </div>
-      <div class="model-item">
-        <div class="model-item-title">Built for Modern Learning</div>
-        <p class="model-item-body">Structured interaction, practitioner tools, and Cadence-supported learning where they genuinely improve understanding.</p>
-      </div>
-      <div class="model-item">
-        <div class="model-item-title">Built Around Competency</div>
-        <p class="model-item-body">Where certification is offered, the credential is tied to demonstrated learning — not attendance.</p>
       </div>
     </div>
   </div>
