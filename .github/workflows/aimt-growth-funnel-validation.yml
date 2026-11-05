@@ -11,6 +11,9 @@ on:
       - 'functions/api/admin/checkout-diagnostics.js'
       - 'head-spa-readiness.html'
       - 'my-aimt.html'
+      - 'readiness-enroll.html'
+      - '_routes.json'
+      - 'tests/readiness-final-decision.test.mjs'
       - 'admin.html'
       - 'assets/js/aimt-readiness-config.js'
       - 'tests/growth-funnel-repair.test.mjs'
@@ -33,6 +36,7 @@ jobs:
         run: |
           env -i PATH="$PATH" node --test \
             tests/readiness-profile-email.test.mjs \
+            tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
             tests/growth-client.test.mjs \
