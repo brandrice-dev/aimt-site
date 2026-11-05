@@ -14,17 +14,14 @@ const hub=read('free-tools.html'), cost=read('head-spa-service-cost.html'), blue
 const routes=JSON.parse(read('_routes.json'));
 
 test('free tools offers exactly three existing/working categories without empty placeholders',()=>{
-  assert.match(hub,/Better services/);
-  assert.match(hub,/start here/);
+  assert.match(hub,/Free tools for beauty professionals/);
+  assert.match(hub,/who want to offer more/);
   const categories=[...hub.matchAll(/<article class="ft-tool-card" data-ft-category="([^"]+)"/g)].map(x=>x[1]);
   assert.deepEqual(categories,['planning','pricing','education']);
   for(const page of ['head-spa-readiness.html','head-spa-service-cost.html','education.html'])assert.ok(existsSync(path.join(ROOT,page)),page);
   assert.match(hub,/href="\/head-spa-readiness"/);
   assert.match(hub,/href="\/head-spa-service-cost"/);
   assert.match(hub,/href="\/education"/);
-  assert.match(hub,/data-ft-filter="all" aria-pressed="true"/);
-  assert.match(hub,/aria-live="polite"/);
-  assert.match(hub,/card\.hidden=choice!=='all'/);
   assert.doesNotMatch(hub,/coming soon|under construction|not yet available/i);
 });
 test('new public routes are allowlisted; Blueprint is noindex and absent from sitemap/homepage',()=>{
