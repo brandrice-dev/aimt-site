@@ -7,6 +7,7 @@ on:
       - 'functions/api/admin/readiness-followups.js'
       - 'scripts/readiness-followups-run.mjs'
       - 'tests/readiness-followups.test.mjs'
+      - 'tests/admin-readiness-leads-layout.test.mjs'
       - 'supabase/migrations/20261104_add_readiness_followup_campaign.sql'
       - '.github/workflows/aimt-readiness-followups.yml'
       - 'functions/_lib/readiness/**'
@@ -42,6 +43,7 @@ jobs:
           env -i PATH="$PATH" node --test \
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
+            tests/admin-readiness-leads-layout.test.mjs \
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
