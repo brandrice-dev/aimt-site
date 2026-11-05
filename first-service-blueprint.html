@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>First-Service Blueprint — AIMT Student Tool</title>
+<meta name="description" content="AIMT First-Service Blueprint: organize one head spa service, its costs, setup checks and next actions. Student working document.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
+<link rel="stylesheet" href="/assets/css/aimt-free-tools.css">
+<style>
+.bp-page{margin:0 0 2rem}
+.bp-meta{display:flex;flex-wrap:wrap;gap:.8rem 1.5rem;align-items:center;color:rgba(255,255,255,.55);font:400 .66rem var(--aimt-font-mono);letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.35rem}
+.bp-page .ft-form-card{margin:0 0 1.2rem}
+.bp-page .ft-form-header{align-items:flex-start}
+.bp-page .ft-form-header h2{font-size:1.2rem}
+.bp-page .ft-form-grid{gap:1.15rem}
+.bp-links{padding:0 1rem;line-height:1.7;font-size:.78rem}
+.bp-links a{color:#554941;text-underline-offset:3px}
+.bp-links li{margin:.3rem 0}
+.bp-links a:hover{color:#262626}
+.bp-small-print{font-size:.77rem;line-height:1.6;color:var(--aimt-color-light-muted)}
+.bp-print-identity{display:none}
+.bp-status{min-height:1.3rem;color:rgba(255,255,255,.68);font-size:.8rem;line-height:1.5}
+@media print{
+  @page{size:letter;margin:10mm 12mm}
+  .bp-page{break-after:page;page-break-after:always;margin:0!important}
+  .bp-page:last-of-type{break-after:auto;page-break-after:auto}
+  .bp-page .ft-form-card{border:0!important;border-radius:0!important;padding:0!important;break-inside:auto!important;margin:0!important}
+  .bp-page .ft-form-header{margin:0 0 7pt}
+  .bp-page .ft-form-header h2{font-size:13pt}
+  .bp-page .ft-form-grid{gap:5pt 9pt}
+  .bp-page .ft-field{gap:2pt}
+  .bp-page .ft-field textarea{height:39pt;min-height:39pt;overflow:hidden;resize:none}
+  .bp-page .ft-field small{display:none}
+  .bp-page .ft-field input,.bp-page .ft-field select{height:22pt}
+  .bp-page .ft-field label{font-size:7.7pt}
+  .bp-page .ft-field.ft-full{grid-column:1/-1}
+  .bp-print-identity{display:block;font:700 8pt var(--aimt-font-mont);letter-spacing:.15em;color:#7a6e66;margin:0 0 8pt;text-transform:uppercase}
+  .ft-content-wrap{padding:0!important}
+  .ft-page-title{font-size:22pt}
+  .ft-intro{font-size:8pt;margin:0 0 11pt}
+  .bp-meta{display:none}
+  .bp-links{font-size:6.9pt;line-height:1.45;margin:0;padding-left:15pt}
+  .bp-links li{margin:1pt 0}
+  .bp-small-print{font-size:7.1pt;line-height:1.4;margin:5pt 0 0}
+  .bp-resources{margin:9pt 0 0!important;padding:0!important;border:0!important;background:transparent!important}
+  .bp-resources h3{font-size:8.5pt;margin:0 0 3pt}
+  #blueprintLeadTitle{display:none}
+  .ft-note{display:none}
+  .bp-page .bp-print-page-label{display:block;color:#7a6e66;font:400 7pt var(--aimt-font-mono);margin-top:6pt;text-align:right}
+}
+@media screen {.bp-page .bp-print-page-label{display:none}}
+</style>
+</head>
+<body class="ft-body ft-blueprint-page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+<nav class="aimt-public-nav aimt-public-nav--sticky">
+  <a href="/" class="aimt-public-nav-mark" aria-label="AIMT home"><svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg></a>
+  <a href="/" class="aimt-public-nav-wordmark"><span class="aimt-public-nav-name">AIMT</span></a>
+  <div class="aimt-public-nav-right">
+    <a class="aimt-public-nav-link" href="/my-aimt">My AIMT</a>
+    <a class="aimt-public-nav-cta" href="/head-spa-certification">Head Spa Certification →</a>
+  </div>
+</nav>
+<main class="ft-shell ft-content-wrap">
+  <div class="ft-breadcrumb ft-no-print"><a href="/my-aimt">My AIMT</a> / Practitioner Resources / First-Service Blueprint</div>
+  <span class="ft-eyebrow" id="blueprintLeadTitle">AIMT / Practitioner Planning Companion</span>
+  <h1 class="ft-page-title">First-Service Blueprint.</h1>
+  <p class="ft-intro">Turn your training into one clear head spa service plan. You decide what the service includes, what it costs, and which checks still need to be resolved. Save a local copy and return to it as you learn.</p>
+  <div class="bp-meta ft-no-print"><span>Two-page working plan</span><span>Self-completed · No AI-generated advice</span><span>No client information</span></div>
+  <div class="ft-actions ft-no-print">
+    <button class="ft-btn ft-btn-primary" id="bpExport" type="button">Save my plan</button>
+    <button class="ft-btn" id="bpPrint" type="button">Print / Save PDF</button>
+    <label class="ft-btn" for="bpImport">Open saved plan</label>
+    <input type="file" id="bpImport" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+    <button class="ft-btn" id="bpClear" type="button">Clear form</button>
+  </div>
+  <p class="bp-status ft-no-print" id="bpStatus" role="status" aria-live="polite">Nothing is stored online. Save your plan to keep your work.</p>
+  <div class="ft-note ft-no-print">Business notes only. Do not enter client names, photos, medical details or confidential information. A completed Blueprint does not mean AIMT has approved your service, that you are certified, or that local rules allow the service.</div>
+  <form id="bpForm" autocomplete="off">
+    <section class="bp-page" aria-labelledby="bpPage1Title">
+      <div class="bp-print-identity">AIMT · First-Service Blueprint</div>
+      <div class="ft-form-card">
+        <div class="ft-form-header">
+          <h2 id="bpPage1Title">01 / Define one service.</h2>
+          <span>Service &amp; Value</span>
+        </div>
+        <div class="ft-form-grid"><div class="ft-field"><label for="practice">Practice or service name</label><input id="practice" name="practice" type="text" maxlength="260" placeholder="Your answer"><small>Your working title.</small></div>
+<div class="ft-field"><label for="audience">Who will this service serve?</label><input id="audience" name="audience" type="text" maxlength="260" placeholder="Your answer"><small>Define the experience, not a medical diagnosis.</small></div>
+<div class="ft-field ft-full"><label for="value">What will clients value?</label><textarea id="value" name="value" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>A clear benefit, expressed in client language.</small></div>
+<div class="ft-field"><label for="format">Choose one service format</label><select id="format" name="format"><option value="">Choose a format</option><option value="Core 60">Core / 60-minute</option><option value="Extended 90">Extended / 90-minute</option><option value="Custom">Custom (verify flow with course)</option></select><small>Use the existing Core or Extended maps as starting references.</small></div>
+<div class="ft-field"><label for="serviceTime">Total appointment time</label><input id="serviceTime" name="serviceTime" type="text" maxlength="260" placeholder="Your answer"><small>Include consultation, setup, client service, reset and admin.</small></div>
+<div class="ft-field ft-full"><label for="consultation">What should the consultation clarify?</label><textarea id="consultation" name="consultation" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>What information informs your cosmetic service plan?</small></div>
+<div class="ft-field"><label for="cost">Estimated cost per service</label><input id="cost" name="cost" type="text" maxlength="260" placeholder="Your answer"><small>Use your own numbers and the Module 9 cost guidance.</small></div>
+<div class="ft-field"><label for="price">Proposed menu price</label><input id="price" name="price" type="text" maxlength="260" placeholder="Your answer"><small>Review your costs and what you deliver, not a generic industry average.</small></div>
+<div class="ft-field ft-full"><label for="difference">What will make this service distinct?</label><textarea id="difference" name="difference" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>Why would a client choose this experience?</small></div></div>
+        <div class="bp-resources" style="margin-top:1.35rem;border-top:1px solid rgba(0,0,0,.1);padding-top:.85rem">
+          <h3 style="font:600 .85rem var(--aimt-font-mont);margin:0 0 .35rem">Use what you've learned.</h3>
+          <ul class="bp-links">
+            <li><a href="/assets/images/course/module-02/module-02-head-spa-intake-service-plan-fillable.pdf">Module 2 · Head Spa Intake + Service Plan</a></li>
+            <li><a href="/assets/images/course/module-08/module-08-core-format-service-map.png">Module 8 · Core Service Map</a> / <a href="/assets/images/course/module-08/module-08-extended-format-service-map.png">Extended Map</a></li>
+            <li>Module 9 · Pricing and service costs in your course; <a href="/assets/images/course/module-09/AIMT-Head-Spa-Enhancement-Strategy-Guide.pdf">Enhancement Strategy Guide</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="bp-print-page-label">1 / 2</p>
+    </section>
+    <section class="bp-page" aria-labelledby="bpPage2Title">
+      <div class="bp-print-identity">AIMT · First-Service Blueprint</div>
+      <div class="ft-form-card">
+        <div class="ft-form-header">
+          <h2 id="bpPage2Title">02 / Prepare and check.</h2>
+          <span>Open Decisions</span>
+        </div>
+        <div class="ft-form-grid"><div class="ft-field ft-full"><label for="equipment">Equipment and product gaps</label><textarea id="equipment" name="equipment" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>List only what must be checked or obtained.</small></div>
+<div class="ft-field ft-full"><label for="licensing">License and scope checks</label><textarea id="licensing" name="licensing" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>Record the source, date and unresolved requirements for your jurisdiction.</small></div>
+<div class="ft-field ft-full"><label for="supplier">Manufacturer or supplier checks</label><textarea id="supplier" name="supplier" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>Note directions, limitations and dates verified.</small></div>
+<div class="ft-field ft-full"><label for="operations">Scheduling, sanitation and reset plan</label><textarea id="operations" name="operations" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>What happens between clients? Link this back to your current documented system.</small></div>
+<div class="ft-field ft-full"><label for="rehearsal">What did a full rehearsal show?</label><textarea id="rehearsal" name="rehearsal" rows="2" maxlength="260" placeholder="Your plan, in a sentence"></textarea><small>Service pacing, client communication and what you would change.</small></div>
+<div class="ft-field"><label for="nextStep">One next action</label><input id="nextStep" name="nextStep" type="text" maxlength="260" placeholder="Your answer"><small>A specific business decision you can complete next.</small></div>
+<div class="ft-field"><label for="reviewDate">Review date</label><input id="reviewDate" name="reviewDate" type="date" maxlength="260" placeholder="Your answer"><small>Choose when you will revisit unfinished checks.</small></div></div>
+        <div class="bp-resources" style="margin-top:1.3rem;border-top:1px solid rgba(0,0,0,.1);padding-top:.8rem">
+          <h3 style="font:600 .85rem var(--aimt-font-mont);margin:0 0 .35rem">Relevant AIMT references</h3>
+          <ul class="bp-links">
+            <li>Module 7 setup lessons, plus <a href="/aimt-service-timer">AIMT Service Timer</a> for practice pacing.</li>
+            <li><a href="/assets/images/course/module-10/module-10-between-client-sanitation-reset-checklist-fillable.pdf">Module 10 · Between-Client Reset Checklist</a></li>
+            <li><a href="/assets/images/course/module-11/module-11-aimt-ai-practice-toolkit-fillable.pdf">Module 11 · AI Practice Toolkit</a> for drafting and verification (not a substitute for professional judgment).</li>
+          </ul>
+        </div>
+        <p class="bp-small-print">You remain responsible for confirming license limits, local requirements, product instructions and any unresolved questions. The Blueprint does not replace professional supervision, demonstrate competency or grant a credential.</p>
+      </div>
+      <p class="bp-print-page-label">2 / 2</p>
+    </section>
+  </form>
+  <p class="ft-tiny ft-no-print">Save a JSON copy to edit later, or print/save a PDF for reference. This form doesn't auto-save; closing the page without exporting loses your work.</p>
+</main>
+<footer class="ft-footer ft-no-print"><div class="ft-shell ft-footer-inner"><span>AIMT · Practitioner planning companion</span><div class="ft-footer-links"><a href="/my-aimt">My AIMT</a><a href="/privacy">Privacy</a></div></div></footer>
+<script type="module">
+import {blueprintPayload,normalizeBlueprint,BLUEPRINT_FIELDS} from '/assets/js/aimt-first-service-blueprint-core.mjs';
+const form=document.getElementById('bpForm'),status=document.getElementById('bpStatus');
+const pick=id=>document.getElementById(id);
+let dirty=false;
+form.addEventListener('input',()=>{dirty=true;status.textContent='Unsaved changes. Save your plan to keep your work.';});
+function currentValues(){
+  const values={};
+  for(const key of Object.keys(BLUEPRINT_FIELDS))values[key]=form.elements[key]?.value||'';
+  return values;
+}
+pick('bpExport').addEventListener('click',()=>{
+  try{
+    const data=blueprintPayload(currentValues());
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='AIMT-First-Service-Blueprint.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    dirty=false;status.textContent='A local copy of your plan was prepared for download.';
+  }catch(_){status.textContent='Unable to export this plan. Review your entries.';}
+});
+pick('bpImport').addEventListener('change',async event=>{
+  const file=event.target.files?.[0];if(!file)return;
+  try{
+    if(file.size>65536)throw new Error('Too large');
+    const data=normalizeBlueprint(JSON.parse(await file.text()));
+    for(const [key,value] of Object.entries(data.fields)){
+      if(form.elements[key])form.elements[key].value=value;
+    }
+    dirty=false;status.textContent='Saved plan opened. You can continue editing.';
+  }catch(_){status.textContent='This file could not be opened. Please use a saved AIMT Blueprint JSON file.';}
+  event.target.value='';
+});
+pick('bpClear').addEventListener('click',()=>{
+  if(dirty&&!window.confirm('Clear this plan? Unsaved changes will be lost.'))return;
+  form.reset();dirty=false;status.textContent='Your form was cleared.';
+});
+pick('bpPrint').addEventListener('click',()=>window.print());
+window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
+</script>
+</body>
+</html>
