@@ -1,6 +1,7 @@
-import {resolveAdmin} from '../../_lib/admin/auth.mjs';
+import {purgeReviewMaterials} from '../../_lib/founder-review/materials.mjs';
+import {resolveAdmin,writeAdminAudit} from '../../_lib/admin/auth.mjs';
 import {supabaseRest} from '../../_lib/certification/auth.mjs';
-import {reply,enabled,listMaterials,objectPath,BUCKET,storageHeaders} from '../../_lib/founder-review/access.mjs';
+import {reply,enabled,listMaterials,objectPath,BUCKET,storageHeaders,readJsonBody} from '../../_lib/founder-review/access.mjs';
 export async function onRequestGet({env,request}){
   try{
     if(!enabled(env))return reply({error:'Founder reviews are not available yet.'},404);
@@ -28,29 +29,37 @@ export async function onRequestPost({env,request}){
  try{
   if(!enabled(env))return reply({error:'Founder reviews are not available yet.'},404);
   const actor=await resolveAdmin(env,request,['owner'],{bootstrap:false});if(actor.errorResponse)return reply({error:'Owner access required.'},actor.errorResponse.status);
-  const text=await request.text();if(text.length>4096)return reply({error:'Request too large.'},413);
-  const data=JSON.parse(text);if(!/^[a-f0-9-]{36}$/i.test(data.id||''))return reply({error:'Invalid review.'},400);
+  let data;try{data=await readJsonBody(request,4096);}catch(error){return reply({error:error.message==='size'?'Request too large.':'Invalid request.'},error.message==='size'?413:400);}
+  if(!/^[a-f0-9-]{36}$/i.test(data?.id||''))return reply({error:'Invalid review.'},400);
   const result=await supabaseRest(env,`founder_review_reservations?${new URLSearchParams({id:'eq.'+data.id,select:'id,status,appointment_at,user_id'})}`);
   const row=result.body?.[0];if(!result.ok)throw Error();if(!row)return reply({error:'Review not found.'},404);
   let updates,expected;
-  if(data.action==='confirm'){
-   if(row.status!=='reserved')return reply({error:'Only a reserved review can be confirmed.'},409);
+  if(data.action==='confirm'||data.action==='reschedule'){
+   expected=data.action==='confirm'?'reserved':'scheduled';
+   if(row.status!==expected)return reply({error:'Refresh the review before changing its booking.'},409);
+   if(!row.user_id)return reply({error:'The student must set up their AIMT account first.'},409);
+   const graduated=await supabaseRest(env,`completions?${new URLSearchParams({select:'credential_id,completed_at,revoked',user_id:'eq.'+row.user_id,course_slug:'eq.headspa-mastery',revoked:'eq.false'})}`);
+   if(!graduated.ok)return reply({error:'Certification could not be checked.'},503);
+   if(!graduated.body?.some(c=>c.revoked===false&&/^AIMT-[A-Z]{2,6}-\d{4}-[A-Z2-9]{4,10}$/.test(c.credential_id)&&c.completed_at&&Date.parse(c.completed_at)<=Date.now()))return reply({error:'The student must complete certification first.'},409);
    const {validReviewTime}=await import('../../_lib/founder-review/schedule.mjs');
    if(!validReviewTime(data.appointmentAt)||typeof data.googleEventId!=='string'||!data.googleEventId.trim()||data.googleEventId.length>512)return reply({error:'Verify the Google booking and choose a Monday or Tuesday time between 9 AM and 2 PM Eastern.'},400);
-   updates={status:'scheduled',appointment_at:new Date(data.appointmentAt).toISOString(),appointment_ends_at:new Date(Date.parse(data.appointmentAt)+45*60000).toISOString(),google_event_id:data.googleEventId.trim()};expected='reserved';
+   updates={status:'scheduled',appointment_at:new Date(data.appointmentAt).toISOString(),appointment_ends_at:new Date(Date.parse(data.appointmentAt)+45*60000).toISOString(),google_event_id:data.googleEventId.trim()};
+  }else if(data.action==='clear_booking'){
+   if(row.status!=='scheduled')return reply({error:'No scheduled booking to clear.'},409);
+   updates={status:'reserved',appointment_at:null,appointment_ends_at:null,google_event_id:null};expected='scheduled';
+  }else if(data.action==='cancel_refunded_bonus'){
+   if(!['reserved','scheduled'].includes(row.status)||data.refundVerified!==true)return reply({error:'Verify the refund before cancelling its bonus.'},409);
+   updates={status:'cancelled',materials_delete_after:new Date(Date.now()+30*86400000).toISOString()};expected=row.status;
   }else if(data.action==='complete'){
    if(row.status!=='scheduled')return reply({error:'Only a scheduled review can be completed.'},409);
    updates={status:'completed',completed_at:new Date().toISOString(),materials_delete_after:new Date(Date.now()+30*86400000).toISOString()};expected='scheduled';
   }else if(data.action==='purge'){
-   if(row.status!=='completed')return reply({error:'Complete the review before deleting its materials.'},409);
-   const paths=['blueprint','supporting-1','supporting-2'].map(s=>objectPath(row,s));
-   const deleted=await fetch(`${env.SUPABASE_URL}/storage/v1/object/${BUCKET}`,{method:'DELETE',headers:storageHeaders(env,{'Content-Type':'application/json'}),body:JSON.stringify({prefixes:paths})});
-   if(!deleted.ok)throw Error();
-   const cleared=await supabaseRest(env,`founder_review_reservations?${new URLSearchParams({id:'eq.'+row.id,status:'eq.completed'})}`,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({questions:'',materials_delete_after:null})});
-   if(!cleared.ok||!cleared.body?.length)throw Error();return reply({saved:true});
+   if(!['completed','cancelled'].includes(row.status))return reply({error:'Complete or cancel the review before deleting its materials.'},409);
+   await purgeReviewMaterials(env,row);await writeAdminAudit(env,actor,'founder_review_materials_purged',{targetUserId:row.user_id,details:{reservationId:row.id}});return reply({saved:true});
   }else return reply({error:'Unknown action.'},400);
   const saved=await supabaseRest(env,`founder_review_reservations?${new URLSearchParams({id:'eq.'+row.id,status:'eq.'+expected})}`,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(updates)});
   if(!saved.ok||!saved.body?.length)return reply({error:'Could not update review. Check for a conflicting booking or refresh.'},409);
+  await writeAdminAudit(env,actor,'founder_review_'+data.action,{targetUserId:row.user_id,details:{reservationId:row.id}});
   return reply({saved:true});
  }catch{return reply({error:'Review could not be updated.'},503);}
 }

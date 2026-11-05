@@ -17,18 +17,24 @@ export async function loadFounderReviews({root,token}){
    async function update(body,button){
     button.disabled=true;try{await api({method:'POST',body:JSON.stringify({id:review.id,...body})});await loadFounderReviews({root,token});}catch(error){notice.textContent=error.message;button.disabled=false;}
    }
-   if(review.status==='reserved'){
+   if(review.status==='reserved'||review.status==='scheduled'){
     const form=el('form'),timeLabel=el('label','Verified appointment — '+Intl.DateTimeFormat().resolvedOptions().timeZone),time=el('input');time.type='datetime-local';time.required=true;time.id='review-time-'+review.id;timeLabel.htmlFor=time.id;
     const refLabel=el('label','Google booking reference (event link or ID)'),ref=el('input');ref.type='text';ref.maxLength=512;ref.required=true;ref.id='review-ref-'+review.id;refLabel.htmlFor=ref.id;
-    const submit=el('button','Confirm verified booking');submit.type='submit';submit.className='btn';
+    const submit=el('button',review.status==='scheduled'?'Update verified booking':'Confirm verified booking');submit.type='submit';submit.className='btn';
     form.append(timeLabel,time,refLabel,ref,submit);card.append(form);
-    form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;update({action:'confirm',appointmentAt:new Date(time.value).toISOString(),googleEventId:ref.value},submit);});
+    form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;update({action:review.status==='scheduled'?'reschedule':'confirm',appointmentAt:new Date(time.value).toISOString(),googleEventId:ref.value},submit);});
    }
    if(review.status==='scheduled'){
+    const clear=el('button','Clear cancelled booking');clear.type='button';clear.className='btn';card.append(clear);
+    clear.addEventListener('click',()=>{if(confirm('Confirm the Google appointment was cancelled. The student keeps their unused review and can choose another time.'))update({action:'clear_booking'},clear);});
     const done=el('button','Mark review complete');done.type='button';done.className='btn';card.append(done);
     done.addEventListener('click',()=>update({action:'complete'},done));
    }
-   if(review.status==='completed'){
+   if(['reserved','scheduled'].includes(review.status)){
+    const cancel=el('button','Cancel refunded bonus');cancel.type='button';cancel.className='btn';card.append(cancel);
+    cancel.addEventListener('click',()=>{if(confirm('Only continue after verifying the purchase was refunded. This cancels its bonus, keeps the allocation occupied, and does not issue a refund.'))update({action:'cancel_refunded_bonus',refundVerified:true},cancel);});
+   }
+   if(review.status==='completed'||review.status==='cancelled'){
     if(review.materials_delete_after)card.append(el('p','Remove materials by '+new Date(review.materials_delete_after).toLocaleDateString()));
     const purge=el('button','Delete review materials');purge.type='button';purge.className='btn';card.append(purge);
     purge.addEventListener('click',()=>{if(confirm('Permanently delete this completed review’s uploaded PDFs and questions?'))update({action:'purge'},purge);});

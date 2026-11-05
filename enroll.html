@@ -512,6 +512,13 @@ a { color: inherit; }
     return stripeJsPromise;
   }
 
+  var checkoutRequestKey;
+  try{checkoutRequestKey=sessionStorage.getItem('aimt-checkout-request-key');}catch(_){}
+  if(!/^[a-f0-9-]{36}$/i.test(checkoutRequestKey||'')){
+    checkoutRequestKey=crypto.randomUUID();
+    try{sessionStorage.setItem('aimt-checkout-request-key',checkoutRequestKey);}catch(_){}
+  }
+
   function requestSession() {
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS) : null;
@@ -519,7 +526,7 @@ a { color: inherit; }
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       /* growth: first-party attribution only (functions/_lib/growth) — no effect on price or payment. */
-      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded', growth: window.AIMTGrowth ? window.AIMTGrowth.checkoutPayload() : null }),
+      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded', checkoutRequestKey: checkoutRequestKey, growth: window.AIMTGrowth ? window.AIMTGrowth.checkoutPayload() : null }),
       signal: controller ? controller.signal : undefined
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {

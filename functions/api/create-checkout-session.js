@@ -1,4 +1,4 @@
-import {holdReview,applyHold,bindHold,releaseRejectedHold} from '../_lib/founder-review/purchase.mjs';
+import {holdReview,applyHold,bindHold,releaseRejectedHold,releaseExpiredReview} from '../_lib/founder-review/purchase.mjs';
 import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
 
 const SUPABASE_URL_FALLBACK = 'https://epcnkncyxqgscrejinwr.supabase.co';
@@ -46,12 +46,13 @@ function embeddedPublishableKey(env) {
   return { key: publishableKey, reason: null };
 }
 
-async function createStripeSession(stripeSecretKey, params, stripeVersion) {
+async function createStripeSession(stripeSecretKey, params, stripeVersion, idempotencyKey) {
   const headers = {
     Authorization: `Bearer ${stripeSecretKey}`,
     'Content-Type': 'application/x-www-form-urlencoded',
   };
   if (stripeVersion) headers['Stripe-Version'] = stripeVersion;
+  if(idempotencyKey)headers['Idempotency-Key']=idempotencyKey;
   const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',
     headers,
@@ -71,13 +72,13 @@ async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin, hol
   };
   applyHold(params,hold,activeOffer);
   let result = await createStripeSession(
-    stripeSecretKey, { ...params, ...EMBEDDED_BRANDING }, EMBEDDED_STRIPE_API_VERSION
+    stripeSecretKey, { ...params, ...EMBEDDED_BRANDING }, EMBEDDED_STRIPE_API_VERSION, hold?`founder-review/${hold.id}/embedded-branded`:undefined
   );
   /* Branding is presentation only — if Stripe rejects it, retry once
      without it rather than blocking enrollment. */
   const rejectedParam = String(result.session?.error?.param || '');
   if (!result.response.ok && rejectedParam.startsWith('branding_settings')) {
-    result = await createStripeSession(stripeSecretKey, params, EMBEDDED_STRIPE_API_VERSION);
+    result = await createStripeSession(stripeSecretKey, params, EMBEDDED_STRIPE_API_VERSION,hold?`founder-review/${hold.id}/embedded-plain`:undefined);
   }
   return result;
 }
@@ -184,8 +185,27 @@ export async function onRequestPost(context) {
   const requestBody = await request.clone().json().catch(() => ({}));
   const wantsEmbedded = !!requestBody && requestBody.ui === 'embedded';
   let founderHold=null;
-  try{founderHold=await holdReview(env);}catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
+  try{founderHold=await holdReview(env,requestBody?.checkoutRequestKey);}catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
 
+
+  // The request key is a per-tab random capability. Only its SHA-256 hash is stored.
+  // Retry the same held session instead of consuming all five bonuses on reload.
+  if(founderHold?.checkout_session_id){
+    try{
+      const response=await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(founderHold.checkout_session_id)}`,{headers:{Authorization:`Bearer ${stripeSecretKey}`}});
+      const session=await response.json();if(!response.ok||session.metadata?.founder_review_hold!==founderHold.id)throw Error();
+      if(session.status==='expired'){
+        await releaseExpiredReview(env,session);founderHold=await holdReview(env,requestBody?.checkoutRequestKey);
+      }else if(session.status==='complete'){
+        return Response.json({url:`${origin}/success.html?session_id=${encodeURIComponent(session.id)}`,fallback:'hosted'},{headers:{'Cache-Control':'no-store'}});
+      }else if(session.status==='open'){
+        const key=embeddedPublishableKey(env).key;
+        if(wantsEmbedded&&session.client_secret&&key)return Response.json({clientSecret:session.client_secret,publishableKey:key,founderReview:true},{headers:{'Cache-Control':'no-store'}});
+        if(session.url)return Response.json({url:session.url,fallback:'hosted'},{headers:{'Cache-Control':'no-store'}});
+        throw Error();
+      }else throw Error();
+    }catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
+  }
 
   if (wantsEmbedded) {
     const { key: publishableKey, reason } = embeddedPublishableKey(env);
@@ -246,6 +266,7 @@ export async function onRequestPost(context) {
       headers: {
         Authorization: `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...(founderHold?{'Idempotency-Key':`founder-review/${founderHold.id}/hosted`}:{}),
       },
       body,
     });

@@ -40,14 +40,19 @@ export async function listMaterials(env,reservation){
   const files=await result.json();
   return FILE_SLOTS.filter(slot=>files.some(f=>f.name===`${slot}.pdf`));
 }
-export async function readBoundedPdf(request){
+export async function readBoundedBytes(request,maxBytes){
   const length=request.headers.get('Content-Length');
-  if(length&&Number(length)>MAX_BYTES)throw Error('size');
-  if(request.headers.get('Content-Type')?.split(';')[0]!=='application/pdf')throw Error('type');
-  if(!request.body)throw Error('type');
+  if(length&&Number(length)>maxBytes)throw Error('size');
+  if(!request.body)return new Uint8Array();
   const reader=request.body.getReader(),chunks=[];let total=0;
-  while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;if(total>MAX_BYTES){await reader.cancel();throw Error('size');}chunks.push(value);}
+  while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;if(total>maxBytes){await reader.cancel();throw Error('size');}chunks.push(value);}
   const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
-  if(total<10||new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw Error('type');
+  return bytes;
+}
+export async function readJsonBody(request,maxBytes=8192){return JSON.parse(new TextDecoder().decode(await readBoundedBytes(request,maxBytes)));}
+export async function readBoundedPdf(request){
+  if(request.headers.get('Content-Type')?.split(';')[0]!=='application/pdf')throw Error('type');
+  const bytes=await readBoundedBytes(request,MAX_BYTES);
+  if(bytes.length<10||new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw Error('type');
   return bytes;
 }

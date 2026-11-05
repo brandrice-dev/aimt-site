@@ -33,6 +33,8 @@ test('real PostgreSQL: inactive campaign, five-slot cap, replay, ownership, rele
   await db.query('insert into course_entitlements values($1,$2,$3,null)',['cs_test_two','headspa-mastery','second@example.com']);
   await db.query('select founder_review_paid($1,$2,$3)',[ids[2],'cs_test_two','second@example.com']);
   await assert.rejects(db.query("update founder_review_reservations set status='scheduled',appointment_at=$2,appointment_ends_at=$3 where id=$1",[ids[2],'2026-11-09T14:15:00Z','2026-11-09T15:00:00Z']));
+  await db.query("update founder_review_reservations set status='cancelled' where id=$1",[ids[2]]);
+  assert.equal((await db.query('select * from founder_review_hold($1)',[ids[1]])).rows.length,0);
   await db.exec('set role authenticated');
   await assert.rejects(db.query('select * from founder_review_reservations'));
   await assert.rejects(db.query('select * from founder_review_hold($1)',[ids[1]]));

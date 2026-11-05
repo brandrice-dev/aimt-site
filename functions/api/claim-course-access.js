@@ -177,7 +177,7 @@ export async function onRequestPost(context) {
     const authenticatedEmail = normalizeEmail(user.email);
 
     const session = await fetchCheckoutSession(sessionId, stripeSecretKey);
-    const paid = session.payment_status === 'paid' || session.status === 'complete';
+    const paid = session.payment_status === 'paid' || (session.payment_status === 'no_payment_required' && session.status === 'complete');
     if (!paid) {
       await logAimtEvent('api_claim_course_access_failure', {
         supabaseUrl,

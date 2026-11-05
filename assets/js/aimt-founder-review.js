@@ -59,7 +59,7 @@ export async function mountFounderReview({container,getToken}){
     try{
       const result=await api('/booking',{method:'POST'});if(!result.response.ok)throw Error(result.data.error||'Booking unavailable.');
       const url=new URL(result.data.url);
-      if(url.origin!=='https://calendar.google.com'||url.pathname!=='/calendar/appointments/schedules/AcZssZ1tNgOWBWQFYBczptBaUliONhU_l0xwWb97qNJ4gffg4B-iCCZZXo8a8RSlcdlZ-ea9pcr6s-zN'||url.search!=='?gv=true')throw Error('Booking unavailable.');
+      if(url.origin!=='https://calendar.google.com'||!/^\/calendar\/appointments\/schedules\/[A-Za-z0-9_-]+$/.test(url.pathname)||url.search!=='?gv=true')throw Error('Booking unavailable.');
       panel.innerHTML=bookingLayoutMarkup(url.href);panel.hidden=false;uploadStatus.textContent=result.data.note;
       panel.scrollIntoView({behavior:'smooth',block:'start'});
     }catch(error){uploadStatus.textContent=error.message;}finally{booking.disabled=false;}

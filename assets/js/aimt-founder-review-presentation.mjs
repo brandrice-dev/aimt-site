@@ -1,5 +1,7 @@
 // Shared presentation for the real booking panel and its draft layout preview.
 export function bookingLayoutMarkup(iframeSrc){
+ const url=new URL(iframeSrc);
+ if(url.origin!=='https://calendar.google.com'||!/^\/calendar\/appointments\/schedules\/[A-Za-z0-9_-]+$/.test(url.pathname)||url.search!=='?gv=true')throw Error('Invalid booking calendar');
  const safeSrc=String(iframeSrc).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  return `<div class="fr-booking"><div class="fr-layout">
   <section class="fr-copy" aria-labelledby="fr-booking-heading">

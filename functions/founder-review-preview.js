@@ -1,7 +1,9 @@
+import {offerPreviewHtml} from './_lib/founder-review/offer-preview.mjs';
 import {BOOKING_URL} from './api/founder-review/booking.js';
 import {bookingLayoutMarkup} from '../assets/js/aimt-founder-review-presentation.mjs';
 export function onRequestGet({request}){
  if(new URL(request.url).hostname!=='feat-founder-review-offer.aimt-site.pages.dev')return new Response('Not found',{status:404});
+ if(new URL(request.url).searchParams.get('view')==='offer')return new Response(offerPreviewHtml(),{headers:{'Content-Type':'text/html;charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex,nofollow'}});
  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Your private review | AIMT</title><link rel="icon" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/aimt-design-system.css"><link rel="stylesheet" href="/assets/css/aimt-founder-review.css"></head><body class="fr-preview-body"><header class="fr-preview-header"><a class="fr-preview-brand" href="/my-aimt"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
   <g id="aimtOrbitalMark">
     <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>

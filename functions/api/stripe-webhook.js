@@ -220,7 +220,7 @@ export async function onRequestPost(context) {
   const session = event.data && event.data.object;
   if (!session || !session.id) return new Response('No session', { status: 400 });
 
-  const paid = session.payment_status === 'paid' || session.status === 'complete';
+  const paid = session.payment_status === 'paid' || (session.payment_status === 'no_payment_required' && session.status === 'complete');
   if (!paid) {
     await logEvent(env, 'webhook_session_unpaid', {
       message: `session_${session.id}_status_${session.payment_status}`
