@@ -71,6 +71,15 @@ async function stillConsented(env,leadId) {
   });
   return rows.length===1&&rows[0].marketing_consent===true&&!rows[0].marketing_unsubscribed_at;
 }
+async function stillUnpaid(env,email) {
+  // Recheck immediately before the provider call as well as in the atomic
+  // reservation; purchasing can happen while a scheduled run is underway.
+  const rows=await readRows(env,'course_entitlements',{
+    select:'checkout_session_id',course_slug:'eq.'+COURSE_SLUG,
+    purchaser_email:'eq.'+email,limit:'1'
+  });
+  return rows.length===0;
+}
 async function updateDelivery(env,id,status,extras={}) {
   const q=new URLSearchParams({id:'eq.'+id,status:'eq.reserved'});
   const r=await supabaseRest(env,'readiness_followup_sends?'+q,{
@@ -90,7 +99,7 @@ async function sendOne(env,cfg,{lead,stage}) {
   const claim=await reserve(env,lead,stage);
   if(!claim)return {state:'skipped'};
   try{
-    if(!await stillConsented(env,lead.id)){
+    if(!await stillConsented(env,lead.id) || !await stillUnpaid(env,lead.email)){
       await updateDelivery(env,claim,'suppressed',{failure_category:'consent_revoked'});
       return {state:'suppressed'};
     }
