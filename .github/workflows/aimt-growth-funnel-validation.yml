@@ -4,6 +4,11 @@ on:
     branches: [main]
     paths:
       - 'functions/api/readiness/**'
+      - 'functions/api/admin/readiness-followups.js'
+      - 'scripts/readiness-followups-run.mjs'
+      - 'tests/readiness-followups.test.mjs'
+      - 'supabase/migrations/20261104_add_readiness_followup_campaign.sql'
+      - '.github/workflows/aimt-readiness-followups.yml'
       - 'functions/_lib/readiness/**'
       - 'functions/_lib/email/aimt-email-shell.mjs'
       - 'tests/readiness-profile-email.test.mjs'
@@ -36,6 +41,7 @@ jobs:
         run: |
           env -i PATH="$PATH" node --test \
             tests/readiness-profile-email.test.mjs \
+            tests/readiness-followups.test.mjs \
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
