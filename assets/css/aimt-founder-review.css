@@ -22,7 +22,7 @@
 .fr-preview-body{margin:0;background:#faf8f5;font-family:var(--aimt-font-sans,'Outfit',sans-serif);color:#262626}
 .fr-preview-header{max-width:1280px;margin:0 auto;height:76px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .fr-preview-brand{display:flex;align-items:center;gap:12px;font:600 12px/1 var(--aimt-font-mont,'Montserrat',sans-serif);letter-spacing:.25em;color:#262626;text-decoration:none}
-.fr-preview-brand img{width:30px;height:30px}
+.fr-preview-brand svg{width:30px;height:30px}
 .fr-preview-status{font-size:12px;color:#8a7b70}
 .fr-preview-main{max-width:1280px;margin:24px auto 64px;padding:0 32px}
 .fr-preview-note{font-size:12px;line-height:1.6;color:#8a7b70;margin:24px 4px 0;text-align:center}
