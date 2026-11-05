@@ -413,6 +413,8 @@
     <span class="section-label" id="toolsLabel"><span class="section-num">03</span>Practitioner Tools</span>
     <div class="tool-list" id="toolsArea"></div>
 
+    <div id="founderReviewArea" hidden style="margin:1.5rem 0"></div>
+
     <span class="section-label" id="resourcesLabel"><span class="section-num">04</span>Resource Library</span>
     <div id="resourcesCard"></div>
 
@@ -807,6 +809,10 @@ async function init() {
   renderContinueLearning(slugs, progressBySlug, certBySlug);
   renderCertification(slugs, progressBySlug, certBySlug);
   loadResources(slugs);
+  import('/assets/js/aimt-founder-review.js').then(({mountFounderReview})=>mountFounderReview({
+    container:document.getElementById('founderReviewArea'),
+    getToken:async()=>{const {data}=await supabaseClient.auth.getSession();return data?.session?.access_token;}
+  })).catch(()=>{});
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';

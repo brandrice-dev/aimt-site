@@ -4,6 +4,12 @@ on:
     branches: [main]
     paths:
       - 'functions/api/readiness/**'
+      - 'functions/api/founder-review/**'
+      - 'functions/api/admin/founder-reviews.js'
+      - 'functions/_lib/founder-review/**'
+      - 'assets/js/aimt-founder-review.js'
+      - 'tests/founder-review.test.mjs'
+      - 'tests/blueprint-autosave.test.mjs'
       - 'functions/api/admin/readiness-followups.js'
       - 'scripts/readiness-followups-run.mjs'
       - 'tests/readiness-followups.test.mjs'
@@ -53,6 +59,8 @@ jobs:
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
             tests/aimt-free-tools.test.mjs \
+            tests/founder-review.test.mjs \
+            tests/blueprint-autosave.test.mjs \
             tests/admin-readiness-leads-layout.test.mjs \
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \

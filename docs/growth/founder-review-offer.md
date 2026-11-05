@@ -13,7 +13,11 @@ Owner-approved initial release: five 45-minute private founder reviews. Monday a
 
 ## Current delivery boundary
 
-This draft implements device-only Blueprint autosave, restore and clear. It does not activate or advertise the bonus, alter checkout, collect uploads, issue reservations, book calendar events, or send confirmations.
+This draft implements device-only Blueprint autosave, restore and clear, plus a disabled dashboard card and authenticated review/material/question APIs. Material access requires a server-held reservation and actual non-revoked certification. Owner-only API returns 60-second download links. Proposed schema lives in founder-review-schema.sql; it is not a generated or applied migration. No live schema, storage bucket, or environment flag has been changed.
+
+The initial upload boundary is one Blueprint plus two optional PDFs, each at most 5 MiB (75 MiB across five recipients). Fixed object paths replace prior versions instead of accumulating submissions. This is not a malware scanner; files are for download by the owner, never embedded as public HTML.
+
+This draft does not activate or advertise the bonus, alter checkout, issue purchase reservations, book calendar events, or send confirmations. FOUNDER_REVIEW_ENABLED defaults off. Reservation allocation, account linking, provider booking verification/one-use enforcement, retention cleanup, and owner management UI remain unfinished. Retention will be visible before any upload is allowed in production. No claim of end-to-end verification.
 
 The existing Google Calendar connection is an assistant tool, not a deployable website scheduling credential. There is no existing booking integration in the repository. A supported scheduling destination or runtime calendar integration must be resolved before implementing the booking path. Do not insert an unprotected public booking URL and treat it as bonus authorization.
 
