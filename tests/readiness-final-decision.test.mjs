@@ -74,7 +74,7 @@ test('Readiness mock dashboard points to new decision page with tracking',()=>{
 test('Results email and admin manual follow-up both point to decision page',()=>{
   assert.equal(new URL(CERTIFICATION_URL).pathname,'/readiness-enroll');
   assert.match(ADMIN,/https:\/\/aimtrichology\.com\/readiness-enroll\?utm_source=email/);
-  assert.match(ADMIN,/consent\?'<a href="/); // manual outreach only with opt-in
+  assert.match(ADMIN,/const contact=consent\s*\?\s*'<a class="readiness-followup-action"/); // manual outreach only with opt-in
   const sample={ first_name:'Sample',score:50,band:'Developing System',priority_pillar:'service',strongest_pillar:'assessment',pillar_scores:{scope:3,assessment:3,service:3,communication:3,business:3},marketing_consent:true };
   assert.match(renderReadinessHtml(sample),/readiness-enroll/);
   assert.doesNotMatch(renderReadinessHtml({...sample,marketing_consent:false}),/readiness-enroll/);
