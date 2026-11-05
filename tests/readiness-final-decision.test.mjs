@@ -45,6 +45,28 @@ test('Unlisted static page is excluded from indexing and is absent from public n
     [...HTML.matchAll(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/gi)].map(a=>a[1]).join('\n')
   ));
 });
+test('Readiness page uses the canonical AIMT mark, typography, navigation and colors',()=>{
+  const canonical=read('about.html').match(/<symbol id="aimtOrbitalMark" viewBox="0 0 44 44">[\s\S]*?<\/symbol>/)?.[0];
+  const actual=HTML.match(/<symbol id="aimtOrbitalMark" viewBox="0 0 44 44">[\s\S]*?<\/symbol>/)?.[0];
+  assert.ok(canonical,'canonical mark exists on the About page');
+  assert.equal(actual,canonical,'orbital geometry must match the existing institute logo exactly');
+  assert.match(HTML,/class="aimt-public-nav aimt-public-nav--sticky"/);
+  assert.match(HTML,/class="aimt-public-nav-name">AIMT<\/span>/);
+  assert.match(HTML,/href="#aimtOrbitalMark"/);
+  assert.match(HTML,/href="\/assets\/css\/aimt-design-system\.css"/);
+  assert.match(HTML,/href="\/assets\/css\/aimt-public-nav\.css"/);
+  const homepage=read('index.html');
+  const canonicalFonts=homepage.match(/<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Montserrat:[^"]+" rel="stylesheet">/)?.[0];
+  assert.ok(canonicalFonts,'canonical institute fonts on homepage');
+  assert.ok(HTML.includes(canonicalFonts),'must load identical fonts and available weights');
+  assert.match(HTML,/font-family:\s*var\(--aimt-font-mont\)/);
+  assert.match(HTML,/font-family:\s*var\(--aimt-font-sans\)/);
+  assert.match(HTML,/background:\s*var\(--aimt-color-bg-primary\)/);
+  assert.match(HTML,/background:\s*var\(--aimt-color-light-bg\)/);
+  assert.match(HTML,/border-radius:\s*var\(--aimt-btn-pill-radius\)/);
+  assert.doesNotMatch(HTML, /#[a-f\d]{3,8}\b/gi,'page must not invent brand hex colors');
+  assert.doesNotMatch(HTML,/font:[^;]+Montserrat/i,'avoid hard-coded font shorthand overriding tokens');
+});
 test('Readiness mock dashboard points to new decision page with tracking',()=>{
   assert.match(MOCK,/href="\/readiness-enroll\?utm_source=aimt&amp;utm_medium=readiness_preview/);
   assert.match(MOCK,/See Your Next Step →/);
