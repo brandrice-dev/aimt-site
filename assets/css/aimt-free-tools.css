@@ -107,3 +107,31 @@
   .ft-results p{font-size:7pt;margin:6pt 0 0}
   .ft-note{color:#514a45!important;background:#faf8f5!important;margin:7pt 0;padding:7pt;font-size:7pt}
 }
+
+/* Editorial hub: category panels lead directly to three working resources. */
+.ft-hub .ft-hero{padding:5.5rem 0 3.5rem;border-bottom:0}
+.ft-hub .ft-hero h1{max-width:1050px;font-size:clamp(2.25rem,4.8vw,4.1rem);line-height:1.1;text-transform:none}
+.ft-hub .ft-hero h1 span{color:#b4a49a}
+.ft-hub .ft-lede{max-width:650px}
+.ft-hero-note{font-size:.73rem;letter-spacing:.025em;color:rgba(255,255,255,.48);margin:1.4rem 0 0}
+.ft-hub .ft-section{padding-top:0}
+.ft-hub .ft-section-head{padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.12);margin-bottom:1.8rem}
+.ft-hub .ft-section-head h2{font-size:1rem}
+.ft-hub .ft-grid{gap:1.2rem}
+.ft-hub .ft-tool-card{position:relative;min-height:470px;padding:2rem;background:linear-gradient(155deg,rgba(163,150,141,.12),rgba(255,255,255,.025));border:1px solid rgba(163,150,141,.24);border-radius:12px}
+.ft-hub .ft-tool-card[data-ft-category=pricing]{background:#eee8e0;color:#292522;border-color:#eee8e0}
+.ft-panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.2rem;color:#c5b3a6}
+.ft-panel-icon{width:42px;height:42px}
+.ft-panel-number{font:400 .7rem var(--aimt-font-mono);letter-spacing:.12em;opacity:.65}
+.ft-hub .ft-tool-card h3{font:500 .72rem var(--aimt-font-sans);letter-spacing:.11em;text-transform:uppercase;color:#c5b3a6;margin-bottom:1rem}
+.ft-hub .ft-tool-card .ft-panel-payoff{font:500 clamp(1.65rem,2.2vw,2rem)/1.15 var(--aimt-font-mont);letter-spacing:-.04em;color:#faf8f5;margin-bottom:1.1rem}
+.ft-hub .ft-tool-card p{font-size:.9rem;line-height:1.65}
+.ft-hub .ft-tool-card .ft-panel-subline{font-size:.75rem;color:rgba(255,255,255,.48);margin-bottom:2rem}
+.ft-hub .ft-card-link{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.17);padding-top:1.2rem;min-height:44px;text-transform:none;font:500 .88rem var(--aimt-font-sans);letter-spacing:0}
+.ft-hub [data-ft-category=pricing] .ft-panel-top,.ft-hub [data-ft-category=pricing] h3{color:#755944}
+.ft-hub [data-ft-category=pricing] .ft-panel-payoff,.ft-hub [data-ft-category=pricing] .ft-card-link{color:#292522}
+.ft-hub [data-ft-category=pricing] p,.ft-hub [data-ft-category=pricing] .ft-panel-subline{color:#655b53}
+.ft-hub [data-ft-category=pricing] .ft-card-link{border-color:rgba(41,37,34,.2)}
+.ft-field input::placeholder,.ft-field textarea::placeholder{color:#736b63;opacity:1}
+@media(max-width:1050px) and (min-width:681px){.ft-hub .ft-grid{grid-template-columns:1fr}.ft-hub .ft-tool-card{min-height:340px}.ft-hub .ft-panel-top{margin-bottom:1.3rem}}
+@media(max-width:680px){.ft-hub .ft-hero{padding:3.2rem 0 2.5rem}.ft-hub .ft-tool-card{padding:1.65rem;min-height:420px}.ft-hub .ft-section-head p{font-size:.8rem}.ft-panel-top{margin-bottom:1.8rem}}
