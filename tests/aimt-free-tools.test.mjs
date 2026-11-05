@@ -37,7 +37,11 @@ test('new public routes are allowlisted; Blueprint is noindex and absent from si
   assert.match(sitemap,/https:\/\/aimtrichology\.com\/free-tools/);
   assert.match(sitemap,/https:\/\/aimtrichology\.com\/head-spa-service-cost/);
   assert.doesNotMatch(sitemap,/first-service-blueprint/);
-  assert.doesNotMatch(read('index.html'),/href="[^"]*\/free-tools/);
+  const home=read('index.html');
+  assert.match(home, /class="aimt-public-nav-link">Free Tools<\/a>/);
+  assert.match(home, /class="aimt-public-nav-mobile-link">Free Tools<\/a>/);
+  assert.match(home, /href="\/free-tools" class="aimt-cta aimt-cta-primary-light">Explore Free Tools/);
+  assert.ok(home.indexOf('id="free-tools-teaser"') < home.indexOf('id="cta"'));
   assert.doesNotMatch(read('assets/js/aimt-course-resources.js'),/client names/);
 });
 test('model uses all minutes, only actual cost inputs, no invented margin or wages',()=>{
