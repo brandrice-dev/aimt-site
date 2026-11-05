@@ -33,11 +33,11 @@ test('AIMT results use the canonical branded email shell, with live clickable de
   assert.match(html,/37\s*<span[^>]*>\s*\/ 100/);
   assert.match(html,/Foundation Building/);
   assert.match(html,/Client Communication &amp; Experience/);
-  assert.match(html,/Explore Head Spa Certification/);
-  assert.match(html,/href="https:\/\/aimtrichology\.com\/head-spa-certification\?utm_source=email&amp;utm_medium=email/);
+  assert.match(html,/See Your Next Step/);
+  assert.match(html,/href="https:\/\/aimtrichology\.com\/readiness-enroll\?utm_source=email&amp;utm_medium=email/);
   assert.match(html,/free practitioner education library/);
   assert.match(html,/https:\/\/aimtrichology\.com\/education\?utm_source=email/);
-  assert.match(plain,/Explore AIMT Head Spa Certification:\nhttps:\/\/aimtrichology\.com\/head-spa-certification\?utm_source=email/);
+  assert.match(plain,/See your next step:\nhttps:\/\/aimtrichology\.com\/readiness-enroll\?utm_source=email/);
   assert.match(plain,/Free practitioner education:/);
   assert.match(html,/One of your strongest areas/); // score ties are handled honestly
   assert.match(plain,/Professional Foundation & Scope: 3\/6/);
@@ -52,7 +52,7 @@ test('Non-marketing opt-in receives educational results, not a course pitch',()=
   assert.match(plain,/education\/safety/);
   assert.doesNotMatch(html,/head-spa-certification/);
   assert.doesNotMatch(plain,/head-spa-certification/);
-  assert.doesNotMatch(html,/Explore Head Spa Certification/);
+  assert.doesNotMatch(html,/readiness-enroll/);
 });
 test('Every priority routes to a real canonical education section',()=>{
   const expected={
@@ -102,5 +102,5 @@ test('All five area scores and the 100-point score are included, no misleading p
   assert.match(html,/reply to this email/i);
   assert.match(html,/privacy/);
   assert.match(html,/This score is a professional self-assessment/);
-  assert.ok(CERTIFICATION_URL.startsWith('https://aimtrichology.com/head-spa-certification?'));
+  assert.ok(CERTIFICATION_URL.startsWith('https://aimtrichology.com/readiness-enroll?'));
 });
