@@ -63,7 +63,7 @@ test('Marketing consent, postal address and unsubscribe link are mandatory',asyn
   const base={stage:1,lead,unsubscribeUrl:url,postalAddress:ADDRESS};
   assert.throws(()=>renderReadinessFollowup({...base,lead:{...lead,marketing_consent:false}}),/Marketing permission/);
   assert.throws(()=>renderReadinessFollowup({...base,lead:{...lead,marketing_unsubscribed_at:new Date().toISOString()}}),/Marketing permission/);
-  assert.throws(()=>renderReadinessFollowup({...base,postalAddress:''}),/postal address/);
+  assert.throws(()=>renderReadinessFollowup({...base,postalAddress:''}),/mailing address/);
   assert.throws(()=>renderReadinessFollowup({...base,unsubscribeUrl:'https://attacker.example/stop'}),/unsubscribe link/);
 });
 test('Signed unsubscribe token validates one lead, rejects tampering',async()=>{
