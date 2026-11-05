@@ -1,3 +1,4 @@
+import {bookingLayoutMarkup} from '/assets/js/aimt-founder-review-presentation.mjs';
 // Optional dashboard card. Server owns eligibility; no saved local eligibility.
 export async function mountFounderReview({container,getToken}){
   container.hidden=true;container.replaceChildren();
@@ -59,12 +60,7 @@ export async function mountFounderReview({container,getToken}){
       const result=await api('/booking',{method:'POST'});if(!result.response.ok)throw Error(result.data.error||'Booking unavailable.');
       const url=new URL(result.data.url);
       if(url.origin!=='https://calendar.google.com'||url.pathname!=='/calendar/appointments/schedules/AcZssZ1tNgOWBWQFYBczptBaUliONhU_l0xwWb97qNJ4gffg4B-iCCZZXo8a8RSlcdlZ-ea9pcr6s-zN'||url.search!=='?gv=true')throw Error('Booking unavailable.');
-      const frame=el('iframe');frame.src=url.href;frame.title='Choose a time for your founder review';
-      frame.style.cssText='width:100%;height:780px;border:0;border-radius:12px;background:white';
-      frame.referrerPolicy='strict-origin-when-cross-origin';
-      // Navigation stays inside this panel; do not grant popup/top-navigation.
-      frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms');
-      panel.replaceChildren(frame);panel.hidden=false;uploadStatus.textContent=result.data.note;
+      panel.innerHTML=bookingLayoutMarkup(url.href);panel.hidden=false;uploadStatus.textContent=result.data.note;
       panel.scrollIntoView({behavior:'smooth',block:'start'});
     }catch(error){uploadStatus.textContent=error.message;}finally{booking.disabled=false;}
   });
