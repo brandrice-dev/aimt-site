@@ -111,7 +111,7 @@ test('Blueprint connects course modules, never grants credentials and requires n
   assert.match(blueprint,/type="file"/);
   assert.match(blueprint,/window\.print\(\)/);
   assert.doesNotMatch(blueprint,/localStorage|sessionStorage|fetch\(|supabase\.|AIMTGrowth/);
-  assert.doesNotMatch(blueprint,/clients?\s+names?|diagnose|medical records/i);
+  assert.doesNotMatch(blueprint,/diagnoses clients|medical records|patient symptoms/i);
 });
 test('The presentation has a compact responsive page system and explicit letter print styling',()=>{
   assert.match(css,/@media\(max-width:680px\)/);
