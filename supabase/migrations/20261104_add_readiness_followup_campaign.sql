@@ -22,7 +22,7 @@ create table if not exists public.readiness_followup_config (
       and char_length(trim(postal_address)) between 12 and 400
       and max_daily_emails >= 1
       and max_total_emails >= 1
-      and total_reserved < max_total_emails
+      and total_reserved <= max_total_emails
     )
   )
 );
