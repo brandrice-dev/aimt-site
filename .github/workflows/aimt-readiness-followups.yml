@@ -35,6 +35,6 @@ jobs:
           node-version: 20
       - name: Run bounded signed campaign check
         env:
-          SUPABASE_SERVICE_ROLE_KEY: \${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          FOLLOWUP_MODE: \${{ github.event_name == 'schedule' && 'send' || 'dry' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FOLLOWUP_MODE: ${{ github.event_name == 'schedule' && 'send' || 'dry' }}
         run: node scripts/readiness-followups-run.mjs
