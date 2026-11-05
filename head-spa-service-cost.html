@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Head Spa Service Cost Worksheet | AIMT</title>
+<meta name="description" content="Use your own appointment time, product costs and overhead to understand the estimated cost of a head spa service. Free AIMT worksheet.">
+<link rel="canonical" href="https://aimtrichology.com/head-spa-service-cost">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
+<link rel="stylesheet" href="/assets/css/aimt-free-tools.css">
+<style>
+#costSummary[hidden]{display:none}
+.ft-cost-print-caption{display:none}
+.ft-cost-page .ft-form-card{margin-bottom:1rem}
+.ft-cost-page .ft-note{margin:1rem 0}
+@media print{
+  .ft-cost-page .ft-content-wrap{padding:0}
+  .ft-cost-page .ft-cost-print-caption{display:block;color:#6b635d;font-size:8pt;margin:0 0 7pt}
+  .ft-cost-page .ft-form-card{padding:8pt 10pt!important;margin:6pt 0}
+  .ft-cost-page .ft-form-grid{gap:5pt 9pt}
+  .ft-cost-page .ft-form-header{margin-bottom:6pt;padding-bottom:5pt}
+  .ft-cost-page .ft-field input{height:20pt}
+  .ft-cost-page .ft-field small{display:none}
+  .ft-cost-page .ft-results{padding:7pt;margin:6pt 0}
+  .ft-cost-page .ft-note{font-size:7pt;margin:5pt 0}
+  .ft-cost-page .ft-worksheet-footer{display:block;color:#615951;font-size:7pt}
+}
+</style>
+</head>
+<body class="ft-body ft-cost-page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+<nav class="aimt-public-nav aimt-public-nav--sticky" aria-label="AIMT navigation">
+<a href="/" class="aimt-public-nav-mark" aria-label="AIMT home"><svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg></a>
+<a href="/" class="aimt-public-nav-wordmark"><span class="aimt-public-nav-name">AIMT</span></a>
+<div class="aimt-public-nav-right">
+ <a href="/free-tools" class="aimt-public-nav-link">Free Tools</a>
+ <a href="/education" class="aimt-public-nav-link">Education Library</a>
+ <a href="/head-spa-certification" class="aimt-public-nav-cta">Certification →</a>
+</div>
+</nav>
+<main class="ft-shell ft-content-wrap">
+  <div class="ft-breadcrumb ft-no-print"><a href="/free-tools">Free Tools</a> / Pricing &amp; Business</div>
+  <span class="ft-eyebrow">AIMT / Free Practitioner Worksheet</span>
+  <h1 class="ft-page-title">Know what your service costs.</h1>
+  <p class="ft-intro">Your appointment costs more than the time your client spends in the chair. Enter your real numbers to see the estimated cost of one head spa service—before you decide what to charge.</p>
+  <p class="ft-cost-print-caption">Head Spa Service Cost Worksheet · Complete using your own actual assumptions · aimtrichology.com/free-tools</p>
+  <p class="ft-tiny">Faint numbers are examples, not prefilled answers or recommended prices. Enter your own minutes and dollar amounts.</p>
+  <form id="costWorksheet" novalidate>
+    <section class="ft-form-card" aria-labelledby="timeheading">
+      <div class="ft-form-header"><h2 id="timeheading">01 / The time behind the service</h2><span>Minutes</span></div>
+      <div class="ft-form-grid"><div class="ft-field"><label for="consultMinutes">Consultation</label><input id="consultMinutes" name="consultMinutes" type="number" inputmode="decimal" min="0" max="1440" step="1" placeholder="15" required><small>Client discussion and cosmetic scalp observation.</small></div>
+<div class="ft-field"><label for="serviceMinutes">Hands-on service</label><input id="serviceMinutes" name="serviceMinutes" type="number" inputmode="decimal" min="1" max="1440" step="1" placeholder="60" required><small>Actual appointment service time.</small></div>
+<div class="ft-field"><label for="prepMinutes">Preparation</label><input id="prepMinutes" name="prepMinutes" type="number" inputmode="decimal" min="0" max="1440" step="1" placeholder="10" required><small>Setup before the client arrives.</small></div>
+<div class="ft-field"><label for="resetMinutes">Reset</label><input id="resetMinutes" name="resetMinutes" type="number" inputmode="decimal" min="0" max="1440" step="1" placeholder="15" required><small>Room turnover after the client.</small></div>
+<div class="ft-field"><label for="adminMinutes">Checkout and notes</label><input id="adminMinutes" name="adminMinutes" type="number" inputmode="decimal" min="0" max="1440" step="1" placeholder="5" required><small>Other time spent finishing the appointment.</small></div></div>
+    </section>
+    <section class="ft-form-card" aria-labelledby="costheading">
+      <div class="ft-form-header"><h2 id="costheading">02 / Your costs</h2><span>USD</span></div>
+      <div class="ft-form-grid"><div class="ft-field"><label for="products">Products used</label><input id="products" name="products" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="12.50" required><small>The actual product amount used for this service.</small></div>
+<div class="ft-field"><label for="supplies">Other consumables</label><input id="supplies" name="supplies" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="3.00" required><small>Disposable items and supplies (do not repeat product costs).</small></div>
+<div class="ft-field"><label for="overhead">Allocated overhead</label><input id="overhead" name="overhead" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="10.00" required><small>Your chosen share of rent, utilities, equipment or other fixed costs.</small></div>
+<div class="ft-field"><label for="laborHourly">Labor value per hour</label><input id="laborHourly" name="laborHourly" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="30.00" required><small>A rate you choose to value all time spent on this appointment.</small></div>
+<div class="ft-field"><label for="menuPrice">Menu price (optional)</label><input id="menuPrice" name="menuPrice" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="145.00"><small>Optional. See the difference between price and modeled cost.</small></div></div>
+      <p class="ft-form-copy">Count each cost once. For overhead and labor value, use your own business assumptions rather than a generic industry estimate.</p>
+    </section>
+    <div class="ft-actions ft-no-print">
+      <button class="ft-btn ft-btn-primary" type="submit">Calculate my service cost</button>
+      <button class="ft-btn" type="button" id="costPrint">Print / Save as PDF</button>
+      <button class="ft-btn" type="reset">Clear worksheet</button>
+    </div>
+    <p id="costError" class="ft-tiny" role="alert" aria-live="assertive"></p>
+  </form>
+  <section class="ft-results" id="costSummary" aria-labelledby="resulttitle">
+    <div class="ft-results-eyebrow">Your cost model</div>
+    <h2 id="resulttitle" style="font:600 1.08rem var(--aimt-font-mont);margin:.6rem 0 0">Based on your numbers</h2>
+    <div class="ft-results-grid">
+      <div><span class="ft-results-label">Total time</span><strong id="resultTime">—</strong></div>
+      <div><span class="ft-results-label">Modeled cost</span><strong id="resultCost">—</strong></div>
+      <div><span class="ft-results-label">Price minus modeled cost</span><strong id="resultDifference">—</strong></div>
+    </div>
+    <p class="ft-result-status" id="resultStatus">Complete the form and calculate to see your result.</p>
+    <p>Calculation: product + consumables + allocated overhead + (full appointment hours × chosen hourly labor value). Any price difference is a model using your entries, not take-home income or a forecast of demand.</p>
+  </section>
+  <p class="ft-note">This worksheet supports business planning only. Results depend entirely on your inputs; they do not establish a recommended price, guarantee profit, or replace financial or tax advice. Your entries stay in this browser page and are not submitted to AIMT.</p>
+  <section class="ft-support ft-no-print" style="padding:1rem 0">
+    <div class="ft-support-inner">
+      <div><h2>Now that you know your numbers, what’s next?</h2><p>See where your head spa practice is strongest—and what still needs attention.</p></div>
+      <a class="ft-pill-link" href="/head-spa-readiness?utm_source=free_tools&amp;utm_medium=worksheet&amp;utm_campaign=service_cost_v1">Get My Head Spa Readiness Score →</a>
+    </div>
+  </section>
+  <p class="ft-worksheet-footer" style="font-size:.68rem;color:rgba(255,255,255,.4)">AIMT · American Institute of Modern Trichology · Free professional education</p>
+</main>
+<footer class="ft-footer ft-no-print"><div class="ft-shell ft-footer-inner"><span>AIMT · Tools for professional learning.</span><div class="ft-footer-links"><a href="/free-tools">All Free Tools</a><a href="/education">Education Library</a><a href="/privacy">Privacy</a></div></div></footer>
+<script type="module">
+import {calculateServiceCost,SERVICE_COST_FIELDS} from '/assets/js/aimt-service-cost-core.mjs';
+const form=document.getElementById('costWorksheet');
+const error=document.getElementById('costError'),summary=document.getElementById('costSummary');
+const fmt=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});
+let validResult=false;
+function clearResults(message='Complete the form and calculate to see your result.'){
+  validResult=false;
+  for(const id of ['resultTime','resultCost','resultDifference'])document.getElementById(id).textContent='—';
+  document.getElementById('resultStatus').textContent=message;
+}
+function sync(){
+  const input={};
+  for(const key of Object.keys(SERVICE_COST_FIELDS))input[key]=form.elements[key].value;
+  return calculateServiceCost(input);
+}
+form.addEventListener('input',()=>{
+  for(const el of form.querySelectorAll('input'))el.removeAttribute('aria-invalid');
+  error.textContent='';
+  if(validResult)clearResults('Numbers changed. Recalculate to update your result.');
+});
+form.addEventListener('reset',()=>{queueMicrotask(()=>{error.textContent='';clearResults()})});
+form.addEventListener('submit',event=>{
+  event.preventDefault();
+  const result=sync();
+  if(!result.ok){
+    for(const key of [...result.missing,...result.invalid]){
+      const el=form.elements[key];if(el)el.setAttribute('aria-invalid','true');
+    }
+    error.textContent='Review the highlighted fields. Enter your own values (zero is allowed for a genuine zero), and add a hands-on service time greater than zero.';
+    form.elements[result.invalid[0]||result.missing[0]]?.focus();
+    clearResults('No calculation until the required fields are complete.');
+    return;
+  }
+  error.textContent='';
+  validResult=true;
+  document.getElementById('resultTime').textContent=result.minutes+' min';
+  document.getElementById('resultCost').textContent=fmt.format(result.modeledCost);
+  document.getElementById('resultDifference').textContent=result.modeledDifference===null?'Not entered':fmt.format(result.modeledDifference);
+  document.getElementById('resultStatus').textContent=result.enteredPrice===null
+    ? 'A menu price is optional. Add one above and recalculate to compare.'
+    : 'This is a modeled difference under your assumptions—not take-home earnings.';
+});
+document.getElementById('costPrint').addEventListener('click',()=>window.print());
+</script>
+</body></html>

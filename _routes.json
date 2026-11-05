@@ -67,6 +67,15 @@
     "/assets/*",
     "/favicon.svg",
     "/robots.txt",
-    "/sitemap.xml"
+    "/sitemap.xml",
+    "/free-tools",
+    "/free-tools.html",
+    "/free-tools/",
+    "/head-spa-service-cost",
+    "/head-spa-service-cost.html",
+    "/head-spa-service-cost/",
+    "/first-service-blueprint",
+    "/first-service-blueprint.html",
+    "/first-service-blueprint/"
   ]
 }

@@ -19,6 +19,14 @@
 window.AIMT_COURSE_RESOURCES = {
   'headspa-mastery': [
     {
+      module: 9,
+      moduleLabel: 'Practice Planning — Modules 2, 7–10',
+      title: 'First-Service Blueprint',
+      description: 'Build one practical head spa service plan: client value, costs, setup checks and next actions. Save it locally and keep refining it as you learn.',
+      type: 'tool',
+      href: 'first-service-blueprint.html'
+    },
+    {
       module: 2,
       moduleLabel: 'Module 2 — Welcoming Your Client',
       title: 'Head Spa Intake + Service Plan',

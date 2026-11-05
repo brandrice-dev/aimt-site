@@ -7,6 +7,15 @@ on:
       - 'functions/api/admin/readiness-followups.js'
       - 'scripts/readiness-followups-run.mjs'
       - 'tests/readiness-followups.test.mjs'
+      - 'tests/aimt-free-tools.test.mjs'
+      - 'free-tools.html'
+      - 'head-spa-service-cost.html'
+      - 'first-service-blueprint.html'
+      - 'assets/css/aimt-free-tools.css'
+      - 'assets/js/aimt-service-cost-core.mjs'
+      - 'assets/js/aimt-first-service-blueprint-core.mjs'
+      - 'assets/js/aimt-course-resources.js'
+      - 'sitemap.xml'
       - 'tests/admin-readiness-leads-layout.test.mjs'
       - 'supabase/migrations/20261104_add_readiness_followup_campaign.sql'
       - '.github/workflows/aimt-readiness-followups.yml'
@@ -43,6 +52,7 @@ jobs:
           env -i PATH="$PATH" node --test \
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
+            tests/aimt-free-tools.test.mjs \
             tests/admin-readiness-leads-layout.test.mjs \
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
