@@ -9,22 +9,208 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
 <style>
-:root{--bg:#1a1814;--paper:#faf8f5;--ink:#262626;--taupe:#a3968d;--sub:#c5bdb7;--hair:rgba(255,255,255,.18);--wine:#4a1f27}
-*{box-sizing:border-box}html{color-scheme:dark}body{margin:0;background:var(--bg);color:var(--paper);font-family:'Outfit',Arial,sans-serif;-webkit-font-smoothing:antialiased}a:focus-visible{outline:2px solid white;outline-offset:4px}
-.wrap{width:min(1080px,calc(100% - 48px));margin:0 auto}.head{height:66px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--hair)}.wordmark{display:flex;align-items:center;gap:12px;font:700 14px 'Montserrat',sans-serif;letter-spacing:.23em;color:var(--paper);text-decoration:none}.wordmark svg{width:24px;height:24px;color:#cdc5bf}.head-note{font:500 11px 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#a99d95}
-main{padding:75px 0 42px}.eyebrow{margin:0 0 18px;color:var(--taupe);font:600 11px 'Montserrat',sans-serif;letter-spacing:.16em;text-transform:uppercase}h1{font:800 clamp(44px,5.7vw,77px)/1.03 'Montserrat',sans-serif;letter-spacing:-.057em;max-width:950px;text-transform:uppercase;margin:0}h1 em{font-style:normal;color:#bdada2;display:block}.lead{max-width:790px;margin:25px 0 0;font-size:clamp(18px,2.05vw,23px);line-height:1.5;color:#e6ded8;font-weight:400}.lead strong{font-weight:600;color:#fff}
-.promise{display:flex;flex-wrap:wrap;gap:11px 31px;margin:32px 0 0;padding:22px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}.promise span{font:500 15px 'Outfit',sans-serif;color:#eee7e0}.promise span:before{content:'✓';margin-right:10px;color:#cdb8a9;font-weight:700}
-.action{margin:34px 0 0;background:var(--paper);color:var(--ink);display:flex;align-items:center;gap:36px;justify-content:space-between;padding:26px 30px;border-left:4px solid var(--wine)}.action-copy small{display:block;font:600 10px 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.12em;color:#7a6e66;margin:0 0 7px}.action-copy b{font:700 22px 'Montserrat',sans-serif;letter-spacing:-.035em}.action-copy p{margin:7px 0 0;font-size:14px;color:#6e635c}.cta{display:inline-flex;align-items:center;justify-content:space-between;gap:14px;padding:21px 26px;background:var(--ink);color:white;font:700 13px 'Montserrat',sans-serif;min-width:276px;text-transform:uppercase;letter-spacing:.015em;white-space:nowrap;text-decoration:none}.cta:hover{background:var(--wine)}.cta .arrow{font-size:21px;font-weight:400;line-height:1}
-.end{padding:0 0 30px;display:flex;justify-content:space-between;gap:24px;font-size:12px;line-height:1.6;color:#a89b90}.end p{margin:0;max-width:690px}.end a{color:#d5c9c0;text-underline-offset:3px}.links{display:flex;gap:18px;flex-wrap:wrap;flex-shrink:0}
-@media(max-width:750px){.wrap{width:min(100% - 36px,650px)}.head{height:56px}.head-note{font-size:9px}main{padding:42px 0 26px}.eyebrow{font-size:9px;margin-bottom:14px}h1{font-size:clamp(36px,9.2vw,55px);line-height:1.08;letter-spacing:-.055em}.lead{font-size:17px;margin-top:19px}.promise{gap:12px;margin-top:25px;padding:18px 0}.promise span{font-size:14px;width:100%}.action{margin-top:25px;padding:23px 21px;display:block}.action-copy b{font-size:19px}.action-copy p{font-size:13px}.cta{width:100%;min-width:0;margin-top:20px;font-size:12px;padding:20px}.end{display:block;font-size:11px}.links{margin-top:13px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+/* AIMT Readiness decision page.
+   Uses the institute's canonical type, colors, navigation and spacing.
+   Branding authorities: assets/css/aimt-design-system.css,
+   assets/css/aimt-public-nav.css and assets/brand/aimt-orbital-mark.svg.
+   Page-only styles control composition, not new brand tokens. */
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--aimt-color-bg-primary);
+  color: var(--aimt-color-text-primary);
+  font-family: var(--aimt-font-sans);
+  font-weight: var(--aimt-weight-light);
+  -webkit-font-smoothing: antialiased;
+}
+a:focus-visible { outline: 2px solid var(--aimt-color-accent); outline-offset: 3px; }
+.enroll-nav-context {
+  font-family: var(--aimt-font-sans);
+  font-size: var(--aimt-type-caption);
+  font-weight: var(--aimt-weight-medium);
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+}
+.wrap {
+  width: min(var(--aimt-container-max), calc(100% - 4rem));
+  margin: 0 auto;
+}
+main { padding: var(--aimt-space-6xl) 0 var(--aimt-space-4xl); }
+.eyebrow {
+  margin: 0 0 var(--aimt-space-lg);
+  color: var(--aimt-color-accent);
+  font-family: var(--aimt-font-mono);
+  font-size: var(--aimt-type-mono-sm);
+  font-weight: var(--aimt-weight-regular);
+  letter-spacing: var(--aimt-track-label-sm);
+  text-transform: uppercase;
+}
+h1 {
+  font-family: var(--aimt-font-mont);
+  font-weight: var(--aimt-weight-bold);
+  font-size: var(--aimt-type-h1);
+  line-height: var(--aimt-leading-heading);
+  letter-spacing: var(--aimt-track-title);
+  max-width: 950px;
+  text-transform: uppercase;
+  margin: 0;
+}
+h1 em {
+  display: block;
+  color: rgba(255,255,255,0.55);
+  font-style: normal;
+}
+.lead {
+  max-width: 780px;
+  margin: var(--aimt-space-xl) 0 0;
+  font-size: var(--aimt-type-body-lg);
+  line-height: var(--aimt-leading-copy);
+  color: rgba(255,255,255,0.65);
+  font-weight: var(--aimt-weight-light);
+}
+.lead strong { font-weight: var(--aimt-weight-semibold); color: var(--aimt-color-text-strong); }
+.promise {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aimt-space-sm) var(--aimt-space-2xl);
+  margin: var(--aimt-space-2xl) 0 0;
+  padding: var(--aimt-space-lg) 0;
+  border-top: var(--aimt-border-hairline) solid var(--aimt-border-strong);
+  border-bottom: var(--aimt-border-hairline) solid var(--aimt-border-strong);
+}
+.promise span {
+  font-family: var(--aimt-font-sans);
+  font-size: var(--aimt-type-body-md);
+  font-weight: var(--aimt-weight-regular);
+  color: rgba(255,255,255,0.75);
+}
+.promise span::before {
+  content: '✓';
+  color: var(--aimt-color-accent);
+  margin-right: var(--aimt-space-sm);
+  font-weight: var(--aimt-weight-bold);
+}
+.action {
+  margin: var(--aimt-space-2xl) 0 0;
+  padding: var(--aimt-space-2xl);
+  background: var(--aimt-color-light-bg);
+  color: var(--aimt-color-light-text);
+  border-radius: var(--aimt-radius-card);
+  display: flex;
+  align-items: center;
+  gap: var(--aimt-space-3xl);
+  justify-content: space-between;
+}
+.action-copy small {
+  display: block;
+  margin: 0 0 var(--aimt-space-xs);
+  font-family: var(--aimt-font-mono);
+  font-size: var(--aimt-type-mono-xs);
+  font-weight: var(--aimt-weight-regular);
+  letter-spacing: var(--aimt-track-label-sm);
+  text-transform: uppercase;
+  color: var(--aimt-color-light-muted);
+}
+.action-copy b {
+  font-family: var(--aimt-font-mont);
+  font-size: clamp(1.2rem,2.3vw,1.65rem);
+  font-weight: var(--aimt-weight-bold);
+  letter-spacing: var(--aimt-track-subtitle);
+}
+.action-copy p {
+  margin: var(--aimt-space-xs) 0 0;
+  font-size: var(--aimt-type-body-sm);
+  color: var(--aimt-color-light-muted);
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aimt-space-md);
+  border-radius: var(--aimt-btn-pill-radius);
+  background: var(--aimt-color-light-text);
+  color: var(--aimt-color-light-bg);
+  padding: 1rem 1.5rem;
+  min-height: 48px;
+  min-width: 250px;
+  font-family: var(--aimt-font-mont);
+  font-weight: var(--aimt-weight-bold);
+  font-size: var(--aimt-btn-font-size);
+  letter-spacing: var(--aimt-track-cta);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.cta:hover { background: var(--aimt-color-bg-primary); }
+.cta .arrow { font-size: 1.2rem; font-weight: var(--aimt-weight-regular); line-height: 1; }
+.end {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--aimt-space-xl);
+  padding: 0 0 var(--aimt-space-3xl);
+  color: var(--aimt-color-text-body);
+  font-family: var(--aimt-font-sans);
+  font-size: var(--aimt-type-caption);
+  line-height: var(--aimt-leading-copy);
+}
+.end p { margin: 0; max-width: 690px; }
+.end a { color: rgba(255,255,255,0.62); text-underline-offset: 3px; }
+.links { display: flex; gap: var(--aimt-space-lg); flex-wrap: wrap; flex-shrink: 0; }
+@media (max-width: 750px) {
+  .wrap { width: calc(100% - 2.5rem); }
+  .enroll-nav-context { font-size: var(--aimt-type-micro); }
+  main { padding: var(--aimt-space-3xl) 0 var(--aimt-space-2xl); }
+  .eyebrow { margin-bottom: var(--aimt-space-md); }
+  h1 { font-size: clamp(2.2rem, 8.5vw, 3.15rem); line-height: 1.08; }
+  .lead { margin-top: var(--aimt-space-lg); }
+  .promise { gap: var(--aimt-space-sm); margin-top: var(--aimt-space-xl); padding: var(--aimt-space-md) 0; }
+  .promise span { width: 100%; }
+  .action { margin-top: var(--aimt-space-xl); padding: var(--aimt-space-xl); display: block; }
+  .cta { width: 100%; min-width: 0; margin-top: var(--aimt-space-lg); }
+  .end { display: block; font-size: var(--aimt-type-micro); }
+  .links { margin-top: var(--aimt-space-md); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
 </style>
 </head>
 <body>
+<!-- Exact owner-approved AIMT institute mark, copied from the existing site symbol. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
+<nav class="aimt-public-nav aimt-public-nav--sticky" aria-label="AIMT">
+  <a href="/" class="aimt-public-nav-mark" aria-label="AIMT home">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
+  </a>
+  <a href="/" class="aimt-public-nav-wordmark">
+    <span class="aimt-public-nav-name">AIMT</span>
+  </a>
+  <div class="aimt-public-nav-right">
+    <span class="enroll-nav-context">Head Spa Certification</span>
+  </div>
+</nav>
 <div class="wrap">
-<header class="head"><a class="wordmark" href="/" aria-label="AIMT home"><svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width=".8"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" opacity=".45"/><circle cx="22" cy="22" r="7" stroke="currentColor" opacity=".4"/><circle cx="22" cy="22" r="2" fill="currentColor"/><g fill="currentColor"><circle cx="22" cy="2" r="1.5"/><circle cx="36.1" cy="7.9" r="1.5"/><circle cx="42" cy="22" r="1.5"/><circle cx="36.1" cy="36.1" r="1.5"/><circle cx="22" cy="42" r="1.5"/><circle cx="14" cy="22" r="1.5"/><circle cx="7.9" cy="36.1" r="1.5"/><circle cx="2" cy="22" r="1.5"/><circle cx="7.9" cy="7.9" r="1.5"/></g></svg>AIMT</a><div class="head-note">Head Spa Certification</div></header>
 <main>
   <p class="eyebrow">For the professional ready to offer more</p>
   <h1>GIVE CLIENTS MORE REASONS <em>TO CHOOSE YOU.</em></h1>
