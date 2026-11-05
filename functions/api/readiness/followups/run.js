@@ -82,7 +82,7 @@ async function stillUnpaid(env,email) {
     select:'checkout_session_id',course_slug:'eq.'+COURSE_SLUG,
     // Case-insensitive exact comparison, like the atomic SQL claim.
     // Escape SQL LIKE wildcards in email addresses (e.g. underscore).
-    purchaser_email:'ilike.'+String(email).replace(/[\\%_]/g,'\\    purchaser_email:'eq.'+email,limit:'1''),limit:'1'
+    purchaser_email:'ilike.'+String(email).replace(/[\\%_]/g,ch=>'\\'+ch),limit:'1'
   });
   return rows.length===0;
 }
