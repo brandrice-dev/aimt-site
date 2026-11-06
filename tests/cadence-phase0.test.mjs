@@ -219,6 +219,10 @@ function makeAttemptRow(overrides = {}) {
   return {
     id: 'attempt-1',
     user_id: 'user-1',
+    // NOT NULL on every real row; content is resolved from these.
+    course_slug: 'headspa-mastery',
+    assessment_version: 'headspa-fe-assessment-v1',
+    bank_version: 'headspa-fe-bank-v1-2026-08-26',
     status: 'part2_locked',
     part3_selected_ids: [realInterview.id],
     part3_conversation_state: {},

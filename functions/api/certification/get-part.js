@@ -6,8 +6,7 @@
    Headers: Authorization: Bearer <supabase access token>
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, supabaseRest, resolveAttemptContentOrError } from '../../_lib/certification/auth.mjs';
 import { projectCaseForClient, projectInterviewItemForClient } from '../../_lib/certification/content-schema.mjs';
 import { findNextInterview } from '../../_lib/certification/interview-progression.mjs';
 
@@ -28,7 +27,9 @@ export async function onRequestGet(context) {
   if (!res.ok || !Array.isArray(res.body) || !res.body.length) return json({ error: 'Attempt not found.' }, 404);
   const attempt = res.body[0];
 
-  const banks = getProductionBanks();
+  const { content, errorResponse: contentError } = resolveAttemptContentOrError(attempt);
+  if (contentError) return contentError;
+  const banks = content.banks;
 
   if (part === '2') {
     if (attempt.status === 'in_progress') return json({ error: 'Submit Part I before starting Part II.' }, 409);

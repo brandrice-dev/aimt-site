@@ -7,8 +7,7 @@
    Body: { attemptId, responses: { "<itemId>": choiceIndex, ... } }
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, supabaseRest, resolveAttemptContentOrError } from '../../_lib/certification/auth.mjs';
 import { scoreKnowledgeResponses } from '../../_lib/certification/scoring.mjs';
 
 export async function onRequestPost(context) {
@@ -37,7 +36,9 @@ export async function onRequestPost(context) {
     return json({ locked: true, alreadySubmitted: true, knowledgeScore: attempt.knowledge_score });
   }
 
-  const banks = getProductionBanks();
+  const { content, errorResponse: contentError } = resolveAttemptContentOrError(attempt);
+  if (contentError) return contentError;
+  const banks = content.banks;
   const selectedItems = (attempt.part1_selected_ids || []).map((id) => banks.knowledgeBank.find((k) => k.id === id)).filter(Boolean);
   if (selectedItems.length !== (attempt.part1_selected_ids || []).length) {
     return json({ error: 'Assessment content unavailable.' }, 503);

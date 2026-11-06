@@ -15,9 +15,10 @@ import fs from 'node:fs';
 import test from 'node:test';
 
 import {
-  courseRegistry, createCourseRegistry, getCourse, listCourses,
+  courseRegistry, createCourseRegistry as createRealCourseRegistry, getCourse, listCourses,
   resolveAssessmentConfig, resolveCurrentAssessmentConfig, requiredModulesForFinalAssessment,
 } from '../functions/_lib/courses/registry.mjs';
+import { lookupBank } from '../functions/_lib/certification/bank-catalog.mjs';
 import { getAssessmentConfig, ASSESSMENT_VERSION_V1, STANDARD_VERSION_V1 } from '../functions/_lib/certification/assessment-config.mjs';
 import { CRITICAL_DOMAIN_CONFIG_VERSION } from '../functions/_lib/certification/critical-domains.mjs';
 import { bankVersion as installedBankVersion } from '../functions/_lib/certification/content-bank.mjs';
@@ -51,6 +52,7 @@ test('Head Spa entry pins every existing identifier', () => {
     versions: ['headspa-fe-assessment-v1'],
     criticalDomainConfigVersion: 'headspa-critical-domains-v1',
     bankVersion: 'headspa-fe-bank-v1-2026-08-26',
+    bankVersions: ['headspa-fe-bank-v1-2026-08-26'],
   });
   assert.deepEqual(c.resources, { coursePage: '/headspa-mastery.html', progressStorageKey: 'levo_app', credentialPrefix: 'AIMT-HS' });
 });
@@ -62,7 +64,8 @@ test('registry agrees with every module that already hardcodes a Head Spa identi
   assert.equal(installedBankVersion, c.assessment.bankVersion, 'content-bank.mjs bankVersion');
   assert.equal(CRITICAL_DOMAIN_CONFIG_VERSION, c.assessment.criticalDomainConfigVersion);
   assert.equal(getAssessmentConfig(c.assessment.current).courseSlug, c.slug);
-  assert.match(read('functions/api/verify-credential.js'), new RegExp(`'${c.slug}': '${c.title}'`), 'verify-credential.js display name');
+  // verify-credential.js now reads its display name from the registry (title pinned above).
+  assert.match(read('functions/api/verify-credential.js'), /certificateTitleFor\(row\.course_slug\) \|\| row\.course_slug/, 'verify-credential.js display name');
   assert.match(read('assets/js/headspa-state.js'), new RegExp(`STORAGE_KEY = '${c.resources.progressStorageKey}'`));
   assert.ok(fs.existsSync(new URL(`..${c.resources.coursePage}`, import.meta.url)), 'course page exists');
   for (const m of c.modules.requiredForFinalAssessment.filter((n) => n > 0)) {
@@ -167,7 +170,7 @@ test('hasCompletedInstructionalModules: Head Spa still requires exactly Modules 
 async function finalizeWith(attemptOverrides) {
   const writes = [];
   const attempt = {
-    id: 'att-1', user_id: 'u1', course_slug: HS, assessment_version: ASSESSMENT_VERSION_V1, attempt_number: 1, status: 'part3_locked',
+    id: 'att-1', user_id: 'u1', course_slug: HS, assessment_version: ASSESSMENT_VERSION_V1, bank_version: 'headspa-fe-bank-v1-2026-08-26', attempt_number: 1, status: 'part3_locked',
     part1_selected_ids: [], part1_responses: {}, part2_case_state: {}, part3_selected_ids: [], part3_conversation_state: {},
     ...attemptOverrides,
   };
@@ -228,11 +231,14 @@ test('already-scored attempts are returned unchanged without re-resolving their 
 // Synthetic fixture only -- NOT Hair Loss, no real content.
 const FIXTURE_CONFIG = Object.freeze({ courseSlug: 'example-course', assessmentVersion: 'example-fe-assessment-v1', criticalDomainConfigVersion: 'example-domains-v1', bankVersion: 'example-bank-v1' });
 const lookupWithFixture = (v) => (v === FIXTURE_CONFIG.assessmentVersion ? FIXTURE_CONFIG : getAssessmentConfig(v));
+const FIXTURE_BANK = Object.freeze({ bankVersion: 'example-bank-v1', knowledgeBank: [], caseBank: [], interviewBank: [] });
+const bankWithFixture = (v) => (v === FIXTURE_BANK.bankVersion ? FIXTURE_BANK : lookupBank(v));
+const createCourseRegistry = (defs, options = {}) => createRealCourseRegistry(defs, { lookupBank: bankWithFixture, ...options });
 const headSpaDef = () => structuredClone(getCourse(HS));
 const fixtureDef = (overrides = {}) => ({
   slug: 'example-course', title: 'Example Certification', status: 'active',
   modules: { ids: [0, 1, 2, 3], requiredForFinalAssessment: [0, 1, 2], finalAssessment: 3 },
-  assessment: { current: 'example-fe-assessment-v1', versions: ['example-fe-assessment-v1'], criticalDomainConfigVersion: 'example-domains-v1', bankVersion: 'example-bank-v1' },
+  assessment: { current: 'example-fe-assessment-v1', versions: ['example-fe-assessment-v1'], criticalDomainConfigVersion: 'example-domains-v1', bankVersion: 'example-bank-v1', bankVersions: ['example-bank-v1'] },
   resources: { coursePage: '/example-course.html', progressStorageKey: 'example_app', credentialPrefix: 'AIMT-EX' },
   ...overrides,
 });
