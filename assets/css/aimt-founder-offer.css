@@ -274,3 +274,8 @@
 
 
 #founderOffer .protocol-mini-demo{margin:0;padding:18px;border-radius:0;border:0;box-shadow:none;background:#1a1814}#founderOffer .fo-demo{border-block:1px solid var(--aimt-border-accent-strong)}#founderOffer .fo-demo summary{cursor:pointer;display:flex;justify-content:space-between;padding:18px 24px;font:500 .85rem/1.5 var(--aimt-font-sans);color:var(--aimt-color-text-primary)}#founderOffer .fo-demo summary:focus-visible{outline:2px solid white;outline-offset:-4px}#founderOffer .fo-demo-note{font:300 .7rem/1.6 var(--aimt-font-sans);color:var(--aimt-color-accent);margin:0;padding:0 24px 14px}#founderOffer .plc-controls{display:none}
+
+/* Limited package corner tab; item numbers share the same eyebrow treatment. */
+#landingPage .fo-shell{position:relative}
+#landingPage .fo-corner-tab{position:absolute;top:0;right:28px;transform:translateY(-50%);padding:7px 16px;border-radius:5px;background:var(--aimt-color-light-bg);color:var(--aimt-color-light-text);box-shadow:0 4px 12px rgba(0,0,0,.2);font:600 .6rem/1.4 var(--aimt-font-mont);letter-spacing:.12em;text-transform:uppercase}
+#landingPage .fo-corner-tab[hidden]{display:none}

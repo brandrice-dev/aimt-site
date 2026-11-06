@@ -18,6 +18,7 @@ test('permanent Sidekick and bundle remain when the founder offer is disabled, s
   assert.equal(nodes.get('.fo-package-limit').hidden,true);
   assert.match(nodes.get('section').innerHTML,/Smart Service Sidekick/);
   assert.equal(nodes.get('.fo-session').hidden,true);
+  assert.equal(nodes.get('.fo-corner-tab').hidden,true);
   assert.equal(nodes.get('.fo-package-extra').hidden,true);
  }
 });
@@ -25,7 +26,8 @@ test('only valid server availability adds the limited session and uses correct s
  for(const remaining of [1,5]){
   const nodes=await render({active:true,capacity:5,remaining});
   assert.equal(nodes.get('.fo-session').hidden,false);
-  assert.equal(nodes.get('.fo-package-title').textContent,'Head Spa Head Start');
+  assert.equal(nodes.get('.fo-corner-tab').hidden,false);
+  assert.equal(nodes.get('.fo-package-title').textContent,'Head Spa Head Start Bonus Package');
   assert.equal(nodes.get('.fo-package-limit').hidden,false);
   assert.equal(nodes.get('.fo-package-extra').hidden,false);
   assert.equal(nodes.get('.fo-availability').textContent,remaining+(remaining===1?' founder session left':' founder sessions left'));
@@ -33,5 +35,6 @@ test('only valid server availability adds the limited session and uses correct s
  for(const remaining of [-1,6,1.5,'3']){
   const nodes=await render({active:true,capacity:5,remaining});
   assert.equal(nodes.get('.fo-session').hidden,true);
+  assert.equal(nodes.get('.fo-corner-tab').hidden,true);
  }
 });
