@@ -1,46 +1,38 @@
 // Presentation only. The course and Sidekick are always included; founder availability is server-owned.
 (function(){
  const root=document.getElementById('landingPage');if(!root)return;
- const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart1';document.head.append(style);
+ const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart2';document.head.append(style);
  const section=document.createElement('section');section.className='fo-section';section.id='founderOffer';
- section.innerHTML=`<div class="lp-band-inner">
-  <header class="fo-head"><span class="fo-label">One enrollment. Your complete head start.</span>
-   <h2 class="section-title">Head Spa Head Start</h2>
-   <p class="fo-lead">Learn the service. <em>Bring support into the treatment room.</em></p>
-   <p class="fo-body">Your certification course and Smart Service Sidekick, together for $597. While places remain, your enrollment also includes a private session with AIMT’s founder.</p>
-  </header>
-  <article class="fo-course"><span class="fo-number" aria-hidden="true">01</span><div><span class="fo-label">Your training</span><h3>Head Spa Certification Course</h3><p>The full course, practitioner resources, and lifetime access. Earn your verifiable AIMT credential by passing the certification assessment.</p></div></article>
+ section.innerHTML=`<div class="lp-band-inner"><div class="fo-shell">
+  <header class="fo-head"><span class="fo-label fo-offer-label">Your course + included bonus</span><h2 class="section-title fo-package-title">Head Spa Certification Package</h2><p class="fo-body">Get certified. Bring a guide into the treatment room. Start with a clear plan.</p><p class="fo-package-limit" hidden role="status"></p></header>
+  <article class="fo-course"><span class="fo-number" aria-hidden="true">01</span><div><span class="fo-label">The foundation</span><h3>Head Spa Certification Course</h3><p>Complete training, practitioner resources, and lifetime access. Earn your AIMT credential by passing the assessment.</p></div></article>
   <div class="fo-grid">
-   <article class="fo-sidekick" aria-labelledby="fo-sidekick-title">
-    <div class="fo-card-copy"><span class="fo-label">02 · Included enrollment bonus</span><h3 id="fo-sidekick-title">Smart Service Sidekick</h3>
-     <p class="fo-sidekick-lead">Know the service. Forget what comes next?</p><p class="fo-body">Keep your training beside you while you work. Open your Sidekick on a phone, tablet, or computer and follow the service from start to finish.</p></div>
-    <img src="/assets/images/marketing/approved-service-timer-live.webp" width="1600" height="862" loading="lazy" alt="Smart Service Sidekick interface showing the current treatment step, countdown, practitioner instructions and client communication cues">
-    <ul class="fo-benefits"><li><strong>Know what to do next.</strong><span>See your current step, how to carry it out, and the transition coming up.</span></li><li><strong>Keep the whole service on pace.</strong><span>Follow each step’s countdown alongside overall service timing in the Core 60-minute or Extended 90-minute reference format.</span></li><li><strong>Answer without losing your flow.</strong><span>Find short, step-specific answers when a client asks a question, plus cues for comfort, temperature, and pressure.</span></li><li><strong>Keep your attention on your client.</strong><span>Hands-free scrolling keeps the instructions moving. Pause, resume, or move between steps when you need to.</span></li></ul>
-    <p class="fo-sidekick-foot">Included with every enrollment. Yours to rehearse with before a client and use during service. Your judgment and your client’s needs always come first.</p>
+   <article class="fo-sidekick" aria-labelledby="fo-sidekick-title"><div class="fo-card-copy"><span class="fo-label">02 · Your included bonus</span><h3 id="fo-sidekick-title">Smart Service Sidekick</h3><p class="fo-sidekick-lead">Know what comes next. Keep your service flowing.</p></div>
+    <img src="/assets/images/marketing/approved-service-timer-live.webp" width="1600" height="862" loading="lazy" alt="Smart Service Sidekick showing step instructions, live pacing and client-response cues">
+    <ul class="fo-benefits"><li><strong>What to do.</strong> Step-by-step instructions and reminders.</li><li><strong>How to pace it.</strong> Step countdowns, total timing, and upcoming transitions.</li><li><strong>What to say.</strong> Short answers when a client asks a question.</li><li><strong>Help while you work.</strong> Hands-free scrolling, pause, and resume.</li></ul><p class="fo-sidekick-foot">Included with every enrollment. Core 60-minute and Extended 90-minute reference formats. Your judgment and client needs come first.</p>
    </article>
-   <article class="fo-session" hidden aria-labelledby="fo-session-title">
-    <span class="fo-label">03 · Limited enrollment bonus</span><div class="fo-session-top"><span class="fo-duration">45 minutes · Private · One-on-one</span></div>
-    <h3 id="fo-session-title">Your plan.<br>The founder’s feedback.</h3>
-    <p class="fo-session-intro">Work directly with AIMT’s founder and co-owner of ATRIUM Head Spa &amp; Wellness. Get the experience behind your training focused on your business.</p>
-    <ul class="fo-benefits"><li><strong>A personal Blueprint review.</strong><span>Bring your service plan. See what’s ready and what needs work.</span></li><li><strong>Your questions, answered.</strong><span>Talk through the decisions you’re still working on.</span></li><li><strong>Clear next steps.</strong><span>Plan what to do before offering your first head spa service.</span></li></ul>
-    <div class="fo-allocation"><p class="fo-availability" role="status"></p><p>Only five enrollments include this private session. Once those places are filled, enrollment continues without the founder session.</p></div>
-    <p class="fo-terms">Complete your certification and Blueprint, then book in My AIMT. Availability is confirmed at checkout.</p>
-   </article>
+   <article class="fo-session" hidden aria-labelledby="fo-session-title"><span class="fo-label">03 · Your limited bonus</span><h3 id="fo-session-title">A private session<br>with AIMT’s founder.</h3><p class="fo-session-intro">45 minutes, one-on-one with the founder of AIMT and co-owner of ATRIUM Head Spa &amp; Wellness.</p><ul class="fo-benefits"><li><strong>Review your Blueprint.</strong> See what’s ready and what needs work.</li><li><strong>Ask your questions.</strong> Talk through decisions for your business.</li><li><strong>Plan your next steps.</strong> Know what to do before your first service.</li></ul><div class="fo-allocation"><p class="fo-availability"></p><p>Only five enrollments include this session. After those places fill, the course and Sidekick remain available without it.</p></div><p class="fo-terms">Book after completing your certification and Blueprint. Bonus availability is confirmed at checkout.</p></article>
   </div>
-  <div class="fo-package-close"><div><span class="fo-label">Head Spa Head Start bundle</span><p class="fo-package-summary">Your course + Smart Service Sidekick.</p><p class="fo-package-extra" hidden>Plus your private founder session, while places remain.</p></div><div class="fo-buy"><div class="fo-price">$597 <span>One-time enrollment</span></div><a class="fo-cta" href="/enroll">Enroll with Head Start <span aria-hidden="true">→</span></a><p class="fo-price-detail">Bonuses included. No extra charge.</p></div></div>
- </div>`;
+  <div class="fo-package-close"><div><p class="fo-package-summary">Your course + Smart Service Sidekick.</p><p class="fo-package-extra" hidden>Plus your private founder session.</p></div><div class="fo-buy"><div class="fo-price">$597 <span>One payment. Bonuses included.</span></div><a class="fo-cta" href="/enroll">Give me a Head Start <span aria-hidden="true">→</span></a></div></div>
+ </div></div>`;
  const pricing=root.querySelector('.lp-pricing-includes');
  const anchor=pricing?.closest('.lp-section-band')||root.querySelector('.lp-final-close');
- if(anchor)anchor.before(section);else root.append(section);
+ if(anchor){anchor.before(section);const status=anchor.querySelector?.('#lpCheckoutStatus');if(status)section.querySelector('.fo-buy').append(status);anchor.hidden=true;}else root.append(section);
  const note=document.createElement('p');note.className='fo-hero-note';root.querySelector('.lp-hero-cta-row')?.after(note);
  const summary=document.createElement('p');summary.className='fo-price-note';pricing?.append(summary);
  root.querySelectorAll('.lp-enroll-btn.lp-enroll-primary').forEach(button=>{button.textContent='Enroll with Head Start — $597';});
  function showAvailability(remaining){
   const available=Number.isInteger(remaining)&&remaining>0;
+  root.querySelectorAll('.lp-enroll-btn.lp-enroll-primary').forEach(button=>{button.textContent=available?'Give me a Head Start — $597':'Enroll with the Sidekick — $597';});
+  section.querySelector('.fo-package-title').textContent=available?'Head Spa Head Start':'Head Spa Certification Package';
+  section.querySelector('.fo-offer-label').textContent=available?'Limited enrollment package':'Your course + included bonus';
+  section.querySelector('.fo-package-limit').hidden=!available;
+  section.querySelector('.fo-package-limit').textContent=available?remaining+' of 5 packages available · Includes your private founder session.':'';
+  section.querySelector('.fo-cta').textContent=available?'Give me a Head Start →':'Enroll with the Sidekick →';
   section.querySelector('.fo-session').hidden=!available;
   section.querySelector('.fo-package-extra').hidden=!available;
   section.classList.toggle('fo-base-only',!available);
-  note.textContent='Head Spa Head Start: your course + Smart Service Sidekick. Bonuses included with enrollment.';
+  note.textContent='Your course + Smart Service Sidekick. Bonus included with enrollment.';
   summary.textContent='Included bonus: Smart Service Sidekick — step-by-step service guidance, live pacing, and client communication cues.';
   if(available){
    const places=remaining+' '+(remaining===1?'founder session':'founder sessions')+' left';

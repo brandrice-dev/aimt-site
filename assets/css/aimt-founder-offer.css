@@ -55,3 +55,32 @@
 #landingPage .fo-base-only .fo-sidekick .fo-benefits{grid-column:2;grid-row:1 / span 2}
 #landingPage .fo-base-only .fo-sidekick-foot{grid-column:1 / -1;margin-top:24px}
 @media(max-width:760px){#landingPage .fo-section{padding:56px 0}#landingPage .fo-grid,#landingPage .fo-base-only .fo-sidekick{display:block}#landingPage .fo-session{margin-top:24px;padding:26px}#landingPage .fo-card-copy{padding:26px 26px 22px}#landingPage .fo-sidekick .fo-benefits{margin-inline:26px}#landingPage .fo-sidekick-foot{margin-inline:26px}#landingPage .fo-course{gap:18px}#landingPage .fo-package-close{flex-direction:column;align-items:stretch;gap:24px}#landingPage .fo-buy{min-width:0}#landingPage .fo-cta{width:100%}}
+
+/* One contained offer replaces the adjacent repeated price block. */
+#landingPage .fo-section{background:transparent;border:0;padding:64px 0}
+#landingPage .fo-shell{padding:clamp(24px,4vw,48px);border:1px solid var(--aimt-border-accent-strong);border-radius:24px;background:#211f1b;box-shadow:0 28px 70px rgba(0,0,0,.3),0 3px 10px rgba(0,0,0,.15)}
+#landingPage .fo-head{max-width:none;margin-bottom:28px}
+#landingPage .fo-head .section-title{font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:14px}
+#landingPage .fo-head .fo-body{font-size:.88rem;line-height:1.7;max-width:560px}
+#landingPage .fo-package-limit{font:500 .8rem/1.6 var(--aimt-font-sans);color:var(--aimt-color-text-primary);margin:18px 0 0;padding-top:16px;border-top:1px solid var(--aimt-border-accent-strong)}
+#landingPage .fo-package-limit[hidden],#landingPage .lp-section-band[hidden]{display:none}
+#landingPage .fo-course{padding:22px 0;margin-bottom:24px}
+#landingPage .fo-course p{font-size:.83rem;line-height:1.7}
+#landingPage .fo-grid{gap:24px}
+#landingPage .fo-card-copy{padding:24px 24px 18px}
+#landingPage .fo-sidekick h3,#landingPage .fo-session h3{font-size:1.35rem}
+#landingPage .fo-sidekick-lead{font-size:.85rem;margin-bottom:0}
+#landingPage .fo-sidekick .fo-benefits{margin:20px 24px}
+#landingPage .fo-benefits li{font-size:.82rem;line-height:1.65;margin:13px 0}
+#landingPage .fo-benefits strong{display:inline;font-size:.85rem}
+#landingPage .fo-sidekick-foot{margin:0 24px 24px;font-size:.7rem}
+#landingPage .fo-session{padding:26px;box-shadow:0 12px 28px rgba(0,0,0,.16)}
+#landingPage .fo-session-intro{font-size:.85rem;line-height:1.7}
+#landingPage .fo-allocation .fo-availability{font-size:1.25rem}
+#landingPage .fo-allocation p,#landingPage .fo-terms{font-size:.72rem;line-height:1.65}
+#landingPage .fo-package-close{margin-top:28px;padding-top:26px}
+#landingPage .fo-package-summary{font-size:.88rem}
+#landingPage .fo-package-extra{font-size:.82rem}
+#landingPage .fo-price{font-size:1.8rem}
+#landingPage .fo-price span{display:block;margin:4px 0 0;font-size:.75rem}
+@media(max-width:760px){#landingPage .fo-section{padding:32px 0}#landingPage .fo-shell{padding:24px 20px;border-radius:18px}#landingPage .fo-course{gap:12px}#landingPage .fo-course h3{font-size:1.05rem}#landingPage .fo-card-copy{padding:22px 20px 18px}#landingPage .fo-sidekick .fo-benefits{margin-inline:20px}#landingPage .fo-sidekick-foot{margin-inline:20px}#landingPage .fo-session{padding:24px 20px}#landingPage .fo-buy{width:100%}}
