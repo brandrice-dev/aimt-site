@@ -4,6 +4,27 @@ on:
     branches: [main]
     paths:
       - 'functions/api/readiness/**'
+      - 'functions/api/founder-review/**'
+      - 'functions/api/admin/founder-reviews.js'
+      - 'functions/_lib/founder-review/**'
+      - 'assets/js/aimt-founder-review.js'
+      - 'tests/founder-review.test.mjs'
+      - 'tests/founder-review-flow.test.mjs'
+      - 'tests/founder-review-maintenance.test.mjs'
+      - 'tests/support/founder-review-local-service.mjs'
+      - 'assets/js/aimt-founder-offer.js'
+      - 'assets/css/aimt-founder-offer.css'
+      - 'scripts/founder-review-cleanup-run.mjs'
+      - '.github/workflows/aimt-founder-review-cleanup.yml'
+      - 'tests/founder-review-purchase.test.mjs'
+      - 'tests/founder-review-sql.test.mjs'
+      - 'supabase/migrations/20261105133743_founder_review_offer.sql'
+      - 'functions/_lib/enrollment/paid-enrollment-email.mjs'
+      - 'functions/api/create-checkout-session.js'
+      - 'functions/api/stripe-webhook.js'
+      - 'functions/api/claim-course-access.js'
+      - 'assets/js/aimt-founder-review-admin.js'
+      - 'tests/blueprint-autosave.test.mjs'
       - 'functions/api/admin/readiness-followups.js'
       - 'scripts/readiness-followups-run.mjs'
       - 'tests/readiness-followups.test.mjs'
@@ -53,10 +74,21 @@ jobs:
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
             tests/aimt-free-tools.test.mjs \
+            tests/founder-review.test.mjs \
+            tests/founder-review-maintenance.test.mjs \
+            tests/founder-review-purchase.test.mjs \
+            tests/blueprint-autosave.test.mjs \
             tests/admin-readiness-leads-layout.test.mjs \
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
             tests/growth-client.test.mjs \
             tests/embedded-enrollment-checkout.test.mjs \
+            tests/stripe-webhook-paid-enrollment-email.test.mjs \
+            tests/transactional-email-redesign.test.mjs \
             tests/readiness-sales-prompt.test.mjs
+
+      - name: Validate founder review ledger in isolated PostgreSQL (no hosted database)
+        run: |
+          npm install --prefix /tmp/aimt-review-sql-test --no-audit --no-fund @electric-sql/pglite@0.5.15
+          PGLITE_MODULE=file:///tmp/aimt-review-sql-test/node_modules/@electric-sql/pglite/dist/index.js node --test tests/founder-review-sql.test.mjs tests/founder-review-flow.test.mjs

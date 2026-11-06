@@ -106,12 +106,12 @@ test('Blueprint connects course modules, never grants credentials and requires n
     assert.ok(resources.includes(original),'existing resource lost '+original);
   assert.match(blueprint,/No client information/);
   assert.match(blueprint,/A completed Blueprint does not mean AIMT has approved your service/);
-  assert.match(blueprint,/Nothing is stored online/);
+  assert.match(blueprint,/Nothing is uploaded to AIMT/);
   assert.match(blueprint,/id="bpExport"/);
   assert.match(blueprint,/id="bpImport"/);
   assert.match(blueprint,/type="file"/);
   assert.match(blueprint,/window\.print\(\)/);
-  assert.doesNotMatch(blueprint,/localStorage|sessionStorage|fetch\(|supabase\.|AIMTGrowth/);
+  assert.doesNotMatch(blueprint,/sessionStorage|fetch\(|supabase\.|AIMTGrowth/);
   assert.doesNotMatch(blueprint,/diagnoses clients|medical records|patient symptoms/i);
 });
 test('The presentation has a compact responsive page system and explicit letter print styling',()=>{

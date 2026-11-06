@@ -1,0 +1,33 @@
+name: AIMT Founder Review Material Cleanup
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        type: boolean
+        default: true
+        required: false
+        description: 'Preview due counts without deleting materials.'
+permissions:
+  contents: read
+concurrency:
+  group: aimt-founder-review-cleanup
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    if: vars.FOUNDER_REVIEW_CLEANUP_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Delete only materials past their 30-day retention deadline
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FOUNDER_CLEANUP_MODE: ${{ github.event_name == 'schedule' && 'delete' || inputs.dry_run == false && 'delete' || 'dry' }}
+        run: node scripts/founder-review-cleanup-run.mjs

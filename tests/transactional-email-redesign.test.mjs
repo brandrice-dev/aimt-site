@@ -224,6 +224,9 @@ test('dormant emails are not wired to any sender', () => {
   assert.deepEqual(senders.sort(), [
     'functions/_lib/admin/manual-grant-invite-email.mjs',
     'functions/_lib/enrollment/paid-enrollment-email.mjs',
+    // Existing approved Readiness Profile and opted-in follow-ups are active senders.
+    'functions/api/readiness/followups/run.js',
+    'functions/api/readiness/submit.js',
   ]);
   for (const f of files) {
     assert.doesNotMatch(read(f), /certification-earned|review-request-received|educator-remediation-request-received|security-password-changed/, f);

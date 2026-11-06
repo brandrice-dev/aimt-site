@@ -512,6 +512,13 @@ a { color: inherit; }
     return stripeJsPromise;
   }
 
+  var checkoutRequestKey;
+  try{checkoutRequestKey=sessionStorage.getItem('aimt-checkout-request-key');}catch(_){}
+  if(!/^[a-f0-9-]{36}$/i.test(checkoutRequestKey||'')){
+    checkoutRequestKey=crypto.randomUUID();
+    try{sessionStorage.setItem('aimt-checkout-request-key',checkoutRequestKey);}catch(_){}
+  }
+
   function requestSession() {
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS) : null;
@@ -519,7 +526,7 @@ a { color: inherit; }
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       /* growth: first-party attribution only (functions/_lib/growth) — no effect on price or payment. */
-      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded', growth: window.AIMTGrowth ? window.AIMTGrowth.checkoutPayload() : null }),
+      body: JSON.stringify({ course: 'headspa-mastery', ui: 'embedded', checkoutRequestKey: checkoutRequestKey, growth: window.AIMTGrowth ? window.AIMTGrowth.checkoutPayload() : null }),
       signal: controller ? controller.signal : undefined
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
@@ -561,6 +568,11 @@ a { color: inherit; }
     requestSession()
       .then(function (data) {
         if (stale()) return null;
+        if(data && typeof data.founderReview==='boolean'){
+          var bonusNote=document.getElementById('founderCheckoutNote');
+          if(!bonusNote){bonusNote=document.createElement('p');bonusNote.id='founderCheckoutNote';bonusNote.setAttribute('role','status');els.mount.parentNode.insertBefore(bonusNote,els.mount);}
+          bonusNote.textContent=data.founderReview?'Your enrollment includes one private 45-minute founder review after certification.':'A founder review is not included with this enrollment; the limited allocation is currently reserved.';
+        }
         if (data && data.fallback === 'hosted' && data.url) {
           /* STRIPE_PUBLISHABLE_KEY not configured server-side — keep
              enrollment working through the hosted page (the old flow). */
