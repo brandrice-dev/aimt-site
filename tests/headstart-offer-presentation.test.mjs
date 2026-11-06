@@ -14,7 +14,8 @@ async function render(payload,ok=true,reject=false){
 test('permanent Sidekick and bundle remain when the founder offer is disabled, sold out or unavailable',async()=>{
  for(const [data,ok,reject] of [[{active:false},true,false],[{active:true,capacity:5,remaining:0},true,false],[{},false,false],[{},true,true]]){
   const nodes=await render(data,ok,reject);
-  assert.match(nodes.get('section').innerHTML,/Head Spa Head Start/);
+  assert.equal(nodes.get('.fo-package-title').textContent,'Head Spa Certification Package');
+  assert.equal(nodes.get('.fo-package-limit').hidden,true);
   assert.match(nodes.get('section').innerHTML,/Smart Service Sidekick/);
   assert.equal(nodes.get('.fo-session').hidden,true);
   assert.equal(nodes.get('.fo-package-extra').hidden,true);
@@ -24,6 +25,8 @@ test('only valid server availability adds the limited session and uses correct s
  for(const remaining of [1,5]){
   const nodes=await render({active:true,capacity:5,remaining});
   assert.equal(nodes.get('.fo-session').hidden,false);
+  assert.equal(nodes.get('.fo-package-title').textContent,'Head Spa Head Start');
+  assert.equal(nodes.get('.fo-package-limit').hidden,false);
   assert.equal(nodes.get('.fo-package-extra').hidden,false);
   assert.equal(nodes.get('.fo-availability').textContent,remaining+(remaining===1?' founder session left':' founder sessions left'));
  }
