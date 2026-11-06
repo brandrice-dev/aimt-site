@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f0d0b">
-<title>AIMT Service Timer</title>
+<title>Smart Service Sidekick</title>
 <meta name="robots" content="noindex,nofollow">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600&display=swap');
@@ -400,7 +400,7 @@ body.timer-open{overflow:hidden}
   <header class="tool-bar">
     <div class="tool-id">
       <svg class="tool-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
-      <div class="tool-wordmark"><span class="tool-name">AIMT</span><span class="tool-product">Service Timer</span></div>
+      <div class="tool-wordmark"><span class="tool-name">AIMT</span><span class="tool-product">Smart Service Sidekick</span></div>
     </div>
     <div class="tool-context">Module 8 · Practitioner Tool</div>
   </header>
@@ -408,11 +408,11 @@ body.timer-open{overflow:hidden}
   <main>
     <section class="hero">
       <div class="hero-inner">
-        <div class="eyebrow">AIMT · Service Timer</div>
+        <div class="eyebrow">AIMT · Smart Service Sidekick</div>
         <h1>Your Service,<br>In Real Time.</h1>
         <div class="hero-copy">
-          <p class="hero-lead">A live pacing companion for the AIMT Core and Extended head spa protocols.</p>
-          <p class="hero-note">Follow each phase and its own countdown, with an uninterrupted overall service clock and clear manual transitions.</p>
+          <p class="hero-lead">Your live guide from the first step to the final transition of a head spa service.</p>
+          <p class="hero-note">See what to do, why the step matters, how to pace it, and what to say if a client asks. Keep your training beside you while you work, with Core and Extended reference formats, hands-free scrolling, and pause/resume controls.</p>
         </div>
         <div class="hero-actions">
           <a class="btn-primary" href="#launch">Open a Protocol</a>
@@ -462,7 +462,7 @@ body.timer-open{overflow:hidden}
         </div>
 
         <div class="read-grid">
-          <div class="demo-shell" aria-label="Example AIMT service timer display">
+          <div class="demo-shell" aria-label="Example Smart Service Sidekick display">
             <div class="demo-top"><div class="demo-brand">AIMT · Extended Format</div><div class="demo-service">Reference example</div></div>
             <div class="demo-progress-labels">
               <div class="demo-remaining"><span>Service remaining</span><strong>75:00</strong></div>
@@ -542,7 +542,7 @@ body.timer-open{overflow:hidden}
     <div class="timer-top-row">
       <div class="timer-id">
         <svg class="timer-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
-        <div class="timer-brand" id="timer-brand">AIMT · Service Timer</div>
+        <div class="timer-brand" id="timer-brand">AIMT · Smart Service Sidekick</div>
       </div>
       <div class="timer-format" id="timer-format"></div>
       <div class="timer-controls">
@@ -628,7 +628,7 @@ body.timer-open{overflow:hidden}
   <div class="complete-screen" id="complete-screen" role="dialog" aria-modal="true" aria-labelledby="complete-title">
     <div class="overlay-card">
       <svg class="complete-ring" viewBox="0 0 72 72" overflow="visible" aria-hidden="true"><circle class="complete-ring-track" cx="36" cy="36" r="30"></circle><circle class="complete-ring-fill" cx="36" cy="36" r="30"></circle></svg>
-      <div class="overlay-kicker">AIMT Service Timer</div>
+      <div class="overlay-kicker">Smart Service Sidekick</div>
       <div class="overlay-title" id="complete-title">Service Complete</div>
       <div class="complete-time" id="complete-time"></div>
       <div class="overlay-copy">The timed treatment is complete. The Timer ends here; checkout, client closing and pricing strategy belong outside this protocol companion.</div>
@@ -1120,7 +1120,7 @@ function tick(){
 
 function render(){
   if(!session) return;
-  ALL.timerBrand.textContent='AIMT · Service Timer';
+  ALL.timerBrand.textContent='AIMT · Smart Service Sidekick';
   ALL.timerFormat.textContent=`${session.protocol.key.toUpperCase()} · ${Math.round(session.protocol.totalSeconds/60)} MIN`;
   ALL.complete.classList.toggle('show',session.completed);
   ALL.pauseOverlay.classList.toggle('show',session.paused && !session.exited && !ALL.exitDialog.classList.contains('show'));

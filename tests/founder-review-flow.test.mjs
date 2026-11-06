@@ -41,7 +41,9 @@ test('integrated handlers + PostgreSQL: purchase → claim → certify → uploa
   const startsData=await Promise.all(starts.map(async r=>{assert.equal(r.status,200);return r.json();}));
   assert.equal(startsData.filter(r=>r.founderReview).length,5);
   assert.equal((await (await offer({env})).json()).remaining,0);
-  const retry=await call(checkout,request('/api/create-checkout-session',0,'POST',JSON.stringify({ui:'embedded',checkoutRequestKey:ids[0]})));assert.equal((await retry.json()).clientSecret,startsData[0].clientSecret);assert.equal(service.sessions.size,6);
+  // Concurrent allocation does not guarantee actor 0 receives a bonus hold.
+  const retryActor=startsData.findIndex(d=>d.founderReview);assert.ok(retryActor>=0);
+  const retry=await call(checkout,request('/api/create-checkout-session',retryActor,'POST',JSON.stringify({ui:'embedded',checkoutRequestKey:ids[retryActor]})));assert.equal((await retry.json()).clientSecret,startsData[retryActor].clientSecret);assert.equal(service.sessions.size,6);
   const sessions=startsData.map(d=>service.sessions.get(d.clientSecret.split('_secret_')[0]));
   assert.match(sessions.find(s=>!s.metadata.founder_review_hold).customText,/does not include/);
   // A completed but pending payment must grant neither access nor its bonus.

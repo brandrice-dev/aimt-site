@@ -104,7 +104,7 @@ const html = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
 // 3. TIMER CONTENT / FUNCTIONALITY / FRAMEWORK — unchanged
 // ─────────────────────────────────────────────────────────────────────────
 (function timerUnchanged() {
-  check('TIMER UNCHANGED', 'Timer badge/title/body copy present', /Included with your certification/.test(html) && /AIMT Service Timer/.test(html));
+  check('TIMER UNCHANGED', 'Timer badge/title/body copy present', /Included with your certification/.test(html) && /Smart Service Sidekick/.test(html));
   check('TIMER UNCHANGED', 'Links to the canonical standalone Timer are present and unchanged', /href="aimt-service-timer\.html"/.test(html));
   check('TIMER UNCHANGED', 'In-page preview app markup (ring, clock, phase, timeline, back/skip) is intact', /id="m8tpRingFill"/.test(html) && /id="m8tpClock"/.test(html) && /id="m8TimerBack\(\)|m8TimerBack\(\)/.test(html) && /m8TimerSkip\(\)/.test(html));
   check('TIMER UNCHANGED', 'Auto-start-on-scroll behavior (IntersectionObserver-driven) is untouched', /function m8InitTimerAutostart/.test(html));
