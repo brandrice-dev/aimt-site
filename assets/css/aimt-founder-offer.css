@@ -84,3 +84,193 @@
 #landingPage .fo-price{font-size:1.8rem}
 #landingPage .fo-price span{display:block;margin:4px 0 0;font-size:.75rem}
 @media(max-width:760px){#landingPage .fo-section{padding:32px 0}#landingPage .fo-shell{padding:24px 20px;border-radius:18px}#landingPage .fo-course{gap:12px}#landingPage .fo-course h3{font-size:1.05rem}#landingPage .fo-card-copy{padding:22px 20px 18px}#landingPage .fo-sidekick .fo-benefits{margin-inline:20px}#landingPage .fo-sidekick-foot{margin-inline:20px}#landingPage .fo-session{padding:24px 20px}#landingPage .fo-buy{width:100%}}
+
+/* Existing homepage Sidekick animated preview, reused without changing protocol data. */
+.protocol-mini-demo { grid-column: 1 / -1; grid-row: 2; }
+@media(max-width:700px){
+  #protocol .section-inner { grid-template-columns: 1fr; }
+  /* Mobile keeps the original, approved stacked order -- copy, then the
+     Timer mock, then the lifestyle photo -- which used to come for free
+     from the mini-demo being nested inside .protocol-text-col in the
+     DOM. Restored via `order` now that all three are siblings (moved so
+     the mini-demo could become its own full-width row on desktop).
+     grid-column/grid-row must be reset to auto here too -- the desktop
+     rules above place these explicitly (column 1/2/1-span, row 1/1/2),
+     and an explicit grid-column on a child forces the grid to
+     IMPLICITLY generate however many column tracks that placement
+     needs even when the container itself only declares one (1fr) --
+     that implicit second, auto-sized track (sized to the photo's own
+     intrinsic/aspect-ratio width) is what was squeezing the photo into
+     a narrow side-by-side thumbnail instead of stacking it full-width. */
+  .protocol-text-col { order: 1; grid-column: auto; grid-row: auto; }
+  .protocol-mini-demo { order: 2; grid-column: auto; grid-row: auto; }
+  .protocol-media-col { order: 3; grid-column: auto; grid-row: auto; }
+}
+#protocol .eyebrow { padding-left: var(--aimt-align); }
+#protocol .section-title { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+#protocol .community-intro { padding-left: var(--aimt-align); padding-right: var(--aimt-align); }
+#protocol .section-sub { padding-left: var(--aimt-align); padding-right: var(--aimt-align); margin-top: 1.75rem; }
+
+/* Media column: a flex column, the photo frame sized by its own aspect
+   ratio rather than stretched to match the text column's height (see
+   below for why the earlier stretch-to-match approach was replaced).
+   Reset to a normal, unstretched image below 700px (see media query) —
+   mobile stacks the column in normal flow regardless. */
+.protocol-media-col { max-width: 420px; display: flex; flex-direction: column; }
+/* Previously flex:1 1 auto, stretching this frame to match the text
+   column's full height via the grid's align-items:stretch. That always
+   showed the source photo's FULL height (840x1493 in an ~420-wide,
+   ~1025-tall strip is height-constrained under object-fit:cover, so
+   object-position's vertical axis had zero slack to work with) -- the
+   tablet, a fixed-size detail low in the frame (isolated via a local-
+   contrast scan of the source photo: roughly x:560-800/840, y:640-
+   1080/1493), was always a small fraction of that tall strip no matter
+   how the horizontal pan was tuned (owner review: "too much of the
+   tablet/screen is cut off"). A transform:scale zoom fixed the tablet's
+   size but overcorrected the other way (owner review: "zoomed in", "just
+   a tablet close-up", lost the room/service context).
+   Fix here is the frame's own shape, not a zoom on top of it: a fixed
+   3:4 aspect ratio is wide enough relative to the source's 840:1493 that
+   object-fit:cover becomes WIDTH-constrained instead of height-
+   constrained -- the full natural width always shows (no horizontal
+   crop at all, so nothing needs "pulling left", the practitioner's hand
+   on the left edge is simply always in frame) and object-position's
+   vertical axis gets real slack to choose a shorter, better-composed
+   vertical slice instead of the entire tall photo. This column no
+   longer fills the grid row's full stretched height -- confirmed
+   visually against the text column beside it; the shorter frame plus
+   its caption reads as intentional, not as a layout bug. */
+#protocol .aimt-sp-proof-frame { aspect-ratio: 3 / 4; }
+/* object-position: 50% 27% -- vertical-only (no horizontal crop at this
+   aspect, see above) -- selects natural y ~100-1220 of 1493: keeps a
+   strip of the curtain/wall for room context at top, then the client's
+   head, the practitioner's hand, the wash basin, AND the full tablet
+   screen together in one balanced frame. Verified against an isolated
+   render at production width before landing this value. */
+#protocol .aimt-sp-proof-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 27%; }
+
+/* Live mini-demo: a product-proof element sitting under the explanatory
+   copy — not on the treatment-room photograph, which already shows the real
+   Timer in use on the physical device. On mobile this sits directly below
+   the copy as a single narrower column, so it carries the same
+   padding-left: var(--aimt-align) inset as the text above it (see the
+   base margin rule and its own comment). On desktop it's promoted to its
+   own full-width row spanning BOTH top-row columns (grid-column: 1/-1,
+   set in the #protocol .section-inner rules above) -- a boxed card
+   filling that full row edge-to-edge reads as a deliberate section of
+   its own rather than something still trying to align with one column's
+   text inset, so the desktop override below removes the side margins
+   entirely instead of stretching them to match.
+
+   Rebuilt from the real Smart Service Sidekick's own DOM/CSS
+   (aimt-service-timer.html: .timer-top, .step-ring-wrap, .metrics-panel,
+   .ring-support, .guidance-panel, .guide-box, .comm-box, .next-strip,
+   .timer-bottom), not approximated — same element order, same color
+   tokens (--warm #a3968d, --paper #faf8f5, --w* opacities), same font
+   stack (Montserrat/Outfit/SF Mono, matched 1:1 by this site's own
+   --aimt-font-mont/-sans/-mono), same ring glow, same guide-box gradient
+   treatment, same pill/border/radius language — scaled down for a bounded
+   homepage card instead of a fixed full-viewport app. --timer-surface
+   (#1a1814) is the real product's own card-on-dark surface color, one
+   step lighter than this section's own #0f0d0b, which is itself already
+   the real product's exact --timer-bg. */
+.protocol-mini-demo {
+  /* Same content axis as the copy above it: matching left AND right margins
+     (instead of the old bare margin-left + a fixed max-width) makes this
+     stretch to the exact width of .community-intro/.section-sub's own
+     padding-inset content box, rather than floating as a narrower card. */
+  margin: 1.75rem var(--aimt-align) 0 var(--aimt-align);
+  background: #1a1814;
+  border: 1px solid rgba(250,248,245,0.1);
+  border-radius: 14px;
+  padding: 16px 18px 16px;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+}
+/* Top bar — mirrors .timer-top/.timer-top-row/.timer-id/.timer-brand/
+   .timer-format/.timer-controls exactly, incl. the real timer-format
+   (plain centered mono text, no pill) and the same brand mark asset this
+   site's own nav already uses. */
+.plc-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-bottom: 18px; }
+.plc-id { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.plc-mark { width: 14px; height: 14px; color: #a3968d; flex-shrink: 0; }
+.plc-brand { font-family: var(--aimt-font-mont); font-size: 8px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,248,245,0.94); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plc-format { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: #a3968d; text-align: center; white-space: nowrap; }
+.plc-controls { display: flex; justify-content: flex-end; gap: 5px; }
+.plc-ctrl { font-family: var(--aimt-font-mont); font-size: 6.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(250,248,245,0.68); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 5px; padding: 3px 6px; }
+
+/* Ring panel — mirrors .ring-panel/.step-ring-wrap/.ring-ambient/
+   .step-ring-svg/.ring-bg/.ring-fill/.step-clock-text/.step-time/
+   .step-time-label/.metrics-panel/.metrics-row/.service-remaining/
+   .service-elapsed/.timer-track/.timer-fill/.timer-marker/.ring-support,
+   stacked vertically — the same order the real timer's own DOM uses, and
+   the same layout the real product itself falls back to on a narrow
+   screen (ring-panel and guidance-panel are flex-row siblings only past
+   860px; this card never reaches that width). */
+.plc-ring-panel { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.plc-ring-wrap { position: relative; width: 128px; height: 128px; display: flex; align-items: center; justify-content: center; }
+.plc-ring-ambient { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle closest-side, rgba(255,248,240,0.14) 0%, rgba(255,248,240,0.05) 55%, transparent 78%); filter: blur(6px); pointer-events: none; z-index: 0; }
+.plc-ring-svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); z-index: 1; overflow: visible; }
+.plc-ring-bg { fill: none; stroke: rgba(250,248,245,0.08); stroke-width: 2.4; }
+.plc-ring-fill {
+  fill: none; stroke: #faf8f5; stroke-width: 2.4; stroke-linecap: round; transition: stroke-dashoffset 0.6s linear;
+  /* Exact triple-layer ivory glow from aimt-service-timer.html's own
+     --ring-glow (that page loads no shared stylesheet, so the value is
+     copied here rather than referenced). */
+  filter:
+    drop-shadow(0 0 6px rgba(255,248,240,0.34))
+    drop-shadow(0 0 16px rgba(255,248,240,0.16))
+    drop-shadow(0 0 28px rgba(255,248,240,0.08));
+}
+.plc-clock-text { position: relative; z-index: 1; text-align: center; }
+.plc-time { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 32px; letter-spacing: -0.03em; line-height: 1; color: #faf8f5; white-space: nowrap; }
+.plc-time-label { font-family: var(--aimt-font-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); margin-top: 7px; }
+
+.plc-metrics { width: 100%; max-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+.plc-service-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.plc-metric-elapsed { text-align: right; }
+.plc-service-label, .plc-elapsed-label { font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.48); display: block; margin-bottom: 3px; }
+.plc-service-time { font-family: var(--aimt-font-mont); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: #faf8f5; white-space: nowrap; }
+.plc-elapsed-time { font-family: var(--aimt-font-mont); font-size: 13px; font-weight: 600; color: rgba(250,248,245,0.68); white-space: nowrap; }
+.plc-track { height: 4px; background: rgba(250,248,245,0.08); border-radius: 99px; position: relative; overflow: visible; }
+.plc-track-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #a3968d; border-radius: 99px; transition: width 1s linear; }
+.plc-track-marker { position: absolute; left: 30%; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: #faf8f5; border: 2px solid #1a1814; transform: translate(-50%,-50%); }
+
+.plc-ring-support { width: 100%; max-width: 240px; font-family: var(--aimt-font-mono); font-size: 8px; letter-spacing: 0.03em; color: rgba(250,248,245,0.32); line-height: 1.5; text-align: left; }
+.plc-ring-support strong { color: rgba(250,248,245,0.48); font-weight: 600; }
+
+/* Guidance panel — mirrors .guidance-panel/.step-meta-row/.step-eyebrow/
+   .phase-pill/.step-title/.guide-box/.guide-label/.guide-text/.comm-box/
+   .comm-head/.comm-row/.comm-label/.comm-copy/.next-strip. The real
+   guide-box is a left-accent gradient fade, not a filled/bordered card —
+   and comm-row stacks label-over-copy on a narrow screen exactly as the
+   real timer's own ≤600px .comm-row rule does. */
+.plc-guidance { margin-top: 4px; padding-top: 16px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; flex-direction: column; gap: 12px; }
+.plc-step-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.plc-step-eyebrow { display: flex; align-items: center; gap: 8px; font-family: var(--aimt-font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(250,248,245,0.9); }
+.plc-step-eyebrow::before { content: ''; width: 13px; height: 1px; background: rgba(163,150,141,0.36); flex-shrink: 0; }
+.plc-phase { font-family: var(--aimt-font-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: #a3968d; padding: 3px 8px; border: 0.5px solid rgba(163,150,141,0.2); border-radius: 999px; background: rgba(163,150,141,0.12); }
+.plc-step-title { font-family: var(--aimt-font-mont); font-weight: 800; font-size: 17px; letter-spacing: -0.02em; line-height: 1.15; text-transform: uppercase; color: #faf8f5; }
+
+.plc-cue { position: relative; padding: 10px 13px 10px 15px; border-radius: 4px; background: linear-gradient(90deg, rgba(255,248,240,0.05), rgba(255,248,240,0.015) 65%, transparent); }
+.plc-cue::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; border-radius: 2px; background: #a3968d; }
+.plc-cue-label { display: block; font-family: var(--aimt-font-mono); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #a3968d; margin-bottom: 6px; }
+.plc-cue-text { font-family: var(--aimt-font-sans); font-size: 11px; line-height: 1.55; color: rgba(250,248,245,0.94); }
+
+.plc-comm { padding-top: 12px; border-top: 0.5px solid rgba(250,248,245,0.08); }
+.plc-comm-head { font-family: var(--aimt-font-mono); font-size: 7px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,248,245,0.48); margin-bottom: 8px; }
+.plc-comm-row { display: flex; flex-direction: column; gap: 4px; }
+.plc-comm-tag { font-family: var(--aimt-font-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(250,248,245,0.9); }
+.plc-comm-copy { font-family: var(--aimt-font-sans); font-size: 11px; line-height: 1.55; color: rgba(250,248,245,0.9); }
+
+.plc-next { padding-top: 11px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-family: var(--aimt-font-mono); font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(250,248,245,0.48); }
+.plc-next strong { font-family: var(--aimt-font-mont); text-transform: none; letter-spacing: 0; font-size: 10.5px; color: rgba(250,248,245,0.9); text-align: right; font-weight: 600; }
+
+/* Bottom nav — mirrors .timer-bottom/back-btn/.next-btn (ghost + filled
+   paper pill). Decorative spans, not buttons: the whole card is already
+   aria-hidden and non-interactive. */
+.plc-bottom { margin-top: 2px; padding-top: 13px; border-top: 0.5px solid rgba(250,248,245,0.08); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.plc-nav-btn { font-family: var(--aimt-font-mont); font-size: 7.5px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(250,248,245,0.68); border: 0.5px solid rgba(250,248,245,0.16); border-radius: 6px; padding: 6px 11px; }
+.plc-nav-btn-next { background: #faf8f5; color: #1a1814; border-color: #faf8f5; }
+
+
+#founderOffer .protocol-mini-demo{margin:0;padding:18px;border-radius:0;border:0;box-shadow:none;background:#1a1814}#founderOffer .fo-demo{border-block:1px solid var(--aimt-border-accent-strong)}#founderOffer .fo-demo summary{cursor:pointer;display:flex;justify-content:space-between;padding:18px 24px;font:500 .85rem/1.5 var(--aimt-font-sans);color:var(--aimt-color-text-primary)}#founderOffer .fo-demo summary:focus-visible{outline:2px solid white;outline-offset:-4px}#founderOffer .fo-demo-note{font:300 .7rem/1.6 var(--aimt-font-sans);color:var(--aimt-color-accent);margin:0;padding:0 24px 14px}#founderOffer .plc-controls{display:none}
