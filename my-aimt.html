@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-metric-ring.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/aimt-course-resources.js"></script>
+<script src="assets/js/aimt-course-resources.js?v=headstart1"></script>
 <script src="assets/js/aimt-metric-ring.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -672,10 +672,10 @@ function progressMessageFor(state, progress) {
    for the same entry. Does not touch the registry or its entitlement
    behavior. Future tools add an entry here and pick up the same row. */
 const TOOL_DISPLAY = {
-  'AIMT Service Timer': {
+  'Smart Service Sidekick': {
     eyebrow: 'Practitioner Tool',
-    description: 'A treatment-room pacing companion for the Core 60-minute and Extended 90-minute AIMT service formats.',
-    cta: 'Open Service Timer →',
+    description: 'Your live service guide: step instructions, pacing, upcoming transitions, and short answers to client questions. Core 60-minute and Extended 90-minute reference formats.',
+    cta: 'Open Smart Service Sidekick →',
     icon: '<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="19" stroke="currentColor" stroke-width="1.2" opacity="0.5"/><path d="M22 22 L22 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M22 22 L29 26" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="22" cy="22" r="1.6" fill="currentColor"/></svg>'
   }
 };
@@ -970,7 +970,7 @@ function renderCertification(slugs, progressBySlug, certBySlug) {
    comes from loadEntitlements()'s RLS-scoped course_entitlements read, so a
    non-entitled user manipulating client state gains nothing — the registry
    for a course they aren't in `entitledSlugs` is simply never rendered.
-   Tool-type entries (e.g. the Service Timer) render in Practitioner Tools;
+   Tool-type entries (e.g. the Smart Service Sidekick) render in Practitioner Tools;
    everything else renders as a resource download row, grouped by module. */
 async function loadResources(entitledSlugs) {
   const toolsArea = document.getElementById('toolsArea');
@@ -1081,7 +1081,7 @@ const PREVIEW_BAND_COPY = {
 
 /* Practitioner Tools shown locked in preview. Cadence and Listen Mode
    are built-in course features (no standalone resource-registry entry
-   to reuse); Service Timer reuses TOOL_DISPLAY's real icon/copy above
+   to reuse); Smart Service Sidekick reuses TOOL_DISPLAY's real icon/copy above
    so the two surfaces never drift on that one. */
 const PREVIEW_TOOLS = [
   {
@@ -1095,9 +1095,9 @@ const PREVIEW_TOOLS = [
     icon: '<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 24v-3a12 12 0 0 1 24 0v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="7" y="24" width="6" height="9" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="31" y="24" width="6" height="9" rx="2.5" stroke="currentColor" stroke-width="1.2"/></svg>'
   },
   {
-    name: 'AIMT Service Timer',
-    description: TOOL_DISPLAY['AIMT Service Timer'].description,
-    icon: TOOL_DISPLAY['AIMT Service Timer'].icon
+    name: 'Smart Service Sidekick',
+    description: TOOL_DISPLAY['Smart Service Sidekick'].description,
+    icon: TOOL_DISPLAY['Smart Service Sidekick'].icon
   }
 ];
 

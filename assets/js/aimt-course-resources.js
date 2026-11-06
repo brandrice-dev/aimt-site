@@ -37,8 +37,8 @@ window.AIMT_COURSE_RESOURCES = {
     {
       module: 8,
       moduleLabel: 'Module 8 — The Head Spa Service',
-      title: 'AIMT Service Timer',
-      description: 'Core (60-min) and Extended (90-min) reference protocols — a treatment-room pacing companion.',
+      title: 'Smart Service Sidekick',
+      description: 'Step-by-step service guidance, live pacing, practitioner notes, and client-response cues. Follow the Core 60-minute or Extended 90-minute reference format.',
       type: 'tool',
       href: 'aimt-service-timer.html'
     },

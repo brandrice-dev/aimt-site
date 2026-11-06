@@ -181,8 +181,8 @@ const resourceEntitlementTestsDone = (function resourceEntitlementTests() {
       /Head Spa Enhancement Strategy Guide/.test(entitled.resourcesHtml) &&
       /Between-Client Sanitation/.test(entitled.resourcesHtml) &&
       /AIMT AI Practice Toolkit/.test(entitled.resourcesHtml));
-    check('D. ENTITLED SEES RESOURCES', 'An entitled student also sees the AIMT Service Timer tool entry (now in the separate Practitioner Tools area)',
-      /AIMT Service Timer/.test(entitled.toolsHtml));
+    check('D. ENTITLED SEES RESOURCES', 'An entitled student also sees the Smart Service Sidekick tool entry (now in the separate Practitioner Tools area)',
+      /Smart Service Sidekick/.test(entitled.toolsHtml));
     check('E. NON-ENTITLED CANNOT GET RESOURCE UI', 'A student with zero entitled slugs sees the empty state in both areas, not any resource item',
       /No practitioner tools are available for this course yet\./.test(none.combinedHtml) &&
       /No resources are available for this course yet\./.test(none.combinedHtml) &&

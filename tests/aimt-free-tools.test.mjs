@@ -101,7 +101,7 @@ test('Blueprint connects course modules, never grants credentials and requires n
   assert.match(resources,/title: 'First-Service Blueprint'/);
   assert.match(resources,/href: 'first-service-blueprint\.html'/);
   assert.match(resources,/type: 'tool'/);
-  for(const original of ['Head Spa Intake + Service Plan','AIMT Service Timer','Core Service Map',
+  for(const original of ['Head Spa Intake + Service Plan','Smart Service Sidekick','Core Service Map',
     'Extended Service Map','Head Spa Enhancement Strategy Guide','Between-Client Sanitation & Reset Checklist','AIMT AI Practice Toolkit'])
     assert.ok(resources.includes(original),'existing resource lost '+original);
   assert.match(blueprint,/No client information/);
