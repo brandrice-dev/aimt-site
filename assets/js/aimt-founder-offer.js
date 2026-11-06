@@ -8,7 +8,7 @@
    const response=await fetch('/api/founder-review/offer',{cache:'no-store',signal:AbortSignal.timeout(10000)});
    const data=await response.json();if(!response.ok||data.active!==true||data.capacity!==5||!Number.isInteger(data.remaining)||data.remaining<0||data.remaining>5){hide();return;}
    if(!section){
-    const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css';if(!document.querySelector('link[href="/assets/css/aimt-founder-offer.css"]'))document.head.append(style);
+    const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=20261106';if(!document.querySelector('link[href="/assets/css/aimt-founder-offer.css?v=20261106"]'))document.head.append(style);
     section=document.createElement('section');section.className='fo-section';section.id='founderOffer';
     section.innerHTML=`<div class="lp-band-inner">
      <div class="fo-founder" aria-labelledby="fo-title">
