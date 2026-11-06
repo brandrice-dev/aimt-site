@@ -30,7 +30,9 @@ export async function buildPublicCatalog(rows, readArticle, { verifyIntegrity=ve
     const h1=html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
     const title=clean(h1?.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"')) || concept.seo_page_concept;
     const subjects=[row.topic_slug.replaceAll('-',' '),...concept.controlled_topics.map(t=>t.replaceAll('-',' ')),PUBLICATION_CLUSTERS[concept.cluster].label];
-    const article={type:'article',title,href:route,description:'Reviewed AIMT practitioner education.',categories:[concept.cluster],subjects};
+    const descriptionTag=html.match(/<meta\b(?=[^>]*\bname=["']description["'])[^>]*>/i)?.[0];
+    const description=clean(descriptionTag?.match(/\bcontent=(["'])([\s\S]*?)\1/i)?.[2]?.replace(/&amp;/g,'&').replace(/&#39;|&apos;/g,"'").replace(/&quot;/g,'"')).slice(0,360) || 'Reviewed AIMT practitioner education.';
+    const article={type:'article',title,href:route,description,categories:[concept.cluster],subjects};
     articles.push(article);
     // Legacy published articles are discoverable from their public HTML, but
     // their study metadata is withheld without an intact clearance snapshot.

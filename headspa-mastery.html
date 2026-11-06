@@ -48,7 +48,7 @@
 <link rel="stylesheet" href="assets/css/aimt-brand.css">
 <link rel="stylesheet" href="assets/css/aimt-supporting-pages.css">
 <link rel="stylesheet" href="assets/css/aimt-public-nav.css">
-<link rel="stylesheet" href="assets/css/aimt-readiness-prompt.css">
+
 <!-- Metric ring primitive shared with My AIMT (assets/js/aimt-metric-ring.js)
      -- Course Home's expanded course card reuses it so the progress
      indicator is the exact same component as the dashboard card. -->
@@ -2074,6 +2074,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
   padding: 0 0 0 2.6em;
 }
 .lp-curr-panel.is-open { max-height: 420px; padding-bottom: 1.1rem; }
+.lp-faq .lp-curr-panel.lp-retake-panel.is-open { max-height: none; }
 .lp-faq-group-label { font-family: var(--aimt-font-mono); font-size: 0.6rem; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(163,150,141,0.6); margin: 2.2rem 0 0.4rem; }
 .lp-faq-group-label:first-child { margin-top: 0; }
 
@@ -3574,7 +3575,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     <span class="aimt-public-nav-name">AIMT</span>
   </div>
   <div class="aimt-public-nav-right">
-    <button type="button" class="aimt-public-nav-cta" onclick="startCheckout()">Begin Enrollment — $597</button>
+    <button type="button" class="aimt-public-nav-cta" id="lpNavEnroll" onclick="startCheckout()">Begin Enrollment — $597</button>
   </div>
 </nav>
 <!-- Fixed dark backer, exactly nav-height, always directly behind the
@@ -3677,7 +3678,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       <div class="lp-band-inner">
         <div class="lp-proof-head">
           <div class="lp-proof-eyebrow">The AIMT Learning System</div>
-          <div class="lp-proof-title">From Information To Usable Judgment.</div>
+          <div class="lp-proof-title">Learn It. Use It With Clients.</div>
         </div>
         <div class="lp-system-grid">
           <div class="lp-system-item">
@@ -3978,34 +3979,6 @@ textarea#gpInput::placeholder { color: var(--muted2); }
       </div>
     </div>
 
-    <!-- 08 MODERN PRACTICE -->
-    <!-- OWNER ASSET DEPENDENCY (Owner Correction Pass, item 12): the prior
-         image here (module-11-ai-scalp-analysis-dashboard.png) leads with a
-         diagnostic-style "AI RESULT: Seborrheic dermatitis — 87%" confidence
-         score, which reads as automated AI scalp-diagnosis software — the
-         opposite of this section's "practitioner stays the decision-maker"
-         message (it's fine in its original Module 11 lesson context, which
-         teaches critical evaluation of that exact output, but not as a
-         standalone marketing image). No approved replacement image exists
-         in assets/images/marketing/ as of this pass, so this section runs
-         text-only rather than shipping another misleading graphic. Reported
-         as a missing asset in the session summary — swap in an approved
-         "practitioner using AI as a tool" image and restore the two-column
-         .lp-modern-recompose layout (media half below) once one exists. -->
-    <div class="lp-section-band" style="background:rgba(255,255,255,0.02);">
-      <div class="lp-band-inner">
-        <div class="lp-modern-recompose lp-modern-recompose--textonly">
-          <div>
-            <div class="lp-proof-eyebrow">Modern Practice</div>
-            <div class="lp-proof-title">Built For The Profession That Exists Now.</div>
-            <p class="lp-proof-body">Clients increasingly arrive with AI-generated information about their scalp, hair, or the service they think they need. AIMT teaches practitioners how to use AI thoughtfully as a professional tool while keeping professional judgment in the lead.</p>
-            <p class="lp-proof-body" style="margin-top:0.9rem;">The course also prepares practitioners to handle conversations where AI-generated conclusions and their own assessment do not align.</p>
-            <p class="lp-proof-eyebrow" style="margin-top:1.5rem;margin-bottom:0;">Covered in Module 11 — AI / Modern Practice Tools</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ECONOMICS OF THE ROOM — interactive gross service revenue explorer.
          Placed here deliberately: after credibility (Product Explorer,
          Complete Service, Curriculum, Practical Outcomes, Modern Practice)
@@ -4196,7 +4169,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
           <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">How do I earn AIMT Head Spa Certification?</span><span class="lp-curr-chev">+</span></button>
           <div class="lp-curr-panel" style="padding-left:0;">Certification requires completion of the required course progression and successful completion of the Final Certification Assessment. The credential is earned through demonstrated learning rather than issued automatically after purchase or passive course access.</div>
           <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What happens if I do not pass the Final Certification Assessment the first time?</span><span class="lp-curr-chev">+</span></button>
-          <div class="lp-curr-panel" style="padding-left:0;">After an unsuccessful first attempt, you receive a Certification Performance Review and may move to Attempt 2 after the appropriate review. If Attempt 2 is unsuccessful, targeted remediation must be completed before Attempt 3 unlocks. If Attempt 3 is unsuccessful, an AIMT Educator Remediation Session is required before an educator may authorize Attempt 4. If Attempt 4 does not meet the standard, the case moves to Individual AIMT Review rather than an automatic fifth attempt. Critical-domain remediation can also be required before the next attempt whenever a critical domain remains uncleared.</div>
+          <div class="lp-curr-panel lp-retake-panel" style="padding-left:0;">You receive a Performance Review and a clear review or retake path. Certification still requires meeting the course standard.<details style="margin-top:0.8rem;"><summary style="cursor:pointer;">See the full retake requirements</summary><p style="margin-top:0.8rem;">After an unsuccessful first attempt, you receive a Certification Performance Review and may move to Attempt 2 after the appropriate review. If Attempt 2 is unsuccessful, targeted remediation must be completed before Attempt 3 unlocks. If Attempt 3 is unsuccessful, an AIMT Educator Remediation Session is required before an educator may authorize Attempt 4. If Attempt 4 does not meet the standard, the case moves to Individual AIMT Review rather than an automatic fifth attempt. Critical-domain remediation can also be required before the next attempt whenever a critical domain remains uncleared.</p></details></div>
           <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">How long do I have access to the course?</span><span class="lp-curr-chev">+</span></button>
           <div class="lp-curr-panel" style="padding-left:0;">Current enrollment includes lifetime access to the Head Spa Certification Course.</div>
           <button type="button" class="lp-curr-row" aria-expanded="false"><span class="lp-curr-title" style="font-size:0.95rem;">What practitioner tools and resources are included?</span><span class="lp-curr-chev">+</span></button>
@@ -10522,7 +10495,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
 <script src="assets/js/aimt-cadence-intro.js"></script>
 <script src="assets/js/aimt-progress-sync.js"></script>
 <script src="assets/js/aimt-growth.js" defer></script>
-<script src="assets/js/aimt-readiness-prompt.js" defer></script>
+<!-- Automatic Readiness prompt retired; the inline free assessment link remains. -->
 <script src="assets/js/aimt-listen-mode-data.js"></script>
 <script src="assets/js/aimt-listen-mode-player.js"></script>
 <script src="assets/js/module12-certification.js"></script>
@@ -14957,6 +14930,6 @@ function m8TimerRestart() {
 </footer>
 
 <script src="/assets/js/aimt-learning-links.js"></script>
-<script src="/assets/js/aimt-founder-offer.js?v=headstart6" defer></script>
+<script src="/assets/js/aimt-founder-offer.js?v=publiccopy1" defer></script>
 </body>
 </html>

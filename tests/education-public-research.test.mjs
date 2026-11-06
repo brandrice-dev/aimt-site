@@ -56,3 +56,17 @@ test('legacy published article discovery does not authorize uncaptured study met
  const legacy={...row,publication_clearance:null};const c=await buildPublicCatalog([legacy],readArticle);
  assert.equal(c.articles.length,1);assert.equal(c.studies.length,0);
 });
+
+
+test('article snippets reuse only public meta descriptions and escape them in result cards',async()=>{
+ const publicHtml=await (await readArticle()).text();
+ const description="Practitioner's guide &amp; context: &quot;hair biology&quot; &lt;script&gt;";
+ const c=await buildPublicCatalog([row],async()=>new Response('<meta content="'+description+'" name="description">'+publicHtml),good);
+ assert.equal(c.articles[0].description,`Practitioner's guide & context: "hair biology" &lt;script&gt;`);
+ const rendered=libraryPage(c,new URLSearchParams());
+ assert.ok(rendered.includes('Practitioner&#39;s guide &amp; context: &quot;hair biology&quot;'));
+ assert.ok(!rendered.includes('<script>'));
+ assert.ok(!JSON.stringify(c).includes('PRIVATE'));
+ const fallback=await buildPublicCatalog([row],readArticle,good);
+ assert.equal(fallback.articles[0].description,'Reviewed AIMT practitioner education.');
+});
