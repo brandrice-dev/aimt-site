@@ -43,3 +43,13 @@ export async function releaseRejectedHold(env,hold,response){
  await rpc(env,'founder_review_release',{p_id:hold.id,p_session:null});
  // Never release on timeout, conflict, rate limit or 5xx: a session may exist.
 }
+
+// Called only for Stripe's signature-verified terminal async failure event.
+export async function releaseFailedReview(env,session){
+ const id=session.metadata?.founder_review_hold;
+ if(!id||!UUID.test(id)||session.status!=='complete'||session.payment_status!=='unpaid'||!/^cs_(test|live)_/.test(session.id||''))return false;
+ const response=await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(session.id)}`,{headers:{Authorization:`Bearer ${env.STRIPE_SECRET_KEY}`}});
+ const current=await response.json();if(!response.ok)throw Error('Failed payment could not be verified');
+ if(current.id!==session.id||current.metadata?.founder_review_hold!==id||current.status!=='complete'||current.payment_status!=='unpaid')return false;
+ return rpc(env,'founder_review_release',{p_id:id,p_session:session.id});
+}

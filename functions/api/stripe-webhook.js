@@ -19,7 +19,7 @@
      Copy the signing secret → STRIPE_WEBHOOK_SECRET
    ═══════════════════════════════════════════════════════════════ */
 
-import {fulfillReview,releaseExpiredReview} from '../_lib/founder-review/purchase.mjs';
+import {fulfillReview,releaseExpiredReview,releaseFailedReview} from '../_lib/founder-review/purchase.mjs';
 import { sendPaidEnrollmentEmail } from '../_lib/enrollment/paid-enrollment-email.mjs';
 import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
 
@@ -207,6 +207,10 @@ export async function onRequestPost(context) {
     return new Response('Bad payload', { status: 400 });
   }
 
+  if(event.type==='checkout.session.async_payment_failed'){
+    try{await releaseFailedReview(env,event.data?.object||{});return Response.json({received:true});}
+    catch{return new Response('Reservation release failed',{status:500});}
+  }
   if(event.type==='checkout.session.expired'){
     try{await releaseExpiredReview(env,event.data?.object||{});return Response.json({received:true});}
     catch{return new Response('Reservation release failed',{status:500});}

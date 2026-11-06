@@ -64,3 +64,16 @@ test('uncertain Stripe failures preserve the held bonus until actual expiration'
  await releaseRejectedHold(env,hold,Response.json({error:{type:'invalid_request_error',param:'line_items[0][price]'}},{status:400}));
  assert.equal(calls,1);
 });
+
+test('signature-verified terminal async failure releases only the bound unpaid hold',async t=>{
+ const calls=[];mock(t,async(url,options)=>{if(url.startsWith('https://api.stripe.com/'))return Response.json({id:'cs_test_failed',status:'complete',payment_status:'unpaid',metadata:{founder_review_hold:id}});calls.push([url,JSON.parse(options.body)]);return Response.json(true);});
+ const session={id:'cs_test_failed',status:'complete',payment_status:'unpaid',metadata:{founder_review_hold:id}};
+ for(const payment_status of ['paid','no_payment_required']){const r=await webhook({env,request:await signedEvent({type:'checkout.session.async_payment_failed',data:{object:{...session,payment_status}}})});assert.equal(r.status,200);}
+ assert.equal(calls.length,0);
+ const r=await webhook({env,request:await signedEvent({type:'checkout.session.async_payment_failed',data:{object:session}})});assert.equal(r.status,200);assert.equal(calls.length,1);assert.deepEqual(calls[0][1],{p_id:id,p_session:session.id});
+});
+
+test('async failure rechecks Stripe and never releases a now-paid checkout',async t=>{
+ mock(t,async url=>{assert.ok(url.startsWith('https://api.stripe.com/'));return Response.json({id:'cs_test_late',status:'complete',payment_status:'paid',metadata:{founder_review_hold:id}});});
+ const r=await webhook({env,request:await signedEvent({type:'checkout.session.async_payment_failed',data:{object:{id:'cs_test_late',status:'complete',payment_status:'unpaid',metadata:{founder_review_hold:id}}}})});assert.equal(r.status,200);
+});
