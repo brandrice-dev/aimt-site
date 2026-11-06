@@ -260,6 +260,7 @@ ${renderSources(plan.sources)}
       <ul class="aimt-edu-related">
 ${renderRelatedLinks(plan.related_links)}
       </ul>
+      <p>Bring your learning into head spa practice. The Head Spa Certification Course covers scalp observation, client communication, and the complete service. <a href="/head-spa-certification">Explore Head Spa Certification →</a></p>
     </section>
 
   </article>

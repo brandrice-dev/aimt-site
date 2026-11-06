@@ -24,13 +24,13 @@ test('Decision page matches approved Version 6 copy, price, and plain direction'
   assert.match(HTML,/Stand out from the competition/);
   assert.match(HTML,/Know what you're doing—and why/);
   assert.match(HTML,/\$597 one time\./);
-  assert.match(HTML,/Lifetime course access/);
+  assert.match(HTML,/Lifetime course access/i);
   assert.match(HTML,/Certification is earned by completing/);
   assert.doesNotMatch(HTML,/previewDialog|Owner draft|mock checkout/i);
   assert.doesNotMatch(HTML,/countdown|guaranteed income|100% guaranteed results/i);
 });
 test('Only real enrollment CTA points to the existing secure payment flow',()=>{
-  assert.match(HTML,/<a class="cta" href="\/enroll" id="startTraining">Start My Training/);
+  assert.match(HTML,/<a class="cta" href="\/enroll" id="startTraining"><span data-next-step-action>Start My Training/);
   assert.doesNotMatch(HTML,/stripe\.com\/v1\/checkout\/sessions|\/api\/create-checkout-session/);
   assert.match(read('enroll.html'),/\/api\/create-checkout-session/);
   assert.doesNotMatch(HTML,/<form[^>]*payment/i);

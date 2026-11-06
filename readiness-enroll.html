@@ -127,6 +127,19 @@ h1 em {
   font-size: var(--aimt-type-body-sm);
   color: var(--aimt-color-light-muted);
 }
+.schedule-note { margin:var(--aimt-space-xl) 0 0; max-width:70ch; color:var(--aimt-color-text-body); font-size:var(--aimt-type-body-sm); line-height:var(--aimt-leading-copy); }
+.schedule-note strong { color:var(--aimt-color-text-primary); font-weight:var(--aimt-weight-semibold); }
+.offer-name { font-family:var(--aimt-font-mont); font-size:clamp(1rem,2vw,1.25rem); line-height:1.3; letter-spacing:var(--aimt-track-subtitle); margin:0 0 var(--aimt-space-lg); }
+.offer-includes { list-style:none; padding:0; margin:0; display:grid; gap:var(--aimt-space-md); }
+.offer-includes li { font-size:var(--aimt-type-body-sm); line-height:var(--aimt-leading-copy); }
+.offer-includes strong { display:block; font-weight:var(--aimt-weight-semibold); }
+.offer-includes span { display:block; color:var(--aimt-color-light-muted); font-size:var(--aimt-type-caption); }
+.offer-includes [hidden],.offer-availability[hidden] { display:none; }
+.offer-purchase { flex:0 0 275px; min-width:0; }
+.offer-price { display:block; font-family:var(--aimt-font-mont); font-size:clamp(1.2rem,2.3vw,1.65rem); margin-bottom:var(--aimt-space-md); }
+.offer-purchase .cta { width:100%; min-width:0; white-space:normal; }
+.offer-availability { color:var(--aimt-color-light-muted); font-size:var(--aimt-type-caption); line-height:var(--aimt-leading-copy); margin:var(--aimt-space-md) 0 0; }
+.offer-details { display:inline-block; margin-top:var(--aimt-space-md); color:var(--aimt-color-light-muted); font-size:var(--aimt-type-caption); text-underline-offset:3px; }
 .cta {
   display: inline-flex;
   align-items: center;
@@ -173,6 +186,8 @@ h1 em {
   .promise span { width: 100%; }
   .action { margin-top: var(--aimt-space-xl); padding: var(--aimt-space-xl); display: block; }
   .cta { width: 100%; min-width: 0; margin-top: var(--aimt-space-lg); }
+  .offer-purchase { margin-top:var(--aimt-space-xl); padding-top:var(--aimt-space-lg); border-top:var(--aimt-border-hairline) solid var(--aimt-border-strong); }
+  .offer-purchase .cta { margin-top:0; }
   .end { display: block; font-size: var(--aimt-type-micro); }
   .links { margin-top: var(--aimt-space-md); }
 }
@@ -216,10 +231,23 @@ h1 em {
   <h1>GIVE CLIENTS MORE REASONS <em>TO CHOOSE YOU.</em></h1>
   <p class="lead"><strong>Stand out from other salons. Offer more value. Build a stronger business.</strong> Learn to offer scalp consultations, build head spa services around each client, and give clear answers they can trust.</p>
   <div class="promise" aria-label="What this training helps you do"><span>Offer more to each client</span><span>Stand out from the competition</span><span>Know what you're doing—and why</span></div>
-  <section class="action" aria-label="Enroll in Head Spa Certification"><div class="action-copy"><small>Head Spa Certification Course</small><b>$597 one time.</b><p>Self-paced. Lifetime course access. Includes Smart Service Sidekick: step-by-step help while you work.</p></div><a class="cta" href="/enroll" id="startTraining">Start My Training <span class="arrow" aria-hidden="true">→</span></a></section>
+  <p class="schedule-note"><strong>Our No-Rush Promise.</strong> Set your study schedule. Pause and return with lifetime course access.</p>
+  <section class="action" aria-label="Enroll in Head Spa Certification" id="nextStepOffer">
+    <div class="action-copy">
+      <small data-next-step-label>Your course + included bonus</small>
+      <h2 class="offer-name" data-next-step-name>Head Spa Certification</h2>
+      <ul class="offer-includes">
+        <li><strong>Head Spa Certification Course</strong><span>Training, assessment + lifetime course access.</span></li>
+        <li><strong>Included bonus: Smart Service Sidekick</strong><span>Step-by-step help while you work.</span></li>
+        <li data-next-step-founder hidden><strong>Limited bonus: private 45-minute founder session</strong><span>Review your service plan after certification and completion of your Blueprint.</span></li>
+      </ul>
+    </div>
+    <div class="offer-purchase"><b class="offer-price">$597 one time.</b><a class="cta" href="/enroll" id="startTraining"><span data-next-step-action>Start My Training</span><span class="arrow" aria-hidden="true">→</span></a><p class="offer-availability" data-next-step-availability hidden role="status"></p><a class="offer-details" href="/head-spa-certification#lpCurriculum">See the full curriculum →</a></div>
+  </section>
 </main>
 <footer class="end"><p>Certification is earned by completing the required training and passing the final assessment. This course does not expand your professional license.</p><div class="links"><a href="/refunds">Refunds</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div></footer>
 </div>
 <script src="/assets/js/aimt-growth.js" defer></script>
+<script src="/assets/js/aimt-next-step-offer.js?v=1" defer></script>
 </body>
 </html>
