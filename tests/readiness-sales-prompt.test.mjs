@@ -3,7 +3,7 @@
 // Executes the real script in a node:vm sandbox with a minimal fake DOM,
 // fake clock, and captured AIMTGrowth.track(), so the trigger, suppression,
 // once-per-visit, enrollment-CTA courtesy, and analytics rules are verified
-// as shipped. Static checks cover the copy/destination, where the script is
+// in isolation. The automatic prompt is retired; static checks cover that it is no longer
 // loaded, mobile CSS bounds, and that enrollment/checkout code is untouched.
 //
 // Run: node --test tests/readiness-sales-prompt.test.mjs
@@ -363,7 +363,7 @@ test('never appears on other routes or inside the course app', () => {
   }
 });
 
-test('the script is loaded only by the Head Spa sales page, never sitewide', () => {
+test('the retired automatic prompt is not loaded on public pages; inline assessment remains', () => {
   const html = [];
   const walk = (dir) => {
     for (const ent of readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
@@ -375,8 +375,9 @@ test('the script is loaded only by the Head Spa sales page, never sitewide', () 
   };
   walk('.');
   const loaders = html.filter((f) => /(src|href)="[^"]*aimt-readiness-prompt\.(js|css)"/.test(read(f)));
-  assert.deepEqual(loaders.map((f) => path.normalize(f)), ['headspa-mastery.html']);
-  assert.equal((SALES.match(/aimt-readiness-prompt/g) || []).length, 2, 'one stylesheet + one script tag');
+  assert.deepEqual(loaders.map((f) => path.normalize(f)), []);
+  assert.equal((SALES.match(/aimt-readiness-prompt/g) || []).length, 0, 'no automatic prompt assets loaded');
+  assert.match(SALES, /href="\/head-spa-readiness"/);
   // Not injected by any shared script either.
   for (const shared of ['assets/js/aimt-public-nav.js', 'assets/js/aimt-growth.js', 'assets/js/headspa-state.js']) {
     assert.doesNotMatch(read(shared), /createElement\(['"]script['"]\)[\s\S]{0,200}readiness-prompt|aimt-rp\b/, shared);
