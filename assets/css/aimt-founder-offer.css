@@ -279,3 +279,8 @@
 #landingPage .fo-shell{position:relative}
 #landingPage .fo-corner-tab{position:absolute;top:0;right:28px;transform:translateY(-50%);padding:7px 16px;border-radius:5px;background:var(--aimt-color-light-bg);color:var(--aimt-color-light-text);box-shadow:0 4px 12px rgba(0,0,0,.2);font:600 .6rem/1.4 var(--aimt-font-mont);letter-spacing:.12em;text-transform:uppercase}
 #landingPage .fo-corner-tab[hidden]{display:none}
+
+/* Keep the package name together; the descriptor has its own hierarchy. */
+#landingPage .fo-name-line{display:block;white-space:nowrap;font-size:clamp(1.05rem,4.35vw,2.8rem)}
+#landingPage .fo-package-subtitle{display:block;font:500 .85rem/1.5 var(--aimt-font-mont);letter-spacing:.1em;margin-top:12px}
+@media(max-width:760px){#landingPage .fo-name-line{font-size:clamp(.9rem,4.35vw,2rem)}}

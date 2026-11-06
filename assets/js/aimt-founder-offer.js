@@ -1,10 +1,10 @@
 // Presentation only. The course and Sidekick are always included; founder availability is server-owned.
 (function(){
  const root=document.getElementById('landingPage');if(!root)return;
- const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart4';document.head.append(style);
+ const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart5';document.head.append(style);
  const section=document.createElement('section');section.className='fo-section';section.id='founderOffer';
  section.innerHTML=`<div class="lp-band-inner"><div class="fo-shell"><span class="fo-corner-tab" hidden>Limited</span>
-  <header class="fo-head"><span class="fo-label fo-offer-label">Your course + included bonus</span><h2 class="section-title fo-package-title">Head Spa Certification Package</h2><p class="fo-body">Earn your certification. Know what to do during the service.</p><p class="fo-package-limit" hidden role="status"></p></header>
+  <header class="fo-head"><span class="fo-label fo-offer-label">Your course + included bonus</span><h2 class="section-title fo-package-title"><span class="fo-name-line">Head Spa Certification</span><span class="fo-package-subtitle">Package</span></h2><p class="fo-body">Earn your certification. Know what to do during the service.</p><p class="fo-package-limit" hidden role="status"></p></header>
   <article class="fo-course"><div><span class="fo-label">01 · The foundation</span><h3>Head Spa Certification Course</h3><p>Complete training, practitioner resources, and lifetime access. Earn your AIMT credential by passing the assessment.</p></div></article>
   <div class="fo-grid">
    <article class="fo-sidekick" aria-labelledby="fo-sidekick-title"><div class="fo-card-copy"><span class="fo-label">02 · Your included bonus</span><h3 id="fo-sidekick-title">Smart Service Sidekick</h3><p class="fo-sidekick-lead">Know what comes next. Keep your service flowing.</p></div>
@@ -85,14 +85,22 @@
  const anchor=pricing?.closest('.lp-section-band')||root.querySelector('.lp-final-close');
  if(anchor){anchor.before(section);const status=anchor.querySelector?.('#lpCheckoutStatus');if(status)section.querySelector('.fo-buy').append(status);anchor.hidden=true;}else root.append(section);
  document.head.append(demoScript);
+ // Consume this one-time deep link after its first layout. A live countdown
+ // must not leave Safari re-targeting the fragment during later DOM updates.
+ if(typeof window!=='undefined'&&window.location.hash==='#founderOffer'){
+  window.requestAnimationFrame(()=>{if(window.location.hash==='#founderOffer')window.history.replaceState(window.history.state,'',window.location.pathname+window.location.search);});
+ }
  const note=document.createElement('p');note.className='fo-hero-note';root.querySelector('.lp-hero-cta-row')?.after(note);
  const summary=document.createElement('p');summary.className='fo-price-note';pricing?.append(summary);
  root.querySelectorAll('.lp-enroll-btn.lp-enroll-primary').forEach(button=>{button.textContent='Enroll with Head Start — $597';});
+ let lastRemaining=Symbol('initial');
  function showAvailability(remaining){
+  if(Object.is(lastRemaining,remaining))return;lastRemaining=remaining;
   const available=Number.isInteger(remaining)&&remaining>0;
   section.querySelector('.fo-head .fo-body').textContent=available?'Earn your certification. Know what to do during the service. Get personal feedback before your first client.':'Earn your certification. Know what to do during the service.';
   root.querySelectorAll('.lp-enroll-btn.lp-enroll-primary').forEach(button=>{button.textContent=available?'Give me a Head Start — $597':'Enroll with the Sidekick — $597';});
-  section.querySelector('.fo-package-title').textContent=available?'Head Spa Head Start Bonus Package':'Head Spa Certification Package';
+  section.querySelector('.fo-name-line').textContent=available?'Head Spa Head Start':'Head Spa Certification';
+  section.querySelector('.fo-package-subtitle').textContent=available?'Bonus Package':'Package';
   section.querySelector('.fo-offer-label').textContent=available?'Limited enrollment package':'Your course + included bonus';
   section.querySelector('.fo-package-limit').hidden=!available;
   section.querySelector('.fo-package-limit').textContent=available?remaining+' of 5 packages available · Includes your private founder session.':'';
