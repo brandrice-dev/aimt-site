@@ -1,7 +1,7 @@
 // Presentation only. The course and Sidekick are always included; founder availability is server-owned.
 (function(){
  const root=document.getElementById('landingPage');if(!root)return;
- const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart5';document.head.append(style);
+ const style=document.createElement('link');style.rel='stylesheet';style.href='/assets/css/aimt-founder-offer.css?v=headstart6';document.head.append(style);
  const section=document.createElement('section');section.className='fo-section';section.id='founderOffer';
  section.innerHTML=`<div class="lp-band-inner"><div class="fo-shell"><span class="fo-corner-tab" hidden>Limited</span>
   <header class="fo-head"><span class="fo-label fo-offer-label">Your course + included bonus</span><h2 class="section-title fo-package-title"><span class="fo-name-line">Head Spa Certification</span><span class="fo-package-subtitle">Package</span></h2><p class="fo-body">Earn your certification. Know what to do during the service.</p><p class="fo-package-limit" hidden role="status"></p></header>
@@ -78,7 +78,7 @@
    </article>
    <article class="fo-session" hidden aria-labelledby="fo-session-title"><span class="fo-label">03 · Your limited bonus</span><h3 id="fo-session-title">A private session<br>with AIMT’s founder.</h3><p class="fo-session-intro">45 minutes, one-on-one with the founder of AIMT and co-owner of ATRIUM Head Spa &amp; Wellness.</p><ul class="fo-benefits"><li><strong>Review your Blueprint.</strong> See what’s ready and what needs work.</li><li><strong>Ask your questions.</strong> Talk through decisions for your business.</li><li><strong>Plan your next steps.</strong> Know what to do before your first service.</li></ul><div class="fo-allocation"><p class="fo-availability"></p><p>Only five enrollments include this session. After those places fill, the course and Sidekick remain available without it.</p></div><p class="fo-terms">Book after completing your certification and Blueprint. Bonus availability is confirmed at checkout.</p></article>
   </div>
-  <div class="fo-package-close"><div><p class="fo-package-summary">Your course + Smart Service Sidekick.</p><p class="fo-package-extra" hidden>Plus your private founder session.</p></div><div class="fo-buy"><div class="fo-price">$597 <span>One payment. Bonuses included.</span></div><a class="fo-cta" href="/enroll">Give me a Head Start <span aria-hidden="true">→</span></a></div></div>
+  <div class="fo-package-close"><div class="fo-close-recap"><h3>Get certified. Start with support.</h3><ul class="fo-close-list"><li><span aria-hidden="true">✓</span><div><strong>Head Spa Certification Course</strong><small>Training, assessment + lifetime course access.</small></div></li><li><span aria-hidden="true">✓</span><div><span class="fo-close-bonus">Included bonus</span><strong>Smart Service Sidekick</strong><small>Step-by-step guidance while you work.</small></div></li><li class="fo-package-extra" hidden><span aria-hidden="true">✓</span><div><span class="fo-close-bonus">Limited bonus</span><strong>Private 45-minute founder session</strong><small>Review your plan. Know your next steps.</small></div></li></ul></div><div class="fo-buy"><div class="fo-price">$597 <span>One payment. Bonuses included at no extra cost.</span></div><a class="fo-cta" href="/enroll">Give me a Head Start <span aria-hidden="true">→</span></a><p class="fo-close-availability" hidden></p></div></div>
  </div></div>`;
  const demoScript=document.createElement('script');demoScript.src='/assets/js/aimt-sidekick-demo.js?v=1';
  const pricing=root.querySelector('.lp-pricing-includes');
@@ -108,6 +108,8 @@
   section.querySelector('.fo-session').hidden=!available;
   section.querySelector('.fo-corner-tab').hidden=!available;
   section.querySelector('.fo-package-extra').hidden=!available;
+  section.querySelector('.fo-close-availability').hidden=!available;
+  section.querySelector('.fo-close-availability').textContent=available?'Only '+remaining+' '+(remaining===1?'founder session remains.':'founder sessions remain.')+' Availability confirmed at checkout.':'';
   section.classList.toggle('fo-base-only',!available);
   note.textContent='Your course + Smart Service Sidekick. Bonus included with enrollment.';
   summary.textContent='Included bonus: Smart Service Sidekick — step-by-step service guidance, live pacing, and client communication cues.';
