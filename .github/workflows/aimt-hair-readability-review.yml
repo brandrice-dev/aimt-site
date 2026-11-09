@@ -11,7 +11,7 @@ on:
         type: string
         required: true
       approve_review:
-        description: Owner-approved $5 total / ten requests; runner uses stricter $2/six requests
+        description: Owner-approved $5 total / ten requests; revised probe approval required; cumulative ledger preserved
         type: boolean
         default: false
 permissions:
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-batch-review-2026-11-09-visual-continuation
+          name: manual-batch-review-2026-11-09-revised-probe
           path: research-import/manual-batch-review/
           if-no-files-found: error
           retention-days: 90
