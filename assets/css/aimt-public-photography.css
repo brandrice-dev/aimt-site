@@ -13,6 +13,7 @@ body{margin:0}
 .pv-education .aimt-sp-eyebrow{color:var(--aimt-color-accent)}
 .pv-image-band{position:relative;width:100%;height:clamp(260px,32vw,440px);margin:0;overflow:hidden}
 .pv-image-band .pv-background{display:block;width:100%;height:100%}
+.aa-body .pv-image-band img{object-position:center center}
 .pv-product{margin:2rem 0 0;width:100%}
 .pv-product img{display:block;width:100%;height:auto;border:var(--aimt-border-hairline) solid var(--aimt-border-soft)}
 .pv-product figcaption{font-family:var(--aimt-font-sans);font-weight:var(--aimt-weight-regular);font-size:.75rem;line-height:1.6;color:var(--aimt-color-light-muted);margin-top:.65rem}
