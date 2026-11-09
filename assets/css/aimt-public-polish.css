@@ -14,6 +14,7 @@
 .card-identity .eyebrow{color:rgba(255,255,255,.72)}
 @media(max-width:700px){
  .home-microscopy-proof{grid-template-columns:1fr;gap:1rem}
+ .footer-legal{font-size:.75rem;line-height:1.5}
  .hero-sub{font-size:1rem!important;line-height:1.55!important;color:rgba(255,255,255,.96)!important}
  .flagship-body,.flagship-subhead,.gallery-card-body{font-size:1rem;line-height:1.65}
  .flagship-body,.gallery-card-body{color:#655b54}
