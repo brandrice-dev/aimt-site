@@ -4,13 +4,14 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('checkout package only includes founder call on strict server confirmation, and resets on subsequent load',()=>{
- const name={textContent:''},founder={hidden:false};const window={};
- vm.runInNewContext(read('assets/js/aimt-enrollment-package.js'),{window,document:{getElementById:id=>id==='enrollPackageName'?name:founder}});
- assert.equal(founder.hidden,true);
+ const name={textContent:''},founder={hidden:false},applied={hidden:false};let marked=false;const panel={classList:{toggle(_,value){marked=value;}}};const window={};
+ const elements={enrollPackageName:name,enrollFounderPackage:founder,enrollPackageApplied:applied,enrollPackage:panel};
+ vm.runInNewContext(read('assets/js/aimt-enrollment-package.js'),{window,document:{getElementById:id=>elements[id]}});
+ assert.equal(founder.hidden,true);assert.equal(applied.hidden,true);assert.equal(marked,false);
  window.AIMTEnrollmentPackage.render(true);
- assert.equal(founder.hidden,false);assert.match(name.textContent,/Head Spa Head Start/);
+ assert.equal(founder.hidden,false);assert.equal(applied.hidden,false);assert.equal(marked,true);assert.match(name.textContent,/Head Spa Head Start/);
  for(const value of [false,undefined,null,1,'true',{}]){
-  window.AIMTEnrollmentPackage.render(value);assert.equal(founder.hidden,true);assert.doesNotMatch(name.textContent,/Head Start/);
+  window.AIMTEnrollmentPackage.render(value);assert.equal(founder.hidden,true);assert.equal(applied.hidden,true);assert.equal(marked,false);assert.doesNotMatch(name.textContent,/Head Start/);
  }
  window.AIMTEnrollmentPackage.render(true);window.AIMTEnrollmentPackage.render(false);assert.equal(founder.hidden,true);
 });

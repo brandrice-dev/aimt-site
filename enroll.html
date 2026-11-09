@@ -281,7 +281,7 @@ a { color: inherit; }
   .enroll-footer-inner { padding: 1.4rem 1rem 2rem; flex-direction: column; }
 }
 </style>
-<link rel="stylesheet" href="/assets/css/aimt-public-polish.css?v=1">
+<link rel="stylesheet" href="/assets/css/aimt-public-polish.css?v=2">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -326,7 +326,8 @@ a { color: inherit; }
         <p class="enroll-price-note">One-time tuition</p>
       </div>
     </div>
-    <div class="enroll-package" aria-live="polite">
+    <div class="enroll-package" id="enrollPackage" aria-live="polite">
+      <p class="enroll-package-applied" id="enrollPackageApplied" hidden><span aria-hidden="true">✓</span> Bonus package applied</p>
       <h2 id="enrollPackageName">Your course + included bonus</h2>
       <p>Head Spa Certification + Smart Service Sidekick</p>
       <p id="enrollFounderPackage" hidden>Plus a private 45-minute, 1-on-1 Google Meet video call with AIMT’s founder after certification and completion of your Blueprint.</p>
@@ -418,7 +419,7 @@ a { color: inherit; }
   </div>
 </footer>
 
-<script src="assets/js/aimt-enrollment-package.js?v=1"></script>
+<script src="assets/js/aimt-enrollment-package.js?v=2"></script>
 <script src="assets/js/aimt-growth.js"></script>
 <script>
 (function () {
