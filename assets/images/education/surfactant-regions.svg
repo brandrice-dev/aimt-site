@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" role="img" aria-labelledby="title desc">
+  <title id="title">Two regions of a surfactant</title>
+  <desc id="desc">A simplified teaching schematic shows a rounded water-attracting region connected to an oil-attracting region. It does not represent the molecular structure of a specific ingredient.</desc>
+  <rect x="1" y="1" width="598" height="418" rx="18" fill="#1a1814" stroke="#a3968d" stroke-opacity=".35"/>
+  <g font-family="Montserrat,Arial,sans-serif" fill="#eee5dc">
+    <text x="32" y="47" font-size="15" letter-spacing="2.2" fill="#a3968d">UNDERSTANDING SURFACTANTS</text>
+    <text x="32" y="92" font-size="27">One molecule, different affinities</text>
+    <circle cx="120" cy="202" r="46" fill="#a3968d" fill-opacity=".24" stroke="#a3968d" stroke-width="2.5"/>
+    <path d="M166 202 H190 L222 177 L254 227 L286 177 L318 227 L350 177 L382 227 L414 177 L446 202 H482" fill="none" stroke="#a3968d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M120 253 V280 M344 242 V315" fill="none" stroke="#a3968d" stroke-opacity=".55"/>
+    <text x="32" y="306" font-size="24">Water-attracting region</text>
+    <text x="236" y="350" font-size="24">Oil-attracting region</text>
+    <text x="32" y="390" font-size="15" fill="#a3968d">SIMPLIFIED SCHEMATIC · NOT TO MOLECULAR SCALE</text>
+  </g>
+</svg>
