@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: brandrice-dev/aimt-research-feed
-          ref: ee082171493ef2ec711361f9ab55c864c93afbb3
+          ref: 0c385837ffce4d81f548c8a51f123bc943bd1793
           token: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
           path: private-review
           persist-credentials: false
@@ -46,15 +46,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ANTHROPIC_PUBLICATION_EDITOR_API_KEY: ${{ secrets.ANTHROPIC_PUBLICATION_EDITOR_API_KEY }}
           ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
-          PACKET_SHA256: aacec382eac848f9d9a954588dd3503a91992fca29fc5c7e95f15aca0edf9975
+          PACKET_SHA256: 2519f169610caf3a8a9755064253732c81ed2a9e483229ed1fd69c1f44f76879
           PR_NUMBER: ${{ inputs.pr_number }}
           CANDIDATE_HEAD: ${{ inputs.candidate_head }}
           APPROVE_REVIEW: ${{ inputs.approve_review }}
-        run: node scripts/education-manual-final-clearance.mjs
+        run: node scripts/education-manual-dandruff-repair.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-final-clearance-2026-11-09
-          path: research-import/manual-final-clearance/
+          name: manual-dandruff-repair-2026-11-09
+          path: research-import/manual-dandruff-repair/
           if-no-files-found: error
           retention-days: 90
