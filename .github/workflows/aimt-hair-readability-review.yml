@@ -11,15 +11,19 @@ on:
         type: string
         required: true
       approve_review:
-        description: Separate owner-approved $0.50 / two-request readability allowance
+        description: Owner-approved $5 total / ten requests; runner uses stricter $2/six requests
         type: boolean
         default: false
+      packet_b64:
+        description: Compressed exact author-proposal packet; never logged
+        type: string
+        required: true
 permissions:
   contents: read
   actions: read
   pull-requests: read
 concurrency:
-  group: aimt-hair-readability-review
+  group: aimt-manual-batch-review-2026-11-09
   cancel-in-progress: false
 jobs:
   independent-review:
@@ -36,14 +40,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
+          PACKET_B64: ${{ inputs.packet_b64 }}
+          PACKET_SHA256: 437701f0141cae239ca519e2a218b80acbeecd594c73583240e4ef4220d94611
           PR_NUMBER: ${{ inputs.pr_number }}
           CANDIDATE_HEAD: ${{ inputs.candidate_head }}
           APPROVE_REVIEW: ${{ inputs.approve_review }}
-        run: node scripts/education-hair-readability-review.mjs
+        run: node scripts/education-manual-batch-review.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: hair-biology-readability-review
-          path: research-import/hair-readability-review/
+          name: manual-batch-review-2026-11-09
+          path: research-import/manual-batch-review/
           if-no-files-found: error
           retention-days: 90
