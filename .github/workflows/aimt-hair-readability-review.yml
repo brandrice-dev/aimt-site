@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: brandrice-dev/aimt-research-feed
-          ref: cf55a889c5b2e5869bc2c2c199fed3406b09ed84
+          ref: ee082171493ef2ec711361f9ab55c864c93afbb3
           token: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
           path: private-review
           persist-credentials: false
@@ -44,16 +44,17 @@ jobs:
       - name: Review data-only proposal against the original cleared snapshot
         env:
           GH_TOKEN: ${{ github.token }}
+          ANTHROPIC_PUBLICATION_EDITOR_API_KEY: ${{ secrets.ANTHROPIC_PUBLICATION_EDITOR_API_KEY }}
           ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
-          PACKET_SHA256: 437701f0141cae239ca519e2a218b80acbeecd594c73583240e4ef4220d94611
+          PACKET_SHA256: aacec382eac848f9d9a954588dd3503a91992fca29fc5c7e95f15aca0edf9975
           PR_NUMBER: ${{ inputs.pr_number }}
           CANDIDATE_HEAD: ${{ inputs.candidate_head }}
           APPROVE_REVIEW: ${{ inputs.approve_review }}
-        run: node scripts/education-manual-batch-review.mjs
+        run: node scripts/education-manual-final-clearance.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-batch-review-2026-11-09-revised-probe
-          path: research-import/manual-batch-review/
+          name: manual-final-clearance-2026-11-09
+          path: research-import/manual-final-clearance/
           if-no-files-found: error
           retention-days: 90

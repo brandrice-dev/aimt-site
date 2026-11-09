@@ -1,6 +1,6 @@
 import {estimatedTokenCost,PUBLICATION_INPUT_TOKEN_LIMIT,PUBLICATION_OUTPUT_TOKEN_LIMIT} from '../../functions/_lib/research/publication-cost-control.mjs';
 export function createManualReviewAllowance({previous,persist}){
- if(previous?.task!=='manual-article-batch-2026-11-09'||previous.requests!==5||previous.requests_with_unknown_usage!==0)throw Error('EXACT_PRIOR_COST_REQUIRED');
+ if(previous?.task!=='manual-article-batch-2026-11-09'||previous.requests!==6||previous.requests_with_unknown_usage!==0)throw Error('EXACT_PRIOR_COST_REQUIRED');
  let state={...previous,budget_usd:5,request_limit:10};
  for(const k of ['requests','reserved_cost_estimate_usd','reported_usage_cost_estimate_usd'])if(!Number.isFinite(state[k])||state[k]<0)throw Error('INVALID_PRIOR_COST');
  const summary=()=>({...state});
