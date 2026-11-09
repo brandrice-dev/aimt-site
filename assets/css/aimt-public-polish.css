@@ -41,3 +41,18 @@
  #landingPage .lp-brand{margin-bottom:1rem}
  #landingPage .fo-hero-note{font-size:.825rem;margin-top:.75rem}
 }
+
+/* The mobile homepage may grow beyond one screen to separate badge and copy. */
+@media(max-width:700px){
+ #hero{display:block;min-height:0;padding:calc(var(--aimt-nav-height,56px) + clamp(340px,100vw,520px)) 1.25rem 3rem}
+ #hero .hero-image{object-position:center top}
+ #hero .hero-content{width:min(100%,24rem);margin:0 auto}
+ #hero .hero-headline{margin-bottom:1.25rem}
+ #hero .hero-lead{line-height:1.2;margin-bottom:.3em}
+ #hero .hero-sub{max-width:none;margin-top:0}
+ #hero .hero-ctas{margin-top:1.75rem;gap:.85rem}
+}
+.enroll-package.is-applied{margin-top:1.25rem;padding:1.1rem 1.2rem;border:1px solid #c7d9cd;border-radius:12px;background:#f1f6f2}
+.enroll-package .enroll-package-applied{display:inline-flex;align-items:center;gap:.45rem;margin:0 0 .8rem;padding:.3rem .65rem;border-radius:999px;background:#dfeee4;color:#23563b;font-family:var(--aimt-font-mont);font-size:.7rem;font-weight:600;line-height:1.4}
+.enroll-package .enroll-package-applied[hidden]{display:none}
+.enroll-package-applied span{display:inline-flex;align-items:center;justify-content:center;width:1.05rem;height:1.05rem;border-radius:50%;background:#2d6a48;color:#fff;font-size:.75rem}

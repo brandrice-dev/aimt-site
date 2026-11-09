@@ -885,7 +885,6 @@ body {
   .institute-intro,
   .community-intro { margin-bottom: 1rem; }
   .section-title { margin-bottom: 0.6rem; }
-  footer { flex-direction: column; align-items: flex-start; gap: 0.9rem; padding: 2.5rem 1.25rem; }
   .mid-cta-actions { flex-direction: column; align-items: stretch; }
   .c01-photo { min-height: 160px; padding: 1.4rem var(--aimt-align) 1.2rem; }
   .c01-tag { font-size: 0.46rem; letter-spacing: 0.12em; }
@@ -905,16 +904,7 @@ body {
   .practice-row { padding: 0.95rem 0; gap: 12px; }
 }
 
-/* ── FOOTER ── */
-footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-.footer-brand { display: flex; align-items: center; gap: 9px; }
-.footer-mark { width: 22px; height: 22px; color: rgba(255,255,255,0.28); }
-.footer-mark svg { width: 22px; height: 22px; }
-.footer-name { font-family: var(--aimt-font-mont); font-size: 0.62rem; letter-spacing: 0.38em; text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,0.46); padding-right: 0.38em; }
-.footer-copy { font-family: var(--aimt-font-mono); font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.46); }
-.footer-legal { display: flex; gap: 1.1rem; font-family: var(--aimt-font-mono); font-size: 0.5rem; letter-spacing: 0.1em; }
-.footer-legal a { color: rgba(255,255,255,0.46); text-decoration: none; transition: color 0.2s; }
-.footer-legal a:hover { color: rgba(255,255,255,0.6); }
+/* Footer uses the shared supporting-page design system. */
 
 /* ── REVEAL ── */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
@@ -936,7 +926,7 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
 
 </style>
 <link rel="stylesheet" href="/assets/css/aimt-public-photography.css?v=3">
-<link rel="stylesheet" href="/assets/css/aimt-public-polish.css?v=1">
+<link rel="stylesheet" href="/assets/css/aimt-public-polish.css?v=2">
 </head>
 <body>
 <!-- ══ CANONICAL AIMT BRAND MARK ══
@@ -1380,12 +1370,40 @@ footer { background: var(--hero-bg2); padding: 2rem 1.5rem; border-top: 0.5px so
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-brand"><div class="footer-mark"><svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/><circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><circle cx="22" cy="22" r="2" fill="currentColor"/><circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/><circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/></svg></div><span class="footer-name">AIMT</span></div>
-  <div class="footer-legal"><a href="head-spa-certification">Head Spa Certification</a><a href="/courses">All Certifications</a><a href="/education">Education Library</a><a href="/about">About</a><a href="student-access.html">Student Access</a></div>
-  <div class="footer-legal"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/refunds">Refunds</a></div>
-  <div class="footer-copy">© 2026 American Institute of Modern Trichology</div>
+<!-- Shared AIMT public footer -->
+<footer class="aimt-footer">
+  <div class="aimt-footer-inner">
+    <div class="aimt-footer-brand">
+      <div class="aimt-footer-mark">
+        <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#aimtOrbitalMark"/></svg>
+        <span>AIMT</span>
+      </div>
+      <p class="aimt-footer-tagline">American Institute of Modern Trichology — professional education for modern practitioners.</p>
+    </div>
+    <div class="aimt-footer-col">
+      <span class="aimt-footer-col-title">Education</span>
+      <a href="head-spa-certification">Head Spa Certification</a>
+      <a href="/courses">AIMT Programs</a>
+    </div>
+    <div class="aimt-footer-col">
+      <span class="aimt-footer-col-title">Student</span>
+      <a href="student-access.html">Student Access</a>
+      <a href="/verify">Verify a Credential</a>
+    </div>
+    <div class="aimt-footer-col">
+      <span class="aimt-footer-col-title">Legal</span>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/refunds">Refund Policy</a>
+    </div>
+    <div class="aimt-footer-col">
+      <span class="aimt-footer-col-title">Institute</span>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/education">Education Library</a>
+    </div>
+  </div>
+  <div class="aimt-footer-bottom" style="text-align:center;">&copy; 2026 American Institute of Modern Trichology.</div>
 </footer>
 
 <script src="assets/js/aimt-public-nav.js"></script>
