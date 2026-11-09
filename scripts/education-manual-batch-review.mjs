@@ -7,7 +7,7 @@ import {EDUCATION_OPS_ROLES} from '../functions/_lib/education-ops/education-ops
 import {createPublicationCostControl} from '../functions/_lib/research/publication-cost-control.mjs';
 const e=process.env, task='manual-article-batch-2026-11-09',dir='research-import/manual-batch-review';
 if(e.APPROVE_REVIEW!=='true'||e.GITHUB_EVENT_NAME!=='workflow_dispatch'||e.GITHUB_REPOSITORY!=='brandrice-dev/aimt-site'||e.CANDIDATE_HEAD!=='7310ec23204b6dd1e2229ec62fb4fc1785c056fa')throw Error('APPROVAL_OR_CANDIDATE_MISMATCH');
-const data=Buffer.from(e.PACKET_B64,'base64');
+const data=Buffer.from(readFileSync('private-review/reviews/manual-article-batch-2026-11-09.packet.b64','utf8').trim(),'base64');
 if(createHash('sha256').update(data).digest('hex')!==e.PACKET_SHA256)throw Error('PACKET_DIGEST_MISMATCH');
 const proposals=JSON.parse(gunzipSync(data));
 const api=p=>JSON.parse(execFileSync('gh',['api',`repos/brandrice-dev/aimt-site/${p}`],{maxBuffer:10e6}));

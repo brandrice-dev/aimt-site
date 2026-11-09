@@ -14,10 +14,6 @@ on:
         description: Owner-approved $5 total / ten requests; runner uses stricter $2/six requests
         type: boolean
         default: false
-      packet_b64:
-        description: Compressed exact author-proposal packet; never logged
-        type: string
-        required: true
 permissions:
   contents: read
   actions: read
@@ -36,11 +32,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - uses: actions/checkout@v4
+        with:
+          repository: brandrice-dev/aimt-research-feed
+          ref: cf55a889c5b2e5869bc2c2c199fed3406b09ed84
+          token: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
+          path: private-review
+          persist-credentials: false
       - name: Review data-only proposal against the original cleared snapshot
         env:
           GH_TOKEN: ${{ github.token }}
           ANTHROPIC_EDUCATION_WRITER_API_KEY: ${{ secrets.ANTHROPIC_EDUCATION_WRITER_API_KEY }}
-          PACKET_B64: ${{ inputs.packet_b64 }}
           PACKET_SHA256: 437701f0141cae239ca519e2a218b80acbeecd594c73583240e4ef4220d94611
           PR_NUMBER: ${{ inputs.pr_number }}
           CANDIDATE_HEAD: ${{ inputs.candidate_head }}
