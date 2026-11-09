@@ -1,0 +1,48 @@
+{
+  "task": "manual-article-batch-2026-11-09",
+  "candidate_head": "d6e2a4d8f5190eddd8748fd6f2cebf9ed0ff4220",
+  "reviewed_at": "2026-11-09T16:38:46.753Z",
+  "ok": true,
+  "output": {
+    "outcome": "PASS",
+    "summary": "Both images are reasonable simplified teaching graphics consistent with their stated captions/disclaimers. The alopecia areata panel correctly depicts a hair follicle with bulb-region immune privilege and peribulbar lymphocytic infiltrate concentrated around the lower follicle/bulb, which matches the accepted model of AA pathophysiology (collapse of immune privilege at the bulb with lymphocytic attack). The surfactant image correctly shows amphipathic molecules with hydrophilic head oriented toward water and hydrophobic tail oriented toward the oil droplet, consistent with proper surfactant orientation at an oil-water interface, and the caption appropriately notes it is 'not a micelle' and 'not to scale.'",
+    "issues": [
+      {
+        "location": "alopecia-areata-immune-rendering.webp - follicle bulb region",
+        "severity": "minor",
+        "reason": "The dermal papilla/bulb coloration and surrounding structures are stylized and anatomically simplified (fibrous sheath, bulge region, sebaceous gland not clearly depicted), which could slightly blur precise follicle landmark identification for learners unfamiliar with true histology.",
+        "required_change": "Optional: add small labels or caption note clarifying that surrounding follicle layers (outer/inner root sheath, bulge) are simplified and not all structures are depicted to scale or in full anatomical detail."
+      },
+      {
+        "location": "how-surfactants-clean.webp - micelle-like arrangement",
+        "severity": "minor",
+        "reason": "Although captioned as 'not a micelle,' the spherical arrangement of surfactant heads around a single large oil droplet closely resembles a classic micelle/emulsion droplet schematic, which could still visually mislead some readers despite the disclaimer.",
+        "required_change": "Optional: add a brief visual note or asterisk near the image clarifying the distinction between this simplified emulsified droplet and a true surfactant micelle for extra clarity, though the existing caption is sufficient for a teaching-simplified context."
+      }
+    ],
+    "source_verification_limits": "Review based solely on visual inspection of the two provided images and their embedded text/labels; no external anatomical or biochemical reference database was consulted, and no quantitative or histological accuracy verification beyond general physiological plausibility was performed."
+  },
+  "rawText": "{\"outcome\":\"PASS\",\"summary\":\"Both images are reasonable simplified teaching graphics consistent with their stated captions/disclaimers. The alopecia areata panel correctly depicts a hair follicle with bulb-region immune privilege and peribulbar lymphocytic infiltrate concentrated around the lower follicle/bulb, which matches the accepted model of AA pathophysiology (collapse of immune privilege at the bulb with lymphocytic attack). The surfactant image correctly shows amphipathic molecules with hydrophilic head oriented toward water and hydrophobic tail oriented toward the oil droplet, consistent with proper surfactant orientation at an oil-water interface, and the caption appropriately notes it is 'not a micelle' and 'not to scale.'\",\"issues\":[{\"location\":\"alopecia-areata-immune-rendering.webp - follicle bulb region\",\"severity\":\"minor\",\"reason\":\"The dermal papilla/bulb coloration and surrounding structures are stylized and anatomically simplified (fibrous sheath, bulge region, sebaceous gland not clearly depicted), which could slightly blur precise follicle landmark identification for learners unfamiliar with true histology.\",\"required_change\":\"Optional: add small labels or caption note clarifying that surrounding follicle layers (outer/inner root sheath, bulge) are simplified and not all structures are depicted to scale or in full anatomical detail.\"},{\"location\":\"how-surfactants-clean.webp - micelle-like arrangement\",\"severity\":\"minor\",\"reason\":\"Although captioned as 'not a micelle,' the spherical arrangement of surfactant heads around a single large oil droplet closely resembles a classic micelle/emulsion droplet schematic, which could still visually mislead some readers despite the disclaimer.\",\"required_change\":\"Optional: add a brief visual note or asterisk near the image clarifying the distinction between this simplified emulsified droplet and a true surfactant micelle for extra clarity, though the existing caption is sufficient for a teaching-simplified context.\"}],\"source_verification_limits\":\"Review based solely on visual inspection of the two provided images and their embedded text/labels; no external anatomical or biochemical reference database was consulted, and no quantitative or histological accuracy verification beyond general physiological plausibility was performed.\"}",
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "education-ops-model-registry-v1",
+    "role": "EDUCATION_REVIEWER_MODEL",
+    "source": "candidate-default"
+  },
+  "usage": {
+    "input_tokens": 1972,
+    "output_tokens": 770
+  },
+  "diagnostics": {
+    "attempts": 1,
+    "elapsed_ms": 10561,
+    "request_bytes": 208767,
+    "max_tokens": 8000,
+    "http_status": 200,
+    "model": "claude-sonnet-5",
+    "request_id": "req_011CgsgaXmRKPLkLp6NST5G8",
+    "stage": "complete"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "run_id": "42658777996",
+  "candidate_head": "d6e2a4d8f5190eddd8748fd6f2cebf9ed0ff4220",
+  "input_packet_sha256": "aacec382eac848f9d9a954588dd3503a91992fca29fc5c7e95f15aca0edf9975",
+  "reviewed_plan_sha256": "c28a0366b6de60bd2b9c2cb5a5ca2575ec440055d2d8dac61f7413a54973393b",
+  "review": {
+    "topic_slug": "surfactants",
+    "paraphrase_reviews": [
+      {
+        "location": "answer_summary",
+        "verdict": "ENTAILED",
+        "reason": "Exact match to cited source statement, no added scope."
+      },
+      {
+        "location": "section:cleansing:0",
+        "verdict": "ENTAILED",
+        "reason": "Faithful restatement of the IUPAC surfactant definition."
+      },
+      {
+        "location": "section:cleansing:2",
+        "verdict": "ENTAILED",
+        "reason": "Matches the cited source statement on lather vs. cleansing exactly."
+      },
+      {
+        "location": "section:surfactant-families:0",
+        "verdict": "ENTAILED",
+        "reason": "Exact match to the cited source statement on surfactant charge families."
+      },
+      {
+        "location": "section:formulation:0",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement on mildness and pH exactly."
+      },
+      {
+        "location": "section:formulation:1",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement on formula blending exactly."
+      },
+      {
+        "location": "section:formulation:2",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement on alkyl glucosides exactly."
+      },
+      {
+        "location": "section:cleansing-and-conditioning:0",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement on cationic conditioning deposition exactly."
+      },
+      {
+        "location": "section:safety-assessment:0",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited CIR conclusion statement, preserving the qualifying condition."
+      },
+      {
+        "location": "section:scalp-research:0",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement on natural moisturizing factor and the washout study's scope exactly."
+      },
+      {
+        "location": "section:scalp-research:1",
+        "verdict": "ENTAILED",
+        "reason": "Faithfully restates the pilot-study finding using one of its two cited source statements without overstating generalizability."
+      },
+      {
+        "location": "key_takeaway:0",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement verbatim in substance."
+      },
+      {
+        "location": "key_takeaway:1",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited source statement verbatim in substance."
+      },
+      {
+        "location": "key_takeaway:2",
+        "verdict": "ENTAILED",
+        "reason": "Faithfully restates the pilot-study finding consistent with its cited source statements."
+      }
+    ],
+    "framing_reviews": [
+      {
+        "location": "section:cleansing:1",
+        "verdict": "NON_FACTUAL",
+        "reason": "Editorial lead-in sentence with no factual content; removable without losing scientific meaning."
+      },
+      {
+        "location": "section:scalp-research:2",
+        "verdict": "NON_FACTUAL",
+        "reason": "Editorial guidance encouraging critical reading of research conditions; introduces no new scientific claim."
+      }
+    ],
+    "voice_verdict": "PASS",
+    "voice_reason": "Tone is clear, instructive, and professional, builds concepts progressively, and avoids journal-abstract or SEO-style language.",
+    "scope_verdict": "PASS",
+    "scope_reason": "Content remains within approved concepts (surfactant chemistry, formulation, safety-assessment framing, scalp research limits) and avoids brand ranking, schedules, concentration limits, or treatment claims."
+  },
+  "verdict": {
+    "outcome": "PASS",
+    "failing_paraphrases": [],
+    "failing_framings": [],
+    "voice_fail": false,
+    "scope_fail": false,
+    "summary": "All units ENTAILED/NON_FACTUAL; voice and scope PASS."
+  },
+  "generation_source_hash": "11488d18bcd4b5ec64513cc7d2b13d19c031616fe20436dceda67d7fb09d9c1e",
+  "rendered_sha256": "2ab99a485c14a76c1b27a58ba8834ebd9fed020ddbe7ea34c7205bbe48fe1298",
+  "figures": [
+    {
+      "before": "surfactant-families",
+      "html": "<figure style=\"margin:2rem 0;max-width:760px\"><img src=\"/assets/images/education/how-surfactants-clean.webp\" width=\"1122\" height=\"1402\" style=\"display:block;width:100%;height:auto\" alt=\"Surfactant structure and oil dispersion: blue hydrophilic heads face water while gold hydrophobic tails associate with oil\"><figcaption class=\"aimt-edu-sources-note\">Simplified teaching model of a surfactant and a surfactant-coated oil droplet. The droplet shown is not a micelle; surfactants can also form smaller aggregates called micelles. Shapes, sizes and molecular structures vary.</figcaption></figure>"
+    },
+    {
+      "before": "cleansing-and-conditioning",
+      "html": "<figure data-course-visual=\"surfactants\" style=\"margin:2rem 0;max-width:760px\"><img src=\"/assets/images/marketing/approved-aesthetic-service-shot3.png\" width=\"1672\" height=\"941\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Lather being worked through the hair during a head-spa cleanse\"><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">Cleansing during a head-spa service. Visible lather does not measure cleansing performance. <a href=\"/head-spa-certification\">Explore AIMT’s Head Spa Certification course.</a></figcaption></figure>"
+    }
+  ]
+}

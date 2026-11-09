@@ -8,12 +8,12 @@ const manifest=JSON.parse(read('functions/_data/education-visual-reviews/manifes
 test('each exact illustration has an independent PASS and unchanged reviewed asset',()=>{
  assert.equal(manifest.source_run_id,42654391453);assert.equal(manifest.source_artifact_id,13690823512);
  for(const [asset,proof] of Object.entries(manifest.reviews)){
-  const review=JSON.parse(read(proof.review_file));assert.equal(review.ok,true);assert.equal(review.output.outcome,'PASS');assert.equal(review.candidate_head,manifest.candidate_head);
+  const review=JSON.parse(read(proof.review_file));assert.equal(review.ok,true);assert.equal(review.output.outcome,'PASS');assert.equal(review.candidate_head,proof.candidate_head||manifest.candidate_head);
   assert.equal(hash(read('assets/images/education/'+asset)),proof.asset_sha256);
  }
 });
 test('visual additions preserve every byte of previously published article content',()=>{
- assert.equal(manifest.pages.length,4);
+ assert.equal(manifest.pages.length,5);
  for(const page of manifest.pages){
   assert.ok(manifest.reviews[page.asset]);const html=read(page.path).toString();assert.equal(hash(html),page.updated_sha256);
   assert.equal(html.split(page.figure_html).length,2,'exact approved figure appears once');

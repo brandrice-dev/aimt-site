@@ -1,0 +1,108 @@
+{
+  "run_id": "42660328299",
+  "candidate_head": "d6e2a4d8f5190eddd8748fd6f2cebf9ed0ff4220",
+  "input_packet_sha256": "2519f169610caf3a8a9755064253732c81ed2a9e483229ed1fd69c1f44f76879",
+  "reviewed_plan_sha256": "8ebe40cea9dc45d114d32b85eb0da94fc9369901a85dd174c084033a3001e3e5",
+  "review": {
+    "topic_slug": "dandruff",
+    "paraphrase_reviews": [
+      {
+        "location": "answer_summary",
+        "verdict": "ENTAILED",
+        "reason": "Matches source statement verbatim in substance with no added claims."
+      },
+      {
+        "location": "section:understanding-dandruff:1",
+        "verdict": "ENTAILED",
+        "reason": "Reproduces the cited source statement verbatim in meaning, no additions."
+      },
+      {
+        "location": "section:skin-cell-shedding:0",
+        "verdict": "ENTAILED",
+        "reason": "Faithful rewrite; the term 'desquamation' is already present in the source statement's parenthetical, so no new fact is added."
+      },
+      {
+        "location": "section:skin-cell-shedding:1",
+        "verdict": "ENTAILED",
+        "reason": "Conservative paraphrase matching the cited statement's content on corneodesmosome persistence and protease-inhibitor proteins."
+      },
+      {
+        "location": "section:malassezia-metabolism:0",
+        "verdict": "ENTAILED",
+        "reason": "Accurately restates the lipase/expression finding and the interpretive point about considering environment alongside yeast activity."
+      },
+      {
+        "location": "section:microbial-balance:0",
+        "verdict": "ENTAILED",
+        "reason": "Correctly restates the French cohort findings; omitting the systematic-review clause (covered separately) does not add or strengthen anything."
+      },
+      {
+        "location": "section:microbial-balance:1",
+        "verdict": "ENTAILED",
+        "reason": "Restates the systematic-review clause from the same cleared statement without adding new scope."
+      },
+      {
+        "location": "section:scalp-barrier:0",
+        "verdict": "ENTAILED",
+        "reason": "Faithful paraphrase of water-loss and barrier lipid findings, correctly distinguishing from surface oiliness."
+      },
+      {
+        "location": "section:scalp-barrier:1",
+        "verdict": "ENTAILED",
+        "reason": "Matches cited statement, including the proposed (not asserted) link between barrier changes and Malassezia metabolite susceptibility."
+      },
+      {
+        "location": "section:practitioner-context:1",
+        "verdict": "ENTAILED",
+        "reason": "Faithfully condenses the multifactorial-explanation statement without overstating certainty."
+      },
+      {
+        "location": "key_takeaway:0",
+        "verdict": "ENTAILED",
+        "reason": "Identical in substance to the cited source statement."
+      },
+      {
+        "location": "key_takeaway:1",
+        "verdict": "ENTAILED",
+        "reason": "Identical in substance to the cited source statement."
+      },
+      {
+        "location": "key_takeaway:2",
+        "verdict": "ENTAILED",
+        "reason": "Faithfully restates the barrier review's described findings and proposed relationship."
+      }
+    ],
+    "framing_reviews": [
+      {
+        "location": "section:understanding-dandruff:0",
+        "verdict": "NON_FACTUAL",
+        "reason": "Purely editorial transition sentence; contains no biological claim and can be removed without losing scientific meaning."
+      },
+      {
+        "location": "section:practitioner-context:0",
+        "verdict": "NON_FACTUAL",
+        "reason": "Editorial encouragement to understand the model before labeling; introduces no new factual or clinical content."
+      }
+    ],
+    "voice_verdict": "PASS",
+    "voice_reason": "The page reads in clear, accessible AIMT Education voice -- plain-language explanations of corneocytes, desquamation, and microbial balance before deeper detail, without academic abstract tone or SEO padding, and without implying diagnostic or treatment authority.",
+    "scope_verdict": "PASS",
+    "scope_reason": "Content stays within the approved in-scope concepts (desquamation, Malassezia metabolism, microbial balance, barrier function, practitioner-level conceptual framing) and avoids diagnosis, treatment protocols, product recommendations, or regrowth claims, consistent with the stated out-of-scope exclusions."
+  },
+  "verdict": {
+    "outcome": "PASS",
+    "failing_paraphrases": [],
+    "failing_framings": [],
+    "voice_fail": false,
+    "scope_fail": false,
+    "summary": "All units ENTAILED/NON_FACTUAL; voice and scope PASS."
+  },
+  "generation_source_hash": "ad6558250530cd19f040c2dd1f2ad37c1bae27698f2f53b1afa08daf7e3092a4",
+  "rendered_sha256": "9670990ce57321ff669593c7ec13e601b80c5c18813e76fcf71c969dd6b6119c",
+  "figures": [
+    {
+      "before": "skin-cell-shedding",
+      "html": "<figure data-course-visual=\"dandruff\" style=\"margin:2rem 0;max-width:760px\"><img src=\"/assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.webp\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Illustrated comparison of dry-scalp and dandruff-spectrum surface patterns\"><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">Illustrative comparison from Module 6. Surface appearance alone cannot establish a diagnosis; these are teaching illustrations, not clinical photographs. <a href=\"/head-spa-certification\">Explore AIMT’s Head Spa Certification course.</a></figcaption></figure>"
+    }
+  ]
+}
