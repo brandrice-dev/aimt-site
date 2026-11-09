@@ -11,6 +11,12 @@ test('published Hair Biology revision exactly matches the independently reviewed
  assert.equal(proof.verdict.outcome,'PASS');assert.equal(proof.original_snapshot_unchanged,true);
  assert.equal(proof.generation_source_hash,artifact.generation_source_hash);assert.equal(proof.original_candidate_artifact,11848689625);
  assert.deepEqual(collectAllProseUnits(artifact.plan).filter(x=>x.unit.kind==='PARAPHRASE').map(x=>x.location),proof.paraphrase_locations);
- assert.equal(readFileSync(new URL('../education/trichology/hair-biology.html',import.meta.url),'utf8'),renderEducationPageHtml(artifact.plan,{launchReady:true,generationSourceHash:artifact.generation_source_hash}));
+ const visuals=JSON.parse(readFileSync(new URL('../functions/_data/education-visual-reviews/manifest.json',import.meta.url)));
+ const visual=visuals.pages.find(p=>p.path==='education/trichology/hair-biology.html');
+ const original=renderEducationPageHtml(artifact.plan,{launchReady:true,generationSourceHash:artifact.generation_source_hash});
+ assert.equal(createHash('sha256').update(original).digest('hex'),visual.original_sha256);
+ const marker='<section class="aimt-legal-doc__section" id="growth-cycle">';
+ assert.equal(original.split(marker).length,2);
+ assert.equal(readFileSync(new URL('../education/trichology/hair-biology.html',import.meta.url),'utf8'),original.replace(marker,visual.figure_html+marker));
  assert.ok(proof.cost_control.requests<=2);assert.ok(proof.cost_control.reserved_cost_estimate_usd<=.5);
 });

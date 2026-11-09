@@ -1,0 +1,54 @@
+{
+  "task": "manual-article-batch-2026-11-09",
+  "candidate_head": "7310ec23204b6dd1e2229ec62fb4fc1785c056fa",
+  "reviewed_at": "2026-11-09T16:25:38.912Z",
+  "ok": true,
+  "output": {
+    "outcome": "PASS",
+    "summary": "The illustration is a reasonable simplified conceptual diagram of scalp microbiome/skin barrier interaction, appropriately labeled as non-diagnostic with organisms enlarged for visibility. No major anatomical, microbiological, or immunological errors that would mislead practitioner audience given stated caption context.",
+    "issues": [
+      {
+        "location": "Sebaceous gland depiction (lower left bulbous structure)",
+        "severity": "minor",
+        "reason": "The gland is drawn attached partway up the follicle rather than clearly emptying via a duct into the upper follicle canal near the infundibulum, which is the typical schematic convention; as drawn it could be misread as part of the dermal papilla/bulb region rather than a sebaceous gland.",
+        "required_change": "Add a thin duct line connecting the gland cluster to the follicle canal near the surface, or move the gland higher and clarify with a label line, to avoid implying sebum originates from the hair bulb/papilla area."
+      },
+      {
+        "location": "Skin barrier inset",
+        "severity": "minor",
+        "reason": "The 'brick and mortar' corneocyte depiction shows uniform elongated hexagonal cells with golden intercellular lipid, which is a reasonable simplification but could be mistaken for literal single-layer thickness of stratum corneum; captions should clarify this is schematic only.",
+        "required_change": "Add a small caption note (if not already covered by general caption) clarifying the barrier inset is a simplified schematic of lipid organization, not an accurate cell-layer count."
+      },
+      {
+        "location": "Bacteria and Malassezia size/placement on surface",
+        "severity": "minor",
+        "reason": "Organisms are shown as large, discrete, well-spaced shapes sitting directly atop sebum, which could visually suggest sparse colonization or an artificially clean distribution pattern rather than the dense, mixed biofilm-like reality.",
+        "required_change": "Rely on existing caption stating organism numbers are illustrative; no image change required beyond ensuring caption is clearly visible in final layout."
+      }
+    ],
+    "source_verification_limits": "Review based solely on visual inspection of the provided image; no access to original source files, layering data, or AIMT's full caption placement in final publication context. Assessment assumes stated captions (exogen overlap, illustrative microbial numbers, non-literal immune shield, non-micelle oil droplet) will accompany this specific image as described, though this image itself does not depict hair cycle or immune privilege elements explicitly."
+  },
+  "rawText": "{\"outcome\":\"PASS\",\"summary\":\"The illustration is a reasonable simplified conceptual diagram of scalp microbiome/skin barrier interaction, appropriately labeled as non-diagnostic with organisms enlarged for visibility. No major anatomical, microbiological, or immunological errors that would mislead practitioner audience given stated caption context.\",\"issues\":[{\"location\":\"Sebaceous gland depiction (lower left bulbous structure)\",\"severity\":\"minor\",\"reason\":\"The gland is drawn attached partway up the follicle rather than clearly emptying via a duct into the upper follicle canal near the infundibulum, which is the typical schematic convention; as drawn it could be misread as part of the dermal papilla/bulb region rather than a sebaceous gland.\",\"required_change\":\"Add a thin duct line connecting the gland cluster to the follicle canal near the surface, or move the gland higher and clarify with a label line, to avoid implying sebum originates from the hair bulb/papilla area.\"},{\"location\":\"Skin barrier inset\",\"severity\":\"minor\",\"reason\":\"The 'brick and mortar' corneocyte depiction shows uniform elongated hexagonal cells with golden intercellular lipid, which is a reasonable simplification but could be mistaken for literal single-layer thickness of stratum corneum; captions should clarify this is schematic only.\",\"required_change\":\"Add a small caption note (if not already covered by general caption) clarifying the barrier inset is a simplified schematic of lipid organization, not an accurate cell-layer count.\"},{\"location\":\"Bacteria and Malassezia size/placement on surface\",\"severity\":\"minor\",\"reason\":\"Organisms are shown as large, discrete, well-spaced shapes sitting directly atop sebum, which could visually suggest sparse colonization or an artificially clean distribution pattern rather than the dense, mixed biofilm-like reality.\",\"required_change\":\"Rely on existing caption stating organism numbers are illustrative; no image change required beyond ensuring caption is clearly visible in final layout.\"}],\"source_verification_limits\":\"Review based solely on visual inspection of the provided image; no access to original source files, layering data, or AIMT's full caption placement in final publication context. Assessment assumes stated captions (exogen overlap, illustrative microbial numbers, non-literal immune shield, non-micelle oil droplet) will accompany this specific image as described, though this image itself does not depict hair cycle or immune privilege elements explicitly.\"}",
+  "modelInfo": {
+    "provider": "anthropic",
+    "modelName": "claude-sonnet-5",
+    "status": "CANDIDATE",
+    "registryVersion": "education-ops-model-registry-v1",
+    "role": "EDUCATION_REVIEWER_MODEL",
+    "source": "candidate-default"
+  },
+  "usage": {
+    "input_tokens": 1361,
+    "output_tokens": 821
+  },
+  "diagnostics": {
+    "attempts": 1,
+    "elapsed_ms": 12132,
+    "request_bytes": 124764,
+    "max_tokens": 8000,
+    "http_status": 200,
+    "model": "claude-sonnet-5",
+    "request_id": "req_011CgsfaLKUYRrE4fHwexMTn",
+    "stage": "complete"
+  }
+}
