@@ -12,10 +12,10 @@ if(createHash('sha256').update(data).digest('hex')!==e.PACKET_SHA256)throw Error
 const proposals=JSON.parse(gunzipSync(data));
 const api=p=>JSON.parse(execFileSync('gh',['api',`repos/brandrice-dev/aimt-site/${p}`],{maxBuffer:10e6}));
 if(api('pulls/154').head.sha!==e.CANDIDATE_HEAD)throw Error('STALE_CANDIDATE');
-if(api('actions/artifacts?name=manual-batch-review-2026-11-09&per_page=100').artifacts.length)throw Error('TASK_ALREADY_ATTEMPTED_DO_NOT_RESET_ALLOWANCE');
+const priorArtifact=api('actions/artifacts/13691048091'); if(priorArtifact.workflow_run.id!==42653493015||priorArtifact.name!=='manual-batch-review-2026-11-09')throw Error('PRIOR_REVIEW_IDENTITY'); const archive=execFileSync('gh',['api','repos/brandrice-dev/aimt-site/actions/artifacts/13691048091/zip'],{maxBuffer:2e6}); if(createHash('sha256').update(archive).digest('hex')!=='70ac1c733a073856767a64a6f030417f176a48f50dbc457d728c4867b0f668ed')throw Error('PRIOR_REVIEW_DIGEST'); mkdirSync(dir,{recursive:true}); execFileSync('python3',['-c',"import zipfile,io,sys;z=zipfile.ZipFile(io.BytesIO(sys.stdin.buffer.read()));z.extractall('research-import/manual-batch-review')"],{input:archive});
 mkdirSync(dir,{recursive:true});
 // Existing $2/six-call allowance is stricter than the owner-approved $5/ten-call ceiling.
-const ledger=createPublicationCostControl({persist:s=>writeFileSync(dir+'/cost.json',JSON.stringify({task,...s},null,2))});
+const ledger=createPublicationCostControl({previous:JSON.parse(readFileSync(dir+'/cost.json')),persist:s=>writeFileSync(dir+'/cost.json',JSON.stringify({task,...s},null,2))});
 const schema={type:'object',properties:{outcome:{type:'string',enum:['PASS','FAIL']},summary:{type:'string'},issues:{type:'array',items:{type:'object',properties:{location:{type:'string'},severity:{type:'string',enum:['blocking','minor']},reason:{type:'string'},required_change:{type:'string'}},required:['location','severity','reason','required_change'],additionalProperties:false}},source_verification_limits:{type:'string'}},required:['outcome','summary','issues','source_verification_limits'],additionalProperties:false};
 let failed=false;
 async function review(name,content,system){
@@ -25,9 +25,8 @@ async function review(name,content,system){
  if(!result.ok)throw Error('REVIEW_REQUEST_FAILED_STOP_NO_RETRY');
  if(result.output.outcome!=='PASS')failed=true;
 }
-for(const proposal of proposals){
- await review(proposal.plan.topic_slug,JSON.stringify(proposal),'You are the independent scientific/editorial reviewer, not the author. Inspect this author-proposed educational article, every factual prose unit, cited claim mapping, source provenance, limitations and practitioner scope. No author-supplied status constitutes clearance. Proposed supplemental claims have not been independently verified; identify that explicitly. Evaluate entailment against supplied evidence, distinguish summaries from primary source extracts, detect overclaim, incorrect mechanisms, false numerical precision and unsupported scientific framing. Return FAIL when evidence is inadequate to independently clear publication, and list concrete blocking issues with locations. Never claim to have fetched or read an external source not included in this request. No rewriting the article, no manufacturing verification. PASS is only a scientific/editorial opinion on the inspected data and is not database publication clearance.');
-}
+// Exact three prior article FAIL results retained; no repeated text calls.
+failed=true;
 const groups=[['hair-cycle',['hair-growth-cycle-rendering.webp']],['scalp-ecosystem',['scalp-ecosystem-rendering.webp']],['immune-and-surfactant',['alopecia-areata-immune-rendering.webp','how-surfactants-clean.webp']]];
 for(const [name,files] of groups){
  const content=[{type:'text',text:'Independently review the attached proposed scientific teaching illustrations and labels for correctness and misleading visual implications. They will be shown in practitioner educational articles, labeled simplified and not diagnostic. Review exact supplied images, not the prompt. Identify any anatomy, cycle, microbiology, immunology or surfactant-orientation error. Use FAIL for scientific blocking errors. Cosmetic preference alone is minor. Captions will explain exogen can overlap cycling, microbial numbers are illustrative, immune privilege is not a literal shield, and the surfactant oil droplet is not a micelle.'}];

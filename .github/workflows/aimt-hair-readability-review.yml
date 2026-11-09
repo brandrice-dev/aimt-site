@@ -39,6 +39,8 @@ jobs:
           token: ${{ secrets.RESEARCH_FEED_READ_TOKEN }}
           path: private-review
           persist-credentials: false
+      - name: Install image conversion utility
+        run: sudo apt-get update -qq && sudo apt-get install -y imagemagick
       - name: Review data-only proposal against the original cleared snapshot
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,7 +53,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manual-batch-review-2026-11-09
+          name: manual-batch-review-2026-11-09-visual-continuation
           path: research-import/manual-batch-review/
           if-no-files-found: error
           retention-days: 90
