@@ -478,6 +478,7 @@ a { color: inherit; }
 
   function showLoading() {
     if(window.AIMTEnrollmentPackage)window.AIMTEnrollmentPackage.render(false);
+    var oldBonusNote=document.getElementById('founderCheckoutNote');if(oldBonusNote)oldBonusNote.hidden=true;
     els.error.hidden = true;
     els.loading.hidden = false;
     els.mount.classList.remove('is-mounted');
@@ -579,6 +580,7 @@ a { color: inherit; }
         if(data && typeof data.founderReview==='boolean'){
           var bonusNote=document.getElementById('founderCheckoutNote');
           if(!bonusNote){bonusNote=document.createElement('p');bonusNote.id='founderCheckoutNote';bonusNote.setAttribute('role','status');els.mount.parentNode.insertBefore(bonusNote,els.mount);}
+          bonusNote.hidden=false;
           bonusNote.textContent=data.founderReview?'Included: one private 45-minute, 1-on-1 Google Meet video call with AIMT’s founder after certification.':'A founder video call is not included with this enrollment; the limited allocation is currently reserved.';
           if(window.AIMTEnrollmentPackage)window.AIMTEnrollmentPackage.render(data.founderReview);
         }
