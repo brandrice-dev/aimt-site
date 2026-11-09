@@ -1,0 +1,316 @@
+{
+  "plan": {
+    "topic_slug": "surfactants",
+    "cluster": "product-science",
+    "route": "/education/product-science/surfactants",
+    "title": "Surfactants and Cleansers: A Practitioner Education Overview",
+    "h1": "Surfactants and Cleansers: A Practitioner Education Overview",
+    "meta_description": "Understand shampoo surfactants, formulation mildness, lather and cleansing-related scalp research without ingredient-list shortcuts.",
+    "answer_summary": {
+      "kind": "PARAPHRASE",
+      "text": "Surfactants are the cleansing agents in shampoo. Their oil-attracting and water-attracting parts help sebum be removed during rinsing, and formulators commonly combine several detergents to achieve the intended result.",
+      "supporting_claim_ids": [
+        "manual-proposed-draelos-2010-mechanism"
+      ],
+      "source_statements": [
+        "Surfactants are the cleansing agents in shampoo. Their oil-attracting and water-attracting parts help sebum be removed during rinsing, and formulators commonly combine several detergents to achieve the intended result."
+      ]
+    },
+    "sections": [
+      {
+        "section_id": "cleansing",
+        "heading": "How surfactants help cleansing",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "IUPAC calls a surfactant a surface-active agent: it lowers surface tension or the tension at a boundary between phases.",
+            "supporting_claim_ids": [
+              "aimt-iupac-surfactant-definition-2025"
+            ],
+            "source_statements": [
+              "IUPAC calls a surfactant a surface-active agent: it lowers surface tension or the tension at a boundary between phases."
+            ]
+          },
+          {
+            "kind": "FRAMING",
+            "text": "Begin with what the cleanser is designed to do.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "Lather is a sensory and formulation feature. Foaming agents help create suds, while detergents do the cleansing; foam volume is not a direct measure of how well a shampoo cleans.",
+            "supporting_claim_ids": [
+              "manual-proposed-draelos-2010-foam"
+            ],
+            "source_statements": [
+              "Lather is a sensory and formulation feature. Foaming agents help create suds, while detergents do the cleansing; foam volume is not a direct measure of how well a shampoo cleans."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "surfactant-families",
+        "heading": "What the surfactant families mean",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Surfactant families differ in the charge of their water-facing region. Anionic surfactants carry a negative charge; cationic surfactants carry a positive charge. Nonionic surfactants have no ionic charge, while amphoteric surfactants can behave differently as pH changes. These categories describe chemistry, rather than a complete assessment of a finished shampoo.",
+            "supporting_claim_ids": [
+              "manual-proposed-surfactants-charge"
+            ],
+            "source_statements": [
+              "Surfactant families differ in the charge of their water-facing region. Anionic surfactants carry a negative charge; cationic surfactants carry a positive charge. Nonionic surfactants have no ionic charge, while amphoteric surfactants can behave differently as pH changes. These categories describe chemistry, rather than a complete assessment of a finished shampoo."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "formulation",
+        "heading": "Understanding the complete formula",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Mildness depends on the surfactant system and the other ingredients in the formula; the pH number alone does not establish how mild a cleanser will be.",
+            "supporting_claim_ids": [
+              "rf-claim-clm-barrier-08"
+            ],
+            "source_statements": [
+              "Mildness depends on the surfactant system and the other ingredients in the formula; the pH number alone does not establish how mild a cleanser will be."
+            ]
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "A shampoo commonly combines surfactants with different roles. One ingredient may provide much of the cleansing, while another modifies the formula’s behaviour. Conditioning ingredients may be added to improve manageability and reduce static. The cleanser and the conditioning system can therefore contribute different parts of the experience.",
+            "supporting_claim_ids": [
+              "manual-proposed-surfactants-blending"
+            ],
+            "source_statements": [
+              "A shampoo commonly combines surfactants with different roles. One ingredient may provide much of the cleansing, while another modifies the formula's behaviour. Conditioning ingredients may be added to improve manageability and reduce static. The cleanser and the conditioning system can therefore contribute different parts of the experience."
+            ]
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "Alkyl glucosides, including decyl glucoside, are another group used mainly as surfactants. Some also have conditioning or emulsion-stabilizing functions.",
+            "supporting_claim_ids": [
+              "cir-alkyl-glucosides-2013--c02"
+            ],
+            "source_statements": [
+              "Alkyl glucosides, including decyl glucoside, are another group used mainly as surfactants. Some also have conditioning or emulsion-stabilizing functions."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "cleansing-and-conditioning",
+        "heading": "Why cleansing and conditioning feel different",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Cationic conditioning ingredients can be attracted to negatively charged hair and deposit on its surface, particularly where the hair is weathered. This is one reason a cleansing product’s finished hair feel cannot be understood from the primary detergent alone.",
+            "supporting_claim_ids": [
+              "manual-proposed-surfactants-conditioning"
+            ],
+            "source_statements": [
+              "Cationic conditioning ingredients can be attracted to negatively charged hair and deposit on its surface, particularly where the hair is weathered. This is one reason a cleansing product's finished hair feel cannot be understood from the primary detergent alone."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "safety-assessment",
+        "heading": "Reading ingredient safety conclusions",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "The CIR assessment of alkyl glucosides concluded that the ingredients were safe under the practices and concentrations assessed when formulated to be nonirritating. That qualification is part of the conclusion.",
+            "supporting_claim_ids": [
+              "cir-alkyl-glucosides-2013--c01"
+            ],
+            "source_statements": [
+              "The CIR assessment of alkyl glucosides concluded that the ingredients were safe under the practices and concentrations assessed when formulated to be nonirritating. That qualification is part of the conclusion."
+            ]
+          }
+        ]
+      },
+      {
+        "section_id": "scalp-research",
+        "heading": "What scalp cleansing research can show",
+        "units": [
+          {
+            "kind": "PARAPHRASE",
+            "text": "Natural moisturizing factor is a mixture of substances within the outer skin layer that helps retain water. The scalp washout study followed some of those substances and a fraction of skin lipids. Measuring these components addresses what the tested washing conditions removed from the skin; it is a different question from how much lather the product produced.",
+            "supporting_claim_ids": [
+              "manual-proposed-surfactants-moisturizing-factor"
+            ],
+            "source_statements": [
+              "Natural moisturizing factor is a mixture of substances within the outer skin layer that helps retain water. The scalp washout study followed some of those substances and a fraction of skin lipids. Measuring these components addresses what the tested washing conditions removed from the skin; it is a different question from how much lather the product produced."
+            ]
+          },
+          {
+            "kind": "PARAPHRASE",
+            "text": "A pilot study on human scalp measured lower levels of natural moisturizing factor components and a fraction of outer-skin lipids after repeated washing with a standard shampoo. This gives researchers a way to investigate cleansing-related dryness.",
+            "supporting_claim_ids": [
+              "rf-claim-clm-barrier-04"
+            ],
+            "source_statements": [
+              "A pilot study on human scalp measured lower levels of natural moisturizing factor components and a fraction of outer-skin lipids after repeated washing with a standard shampoo. This gives researchers a way to investigate cleansing-related dryness.",
+              "The scalp washout finding concerns the tested shampoo and repeated-washing conditions. It does not establish the same response to every surfactant formula."
+            ]
+          },
+          {
+            "kind": "FRAMING",
+            "text": "For professionals, the useful habit is to ask what was tested, in which formulation, and under which conditions.",
+            "supporting_claim_ids": [],
+            "source_statements": []
+          }
+        ]
+      }
+    ],
+    "scope_note": "This page explains surfactant cleansing, formulation context and selected scalp washout research. It does not rank brands or ingredient classes, claim that a sulfate-free or other label guarantees suitability, prescribe a washing schedule or contact time, provide formulation concentration limits, or diagnose or treat scalp disease. Ingredient-assessment conclusions remain limited to their stated conditions.",
+    "limitations": [
+      {
+        "kind": "VERBATIM",
+        "text": "The alkyl-glucoside assessment reflects the use practices and concentrations assessed at publication; it is not a current audit of every finished shampoo.",
+        "supporting_claim_ids": [
+          "cir-alkyl-glucosides-2013--c04"
+        ],
+        "source_statements": [
+          "The alkyl-glucoside assessment reflects the use practices and concentrations assessed at publication; it is not a current audit of every finished shampoo."
+        ]
+      },
+      {
+        "kind": "VERBATIM",
+        "text": "The scalp washout finding concerns the tested shampoo and repeated-washing conditions. It does not establish the same response to every surfactant formula.",
+        "supporting_claim_ids": [
+          "rf-claim-clm-barrier-04"
+        ],
+        "source_statements": [
+          "The scalp washout finding concerns the tested shampoo and repeated-washing conditions. It does not establish the same response to every surfactant formula."
+        ]
+      }
+    ],
+    "key_takeaways": [
+      {
+        "kind": "PARAPHRASE",
+        "text": "Surfactants are the cleansing agents in shampoo. Their oil-attracting and water-attracting parts help sebum be removed during rinsing, and formulators commonly combine several detergents to achieve the intended result.",
+        "supporting_claim_ids": [
+          "manual-proposed-draelos-2010-mechanism"
+        ],
+        "source_statements": [
+          "Surfactants are the cleansing agents in shampoo. Their oil-attracting and water-attracting parts help sebum be removed during rinsing, and formulators commonly combine several detergents to achieve the intended result."
+        ]
+      },
+      {
+        "kind": "PARAPHRASE",
+        "text": "Mildness depends on the surfactant system and the other ingredients in the formula; the pH number alone does not establish how mild a cleanser will be.",
+        "supporting_claim_ids": [
+          "rf-claim-clm-barrier-08"
+        ],
+        "source_statements": [
+          "Mildness depends on the surfactant system and the other ingredients in the formula; the pH number alone does not establish how mild a cleanser will be."
+        ]
+      },
+      {
+        "kind": "PARAPHRASE",
+        "text": "A pilot study on human scalp measured lower levels of natural moisturizing factor components and a fraction of outer-skin lipids after repeated washing with a standard shampoo. This gives researchers a way to investigate cleansing-related dryness.",
+        "supporting_claim_ids": [
+          "rf-claim-clm-barrier-04"
+        ],
+        "source_statements": [
+          "A pilot study on human scalp measured lower levels of natural moisturizing factor components and a fraction of outer-skin lipids after repeated washing with a standard shampoo. This gives researchers a way to investigate cleansing-related dryness.",
+          "The scalp washout finding concerns the tested shampoo and repeated-washing conditions. It does not establish the same response to every surfactant formula."
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "source_id": "rf-src-draelos-2010",
+        "title": "Essentials of hair care often neglected: Hair cleansing",
+        "authors": [
+          "Draelos, Zoe Diana"
+        ],
+        "year": 2010,
+        "doi": "10.4103/0974-7753.66909",
+        "url": "https://doi.org/10.4103/0974-7753.66909"
+      },
+      {
+        "source_id": "cir-alkyl-glucosides-2013",
+        "title": "Safety Assessment of Decyl Glucoside and Other Alkyl Glucosides as Used in Cosmetics",
+        "authors": [
+          "Monice M. Fiume",
+          "Bart Heldreth",
+          "Wilma F. Bergfeld",
+          "Donald V. Belsito",
+          "Ronald A. Hill",
+          "Curtis D. Klaassen",
+          "Daniel Liebler",
+          "James G. Marks",
+          "Ronald C. Shank",
+          "Thomas J. Slaga",
+          "Paul W. Snyder",
+          "F. Alan Andersen"
+        ],
+        "year": 2013,
+        "doi": "10.1177/1091581813497764",
+        "url": "https://doi.org/10.1177/1091581813497764"
+      },
+      {
+        "source_id": "rf-src-kourbaj-2022",
+        "title": "Confocal Raman spectroscopy is suitable to assess hair cleansing-derived skin dryness on human scalp",
+        "authors": [
+          "Kourbaj, Ghaith",
+          "Bielfeldt, Stephan",
+          "Kruse, Iryna",
+          "Wilhelm, Klaus-Peter"
+        ],
+        "year": 2022,
+        "doi": "10.1111/srt.13157",
+        "url": "https://doi.org/10.1111/srt.13157"
+      },
+      {
+        "source_id": "manual-proposed-source-dsouza-rathi-2015",
+        "title": "Shampoo and Conditioners: What a Dermatologist Should Know?",
+        "authors": [
+          "Paschal D’Souza",
+          "Sanjay K. Rathi"
+        ],
+        "year": 2015,
+        "doi": "10.4103/0019-5154.156355",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4458934/"
+      },
+      {
+        "source_id": "aimt-iupac-surfactant-goldbook-2025",
+        "title": "Surfactant — IUPAC Compendium of Chemical Terminology",
+        "authors": [
+          "International Union of Pure and Applied Chemistry"
+        ],
+        "year": 2025,
+        "doi": "10.1351/goldbook.S06194",
+        "url": "https://goldbook.iupac.org/terms/view/S06194"
+      }
+    ],
+    "related_links": [
+      {
+        "href": "/education/product-science",
+        "label": "Product Science — AIMT Education Library",
+        "relation": "cluster"
+      },
+      {
+        "href": "/education",
+        "label": "AIMT Education Library",
+        "relation": "library"
+      },
+      {
+        "href": "/about/research-standards",
+        "label": "How AIMT reviews research and evidence",
+        "relation": "standards"
+      }
+    ],
+    "visual_recommendation": {
+      "recommendation": "DIAGRAM",
+      "rationale": "Original simplified schematic of water-attracting and oil-attracting surfactant regions. Caption and labels are scientific teaching content and remain subject to source review. No molecule-specific geometry is asserted."
+    }
+  },
+  "generation_source_hash": "11488d18bcd4b5ec64513cc7d2b13d19c031616fe20436dceda67d7fb09d9c1e"
+}
