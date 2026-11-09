@@ -1,0 +1,32 @@
+/* Public clarity and responsive polish. No private lesson or form styles. */
+.home-microscopy-proof{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;align-items:center;max-width:860px;margin:2rem 0}
+.home-microscopy-proof img{display:block;width:100%;height:auto}
+.home-microscopy-proof figcaption{font-family:var(--aimt-font-sans);font-size:1rem;line-height:1.65;color:var(--text)}
+.home-microscopy-proof h3{font-family:var(--aimt-font-mont);font-size:clamp(1.3rem,2.3vw,1.7rem);line-height:1.15;margin:0 0 1rem}
+.home-microscopy-proof small,.guide-name{display:block;font-family:var(--aimt-font-sans);font-size:.8rem;line-height:1.6;opacity:.7;margin-top:.6rem}
+.footer-legal{flex-wrap:wrap;min-width:0;max-width:100%;row-gap:.65rem}
+.footer-copy{max-width:100%;overflow-wrap:anywhere}
+#landingPage .lp-subhead{color:rgba(255,255,255,.85)}
+#landingPage .lp-mobile-sticky-cta.lp-sticky-hide{visibility:hidden;pointer-events:none}
+#landingPage .lp-tour-tab[data-tour="cadence"]{white-space:normal}
+.card-identity{background:linear-gradient(135deg,rgba(15,13,10,.65),rgba(15,13,10,.78)),url('/assets/images/marketing/public/student-access-suds.webp') 62% center/cover no-repeat}
+.card-identity .lead{color:rgba(255,255,255,.85)}
+.card-identity .eyebrow{color:rgba(255,255,255,.72)}
+@media(max-width:700px){
+ .home-microscopy-proof{grid-template-columns:1fr;gap:1rem}
+ .hero-sub{font-size:1rem!important;line-height:1.55!important;color:rgba(255,255,255,.96)!important}
+ .flagship-body,.flagship-subhead,.gallery-card-body{font-size:1rem;line-height:1.65}
+ .flagship-body,.gallery-card-body{color:#655b54}
+ #landingPage .lp-hero-full{min-height:calc(100svh - var(--aimt-nav-height,56px));margin-bottom:0;align-items:flex-end;flex-shrink:0}
+ #landingPage .lp-hero-inner{padding-block:clamp(2rem,8svh,4rem) 2.5rem}
+ #landingPage .lp-headline{font-size:clamp(2.6rem,12vw,3.8rem);line-height:.98}
+ #landingPage .lp-brand{margin-bottom:1.25rem}
+ #landingPage .lp-subhead{font-size:1rem;line-height:1.6;margin-bottom:1.25rem}
+ #landingPage .lp-hero-facts{font-size:.72rem;line-height:1.6;margin-bottom:1.25rem}
+ #landingPage .lp-hero-cta-row{gap:1rem}
+ #landingPage .fo-hero-note{font-size:.875rem;line-height:1.55;color:rgba(255,255,255,.78);margin-top:1rem}
+ #landingPage .lp-proof-body,#landingPage .lp-system-body,#landingPage .lp-outcome-text,#landingPage .lp-tour-caption{font-size:1rem;line-height:1.65}
+}
+.enroll-package{padding:1.25rem 0 0;font-family:var(--aimt-font-sans);color:var(--ink-soft)}
+.enroll-package h2{font-family:var(--aimt-font-mont);font-size:1rem;line-height:1.35;font-weight:600;margin:0 0 .6rem;color:var(--ink)}
+.enroll-package p{font-size:.92rem;line-height:1.6;margin:.35rem 0}
