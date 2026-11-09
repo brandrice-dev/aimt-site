@@ -1,0 +1,46 @@
+{
+  "source_run_id": 42654391453,
+  "source_artifact_id": 13690823512,
+  "source_artifact_sha256": "1be60a8a8ec05081e358337c218943e9b9223e2f205d1e36487c40b7601d2cdb",
+  "candidate_head": "7310ec23204b6dd1e2229ec62fb4fc1785c056fa",
+  "reviews": {
+    "hair-growth-cycle-rendering.webp": {
+      "review_file": "functions/_data/education-visual-reviews/hair-cycle.json",
+      "asset_sha256": "304db6c02286366d2c884d42c0124c647e199539ebf73d58e045948628afb9a0"
+    },
+    "scalp-ecosystem-rendering.webp": {
+      "review_file": "functions/_data/education-visual-reviews/scalp-ecosystem.json",
+      "asset_sha256": "32aa08fce951833235100214236e9ccc7c619ca1ee856bf43b03c3625615245d"
+    }
+  },
+  "pages": [
+    {
+      "path": "education/hair-loss/hair-growth-cycle.html",
+      "asset": "hair-growth-cycle-rendering.webp",
+      "figure_html": "<figure data-education-visual=\"hair-growth-cycle-rendering.webp\" style=\"margin:2rem 0;max-width:760px\"><a href=\"/assets/images/education/hair-growth-cycle-rendering.webp\" target=\"_blank\" rel=\"noopener\" aria-label=\"Open full-size teaching illustration\"><img src=\"/assets/images/education/hair-growth-cycle-rendering.webp\" width=\"1122\" height=\"1402\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Conceptual hair follicle illustrations showing anagen growth, catagen regression, telogen rest and exogen hair release.\"></a><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">The normal cycle provides context for observation. Exogen describes hair release and can overlap other cycling events; the panels are a simplified teaching model, not a diagnostic sequence. The papilla’s relative upward position reflects shortening of the lower follicle; it is not depicted migrating independently through the scalp. Open the image to view labels at full size.</figcaption></figure>\n\n    ",
+      "original_sha256": "a290afa94d3dfb6b5ace82e97f21ecb49f72e2ea84cfb6295123461431b3504c",
+      "updated_sha256": "7ff57499bdb5dbe5df5a41379f28558a66f983b7cece7131dc0294beab52c54a"
+    },
+    {
+      "path": "education/hair-loss/telogen-effluvium.html",
+      "asset": "hair-growth-cycle-rendering.webp",
+      "figure_html": "<figure data-education-visual=\"hair-growth-cycle-rendering.webp\" style=\"margin:2rem 0;max-width:760px\"><a href=\"/assets/images/education/hair-growth-cycle-rendering.webp\" target=\"_blank\" rel=\"noopener\" aria-label=\"Open full-size teaching illustration\"><img src=\"/assets/images/education/hair-growth-cycle-rendering.webp\" width=\"1122\" height=\"1402\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Conceptual illustration of the normal hair cycle: anagen, catagen, telogen and exogen.\"></a><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">Normal-cycle reference. This image does not depict or diagnose telogen effluvium; it illustrates the stages discussed above. Follicles cycle independently, and exogen can overlap other cycling events. The papilla’s relative upward position reflects shortening of the lower follicle; it is not depicted migrating independently through the scalp. Open the image to view labels at full size.</figcaption></figure>\n\n    ",
+      "original_sha256": "67c8c25933d87ed9c0f2015ad56812f1ed907c51cb0163ffa5e97d1b7c21aa1a",
+      "updated_sha256": "d8c4cff7ef0e15cd3033cb0e64a3e3126edcfc1129b3ad639b8dc33b647e6201"
+    },
+    {
+      "path": "education/trichology/hair-biology.html",
+      "asset": "hair-growth-cycle-rendering.webp",
+      "figure_html": "<figure data-education-visual=\"hair-growth-cycle-rendering.webp\" style=\"margin:2rem 0;max-width:760px\"><a href=\"/assets/images/education/hair-growth-cycle-rendering.webp\" target=\"_blank\" rel=\"noopener\" aria-label=\"Open full-size teaching illustration\"><img src=\"/assets/images/education/hair-growth-cycle-rendering.webp\" width=\"1122\" height=\"1402\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Teaching illustration of hair follicle growth, regression, rest and hair release.\"></a><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">Simplified follicle-cycle model. Shapes and proportions are illustrative; exogen describes release and can overlap other cycling events. The papilla’s relative upward position reflects shortening of the lower follicle; it is not depicted migrating independently through the scalp. Open the image to view labels at full size.</figcaption></figure>\n\n    ",
+      "original_sha256": "56c4f5daa867c8c98d7c7c710171ae77ef181e4ecd533bed6f7724e3135d9d4c",
+      "updated_sha256": "1b907919e3d4dd249c04a29e22c3a028dab824685b677813d93116589176e7cb"
+    },
+    {
+      "path": "education/scalp-health/scalp-microbiome.html",
+      "asset": "scalp-ecosystem-rendering.webp",
+      "figure_html": "<figure data-education-visual=\"scalp-ecosystem-rendering.webp\" style=\"margin:2rem 0;max-width:760px\"><a href=\"/assets/images/education/scalp-ecosystem-rendering.webp\" target=\"_blank\" rel=\"noopener\" aria-label=\"Open full-size teaching illustration\"><img src=\"/assets/images/education/scalp-ecosystem-rendering.webp\" width=\"1122\" height=\"1402\" loading=\"lazy\" decoding=\"async\" style=\"display:block;width:100%;height:auto;border-radius:12px\" alt=\"Conceptual scalp cross-section showing surface bacteria, Malassezia yeasts, sebum and a magnified skin-barrier inset.\"></a><figcaption style=\"font-size:.85rem;line-height:1.6;color:#bcb6ad;margin-top:.75rem\">Conceptual scalp ecosystem. Organisms are enlarged for visibility; their illustrated numbers and positions are not measured microbial distributions. This is not a clinical specimen or a diagnosis. The barrier inset does not represent a measured layer count. Sebaceous glands release sebum through a duct into the upper follicle; they are separate from the hair bulb. Open the image to view labels at full size.</figcaption></figure>\n\n    ",
+      "original_sha256": "a83ae16133fbf38f72aaf70dadb49e52b8d858c6472d0b6d0882e06b280b818d",
+      "updated_sha256": "03d511b8c54e5ccb67bbc6bcde43b583f2e42df396cbeb495615cd0a2d9b08bb"
+    }
+  ]
+}
