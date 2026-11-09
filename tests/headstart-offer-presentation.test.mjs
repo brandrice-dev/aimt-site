@@ -33,7 +33,7 @@ test('only valid server availability adds the limited session and uses correct s
   assert.equal(nodes.get('navCTA').textContent,'Give me a Head Start — $597');
   assert.equal(nodes.get('.fo-package-limit').hidden,false);
   assert.equal(nodes.get('.fo-package-extra').hidden,false);
-  assert.equal(nodes.get('.fo-availability').textContent,remaining+(remaining===1?' founder session left':' founder sessions left'));
+  assert.equal(nodes.get('.fo-availability').textContent,remaining+(remaining===1?' founder call left':' founder calls left'));
  }
  for(const remaining of [-1,6,1.5,'3']){
   const nodes=await render({active:true,capacity:5,remaining});

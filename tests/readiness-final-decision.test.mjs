@@ -54,7 +54,7 @@ test('Readiness page uses the canonical AIMT mark, typography, navigation and co
   assert.match(HTML,/class="aimt-public-nav-name">AIMT<\/span>/);
   assert.match(HTML,/href="#aimtOrbitalMark"/);
   assert.match(HTML,/href="\/assets\/css\/aimt-design-system\.css"/);
-  assert.match(HTML,/href="\/assets\/css\/aimt-public-nav\.css"/);
+  assert.match(HTML,/href="\/assets\/css\/aimt-public-nav\.css(?:\?v=[\w.-]+)?"/);
   const homepage=read('index.html');
   const canonicalFonts=homepage.match(/<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Montserrat:[^"]+" rel="stylesheet">/)?.[0];
   assert.ok(canonicalFonts,'canonical institute fonts on homepage');

@@ -96,13 +96,15 @@
 @media (max-width: 700px) {
   .aimt-public-nav { padding: 0 1rem; }
   .aimt-public-nav-links { display: none; }
+  .aimt-public-nav-right { min-width: 0; gap: 0.35rem; }
+  .aimt-public-nav-wordmark { flex-shrink: 0; }
   .aimt-public-nav-sep { display: none; }
   .aimt-public-nav-right > .aimt-public-nav-link { display: none; }
-  .aimt-public-nav-cta { font-size: 0.62rem; padding: 0.7rem 1.15rem; white-space: nowrap; position: relative; }
+  .aimt-public-nav-cta { font-size: 0.62rem; padding: 0.65rem 0.85rem; white-space: normal; position: relative; min-width: 0; line-height: 1.25; text-align: center; }
   .aimt-public-nav-cta::after { content: ''; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px; }
   .aimt-public-nav-hamburger {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-    width: 44px; height: 44px; flex-shrink: 0; margin-left: 12px;
+    width: 44px; height: 44px; flex-shrink: 0; margin-left: 0;
     background: none; border: none; padding: 0; cursor: pointer;
   }
   .aimt-public-nav-hamburger-line { width: 20px; height: 1px; background: #faf8f5; transition: transform 0.2s ease, opacity 0.2s ease; }

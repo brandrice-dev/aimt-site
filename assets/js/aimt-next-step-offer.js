@@ -12,9 +12,9 @@
   if(Object.is(last,remaining))return;last=remaining;
   const active=Number.isInteger(remaining)&&remaining>0;
   name.textContent=active?'Head Spa Head Start':'Head Spa Certification';
-  label.textContent=active?'Bonus package · Limited founder sessions':'Your course + included bonus';
+  label.textContent=active?'Bonus package · Limited founder video calls':'Your course + included bonus';
   founder.hidden=!active;availability.hidden=!active;
-  availability.textContent=active?'Only '+remaining+' '+(remaining===1?'founder session remains.':'founder sessions remain.')+' Availability confirmed at checkout.':'';
+  availability.textContent=active?'Only '+remaining+' '+(remaining===1?'founder call remains.':'founder calls remain.')+' Availability confirmed at checkout.':'';
   action.textContent=active?'Give me a Head Start':'Start My Training';
  }
  async function refresh(){

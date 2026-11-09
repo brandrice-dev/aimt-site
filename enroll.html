@@ -281,6 +281,7 @@ a { color: inherit; }
   .enroll-footer-inner { padding: 1.4rem 1rem 2rem; flex-direction: column; }
 }
 </style>
+<link rel="stylesheet" href="/assets/css/aimt-public-polish.css?v=1">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -324,6 +325,11 @@ a { color: inherit; }
         <p class="enroll-price-value"><span class="sr-only">Tuition: </span>$597</p>
         <p class="enroll-price-note">One-time tuition</p>
       </div>
+    </div>
+    <div class="enroll-package" aria-live="polite">
+      <h2 id="enrollPackageName">Your course + included bonus</h2>
+      <p>Head Spa Certification + Smart Service Sidekick</p>
+      <p id="enrollFounderPackage" hidden>Plus a private 45-minute, 1-on-1 Google Meet video call with AIMT’s founder after certification and completion of your Blueprint.</p>
     </div>
   </section>
 
@@ -412,6 +418,7 @@ a { color: inherit; }
   </div>
 </footer>
 
+<script src="assets/js/aimt-enrollment-package.js?v=1"></script>
 <script src="assets/js/aimt-growth.js"></script>
 <script>
 (function () {
@@ -470,6 +477,8 @@ a { color: inherit; }
   function announce(text) { els.status.textContent = text; }
 
   function showLoading() {
+    if(window.AIMTEnrollmentPackage)window.AIMTEnrollmentPackage.render(false);
+    var oldBonusNote=document.getElementById('founderCheckoutNote');if(oldBonusNote)oldBonusNote.hidden=true;
     els.error.hidden = true;
     els.loading.hidden = false;
     els.mount.classList.remove('is-mounted');
@@ -571,7 +580,9 @@ a { color: inherit; }
         if(data && typeof data.founderReview==='boolean'){
           var bonusNote=document.getElementById('founderCheckoutNote');
           if(!bonusNote){bonusNote=document.createElement('p');bonusNote.id='founderCheckoutNote';bonusNote.setAttribute('role','status');els.mount.parentNode.insertBefore(bonusNote,els.mount);}
-          bonusNote.textContent=data.founderReview?'Your enrollment includes one private 45-minute founder review after certification.':'A founder review is not included with this enrollment; the limited allocation is currently reserved.';
+          bonusNote.hidden=false;
+          bonusNote.textContent=data.founderReview?'Included: one private 45-minute, 1-on-1 Google Meet video call with AIMT’s founder after certification.':'A founder video call is not included with this enrollment; the limited allocation is currently reserved.';
+          if(window.AIMTEnrollmentPackage)window.AIMTEnrollmentPackage.render(data.founderReview);
         }
         if (data && data.fallback === 'hosted' && data.url) {
           /* STRIPE_PUBLISHABLE_KEY not configured server-side — keep
