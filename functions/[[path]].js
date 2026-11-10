@@ -1,3 +1,5 @@
+import { COURSE_PATHS, deliverCoursePage } from './_lib/courses/page-delivery.mjs';
+
 /* ═══════════════════════════════════════════════════════════════
    Default-deny for the public deployment surface.
 
@@ -12,7 +14,8 @@
    URLs, and free static serving are unchanged for them. Anything not on
    that allowlist reaches Functions; the specific /api/* and /.well-known/*
    functions still win (more specific routes take precedence), and every
-   remaining request lands here: a real 404 with the site's 404 page.
+   remaining request lands here. Course URLs use the server-side public/
+   private content boundary below; other paths get a real 404.
 
    Adding a new public root page? Add "/<page>", "/<page>.html" and
    "/<page>/" to the exclude list in _routes.json — until then it 404s
@@ -22,6 +25,7 @@
 const FALLBACK_404 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Page not found — AIMT</title></head><body><h1>Page not found</h1><p><a href="/">Return to AIMT</a></p></body></html>';
 
 export async function onRequest({ request, env }) {
+  if (COURSE_PATHS.has(new URL(request.url).pathname)) return deliverCoursePage({ request, env });
   /* Same as the static layer this replaces: non-GET/HEAD → 405 (e.g. a
      POST to a GET-only /api/* function falls through to here). */
   if (request.method !== 'GET' && request.method !== 'HEAD') {
