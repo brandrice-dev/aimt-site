@@ -125,6 +125,10 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <div id="readinessLeadsBody" class="card table-wrap"><div class="loading">Open Growth to load leads…</div></div>
       </div>
       <div class="growth-section">
+        <div class="section-head"><div><h2>Free tool leads</h2><p>Private contacts from the Service Cost Worksheet and First-Service Blueprint. Marketing opt-in is separate; these contacts are not enrolled in Readiness follow-ups.</p></div><button class="btn" id="refreshFreeToolLeadsBtn" type="button">Refresh tool leads</button></div>
+        <div id="freeToolLeadsBody" class="card table-wrap"><div class="loading">Open Growth to load tool leads…</div></div>
+      </div>
+      <div class="growth-section">
         <div class="section-head">
           <div><h2>Readiness email follow-ups</h2><p>Two emails only: first after 48 hours, second five days after the first. Opted-in new leads only. Stop on purchase or unsubscribe.</p></div>
           <button class="btn" id="refreshReadinessFollowupsBtn" type="button">Refresh status</button>
@@ -306,6 +310,22 @@ async function loadReadinessFollowups(){
     }
   }catch(err){target.innerHTML='<div class="notice show error">'+esc(err.message)+'</div>';}
 }
+async function loadFreeToolLeads(){
+  const target=$('freeToolLeadsBody');
+  target.innerHTML='<div class="loading">Loading tool leads…</div>';
+  try{
+    const data=await api('/free-tool-leads');
+    if(!Array.isArray(data.leads)||!data.leads.length){target.innerHTML='<div class="loading">No saved free tool contacts yet.</div>';return;}
+    const labels={'service-cost':'Service Cost Worksheet','first-service-blueprint':'First-Service Blueprint'};
+    const rows=data.leads.map(l=>'<tr>'
+      +'<td><strong>'+esc(l.first_name)+'</strong><span class="sub">'+esc(l.email)+'</span></td>'
+      +'<td>'+esc(labels[l.tool]||l.tool)+'</td>'
+      +'<td>'+(l.marketing_consent===true?'Opted in':'Not opted in')+'</td>'
+      +'<td>'+esc(fmtDate(l.last_submitted_at))+'</td></tr>').join('');
+    target.innerHTML='<div class="readiness-leads-summary"><span><strong>'+esc(data.count)+'</strong> saved tool contacts (latest 100)</span><span><strong>'+esc(data.withMarketingConsent)+'</strong> opted in</span></div>'
+      +'<table class="table"><thead><tr><th>Contact</th><th>Tool</th><th>Marketing consent</th><th>Submitted</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){target.innerHTML='<div class="notice show error">'+esc(e.message)+'</div>';}
+}
 async function loadReadinessLeads(){
   const target=$('readinessLeadsBody');
   target.innerHTML='<div class="loading">Loading submitted leads…</div>';
@@ -423,11 +443,12 @@ growthState.scoreboardText=lines.join('\n');$('scoreboardBody').innerHTML=`<tabl
 async function reconcileRevenue(btn){btn.disabled=true;btn.textContent='Reconciling…';try{const r=await api('',{method:'POST',body:JSON.stringify({action:'growth_reconcile_revenue'})});showNotice($('globalNotice'),`Stripe reconciliation: ${r.recorded} recorded, ${r.skipped} not paid, ${r.failed} failed${r.remaining?`, ${r.remaining} remaining — run again`:''}.`);await loadGrowth();}catch(e){showNotice($('globalNotice'),e.message,true);btn.disabled=false;btn.textContent='Reconcile revenue from Stripe';}}
 document.querySelectorAll('[data-growth-range]').forEach(b=>b.addEventListener('click',()=>{growthState.range=b.dataset.growthRange;loadGrowth();}));
 document.querySelectorAll('[data-growth-model]').forEach(b=>b.addEventListener('click',()=>{growthState.model=b.dataset.growthModel;loadGrowth();}));
+$('refreshFreeToolLeadsBtn').addEventListener('click',loadFreeToolLeads);
 $('refreshReadinessLeadsBtn').addEventListener('click',loadReadinessLeads);
 $('refreshReadinessFollowupsBtn').addEventListener('click',loadReadinessFollowups);
 $('runCheckoutDiagnosticsBtn').addEventListener('click',loadCheckoutDiagnostics);
 $('copyScoreboardBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(growthState.scoreboardText);showNotice($('globalNotice'),'Scoreboard copied.');}catch(_){showNotice($('globalNotice'),'Copy failed — select the table instead.',true);}});
-document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='founder-reviews'){import('/assets/js/aimt-founder-review-admin.js').then(({loadFounderReviews})=>loadFounderReviews({root:$('founderReviewsBody'),token}));}if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='founder-reviews'?'Founder reviews':btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth'){loadGrowth();loadReadinessLeads();loadReadinessFollowups();}if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('view-'+btn.dataset.view).classList.add('active');$('grantBtn').style.display=btn.dataset.view==='office'?'none':canMutate()?'':'none';if(btn.dataset.view==='founder-reviews'){import('/assets/js/aimt-founder-review-admin.js').then(({loadFounderReviews})=>loadFounderReviews({root:$('founderReviewsBody'),token}));}if(btn.dataset.view==='office'){showNotice($('globalNotice'),'');window.AIMTOffice.load();}$('pageTitle').textContent=btn.dataset.view==='founder-reviews'?'Founder reviews':btn.dataset.view==='office'?'Office':btn.dataset.view==='dashboard'?'Operations overview':btn.dataset.view==='students'?'Students':btn.dataset.view==='audit'?'Admin activity':btn.dataset.view==='growth'?'Growth':'System Health';if(btn.dataset.view==='growth'){loadGrowth();loadReadinessLeads();loadFreeToolLeads();loadReadinessFollowups();}if(btn.dataset.view==='students')loadStudents($('studentSearch').value);if(btn.dataset.view==='audit')loadAudit();if(btn.dataset.view==='config-health')loadConfigHealth();}));
 $('grantModal').addEventListener('click',e=>{if(e.target===$('grantModal'))closeGrant()});$('studentDrawer').addEventListener('click',e=>{if(e.target===$('studentDrawer'))$('drawerClose').click()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGrant();$('drawerClose').click();}});
 (async()=>{const {data}=await supabaseClient.auth.getSession();if(data?.session)await verifyAdmin();else $('loginWrap').classList.add('show');})();
 </script>
