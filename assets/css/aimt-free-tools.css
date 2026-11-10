@@ -143,3 +143,6 @@
 .ft-contact-consent input{margin-top:.35rem;flex:0 0 auto}
 .ft-contact-honey{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 @media print{.ft-contact-gate{display:none!important}}
+
+.ft-contact-gate .ft-tiny{color:#625951}
+.ft-contact-gate a{color:#65534a}
