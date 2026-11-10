@@ -4,6 +4,12 @@ on:
     branches: [main]
     paths:
       - 'functions/api/readiness/**'
+      - 'functions/api/free-tools/**'
+      - 'functions/api/admin/free-tool-leads.js'
+      - 'assets/js/aimt-free-tool-capture.mjs'
+      - 'tests/free-tool-capture.test.mjs'
+      - 'supabase/migrations/*_free_tool_leads.sql'
+      - 'privacy.html'
       - 'functions/api/founder-review/**'
       - 'functions/api/admin/founder-reviews.js'
       - 'functions/_lib/founder-review/**'
@@ -74,6 +80,7 @@ jobs:
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
             tests/aimt-free-tools.test.mjs \
+            tests/free-tool-capture.test.mjs \
             tests/founder-review.test.mjs \
             tests/founder-review-maintenance.test.mjs \
             tests/founder-review-purchase.test.mjs \
