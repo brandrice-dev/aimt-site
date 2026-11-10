@@ -16,7 +16,7 @@ test('permanent Sidekick and bundle remain when the founder offer is disabled, s
  for(const [data,ok,reject] of [[{active:false},true,false],[{active:true,capacity:5,remaining:0},true,false],[{},false,false],[{},true,true]]){
   const nodes=await render(data,ok,reject);
   assert.equal(nodes.get('.fo-name-line').textContent,'Head Spa Certification');
-  assert.equal(nodes.get('navCTA').textContent,'Enroll with the Sidekick — $597');
+  assert.equal(nodes.get('navCTA').textContent,'Enroll with the Sidekick — $697');
   assert.equal(nodes.get('.fo-package-limit').hidden,true);
   assert.match(nodes.get('section').innerHTML,/Smart Service Sidekick/);
   assert.equal(nodes.get('.fo-session').hidden,true);
@@ -30,7 +30,7 @@ test('only valid server availability adds the limited session and uses correct s
   assert.equal(nodes.get('.fo-session').hidden,false);
   assert.equal(nodes.get('.fo-corner-tab').hidden,false);
   assert.equal(nodes.get('.fo-name-line').textContent,'Head Spa Head Start');
-  assert.equal(nodes.get('navCTA').textContent,'Give me a Head Start — $597');
+  assert.equal(nodes.get('navCTA').textContent,'Give me a Head Start — $697');
   assert.equal(nodes.get('.fo-package-limit').hidden,false);
   assert.equal(nodes.get('.fo-package-extra').hidden,false);
   assert.equal(nodes.get('.fo-availability').textContent,remaining+(remaining===1?' founder call left':' founder calls left'));

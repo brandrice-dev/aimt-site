@@ -88,7 +88,7 @@ const embeddedOk = (params) => jsonResponse({
 
 // ── Session creation ─────────────────────────────────────────────────────
 
-test('embedded request creates an embedded_page session for the configured $597 price with return_url → success.html', async (t) => {
+test('embedded request creates an embedded_page session for the configured $697 price with return_url → success.html', async (t) => {
   const state = installFetchMock(t, embeddedOk);
   const { response, data } = await postCreate(makeEnv(), { course: 'headspa-mastery', ui: 'embedded' });
 
@@ -270,12 +270,12 @@ test('enroll.html mounts Stripe Embedded Checkout from js.stripe.com using only 
   assert.doesNotMatch(enrollSrc, /whsec_|service_role|SERVICE_ROLE/);
 });
 
-test('enroll.html states the exact product and $597 price and links refund/terms/privacy', () => {
+test('enroll.html states the exact product and $697 price and links refund/terms/privacy', () => {
   assert.match(enrollSrc, /Complete your enrollment/);
   assert.match(enrollSrc, /American Institute of Modern Trichology/);
   assert.match(enrollSrc, /Head Spa Certification Course/);
-  assert.match(enrollSrc, /\$597/);
-  assert.doesNotMatch(enrollSrc, /\$(?!597\b)\d/, 'no other price appears');
+  assert.match(enrollSrc, /\$697/);
+  assert.doesNotMatch(enrollSrc, /\$(?!697\b)\d/, 'no other price appears');
   assert.match(enrollSrc, /Secure payment processed by Stripe/);
   assert.match(enrollSrc, /AIMT does not receive or store your card details/);
   for (const href of ['/refunds', '/terms', '/privacy']) assert.ok(enrollSrc.includes(`href="${href}"`));

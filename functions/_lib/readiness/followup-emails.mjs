@@ -57,7 +57,7 @@ export function renderReadinessFollowup({stage,lead,unsubscribeUrl,postalAddress
       paragraph(escapeHtml(focus.next),{top:12}),
       paragraph('AIMT Head Spa Certification helps you build the knowledge behind better consultations, intentional service planning, and clear client communication. So you can offer more value—not just another treatment.',{top:14}),
       button({label:'See Your Next Step',href:escapeHtml(courseUrl),width:260,top:22}),
-      paragraph('Self-paced training · $597 once · Lifetime course access.',{top:15,size:13,color:COLORS.muted}),
+      paragraph('Self-paced training · $697 once · Lifetime course access.',{top:15,size:13,color:COLORS.muted}),
       optOut.html,
     ].join('\n');
     plain=[
@@ -65,7 +65,7 @@ export function renderReadinessFollowup({stage,lead,unsubscribeUrl,postalAddress
       focus.next,'',
       'AIMT Head Spa Certification helps you build the knowledge behind better consultations, intentional service planning, and clear client communication. Offer more value—not just another treatment.','',
       'See your next step:',courseUrl,'',
-      'Self-paced training. $597 once. Lifetime course access.',
+      'Self-paced training. $697 once. Lifetime course access.',
     ].join('\n');
   }else{
     content=[
@@ -74,7 +74,7 @@ export function renderReadinessFollowup({stage,lead,unsubscribeUrl,postalAddress
       sectionLabel('What sets your service apart',{top:22}),
       paragraph('<strong style="color:'+COLORS.ink+';">Know what you are seeing. Know how to adapt. Know how to explain it.</strong>',{top:12}),
       paragraph('That is the difference between adding a head spa service and building an offering your clients understand and value.',{top:13}),
-      paragraph('<strong style="color:'+COLORS.ink+';">Head Spa Certification · $597 one time · Lifetime access.</strong>',{top:18}),
+      paragraph('<strong style="color:'+COLORS.ink+';">Head Spa Certification · $697 one time · Lifetime access.</strong>',{top:18}),
       button({label:'Start My Training',href:escapeHtml(courseUrl),width:255,top:23}),
       paragraph('Certification is earned by completing the required coursework and passing the final assessment. The course does not expand your professional license.',{top:15,size:12,color:COLORS.muted}),
       optOut.html,
@@ -83,7 +83,7 @@ export function renderReadinessFollowup({stage,lead,unsubscribeUrl,postalAddress
       intro,'','Your clients have choices. Give them a reason to choose you.','',
       'Know what you are seeing. Know how to adapt. Know how to explain it.',
       'That is the difference between adding a head spa service and building an offering your clients understand and value.','',
-      'Head Spa Certification. $597 one time. Lifetime access.','',
+      'Head Spa Certification. $697 one time. Lifetime access.','',
       'Start my training:',courseUrl,'',
       'Certification is earned through the required coursework and final assessment. This course does not expand your professional license.',
     ].join('\n');

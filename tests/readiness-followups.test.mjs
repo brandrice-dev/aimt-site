@@ -55,7 +55,7 @@ test('Stage-one copy is personal; stage two is decisive; both use AIMT design an
   }
   assert.match(first.html,/client communication/);
   assert.match(first.text,/clear client communication/);
-  assert.match(second.html,/\$597 one time/);
+  assert.match(second.html,/\$697 one time/);
   assert.notEqual(followupUrl(1),followupUrl(2));
 });
 test('Marketing consent, postal address and unsubscribe link are mandatory',async()=>{
