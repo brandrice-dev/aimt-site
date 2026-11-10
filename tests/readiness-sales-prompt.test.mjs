@@ -470,11 +470,11 @@ test('mobile sheet offset tracks the sticky enroll bar height', () => {
 test('enrollment and checkout behaviour are unchanged', () => {
   assert.match(SALES, /function startCheckout\(\) \{\n  window\.location\.href = '\/enroll';\n\}/);
   assert.equal((SALES.match(/onclick="startCheckout\(\)"/g) || []).length, 5, 'all five enroll CTAs intact');
-  assert.match(SALES, /Begin Enrollment — \$597/);
-  assert.match(SALES, /Enroll · \$597/);
+  assert.match(SALES, /Begin Enrollment — \$697/);
+  assert.match(SALES, /Enroll · \$697/);
   // The prompt never calls checkout, never links to /enroll, never touches price.
   const code = SRC.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-  assert.doesNotMatch(code, /startCheckout\(|location\.href\s*=|\$597|stripe|create-checkout/i);
+  assert.doesNotMatch(code, /startCheckout\(|location\.href\s*=|\$697|stripe|create-checkout/i);
   assert.doesNotMatch(code, /href\s*=\s*['"]\/enroll/);
   assert.equal((code.match(/\.href = /g) || []).length, 1, 'the only link it creates is the Readiness CTA');
 });

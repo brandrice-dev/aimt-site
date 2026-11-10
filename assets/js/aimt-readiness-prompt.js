@@ -223,7 +223,7 @@
     return b;
   }
 
-  // Mobile: sit above the sticky "Enroll · $597" bar while it is showing,
+  // Mobile: sit above the sticky "Enroll · $697" bar while it is showing,
   // so the primary enrollment action is never covered by this card.
   function placeAboveStickyBar() {
     if (!el) return;

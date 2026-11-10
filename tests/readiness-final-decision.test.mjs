@@ -23,7 +23,7 @@ test('Decision page matches approved Version 6 copy, price, and plain direction'
   assert.match(HTML,/Offer more to each client/);
   assert.match(HTML,/Stand out from the competition/);
   assert.match(HTML,/Know what you're doing—and why/);
-  assert.match(HTML,/\$597 one time\./);
+  assert.match(HTML,/\$697 one time\./);
   assert.match(HTML,/Lifetime course access/i);
   assert.match(HTML,/Certification is earned by completing/);
   assert.doesNotMatch(HTML,/previewDialog|Owner draft|mock checkout/i);
