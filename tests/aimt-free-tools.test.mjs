@@ -76,9 +76,9 @@ test('blank is not zero, values are finite, and optional price is truly optional
   assert.equal(readAmount('5.5',SERVICE_COST_FIELDS.serviceMinutes).state,'invalid');
   assert.equal(readAmount('0',SERVICE_COST_FIELDS.products).state,'ok');
 });
-test('public worksheet has no PII collection, tracking form or automatic network sends',()=>{
+test('worksheet contact capture remains separate from local-only business calculations',()=>{
   assert.match(cost,/href="\/head-spa-readiness\?utm_source=free_tools/);
-  assert.match(cost,/Your entries stay in this browser page/);
+  assert.match(cost,/Your cost entries stay in this browser page/);
   assert.match(cost,/modeled difference/);
   assert.match(cost,/Print \/ Save as PDF/);
   assert.doesNotMatch(cost,/fetch\(|localStorage|api\/readiness\/submit|<form[^>]*action=/);
@@ -96,7 +96,7 @@ test('Blueprint exports and imports a stable, bounded, business-only shape',()=>
   assert.throws(()=>normalizeBlueprint({version:BLUEPRINT_VERSION,fields:{value:'a'.repeat(261)}}),/Invalid value/);
   assert.throws(()=>normalizeBlueprint({version:BLUEPRINT_VERSION,fields:{value:'bad\u0000text'}}),/Unsupported text/);
 });
-test('Blueprint connects course modules, never grants credentials and requires no server storage',()=>{
+test('Blueprint connects course modules and keeps plan contents local',()=>{
   const resources=read('assets/js/aimt-course-resources.js');
   assert.match(resources,/title: 'First-Service Blueprint'/);
   assert.match(resources,/href: 'first-service-blueprint\.html'/);
@@ -106,7 +106,7 @@ test('Blueprint connects course modules, never grants credentials and requires n
     assert.ok(resources.includes(original),'existing resource lost '+original);
   assert.match(blueprint,/No client information/);
   assert.match(blueprint,/A completed Blueprint does not mean AIMT has approved your service/);
-  assert.match(blueprint,/Nothing is uploaded to AIMT/);
+  assert.match(blueprint,/Your plan contents are not uploaded to AIMT/);
   assert.match(blueprint,/id="bpExport"/);
   assert.match(blueprint,/id="bpImport"/);
   assert.match(blueprint,/type="file"/);
