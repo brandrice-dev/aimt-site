@@ -105,8 +105,10 @@ async function call(db, handler, user, body) {
   const restore = installFetch(db);
   try {
     const request = {
+      url: 'https://aimtrichology.com/api/certification/x',
       headers: { get: (n) => (n === 'Authorization' ? `Bearer ${user.id}` : null) },
       json: async () => body || {},
+      text: async () => JSON.stringify(body || {}),
     };
     const res = await handler({ request, env: ENV });
     return { status: res.status, body: await res.json() };
@@ -117,7 +119,7 @@ async function call(db, handler, user, body) {
 
 function addAttempt(db, attemptNumber, decision, criticalDomainResults = CLEARED, user = STUDENT) {
   const row = {
-    id: `att-${user.id}-${attemptNumber}`, user_id: user.id, course_slug: COURSE, assessment_version: 'headspa-fe-assessment-v1', attempt_number: attemptNumber,
+    id: `att-${user.id}-${attemptNumber}`, user_id: user.id, course_slug: COURSE, assessment_version: 'headspa-fe-assessment-v1', bank_version: 'headspa-fe-bank-v1-2026-08-26', attempt_number: attemptNumber,
     status: decision ? 'scored' : 'in_progress', certification_decision: decision, critical_domain_results: criticalDomainResults,
     part1_selected_ids: [], part2_selected_ids: [], part3_selected_ids: [], part1_responses: {},
   };

@@ -6,9 +6,10 @@
    paper certificate would show anyway.
    ═══════════════════════════════════════════════════════════════ */
 
-const COURSE_NAMES = {
-  'headspa-mastery': 'Head Spa Certification Course'
-};
+// Course display title comes from the course registry. A credential whose
+// course isn't (or is no longer) listed still verifies -- showing its stored
+// slug, exactly as before -- so no issued credential or link ever breaks.
+import { certificateTitleFor } from '../_lib/courses/registry.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -64,7 +65,7 @@ export async function onRequestGet(context) {
   return json({
     valid: true,
     credential_id: row.credential_id,
-    course: COURSE_NAMES[row.course_slug] || row.course_slug,
+    course: certificateTitleFor(row.course_slug) || row.course_slug,
     student_name: row.student_name,
     completed_at: row.completed_at
   });

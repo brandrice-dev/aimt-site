@@ -18,8 +18,7 @@
    consumes a case submission or looks like a failed evaluation.
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, supabaseRest, resolveAttemptContentOrError } from '../../_lib/certification/auth.mjs';
 import { scoreCaseSubmission, computeAppliedCasesComponent } from '../../_lib/certification/scoring.mjs';
 import { evaluateStructuredCasePart } from '../../_lib/certification/cadence-grader.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
@@ -72,7 +71,10 @@ export async function onRequestPost(context) {
     return json({ error: 'This case is already being evaluated. Please wait a moment.', inFlight: true }, 409);
   }
 
-  const banks = getProductionBanks();
+  // Resolved before the lock is claimed, so a rejection never holds it.
+  const { content, errorResponse: contentError } = resolveAttemptContentOrError(attempt);
+  if (contentError) return contentError;
+  const banks = content.banks;
   const caseDef = banks.caseBank.find((c) => c.id === caseId);
   if (!caseDef) return json({ error: 'Assessment content unavailable.' }, 503);
 
