@@ -133,3 +133,19 @@
  refresh();setInterval(()=>{if(!document.hidden&&root.getClientRects().length)refresh();},60000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&root.getClientRects().length)refresh();});
 })();
+
+// Public course presentation only; no effect on checkout or bonus eligibility.
+(function showKlarnaOption(){
+ if(typeof document.querySelector!=='function')return;
+ for(const selector of ['.lp-hero-cta-row','#lpCheckoutStatus']){
+  const target=document.querySelector(selector);
+  if(!target||target.previousElementSibling?.classList.contains('aimt-payment-options'))continue;
+  const note=document.createElement('p');
+  note.className='aimt-payment-options';
+  note.style.cssText='font-size:.88rem;line-height:1.6;margin:1rem 0';
+  const title=document.createElement('strong');title.textContent='Your next step. Payments that fit.';
+  const terms=document.createElement('span');terms.style.cssText='font-size:.75rem;opacity:.8';terms.textContent='Subject to eligibility and approval.';
+  note.append(title,document.createElement('br'),'Pay over time with Klarna at checkout.',document.createElement('br'),terms);
+  target.before(note);
+ }
+})();
