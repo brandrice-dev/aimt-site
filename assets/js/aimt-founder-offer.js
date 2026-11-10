@@ -136,6 +136,7 @@
 
 // Public course presentation only; no effect on checkout or bonus eligibility.
 (function showKlarnaOption(){
+ if(typeof document.querySelector!=='function')return;
  for(const selector of ['.lp-hero-cta-row','#lpCheckoutStatus']){
   const target=document.querySelector(selector);
   if(!target||target.previousElementSibling?.classList.contains('aimt-payment-options'))continue;
