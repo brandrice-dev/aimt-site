@@ -245,6 +245,22 @@ async function runChecks() {
     check('H. WRONG PRICE', 'No entitlement row is written for a mismatched price', entitlementsStore.length === 0);
   }
 
+  // Historical paid purchases remain valid after switching regular tuition.
+  for (const priceId of ['price_headspa_mastery', 'price_1Tq2DoKjvZ2g2Oyxwy9RXgF6']) {
+    const entitlementsStore = [];
+    const stripeSessions = { cs_price_migration: paidSession({ id: 'cs_price_migration', email: USER_A.email, priceId }) };
+    const mock = buildMockFetch({ users: { [TOKEN_A]: USER_A }, stripeSessions, entitlementsStore });
+    const res = await withMockFetch(mock, () => onRequestPost({ request: makePostRequest({ sessionId: 'cs_price_migration' }, TOKEN_A), env }));
+    check('PRICE MIGRATION', `Configured or historical price ${priceId} remains claimable`, res.status === 200 && entitlementsStore.length === 1);
+  }
+  {
+    const entitlementsStore = [];
+    const stripeSessions = { cs_missing_config: paidSession({ id: 'cs_missing_config', email: USER_A.email }) };
+    const mock = buildMockFetch({ users: { [TOKEN_A]: USER_A }, stripeSessions, entitlementsStore });
+    const res = await withMockFetch(mock, () => onRequestPost({ request: makePostRequest({ sessionId: 'cs_missing_config' }, TOKEN_A), env: { ...env, STRIPE_PRICE_ID: '' } }));
+    check('PRICE MIGRATION', 'Missing configured price cannot bypass purchase validation', res.status === 400 && entitlementsStore.length === 0);
+  }
+
   // I. Duplicate/replay claim is idempotent
   {
     const entitlementsStore = [];

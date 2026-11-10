@@ -1,3 +1,4 @@
+import { isHeadspaCoursePrice } from '../_lib/enrollment/course-prices.mjs';
 import {fulfillReview} from '../_lib/founder-review/purchase.mjs';
 import { resolveUser } from '../_lib/certification/auth.mjs';
 
@@ -62,8 +63,8 @@ async function logAimtEvent(type, payload) {
 /* Validate the session actually purchased THIS course's price.
    Prevents a checkout session for a cheaper future product from
    granting HeadSpa Mastery access. */
-async function sessionMatchesCoursePrice(sessionId, stripeSecretKey, expectedPriceId) {
-  if (!expectedPriceId) return true; // no price configured — skip check
+async function sessionMatchesCoursePrice(sessionId, stripeSecretKey, env) {
+  if (!env.STRIPE_PRICE_ID) return false;
   const response = await fetch(
     `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}/line_items?limit=10`,
     { headers: { Authorization: `Bearer ${stripeSecretKey}` } }
@@ -73,7 +74,7 @@ async function sessionMatchesCoursePrice(sessionId, stripeSecretKey, expectedPri
     throw new Error(data?.error?.message || 'Unable to verify purchased items.');
   }
   const items = Array.isArray(data.data) ? data.data : [];
-  return items.some((item) => item?.price?.id === expectedPriceId);
+  return items.some((item) => isHeadspaCoursePrice(item?.price?.id, env));
 }
 
 async function fetchCheckoutSession(sessionId, stripeSecretKey) {
@@ -192,7 +193,7 @@ export async function onRequestPost(context) {
     const priceMatches = await sessionMatchesCoursePrice(
       session.id,
       stripeSecretKey,
-      env.STRIPE_PRICE_ID
+      env
     );
     if (!priceMatches) {
       await logAimtEvent('api_claim_course_access_failure', {

@@ -395,3 +395,12 @@ test('no real network call is made anywhere in this file — every fetch is rout
     );
   }
 });
+
+
+test('historical $597 course price still fulfills after the regular tuition price changes', async (t) => {
+  const state = makeState({ lineItemsPriceId: 'price_1Tq2DoKjvZ2g2Oyxwy9RXgF6' });
+  t.mock.method(globalThis, 'fetch', createFetchMock(state));
+  const res = await postWebhook(makeEnv());
+  assert.equal(res.status, 200);
+  assert.equal(state.entitlements.length, 1);
+});

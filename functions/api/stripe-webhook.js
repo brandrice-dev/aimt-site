@@ -1,3 +1,4 @@
+import { isHeadspaCoursePrice } from '../_lib/enrollment/course-prices.mjs';
 /* ═══════════════════════════════════════════════════════════════
    Stripe Webhook — server-side entitlement writes
    ---------------------------------------------------------------
@@ -29,7 +30,7 @@ const SIGNATURE_TOLERANCE_SECONDS = 300; // 5 minutes
 
 /* Map Stripe price IDs → course slugs. Add rows as courses launch. */
 function courseSlugForPrice(priceId, env) {
-  if (priceId && env.STRIPE_PRICE_ID && priceId === env.STRIPE_PRICE_ID) {
+  if (isHeadspaCoursePrice(priceId, env)) {
     return 'headspa-mastery';
   }
   return null;
