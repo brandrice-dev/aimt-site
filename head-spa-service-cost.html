@@ -61,6 +61,23 @@
   <span class="ft-eyebrow">AIMT / Free Practitioner Worksheet</span>
   <h1 class="ft-page-title">Know what your service costs.</h1>
   <p class="ft-intro">Your appointment costs more than the time your client spends in the chair. Enter your real numbers to see the estimated cost of one head spa service—before you decide what to charge.</p>
+  <section class="ft-form-card ft-contact-gate" id="freeToolGate" aria-labelledby="freeToolGateTitle">
+    <h2 id="freeToolGateTitle">Get your free Service Cost Worksheet.</h2>
+    <p>Enter your first name and email to use this tool. No purchase needed.</p>
+    <form id="freeToolContact" data-tool="service-cost">
+      <div class="ft-form-grid">
+        <div class="ft-field"><label for="toolFirstName">First name</label><input id="toolFirstName" name="first_name" type="text" autocomplete="given-name" maxlength="80" required></div>
+        <div class="ft-field"><label for="toolEmail">Email</label><input id="toolEmail" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+      </div>
+      <div class="ft-contact-honey" aria-hidden="true"><label for="toolWebsite">Website</label><input id="toolWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="ft-contact-consent"><input id="toolMarketing" name="marketing_consent" type="checkbox"><label for="toolMarketing">Send me occasional AIMT practitioner education, resources, and certification updates.</label></p>
+      <p class="ft-tiny">AIMT saves your name, email, tool choice, and update preference. Your worksheet entries stay on your device. <a href="/privacy">Privacy Policy</a></p>
+      <button class="ft-btn ft-btn-primary" type="submit">Open my free tool →</button>
+      <p id="freeToolContactStatus" class="ft-tiny" role="status" aria-live="polite"></p>
+    </form>
+    <noscript><p>Enable JavaScript to save your details and open this tool.</p></noscript>
+  </section>
+  <div id="freeToolContent" hidden>
   <p class="ft-cost-print-caption">Head Spa Service Cost Worksheet · Complete using your own actual assumptions · aimtrichology.com/free-tools</p>
   <p class="ft-tiny">Faint numbers are examples, not prefilled answers or recommended prices. Enter your own minutes and dollar amounts.</p>
   <form id="costWorksheet" novalidate>
@@ -99,7 +116,7 @@
     <p class="ft-result-status" id="resultStatus">Complete the form and calculate to see your result.</p>
     <p>Calculation: product + consumables + allocated overhead + (full appointment hours × chosen hourly labor value). Any price difference is a model using your entries, not take-home income or a forecast of demand.</p>
   </section>
-  <p class="ft-note">This worksheet supports business planning only. Results depend entirely on your inputs; they do not establish a recommended price, guarantee profit, or replace financial or tax advice. Your entries stay in this browser page and are not submitted to AIMT.</p>
+  <p class="ft-note">This worksheet supports business planning only. Results depend entirely on your inputs; they do not establish a recommended price, guarantee profit, or replace financial or tax advice. Your cost entries stay in this browser page and are not submitted to AIMT. Your contact details are saved separately.</p>
   <section class="ft-support ft-no-print" style="padding:1rem 0">
     <div class="ft-support-inner">
       <div><h2>Now that you know your numbers, what’s next?</h2><p>Build on your cost model with training in pricing, service planning, and the full head spa service.</p><p><a class="ft-pill-link" href="/head-spa-certification">Explore Head Spa Certification →</a></p></div>
@@ -107,6 +124,7 @@
     </div>
   </section>
   <p class="ft-worksheet-footer" style="font-size:.68rem;color:rgba(255,255,255,.4)">AIMT · American Institute of Modern Trichology · Free professional education</p>
+  </div>
 </main>
 <footer class="ft-footer ft-no-print"><div class="ft-shell ft-footer-inner"><span>AIMT · Tools for professional learning.</span><div class="ft-footer-links"><a href="/free-tools">All Free Tools</a><a href="/education">Education Library</a><a href="/privacy">Privacy</a></div></div></footer>
 <script type="module">
@@ -154,4 +172,5 @@ form.addEventListener('submit',event=>{
 });
 document.getElementById('costPrint').addEventListener('click',()=>window.print());
 </script>
+<script type="module" src="/assets/js/aimt-free-tool-capture.mjs"></script>
 </body></html>

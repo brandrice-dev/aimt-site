@@ -135,3 +135,14 @@
 .ft-field input::placeholder,.ft-field textarea::placeholder{color:#736b63;opacity:1}
 @media(max-width:1050px) and (min-width:681px){.ft-hub .ft-grid{grid-template-columns:1fr}.ft-hub .ft-tool-card{min-height:340px}.ft-hub .ft-panel-top{margin-bottom:1.3rem}}
 @media(max-width:680px){.ft-hub .ft-hero{padding:3.2rem 0 2.5rem}.ft-hub .ft-tool-card{padding:1.65rem;min-height:420px}.ft-hub .ft-section-head p{font-size:.8rem}.ft-panel-top{margin-bottom:1.8rem}}
+
+/* Contact capture stays separate from local business worksheets. */
+#freeToolContent[hidden],#freeToolGate[hidden]{display:none!important}
+.ft-contact-gate{max-width:760px}
+.ft-contact-consent{display:flex;align-items:flex-start;gap:.65rem;font-size:.85rem;line-height:1.6}
+.ft-contact-consent input{margin-top:.35rem;flex:0 0 auto}
+.ft-contact-honey{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media print{.ft-contact-gate{display:none!important}}
+
+.ft-contact-gate .ft-tiny{color:#625951}
+.ft-contact-gate a{color:#65534a}

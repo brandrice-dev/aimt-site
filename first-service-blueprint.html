@@ -86,6 +86,23 @@
   <span class="ft-eyebrow" id="blueprintLeadTitle">AIMT / Practitioner Planning Companion</span>
   <h1 class="ft-page-title">First-Service Blueprint.</h1>
   <p class="ft-intro">Turn your training into one clear head spa service plan. You decide what the service includes, what it costs, and which checks still need to be resolved. Save a plan backup and return to it as you learn.</p>
+  <section class="ft-form-card ft-contact-gate" id="freeToolGate" aria-labelledby="freeToolGateTitle">
+    <h2 id="freeToolGateTitle">Get your free First-Service Blueprint.</h2>
+    <p>Enter your first name and email to use this tool. No purchase needed.</p>
+    <form id="freeToolContact" data-tool="first-service-blueprint">
+      <div class="ft-form-grid">
+        <div class="ft-field"><label for="toolFirstName">First name</label><input id="toolFirstName" name="first_name" type="text" autocomplete="given-name" maxlength="80" required></div>
+        <div class="ft-field"><label for="toolEmail">Email</label><input id="toolEmail" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+      </div>
+      <div class="ft-contact-honey" aria-hidden="true"><label for="toolWebsite">Website</label><input id="toolWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="ft-contact-consent"><input id="toolMarketing" name="marketing_consent" type="checkbox"><label for="toolMarketing">Send me occasional AIMT practitioner education, resources, and certification updates.</label></p>
+      <p class="ft-tiny">AIMT saves your name, email, tool choice, and update preference. Your worksheet entries stay on your device. <a href="/privacy">Privacy Policy</a></p>
+      <button class="ft-btn ft-btn-primary" type="submit">Open my free tool →</button>
+      <p id="freeToolContactStatus" class="ft-tiny" role="status" aria-live="polite"></p>
+    </form>
+    <noscript><p>Enable JavaScript to save your details and open this tool.</p></noscript>
+  </section>
+  <div id="freeToolContent" hidden>
   <div class="bp-meta ft-no-print"><span>Two-page working plan</span><span>Self-completed · No AI-generated advice</span><span>No client information</span></div>
   <div class="ft-actions ft-no-print">
     <button class="ft-btn ft-btn-primary" id="bpExport" type="button">Download plan backup</button>
@@ -94,7 +111,7 @@
     <input type="file" id="bpImport" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
     <button class="ft-btn" id="bpClear" type="button">Clear form</button>
   </div>
-  <p class="bp-status ft-no-print" id="bpStatus" role="status" aria-live="polite">Drafts save in this browser on this device. Nothing is uploaded to AIMT.</p>
+  <p class="bp-status ft-no-print" id="bpStatus" role="status" aria-live="polite">Drafts save in this browser on this device. Your plan contents are not uploaded to AIMT.</p>
   <div class="ft-note ft-no-print">Business notes only. Do not enter client names, photos, medical details or confidential information. A completed Blueprint does not mean AIMT has approved your service, that you are certified, or that local rules allow the service.</div>
   <form id="bpForm" autocomplete="off">
     <section class="bp-page" aria-labelledby="bpPage1Title">
@@ -152,6 +169,7 @@
     </section>
   </form>
   <p class="ft-tiny ft-no-print">Your draft saves in this browser on this device. Download a plan backup to reopen here or on another device, or save a PDF for your review. Clearing browser data removes the saved draft.</p>
+  </div>
 </main>
 <footer class="ft-footer ft-no-print"><div class="ft-shell ft-footer-inner"><span>AIMT · Practitioner planning companion</span><div class="ft-footer-links"><a href="/free-tools">Free Tools</a><a href="/privacy">Privacy</a></div></div></footer>
 <script type="module">
@@ -164,7 +182,7 @@ function saveDraft(){
   dirty=true;
   try{
     localStorage.setItem(draftKey,JSON.stringify(blueprintPayload(currentValues())));
-    dirty=false;status.textContent='Draft saved in this browser on this device. Nothing is uploaded to AIMT.';
+    dirty=false;status.textContent='Draft saved in this browser on this device. Your plan contents are not uploaded to AIMT.';
     return true;
   }catch(_){
     status.textContent='This browser could not save your draft. Download an editable copy before leaving.';
@@ -176,7 +194,7 @@ try{
   if(saved){
     const data=normalizeBlueprint(JSON.parse(saved));
     for(const [key,value] of Object.entries(data.fields))if(form.elements[key])form.elements[key].value=value;
-    status.textContent='Your saved draft was restored from this browser. Nothing is uploaded to AIMT.';
+    status.textContent='Your saved draft was restored from this browser. Your plan contents are not uploaded to AIMT.';
   }
 }catch(_){status.textContent='The saved draft could not be restored. Open a downloaded copy or start a new plan.';}
 form.addEventListener('input',saveDraft);
@@ -215,5 +233,6 @@ pick('bpClear').addEventListener('click',()=>{
 pick('bpPrint').addEventListener('click',()=>window.print());
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 </script>
+<script type="module" src="/assets/js/aimt-free-tool-capture.mjs"></script>
 </body>
 </html>
