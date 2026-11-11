@@ -24,7 +24,7 @@
 
   /* ══════════════════════════════════════════════════════
      COURSE REVIEW MODE — audit-only, owner inspection.
-     Never activates on a production hostname. Session-only;
+     Localhost/127.0.0.1 only; never on deployed sites. Session-only;
      never touches localStorage['levo_app'] or progress sync.
      See docs/course-audit/implementation-log.md for the audit trail.
      ══════════════════════════════════════════════════════ */
@@ -43,10 +43,7 @@
   function isReviewModeEligibleHost(hostname) {
     const h = (hostname || '').toLowerCase();
     if (isReviewModeProductionHost(h)) return false;
-    if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local')) return true;
-    /* Cloudflare Pages branch-preview subdomains: <branch>.aimt-site.pages.dev */
-    if (/^[a-z0-9-]+\.aimt-site\.pages\.dev$/.test(h)) return true;
-    return false;
+    return h === 'localhost' || h === '127.0.0.1';
   }
 
   const ReviewMode = {
