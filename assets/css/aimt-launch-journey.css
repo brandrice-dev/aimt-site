@@ -1,0 +1,151 @@
+/* AIMT standalone free tools + Accelerator. Consumes canonical typography and palette.
+   No frameworks, no external UI packages. Shared components intentionally modest. */
+.lj-body{margin:0;background:#1a1814;color:#faf8f5;font-family:var(--aimt-font-sans,Outfit,sans-serif);font-weight:300;-webkit-font-smoothing:antialiased}
+.lj-body *{box-sizing:border-box}
+.lj-body button,.lj-body select,.lj-body textarea,.lj-body input{font:inherit}
+.lj-body button{cursor:pointer}
+.lj-body a{color:inherit}
+.lj-body :is(button,a,input,select,textarea):focus-visible{outline:2px solid #d8b3b4;outline-offset:3px}
+.lj-body [hidden]{display:none!important}
+.lj-container{width:min(1140px,calc(100% - 56px));margin:0 auto}
+.lj-top{border-bottom:1px solid rgba(255,255,255,.10);background:rgba(26,24,20,.96);position:relative;z-index:5}
+.lj-top-inner{display:flex;align-items:center;gap:25px;justify-content:space-between;min-height:68px}
+.lj-brand{font:700 13px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.25em;text-decoration:none;white-space:nowrap}
+.lj-brand-sub{font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);color:#aa9b96;letter-spacing:.11em;text-transform:uppercase;flex:1}
+.lj-top-link{font-size:12px;color:rgba(255,255,255,.7)!important;text-decoration:none;white-space:nowrap}
+.lj-top-link:hover{text-decoration:underline;text-underline-offset:4px}
+.lj-hero{padding:clamp(55px,9vw,105px) 0 62px;border-bottom:1px solid rgba(255,255,255,.10);position:relative}
+.lj-hero-inner{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.65fr);gap:clamp(28px,6vw,75px);align-items:end}
+.lj-overline{display:block;font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);text-transform:uppercase;letter-spacing:.22em;color:#c3a7a4;margin-bottom:20px}
+.lj-title{font:700 clamp(36px,6.2vw,78px)/1.02 var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:-.048em;text-transform:uppercase;margin:0;max-width:960px}
+.lj-title span{display:block;color:#bca8a1}
+.lj-hero-copy{max-width:540px;font-size:clamp(16px,1.9vw,20px);line-height:1.6;color:rgba(255,255,255,.69);margin:20px 0}
+.lj-hero-side{border-top:1px solid rgba(255,255,255,.19);padding-top:22px}
+.lj-hero-side strong{font:600 12px var(--aimt-font-mont,Montserrat,sans-serif);line-height:1.5}
+.lj-hero-side p{font-size:14px;line-height:1.65;color:rgba(255,255,255,.58)}
+.lj-meta{font:500 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#bca8a1}
+.lj-small{font-size:12px!important;line-height:1.6!important;color:rgba(255,255,255,.5)!important}
+.lj-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;align-items:center}
+.lj-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(255,255,255,.27);color:white;background:transparent;padding:12px 20px;min-height:48px;text-decoration:none;font:700 11px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.055em}
+.lj-btn:hover{background:rgba(255,255,255,.08)}
+.lj-btn-primary{background:#f8f3ed;border-color:#f8f3ed;color:#1a1814!important}
+.lj-btn-primary:hover{background:#e5ddd5;border-color:#e5ddd5}
+.lj-btn:disabled{opacity:.4;cursor:not-allowed}
+.lj-btn-dark{border-color:#282320;background:#282320;color:#faf8f5!important}
+.lj-btn-dark:hover{background:#4b413d}
+.lj-btn-outline-dark{border-color:#a69c95;color:#282320!important}
+.lj-btn-outline-dark:hover{background:#eee6e0}
+.lj-course{display:grid;grid-template-columns:minmax(215px,270px) minmax(0,1fr);gap:clamp(32px,5vw,70px);padding:46px 0 95px;align-items:start}
+.lj-rail{position:sticky;top:20px;min-width:0}
+.lj-progress-label{font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.13em;text-transform:uppercase;color:#c5aba5;display:flex;justify-content:space-between}
+.lj-progress-track{height:3px;border-radius:5px;background:rgba(255,255,255,.13);margin:13px 0 28px;overflow:hidden}
+.lj-progress-track span{display:block;height:100%;width:0;background:#bda6a0;transition:width .2s}
+.lj-step-nav{display:grid;gap:3px}
+.lj-step-button{display:grid;grid-template-columns:30px 1fr 16px;gap:9px;align-items:center;width:100%;text-align:left;padding:17px 9px 17px 0;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.67);border-radius:0}
+.lj-step-button b{font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);color:#bca8a1}
+.lj-step-button span{font:500 13px var(--aimt-font-sans,Outfit,sans-serif);line-height:1.4}
+.lj-step-button.is-active{color:#fff;border-bottom-color:#bba29f}
+.lj-step-button.is-active span{font-weight:600}
+.lj-step-button .lj-done{font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);color:#c7b3ad}
+.lj-rail-note{font-size:12px;line-height:1.6;color:rgba(255,255,255,.43);margin-top:24px}
+.lj-lessons{min-width:0}
+.lj-lesson[hidden]{display:none!important}
+.lj-lesson-head{padding-bottom:27px;border-bottom:1px solid rgba(255,255,255,.11)}
+.lj-lesson-index{font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.15em;text-transform:uppercase;color:#bca9a2}
+.lj-lesson h2{font:700 clamp(30px,4.1vw,51px)/1.08 var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:-.038em;text-transform:uppercase;margin:17px 0}
+.lj-lesson h3{font:600 22px var(--aimt-font-mont,Montserrat,sans-serif);line-height:1.2;letter-spacing:-.025em;margin:26px 0 12px}
+.lj-lesson h4{font:600 15px var(--aimt-font-mont,Montserrat,sans-serif);margin:16px 0 10px}
+.lj-lesson p{font-size:16px;line-height:1.72;color:rgba(255,255,255,.74);max-width:75ch}
+.lj-lesson strong{color:#fff}
+.lj-lesson .lj-lead{font-size:19px;line-height:1.6;color:#eee7df;margin:15px 0 0;font-weight:300}
+.lj-lesson-section{margin:32px 0}
+.lj-contrast{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:26px 0}
+.lj-contrast article{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035);border-radius:14px;padding:22px}
+.lj-contrast article small{font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);color:#c8ada7;letter-spacing:.1em;text-transform:uppercase}
+.lj-contrast article h3{font-size:19px;margin:12px 0}
+.lj-contrast article p{font-size:14px;margin:0}
+.lj-teach{background:rgba(163,150,141,.10);border-left:3px solid #b59e96;padding:19px 23px;border-radius:0 11px 11px 0;margin:24px 0}
+.lj-teach strong{display:block;font:600 11px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#dcc5bc}
+.lj-teach p{margin:8px 0 0;font-size:15px}
+.lj-tool{margin:32px 0;background:#f6f1ea;color:#29231f;border-radius:18px;padding:clamp(20px,3.6vw,34px);box-shadow:0 4px 28px rgba(0,0,0,.08)}
+.lj-tool-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:13px}
+.lj-tool-head small{font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);color:#8c655f;letter-spacing:.13em;text-transform:uppercase}
+.lj-tool h3,.lj-tool h4{color:#29231f;font-family:var(--aimt-font-mont,Montserrat,sans-serif)}
+.lj-tool h3{font-size:23px;letter-spacing:-.025em;margin:10px 0}
+.lj-tool p,.lj-tool li{color:#625a54;font-size:14px;line-height:1.65}
+.lj-tool strong{color:#29231f}
+.lj-tool label{display:block;font-size:13px;font-weight:600;line-height:1.5;color:#352e29;margin:13px 0 6px}
+.lj-tool :is(input,select,textarea){max-width:100%;width:100%;border:1px solid #c8c0ba;border-radius:8px;background:#fff;color:#302923;min-height:47px;padding:10px 12px;resize:vertical}
+.lj-tool textarea{min-height:85px;line-height:1.55}
+.lj-tool input[type=checkbox],.lj-tool input[type=radio]{width:17px;height:17px;min-height:0;padding:0;accent-color:#7b4d54;flex-shrink:0;margin:3px 0 0}
+.lj-tool fieldset{margin:17px 0;padding:0;border:0}
+.lj-tool legend{color:#352e29;font-weight:600;font-size:13px;line-height:1.6;margin-bottom:10px}
+.lj-tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.lj-tool .lj-check{display:flex;gap:10px;align-items:flex-start;border:1px solid #ddd4cc;padding:12px;border-radius:9px;background:#fff;margin:6px 0;cursor:pointer;font-weight:400}
+.lj-tool .lj-check:has(input:checked){border-color:#90696f;background:#f6eded}
+.lj-option{display:flex;align-items:flex-start;gap:10px;line-height:1.6!important;font-weight:400!important;padding:13px 15px;margin:8px 0!important;border:1px solid #d5ccc5;border-radius:10px;cursor:pointer;background:white}
+.lj-option:has(input:checked){background:#f6eceb;border-color:#8d6269}
+.lj-help{font-size:12px!important;color:#71655f!important;line-height:1.55!important;margin:6px 0 15px!important}
+.lj-feedback{border-left:3px solid #7c5558;background:#eae0dc;border-radius:0 10px 10px 0;padding:16px;margin:15px 0;font-size:14px;line-height:1.6;color:#362b27}
+.lj-feedback strong{display:block;color:#362b27;margin-bottom:5px}
+.lj-feedback[hidden]{display:none!important}
+.lj-source-list{margin:12px 0;padding-left:22px}
+.lj-source-list li{margin:8px 0}
+.lj-source-list a{color:#67454b;overflow-wrap:anywhere;text-underline-offset:3px}
+.lj-status{font-size:12px!important;color:#7a545c!important;line-height:1.5!important;min-height:17px}
+.lj-keep{background:#29231f;color:#faf8f5;border-radius:13px;padding:19px 22px;margin:20px 0}
+.lj-keep strong{font:600 13px var(--aimt-font-mont,Montserrat,sans-serif);color:#fff}
+.lj-keep p{color:rgba(255,255,255,.77)!important;margin:10px 0}
+.lj-keep small{color:rgba(255,255,255,.58);font-size:11px;line-height:1.5}
+.lj-course-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.12);padding-top:24px;margin-top:35px}
+.lj-course-nav small{font-size:12px;color:rgba(255,255,255,.52)}
+.lj-lesson-footer{border-top:1px solid rgba(255,255,255,.1);padding:21px 0}
+.lj-result-block{white-space:pre-wrap;word-break:break-word;background:#f9f5ef;color:#27221f;padding:27px;border-radius:13px;font:400 14px/1.65 var(--aimt-font-sans,Outfit,sans-serif);border:1px solid #e5dcd5;margin-top:18px}
+.lj-summary-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.lj-standalone{padding:55px 0 75px}
+.lj-standalone-title{font:700 clamp(33px,5vw,58px)/1.08 var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:-.035em;text-transform:uppercase;max-width:850px;margin:16px 0}
+.lj-standalone-intro{font-size:18px;line-height:1.7;color:rgba(255,255,255,.72);max-width:730px;margin:0 0 30px}
+.lj-standalone .lj-tool{max-width:940px}
+.lj-bottom{border-top:1px solid rgba(255,255,255,.11);padding:25px 0 50px;color:rgba(255,255,255,.47);font-size:12px;line-height:1.6}
+.lj-bottom a{color:rgba(255,255,255,.77)}
+.lj-illustration{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:18px 0}
+.lj-illustration svg{display:block;width:min(100%,400px);height:auto;flex:1 1 245px;background:#e4d5ca;border-radius:10px}
+.lj-illustration-note{flex:1 1 170px;display:flex;flex-direction:column;justify-content:center;font-size:12px!important;color:#675c56!important;line-height:1.6}
+.lj-readiness{background:#2b2320;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:24px;margin:24px 0}
+.lj-readiness h3{margin:0 0 10px}
+.lj-readiness p{margin:0 0 20px}
+@media(max-width:850px){
+ .lj-hero-inner{grid-template-columns:1fr}
+ .lj-course{grid-template-columns:1fr;gap:24px}
+ .lj-rail{position:static}
+ .lj-step-nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+ .lj-step-button{display:block;text-align:center;border:1px solid rgba(255,255,255,.12);padding:11px 5px;border-radius:8px;min-height:60px}
+ .lj-step-button b{display:block;margin-bottom:5px}
+ .lj-step-button span{font-size:10px}
+ .lj-step-button .lj-done{display:none}
+ .lj-rail-note{margin-top:10px}
+}
+@media(max-width:600px){
+ .lj-container{width:calc(100% - 32px)}
+ .lj-top-inner{min-height:60px}
+ .lj-brand-sub{display:none}
+ .lj-hero{padding:39px 0}
+ .lj-hero-inner{gap:26px}
+ .lj-course{padding-top:24px}
+ .lj-step-button span{font-size:9px;overflow-wrap:anywhere}
+ .lj-contrast,.lj-tool-grid{grid-template-columns:1fr}
+ .lj-tool{margin:22px 0;padding:20px}
+ .lj-lesson h2{font-size:30px}
+ .lj-course-nav .lj-btn{flex:1 1 145px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.lj-progress-track span{transition:none}}
+@media print{
+ .lj-top,.lj-hero,.lj-rail,.lj-course-nav,.lj-actions,.lj-summary-actions,.lj-bottom,.lj-tool{display:none!important}
+ html,.lj-body{background:#fff!important;color:#222!important}
+ .lj-container{max-width:none;width:100%}
+ .lj-lessons{width:100%}
+ .lj-result-block{background:#fff;white-space:pre-wrap;color:#222;padding:0;border:0}
+ .lj-lesson[hidden]{display:none!important}
+ #lesson-summary{display:block!important}
+ #lesson-summary h2{color:#222}
+}
