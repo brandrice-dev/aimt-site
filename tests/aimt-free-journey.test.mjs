@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
- STORAGE_KEY,STATES,LICENSES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
+ STORAGE_KEY,STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
@@ -90,7 +90,7 @@ test('individual unlicensed shampoo exceptions do not transfer to massage and st
  const california=evidenceFor('California','Esthetician',['wash','styling','scalp-massage']);
  assert.equal(california.findings[0].status,'outside_credential');
  assert.equal(california.findings[1].status,'outside_credential');
- assert.equal(california.findings[2].status,'unresolved');
+ assert.equal(california.findings[2].status,'credential_scope');
  const texas=evidenceFor('Texas','Esthetician',['wash','styling','scalp-massage']);
  assert.equal(texas.findings[0].status,'documented_exemption');
  assert.equal(texas.findings[1].status,'outside_credential');
@@ -328,7 +328,8 @@ test('newest official New York procedural chart is referenced and older chart is
  const ny=SCOPE_EVIDENCE['New York'];
  assert.ok(ny.sources.some(x=>x.url.includes('2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf')));
  assert.ok(!ny.sources.some(x=>x.url.includes('2025/03/ae-licensees')));
- assert.ok(ny.findings.length===0,'NY chart alone does not authorize activity without interpretation');
+ assert.ok(ny.findings.length>0,'NY official scope pages now have narrow source-backed findings');
+ assert.equal(evidenceFor('New York','Massage therapist',['bodywork']).findings[0].status,'unresolved');
 });
 
 test('source-backed review can be copied as one actionable research record without collecting identity data',()=>{
@@ -339,4 +340,78 @@ test('source-backed review can be copied as one actionable research record witho
  assert.match(widget,/OFFICIAL LICENSE LOOKUP:/);
  assert.match(widget,/No finding authorizes a complete head spa treatment/);
  assert.doesNotMatch(widget,/name="licenseNumber"|name="birthdate"|name="license_number"/i);
+});
+
+
+const SCOPE_SCENARIOS=[
+ ['CA esthetician shampoo restriction','California','Esthetician','wash','outside_credential'],
+ ['CA esthetician cosmetic scalp','California','Esthetician','scalp','credential_scope'],
+ ['CA esthetician scalp massage','California','Esthetician','scalp-massage','credential_scope'],
+ ['CA hairstylist hair styling','California','Hairstylist','styling','credential_scope'],
+ ['CA unlicensed shampoo','California','No professional license','wash','licensed_role_required'],
+ ['CA unlicensed scalp exfoliation','California','No professional license','scalp','unresolved'],
+ ['TX no license shampoo','Texas','No professional license','wash','documented_exemption'],
+ ['TX no license scalp massage','Texas','No professional license','scalp-massage','licensed_role_required'],
+ ['TX esthetician scalp cleansing','Texas','Esthetician','scalp','credential_scope'],
+ ['TX esthetician hair styling','Texas','Esthetician','styling','outside_credential'],
+ ['TX Class A barber hair styling','Texas','Class A Barber','styling','credential_scope'],
+ ['TX generic barber hair styling','Texas','Barber','styling','unresolved'],
+ ['TX operator hair styling','Texas','Cosmetology Operator','styling','credential_scope'],
+ ['TN no license shampoo','Tennessee','No professional license','wash','documented_exemption'],
+ ['TN no license hair styling','Tennessee','No professional license','styling','licensed_role_required'],
+ ['TN esthetician scalp massage','Tennessee','Esthetician','scalp-massage','credential_scope'],
+ ['TN esthetician hair styling','Tennessee','Esthetician','styling','outside_credential'],
+ ['TN Master Barber hair styling','Tennessee','Master Barber','styling','credential_scope'],
+ ['TN generic barber hair styling','Tennessee','Barber','styling','unresolved'],
+ ['FL no license shampoo','Florida','No professional license','wash','documented_exemption'],
+ ['FL no license hair styling','Florida','No professional license','styling','licensed_role_required'],
+ ['FL Facial Specialist scalp massage','Florida','Facial Specialist','scalp-massage','credential_scope'],
+ ['FL Facial Specialist cosmetic scalp','Florida','Facial Specialist','scalp','credential_scope'],
+ ['FL Facial Specialist hair styling','Florida','Facial Specialist','styling','outside_credential'],
+ ['FL Full Specialist styling','Florida','Full Specialist','styling','outside_credential'],
+ ['FL cosmetologist styling','Florida','Cosmetologist','styling','credential_scope'],
+ ['PA supervised shampoo exemption','Pennsylvania','No professional license','wash','conditional_exemption'],
+ ['PA cosmetologist hair wash','Pennsylvania','Cosmetologist','wash','credential_scope'],
+ ['PA barber scalp massage','Pennsylvania','Barber','scalp-massage','credential_scope'],
+ ['PA esthetician scalp services unclear','Pennsylvania','Esthetician','scalp','unresolved'],
+ ['NY cosmetologist hair wash','New York','Cosmetologist','wash','credential_scope'],
+ ['NY cosmetologist cosmetic scalp','New York','Cosmetologist','scalp','credential_scope'],
+ ['NY esthetician hair styling','New York','Esthetician','styling','outside_credential'],
+ ['NY no license styling','New York','No professional license','styling','licensed_role_required'],
+ ['NY licensed MT therapeutic massage classification','New York','Massage therapist','bodywork','unresolved'],
+ ['Unmapped state defaults safely','Alaska','No professional license','wash','unresolved']
+];
+for(const [label,state,license,activity,expected] of SCOPE_SCENARIOS){
+ test('scope scenario: '+label,()=>{
+  const record=evidenceFor(state,license,[activity]);
+  assert.equal(record.findings.length,1);
+  assert.equal(record.findings[0].status,expected);
+  if(expected!=='unresolved'){
+   assert.ok(record.findings[0].sources.length>0, 'No source for '+label);
+   assert.ok(record.findings[0].sources.every(x=>x.url.startsWith('https://')));
+  }
+  assert.ok(!('canPerformHeadSpa' in record));
+ });
+}
+test('six-state license selector shows exact board credential names',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.ok(widget.includes('refreshCredentials'));
+ assert.ok(widget.includes('STATE_CREDENTIALS[st.value]'));
+ assert.ok(widget.includes('CREDENTIAL_NOTES[st.value]'));
+ for(const [state,allowed] of Object.entries(STATE_CREDENTIALS)){
+  assert.ok(allowed.length>=6, 'Few credential options for '+state);
+  for(const label of allowed) assert.ok(LICENSES.includes(label), 'Unknown credential '+label);
+ }
+ assert.ok(!STATE_CREDENTIALS.Florida.includes('Esthetician'), 'Florida should use Facial Specialist registration');
+ assert.ok(STATE_CREDENTIALS.Texas.includes('Class A Barber'));
+ assert.ok(STATE_CREDENTIALS.Tennessee.includes('Master Barber'));
+});
+test('unlicensed Pennsylvania shampoo exception remains conditional, not a general permission',()=>{
+ const result=scopeResult({...example,state:'Pennsylvania',license:'No professional license',
+   licenseStatus:'none',operatingContext:'independent',activities:['wash','scalp-massage']});
+ assert.equal(result.review.findings[0].status,'conditional_exemption');
+ assert.equal(result.review.findings[1].status,'unresolved');
+ assert.match(result.review.findings[0].limits,/not permission|NOT permission/i);
+ assert.match(result.review.findings[0].summary,/supervised/i);
+ assert.match(result.review.facility,/licensed|inspection/i);
 });
