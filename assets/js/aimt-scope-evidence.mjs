@@ -153,6 +153,8 @@ export const SCOPE_EVIDENCE=Object.freeze({
         finding('styling',license,'licensed_role_required','Florida DBPR says blow-drying and styling hair for compensation require an appropriate cosmetology license.',['fl-faq','fl-required'])
       ]),
       finding('styling','Cosmetologist','credential_scope','Florida DBPR identifies cosmetology licensing for paid hair drying and styling.',['fl-faq','fl-required']),
+      finding('styling','Facial Specialist','outside_credential','Florida Facial Specialist registration covers cosmetic facial/scalp services, not regulated hair blow-drying or styling.',['fl-types','fl-required'],'Cosmetology licensure is a separate category.'),
+      finding('styling','Full Specialist','outside_credential','Florida Full Specialist combines Facial and Nail Specialist registrations but is not a cosmetology operator license for hair styling.',['fl-types','fl-required'],'A cosmetology credential is required for regulated hair styling.'),
       finding('styling','Esthetician','outside_credential','DBPR says blow-drying and styling hair require cosmetology licensure rather than an esthetics-only credential.',['fl-faq','fl-required'])
     ],
     facility:'Florida requires salon licenses for many compensated cosmetology and facial-specialist services. Certain limited hair services can be performed outside salons. This exception does not cover the whole multi-step head spa. Verify facility license, sanitation, water and local-code rules (DBPR Cosmetology FAQ and Salon License Checklist).',
@@ -200,6 +202,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
       finding('styling','Cosmetologist','credential_scope','NY DOS describes hair styling and arranging within cosmetology scope.',['ny-cosmo','ny-faq']),
       finding('scalp','Cosmetologist','credential_scope','NY DOS describes cosmetic head/scalp services within cosmetology scope.',['ny-cosmo'],'Exact device, medical and technique exclusions require review.'),
       finding('styling','Esthetician','outside_credential','NY DOS esthetics defines services for skin of face, neck, arms, legs and shoulders, while hair styling belongs to hair-service credentials.',['ny-esthetics','ny-cosmo'],'An esthetics credential alone is not a general hair-styling license.'),
+      ...NO_LICENSE.map(license=>finding('styling',license,'licensed_role_required','NY DOS says compensated cosmetology services require the appropriate licensed practitioner. Hair styling is not an unlicensed head-spa exemption.',['ny-cosmo','ny-business'],'This is not an assessment of whether another statutory exception might apply to a particular service.')),
       finding('bodywork','Massage therapist','unresolved','NY DOS assigns some pressure/massage procedures to Massage Therapy, but neck/shoulder bodywork must be classified by exact technique and purpose.',['ny-lic-chart'],'Deep tissue, acupressure and therapeutic modalities differ from light cosmetic massage.')
     ],
     facility:'NY requires an Appearance Enhancement Business license separate from the individual license. An independent area renter needs their own Area Renter business license. The appearance enhancement premises may need a Barber Shop license for barbering. See NY DOS Business FAQ; local safety and insurance rules also apply.',
