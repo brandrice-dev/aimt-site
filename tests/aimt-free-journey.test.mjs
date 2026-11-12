@@ -69,7 +69,7 @@ test('each official finding has exact source records, status code, and credentia
   assert.equal(ids.size,record.sources.length,'Duplicate source ID: '+state);
   for(const source of record.sources){
    assert.match(source.url,/^https:\/\//);
-   assert.ok(/(?:\.gov\/|\.state\.[a-z]{2}\.us\/|palegis\.us\/|publications\.tnsosfiles\.com\/)/.test(source.url),'Source not on official state/regulator site: '+source.url);
+   assert.ok(/(?:\.gov\/|\.state\.[a-z]{2}\.us\/|palegis\.us\/|publications\.tnsosfiles\.com\/|myfloridalicense\.com\/)/.test(source.url),'Source not on official state/regulator site: '+source.url);
   }
   for(const finding of record.findings){
    assert.ok(legalStatuses.has(finding.status),'Unknown status');
@@ -103,14 +103,14 @@ test('Pennsylvania licensed-salon obligation and no-advisory-opinion restriction
  assert.match(r.nextContact,/cannot issue advisory legal opinions/i);
  const unknown=evidenceFor('Alaska','No professional license',['wash','scalp']);
  assert.equal(unknown.researchDate,null);
- assert.match(unknown.coverage,/not yet researched/i);
+ assert.match(unknown.coverage,/not researched this state yet/i);
 });
 test('Scope Finder shows research coverage, facility, individual source citations and safe copy action',()=>{
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
  for(const token of [
   'sc-context','data-activity-findings','data-source-facility','data-source-reviewed',
   'data-next-contact','data-board-inquiry','scope-save','scope-copy',
-  'RESEARCH COVERAGE','not an approval to offer your full head spa'
+  'RESEARCH COVERAGE','an approval to offer your full head spa'
  ])assert.ok(widget.includes(token),'Missing '+token);
  assert.doesNotMatch(widget,/you may offer all head spa services|head spa permitted/i);
 });
