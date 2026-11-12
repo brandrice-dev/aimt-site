@@ -22,6 +22,13 @@ export const STATES=Object.freeze([
  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ]);
 export const LICENSES=Object.freeze(['Cosmetologist','Esthetician','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']);
+export const LICENSE_STATUSES=Object.freeze([
+ {key:'active_here',label:'I hold an active license issued by this state'},
+ {key:'licensed_elsewhere',label:'My license is from a different state'},
+ {key:'pending_or_expired',label:'My state license is pending, inactive or expired'},
+ {key:'none',label:'I do not currently hold a professional license'},
+ {key:'unsure',label:'I need to check my license status'}
+]);
 export const OPERATING_CONTEXTS=Object.freeze([
  {key:'salon',label:'An existing salon or licensed workplace'},
  {key:'suite',label:'A private salon suite or rented room'},
@@ -68,7 +75,7 @@ export const SPACE_OPTIONS=Object.freeze([
  {key:'dedicated',label:'Dedicated treatment room'}
 ]);
 export const PLAN_FIELDS=Object.freeze([
- 'careerStage','state','license','operatingContext','activities','licenseQuestions','serviceFormat','clientPromise','audience',
+ 'careerStage','state','license','licenseStatus','operatingContext','activities','licenseQuestions','serviceFormat','clientPromise','audience',
  'consultMinutes','serviceMinutes','prepMinutes','resetMinutes','adminMinutes',
  'products','supplies','overhead','laborHourly','menuPrice',
  'space','equipmentSystem','equipmentPriority','equipmentQuestions',
@@ -91,7 +98,7 @@ function amount(value){
  return v;
 }
 export function emptyPlan(){
- return {version:VERSION,careerStage:'',state:'',license:'',operatingContext:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
+ return {version:VERSION,careerStage:'',state:'',license:'',licenseStatus:'',operatingContext:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
   consultMinutes:'',serviceMinutes:'',prepMinutes:'',resetMinutes:'',adminMinutes:'',
   products:'',supplies:'',overhead:'',laborHourly:'',menuPrice:'',
   space:'',equipmentSystem:'',equipmentPriority:'',equipmentQuestions:'',
@@ -103,6 +110,7 @@ export function normalizePlan(raw){
  p.careerStage=accepted(raw.careerStage,CAREER_STAGES.map(x=>x.key));
  p.state=accepted(raw.state,STATES);
  p.license=accepted(raw.license,LICENSES);
+ p.licenseStatus=accepted(raw.licenseStatus,LICENSE_STATUSES.map(x=>x.key));
  p.operatingContext=accepted(raw.operatingContext,OPERATING_CONTEXTS.map(x=>x.key));
  p.activities=Array.isArray(raw.activities)?[...new Set(raw.activities.filter(x=>ACTIVITIES.some(a=>a.key===x)))].slice(0,7):[];
  p.serviceFormat=accepted(raw.serviceFormat,['undecided','focused','dedicated']);
@@ -168,6 +176,11 @@ export function scopeResult(plan){
  ].join('\n');
  return {
    sources:review.sources.map(x=>[x.title,x.url]),
+   licenseStatus:p.licenseStatus,
+   licenseStatusNote:p.licenseStatus==='active_here'?'AIMT has not verified your license. Confirm the public record and status before practicing.':
+      p.licenseStatus==='licensed_elsewhere'?'An out-of-state license does not automatically authorize practice here. Check reciprocity and obtain the required credential before offering regulated services.':
+      p.licenseStatus==='pending_or_expired'?'Pending, inactive and expired credentials are not proof of current authorization. Check official status before practice.':
+      p.licenseStatus==='none'?'A source-backed exemption may cover one narrow activity, but a professional license is required for other regulated steps.':'Confirm your credential is active and valid in this state before practicing regulated services.',
    activities,review,inquiry,
    status:review.researchStatus,
    note:['Massage therapist','Student / not yet licensed','No professional license','Other / unsure'].includes(p.license)
@@ -202,6 +215,7 @@ export function renderPlanText(plan){
  return [
   'AIMT — HEAD SPA LAUNCH PLAN','Working plan only; not certification or legal clearance.','',
   '01 / SCOPE','Experience: '+(CAREER_STAGES.find(x=>x.key===p.careerStage)?.label||'Not selected'),'State: '+(p.state||'Unselected'),
+  'License status (self-reported, not verified by AIMT): '+(LICENSE_STATUSES.find(x=>x.key===p.licenseStatus)?.label||'Not checked'),
   'Work setting: '+(OPERATING_CONTEXTS.find(x=>x.key===p.operatingContext)?.label||'Not selected'),'Credential: '+(p.license||'Unselected'),
   'Activities to verify: '+(ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label).join('; ')||'Unspecified'),
   'Board question: '+(p.licenseQuestions||'Unwritten'),'Permission: NOT DETERMINED','',
