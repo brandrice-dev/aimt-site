@@ -11,6 +11,7 @@ export const SCOPE_FINDINGS=Object.freeze({
     heading:'Specific activity is exempt from individual licensing',
     explanation:'The cited agency specifically describes this activity as not requiring an individual license. Other steps, facility rules and local requirements may still apply.'
   },
+  conditional_exemption:{heading:'Narrow exception with required supervision',explanation:'A specific activity may be exempt only under described work-setting and supervision conditions. Not permission to operate a whole head spa.'},
   credential_scope:{
     heading:'Activity is listed in this license’s scope',
     explanation:'The cited agency includes this activity for the selected credential. Confirm the exact technique, facility rules and limitations before providing it.'
@@ -43,13 +44,23 @@ export const SCOPE_EVIDENCE=Object.freeze({
     coverage:'Focused agency head-spa guidance for specific roles. Other activities and establishment rules require separate confirmation.',
     sources:[
       link('ca-bulletin','Industry Bulletin — Head Spas (11/1/2024)','https://barbercosmo.ca.gov/forms_pubs/headspas.pdf','Board bulletin, questions 3–5','2024-11-01'),
-      link('ca-bulletins','Board industry bulletins','https://barbercosmo.ca.gov/forms_pubs/publications/bulletins.shtml')
+      link('ca-bulletins','Board industry bulletins','https://barbercosmo.ca.gov/forms_pubs/publications/bulletins.shtml'),
+      link('ca-faq','CA Board FAQ — Establishment Owners','https://barbercosmo.ca.gov/forms_pubs/publications/faqs.shtml'),
+      link('ca-2025','CA Board 2025 newsletter — Hairstylists and Head Spas','https://barbercosmo.ca.gov/forms_pubs/publications/newsletter_2025_issue_9.pdf','Pages 5 and 8','2025')
     ],
     findings:[
       finding('wash','Esthetician','outside_credential',
         'California’s head-spa bulletin says estheticians are not licensed to shampoo or wash hair.','ca-bulletin'.split(','),'The bulletin identifies barbers, cosmetologists and hairstylists for this step.'),
+      finding('scalp','Esthetician','credential_scope','TDLR explicitly includes cosmetic scalp cleansing treatments in the esthetician scope.',['tx-esthetician'],'This is not equivalent to regulated cleansing or styling of hair.'),
+      finding('scalp','Cosmetologist','credential_scope','TDLR identifies scalp cleansing among cosmetology operator services.',['tx-operator']),
+      finding('scalp','Cosmetology Operator','credential_scope','TDLR identifies scalp cleansing among cosmetology operator services.',['tx-operator']),
+      finding('scalp','Class A Barber','credential_scope','TDLR identifies scalp cleansing among Class A barber services.',['tx-barber']),
       finding('styling','Esthetician','outside_credential',
         'California’s head-spa bulletin says estheticians cannot provide blow-drying services.',['ca-bulletin'],'The client may blow-dry their own hair; that does not authorize the esthetician to shampoo it.'),
+      finding('scalp','Esthetician','credential_scope','California board guidance identifies non-medical scalp cleansing and exfoliation among esthetician scalp treatments.',['ca-2025','ca-bulletin'],'This does not include shampooing or washing hair; exact products and techniques require separate scope review.'),
+      finding('scalp-massage','Esthetician','credential_scope','CA Board 2025 head-spa guidance describes cosmetic scalp massage among esthetician practices.',['ca-2025'],'Not medical/therapeutic bodywork and not an exemption for hair services.'),
+      finding('wash','Hairstylist','credential_scope','California licensed hairstylists may shampoo hair, excluding prescription shampoo.',['ca-bulletin','ca-2025'],'This credential differs from esthetics and excludes chemical hair services.'),
+      finding('styling','Hairstylist','credential_scope','California hairstylist scope includes blow-drying and nonchemical styling.',['ca-2025','ca-bulletin'],'Chemical hair services remain outside a hairstylist license.'),
       finding('wash','Cosmetologist','credential_scope','The head-spa bulletin identifies licensed cosmetologists as professionals who may shampoo hair.',['ca-bulletin']),
       finding('wash','Barber','credential_scope','The head-spa bulletin identifies licensed barbers as professionals who may shampoo hair.',['ca-bulletin']),
       finding('styling','Cosmetologist','credential_scope','The head-spa bulletin identifies licensed cosmetologists as professionals who may blow-dry hair.',['ca-bulletin']),
@@ -59,7 +70,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
         finding('styling',license,'licensed_role_required','The board says blow-drying in a head spa must be provided by a licensed barber, cosmetologist or hairstylist.',['ca-bulletin'])
       ])
     ],
-    facility:'The head-spa bulletin covers individual scope but is not a comprehensive facility/permit guide. Confirm establishment license, sanitation, water-system rules and the actual work setting.',
+    facility:'The California Board FAQ says an establishment license applies to regulated shop, salon and spa premises; a booth renter does not automatically need a second establishment license at the same address. Verify the actual owner, premises, sanitation, water system and local requirements. See CA Establishment Owners FAQ.',
     nextContact:'Contact the Board for the applicable written regulations; if a disputed activity is not expressly covered, request qualified regulatory/legal review.'
   },
   'Texas':{
@@ -71,16 +82,20 @@ export const SCOPE_EVIDENCE=Object.freeze({
       link('tx-esthetician','TDLR — Esthetician Scope','https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/estheticians.htm','See allowed scalp work and excluded hair services'),
       link('tx-operator','TDLR — Cosmetology Operator Scope','https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/operators.htm'),
       link('tx-barber','TDLR — Class A Barber Scope','https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/barbers.htm'),
-      link('tx-facility','TDLR — Barbering & Cosmetology Inspections Guide','https://www.tdlr.texas.gov/barbering-and-cosmetology/inspections-guide/','Licensed establishment, sanitation and equipment rules')
+      link('tx-facility','TDLR — Barbering & Cosmetology Inspections Guide','https://www.tdlr.texas.gov/barbering-and-cosmetology/inspections-guide/','Licensed establishment, sanitation and equipment rules'),
+      link('tx-establish','TDLR — Establishment License Applications','https://www.tdlr.texas.gov/barbering-and-cosmetology/establishments/apply.htm','Business and rented-space rules'),
+      link('tx-mobile','TDLR — Mobile Establishment Requirements','https://www.tdlr.texas.gov/barbering-and-cosmetology/establishments/apply-mobile-establishment.htm')
     ],
     findings:[
       finding('wash',ALL,'documented_exemption','TDLR states that shampooing and conditioning hair do not require an individual license in Texas.',['tx-who'],'This does not exempt scalp treatments, hair styling or a regulated establishment.'),
       finding('styling','Esthetician','outside_credential','TDLR’s esthetician guide excludes regulated hair services, including styling.',['tx-esthetician'],'Standalone unregulated shampooing/conditioning is a separate exception.'),
       finding('scalp-massage','Esthetician','credential_scope','TDLR explicitly lists scalp massage within the esthetician scope.',['tx-esthetician'],'Within the cosmetic professional scope and appropriately licensed establishment.'),
       finding('scalp-massage','Cosmetologist','credential_scope','TDLR explicitly lists scalp massage within the cosmetology operator scope.',['tx-operator']),
-      finding('scalp-massage','Barber','credential_scope','TDLR explicitly lists scalp massage for Class A barbers.',['tx-barber']),
+      finding('scalp-massage','Class A Barber','credential_scope','TDLR explicitly lists scalp massage for Class A barbers.',['tx-barber']),
       finding('styling','Cosmetologist','credential_scope','TDLR includes styling hair in a cosmetology operator’s scope.',['tx-operator']),
-      finding('styling','Barber','credential_scope','TDLR includes styling hair in a Class A barber’s scope.',['tx-barber']),
+      finding('styling','Class A Barber','credential_scope','TDLR includes styling hair in a Class A barber’s scope.',['tx-barber']),
+      finding('styling','Cosmetology Operator','credential_scope','TDLR includes hair styling in the operator scope.',['tx-operator']),
+      finding('scalp-massage','Cosmetology Operator','credential_scope','TDLR explicitly includes scalp massage in the operator scope.',['tx-operator']),
       ...NO_LICENSE.flatMap(license=>[
         finding('styling',license,'licensed_role_required','TDLR treats regulated hair styling as a service requiring an appropriate professional license.',['tx-operator','tx-who'],'The shampoo-only exception does not confer permission for hair styling.'),
         finding('scalp-massage',license,'licensed_role_required','TDLR identifies professional licenses for regulated scalp massage services.',['tx-who'],'Medical, therapy and other-law exceptions require their own separate review.')
@@ -96,7 +111,9 @@ export const SCOPE_EVIDENCE=Object.freeze({
     sources:[
       link('tn-faq','Tennessee — Shampoo and Head Spa FAQ','https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa','Official FAQ; last updated September 23, 2026','2026-09-23'),
       link('tn-licenses','Tennessee — Individual Licensing','https://www.tn.gov/commerce/regboards/cosmo/license/individual.html'),
-      link('tn-rules','Tennessee — Cosmetology Rules','https://publications.tnsosfiles.com/rules/0440/0440.htm')
+      link('tn-rules','Tennessee — Cosmetology Rules','https://publications.tnsosfiles.com/rules/0440/0440.htm'),
+      link('tn-shop','TN Board — Shop Applicant Requirements','https://www.tn.gov/commerce/regboards/cosmo/license/shop-school/info.html','Shop license, inspection and sanitation requirements'),
+      link('tn-master','TN Board — Master Barber','https://www.tn.gov/commerce/regboards/cosmo/license/individual/master-barber.html','Exact master barber scope')
     ],
     findings:[
       finding('wash',ALL,'documented_exemption','Tennessee says shampooing has been deregulated and does not require a shampooing license.',['tn-faq'],'The FAQ distinguishes shampoo-only from blow-drying, curling and styling tools.'),
@@ -106,9 +123,11 @@ export const SCOPE_EVIDENCE=Object.freeze({
       ]),
       finding('styling','Esthetician','outside_credential','The Tennessee FAQ says blow-drying and curling/styling tools require a cosmetologist or master barber license.',['tn-faq']),
       finding('styling','Cosmetologist','credential_scope','Tennessee’s FAQ identifies cosmetologists among licensed professionals for blow-drying and styling tools.',['tn-faq']),
-      finding('styling','Barber','unresolved','The FAQ specifies MASTER barbers; the generic “Barber” selection does not establish that credential level.',['tn-faq'],'Confirm that you hold the required license subtype.')
+      finding('styling','Master Barber','credential_scope','TN head spa FAQ identifies licensed master barbers among providers permitted to blow-dry and style hair.',['tn-faq','tn-master'],'A generic Barber title does not establish Master Barber status.'),
+      finding('scalp-massage','Master Barber','credential_scope','TN Board Master Barber description includes scalp massage in barber scope.',['tn-master'],'Medical/therapeutic bodywork remains separate.'),
+      finding('styling','Barber','unresolved','The FAQ specifies MASTER barbers; generic Barber does not establish that license level.',['tn-faq'],'Confirm exact credential subtype.')
     ],
-    facility:'Shampooing being deregulated does not establish zoning, sanitation, establishment, insurance or local approval for a full head spa. Confirm these separately.',
+    facility:'Tennessee requires a shop license and inspection for regulated cosmetology and aesthetics services. Shop type, qualified manager and sanitation depend on services; a shampoo-only exception cannot clear a full head spa or its premises. See Tennessee Shop Applicant Requirements and check local utilities, codes and insurance.',
     nextContact:'Use the board’s individual-license and rule links for credential-specific detail. Specify whether a barber credential is a master barber license.'
   },
   'Florida':{
