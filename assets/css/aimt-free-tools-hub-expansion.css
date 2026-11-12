@@ -30,3 +30,58 @@
  .ft-hub-clinic{grid-template-columns:1fr}
 }
 @media(max-width:630px){.ft-hub .ft-grid{grid-template-columns:1fr}.ft-hub .ft-tool-card{min-height:195px}.ft-hub-clinic{padding:18px}}
+
+
+/* Visual parity: legacy stylesheet highlighted Pricing with a light card.
+   The expanded Free Tools grid uses ONE consistent card treatment. */
+.ft-hub .ft-grid .ft-tool-card,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing]{
+  min-height:328px;padding:1.55rem 1.65rem;border-radius:15px;
+  background:linear-gradient(155deg,rgba(163,150,141,.12),rgba(255,255,255,.025));
+  border:1px solid rgba(163,150,141,.24);color:#faf8f5;
+  transition:border-color .2s ease,transform .2s ease,background .2s ease;
+}
+.ft-hub .ft-grid .ft-tool-card:hover{border-color:rgba(196,174,163,.58);transform:translateY(-2px)}
+.ft-hub .ft-grid .ft-tool-card .ft-card-meta,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] .ft-card-meta{
+  display:block;font:600 9px var(--aimt-font-mont);letter-spacing:.14em;
+  color:#bca79e;text-transform:uppercase;margin:0 0 .6rem;
+}
+.ft-hub .ft-grid .ft-tool-card h3,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] h3{
+  font:600 clamp(16px,1.7vw,20px)/1.25 var(--aimt-font-mont);letter-spacing:-.025em;
+  text-transform:none;color:#faf8f5;margin:.25rem 0 .55rem;
+}
+.ft-hub .ft-grid .ft-tool-card .ft-panel-payoff,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] .ft-panel-payoff{
+  font:500 15px/1.45 var(--aimt-font-sans);letter-spacing:0;
+  color:#ece1d9;margin:0 0 .65rem;
+}
+.ft-hub .ft-grid .ft-tool-card p,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] p{
+  font-size:13px;line-height:1.6;color:rgba(255,255,255,.58);margin-bottom:.9rem;
+}
+.ft-hub .ft-grid .ft-tool-card .ft-panel-subline,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] .ft-panel-subline{
+  font:400 11px/1.4 var(--aimt-font-sans);letter-spacing:0;
+  color:rgba(255,255,255,.43);margin-top:0;margin-bottom:1rem;
+}
+.ft-hub .ft-grid .ft-tool-card .ft-card-link,
+.ft-hub .ft-grid .ft-tool-card[data-ft-category=pricing] .ft-card-link{
+  color:#faf8f5;text-decoration:none;font:700 10px var(--aimt-font-mont);
+  letter-spacing:.07em;text-transform:uppercase;padding-top:12px;
+}
+.ft-hub .ft-grid .ft-tool-card .ft-card-link:hover{text-decoration:underline;text-underline-offset:4px}
+.ft-hub .ft-grid .ft-tool-card .ft-tool-illustration{
+  display:block;flex-shrink:0;width:116px;height:72px;max-width:65%;
+  margin:3px 0 14px;fill:none;color:#c2aca3;
+}
+.ft-hub .ft-grid .ft-tool-card .ft-tool-illustration [fill="#3b3029"]{fill:#3b3029}
+@media(max-width:630px){
+ .ft-hub .ft-grid .ft-tool-card{min-height:290px;padding:1.45rem}
+ .ft-hub .ft-grid .ft-tool-card .ft-tool-illustration{height:62px;margin-bottom:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ft-hub .ft-grid .ft-tool-card{transition:none}
+ .ft-hub .ft-grid .ft-tool-card:hover{transform:none}
+}
