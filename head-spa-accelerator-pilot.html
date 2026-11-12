@@ -68,6 +68,7 @@ button:focus-visible,select:focus-visible,a:focus-visible,textarea:focus-visible
 .acc-feedback[hidden]{display:none!important}
 .acc-feedback strong{display:block;margin-bottom:4px}
 .acc-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.acc-field input[type=number]{width:100%;padding:11px 12px;border:1px solid #c8beb7;background:#fff;color:#29231f;border-radius:8px;min-height:50px;font-size:14px}
 .acc-field label{display:block;color:#302725;font-size:13px;font-weight:600;line-height:1.5;margin-bottom:8px}
 .acc-field select{width:100%;padding:11px 12px;border:1px solid #c8beb7;background:#fff;color:#29231f;border-radius:8px;min-height:50px;font-size:14px}
 .acc-field small{display:block;color:#655950;line-height:1.45;font-size:11px;margin-top:7px}
@@ -155,6 +156,22 @@ button:focus-visible,select:focus-visible,a:focus-visible,textarea:focus-visible
     <div class="acc-teaching">
       <span class="acc-claim">Example · Core versus Extended</span>
       <p>A 60-minute reference and a 90-minute reference are not automatically interchangeable. The additional time has to make a meaningful difference to the appointment, without making rinses or product processing longer merely to fill the clock.</p>
+    </div>
+    <div class="acc-light" id="capacityExercise">
+      <h3>The 60-minute appointment that takes longer than an hour.</h3>
+      <p>Before you choose a price or decide how many services you can fit in a day, count all the time this one appointment occupies. Change any of the assumptions below.</p>
+      <div class="acc-form-grid">
+        <div class="acc-field"><label for="handsOn">Hands-on service (minutes)</label><input id="handsOn" type="number" inputmode="numeric" min="1" max="240" step="1" value="60"></div>
+        <div class="acc-field"><label for="consultation">Consultation (minutes)</label><input id="consultation" type="number" inputmode="numeric" min="0" max="180" step="1" value="15"></div>
+        <div class="acc-field"><label for="preparation">Prepare the space (minutes)</label><input id="preparation" type="number" inputmode="numeric" min="0" max="180" step="1" value="10"></div>
+        <div class="acc-field"><label for="closeReset">Checkout + sanitation/reset (minutes)</label><input id="closeReset" type="number" inputmode="numeric" min="0" max="180" step="1" value="15"></div>
+      </div>
+      <div class="acc-result">
+        <h3 id="capacityHeading">The complete time commitment</h3>
+        <p id="capacityTotal" role="status" aria-live="polite">100 minutes of appointment capacity, including 40 minutes outside the hands-on service.</p>
+        <p class="acc-result-note" id="capacityInsight">If your calendar blocks only 60 minutes, the schedule is missing preparation, consultation, checkout and reset. Measure these before pricing or publishing your first appointment.</p>
+      </div>
+      <p class="acc-field-help">This measures time, not profit. AIMT's existing Service Cost Worksheet adds your real labor, supplies and overhead after you've checked the timing.</p>
     </div>
     <div class="acc-light">
       <h3>Your first decision</h3>
@@ -268,6 +285,17 @@ $('next1').addEventListener('click',()=>showStage(1));
 $('back2').addEventListener('click',()=>showStage(0));
 $('next2').addEventListener('click',()=>showStage(2));
 $('back3').addEventListener('click',()=>showStage(1));
+const capacityIds=['handsOn','consultation','preparation','closeReset'];
+function recalcCapacity(){
+  const values=capacityIds.map(id=>Number($(id).value));
+  const valid=values.every((n,i)=>Number.isFinite(n)&&Number.isInteger(n)&&n>=(i===0?1:0)&&n<=(i===0?240:180));
+  if(!valid){$('capacityTotal').textContent='Enter valid whole minutes in every field.';$('capacityInsight').textContent='No time total is shown until the assumptions are valid.';return;}
+  const complete=values.reduce((a,b)=>a+b,0),nonTreatment=complete-values[0];
+  $('capacityTotal').textContent=complete+' minutes of appointment capacity, including '+nonTreatment+' minutes outside the hands-on service.';
+  $('capacityInsight').textContent=nonTreatment===0?'Verify that all before/after activities truly require no additional appointment capacity.':('A '+values[0]+'-minute hands-on service occupies '+complete+' minutes on these assumptions. Your schedule needs to account for the '+nonTreatment+' additional minutes.');
+}
+capacityIds.forEach(id=>$(id).addEventListener('input',recalcCapacity));
+recalcCapacity();
 const feedback={
   buy:['Equipment is a later decision.','A bed does not establish an appropriate service. First confirm the client experience, your professional scope, installation requirements and business capacity.'],
   define:['This is the stronger reasoning.','You are building the promise first, then checking that your space, skills, legal scope and equipment can actually deliver it.'],
