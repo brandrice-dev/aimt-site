@@ -40,14 +40,16 @@ function refreshSummary(){
   ?'You have recorded all five early-stage decisions. This is a working plan, not proof of permission or professional service competence. Confirm each unresolved item before acting.'
   :'You have '+ready+' of 5 decision areas documented. The blank areas are worth revisiting, but you can keep this provisional plan now. No readiness or certification is implied.';
 }
-function openLesson(id){
+function openLesson(id,{enter=true,scroll=true}={}){
  if(!ids.includes(id))return;
+ if(enter)document.body.classList.add('lj-course-started');
  active=id;
  document.querySelectorAll('[data-lesson]').forEach(section=>{section.hidden=section.dataset.lesson!==id;});
  refresh();
+ if(!scroll)return;
  const section=$('[data-lesson="'+id+'"]');
  const heading=section.querySelector('h2');
- if(heading){heading.focus({preventScroll:true});}
+ if(heading)heading.focus({preventScroll:true});
  const course=$('#course');
  window.scrollTo({top:Math.max(0,course.getBoundingClientRect().top+window.scrollY-12),
   behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
@@ -90,6 +92,12 @@ $('#startCourse').addEventListener('click',()=>{
  const p=getPlan(),first=LESSONS.find(l=>!(p.completed.includes(l.id)&&lessonReady(l.id,p)));
  openLesson(first?.id||'summary');
 });
+$('#seeLessons').addEventListener('click',()=>openLesson('scope'));
+$('#backOverview').addEventListener('click',()=>{
+ document.body.classList.remove('lj-course-started');
+ window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
+ $('#startCourse').focus({preventScroll:true});
+});
 $('#downloadLaunchPlan').addEventListener('click',()=>download('AIMT-Head-Spa-Launch-Plan.txt',renderPlanText(getPlan()),'text/plain;charset=utf-8'));
 $('#downloadBlueprintPlan').addEventListener('click',()=>{
  const data=blueprintFromPlan(getPlan());
@@ -106,4 +114,4 @@ $('#clearPlan').addEventListener('click',()=>{
 window.addEventListener('aimt-launch-plan-change',refresh);
 window.addEventListener('focus',refresh);
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)refresh();});
-openLesson('scope');
+openLesson('scope',{enter:false,scroll:false});
