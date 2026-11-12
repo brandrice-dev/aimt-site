@@ -7,7 +7,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
  STORAGE_KEY,STATES,LICENSES,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
- appointmentMinutes,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
+ appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
 
@@ -65,6 +65,19 @@ test('appointment calculation counts all capacity, not only hands-on time',()=>{
  assert.equal(appointmentMinutes({...example,resetMinutes:''}),null);
  assert.equal(appointmentMinutes({...example,serviceMinutes:'0'}),null);
  assert.equal(appointmentMinutes({...example,serviceMinutes:'-2'}),null);
+});
+test('Accelerator reuses existing numeric cost calculation and never invents missing values',()=>{
+ const blank=pricingResult(example);
+ assert.equal(blank.ok,false);
+ const priced={...example,products:'12.50',supplies:'2.50',overhead:'9.75',laborHourly:'24',menuPrice:'150'};
+ const calc=pricingResult(priced);
+ assert.equal(calc.ok,true);assert.equal(calc.minutes,105);
+ assert.equal(calc.modeledCost,66.75);assert.equal(calc.modeledDifference,83.25);
+ assert.match(renderPlanText(priced),/Modeled service cost: \$66.75/);
+ const data=blueprintFromPlan(priced);
+ assert.match(data.fields.cost,/\$66.75/);assert.match(data.fields.price,/\$150.00/);
+ const optional=pricingResult({...priced,menuPrice:''});
+ assert.equal(optional.ok,true);assert.equal(optional.enteredPrice,null);
 });
 test('equipment planner changes question priorities by environment/system',()=>{
  const portable=equipmentResult({...example,space:'suite',equipmentSystem:'portable'});
