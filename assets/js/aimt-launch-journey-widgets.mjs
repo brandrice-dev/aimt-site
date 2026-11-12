@@ -1,7 +1,7 @@
 // Shared interactive learning widgets. Mount the same tool once in its own page or a lesson.
 // No API calls, diagnostic model, user photos, or lead database.
 import {
- STATES,LICENSES,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
+ STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
 
@@ -66,9 +66,11 @@ export function mountScope(root){
   '<h3>Verify the steps, not just the service name.</h3>',
   '<p>One head spa appointment can involve activities governed by different rules. A license does not automatically authorize every step, and AIMT certification is not a state license.</p>',
   '<div class="lj-tool-grid">',
+   field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'No experience level is required to use this planner.'),
    field('State or jurisdiction','sc-state',select('sc-state',STATES,'Choose a state')),
    field('Current professional credential','sc-license',select('sc-license',LICENSES,'Choose a credential')),
   '</div>',
+  '<div class="lj-stage-guidance" data-stage-guidance role="status" aria-live="polite" hidden></div>',
   '<fieldset><legend>Which activities are you considering?</legend><p class="lj-help">Select the steps you need the licensing authority to address.</p>',
    ACTIVITIES.map(a=>'<label class="lj-check"><input type="checkbox" name="sc-activity" value="'+a.key+'"><span>'+a.label+'</span></label>').join(''),
   '</fieldset>',
@@ -80,8 +82,10 @@ export function mountScope(root){
   '<div data-sources hidden><h4>Official source links</h4><p class="lj-help">Last curated Nov 11, 2026. These are not clearance decisions; confirm current rules for your license, activities and location.</p><ul class="lj-source-list" data-source-links></ul><div class="lj-feedback"><strong data-source-state></strong><span data-source-note></span></div><h4>Your licensing-board inquiry</h4><p class="lj-help">A draft you can copy and send yourself. No information is sent by AIMT.</p><div class="lj-feedback" data-board-inquiry style="white-space:pre-wrap;word-break:break-word"></div></div>',
   resultHTML('Scope review started')
  ].join('');
- const st=$(root,'#sc-state'),lic=$(root,'#sc-license');
- st.value=p.state;lic.value=p.license;$(root,'#sc-question').value=p.licenseQuestions;
+ const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),stage=$(root,'#sc-stage');
+ st.value=p.state;lic.value=p.license;stage.value=p.careerStage;$(root,'#sc-question').value=p.licenseQuestions;
+ function updateGuidance(){const el=$(root,'[data-stage-guidance]');el.hidden=!stage.value;if(stage.value)el.textContent=CAREER_STAGE_GUIDANCE[stage.value];}
+ stage.addEventListener('change',updateGuidance);updateGuidance();
  root.querySelectorAll('[name="sc-activity"]').forEach(x=>x.checked=p.activities.includes(x.value));
  let inquiry='';
  function generate(save=true){
@@ -89,7 +93,7 @@ export function mountScope(root){
   if(!state||!license||!activities.length){
    info(root,'.lj-save-message','Choose a state, credential and at least one planned activity.');return false;
   }
-  const next=save?persist({state,license,activities,licenseQuestions:$(root,'#sc-question').value},root):{...current(),state,license,activities};
+  const next=save?persist({careerStage:stage.value,state,license,activities,licenseQuestions:$(root,'#sc-question').value},root):{...current(),careerStage:stage.value,state,license,activities};
   const g=scopeResult(next);
   const links=$(root,'[data-source-links]');links.replaceChildren();
   if(g.sources.length){
