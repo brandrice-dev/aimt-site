@@ -419,12 +419,12 @@ test('unlicensed Pennsylvania shampoo exception remains conditional, not a gener
 
 test('plain-language summaries never clear an entire head spa, even when one step is exempt',()=>{
  const cases=[
-  [evidenceFor('Florida','No professional license',['wash']),/individual licensing exception/i],
-  [evidenceFor('Texas','No professional license',['wash','styling']),/different professional license/i],
+  [evidenceFor('Florida','No professional license',['wash']),/individual license exemption/i],
+  [evidenceFor('Texas','No professional license',['wash','styling']),/another professional credential/i],
   [evidenceFor('Pennsylvania','No professional license',['wash']),/narrow exception/i],
-  [evidenceFor('New York','Esthetician',['scalp']),/need answers/i],
-  [evidenceFor('Alaska','Cosmetologist',['wash']),/need answers/i],
-  [evidenceFor('California','Esthetician',['wash','styling']),/different professional license/i]
+  [evidenceFor('New York','Esthetician',['scalp']),/AIMT has not finished researching/i],
+  [evidenceFor('Alaska','Cosmetologist',['wash']),/AIMT has not finished researching/i],
+  [evidenceFor('California','Esthetician',['wash','styling']),/another professional credential/i]
  ];
  for(const [review,expected] of cases){
   const summary=scopeSummary(review);
@@ -445,4 +445,43 @@ test('no cross-state citations or duplicate source identifiers in registry',()=>
    for(const id of f.sourceIds)assert.ok(ids.has(id),'Foreign or missing source in '+state+': '+id+' for '+key);
   }
  }
+});
+
+
+test('Pennsylvania cosmetologist sees covered services first, not seven scary verification warnings',()=>{
+ const selections=['wash','scalp','scalp-massage','bodywork','styling','camera','wet'];
+ const review=evidenceFor('Pennsylvania','Cosmetologist',selections);
+ assert.deepEqual(review.findings.map(x=>x.status),[
+  'credential_scope','credential_scope','credential_scope','credential_scope','credential_scope',
+  'implementation_review','implementation_review'
+ ]);
+ const summary=scopeSummary(review);
+ assert.match(summary.headline,/Your license category covers core cosmetic services/i);
+ assert.equal(summary.counts.credential_scope,5);
+ assert.equal(summary.counts.implementation_review,2);
+ assert.equal(summary.counts.unresolved,0);
+ assert.equal(summary.counts.outside_credential,0);
+ assert.equal(summary.wholeServiceCleared,false);
+ assert.doesNotMatch(summary.headline+summary.message,/not allowed|prohibited|probably|more verification required/i);
+ const scalp=review.findings.find(x=>x.activity==='scalp');
+ assert.match(scalp.summary,/scalp.*cleansing|cleansing.*scalp/i);
+ assert.ok(scalp.sources.some(x=>x.url.includes('palegis.us')));
+ const upper=review.findings.find(x=>x.activity==='bodywork');
+ assert.match(upper.limits,/therapeutic/i);
+ const machine=review.findings.find(x=>x.activity==='wet');
+ assert.ok(machine.sources.some(x=>x.url.includes('s7.92.html')));
+});
+test('unresearched is clearly an AIMT evidence gap, not a restriction',()=>{
+ const pa=evidenceFor('Pennsylvania','Esthetician',['scalp','camera']);
+ const alaska=evidenceFor('Alaska','Cosmetologist',['wash']);
+ for(const report of [pa,alaska]){
+  const summary=scopeSummary(report);
+  assert.match(summary.headline,/AIMT has not finished researching/i);
+  assert.match(summary.message,/AIMT research gap|AIMT has not yet documented|AIMT has not finished|not evidence/i);
+  assert.equal(summary.counts.licensed_role_required,0);
+  assert.equal(summary.counts.outside_credential,0);
+ }
+ const registry=read('assets/js/aimt-scope-evidence.mjs');
+ assert.match(registry,/AIMT research is not complete for this step/);
+ assert.match(registry,/gap in AIMT’s research/);
 });
