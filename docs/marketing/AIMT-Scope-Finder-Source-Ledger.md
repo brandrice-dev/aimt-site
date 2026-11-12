@@ -1,5 +1,5 @@
 # AIMT Head Spa License & Scope Finder — Primary-Source Ledger
-**Research status:** PRIMARY SOURCES LOCATED; **NO legal determination approved**.
+**Research status:** SELECTED PRIMARY SOURCES REVIEWED FOR SIX STATES; **NO legal determination approved**.
 **Checked:** 2026-11-11 (official agency sources only).
 **Owner/QA gate:** Qualified state-specific legal/regulatory review and current URL checks required before releasing any automatic allowed/prohibited activity mappings or legal interpretations.
 
@@ -52,3 +52,63 @@ Do not include license number, client details or identifying documents inside AI
 - [ ] Owner reviews and explicitly authorizes production release.
 
 **Current build boundary:** source-directory **preview only**, not legal advice, not a state-law compliance engine and not a substitute for contacting the board.
+
+
+---
+## 2026-11-12 research upgrade — Activity-specific, credential-specific evidence
+
+**Status: selected state sources examined; NOT an approved legal interpretation or national coverage.**
+The older five-state URL-only directory was insufficient for a professional relying on AIMT to understand scope. The development Finder now uses one evidence registry: \`assets/js/aimt-scope-evidence.mjs\`. The shared Accelerator and standalone Finder consume the same evaluation logic. Only an actual, source-backed **activity + credential + state** combination may receive a specific note; every other combination is "Further verification required." No combination produces a "head spa cleared" verdict.
+
+### Coverage snapshot
+
+- 51 U.S. jurisdictions selectable (50 states + District of Columbia).
+- **6 with curated primary sources:** California, Texas, Tennessee, Florida, Pennsylvania, New York.
+- **5 with at least one activity-specific source note:** CA, TX, TN, FL, PA. New York has an official document link but no activity-level determination approved by this research.
+- **45 with no vetted state source registry in the tool yet.** They show an explicit research gap, not a permissive conclusion.
+- 7 distinct candidate activities: shampoo/condition hair; cosmetic scalp cleansing/exfoliation; scalp massage; neck/shoulder massage; blow-dry/style hair; magnified cosmetic observation; water/steam equipment and sanitation. These activities require further subdivision in jurisdictions where the legal definitions differ.
+- 7 current self-reported professional credential choices, including **No professional license** and **Student/not yet licensed** separately. Professional license validity is not verified by AIMT.
+- Five possible work settings: existing salon, rented suite, new independent location, mobile and exploring; the selected setting triggers questions, **not** a facility-permission decision.
+
+### State examples supported directly by official sources
+
+| State | Narrow finding AIMT can describe | Primary official source | Boundaries |
+| --- | --- | --- | --- |
+| **Texas** | Hair shampooing/conditioning does not require an individual cosmetology license. Licensed estheticians' explicitly listed scalp massage and scalp cleansing differ from excluded regulated hair styling. | [TDLR Who Regulates What](https://www.tdlr.texas.gov/barbering-and-cosmetology/who-regulates-what.htm); [TDLR Esthetician Scope](https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/estheticians.htm); [Cosmetology Operator Scope](https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/operators.htm) | Separate establishment rules in [TDLR Inspections Guide](https://www.tdlr.texas.gov/barbering-and-cosmetology/inspections-guide/). Do not infer that a full head spa is unregulated. |
+| **Tennessee** | Head-spa FAQ expressly says shampooing is deregulated; blow-drying/curling with tools requires licensed cosmetologist/master barber. A licensed aesthetician may massage the scalp. | [Tennessee Shampoo and Head Spa FAQ](https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa) (updated 2026-09-23) | Generic "Barber" category is insufficient to prove **master barber** subtype. No general facility clearance. |
+| **Florida** | DBPR says shampoo-only does not require an individual license; paid blow-dry/styling requires professional cosmetology authorization. | [DBPR FAQs](https://www2.myfloridalicense.com/cosmetology/faqs/); [Unlicensed Activity Guide](https://ula.myfloridalicense.com/what-requires-a-license/) | No conclusion about scalp exfoliation, massage, or the full equipment-backed service. Venue requirements vary by activity. |
+| **California** | The official 2024 head-spa bulletin explicitly says estheticians cannot perform hair shampooing or blow-drying, which are within listed hair-service licenses. | [California Head Spas Bulletin](https://barbercosmo.ca.gov/forms_pubs/headspas.pdf) (2024-11-01; page visually checked 2026-11-12) | Do not equate permitted cosmetic scalp care with licensed hair care or all neck/shoulder bodywork. |
+| **Pennsylvania** | The statute defines cosmetology to include hair cleansing and cosmetic scalp work. Esthetics has a narrower statutory definition. PA requires salon licensing/inspection; board staff cannot issue advisory legal opinions. | [PA Cosmetology Act §1](https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=1&sessInd=0&smthLwInd=0&subsctn=0&txtType=HTM&yr=1933); [PA Board](https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology); [Salon licensing procedure](https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology/application-process) | Don't extrapolate a complete esthetician exclusion or unlicensed shampoo exemption from the text. For disputed scope, point to law and a Pennsylvania licensing attorney, not a promise the board will advise. |
+| **New York** | Appearance Enhancement Service Determinations chart exists. | [NY DOS March 2025 chart](https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf) | **No individual scope determination reviewed in this version.** Requires current chart and statutory cross-check. |
+
+### Important research conflict to resolve before adding Oklahoma
+
+Oklahoma’s [2024 board newsletter](https://oklahoma.gov/content/dam/ok/en/cosmo/documents/newsletters/July%202024%20Newsletter.pdf) describes the shampoo-only exception as washing/cleaning with shampoo and conditioner and limits other chemical services. However, the **later 2025 statutory definition** of shampooing includes conditioning **and drying**, and covers certain hair pieces/wigs, in the statutory text (Title 59 §199.1); §199.6 provides the unlicensed shampoo-only exception. This is an example of why an older FAQ or newsletter is not always sufficient. Do **not** add Oklahoma as a decided jurisdiction until its current statutory source, rule revisions, facility rules and exact drying meaning are reconciled by qualified review. The board's [official licensing page](https://oklahoma.gov/cosmo/licenses.html) remains a primary source for general professional licensure.
+
+Maine is also on the priority queue. Its [current official statute §14203](https://web.legis.maine.gov/statutes/32/title32sec14203.html) lists some exempt activities but does not provide a blanket head-spa exemption. Do not assume an alleged shampoo-only exception without a verified statutory or board basis.
+
+### The evidence quality contract for EVERY state and license type
+
+**Research record** for each proposed statement:
+1. State, relevant regulator and exact license subtype, including any trainee, limited, master, specialty or mobile permit qualifications.
+2. Specific activity (e.g. wash *hair* vs. cleanse/exfoliate *scalp*; separate neck/shoulder massage; drying vs regulated styling; installation vs operation of a device).
+3. Narrow proposed finding and its evidence status: \`documented_exemption\`, \`credential_scope\`, \`outside_credential\`, \`licensed_role_required\`, or \`unresolved\`.
+4. Exact official statute/regulation section **and** regulator FAQ/bulletin when applicable; direct primary URL; source title and publication/amendment date. A vendor blog, TikTok claim, course website or AI-generated summary does not qualify.
+5. Reviewer observation/date, practical caveats, conflicting sources, facility rules (salon/suite/mobile, ownership, inspection, equipment, sanitation), and local business/health and insurance unknowns.
+6. Current validity check: when agency rules change or an authoritative link disappears, affected findings revert to **unresolved**, not an assumed stable permission.
+7. Named independent regulatory reviewer and explicit signoff for any customer-facing determination, especially negative/positive scope claims.
+
+**User experience acceptance:** first ask state + current credential + work setting + intended individual activities, then show *what primary guidance actually says for each chosen activity*. Include source name and direct link beside each finding, a plain-language limitation, facility-specific outstanding checks and an inquiry draft. An exemption for a single step must NEVER turn into a "you may run a head spa" status. For unresearched states, communicate "Not yet researched" without implying legal permissiveness or prohibition.
+
+**Coverage target before representing the tool as nationwide reliable:**
+- Official regulator link and licensing statute/rulebook identified and checked for all 51 jurisdictions.
+- Activity-by-activity review for at least the most common licenses and common exemptions, with honest unresolved entries where the law is ambiguous.
+- Separate establishment/sanitation and mobile/suite checks, even if only preliminary.
+- Independent review of ambiguous findings and a maintenance owner.
+- Manual QA of high-risk scenarios: student, no credential, out-of-state license, esthetician + shampoo, cosmetologist + scalp massage, standalone shampoo-only, mobile operation, simultaneous service steps provided by different practitioners, and an unresearched state.
+- Program/QA release requires clear distinction between **research evidence**, **practice permission**, and AIMT **education**. AIMT certification never substitutes for state licensure.
+
+**Recheck policy recommendation:** immediately on board bulletin/rule changes, broken links or credible disputes, and at least quarterly for each approved state; preserve dated evidence revisions. This is a proposed maintenance SLA until owner approval. Do not create recurring monitoring or paid searches without authorization.
+
+### Publication gate
+Current activity statements in this development prototype are **research interpretations that still need independent legal/regulatory review**. They are not advertised as final legal answers. No launch, merge to main, student messaging or consent/backend changes were authorized. The feature branch contains the current research code and tests; #165 and draft PR #166 own the release record.
