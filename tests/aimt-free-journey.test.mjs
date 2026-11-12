@@ -10,6 +10,7 @@ import {
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
+import {SCOPE_EVIDENCE,SCOPE_FINDINGS,evidenceFor} from '../assets/js/aimt-scope-evidence.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
@@ -43,21 +44,80 @@ test('state/license and activities are strict whitelists; notes sanitized',()=>{
  assert.equal(v.clientPromise,'scriptHi/script');
  assert.equal(STATES.length,51);assert.ok(LICENSES.length>4);
 });
-test('scope finder provides only official source references, never permission decisions',()=>{
- const p=normalizePlan(example),r=scopeResult(p);
+test('Scope Finder gives sourced findings for precise activity, credential and state — never full service clearance',()=>{
+ const p=normalizePlan({...example,operatingContext:'salon'}),r=scopeResult(p);
  assert.ok(r.sources.length>=1);
- assert.match(r.status,/NOT determined/i);
+ assert.match(r.status,/PRIMARY SOURCES LOCATED/i);
  assert.match(r.inquiry,/California/);
  assert.match(r.inquiry,/Shampooing or washing hair/);
- assert.doesNotMatch(r.inquiry,/authorized|you may offer|permission granted/i);
- const unknown=scopeResult({...p,state:'Pennsylvania'});
- assert.equal(unknown.sources.length,0);assert.match(unknown.status,/No curated official source/);
- assert.equal(Object.keys(SCOPE_SOURCES).length,5);
+ assert.match(r.inquiry,/establishment/);
+ assert.doesNotMatch(r.inquiry,/you are approved|permission granted/i);
+ assert.equal(r.review.findings[0].status,'credential_scope');
+ assert.equal(r.review.findings[1].status,'unresolved');
+ const unknown=scopeResult({...p,state:'Wyoming'});
+ assert.equal(unknown.sources.length,0);
+ assert.match(unknown.status,/NOT YET RESEARCHED/);
+ assert.ok(unknown.review.findings.every(x=>x.status==='unresolved'));
+ assert.equal(Object.keys(SCOPE_EVIDENCE).length,6);
+ assert.equal(Object.keys(SCOPE_SOURCES).length,6);
+});
+test('each official finding has exact source records, status code, and credential target',()=>{
+ const legalStatuses=new Set(Object.keys(SCOPE_FINDINGS));
+ for(const [state,record] of Object.entries(SCOPE_EVIDENCE)){
+  assert.ok(record.sources.length>=1,'No sources: '+state);
+  const ids=new Set(record.sources.map(x=>x.id));
+  assert.equal(ids.size,record.sources.length,'Duplicate source ID: '+state);
+  for(const source of record.sources){
+   assert.match(source.url,/^https:\/\//);
+   assert.ok(/(?:\.gov\/|\.state\.[a-z]{2}\.us\/|\.us\/)/.test(source.url),'Source not on official state/regulator site: '+source.url);
+  }
+  for(const finding of record.findings){
+   assert.ok(legalStatuses.has(finding.status),'Unknown status');
+   assert.ok(finding.sourceIds.every(id=>ids.has(id)),state+' has unsupported reference');
+   assert.ok(finding.sourceIds.length>0,'Uncited finding');
+  }
+ }
+});
+test('individual unlicensed shampoo exceptions do not transfer to massage and styling',()=>{
+ const unlicensed='No professional license';
+ for(const state of ['Texas','Tennessee','Florida']){
+  const r=evidenceFor(state,unlicensed,['wash','scalp-massage','styling']);
+  assert.equal(r.findings[0].status,'documented_exemption');
+  assert.notEqual(r.findings[1].status,'documented_exemption');
+  assert.notEqual(r.findings[2].status,'documented_exemption');
+  assert.match(r.findings[0].limits,/not|does not|exception/i);
+ }
+ const california=evidenceFor('California','Esthetician',['wash','styling','scalp-massage']);
+ assert.equal(california.findings[0].status,'outside_credential');
+ assert.equal(california.findings[1].status,'outside_credential');
+ assert.equal(california.findings[2].status,'unresolved');
+ const texas=evidenceFor('Texas','Esthetician',['wash','styling','scalp-massage']);
+ assert.equal(texas.findings[0].status,'documented_exemption');
+ assert.equal(texas.findings[1].status,'outside_credential');
+ assert.equal(texas.findings[2].status,'credential_scope');
+});
+test('Pennsylvania licensed-salon obligation and no-advisory-opinion restriction are visible',()=>{
+ const r=evidenceFor('Pennsylvania','Esthetician',['wash','scalp','styling']);
+ assert.ok(r.findings.every(f=>f.status==='unresolved'));
+ assert.match(r.facility,/licensed|inspection/i);
+ assert.match(r.nextContact,/cannot issue advisory legal opinions/i);
+ const unknown=evidenceFor('Alaska','No professional license',['wash','scalp']);
+ assert.equal(unknown.researchDate,null);
+ assert.match(unknown.coverage,/not yet researched/i);
+});
+test('Scope Finder shows research coverage, facility, individual source citations and safe copy action',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ for(const token of [
+  'sc-context','data-activity-findings','data-source-facility','data-source-reviewed',
+  'data-next-contact','data-board-inquiry','scope-save','scope-copy',
+  'RESEARCH COVERAGE','not an approval to offer your full head spa'
+ ])assert.ok(widget.includes(token),'Missing '+token);
+ assert.doesNotMatch(widget,/you may offer all head spa services|head spa permitted/i);
 });
 test('scope result clarifies mismatch for massage therapy and unlicensed learner',()=>{
- for(const license of ['Massage therapist','Student / not yet licensed']){
+ for(const license of ['Massage therapist','Student / not yet licensed','No professional license']){
   const r=scopeResult({...example,license});
-  assert.match(r.note,/appropriate regulator/);
+  assert.match(r.note,/right regulator/);
  }
 });
 test('appointment calculation counts all capacity, not only hands-on time',()=>{
