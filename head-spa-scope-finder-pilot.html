@@ -160,8 +160,11 @@ function render(){
  $('sourceList').replaceChildren();$('activityList').replaceChildren();
  const sources=sourceMap[state]||[];
  $('statusLabel').textContent=sources.length?'OFFICIAL SOURCES FOUND — PERMISSIONS NOT DETERMINED':'SOURCE DIRECTORY INCOMPLETE — STATE NOT YET MAPPED';
+ const otherAuthority=lic==='Massage therapy license'||lic==='Other credential'||lic==='No current professional license';
  $('resultNote').textContent=sources.length
-  ?'These are government resources, not a license clearance. You still need to check the rules for your exact credential, activity, venue and local requirements.'
+  ?(otherAuthority
+     ?'The links listed here concern barbering/cosmetology or appearance-enhancement regulation; they may not govern your credential or unlicensed activity. Identify the correct professional board as well. AIMT has not determined permission for these activities.'
+     :'These are government resources, not a license clearance. You still need to check the rules for your exact credential, activity, venue and local requirements.')
   :'AIMT has not yet verified a government source for this state in this pilot. Do not infer that your proposed service is allowed or prohibited; locate the official board and ask directly.';
  if(sources.length)for(const entry of sources)addListItem($('sourceList'),entry[0],entry[1]);
  else addListItem($('sourceList'),'No curated source available for this state yet. Search your official state government site for the professional licensing board.');
