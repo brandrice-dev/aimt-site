@@ -19,7 +19,7 @@ Never interpret `head spa` as a single statutory license category, or equate an 
 | TN | State Board of Cosmetology and Barber Examiners / Commerce and Insurance | [Shampoo and Head Spa FAQ (updated Sep 23, 2026)](https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa); [licensing](https://www.tn.gov/commerce/regboards/cosmo/license/individual.html); [rules](https://publications.tnsosfiles.com/rules/0440/0440.htm) | Official FAQ addresses shampooing, styling and some licensed roles; verify separate massage, salon/facility, and equipment questions for specific fact patterns. |
 | TX | Texas Department of Licensing and Regulation | [Scope guides index](https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/); [esthetician guide](https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/estheticians.htm); [cosmetology operator guide](https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/operators.htm); [Who regulates what?](https://www.tdlr.texas.gov/barbering-and-cosmetology/who-regulates-what.htm) | **Interpretation risk**: individual hair-service language, scalp-cleansing authority and unregulated shampooing/conditioning interact; do not convert one page into a blanket yes/no. |
 | FL | Florida DBPR | [Cosmetology FAQ](https://www2.myfloridalicense.com/cosmetology/faqs/); [What requires a license](https://ula.myfloridalicense.com/what-requires-a-license/) | Board FAQ discusses shampooing and various hair services, but does not by itself clear a complete "head spa" sequence or venue. |
-| NY | NY Department of State, Appearance Enhancement | [Procedural service determinations chart (Mar 2025)](https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf) | Multi-license matrix; requires checking most recent law, subsequent updates and massage-therapy distinctions. Official PDF cover/table reviewed visually. |
+| NY | NY Department of State, Appearance Enhancement | [Procedural service determinations chart (Mar 31, 2026)](https://dos.ny.gov/system/files/documents/2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf) | Multi-license matrix; requires checking most recent law, subsequent updates and massage-therapy distinctions. Official PDF cover/table reviewed visually. |
 
 **Unmapped states:** all other US states. Do **not** extrapolate from the five above. Present a neutral prompt to locate the relevant state board and verify service/activity details. If a link becomes unavailable, remove it from the supported-source registry until rechecked.
 
@@ -79,7 +79,7 @@ The older five-state URL-only directory was insufficient for a professional rely
 | **Florida** | DBPR says shampoo-only does not require an individual license; paid blow-dry/styling requires professional cosmetology authorization. | [DBPR FAQs](https://www2.myfloridalicense.com/cosmetology/faqs/); [Unlicensed Activity Guide](https://ula.myfloridalicense.com/what-requires-a-license/) | No conclusion about scalp exfoliation, massage, or the full equipment-backed service. Venue requirements vary by activity. |
 | **California** | The official 2024 head-spa bulletin explicitly says estheticians cannot perform hair shampooing or blow-drying, which are within listed hair-service licenses. | [California Head Spas Bulletin](https://barbercosmo.ca.gov/forms_pubs/headspas.pdf) (2024-11-01; page visually checked 2026-11-12) | Do not equate permitted cosmetic scalp care with licensed hair care or all neck/shoulder bodywork. |
 | **Pennsylvania** | The statute defines cosmetology to include hair cleansing and cosmetic scalp work. Esthetics has a narrower statutory definition. PA requires salon licensing/inspection; board staff cannot issue advisory legal opinions. | [PA Cosmetology Act §1](https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=1&sessInd=0&smthLwInd=0&subsctn=0&txtType=HTM&yr=1933); [PA Board](https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology); [Salon licensing procedure](https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology/application-process) | Don't extrapolate a complete esthetician exclusion or unlicensed shampoo exemption from the text. For disputed scope, point to law and a Pennsylvania licensing attorney, not a promise the board will advise. |
-| **New York** | Appearance Enhancement Service Determinations chart exists. | [NY DOS March 2025 chart](https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf) | **No individual scope determination reviewed in this version.** Requires current chart and statutory cross-check. |
+| **New York** | Appearance Enhancement Service Determinations chart exists. | [NY DOS March 31, 2026 chart](https://dos.ny.gov/system/files/documents/2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf) | **No individual scope determination reviewed in this version.** Requires current chart and statutory cross-check. |
 
 ### Important research conflict to resolve before adding Oklahoma
 
@@ -109,6 +109,24 @@ Maine is also on the priority queue. Its [current official statute §14203](http
 - Program/QA release requires clear distinction between **research evidence**, **practice permission**, and AIMT **education**. AIMT certification never substitutes for state licensure.
 
 **Recheck policy recommendation:** immediately on board bulletin/rule changes, broken links or credible disputes, and at least quarterly for each approved state; preserve dated evidence revisions. This is a proposed maintenance SLA until owner approval. Do not create recurring monitoring or paid searches without authorization.
+
+
+### Official professional-license verification (added Nov 12)
+
+AIMT's Scope Finder now asks separately **what type of license someone holds** and **whether they self-report it as active in the selected state**. An out-of-state, expired, pending or unverified credential is not treated as practice authorization. The tool does not collect or send personal license numbers, names or credentials, and does not perform an automated lookup. It links users to state-maintained search portals instead.
+
+| State | Official public lookup or regulator entry point | Evidence |
+| --- | --- | --- |
+| California | https://search.dca.ca.gov/ | DCA public license-search tool; source links in [California board FAQ](https://barbercosmo.ca.gov/forms_pubs/publications/faqs) |
+| Texas | https://www.tdlr.texas.gov/verify.htm | TDLR search for individuals and establishments |
+| Tennessee | https://www.tn.gov/commerce/regboards/cosmo/help-support.html | Board Verify Public Search, license status and expiration; portal accessible through board |
+| Florida | https://www2.myfloridalicense.com/online-services/ | DBPR "Verify a License" page |
+| Pennsylvania | https://www.pa.gov/services/dos/verify-a-professional-or-occupational-license | PA PALS public professional license verification |
+| New York | https://appext20.dos.ny.gov/lcns_public/main_screen | NY DOS License Status Page, points Appearance Enhancement/Barber search to Open NY portal |
+
+**Verified scope vs. verified identity:** The link is official, but AIMT does **not** know whether the person clicking it actually holds that credential. Even a current license record does **not** decide whether an individual planned treatment or establishment is allowed. The two checks remain separate and every tool result states this.
+
+**New York source correction:** The previous work linked a 2025 DOS procedure chart. On November 12, 2026 an updated **March 31, 2026** chart was found and its first page inspected: https://dos.ny.gov/system/files/documents/2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf. The Finder now links this newer version. We have deliberately **not** assigned new activity-level permissions based on it without an independent legal cross-check. This demonstrates why source versions and rechecks are essential.
 
 ### Publication gate
 Current activity statements in this development prototype are **research interpretations that still need independent legal/regulatory review**. They are not advertised as final legal answers. No launch, merge to main, student messaging or consent/backend changes were authorized. The feature branch contains the current research code and tests; #165 and draft PR #166 own the release record.
