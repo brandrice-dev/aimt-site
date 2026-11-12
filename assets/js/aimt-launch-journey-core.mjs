@@ -21,7 +21,15 @@ export const STATES=Object.freeze([
  'Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ]);
-export const LICENSES=Object.freeze(['Cosmetologist','Esthetician','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']);
+export const LICENSES=Object.freeze(['Cosmetologist','Cosmetology Operator','Esthetician','Facial Specialist','Full Specialist','Barber','Class A Barber','Master Barber','Hairstylist','Natural Hair Stylist','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']);
+export const CREDENTIAL_NOTES=Object.freeze({
+ 'California':'Choose the exact California board credential. A hairstylist license differs from an esthetician license, and an unrelated out-of-state license is not automatically valid.',
+ 'Texas':'Texas uses the titles Cosmetology Operator and Class A Barber. Use your actual TDLR credential; a generic title does not prove a particular license subtype.',
+ 'Tennessee':'The state distinguishes Master Barber, Barber Technician and Cosmetologist. Generic Barber does not establish Master Barber status.',
+ 'Florida':'Florida uses the titles Cosmetologist, Facial Specialist and Full Specialist. A generic Esthetician choice is not automatically equivalent to Florida registration.',
+ 'Pennsylvania':'PA cosmetologists, estheticians and barbers are regulated under different statutory definitions and sometimes different boards.',
+ 'New York':'NY distinguishes Cosmetology, Esthetics and Natural Hair Styling, plus separate barbering regulation. Confirm your exact registered category.'
+});
 export const LICENSE_STATUSES=Object.freeze([
  {key:'active_here',label:'I hold an active license issued by this state'},
  {key:'licensed_elsewhere',label:'My license is from a different state'},
