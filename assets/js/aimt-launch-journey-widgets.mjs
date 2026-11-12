@@ -4,6 +4,7 @@ import {
  STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
+import { scopeSummary } from './aimt-scope-evidence.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
 function options(items,selected=''){
@@ -87,6 +88,7 @@ export function mountScope(root){
   '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy my findings','scope-report-copy',true),btn('Copy questions for my board','scope-copy',true),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   '<div data-sources hidden>',
+   '<div class="lj-scope-quick" aria-live="polite"><strong data-scope-quick-headline></strong><p data-scope-quick-message></p><p data-scope-quick-counts class="lj-help"></p></div>',
    '<div class="lj-scope-overview">',
     '<div class="lj-scope-coverage"><span>RESEARCH COVERAGE</span><h4 data-source-state></h4><p data-source-coverage></p><p data-source-reviewed></p></div>',
     '<p class="lj-scope-not-cleared"><strong>Important:</strong> These are findings about specific activities, <strong>not</strong> an approval to offer your full head spa service. Facility licenses, equipment, local codes and the exact technique may change the answer.</p>',
@@ -138,6 +140,16 @@ export function mountScope(root){
   const patch={careerStage:stage.value,state,license,licenseStatus:credentialStatus,operatingContext,activities,licenseQuestions:$(root,'#sc-question').value};
   const next=save?persist(patch,root):{...current(),...patch};
   const g=scopeResult(next),review=g.review;
+  const quick=scopeSummary(review);
+  info(root,'[data-scope-quick-headline]',quick.headline);
+  info(root,'[data-scope-quick-message]',quick.message);
+  info(root,'[data-scope-quick-counts]',
+    quick.counts.documented_exemption+' documented individual-license exemptions · '+
+    quick.counts.credential_scope+' license-category findings · '+
+    quick.counts.conditional_exemption+' conditional exceptions · '+
+    (quick.counts.outside_credential+quick.counts.licensed_role_required)+' restricted steps · '+
+    quick.counts.unresolved+' unresolved steps');
+
   info(root,'[data-source-state]',review.researchStatus);
   info(root,'[data-source-coverage]',review.coverage);
   const mismatch=(license==='No professional license'||license==='Student / not yet licensed') && credentialStatus==='active_here';
