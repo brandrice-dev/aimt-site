@@ -109,7 +109,7 @@ test('Scope Finder shows research coverage, facility, individual source citation
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
  for(const token of [
   'sc-context','data-activity-findings','data-source-facility','data-source-reviewed',
-  'data-next-contact','data-board-inquiry','scope-save','scope-copy',
+  'data-next-contact','data-board-inquiry','scope-save','scope-copy','scope-report-copy',
   'RESEARCH COVERAGE','an approval to offer your full head spa'
  ])assert.ok(widget.includes(token),'Missing '+token);
  assert.doesNotMatch(widget,/you may offer all head spa services|head spa permitted/i);
@@ -329,4 +329,14 @@ test('newest official New York procedural chart is referenced and older chart is
  assert.ok(ny.sources.some(x=>x.url.includes('2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf')));
  assert.ok(!ny.sources.some(x=>x.url.includes('2025/03/ae-licensees')));
  assert.ok(ny.findings.length===0,'NY chart alone does not authorize activity without interpretation');
+});
+
+test('source-backed review can be copied as one actionable research record without collecting identity data',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.match(widget,/Copy my findings/);
+ assert.match(widget,/AIMT \/ HEAD SPA LICENSE & SCOPE RESEARCH NOTES/);
+ assert.match(widget,/Source explanation:/);
+ assert.match(widget,/OFFICIAL LICENSE LOOKUP:/);
+ assert.match(widget,/No finding authorizes a complete head spa treatment/);
+ assert.doesNotMatch(widget,/name="licenseNumber"|name="birthdate"|name="license_number"/i);
 });
