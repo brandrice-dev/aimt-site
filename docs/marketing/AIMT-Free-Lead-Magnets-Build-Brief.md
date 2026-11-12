@@ -122,3 +122,45 @@ Preserve the existing `assets/js/aimt-growth.js` and `docs/growth/AIMT-Growth-Me
 - [ ] Release approval recorded in issue; only then create/merge deployment PR.
 
 **Status definitions:** editorial brief = **PROPOSED**; functional isolated prototype = **IMPLEMENTED** after commit; **TESTED** only with named checks; **DEPLOYED/VERIFIED** only after permitted live release and observation.
+
+---
+
+## 8. November 11 owner decision — one-build/two-context architecture
+
+The owner approved building the Free Tools as separately accessible experiences **and** reusing them inside the Free Head Spa Launch Accelerator. This supersedes earlier concepts that would construct a separate set of interactive widgets for the course.
+
+**Implemented in feature/head-spa-free-accelerator (not production):**
+
+- Free Tools hub: prominently features the new Free Head Spa Launch Accelerator, then six individual resources: License & Scope Finder, Equipment Planner, Scalp Observation Lab, existing Service Cost Worksheet, existing Readiness Score, existing First-Service Blueprint. Equipment Clinic is announced as a concept **without active registration**, since no event is scheduled.
+- The five-lesson Accelerator uses the *same* shared widget implementation as the three new standalone tools (scope, equipment, observation); the service design lesson and launch sequence are additional course-only teaching activities.
+- The service lesson reuses the existing AIMT numerical service-cost calculation through the shared core and lets students model the full appointment, supplies, labor and overhead without inventing earnings. The richer existing standalone Cost Worksheet remains independently accessible.
+- The existing Readiness Score remains the real 15-question tool; the Accelerator sends learners to it as a separate next-step experience, rather than copying questions, scores, PII or lead records. The Blueprint is reusable through a compatible JSON export; original drafts are not overwritten.
+- The one connected Head Spa Launch Plan is stored in a versioned, browser-local object using a strict field allowlist; it carries selected activities to verify, service concept, full time and optional modeled costs, equipment questions, a non-diagnostic observation statement and next steps. No real client data or email is captured by the new widgets.
+- New pages use a shared AIMT style sheet and the canonical Montserrat/Outfit design system. They are marked noindex until launch. The feature branch only has new static route allowlist entries.
+- The original two pilot files are retained on the branch for comparison but are not primary public-navigation targets.
+
+**Implementation map:**
+
+| Shared or composed piece | File |
+|---|---|
+| Pure shared state, official links, question model, cost adapter and Blueprint export | assets/js/aimt-launch-journey-core.mjs |
+| Reusable scope/service/equipment/observation/launch widgets | assets/js/aimt-launch-journey-widgets.mjs |
+| Course progression, local completion state, print/download | assets/js/aimt-launch-accelerator.mjs |
+| Standalone widget mounting | assets/js/aimt-standalone-tool.mjs |
+| Course user experience | head-spa-launch-accelerator.html |
+| Standalone tool experiences | head-spa-scope-finder.html, head-spa-equipment-planner.html, scalp-observation-lab.html |
+| Shared responsive styles | assets/css/aimt-launch-journey.css |
+| Hub hierarchy | free-tools.html, assets/css/aimt-free-tools-hub-expansion.css |
+| Regression and acceptance checks | tests/aimt-free-journey.test.mjs, tests/aimt-free-tools.test.mjs |
+
+**Known limitations requiring distinct approval before production:**
+
+1. **Not one signup yet.** Existing readiness, Cost Worksheet and Blueprint capture paths are intact, and the new widget preview has no registration. Unifying authenticated or lead-capture identity requires a separate approved privacy, backend and consent design. Never claim single-sign-on merely because storage is shared locally.
+2. **No diagnostic camera upload.** The Scalp Lab has an obviously illustrative SVG and deterministic feedback. Approved, consented microscopy images and health/privacy review are required for any genuine-image library or personal-photo upload.
+3. **No state permission determinations.** The Scope Finder supplies primary-source links and board questions, but makes no legal clearance claims. Regulator-specific review and maintenance are required before expanding jurisdiction conclusions.
+4. **No recorded or scheduled webinar.** The Equipment Clinic production brief exists; founder interview, photos, platform, date and recording permission are still needed.
+5. **No production launch.** The draft PR requires independent manual desktop/mobile/keyboard QA, editorial review of all five lessons, and explicit owner release approval.
+
+**Acceptance evidence:** GitHub CI runs the new offline free-journey tests alongside established Readiness/Growth/Free Tools checks. The development branch has a Cloudflare Pages branch preview. Passing CI is not equivalent to real-device or user-facing verification. All external claims of launch readiness must name those gaps.
+
+**Next bounded action:** confirm latest branch CI and Cloudflare preview statuses, record in Issue #165 and Draft PR #166, then request actual learner-facing review. The next iteration should be editorial cleanup, instructor assets and consent/registration design—not another competing architecture.
