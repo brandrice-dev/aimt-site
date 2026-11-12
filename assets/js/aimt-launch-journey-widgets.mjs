@@ -2,7 +2,7 @@
 // No API calls, diagnostic model, user photos, or lead database.
 import {
  STATES,LICENSES,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
- scopeResult,equipmentResult,observationFeedback,appointmentMinutes
+ scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
@@ -111,7 +111,7 @@ export function mountScope(root){
 export function mountService(root){
  const p=current();
  root.innerHTML=[
-  '<div class="lj-tool-head"><small>Lesson tool / Service Design</small><small>Client promise + time model</small></div>',
+  '<div class="lj-tool-head"><small>Lesson tool / Service Design</small><small>Client promise + real costs</small></div>',
   '<h3>Build the experience before the equipment list.</h3>',
   '<p>A focused scalp-care addition and a dedicated head spa appointment can both be legitimate when accurately described and within scope. The client promise, planned flow and available capacity make the difference.</p>',
   '<div class="lj-tool-grid">',
@@ -137,17 +137,30 @@ export function mountService(root){
    field('Checkout and notes (minutes)','sv-admin','<input id="sv-admin" type="number" inputmode="numeric" min="0" max="1440" placeholder="5">')
   ,'</div>',
   '<div class="lj-feedback" data-capacity role="status" aria-live="polite">Enter all five time assumptions to see how much of the schedule the appointment requires.</div>',
+  '<h4>Check the numbers before choosing a menu price.</h4>',
+  '<p class="lj-help">A transparent first cost estimate uses your full appointment time, a labor rate you choose, products, consumables and allocated overhead. If you do not know a number, leave it blank instead of guessing. This uses the exact calculation behind AIMT\'s standalone Service Cost Worksheet.</p>',
+  '<div class="lj-tool-grid">',
+   field('Products used (USD)','sv-products','<input id="sv-products" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="Product cost">'),
+   field('Other supplies (USD)','sv-supplies','<input id="sv-supplies" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="Consumable cost">'),
+   field('Allocated overhead (USD)','sv-overhead','<input id="sv-overhead" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="Overhead per appointment">'),
+   field('Labor value per hour (USD)','sv-labor','<input id="sv-labor" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="Your hourly rate">'),
+   field('Potential menu price (optional)','sv-menuPrice','<input id="sv-menuPrice" type="number" inputmode="decimal" min="0" max="100000" step=".01" placeholder="Your proposed price">'),
+  '</div>',
+  '<div class="lj-feedback" data-pricing role="status" aria-live="polite">Add your actual cost assumptions to see the modeled cost; a proposed price is optional.</div>',
   '<div class="lj-actions">',btn('Save my service direction','service-save'),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   resultHTML('Your provisional service direction'),
-  '<p class="lj-help">Next, use the existing <a href="/head-spa-service-cost" target="_blank" rel="noopener">Service Cost Worksheet</a> with your own labor and supply amounts. This course does not invent them.</p>'
+  '<p class="lj-help">For a full standalone version, use the <a href="/head-spa-service-cost" target="_blank" rel="noopener">Service Cost Worksheet</a>. The same calculation is used in both tools. Neither result is a guaranteed profit or forecast.</p>'
  ].join('');
- const map={serviceMinutes:'sv-service',consultMinutes:'sv-consult',prepMinutes:'sv-prep',resetMinutes:'sv-reset',adminMinutes:'sv-admin'};
+ const map={serviceMinutes:'sv-service',consultMinutes:'sv-consult',prepMinutes:'sv-prep',resetMinutes:'sv-reset',adminMinutes:'sv-admin',products:'sv-products',supplies:'sv-supplies',overhead:'sv-overhead',laborHourly:'sv-labor',menuPrice:'sv-menuPrice'};
  $(root,'#sv-audience').value=p.audience;$(root,'#sv-promise').value=p.clientPromise;$(root,'#sv-format').value=p.serviceFormat;
  Object.keys(map).forEach(k=>$(root,'#'+map[k]).value=p[k]);
  function time(){
   const values={};for(const k in map)values[k]=$(root,'#'+map[k]).value;
   const t=appointmentMinutes({...current(),...values});
+  const price=pricingResult({...current(),...values});
+  const fmt=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
+  info(root,'[data-pricing]',price.ok?'Modeled cost: '+fmt.format(price.modeledCost)+(price.enteredPrice===null?'. Add a price if you want to compare.':'. Price minus modeled cost: '+fmt.format(price.modeledDifference)+' (not profit; excludes any omitted costs).'):'Add valid product, supply, overhead and labor estimates if you want a cost result. Blank is not zero.');
   info(root,'[data-capacity]',t?'Your appointment would occupy '+t.total+' minutes, including '+t.extra+' minutes outside the hands-on service. Verify these estimates before making a schedule.':'Enter valid nonnegative whole minutes in every field (hands-on must be greater than zero).');
   return t;
  }
