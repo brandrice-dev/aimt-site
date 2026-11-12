@@ -13,8 +13,12 @@ export const SCOPE_FINDINGS=Object.freeze({
   },
   conditional_exemption:{heading:'Narrow exception with required supervision',explanation:'A specific activity may be exempt only under described work-setting and supervision conditions. Not permission to operate a whole head spa.'},
   credential_scope:{
-    heading:'This state lists the step within the license category',
-    explanation:'The cited agency includes this activity for the selected credential. Confirm the exact technique, facility rules and limitations before providing it.'
+    heading:'Covered within this professional license category',
+    explanation:'The cited law or regulator describes this type of cosmetic service within the professional scope. Specific techniques, health rules and the workplace still matter.'
+  },
+  implementation_review:{
+    heading:'Cosmetic practice is covered; confirm equipment or technique details',
+    explanation:'The source addresses the broader professional service, but additional equipment, installation, recordkeeping or medical-boundary details need to be checked. This is not a finding that the activity is prohibited.'
   },
   outside_credential:{
     heading:'Not included in this license’s scope',
@@ -25,8 +29,8 @@ export const SCOPE_FINDINGS=Object.freeze({
     explanation:'The cited agency requires a designated credential for this activity. An exemption for another step does not cover this one.'
   },
   unresolved:{
-    heading:'Further verification required',
-    explanation:'No specific finding has been cleared for this activity, license and jurisdiction. Do not assume permission or prohibition.'
+    heading:'AIMT research is not complete for this step',
+    explanation:'We have not yet documented enough official guidance for this exact activity and credential. This is a gap in AIMT’s research—not evidence the service is prohibited.'
   }
 });
 
@@ -158,26 +162,47 @@ export const SCOPE_EVIDENCE=Object.freeze({
   'Pennsylvania':{
     authority:'Pennsylvania State Board of Cosmetology / Department of State',
     licenseLookup:{title:'PA PALS — Verify a Professional License',url:'https://www.pa.gov/services/dos/verify-a-professional-or-occupational-license'}, 
-    coverage:'Official statute and board guidance describe professional scope and salon licensing; no blanket head-spa exemption has been established in this research.',
+    coverage:'Pennsylvania’s Cosmetology Law expressly covers cosmetic hair cleansing, scalp cleansing, massage and stimulation, and cosmetic upper-body work. Professional scope and salon/equipment compliance are separate questions; the specific technique must remain within nonmedical cosmetology practice.' ,
     sources:[
       link('pa-law','Pennsylvania Cosmetology Law — Definitions (§1)','https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=1&sessInd=0&smthLwInd=0&subsctn=0&txtType=HTM&yr=1933','Scalp, hair and esthetics definitions'),
       link('pa-cosmo','PA — Cosmetology Licensure Guide','https://www.pa.gov/agencies/dos/resources/professional-licensing-resources/licensure-processing-guides-and-timelines/cosmetology-guide','For compensation scope description'),
       link('pa-board','PA — State Board of Cosmetology','https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology','Board does not provide advisory legal opinions'),
       link('pa-salon','PA — Salon Licensure Procedure','https://www.pa.gov/agencies/dos/department-and-offices/bpoa/boards-commissions/cosmetology/application-process','Inspection and licensing of salons'),
       link('pa-barber-law','PA — Barber License Law §13','https://www.pa.gov/content/dam/copapwp-pagov/en/dos/department-and-offices/bpoa/barber/barber-law.pdf','Barber license, scope and supervised shampoo exception'),
-      link('pa-barber-guide','PA — Barber Licensure Guide','https://www.pa.gov/agencies/dos/resources/professional-licensing-resources/licensure-processing-guides-and-timelines/barber-guide','Barber shampoo, styling and scalp-care scope')
+      link('pa-barber-guide','PA — Barber Licensure Guide','https://www.pa.gov/agencies/dos/resources/professional-licensing-resources/licensure-processing-guides-and-timelines/barber-guide','Barber shampoo, styling and scalp-care scope'),
+      link('pa-sanitation','49 Pa. Code §7.92 — Sanitization of Equipment','https://www.pacodeandbulletin.gov/secure/pacode/data/049/chapter7/s7.92.html','Sanitation of salon tools, instruments, utensils and appliances'),
+      link('pa-salon-rules','49 Pa. Code Chapter 7 — Cosmetology Regulations','https://www.pacodeandbulletin.gov/secure/pacode/data/049/chapter7/chap7toc.html','Salon safety, sanitation, premises and appliances'),
+      link('pa-massage-boundary','PA Cosmetology Law §9.3 — Massage Therapy in a Cosmetology Salon','https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=9&sessInd=0&smthLwInd=0&subsctn=3&txtType=HTM&yr=1933','Distinguishes cosmetic services from licensed massage therapy')
     ],
     findings:[
-      finding("wash","Cosmetologist","credential_scope","PA Cosmetology Act includes cleansing human hair.",["pa-law","pa-cosmo"],"Verify current individual and salon license."),
-      finding("scalp-massage","Cosmetologist","credential_scope","PA Cosmetology Act includes cosmetic scalp massage.",["pa-law"],"Not medical/therapeutic bodywork."),
-      finding("styling","Cosmetologist","credential_scope","PA Cosmetology Act covers arranging and styling human hair.",["pa-law","pa-cosmo"],""),
-      finding("wash","Barber","credential_scope","PA Barber Law includes shampooing hair within licensed barbering.",["pa-barber-law","pa-barber-guide"],""),
-      finding("styling","Barber","credential_scope","PA Barber Law includes hair styling within barbering.",["pa-barber-law"],""),
-      finding("scalp-massage","Barber","credential_scope","PA Barber Law includes cosmetic scalp massage and treatment.",["pa-barber-law","pa-barber-guide"],""),
+      finding("wash","Cosmetologist","credential_scope",
+        "PA Cosmetology Law §1 expressly includes cleansing human hair as cosmetology work.",["pa-law","pa-cosmo"],
+        "Professional license must be active; the service must occur in a permitted setting."),
+      finding("scalp","Cosmetologist","credential_scope",
+        "PA Cosmetology Law §1 expressly includes cleansing, stimulating and manipulating the scalp with cosmetic preparations or appliances. Ordinary nonmedical cosmetic scalp cleansing/exfoliation fits this broad service category.",["pa-law","pa-cosmo"],
+        "The exact product, exfoliation method and medical/nonmedical boundary still matter; chemical peels or medical treatment should not be inferred from this description."),
+      finding("scalp-massage","Cosmetologist","credential_scope",
+        "PA Cosmetology Law §1 expressly includes cosmetic scalp massage, manipulation and stimulation.",["pa-law","pa-cosmo"],
+        "Cosmetic scalp massage is different from offering medical or independent licensed massage therapy."),
+      finding("bodywork","Cosmetologist","credential_scope",
+        "PA Cosmetology Law §1 includes cosmetic massaging and manipulation of the upper part of the body. That supports ordinary nontherapeutic cosmetic neck/shoulder work within cosmetology practice.",["pa-law","pa-cosmo","pa-massage-boundary"],
+        "The conclusion is limited to cosmetic upper-body techniques. Deep-tissue/therapeutic massage, treatment claims or holding out as a massage therapist have separate licensure boundaries."),
+      finding("styling","Cosmetologist","credential_scope",
+        "PA Cosmetology Law §1 includes arranging, dressing and styling human hair.",["pa-law","pa-cosmo"],
+        "Individual and premises licensure requirements still apply."),
+      finding("camera","Cosmetologist","implementation_review",
+        "Pennsylvania cosmetology law broadly covers cosmetic scalp work and the use of mechanical/electrical appliances. It does not separately name scalp cameras; non-diagnostic observation is a service-planning use, not a diagnosis.",["pa-law","pa-cosmo"],
+        "Confirm intended device use and any applicable device/recording rules. Do not imply permission for medical diagnosis or image-based treatment claims."),
+      finding("wet","Cosmetologist","implementation_review",
+        "Pennsylvania cosmetology law encompasses hair/scalp cleansing and cosmetic appliances. Salon regulations require sanitary equipment and safe premises; the exact bed, steamer and water system need an installation/sanitation check.",["pa-law","pa-sanitation","pa-salon-rules"],
+        "The professional service and the installation of particular plumbing, electrical or steam equipment are separate compliance questions."),
+      finding("wash","Barber","credential_scope","PA Barber Law includes shampooing hair within licensed barbering.",["pa-barber-law","pa-barber-guide"],"Verify current barber credential and shop requirements."),
+      finding("styling","Barber","credential_scope","PA Barber Law includes hair styling within barbering.",["pa-barber-law"],"Specific techniques and workplace rules apply."),
+      finding("scalp-massage","Barber","credential_scope","PA Barber Law includes cosmetic scalp massage and treatment.",["pa-barber-law","pa-barber-guide"],"Not unrestricted therapeutic bodywork."),
       finding("wash","No professional license","conditional_exemption","PA Barber Law §13(a) permits unlicensed persons to shampoo hair under a barber-manager, barber-owner or barber-teacher’s supervision.",["pa-barber-law"],"NOT permission to shampoo independently or operate an unlicensed head spa; shop and supervisor requirements are essential."),
       finding("wash","Student / not yet licensed","conditional_exemption","PA Barber Law §13(a) permits unlicensed persons to shampoo hair under a barber-manager, barber-owner or barber-teacher’s supervision.",["pa-barber-law"],"NOT permission to shampoo independently or operate an unlicensed head spa; shop and supervisor requirements are essential.")
     ],
-    facility:'PA states that salons must be licensed and pass inspection before opening. The specific category of salon for the planned mix of services needs verification.',
+    facility:'The Pennsylvania Cosmetology Law §8 requires regulated cosmetology work in a licensed cosmetology salon or barber shop, with a limited client-residence exception. The PA Board states new salons must be licensed and inspected before opening. Once a salon and a cosmetologist are appropriately licensed, the ordinary cosmetic services listed in §1 do not each require a separate named “head spa” license. Confirm equipment sanitation, water/electrical installation and any business/municipal requirements for the chosen premises.',
     nextContact:'PA board staff and counsel say they cannot issue advisory legal opinions. Review the statute and regulations; for an ambiguous license/scope question, consult a Pennsylvania attorney familiar with professional licensing.'
   },
   'New York':{
