@@ -184,15 +184,41 @@
     <button type="button" class="lj-btn" id="printLaunchPlan">Print / Save PDF</button>
    </div>
    <p class="lj-status" id="planStatus" role="status" aria-live="polite"></p>
-   <div class="lj-readiness">
-    <h3>You now have a direction. Next comes skill.</h3>
-    <p>The free Accelerator focuses on your first decisions. The <strong>AIMT Head Spa Certification</strong> goes further: service execution, scalp observation, client communication, appropriate adaptation, practical resources and earned assessment. A certification does not replace professional licensing or hands-on practice requirements.</p>
-    <div class="lj-actions">
-     <a class="lj-btn lj-btn-primary" href="/head-spa-certification">Explore Head Spa Certification →</a>
-     <a class="lj-btn" href="/head-spa-readiness">Take the Readiness Score</a>
-     <a class="lj-btn" href="/first-service-blueprint">Open the existing First-Service Blueprint</a>
+   <section class="lj-next-move" id="nextStepOffer" aria-labelledby="nextMoveHeading">
+    <div class="lj-next-move-top">
+     <span class="lj-overline">YOUR NEXT MOVE · THE FULL TRAINING SYSTEM</span>
+     <h3 id="nextMoveHeading">When you're ready to go further.</h3>
+     <p>The free class helps you decide where to start. AIMT Head Spa Certification teaches the professional decisions and service skills behind doing it well.</p>
     </div>
-   </div>
+    <div class="lj-next-move-grid">
+     <!-- REPLACEABLE OWNER MEDIA SLOT: swap this existing-product-proof collage for the approved uploaded bundle photo when supplied. Do not use generated fake UI or implied included bonuses. -->
+     <figure class="lj-next-move-media" data-bundle-photo-slot="awaiting-owner-upload">
+      <div class="lj-next-move-proof">
+       <img class="lj-next-move-course-image" src="/assets/images/marketing/head-spa-certification-course-ui.webp" alt="Actual AIMT Head Spa Certification course lesson interface" loading="lazy" decoding="async">
+       <img class="lj-next-move-sidekick-image" src="/assets/images/marketing/approved-service-timer-live.webp" alt="Actual AIMT Smart Service Sidekick step-by-step service timing interface" loading="lazy" decoding="async">
+      </div>
+      <figcaption>Actual AIMT course and Smart Service Sidekick previews. Your final bundle photograph will replace this composite when approved.</figcaption>
+     </figure>
+     <div class="lj-next-move-offer">
+      <span class="lj-next-move-label" data-next-step-label>Your course + included bonus</span>
+      <h4 data-next-step-name>Head Spa Certification</h4>
+      <p class="lj-next-move-intro">One course, the tools to keep using what you learn, and an earned credential when you pass the assessment.</p>
+      <ul class="lj-next-move-includes">
+       <li><span aria-hidden="true">01</span><div><strong>Head Spa Certification Course</strong><small>Full lessons, practice and final assessment. Lifetime course access.</small></div></li>
+       <li><span aria-hidden="true">02</span><div><strong>Smart Service Sidekick</strong><small>Included for every enrollee. A step-by-step companion for 60- and 90-minute reference services.</small></div></li>
+       <li><span aria-hidden="true">03</span><div><strong>Practitioner Resource Library</strong><small>Consultation, service maps and practical reference resources from the certification.</small></div></li>
+       <li><span aria-hidden="true">04</span><div><strong>First-Service Blueprint</strong><small>A working plan to connect your service idea, costs and next decisions. Also offered free in AIMT Tools.</small></div></li>
+       <li data-next-step-founder hidden><span aria-hidden="true">05</span><div><strong>Private 1:1 Founder Review Call · Limited bonus</strong><small>45 minutes after completing certification and your Blueprint. Available only for eligible enrollments while places remain.</small></div></li>
+      </ul>
+      <p class="lj-next-move-availability" data-next-step-availability hidden role="status" aria-live="polite"></p>
+      <div class="lj-actions">
+       <a href="/head-spa-certification" class="lj-btn lj-btn-primary" data-next-step-action>Explore Head Spa Certification</a>
+       <a href="/head-spa-readiness" class="lj-btn">Check my readiness</a>
+      </div>
+      <p class="lj-next-move-disclaimer">The founder call is not included with every enrollment. Limited bonus eligibility is confirmed at checkout. AIMT certification does not grant a professional license.</p>
+     </div>
+    </div>
+   </section>
    <p class="lj-small">The Blueprint import accepts the downloaded JSON file from this Accelerator. Your existing Blueprint draft is not overwritten by the export. The separate Service Cost Worksheet keeps its own cost fields.</p>
    <div class="lj-course-nav"><button class="lj-btn" type="button" data-back="launch">← Review Lesson 5</button><a class="lj-btn" href="/free-tools">Browse the standalone Free Tools →</a></div>
   </section>
@@ -201,5 +227,6 @@
 </main>
 <footer class="lj-bottom"><div class="lj-container">AIMT · American Institute of Modern Trichology · Preview for curriculum and interface review. No course access, professional license, assessment result or clinical interpretation is conferred. <a href="/privacy">Privacy</a> · <a href="/free-tools">Free Tools</a></div></footer>
 <script type="module" src="/assets/js/aimt-launch-accelerator.mjs"></script>
+<script src="/assets/js/aimt-next-step-offer.js" defer></script>
 </body>
 </html>
