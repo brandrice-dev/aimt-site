@@ -34,6 +34,28 @@ Open the branch preview at `/head-spa-scope-finder`, preferably in an incognito/
 | 19 | New York cosmetologist/area renter | hair styling + shampoo | official NY scope findings; separate appearance-enhancement business and area-renter requirements | say operator license alone authorizes suite | UNTESTED |
 | 20 | New York esthetician | hair styling + cosmetic scalp care | hair styling outside esthetics; scalp practice marked unresolved | infer esthetics automatically authorizes hair services | UNTESTED |
 
+## High-priority regression: PA licensed cosmetologist is **not** a research gap
+
+A PA cosmetologist selects all seven advertised head spa components. This exact complaint is the highest-priority user acceptance case:
+
+| Activity | Result expected | Why |
+| --- | --- | --- |
+| Shampooing / cleansing hair | **Included in cosmetologist scope** | Cosmetology Act §1, PA licensure guide |
+| Ordinary nonmedical cosmetic scalp cleansing / exfoliation | **Included in broad cosmetologist scope**, with technique/product limits | Cosmetology Act §1 includes cleansing, stimulating and manipulating the scalp using cosmetics and appliances |
+| Cosmetic scalp massage | **Included in cosmetologist scope** | Cosmetology Act §1 |
+| Cosmetic neck/shoulder (upper-body) massage | **Included in broad cosmetologist scope**, with nontherapeutic limits | Cosmetology Act §1 and §9.3 distinguishes LMT services |
+| Blow-drying / styling hair | **Included in cosmetologist scope** | Cosmetology Act §1 |
+| Observation-only scalp camera | **Practice-related technique / device questions to verify**, NOT an implied license restriction | The statute does not separately name cameras; no medical diagnosis or imagery-based treatment claims |
+| Bed, steamer and water apparatus | **Implementation/sanitation/installation checks**, NOT missing permission for hair cleansing | Cosmetology Act §1 includes appliances; 49 Pa. Code §7.92 covers sanitation; local building and manufacturer requirements still apply |
+
+**Headline must prioritize the positive professional scope:** “Your license category covers core cosmetic services.” Do not lead with “Some steps still need answers” when five are already included in the state’s broad license definition. Separate any **AIMT research gap** from a genuine state prohibition. A camera or equipment check does not make regular cosmetic scalp services sound illegal.
+
+**Negative case:** A PA esthetician selecting the same scalp services must not inherit cosmetologist findings. The tool should say AIMT has not finished researching the specific esthetics scope, not that an esthetician is categorically forbidden without a primary source.
+
+**Language check:** Never state that a research gap means “not allowed,” “probably restricted,” or “permission denied.” However, do not replace genuine primary-source restrictions in CA/TX/FL/TN with reassurance. Source-specific restrictions remain clear and traceable.
+
+**Reviewer evidence:** record a screenshot of (a) PA cosmo all-seven results on mobile; (b) PA cosmo partial result, six supported + equipment questions; (c) PA esthetics unresearched; (d) TX no-license shampoo exemption + restricted styling. All remain UNTESTED in an actual browser until recorded.
+
 ## Additional must-pass safety and UX checks (not case count)
 
 - All 51 states selectable. Unmapped state (e.g. Alaska) shows **Not yet researched**, with zero licensed/exempt conclusions; direct official-source guidance is not fabricated.
