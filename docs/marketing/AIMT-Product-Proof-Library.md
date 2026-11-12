@@ -86,6 +86,24 @@ stay as masters. Also current: `images/marketing/approved-module08-screenshot1.p
 (laptop scene, catalog) and `images/marketing/head-spa-certification-course-ui.webp`
 (Module 4 lesson with a Cadence pull quote, 16:10).
 
+### Development preview references in the Free Head Spa Launch Accelerator (not yet released)
+
+The November 12 development branch reuses these **existing AIMT-approved** assets to avoid stock/generated practitioner photography:
+
+| Preview location | Existing source | Treatment and limitation |
+|---|---|---|
+| Lesson 1 · Scope | `images/marketing/head-spa-service-rinse.webp` | Real AIMT treatment photo, contextual illustration of a multi-activity service; **does not imply any individual license permits it** |
+| Lesson 2 · Service design | `images/marketing/approved-aesthetic-service-shot2.png` | Approved real scalp massage photo; teaches the service experience, not a performance or wellness outcome |
+| Lesson 3 · Equipment | `images/marketing/head-spa-service-basin.webp` | Real treatment setup with timer, not a specification or installation recommendation |
+| Lesson 5 · Launch pathway | `images/marketing/product-proof/my-aimt-resource-library.webp` | Real current product UI with QA student only; an illustrative glimpse of deeper course resources |
+| Shared Scalp Observation Lab · Free Lesson 4 | `images/course/module-04/microscopy/microscopy-surface-residue.webp` | **Illustrative magnified teaching example from paid Module 4**. Explicitly labeled not a clinical diagnosis; image links to `/head-spa-certification` |
+
+The course-derived magnified image is **not authenticated clinical photography** and must not be marketed as a real patient's condition, medical diagnostic evidence, treatment result, or a substitute for consented scalp-image cases. It is used as a **clearly labeled course teaching sample** while the free exercise retains an explicitly schematic illustration for its observation question. The preview links to Head Spa Certification rather than implying completion of the paid material. Owner-directed development placement is not equivalent to final editorial/clinical release signoff.
+
+The existing `images/marketing/my-aimt-course-texture.webp` is reused as a very subtle background layer. No new photographic assets or third-party image licenses were introduced in this pass.
+
+---
+
 ## 5. My AIMT (new captures, QA student "Jordan Sample")
 
 | Asset | Proves | S | O | A | E | P | Ratios |
