@@ -21,6 +21,18 @@ export const STATES=Object.freeze([
  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ]);
 export const LICENSES=Object.freeze(['Cosmetologist','Esthetician','Barber','Massage therapist','Student / not yet licensed','Other / unsure']);
+export const CAREER_STAGES=Object.freeze([
+ {key:'exploring',label:'Exploring head spa or still in school'},
+ {key:'new',label:'Newly licensed / early in my career'},
+ {key:'experienced',label:'Experienced professional, new to head spa'},
+ {key:'offering',label:'Already providing head spa services'}
+]);
+export const CAREER_STAGE_GUIDANCE=Object.freeze({
+ exploring:'Start by checking licensing requirements and finding out what supervised or permitted practice you need. There is no need to buy a bed before you know your path.',
+ new:'Focus first on professional scope, core consultation skills and practicing a repeatable service before making big equipment purchases.',
+ experienced:'You bring useful experience, but head spa has its own timing, equipment and client-expectation decisions. Review what changes in your current space.',
+ offering:'Use your existing appointments as evidence. Measure what takes time, identify weak points in your setup and improve consistency before adding more services.'
+});
 export const ACTIVITIES=Object.freeze([
  {key:'wash',label:'Shampooing or washing hair'},
  {key:'scalp',label:'Cosmetic scalp cleansing or exfoliation'},
@@ -60,7 +72,7 @@ export const SPACE_OPTIONS=Object.freeze([
  {key:'dedicated',label:'Dedicated treatment room'}
 ]);
 export const PLAN_FIELDS=Object.freeze([
- 'state','license','activities','licenseQuestions','serviceFormat','clientPromise','audience',
+ 'careerStage','state','license','activities','licenseQuestions','serviceFormat','clientPromise','audience',
  'consultMinutes','serviceMinutes','prepMinutes','resetMinutes','adminMinutes',
  'products','supplies','overhead','laborHourly','menuPrice',
  'space','equipmentSystem','equipmentPriority','equipmentQuestions',
@@ -83,7 +95,7 @@ function amount(value){
  return v;
 }
 export function emptyPlan(){
- return {version:VERSION,state:'',license:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
+ return {version:VERSION,careerStage:'',state:'',license:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
   consultMinutes:'',serviceMinutes:'',prepMinutes:'',resetMinutes:'',adminMinutes:'',
   products:'',supplies:'',overhead:'',laborHourly:'',menuPrice:'',
   space:'',equipmentSystem:'',equipmentPriority:'',equipmentQuestions:'',
@@ -92,6 +104,7 @@ export function emptyPlan(){
 export function normalizePlan(raw){
  const p=emptyPlan();
  if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.version!==VERSION)return p;
+ p.careerStage=accepted(raw.careerStage,CAREER_STAGES.map(x=>x.key));
  p.state=accepted(raw.state,STATES);
  p.license=accepted(raw.license,LICENSES);
  p.activities=Array.isArray(raw.activities)?[...new Set(raw.activities.filter(x=>ACTIVITIES.some(a=>a.key===x)))].slice(0,7):[];
@@ -175,7 +188,7 @@ export function renderPlanText(plan){
  const p=normalizePlan(plan),time=appointmentMinutes(p),eq=equipmentResult(p),price=pricingResult(p);
  return [
   'AIMT — HEAD SPA LAUNCH PLAN','Working plan only; not certification or legal clearance.','',
-  '01 / SCOPE','State: '+(p.state||'Unselected'),'Credential: '+(p.license||'Unselected'),
+  '01 / SCOPE','Experience: '+(CAREER_STAGES.find(x=>x.key===p.careerStage)?.label||'Not selected'),'State: '+(p.state||'Unselected'),'Credential: '+(p.license||'Unselected'),
   'Activities to verify: '+(ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label).join('; ')||'Unspecified'),
   'Board question: '+(p.licenseQuestions||'Unwritten'),'Permission: NOT DETERMINED','',
   '02 / SERVICE','Clients: '+(p.audience||'Unspecified'),'Format: '+(p.serviceFormat||'Unselected'),
