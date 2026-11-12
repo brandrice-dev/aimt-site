@@ -139,6 +139,54 @@
  .lj-course-nav .lj-btn{flex:1 1 145px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.lj-progress-track span{transition:none}}
+/* Editorial polish: approved AIMT imagery and a very light lesson texture. */
+.lj-hero{isolation:isolate;overflow:hidden}
+.lj-hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(110deg,rgba(26,24,20,.81),rgba(26,24,20,.91) 69%),
+ url("/assets/images/marketing/my-aimt-course-texture.webp") center/cover no-repeat;
+ opacity:.68}
+.lj-hero-inner{position:relative;z-index:1}
+.lj-body.lj-course-started .lj-hero{display:none}
+.lj-body.lj-course-started .lj-course{padding-top:35px}
+.lj-interior-label{display:none}
+.lj-body.lj-course-started .lj-interior-label{display:block;font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);
+ letter-spacing:.15em;color:#bca9a2;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.12);
+ margin-bottom:20px}
+.lj-lesson-head{padding:23px 26px 29px;margin:-10px -26px 0;
+ background-image:linear-gradient(105deg,rgba(26,24,20,.90),rgba(26,24,20,.91)),
+ url("/assets/images/marketing/my-aimt-course-texture.webp");
+ background-size:cover;background-position:center;border-radius:12px 12px 0 0}
+.lj-lesson-media{margin:24px 0 26px;max-width:820px;border:1px solid rgba(255,255,255,.12);
+ background:rgba(255,255,255,.028);border-radius:14px;overflow:hidden}
+.lj-lesson-media img{width:100%;height:clamp(180px,25vw,305px);object-fit:cover;object-position:center;display:block}
+.lj-lesson-media figcaption{padding:12px 16px 15px;font-size:12px;line-height:1.65;color:rgba(255,255,255,.65)}
+.lj-lesson-media figcaption span{font:600 9px var(--aimt-font-mont,Montserrat,sans-serif);
+ text-transform:uppercase;letter-spacing:.14em;color:#cdb5ac;display:block;margin-bottom:5px}
+.lj-cert-preview{margin:28px 0;border:1px solid #d7c9c0;background:#ede4dc;border-radius:13px;
+ display:grid;grid-template-columns:minmax(0,210px) minmax(0,1fr);overflow:hidden}
+.lj-cert-preview-image{display:block;min-height:220px;overflow:hidden}
+.lj-cert-preview-image img{width:100%;height:100%;min-height:220px;display:block;
+ object-fit:cover;object-position:center;transition:transform .2s ease}
+.lj-cert-preview-image:hover img{transform:scale(1.025)}
+.lj-cert-preview-copy{padding:22px 23px;min-width:0}
+.lj-cert-preview-copy small{display:block;font:700 9px var(--aimt-font-mont,Montserrat,sans-serif);
+ letter-spacing:.12em;color:#815b59!important;line-height:1.4;margin-bottom:9px}
+.lj-cert-preview-copy strong{display:block;color:#2a2523!important;font:600 17px/1.25 var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:-.02em}
+.lj-cert-preview-copy p{font-size:12px!important;line-height:1.65!important;margin:9px 0;color:#5e514a!important}
+.lj-cert-preview-link{color:#503339!important;font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);
+ letter-spacing:.045em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid #84625f;padding-bottom:3px}
+.lj-cert-preview-link:hover{color:#23191d!important}
+@media(max-width:850px){.lj-lesson-head{margin:-8px 0 0;padding:21px 22px 25px}}
+@media(max-width:560px){
+ .lj-lesson-head{padding:20px 16px 23px}
+ .lj-lesson-media img{height:210px}
+ .lj-cert-preview{grid-template-columns:1fr}
+ .lj-cert-preview-image{max-height:250px}
+ .lj-cert-preview-image img{max-height:250px;min-height:190px}
+ .lj-cert-preview-copy{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){.lj-cert-preview-image img{transition:none}}
+
 @media print{
  .lj-top,.lj-hero,.lj-rail,.lj-course-nav,.lj-actions,.lj-summary-actions,.lj-bottom,.lj-tool{display:none!important}
  html,.lj-body{background:#fff!important;color:#222!important}
