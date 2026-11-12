@@ -206,7 +206,7 @@ test('new graduates and experienced practitioners receive specific guidance with
  assert.deepEqual(scopeResult(starter).sources,scopeResult(experienced).sources);
  assert.equal(normalizePlan({...example,careerStage:'unverified'}).careerStage,'');
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
- assert.match(widget,/id="sc-stage"/);
+ assert.match(widget,/select\('sc-stage',CAREER_STAGES/);
  assert.match(widget,/CAREER_STAGE_GUIDANCE/);
  const hub=read('free-tools.html');
  assert.match(hub,/Fresh out of school or years behind the chair/);
