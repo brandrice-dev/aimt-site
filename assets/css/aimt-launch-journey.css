@@ -259,6 +259,37 @@
  .lj-next-move-offer{padding:24px 18px 29px}.lj-next-move-top{padding:22px 20px}
  .lj-next-move-offer .lj-actions .lj-btn{width:100%}}
 
+
+/* Licensing research — individual activity evidence, never an overall legal clearance. */
+.lj-scope-overview{border:1px solid #d6ccc3;border-radius:12px;overflow:hidden;margin:28px 0}
+.lj-scope-coverage{padding:19px 21px;background:#eee6df}
+.lj-scope-coverage>span{display:block;font:600 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.12em;color:#80625f}
+.lj-tool .lj-scope-coverage h4{font:700 13px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);margin:7px 0;color:#302b28}
+.lj-tool .lj-scope-coverage p{font-size:12px;line-height:1.6;margin:5px 0;color:#5b524b}
+.lj-tool .lj-scope-not-cleared{padding:16px 20px;margin:0;border-top:1px solid #d6ccc3;background:#f9f6f1;color:#493831}
+.lj-evidence-list{display:grid;gap:12px;margin:16px 0 30px}
+.lj-evidence-card{border:1px solid #d9cec3;background:#fffdf9;border-radius:12px;padding:17px 18px}
+.lj-evidence-card[data-scope-status=unresolved]{background:#f6f0ea;border-color:#d2c2b4}
+.lj-tool .lj-evidence-card h5{font:700 15px/1.35 var(--aimt-font-mont,Montserrat,sans-serif);color:#28231f;margin:0 0 8px}
+.lj-evidence-kind{display:inline-flex;font:700 10px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);
+ text-transform:uppercase;letter-spacing:.055em;color:#5a4146;background:#eee5e1;border:1px solid #d8c8c3;
+ border-radius:6px;padding:5px 7px}
+.lj-evidence-card[data-scope-status=unresolved] .lj-evidence-kind{color:#855d37;background:#f6e9d7;border-color:#e7d2b7}
+.lj-evidence-card[data-scope-status=outside_credential] .lj-evidence-kind,
+.lj-evidence-card[data-scope-status=licensed_role_required] .lj-evidence-kind{color:#713b43;background:#f5e5e6;border-color:#e3c5c9}
+.lj-evidence-card p{font-size:13px!important;color:#504942!important;margin:11px 0 0;line-height:1.6!important}
+.lj-evidence-card p.lj-evidence-limits{font-size:12px!important;color:#70645d!important}
+.lj-evidence-refs{display:flex;flex-wrap:wrap;gap:8px 15px;margin-top:14px;padding-top:11px;border-top:1px solid #ede5df}
+.lj-evidence-refs a{font:600 11px/1.6 var(--aimt-font-sans,Outfit,sans-serif);
+ color:#704852!important;text-underline-offset:3px;overflow-wrap:anywhere}
+.lj-evidence-card small{color:#746960;display:block;font-size:11px;margin-top:11px}
+.lj-scope-facility{background:#eee7df;border-left:3px solid #9a7d73;
+ padding:13px 15px;border-radius:0 8px 8px 0;color:#4e453f!important}
+.lj-scope-inquiry{background:#f0e9e2;border-left-color:#8c7770;color:#3f352e;line-height:1.65}
+.lj-scope-inquiry [data-board-inquiry]{font:400 12px/1.65 var(--aimt-font-sans,Outfit,sans-serif)}
+.lj-scope-inquiry p.lj-help{color:#635650!important}
+@media(max-width:600px){.lj-scope-coverage{padding:17px}.lj-evidence-card{padding:15px}}
+
 @media print{
  .lj-top,.lj-hero,.lj-rail,.lj-course-nav,.lj-actions,.lj-summary-actions,.lj-bottom,.lj-tool{display:none!important}
  html,.lj-body{background:#fff!important;color:#222!important}
