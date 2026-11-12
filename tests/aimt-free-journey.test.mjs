@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
- STORAGE_KEY,STATES,LICENSES,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
+ STORAGE_KEY,STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
@@ -149,9 +149,10 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  const references=[
   'assets/images/marketing/head-spa-service-rinse.webp',
   'assets/images/marketing/approved-aesthetic-service-shot2.png',
-  'assets/images/marketing/head-spa-service-basin.webp',
+  'assets/images/course/module-07/module-07-treatment-bed-setup.webp',
   'assets/images/marketing/product-proof/my-aimt-resource-library.webp',
-  'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp'
+  'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp',
+  'assets/images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp'
  ];
  for(const asset of references)assert.ok(fs.existsSync(path.join(root,asset)),'Missing approved image '+asset);
  for(const src of references.slice(0,4))assert.ok(lesson.includes('/'+src),'Lesson missing photo '+src);
@@ -160,7 +161,8 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  assert.match(widgets,/INSIDE AIMT HEAD SPA CERTIFICATION/);
  assert.match(widgets,/not a medical condition or diagnosis/);
  assert.match(widgets,/href="\/head-spa-certification"/);
- assert.match(widgets,/Illustration, not clinical evidence/);
+ assert.match(widgets,/Illustrative course image — not clinical evidence/);
+ assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
  assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
 });
 test('landing hook disappears after entering course and lesson navigation remains usable',()=>{
@@ -188,4 +190,56 @@ test('tool card illustrations are accessible and the formerly light pricing card
   'What should I learn next?',
   'How do I plan my first service?'
  ])assert.ok(hub.includes(promise),'Missing simple tool value statement: '+promise);
+});
+
+test('new graduates and experienced practitioners receive specific guidance without changing licensing results',()=>{
+ const levels=CAREER_STAGES.map(x=>x.key);
+ assert.deepEqual(levels,['exploring','new','experienced','offering']);
+ const notes=Object.values(CAREER_STAGE_GUIDANCE);
+ assert.ok(notes.every(x=>x.length>70));
+ const starter=normalizePlan({...example,careerStage:'new'});
+ const experienced=normalizePlan({...example,careerStage:'experienced'});
+ assert.equal(starter.careerStage,'new');
+ assert.equal(experienced.careerStage,'experienced');
+ assert.match(renderPlanText(starter),/Early in my career|Newly licensed/i);
+ assert.match(renderPlanText(experienced),/Experienced professional/i);
+ assert.deepEqual(scopeResult(starter).sources,scopeResult(experienced).sources);
+ assert.equal(normalizePlan({...example,careerStage:'unverified'}).careerStage,'');
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.match(widget,/id="sc-stage"/);
+ assert.match(widget,/CAREER_STAGE_GUIDANCE/);
+ const hub=read('free-tools.html');
+ assert.match(hub,/Fresh out of school or years behind the chair/);
+});
+test('correct decisions use canonical AIMT success green, while unsafe answers are distinct',()=>{
+ const css=read('assets/css/aimt-launch-journey.css');
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ const shell=read('assets/css/cadence-shell.css');
+ assert.match(shell,/--aimt-success, #3a5a3a/);
+ assert.match(css,/\.lj-feedback\.is-correct/);
+ assert.match(css,/--aimt-success,#3a5a3a/);
+ assert.match(css,/--aimt-success-light,#e8ede8/);
+ assert.match(css,/\.lj-feedback\.is-incorrect/);
+ assert.match(widget,/feedbackState\(fb,input.value==='define'\)/);
+ assert.match(widget,/feedbackState\(fb,x.value==='verify'\)/);
+ assert.match(widget,/feedbackState\(el,fb.correct\)/);
+});
+test('Next Move package uses authentic AIMT product proof and keeps founder bonus conditional',()=>{
+ const app=read('head-spa-launch-accelerator.html');
+ const official=read('assets/js/aimt-next-step-offer.js');
+ assert.match(app,/id="nextStepOffer"/);
+ assert.match(app,/data-bundle-photo-slot="awaiting-owner-upload"/);
+ assert.match(app,/head-spa-certification-course-ui.webp/);
+ assert.match(app,/approved-service-timer-live.webp/);
+ assert.match(app,/First-Service Blueprint/);
+ assert.match(app,/Smart Service Sidekick/);
+ assert.match(app,/Practitioner Resource Library/);
+ assert.match(app,/data-next-step-founder hidden/);
+ assert.match(app,/data-next-step-availability hidden/);
+ assert.match(app,/aimt-next-step-offer\.js/);
+ assert.match(official,/remaining>0/);
+ assert.match(official,/data\.capacity===5/);
+ assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-certification-course-ui.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/approved-service-timer-live.webp')));
 });
