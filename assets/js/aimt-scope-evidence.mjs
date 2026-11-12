@@ -13,7 +13,7 @@ export const SCOPE_FINDINGS=Object.freeze({
   },
   conditional_exemption:{heading:'Narrow exception with required supervision',explanation:'A specific activity may be exempt only under described work-setting and supervision conditions. Not permission to operate a whole head spa.'},
   credential_scope:{
-    heading:'Activity is listed in this license’s scope',
+    heading:'This state lists the step within the license category',
     explanation:'The cited agency includes this activity for the selected credential. Confirm the exact technique, facility rules and limitations before providing it.'
   },
   outside_credential:{
@@ -205,6 +205,34 @@ export const SCOPE_EVIDENCE=Object.freeze({
     nextContact:'Use the DOS license chart and relevant written law; if a row or service is not clear, seek current written authority before providing it.'
   }
 });
+
+export function scopeSummary(review){
+ const results=Array.isArray(review?.findings)?review.findings:[];
+ const counts={
+  documented_exemption:0,conditional_exemption:0,credential_scope:0,
+  outside_credential:0,licensed_role_required:0,unresolved:0
+ };
+ for(const f of results)if(Object.prototype.hasOwnProperty.call(counts,f.status))counts[f.status]++;
+ let headline='Review each step before offering your service';
+ let message='No complete head spa is approved by this tool. Your professional license and business requirements must still be checked.';
+ if(counts.outside_credential+counts.licensed_role_required){
+  headline='Some steps need a different professional license';
+  message='At least one selected step is identified as outside this credential or requiring licensed personnel. Do not offer those steps until the required professional authorization is confirmed.';
+ }else if(counts.conditional_exemption){
+  headline='A narrow exception has important conditions';
+  message='One of the selected steps may be exempt only in a specified workplace or under a required supervisor. This does not authorize independent head spa services.';
+ }else if(counts.unresolved){
+  headline='Some steps still need answers';
+  message='We found only partial guidance for your proposed service. Follow the linked official rules and check the unresolved steps before purchasing equipment or advertising.';
+ }else if(results.length && counts.documented_exemption===results.length){
+  headline='Individual licensing exception documented for the selected step';
+  message='An official source describes an individual-license exemption for this specific activity. This does not resolve business permits, other services, or whether your full head spa can operate.';
+ }else if(results.length && counts.credential_scope===results.length){
+  headline='Sources describe these steps for this license type';
+  message='This describes the professional license category, not your particular license status or permission to run a business. Verify all remaining establishment and service details.';
+ }
+ return {headline,message,counts,total:results.length,wholeServiceCleared:false};
+}
 
 export function evidenceFor(state,license,activities=[]){
   const record=SCOPE_EVIDENCE[state]||null;
