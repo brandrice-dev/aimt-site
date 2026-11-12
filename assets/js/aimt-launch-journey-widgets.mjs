@@ -1,7 +1,7 @@
 // Shared interactive learning widgets. Mount the same tool once in its own page or a lesson.
 // No API calls, diagnostic model, user photos, or lead database.
 import {
- STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
+ STATES,LICENSES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
 
@@ -75,6 +75,7 @@ export function mountScope(root){
    field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'New to the industry and experienced professionals use the same legal verification process.'),
    field('State or jurisdiction','sc-state',select('sc-state',STATES,'Choose a state')),
    field('What license do you hold?','sc-license',select('sc-license',LICENSES,'Choose a credential'),'Choose No professional license if you are not enrolled in or holding a professional credential.'),
+   field('Is it active in this state?','sc-status',select('sc-status',LICENSE_STATUSES,'Choose your license status'),'A license from another state is not automatically valid here. AIMT does not check your license status.'),
    field('Where would you work?','sc-context',select('sc-context',OPERATING_CONTEXTS,'Choose a work setting'),'Individual scope and business/facility permissions are separate questions.'),
   '</div>',
   '<div class="lj-stage-guidance" data-stage-guidance role="status" aria-live="polite" hidden></div>',
@@ -89,6 +90,7 @@ export function mountScope(root){
     '<div class="lj-scope-coverage"><span>RESEARCH COVERAGE</span><h4 data-source-state></h4><p data-source-coverage></p><p data-source-reviewed></p></div>',
     '<p class="lj-scope-not-cleared"><strong>Important:</strong> These are findings about specific activities, <strong>not</strong> an approval to offer your full head spa service. Facility licenses, equipment, local codes and the exact technique may change the answer.</p>',
    '</div>',
+   '<section class="lj-scope-license-check" aria-label="License validity reminder"><h4>Your professional license status</h4><p data-license-caution></p><div data-license-lookup></div><p class="lj-help">Check the license directly on the government website. Do not enter your name, license number or private documents into AIMT.</p></section>',
    '<h4>What the sources say about each step</h4>',
    '<div data-activity-findings class="lj-evidence-list"></div>',
    '<h4>Facility and business requirements</h4><p data-source-facility class="lj-scope-facility"></p>',
@@ -98,8 +100,8 @@ export function mountScope(root){
   '</div>',
   resultHTML('Your licensing research summary')
  ].join('');
- const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),stage=$(root,'#sc-stage'),context=$(root,'#sc-context');
- st.value=p.state;lic.value=p.license;stage.value=p.careerStage;context.value=p.operatingContext;
+ const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),licenseStatus=$(root,'#sc-status'),stage=$(root,'#sc-stage'),context=$(root,'#sc-context');
+ st.value=p.state;lic.value=p.license;licenseStatus.value=p.licenseStatus;stage.value=p.careerStage;context.value=p.operatingContext;
  $(root,'#sc-question').value=p.licenseQuestions;
  function updateGuidance(){
   const el=$(root,'[data-stage-guidance]');el.hidden=!stage.value;
@@ -114,16 +116,26 @@ export function mountScope(root){
   return a;
  }
  function generate(save=true){
-  const state=st.value,license=lic.value,operatingContext=context.value;
+  const state=st.value,license=lic.value,credentialStatus=licenseStatus.value,operatingContext=context.value;
   const activities=Array.from(root.querySelectorAll('[name="sc-activity"]:checked')).map(x=>x.value);
-  if(!state||!license||!operatingContext||!activities.length){
-   info(root,'.lj-save-message','Select your state, credential, work setting, and at least one step of the service.');return false;
+  if(!state||!license||!credentialStatus||!operatingContext||!activities.length){
+   info(root,'.lj-save-message','Select your state, credential, license status, work setting, and at least one service step.');return false;
   }
-  const patch={careerStage:stage.value,state,license,operatingContext,activities,licenseQuestions:$(root,'#sc-question').value};
+  const patch={careerStage:stage.value,state,license,licenseStatus:credentialStatus,operatingContext,activities,licenseQuestions:$(root,'#sc-question').value};
   const next=save?persist(patch,root):{...current(),...patch};
   const g=scopeResult(next),review=g.review;
   info(root,'[data-source-state]',review.researchStatus);
   info(root,'[data-source-coverage]',review.coverage);
+  const mismatch=(license==='No professional license'||license==='Student / not yet licensed') && credentialStatus==='active_here';
+  info(root,'[data-license-caution]',mismatch
+    ?'Your selections conflict: you selected no current professional credential but also selected an active license. Verify your status before using credential-specific guidance.'
+    :g.licenseStatusNote);
+  const lookup=$(root,'[data-license-lookup]');lookup.replaceChildren();
+  if(review.licenseLookup){
+   const a=createLink(review.licenseLookup);a.className='lj-license-lookup-link';a.textContent='Open official license verification → '+review.licenseLookup.title;lookup.appendChild(a);
+  }else{
+   const note=document.createElement('p');note.textContent='AIMT has not yet mapped the public license lookup for this state. Find it on the official regulator site.';lookup.appendChild(note);
+  }
   info(root,'[data-source-reviewed]',review.researchDate?'Official sources examined: '+review.researchDate+'. Guidance can change; always check the current source.':'This state has no reviewed activity findings in AIMT yet.');
   const list=$(root,'[data-activity-findings]');list.replaceChildren();
   for(const finding of review.findings){
@@ -167,7 +179,7 @@ export function mountScope(root){
  }
  trigger(root,'scope-save',()=>generate(true));
  trigger(root,'scope-copy',()=>{if(generate(false))copy(inquiry,root);});
- if(p.state&&p.license&&p.operatingContext&&p.activities.length)generate(false);
+ if(p.state&&p.license&&p.licenseStatus&&p.operatingContext&&p.activities.length)generate(false);
 }
 
 export function mountService(root){
