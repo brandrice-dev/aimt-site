@@ -1,7 +1,7 @@
 // Shared interactive learning widgets. Mount the same tool once in its own page or a lesson.
 // No API calls, diagnostic model, user photos, or lead database.
 import {
- STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
+ STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
 
@@ -67,58 +67,107 @@ function markSaved(root){info(root,'.lj-save-message','Saved in the shared Launc
 export function mountScope(root){
  const p=current();
  root.innerHTML=[
-  '<div class="lj-tool-head"><small>Free Tool / License &amp; Scope Finder</small><small>Official-source guide</small></div>',
-  '<h3>Verify the steps, not just the service name.</h3>',
-  '<p>One head spa appointment can involve activities governed by different rules. A license does not automatically authorize every step, and AIMT certification is not a state license.</p>',
+  '<div class="lj-tool-head"><small>Free Tool / License &amp; Scope Finder</small><small>Primary sources, not legal clearance</small></div>',
+  '<h3>What does your license let you do?</h3>',
+  '<p>A head spa is made of individual services: shampooing, cosmetic scalp care, massage, styling, and equipment use. The law can treat each step differently. <strong>One shampoo exception is not permission to perform the entire head spa treatment.</strong></p>',
+  '<p class="lj-help">This research preview gives activity-by-activity explanations only where AIMT has identified an official source. It cannot confirm your license is active or approve a complete service.</p>',
   '<div class="lj-tool-grid">',
-   field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'No experience level is required to use this planner.'),
+   field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'New to the industry and experienced professionals use the same legal verification process.'),
    field('State or jurisdiction','sc-state',select('sc-state',STATES,'Choose a state')),
-   field('Current professional credential','sc-license',select('sc-license',LICENSES,'Choose a credential')),
+   field('What license do you hold?','sc-license',select('sc-license',LICENSES,'Choose a credential'),'Choose No professional license if you are not enrolled in or holding a professional credential.'),
+   field('Where would you work?','sc-context',select('sc-context',OPERATING_CONTEXTS,'Choose a work setting'),'Individual scope and business/facility permissions are separate questions.'),
   '</div>',
   '<div class="lj-stage-guidance" data-stage-guidance role="status" aria-live="polite" hidden></div>',
-  '<fieldset><legend>Which activities are you considering?</legend><p class="lj-help">Select the steps you need the licensing authority to address.</p>',
+  '<fieldset><legend>Which steps would your head spa include?</legend><p class="lj-help">Select only what you would actually do. Each step gets its own research result.</p>',
    ACTIVITIES.map(a=>'<label class="lj-check"><input type="checkbox" name="sc-activity" value="'+a.key+'"><span>'+a.label+'</span></label>').join(''),
   '</fieldset>',
-  field('What remains unclear about your own proposed service?','sc-question','<textarea id="sc-question" maxlength="320" placeholder="For my credential, does shampooing at a head spa require an additional license or permit?"></textarea>','Keep the question about the professional activity. Do not enter license numbers or private details.'),
-  '<div class="lj-actions">',
-    btn('Find official sources','scope-save'),btn('Copy board question','scope-copy',true),
-  '</div>',
+  field('What still needs clarification?','sc-question','<textarea id="sc-question" maxlength="320" placeholder="Example: Can my license include scalp cleansing and shampooing at a private suite?"></textarea>','No names, license numbers, medical concerns or client information.'),
+  '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy questions for my board','scope-copy',true),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
-  '<div data-sources hidden><h4>Official source links</h4><p class="lj-help">Last curated Nov 11, 2026. These are not clearance decisions; confirm current rules for your license, activities and location.</p><ul class="lj-source-list" data-source-links></ul><div class="lj-feedback"><strong data-source-state></strong><span data-source-note></span></div><h4>Your licensing-board inquiry</h4><p class="lj-help">A draft you can copy and send yourself. No information is sent by AIMT.</p><div class="lj-feedback" data-board-inquiry style="white-space:pre-wrap;word-break:break-word"></div></div>',
-  resultHTML('Scope review started')
+  '<div data-sources hidden>',
+   '<div class="lj-scope-overview">',
+    '<div class="lj-scope-coverage"><span>RESEARCH COVERAGE</span><h4 data-source-state></h4><p data-source-coverage></p><p data-source-reviewed></p></div>',
+    '<p class="lj-scope-not-cleared"><strong>Important:</strong> These are findings about specific activities, <strong>not</strong> an approval to offer your full head spa service. Facility licenses, equipment, local codes and the exact technique may change the answer.</p>',
+   '</div>',
+   '<h4>What the sources say about each step</h4>',
+   '<div data-activity-findings class="lj-evidence-list"></div>',
+   '<h4>Facility and business requirements</h4><p data-source-facility class="lj-scope-facility"></p>',
+   '<h4>Official sources you can open</h4><ul class="lj-source-list" data-source-links></ul>',
+   '<h4>What to do next</h4><p class="lj-help" data-next-contact></p>',
+   '<div class="lj-feedback lj-scope-inquiry"><strong>Your licensing questions</strong><p class="lj-help">Copy this draft and send it yourself. Boards differ in what advice they can give; in some states legal interpretation requires a qualified attorney.</p><div data-board-inquiry style="white-space:pre-wrap;word-break:break-word"></div></div>',
+  '</div>',
+  resultHTML('Your licensing research summary')
  ].join('');
- const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),stage=$(root,'#sc-stage');
- st.value=p.state;lic.value=p.license;stage.value=p.careerStage;$(root,'#sc-question').value=p.licenseQuestions;
- function updateGuidance(){const el=$(root,'[data-stage-guidance]');el.hidden=!stage.value;if(stage.value)el.textContent=CAREER_STAGE_GUIDANCE[stage.value];}
+ const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),stage=$(root,'#sc-stage'),context=$(root,'#sc-context');
+ st.value=p.state;lic.value=p.license;stage.value=p.careerStage;context.value=p.operatingContext;
+ $(root,'#sc-question').value=p.licenseQuestions;
+ function updateGuidance(){
+  const el=$(root,'[data-stage-guidance]');el.hidden=!stage.value;
+  if(stage.value)el.textContent=CAREER_STAGE_GUIDANCE[stage.value];
+ }
  stage.addEventListener('change',updateGuidance);updateGuidance();
  root.querySelectorAll('[name="sc-activity"]').forEach(x=>x.checked=p.activities.includes(x.value));
  let inquiry='';
+ function createLink(item){
+  const a=document.createElement('a');a.href=item.url;
+  a.target='_blank';a.rel='noopener noreferrer';a.textContent=item.title;
+  return a;
+ }
  function generate(save=true){
-  const state=st.value,license=lic.value,activities=Array.from(root.querySelectorAll('[name="sc-activity"]:checked')).map(x=>x.value);
-  if(!state||!license||!activities.length){
-   info(root,'.lj-save-message','Choose a state, credential and at least one planned activity.');return false;
+  const state=st.value,license=lic.value,operatingContext=context.value;
+  const activities=Array.from(root.querySelectorAll('[name="sc-activity"]:checked')).map(x=>x.value);
+  if(!state||!license||!operatingContext||!activities.length){
+   info(root,'.lj-save-message','Select your state, credential, work setting, and at least one step of the service.');return false;
   }
-  const next=save?persist({careerStage:stage.value,state,license,activities,licenseQuestions:$(root,'#sc-question').value},root):{...current(),careerStage:stage.value,state,license,activities};
-  const g=scopeResult(next);
-  const links=$(root,'[data-source-links]');links.replaceChildren();
-  if(g.sources.length){
-   for(const [title,url] of g.sources){
-    const li=document.createElement('li'),a=document.createElement('a');
-    a.textContent=title+' (government source)';a.href=url;a.target='_blank';a.rel='noopener noreferrer';li.appendChild(a);links.appendChild(li);
+  const patch={careerStage:stage.value,state,license,operatingContext,activities,licenseQuestions:$(root,'#sc-question').value};
+  const next=save?persist(patch,root):{...current(),...patch};
+  const g=scopeResult(next),review=g.review;
+  info(root,'[data-source-state]',review.researchStatus);
+  info(root,'[data-source-coverage]',review.coverage);
+  info(root,'[data-source-reviewed]',review.researchDate?'Official sources examined: '+review.researchDate+'. Guidance can change; always check the current source.':'This state has no reviewed activity findings in AIMT yet.');
+  const list=$(root,'[data-activity-findings]');list.replaceChildren();
+  for(const finding of review.findings){
+   const card=document.createElement('article');card.className='lj-evidence-card';
+   card.dataset.scopeStatus=finding.status;
+   const heading=document.createElement('h5');
+   heading.textContent=ACTIVITIES.find(x=>x.key===finding.activity)?.label||finding.activity;
+   const kind=document.createElement('span');kind.className='lj-evidence-kind';
+   kind.textContent=finding.heading;
+   const p=document.createElement('p');p.textContent=finding.summary;
+   const fine=document.createElement('p');fine.className='lj-evidence-limits';fine.textContent=finding.limits;
+   card.append(heading,kind,p,fine);
+   if(finding.sources.length){
+    const links=document.createElement('div');links.className='lj-evidence-refs';
+    for(const source of finding.sources){
+     const a=createLink(source);links.appendChild(a);
+    }
+    card.appendChild(links);
+   }else{
+    const no=document.createElement('small');no.textContent='No verified activity-specific source in the current AIMT research.';card.appendChild(no);
+   }
+   list.appendChild(card);
+  }
+  info(root,'[data-source-facility]',review.facility);
+  const sources=$(root,'[data-source-links]');sources.replaceChildren();
+  if(review.sources.length){
+   for(const source of review.sources){
+    const li=document.createElement('li');li.appendChild(createLink(source));
+    const meta=document.createElement('small');meta.textContent=' — '+(source.detail||'Official agency resource')+(source.date?' · Published/updated '+source.date:'');
+    li.appendChild(meta);sources.appendChild(li);
    }
   }else{
-   const li=document.createElement('li');li.textContent='No curated source available for this state. Locate the official state board website and request written guidance.';links.appendChild(li);
+   const li=document.createElement('li');li.textContent='This state has not yet been researched. Find your state’s official cosmetology/barber board and current written law. Do not infer permission.';sources.appendChild(li);
   }
-  info(root,'[data-source-state]',g.status);
-  info(root,'[data-source-note]',' '+g.note);
+  info(root,'[data-next-contact]',review.nextContact);
   info(root,'[data-board-inquiry]',g.inquiry);
   $(root,'[data-sources]').hidden=false;inquiry=g.inquiry;
-  showResult(root,'Selected activities remain unverified. Your next step is to read the official source and obtain clarification on any unclear activity.');
+  const documented=review.findings.filter(x=>x.status!=='unresolved').length;
+  showResult(root,documented+' of '+review.findings.length+' selected activities have a specific official-source note in this research snapshot. The rest need further verification. No complete service is cleared.');
   return true;
  }
  trigger(root,'scope-save',()=>generate(true));
  trigger(root,'scope-copy',()=>{if(generate(false))copy(inquiry,root);});
- if(p.state&&p.license&&p.activities.length)generate(false);
+ if(p.state&&p.license&&p.operatingContext&&p.activities.length)generate(false);
 }
 
 export function mountService(root){
