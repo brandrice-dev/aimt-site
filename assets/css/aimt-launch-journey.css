@@ -92,8 +92,8 @@
 .lj-feedback.is-correct{border-left-color:var(--aimt-success,#3a5a3a);background:var(--aimt-success-light,#e8ede8);color:var(--aimt-success,#3a5a3a)}
 .lj-feedback.is-correct strong{color:var(--aimt-success,#3a5a3a)}
 .lj-feedback.is-correct::before{content:"✓";font:700 13px var(--aimt-font-mont,Montserrat,sans-serif);color:var(--aimt-success,#3a5a3a);float:right;margin:0 0 8px 12px}
-.lj-feedback.is-incorrect{border-left-color:#965e63;background:#efe3e2;color:#69343c}
-.lj-feedback.is-incorrect strong{color:#69343c}
+.lj-feedback.is-incorrect{border-left-color:var(--aimt-error,#7a3030);background:var(--aimt-error-light,#f0e8e8);color:var(--aimt-error,#7a3030)}
+.lj-feedback.is-incorrect strong{color:var(--aimt-error,#7a3030)}
 .lj-stage-guidance{margin:16px 0 22px;border:1px solid #d4c9bf;background:#efe7df;border-radius:10px;padding:14px 17px;font-size:13px;line-height:1.65;color:#3c342f}
 
 .lj-source-list{margin:12px 0;padding-left:22px}
@@ -265,6 +265,55 @@
 .lj-tool .lj-scope-quick p{font-size:13px;line-height:1.65;color:#574b43;margin:9px 0}
 .lj-tool .lj-scope-quick .lj-help{font-size:11px!important;color:#74675c!important;margin-bottom:0!important}
 .lj-evidence-card[data-scope-status=conditional_exemption] .lj-evidence-kind{color:#84562b;background:#fff0da;border-color:#e2c8a4}
+
+/* AIMT's existing instructional color semantics:
+   confirmed by a cited state source = success green; an explicit credential
+   restriction = error red; conditional or unresearched = neutral/amber.
+   No source-status color indicates the user has been cleared to practice. */
+.lj-scope-disclaimer{margin:16px 0 22px;padding:16px 18px;border:1px solid #d9ccc1;
+  border-left:3px solid #82786d;background:#f2ebe5;border-radius:0 10px 10px 0}
+.lj-tool .lj-scope-disclaimer strong{display:block;font:700 12px/1.5 var(--aimt-font-mont,Montserrat,sans-serif);
+  color:#332c27}
+.lj-tool .lj-scope-disclaimer p{font-size:12px!important;line-height:1.65!important;
+  margin:7px 0 0;color:#5c514c!important}
+.lj-scope-disclaimer-result{margin-top:8px;margin-bottom:24px;background:#f8f5f1;padding:12px 16px;
+  font-size:12px;line-height:1.65;color:#5e514a}
+.lj-scope-quick[data-scope-tone="supported"]{
+  background:var(--aimt-success-light,#e8ede8);
+  border-color:rgba(58,90,58,.28);
+  border-left-color:var(--aimt-success,#3a5a3a)}
+.lj-scope-quick[data-scope-tone="supported"] strong{color:var(--aimt-success,#3a5a3a)}
+.lj-scope-quick[data-scope-tone="restricted"]{
+  background:var(--aimt-error-light,#f0e8e8);
+  border-color:rgba(122,48,48,.27);
+  border-left-color:var(--aimt-error,#7a3030)}
+.lj-scope-quick[data-scope-tone="restricted"] strong{color:var(--aimt-error,#7a3030)}
+.lj-evidence-card[data-scope-status="credential_scope"],
+.lj-evidence-card[data-scope-status="documented_exemption"]{
+  background:var(--aimt-success-light,#e8ede8);
+  border-color:rgba(58,90,58,.28);
+  border-left:3px solid var(--aimt-success,#3a5a3a)}
+.lj-evidence-card[data-scope-status="credential_scope"] .lj-evidence-kind,
+.lj-evidence-card[data-scope-status="documented_exemption"] .lj-evidence-kind{
+  color:var(--aimt-success,#3a5a3a);
+  background:var(--aimt-success-light,#e8ede8);
+  border:1px solid rgba(58,90,58,.35)}
+.lj-evidence-card[data-scope-status="outside_credential"],
+.lj-evidence-card[data-scope-status="licensed_role_required"]{
+  background:var(--aimt-error-light,#f0e8e8);
+  border-color:rgba(122,48,48,.30);
+  border-left:3px solid var(--aimt-error,#7a3030)}
+.lj-evidence-card[data-scope-status="outside_credential"] .lj-evidence-kind,
+.lj-evidence-card[data-scope-status="licensed_role_required"] .lj-evidence-kind{
+  color:var(--aimt-error,#7a3030);
+  background:var(--aimt-error-light,#f0e8e8);
+  border:1px solid rgba(122,48,48,.34)}
+/* Unclear guidance or equipment implementation details are not errors. */
+.lj-evidence-card[data-scope-status="implementation_review"],
+.lj-evidence-card[data-scope-status="unresolved"]{
+  border-left:3px solid #9b806b}
+.lj-evidence-card[data-scope-status="implementation_review"] .lj-evidence-kind{
+  color:#695543;background:#eee6df;border-color:#d9cabc}
 
 /* Licensing research — individual activity evidence, never an overall legal clearance. */
 .lj-scope-overview{border:1px solid #d6ccc3;border-radius:12px;overflow:hidden;margin:28px 0}
