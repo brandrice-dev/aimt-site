@@ -89,6 +89,13 @@
 .lj-feedback{border-left:3px solid #7c5558;background:#eae0dc;border-radius:0 10px 10px 0;padding:16px;margin:15px 0;font-size:14px;line-height:1.6;color:#362b27}
 .lj-feedback strong{display:block;color:#362b27;margin-bottom:5px}
 .lj-feedback[hidden]{display:none!important}
+.lj-feedback.is-correct{border-left-color:var(--aimt-success,#3a5a3a);background:var(--aimt-success-light,#e8ede8);color:var(--aimt-success,#3a5a3a)}
+.lj-feedback.is-correct strong{color:var(--aimt-success,#3a5a3a)}
+.lj-feedback.is-correct::before{content:"✓";font:700 13px var(--aimt-font-mont,Montserrat,sans-serif);color:var(--aimt-success,#3a5a3a);float:right;margin:0 0 8px 12px}
+.lj-feedback.is-incorrect{border-left-color:#965e63;background:#efe3e2;color:#69343c}
+.lj-feedback.is-incorrect strong{color:#69343c}
+.lj-stage-guidance{margin:16px 0 22px;border:1px solid #d4c9bf;background:#efe7df;border-radius:10px;padding:14px 17px;font-size:13px;line-height:1.65;color:#3c342f}
+
 .lj-source-list{margin:12px 0;padding-left:22px}
 .lj-source-list li{margin:8px 0}
 .lj-source-list a{color:#67454b;overflow-wrap:anywhere;text-underline-offset:3px}
