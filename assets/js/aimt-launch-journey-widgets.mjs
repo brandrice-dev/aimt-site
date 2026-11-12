@@ -144,11 +144,12 @@ export function mountScope(root){
   info(root,'[data-scope-quick-headline]',quick.headline);
   info(root,'[data-scope-quick-message]',quick.message);
   info(root,'[data-scope-quick-counts]',
-    quick.counts.documented_exemption+' documented individual-license exemptions · '+
-    quick.counts.credential_scope+' license-category findings · '+
+    quick.counts.credential_scope+' documented license-scope services · '+
+    quick.counts.implementation_review+' equipment/technique checks · '+
+    quick.counts.documented_exemption+' individual-license exemptions · '+
     quick.counts.conditional_exemption+' conditional exceptions · '+
-    (quick.counts.outside_credential+quick.counts.licensed_role_required)+' restricted steps · '+
-    quick.counts.unresolved+' unresolved steps');
+    (quick.counts.outside_credential+quick.counts.licensed_role_required)+' credential restrictions · '+
+    quick.counts.unresolved+' AIMT research gaps');
 
   info(root,'[data-source-state]',review.researchStatus);
   info(root,'[data-source-coverage]',review.coverage);
@@ -164,7 +165,11 @@ export function mountScope(root){
   }
   info(root,'[data-source-reviewed]',review.researchDate?'Official sources examined: '+review.researchDate+'. Guidance can change; always check the current source.':'This state has no reviewed activity findings in AIMT yet.');
   const list=$(root,'[data-activity-findings]');list.replaceChildren();
-  for(const finding of review.findings){
+  // Present documented coverage before open implementation/research questions.
+  // Do not make a missing AIMT entry look like a legal prohibition.
+  const order={credential_scope:0,documented_exemption:1,implementation_review:2,
+   conditional_exemption:3,outside_credential:4,licensed_role_required:4,unresolved:5};
+  for(const finding of [...review.findings].sort((a,b)=>(order[a.status]??9)-(order[b.status]??9))){
    const card=document.createElement('article');card.className='lj-evidence-card';
    card.dataset.scopeStatus=finding.status;
    const heading=document.createElement('h5');
@@ -223,7 +228,9 @@ export function mountScope(root){
     'No finding authorizes a complete head spa treatment. An individual licensing exemption for one step does not extend to others.'
   ].join('\n');
   const documented=review.findings.filter(x=>x.status!=='unresolved').length;
-  showResult(root,documented+' of '+review.findings.length+' selected activities have a specific official-source note in this research snapshot. The rest need further verification. No complete service is cleared.');
+  const covered=quick.counts.credential_scope;
+  const open=quick.counts.unresolved;
+  showResult(root,covered+' of '+review.findings.length+' selected steps are described as within this professional license category; '+quick.counts.implementation_review+' have specific equipment/technique checks. '+open+' step(s) lack complete AIMT research. This is information about the state’s general license scope, not validation of your personal license or salon.');
   return true;
  }
  trigger(root,'scope-save',()=>generate(true));
