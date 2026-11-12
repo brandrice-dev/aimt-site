@@ -283,6 +283,12 @@
 .lj-evidence-refs a{font:600 11px/1.6 var(--aimt-font-sans,Outfit,sans-serif);
  color:#704852!important;text-underline-offset:3px;overflow-wrap:anywhere}
 .lj-evidence-card small{color:#746960;display:block;font-size:11px;margin-top:11px}
+.lj-scope-license-check{background:#fffdf9;border:1px solid #d4ccc4;border-radius:12px;padding:18px 20px;margin:25px 0}
+.lj-tool .lj-scope-license-check h4{margin:0 0 10px;color:#312824}
+.lj-tool .lj-scope-license-check p{color:#655951;line-height:1.65;font-size:13px;margin:8px 0 12px}
+.lj-license-lookup-link{display:inline-flex;padding:11px 13px;border:1px solid #77575b;border-radius:8px;
+ background:#ede2e0;color:#5a383e!important;text-decoration:none;font:700 12px/1.45 var(--aimt-font-sans,Outfit,sans-serif);margin:3px 0 8px}
+.lj-license-lookup-link:hover{background:#e1d2d0;text-decoration:underline;text-underline-offset:3px}
 .lj-scope-facility{background:#eee7df;border-left:3px solid #9a7d73;
  padding:13px 15px;border-radius:0 8px 8px 0;color:#4e453f!important}
 .lj-scope-inquiry{background:#f0e9e2;border-left-color:#8c7770;color:#3f352e;line-height:1.65}
