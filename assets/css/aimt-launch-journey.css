@@ -260,6 +260,12 @@
  .lj-next-move-offer .lj-actions .lj-btn{width:100%}}
 
 
+.lj-scope-quick{margin:22px 0 15px;padding:19px 20px;background:#efe9e1;border:1px solid #d3c6bb;border-left:4px solid #906f60;border-radius:0 11px 11px 0}
+.lj-scope-quick strong{font:700 clamp(17px,2.5vw,21px)/1.35 var(--aimt-font-mont,Montserrat,sans-serif);color:#282421}
+.lj-tool .lj-scope-quick p{font-size:13px;line-height:1.65;color:#574b43;margin:9px 0}
+.lj-tool .lj-scope-quick .lj-help{font-size:11px!important;color:#74675c!important;margin-bottom:0!important}
+.lj-evidence-card[data-scope-status=conditional_exemption] .lj-evidence-kind{color:#84562b;background:#fff0da;border-color:#e2c8a4}
+
 /* Licensing research — individual activity evidence, never an overall legal clearance. */
 .lj-scope-overview{border:1px solid #d6ccc3;border-radius:12px;overflow:hidden;margin:28px 0}
 .lj-scope-coverage{padding:19px 21px;background:#eee6df}
