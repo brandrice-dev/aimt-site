@@ -179,7 +179,7 @@ export function equipmentResult(plan){
   caution:'Planning questions only. Check manufacturer instructions, local codes and qualified installers before any equipment modification or installation.'};
 }
 export function observationFeedback(choice){
- if(choice==='visible')return {correct:true,title:'Supported by the illustration.',copy:'You can describe visible light-colored surface material. You cannot identify its cause from a single illustrative view.'};
+ if(choice==='visible')return {correct:true,title:'Supported by this teaching image.',copy:'You can describe visible surface material near hair shafts. The image alone cannot establish its cause or a medical condition.'};
  if(choice==='diagnosis')return {correct:false,title:'That exceeds observation.',copy:'A single view does not establish a disorder or its severity. Describe the feature; do not diagnose.'};
  if(choice==='guarantee')return {correct:false,title:'Appearance does not predict an outcome.',copy:'Neither a scalp image nor this exercise justifies hair-growth promises or treatment predictions.'};
  return null;
