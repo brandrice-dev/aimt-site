@@ -22,6 +22,14 @@ export const STATES=Object.freeze([
  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ]);
 export const LICENSES=Object.freeze(['Cosmetologist','Cosmetology Operator','Esthetician','Facial Specialist','Full Specialist','Barber','Class A Barber','Master Barber','Hairstylist','Natural Hair Stylist','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']);
+export const STATE_CREDENTIALS=Object.freeze({
+ 'California':['Cosmetologist','Esthetician','Barber','Hairstylist','Massage therapist','No professional license','Student / not yet licensed','Other / unsure'],
+ 'Texas':['Cosmetology Operator','Esthetician','Class A Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure'],
+ 'Tennessee':['Cosmetologist','Esthetician','Master Barber','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure'],
+ 'Florida':['Cosmetologist','Facial Specialist','Full Specialist','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure'],
+ 'Pennsylvania':['Cosmetologist','Esthetician','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure'],
+ 'New York':['Cosmetologist','Esthetician','Barber','Natural Hair Stylist','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']
+});
 export const CREDENTIAL_NOTES=Object.freeze({
  'California':'Choose the exact California board credential. A hairstylist license differs from an esthetician license, and an unrelated out-of-state license is not automatically valid.',
  'Texas':'Texas uses the titles Cosmetology Operator and Class A Barber. Use your actual TDLR credential; a generic title does not prove a particular license subtype.',
