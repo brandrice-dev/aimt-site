@@ -10,7 +10,7 @@ import {
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
-import {SCOPE_EVIDENCE,SCOPE_FINDINGS,evidenceFor} from '../assets/js/aimt-scope-evidence.mjs';
+import {SCOPE_EVIDENCE,SCOPE_FINDINGS,evidenceFor,scopeSummary} from '../assets/js/aimt-scope-evidence.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
@@ -412,6 +412,37 @@ test('unlicensed Pennsylvania shampoo exception remains conditional, not a gener
  assert.equal(result.review.findings[0].status,'conditional_exemption');
  assert.equal(result.review.findings[1].status,'unresolved');
  assert.match(result.review.findings[0].limits,/not permission|NOT permission/i);
- assert.match(result.review.findings[0].summary,/supervised/i);
+ assert.match(result.review.findings[0].summary,/supervis/i);
  assert.match(result.review.facility,/licensed|inspection/i);
+});
+
+
+test('plain-language summaries never clear an entire head spa, even when one step is exempt',()=>{
+ const cases=[
+  [evidenceFor('Florida','No professional license',['wash']),/individual licensing exception/i],
+  [evidenceFor('Texas','No professional license',['wash','styling']),/different professional license/i],
+  [evidenceFor('Pennsylvania','No professional license',['wash']),/narrow exception/i],
+  [evidenceFor('New York','Esthetician',['scalp']),/need answers/i],
+  [evidenceFor('Alaska','Cosmetologist',['wash']),/need answers/i],
+  [evidenceFor('California','Esthetician',['wash','styling']),/different professional license/i]
+ ];
+ for(const [review,expected] of cases){
+  const summary=scopeSummary(review);
+  assert.match(summary.headline,expected);
+  assert.equal(summary.wholeServiceCleared,false);
+  assert.equal(summary.total,review.findings.length);
+  assert.equal(Object.values(summary.counts).reduce((x,y)=>x+y,0),review.findings.length);
+ }
+});
+test('no cross-state citations or duplicate source identifiers in registry',()=>{
+ for(const [state,record] of Object.entries(SCOPE_EVIDENCE)){
+  const ids=new Set(record.sources.map(x=>x.id));
+  const seen=new Set();
+  for(const f of record.findings){
+   const key=f.activity+'|'+f.license;
+   assert.ok(!seen.has(key),'Duplicate rule in '+state+': '+key);
+   seen.add(key);
+   for(const id of f.sourceIds)assert.ok(ids.has(id),'Foreign or missing source in '+state+': '+id+' for '+key);
+  }
+ }
 });
