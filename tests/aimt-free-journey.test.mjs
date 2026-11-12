@@ -181,11 +181,11 @@ test('tool card illustrations are accessible and the formerly light pricing card
  assert.equal((hub.match(/ft-tool-illustration"[^>]*aria-hidden="true"/g)||[]).length,6);
  assert.match(css,/\.ft-hub \.ft-grid \.ft-tool-card\[data-ft-category=pricing\]/);
  for(const promise of [
-  'What can I legally do?',
-  'Which bed works in my space?',
+  'How do I check my license?',
+  'What should I check before buying?',
   'What am I seeing on a scalp?',
-  'What should I charge?',
-  'What do I need to learn?',
+  'What does one service cost?',
+  'What should I learn next?',
   'How do I plan my first service?'
  ])assert.ok(hub.includes(promise),'Missing simple tool value statement: '+promise);
 });
