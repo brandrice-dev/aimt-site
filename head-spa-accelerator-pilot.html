@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#1a1814">
+<title>What Are You Actually Building? | AIMT Accelerator Lesson Preview</title>
+<meta name="description" content="Unlisted instructional pilot. Learn to distinguish focused scalp services from a dedicated head spa appointment and define a sensible first service.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-free-tools.css">
+<style>
+:root{color-scheme:dark}
+html{scroll-behavior:smooth}
+body{margin:0;background:#1a1814;color:#faf8f5;font-family:'Outfit',system-ui,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+button:focus-visible,select:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #dfbfc1;outline-offset:4px}
+.acc-top{border-bottom:1px solid rgba(255,255,255,.1);padding:18px clamp(20px,5vw,56px);display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.acc-logo{font:700 13px 'Montserrat',sans-serif;letter-spacing:.19em;text-decoration:none}
+.acc-top small{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#a3968d}
+.acc-top a:last-child{font-size:12px;color:rgba(255,255,255,.65);text-decoration:none}
+.acc-shell{max-width:1060px;width:calc(100% - 40px);margin:0 auto}
+.acc-hero{padding:clamp(40px,7vw,75px) 0 40px}
+.acc-kicker{font:600 10px 'Montserrat',sans-serif;color:#c7aba8;letter-spacing:.15em;text-transform:uppercase;margin:0 0 18px}
+.acc-hero h1{font:700 clamp(34px,5.8vw,66px)/1.02 'Montserrat',sans-serif;letter-spacing:-.035em;text-transform:uppercase;max-width:950px;margin:0 0 20px}
+.acc-lede{font-size:clamp(16px,1.9vw,20px);font-weight:300;color:rgba(255,255,255,.7);line-height:1.65;max-width:760px;margin:0}
+.acc-hero-note{font-size:12px;line-height:1.6;color:rgba(255,255,255,.48);margin:22px 0 0;max-width:760px}
+.acc-progress{border-top:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.10);padding:18px 0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.acc-progress p{font:600 10px 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.1em;margin:0;color:#d1bdba}
+.acc-progress small{font-size:11px;color:rgba(255,255,255,.5)}
+.acc-track{grid-column:1/-1;height:3px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden}
+.acc-bar{height:100%;width:33.333%;background:#b09b92;transition:width .2s ease}
+.acc-stage{padding:clamp(32px,5vw,55px) 0 35px;max-width:930px}
+.acc-stage[hidden]{display:none!important}
+.acc-eyebrow{font:600 11px 'Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#c7aba8;margin:0 0 14px}
+.acc-stage h2{font:600 clamp(27px,4vw,44px)/1.1 'Montserrat',sans-serif;letter-spacing:-.03em;margin:0 0 22px}
+.acc-stage h3{font:600 18px 'Montserrat',sans-serif;letter-spacing:-.02em;margin:0 0 10px}
+.acc-stage p{font-size:16px;line-height:1.68;color:rgba(255,255,255,.75);max-width:75ch}
+.acc-stage p strong{color:#faf8f5}
+.acc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:28px 0}
+.acc-panel{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.13);border-radius:16px;padding:24px;min-width:0}
+.acc-panel small{font:600 10px 'Montserrat',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#bfa8a0}
+.acc-panel h3{margin:14px 0}
+.acc-panel p{margin:0 0 14px;font-size:14px}
+.acc-panel ul{padding-left:20px;margin:12px 0 0;color:rgba(255,255,255,.67);line-height:1.8;font-size:14px}
+.acc-panel li{padding-left:3px}
+.acc-teaching{border-left:3px solid #a3968d;background:rgba(163,150,141,.08);padding:18px 20px;margin:25px 0;border-radius:0 12px 12px 0}
+.acc-teaching .acc-claim{font:600 10px 'Montserrat',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#bfa8a0}
+.acc-teaching p{margin:8px 0 0}
+.acc-phases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:25px 0}
+.acc-phase{padding:13px 8px;border-top:2px solid #a3968d;background:rgba(255,255,255,.035);text-align:center;min-width:0}
+.acc-phase b{display:block;font:600 11px 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.04em;line-height:1.45}
+.acc-phase span{display:block;font:400 9px 'Outfit',sans-serif;color:rgba(255,255,255,.6);margin-top:5px;line-height:1.4}
+.acc-light{background:#f5f1eb;color:#27221f;border-radius:17px;padding:clamp(22px,4vw,33px);margin:30px 0}
+.acc-light h3{color:#27221f}
+.acc-light p,.acc-light .acc-help{color:#635a55}
+.acc-light fieldset{border:0;padding:0;margin:20px 0 0}
+.acc-light legend{font:600 15px 'Montserrat',sans-serif;line-height:1.45;max-width:720px;color:#27221f;margin-bottom:14px}
+.acc-choices{display:grid;gap:11px}
+.acc-choice{display:flex;align-items:flex-start;gap:12px;border:1px solid #c9c1bb;padding:16px 15px;border-radius:11px;background:#fff;cursor:pointer;color:#28231f;font-size:14px;line-height:1.55}
+.acc-choice:has(input:checked){border-color:#7d5558;background:#f6eeec}
+.acc-choice input{margin-top:4px;accent-color:#784a52;flex-shrink:0}
+.acc-feedback{padding:16px;border-left:3px solid #7d5558;background:#eee2df;border-radius:0 9px 9px 0;margin-top:17px;font-size:14px;line-height:1.6;color:#2d2221}
+.acc-feedback[hidden]{display:none!important}
+.acc-feedback strong{display:block;margin-bottom:4px}
+.acc-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+.acc-field label{display:block;color:#302725;font-size:13px;font-weight:600;line-height:1.5;margin-bottom:8px}
+.acc-field select{width:100%;padding:11px 12px;border:1px solid #c8beb7;background:#fff;color:#29231f;border-radius:8px;min-height:50px;font-size:14px}
+.acc-field small{display:block;color:#655950;line-height:1.45;font-size:11px;margin-top:7px}
+.acc-result{background:#1e1a19;color:#fff;border-radius:12px;padding:24px;margin:23px 0 0}
+.acc-result h3{font:600 15px 'Montserrat',sans-serif;color:#fff;line-height:1.4;margin-bottom:8px}
+.acc-result p{color:rgba(255,255,255,.86);margin:8px 0;font-size:15px}
+.acc-result .acc-result-note{font-size:12px;color:rgba(255,255,255,.63)}
+.acc-actions{display:flex;flex-wrap:wrap;gap:10px;margin:23px 0 0}
+.acc-btn{border:1px solid rgba(255,255,255,.23);padding:12px 18px;min-height:46px;background:transparent;color:#f9f5f1;border-radius:50px;text-decoration:none;font:600 11px 'Montserrat',sans-serif;letter-spacing:.04em;display:inline-flex;align-items:center;justify-content:center}
+.acc-btn:hover{background:rgba(255,255,255,.07)}
+.acc-btn-primary{background:#faf8f5;color:#221e1b;border-color:#faf8f5}
+.acc-btn-primary:hover{background:#e6ded6;color:#221e1b}
+.acc-btn:disabled{opacity:.4;cursor:not-allowed}
+.acc-btn-light{border:1px solid #aaa098;color:#26221f}
+.acc-btn-light:hover{background:#e4ddd5}
+.acc-btn-light-primary{background:#27221f;border-color:#27221f;color:white}
+.acc-status{font-size:12px!important;min-height:1.4em;line-height:1.5!important;color:#bfa8a0!important;margin:12px 0 0!important}
+.acc-foot{padding:25px 0 50px;border-top:1px solid rgba(255,255,255,.1);margin-top:25px;color:rgba(255,255,255,.5);font-size:12px}
+.acc-foot a{color:rgba(255,255,255,.75)}
+.acc-screen-note{display:block;font:600 10px 'Montserrat',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#af8f8f;margin:26px 0 10px}
+.acc-reading{border-left:1px solid rgba(255,255,255,.18);padding-left:20px;margin:22px 0}
+.acc-reading p{margin:0 0 10px}
+.acc-field-help{font-size:12px!important}
+@media(max-width:670px){.acc-grid,.acc-form-grid{grid-template-columns:1fr}.acc-phases{grid-template-columns:repeat(2,1fr)}.acc-phase:last-child{grid-column:1/-1}.acc-shell{width:calc(100% - 32px)}.acc-panel{padding:20px}.acc-hero{padding-top:35px}.acc-stage{padding-top:31px}.acc-top a:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.acc-bar{transition:none}}
+@media print{.acc-top,.acc-hero,.acc-progress,.acc-actions,.acc-foot,#stage1,#stage2,.acc-screen-note{display:none!important}body{background:#fff;color:#000}.acc-shell{width:100%;max-width:100%}#stage3{display:block!important;padding:0}.acc-light{background:#fff;padding:0}.acc-result{background:#fff;color:#000;border:1px solid #777}.acc-result h3,.acc-result p{color:#000}.acc-field{display:none}.acc-stage h2{color:#000}.acc-hero-note{display:none}}
+</style>
+</head>
+<body>
+<header class="acc-top">
+  <a class="acc-logo" href="/free-tools">AIMT</a>
+  <small>FREE HEAD SPA LAUNCH ACCELERATOR · UNLISTED PILOT</small>
+  <a href="/free-tools">Free Tools</a>
+</header>
+<main class="acc-shell">
+  <div class="acc-hero">
+    <div class="acc-kicker">Lesson 02 / 05 · Service Design · Approx. 5 minutes</div>
+    <h1>What are you actually building?</h1>
+    <p class="acc-lede">A head spa is not defined by the bed alone. Before you shop for equipment or write a menu, decide what kind of experience you want to offer—and what you can reliably deliver.</p>
+    <p class="acc-hero-note">This is a functioning preview of one lesson, not the completed free course. It does not certify professional readiness or determine your legal scope.</p>
+  </div>
+  <div class="acc-progress" aria-label="Lesson progress">
+    <p id="progressText">01 / Understand the difference</p>
+    <small id="progressCount">1 of 3 sections</small>
+    <div class="acc-track" aria-hidden="true"><div class="acc-bar" id="progressBar"></div></div>
+  </div>
+  <section class="acc-stage" id="stage1" aria-labelledby="stage1Title">
+    <p class="acc-eyebrow">01 / Learn &amp; observe</p>
+    <h2 id="stage1Title">The equipment doesn't make the promise.</h2>
+    <p>A client isn't paying for a piece of furniture. They are choosing an appointment with a particular purpose: time for scalp care, a relaxing experience, or a combination of both.</p>
+    <p>Those services can look different. A focused scalp service may work from an existing wash station. A dedicated head spa appointment usually needs more preparation, a deliberate treatment environment, and a planned beginning and ending. <strong>Neither format is automatically right for every business.</strong></p>
+    <div class="acc-grid">
+      <article class="acc-panel">
+        <small>Model A · Focused scalp service</small>
+        <h3>A defined addition to an existing visit.</h3>
+        <p>A shorter, more targeted scalp-care experience built around a clear client need and the equipment already available, where professional scope permits.</p>
+        <ul><li>Limited time and space</li><li>A clearly stated service, not a misleading full-appointment claim</li><li>Requires its own sanitation, consultation and scheduling decisions</li></ul>
+      </article>
+      <article class="acc-panel">
+        <small>Model B · Dedicated head spa appointment</small>
+        <h3>A complete visit with its own rhythm.</h3>
+        <p>A planned appointment where arrival, comfort, scalp-focused treatment, transitions and closing are intentionally connected.</p>
+        <ul><li>More control of the environment and pacing</li><li>Separate setup and reset requirements</li><li>Time must be justified by client experience, not just equipment</li></ul>
+      </article>
+    </div>
+    <div class="acc-teaching">
+      <span class="acc-claim">Practitioner reasoning</span>
+      <p>Don't ask only, “Which bed should I buy?” Ask, “What am I promising a client, what can I provide within my professional scope, and what must happen before and after the hands-on service?”</p>
+    </div>
+    <p class="acc-screen-note">AIMT service-design framework</p>
+    <div class="acc-phases" aria-label="Five elements that shape a complete service">
+      <div class="acc-phase"><b>Assess</b><span>Clarify client needs</span></div>
+      <div class="acc-phase"><b>Adapt</b><span>Plan responsibly</span></div>
+      <div class="acc-phase"><b>Execute</b><span>Deliver the sequence</span></div>
+      <div class="acc-phase"><b>Communicate</b><span>Explain when needed</span></div>
+      <div class="acc-phase"><b>Operate</b><span>Reset &amp; sustain</span></div>
+    </div>
+    <p class="acc-field-help">This is a planning model, not a complete service protocol. Specific activities and techniques depend on training, client context, manufacturer instructions and applicable law.</p>
+    <div class="acc-actions"><button type="button" class="acc-btn acc-btn-primary" id="next1">Practice a decision →</button></div>
+  </section>
+  <section class="acc-stage" id="stage2" aria-labelledby="stage2Title" hidden>
+    <p class="acc-eyebrow">02 / Think like a practitioner</p>
+    <h2 id="stage2Title">More minutes need a reason.</h2>
+    <p>AIMT's reference service formats show a useful distinction: an extended experience does not simply stretch every step. Some steps are constrained by product directions, sanitation, and the client's needs. Other portions can intentionally expand.</p>
+    <div class="acc-teaching">
+      <span class="acc-claim">Example · Core versus Extended</span>
+      <p>A 60-minute reference and a 90-minute reference are not automatically interchangeable. The additional time has to make a meaningful difference to the appointment, without making rinses or product processing longer merely to fill the clock.</p>
+    </div>
+    <div class="acc-light">
+      <h3>Your first decision</h3>
+      <p>A colleague says: “To offer real head spa, you have to buy a dedicated bed right away. A focused scalp service at a wash station doesn't count.” You're considering head spa but haven't verified your space or client demand.</p>
+      <fieldset>
+        <legend>What's the most responsible next step?</legend>
+        <div class="acc-choices">
+          <label class="acc-choice"><input type="radio" name="decision" value="buy"> <span>Buy a bed immediately so the service feels legitimate.</span></label>
+          <label class="acc-choice"><input type="radio" name="decision" value="define"> <span>Define the experience you want to offer, check your legal scope and setup, and then choose equipment that supports it.</span></label>
+          <label class="acc-choice"><input type="radio" name="decision" value="claim"> <span>Advertise a full head spa appointment now and choose the equipment afterward.</span></label>
+        </div>
+      </fieldset>
+      <div class="acc-feedback" id="decisionFeedback" hidden role="status" aria-live="polite"></div>
+    </div>
+    <p>You can begin with an honest, focused offering and develop a dedicated experience later—or start with the dedicated format if your service plan, training and environment support it. <strong>The correct order is promise → feasibility → equipment, not equipment → invented promise.</strong></p>
+    <div class="acc-actions"><button type="button" class="acc-btn" id="back2">← Back</button><button type="button" class="acc-btn acc-btn-primary" id="next2">Apply it to my situation →</button></div>
+  </section>
+  <section class="acc-stage" id="stage3" aria-labelledby="stage3Title" hidden>
+    <p class="acc-eyebrow">03 / Apply &amp; keep it</p>
+    <h2 id="stage3Title">Define the service before you shop.</h2>
+    <p>Pick your starting situation and the value you want clients to notice. There is no universal “correct” menu here. Your result is a <strong>provisional direction</strong> to investigate, not an approved service.</p>
+    <div class="acc-light">
+      <div class="acc-form-grid">
+        <div class="acc-field">
+          <label for="startingPoint">Where are you starting?</label>
+          <select id="startingPoint">
+            <option value="exploring">I'm exploring a future opportunity</option>
+            <option value="station">I already use a shampoo or wash station</option>
+            <option value="room">I have or plan a dedicated treatment room</option>
+          </select>
+          <small>Choose what best represents your likely starting environment.</small>
+        </div>
+        <div class="acc-field">
+          <label for="clientGoal">What experience matters most?</label>
+          <select id="clientGoal">
+            <option value="care">Focused cosmetic scalp care</option>
+            <option value="rest">An intentionally paced relaxation experience</option>
+            <option value="blend">A considered blend of both</option>
+          </select>
+          <small>This is about the client promise, not a medical outcome.</small>
+        </div>
+        <div class="acc-field">
+          <label for="formatChoice">What first format are you considering?</label>
+          <select id="formatChoice">
+            <option value="undecided">I'm not sure yet</option>
+            <option value="focused">A focused scalp service</option>
+            <option value="dedicated">A dedicated head spa appointment</option>
+          </select>
+          <small>It is acceptable to remain undecided.</small>
+        </div>
+        <div class="acc-field">
+          <label for="openQuestion">What is most uncertain?</label>
+          <select id="openQuestion">
+            <option value="scope">What my license permits</option>
+            <option value="setup">What my space and equipment can support</option>
+            <option value="time">How long the full appointment takes</option>
+            <option value="training">What skills and training I need</option>
+          </select>
+          <small>Your unanswered question becomes the next step.</small>
+        </div>
+      </div>
+      <button type="button" id="generateResult" class="acc-btn acc-btn-light-primary">Show my service direction →</button>
+      <div class="acc-result" id="result" hidden aria-live="polite">
+        <h3>Your provisional service direction</h3>
+        <p id="modelResult"></p>
+        <p id="constraintResult"></p>
+        <p id="nextAction"></p>
+        <p class="acc-result-note">This does not establish legal scope, a profitable business model or competence to perform a treatment. Confirm the details before advertising or purchasing equipment.</p>
+        <div class="acc-actions">
+          <button type="button" class="acc-btn" id="copyResult">Copy statement</button>
+          <button type="button" class="acc-btn" id="saveResult">Save on this device</button>
+          <button type="button" class="acc-btn" id="printResult">Print / Save PDF</button>
+        </div>
+        <p class="acc-status" id="saveStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="acc-reading">
+      <h3>Carry the decision forward.</h3>
+      <p>Put your provisional service direction into AIMT's existing <strong>First-Service Blueprint</strong>. Then use the <strong>Service Cost Worksheet</strong> to account for setup, consultation, treatment, reset, supplies and labor. Treatment minutes are not necessarily the entire appointment.</p>
+      <p>The certification takes you beyond an initial concept: how to observe, plan, perform, adapt and communicate the service consistently—and demonstrate the required learning.</p>
+    </div>
+    <div class="acc-actions">
+      <button type="button" class="acc-btn" id="back3">← Back</button>
+      <a class="acc-btn acc-btn-primary" href="/first-service-blueprint">Open the First-Service Blueprint →</a>
+      <a class="acc-btn" href="/head-spa-service-cost">Use the Cost Worksheet</a>
+      <a class="acc-btn" href="/head-spa-readiness">See my existing Readiness Score</a>
+    </div>
+    <p class="acc-status" id="finishStatus" aria-live="polite">Pilot complete when you've considered your direction and saved or copied your own working notes. Nothing here is graded.</p>
+  </section>
+  <footer class="acc-foot">AIMT · Unlisted instructional pilot for internal review. Not a certification, licensing opinion, client assessment, or training authorization. <a href="/privacy">Privacy</a> · <a href="/free-tools">Free Tools</a></footer>
+</main>
+<script>
+(function(){
+'use strict';
+const stages=['stage1','stage2','stage3'];
+const titles=['01 / Understand the difference','02 / Practice a decision','03 / Apply it to your service'];
+const $=id=>document.getElementById(id);
+let index=0;
+function showStage(i){
+  index=Math.min(Math.max(i,0),2);
+  for(let j=0;j<3;j++)$(stages[j]).hidden=j!==index;
+  $('progressText').textContent=titles[index];
+  $('progressCount').textContent=(index+1)+' of 3 sections';
+  $('progressBar').style.width=((index+1)/3*100)+'%';
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)window.scrollTo(0,0);
+  else window.scrollTo({top:0,behavior:'smooth'});
+  $(stages[index]).querySelector('h2').setAttribute('tabindex','-1');
+  $(stages[index]).querySelector('h2').focus({preventScroll:true});
+}
+$('next1').addEventListener('click',()=>showStage(1));
+$('back2').addEventListener('click',()=>showStage(0));
+$('next2').addEventListener('click',()=>showStage(2));
+$('back3').addEventListener('click',()=>showStage(1));
+const feedback={
+  buy:['Equipment is a later decision.','A bed does not establish an appropriate service. First confirm the client experience, your professional scope, installation requirements and business capacity.'],
+  define:['This is the stronger reasoning.','You are building the promise first, then checking that your space, skills, legal scope and equipment can actually deliver it.'],
+  claim:['The advertisement is ahead of the service.','Do not promise a complete experience you have not planned, verified or learned to deliver. Define the service before selling it.']
+};
+document.querySelectorAll('input[name="decision"]').forEach(input=>{
+  input.addEventListener('change',()=>{
+    const out=feedback[input.value],el=$('decisionFeedback');
+    el.hidden=false;el.replaceChildren();
+    const strong=document.createElement('strong');strong.textContent=out[0];
+    el.append(strong,document.createTextNode(out[1]));
+  });
+});
+const beginnings={exploring:'I am exploring a future head spa offering',station:'I currently work from an existing shampoo or wash station',room:'I have or am planning a dedicated treatment room'};
+const goals={care:'focused cosmetic scalp care',rest:'a deliberately paced relaxation experience',blend:'cosmetic scalp care and a deliberately paced relaxation experience'};
+const formats={undecided:'I have not selected a service format yet',focused:'I am considering a focused scalp service',dedicated:'I am considering a dedicated head spa appointment'};
+const questions={scope:'I must confirm which individual service activities are permitted by my professional license and local authority.',setup:'I must verify equipment installation, water handling, sanitation, supplier support and the capabilities of my space.',time:'I must measure consultation, preparation, hands-on service, checkout and between-client reset before setting a menu duration or price.',training:'I must identify the observation, technical delivery, adaptation and client-communication skills that still require training and practice.'};
+let textToSave='';
+function build(){
+  const starting=beginnings[$('startingPoint').value];
+  const goal=goals[$('clientGoal').value];
+  const format=formats[$('formatChoice').value];
+  const question=questions[$('openQuestion').value];
+  $('modelResult').textContent=starting+'. My goal is '+goal+'. '+format+'.';
+  $('constraintResult').textContent=question;
+  const note=$('formatChoice').value==='undecided'
+    ? 'Next: compare focused and dedicated formats against your actual environment and professional scope before shopping.'
+    : 'Next: describe exactly what a client receives, then test whether the full appointment time, space and cost support that promise.';
+  $('nextAction').textContent=note;
+  textToSave='AIMT · Accelerator Lesson 02 — Provisional Service Direction\n'+$('modelResult').textContent+'\n'+question+'\n'+note+'\nThis is planning only. Verify professional scope, setup, costs and training.';
+  $('result').hidden=false;
+  $('saveStatus').textContent='Your answers are only in this page until you copy or save them. No information is sent to AIMT.';
+}
+$('generateResult').addEventListener('click',build);
+const draftKey='aimt-free-accelerator-lesson02-pilot-v1';
+$('saveResult').addEventListener('click',()=>{
+  if(!textToSave)return;
+  try{
+    const data={startingPoint:$('startingPoint').value,clientGoal:$('clientGoal').value,formatChoice:$('formatChoice').value,openQuestion:$('openQuestion').value};
+    localStorage.setItem(draftKey,JSON.stringify(data));
+    $('saveStatus').textContent='Saved on this device only. Your contact details and plan are not uploaded to AIMT.';
+  }catch(e){$('saveStatus').textContent='This device could not save your draft. Use Copy statement or print to keep it.';}
+});
+$('copyResult').addEventListener('click',async()=>{
+  if(!textToSave)return;
+  try{
+    await navigator.clipboard.writeText(textToSave);
+    $('saveStatus').textContent='Statement copied. Open the First-Service Blueprint to add it to your plan.';
+  }catch(e){
+    const area=document.createElement('textarea');
+    area.value=textToSave;area.readOnly=true;area.rows=8;area.setAttribute('aria-label','Select and copy your statement');
+    area.style.cssText='width:100%;margin-top:14px;padding:12px;color:#222;background:#fff;';
+    $('result').appendChild(area);area.focus();area.select();
+    $('saveStatus').textContent='Clipboard access was blocked. Select and copy the statement shown below.';
+  }
+});
+$('printResult').addEventListener('click',()=>window.print());
+try{
+  const obj=JSON.parse(localStorage.getItem(draftKey)||'null');
+  if(obj && typeof obj==='object'){
+    for(const k of ['startingPoint','clientGoal','formatChoice','openQuestion']){
+      const el=$(k);if(el&&typeof obj[k]==='string'&&Array.from(el.options).some(o=>o.value===obj[k]))el.value=obj[k];
+    }
+    $('finishStatus').textContent='An earlier local draft is available. Open the Apply section and select “Show my service direction” to review it.';
+  }
+}catch(e){}
+})();
+</script>
+</body>
+</html>
