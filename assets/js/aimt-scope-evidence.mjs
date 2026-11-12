@@ -39,6 +39,7 @@ const NO_LICENSE=['No professional license','Student / not yet licensed'];
 export const SCOPE_EVIDENCE=Object.freeze({
   'California':{
     authority:'California Board of Barbering and Cosmetology',
+    licenseLookup:{title:'California DCA License Search',url:'https://search.dca.ca.gov/'}, 
     coverage:'Focused agency head-spa guidance for specific roles. Other activities and establishment rules require separate confirmation.',
     sources:[
       link('ca-bulletin','Industry Bulletin — Head Spas (11/1/2024)','https://barbercosmo.ca.gov/forms_pubs/headspas.pdf','Board bulletin, questions 3–5','2024-11-01'),
@@ -63,6 +64,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
   },
   'Texas':{
     authority:'Texas Department of Licensing and Regulation (TDLR)',
+    licenseLookup:{title:'TDLR Public License Search',url:'https://www.tdlr.texas.gov/verify.htm'}, 
     coverage:'Individual license scope and an explicit shampoo/conditioning exemption; business establishment requirements must also be checked.',
     sources:[
       link('tx-who','TDLR — Who Regulates What?','https://www.tdlr.texas.gov/barbering-and-cosmetology/who-regulates-what.htm','See Shampooing and Conditioning; Massage; Cleansing Treatments'),
@@ -89,6 +91,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
   },
   'Tennessee':{
     authority:'Tennessee State Board of Cosmetology and Barber Examiners / Commerce & Insurance',
+    licenseLookup:{title:'Tennessee Verify Public Search',url:'https://www.tn.gov/commerce/regboards/cosmo/help-support.html'}, 
     coverage:'Official head-spa FAQ addresses shampoo-only deregulation, styling restrictions and aesthetician scalp massage.',
     sources:[
       link('tn-faq','Tennessee — Shampoo and Head Spa FAQ','https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa','Official FAQ; last updated September 23, 2026','2026-09-23'),
@@ -110,6 +113,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
   },
   'Florida':{
     authority:'Florida Department of Business and Professional Regulation (DBPR)',
+    licenseLookup:{title:'Florida DBPR Verify a License',url:'https://www2.myfloridalicense.com/online-services/'}, 
     coverage:'Official DBPR FAQ and unlicensed-activity guide describe shampoo-only exemption and limits of other hair services.',
     sources:[
       link('fl-faq','Florida DBPR — Cosmetology FAQs','https://www2.myfloridalicense.com/cosmetology/faqs/','See SCOPE OF WORK — shampooing'),
@@ -128,6 +132,7 @@ export const SCOPE_EVIDENCE=Object.freeze({
   },
   'Pennsylvania':{
     authority:'Pennsylvania State Board of Cosmetology / Department of State',
+    licenseLookup:{title:'PA PALS — Verify a Professional License',url:'https://www.pa.gov/services/dos/verify-a-professional-or-occupational-license'}, 
     coverage:'Official statute and board guidance describe professional scope and salon licensing; no blanket head-spa exemption has been established in this research.',
     sources:[
       link('pa-law','Pennsylvania Cosmetology Law — Definitions (§1)','https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=1&sessInd=0&smthLwInd=0&subsctn=0&txtType=HTM&yr=1933','Scalp, hair and esthetics definitions'),
@@ -145,9 +150,10 @@ export const SCOPE_EVIDENCE=Object.freeze({
   },
   'New York':{
     authority:'New York Department of State — Appearance Enhancement',
+    licenseLookup:{title:'New York DOS — Licensing Status and Open NY Portal',url:'https://appext20.dos.ny.gov/lcns_public/main_screen'}, 
     coverage:'An official multi-license service-determination chart is available, but no activity-level interpretations are approved in this version.',
     sources:[
-      link('ny-chart','NY DOS — Appearance Enhancement Service Determinations (March 2025)','https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf','Review the individual license/service intersection','2025-03')
+      link('ny-chart','NY DOS — Appearance Enhancement Service Determinations (Mar 31, 2026)','https://dos.ny.gov/system/files/documents/2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf','Current reviewed chart; check specific license columns','2026-03-31')
     ],
     findings:[],
     facility:'The official service-determination chart does not replace a review of specific facility licenses, supervision, devices and local rules.',
@@ -173,6 +179,7 @@ export function evidenceFor(state,license,activities=[]){
   });
   return {
     state,license,authority:record?.authority||'Relevant state licensing authority not yet mapped',
+    licenseLookup:record?.licenseLookup||null,
     researchStatus:record?'PRIMARY SOURCES LOCATED — SELECTED ACTIVITY NOTES':'NOT YET RESEARCHED — NO SCOPE FINDINGS',
     researchDate:record?SCOPE_REVIEW_DATE:null,
     coverage:record?.coverage||'AIMT has not researched this state yet. The absence of a finding is not a statement of permission or prohibition.',
