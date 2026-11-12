@@ -153,7 +153,7 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
   'assets/images/marketing/product-proof/my-aimt-resource-library.webp',
   'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp'
  ];
- for(const asset of references)assert.ok(existsSync(path.join(root,asset)),'Missing approved image '+asset);
+ for(const asset of references)assert.ok(fs.existsSync(path.join(root,asset)),'Missing approved image '+asset);
  for(const src of references.slice(0,4))assert.ok(lesson.includes('/'+src),'Lesson missing photo '+src);
  const widgets=read('assets/js/aimt-launch-journey-widgets.mjs');
  assert.ok(widgets.includes('/'+references[4]),'Shared observation tool missing actual course teaching example');
