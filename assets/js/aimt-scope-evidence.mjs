@@ -233,28 +233,38 @@ export const SCOPE_EVIDENCE=Object.freeze({
 
 export function scopeSummary(review){
  const results=Array.isArray(review?.findings)?review.findings:[];
- const counts={
-  documented_exemption:0,conditional_exemption:0,credential_scope:0,
-  outside_credential:0,licensed_role_required:0,unresolved:0
- };
+ const counts={documented_exemption:0,conditional_exemption:0,credential_scope:0,
+  implementation_review:0,outside_credential:0,licensed_role_required:0,unresolved:0};
  for(const f of results)if(Object.prototype.hasOwnProperty.call(counts,f.status))counts[f.status]++;
- let headline='Review each step before offering your service';
- let message='No complete head spa is approved by this tool. Your professional license and business requirements must still be checked.';
- if(counts.outside_credential+counts.licensed_role_required){
-  headline='Some steps need a different professional license';
-  message='At least one selected step is identified as outside this credential or requiring licensed personnel. Do not offer those steps until the required professional authorization is confirmed.';
+ const restricted=counts.outside_credential+counts.licensed_role_required;
+ const supported=counts.credential_scope+counts.implementation_review;
+ let headline='See what the official sources say';
+ let message='This research tool explains the professional scope and remaining operational details; AIMT does not issue licensing decisions.';
+ if(restricted){
+  headline='Some selected steps need another professional credential';
+  message='The cited guidance identifies certain steps outside the selected license category. Other listed cosmetic services may still be in scope. Review the particular restricted steps and their official sources.';
+ }else if(supported){
+  headline=counts.credential_scope>=2
+   ?'Your license category covers core cosmetic services'
+   :'This activity is supported by your license category';
+  message=counts.unresolved
+   ?'The sourced findings below describe services included in this professional scope. For other items, AIMT has not finished researching the precise rule; that gap does not mean they are prohibited.'
+   :'The cited law covers the listed cosmetic services. Any remaining notes concern how to perform them compliantly: active license, nonmedical technique, licensed premises, sanitation or equipment requirements.';
+  if(counts.implementation_review){
+   message+=' Equipment- or method-specific questions are separate from the underlying professional scope.';
+  }
  }else if(counts.conditional_exemption){
-  headline='A narrow exception has important conditions';
-  message='One of the selected steps may be exempt only in a specified workplace or under a required supervisor. This does not authorize independent head spa services.';
- }else if(counts.unresolved){
-  headline='Some steps still need answers';
-  message='We found only partial guidance for your proposed service. Follow the linked official rules and check the unresolved steps before purchasing equipment or advertising.';
- }else if(results.length && counts.documented_exemption===results.length){
-  headline='Individual licensing exception documented for the selected step';
-  message='An official source describes an individual-license exemption for this specific activity. This does not resolve business permits, other services, or whether your full head spa can operate.';
- }else if(results.length && counts.credential_scope===results.length){
-  headline='Sources describe these steps for this license type';
-  message='This describes the professional license category, not your particular license status or permission to run a business. Verify all remaining establishment and service details.';
+  headline='A narrow exception exists, with specific conditions';
+  message='The law describes a limited exemption for this step. It applies only when the listed conditions are met and does not establish independent head spa authorization.';
+ }else if(results.length&&counts.documented_exemption===results.length){
+  headline='Individual license exemption documented for this step';
+  message='The cited state source exempts this particular activity from individual licensure. That does not determine establishment requirements or other services in a head spa.';
+ }else if(counts.documented_exemption){
+  headline='One step is exempt; other steps still need research';
+  message='The official source exempts a specific activity. AIMT has not yet documented the others sufficiently; that is not a finding that they are prohibited.';
+ }else if(results.length&&counts.unresolved===results.length){
+  headline='AIMT has not finished researching these activities';
+  message='We cannot yet give a reliable activity-by-activity result from our sources. This is an AIMT research gap, not evidence that your license disallows these services.';
  }
  return {headline,message,counts,total:results.length,wholeServiceCleared:false};
 }
