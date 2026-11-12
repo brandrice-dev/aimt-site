@@ -26,8 +26,11 @@ function info(root,selector,msg){
 function current(){return readPlan(window.localStorage);}
 function persist(patch,root){
  const next=writePlan(window.localStorage,patch);
- if(root)info(root,'.lj-save-message','Saved on this device. Your notes are not uploaded or linked to an account.');
- window.dispatchEvent(new Event('aimt-launch-plan-change'));
+ let stored=false;
+ try{stored=window.localStorage.getItem('aimt-free-head-spa-launch-plan-v1')===JSON.stringify(next);}
+ catch{}
+ if(root)info(root,'.lj-save-message',stored?'Saved on this device. Your notes are not uploaded or linked to an account.':'This device could not save your answers. Copy the visible result before leaving.');
+ if(stored)window.dispatchEvent(new Event('aimt-launch-plan-change'));
  return next;
 }
 function radio(name,values){
