@@ -145,5 +145,18 @@ The corrected PA Cosmetologist matrix now uses the current [Cosmetology Act §1]
 
 **Verification status:** This is a correction to the research-backed development prototype. It still requires independent PA regulatory/legal review for unusually broad exfoliation modalities, specific steam/bed installations and therapeutic massage boundaries prior to publication. The tool does not verify individual license status or business inspection.
 
+
+### November 12 — Canonical AIMT legal-status colors and research disclaimer
+
+The licensing Finder now uses the **existing paid-course AIMT feedback palette** (not an arbitrary burgundy warning):
+- **Green** \`--aimt-success: #3a5a3a\`, light \`--aimt-success-light: #e8ede8\`: when a primary government source supports a defined activity within a professional license category (\`credential_scope\`) or explicitly documents a narrow individual-license exemption (\`documented_exemption\`). Green is **not** confirmation of a specific person's license or approval of a complete head spa.
+- **Red** \`--aimt-error: #7a3030\`, light \`--aimt-error-light: #f0e8e8\`: only when a cited primary source identifies the selected activity as **outside the chosen credential** (\`outside_credential\`) or requiring another professional license (\`licensed_role_required\`). The label also says why and links the supporting source.
+- **Neutral/amber**: for \`implementation_review\` (specific devices/technique), \`conditional_exemption\` (must meet supervision or setting conditions), and \`unresolved\` (AIMT research gap). These must **never** appear as if an unknown equals a legal restriction.
+- **Overall summary** gets its own semantic \`tone\` grounded in the mix of per-activity statuses; a sourced positive area remains green even if a separate activity needs additional research. An actual restricted step does not cause unrelated permitted steps to be miscolored.
+
+**Research-only disclaimer** is presented before form use and again alongside findings; it accompanies the copyable report: "Educational research only. AIMT summarizes selected official sources but does not provide legal advice, verify your individual license, determine whether a complete head spa is permitted, or guarantee that the information is complete or current. Requirements vary by activity, credential, premises and location and can change. Confirm applicable rules with the official licensing authorities and, when needed, a qualified licensing attorney before providing services."
+
+This disclaimer must not be used as a substitute for accurate source citation, state-specific qualified review, or current maintenance. The site remains a development preview; no paid student auth or license check is performed.
+
 ### Publication gate
 Current activity statements in this development prototype are **research interpretations that still need independent legal/regulatory review**. They are not advertised as final legal answers. No launch, merge to main, student messaging or consent/backend changes were authorized. The feature branch contains the current research code and tests; #165 and draft PR #166 own the release record.
