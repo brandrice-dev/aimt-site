@@ -142,3 +142,50 @@ test('hub promotes Accelerator and links to each real, standalone route',()=>{
  for(const p of paths)assert.ok(html.includes('href="'+p+'"'),p+' missing');
  assert.match(html,/Equipment Clinic/);
 });
+
+
+test('real AIMT references appear in the proper lessons and remain clearly contextualized',()=>{
+ const lesson=read('head-spa-launch-accelerator.html');
+ const references=[
+  'assets/images/marketing/head-spa-service-rinse.webp',
+  'assets/images/marketing/approved-aesthetic-service-shot2.png',
+  'assets/images/marketing/head-spa-service-basin.webp',
+  'assets/images/marketing/product-proof/my-aimt-resource-library.webp',
+  'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp'
+ ];
+ for(const asset of references)assert.ok(existsSync(path.join(root,asset)),'Missing approved image '+asset);
+ for(const src of references.slice(0,4))assert.ok(lesson.includes('/'+src),'Lesson missing photo '+src);
+ const widgets=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.ok(widgets.includes('/'+references[4]),'Shared observation tool missing actual course teaching example');
+ assert.match(widgets,/INSIDE AIMT HEAD SPA CERTIFICATION/);
+ assert.match(widgets,/not a medical condition or diagnosis/);
+ assert.match(widgets,/href="\/head-spa-certification"/);
+ assert.match(widgets,/Illustration, not clinical evidence/);
+ assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
+});
+test('landing hook disappears after entering course and lesson navigation remains usable',()=>{
+ const nav=read('assets/js/aimt-launch-accelerator.mjs');
+ const css=read('assets/css/aimt-launch-journey.css');
+ const lesson=read('head-spa-launch-accelerator.html');
+ assert.match(nav,/document\.body\.classList\.add\('lj-course-started'\)/);
+ assert.match(nav,/openLesson\('scope',\{enter:false,scroll:false\}\)/);
+ assert.match(nav,/document\.body\.classList\.remove\('lj-course-started'\)/);
+ assert.match(css,/\.lj-body\.lj-course-started \.lj-hero\{display:none\}/);
+ assert.match(lesson,/id="seeLessons"/);
+ assert.match(lesson,/id="backOverview"/);
+});
+test('tool card illustrations are accessible and the formerly light pricing card is visually unified',()=>{
+ const hub=read('free-tools.html');
+ const css=read('assets/css/aimt-free-tools-hub-expansion.css');
+ assert.equal((hub.match(/class="ft-tool-illustration"/g)||[]).length,6);
+ assert.equal((hub.match(/ft-tool-illustration"[^>]*aria-hidden="true"/g)||[]).length,6);
+ assert.match(css,/\.ft-hub \.ft-grid \.ft-tool-card\[data-ft-category=pricing\]/);
+ for(const promise of [
+  'What can I legally do?',
+  'Which bed works in my space?',
+  'What am I seeing on a scalp?',
+  'What should I charge?',
+  'What do I need to learn?',
+  'How do I plan my first service?'
+ ])assert.ok(hub.includes(promise),'Missing simple tool value statement: '+promise);
+});
