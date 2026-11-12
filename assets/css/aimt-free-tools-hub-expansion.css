@@ -1,0 +1,32 @@
+/* Free Tools hub expansion for standalone resources + one guided Accelerator.
+   No changes to paid course or existing worksheet styling. */
+.ft-hub-feature{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:clamp(20px,5vw,65px);
+ align-items:center;padding:clamp(26px,4vw,42px);margin:10px 0 46px;border:1px solid rgba(187,157,151,.28);
+ background:linear-gradient(115deg,rgba(128,71,78,.22),rgba(255,255,255,.025) 57%);border-radius:22px}
+.ft-hub-feature-kicker{display:block;font:700 10px var(--aimt-font-mont);color:#c9b3aa;letter-spacing:.15em;text-transform:uppercase;margin-bottom:15px}
+.ft-hub-feature h2{font:700 clamp(26px,4vw,44px)/1.1 var(--aimt-font-mont);letter-spacing:-.035em;color:#fff;text-transform:uppercase;margin:0 0 15px}
+.ft-hub-feature p{font-size:15px;line-height:1.7;color:rgba(255,255,255,.66);max-width:600px;margin:0 0 22px}
+.ft-hub-feature .ft-hub-big{font:500 17px/1.6 var(--aimt-font-sans);color:#eee5df;max-width:270px;margin:12px 0}
+.ft-hub-feature .ft-hub-sub{font-size:12px;letter-spacing:.06em;color:#bfa9a3;margin-top:17px}
+.ft-hub-feature .ft-btn-primary{display:inline-flex;text-decoration:none;min-width:210px}
+.ft-hub-feature aside{border-left:1px solid rgba(255,255,255,.15);padding-left:25px}
+.ft-hub .ft-section-head{margin-bottom:24px}
+.ft-hub .ft-tool-card{min-height:245px;padding:1.6rem}
+.ft-hub .ft-tool-card h3{font-size:1.22rem}
+.ft-hub .ft-card-meta{margin-bottom:13px}
+.ft-hub .ft-tool-card .ft-panel-payoff{font-size:.89rem;line-height:1.5;color:#f0eae4;font-weight:500}
+.ft-hub .ft-tool-card .ft-panel-subline{font-size:12px;color:rgba(255,255,255,.48)}
+.ft-hub-clinic{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:23px;padding:24px 28px;background:rgba(255,255,255,.027);
+ border:1px solid rgba(255,255,255,.11);border-radius:15px}
+.ft-hub-clinic strong{font:600 15px var(--aimt-font-mont);color:#fff}
+.ft-hub-clinic p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.57);margin:9px 0 0}
+.ft-hub-clinic span{font:600 10px var(--aimt-font-mont);letter-spacing:.13em;color:#c1aaa4;text-transform:uppercase;white-space:nowrap}
+.ft-hub-disclosure{margin:10px 0 0;color:rgba(255,255,255,.45);font-size:12px;line-height:1.6}
+.ft-hub .ft-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:890px){.ft-hub .ft-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){
+ .ft-hub-feature{grid-template-columns:1fr;gap:18px}
+ .ft-hub-feature aside{border-left:0;border-top:1px solid rgba(255,255,255,.15);padding:18px 0 0}
+ .ft-hub-clinic{grid-template-columns:1fr}
+}
+@media(max-width:630px){.ft-hub .ft-grid{grid-template-columns:1fr}.ft-hub .ft-tool-card{min-height:195px}.ft-hub-clinic{padding:18px}}
