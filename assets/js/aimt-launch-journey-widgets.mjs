@@ -1,7 +1,7 @@
 // Shared interactive learning widgets. Mount the same tool once in its own page or a lesson.
 // No API calls, diagnostic model, user photos, or lead database.
 import {
- STATES,LICENSES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
+ STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
 
@@ -74,11 +74,12 @@ export function mountScope(root){
   '<div class="lj-tool-grid">',
    field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'New to the industry and experienced professionals use the same legal verification process.'),
    field('State or jurisdiction','sc-state',select('sc-state',STATES,'Choose a state')),
-   field('What license do you hold?','sc-license',select('sc-license',LICENSES,'Choose a credential'),'Choose No professional license if you are not enrolled in or holding a professional credential.'),
+   field('What exact license do you hold?','sc-license',select('sc-license',LICENSES,'Choose a credential'),'Choose the license category written on your state record. Licenses with similar names do not always cover the same steps.'),
    field('Is it active in this state?','sc-status',select('sc-status',LICENSE_STATUSES,'Choose your license status'),'A license from another state is not automatically valid here. AIMT does not check your license status.'),
    field('Where would you work?','sc-context',select('sc-context',OPERATING_CONTEXTS,'Choose a work setting'),'Individual scope and business/facility permissions are separate questions.'),
   '</div>',
   '<div class="lj-stage-guidance" data-stage-guidance role="status" aria-live="polite" hidden></div>',
+  '<p class="lj-help lj-credential-note" data-credential-note aria-live="polite"></p>',
   '<fieldset><legend>Which steps would your head spa include?</legend><p class="lj-help">Select only what you would actually do. Each step gets its own research result.</p>',
    ACTIVITIES.map(a=>'<label class="lj-check"><input type="checkbox" name="sc-activity" value="'+a.key+'"><span>'+a.label+'</span></label>').join(''),
   '</fieldset>',
@@ -101,7 +102,20 @@ export function mountScope(root){
   resultHTML('Your licensing research summary')
  ].join('');
  const st=$(root,'#sc-state'),lic=$(root,'#sc-license'),licenseStatus=$(root,'#sc-status'),stage=$(root,'#sc-stage'),context=$(root,'#sc-context');
- st.value=p.state;lic.value=p.license;licenseStatus.value=p.licenseStatus;stage.value=p.careerStage;context.value=p.operatingContext;
+ st.value=p.state;licenseStatus.value=p.licenseStatus;stage.value=p.careerStage;context.value=p.operatingContext;
+ function refreshCredentials(preferred){
+  const values=STATE_CREDENTIALS[st.value]||LICENSES;
+  const prior=typeof preferred==='string'?preferred:lic.value;
+  lic.replaceChildren();
+  const blank=document.createElement('option');blank.value='';blank.textContent='Choose the exact credential';lic.appendChild(blank);
+  for(const value of values){
+   const option=document.createElement('option');option.value=value;option.textContent=value;lic.appendChild(option);
+  }
+  lic.value=values.includes(prior)?prior:'';
+  info(root,'[data-credential-note]',CREDENTIAL_NOTES[st.value]||'For states without curated coverage, select the closest professional category and verify your exact state license title with its board.');
+ }
+ st.addEventListener('change',()=>refreshCredentials());
+ refreshCredentials(p.license);
  $(root,'#sc-question').value=p.licenseQuestions;
  function updateGuidance(){
   const el=$(root,'[data-stage-guidance]');el.hidden=!stage.value;
