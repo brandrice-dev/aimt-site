@@ -10,7 +10,7 @@ import {
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
-import {SCOPE_EVIDENCE,SCOPE_FINDINGS,evidenceFor,scopeSummary} from '../assets/js/aimt-scope-evidence.mjs';
+import {SCOPE_EVIDENCE,SCOPE_FINDINGS,SCOPE_RESEARCH_DISCLAIMER,evidenceFor,scopeSummary} from '../assets/js/aimt-scope-evidence.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
@@ -484,4 +484,54 @@ test('unresearched is clearly an AIMT evidence gap, not a restriction',()=>{
  const registry=read('assets/js/aimt-scope-evidence.mjs');
  assert.match(registry,/AIMT research is not complete for this step/);
  assert.match(registry,/gap in AIMT’s research/);
+});
+
+
+test('AIMT scope status colors use canonical paid-course green/red and do not mark unknown as wrong',()=>{
+ const stylesheet=read('assets/css/aimt-launch-journey.css');
+ const canonical=read('assets/css/cadence-shell.css');
+ assert.match(canonical,/--aimt-success,\s*#3a5a3a/);
+ assert.match(canonical,/--aimt-error,\s*#7a3030/);
+ for(const status of ['credential_scope','documented_exemption']){
+  assert.match(stylesheet,new RegExp('\\.lj-evidence-card\\[data-scope-status="'+status+'"\\]'));
+ }
+ for(const status of ['outside_credential','licensed_role_required']){
+  assert.match(stylesheet,new RegExp('\\.lj-evidence-card\\[data-scope-status="'+status+'"\\]'));
+ }
+ assert.match(stylesheet,/\.lj-scope-quick\[data-scope-tone="supported"\]/);
+ assert.match(stylesheet,/\.lj-scope-quick\[data-scope-tone="restricted"\]/);
+ assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="unresolved"\]/);
+ assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="conditional_exemption"\]/);
+ assert.match(stylesheet,/var\(--aimt-success,#3a5a3a\)/);
+ assert.match(stylesheet,/var\(--aimt-error,#7a3030\)/);
+ assert.match(stylesheet,/var\(--aimt-success-light,#e8ede8\)/);
+ assert.match(stylesheet,/var\(--aimt-error-light,#f0e8e8\)/);
+ const supported=scopeSummary(evidenceFor('Pennsylvania','Cosmetologist',['wash','scalp','scalp-massage','styling','camera','wet']));
+ assert.equal(supported.tone,'supported');
+ assert.equal(supported.wholeServiceCleared,false);
+ assert.equal(scopeSummary(evidenceFor('Texas','No professional license',['wash'])).tone,'supported');
+ assert.equal(scopeSummary(evidenceFor('California','Esthetician',['wash'])).tone,'restricted');
+ assert.equal(scopeSummary(evidenceFor('Pennsylvania','No professional license',['wash'])).tone,'caution');
+ assert.equal(scopeSummary(evidenceFor('Alaska','Cosmetologist',['wash'])).tone,'unknown');
+ assert.equal(scopeSummary(evidenceFor('New York','Esthetician',['scalp'])).tone,'unknown');
+ assert.notEqual(scopeSummary(evidenceFor('Texas','No professional license',['wash','styling'])).tone,'supported');
+});
+test('research-only limitation is clear in standalone and Accelerator and follows copied findings',()=>{
+ assert.match(SCOPE_RESEARCH_DISCLAIMER,/Educational research only/);
+ assert.match(SCOPE_RESEARCH_DISCLAIMER,/does not provide legal advice/);
+ assert.match(SCOPE_RESEARCH_DISCLAIMER,/does not.*verify your individual license/);
+ assert.match(SCOPE_RESEARCH_DISCLAIMER,/guarantee.*complete or current/);
+ assert.match(SCOPE_RESEARCH_DISCLAIMER,/qualified licensing attorney/);
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.match(widget,/Research information, not legal advice/);
+ assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER/);
+ assert.match(widget,/data-scope-tone="neutral"/);
+ assert.match(widget,/dataset\.scopeTone=quick\.tone/);
+ assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER,\s*[\r\n]/);
+ assert.match(widget,/Use these sources for research only/);
+ const standalone=read('head-spa-scope-finder.html');
+ const accelerator=read('head-spa-launch-accelerator.html');
+ assert.match(standalone,/data-aimt-tool="scope"/);
+ assert.match(accelerator,/data-aimt-tool="scope"/);
+ assert.doesNotMatch(widget,/permission granted|head spa cleared for practice/i);
 });
