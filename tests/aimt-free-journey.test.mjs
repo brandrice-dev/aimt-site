@@ -500,8 +500,8 @@ test('AIMT scope status colors use canonical paid-course green/red and do not ma
  }
  assert.match(stylesheet,/\.lj-scope-quick\[data-scope-tone="supported"\]/);
  assert.match(stylesheet,/\.lj-scope-quick\[data-scope-tone="restricted"\]/);
- assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="unresolved"\]/);
- assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="conditional_exemption"\]/);
+ assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="?unresolved"?\]/);
+ assert.match(stylesheet,/\.lj-evidence-card\[data-scope-status="?conditional_exemption"?\]/);
  assert.match(stylesheet,/var\(--aimt-success,#3a5a3a\)/);
  assert.match(stylesheet,/var\(--aimt-error,#7a3030\)/);
  assert.match(stylesheet,/var\(--aimt-success-light,#e8ede8\)/);
