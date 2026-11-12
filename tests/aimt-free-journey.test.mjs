@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
- STORAGE_KEY,STATES,LICENSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
+ STORAGE_KEY,STATES,LICENSES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
@@ -302,4 +302,31 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
  assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-certification-course-ui.webp')));
  assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/approved-service-timer-live.webp')));
+});
+
+
+test('license verification is an official outbound step, not AIMT credential validation',()=>{
+ const options=LICENSE_STATUSES.map(x=>x.key);
+ assert.deepEqual(options,['active_here','licensed_elsewhere','pending_or_expired','none','unsure']);
+ for(const [state,record] of Object.entries(SCOPE_EVIDENCE)){
+  assert.ok(record.licenseLookup?.url,'Missing official portal in '+state);
+  assert.match(record.licenseLookup.url,/^https:\/\//);
+  assert.ok(evidenceFor(state,'Cosmetologist',['wash']).licenseLookup?.url);
+ }
+ const other=scopeResult({...example,licenseStatus:'licensed_elsewhere'});
+ assert.match(other.licenseStatusNote,/out-of-state license does not automatically authorize/i);
+ const pending=scopeResult({...example,licenseStatus:'pending_or_expired'});
+ assert.match(pending.licenseStatusNote,/not proof of current authorization/i);
+ assert.equal(normalizePlan({...example,licenseStatus:'definitely good'}).licenseStatus,'');
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.match(widget,/select\('sc-status',LICENSE_STATUSES/);
+ assert.match(widget,/data-license-lookup/);
+ assert.match(widget,/official license verification/);
+ assert.doesNotMatch(widget,/type="file"|name="license_number"|name="licenseNumber"/);
+});
+test('newest official New York procedural chart is referenced and older chart is not served',()=>{
+ const ny=SCOPE_EVIDENCE['New York'];
+ assert.ok(ny.sources.some(x=>x.url.includes('2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf')));
+ assert.ok(!ny.sources.some(x=>x.url.includes('2025/03/ae-licensees')));
+ assert.ok(ny.findings.length===0,'NY chart alone does not authorize activity without interpretation');
 });
