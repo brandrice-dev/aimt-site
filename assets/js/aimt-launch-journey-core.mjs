@@ -2,6 +2,7 @@
 // Used by standalone tools AND the five-lesson Accelerator. Does not grant practice scope.
 import { blueprintPayload } from './aimt-first-service-blueprint-core.mjs';
 import { calculateServiceCost } from './aimt-service-cost-core.mjs';
+import { SCOPE_EVIDENCE,evidenceFor } from './aimt-scope-evidence.mjs';
 
 export const STORAGE_KEY='aimt-free-head-spa-launch-plan-v1';
 export const VERSION=1;
@@ -20,7 +21,14 @@ export const STATES=Object.freeze([
  'Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
 ]);
-export const LICENSES=Object.freeze(['Cosmetologist','Esthetician','Barber','Massage therapist','Student / not yet licensed','Other / unsure']);
+export const LICENSES=Object.freeze(['Cosmetologist','Esthetician','Barber','Massage therapist','No professional license','Student / not yet licensed','Other / unsure']);
+export const OPERATING_CONTEXTS=Object.freeze([
+ {key:'salon',label:'An existing salon or licensed workplace'},
+ {key:'suite',label:'A private salon suite or rented room'},
+ {key:'independent',label:'Opening my own head spa or location'},
+ {key:'mobile',label:'Mobile / visiting clients'},
+ {key:'exploring',label:'Still researching my options'}
+]);
 export const CAREER_STAGES=Object.freeze([
  {key:'exploring',label:'Exploring head spa or still in school'},
  {key:'new',label:'Newly licensed / early in my career'},
@@ -43,22 +51,10 @@ export const ACTIVITIES=Object.freeze([
  {key:'wet',label:'Water/steam equipment and sanitation'}
 ]);
 // Curated Nov 11, 2026; official source links, NOT legal opinions or approval.
-export const SCOPE_SOURCES=Object.freeze({
- California:[
-  ['California Board — Head Spas bulletin','https://barbercosmo.ca.gov/forms_pubs/headspas.pdf'],
-  ['California Board — bulletins index','https://barbercosmo.ca.gov/forms_pubs/publications/bulletins.shtml']],
- Tennessee:[
-  ['Tennessee Commerce — shampoo and head spa FAQ','https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa'],
-  ['Tennessee Board — individual licensing','https://www.tn.gov/commerce/regboards/cosmo/license/individual.html']],
- Texas:[
-  ['TDLR — scope of practice guides','https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/'],
-  ['TDLR — who regulates what','https://www.tdlr.texas.gov/barbering-and-cosmetology/who-regulates-what.htm']],
- Florida:[
-  ['Florida DBPR — cosmetology FAQ','https://www2.myfloridalicense.com/cosmetology/faqs/'],
-  ['Florida DBPR — what requires a license','https://ula.myfloridalicense.com/what-requires-a-license/']],
- 'New York':[
-  ['New York DOS — appearance-enhancement procedure chart','https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf']]
-});
+// Source directory and activity-level evidence share one canonical registry.
+export const SCOPE_SOURCES=Object.freeze(Object.fromEntries(
+ Object.entries(SCOPE_EVIDENCE).map(([state,entry])=>[state,entry.sources.map(x=>[x.title,x.url])])
+));
 export const SYSTEM_OPTIONS=Object.freeze([
  {key:'undecided',label:'Not decided yet'},
  {key:'plumbed',label:'Plumbed head spa bed'},
@@ -72,7 +68,7 @@ export const SPACE_OPTIONS=Object.freeze([
  {key:'dedicated',label:'Dedicated treatment room'}
 ]);
 export const PLAN_FIELDS=Object.freeze([
- 'careerStage','state','license','activities','licenseQuestions','serviceFormat','clientPromise','audience',
+ 'careerStage','state','license','operatingContext','activities','licenseQuestions','serviceFormat','clientPromise','audience',
  'consultMinutes','serviceMinutes','prepMinutes','resetMinutes','adminMinutes',
  'products','supplies','overhead','laborHourly','menuPrice',
  'space','equipmentSystem','equipmentPriority','equipmentQuestions',
@@ -95,7 +91,7 @@ function amount(value){
  return v;
 }
 export function emptyPlan(){
- return {version:VERSION,careerStage:'',state:'',license:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
+ return {version:VERSION,careerStage:'',state:'',license:'',operatingContext:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
   consultMinutes:'',serviceMinutes:'',prepMinutes:'',resetMinutes:'',adminMinutes:'',
   products:'',supplies:'',overhead:'',laborHourly:'',menuPrice:'',
   space:'',equipmentSystem:'',equipmentPriority:'',equipmentQuestions:'',
@@ -107,6 +103,7 @@ export function normalizePlan(raw){
  p.careerStage=accepted(raw.careerStage,CAREER_STAGES.map(x=>x.key));
  p.state=accepted(raw.state,STATES);
  p.license=accepted(raw.license,LICENSES);
+ p.operatingContext=accepted(raw.operatingContext,OPERATING_CONTEXTS.map(x=>x.key));
  p.activities=Array.isArray(raw.activities)?[...new Set(raw.activities.filter(x=>ACTIVITIES.some(a=>a.key===x)))].slice(0,7):[];
  p.serviceFormat=accepted(raw.serviceFormat,['undecided','focused','dedicated']);
  p.space=accepted(raw.space,SPACE_OPTIONS.map(x=>x.key));
@@ -151,15 +148,31 @@ export function pricingResult(plan){
  });
 }
 export function scopeResult(plan){
- const p=normalizePlan(plan),sources=SCOPE_SOURCES[p.state]||[];
+ const p=normalizePlan(plan),review=evidenceFor(p.state,p.license,p.activities);
  const activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
  const list=activities.length?activities.map(a=>'• '+a).join('\n'):'• [describe proposed activities]';
- return {sources,activities,
-  status:sources.length?'Official source links located; permission NOT determined.':'No curated official source for this state. Locate the state licensing board.',
-  note:['Massage therapist','Student / not yet licensed','Other / unsure'].includes(p.license)
-   ?'These references may cover barbering or cosmetology rather than your credential. Identify the appropriate regulator.'
-   :'Official sources require activity-by-activity review. This tool does not approve a service.',
-  inquiry:'Subject: Scope of a proposed cosmetic scalp-care service\n\nHello,\n\nI am a '+(p.license||'[credential]')+' in '+(p.state||'[state]')+'. Before offering cosmetic scalp-care or head spa services, I need to verify which activities are permitted:\n\n'+list+'\n\nCould you identify the written rules and any separate establishment permits, supervision, sanitation or equipment requirements?\n\nThank you.'
+ const context=OPERATING_CONTEXTS.find(x=>x.key===p.operatingContext)?.label||'[work setting]';
+ const inquiry=[
+  'Subject: Professional scope and establishment questions about a head spa service','',
+  'Hello,','',
+  'I am evaluating a cosmetic scalp-care / head spa service in '+(p.state||'[state]')+'.',
+  'My credential: '+(p.license||'[credential or no professional license]')+'.',
+  'My planned work setting: '+context+'.','',
+  'Before offering services, I want to verify the requirements for these specific activities:',
+  list,'',
+  'Could you point me to the governing statutes, regulations or official guidance for each activity?',
+  'What individual professional licenses, establishment licenses, inspections, supervision and sanitation obligations apply?',
+  'Are there additional requirements for the head spa water/steam equipment and its installation?','',
+  'I understand some boards cannot provide advisory legal opinions; a reference to the governing written sources would still be helpful.','',
+  'Thank you.'
+ ].join('\n');
+ return {
+   sources:review.sources.map(x=>[x.title,x.url]),
+   activities,review,inquiry,
+   status:review.researchStatus,
+   note:['Massage therapist','Student / not yet licensed','No professional license','Other / unsure'].includes(p.license)
+      ?'Some curated sources concern cosmetology rather than massage therapy or another credential. The right regulator for each activity must be identified.'
+      :'The findings describe individual steps only, not permission to perform the whole head spa service.'
  };
 }
 export function equipmentResult(plan){
@@ -188,7 +201,8 @@ export function renderPlanText(plan){
  const p=normalizePlan(plan),time=appointmentMinutes(p),eq=equipmentResult(p),price=pricingResult(p);
  return [
   'AIMT — HEAD SPA LAUNCH PLAN','Working plan only; not certification or legal clearance.','',
-  '01 / SCOPE','Experience: '+(CAREER_STAGES.find(x=>x.key===p.careerStage)?.label||'Not selected'),'State: '+(p.state||'Unselected'),'Credential: '+(p.license||'Unselected'),
+  '01 / SCOPE','Experience: '+(CAREER_STAGES.find(x=>x.key===p.careerStage)?.label||'Not selected'),'State: '+(p.state||'Unselected'),
+  'Work setting: '+(OPERATING_CONTEXTS.find(x=>x.key===p.operatingContext)?.label||'Not selected'),'Credential: '+(p.license||'Unselected'),
   'Activities to verify: '+(ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label).join('; ')||'Unspecified'),
   'Board question: '+(p.licenseQuestions||'Unwritten'),'Permission: NOT DETERMINED','',
   '02 / SERVICE','Clients: '+(p.audience||'Unspecified'),'Format: '+(p.serviceFormat||'Unselected'),
