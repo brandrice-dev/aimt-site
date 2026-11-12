@@ -83,7 +83,7 @@ export function mountScope(root){
    ACTIVITIES.map(a=>'<label class="lj-check"><input type="checkbox" name="sc-activity" value="'+a.key+'"><span>'+a.label+'</span></label>').join(''),
   '</fieldset>',
   field('What still needs clarification?','sc-question','<textarea id="sc-question" maxlength="320" placeholder="Example: Can my license include scalp cleansing and shampooing at a private suite?"></textarea>','No names, license numbers, medical concerns or client information.'),
-  '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy questions for my board','scope-copy',true),'</div>',
+  '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy my findings','scope-report-copy',true),btn('Copy questions for my board','scope-copy',true),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   '<div data-sources hidden>',
    '<div class="lj-scope-overview">',
@@ -109,7 +109,7 @@ export function mountScope(root){
  }
  stage.addEventListener('change',updateGuidance);updateGuidance();
  root.querySelectorAll('[name="sc-activity"]').forEach(x=>x.checked=p.activities.includes(x.value));
- let inquiry='';
+ let inquiry='',report='';
  function createLink(item){
   const a=document.createElement('a');a.href=item.url;
   a.target='_blank';a.rel='noopener noreferrer';a.textContent=item.title;
@@ -173,11 +173,35 @@ export function mountScope(root){
   info(root,'[data-next-contact]',review.nextContact);
   info(root,'[data-board-inquiry]',g.inquiry);
   $(root,'[data-sources]').hidden=false;inquiry=g.inquiry;
+  report=[
+    'AIMT / HEAD SPA LICENSE & SCOPE RESEARCH NOTES',
+    'Research is not permission to practice. Confirm current law and professional scope.',
+    'State: '+state,'Professional credential: '+license,
+    'License status (self-reported): '+credentialStatus,
+    'Work setting: '+(OPERATING_CONTEXTS.find(x=>x.key===operatingContext)?.label||operatingContext),
+    'Source review: '+(review.researchDate||'No reviewed jurisdiction sources'),
+    '',
+    'ACTIVITY-BY-ACTIVITY NOTES',
+    ...review.findings.flatMap((item,index)=>[
+      (index+1)+'. '+(ACTIVITIES.find(x=>x.key===item.activity)?.label||item.activity),
+      'Finding: '+item.heading,'Source explanation: '+item.summary,
+      'Limitations: '+item.limits,
+      'Sources: '+(item.sources.length?item.sources.map(x=>x.title+' — '+x.url).join(' | '):'No supported source yet'),
+      ''
+    ]),
+    'LICENSE STATUS: '+g.licenseStatusNote,
+    'ESTABLISHMENT / FACILITY: '+review.facility,
+    'NEXT VERIFICATION: '+review.nextContact,
+    'OFFICIAL LICENSE LOOKUP: '+(review.licenseLookup?.url||'Not yet mapped'),
+    '',
+    'No finding authorizes a complete head spa treatment. An individual licensing exemption for one step does not extend to others.'
+  ].join('\n');
   const documented=review.findings.filter(x=>x.status!=='unresolved').length;
   showResult(root,documented+' of '+review.findings.length+' selected activities have a specific official-source note in this research snapshot. The rest need further verification. No complete service is cleared.');
   return true;
  }
  trigger(root,'scope-save',()=>generate(true));
+ trigger(root,'scope-report-copy',()=>{if(generate(false))copy(report,root);});
  trigger(root,'scope-copy',()=>{if(generate(false))copy(inquiry,root);});
  if(p.state&&p.license&&p.licenseStatus&&p.operatingContext&&p.activities.length)generate(false);
 }
