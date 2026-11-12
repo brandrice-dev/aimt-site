@@ -128,5 +128,22 @@ AIMT's Scope Finder now asks separately **what type of license someone holds** a
 
 **New York source correction:** The previous work linked a 2025 DOS procedure chart. On November 12, 2026 an updated **March 31, 2026** chart was found and its first page inspected: https://dos.ny.gov/system/files/documents/2026/04/ae-licensees-procedural-service-determinations_3.31.2026.pdf. The Finder now links this newer version. We have deliberately **not** assigned new activity-level permissions based on it without an independent legal cross-check. This demonstrates why source versions and rechecks are essential.
 
+### Pennsylvania cosmetologist accuracy correction — November 12, 2026
+
+**Trigger:** A licensed Pennsylvania cosmetologist tested the Finder and saw several "Further verification required" cards for ordinary cosmetic scalp work already covered by their professional license. This created an erroneous *impression of prohibition* even though the state’s broad cosmetology definition supported the core services. The source research was incomplete, not the customer's authority.
+
+The corrected PA Cosmetologist matrix now uses the current [Cosmetology Act §1](https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=1&sessInd=0&smthLwInd=0&subsctn=0&txtType=HTM&yr=1933), [PA license guide](https://www.pa.gov/agencies/dos/resources/professional-licensing-resources/licensure-processing-guides-and-timelines/cosmetology-guide), [Cosmetology Law §9.3](https://www.palegis.us/statutes/unconsolidated/law-information/view-statute?act=86&chpt=0&iFrame=true&sctn=9&sessInd=0&smthLwInd=0&subsctn=3&txtType=HTM&yr=1933) and [49 Pa. Code §7.92](https://www.pacodeandbulletin.gov/secure/pacode/data/049/chapter7/s7.92.html):
+
+- **Documented professional scope:** hair washing/cleansing; ordinary nonmedical cosmetic scalp cleansing/exfoliation; cosmetic scalp massage/stimulation; appropriate cosmetic upper-body/neck/shoulder manipulation; hair styling/blow-drying.
+- **Separately unresolved implementation details—not an adverse scope finding:** non-diagnostic camera technique/claims and specific bed, steam, plumbing, electrical, sanitation and water-system requirements.
+- **Separate premises condition:** for paid services, the salon/setting must satisfy PA professional and facility licensing/inspection requirements. The PA Cosmetology Law §8 and Board Salon Licensure Procedure must be checked for the actual site.
+- **Medical boundary:** PA cosmetology scope is not a general license to diagnose disease or advertise independent licensed massage therapy. The broad upper-body language does not authorize therapeutic or deep-tissue massage beyond the cosmetic professional scope.
+
+**Updated taxonomy:** `credential_scope` identifies a cited profession-level service; `implementation_review` identifies an otherwise broadly related cosmetic activity requiring technique/equipment/facility checks; `unresolved` means **AIMT has not researched enough**, explicitly *not evidence of prohibition*. A genuine `outside_credential` or `licensed_role_required` restriction stays separately identified with its own primary sources. An operational concern never changes an otherwise supported cosmetic activity into "not allowed."
+
+**First impression:** The result summary leads with supported scope before any unknown details. The activity cards show supported entries first; only then the individual implementation notes or research gaps. A license's broad statutory definition remains central: a service name (such as "head spa") does not have to be named verbatim to fall within existing cosmetic hair/scalp work.
+
+**Verification status:** This is a correction to the research-backed development prototype. It still requires independent PA regulatory/legal review for unusually broad exfoliation modalities, specific steam/bed installations and therapeutic massage boundaries prior to publication. The tool does not verify individual license status or business inspection.
+
 ### Publication gate
 Current activity statements in this development prototype are **research interpretations that still need independent legal/regulatory review**. They are not advertised as final legal answers. No launch, merge to main, student messaging or consent/backend changes were authorized. The feature branch contains the current research code and tests; #165 and draft PR #166 own the release record.
