@@ -53,6 +53,11 @@ async function copy(value,root){
   info(root,'.lj-save-message','Clipboard access is unavailable. Select and copy the text shown below.');
  }
 }
+function feedbackState(element,isSupported){
+ element.classList.toggle('is-correct',!!isSupported);
+ element.classList.toggle('is-incorrect',!isSupported);
+ element.dataset.feedback=!!isSupported?'correct':'review';
+}
 function showResult(root,text){
  const area=$(root,'[data-result]');if(!area)return;
  area.hidden=false;$(root,'[data-result-copy]').textContent=text;
@@ -180,7 +185,7 @@ export function mountService(root){
    define:'Correct reasoning: decide what is being offered, then verify scope, operations and equipment.',
    sell:'A promise should not get ahead of your skills or service plan. Do not advertise a full service before you can deliver it.'
   };
-  fb.hidden=false;fb.textContent=messages[input.value];
+  fb.hidden=false;fb.textContent=messages[input.value];feedbackState(fb,input.value==='define');
  }));
  trigger(root,'service-save',()=>{
   const patch={audience:$(root,'#sv-audience').value,clientPromise:$(root,'#sv-promise').value,serviceFormat:$(root,'#sv-format').value};
@@ -229,6 +234,7 @@ export function mountEquipment(root){
  root.querySelectorAll('[name="eq-priority"]').forEach(x=>x.checked=x.value===p.equipmentPriority);
  root.querySelectorAll('[name="eq-choice"]').forEach(x=>x.addEventListener('change',()=>{
   const fb=$(root,'[data-eq-feedback]');fb.hidden=false;
+  feedbackState(fb,x.value==='verify');
   fb.textContent=x.value==='verify'?'Correct: the exact model, room and local requirements determine feasibility.':
     x.value==='modify'?'Do not assume that DIY changes to water and electrical systems are appropriate or compliant. Confirm safe manufacturer-supported requirements with qualified professionals.':
     'Appearance is secondary to whether a system can be installed, cleaned, supported and operated in your actual space.';
@@ -294,7 +300,7 @@ export function mountObservation(root){
   input.checked=input.value===p.observationAnswer;
   input.addEventListener('change',()=>{
    const fb=observationFeedback(input.value),el=$(root,'[data-ob-feedback]');
-   el.hidden=false;el.replaceChildren();const strong=document.createElement('strong');strong.textContent=fb.title;el.append(strong,document.createTextNode(fb.copy));
+   el.hidden=false;feedbackState(el,fb.correct);el.replaceChildren();const strong=document.createElement('strong');strong.textContent=fb.title;el.append(strong,document.createTextNode(fb.copy));
   });
  });
  trigger(root,'observation-save',()=>{
@@ -345,7 +351,7 @@ export function mountLaunch(root){
  root.querySelectorAll('[name="la-vet"]').forEach(x=>x.checked=p.trainingChecklist.includes(x.value));
  root.querySelectorAll('[name="la-sequence"]').forEach(x=>x.addEventListener('change',()=>{
   const feedback=$(root,'[data-la-feedback]');
-  feedback.hidden=false;
+  feedback.hidden=false;feedbackState(feedback,x.value==='verify');
   feedback.textContent=x.value==='verify'?'Strong sequence: verify what is permitted, define the experience, check feasibility, acquire necessary education and practice, then launch.':
    'That puts spending or sales ahead of legal permissions and operational readiness. Reconsider what needs verification first.';
  }));
