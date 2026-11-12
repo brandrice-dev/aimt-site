@@ -159,7 +159,7 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  const widgets=read('assets/js/aimt-launch-journey-widgets.mjs');
  assert.ok(widgets.includes('/'+references[4]),'Shared observation tool missing actual course teaching example');
  assert.match(widgets,/INSIDE AIMT HEAD SPA CERTIFICATION/);
- assert.match(widgets,/not a medical condition or diagnosis/);
+ assert.match(widgets,/not a diagnosis or a certificate of competence/);
  assert.match(widgets,/href="\/head-spa-certification"/);
  assert.match(widgets,/Illustrative course image — not clinical evidence/);
  assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
