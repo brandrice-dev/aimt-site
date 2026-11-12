@@ -4,7 +4,7 @@ import {
  STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
-import { scopeSummary } from './aimt-scope-evidence.mjs';
+import { scopeSummary, SCOPE_RESEARCH_DISCLAIMER } from './aimt-scope-evidence.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
 function options(items,selected=''){
@@ -72,6 +72,7 @@ export function mountScope(root){
   '<h3>What does your license let you do?</h3>',
   '<p>A head spa is made of individual services: shampooing, cosmetic scalp care, massage, styling, and equipment use. The law can treat each step differently. <strong>One shampoo exception is not permission to perform the entire head spa treatment.</strong></p>',
   '<p class="lj-help">This research preview gives activity-by-activity explanations only where AIMT has identified an official source. It cannot confirm your license is active or approve a complete service.</p>',
+  '<div class="lj-scope-disclaimer" role="note"><strong>Research information, not legal advice</strong><p>'+safe(SCOPE_RESEARCH_DISCLAIMER)+'</p></div>',
   '<div class="lj-tool-grid">',
    field('Where are you in your career?','sc-stage',select('sc-stage',CAREER_STAGES,'Choose your starting point'),'New to the industry and experienced professionals use the same legal verification process.'),
    field('State or jurisdiction','sc-state',select('sc-state',STATES,'Choose a state')),
@@ -88,7 +89,7 @@ export function mountScope(root){
   '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy my findings','scope-report-copy',true),btn('Copy questions for my board','scope-copy',true),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   '<div data-sources hidden>',
-   '<div class="lj-scope-quick" aria-live="polite"><strong data-scope-quick-headline></strong><p data-scope-quick-message></p><p data-scope-quick-counts class="lj-help"></p></div>',
+   '<div class="lj-scope-quick" data-scope-tone="neutral" aria-live="polite"><strong data-scope-quick-headline></strong><p data-scope-quick-message></p><p data-scope-quick-counts class="lj-help"></p></div>',
    '<div class="lj-scope-overview">',
     '<div class="lj-scope-coverage"><span>RESEARCH COVERAGE</span><h4 data-source-state></h4><p data-source-coverage></p><p data-source-reviewed></p></div>',
     '<p class="lj-scope-not-cleared"><strong>Important:</strong> These are findings about specific activities, <strong>not</strong> an approval to offer your full head spa service. Facility licenses, equipment, local codes and the exact technique may change the answer.</p>',
@@ -96,6 +97,7 @@ export function mountScope(root){
    '<section class="lj-scope-license-check" aria-label="License validity reminder"><h4>Your professional license status</h4><p data-license-caution></p><div data-license-lookup></div><p class="lj-help">Check the license directly on the government website. Do not enter your name, license number or private documents into AIMT.</p></section>',
    '<h4>What the sources say about each step</h4>',
    '<div data-activity-findings class="lj-evidence-list"></div>',
+   '<p class="lj-scope-disclaimer lj-scope-disclaimer-result" role="note"><strong>Use these sources for research only.</strong> AIMT does not confirm legal permission, individual licenses or compliance. Check current laws and facility rules before practice.</p>',
    '<h4>Facility and business requirements</h4><p data-source-facility class="lj-scope-facility"></p>',
    '<h4>Official sources you can open</h4><ul class="lj-source-list" data-source-links></ul>',
    '<h4>What to do next</h4><p class="lj-help" data-next-contact></p>',
@@ -141,6 +143,7 @@ export function mountScope(root){
   const next=save?persist(patch,root):{...current(),...patch};
   const g=scopeResult(next),review=g.review;
   const quick=scopeSummary(review);
+  $(root,'[data-scope-tone]').dataset.scopeTone=quick.tone;
   info(root,'[data-scope-quick-headline]',quick.headline);
   info(root,'[data-scope-quick-message]',quick.message);
   info(root,'[data-scope-quick-counts]',
@@ -206,7 +209,7 @@ export function mountScope(root){
   $(root,'[data-sources]').hidden=false;inquiry=g.inquiry;
   report=[
     'AIMT / HEAD SPA LICENSE & SCOPE RESEARCH NOTES',
-    'Research is not permission to practice. Confirm current law and professional scope.',
+    SCOPE_RESEARCH_DISCLAIMER,
     'State: '+state,'Professional credential: '+license,
     'License status (self-reported): '+credentialStatus,
     'Work setting: '+(OPERATING_CONTEXTS.find(x=>x.key===operatingContext)?.label||operatingContext),
