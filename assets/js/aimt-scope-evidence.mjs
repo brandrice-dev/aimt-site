@@ -280,8 +280,8 @@ export function evidenceFor(state,license,activities=[]){
       activity,status:found?.status||'unresolved',
       heading:SCOPE_FINDINGS[found?.status||'unresolved'].heading,
       generalExplanation:SCOPE_FINDINGS[found?.status||'unresolved'].explanation,
-      summary:found?.summary||(record?'Current curated sources do not settle this specific activity for the selected credential.':'This jurisdiction has not yet been researched for this activity.'),
-      limits:found?.limits||'Further licensing, facility, technique and local-rule verification may be required.',
+      summary:found?.summary||(record?'AIMT has not yet researched this exact activity and license category sufficiently. This is not a finding that the service is prohibited.':'AIMT has not yet researched this activity in this state. No permission or prohibition is inferred.'),
+      limits:found?.limits||'Research gap on AIMT’s side. Review the written scope for your credential and the separate facility or equipment requirements, as applicable.',
       sources:record?.sources?.filter(s=>sourceIds.includes(s.id))||[]
     };
   });
