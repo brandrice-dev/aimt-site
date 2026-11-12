@@ -69,6 +69,7 @@ export function mountScope(root){
   '<fieldset><legend>Which activities are you considering?</legend><p class="lj-help">Select the steps you need the licensing authority to address.</p>',
    ACTIVITIES.map(a=>'<label class="lj-check"><input type="checkbox" name="sc-activity" value="'+a.key+'"><span>'+a.label+'</span></label>').join(''),
   '</fieldset>',
+  field('What remains unclear about your own proposed service?','sc-question','<textarea id="sc-question" maxlength="320" placeholder="For my credential, does shampooing at a head spa require an additional license or permit?"></textarea>','Keep the question about the professional activity. Do not enter license numbers or private details.'),
   '<div class="lj-actions">',
     btn('Find official sources','scope-save'),btn('Copy board question','scope-copy',true),
   '</div>',
@@ -77,7 +78,7 @@ export function mountScope(root){
   resultHTML('Scope review started')
  ].join('');
  const st=$(root,'#sc-state'),lic=$(root,'#sc-license');
- st.value=p.state;lic.value=p.license;
+ st.value=p.state;lic.value=p.license;$(root,'#sc-question').value=p.licenseQuestions;
  root.querySelectorAll('[name="sc-activity"]').forEach(x=>x.checked=p.activities.includes(x.value));
  let inquiry='';
  function generate(save=true){
@@ -85,7 +86,7 @@ export function mountScope(root){
   if(!state||!license||!activities.length){
    info(root,'.lj-save-message','Choose a state, credential and at least one planned activity.');return false;
   }
-  const next=save?persist({state,license,activities},root):{...current(),state,license,activities};
+  const next=save?persist({state,license,activities,licenseQuestions:$(root,'#sc-question').value},root):{...current(),state,license,activities};
   const g=scopeResult(next);
   const links=$(root,'[data-source-links]');links.replaceChildren();
   if(g.sources.length){
