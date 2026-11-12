@@ -1,6 +1,7 @@
 // Shared AIMT free launch experience. Browser-local business notes, no PII or client images.
 // Used by standalone tools AND the five-lesson Accelerator. Does not grant practice scope.
 import { blueprintPayload } from './aimt-first-service-blueprint-core.mjs';
+import { calculateServiceCost } from './aimt-service-cost-core.mjs';
 
 export const STORAGE_KEY='aimt-free-head-spa-launch-plan-v1';
 export const VERSION=1;
@@ -61,6 +62,7 @@ export const SPACE_OPTIONS=Object.freeze([
 export const PLAN_FIELDS=Object.freeze([
  'state','license','activities','licenseQuestions','serviceFormat','clientPromise','audience',
  'consultMinutes','serviceMinutes','prepMinutes','resetMinutes','adminMinutes',
+ 'products','supplies','overhead','laborHourly','menuPrice',
  'space','equipmentSystem','equipmentPriority','equipmentQuestions',
  'observationAnswer','observationNote','trainingPriority','trainingChecklist','nextSteps','completed'
 ]);
@@ -74,9 +76,16 @@ function minutes(v){
  if(v===''||v===null||v===undefined)return '';
  const n=Number(v);return Number.isInteger(n)&&n>=0&&n<=1440?String(n):'';
 }
+function amount(value){
+ if(value===''||value===undefined||value===null)return '';
+ const v=String(value).trim();
+ if(!/^(?:\d+)(?:\.\d{1,4})?$/.test(v)||Number(v)>100000)return '';
+ return v;
+}
 export function emptyPlan(){
  return {version:VERSION,state:'',license:'',activities:[],licenseQuestions:'',serviceFormat:'',clientPromise:'',audience:'',
   consultMinutes:'',serviceMinutes:'',prepMinutes:'',resetMinutes:'',adminMinutes:'',
+  products:'',supplies:'',overhead:'',laborHourly:'',menuPrice:'',
   space:'',equipmentSystem:'',equipmentPriority:'',equipmentQuestions:'',
   observationAnswer:'',observationNote:'',trainingPriority:'',trainingChecklist:[],nextSteps:[],completed:[]};
 }
@@ -96,6 +105,7 @@ export function normalizePlan(raw){
  p.completed=Array.isArray(raw.completed)?[...new Set(raw.completed.filter(x=>LESSONS.some(l=>l.id===x)))]:[];
  TEXT_FIELDS.forEach(k=>p[k]=cleanText(raw[k],LIMITS[k]));
  ['consultMinutes','serviceMinutes','prepMinutes','resetMinutes','adminMinutes'].forEach(k=>p[k]=minutes(raw[k]));
+ ['products','supplies','overhead','laborHourly','menuPrice'].forEach(k=>p[k]=amount(raw[k]));
  return p;
 }
 export function readPlan(storage){
@@ -118,6 +128,14 @@ export function appointmentMinutes(plan){
  const service=Number(p.serviceMinutes);
  const total=keys.reduce((sum,k)=>sum+Number(p[k]),0);
  return {service,total,extra:total-service};
+}
+export function pricingResult(plan){
+ const p=normalizePlan(plan);
+ return calculateServiceCost({
+  consultMinutes:p.consultMinutes,serviceMinutes:p.serviceMinutes,prepMinutes:p.prepMinutes,
+  resetMinutes:p.resetMinutes,adminMinutes:p.adminMinutes,
+  products:p.products,supplies:p.supplies,overhead:p.overhead,laborHourly:p.laborHourly,menuPrice:p.menuPrice
+ });
 }
 export function scopeResult(plan){
  const p=normalizePlan(plan),sources=SCOPE_SOURCES[p.state]||[];
@@ -154,7 +172,7 @@ export function observationFeedback(choice){
  return null;
 }
 export function renderPlanText(plan){
- const p=normalizePlan(plan),time=appointmentMinutes(p),eq=equipmentResult(p);
+ const p=normalizePlan(plan),time=appointmentMinutes(p),eq=equipmentResult(p),price=pricingResult(p);
  return [
   'AIMT — HEAD SPA LAUNCH PLAN','Working plan only; not certification or legal clearance.','',
   '01 / SCOPE','State: '+(p.state||'Unselected'),'Credential: '+(p.license||'Unselected'),
@@ -162,7 +180,269 @@ export function renderPlanText(plan){
   'Board question: '+(p.licenseQuestions||'Unwritten'),'Permission: NOT DETERMINED','',
   '02 / SERVICE','Clients: '+(p.audience||'Unspecified'),'Format: '+(p.serviceFormat||'Unselected'),
   'Client promise: '+(p.clientPromise||'Unwritten'),
-  'Full appointment: '+(time?time.total+' minutes (including '+time.extra+' outside hands-on service)':'Not calculated'),'',
+  'Full appointment: '+(time?time.total+' minutes (including '+time.extra+' outside hands-on service)':'Not calculated'),
+  'Modeled service cost: '+(price.ok?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),price=pricingResult(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:price.ok?'
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledCost.toFixed(2)+' (your inputs; not a profit figure)':'Not calculated'),
+  'Proposed price: '+(price.ok&&price.enteredPrice!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.enteredPrice.toFixed(2):'Not entered'),
+  'Price minus modeled cost: '+(price.ok&&price.modeledDifference!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledDifference.toFixed(2)+' (before other costs; not profit)':'Not calculated'),'',
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledCost.toFixed(2)+' modeled cost using user estimates':'Estimate separately in the Cost Worksheet',
+  price:price.ok&&price.enteredPrice!==null?'
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledCost.toFixed(2)+' (your inputs; not a profit figure)':'Not calculated'),
+  'Proposed price: '+(price.ok&&price.enteredPrice!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.enteredPrice.toFixed(2):'Not entered'),
+  'Price minus modeled cost: '+(price.ok&&price.modeledDifference!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledDifference.toFixed(2)+' (before other costs; not profit)':'Not calculated'),'',
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.enteredPrice.toFixed(2)+' proposed price':'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledCost.toFixed(2)+' (your inputs; not a profit figure)':'Not calculated'),
+  'Proposed price: '+(price.ok&&price.enteredPrice!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.enteredPrice.toFixed(2):'Not entered'),
+  'Price minus modeled cost: '+(price.ok&&price.modeledDifference!==null?'
+  '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
+  'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
+  '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
+  '05 / NEXT STEPS',...[0,1,2].map(i=>(i+1)+'. '+(p.nextSteps[i]||'Unwritten')),
+  'Training priority: '+(p.trainingPriority||'Unidentified'),'', 'Verify scope, setup and costs before advertising or providing services.'
+ ].join('\n');
+}
+export function blueprintFromPlan(plan){
+ const p=normalizePlan(plan),time=appointmentMinutes(p),activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
+ return blueprintPayload({
+  practice:p.serviceFormat==='dedicated'?'Proposed dedicated head spa service':'Proposed scalp-care service',
+  audience:p.audience,value:p.clientPromise,
+  format:p.serviceFormat==='dedicated'?'Extended 90':p.serviceFormat==='focused'?'Core 60':'Custom',
+  consultation:'Review client goals, comfort, intake, scope, and appropriate service decisions.',
+  serviceTime:time?time.total+' minutes total including pre/post-treatment time':'',
+  cost:'Estimate separately using the Service Cost Worksheet',price:'',
+  difference:'A purpose-built client experience with verified operational capacity.',
+  equipment:eqShort(p), licensing:(p.state||'State?')+' / '+(p.license||'Credential?')+'. Verify: '+(activities.join(', ')||'activities unknown'),
+  supplier:p.equipmentQuestions||'Check parts, warranty, instructions, installation.',
+  operations:'Verify sanitation, setup, checkout and between-client reset.',
+  rehearsal:'Practice service and measure the real full appointment.',
+  nextStep:p.nextSteps.find(Boolean)||'Confirm scope and first training priority.',reviewDate:''
+ });
+}
+function eqShort(p){return (SYSTEM_OPTIONS.find(o=>o.key===p.equipmentSystem)?.label||'Equipment undecided')+'. Verify utilities and sanitation.';}
++price.modeledDifference.toFixed(2)+' (before other costs; not profit)':'Not calculated'),'',
   '03 / EQUIPMENT','Environment: '+(SPACE_OPTIONS.find(o=>o.key===p.space)?.label||'Unspecified'),
   'Equipment under consideration: '+eq.label,'Supplier/installer question: '+(p.equipmentQuestions||'Unwritten'),'Installation: NOT VERIFIED','',
   '04 / OBSERVATION','Practice sentence: '+(p.observationNote||'Unwritten'),'An observation is not a medical diagnosis.','',
