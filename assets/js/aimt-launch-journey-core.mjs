@@ -178,21 +178,21 @@ export function scopeResult(plan){
  const list=activities.length?activities.map(a=>'• '+a).join('\n'):'• [describe proposed activities]';
  const context=OPERATING_CONTEXTS.find(x=>x.key===p.operatingContext)?.label||'[work setting]';
  const inquiry=[
-  'Subject: Professional scope and establishment questions about a head spa service','',
+  'Subject: Head spa service — licensing questions in '+(p.state||'[state]'),'',
   'Hello,','',
-  'I am evaluating a cosmetic scalp-care / head spa service in '+(p.state||'[state]')+'.',
-  'My credential: '+(p.license||'[credential or no professional license]')+'.',
-  'My planned work setting: '+context+'.','',
-  'Before offering services, I want to verify the requirements for these specific activities:',
+  'I am planning a head spa service in '+(p.state||'[state]')+'.',
+  'My license or registration: '+(p.license||'[credential or no professional license]')+'.',
+  'Where I plan to work: '+context+'.','',
+  'The service would include:',
   list,'',
   ...(researchPath.questions.length
-    ? ['Specific questions for the steps not covered by a cited determination:',
+    ? ['I have a few specific questions:',
        ...researchPath.questions.map(q=>'• '+q.question),'']
     : []),
-  'Could you point me to the governing statutes, regulations or official guidance for each activity?',
-  'What individual professional licenses, establishment licenses, inspections, supervision and sanitation obligations apply?',
-  'Are there additional requirements for the head spa water/steam equipment and its installation?','',
-  'I understand some boards cannot provide advisory legal opinions; a reference to the governing written sources would still be helpful.','',
+  'Could you direct me to the current state laws or rules that cover these steps,',
+  'including any required professional license, salon permit, inspection,',
+  'sanitation, or equipment requirements?','',
+  'A link to the written rule would be helpful if the board cannot offer legal advice.','',
   'Thank you.'
  ].join('\n');
  return {
