@@ -129,3 +129,25 @@ The app already had success/error token overrides in the shared CSS, but the obs
 **Automated scenarios added:** Alaska cosmetologist with seven unanswered selected steps; New York esthetician with cited state references but an unanswered scalp question; California esthetician with an explicit shampoo restriction plus one unanswered camera question; Pennsylvania cosmetologist with fully supported steps and no redundant research route. Exact copy/readability and URL behavior must still be checked in an actual browser at desktop and narrow mobile widths.
 
 **Release gate:** This is a development-preview UX correction, not nationwide legal coverage. No production merge until the existing independent regulatory and manual-device QA gates are met.
+
+
+## Nov 13 — "Your Findings" plain-English summary and glossary
+
+**Owner observation:** The formerly prominent fallback banner began with “Here’s how to confirm the rules for your service” and statutory jargon. It did not clearly identify itself as the actual **summary of findings** or translate official law into understandable language for a student newly licensed or 10 years into practice.
+
+**Designed and implemented in the existing shared Scope Finder widget**, used in both the standalone page and Accelerator Lesson 1:
+- A neutral, clearly labeled **YOUR FINDINGS / Your results, in plain English** section appears before the detailed legal citations and research path.
+- Personal context is limited to the visitor’s selected **license category and state**. The page does NOT claim to have verified their identity, active credential, facility or overall permission.
+- Each category is stated in everyday language, only when relevant: **What this license type covers**, **A specific license exception**, **What needs another license**, **An exception with conditions**, **Equipment or methods to check**, and **What still needs an exact answer**.
+- Source-backed positive categories use AIMT success green; express restrictions use AIMT error red; conditional exceptions, technical checks and unsupported source conclusions stay neutral. No green label is used to certify the visitor’s own license.
+- With **7 unaddressed activities**, the summary remains a short, neutral finding and a **link to the official government-source route**, not a wall of zeros, not repeated warning cards, and not the claim “this state provides no information.” The full tailored questions appear in the research-path section below.
+- With a mixed set of activities, positive findings and explicit restrictions both remain visible. When a real restriction exists, the **next action prioritizes reading the precise restricted step’s official source**.
+- With only a specific unlicensed shampoo exemption, the suggested next action is to **check the actual workplace conditions**, not to “verify your license” when none is held.
+- An accessible expandable glossary defines **scope of practice, salon/establishment license, exemption, and licensing board** in simple terms.
+- Copied research report puts the same plain-English summary **before** the statute/citation details.
+- Full research-only disclaimer, official evidence links, valid-license limitations and establishment rules remain.
+- No new backend, analytics, lead capture, legal clearance or production release.
+
+**Manual acceptance cases still outstanding**: PA licensed cosmetologist (5 scoped + 2 implementation checks), Alaska cosmetologist 7 unknown steps (1 neutral summary + USAGov route), TX no-license shampoo-only (specific exemption + correct workplace next step), TX no-license shampoo + styling (one green + one red, restricted-rule next step), CA esthetician shampoo (red legal exclusion), Pennsylvania nonlicensed supervised shampoo (conditional neutral), and narrow mobile width (glossary definition grid collapses). Capture 375px/mobile and desktop screenshots plus keyboard focus/expanded glossary verification.
+
+**Automated verification**: regression tests were added to check these examples, the factual data and UI source. A passing CI run is not a substitute for interactive browser, device, or independent regulatory interpretation review.
