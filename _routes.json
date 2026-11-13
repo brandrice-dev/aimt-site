@@ -34,6 +34,12 @@
     "/head-spa-readiness",
     "/head-spa-readiness.html",
     "/head-spa-readiness/",
+    "/head-spa-accelerator-pilot",
+    "/head-spa-accelerator-pilot.html",
+    "/head-spa-accelerator-pilot/",
+    "/head-spa-scope-finder-pilot",
+    "/head-spa-scope-finder-pilot.html",
+    "/head-spa-scope-finder-pilot/",
     "/readiness-enroll",
     "/readiness-enroll.html",
     "/readiness-enroll/",
@@ -76,6 +82,18 @@
     "/head-spa-service-cost/",
     "/first-service-blueprint",
     "/first-service-blueprint.html",
-    "/first-service-blueprint/"
+    "/first-service-blueprint/",
+    "/head-spa-launch-accelerator",
+    "/head-spa-launch-accelerator.html",
+    "/head-spa-launch-accelerator/",
+    "/head-spa-scope-finder",
+    "/head-spa-scope-finder.html",
+    "/head-spa-scope-finder/",
+    "/head-spa-equipment-planner",
+    "/head-spa-equipment-planner.html",
+    "/head-spa-equipment-planner/",
+    "/scalp-observation-lab",
+    "/scalp-observation-lab.html",
+    "/scalp-observation-lab/"
   ]
 }

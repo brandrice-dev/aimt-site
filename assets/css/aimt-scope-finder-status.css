@@ -1,0 +1,418 @@
+/* AIMT Scope Finder status and selection color semantics.
+   Loaded AFTER aimt-launch-journey.css in both shared widget contexts.
+   Green/red refer to source-backed legal activity guidance, not a person's
+   verified license or permission to operate a complete head spa.
+   Selected checkboxes are merely user choices and stay neutral. */
+.lj-tool[data-aimt-tool="scope"]{
+  --scope-success:var(--aimt-success,#3a5a3a);
+  --scope-success-light:var(--aimt-success-light,#e8ede8);
+  --scope-error:var(--aimt-error,#7a3030);
+  --scope-error-light:var(--aimt-error-light,#f0e8e8);
+  --scope-ink:#35332f;
+}
+
+/* Checked means included in my planned service, not approved or prohibited. */
+.lj-tool[data-aimt-tool="scope"] input[type=checkbox]{
+  accent-color:var(--scope-ink);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-check:has(input:checked){
+  background:#f1eee9;
+  border-color:#a29b92;
+  box-shadow:inset 0 0 0 1px rgba(53,51,47,.08);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-check:has(input:checked) span{
+  color:#292724;
+}
+
+/* SOURCE-BACKED scope/exemption = AIMT success green. This is NOT practice clearance. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"]{
+  background:var(--scope-success-light);
+  border:1px solid rgba(58,90,58,.30);
+  border-left:4px solid var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"] .lj-evidence-kind{
+  background:var(--scope-success-light);
+  color:var(--scope-success);
+  border:1px solid rgba(58,90,58,.35);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"] .lj-evidence-kind::before,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"] .lj-evidence-kind::before{
+  content:"✓";
+  font-weight:700;
+  margin-right:7px;
+}
+
+/* An express credential restriction = AIMT error red. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"]{
+  background:var(--scope-error-light);
+  border:1px solid rgba(122,48,48,.28);
+  border-left:4px solid var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"] .lj-evidence-kind{
+  background:var(--scope-error-light);
+  color:var(--scope-error);
+  border:1px solid rgba(122,48,48,.32);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"] .lj-evidence-kind::before,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"] .lj-evidence-kind::before{
+  content:"×";
+  font-weight:700;
+  margin-right:7px;
+}
+
+/* Implementation questions, supervision conditions and unfinished research
+   are NOT violations or denials; keep those status cards neutral. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="implementation_review"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="unresolved"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="conditional_exemption"]{
+  background:#faf7f2;
+  border:1px solid #d8ccbe;
+  border-left:4px solid #a99a86;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="implementation_review"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="unresolved"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="conditional_exemption"] .lj-evidence-kind{
+  background:#f0ebe3;
+  color:#65584b;
+  border:1px solid #dbd0c2;
+}
+
+/* Summary is semantic and source-led, distinct from a user's claimed license. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="supported"]{
+  background:var(--scope-success-light);
+  border-color:rgba(58,90,58,.3);
+  border-left-color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="supported"] strong{
+  color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="restricted"]{
+  background:var(--scope-error-light);
+  border-color:rgba(122,48,48,.3);
+  border-left-color:var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="restricted"] strong{
+  color:var(--scope-error);
+}
+
+/* Links and government lookup are actions, not warning indicators. */
+.lj-tool[data-aimt-tool="scope"] .lj-license-lookup-link{
+  background:#f4f1ec;
+  border-color:#918b82;
+  color:var(--scope-ink)!important;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-license-lookup-link:hover{
+  background:#eae6df;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-refs a,
+.lj-tool[data-aimt-tool="scope"] .lj-source-list a{
+  color:var(--scope-ink)!important;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-refs a:hover,
+.lj-tool[data-aimt-tool="scope"] .lj-source-list a:hover{
+  text-decoration-thickness:2px;
+}
+.lj-tool[data-aimt-tool="scope"] a:focus-visible,
+.lj-tool[data-aimt-tool="scope"] .lj-check:focus-within{
+  outline:2px solid #605b53;
+  outline-offset:3px;
+}
+
+/* Research pathway: actionable guidance, not a negative licensing verdict. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="unknown"]{background:#f5f1eb;border:1px solid #d8cec2;border-left:4px solid #998a77}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="unknown"] strong{color:#302b28}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-research-path{margin:18px 0 27px;padding:clamp(18px,3vw,27px);background:#fffdf9;border:1px solid #d9cfc5;border-radius:13px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head>span{display:block;font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.15em;color:#786b5c}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head h4{font:700 clamp(18px,2.5vw,23px)/1.25 var(--aimt-font-mont,Montserrat,sans-serif);color:#282522;margin:9px 0 12px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head p{font-size:13px;line-height:1.65;color:#5e544c;margin:0 0 17px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link{display:inline-flex;align-items:center;min-height:44px;border:1px solid #514e48;border-radius:8px;padding:11px 15px;background:#292925;color:#fff!important;text-decoration:none;font:600 12px/1.5 var(--aimt-font-sans,Outfit,sans-serif)}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link:hover{background:#46433c}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps{list-style:decimal;margin:23px 0;padding:0 0 0 22px;border-top:1px solid #e6ded5}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps li{display:list-item;padding:14px 4px 14px 3px;border-bottom:1px solid #e6ded5;color:#675c52}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps strong{display:block;color:#302a27;font:600 13px/1.4 var(--aimt-font-mont,Montserrat,sans-serif)}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps li p{margin:7px 0 0;color:#665a51;font-size:12px;line-height:1.65}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions{margin-top:20px;padding:16px 19px;border-radius:10px;background:#f4efe9}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions h5{color:#312c28;font:700 13px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);margin:0 0 11px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions ul{margin:0;padding-left:19px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions li{font-size:12px;line-height:1.65;color:#514840;margin:7px 0}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-caption{color:#6d625a;font-size:11px;line-height:1.6;margin:16px 0 0}
+@media(max-width:560px){.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link{display:flex;width:100%;justify-content:center;text-align:center}}
+
+
+/* Findings summary is a translation layer, NOT a licensing verdict.
+   Only its individual source-backed outcome rows carry green/red. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick.lj-scope-takeaway{
+  margin:23px 0 27px;
+  border:1px solid #d7cec4;
+  border-top:4px solid #54504a;
+  border-radius:13px;
+  background:#faf8f4;
+  padding:clamp(20px,3vw,30px);
+  box-shadow:0 8px 24px rgba(42,35,29,.055);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick.lj-scope-takeaway[data-scope-tone="supported"],
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick.lj-scope-takeaway[data-scope-tone="restricted"],
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick.lj-scope-takeaway[data-scope-tone="unknown"]{
+  border:1px solid #d7cec4;
+  border-top:4px solid #54504a;
+  background:#faf8f4;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-eyebrow{
+  display:block;
+  margin-bottom:10px;
+  font:700 11px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#6a625b;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-header h3{
+  margin:0 0 10px;
+  font:700 clamp(22px,3.2vw,31px)/1.18 var(--aimt-font-mont,Montserrat,sans-serif);
+  letter-spacing:-.035em;
+  color:#282421;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-header>p{
+  font-size:14px;
+  line-height:1.6;
+  color:#665c54;
+  margin:0 0 19px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-items{
+  display:grid;
+  gap:10px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item{
+  border:1px solid #d9d0c5;
+  border-left:4px solid #9e9181;
+  border-radius:0 10px 10px 0;
+  background:#f5f1eb;
+  padding:14px 17px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item strong{
+  display:block;
+  font:700 14px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);
+  color:#34302c;
+  margin-bottom:5px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item p{
+  font-size:13px;
+  line-height:1.6;
+  color:#554d46;
+  margin:0;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="supported"]{
+  background:var(--scope-success-light);
+  border-color:rgba(58,90,58,.25);
+  border-left-color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="supported"] strong{
+  color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="restricted"]{
+  background:var(--scope-error-light);
+  border-color:rgba(122,48,48,.25);
+  border-left-color:var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="restricted"] strong{
+  color:var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next{
+  margin-top:19px;
+  border-top:1px solid #ded5ca;
+  padding-top:17px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next strong{
+  display:block;
+  font:700 13px/1.45 var(--aimt-font-mont,Montserrat,sans-serif);
+  color:#322d29;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next p{
+  font-size:12px;
+  line-height:1.6;
+  color:#625850;
+  margin:7px 0 11px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next a{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:8px;
+  background:#302e2a;
+  color:#fff!important;
+  font:600 12px/1.5 var(--aimt-font-sans,Outfit,sans-serif);
+  text-decoration:none;
+  overflow-wrap:anywhere;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next a:hover{
+  background:#45413a;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary{
+  margin-top:17px;
+  padding-top:15px;
+  border-top:1px solid #ded5ca;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary summary{
+  cursor:pointer;
+  font:600 12px/1.5 var(--aimt-font-sans,Outfit,sans-serif);
+  text-decoration:underline;
+  text-underline-offset:4px;
+  color:#4a403a;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary summary:focus-visible{
+  outline:2px solid #62584f;outline-offset:4px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary dl{
+  display:grid;
+  grid-template-columns:minmax(0,170px) minmax(0,1fr);
+  gap:10px 16px;
+  margin:16px 0 0;
+  font-size:12px;
+  line-height:1.6;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary dt{
+  font-weight:600;color:#39312c;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-glossary dd{
+  margin:0;color:#5b5049;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-note{
+  margin:16px 0 0;
+  color:#786e65;
+  font-size:11px;
+  line-height:1.6;
+}
+@media(max-width:620px){
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-glossary dl{
+  grid-template-columns:1fr;gap:4px;
+ }
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-glossary dd{margin-bottom:9px}
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-next a{
+  display:block;text-align:center;
+ }
+}
+
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-steps{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:24px;
+  row-gap:6px;
+  padding-left:19px;
+  margin:12px 0 0;
+  list-style:disc;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-steps li{
+  font-size:13px;
+  line-height:1.55;
+  color:#423b35;
+  padding-left:2px;
+  margin:0;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="supported"] .lj-scope-takeaway-steps li::marker{
+  color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-item[data-finding-tone="restricted"] .lj-scope-takeaway-steps li::marker{
+  color:var(--scope-error);
+}
+@media(max-width:650px){
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-takeaway-steps{
+  grid-template-columns:1fr;
+ }
+}
+
+
+/* Final simplified result flow: findings -> email -> optional source details.
+   The full source evidence is still accessible, not repeated on first view. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email{
+  margin:21px 0 15px;
+  padding:clamp(18px,3vw,26px);
+  border:1px solid #d7ccc2;
+  border-radius:13px;
+  background:#fffdf9;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:17px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading>div{min-width:0;flex:1}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading span{
+  display:block;font:700 10px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);
+  letter-spacing:.13em;color:#73685f;margin:0 0 7px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading h4{
+  margin:0 0 7px;
+  font:700 clamp(18px,2.2vw,22px)/1.3 var(--aimt-font-mont,Montserrat,sans-serif);
+  letter-spacing:-.02em;color:#292521;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading p{
+  margin:0;color:#5c5149;font:400 13px/1.65 var(--aimt-font-sans,Outfit,sans-serif);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading button{
+  flex-shrink:0;min-height:43px;margin-top:9px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email [data-email-status],
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details [data-report-status]{
+  min-height:0;margin:9px 0 0;
+}
+.lj-tool[data-aimt-tool="scope"] :is(.lj-scope-email-preview,.lj-scope-details,.lj-scope-research-path)>summary{
+  cursor:pointer;list-style:revert;
+  font:600 13px/1.5 var(--aimt-font-sans,Outfit,sans-serif);
+  color:#403933;
+}
+.lj-tool[data-aimt-tool="scope"] :is(.lj-scope-email-preview,.lj-scope-details,.lj-scope-research-path)>summary:focus-visible{
+  outline:2px solid #55514b;outline-offset:3px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-preview{
+  border-top:1px solid #e1d9cf;padding-top:13px;margin:17px 0 0;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-email-preview pre{
+  display:block;white-space:pre-wrap;overflow-wrap:anywhere;
+  margin:13px 0 0;padding:16px;
+  border:1px solid #dfd5cb;border-radius:9px;
+  background:#f6f1eb;
+  color:#3d3731;
+  font:400 12px/1.65 var(--aimt-font-sans,Outfit,sans-serif);
+  max-height:360px;overflow:auto;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details,
+.lj-tool[data-aimt-tool="scope"] .lj-scope-research-path{
+  margin:15px 0;
+  border:1px solid #d8cec3;
+  border-radius:12px;
+  background:#fbf8f3;
+  padding:16px 20px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-research-path{
+  box-shadow:none;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details-body,
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-body{
+  border-top:1px solid #e3dbd0;
+  margin-top:16px;padding-top:17px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details-body h4{
+  font:700 15px/1.45 var(--aimt-font-mont,Montserrat,sans-serif);
+  margin:19px 0 9px;color:#2f2925;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details-body h4:first-child{margin-top:0}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-details-body .lj-source-list li{
+  font-size:12px;line-height:1.6;overflow-wrap:anywhere;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-license-warning{
+  padding:12px 14px;margin:13px 0 0;
+  background:#f0e8e1;border-left:3px solid #8e7567;
+  border-radius:0 8px 8px 0;color:#4d3e36;
+  font-size:12px;line-height:1.6;
+}
+.lj-tool[data-aimt-tool="scope"] textarea[data-copy-fallback]{
+  display:block;min-height:115px;margin-top:10px;font-size:12px;
+}
+@media(max-width:620px){
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading{flex-direction:column;gap:12px}
+ .lj-tool[data-aimt-tool="scope"] .lj-scope-email-heading button{width:100%;margin:0}
+ .lj-tool[data-aimt-tool="scope"] :is(.lj-scope-details,.lj-scope-research-path){padding:16px}
+}

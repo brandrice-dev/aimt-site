@@ -13,16 +13,26 @@ const read=p=>readFileSync(path.join(ROOT,p),'utf8');
 const hub=read('free-tools.html'), cost=read('head-spa-service-cost.html'), blueprint=read('first-service-blueprint.html'),css=read('assets/css/aimt-free-tools.css');
 const routes=JSON.parse(read('_routes.json'));
 
-test('free tools offers exactly three existing/working categories without empty placeholders',()=>{
+test('free tools prominently features the guided Accelerator and six working resources',()=>{
   assert.match(hub,/Free tools for beauty professionals/);
   assert.match(hub,/who want to offer more/);
+  assert.match(hub,/Free Head Spa Launch Accelerator/);
   const categories=[...hub.matchAll(/<article class="ft-tool-card" data-ft-category="([^"]+)"/g)].map(x=>x[1]);
-  assert.deepEqual(categories,['planning','pricing','education']);
-  for(const page of ['head-spa-readiness.html','head-spa-service-cost.html','education.html'])assert.ok(existsSync(path.join(ROOT,page)),page);
-  assert.match(hub,/href="\/head-spa-readiness"/);
-  assert.match(hub,/href="\/head-spa-service-cost"/);
-  assert.match(hub,/href="\/education"/);
-  assert.doesNotMatch(hub,/coming soon|under construction|not yet available/i);
+  assert.deepEqual(categories,['scope','equipment','observation','pricing','planning','planning']);
+  for(const page of [
+    'head-spa-launch-accelerator.html','head-spa-scope-finder.html',
+    'head-spa-equipment-planner.html','scalp-observation-lab.html',
+    'head-spa-readiness.html','head-spa-service-cost.html',
+    'first-service-blueprint.html','education.html'
+  ])assert.ok(existsSync(path.join(ROOT,page)),page);
+  for(const url of [
+    '/head-spa-launch-accelerator','/head-spa-scope-finder',
+    '/head-spa-equipment-planner','/scalp-observation-lab',
+    '/head-spa-readiness','/head-spa-service-cost','/first-service-blueprint'
+  ])assert.match(hub,new RegExp('href="'+url+'"'));
+  assert.match(hub,/Equipment Clinic/);
+  assert.match(hub,/In planning/);
+  assert.match(hub,/account-wide single signup has not yet been implemented/i);
 });
 test('new public routes are allowlisted; Blueprint is noindex and absent from sitemap/homepage',()=>{
   for(const base of ['free-tools','head-spa-service-cost','first-service-blueprint'])for(const s of ['','.html','/'])assert.ok(routes.exclude.includes('/'+base+s));
