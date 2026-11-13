@@ -483,7 +483,7 @@ test('unresearched is clearly an AIMT evidence gap, not a restriction',()=>{
   assert.equal(summary.counts.outside_credential,0);
  }
  const registry=read('assets/js/aimt-scope-evidence.mjs');
- assert.match(registry,/Confirm the specific rule for this activity/);
+ assert.match(registry,/Find the rule for this exact step/);
  assert.match(registry,/not evidence the activity is prohibited/);
 });
 
