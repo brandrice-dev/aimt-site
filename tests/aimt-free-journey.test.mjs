@@ -673,3 +673,22 @@ test('all free-journey browser JavaScript modules parse as valid ES modules',()=
   }),'Invalid ES module syntax in '+file);
  }
 });
+
+
+test('research path points each profession to a relevant authority, not an unrelated cosmo board',()=>{
+ const directory='https://www.usa.gov/state-governments';
+ for(const [state,credential] of [
+  ['Texas','Massage therapist'],
+  ['California','Other / unsure'],
+  ['Florida','Barber'],
+  ['New York','Barber']
+ ]){
+  const route=scopeResearchPath(evidenceFor(state,credential,['camera']));
+  assert.equal(route.startingPoint.url,directory,state+' '+credential+' should use neutral state agency directory');
+  assert.equal(route.hasStateSources,false);
+ }
+ const paBarber=scopeResearchPath(evidenceFor('Pennsylvania','Barber',['camera']));
+ assert.match(paBarber.startingPoint.url,/barber/i);
+ assert.equal(paBarber.hasStateSources,true);
+ assert.equal(scopeResearchPath(evidenceFor('Texas','Esthetician',['camera'])).hasStateSources,true);
+});
