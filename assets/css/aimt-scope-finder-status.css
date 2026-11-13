@@ -123,3 +123,23 @@
   outline:2px solid #605b53;
   outline-offset:3px;
 }
+
+/* Research pathway: actionable guidance, not a negative licensing verdict. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="unknown"]{background:#f5f1eb;border:1px solid #d8cec2;border-left:4px solid #998a77}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="unknown"] strong{color:#302b28}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-research-path{margin:18px 0 27px;padding:clamp(18px,3vw,27px);background:#fffdf9;border:1px solid #d9cfc5;border-radius:13px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head>span{display:block;font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.15em;color:#786b5c}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head h4{font:700 clamp(18px,2.5vw,23px)/1.25 var(--aimt-font-mont,Montserrat,sans-serif);color:#282522;margin:9px 0 12px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-head p{font-size:13px;line-height:1.65;color:#5e544c;margin:0 0 17px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link{display:inline-flex;align-items:center;min-height:44px;border:1px solid #514e48;border-radius:8px;padding:11px 15px;background:#292925;color:#fff!important;text-decoration:none;font:600 12px/1.5 var(--aimt-font-sans,Outfit,sans-serif)}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link:hover{background:#46433c}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps{list-style:decimal;margin:23px 0;padding:0 0 0 22px;border-top:1px solid #e6ded5}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps li{display:list-item;padding:14px 4px 14px 3px;border-bottom:1px solid #e6ded5;color:#675c52}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps strong{display:block;color:#302a27;font:600 13px/1.4 var(--aimt-font-mont,Montserrat,sans-serif)}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-steps li p{margin:7px 0 0;color:#665a51;font-size:12px;line-height:1.65}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions{margin-top:20px;padding:16px 19px;border-radius:10px;background:#f4efe9}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions h5{color:#312c28;font:700 13px/1.4 var(--aimt-font-mont,Montserrat,sans-serif);margin:0 0 11px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions ul{margin:0;padding-left:19px}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-questions li{font-size:12px;line-height:1.65;color:#514840;margin:7px 0}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-path-caption{color:#6d625a;font-size:11px;line-height:1.6;margin:16px 0 0}
+@media(max-width:560px){.lj-tool[data-aimt-tool="scope"] .lj-scope-path-link{display:flex;width:100%;justify-content:center;text-align:center}}
