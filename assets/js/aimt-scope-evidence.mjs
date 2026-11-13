@@ -279,6 +279,53 @@ export function scopeSummary(review){
  return {headline,message,tone,counts,total:results.length,wholeServiceCleared:false};
 }
 
+// Plain-language interpretation of what the SOURCES show, not of a
+// visitor's personal permission to practice. Never map 'unresolved' to 'no'.
+const SUMMARY_STEP_NAMES=Object.freeze({
+ wash:'shampooing hair',scalp:'cosmetic scalp care',
+ 'scalp-massage':'scalp massage',bodywork:'cosmetic neck or shoulder massage',
+ styling:'hair styling',camera:'scalp-camera observation',
+ wet:'water, steam or sanitation equipment'
+});
+function stepNames(findings){
+ return findings.map(f=>SUMMARY_STEP_NAMES[f.activity]||f.activity).join(', ');
+}
+export function scopePlainEnglish(review){
+ const findings=Array.isArray(review?.findings)?review.findings:[];
+ const groups=[
+  {id:'credential_scope',tone:'supported',title:'What your license type covers',items:findings.filter(f=>f.status==='credential_scope'),
+   explain:items=>'The official references describe '+stepNames(items)+' as services within this professional license category.'},
+  {id:'documented_exemption',tone:'supported',title:'A specific license exception',items:findings.filter(f=>f.status==='documented_exemption'),
+   explain:items=>'The cited state source says '+stepNames(items)+' does not require an individual professional license. That exception is limited to these activities.'},
+  {id:'outside_credential',tone:'restricted',title:'What needs another license',items:findings.filter(f=>['outside_credential','licensed_role_required'].includes(f.status)),
+   explain:items=>'The official references identify a licensing restriction for '+stepNames(items)+'. See the specific requirement and source below.'},
+  {id:'conditional_exemption',tone:'check',title:'An exception with conditions',items:findings.filter(f=>f.status==='conditional_exemption'),
+   explain:items=>'A narrow exception may apply to '+stepNames(items)+', but only when the stated supervision or workplace conditions are met.'},
+  {id:'implementation_review',tone:'check',title:'Equipment or methods to check',items:findings.filter(f=>f.status==='implementation_review'),
+   explain:items=>'The underlying cosmetic service may be in scope; '+stepNames(items)+' still has specific equipment, technique or location requirements to check.'},
+  {id:'unresolved',tone:'neutral',title:'What still needs an exact answer',items:findings.filter(f=>f.status==='unresolved'),
+   explain:items=>'For '+stepNames(items)+', the references shown do not establish an exact answer for this license type. That does not mean the services are prohibited.'}
+ ];
+ const items=groups.filter(g=>g.items.length).map(g=>({
+  id:g.id,tone:g.tone,title:g.title,text:g.explain(g.items),count:g.items.length
+ }));
+ const state=review?.state||'your state',license=review?.license||'the selected license';
+ const none=items.length===1 && items[0].id==='unresolved';
+ const route=scopeResearchPath(review);
+ const next=none || items.some(i=>i.id==='unresolved')
+  ? {label:'Next: find the exact rule',text:'Open the government source below, then use the service-specific questions to check what applies to your license and workplace.',
+     href:route.startingPoint.url,linkLabel:route.startingPoint.title}
+  : {label:'Next: verify your license and workplace',text:'Check that your individual license is active and that your salon or work location meets its separate requirements.',
+     href:review?.licenseLookup?.url||route.startingPoint.url,
+     linkLabel:review?.licenseLookup?'Check your license on the official state website':route.startingPoint.title};
+ return {
+  context:'You selected '+license+' in '+state+'. Here is what the cited government references mean for the services you chose.',
+  items,next,
+  note:'These results describe written guidance for license types and activities. They do not verify your individual license, business premises, or permission to offer an entire head spa service.',
+  hasSourceBackedResult:items.some(x=>x.tone==='supported'||x.tone==='restricted'||x.id==='conditional_exemption')
+ };
+}
+
 // Source-led next steps for selections without a complete written determination.
 // USAGov is an official government directory, NOT a claim that it is a
 // cosmetology board or that it decides individual licensing questions.
