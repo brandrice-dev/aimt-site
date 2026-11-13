@@ -87,3 +87,25 @@ A PA cosmetologist selects all seven advertised head spa components. This exact 
 ### Release decision
 
 Code/automated tests alone do not establish the legal accuracy of a regulatory answer. A qualified independent reviewer must approve the state-specific interpretations, exclusion language, facility statements and source-change plan before any production promotion as a licensing guide. Owner's explicit merge/release decision is also required. A preliminary six-state tool can be published only if all source/legal, UX, privacy and owner gates have been cleared; nationwide claims require all 51 jurisdictions researched and maintained.
+
+
+## Nov 13 — screenshot-reported color regression (owner observation)
+
+The branch preview screenshot showed burgundy/maroon on both:
+1. Checked **planned activity** boxes (the user was simply selecting services, not failing a licensing test).
+2. **Source-confirmed professional scope** cards, their "COVERED WITHIN..." labels and citation/PA PALS links (which visually resembled warnings).
+
+The app already had success/error token overrides in the shared CSS, but the observed branch preview did not display them reliably; old selectors and cached shared CSS continued to convey warning colors.
+
+**Corrected design contract** (both standalone Finder and Accelerator):
+- Checked activity box = **neutral charcoal and warm gray**, never red or green. Selection is not a legal determination.
+- Confirmed state-source professional scope or specific individual-license exemption = AIMT green \`#3a5a3a\` and pale green \`#e8ede8\`, explicitly not proof the individual's credential is active.
+- Express scope exclusion or requirement for another licensed role = AIMT red \`#7a3030\` and pale red \`#f0e8e8\`.
+- Unresearched, conditionally exempt and equipment/sanitation details = neutral/warm stone, not an implicit denial.
+- Board license lookup and citation links = normal charcoal interactive styling, not red restriction badges.
+- Green and red use descriptive text/icons as well as color.
+
+**Implementation:** A new and narrowly scoped \`assets/css/aimt-scope-finder-status.css\` loads **after** the shared stylesheet, with more specific selectors and cache-busted stylesheet links in both pages, so browsers cannot reuse the older cached CSS. Existing neutral inputs and links in other AIMT free tools remain unchanged.
+
+**Actual-browser verification remains required:** In the PA cosmetologist example (shampoo, cosmetic scalp work, scalp massage), confirm selected checkboxes are charcoal, all "Covered within..." labels and source-backed cards are green, PA PALS and official sources are charcoal, and no red appears absent a genuine restricted activity. Repeat with CA Esthetician + shampoo to prove a real restriction is red. Record screenshots at desktop and 375px mobile, plus computed style inspection and force refresh in the same browser that reproduced the bug. GitHub CI's static CSS tests and Cloudflare deployment success are NOT visual verification.
+
