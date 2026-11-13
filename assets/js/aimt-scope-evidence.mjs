@@ -298,11 +298,20 @@ const STEP_QUESTIONS=Object.freeze({
 });
 export function scopeResearchPath(review){
  const unknown=Array.isArray(review?.findings)?review.findings.filter(x=>x.status==='unresolved'):[];
- const hasStateSources=Array.isArray(review?.sources)&&review.sources.length>0;
+ const available=Array.isArray(review?.sources)?review.sources:[];
+ const credential=review?.license||'';
+ // Don't send massage therapists or unknown-credential visitors to a
+ // cosmetology-only board just because AIMT mapped that state's cosmo law.
+ const needsDifferentRegulator=['Massage therapist','Other / unsure'].includes(credential)
+   ||(['Florida','New York'].includes(review?.state)&&credential==='Barber');
+ const candidates=review?.state==='Pennsylvania'&&credential==='Barber'
+   ? available.filter(x=>x.id==='pa-barber-guide'||x.id==='pa-barber-law')
+   : needsDifferentRegulator?[]:available;
+ const hasStateSources=candidates.length>0;
  const startingPoint=hasStateSources
-  ? {title:'Open the official '+(review.authority||'state licensing')+' sources',
-     detail:'Start with the government references shown below for the selected state and credential.',
-     url:review.sources[0].url,sourceTitle:review.sources[0].title}
+  ? {title:'Open '+(review?.state||'state')+' official licensing guidance',
+     detail:'Begin with '+candidates[0].title+'. Confirm that this is the regulator for your exact credential, then read the service and facility requirements.',
+     url:candidates[0].url,sourceTitle:candidates[0].title}
   : {title:'Find the '+(review?.state||'state')+' professional licensing agency',
      detail:'Select '+(review?.state||'your state')+' in the official USAGov directory, then locate the board overseeing your credential.',
      url:SCOPE_GOVERNMENT_DIRECTORY.url,sourceTitle:SCOPE_GOVERNMENT_DIRECTORY.title};
