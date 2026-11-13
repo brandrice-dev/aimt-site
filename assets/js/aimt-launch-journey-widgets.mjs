@@ -170,10 +170,19 @@ export function mountScope(root){
   lic.value=values.includes(previous)?previous:'';
   info(root,'[data-credential-note]',CREDENTIAL_NOTES[st.value]||'Use the exact license title from your state board.');
  }
- st.addEventListener('change',()=>refreshCredentials());
  refreshCredentials(p.license);
  root.querySelectorAll('[name="sc-activity"]').forEach(x=>x.checked=p.activities.includes(x.value));
  let inquiry='',report='';
+ function invalidate(){
+  // Old legal findings must not remain visible after a different state,
+  // credential, work setting or service selection is entered.
+  $(root,'[data-sources]').hidden=true;
+  inquiry='';report='';
+  info(root,'.lj-save-message','Selections changed. Choose View my results to update the guidance.');
+ }
+ st.addEventListener('change',()=>{refreshCredentials();invalidate();});
+ [lic,licenseStatus,context,...root.querySelectorAll('[name="sc-activity"]')]
+  .forEach(input=>input.addEventListener('change',invalidate));
  function createLink(item){
   const a=document.createElement('a');a.href=item.url;
   a.target='_blank';a.rel='noopener noreferrer';a.textContent=item.title;
