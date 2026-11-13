@@ -46,12 +46,17 @@ function trigger(root,id,fn){
 function resultHTML(title='Your working result'){
  return '<div class="lj-keep" data-result hidden><strong>'+safe(title)+'</strong><p data-result-copy></p><small>Planning only. Confirm all legal, operational and training requirements before practice.</small></div>';
 }
-async function copy(value,root){
- try{await navigator.clipboard.writeText(value);info(root,'.lj-save-message','Copied. You can paste this into your own plan or message.');}
- catch{
-  const area=document.createElement('textarea');area.setAttribute('aria-label','Select and copy this text');
-  area.value=value;area.style.width='100%';area.rows=7;root.appendChild(area);area.focus();area.select();
-  info(root,'.lj-save-message','Clipboard access is unavailable. Select and copy the text shown below.');
+async function copy(value,root,{statusSelector='.lj-save-message',fallbackRoot=root,successMessage='Copied. You can paste this into your own plan or message.'}={}){
+ try{
+  await navigator.clipboard.writeText(value);
+  info(root,statusSelector,successMessage);
+ }catch{
+  fallbackRoot.querySelector('[data-copy-fallback]')?.remove();
+  const area=document.createElement('textarea');
+  area.dataset.copyFallback='';area.setAttribute('aria-label','Select and copy this text');
+  area.readOnly=true;area.value=value;area.style.width='100%';area.rows=7;
+  fallbackRoot.appendChild(area);area.focus();area.select();
+  info(root,statusSelector,'Automatic copying is unavailable. Select the text shown below and copy it manually.');
  }
 }
 function feedbackState(element,isSupported){
