@@ -272,7 +272,9 @@ export function scopeSummary(review){
  }else if(results.length&&counts.unresolved===results.length){
   tone='unknown';
   headline='Here’s how to confirm the rules for your service';
-  message='“Head spa” is a service name; professional rules address the actual activities, credentials and premises. We do not have a specific, source-backed determination for this selection. That does not mean these services are prohibited. Use the official resources and tailored questions below to find out what applies.';
+  message=review?.sources?.length
+   ?'Your state has official licensing resources, but the references shown do not settle this exact combination of activities, credential and workplace. That is not a finding that the services are prohibited. Use the official sources and the tailored questions below.'
+   :'“Head spa” is a service name; professional rules address the actual activities, credentials and workplace. We do not have a state-specific source-backed determination for this selection. That does not mean the services are prohibited. Begin with the official government directory and the tailored questions below.';
  }
  return {headline,message,tone,counts,total:results.length,wholeServiceCleared:false};
 }
