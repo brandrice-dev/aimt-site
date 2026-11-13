@@ -9,28 +9,28 @@ export const SCOPE_RESEARCH_DISCLAIMER="Educational research only. AIMT summariz
 
 export const SCOPE_FINDINGS=Object.freeze({
   documented_exemption:{
-    heading:'Specific activity is exempt from individual licensing',
+    heading:'No individual license required for this specific step',
     explanation:'The cited agency specifically describes this activity as not requiring an individual license. Other steps, facility rules and local requirements may still apply.'
   },
-  conditional_exemption:{heading:'Narrow exception with required supervision',explanation:'A specific activity may be exempt only under described work-setting and supervision conditions. Not permission to operate a whole head spa.'},
+  conditional_exemption:{heading:'This exception has specific conditions',explanation:'A specific activity may be exempt only under described work-setting and supervision conditions. Not permission to operate a whole head spa.'},
   credential_scope:{
-    heading:'Covered within this professional license category',
+    heading:'Covered by this type of license',
     explanation:'The cited law or regulator describes this type of cosmetic service within the professional scope. Specific techniques, health rules and the workplace still matter.'
   },
   implementation_review:{
-    heading:'Cosmetic practice is covered; confirm equipment or technique details',
+    heading:'Cosmetic service covered; check equipment or technique',
     explanation:'The source addresses the broader professional service, but additional equipment, installation, recordkeeping or medical-boundary details need to be checked. This is not a finding that the activity is prohibited.'
   },
   outside_credential:{
-    heading:'Not included in this license’s scope',
+    heading:'Not covered by this type of license',
     explanation:'The cited agency specifically excludes this activity for the selected credential. A separate qualifying credential or practitioner may be needed.'
   },
   licensed_role_required:{
-    heading:'Agency identifies a required professional license',
+    heading:'This step requires a licensed professional',
     explanation:'The cited agency requires a designated credential for this activity. An exemption for another step does not cover this one.'
   },
   unresolved:{
-    heading:'Confirm the specific rule for this activity',
+    heading:'Find the rule for this exact step',
     explanation:'The official references currently cited here do not establish a conclusion for this exact activity and credential. That is not evidence the activity is prohibited.'
   }
 });
