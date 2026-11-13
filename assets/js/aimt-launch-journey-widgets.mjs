@@ -4,7 +4,7 @@ import {
  STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
-import { scopeSummary, SCOPE_RESEARCH_DISCLAIMER } from './aimt-scope-evidence.mjs';
+import { scopeSummary, SCOPE_RESEARCH_DISCLAIMER, SCOPE_GOVERNMENT_DIRECTORY } from './aimt-scope-evidence.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
 function options(items,selected=''){
@@ -90,12 +90,19 @@ export function mountScope(root){
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   '<div data-sources hidden>',
    '<div class="lj-scope-quick" data-scope-tone="neutral" aria-live="polite"><strong data-scope-quick-headline></strong><p data-scope-quick-message></p><p data-scope-quick-counts class="lj-help"></p></div>',
+   '<section class="lj-scope-research-path" data-scope-research-path hidden aria-labelledby="lj-scope-path-title">',
+    '<div class="lj-scope-path-head"><span>YOUR NEXT STEPS</span><h4 id="lj-scope-path-title">Find the rules that apply to your service</h4><p>The official rules are tied to your license and activities—not necessarily the term “head spa.” Use this checklist to establish what applies.</p></div>',
+    '<a class="lj-scope-path-link" data-scope-path-link target="_blank" rel="noopener noreferrer"></a>',
+    '<ol class="lj-scope-path-steps" data-scope-path-steps></ol>',
+    '<div class="lj-scope-path-questions" data-scope-path-questions hidden><h5>Questions tailored to your selected services</h5><ul data-scope-questions></ul></div>',
+    '<p class="lj-scope-path-caption">This is a research pathway, not a legal decision. The absence of a cited answer is not evidence an activity is forbidden.</p>',
+   '</section>',
    '<div class="lj-scope-overview">',
     '<div class="lj-scope-coverage"><span>RESEARCH COVERAGE</span><h4 data-source-state></h4><p data-source-coverage></p><p data-source-reviewed></p></div>',
     '<p class="lj-scope-not-cleared"><strong>Important:</strong> These are findings about specific activities, <strong>not</strong> an approval to offer your full head spa service. Facility licenses, equipment, local codes and the exact technique may change the answer.</p>',
    '</div>',
    '<section class="lj-scope-license-check" aria-label="License validity reminder"><h4>Your professional license status</h4><p data-license-caution></p><div data-license-lookup></div><p class="lj-help">Check the license directly on the government website. Do not enter your name, license number or private documents into AIMT.</p></section>',
-   '<h4>What the sources say about each step</h4>',
+   '<h4 data-scope-findings-title>What the official sources say about your selected steps</h4>',
    '<div data-activity-findings class="lj-evidence-list"></div>',
    '<p class="lj-scope-disclaimer lj-scope-disclaimer-result" role="note"><strong>Use these sources for research only.</strong> AIMT does not confirm legal permission, individual licenses or compliance. Check current laws and facility rules before practice.</p>',
    '<h4>Facility and business requirements</h4><p data-source-facility class="lj-scope-facility"></p>',
@@ -146,14 +153,43 @@ export function mountScope(root){
   $(root,'[data-scope-tone]').dataset.scopeTone=quick.tone;
   info(root,'[data-scope-quick-headline]',quick.headline);
   info(root,'[data-scope-quick-message]',quick.message);
-  info(root,'[data-scope-quick-counts]',
-    quick.counts.credential_scope+' documented license-scope services · '+
-    quick.counts.implementation_review+' equipment/technique checks · '+
-    quick.counts.documented_exemption+' individual-license exemptions · '+
-    quick.counts.conditional_exemption+' conditional exceptions · '+
-    (quick.counts.outside_credential+quick.counts.licensed_role_required)+' credential restrictions · '+
-    quick.counts.unresolved+' AIMT research gaps');
+  const readableCounts=[
+   [quick.counts.credential_scope,'license-scope services supported by official references'],
+   [quick.counts.documented_exemption,'individual-license exemptions cited'],
+   [quick.counts.implementation_review,'equipment or method checks'],
+   [quick.counts.conditional_exemption,'conditional exceptions'],
+   [quick.counts.outside_credential+quick.counts.licensed_role_required,'credential restrictions cited']
+  ].filter(entry=>entry[0]>0).map(([n,label])=>n+' '+label);
+  if(quick.counts.unresolved){
+   readableCounts.push(quick.counts.unresolved+' service steps with a tailored research pathway below');
+  }
+  info(root,'[data-scope-quick-counts]',readableCounts.join(' · ')||'Your service-specific research pathway is below.');
 
+  const route=g.researchPath;
+  const hasOpenQuestions=route.questions.length>0;
+  const pathSection=$(root,'[data-scope-research-path]');
+  pathSection.hidden=!hasOpenQuestions;
+  if(hasOpenQuestions){
+   const link=$(root,'[data-scope-path-link]');
+   link.href=route.startingPoint.url;
+   link.textContent=route.startingPoint.title+' ↗';
+   const steps=$(root,'[data-scope-path-steps]');steps.replaceChildren();
+   for(const step of route.steps){
+    const li=document.createElement('li'),heading=document.createElement('strong'),detail=document.createElement('p');
+    heading.textContent=step.title;detail.textContent=step.detail;
+    li.append(heading,detail);steps.appendChild(li);
+   }
+   const questions=$(root,'[data-scope-questions]');questions.replaceChildren();
+   for(const q of route.questions){
+    const li=document.createElement('li');
+    li.textContent=q.question;
+    questions.appendChild(li);
+   }
+   $(root,'[data-scope-path-questions]').hidden=false;
+  }
+  // The coverage/availability of research belongs in secondary detail,
+  // not as a large self-critical error headline.
+  $(root,'.lj-scope-overview').hidden=quick.tone==='unknown';
   info(root,'[data-source-state]',review.researchStatus);
   info(root,'[data-source-coverage]',review.coverage);
   const mismatch=(license==='No professional license'||license==='Student / not yet licensed') && credentialStatus==='active_here';
@@ -164,15 +200,20 @@ export function mountScope(root){
   if(review.licenseLookup){
    const a=createLink(review.licenseLookup);a.className='lj-license-lookup-link';a.textContent='Open official license verification → '+review.licenseLookup.title;lookup.appendChild(a);
   }else{
-   const note=document.createElement('p');note.textContent='AIMT has not yet mapped the public license lookup for this state. Find it on the official regulator site.';lookup.appendChild(note);
+   const a=createLink(SCOPE_GOVERNMENT_DIRECTORY);a.className='lj-license-lookup-link';
+   a.textContent='Locate your state’s licensing agency on USAGov ↗';lookup.appendChild(a);
+   const note=document.createElement('p');
+   note.textContent='This directory helps locate state government agencies. License verification takes place on the applicable state board’s own website.';lookup.appendChild(note);
   }
-  info(root,'[data-source-reviewed]',review.researchDate?'Official sources examined: '+review.researchDate+'. Guidance can change; always check the current source.':'This state has no reviewed activity findings in AIMT yet.');
+  info(root,'[data-source-reviewed]',review.researchDate?'Official sources examined: '+review.researchDate+'. Guidance can change; always check the current source.':'For this selection, use the government-source pathway above to confirm the exact professional rules.');
   const list=$(root,'[data-activity-findings]');list.replaceChildren();
+  const sourced=review.findings.filter(f=>f.status!=='unresolved');
+  $(root,'[data-scope-findings-title]').hidden=sourced.length===0;
   // Present documented coverage before open implementation/research questions.
   // Do not make a missing AIMT entry look like a legal prohibition.
   const order={credential_scope:0,documented_exemption:1,implementation_review:2,
    conditional_exemption:3,outside_credential:4,licensed_role_required:4,unresolved:5};
-  for(const finding of [...review.findings].sort((a,b)=>(order[a.status]??9)-(order[b.status]??9))){
+  for(const finding of [...sourced].sort((a,b)=>(order[a.status]??9)-(order[b.status]??9))){
    const card=document.createElement('article');card.className='lj-evidence-card';
    card.dataset.scopeStatus=finding.status;
    const heading=document.createElement('h5');
@@ -202,7 +243,11 @@ export function mountScope(root){
     li.appendChild(meta);sources.appendChild(li);
    }
   }else{
-   const li=document.createElement('li');li.textContent='This state has not yet been researched. Find your state’s official cosmetology/barber board and current written law. Do not infer permission.';sources.appendChild(li);
+   const li=document.createElement('li'),a=createLink(SCOPE_GOVERNMENT_DIRECTORY);
+   a.textContent='USAGov — Find your state government and licensing agency';
+   li.appendChild(a);
+   const note=document.createElement('small');note.textContent=' — Government directory, not a licensing determination';
+   li.appendChild(note);sources.appendChild(li);
   }
   info(root,'[data-next-contact]',review.nextContact);
   info(root,'[data-board-inquiry]',g.inquiry);
@@ -233,7 +278,7 @@ export function mountScope(root){
   const documented=review.findings.filter(x=>x.status!=='unresolved').length;
   const covered=quick.counts.credential_scope;
   const open=quick.counts.unresolved;
-  showResult(root,covered+' of '+review.findings.length+' selected steps are described as within this professional license category; '+quick.counts.implementation_review+' have specific equipment/technique checks. '+open+' step(s) lack complete AIMT research. This is information about the state’s general license scope, not validation of your personal license or salon.');
+  showResult(root,covered+' selected activities have an official license-scope reference, and '+quick.counts.implementation_review+' have specific equipment or technique checks. '+(open?'For the remaining '+open+' step(s), use your tailored questions and official starting point above. ':'')+'No complete service or individual license is verified by this tool.');
   return true;
  }
  trigger(root,'scope-save',()=>generate(true));
