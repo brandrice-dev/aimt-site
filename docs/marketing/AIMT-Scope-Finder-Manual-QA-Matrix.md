@@ -151,3 +151,23 @@ The app already had success/error token overrides in the shared CSS, but the obs
 **Manual acceptance cases still outstanding**: PA licensed cosmetologist (5 scoped + 2 implementation checks), Alaska cosmetologist 7 unknown steps (1 neutral summary + USAGov route), TX no-license shampoo-only (specific exemption + correct workplace next step), TX no-license shampoo + styling (one green + one red, restricted-rule next step), CA esthetician shampoo (red legal exclusion), Pennsylvania nonlicensed supervised shampoo (conditional neutral), and narrow mobile width (glossary definition grid collapses). Capture 375px/mobile and desktop screenshots plus keyboard focus/expanded glossary verification.
 
 **Automated verification**: regression tests were added to check these examples, the factual data and UI source. A passing CI run is not a substitute for interactive browser, device, or independent regulatory interpretation review.
+
+
+## Nov 13 — Owner-directed final editorial cleanup and copy-email UX
+
+**Final goal:** Finish one bounded cleanup of the already-built licensing tool; do not create a new feature system or begin another open-ended iteration.
+
+**IMPLEMENTED in Draft PR #166 / isolated feature branch:**
+
+- Reduced the first screen to **four legally relevant selectors**: state, exact credential, in-state license status and workplace, plus the seven proposed service steps. Removed the career-stage selector from the licensing questionnaire (stage is not a legal scope determinant) and removed the unused optional free-text question field (the tool already generates questions for the selected activities). Existing saved data schema and other Accelerator lessons remain compatible.
+- Entry: one short reason to use the tool and **one full research-only legal disclaimer**. Removed repeated intro claims, redundant source-coverage banner, second post-tool disclaimer and two unrelated free-tools CTAs. Retained one coherent link to the Free Head Spa Launch Accelerator.
+- Result order: **Your Results** summary first; **Email your licensing board** panel with direct **Copy email** button second; optional **How to check unanswered services** and **Official sources and detailed rules** sections in accessible expandable details below. The source citations, legal limits, facility/credential requirements and full report remain accessible, but are not repeated on initial view.
+- Email: generated from state, credential, work setting and selected steps, with specific questions for rules not yet settled by the referenced sources. Does **not** claim to email or contact the regulator. Copy is user-triggered and matches the on-screen email text exactly. Button gives **in-place live status**. If clipboard is unavailable, a read-only, selectable fallback appears in the email panel itself.
+- Detailed source area offers a separate **Copy full research report** action with its own live status and local fallback.
+- Scrolling/focus: after **View my results**, focus and scroll to the summary heading (honoring reduced-motion preference).
+- Safety: when any legally relevant selection changes, immediately hide old results and clear the previously generated email/report to prevent stale jurisdiction-specific guidance being viewed or copied. Validation errors do not create a report. Saved browser-local data remains local.
+- Real restrictions retain AIMT red and cited source guidance; sourced positive scope retains AIMT green; conditional/technical/unresolved remain neutral. Unverified personal license, full-service legal clearance, and privacy constraints are unchanged.
+
+**Automated delivery evidence:** Commit \`7019180ab93348347c8c9027d7c37309e13e77e4\` — Growth Funnel regression suite SUCCESS, Publication Candidate tests SUCCESS, Cloudflare Pages branch preview SUCCESS. Immutable preview: https://8d0894f6.aimt-site.pages.dev/head-spa-scope-finder. This supports IMPLEMENTED/TESTED/DEPLOYED, not actual graphical-interaction verification.
+
+**Manual acceptance before publication (still UNTESTED, not silently waived):** (1) change PA Cosmetologist to TX Esthetician after generating results and confirm stale findings vanish; (2) generate an Alaska result and copy the email, checking the exact text and USAGov starting point; (3) open the emailed text preview and compare it to clipboard contents; (4) deny clipboard permission and check the selectable fallback is adjacent to the email; (5) inspect CA Esthetician shampoo restriction with the detailed sources expanded; (6) desktop/mid-mobile/320px keyboard, focus, scroll, glossary and disclosure behavior; (7) independent legal/regulatory signoff. Production remains untouched pending explicit owner approval.
