@@ -328,6 +328,11 @@ export function scopePlainEnglish(review){
   ? {label:'Next: check the required conditions',text:'Read the source for the exemption and confirm you meet its supervision and workplace requirements before using it.',
      href:items.find(i=>i.id==='conditional_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
      linkLabel:'Read the official conditions'}
+  : ['No professional license','Student / not yet licensed'].includes(license)
+    && items.some(i=>i.id==='documented_exemption')
+  ? {label:'Next: check the work setting and limits',text:'This is an exception for a particular service step, not an exemption for your entire head spa. Check the workplace and any other services separately.',
+     href:groups.find(g=>g.id==='documented_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
+     linkLabel:'Read the exact official exemption'}
   : {label:'Next: verify your license and workplace',text:'Check that your individual license is active and that your salon or work location meets its separate requirements.',
      href:review?.licenseLookup?.url||route.startingPoint.url,
      linkLabel:review?.licenseLookup?'Check your license on the official state website':route.startingPoint.title};
