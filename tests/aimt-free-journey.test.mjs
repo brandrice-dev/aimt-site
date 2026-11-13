@@ -323,7 +323,7 @@ test('license verification is an official outbound step, not AIMT credential val
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
  assert.match(widget,/select\('sc-status',LICENSE_STATUSES/);
  assert.match(widget,/data-license-lookup/);
- assert.match(widget,/official license verification/);
+ assert.match(widget,/Check license on state website/);
  assert.doesNotMatch(widget,/type="file"|name="license_number"|name="licenseNumber"/);
 });
 test('newest official New York procedural chart is referenced and older chart is not served',()=>{
@@ -336,11 +336,11 @@ test('newest official New York procedural chart is referenced and older chart is
 
 test('source-backed review can be copied as one actionable research record without collecting identity data',()=>{
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
- assert.match(widget,/Copy my findings/);
+ assert.match(widget,/Copy full research report/);
  assert.match(widget,/AIMT \/ HEAD SPA LICENSE & SCOPE RESEARCH NOTES/);
- assert.match(widget,/Source explanation:/);
- assert.match(widget,/OFFICIAL LICENSE LOOKUP:/);
- assert.match(widget,/No finding authorizes a complete head spa treatment/);
+ assert.match(widget,/Explanation:/);
+ assert.match(widget,/PUBLIC LICENSE SEARCH:/);
+ assert.match(widget,/No result confirms an entire head spa service/);
  assert.doesNotMatch(widget,/name="licenseNumber"|name="birthdate"|name="license_number"/i);
 });
 
@@ -525,12 +525,12 @@ test('research-only limitation is clear in standalone and Accelerator and follow
  assert.match(SCOPE_RESEARCH_DISCLAIMER,/guarantee.*complete or current/);
  assert.match(SCOPE_RESEARCH_DISCLAIMER,/qualified licensing attorney/);
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
- assert.match(widget,/Research information, not legal advice/);
+ assert.match(widget,/For research only/);
  assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER/);
  assert.match(widget,/data-scope-tone="neutral"/);
  assert.match(widget,/dataset\.scopeTone=quick\.tone/);
- assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER,\s*[\r\n]/);
- assert.match(widget,/Use these sources for research only/);
+ assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER/);
+ assert.match(widget,/For research only/);
  const standalone=read('head-spa-scope-finder.html');
  const accelerator=read('head-spa-launch-accelerator.html');
  assert.match(standalone,/data-aimt-tool="scope"/);
@@ -599,7 +599,7 @@ test('when none of the activities has a verified state-specific interpretation, 
  ]);
  assert.equal(quick.wholeServiceCleared,false);
  const result=scopeResult({...example,state:'Alaska',license:'Cosmetologist',activities:['wash','scalp','wet'],operatingContext:'suite'});
- assert.match(result.inquiry,/Specific questions for the steps not covered by a cited determination/);
+ assert.match(result.inquiry,/I have a few specific questions/);
  assert.match(result.inquiry,/Does this credential cover shampooing/);
  assert.match(result.inquiry,/What sanitation, plumbing/);
  assert.doesNotMatch(result.inquiry,/license approved|permission granted/i);
@@ -656,7 +656,7 @@ test('source limits are framed as a research pathway, not evidence that a state 
  assert.equal(unmapped.wholeServiceCleared,false);
  assert.equal(mappedButUnanswered.wholeServiceCleared,false);
  const standalone=read('head-spa-scope-finder.html');
- assert.match(standalone,/Source coverage varies by state/);
+ assert.doesNotMatch(standalone,/Source coverage varies by state/);
  assert.doesNotMatch(standalone,/Research in progress: six states have curated official sources/);
 });
 
@@ -836,4 +836,18 @@ test('final copy fallback and privacy protections remain for scope and other too
  const scope=widget.slice(widget.indexOf('export function mountScope'),widget.indexOf('export function mountService'));
  assert.match(scope,/SCOPE_RESEARCH_DISCLAIMER/);
  assert.doesNotMatch(scope,/type="file"|name="license_number"|name="email"/);
+});
+
+
+test('changing a scope selection hides old findings and prevents copying a stale licensing email',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ const scope=widget.slice(widget.indexOf('export function mountScope'),widget.indexOf('export function mountService'));
+ assert.match(scope,/function invalidate\(\)/);
+ assert.match(scope,/\[data-sources\]'\)\.hidden=true/);
+ assert.match(scope,/inquiry='';report=''/);
+ assert.match(scope,/st\.addEventListener\('change',\(\)=>\{refreshCredentials\(\);invalidate\(\);\}\)/);
+ assert.match(scope,/\[lic,licenseStatus,context,\.\.\.root\.querySelectorAll/);
+ assert.match(scope,/input\.addEventListener\('change',invalidate\)/);
+ assert.match(scope,/if\(!inquiry\)return/);
+ assert.match(scope,/if\(!report\)return/);
 });
