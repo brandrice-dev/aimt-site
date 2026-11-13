@@ -91,8 +91,8 @@ export function mountScope(root){
   '<div data-sources hidden>',
       '<section class="lj-scope-quick lj-scope-takeaway" data-scope-tone="neutral" aria-labelledby="scope-takeaway-title" role="region">',
     '<div class="lj-scope-takeaway-header">',
-     '<span class="lj-scope-takeaway-eyebrow">YOUR FINDINGS</span>',
-     '<h3 id="scope-takeaway-title">Your results, in plain English</h3>',
+     '<span class="lj-scope-takeaway-eyebrow">YOUR RESULTS</span>',
+     '<h3 id="scope-takeaway-title">What this means for your service</h3>',
      '<p data-scope-quick-message></p>',
     '</div>',
     '<div class="lj-scope-takeaway-items" data-scope-takeaway-items aria-live="polite"></div>',
@@ -101,12 +101,12 @@ export function mountScope(root){
       '<p data-scope-next-text></p>',
       '<a data-scope-next-link target="_blank" rel="noopener noreferrer"></a>',
     '</div>',
-    '<details class="lj-scope-glossary"><summary>What do these licensing words mean?</summary>',
+    '<details class="lj-scope-glossary"><summary>Quick definitions of licensing terms</summary>',
       '<dl>',
-       '<dt>Scope of practice</dt><dd>The services a professional license covers.</dd>',
-       '<dt>Salon or establishment license</dt><dd>Permission for the place where a business provides regulated services. It is separate from your personal license.</dd>',
-       '<dt>Exemption</dt><dd>A specific activity that may not require an individual license, sometimes only under certain conditions.</dd>',
-       '<dt>Licensing board</dt><dd>The state government agency that oversees a profession and its rules.</dd>',
+       '<dt>Scope of practice</dt><dd>The services a license lets someone provide.</dd>',
+       '<dt>Salon or establishment license</dt><dd>A license for the salon or place where you work. It is separate from your own license.</dd>',
+       '<dt>Exemption</dt><dd>A rule that says a specific service may not need a license. Other rules may still apply.</dd>',
+       '<dt>Licensing board</dt><dd>The state office that oversees professional licenses and rules.</dd>',
       '</dl>',
     '</details>',
     '<p class="lj-scope-takeaway-note" data-scope-takeaway-note></p>',
@@ -180,7 +180,11 @@ export function mountScope(root){
    section.dataset.findingTone=item.tone;
    const title=document.createElement('strong');title.textContent=item.title;
    const text=document.createElement('p');text.textContent=item.text;
-   section.append(title,text);summaryItems.appendChild(section);
+   const steps=document.createElement('ul');steps.className='lj-scope-takeaway-steps';
+   for(const step of item.steps){
+    const li=document.createElement('li');li.textContent=step.label;steps.appendChild(li);
+   }
+   section.append(title,text,steps);summaryItems.appendChild(section);
   }
   info(root,'[data-scope-next-label]',plain.next.label);
   info(root,'[data-scope-next-text]',plain.next.text);
@@ -283,9 +287,9 @@ export function mountScope(root){
     'Work setting: '+(OPERATING_CONTEXTS.find(x=>x.key===operatingContext)?.label||operatingContext),
     'Source review: '+(review.researchDate||'No reviewed jurisdiction sources'),
     '',
-    'YOUR FINDINGS IN PLAIN ENGLISH',
+    'YOUR RESULTS — WHAT THIS MEANS FOR YOUR SERVICE',
     plain.context,
-    ...plain.items.flatMap(item=>[item.title+': '+item.text]),
+    ...plain.items.flatMap(item=>[item.title+': '+item.text,...item.steps.map(step=>'• '+step.label)]),
     'Next step: '+plain.next.text,
     'Official link: '+plain.next.href,
     plain.note,
