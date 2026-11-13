@@ -640,3 +640,20 @@ test('unresolved activities are shown as a source-led guide instead of seven neg
  assert.match(css,/\.lj-scope-path-link/);
  assert.doesNotMatch(widget,/7 AIMT research gaps/);
 });
+
+
+test('source limits are framed as a research pathway, not evidence that a state forbids head spa',()=>{
+ const unmapped=scopeSummary(evidenceFor('Alaska','Cosmetologist',['wash','scalp']));
+ const mappedButUnanswered=scopeSummary(evidenceFor('New York','Esthetician',['scalp','camera']));
+ assert.match(unmapped.headline,/Here’s how to confirm the rules/);
+ assert.match(mappedButUnanswered.headline,/Here’s how to confirm the rules/);
+ assert.match(unmapped.message,/official government directory/i);
+ assert.match(mappedButUnanswered.message,/state has official licensing resources/i);
+ assert.match(unmapped.message,/not.*prohibited/i);
+ assert.match(mappedButUnanswered.message,/not.*prohibited/i);
+ assert.equal(unmapped.wholeServiceCleared,false);
+ assert.equal(mappedButUnanswered.wholeServiceCleared,false);
+ const standalone=read('head-spa-scope-finder.html');
+ assert.match(standalone,/Source coverage varies by state/);
+ assert.doesNotMatch(standalone,/Research in progress: six states have curated official sources/);
+});
