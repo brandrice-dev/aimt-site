@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {
  STORAGE_KEY,STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,SCOPE_SOURCES,LESSONS,emptyPlan,normalizePlan,writePlan,readPlan,
@@ -656,4 +657,19 @@ test('source limits are framed as a research pathway, not evidence that a state 
  const standalone=read('head-spa-scope-finder.html');
  assert.match(standalone,/Source coverage varies by state/);
  assert.doesNotMatch(standalone,/Research in progress: six states have curated official sources/);
+});
+
+
+test('all free-journey browser JavaScript modules parse as valid ES modules',()=>{
+ for(const file of [
+  'assets/js/aimt-scope-evidence.mjs',
+  'assets/js/aimt-launch-journey-core.mjs',
+  'assets/js/aimt-launch-journey-widgets.mjs',
+  'assets/js/aimt-launch-accelerator.mjs',
+  'assets/js/aimt-standalone-tool.mjs'
+ ]){
+  assert.doesNotThrow(()=>execFileSync(process.execPath,['--check',path.join(root,file)],{
+   encoding:'utf8',timeout:6000
+  }),'Invalid ES module syntax in '+file);
+ }
 });
