@@ -2,7 +2,7 @@
 // Used by standalone tools AND the five-lesson Accelerator. Does not grant practice scope.
 import { blueprintPayload } from './aimt-first-service-blueprint-core.mjs';
 import { calculateServiceCost } from './aimt-service-cost-core.mjs';
-import { SCOPE_EVIDENCE,evidenceFor } from './aimt-scope-evidence.mjs';
+import { SCOPE_EVIDENCE,evidenceFor,scopeResearchPath } from './aimt-scope-evidence.mjs';
 
 export const STORAGE_KEY='aimt-free-head-spa-launch-plan-v1';
 export const VERSION=1;
@@ -173,6 +173,7 @@ export function pricingResult(plan){
 }
 export function scopeResult(plan){
  const p=normalizePlan(plan),review=evidenceFor(p.state,p.license,p.activities);
+ const researchPath=scopeResearchPath(review);
  const activities=ACTIVITIES.filter(a=>p.activities.includes(a.key)).map(a=>a.label);
  const list=activities.length?activities.map(a=>'• '+a).join('\n'):'• [describe proposed activities]';
  const context=OPERATING_CONTEXTS.find(x=>x.key===p.operatingContext)?.label||'[work setting]';
@@ -184,6 +185,10 @@ export function scopeResult(plan){
   'My planned work setting: '+context+'.','',
   'Before offering services, I want to verify the requirements for these specific activities:',
   list,'',
+  ...(researchPath.questions.length
+    ? ['Specific questions for the steps not covered by a cited determination:',
+       ...researchPath.questions.map(q=>'• '+q.question),'']
+    : []),
   'Could you point me to the governing statutes, regulations or official guidance for each activity?',
   'What individual professional licenses, establishment licenses, inspections, supervision and sanitation obligations apply?',
   'Are there additional requirements for the head spa water/steam equipment and its installation?','',
@@ -197,7 +202,7 @@ export function scopeResult(plan){
       p.licenseStatus==='licensed_elsewhere'?'An out-of-state license does not automatically authorize practice here. Check reciprocity and obtain the required credential before offering regulated services.':
       p.licenseStatus==='pending_or_expired'?'Pending, inactive and expired credentials are not proof of current authorization. Check official status before practice.':
       p.licenseStatus==='none'?'A source-backed exemption may cover one narrow activity, but a professional license is required for other regulated steps.':'Confirm your credential is active and valid in this state before practicing regulated services.',
-   activities,review,inquiry,
+   activities,review,researchPath,inquiry,
    status:review.researchStatus,
    note:['Massage therapist','Student / not yet licensed','No professional license','Other / unsure'].includes(p.license)
       ?'Some curated sources concern cosmetology rather than massage therapy or another credential. The right regulator for each activity must be identified.'
