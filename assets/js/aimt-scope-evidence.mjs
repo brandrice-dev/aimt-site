@@ -281,36 +281,43 @@ export function scopeSummary(review){
 
 // Plain-language interpretation of what the SOURCES show, not of a
 // visitor's personal permission to practice. Never map 'unresolved' to 'no'.
+// Short service names for the on-screen summary. The detailed official-source
+// explanations remain in each referenced activity card below.
 const SUMMARY_STEP_NAMES=Object.freeze({
- wash:'shampooing hair',scalp:'cosmetic scalp care',
- 'scalp-massage':'scalp massage',bodywork:'cosmetic neck or shoulder massage',
- styling:'hair styling',camera:'scalp-camera observation',
- wet:'water, steam or sanitation equipment'
+ wash:'Shampoo or wash hair',
+ scalp:'Clean or exfoliate the scalp',
+ 'scalp-massage':'Massage the scalp',
+ bodywork:'Cosmetic neck or shoulder massage',
+ styling:'Blow-dry or style hair',
+ camera:'Look at the scalp with a camera',
+ wet:'Use water or steam equipment'
 });
-function stepNames(findings){
- const names=findings.map(f=>SUMMARY_STEP_NAMES[f.activity]||f.activity);
- if(names.length>3)return names.slice(0,2).join(' and ')+' and '+(names.length-2)+' other selected steps';
- if(names.length===3)return names[0]+', '+names[1]+' and '+names[2];
- return names.join(' and ');
-}
 export function scopePlainEnglish(review){
  const findings=Array.isArray(review?.findings)?review.findings:[];
  const groups=[
-  {id:'credential_scope',tone:'supported',title:'What this license type covers',items:findings.filter(f=>f.status==='credential_scope'),
-   explain:items=>'The official references describe '+stepNames(items)+' as services within this professional license category.'},
-  {id:'documented_exemption',tone:'supported',title:'A specific license exception',items:findings.filter(f=>f.status==='documented_exemption'),
-   explain:items=>'The cited state source says '+stepNames(items)+' does not require an individual professional license. That exception is limited to these activities.'},
-  {id:'outside_credential',tone:'restricted',title:'What needs another license',items:findings.filter(f=>['outside_credential','licensed_role_required'].includes(f.status)),
-   explain:items=>'The official references identify a licensing restriction for '+stepNames(items)+'. See the specific requirement and source below.'},
-  {id:'conditional_exemption',tone:'check',title:'An exception with conditions',items:findings.filter(f=>f.status==='conditional_exemption'),
-   explain:items=>'A narrow exception may apply to '+stepNames(items)+', but only when the stated supervision or workplace conditions are met.'},
-  {id:'implementation_review',tone:'check',title:'Equipment or methods to check',items:findings.filter(f=>f.status==='implementation_review'),
-   explain:items=>'The underlying cosmetic service may be in scope; '+stepNames(items)+' still has specific equipment, technique or location requirements to check.'},
-  {id:'unresolved',tone:'neutral',title:'What still needs an exact answer',items:findings.filter(f=>f.status==='unresolved'),
-   explain:items=>'For '+stepNames(items)+', the references shown do not establish an exact answer for this license type. That does not mean the services are prohibited.'}
+  {id:'credential_scope',tone:'supported',title:'Covered by this license type',
+   text:'State rules include these services for this license type:',
+   items:findings.filter(f=>f.status==='credential_scope')},
+  {id:'documented_exemption',tone:'supported',title:'No individual license needed for these steps',
+   text:'The state does not require an individual professional license for these specific steps:',
+   items:findings.filter(f=>f.status==='documented_exemption')},
+  {id:'outside_credential',tone:'restricted',title:'These steps have a license restriction',
+   text:'The state says this license does not cover these steps, or requires another licensed professional:',
+   items:findings.filter(f=>['outside_credential','licensed_role_required'].includes(f.status))},
+  {id:'conditional_exemption',tone:'check',title:'Allowed only if conditions are met',
+   text:'A special exception may apply, but only if you meet its rules, such as required supervision:',
+   items:findings.filter(f=>f.status==='conditional_exemption')},
+  {id:'implementation_review',tone:'check',title:'Equipment or methods to check',
+   text:'The cosmetic service may be covered. Check the rules for these tools or methods:',
+   items:findings.filter(f=>f.status==='implementation_review')},
+  {id:'unresolved',tone:'neutral',title:'These steps need a closer look',
+   text:'The sources shown do not give a clear answer for these steps. That does not mean you cannot offer them:',
+   items:findings.filter(f=>f.status==='unresolved')}
  ];
  const items=groups.filter(g=>g.items.length).map(g=>({
-  id:g.id,tone:g.tone,title:g.title,text:g.explain(g.items),count:g.items.length
+  id:g.id,tone:g.tone,title:g.title,text:g.text,
+  steps:g.items.map(f=>({activity:f.activity,label:SUMMARY_STEP_NAMES[f.activity]||f.activity})),
+  count:g.items.length
  }));
  const state=review?.state||'your state',license=review?.license||'the selected license';
  const none=items.length===1 && items[0].id==='unresolved';
@@ -318,28 +325,33 @@ export function scopePlainEnglish(review){
  const restricted=groups.find(g=>g.id==='outside_credential'&&g.items.length);
  const firstRestrictedSource=restricted?.items?.flatMap(x=>x.sources||[])[0];
  const next=restricted
-  ? {label:'Next: check the restricted service step',text:'Read the specific official rule before offering that step. You may need a professional with a different license or need to change your planned service.',
+  ? {label:'Next: check the restricted step',
+     text:'Read the state rule before offering that step. You may need a different license or a licensed team member.',
      href:firstRestrictedSource?.url||route.startingPoint.url,
-     linkLabel:firstRestrictedSource?'Read the cited licensing rule':route.startingPoint.title}
+     linkLabel:firstRestrictedSource?'Read the state rule':route.startingPoint.title}
   : none || items.some(i=>i.id==='unresolved')
-  ? {label:'Next: find the exact rule',text:'Open the government source below, then use the service-specific questions to check what applies to your license and workplace.',
+  ? {label:'Next: check your state’s rules',
+     text:'Open the government source below. Use the questions in your report to check each step.',
      href:route.startingPoint.url,linkLabel:route.startingPoint.title}
   : items.some(i=>i.id==='conditional_exemption')
-  ? {label:'Next: check the required conditions',text:'Read the source for the exemption and confirm you meet its supervision and workplace requirements before using it.',
-     href:items.find(i=>i.id==='conditional_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
+  ? {label:'Next: check the conditions',
+     text:'Read the state rule. Make sure the required supervisor and work setting apply to you.',
+     href:groups.find(g=>g.id==='conditional_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
      linkLabel:'Read the official conditions'}
   : ['No professional license','Student / not yet licensed'].includes(license)
     && items.some(i=>i.id==='documented_exemption')
-  ? {label:'Next: check the work setting and limits',text:'This is an exception for a particular service step, not an exemption for your entire head spa. Check the workplace and any other services separately.',
+  ? {label:'Next: check where you can offer this step',
+     text:'This exception applies only to the steps above. Check your work location and any other services separately.',
      href:groups.find(g=>g.id==='documented_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
-     linkLabel:'Read the exact official exemption'}
-  : {label:'Next: verify your license and workplace',text:'Check that your individual license is active and that your salon or work location meets its separate requirements.',
+     linkLabel:'Read the state exemption'}
+  : {label:'Next: check your license and work location',
+     text:'Make sure your license is active. Check that your salon or work location meets state rules.',
      href:review?.licenseLookup?.url||route.startingPoint.url,
-     linkLabel:review?.licenseLookup?'Check your license on the official state website':route.startingPoint.title};
+     linkLabel:review?.licenseLookup?'Check your license on the state website':route.startingPoint.title};
  return {
-  context:'You selected '+license+' in '+state+'. Here is what the cited government references mean for the services you chose.',
+  context:'You selected '+license+' in '+state+'. Here is what the state sources say about the services you chose.',
   items,next,
-  note:'These results describe written guidance for license types and activities. They do not verify your individual license, business premises, or permission to offer an entire head spa service.',
+  note:'These findings explain general state rules. They do not check your personal license or approve your whole head spa service.',
   hasSourceBackedResult:items.some(x=>x.tone==='supported'||x.tone==='restricted'||x.id==='conditional_exemption')
  };
 }
