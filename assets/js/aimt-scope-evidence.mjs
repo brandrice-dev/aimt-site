@@ -30,8 +30,8 @@ export const SCOPE_FINDINGS=Object.freeze({
     explanation:'The cited agency requires a designated credential for this activity. An exemption for another step does not cover this one.'
   },
   unresolved:{
-    heading:'AIMT research is not complete for this step',
-    explanation:'We have not yet documented enough official guidance for this exact activity and credential. This is a gap in AIMT’s research—not evidence the service is prohibited.'
+    heading:'Confirm the specific rule for this activity',
+    explanation:'The official references currently cited here do not establish a conclusion for this exact activity and credential. That is not evidence the activity is prohibited.'
   }
 });
 
@@ -252,7 +252,7 @@ export function scopeSummary(review){
    ?'Your license category covers core cosmetic services'
    :'This activity is supported by your license category';
   message=counts.unresolved
-   ?'The sourced findings below describe services included in this professional scope. For other items, AIMT has not finished researching the precise rule; that gap does not mean they are prohibited.'
+   ?'The cited sources support the activities identified below. For other selected steps, a specific determination is not yet established from the references available here. Those steps are not being classified as prohibited.'
    :'The cited law covers the listed cosmetic services. Any remaining notes concern how to perform them compliantly: active license, nonmedical technique, licensed premises, sanitation or equipment requirements.';
   if(counts.implementation_review){
    message+=' Equipment- or method-specific questions are separate from the underlying professional scope.';
@@ -267,14 +267,57 @@ export function scopeSummary(review){
   message='The cited state source exempts this particular activity from individual licensure. That does not determine establishment requirements or other services in a head spa.';
  }else if(counts.documented_exemption){
   tone='mixed';
-  headline='One step is exempt; other steps still need research';
-  message='The official source exempts a specific activity. AIMT has not yet documented the others sufficiently; that is not a finding that they are prohibited.';
+  headline='A specific exemption is documented. Check the remaining steps.';
+  message='The cited official source identifies an exemption for one service activity. For the other steps, check the separate licensing and facility provisions linked below; they are not automatically restricted.';
  }else if(results.length&&counts.unresolved===results.length){
   tone='unknown';
-  headline='AIMT has not finished researching these activities';
-  message='We cannot yet give a reliable activity-by-activity result from our sources. This is an AIMT research gap, not evidence that your license disallows these services.';
+  headline='Here’s how to confirm the rules for your service';
+  message='“Head spa” is a service name; professional rules address the actual activities, credentials and premises. We do not have a specific, source-backed determination for this selection. That does not mean these services are prohibited. Use the official resources and tailored questions below to find out what applies.';
  }
  return {headline,message,tone,counts,total:results.length,wholeServiceCleared:false};
+}
+
+// Source-led next steps for selections without a complete written determination.
+// USAGov is an official government directory, NOT a claim that it is a
+// cosmetology board or that it decides individual licensing questions.
+export const SCOPE_GOVERNMENT_DIRECTORY=Object.freeze({
+ title:'Find your state government and licensing agency',
+ url:'https://www.usa.gov/state-governments',
+ detail:'Official USAGov state-government directory; select your state to locate its professional licensing department.'
+});
+const STEP_QUESTIONS=Object.freeze({
+ wash:'Does this credential cover shampooing and conditioning hair, or is there an individual-license exemption?',
+ scalp:'Does the credential include nonmedical cosmetic scalp cleansing or exfoliation? Which techniques and products have limits?',
+ 'scalp-massage':'Is cosmetic scalp massage included, and how is it distinguished from therapeutic massage?',
+ bodywork:'What cosmetic neck or shoulder techniques are covered, and when does massage-therapy licensing apply?',
+ styling:'Can this professional credential provide paid hair blow-drying or styling?',
+ camera:'May a practitioner use magnified scalp images only for cosmetic observation and referral, without diagnosis?',
+ wet:'What sanitation, plumbing, drainage, steaming, electrical and premises rules apply to this equipment?'
+});
+export function scopeResearchPath(review){
+ const unknown=Array.isArray(review?.findings)?review.findings.filter(x=>x.status==='unresolved'):[];
+ const hasStateSources=Array.isArray(review?.sources)&&review.sources.length>0;
+ const startingPoint=hasStateSources
+  ? {title:'Open the official '+(review.authority||'state licensing')+' sources',
+     detail:'Start with the government references shown below for the selected state and credential.',
+     url:review.sources[0].url,sourceTitle:review.sources[0].title}
+  : {title:'Find the '+(review?.state||'state')+' professional licensing agency',
+     detail:'Select '+(review?.state||'your state')+' in the official USAGov directory, then locate the board overseeing your credential.',
+     url:SCOPE_GOVERNMENT_DIRECTORY.url,sourceTitle:SCOPE_GOVERNMENT_DIRECTORY.title};
+ return {
+  hasStateSources,
+  startingPoint,
+  questions:unknown.map(x=>({
+   activity:x.activity,
+   question:STEP_QUESTIONS[x.activity]||'Which official regulation governs this specific activity?'
+  })),
+  steps:[
+   {title:'Locate the governing licensing rules',detail:startingPoint.detail},
+   {title:'Match your exact credential to the activities',detail:'Check each selected step separately. A shampoo-only exception does not automatically include scalp treatments, massage or styling.'},
+   {title:'Check the workplace and equipment',detail:'Confirm salon/shop licensing, sanitation and local plumbing/electrical requirements for the way you plan to operate.'},
+   {title:'Keep the source or ask for a rule citation',detail:'Use the prepared questions below. When a regulator cannot give legal interpretations, request the written rule or consult qualified counsel.'}
+  ]
+ };
 }
 
 export function evidenceFor(state,license,activities=[]){
@@ -288,20 +331,20 @@ export function evidenceFor(state,license,activities=[]){
       activity,status:found?.status||'unresolved',
       heading:SCOPE_FINDINGS[found?.status||'unresolved'].heading,
       generalExplanation:SCOPE_FINDINGS[found?.status||'unresolved'].explanation,
-      summary:found?.summary||(record?'AIMT has not yet researched this exact activity and license category sufficiently. This is not a finding that the service is prohibited.':'AIMT has not yet researched this activity in this state. No permission or prohibition is inferred.'),
-      limits:found?.limits||'Research gap on AIMT’s side. Review the written scope for your credential and the separate facility or equipment requirements, as applicable.',
+      summary:found?.summary||'The sources linked here do not establish an activity-specific conclusion for this credential and service step. This is not a restriction or permission.',
+      limits:found?.limits||'Next: check the written scope for the exact professional license and the relevant establishment or equipment rules.',
       sources:record?.sources?.filter(s=>sourceIds.includes(s.id))||[]
     };
   });
   return {
     state,license,authority:record?.authority||'Relevant state licensing authority not yet mapped',
     licenseLookup:record?.licenseLookup||null,
-    researchStatus:record?'PRIMARY SOURCES LOCATED — SELECTED ACTIVITY NOTES':'NOT YET RESEARCHED — NO SCOPE FINDINGS',
+    researchStatus:record?'OFFICIAL STATE REFERENCES AVAILABLE':'NO ACTIVITY-SPECIFIC FINDING CITED YET',
     researchDate:record?SCOPE_REVIEW_DATE:null,
-    coverage:record?.coverage||'AIMT has not researched this state yet. The absence of a finding is not a statement of permission or prohibition.',
+    coverage:record?.coverage||'No state-specific determination is cited for the selected activities and credential. Use the official state-government directory and verification steps below. No permission or prohibition is inferred.',
     sources:record?.sources||[],
-    facility:record?.facility||'Establishment, local permits, insurance and sanitation obligations have not been researched for this state.',
-    nextContact:record?.nextContact||'Find your official state cosmetology/barbering board, read the current statute and regulations, and consult a qualified licensing professional for disputed activities.',
+    facility:record?.facility||'Check whether this workplace requires a licensed salon or shop, inspection, local business or health permits, sanitation controls, and installation approval for water or electrical equipment. These questions are separate from your individual license.',
+    nextContact:record?.nextContact||'Use the USAGov state-government directory to locate the official professional licensing agency. Ask for the statute or rule governing your exact proposed steps. If the agency cannot interpret the law, consult a qualified licensing attorney.',
     findings:byActivity
   };
 }
