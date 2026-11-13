@@ -109,3 +109,23 @@ The app already had success/error token overrides in the shared CSS, but the obs
 
 **Actual-browser verification remains required:** In the PA cosmetologist example (shampoo, cosmetic scalp work, scalp massage), confirm selected checkboxes are charcoal, all "Covered within..." labels and source-backed cards are green, PA PALS and official sources are charcoal, and no red appears absent a genuine restricted activity. Repeat with CA Esthetician + shampoo to prove a real restriction is red. Record screenshots at desktop and 375px mobile, plus computed style inspection and force refresh in the same browser that reproduced the bug. GitHub CI's static CSS tests and Cloudflare deployment success are NOT visual verification.
 
+
+
+## Nov 13 — Research-pathway experience for unresolved source questions
+
+**Observed owner issue:** An all-unresolved result displayed “AIMT has not finished researching these activities” plus a row of seven zeros. It appeared to say that AIMT lacked knowledge or that the state had prohibited the activities, while providing no clear action. The user needs a usable answer even when official sources do not resolve every part of a proposed service.
+
+**Revised acceptance contract:**
+- A result with all activities unresolved must lead: **“Here’s how to confirm the rules for your service”**, not a self-critical lack-of-data or legal-warning headline.
+- Explain that “head spa” is a marketing/service term; individual statutes typically regulate the underlying professional activities, credential and premises. **Do not blame a state for missing information without verified evidence**; distinguish sources available but not decisive for the selected facts from source coverage not yet established.
+- The banner must **not** list “0 documented, 0 approved, 0 exempt, 7 AIMT research gaps.” Instead, identify the **number of selected steps** and link the relevant research route.
+- For the six states with sourced agency records, link a **relevant official agency source**. For an unresearched state, link the verified federal directory: https://www.usa.gov/state-governments. Label it honestly as a **directory to locate the state government/licensing agency**, not as a direct state licensing board or a licensing verdict.
+- Provide four sequential actions: locate current agency regulations, match individual activities to the exact credential, check facility/equipment requirements, then seek a provision/citation or qualified counsel if the board cannot interpret laws.
+- The questions list should be generated from **the actual unaddressed activities**: shampoo, scalp exfoliation, scalp massage, neck/shoulder bodywork, drying/styling, camera observation and water/steam sanitation. A single selected activity produces one relevant question; seven produce seven distinct questions.
+- If only some activities lack source-backed determinations, **retain supported/restricted entries and their citations**. Do not hide a genuine California esthetician shampoo restriction or Texas shampoo exemption. Group unaddressed steps as practical questions rather than repeated identical warning cards.
+- The standalone tool and guided Accelerator use the **same widget**. The copied board inquiry and full report should both include the selected state's official source or directory plus the tailored questions. Keep name, license number, medical data and images out of the free planning form.
+- The research-only disclaimer remains. A missing specific answer is **neither proof of permission nor evidence of prohibition**, and the product does not verify personal licensure or authorize whole-service practice.
+
+**Automated scenarios added:** Alaska cosmetologist with seven unanswered selected steps; New York esthetician with cited state references but an unanswered scalp question; California esthetician with an explicit shampoo restriction plus one unanswered camera question; Pennsylvania cosmetologist with fully supported steps and no redundant research route. Exact copy/readability and URL behavior must still be checked in an actual browser at desktop and narrow mobile widths.
+
+**Release gate:** This is a development-preview UX correction, not nationwide legal coverage. No production merge until the existing independent regulatory and manual-device QA gates are met.
