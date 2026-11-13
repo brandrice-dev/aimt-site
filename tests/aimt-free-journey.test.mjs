@@ -702,24 +702,27 @@ test('plain-English result summarizes PA cosmetologist without making routine se
  assert.deepEqual(plain.items.map(x=>x.tone),['supported','check']);
  assert.equal(plain.items[0].count,5);
  assert.equal(plain.items[1].count,2);
- assert.match(plain.items[0].text,/official references/);
- assert.match(plain.items[1].text,/equipment|technique/);
- assert.match(plain.next.label,/verify your license and workplace/);
+ assert.match(plain.items[0].text,/State rules include these services/);
+ assert.deepEqual(plain.items[0].steps.map(x=>x.label),['Shampoo or wash hair','Clean or exfoliate the scalp','Massage the scalp','Cosmetic neck or shoulder massage','Blow-dry or style hair']);
+ assert.match(plain.items[1].text,/tools or methods/);
+ assert.deepEqual(plain.items[1].steps.map(x=>x.label),['Look at the scalp with a camera','Use water or steam equipment']);
+ assert.match(plain.next.label,/check your license and work location/);
  assert.match(plain.next.href,/pa.gov/);
  assert.doesNotMatch(plain.context+plain.items.map(x=>x.text).join(' '),/probably illegal|prohibited for your license/i);
- assert.match(plain.note,/do not verify your individual license/);
+ assert.match(plain.note,/do not check your personal license/);
 });
 test('unknown-state summary gives a short neutral explanation and useful next action',()=>{
  const review=evidenceFor('Alaska','Cosmetologist',['wash','scalp','scalp-massage','bodywork','styling','camera','wet']);
  const plain=scopePlainEnglish(review);
  assert.equal(plain.items.length,1);
  assert.equal(plain.items[0].tone,'neutral');
- assert.match(plain.items[0].title,/still needs an exact answer/i);
- assert.match(plain.items[0].text,/5 other selected steps/);
- assert.match(plain.items[0].text,/not.*prohibited/i);
+ assert.match(plain.items[0].title,/need a closer look/i);
+ assert.equal(plain.items[0].steps.length,7);
+ assert.match(plain.items[0].steps[0].label,/shampoo/i);
+ assert.match(plain.items[0].text,/does not mean you cannot offer them/i);
  assert.doesNotMatch(plain.items[0].text,/AIMT has not finished|AIMT research gap/i);
  assert.equal(plain.next.href,'https://www.usa.gov/state-governments');
- assert.match(plain.next.label,/find the exact rule/i);
+ assert.match(plain.next.label,/check your state.s rules/i);
  assert.equal(plain.hasSourceBackedResult,false);
 });
 test('mixed findings keep cited positives green and real restrictions red with a targeted next step',()=>{
@@ -730,43 +733,48 @@ test('mixed findings keep cited positives green and real restrictions red with a
  const unanswered=plain.items.find(x=>x.tone==='neutral');
  assert.ok(supported&&restricted&&unanswered);
  assert.equal(supported.tone,'supported');
- assert.match(supported.text,/shampooing/i);
- assert.match(restricted.text,/hair styling/);
- assert.match(plain.next.label,/restricted service step/i);
+ assert.match(supported.steps[0].label,/shampoo/i);
+ assert.match(restricted.steps[0].label,/style hair/i);
+ assert.match(plain.next.label,/check the restricted step/i);
  assert.match(plain.next.href,/tdlr\.texas\.gov/);
- assert.match(plain.note,/permission to offer an entire head spa/i);
+ assert.match(plain.note,/approve your whole head spa service/i);
  const washOnly=scopePlainEnglish(evidenceFor('Texas','No professional license',['wash']));
- assert.match(washOnly.next.label,/work setting and limits/i);
+ assert.match(washOnly.next.label,/where you can offer this step/i);
  assert.doesNotMatch(washOnly.next.label,/verify your license/i);
  const conditional=scopePlainEnglish(evidenceFor('Pennsylvania','No professional license',['wash']));
  assert.equal(conditional.items[0].tone,'check');
- assert.match(conditional.next.label,/required conditions/i);
+ assert.match(conditional.next.label,/check the conditions/i);
 });
 test('Finder uses a visibly titled findings summary, plain-English glossary and clear status colors',()=>{
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
  const css=read('assets/css/aimt-scope-finder-status.css');
  for(const token of [
-  'YOUR FINDINGS',
-  'Your results, in plain English',
+  'YOUR RESULTS',
+  'What this means for your service',
   'data-scope-takeaway-items',
   'data-scope-next-label',
   'data-scope-next-text',
   'data-scope-next-link',
   'data-scope-takeaway-note',
   'scopePlainEnglish(review)',
-  'What do these licensing words mean?',
+  'Quick definitions of licensing terms',
   'Scope of practice',
   'Salon or establishment license',
   'Exemption',
   'Licensing board'
  ])assert.ok(widget.includes(token),'Summary missing '+token);
  assert.match(widget,/section\.dataset\.findingTone=item\.tone/);
+ assert.match(widget,/steps\.className='lj-scope-takeaway-steps'/);
+ assert.match(widget,/section\.append\(title,text,steps\)/);
+ assert.doesNotMatch(widget,/Your results, in plain English/);
+ assert.doesNotMatch(widget,/YOUR FINDINGS/);
  assert.match(css,/\.lj-scope-quick\.lj-scope-takeaway/);
  assert.match(css,/\[data-finding-tone="supported"\]/);
  assert.match(css,/\[data-finding-tone="restricted"\]/);
  assert.match(css,/var\(--scope-success\)/);
  assert.match(css,/var\(--scope-error\)/);
  assert.match(css,/\.lj-scope-glossary summary:focus-visible/);
+ assert.match(css,/\.lj-scope-takeaway-steps/);
  assert.doesNotMatch(widget,/data-scope-quick-counts/);
  const evidence=read('assets/js/aimt-scope-evidence.mjs');
  for(const phrase of [
