@@ -1,0 +1,125 @@
+/* AIMT Scope Finder status and selection color semantics.
+   Loaded AFTER aimt-launch-journey.css in both shared widget contexts.
+   Green/red refer to source-backed legal activity guidance, not a person's
+   verified license or permission to operate a complete head spa.
+   Selected checkboxes are merely user choices and stay neutral. */
+.lj-tool[data-aimt-tool="scope"]{
+  --scope-success:var(--aimt-success,#3a5a3a);
+  --scope-success-light:var(--aimt-success-light,#e8ede8);
+  --scope-error:var(--aimt-error,#7a3030);
+  --scope-error-light:var(--aimt-error-light,#f0e8e8);
+  --scope-ink:#35332f;
+}
+
+/* Checked means included in my planned service, not approved or prohibited. */
+.lj-tool[data-aimt-tool="scope"] input[type=checkbox]{
+  accent-color:var(--scope-ink);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-check:has(input:checked){
+  background:#f1eee9;
+  border-color:#a29b92;
+  box-shadow:inset 0 0 0 1px rgba(53,51,47,.08);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-check:has(input:checked) span{
+  color:#292724;
+}
+
+/* SOURCE-BACKED scope/exemption = AIMT success green. This is NOT practice clearance. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"]{
+  background:var(--scope-success-light);
+  border:1px solid rgba(58,90,58,.30);
+  border-left:4px solid var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"] .lj-evidence-kind{
+  background:var(--scope-success-light);
+  color:var(--scope-success);
+  border:1px solid rgba(58,90,58,.35);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="credential_scope"] .lj-evidence-kind::before,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="documented_exemption"] .lj-evidence-kind::before{
+  content:"✓";
+  font-weight:700;
+  margin-right:7px;
+}
+
+/* An express credential restriction = AIMT error red. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"]{
+  background:var(--scope-error-light);
+  border:1px solid rgba(122,48,48,.28);
+  border-left:4px solid var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"] .lj-evidence-kind{
+  background:var(--scope-error-light);
+  color:var(--scope-error);
+  border:1px solid rgba(122,48,48,.32);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="outside_credential"] .lj-evidence-kind::before,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="licensed_role_required"] .lj-evidence-kind::before{
+  content:"×";
+  font-weight:700;
+  margin-right:7px;
+}
+
+/* Implementation questions, supervision conditions and unfinished research
+   are NOT violations or denials; keep those status cards neutral. */
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="implementation_review"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="unresolved"],
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="conditional_exemption"]{
+  background:#faf7f2;
+  border:1px solid #d8ccbe;
+  border-left:4px solid #a99a86;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="implementation_review"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="unresolved"] .lj-evidence-kind,
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-card[data-scope-status="conditional_exemption"] .lj-evidence-kind{
+  background:#f0ebe3;
+  color:#65584b;
+  border:1px solid #dbd0c2;
+}
+
+/* Summary is semantic and source-led, distinct from a user's claimed license. */
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="supported"]{
+  background:var(--scope-success-light);
+  border-color:rgba(58,90,58,.3);
+  border-left-color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="supported"] strong{
+  color:var(--scope-success);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="restricted"]{
+  background:var(--scope-error-light);
+  border-color:rgba(122,48,48,.3);
+  border-left-color:var(--scope-error);
+}
+.lj-tool[data-aimt-tool="scope"] .lj-scope-quick[data-scope-tone="restricted"] strong{
+  color:var(--scope-error);
+}
+
+/* Links and government lookup are actions, not warning indicators. */
+.lj-tool[data-aimt-tool="scope"] .lj-license-lookup-link{
+  background:#f4f1ec;
+  border-color:#918b82;
+  color:var(--scope-ink)!important;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-license-lookup-link:hover{
+  background:#eae6df;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-refs a,
+.lj-tool[data-aimt-tool="scope"] .lj-source-list a{
+  color:var(--scope-ink)!important;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.lj-tool[data-aimt-tool="scope"] .lj-evidence-refs a:hover,
+.lj-tool[data-aimt-tool="scope"] .lj-source-list a:hover{
+  text-decoration-thickness:2px;
+}
+.lj-tool[data-aimt-tool="scope"] a:focus-visible,
+.lj-tool[data-aimt-tool="scope"] .lj-check:focus-within{
+  outline:2px solid #605b53;
+  outline-offset:3px;
+}
