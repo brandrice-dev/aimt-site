@@ -271,14 +271,23 @@ export function mountScope(root){
     'LICENSE STATUS: '+g.licenseStatusNote,
     'ESTABLISHMENT / FACILITY: '+review.facility,
     'NEXT VERIFICATION: '+review.nextContact,
-    'OFFICIAL LICENSE LOOKUP: '+(review.licenseLookup?.url||'Not yet mapped'),
+    'OFFICIAL LICENSE LOOKUP: '+(review.licenseLookup?.url||'Find the regulator through '+SCOPE_GOVERNMENT_DIRECTORY.url),
+    '',
+    'OFFICIAL RESEARCH STARTING POINT',
+    route.startingPoint.title+' — '+route.startingPoint.url,
+    ...route.steps.map((step,index)=>(index+1)+'. '+step.title+': '+step.detail),
+    ...(route.questions.length?['','SERVICE-SPECIFIC QUESTIONS',...route.questions.map(q=>'• '+q.question)]:[]),
     '',
     'No finding authorizes a complete head spa treatment. An individual licensing exemption for one step does not extend to others.'
   ].join('\n');
   const documented=review.findings.filter(x=>x.status!=='unresolved').length;
   const covered=quick.counts.credential_scope;
   const open=quick.counts.unresolved;
-  showResult(root,covered+' selected activities have an official license-scope reference, and '+quick.counts.implementation_review+' have specific equipment or technique checks. '+(open?'For the remaining '+open+' step(s), use your tailored questions and official starting point above. ':'')+'No complete service or individual license is verified by this tool.');
+  if(sourced.length===0){
+   showResult(root,'Your personalized licensing research pathway is ready. Open the official government source, use the tailored questions and keep a copy of this report. No legal determination has been made.');
+  }else{
+   showResult(root,covered+' selected activities have an official license-scope reference, and '+quick.counts.implementation_review+' have specific equipment or technique checks. '+(open?'For the remaining '+open+' step(s), use your tailored questions and official starting point above. ':'')+'No complete service or individual license is verified by this tool.');
+  }
   return true;
  }
  trigger(root,'scope-save',()=>generate(true));
