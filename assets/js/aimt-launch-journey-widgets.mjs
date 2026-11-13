@@ -4,7 +4,7 @@ import {
  STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
 } from './aimt-launch-journey-core.mjs';
-import { scopeSummary, SCOPE_RESEARCH_DISCLAIMER, SCOPE_GOVERNMENT_DIRECTORY } from './aimt-scope-evidence.mjs';
+import { scopeSummary, scopePlainEnglish, SCOPE_RESEARCH_DISCLAIMER, SCOPE_GOVERNMENT_DIRECTORY } from './aimt-scope-evidence.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
 function options(items,selected=''){
@@ -89,7 +89,28 @@ export function mountScope(root){
   '<div class="lj-actions">',btn('Review my activities','scope-save'),btn('Copy my findings','scope-report-copy',true),btn('Copy questions for my board','scope-copy',true),'</div>',
   '<p class="lj-status lj-save-message" role="status" aria-live="polite"></p>',
   '<div data-sources hidden>',
-   '<div class="lj-scope-quick" data-scope-tone="neutral" aria-live="polite"><strong data-scope-quick-headline></strong><p data-scope-quick-message></p><p data-scope-quick-counts class="lj-help"></p></div>',
+      '<section class="lj-scope-quick lj-scope-takeaway" data-scope-tone="neutral" aria-labelledby="scope-takeaway-title" role="region">',
+    '<div class="lj-scope-takeaway-header">',
+     '<span class="lj-scope-takeaway-eyebrow">YOUR FINDINGS</span>',
+     '<h3 id="scope-takeaway-title">Your results, in plain English</h3>',
+     '<p data-scope-quick-message></p>',
+    '</div>',
+    '<div class="lj-scope-takeaway-items" data-scope-takeaway-items aria-live="polite"></div>',
+    '<div class="lj-scope-takeaway-next">',
+      '<strong data-scope-next-label></strong>',
+      '<p data-scope-next-text></p>',
+      '<a data-scope-next-link target="_blank" rel="noopener noreferrer"></a>',
+    '</div>',
+    '<details class="lj-scope-glossary"><summary>What do these licensing words mean?</summary>',
+      '<dl>',
+       '<dt>Scope of practice</dt><dd>The services a professional license covers.</dd>',
+       '<dt>Salon or establishment license</dt><dd>Permission for the place where a business provides regulated services. It is separate from your personal license.</dd>',
+       '<dt>Exemption</dt><dd>A specific activity that may not require an individual license, sometimes only under certain conditions.</dd>',
+       '<dt>Licensing board</dt><dd>The state government agency that oversees a profession and its rules.</dd>',
+      '</dl>',
+    '</details>',
+    '<p class="lj-scope-takeaway-note" data-scope-takeaway-note></p>',
+   '</section>',
    '<section class="lj-scope-research-path" data-scope-research-path hidden aria-labelledby="lj-scope-path-title">',
     '<div class="lj-scope-path-head"><span>YOUR NEXT STEPS</span><h4 id="lj-scope-path-title">Find the rules that apply to your service</h4><p>The official rules are tied to your license and activities—not necessarily the term “head spa.” Use this checklist to establish what applies.</p></div>',
     '<a class="lj-scope-path-link" data-scope-path-link target="_blank" rel="noopener noreferrer"></a>',
@@ -149,22 +170,24 @@ export function mountScope(root){
   const patch={careerStage:stage.value,state,license,licenseStatus:credentialStatus,operatingContext,activities,licenseQuestions:$(root,'#sc-question').value};
   const next=save?persist(patch,root):{...current(),...patch};
   const g=scopeResult(next),review=g.review;
-  const quick=scopeSummary(review);
+  const quick=scopeSummary(review),plain=scopePlainEnglish(review);
   $(root,'[data-scope-tone]').dataset.scopeTone=quick.tone;
-  info(root,'[data-scope-quick-headline]',quick.headline);
-  info(root,'[data-scope-quick-message]',quick.message);
-  const readableCounts=[
-   [quick.counts.credential_scope,'license-scope services supported by official references'],
-   [quick.counts.documented_exemption,'individual-license exemptions cited'],
-   [quick.counts.implementation_review,'equipment or method checks'],
-   [quick.counts.conditional_exemption,'conditional exceptions'],
-   [quick.counts.outside_credential+quick.counts.licensed_role_required,'credential restrictions cited']
-  ].filter(entry=>entry[0]>0).map(([n,label])=>n+' '+label);
-  if(quick.counts.unresolved){
-   readableCounts.push(quick.counts.unresolved+' service steps with a tailored research pathway below');
+  info(root,'[data-scope-quick-message]',plain.context);
+  const summaryItems=$(root,'[data-scope-takeaway-items]');
+  summaryItems.replaceChildren();
+  for(const item of plain.items){
+   const section=document.createElement('div');section.className='lj-scope-takeaway-item';
+   section.dataset.findingTone=item.tone;
+   const title=document.createElement('strong');title.textContent=item.title;
+   const text=document.createElement('p');text.textContent=item.text;
+   section.append(title,text);summaryItems.appendChild(section);
   }
-  info(root,'[data-scope-quick-counts]',readableCounts.join(' · ')||'Your service-specific research pathway is below.');
-
+  info(root,'[data-scope-next-label]',plain.next.label);
+  info(root,'[data-scope-next-text]',plain.next.text);
+  const nextLink=$(root,'[data-scope-next-link]');
+  nextLink.href=plain.next.href;
+  nextLink.textContent=plain.next.linkLabel+' ↗';
+  info(root,'[data-scope-takeaway-note]',plain.note);
   const route=g.researchPath;
   const hasOpenQuestions=route.questions.length>0;
   const pathSection=$(root,'[data-scope-research-path]');
