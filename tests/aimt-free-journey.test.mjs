@@ -10,7 +10,7 @@ import {
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
-import {SCOPE_EVIDENCE,SCOPE_FINDINGS,SCOPE_RESEARCH_DISCLAIMER,evidenceFor,scopeSummary} from '../assets/js/aimt-scope-evidence.mjs';
+import {SCOPE_EVIDENCE,SCOPE_FINDINGS,SCOPE_RESEARCH_DISCLAIMER,SCOPE_GOVERNMENT_DIRECTORY,evidenceFor,scopeSummary,scopeResearchPath} from '../assets/js/aimt-scope-evidence.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
@@ -56,7 +56,7 @@ test('Scope Finder gives sourced findings for precise activity, credential and s
  assert.equal(r.review.findings[1].status,'unresolved');
  const unknown=scopeResult({...p,state:'Wyoming'});
  assert.equal(unknown.sources.length,0);
- assert.match(unknown.status,/NOT YET RESEARCHED/);
+ assert.match(unknown.status,/NO ACTIVITY-SPECIFIC FINDING CITED YET/);
  assert.ok(unknown.review.findings.every(x=>x.status==='unresolved'));
  assert.equal(Object.keys(SCOPE_EVIDENCE).length,6);
  assert.equal(Object.keys(SCOPE_SOURCES).length,6);
@@ -103,7 +103,7 @@ test('Pennsylvania licensed-salon obligation and no-advisory-opinion restriction
  assert.match(r.nextContact,/cannot issue advisory legal opinions/i);
  const unknown=evidenceFor('Alaska','No professional license',['wash','scalp']);
  assert.equal(unknown.researchDate,null);
- assert.match(unknown.coverage,/not researched this state yet/i);
+ assert.match(unknown.coverage,/No state-specific determination is cited/i);
 });
 test('Scope Finder shows research coverage, facility, individual source citations and safe copy action',()=>{
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
@@ -422,8 +422,8 @@ test('plain-language summaries never clear an entire head spa, even when one ste
   [evidenceFor('Florida','No professional license',['wash']),/individual license exemption/i],
   [evidenceFor('Texas','No professional license',['wash','styling']),/another professional credential/i],
   [evidenceFor('Pennsylvania','No professional license',['wash']),/narrow exception/i],
-  [evidenceFor('New York','Esthetician',['scalp']),/AIMT has not finished researching/i],
-  [evidenceFor('Alaska','Cosmetologist',['wash']),/AIMT has not finished researching/i],
+  [evidenceFor('New York','Esthetician',['scalp']),/Here’s how to confirm the rules for your service/i],
+  [evidenceFor('Alaska','Cosmetologist',['wash']),/Here’s how to confirm the rules for your service/i],
   [evidenceFor('California','Esthetician',['wash','styling']),/another professional credential/i]
  ];
  for(const [review,expected] of cases){
@@ -476,14 +476,14 @@ test('unresearched is clearly an AIMT evidence gap, not a restriction',()=>{
  const alaska=evidenceFor('Alaska','Cosmetologist',['wash']);
  for(const report of [pa,alaska]){
   const summary=scopeSummary(report);
-  assert.match(summary.headline,/AIMT has not finished researching/i);
-  assert.match(summary.message,/AIMT research gap|AIMT has not yet documented|AIMT has not finished|not evidence/i);
+  assert.match(summary.headline,/Here’s how to confirm the rules for your service/i);
+  assert.match(summary.message,/not.*prohibited|does not mean/i);
   assert.equal(summary.counts.licensed_role_required,0);
   assert.equal(summary.counts.outside_credential,0);
  }
  const registry=read('assets/js/aimt-scope-evidence.mjs');
- assert.match(registry,/AIMT research is not complete for this step/);
- assert.match(registry,/gap in AIMT’s research/);
+ assert.match(registry,/Confirm the specific rule for this activity/);
+ assert.match(registry,/not evidence the activity is prohibited/);
 });
 
 
@@ -569,4 +569,74 @@ test('Scope Finder screenshot regression: selected inputs are neutral, supported
   assert.ok(original>0&&override>original,'Scope style must load after base with a fresh URL: '+page);
   assert.match(html,/class="lj-tool" data-aimt-tool="scope"/);
  }
+});
+
+
+test('when none of the activities has a verified state-specific interpretation, give useful next steps',()=>{
+ const review=evidenceFor('Alaska','Cosmetologist',['wash','scalp','scalp-massage','bodywork','styling','camera','wet']);
+ const quick=scopeSummary(review);
+ const route=scopeResearchPath(review);
+ assert.equal(quick.tone,'unknown');
+ assert.equal(quick.total,7);
+ assert.equal(quick.counts.unresolved,7);
+ assert.match(quick.headline,/how to confirm the rules for your service/i);
+ assert.doesNotMatch(quick.headline+/ /+quick.message,/AIMT has not finished|7 AIMT research gaps|state does not provide/i);
+ assert.match(quick.message,/does not mean.*prohibited/i);
+ assert.equal(route.hasStateSources,false);
+ assert.equal(route.startingPoint.url,'https://www.usa.gov/state-governments');
+ assert.equal(SCOPE_GOVERNMENT_DIRECTORY.url,route.startingPoint.url);
+ assert.match(route.startingPoint.detail,/Alaska/);
+ assert.equal(route.questions.length,7);
+ assert.match(route.questions[0].question,/shampooing/i);
+ assert.match(route.questions[6].question,/sanitation|plumbing/i);
+ assert.deepEqual(route.steps.map(x=>x.title),[
+  'Locate the governing licensing rules',
+  'Match your exact credential to the activities',
+  'Check the workplace and equipment',
+  'Keep the source or ask for a rule citation'
+ ]);
+ assert.equal(quick.wholeServiceCleared,false);
+ const result=scopeResult({...example,state:'Alaska',license:'Cosmetologist',activities:['wash','scalp','wet'],operatingContext:'suite'});
+ assert.match(result.inquiry,/Specific questions for the steps not covered by a cited determination/);
+ assert.match(result.inquiry,/Does this credential cover shampooing/);
+ assert.match(result.inquiry,/What sanitation, plumbing/);
+ assert.doesNotMatch(result.inquiry,/license approved|permission granted/i);
+});
+test('when only one or two activities lack findings, preserve cited results and offer a narrower source path',()=>{
+ const review=evidenceFor('California','Esthetician',['wash','camera']);
+ const quick=scopeSummary(review);
+ const route=scopeResearchPath(review);
+ assert.equal(quick.counts.outside_credential,1);
+ assert.equal(quick.counts.unresolved,1);
+ assert.equal(quick.tone,'restricted');
+ assert.equal(route.hasStateSources,true);
+ assert.ok(route.startingPoint.url.includes('barbercosmo.ca.gov'));
+ assert.equal(route.questions.length,1);
+ assert.equal(route.questions[0].activity,'camera');
+ assert.equal(quick.wholeServiceCleared,false);
+ const supported=evidenceFor('Pennsylvania','Cosmetologist',['wash','scalp','styling']);
+ assert.equal(scopeResearchPath(supported).questions.length,0);
+ assert.equal(scopeSummary(supported).tone,'supported');
+});
+test('unresolved activities are shown as a source-led guide instead of seven negative cards',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ const css=read('assets/css/aimt-scope-finder-status.css');
+ for(const fragment of [
+  'data-scope-research-path',
+  'data-scope-path-link',
+  'data-scope-path-steps',
+  'data-scope-path-questions',
+  'data-scope-questions',
+  'data-scope-findings-title',
+  'sourced=review.findings.filter',
+  "quick.tone==='unknown'",
+  'SCOPE_GOVERNMENT_DIRECTORY',
+  'Your personalized licensing research pathway is ready',
+  'SERVICE-SPECIFIC QUESTIONS'
+ ])assert.ok(widget.includes(fragment),'Missing source-led design: '+fragment);
+ assert.match(widget,/for\(const finding of \[\.\.\.sourced\]/);
+ assert.match(widget,/if\(sourced.length===0\)/);
+ assert.match(css,/\.lj-scope-research-path/);
+ assert.match(css,/\.lj-scope-path-link/);
+ assert.doesNotMatch(widget,/7 AIMT research gaps/);
 });
