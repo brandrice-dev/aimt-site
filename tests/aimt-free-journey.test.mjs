@@ -535,3 +535,38 @@ test('research-only limitation is clear in standalone and Accelerator and follow
  assert.match(accelerator,/data-aimt-tool="scope"/);
  assert.doesNotMatch(widget,/permission granted|head spa cleared for practice/i);
 });
+
+
+test('Scope Finder screenshot regression: selected inputs are neutral, supported cards green, restrictions red',()=>{
+ const css=read('assets/css/aimt-scope-finder-status.css');
+ const base=read('assets/css/aimt-launch-journey.css');
+ const shell=read('assets/css/cadence-shell.css');
+ assert.match(shell,/--aimt-success,\s*#3a5a3a/);
+ assert.match(shell,/--aimt-error,\s*#7a3030/);
+ assert.match(base,/accent-color:#7b4d54/,'Base shared style can be burgundy but Scope Finder must override it');
+ assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] input\[type=checkbox\]/);
+ assert.match(css,/accent-color:var\(--scope-ink\)/);
+ assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] \.lj-check:has\(input:checked\)/);
+ assert.match(css,/background:#f1eee9/);
+ assert.doesNotMatch(css,/(?:\.lj-check:has\(input:checked\)[\s\S]{0,110}background:var\(--scope-error)/);
+ for(const key of ['credential_scope','documented_exemption']){
+  assert.ok(css.includes('data-scope-status="'+key+'"'));
+ }
+ assert.match(css,/background:var\(--scope-success-light\)/);
+ assert.match(css,/border-left:4px solid var\(--scope-success\)/);
+ for(const key of ['outside_credential','licensed_role_required']){
+  assert.ok(css.includes('data-scope-status="'+key+'"'));
+ }
+ assert.match(css,/background:var\(--scope-error-light\)/);
+ assert.match(css,/border-left:4px solid var\(--scope-error\)/);
+ assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] \.lj-license-lookup-link/);
+ assert.match(css,/color:var\(--scope-ink\)!important/);
+ assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] \.lj-evidence-refs a/);
+ for(const page of ['head-spa-scope-finder.html','head-spa-launch-accelerator.html']){
+  const html=read(page);
+  const original=html.indexOf('aimt-launch-journey.css?v=20261113-scope-status');
+  const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-scope-status');
+  assert.ok(original>0&&override>original,'Scope style must load after base with a fresh URL: '+page);
+  assert.match(html,/class="lj-tool" data-aimt-tool="scope"/);
+ }
+});
