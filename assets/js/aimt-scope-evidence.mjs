@@ -288,12 +288,15 @@ const SUMMARY_STEP_NAMES=Object.freeze({
  wet:'water, steam or sanitation equipment'
 });
 function stepNames(findings){
- return findings.map(f=>SUMMARY_STEP_NAMES[f.activity]||f.activity).join(', ');
+ const names=findings.map(f=>SUMMARY_STEP_NAMES[f.activity]||f.activity);
+ if(names.length>3)return names.slice(0,2).join(' and ')+' and '+(names.length-2)+' other selected steps';
+ if(names.length===3)return names[0]+', '+names[1]+' and '+names[2];
+ return names.join(' and ');
 }
 export function scopePlainEnglish(review){
  const findings=Array.isArray(review?.findings)?review.findings:[];
  const groups=[
-  {id:'credential_scope',tone:'supported',title:'What your license type covers',items:findings.filter(f=>f.status==='credential_scope'),
+  {id:'credential_scope',tone:'supported',title:'What this license type covers',items:findings.filter(f=>f.status==='credential_scope'),
    explain:items=>'The official references describe '+stepNames(items)+' as services within this professional license category.'},
   {id:'documented_exemption',tone:'supported',title:'A specific license exception',items:findings.filter(f=>f.status==='documented_exemption'),
    explain:items=>'The cited state source says '+stepNames(items)+' does not require an individual professional license. That exception is limited to these activities.'},
@@ -312,9 +315,19 @@ export function scopePlainEnglish(review){
  const state=review?.state||'your state',license=review?.license||'the selected license';
  const none=items.length===1 && items[0].id==='unresolved';
  const route=scopeResearchPath(review);
- const next=none || items.some(i=>i.id==='unresolved')
+ const restricted=groups.find(g=>g.id==='outside_credential'&&g.items.length);
+ const firstRestrictedSource=restricted?.items?.flatMap(x=>x.sources||[])[0];
+ const next=restricted
+  ? {label:'Next: check the restricted service step',text:'Read the specific official rule before offering that step. You may need a professional with a different license or need to change your planned service.',
+     href:firstRestrictedSource?.url||route.startingPoint.url,
+     linkLabel:firstRestrictedSource?'Read the cited licensing rule':route.startingPoint.title}
+  : none || items.some(i=>i.id==='unresolved')
   ? {label:'Next: find the exact rule',text:'Open the government source below, then use the service-specific questions to check what applies to your license and workplace.',
      href:route.startingPoint.url,linkLabel:route.startingPoint.title}
+  : items.some(i=>i.id==='conditional_exemption')
+  ? {label:'Next: check the required conditions',text:'Read the source for the exemption and confirm you meet its supervision and workplace requirements before using it.',
+     href:items.find(i=>i.id==='conditional_exemption')?.items?.[0]?.sources?.[0]?.url||route.startingPoint.url,
+     linkLabel:'Read the official conditions'}
   : {label:'Next: verify your license and workplace',text:'Check that your individual license is active and that your salon or work location meets its separate requirements.',
      href:review?.licenseLookup?.url||route.startingPoint.url,
      linkLabel:review?.licenseLookup?'Check your license on the official state website':route.startingPoint.title};
