@@ -11,7 +11,7 @@ import {
  appointmentMinutes,pricingResult,scopeResult,equipmentResult,observationFeedback,renderPlanText,blueprintFromPlan
 } from '../assets/js/aimt-launch-journey-core.mjs';
 import {normalizeBlueprint,BLUEPRINT_FIELDS} from '../assets/js/aimt-first-service-blueprint-core.mjs';
-import {SCOPE_EVIDENCE,SCOPE_FINDINGS,SCOPE_RESEARCH_DISCLAIMER,SCOPE_GOVERNMENT_DIRECTORY,evidenceFor,scopeSummary,scopeResearchPath} from '../assets/js/aimt-scope-evidence.mjs';
+import {SCOPE_EVIDENCE,SCOPE_FINDINGS,SCOPE_RESEARCH_DISCLAIMER,SCOPE_GOVERNMENT_DIRECTORY,evidenceFor,scopeSummary,scopeResearchPath,scopePlainEnglish} from '../assets/js/aimt-scope-evidence.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
@@ -691,4 +691,87 @@ test('research path points each profession to a relevant authority, not an unrel
  assert.match(paBarber.startingPoint.url,/barber/i);
  assert.equal(paBarber.hasStateSources,true);
  assert.equal(scopeResearchPath(evidenceFor('Texas','Esthetician',['camera'])).hasStateSources,true);
+});
+
+
+test('plain-English result summarizes PA cosmetologist without making routine services sound restricted',()=>{
+ const review=evidenceFor('Pennsylvania','Cosmetologist',['wash','scalp','scalp-massage','bodywork','styling','camera','wet']);
+ const plain=scopePlainEnglish(review);
+ assert.match(plain.context,/Cosmetologist in Pennsylvania/);
+ assert.equal(plain.items.length,2);
+ assert.deepEqual(plain.items.map(x=>x.tone),['supported','check']);
+ assert.equal(plain.items[0].count,5);
+ assert.equal(plain.items[1].count,2);
+ assert.match(plain.items[0].text,/official references/);
+ assert.match(plain.items[1].text,/equipment|technique/);
+ assert.match(plain.next.label,/verify your license and workplace/);
+ assert.match(plain.next.href,/pa.gov/);
+ assert.doesNotMatch(plain.context+plain.items.map(x=>x.text).join(' '),/probably illegal|prohibited for your license/i);
+ assert.match(plain.note,/do not verify your individual license/);
+});
+test('unknown-state summary gives a short neutral explanation and useful next action',()=>{
+ const review=evidenceFor('Alaska','Cosmetologist',['wash','scalp','scalp-massage','bodywork','styling','camera','wet']);
+ const plain=scopePlainEnglish(review);
+ assert.equal(plain.items.length,1);
+ assert.equal(plain.items[0].tone,'neutral');
+ assert.match(plain.items[0].title,/still needs an exact answer/i);
+ assert.match(plain.items[0].text,/5 other selected steps/);
+ assert.match(plain.items[0].text,/not.*prohibited/i);
+ assert.doesNotMatch(plain.items[0].text,/AIMT has not finished|AIMT research gap/i);
+ assert.equal(plain.next.href,'https://www.usa.gov/state-governments');
+ assert.match(plain.next.label,/find the exact rule/i);
+ assert.equal(plain.hasSourceBackedResult,false);
+});
+test('mixed findings keep cited positives green and real restrictions red with a targeted next step',()=>{
+ const review=evidenceFor('Texas','No professional license',['wash','styling','camera']);
+ const plain=scopePlainEnglish(review);
+ const supported=plain.items.find(x=>x.id==='documented_exemption');
+ const restricted=plain.items.find(x=>x.tone==='restricted');
+ const unanswered=plain.items.find(x=>x.tone==='neutral');
+ assert.ok(supported&&restricted&&unanswered);
+ assert.equal(supported.tone,'supported');
+ assert.match(supported.text,/shampooing/i);
+ assert.match(restricted.text,/hair styling/);
+ assert.match(plain.next.label,/restricted service step/i);
+ assert.match(plain.next.href,/tdlr\.texas\.gov/);
+ assert.match(plain.note,/permission to offer an entire head spa/i);
+ const washOnly=scopePlainEnglish(evidenceFor('Texas','No professional license',['wash']));
+ assert.match(washOnly.next.label,/work setting and limits/i);
+ assert.doesNotMatch(washOnly.next.label,/verify your license/i);
+ const conditional=scopePlainEnglish(evidenceFor('Pennsylvania','No professional license',['wash']));
+ assert.equal(conditional.items[0].tone,'check');
+ assert.match(conditional.next.label,/required conditions/i);
+});
+test('Finder uses a visibly titled findings summary, plain-English glossary and clear status colors',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ const css=read('assets/css/aimt-scope-finder-status.css');
+ for(const token of [
+  'YOUR FINDINGS',
+  'Your results, in plain English',
+  'data-scope-takeaway-items',
+  'data-scope-next-label',
+  'data-scope-next-text',
+  'data-scope-next-link',
+  'data-scope-takeaway-note',
+  'scopePlainEnglish(review)',
+  'What do these licensing words mean?',
+  'Scope of practice',
+  'Salon or establishment license',
+  'Exemption',
+  'Licensing board'
+ ])assert.ok(widget.includes(token),'Summary missing '+token);
+ assert.match(widget,/section\.dataset\.findingTone=item\.tone/);
+ assert.match(css,/\.lj-scope-quick\.lj-scope-takeaway/);
+ assert.match(css,/\[data-finding-tone="supported"\]/);
+ assert.match(css,/\[data-finding-tone="restricted"\]/);
+ assert.match(css,/var\(--scope-success\)/);
+ assert.match(css,/var\(--scope-error\)/);
+ assert.match(css,/\.lj-scope-glossary summary:focus-visible/);
+ assert.doesNotMatch(widget,/data-scope-quick-counts/);
+ const evidence=read('assets/js/aimt-scope-evidence.mjs');
+ for(const phrase of [
+  'Covered by this type of license',
+  'Not covered by this type of license',
+  'Find the rule for this exact step'
+ ])assert.ok(evidence.includes(phrase));
 });
