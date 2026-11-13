@@ -51,7 +51,7 @@ test('Scope Finder gives sourced findings for precise activity, credential and s
  assert.match(r.status,/OFFICIAL STATE REFERENCES AVAILABLE/i);
  assert.match(r.inquiry,/California/);
  assert.match(r.inquiry,/Shampooing or washing hair/);
- assert.match(r.inquiry,/establishment/);
+ assert.match(r.inquiry,/salon permit/);
  assert.doesNotMatch(r.inquiry,/you are approved|permission granted/i);
  assert.equal(r.review.findings[0].status,'credential_scope');
  assert.equal(r.review.findings[1].status,'unresolved');
@@ -106,13 +106,14 @@ test('Pennsylvania licensed-salon obligation and no-advisory-opinion restriction
  assert.equal(unknown.researchDate,null);
  assert.match(unknown.coverage,/No state-specific determination is cited/i);
 });
-test('Scope Finder shows research coverage, facility, individual source citations and safe copy action',()=>{
+test('Scope Finder keeps exact sources and facilities accessible without repeating them in the primary flow',()=>{
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
  for(const token of [
   'sc-context','data-activity-findings','data-source-facility','data-source-reviewed',
-  'data-next-contact','data-board-inquiry','scope-save','scope-copy','scope-report-copy',
-  'RESEARCH COVERAGE','an approval to offer your full head spa'
+  'data-next-contact','data-board-inquiry','scope-save','scope-email-copy',
+  'scope-report-copy','data-scope-legal-details','Official sources and detailed rules'
  ])assert.ok(widget.includes(token),'Missing '+token);
+ assert.doesNotMatch(widget,/RESEARCH COVERAGE|scope-copy|an approval to offer your full head spa/i);
  assert.doesNotMatch(widget,/you may offer all head spa services|head spa permitted/i);
 });
 test('scope result clarifies mismatch for massage therapy and unlicensed learner',()=>{
@@ -267,8 +268,8 @@ test('new graduates and experienced practitioners receive specific guidance with
  assert.deepEqual(scopeResult(starter).sources,scopeResult(experienced).sources);
  assert.equal(normalizePlan({...example,careerStage:'unverified'}).careerStage,'');
  const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
- assert.match(widget,/select\('sc-stage',CAREER_STAGES/);
- assert.match(widget,/CAREER_STAGE_GUIDANCE/);
+ assert.doesNotMatch(widget,/select\('sc-stage',CAREER_STAGES/);
+ assert.doesNotMatch(widget,/data-stage-guidance/);
  const hub=read('free-tools.html');
  assert.match(hub,/Fresh out of school or years behind the chair/);
 });
@@ -566,7 +567,7 @@ test('Scope Finder screenshot regression: selected inputs are neutral, supported
  for(const page of ['head-spa-scope-finder.html','head-spa-launch-accelerator.html']){
   const html=read(page);
   const original=html.indexOf('aimt-launch-journey.css?v=20261113-scope-status');
-  const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-results');
+  const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-final-scope');
   assert.ok(original>0&&override>original,'Scope style must load after base with a fresh URL: '+page);
   assert.match(html,/class="lj-tool" data-aimt-tool="scope"/);
  }
@@ -630,13 +631,13 @@ test('unresolved activities are shown as a source-led guide instead of seven neg
   'data-scope-questions',
   'data-scope-findings-title',
   'sourced=review.findings.filter',
-  "quick.tone==='unknown'",
+  "path.open=quick.tone==='unknown'",
   'SCOPE_GOVERNMENT_DIRECTORY',
-  'Your personalized licensing research pathway is ready',
-  'SERVICE-SPECIFIC QUESTIONS'
+  'Email your licensing board',
+  'QUESTIONS TO VERIFY'
  ])assert.ok(widget.includes(fragment),'Missing source-led design: '+fragment);
  assert.match(widget,/for\(const finding of \[\.\.\.sourced\]/);
- assert.match(widget,/if\(sourced.length===0\)/);
+ assert.match(widget,/const sourced=review.findings.filter/);
  assert.match(css,/\.lj-scope-research-path/);
  assert.match(css,/\.lj-scope-path-link/);
  assert.doesNotMatch(widget,/7 AIMT research gaps/);
@@ -782,4 +783,57 @@ test('Finder uses a visibly titled findings summary, plain-English glossary and 
   'Not covered by this type of license',
   'Find the rule for this exact step'
  ])assert.ok(evidence.includes(phrase));
+});
+
+
+test('final scope review has one focused form, results first, and nearby copyable email',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ const a=widget.indexOf('export function mountScope(root)');
+ const b=widget.indexOf('export function mountService(root)',a);
+ const scope=widget.slice(a,b);
+ const indexOf=t=>scope.indexOf(t);
+ for(const control of ['sc-state','sc-license','sc-status','sc-context']){
+  assert.ok(indexOf(control)>0,'Missing required control '+control);
+ }
+ assert.doesNotMatch(scope,/sc-stage|sc-question|licenseQuestions|data-stage-guidance/);
+ assert.equal((scope.match(/field\('/g)||[]).length,4,'Only the four licensing-context fields should remain');
+ assert.match(scope,/View my results/);
+ assert.doesNotMatch(scope,/btn\('Copy my findings'|btn\('Copy questions for my board'/);
+ assert.ok(indexOf('YOUR RESULTS')>0);
+ assert.ok(indexOf('scope-email-copy')>indexOf('YOUR RESULTS'),'Email button should follow the summary');
+ assert.ok(indexOf('data-scope-legal-details')>indexOf('scope-email-copy'),'Legal details should follow email');
+ assert.match(scope,/Email your licensing board/);
+ assert.match(scope,/Copy email/);
+ assert.match(scope,/data-email-status/);
+ assert.match(scope,/data-board-inquiry/);
+ assert.match(scope,/scope-report-copy/);
+ assert.match(scope,/Copy full research report/);
+ assert.match(scope,/copy\(inquiry,root,\{/);
+ assert.match(scope,/statusSelector:'\[data-email-status\]'/);
+ assert.match(scope,/successMessage:'Email copied/);
+ assert.match(scope,/fallbackRoot:\$\(root,'\.lj-scope-email'\)/);
+ assert.match(scope,/report=\[/);
+ assert.match(scope,/data-source-links/);
+ assert.doesNotMatch(scope,/resultHTML\('Your licensing research summary'\)|showResult\(root/);
+ const css=read('assets/css/aimt-scope-finder-status.css');
+ assert.match(css,/\.lj-scope-email-heading/);
+ assert.match(css,/\.lj-scope-email-preview pre/);
+ assert.match(css,/\.lj-scope-details-body/);
+ assert.match(css,/textarea\[data-copy-fallback\]/);
+});
+test('final copy fallback and privacy protections remain for scope and other tools',()=>{
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.match(widget,/async function copy\(value,root,\{/);
+ assert.match(widget,/await navigator\.clipboard\.writeText\(value\)/);
+ assert.match(widget,/fallbackRoot\.appendChild\(area\)/);
+ assert.match(widget,/area\.readOnly=true/);
+ assert.match(widget,/area\.select\(\)/);
+ assert.doesNotMatch(widget,/window\.open\('mailto:|fetch\('mailto:/);
+ const html=read('head-spa-scope-finder.html');
+ assert.doesNotMatch(html,/Source coverage varies by state/);
+ assert.doesNotMatch(html,/Service Cost Worksheet|Readiness Score/);
+ assert.match(html,/Explore the Free Launch Accelerator/);
+ const scope=widget.slice(widget.indexOf('export function mountScope'),widget.indexOf('export function mountService'));
+ assert.match(scope,/SCOPE_RESEARCH_DISCLAIMER/);
+ assert.doesNotMatch(scope,/type="file"|name="license_number"|name="email"/);
 });
