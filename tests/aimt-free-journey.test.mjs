@@ -565,7 +565,7 @@ test('Scope Finder screenshot regression: selected inputs are neutral, supported
  for(const page of ['head-spa-scope-finder.html','head-spa-launch-accelerator.html']){
   const html=read(page);
   const original=html.indexOf('aimt-launch-journey.css?v=20261113-scope-status');
-  const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-scope-status');
+  const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-research-path');
   assert.ok(original>0&&override>original,'Scope style must load after base with a fresh URL: '+page);
   assert.match(html,/class="lj-tool" data-aimt-tool="scope"/);
  }
