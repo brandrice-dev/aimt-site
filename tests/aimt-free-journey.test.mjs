@@ -47,7 +47,7 @@ test('state/license and activities are strict whitelists; notes sanitized',()=>{
 test('Scope Finder gives sourced findings for precise activity, credential and state — never full service clearance',()=>{
  const p=normalizePlan({...example,operatingContext:'salon'}),r=scopeResult(p);
  assert.ok(r.sources.length>=1);
- assert.match(r.status,/PRIMARY SOURCES LOCATED/i);
+ assert.match(r.status,/OFFICIAL STATE REFERENCES AVAILABLE/i);
  assert.match(r.inquiry,/California/);
  assert.match(r.inquiry,/Shampooing or washing hair/);
  assert.match(r.inquiry,/establishment/);
