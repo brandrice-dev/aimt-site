@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 import {COURSE_CONTEXT} from '../functions/_lib/cadence/course-context.mjs';
 import {routeLearningQuestion,retrieveLearningResearch,assessmentContext,groundedCourseContext,classifyLearningGap,recordLearningGap,verifiedCitationCards,projectLearningResearch,diverseEvidence} from '../functions/_lib/cadence/learning-research.mjs';
 import {askCadenceServerSide} from '../functions/_lib/cadence/ask-cadence.mjs';
+import {CHECKPOINT_EVAL_INSTRUCTION,CHECKPOINT_EVALUATION_JSON_SCHEMA,evaluateCheckpointServerSide,rubricVersionTag} from '../functions/_lib/cadence/checkpoint-evaluation.mjs';
 import {onRequestPost} from '../functions/api/cadence/ask.js';
 import {_resetRateLimitBucketsForTests} from '../functions/_lib/cadence/rate-limit.mjs';
 import {triageStudentLearningGaps} from '../scripts/_lib/student-learning-gap-triage.mjs';
@@ -110,4 +111,37 @@ test('Cadence authentication failures use private no-store responses before any 
  const request=new Request('https://local.test/api/cadence/ask',{method:'POST',body:'{}'});
  const ask=await onRequestPost({env,request});assert.equal(ask.status,401);assert.match(ask.headers.get('cache-control'),/private, no-store/);assert.equal(ask.headers.get('vary'),'Authorization');
  const history=await onRequestGet({env,request:new Request('https://local.test/api/cadence/get-thread?moduleId=3')});assert.equal(history.status,401);assert.match(history.headers.get('cache-control'),/no-store/);
+});
+
+test('checkpoint feedback tone instruction is delivered without changing grading decisions, rubric identity or JSON schema',async t=>{
+  const captures=[];
+  const replies=[
+    {requiredElementsDemonstrated:[],requiredElementsMissing:['reasoning'],unsafeReasoning:false,unsafeReasoningDescription:null,feedback:'What would you do first, and why?'},
+    {requiredElementsDemonstrated:['planning','reasoning'],requiredElementsMissing:[],unsafeReasoning:false,unsafeReasoningDescription:null,feedback:'You explained the preparation sequence and why it matters.'},
+    {requiredElementsDemonstrated:['planning'],requiredElementsMissing:[],unsafeReasoning:true,unsafeReasoningDescription:'Explicit sanitation safety issue.',feedback:'Sanitation cannot be skipped; please correct that part of the plan.'}
+  ];
+  mock(t,async(_url,options)=>{
+    captures.push(JSON.parse(options.body));
+    return reply(JSON.stringify(replies.shift()));
+  });
+  const gradingEnv={ANTHROPIC_API_KEY:'PRIVATE_TEST_KEY',CADENCE_GRADING_MODEL:'claude-sonnet-5'};
+  const rubric='Isolated fixture rubric: planning and reasoning required; sanitation cannot be skipped.';
+  const question='A new student is setting up a head spa room. What comes first and why does sequence matter?';
+  const args={checkpointId:'m7cp1',systemPrompt:rubric,question,studentResponse:'Can you show me supporting research?'};
+  const revise=await evaluateCheckpointServerSide(gradingEnv,args);
+  const passed=await evaluateCheckpointServerSide(gradingEnv,{...args,studentResponse:'I established a safe prep order and explained the dependency.'});
+  const unsafe=await evaluateCheckpointServerSide(gradingEnv,{...args,studentResponse:'I can skip sanitation.'});
+  assert.equal(revise.decision,'revise');
+  assert.equal(passed.decision,'pass');
+  assert.equal(unsafe.decision,'revise');
+  assert.equal(unsafe.reason,'unsafe_reasoning');
+  assert.equal(revise.rubricVersion,rubricVersionTag(rubric));
+  assert.equal(captures.length,3);
+  for(const body of captures){
+    assert.equal(body.system,rubric+'\n\n'+CHECKPOINT_EVAL_INSTRUCTION);
+    assert.deepEqual(body.output_config.format.schema,CHECKPOINT_EVALUATION_JSON_SCHEMA);
+    assert.match(body.system,/Feedback tone \(student-facing/);
+    assert.match(body.system,/Do not answer the checkpoint in revision feedback/);
+    assert.match(body.system,/Always correct a specific unsafe or diagnostic claim/);
+  }
 });
