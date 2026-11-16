@@ -9,13 +9,76 @@ let page=1,sourceId='',requestSerial=0;
 const requestedReturn=new URLSearchParams(location.search).get('return_module');
 const returnModule=/^(?:[0-9]|1[01])$/.test(requestedReturn || '')?requestedReturn:null;
 if(returnModule)$('return-course').href='/head-spa-certification?enter=1&module='+returnModule;
-function clearProtected() { requestSerial++;$('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('graduate-library').hidden=true; }
+function clearProtected() { clearCadenceAnswer(); requestSerial++;$('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('graduate-library').hidden=true; }
 async function api(params) {
  const {data:{session}}=await client.auth.getSession();
  if(!session)throw Object.assign(Error('Sign in to My AIMT to continue.'),{status:401});
  const response=await fetch(`/api/graduate-research?${params}`,{headers:{Authorization:`Bearer ${session.access_token}`},cache:'no-store'});
  const body=await response.json();if(!response.ok)throw Object.assign(Error(body.error || 'Unable to load the library.'),{status:response.status});return body;
 }
+
+let cadenceRequestSerial=0;
+function clearCadenceAnswer(){
+ cadenceRequestSerial++;
+ $('cadence-answer').hidden=true;
+ $('cadence-answer-body').textContent='';
+ $('cadence-answer-sources').replaceChildren();
+ $('cadence-answer-status').textContent='';
+}
+async function askResearchCadence(question, sourceId=''){
+ const serial=++cadenceRequestSerial;
+ const panel=$('cadence-answer');
+ panel.hidden=false;
+ $('cadence-answer-body').textContent='';
+ $('cadence-answer-sources').replaceChildren();
+ $('cadence-answer-status').textContent='Cadence is checking eligible AIMT findings…';
+ if(!question.trim()){$('cadence-answer-status').textContent='Type a question to ask Cadence.';return;}
+ const askBtn=$('ask-cadence');
+ askBtn.disabled=true;
+ panel.scrollIntoView({block:'nearest'});
+ try{
+  const {data:{session}}=await client.auth.getSession();
+  if(!session)throw Object.assign(Error('Sign in to My AIMT to continue.'),{status:401});
+  const response=await fetch('/api/research-cadence',{
+   method:'POST',cache:'no-store',
+   headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},
+   body:JSON.stringify({question,source_id:sourceId})
+  });
+  const data=await response.json();
+  if(!response.ok)throw Object.assign(Error(data.error||'Cadence is temporarily unavailable.'),{status:response.status});
+  if(serial!==cadenceRequestSerial)return;
+  const title=data.coverage==='verified_findings'?'Source-linked explanation':
+   data.coverage==='general_background'?'General background · not AIMT verified':
+   data.coverage==='assessment_restricted'?'Learning support only':'Limited evidence explanation';
+  $('cadence-answer-title').textContent=title;
+  $('cadence-answer-status').textContent=(data.citations||[]).length+
+    ((data.citations||[]).length===1?' verified finding referenced.':' verified findings referenced.');
+  $('cadence-answer-body').textContent=data.answer||'';
+  if(data.note){const note=document.createElement('p');note.className='cadence-answer-note';note.textContent=data.note;$('cadence-answer-sources').append(note);}
+  if(Array.isArray(data.citations)&&data.citations.length){
+   const heading=document.createElement('h3');heading.textContent='Examine the evidence';$('cadence-answer-sources').append(heading);
+   const list=document.createElement('ul');list.className='cadence-source-links';
+   for(const citation of data.citations){
+    try{
+     const href=new URL(citation.library_href,location.origin);
+     if(href.origin!==location.origin || href.pathname!=='/my-aimt/research')continue;
+     if(returnModule)href.searchParams.set('return_module',returnModule);
+     const li=document.createElement('li'),a=document.createElement('a');
+     a.href=href.href;a.textContent='['+citation.id+'] '+citation.title+(citation.year?' ('+citation.year+')':'');
+     const tag=document.createElement('small');
+     tag.textContent=citation.verification_status==='AIMT_APPROVED'?'AIMT approved':'Claim verified';
+     li.append(a,tag);list.append(li);
+    }catch{}
+   }
+   $('cadence-answer-sources').append(list);
+  }
+ }catch(error){
+  if(serial!==cadenceRequestSerial)return;
+  if(error.status===401||error.status===403){accessFailure(error);return;}
+  $('cadence-answer-status').textContent=error.message;
+ }finally{if(serial===cadenceRequestSerial)askBtn.disabled=false;}
+}
+
 function accessFailure(error) {clearProtected();$('access-status').textContent=error.message;$('access-help').hidden=false;}
 const sourceLink=id=>`/my-aimt/research?source_id=${encodeURIComponent(id)}${returnModule?'&return_module='+returnModule:''}`;
 const findingLink=c=>`${sourceLink(c.source_id)}#${encodeURIComponent(c.claim_id)}`;
@@ -38,7 +101,7 @@ async function relatedEducation(source,serial) {
 }
 async function search({historyMode='push'}={}) {
  const serial=++requestSerial,params=paramsFromForm();
- $('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('study-detail').hidden=true;
+ clearCadenceAnswer();$('graduate-results').replaceChildren();$('study-detail').replaceChildren();$('study-detail').hidden=true;
  $('result-status').textContent='Searching verified research…';$('previous-page').hidden=true;$('next-page').hidden=true;$('page-label').textContent='';
  for(const button of document.querySelectorAll('#graduate-library button'))button.disabled=true;
  if(historyMode==='push')history.pushState({},'',`/my-aimt/research${params.size?`?${params}`:''}${sourceId?location.hash:''}`);
@@ -55,7 +118,7 @@ async function search({historyMode='push'}={}) {
    }
    const limitations=result.claims.filter(c=>c.claim_type==='limitation'),evidence=result.claims.filter(c=>c.claim_type!=='limitation');
    $('study-detail').hidden=false;
-   $('study-detail').innerHTML=`<p><a href="/my-aimt/research">← Back to research search</a></p><h2>${e(source.title || 'Scientific source')}</h2>${metadata(source)}<p>${topicLinks(source.topics)}</p><h2>Scientific evidence</h2>${evidence.map(finding).join('') || '<p>No other findings on this page.</p>'}<h2>Understanding the findings</h2><p>A separately validated explanation is not available in this view. The findings above preserve the recorded evidence and extraction provenance.</p><h2>Limitations and uncertainty</h2>${limitations.map(finding).join('') || '<p>No verified limitation statement appears on this page. This does not mean the study has no limitations. Read the original methods and discussion; more findings may appear on subsequent pages.</p>'}<h2>Practitioner context</h2><p>Consider the recorded population, evidence type, and study methods before applying these findings to professional learning. Preclinical or animal evidence does not by itself establish clinical applicability; observational associations do not establish causation. No practice recommendation has been inferred here.</p><div id="related-education"></div><h2>Continue investigating</h2><p>Explore related findings through the subject links above, or <a href="/research">visit the public Research Library</a>.</p>`;
+   $('study-detail').innerHTML=`<p><a href="/my-aimt/research">← Back to research search</a></p><h2>${e(source.title || 'Scientific source')}</h2>${metadata(source)}<p>${topicLinks(source.topics)}</p><button class="cadence-explain-source" type="button" data-explain-source="${e(source.source_id)}">Explain this study with Cadence ↗</button><h2>Scientific evidence</h2>${evidence.map(finding).join('') || '<p>No other findings on this page.</p>'}<h2>Understanding the findings</h2><p>A separately validated explanation is not available in this view. The findings above preserve the recorded evidence and extraction provenance.</p><h2>Limitations and uncertainty</h2>${limitations.map(finding).join('') || '<p>No verified limitation statement appears on this page. This does not mean the study has no limitations. Read the original methods and discussion; more findings may appear on subsequent pages.</p>'}<h2>Practitioner context</h2><p>Consider the recorded population, evidence type, and study methods before applying these findings to professional learning. Preclinical or animal evidence does not by itself establish clinical applicability; observational associations do not establish causation. No practice recommendation has been inferred here.</p><div id="related-education"></div><h2>Continue investigating</h2><p>Explore related findings through the subject links above, or <a href="/research">visit the public Research Library</a>.</p>`;
    await relatedEducation(source,serial);
    if(serial!==requestSerial)return;
    if(location.hash)document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({block:'center'});
@@ -71,6 +134,11 @@ async function search({historyMode='push'}={}) {
  finally {if(serial===requestSerial)for(const button of document.querySelectorAll('#graduate-library button'))button.disabled=false;}
 }
 form.addEventListener('submit',event=>{event.preventDefault();sourceId='';page=1;search();});
+$('ask-cadence').addEventListener('click',()=>askResearchCadence(form.elements.q.value));
+$('study-detail').addEventListener('click',event=>{
+ const btn=event.target.closest('button[data-explain-source]');
+ if(btn)askResearchCadence('Explain the verified findings of this paper in plain language. What are its limitations and what should a head spa professional not infer from it?',btn.dataset.explainSource);
+});
 $('previous-page').addEventListener('click',()=>{page--;search();});$('next-page').addEventListener('click',()=>{page++;search();});
 $('clear-search').addEventListener('click',()=>{form.reset();sourceId='';page=1;search();});
 for(const button of document.querySelectorAll('[data-query]'))button.addEventListener('click',()=>{form.reset();form.elements.q.value=button.dataset.query;sourceId='';page=1;search();});

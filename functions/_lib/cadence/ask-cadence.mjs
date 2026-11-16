@@ -299,7 +299,7 @@ export async function askCadenceServerSide(env,args) {
  const generated=await generateCadenceTurn(env,args);
  const research=args.research;
  let proposedGap=null, rejectionReasons=[], courseIssue=null;
- if(!research || research.state==='assessment_restricted' || !research.routes?.length || research.state==='temporarily_unavailable')return {...generated,citations:[],researchReview:null};
+ if(!research || research.state==='assessment_restricted' || (!research.routes?.length && research.library!==true) || research.state==='temporarily_unavailable')return {...generated,citations:[],researchReview:null};
  try {
   const citations=verifiedCitationCards(research,generated.text);
   if(/https?:\/\/|www\.|\bdoi\s*[:/]|\b10\.\d{4,9}\//i.test(generated.text))throw Error('UNSUPPORTED_BIBLIOGRAPHY');
