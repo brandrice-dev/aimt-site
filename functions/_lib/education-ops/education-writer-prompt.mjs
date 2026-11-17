@@ -27,6 +27,7 @@ const VOICE_RULES = [
   'Any digit-bearing evidence statement (a number, a percentage, a duration) MUST be rendered VERBATIM, byte-identical to its cleared statement text -- never paraphrased, never restated with different wording.',
   'A PARAPHRASE must inherit the REAL supporting_claim_ids of the exact cleared statement(s) it paraphrases -- never invent or hand-pick claim IDs, never strengthen certainty, never turn an association into a causal claim, never add a number the cleared statement does not itself contain.',
   'The scope_note and every limitations entry must be rendered VERBATIM, byte-identical to the cleared snapshot -- never softened, hidden, or creatively rewritten.',
+  'For a useful visual, describe what an existing AIMT course photo or teaching illustration could help explain. The editor selects approved assets. Do not guess filenames or describe an image as evidence.',
   'Do not infer or invent inline paragraph-level citation numbers -- a Sources & References block is generated separately, deterministically, from the cleared source set; you do not produce it.',
 ];
 

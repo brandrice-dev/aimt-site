@@ -220,6 +220,14 @@ sentences:
   "voice" — it's drift, and the framing rule above exists specifically to
   catch it.
 
+## Course visuals in Education Library articles
+
+Check AIMT's course assets and approved course marketing images when preparing each article. Reuse a photo or teaching illustration when it helps readers understand a specific observation, concept, or client conversation. Place the figure next to the text it supports.
+
+Give each figure descriptive alt text and a short caption that names what it shows. Credit the relevant course or module and link to the course when the image shows something readers can learn there. Identify demonstrations and teaching illustrations in the caption. Images of a service or a model provide practice context. Scientific claims still draw their support from the article's approved sources.
+
+The writer can recommend what a visual should teach. The editor checks existing assets first, confirms that the chosen image is suitable for public use, and verifies the caption and placement during page review. Use a text-only page when no suitable course asset serves a teaching purpose.
+
 ## What was deliberately left alone
 
 - **Scope callout and both limitation statements** — left **VERBATIM**,
