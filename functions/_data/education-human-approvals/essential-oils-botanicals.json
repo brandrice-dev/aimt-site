@@ -1,0 +1,348 @@
+{
+  "topic_slug": "essential-oils-botanicals",
+  "topic": null,
+  "seo_title": "Essential Oils in Scalp Care: What the Research Shows",
+  "meta_description": "Read the evidence on rosemary, peppermint, and tea tree oil in scalp care, including what researchers measured and where the findings stop.",
+  "canonical_url": "https://aimtrichology.com/education/product-science/essential-oils-botanicals",
+  "summary_markdown": "Read the evidence on rosemary, peppermint, and tea tree oil in scalp care, including what researchers measured and where the findings stop.",
+  "key_claim_ids": [
+    "allam-herbal-hair-loss-sr-2025--c04",
+    "panahi-rosemary-minoxidil-2015--c01",
+    "panahi-rosemary-minoxidil-2015--c02",
+    "panahi-rosemary-minoxidil-2015--c03",
+    "panahi-rosemary-minoxidil-2015--c10",
+    "rf-claim-menthol-cooling-sensation-human-skin",
+    "rf-claim-peppermint-oil-patch-test-uncommon",
+    "rf-claim-rose-acd-case-reports-exist",
+    "rf-claim-tto-no-meta-analysis-one-scalp-trial",
+    "rf-claim-tto-oxidation-ascaridole-sensitizers",
+    "rf-claim-tto-satchell-abstract"
+  ],
+  "source_ids": [
+    "allam-herbal-hair-loss-sr-2025",
+    "panahi-rosemary-minoxidil-2015",
+    "rf-src-bromm-menthol-itch-1995",
+    "rf-src-degroot-tto-contact-2016",
+    "rf-src-hjorther-carnosol-1997",
+    "rf-src-kairey-tto-rct-sr-2023",
+    "rf-src-satchell-tto-dandruff-2002",
+    "rf-src-warshaw-peppermint-nacdg-2024"
+  ],
+  "limitations_markdown": "This article describes the findings and limits of selected studies. Each section keeps the studied preparation, population, and outcome in view. The article is intended for professional education and product discussions. It does not give treatment instructions, concentrations for blending oils, or guidance for diagnosing a scalp condition.",
+  "practitioner_relevance_markdown": "Practitioner education for scalp professionals, hairstylists, and trichology consultations.",
+  "status": "approved",
+  "sitemap_eligible": false,
+  "last_reviewed_on": "2026-11-17",
+  "last_generated_at": "2026-11-18T01:53:22.568Z",
+  "published_at": null,
+  "generation_source_hash": "fb92d368c9f558bd3a6e96688322413f68b2b6f1417d7808737a11835df8ea2c",
+  "clearance_mode": "HUMAN_APPROVED",
+  "publication_clearance": {
+    "fingerprint_algorithm": "sha256-canonical-json-v2",
+    "fingerprint_input": {
+      "topic_slug": "essential-oils-botanicals",
+      "page_concept": "Essential Oils in Scalp Care: What the Research Shows",
+      "public_intent": "Read the evidence on rosemary, peppermint, and tea tree oil in scalp care, including what researchers measured and where the findings stop.",
+      "scope_language": {
+        "article_scope": "This article describes the findings and limits of selected studies. Each section keeps the studied preparation, population, and outcome in view. The article is intended for professional education and product discussions. It does not give treatment instructions, concentrations for blending oils, or guidance for diagnosing a scalp condition.",
+        "audience": "Scalp professionals"
+      },
+      "risk_tier": "MODERATE",
+      "selected_claim_ids": [
+        "allam-herbal-hair-loss-sr-2025--c04",
+        "panahi-rosemary-minoxidil-2015--c01",
+        "panahi-rosemary-minoxidil-2015--c02",
+        "panahi-rosemary-minoxidil-2015--c03",
+        "panahi-rosemary-minoxidil-2015--c10",
+        "rf-claim-menthol-cooling-sensation-human-skin",
+        "rf-claim-peppermint-oil-patch-test-uncommon",
+        "rf-claim-rose-acd-case-reports-exist",
+        "rf-claim-tto-no-meta-analysis-one-scalp-trial",
+        "rf-claim-tto-oxidation-ascaridole-sensitizers",
+        "rf-claim-tto-satchell-abstract"
+      ],
+      "core_factual_points": [
+        {
+          "statement": "A systematic review identified one randomized trial of tea tree oil shampoo for dandruff. In that trial, the dandruff score improved more with a shampoo containing tea tree oil than with the comparison shampoo over four weeks. The review discusses the possibility that the oil’s odor affected how well the trial stayed blinded.\n\nThat result describes the shampoo formulation used in one short trial. A review of contact allergy reports found that oxidation increased tea tree oil’s ability to cause allergic reactions and that undiluted oil was involved in most published cases. Those cases leave the risk for any given finished shampoo uncertain.",
+          "supporting_claim_ids": [
+            "rf-claim-tto-no-meta-analysis-one-scalp-trial",
+            "rf-claim-tto-oxidation-ascaridole-sensitizers",
+            "rf-claim-tto-satchell-abstract"
+          ]
+        },
+        {
+          "statement": "Menthol applied to the forearm produced a cooling sensation in a human experiment. That study measured responses on the forearm. It does not tell us whether a cooling shampoo improves the scalp finding a client came in to discuss.\n\nOne North American study reported an allergic reaction in 0.6% of the patients patch-tested for peppermint oil. These were patients referred for testing. The result does not estimate the chance of a reaction among everyone who uses a peppermint product.",
+          "supporting_claim_ids": [
+            "rf-claim-menthol-cooling-sensation-human-skin",
+            "rf-claim-peppermint-oil-patch-test-uncommon"
+          ]
+        },
+        {
+          "statement": "One randomized trial compared a rosemary oil preparation with 2% minoxidil in people with pattern hair loss. At six months, hair counts had increased from baseline in both groups. The study did not detect a statistically significant difference between the groups.\n\nThe trial used an active comparison and had no placebo arm. Its results leave uncertainty about how much of the observed change was due to the rosemary preparation. It also did not establish that the two products work equally well. A broader review of herbal remedies found that differences in study design and outcomes limit the conclusions researchers can draw.\n\nContact allergy to rosemary preparations has been documented in case reports. Those reports tell us that a reaction can happen. They do not establish how often one occurs in people using scalp products.",
+          "supporting_claim_ids": [
+            "allam-herbal-hair-loss-sr-2025--c04",
+            "panahi-rosemary-minoxidil-2015--c01",
+            "panahi-rosemary-minoxidil-2015--c02",
+            "panahi-rosemary-minoxidil-2015--c03",
+            "panahi-rosemary-minoxidil-2015--c10",
+            "rf-claim-rose-acd-case-reports-exist"
+          ]
+        }
+      ],
+      "limitations": [
+        {
+          "statement": "This article describes the findings and limits of selected studies. Each section keeps the studied preparation, population, and outcome in view. The article is intended for professional education and product discussions. It does not give treatment instructions, concentrations for blending oils, or guidance for diagnosing a scalp condition.",
+          "supporting_claim_ids": []
+        }
+      ],
+      "citation_map": {
+        "allam-herbal-hair-loss-sr-2025": {
+          "authors": [
+            "Anood T. Allam",
+            "Riham A. El-Shiekh",
+            "Ahmed M. El-Dessouki",
+            "Noha M. Gamil",
+            "Nehal Mohamed Eisa",
+            "Menna M. Ayoub",
+            "Weam A. M. Khallil",
+            "Mariam A. N. Farag",
+            "Madonna G. Attallah",
+            "Mohamed S. Abd El Hafeez",
+            "Dina Abou-Hussein"
+          ],
+          "doi": "10.1007/s00210-025-04286-6",
+          "title": "Pathophysiology, conventional treatments, and evidence-based herbal remedies of hair loss with a systematic review of controlled clinical trials",
+          "url": "https://doi.org/10.1007/s00210-025-04286-6",
+          "year": 2025
+        },
+        "panahi-rosemary-minoxidil-2015": {
+          "authors": [
+            "Panahi Y",
+            "Taghizadeh M",
+            "Marzony ET",
+            "Sahebkar A"
+          ],
+          "doi": null,
+          "title": "Rosemary Oil vs Minoxidil 2% for the Treatment of Androgenetic Alopecia: A Randomized Comparative Trial",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25842469",
+          "year": 2015
+        },
+        "rf-src-bromm-menthol-itch-1995": {
+          "authors": [
+            "Bromm B",
+            "Scharein E",
+            "Darsow U",
+            "Ring J"
+          ],
+          "doi": "10.1016/0304-3940(95)11362-z",
+          "title": "Effects of menthol and cold on histamine-induced itch and skin reactions in man",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/7624016/",
+          "year": 1995
+        },
+        "rf-src-degroot-tto-contact-2016": {
+          "authors": [
+            "de Groot AC",
+            "Schmidt E"
+          ],
+          "doi": "10.1111/cod.12591",
+          "title": "Tea tree oil: contact allergy and chemical composition",
+          "url": "https://onlinelibrary.wiley.com/doi/full/10.1111/cod.12591",
+          "year": 2016
+        },
+        "rf-src-hjorther-carnosol-1997": {
+          "authors": [
+            "Hjorther AB",
+            "Christophersen C",
+            "Hausen BM",
+            "Menne T"
+          ],
+          "doi": "10.1111/j.1600-0536.1997.tb00311.x",
+          "title": "Occupational allergic contact dermatitis from carnosol, a naturally-occurring compound present in rosemary",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/9330813/",
+          "year": 1997
+        },
+        "rf-src-kairey-tto-rct-sr-2023": {
+          "authors": [
+            "Kairey L",
+            "Agnew T",
+            "Bowles EJ",
+            "Barkla BJ",
+            "Wardle J",
+            "Lauche R"
+          ],
+          "doi": "10.3389/fphar.2023.1116077",
+          "title": "Efficacy and safety of Melaleuca alternifolia (tea tree) oil for human health—A systematic review of randomized controlled trials",
+          "url": "https://www.frontiersin.org/journals/pharmacology/articles/10.3389/fphar.2023.1116077/full",
+          "year": 2023
+        },
+        "rf-src-satchell-tto-dandruff-2002": {
+          "authors": [
+            "Satchell AC",
+            "Saurajen A",
+            "Bell C",
+            "Barnetson RS"
+          ],
+          "doi": "10.1067/mjd.2002.122734",
+          "title": "Treatment of dandruff with 5% tea tree oil shampoo",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/12451368/",
+          "year": 2002
+        },
+        "rf-src-warshaw-peppermint-nacdg-2024": {
+          "authors": [
+            "Warshaw EM",
+            "Yamashita Peterson M",
+            "DeKoven JG",
+            "Adler BL",
+            "Pratt MD",
+            "Belsito DV",
+            "Atwater AR",
+            "Houle MC",
+            "Dunnick CA",
+            "Yu J",
+            "Taylor JS",
+            "Silverberg JI",
+            "Reeder MJ",
+            "DeLeo VA",
+            "Mowad CM",
+            "Botto NC"
+          ],
+          "doi": "10.1089/derm.2024.0118",
+          "title": "Patch Testing to Mentha piperita (Peppermint) Oil: The North American Contact Dermatitis Group Experience (2009-2020)",
+          "url": "https://journals.sagepub.com/doi/full/10.1089/derm.2024.0118",
+          "year": 2024
+        }
+      },
+      "source_ids": [
+        "allam-herbal-hair-loss-sr-2025",
+        "panahi-rosemary-minoxidil-2015",
+        "rf-src-bromm-menthol-itch-1995",
+        "rf-src-degroot-tto-contact-2016",
+        "rf-src-hjorther-carnosol-1997",
+        "rf-src-kairey-tto-rct-sr-2023",
+        "rf-src-satchell-tto-dandruff-2002",
+        "rf-src-warshaw-peppermint-nacdg-2024"
+      ]
+    },
+    "risk_tier": "MODERATE",
+    "human_approval": {
+      "reviewer_role": "AIMT site owner",
+      "decision": "APPROVED_FOR_PUBLICATION",
+      "approval_text": "ok, i checked them, they pass, publish them all",
+      "reviewed_commit_sha": "3f615f41a78a4e104721678fba309728b364b864",
+      "approval_record_url": "https://github.com/brandrice-dev/aimt-site/pull/169",
+      "recorded_at": "2026-11-18T01:53:22.568Z",
+      "approved_file_sha256": "c6a20d0af02f3d509bd8414e3d4b1fca8ffaf37903f1d7db98f9a9c35cd8e29c",
+      "approved_article_html_sha256": "4704af4c40c8e5d5d4fa5117cbf229dc4653d56ce8f9607c8d0d657bf4cc4dc4"
+    },
+    "displayed_citations": [
+      {
+        "source_id": "panahi-rosemary-minoxidil-2015",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/25842469",
+        "label": "Rosemary Oil vs Minoxidil 2% for the Treatment of Androgenetic Alopecia: A Randomized Comparative Trial"
+      },
+      {
+        "source_id": "allam-herbal-hair-loss-sr-2025",
+        "url": "https://doi.org/10.1007/s00210-025-04286-6",
+        "label": "Pathophysiology, conventional treatments, and evidence-based herbal remedies of hair loss with a systematic review of controlled clinical trials"
+      },
+      {
+        "source_id": "rf-src-hjorther-carnosol-1997",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/9330813/",
+        "label": "Occupational allergic contact dermatitis from carnosol, a naturally-occurring compound present in rosemary"
+      },
+      {
+        "source_id": "rf-src-bromm-menthol-itch-1995",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/7624016/",
+        "label": "Effects of menthol and cold on histamine-induced itch and skin reactions in man"
+      },
+      {
+        "source_id": "rf-src-warshaw-peppermint-nacdg-2024",
+        "url": "https://journals.sagepub.com/doi/full/10.1089/derm.2024.0118",
+        "label": "Patch Testing to Mentha piperita (Peppermint) Oil: The North American Contact Dermatitis Group Experience (2009-2020)"
+      },
+      {
+        "source_id": "rf-src-kairey-tto-rct-sr-2023",
+        "url": "https://www.frontiersin.org/journals/pharmacology/articles/10.3389/fphar.2023.1116077/full",
+        "label": "Efficacy and safety of Melaleuca alternifolia (tea tree) oil for human health—A systematic review of randomized controlled trials"
+      },
+      {
+        "source_id": "rf-src-satchell-tto-dandruff-2002",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/12451368/",
+        "label": "Treatment of dandruff with 5% tea tree oil shampoo"
+      },
+      {
+        "source_id": "rf-src-degroot-tto-contact-2016",
+        "url": "https://onlinelibrary.wiley.com/doi/full/10.1111/cod.12591",
+        "label": "Tea tree oil: contact allergy and chemical composition"
+      }
+    ],
+    "claim_provenance": [
+      {
+        "claim_id": "panahi-rosemary-minoxidil-2015--c01",
+        "source_id": "panahi-rosemary-minoxidil-2015",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": "Patients and Methods; Abstract"
+      },
+      {
+        "claim_id": "panahi-rosemary-minoxidil-2015--c02",
+        "source_id": "panahi-rosemary-minoxidil-2015",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": "Abstract; Results"
+      },
+      {
+        "claim_id": "panahi-rosemary-minoxidil-2015--c03",
+        "source_id": "panahi-rosemary-minoxidil-2015",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": "Abstract; Results"
+      },
+      {
+        "claim_id": "panahi-rosemary-minoxidil-2015--c10",
+        "source_id": "panahi-rosemary-minoxidil-2015",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": "Conclusions"
+      },
+      {
+        "claim_id": "allam-herbal-hair-loss-sr-2025--c04",
+        "source_id": "allam-herbal-hair-loss-sr-2025",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": "Abstract"
+      },
+      {
+        "claim_id": "rf-claim-rose-acd-case-reports-exist",
+        "source_id": "rf-src-hjorther-carnosol-1997",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-menthol-cooling-sensation-human-skin",
+        "source_id": "rf-src-bromm-menthol-itch-1995",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-peppermint-oil-patch-test-uncommon",
+        "source_id": "rf-src-warshaw-peppermint-nacdg-2024",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-tto-no-meta-analysis-one-scalp-trial",
+        "source_id": "rf-src-kairey-tto-rct-sr-2023",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-tto-satchell-abstract",
+        "source_id": "rf-src-satchell-tto-dandruff-2002",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-tto-oxidation-ascaridole-sensitizers",
+        "source_id": "rf-src-degroot-tto-contact-2016",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "topic_slug": "sensitive-scalp",
+  "topic": null,
+  "seo_title": "Sensitive Scalp: What Clients Feel and What to Observe",
+  "meta_description": "Understand sensitive scalp, what people report in surveys, and how to document and discuss scalp discomfort in a consultation.",
+  "canonical_url": "https://aimtrichology.com/education/scalp-health/sensitive-scalp",
+  "summary_markdown": "Understand sensitive scalp, what people report in surveys, and how to document and discuss scalp discomfort in a consultation.",
+  "key_claim_ids": [
+    "rf-claim-sensscalp-c01",
+    "rf-claim-sensscalp-c03",
+    "rf-claim-sensscalp-c05",
+    "rf-claim-sensscalp-c14"
+  ],
+  "source_ids": [
+    "rf-src-bad-lpp-2022",
+    "rf-src-brenaut-2021",
+    "rf-src-ifsi-definition-2017",
+    "rf-src-misery-2008",
+    "rf-src-nhs-ringworm-2025",
+    "rf-src-souza-2023"
+  ],
+  "limitations_markdown": "This page covers recognition, documentation, and referral in a scalp consultation. The survey estimates are self-reported. The referral examples describe observable signs that merit medical evaluation.",
+  "practitioner_relevance_markdown": "Practitioner education for scalp professionals, hairstylists, and trichology consultations.",
+  "status": "approved",
+  "sitemap_eligible": false,
+  "last_reviewed_on": "2026-11-17",
+  "last_generated_at": "2026-11-18T01:53:22.568Z",
+  "published_at": null,
+  "generation_source_hash": "ba7a59a67d63f381ef7df738b8d1f8b75316522c6f8f000a028e943be023e6de",
+  "clearance_mode": "HUMAN_APPROVED",
+  "publication_clearance": {
+    "fingerprint_algorithm": "sha256-canonical-json-v2",
+    "fingerprint_input": {
+      "topic_slug": "sensitive-scalp",
+      "page_concept": "Sensitive Scalp: What Clients Feel and What to Observe",
+      "public_intent": "Understand sensitive scalp, what people report in surveys, and how to document and discuss scalp discomfort in a consultation.",
+      "scope_language": {
+        "article_scope": "This page covers recognition, documentation, and referral in a scalp consultation. The survey estimates are self-reported. The referral examples describe observable signs that merit medical evaluation.",
+        "audience": "Scalp professionals"
+      },
+      "risk_tier": "HIGH",
+      "selected_claim_ids": [
+        "rf-claim-sensscalp-c01",
+        "rf-claim-sensscalp-c03",
+        "rf-claim-sensscalp-c05",
+        "rf-claim-sensscalp-c14"
+      ],
+      "core_factual_points": [
+        {
+          "statement": "A new patch of hair loss with scale, or painful areas with persistent redness and scale around the base of hairs, warrant medical evaluation. Describe the location, appearance, and timing so the client can share those details at the appointment.",
+          "supporting_claim_ids": [
+            "rf-claim-sensscalp-c14"
+          ]
+        },
+        {
+          "statement": "An international expert group defines sensitive skin as unpleasant sensations, such as stinging, burning, itching, pain, or tingling, in response to things that would not usually provoke them. Under that definition, a skin disease does not explain the sensations. The skin can look normal or appear red. Researchers apply this definition to sensitive scalp.",
+          "supporting_claim_ids": [
+            "rf-claim-sensscalp-c01"
+          ]
+        },
+        {
+          "statement": "Heat was among the triggers people reported in the French survey. A report of a trigger tells you what the person noticed around the time symptoms appeared. The study design cannot establish what caused them.\n\nAsk the client to describe the sensation in their own words, tell you when it began, and explain what happened just before. Record their account alongside your observations.",
+          "supporting_claim_ids": [
+            "rf-claim-sensscalp-c05"
+          ]
+        },
+        {
+          "statement": "In a French survey of 1,011 adults, 44.2% described their scalp as sensitive or very sensitive. Other surveys use different questions and recruit different groups. Treat that figure as a report from one survey. It describes how people answered, rather than the result of a clinical exam.",
+          "supporting_claim_ids": [
+            "rf-claim-sensscalp-c03"
+          ]
+        }
+      ],
+      "limitations": [
+        {
+          "statement": "This page covers recognition, documentation, and referral in a scalp consultation. The survey estimates are self-reported. The referral examples describe observable signs that merit medical evaluation.",
+          "supporting_claim_ids": []
+        }
+      ],
+      "citation_map": {
+        "rf-src-bad-lpp-2022": {
+          "authors": [
+            "British Association of Dermatologists"
+          ],
+          "doi": null,
+          "title": "Lichen planopilaris",
+          "url": "https://www.bad.org.uk/pils/lichen-planopilaris/",
+          "year": 2022
+        },
+        "rf-src-brenaut-2021": {
+          "authors": [
+            "Brenaut E",
+            "Misery L",
+            "Legeas C",
+            "Roudot AC",
+            "Ficheux AS"
+          ],
+          "doi": "10.3389/fmed.2020.596544",
+          "title": "Sensitive Scalp: A Possible Association With the Use of Hair Conditioners",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/33791317/",
+          "year": 2020
+        },
+        "rf-src-ifsi-definition-2017": {
+          "authors": [
+            "Misery L",
+            "Stander S",
+            "Szepietowski JC",
+            "Reich A",
+            "Wallengren J",
+            "Evers AWM",
+            "Takamori K",
+            "Brenaut E",
+            "Le Gall-Ianotto C",
+            "Fluhr JW",
+            "Berardesca E",
+            "Weisshaar E"
+          ],
+          "doi": "10.2340/00015555-2397",
+          "title": "Definition of Sensitive Skin: An Expert Position Paper from the Special Interest Group on Sensitive Skin of the International Forum for the Study of Itch",
+          "url": "https://www.medicaljournals.se/acta/content/html/10.2340/00015555-2397",
+          "year": 2017
+        },
+        "rf-src-misery-2008": {
+          "authors": [
+            "Misery L",
+            "Sibaud V",
+            "Ambronati M",
+            "Macy G",
+            "Boussetta S",
+            "Taieb C"
+          ],
+          "doi": "10.1111/j.1600-0536.2007.01288.x",
+          "title": "Sensitive scalp: does this condition exist? An epidemiological study",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/18353032/",
+          "year": 2008
+        },
+        "rf-src-nhs-ringworm-2025": {
+          "authors": [
+            "NHS"
+          ],
+          "doi": null,
+          "title": "Ringworm",
+          "url": "https://www.nhs.uk/conditions/ringworm/",
+          "year": 2025
+        },
+        "rf-src-souza-2023": {
+          "authors": [
+            "Souza EN",
+            "Anzai A",
+            "Costa Fechine CO",
+            "Sakai Valente NY",
+            "Romiti R"
+          ],
+          "doi": "10.1159/000533795",
+          "title": "Sensitive Scalp and Trichodynia: Epidemiology, Etiopathogenesis, Diagnosis, and Management",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/38058545/",
+          "year": 2023
+        }
+      },
+      "source_ids": [
+        "rf-src-bad-lpp-2022",
+        "rf-src-brenaut-2021",
+        "rf-src-ifsi-definition-2017",
+        "rf-src-misery-2008",
+        "rf-src-nhs-ringworm-2025",
+        "rf-src-souza-2023"
+      ]
+    },
+    "risk_tier": "HIGH",
+    "human_approval": {
+      "reviewer_role": "AIMT site owner",
+      "decision": "APPROVED_FOR_PUBLICATION",
+      "approval_text": "ok, i checked them, they pass, publish them all",
+      "reviewed_commit_sha": "5ca29a17218aac49d8ca1de0072a6ee73bd2abbf",
+      "approval_record_url": "https://github.com/brandrice-dev/aimt-site/pull/167",
+      "recorded_at": "2026-11-18T01:53:22.568Z",
+      "approved_file_sha256": "5ac33d06001015779f1dc6a0b25469bf14417a7f12076de89de1e0459fe97c66",
+      "approved_article_html_sha256": "3d6d532f67aea9ad97cb12ea7156111acb30b100e082ba29659d6f23d19e60dd"
+    },
+    "displayed_citations": [
+      {
+        "source_id": "rf-src-ifsi-definition-2017",
+        "url": "https://doi.org/10.2340/00015555-2397",
+        "label": "Definition of Sensitive Skin"
+      },
+      {
+        "source_id": "rf-src-misery-2008",
+        "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1600-0536.2007.01288.x",
+        "label": "Sensitive Scalp: Does This Condition Exist? An Epidemiological Study"
+      },
+      {
+        "source_id": "rf-src-souza-2023",
+        "url": "https://doi.org/10.1159/000533795",
+        "label": "Sensitive Scalp and Trichodynia: Epidemiology, Etiopathogenesis, Diagnosis, and Management"
+      },
+      {
+        "source_id": "rf-src-nhs-ringworm-2025",
+        "url": "https://www.nhs.uk/conditions/ringworm/",
+        "label": "Ringworm"
+      },
+      {
+        "source_id": "rf-src-bad-lpp-2022",
+        "url": "https://www.bad.org.uk/pils/lichen-planopilaris/",
+        "label": "Lichen Planopilaris"
+      }
+    ],
+    "claim_provenance": [
+      {
+        "claim_id": "rf-claim-sensscalp-c01",
+        "source_id": "rf-src-ifsi-definition-2017",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-sensscalp-c03",
+        "source_id": "rf-src-misery-2008",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-sensscalp-c05",
+        "source_id": "rf-src-misery-2008",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      },
+      {
+        "claim_id": "rf-claim-sensscalp-c14",
+        "source_id": "rf-src-brenaut-2021",
+        "verification_status": "CLAIM_VERIFIED",
+        "locator": null
+      }
+    ]
+  }
+}
