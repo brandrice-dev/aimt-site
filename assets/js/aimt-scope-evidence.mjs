@@ -243,10 +243,23 @@ export function scopeSummary(review){
  let headline='See what the official sources say';
  let message='This research tool explains the professional scope and remaining operational details; AIMT does not issue licensing decisions.';
  if(restricted){
-  tone='restricted';
-  headline='Some selected steps need another professional credential';
-  message='The cited guidance identifies certain steps outside the selected license category. Other listed cosmetic services may still be in scope. Review the particular restricted steps and their official sources.';
- }else if(supported){
+  if(supported||counts.documented_exemption||counts.conditional_exemption){
+   // Preserve sourced restrictions, but do not hide supported pathways behind them.
+   tone='mixed';
+   headline=supported?'Your selected services include covered activities and credential limits'
+    :counts.documented_exemption?'One step is exempt; other steps have licensing requirements'
+    :'Some steps have conditional options; others have licensing requirements';
+   message=supported
+    ?'The cited rules support some selected cosmetic services and identify separate credential requirements for others. Start with the supported activities below, then review the requirements for the other steps.'
+    :counts.documented_exemption
+    ?'The cited rules identify an individual-license exemption for one selected step and separate credential requirements for others. Review both findings before choosing your service activities.'
+    :'The cited rules describe a conditional option for certain steps and separate credential requirements for others. Review each condition and restriction.';
+   if(counts.unresolved)message+=' Unanswered steps are not being classified as prohibited.';
+  }else{
+   tone='restricted';
+   headline='Some selected steps need another professional credential';
+   message='The cited guidance identifies certain steps outside the selected license category. Other listed cosmetic services may still be in scope. Review the particular restricted steps and their official sources.';
+  } }else if(supported){
   tone=counts.credential_scope?'supported':'caution';
   headline=counts.credential_scope>=2
    ?'Your license category covers core cosmetic services'
@@ -324,9 +337,12 @@ export function scopePlainEnglish(review){
  const route=scopeResearchPath(review);
  const restricted=groups.find(g=>g.id==='outside_credential'&&g.items.length);
  const firstRestrictedSource=restricted?.items?.flatMap(x=>x.sources||[])[0];
+ const hasAlternativePath=items.some(i=>i.tone==='supported'||i.id==='conditional_exemption');
  const next=restricted
-  ? {label:'Next: check the restricted step',
-     text:'Read the state rule before offering that step. You may need a different license or a licensed team member.',
+  ? {label:hasAlternativePath?'Next: review the step with separate requirements':'Next: check the restricted step',
+     text:hasAlternativePath
+      ?'Your results also identify supported or conditionally permitted activities. Review the cited rule for any step with separate credential requirements before including it in your service.'
+      :'Read the state rule before offering that step. You may need a different license or a licensed team member.',
      href:firstRestrictedSource?.url||route.startingPoint.url,
      linkLabel:firstRestrictedSource?'Read the state rule':route.startingPoint.title}
   : none || items.some(i=>i.id==='unresolved')
