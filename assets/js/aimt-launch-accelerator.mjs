@@ -50,8 +50,12 @@ function openLesson(id,{enter=true,scroll=true}={}){
  const section=$('[data-lesson="'+id+'"]');
  const heading=section.querySelector('h2');
  if(heading)heading.focus({preventScroll:true});
- const course=$('#course');
- window.scrollTo({top:Math.max(0,course.getBoundingClientRect().top+window.scrollY-12),
+ // On phones the progress rail appears before the lesson. Scroll to the lesson
+ // heading, not the top of the rail, after advancing or revisiting a lesson.
+ const compact=window.matchMedia('(max-width:850px)').matches;
+ const scrollTarget=compact?(heading||section):$('#course');
+ const inset=compact?(window.matchMedia('(min-width:801px)').matches?80:12):12;
+ window.scrollTo({top:Math.max(0,scrollTarget.getBoundingClientRect().top+window.scrollY-inset),
   behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
 }
 function markAndContinue(id){
