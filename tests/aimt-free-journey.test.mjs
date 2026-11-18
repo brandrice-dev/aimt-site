@@ -259,6 +259,21 @@ test('final client scenario gives real reasoning feedback and never gates progre
  assert.match(classroom,/You have the plan\. Now learn how to deliver it/);
  assert.match(classroom,/Head Spa Certification/);
 });
+test('classroom phone layout keeps every lesson usable without squeezed tabs or reset scroll',()=>{
+ const css=read('assets/css/aimt-accelerator-classroom.css');
+ const js=read('assets/js/aimt-launch-accelerator.mjs');
+ const html=read('head-spa-accelerator-classroom.html');
+ assert.match(css,/\.lj-classroom \.lj-step-nav\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/\.lj-classroom \.lj-step-button\{display:flex/);
+ assert.match(css,/min-height:62px/);
+ assert.match(css,/\.lj-classroom \.lj-tool select,\.lj-classroom \.lj-tool textarea\{font-size:16px/);
+ assert.match(css,/\.lj-classroom \.lj-summary-actions\{display:grid;grid-template-columns:1fr/);
+ assert.match(js,/const compact=window\.matchMedia\('\(max-width:850px\)'\)\.matches/);
+ assert.match(js,/const scrollTarget=compact\?\(heading\|\|section\):\$\('#course'\)/);
+ assert.match(html,/name="aimt-case-response"/);
+ assert.match(html,/id="downloadLaunchPlan"/);
+ assert.match(html,/id="copyLaunchPlan"/);
+});
 test('tool card illustrations are accessible and the formerly light pricing card is visually unified',()=>{
  const hub=read('free-tools.html');
  const css=read('assets/css/aimt-free-tools-hub-expansion.css');
