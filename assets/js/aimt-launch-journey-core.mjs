@@ -7,7 +7,7 @@ import { SCOPE_EVIDENCE,evidenceFor,scopeResearchPath } from './aimt-scope-evide
 export const STORAGE_KEY='aimt-free-head-spa-launch-plan-v1';
 export const VERSION=1;
 export const LESSONS=Object.freeze([
- {id:'scope',title:'Can I actually offer this?',minutes:5},
+ {id:'scope',title:'What can I offer with my license?',minutes:5},
  {id:'service',title:'What am I actually building?',minutes:5},
  {id:'equipment',title:'Set up without regret',minutes:6},
  {id:'observation',title:'What am I looking at?',minutes:6},
