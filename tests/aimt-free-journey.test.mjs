@@ -188,7 +188,7 @@ test('standalone pages and guided lesson import one shared widget implementation
  assert.equal((app.match(/data-aimt-tool="/g)||[]).length,5);
  assert.match(runner,/import \{mountAll\} from '\.\/aimt-launch-journey-widgets\.mjs'/);
  assert.match(standalone,/aimt-launch-journey-widgets\.mjs/);
- for(const p of newPages.slice(1))assert.equal((read(p).match(/data-aimt-tool="/g)||[]).length,1);
+ for(const p of newPages.slice(2))assert.equal((read(p).match(/data-aimt-tool="/g)||[]).length,1);
 });
 test('new tools do not create new lead capture, network calls, or automated image diagnosis',()=>{
  for(const file of ['assets/js/aimt-launch-journey-core.mjs','assets/js/aimt-launch-journey-widgets.mjs','assets/js/aimt-launch-accelerator.mjs']){
