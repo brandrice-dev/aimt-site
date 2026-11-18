@@ -471,7 +471,7 @@ test('unlicensed Pennsylvania shampoo exception remains conditional, not a gener
 test('plain-language summaries never clear an entire head spa, even when one step is exempt',()=>{
  const cases=[
   [evidenceFor('Florida','No professional license',['wash']),/individual license exemption/i],
-  [evidenceFor('Texas','No professional license',['wash','styling']),/another professional credential/i],
+  [evidenceFor('Texas','No professional license',['wash','styling']),/One step is exempt; other steps have licensing requirements/i],
   [evidenceFor('Pennsylvania','No professional license',['wash']),/narrow exception/i],
   [evidenceFor('New York','Esthetician',['scalp']),/Here’s how to confirm the rules for your service/i],
   [evidenceFor('Alaska','Cosmetologist',['wash']),/Here’s how to confirm the rules for your service/i],
@@ -484,6 +484,29 @@ test('plain-language summaries never clear an entire head spa, even when one ste
   assert.equal(summary.total,review.findings.length);
   assert.equal(Object.values(summary.counts).reduce((x,y)=>x+y,0),review.findings.length);
  }
+});
+test('mixed licensed-esthetician findings start with supported services without concealing restrictions',()=>{
+ const mixed=evidenceFor('California','Esthetician',['scalp','scalp-massage','wash','styling','camera']);
+ const headline=scopeSummary(mixed);
+ const plain=scopePlainEnglish(mixed);
+ assert.equal(headline.tone,'mixed');
+ assert.match(headline.headline,/covered activities and credential limits/i);
+ assert.match(headline.message,/support some selected cosmetic services/i);
+ assert.equal(headline.counts.credential_scope,2);
+ assert.equal(headline.counts.outside_credential,2);
+ assert.equal(headline.counts.unresolved,1);
+ assert.equal(headline.wholeServiceCleared,false);
+ assert.equal(plain.items[0].id,'credential_scope');
+ assert.equal(plain.items[0].tone,'supported');
+ assert.equal(plain.items[1].id,'outside_credential');
+ assert.equal(plain.items[1].tone,'restricted');
+ assert.match(plain.next.label,/review the step with separate requirements/i);
+ assert.match(plain.next.href,/barbercosmo\.ca\.gov/);
+ const allRestricted=scopeSummary(evidenceFor('California','Esthetician',['wash','styling']));
+ assert.equal(allRestricted.tone,'restricted');
+ assert.match(allRestricted.headline,/another professional credential/i);
+ const classroom=read('head-spa-accelerator-classroom.html');
+ assert.match(classroom,/applicable license, exemption, and workplace requirements/);
 });
 test('no cross-state citations or duplicate source identifiers in registry',()=>{
  for(const [state,record] of Object.entries(SCOPE_EVIDENCE)){
@@ -785,7 +808,7 @@ test('mixed findings keep cited positives green and real restrictions red with a
  assert.equal(supported.tone,'supported');
  assert.match(supported.steps[0].label,/shampoo/i);
  assert.match(restricted.steps[0].label,/style hair/i);
- assert.match(plain.next.label,/check the restricted step/i);
+ assert.match(plain.next.label,/review the step with separate requirements/i);
  assert.match(plain.next.href,/tdlr\.texas\.gov/);
  assert.match(plain.note,/approve your whole head spa service/i);
  const washOnly=scopePlainEnglish(evidenceFor('Texas','No professional license',['wash']));
