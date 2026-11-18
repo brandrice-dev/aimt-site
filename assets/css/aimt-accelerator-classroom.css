@@ -40,3 +40,46 @@
  .lj-practice-case{padding:18px}
  .lj-case-choices label{font-size:13px}
 }
+
+/* Phone-first lesson navigation: readable labels, consistent touch targets,
+   and no stranded sixth tile below a five-column grid. */
+@media(max-width:850px){
+ .lj-classroom .lj-step-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .lj-classroom .lj-step-button{display:flex;align-items:center;gap:9px;min-height:62px;
+  padding:11px 12px;text-align:left;border:1px solid rgba(255,255,255,.18);border-radius:10px;
+  background:rgba(255,255,255,.025);min-width:0}
+ .lj-classroom .lj-step-button.is-active{background:rgba(197,159,151,.14);border-color:#c6aaa2}
+ .lj-classroom .lj-step-button b{margin:0;flex:0 0 22px;font-size:12px;line-height:1.5}
+ .lj-classroom .lj-step-button span{font-size:12px;line-height:1.35;overflow-wrap:normal;word-break:normal}
+ .lj-classroom .lj-step-button .lj-done{display:inline-block;margin-left:auto;flex:0 0 auto;font-size:12px}
+ .lj-classroom .lj-rail-note{margin:15px 0 5px;line-height:1.5}
+ .lj-classroom .lj-course{gap:30px}
+ .lj-classroom .lj-lesson-head{scroll-margin-top:82px}
+}
+@media(max-width:800px){
+ .lj-classroom .lj-lesson-head{scroll-margin-top:12px}
+}
+@media(max-width:600px){
+ .lj-classroom .lj-course{padding-top:18px}
+ .lj-classroom .lj-classroom-intro{padding:18px 0}
+ .lj-classroom .lj-classroom-intro h1{margin:7px 0;font-size:23px}
+ .lj-classroom .lj-classroom-intro p{font-size:13px;line-height:1.5}
+ .lj-classroom .lj-step-button{min-height:66px}
+ .lj-classroom .lj-rail #clearPlan,.lj-classroom .lj-rail-overview{min-height:44px}
+ .lj-classroom .lj-tool{min-width:0;overflow-wrap:anywhere}
+ .lj-classroom .lj-tool input:not([type="checkbox"]):not([type="radio"]),
+ .lj-classroom .lj-tool select,.lj-classroom .lj-tool textarea{font-size:16px;min-width:0}
+ .lj-classroom .lj-tool .lj-btn,.lj-classroom .lj-course-nav .lj-btn,
+ .lj-classroom .lj-summary-actions .lj-btn,.lj-classroom .lj-next-move-offer .lj-btn{min-height:48px}
+ .lj-classroom .lj-course-nav .lj-btn{flex:1 1 100%;width:100%}
+ .lj-classroom .lj-summary-actions{display:grid;grid-template-columns:1fr;gap:9px}
+ .lj-classroom .lj-summary-actions .lj-btn{width:100%;white-space:normal;text-align:center}
+ .lj-classroom .lj-next-move{min-width:0}
+ .lj-classroom .lj-lesson p,.lj-classroom .lj-lesson-bridge p{overflow-wrap:break-word}
+ .lj-classroom .lj-case-feedback{overflow-wrap:break-word}
+}
+@media(max-width:350px){
+ .lj-classroom .lj-step-button{gap:6px;padding:10px 7px}
+ .lj-classroom .lj-step-button span{font-size:11px}
+ .lj-classroom .lj-step-button b{flex-basis:18px;font-size:11px}
+}
