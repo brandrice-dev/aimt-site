@@ -88,16 +88,6 @@ mountAll();
 document.querySelectorAll('[data-open-lesson]').forEach(btn=>btn.addEventListener('click',()=>openLesson(btn.dataset.openLesson)));
 document.querySelectorAll('[data-continue]').forEach(btn=>btn.addEventListener('click',()=>markAndContinue(btn.dataset.continue)));
 document.querySelectorAll('[data-back]').forEach(btn=>btn.addEventListener('click',()=>openLesson(btn.dataset.back)));
-$('#startCourse').addEventListener('click',()=>{
- const p=getPlan(),first=LESSONS.find(l=>!(p.completed.includes(l.id)&&lessonReady(l.id,p)));
- openLesson(first?.id||'summary');
-});
-$('#seeLessons').addEventListener('click',()=>openLesson('scope'));
-$('#backOverview').addEventListener('click',()=>{
- document.body.classList.remove('lj-course-started');
- window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
- $('#startCourse').focus({preventScroll:true});
-});
 $('#downloadLaunchPlan').addEventListener('click',()=>download('AIMT-Head-Spa-Launch-Plan.txt',renderPlanText(getPlan()),'text/plain;charset=utf-8'));
 $('#downloadBlueprintPlan').addEventListener('click',()=>{
  const data=blueprintFromPlan(getPlan());
@@ -114,4 +104,50 @@ $('#clearPlan').addEventListener('click',()=>{
 window.addEventListener('aimt-launch-plan-change',refresh);
 window.addEventListener('focus',refresh);
 window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY)refresh();});
-openLesson('scope',{enter:false,scroll:false});
+// The classroom is a separate route: open immediately at the next unfinished lesson.
+const initialPlan=getPlan();
+const firstOpen=LESSONS.find(l=>!(initialPlan.completed.includes(l.id)&&lessonReady(l.id,initialPlan)));
+openLesson(firstOpen?.id||'summary',{enter:true,scroll:false});
+
+// A small, ungraded decision shows the difference between having a plan
+// and making client-specific judgments. It does not store responses or gate progress.
+const caseMessages={
+ exfoliate:{
+  heading:'Review the decision before proceeding.',
+  detail:'A visible change and reported stinging are reasons to stop and gather more information, not to choose a different exfoliant automatically. Client preference does not replace suitability, product instructions, or scope.',
+  strong:false
+ },
+ assess:{
+  heading:'Strong first decision.',
+  detail:'You recognized that discomfort and visible irritation call for more context before selecting any technique. Depending on the findings and your scope, deferring the service and an appropriate referral may be needed. The full certification develops this judgment across more client situations.',
+  strong:true
+ },
+ camera:{
+  heading:'A camera cannot make that determination.',
+  detail:'Magnification can help describe visible features, but cannot identify a medical condition or determine whether exfoliation is suitable. Intake, symptoms, scope, and the responsible next step still matter.',
+  strong:false
+ }
+};
+const practiceCheck=$('#practiceCheck');
+const practiceFeedback=$('#practiceFeedback');
+if(practiceCheck&&practiceFeedback){
+ practiceCheck.addEventListener('click',()=>{
+  const choice=document.querySelector('input[name="aimt-case-response"]:checked');
+  practiceFeedback.hidden=false;
+  if(!choice){
+   practiceFeedback.className='lj-case-feedback';
+   practiceFeedback.textContent='Choose a response to review the practitioner reasoning.';
+   return;
+  }
+  const result=caseMessages[choice.value];
+  if(!result)return;
+  practiceFeedback.className='lj-case-feedback '+(result.strong?'is-good':'is-review');
+  const heading=document.createElement('strong');
+  heading.textContent=result.heading;
+  practiceFeedback.replaceChildren(heading,document.createTextNode(result.detail));
+  practiceFeedback.scrollIntoView({block:'nearest',behavior:'auto'});
+ });
+ document.querySelectorAll('input[name="aimt-case-response"]').forEach(input=>input.addEventListener('change',()=>{
+  practiceFeedback.hidden=true;
+ }));
+}
