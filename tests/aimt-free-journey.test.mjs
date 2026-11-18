@@ -222,7 +222,7 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  assert.ok(widgets.includes('/'+references[4]),'Shared observation tool missing actual course teaching example');
  assert.match(widgets,/INSIDE AIMT HEAD SPA CERTIFICATION/);
  assert.match(widgets,/not a diagnosis or a certificate of competence/);
- assert.match(widgets,/href="\/head-spa-certification"/);
+ assert.match(widgets,/href="https:\/\/aimtrichology\.com\/head-spa-certification"/);
  assert.match(widgets,/Illustrative course image — not clinical evidence/);
  assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
  assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
@@ -343,11 +343,13 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.match(app,/head-spa-certification-course-ui.webp/);
  assert.match(app,/approved-service-timer-live.webp/);
  assert.match(app,/First-Service Blueprint/);
+ assert.match(app,/href="https:\/\/aimtrichology\.com\/head-spa-certification"/);
+ assert.match(app,/bonus availability is checked only at live enrollment/);
  assert.match(app,/Smart Service Sidekick/);
  assert.match(app,/Practitioner Resource Library/);
  assert.match(app,/data-next-step-founder hidden/);
  assert.match(app,/data-next-step-availability hidden/);
- assert.match(app,/aimt-next-step-offer\.js/);
+ assert.doesNotMatch(app,/<script src="\/assets\/js\/aimt-next-step-offer\.js"/);
  assert.match(official,/remaining>0/);
  assert.match(official,/data\.capacity===5/);
  assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
