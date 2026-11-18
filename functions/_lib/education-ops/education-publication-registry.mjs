@@ -220,6 +220,17 @@ const MULTI_CLUSTER_CONCEPTS = [
   direct('scalp-microbiome', 'scalp-health', 'The Scalp Microbiome: A Practitioner Education Overview'),
   direct('seborrheic-dermatitis', 'scalp-health', 'Seborrheic Dermatitis: A Practitioner Education Overview'),
   direct('dandruff', 'scalp-health', 'Dandruff: A Practitioner Education Overview'),
+  {
+    topic_slug: 'sensitive-scalp',
+    seo_page_concept: 'Sensitive Scalp: What Clients Feel and What to Observe',
+    controlled_topics: ['scalp-health', 'adjacent-dermatology'],
+    cluster: 'scalp-health',
+    route_slug: 'sensitive-scalp',
+    mapping_type: 'constructed_practitioner_concept',
+    mapping_rationale: 'Scalp health covers the reported sensations and survey findings. Adjacent dermatology covers the observable signs that prompt referral. The page does not offer diagnosis or treatment.',
+    autonomously_selectable: false,
+    selectability_note: 'Human review is required for referral guidance.',
+  },
   direct('psoriasis-scalp', 'scalp-health', 'Scalp Psoriasis: A Practitioner Education Overview', { route_slug: 'scalp-psoriasis' }),
   direct('folliculitis', 'scalp-health', 'Folliculitis: A Practitioner Education Overview'),
   direct('adjacent-dermatology', 'scalp-health', 'Dermatology-Adjacent Scalp Topics: A Practitioner Education Overview', {
@@ -259,6 +270,17 @@ const MULTI_CLUSTER_CONCEPTS = [
   direct('conditioning-agents', 'product-science', 'Conditioning Agents: A Practitioner Education Overview'),
   direct('essential-oils-botanicals', 'product-science', 'Essential Oils and Botanicals: A Practitioner Education Overview'),
   direct('actives-other', 'product-science', 'Scalp Care Actives: A Practitioner Education Overview', { route_slug: 'scalp-care-actives' }),
+  {
+    topic_slug: 'dandruff-shampoo-actives',
+    seo_page_concept: 'Dandruff Shampoo Actives: How to Read the Label',
+    controlled_topics: ['actives-other', 'dandruff', 'seborrheic-dermatitis'],
+    cluster: 'product-science',
+    route_slug: 'dandruff-shampoo-actives',
+    mapping_type: 'constructed_practitioner_concept',
+    mapping_rationale: 'Scalp care actives covers drug ingredients and labeling. Dandruff and seborrheic dermatitis cover the labeled uses and the scope of the comparative evidence discussed on the page.',
+    autonomously_selectable: false,
+    selectability_note: 'Human review is required for interpretation of medicated product labeling and clinical evidence.',
+  },
   direct('actives-minoxidil', 'product-science', 'Minoxidil: A Practitioner Education Overview', { route_slug: 'minoxidil' }),
 
   // E. Head Spa Techniques
@@ -409,3 +431,4 @@ export function clusterForRoute(route) {
 export function controlledTopicsForConcepts(concepts = PUBLICATION_CONCEPTS) {
   return [...new Set(concepts.flatMap((c) => c.controlled_topics))].sort();
 }
+
