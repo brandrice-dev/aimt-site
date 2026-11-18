@@ -1,0 +1,42 @@
+/* Dedicated AIMT Head Spa Accelerator learning environment, preview only. */
+.lj-classroom .lj-top{position:sticky;top:0;z-index:20;background:#171411}
+.lj-classroom .lj-course{padding-top:38px}
+.lj-classroom .lj-rail{top:94px}
+.lj-classroom-intro{border-bottom:1px solid rgba(255,255,255,.11);background:#211c1a;padding:30px 0}
+.lj-classroom-intro-inner{display:flex;align-items:center;justify-content:space-between;gap:30px}
+.lj-classroom-intro h1{font:700 clamp(22px,3.1vw,36px)/1.15 var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:-.03em;text-transform:uppercase;margin:12px 0}
+.lj-classroom-intro p{color:rgba(250,248,245,.69);max-width:650px;font-size:14px;line-height:1.65;margin:0}
+.lj-classroom-access{font:700 9px var(--aimt-font-mont,Montserrat,sans-serif);color:#ceb2aa;letter-spacing:.14em;line-height:1.8;white-space:nowrap}
+.lj-classroom .lj-rail-overview{margin-top:15px;width:100%;text-align:center}
+.lj-classroom .lj-rail #clearPlan{width:100%}
+.lj-lesson-bridge{border-top:1px solid rgba(250,248,245,.21);border-bottom:1px solid rgba(250,248,245,.11);margin:24px 0 32px;padding:20px 0}
+.lj-bridge-label{display:block;font:700 10px var(--aimt-font-mont,Montserrat,sans-serif);letter-spacing:.16em;color:#ccaea7;margin-bottom:8px}
+.lj-lesson-bridge p{font-size:15px;line-height:1.7;margin:0;color:rgba(250,248,245,.8)}
+.lj-practice-case{padding:clamp(20px,3.5vw,33px);margin:35px 0;border:1px solid rgba(250,248,245,.23);border-radius:14px;background:#28221f}
+.lj-practice-case h3{font-size:clamp(21px,2.3vw,30px);line-height:1.22;margin:15px 0!important}
+.lj-practice-case>p{font-size:15px;max-width:72ch}
+.lj-case-choices{border:0;padding:0;margin:23px 0 18px;min-width:0}
+.lj-case-choices legend{font:600 13px var(--aimt-font-mont,Montserrat,sans-serif);line-height:1.5;color:#fff;margin:0 0 12px}
+.lj-case-choices label{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid rgba(250,248,245,.2);border-radius:10px;margin:8px 0;background:rgba(250,248,245,.035);cursor:pointer;font-size:14px;line-height:1.6;color:rgba(250,248,245,.86)}
+.lj-case-choices label:has(input:checked){border-color:#d4afa6;background:rgba(197,159,151,.13)}
+.lj-case-choices label:focus-within{outline:2px solid #d8b3b4;outline-offset:2px}
+.lj-case-choices input{width:18px;height:18px;flex-shrink:0;margin:3px 0 0;accent-color:#d0a8a2}
+.lj-case-feedback{border-left:4px solid #a79d94;background:rgba(250,248,245,.075);padding:16px 19px;border-radius:0 8px 8px 0;color:#f9f6f2;font-size:14px;line-height:1.6;margin:18px 0}
+.lj-case-feedback[hidden]{display:none}
+.lj-case-feedback strong{display:block;color:#fff;font-size:15px;margin-bottom:7px}
+.lj-case-feedback.is-good{border-left-color:#8eaa8e;background:#253828}
+.lj-case-feedback.is-review{border-left-color:#c08c8c;background:#392626}
+.lj-practice-case .lj-case-note{font-size:11px;line-height:1.6;color:rgba(250,248,245,.56);margin:20px 0 0}
+.lj-classroom .lj-next-move-top p{max-width:76ch}
+@media(max-width:800px){
+ .lj-classroom-intro-inner{align-items:flex-start;flex-direction:column;gap:14px}
+ .lj-classroom .lj-rail{top:auto}
+ .lj-classroom .lj-top{position:relative}
+}
+@media(max-width:600px){
+ .lj-classroom-intro{padding:25px 0}
+ .lj-classroom-intro h1{font-size:25px}
+ .lj-classroom-access{white-space:normal}
+ .lj-practice-case{padding:18px}
+ .lj-case-choices label{font-size:13px}
+}
