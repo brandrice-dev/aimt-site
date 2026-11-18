@@ -147,7 +147,8 @@ The owner approved building the Free Tools as separately accessible experiences 
 | Reusable scope/service/equipment/observation/launch widgets | assets/js/aimt-launch-journey-widgets.mjs |
 | Course progression, local completion state, print/download | assets/js/aimt-launch-accelerator.mjs |
 | Standalone widget mounting | assets/js/aimt-standalone-tool.mjs |
-| Course user experience | head-spa-launch-accelerator.html |
+| Free Accelerator marketing landing | head-spa-launch-accelerator.html, assets/css/aimt-accelerator-landing.css |
+| Dedicated five-lesson classroom | head-spa-accelerator-classroom.html, assets/css/aimt-accelerator-classroom.css |
 | Standalone tool experiences | head-spa-scope-finder.html, head-spa-equipment-planner.html, scalp-observation-lab.html |
 | Shared responsive styles | assets/css/aimt-launch-journey.css |
 | Hub hierarchy | free-tools.html, assets/css/aimt-free-tools-hub-expansion.css |
@@ -164,3 +165,12 @@ The owner approved building the Free Tools as separately accessible experiences 
 **Acceptance evidence:** GitHub CI runs the new offline free-journey tests alongside established Readiness/Growth/Free Tools checks. The development branch has a Cloudflare Pages branch preview. Passing CI is not equivalent to real-device or user-facing verification. All external claims of launch readiness must name those gaps.
 
 **Next bounded action:** confirm latest branch CI and Cloudflare preview statuses, record in Issue #165 and Draft PR #166, then request actual learner-facing review. The next iteration should be editorial cleanup, instructor assets and consent/registration design—not another competing architecture.
+
+
+## November 18, 2026 — early-access funnel separation (feature branch only)
+
+The free marketing entry and the educational experience are now separate static routes. The public-facing acquisition message remains at `/head-spa-launch-accelerator`; the direct-to-lesson classroom is at `/head-spa-accelerator-classroom`. This keeps marketing headlines outside the student experience and lets a selected prospective student enter the actual lessons without viewing a sales landing page first. Both routes remain `noindex` development previews. **Neither route is password protected**; sharing a preview URL is not identity-based private access.
+
+The five existing lessons, shared tools, local-only plan, Blueprint export, official-scope sources and course offer infrastructure remain unchanged in their core behavior. A concise learning-to-practice bridge follows lessons 1–4; lesson 5 now includes an **ungraded client decision exercise** that gives an explanation for each response without granting professional authorization or writing personal data. The completion experience emphasizes the real next competency gap: moving from a planning document to intake, assessment, sequencing, pacing, technique and responsible service adaptation. Head Spa Certification is presented at the end as a deeper structured education path, not as an interruption after every exercise.
+
+Regression coverage now checks the split routes, that marketing content does not render inside the classroom, the preservation of the five shared educational tools, the client-scenario feedback, and the existing paid-course/conditional-bonus messaging. Real desktop, phone, keyboard and accessibility QA as well as independent regulatory review remain open release gates. Do not merge `main` without explicit approval.
