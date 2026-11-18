@@ -227,6 +227,19 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
  assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
 });
+test('accelerator welcomes estheticians without claiming universal professional scope',()=>{
+ const landing=read('head-spa-launch-accelerator.html');
+ const classroom=read('head-spa-accelerator-classroom.html');
+ assert.match(landing,/esthetician, cosmetologist, or another beauty professional/i);
+ assert.match(landing,/What can I offer with my license\?/);
+ assert.match(classroom,/Estheticians, cosmetologists, and other beauty professionals/);
+ assert.match(classroom,/Being an esthetician does not automatically rule you out of head spa services/);
+ assert.match(classroom,/This is a Texas example, not permission/);
+ assert.match(classroom,/What can I offer with my license\?/);
+ assert.doesNotMatch(classroom,/Imagine an esthetician sees a popular head spa video/);
+ assert.ok(LICENSES.includes('Esthetician'));
+ assert.equal(LESSONS[0].title,'What can I offer with my license?');
+});
 test('marketing landing and separate early-access classroom have distinct responsibilities',()=>{
  const landing=read('head-spa-launch-accelerator.html');
  const classroom=read('head-spa-accelerator-classroom.html');
