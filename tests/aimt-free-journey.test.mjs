@@ -171,7 +171,7 @@ test('export interoperates with the existing Blueprint v1, without overwriting i
  assert.match(validated.fields.licensing,/California/);
  assert.equal(validated.fields.price,'');
 });
-const newPages=['head-spa-launch-accelerator.html','head-spa-scope-finder.html','head-spa-equipment-planner.html','scalp-observation-lab.html'];
+const newPages=['head-spa-launch-accelerator.html','head-spa-accelerator-classroom.html','head-spa-scope-finder.html','head-spa-equipment-planner.html','scalp-observation-lab.html'];
 test('all pages and routes are present without promotion to public indexing',()=>{
  const routes=JSON.parse(read('_routes.json'));
  for(const file of newPages){
@@ -183,7 +183,7 @@ test('all pages and routes are present without promotion to public indexing',()=
  }
 });
 test('standalone pages and guided lesson import one shared widget implementation',()=>{
- const app=read('head-spa-launch-accelerator.html'),runner=read('assets/js/aimt-launch-accelerator.mjs');
+ const app=read('head-spa-accelerator-classroom.html'),runner=read('assets/js/aimt-launch-accelerator.mjs');
  const standalone=read('assets/js/aimt-standalone-tool.mjs');
  assert.equal((app.match(/data-aimt-tool="/g)||[]).length,5);
  assert.match(runner,/import \{mountAll\} from '\.\/aimt-launch-journey-widgets\.mjs'/);
@@ -207,7 +207,7 @@ test('hub promotes Accelerator and links to each real, standalone route',()=>{
 
 
 test('real AIMT references appear in the proper lessons and remain clearly contextualized',()=>{
- const lesson=read('head-spa-launch-accelerator.html');
+ const lesson=read('head-spa-accelerator-classroom.html');
  const references=[
   'assets/images/marketing/head-spa-service-rinse.webp',
   'assets/images/marketing/approved-aesthetic-service-shot2.png',
@@ -227,16 +227,37 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
  assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
 });
-test('landing hook disappears after entering course and lesson navigation remains usable',()=>{
+test('marketing landing and separate early-access classroom have distinct responsibilities',()=>{
+ const landing=read('head-spa-launch-accelerator.html');
+ const classroom=read('head-spa-accelerator-classroom.html');
  const nav=read('assets/js/aimt-launch-accelerator.mjs');
- const css=read('assets/css/aimt-launch-journey.css');
- const lesson=read('head-spa-launch-accelerator.html');
- assert.match(nav,/document\.body\.classList\.add\('lj-course-started'\)/);
- assert.match(nav,/openLesson\('scope',\{enter:false,scroll:false\}\)/);
- assert.match(nav,/document\.body\.classList\.remove\('lj-course-started'\)/);
- assert.match(css,/\.lj-body\.lj-course-started \.lj-hero\{display:none\}/);
- assert.match(lesson,/id="seeLessons"/);
- assert.match(lesson,/id="backOverview"/);
+ const routes=JSON.parse(read('_routes.json'));
+ assert.match(landing,/Don't enroll in Head Spa Certification/);
+ assert.match(landing,/href="\/head-spa-accelerator-classroom"/);
+ assert.doesNotMatch(landing,/data-lesson=|data-aimt-tool=|aimt-launch-accelerator\.mjs/);
+ assert.match(classroom,/class="lj-body lj-course-started lj-classroom"/);
+ assert.match(classroom,/href="\/head-spa-launch-accelerator"/);
+ assert.match(classroom,/data-lesson="scope"/);
+ assert.doesNotMatch(classroom,/Don't enroll in Head Spa Certification|id="startCourse"|id="seeLessons"/);
+ assert.match(nav,/const firstOpen=LESSONS\.find/);
+ assert.match(nav,/openLesson\(firstOpen\?\.id\|\|'summary',\{enter:true,scroll:false\}\)/);
+ assert.doesNotMatch(nav,/\$\('#startCourse'\)|\$\('#backOverview'\)/);
+ for(const suffix of ['','.html','/'])assert.ok(routes.exclude.includes('/head-spa-accelerator-classroom'+suffix));
+});
+test('final client scenario gives real reasoning feedback and never gates progress',()=>{
+ const classroom=read('head-spa-accelerator-classroom.html');
+ const nav=read('assets/js/aimt-launch-accelerator.mjs');
+ const css=read('assets/css/aimt-accelerator-classroom.css');
+ for(const token of ['id="practiceCheck"','id="practiceFeedback"','name="aimt-case-response"','Ungraded practice','visible redness']){
+  assert.ok(classroom.includes(token),token+' missing');
+ }
+ assert.match(nav,/const caseMessages=/);
+ assert.match(nav,/practiceFeedback\.replaceChildren/);
+ assert.match(nav,/practiceFeedback\.hidden=true/);
+ assert.match(css,/\.lj-case-feedback\.is-good/);
+ assert.match(css,/\.lj-case-feedback\.is-review/);
+ assert.match(classroom,/You have the plan\. Now learn how to deliver it/);
+ assert.match(classroom,/Head Spa Certification/);
 });
 test('tool card illustrations are accessible and the formerly light pricing card is visually unified',()=>{
  const hub=read('free-tools.html');
@@ -287,7 +308,7 @@ test('correct decisions use canonical AIMT success green, while unsafe answers a
  assert.match(widget,/feedbackState\(el,fb.correct\)/);
 });
 test('Next Move package uses authentic AIMT product proof and keeps founder bonus conditional',()=>{
- const app=read('head-spa-launch-accelerator.html');
+ const app=read('head-spa-accelerator-classroom.html');
  const official=read('assets/js/aimt-next-step-offer.js');
  assert.match(app,/id="nextStepOffer"/);
  assert.match(app,/data-bundle-photo-slot="awaiting-owner-upload"/);
@@ -532,7 +553,7 @@ test('research-only limitation is clear in standalone and Accelerator and follow
  assert.match(widget,/SCOPE_RESEARCH_DISCLAIMER/);
  assert.match(widget,/For research only/);
  const standalone=read('head-spa-scope-finder.html');
- const accelerator=read('head-spa-launch-accelerator.html');
+ const accelerator=read('head-spa-accelerator-classroom.html');
  assert.match(standalone,/data-aimt-tool="scope"/);
  assert.match(accelerator,/data-aimt-tool="scope"/);
  assert.doesNotMatch(widget,/permission granted|head spa cleared for practice/i);
@@ -564,7 +585,7 @@ test('Scope Finder screenshot regression: selected inputs are neutral, supported
  assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] \.lj-license-lookup-link/);
  assert.match(css,/color:var\(--scope-ink\)!important/);
  assert.match(css,/\.lj-tool\[data-aimt-tool="scope"\] \.lj-evidence-refs a/);
- for(const page of ['head-spa-scope-finder.html','head-spa-launch-accelerator.html']){
+ for(const page of ['head-spa-scope-finder.html','head-spa-accelerator-classroom.html']){
   const html=read(page);
   const original=html.indexOf('aimt-launch-journey.css?v=20261113-scope-status');
   const override=html.indexOf('aimt-scope-finder-status.css?v=20261113-final-scope');
