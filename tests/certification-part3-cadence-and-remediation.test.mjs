@@ -151,7 +151,7 @@ function fnBody(src, name) {
   // The remediation read moved into the shared ladder-gate helper so
   // get-status and start-attempt gate on the same rows.
   const authSrc = readFileSync(path.join(ROOT, 'functions/_lib/certification/auth.mjs'), 'utf8');
-  check('PRODUCTION remediation', 'get-status.js selects the remediation row id (required for the client\'s completion action)', /fetchLadderGateRows\(env, user\.id\)/.test(getStatusSrc) && /select:\s*'id,competency_area/.test(authSrc));
+  check('PRODUCTION remediation', 'get-status.js selects the remediation row id (required for the client\'s completion action)', /fetchLadderGateRows\(env, user\.id, courseSlug\)/.test(getStatusSrc) && /select:\s*'id,competency_area/.test(authSrc));
   check('PRODUCTION remediation', 'get-status.js no longer filters remediation to only the latest finalized attempt (the real ladder gate spans every attempt)', !/attempt_id:\s*`eq\.\$\{latestFinalized\.id\}`/.test(getStatusSrc));
 
   const completeSrc = readFileSync(path.join(ROOT, 'functions/api/certification/complete-remediation.js'), 'utf8');

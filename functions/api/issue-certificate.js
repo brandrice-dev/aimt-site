@@ -22,8 +22,10 @@
 
 import { json, hasSupabaseEnv, resolveUser } from '../_lib/certification/auth.mjs';
 import { ensureCertificateIssued } from '../_lib/certification/certificate-issuance.mjs';
+import { resolveRequestedCourse, requestedCourseFromQuery } from '../_lib/courses/registry.mjs';
 
 const STATUS_HTTP = {
+  unknown_course: 400,
   revoked: 409,
   not_entitled: 403,
   incomplete: 409,
@@ -39,9 +41,15 @@ export async function onRequestPost(context) {
   const { user, errorResponse } = await resolveUser(env, request);
   if (errorResponse) return errorResponse;
 
+  // ?courseSlug= absent -> Head Spa (the existing client sends none); an
+  // explicit invalid value is rejected, never defaulted. Taken from the
+  // query string so the request body (incl. any student_name) stays unread.
+  const requested = resolveRequestedCourse(requestedCourseFromQuery(new URL(request.url).searchParams));
+  if (!requested.ok) return json({ error: 'Unknown course.', status: requested.reason }, 400);
+
   let result;
   try {
-    result = await ensureCertificateIssued(env, user);
+    result = await ensureCertificateIssued(env, user, { courseSlug: requested.slug });
   } catch (_) {
     return json({ error: 'Could not issue certificate — please try again.' }, 500);
   }

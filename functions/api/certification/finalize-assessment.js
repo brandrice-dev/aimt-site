@@ -10,9 +10,8 @@
    Body: { attemptId }
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, supabaseRest, COURSE_SLUG } from '../../_lib/certification/auth.mjs';
-import { resolveAssessmentConfig } from '../../_lib/courses/registry.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
+import { resolveAttemptContent } from '../../_lib/courses/registry.mjs';
 import {
   scoreKnowledgeResponses,
   evaluateCriticalDomains,
@@ -32,10 +31,12 @@ import { ensureCertificateIssued } from '../../_lib/certification/certificate-is
 // healed by the next finalize call. The PASS is never rolled back or
 // altered because a credential could not be written: issuance problems are
 // reported as `certificate.status` alongside the unchanged decision.
-async function certificateForPass(env, user, decision) {
+// Always for the ATTEMPT's own course: a pass in one course can never issue
+// another course's credential.
+async function certificateForPass(env, user, decision, courseSlug) {
   if (decision !== 'pass') return undefined;
   try {
-    const result = await ensureCertificateIssued(env, user);
+    const result = await ensureCertificateIssued(env, user, { courseSlug });
     if (result.ok) return { status: 'issued', credentialId: result.credential.credential_id };
     if (result.status === 'name_required') return { status: 'name_required', reason: result.message };
     return { status: 'pending', reason: result.status };
@@ -66,20 +67,20 @@ export async function onRequestPost(context) {
   const attempt = res.body[0];
 
   if (attempt.status === 'scored') {
-    const certificate = await certificateForPass(env, user, attempt.certification_decision);
+    const certificate = await certificateForPass(env, user, attempt.certification_decision, attempt.course_slug);
     return json({ alreadyScored: true, decision: attempt.certification_decision, overallScore: attempt.overall_score, certificate });
   }
   if (attempt.status !== 'part3_locked') {
     return json({ error: 'All three parts must be submitted before finalizing.' }, 409);
   }
 
-  // Score under the version this attempt was started with, for its own
-  // course -- never "whatever is current" (standard Section 15). Nothing is
-  // written if that can't be resolved.
-  const resolved = resolveAssessmentConfig(attempt.course_slug, attempt.assessment_version);
+  // Score under the rules AND content bank this attempt was started with,
+  // for its own course -- never "whatever is current" (standard Section 15).
+  // Nothing is written if that can't be resolved.
+  const resolved = resolveAttemptContent(attempt);
   if (!resolved.ok) return json({ error: 'This attempt cannot be scored under a recognized assessment version.', reason: resolved.reason }, 409);
-  const config = resolved.config;
-  const banks = getProductionBanks();
+  const { config, banks } = resolved;
+  const courseSlug = resolved.course.slug;
 
   // Recompute Part I evidence points from the authoritative stored responses
   // (never trusting a client-submitted score).
@@ -148,7 +149,7 @@ export async function onRequestPost(context) {
     const refetch = await supabaseRest(env, `certification_attempts?${refetchParams}`);
     const row = refetch.ok && Array.isArray(refetch.body) && refetch.body.length ? refetch.body[0] : null;
     const decision = row ? row.certification_decision : decisionResult.decision;
-    const certificate = await certificateForPass(env, user, decision);
+    const certificate = await certificateForPass(env, user, decision, courseSlug);
     return json({
       alreadyScored: true,
       decision,
@@ -208,7 +209,7 @@ export async function onRequestPost(context) {
     const assignments = buildRemediationAssignments({ criticalDomainResults, weakCompetencyAreas }).map((a) => ({
       ...a,
       user_id: user.id,
-      course_slug: COURSE_SLUG,
+      course_slug: courseSlug,
       attempt_id: attemptId,
     }));
     if (assignments.length > 0) {
@@ -219,7 +220,7 @@ export async function onRequestPost(context) {
     }
   }
 
-  const certificate = await certificateForPass(env, user, decisionResult.decision);
+  const certificate = await certificateForPass(env, user, decisionResult.decision, courseSlug);
 
   return json({
     alreadyScored: false,

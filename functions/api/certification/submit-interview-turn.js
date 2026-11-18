@@ -37,8 +37,7 @@
      transcript, or looks like a failed evaluation.
    ═══════════════════════════════════════════════════════════════ */
 
-import { json, hasSupabaseEnv, resolveUser, supabaseRest } from '../../_lib/certification/auth.mjs';
-import { getProductionBanks } from '../../_lib/certification/content-bank.mjs';
+import { json, hasSupabaseEnv, resolveUser, supabaseRest, resolveAttemptContentOrError } from '../../_lib/certification/auth.mjs';
 import { evaluateInterviewTurn } from '../../_lib/certification/cadence-grader.mjs';
 import { scoreInterviewConversation, computeInterviewComponent, interviewEvaluatorFlagsFromState } from '../../_lib/certification/scoring.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
@@ -104,6 +103,14 @@ export async function onRequestPost(context) {
     return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
   }
 
+  // This attempt's own rules + content, resolved before the lock is claimed
+  // so neither an unrecognized attempt nor missing content ever holds it.
+  const { content, errorResponse: contentError } = resolveAttemptContentOrError(attempt);
+  if (contentError) return contentError;
+  const banks = content.banks;
+  const interviewDef = banks.interviewBank.find((i) => i.id === interviewId);
+  if (!interviewDef) return json({ error: 'Assessment content unavailable.' }, 503);
+
   // Claim the lock atomically before calling Anthropic: the conditional
   // filter below only applies this PATCH if turnInFlightAt still equals what
   // we just read, so a near-simultaneous second request either sees the
@@ -128,10 +135,6 @@ export async function onRequestPost(context) {
   if (!casPatchSucceeded(claim)) {
     return json({ error: 'A response is already being evaluated for this conversation. Please wait a moment.', inFlight: true }, 409);
   }
-
-  const banks = getProductionBanks();
-  const interviewDef = banks.interviewBank.find((i) => i.id === interviewId);
-  if (!interviewDef) return json({ error: 'Assessment content unavailable.' }, 503);
 
   const priorTranscript = state.transcript.length ? state.transcript.slice() : [{ role: 'assistant', content: interviewDef.primaryPrompt }];
 
