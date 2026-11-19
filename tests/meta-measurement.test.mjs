@@ -83,3 +83,81 @@ test('calculator and founder review safeguards remain in the public course page'
   assert.doesNotMatch(src, /\$100,800/);
   assert.match(src, /Read the founder's story/);
 });
+
+
+// Synthetic browser proof: no Meta request without permission, and each
+// permitted standard event is emitted once. No browser or Meta API required.
+test('browser Pixel is opt-in and fires PageView, ViewContent, Checkout and Purchase once', async () => {
+  const { readFileSync } = await import('node:fs');
+  const vm = await import('node:vm');
+  const js = readFileSync(new URL('../assets/js/aimt-meta.js', import.meta.url), 'utf8');
+  async function makeBrowser({ allow = false, gpc = false } = {}) {
+    const store = new Map(allow ? [['aimt_meta_consent_v1', 'allow']] : []);
+    const sent = new Map();
+    const loaded = [];
+    const cookieJar = new Map();
+    let configFetches = 0;
+    const localStorage = { getItem: k => store.get(k) || null, setItem: (k, v) => store.set(k, v) };
+    const sessionStorage = { getItem: k => sent.get(k) || null, setItem: (k, v) => sent.set(k, v) };
+    const doc = {
+      readyState: 'complete',
+      head: { appendChild: el => loaded.push(el.src) },
+      body: { appendChild: () => {} },
+      getElementById: id => id === 'landingPage' ? { id } : null,
+      createElement: tag => ({
+        tag, style: {}, setAttribute() {}, addEventListener() {}, append() {}, remove() {}, textContent: '',
+      })
+    };
+    Object.defineProperty(doc, 'cookie', {
+      get: () => Array.from(cookieJar, ([k, v]) => k + '=' + v).join('; '),
+      set: v => {
+        const [k, value] = String(v).split(';')[0].split('=');
+        cookieJar.set(k, value);
+      }
+    });
+    const win = {
+      AIMTGrowth: { checkoutPayload: () => ({ first_touch: { fbclid: 'Click_123' }, last_touch: { fbclid: 'Click_123' } }) }
+    };
+    const navigator = { globalPrivacyControl: gpc };
+    const location = { protocol: 'https:', pathname: '/head-spa-certification', search: '?fbclid=Click_123' };
+    win.navigator = navigator;
+    win.location = location;
+    vm.runInNewContext(js, {
+      window: win, navigator, location, document: doc, localStorage, sessionStorage,
+      URLSearchParams, Date,
+      getComputedStyle: () => ({ display: 'block' }),
+      fetch: async () => { configFetches++; return { ok: true, json: async () => ({ pixelId: '123456789012345' }) }; }
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    return {
+      api: win.AIMTMeta, win, loaded, cookieJar,
+      configFetches: () => configFetches,
+      events: () => win.fbq ? Array.from(win.fbq.queue, args => Array.from(args)) : []
+    };
+  }
+  const unknown = await makeBrowser();
+  assert.equal(unknown.configFetches(), 1);
+  assert.equal(unknown.loaded.length, 0, 'No Meta scripts before opt-in');
+  assert.equal(unknown.cookieJar.size, 0, 'No Meta cookies before opt-in');
+
+  const blocked = await makeBrowser({ allow: true, gpc: true });
+  assert.equal(blocked.configFetches(), 0, 'GPC blocks even a stored opt-in');
+  assert.equal(blocked.api.checkoutPayload(), null);
+  assert.equal(blocked.loaded.length, 0);
+
+  const allowed = await makeBrowser({ allow: true });
+  assert.equal(allowed.loaded.filter(v => v === 'https://connect.facebook.net/en_US/fbevents.js').length, 1);
+  allowed.api.checkoutCreated('cs_test_purchase_123');
+  allowed.api.checkoutCreated('cs_test_purchase_123');
+  allowed.api.paidPurchase('cs_test_purchase_123', { amount_total: 69700, currency: 'usd' });
+  allowed.api.paidPurchase('cs_test_purchase_123', { amount_total: 69700, currency: 'usd' });
+  const events = allowed.events();
+  const count = name => events.filter(parts => parts[0] === 'track' && parts[1] === name).length;
+  for (const name of ['PageView', 'ViewContent', 'InitiateCheckout', 'Purchase']) {
+    assert.equal(count(name), 1, name + ' must emit exactly once per page/session');
+  }
+  assert.ok(decodeURIComponent(allowed.cookieJar.get('_fbc')).startsWith('fb.1.'));
+  const purchase = events.find(parts => parts[1] === 'Purchase');
+  assert.equal(purchase[2].value, 697);
+  assert.equal(purchase[3].eventID, 'cs_test_purchase_123');
+});
