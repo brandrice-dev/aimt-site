@@ -1,8 +1,8 @@
 // AIMT Head Spa Launch Accelerator navigation and export.
 // Tool implementations live in aimt-launch-journey-widgets.mjs and are shared
 // with independent Free Tools pages. No separate enrollment or grading system.
-import {mountAll} from './aimt-launch-journey-widgets.mjs';
-import {LESSONS,readPlan,writePlan,STORAGE_KEY,appointmentMinutes,renderPlanText,blueprintFromPlan} from './aimt-launch-journey-core.mjs';
+import {mountAll} from './aimt-launch-journey-widgets.mjs?v=20261118-skill-v3';
+import {LESSONS,readPlan,writePlan,STORAGE_KEY,appointmentMinutes,renderPlanText,blueprintFromPlan} from './aimt-launch-journey-core.mjs?v=20261118-skill-v3';
 
 const $=selector=>document.querySelector(selector);
 const ids=LESSONS.map(x=>x.id).concat('summary');
