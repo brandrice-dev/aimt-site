@@ -189,10 +189,27 @@ test('standalone pages and guided lesson import one shared widget implementation
  assert.match(runner,/import \{mountAll\} from '\.\/aimt-launch-journey-widgets\.mjs\?v=20261118-skill-v3'/);
  assert.match(runner,/aimt-launch-journey-core\.mjs\?v=20261118-skill-v3/);
  assert.match(read('assets/js/aimt-launch-journey-widgets.mjs'),/aimt-launch-journey-core\.mjs\?v=20261118-skill-v3/);
- assert.match(app,/aimt-accelerator-classroom\.css\?v=20261119-bundle-v4/);
+ assert.match(app,/aimt-accelerator-classroom\.css\?v=20261119-brand-v5/);
  assert.match(app,/aimt-launch-accelerator\.mjs\?v=20261118-skill-v3/);
  assert.match(standalone,/aimt-launch-journey-widgets\.mjs/);
  for(const p of newPages.slice(2))assert.equal((read(p).match(/data-aimt-tool="/g)||[]).length,1);
+});
+test('both Accelerator entry points match AIMT canonical orbital mark and wordmark',()=>{
+ const reference=read('free-tools.html');
+ const sym=(html)=>html.match(/<symbol id="aimtOrbitalMark"[\\s\\S]*?<\\/symbol>/)?.[0];
+ const source=sym(reference);
+ assert.ok(source,'Missing canonical AIMT orbital mark in Free Tools');
+ for(const filename of ['head-spa-launch-accelerator.html','head-spa-accelerator-classroom.html']){
+  const html=read(filename);
+  assert.equal(sym(html),source,filename+' orbital mark geometry differs from canonical AIMT');
+  assert.match(html,/href="\\/assets\\/css\\/aimt-public-nav\\.css"/);
+  assert.match(html,/class="aimt-public-nav-mark"[^>]*>[\\s\\S]*?<use href="#aimtOrbitalMark"/);
+  assert.match(html,/class="aimt-public-nav-wordmark"[^>]*><span class="aimt-public-nav-name">AIMT<\\/span>/);
+  assert.doesNotMatch(html,/class="lj-brand"[^>]*>AIMT<\\/a>/);
+ }
+ for(const style of ['assets/css/aimt-accelerator-landing.css','assets/css/aimt-accelerator-classroom.css']){
+  assert.match(read(style),/\\.lj-top \\.lj-brand-group\\{display:flex;align-items:center;gap:12px/);
+ }
 });
 test('new tools do not create new lead capture, network calls, or automated image diagnosis',()=>{
  for(const file of ['assets/js/aimt-launch-journey-core.mjs','assets/js/aimt-launch-journey-widgets.mjs','assets/js/aimt-launch-accelerator.mjs']){
