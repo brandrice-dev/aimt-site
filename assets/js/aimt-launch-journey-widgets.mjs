@@ -3,7 +3,7 @@
 import {
  STATES,LICENSES,STATE_CREDENTIALS,CREDENTIAL_NOTES,LICENSE_STATUSES,CAREER_STAGES,CAREER_STAGE_GUIDANCE,OPERATING_CONTEXTS,ACTIVITIES,SCOPE_SOURCES,SYSTEM_OPTIONS,SPACE_OPTIONS,readPlan,writePlan,
  scopeResult,equipmentResult,observationFeedback,appointmentMinutes,pricingResult
-} from './aimt-launch-journey-core.mjs';
+} from './aimt-launch-journey-core.mjs?v=20261118-skill-v3';
 import { scopeSummary, scopePlainEnglish, SCOPE_RESEARCH_DISCLAIMER, SCOPE_GOVERNMENT_DIRECTORY } from './aimt-scope-evidence.mjs';
 
 const $=(root,selector)=>root.querySelector(selector);
