@@ -174,3 +174,18 @@ The free marketing entry and the educational experience are now separate static 
 The five existing lessons, shared tools, local-only plan, Blueprint export, official-scope sources and course offer infrastructure remain unchanged in their core behavior. A concise learning-to-practice bridge follows lessons 1–4; lesson 5 now includes an **ungraded client decision exercise** that gives an explanation for each response without granting professional authorization or writing personal data. The completion experience emphasizes the real next competency gap: moving from a planning document to intake, assessment, sequencing, pacing, technique and responsible service adaptation. Head Spa Certification is presented at the end as a deeper structured education path, not as an interruption after every exercise.
 
 Regression coverage now checks the split routes, that marketing content does not render inside the classroom, the preservation of the five shared educational tools, the client-scenario feedback, and the existing paid-course/conditional-bonus messaging. Real desktop, phone, keyboard and accessibility QA as well as independent regulatory review remain open release gates. Do not merge `main` without explicit approval.
+
+## Aspirational value-first positioning standard — November 18, 2026
+
+The AIMT free-course marketing model should **sell the professional's desired future experience without pretending that one short lesson confers full skill**. Use this sequence across the Head Spa Accelerator and future Hair Loss Specialist / Trichology free introductions:
+
+1. **Professional identity and client experience.** Show what a more skilled, observant, prepared practitioner can notice, explain or deliver, and how that can make the client's experience feel more thoughtful and personal.
+2. **Useful first skill.** Teach something real and immediately applicable, then let the visitor make a decision, observe an image, calculate a constraint, or practice professional communication.
+3. **Visible learning payoff.** Name the skill they began developing, not a false promise of independent competence, a treatment outcome, a diagnosis, or automatic permission to work.
+4. **Next genuine competency gap.** Explain why more complex cases, consistent protocols and practiced judgment require the full Head Spa Certification.
+
+**Scalp lesson example:** “A Closer Look at the Scalp” now begins with the aspirational practitioner identity—notice details, speak more clearly with a client and make a more individualized service plan—then practices observation-only reasoning using an explicitly illustrative AIMT teaching image. The full certification is the next step for intake, multi-region observation, client communication and service adaptation. Safeguards remain factual but are not the lead marketing message.
+
+**Visual proof:** Prefer approved real AIMT practitioners and treatments to screenshots or invented lifestyle composites when showing the desired client experience. The November 18 classroom uses genuine treatment photography for Lesson 5 and the closing conversion panel while the owner’s future real bundle photograph remains pending. Product inclusions stay accurately described in adjacent copy. The temporary photo does not prove financial returns, certification completion, or client treatment outcomes.
+
+Avoid attacking existing estheticians, stylists or service styles to create a need. The positioning is **greater capability through education**, not that the learner is deficient.
