@@ -68,7 +68,7 @@
      const bundle=d.querySelector('.lj-next-move-bundle-image');
      check('approved bundle image present',!!bundle&&bundle.getAttribute('src')==='/assets/images/marketing/aimt-get-better-faster-bundle.webp');
      if(bundle){
-      check('approved bundle has square dimensions',bundle.width===480&&bundle.height===480);
+      check('approved bundle has square dimensions',bundle.getAttribute('width')==='480'&&bundle.getAttribute('height')==='480');
       check('approved bundle fits without cropping',w.getComputedStyle(bundle).objectFit==='contain');
      }
      const link=d.querySelector('[data-next-step-action]');
