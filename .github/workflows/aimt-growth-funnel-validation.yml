@@ -36,6 +36,14 @@ on:
       - 'assets/js/aimt-public-nav.js'
       - 'tests/meta-measurement.test.mjs'
       - 'tests/paid-content-boundary.test.mjs'
+      - 'tests/paid-content-media.test.mjs'
+      - 'functions/api/course-session.js'
+      - 'functions/_lib/paid-content/**'
+      - 'functions/assets/**'
+      - 'assets/js/aimt-paid-course-loader.js'
+      - 'assets/js/aimt-paid-media-session.js'
+      - 'scripts/paid-course-cutover.mjs'
+      - 'scripts/_lib/private-course-snapshot.mjs'
       - 'tests/growth-measurement.test.mjs'
       - 'tests/growth-client.test.mjs'
       - 'headspa-mastery.html'
@@ -105,6 +113,7 @@ jobs:
             tests/growth-measurement.test.mjs \
             tests/meta-measurement.test.mjs \
             tests/paid-content-boundary.test.mjs \
+            tests/paid-content-media.test.mjs \
             tests/growth-client.test.mjs \
             tests/embedded-enrollment-checkout.test.mjs \
             tests/stripe-webhook-paid-enrollment-email.test.mjs \
