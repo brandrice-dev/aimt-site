@@ -33,6 +33,7 @@
 // No Anthropic API calls. Run: node tests/cadence-chat-trust-precision.test.mjs
 
 import { readFileSync } from 'node:fs';
+import { readPrivateCourseSnapshot } from '../scripts/_lib/private-course-snapshot.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -195,7 +196,7 @@ await (async function noFabricatedContinuityEndToEndTests() {
   check('I. CHAT-12 MATCHES REALITY', 'Verified: the Cadence shell has a close control that returns to the lesson (not a literal "dashboard")',
     /cshell-close/.test(shellSrc) && /Close and return to the lesson/.test(shellSrc));
 
-  const courseSrc = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
+  const courseSrc = readPrivateCourseSnapshot();
   check('I. CHAT-12 MATCHES REALITY', 'Verified: headspa-mastery.html now has a direct in-course link to the separate My AIMT dashboard page (my-aimt.html) -- P1-3, Dashboard/Resources launch pass',
     /class="ln-dash" href="my-aimt\.html"/.test(courseSrc) && /class="brand-dash-link" href="my-aimt\.html"/.test(courseSrc));
   check('I. CHAT-12 MATCHES REALITY', 'Verified: the course does have its own in-course "Back" navigation control',
