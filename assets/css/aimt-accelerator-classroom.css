@@ -92,3 +92,8 @@
 .lj-classroom .lj-next-move-media figcaption{background:#251d1b;color:rgba(250,248,245,.78);font-size:12px;line-height:1.55}
 @media(max-width:990px){.lj-classroom .lj-next-move-media{min-height:0}.lj-classroom .lj-next-move-proof{min-height:0}}
 @media(max-width:560px){.lj-classroom .lj-next-move-media{min-height:0}.lj-classroom .lj-next-move-proof{min-height:0}}
+
+/* Match the canonical public AIMT mark + wordmark spacing within the Accelerator header. */
+.lj-top .lj-brand-group{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.lj-top .lj-brand-group .aimt-public-nav-mark{width:28px;height:28px;flex-shrink:0}
+.lj-top .lj-brand-group .aimt-public-nav-wordmark{display:flex;align-items:center}
