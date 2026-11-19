@@ -359,9 +359,15 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  const app=read('head-spa-accelerator-classroom.html');
  const official=read('assets/js/aimt-next-step-offer.js');
  assert.match(app,/id="nextStepOffer"/);
- assert.match(app,/data-bundle-photo-slot="awaiting-owner-upload"/);
- assert.match(app,/approved-service-timer1.webp/);
- assert.match(app,/lj-next-move-lifestyle-image/);
+ assert.match(app,/data-bundle-photo-slot="owner-approved"/);
+ assert.match(app,/aimt-get-better-faster-bundle.webp/);
+ assert.match(app,/lj-next-move-bundle-image/);
+ assert.match(app,/width="480" height="480"/);
+ assert.match(app,/Get Better\. Faster/);
+ assert.doesNotMatch(app,/approved-service-timer1\.webp/);
+ const bundleStyle=read('assets/css/aimt-accelerator-classroom.css');
+ assert.match(bundleStyle,/\.lj-classroom \.lj-next-move-proof\{[^}]*aspect-ratio:1\/1/);
+ assert.match(bundleStyle,/\.lj-classroom \.lj-next-move-bundle-image\{[^}]*object-fit:contain/);
  assert.doesNotMatch(app,/lj-next-move-sidekick-image/);
  assert.match(app,/First-Service Blueprint/);
  assert.match(app,/href="https:\/\/aimtrichology\.com\/head-spa-certification"/);
@@ -375,7 +381,7 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.match(official,/data\.capacity===5/);
  assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
  assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-service-basin.webp')));
- assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/approved-service-timer1.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/aimt-get-better-faster-bundle.webp')));
 });
 
 
