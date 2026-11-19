@@ -189,7 +189,7 @@ test('standalone pages and guided lesson import one shared widget implementation
  assert.match(runner,/import \{mountAll\} from '\.\/aimt-launch-journey-widgets\.mjs\?v=20261118-skill-v3'/);
  assert.match(runner,/aimt-launch-journey-core\.mjs\?v=20261118-skill-v3/);
  assert.match(read('assets/js/aimt-launch-journey-widgets.mjs'),/aimt-launch-journey-core\.mjs\?v=20261118-skill-v3/);
- assert.match(app,/aimt-accelerator-classroom\.css\?v=20261118-skill-v3/);
+ assert.match(app,/aimt-accelerator-classroom\.css\?v=20261119-bundle-v4/);
  assert.match(app,/aimt-launch-accelerator\.mjs\?v=20261118-skill-v3/);
  assert.match(standalone,/aimt-launch-journey-widgets\.mjs/);
  for(const p of newPages.slice(2))assert.equal((read(p).match(/data-aimt-tool="/g)||[]).length,1);
