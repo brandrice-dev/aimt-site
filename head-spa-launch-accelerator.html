@@ -11,12 +11,35 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-public-nav.css">
 <link rel="stylesheet" href="/assets/css/aimt-launch-journey.css?v=20261113-scope-status">
 <link rel="stylesheet" href="/assets/css/aimt-accelerator-landing.css?v=20261118-separate">
 </head>
 <body class="lj-body lj-landing">
+<!-- Canonical AIMT institute mark; same geometry as the homepage and Free Tools. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="aimtOrbitalMark" viewBox="0 0 44 44">
+    <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-width="0.75" opacity="0.6"/>
+    <circle cx="22" cy="22" r="13.5" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="22" cy="22" r="7" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+    <circle cx="22" cy="22" r="2" fill="currentColor"/>
+    <circle cx="22" cy="2" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="42" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="36.1" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="22" cy="42" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="36.1" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="2" cy="22" r="1.5" fill="currentColor" opacity="0.75"/>
+    <circle cx="7.9" cy="7.9" r="1.5" fill="currentColor" opacity="0.75"/>
+  </symbol>
+</svg>
 <header class="lj-top"><div class="lj-container lj-top-inner">
- <a class="lj-brand" href="/free-tools" aria-label="AIMT Free Tools">AIMT</a>
+ <div class="lj-brand-group">
+  <a href="/" class="aimt-public-nav-mark" aria-label="AIMT homepage">
+   <svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><use href="#aimtOrbitalMark"></use></svg>
+  </a>
+  <a href="/" class="aimt-public-nav-wordmark" aria-label="AIMT homepage"><span class="aimt-public-nav-name">AIMT</span></a>
+ </div>
  <span class="lj-brand-sub">AMERICAN INSTITUTE OF MODERN TRICHOLOGY</span>
  <a class="lj-top-link" href="/free-tools">All free tools</a>
 </div></header>
