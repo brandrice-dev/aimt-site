@@ -461,9 +461,9 @@ export function mountEquipment(root){
 export function mountObservation(root){
  const p=current();
  root.innerHTML=[
-  '<div class="lj-tool-head"><small>Free Tool / Scalp Observation Lab</small><small>Introductory non-diagnostic practice</small></div>',
-  '<h3>What can you describe—and what can you not conclude?</h3>',
-  '<p>Magnification lets you see more detail. It does not, by itself, identify the cause of a scalp concern. This exercise practices accurate language, not medical interpretation.</p>',
+  '<div class="lj-tool-head"><small>Free Tool / Scalp Observation Lab</small><small>Start developing your observation skill</small></div>',
+  '<h3>Learn to notice what matters.</h3>',
+  '<p>There is a difference between seeing a close-up scalp image and knowing what to notice. Look at the visible details, practice describing them clearly, and consider what you would want to ask before choosing a service direction. This is a starting skill, not a medical interpretation.</p>',
   '<figure class="lj-illustration lj-illustration-photo">',
     '<img src="/assets/images/course/module-04/microscopy/microscopy-surface-residue.webp" width="560" height="340" loading="lazy" decoding="async" alt="Illustrative magnified scalp teaching example from AIMT Module 4 showing hair shafts and surface detail, not a clinical diagnosis.">',
     '<figcaption class="lj-illustration-note"><strong>Illustrative course image — not clinical evidence.</strong><p>This actual AIMT Module 4 teaching asset shows what magnification can reveal. Look for visible details near the hair shafts, but do not label a condition or cause from one picture.</p></figcaption>',
@@ -476,8 +476,8 @@ export function mountObservation(root){
    ]),
   '</fieldset>',
   '<div class="lj-feedback" data-ob-feedback role="status" aria-live="polite" hidden></div>',
-  '<h4>Practitioner communication: a client asks if the image means they have a disease.</h4>',
-  '<p class="lj-help">A safer response describes only what is visible, acknowledges the limits of the camera image, and directs medical concerns to an appropriate qualified professional. Lighting, parting, symptoms and other context can change interpretation. Do not assume one technique fits curls, coils, locs, braids, or every scalp tone.</p>',
+  '<h4>Turn what you notice into a better client conversation.</h4>',
+  '<p class="lj-help">Imagine a client asks what you can tell from this image. A thoughtful answer describes the visible feature, asks about their experience, and explains when more information is needed. Lighting, parting, symptoms and individual scalp and hair characteristics matter. Medical concerns belong with an appropriate qualified professional—not a diagnosis based on this image.</p>',
   field('Try one observation-only sentence','ob-note','<textarea id="ob-note" maxlength="220" placeholder="In this magnified view I notice... This image cannot establish..."></textarea>','Use this teaching image only. Do not enter client names, medical details or identifying information.'),
   '<figure class="lj-cert-preview">',
     '<a class="lj-cert-preview-image" href="https://aimtrichology.com/head-spa-certification" aria-label="Explore AIMT Head Spa Certification and its Module 4 microscopy lessons">',
@@ -485,8 +485,8 @@ export function mountObservation(root){
     '</a>',
     '<figcaption class="lj-cert-preview-copy">',
       '<small>INSIDE AIMT HEAD SPA CERTIFICATION · MODULE 4</small>',
-      '<strong>See what deeper scalp assessment training looks like.</strong>',
-      '<p>This is a view of AIMT’s actual Module 4 teaching interface. The certification develops observation, context and practitioner decisions in far more depth. This free example is not a diagnosis or a certificate of competence.</p>',
+      '<strong>Go from observing details to making informed service decisions.</strong>',
+      '<p>Imagine bringing more precision to client conversations and service planning. AIMT’s full certification develops the intake, observation, comparison and service-adaptation skills behind that experience. This free example is not a diagnosis or a certificate of competence.</p>',
       '<a href="https://aimtrichology.com/head-spa-certification" class="lj-cert-preview-link">Explore Head Spa Certification <span aria-hidden="true">→</span></a>',
     '</figcaption>',
   '</figure>',
@@ -508,7 +508,7 @@ export function mountObservation(root){
   if(!choice||!note){info(root,'.lj-save-message','Choose an answer and write an observation-only sentence first.');return;}
   persist({observationAnswer:choice,observationNote:note},root);
   const fb=observationFeedback(choice);
-  showResult(root,'Your working sentence: '+note+'. '+fb.copy+' Your next learning priority is to observe without assuming a diagnosis.');
+  showResult(root,'Your working sentence: '+note+'. '+fb.copy+' You are practicing a useful first skill: noticing visible detail, describing it clearly and asking better questions.');
  });
 }
 
