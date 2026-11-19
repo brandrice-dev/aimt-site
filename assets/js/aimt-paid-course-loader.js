@@ -78,6 +78,16 @@
       const html = await course.text();
       if (!html.includes('id="courseHome"') || !html.includes('id="module12Wrap"')) throw new Error('Incomplete private course bundle');
       try { sessionStorage.setItem(ACTIVE_KEY, '1'); } catch (_) {}
+      // The legacy course bootstrap requires ?enter=1 (or a one-shot
+      // student-access handoff) even after the server has verified the
+      // student. Its own startup immediately strips that parameter.
+      // Restore it only in this verified handoff so refreshing a lesson
+      // retains the course view rather than showing the sales page.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('enter') !== '1') {
+        params.set('enter', '1');
+        window.history.replaceState({}, document.title, window.location.pathname + '?' + params.toString());
+      }
       // Reparse the complete, original HTML under the same first-party URL.
       // This preserves relative paths, Supabase storage, the original course
       // start-up lifecycle, checkpoints, Review Mode and certificate routes.
