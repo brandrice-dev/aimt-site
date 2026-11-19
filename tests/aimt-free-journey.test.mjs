@@ -216,7 +216,7 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
   'assets/images/marketing/head-spa-service-rinse.webp',
   'assets/images/marketing/approved-aesthetic-service-shot2.png',
   'assets/images/course/module-07/module-07-treatment-bed-setup.webp',
-  'assets/images/marketing/head-spa-service-basin.webp',
+  'assets/images/marketing/public/consultation-warm-1440.webp',
   'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp',
   'assets/images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp'
  ];
@@ -361,6 +361,8 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.match(app,/id="nextStepOffer"/);
  assert.match(app,/data-bundle-photo-slot="owner-approved"/);
  assert.match(app,/aimt-get-better-faster-bundle.webp/);
+ assert.match(app,/consultation-warm-1440\.webp/);
+ assert.match(app,/Behind an intentional head spa experience are closer observations/);
  assert.match(app,/lj-next-move-bundle-image/);
  assert.match(app,/width="480" height="480"/);
  assert.match(app,/Get Better\. Faster/);
@@ -380,7 +382,7 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.match(official,/remaining>0/);
  assert.match(official,/data\.capacity===5/);
  assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
- assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-service-basin.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/public/consultation-warm-1440.webp')));
  assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/aimt-get-better-faster-bundle.webp')));
 });
 
