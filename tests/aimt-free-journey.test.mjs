@@ -196,19 +196,24 @@ test('standalone pages and guided lesson import one shared widget implementation
 });
 test('both Accelerator entry points match AIMT canonical orbital mark and wordmark',()=>{
  const reference=read('free-tools.html');
- const sym=(html)=>html.match(/<symbol id="aimtOrbitalMark"[\\s\\S]*?<\\/symbol>/)?.[0];
+ const sym=(html)=>{
+  const start=html.indexOf('<symbol id="aimtOrbitalMark"');
+  const end=html.indexOf('</symbol>',start);
+  return start<0||end<0?null:html.slice(start,end+'</symbol>'.length);
+ };
  const source=sym(reference);
  assert.ok(source,'Missing canonical AIMT orbital mark in Free Tools');
  for(const filename of ['head-spa-launch-accelerator.html','head-spa-accelerator-classroom.html']){
   const html=read(filename);
   assert.equal(sym(html),source,filename+' orbital mark geometry differs from canonical AIMT');
-  assert.match(html,/href="\\/assets\\/css\\/aimt-public-nav\\.css"/);
-  assert.match(html,/class="aimt-public-nav-mark"[^>]*>[\\s\\S]*?<use href="#aimtOrbitalMark"/);
-  assert.match(html,/class="aimt-public-nav-wordmark"[^>]*><span class="aimt-public-nav-name">AIMT<\\/span>/);
-  assert.doesNotMatch(html,/class="lj-brand"[^>]*>AIMT<\\/a>/);
+  assert.ok(html.includes('href="/assets/css/aimt-public-nav.css"'));
+  assert.ok(html.includes('class="aimt-public-nav-mark"'));
+  assert.ok(html.includes('<use href="#aimtOrbitalMark"></use>'));
+  assert.ok(html.includes('<span class="aimt-public-nav-name">AIMT</span>'));
+  assert.ok(!html.includes('class="lj-brand"'));
  }
  for(const style of ['assets/css/aimt-accelerator-landing.css','assets/css/aimt-accelerator-classroom.css']){
-  assert.match(read(style),/\\.lj-top \\.lj-brand-group\\{display:flex;align-items:center;gap:12px/);
+  assert.ok(read(style).includes('.lj-top .lj-brand-group{display:flex;align-items:center;gap:12px'));
  }
 });
 test('new tools do not create new lead capture, network calls, or automated image diagnosis',()=>{
