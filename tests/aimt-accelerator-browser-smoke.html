@@ -30,6 +30,12 @@
    await new Promise(resolve=>setTimeout(resolve,450));
    check('responsive viewport',w.innerWidth===width,String(w.innerWidth));
    check('course widgets loaded',!!d.querySelector('#sc-state')&&!!d.querySelector('#practiceCheck'));
+   const brand=d.querySelector('.lj-brand-group');
+   const mark=brand?.querySelector('.aimt-public-nav-mark svg use');
+   const wordmark=brand?.querySelector('.aimt-public-nav-name');
+   const markSvg=brand?.querySelector('.aimt-public-nav-mark svg');
+   check('AIMT canonical orbital logo',!!brand&&mark?.getAttribute('href')==='#aimtOrbitalMark'&&!!d.getElementById('aimtOrbitalMark')&&wordmark?.textContent==='AIMT');
+   check('AIMT orbital mobile dimensions',!!markSvg&&markSvg.getBoundingClientRect().width>=26&&markSvg.getBoundingClientRect().height>=26);
    inspect('Lesson 1 initial');
    const nav=[...d.querySelectorAll('[data-open-lesson]')];
    check('six progress destinations',nav.length===6,String(nav.length));
