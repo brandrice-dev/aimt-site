@@ -10,7 +10,7 @@ export const LESSONS=Object.freeze([
  {id:'scope',title:'What can I offer with my license?',minutes:5},
  {id:'service',title:'What am I actually building?',minutes:5},
  {id:'equipment',title:'Set up without regret',minutes:6},
- {id:'observation',title:'What am I looking at?',minutes:6},
+ {id:'observation',title:'A Closer Look at the Scalp',minutes:6},
  {id:'launch',title:'Know your next move',minutes:6}
 ]);
 export const STATES=Object.freeze([
