@@ -258,7 +258,7 @@ export async function onRequestPost(context) {
       user_id: authenticatedUserId,
       message: 'entitlement_upserted'
     });
-    return json({ ok: true });
+    return json({ ok: true, amount_total: session.amount_total, currency: session.currency });
   } catch (error) {
     const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
     const supabaseUrl = env.SUPABASE_URL || SUPABASE_URL_FALLBACK;
