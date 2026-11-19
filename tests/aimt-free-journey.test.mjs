@@ -212,7 +212,7 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
   'assets/images/marketing/head-spa-service-rinse.webp',
   'assets/images/marketing/approved-aesthetic-service-shot2.png',
   'assets/images/course/module-07/module-07-treatment-bed-setup.webp',
-  'assets/images/marketing/product-proof/my-aimt-resource-library.webp',
+  'assets/images/marketing/head-spa-service-basin.webp',
   'assets/images/course/module-04/microscopy/microscopy-surface-residue.webp',
   'assets/images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp'
  ];
@@ -226,6 +226,22 @@ test('real AIMT references appear in the proper lessons and remain clearly conte
  assert.match(widgets,/Illustrative course image — not clinical evidence/);
  assert.match(widgets,/lesson-module-04-microscopy-assessment-1x1.webp/);
  assert.doesNotMatch(widgets,/<input[^>]*type="file"/);
+});
+test('scalp section sells practitioner skill and remains observation-only',()=>{
+ const classroom=read('head-spa-accelerator-classroom.html');
+ const landing=read('head-spa-launch-accelerator.html');
+ const widget=read('assets/js/aimt-launch-journey-widgets.mjs');
+ assert.equal(LESSONS.find(x=>x.id==='observation')?.title,'A Closer Look at the Scalp');
+ assert.match(classroom,/A Closer Look at the Scalp/);
+ assert.match(classroom,/The difference is in the details/);
+ assert.match(classroom,/The practitioner difference/);
+ assert.match(classroom,/THE SKILL YOU STARTED BUILDING/);
+ assert.match(classroom,/Head Spa Certification goes deeper into observation across scalp regions/);
+ assert.match(widget,/Learn to notice what matters/);
+ assert.match(widget,/Turn what you notice into a better client conversation/);
+ assert.match(widget,/not a diagnosis or a certificate of competence/);
+ assert.match(landing,/DEVELOP YOUR EYE/);
+ assert.doesNotMatch(classroom,/What am I looking at\?/);
 });
 test('accelerator welcomes estheticians without claiming universal professional scope',()=>{
  const landing=read('head-spa-launch-accelerator.html');
@@ -340,8 +356,9 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  const official=read('assets/js/aimt-next-step-offer.js');
  assert.match(app,/id="nextStepOffer"/);
  assert.match(app,/data-bundle-photo-slot="awaiting-owner-upload"/);
- assert.match(app,/head-spa-certification-course-ui.webp/);
- assert.match(app,/approved-service-timer-live.webp/);
+ assert.match(app,/approved-service-timer1.webp/);
+ assert.match(app,/lj-next-move-lifestyle-image/);
+ assert.doesNotMatch(app,/lj-next-move-sidekick-image/);
  assert.match(app,/First-Service Blueprint/);
  assert.match(app,/href="https:\/\/aimtrichology\.com\/head-spa-certification"/);
  assert.match(app,/bonus availability is checked only at live enrollment/);
@@ -353,8 +370,8 @@ test('Next Move package uses authentic AIMT product proof and keeps founder bonu
  assert.match(official,/remaining>0/);
  assert.match(official,/data\.capacity===5/);
  assert.doesNotMatch(app,/your_next_move_aimt_launch_bundle/);
- assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-certification-course-ui.webp')));
- assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/approved-service-timer-live.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/head-spa-service-basin.webp')));
+ assert.ok(fs.existsSync(path.join(root,'assets/images/marketing/approved-service-timer1.webp')));
 });
 
 
