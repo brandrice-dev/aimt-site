@@ -28,6 +28,19 @@ on:
       - 'functions/_lib/enrollment/paid-enrollment-email.mjs'
       - 'functions/api/create-checkout-session.js'
       - 'functions/api/stripe-webhook.js'
+      - 'functions/api/meta-config.js'
+      - 'functions/api/course-material.js'
+      - 'functions/_lib/meta/**'
+      - 'assets/js/aimt-meta.js'
+      - 'assets/js/aimt-growth.js'
+      - 'assets/js/aimt-public-nav.js'
+      - 'tests/meta-measurement.test.mjs'
+      - 'tests/paid-content-boundary.test.mjs'
+      - 'tests/growth-measurement.test.mjs'
+      - 'tests/growth-client.test.mjs'
+      - 'headspa-mastery.html'
+      - 'enroll.html'
+      - 'success.html'
       - 'functions/api/claim-course-access.js'
       - 'assets/js/aimt-founder-review-admin.js'
       - 'tests/blueprint-autosave.test.mjs'
@@ -89,6 +102,8 @@ jobs:
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
+            tests/meta-measurement.test.mjs \
+            tests/paid-content-boundary.test.mjs \
             tests/growth-client.test.mjs \
             tests/embedded-enrollment-checkout.test.mjs \
             tests/stripe-webhook-paid-enrollment-email.test.mjs \
