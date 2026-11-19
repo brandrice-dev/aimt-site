@@ -38,7 +38,7 @@ function ruleMatches(rule, p) {
 const isExcluded = (p) => routes.exclude.some((r) => ruleMatches(r, p));
 const reachesFunctions = (p) => routes.include.some((r) => ruleMatches(r, p)) && !isExcluded(p);
 
-const PUBLIC_DIRS = ['about', 'assets', 'education', 'oauth'];
+const PUBLIC_DIRS = ['about', 'education', 'oauth'];
 // Root .html files that are owner/dev-only: never served at their clean URL.
 // The .html form stays allowlisted only so its _redirects 301 → / applies.
 const INTERNAL_ROOT_PAGES = ['cadence-intro-preview'];
@@ -147,6 +147,23 @@ test('owner/dev-only root pages are not served at their clean URLs; the .html re
     assert.ok(isExcluded(`/${page}.html`), `/${page}.html stays static so its _redirects rule applies`);
   }
   assert.match(read('_redirects'), /^\/cadence-intro-preview\.html \/ 301$/m);
+});
+
+test('paid course images and Listen Mode audio reach authenticated Functions, not static Pages', () => {
+  for (const p of [
+    '/assets/images/course/module-09/AIMT-Head-Spa-Enhancement-Strategy-Guide.pdf',
+    '/assets/images/course/module-08/module-08-core-format-service-map.png',
+    '/assets/audio/listen/headspa-mastery/module-08/m8-01.mp3',
+  ]) {
+    assert.ok(!isExcluded(p), p + ' must not bypass Functions');
+    assert.ok(reachesFunctions(p), p + ' must reach the paid media handler');
+  }
+  assert.ok(existsSync(path.join(ROOT, 'functions/assets/images/course/[[path]].js')));
+  assert.ok(existsSync(path.join(ROOT, 'functions/assets/audio/listen/headspa-mastery/[[path]].js')));
+  for (const p of ['/assets/js/aimt-course-resources.js', '/assets/css/aimt-design-system.css',
+    '/assets/images/marketing/head-spa-service-rinse.webp', '/assets/brand/aimt-orbital-mark.svg']) {
+    assert.ok(isExcluded(p), p + ' must remain an ordinary public static asset');
+  }
 });
 
 // ── Live (opt-in) ─────────────────────────────────────────────────────────

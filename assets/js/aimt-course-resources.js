@@ -4,7 +4,7 @@
    Single source of truth for the student-facing resources shown in
    the My AIMT dashboard's Resources Library (my-aimt.html). Every
    entry must point at a real, already-shipped student-facing asset —
-   this file does not gate access (the dashboard only renders a
+   the server-side API validates enrollment (the dashboard only renders a
    course's entries for a student the entitlement read already proved
    is entitled to that course; see my-aimt.html's loadResources()).
 
@@ -32,7 +32,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'Head Spa Intake + Service Plan',
       description: 'A two-part form for gathering what affects service planning, then converting it into a clear practitioner plan before hands-on treatment begins.',
       type: 'download',
-      href: 'assets/images/course/module-02/module-02-head-spa-intake-service-plan-fillable.pdf'
+      href: '/api/course-material?resource=module-02-intake',
+      resourceKey: 'module-02-intake',
+      downloadName: 'head-spa-intake-service-plan.pdf'
     },
     {
       module: 8,
@@ -48,7 +50,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'Core Service Map',
       description: 'Printable 60-minute service flow reference.',
       type: 'download',
-      href: 'assets/images/course/module-08/module-08-core-format-service-map.png'
+      href: '/api/course-material?resource=module-08-core-map',
+      resourceKey: 'module-08-core-map',
+      downloadName: 'core-service-map.png'
     },
     {
       module: 8,
@@ -56,7 +60,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'Extended Service Map',
       description: 'Printable 90-minute service flow reference.',
       type: 'download',
-      href: 'assets/images/course/module-08/module-08-extended-format-service-map.png'
+      href: '/api/course-material?resource=module-08-extended-map',
+      resourceKey: 'module-08-extended-map',
+      downloadName: 'extended-service-map.png'
     },
     {
       module: 9,
@@ -64,7 +70,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'Head Spa Enhancement Strategy Guide',
       description: 'Enhancement ideas, why they may earn a place on your menu, and how to position them without a sales pitch.',
       type: 'download',
-      href: 'assets/images/course/module-09/AIMT-Head-Spa-Enhancement-Strategy-Guide.pdf'
+      href: '/api/course-material?resource=module-09-enhancement-guide',
+      resourceKey: 'module-09-enhancement-guide',
+      downloadName: 'head-spa-enhancement-strategy.pdf'
     },
     {
       module: 10,
@@ -72,7 +80,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'Between-Client Sanitation & Reset Checklist',
       description: 'The Contain → Clean → Disinfect/Process → Reset → Verify workflow, plus a fillable page for your own product, equipment, and jurisdiction details.',
       type: 'download',
-      href: 'assets/images/course/module-10/module-10-between-client-sanitation-reset-checklist-fillable.pdf'
+      href: '/api/course-material?resource=module-10-reset',
+      resourceKey: 'module-10-reset',
+      downloadName: 'sanitation-reset-checklist.pdf'
     },
     {
       module: 11,
@@ -80,7 +90,9 @@ window.AIMT_COURSE_RESOURCES = {
       title: 'AIMT AI Practice Toolkit',
       description: 'The B.R.I.E.F. prompt framework, an AI-use and verification matrix, a client-brings-AI response framework, and ready-to-customize practice prompts.',
       type: 'download',
-      href: 'assets/images/course/module-11/module-11-aimt-ai-practice-toolkit-fillable.pdf'
+      href: '/api/course-material?resource=module-11-toolkit',
+      resourceKey: 'module-11-toolkit',
+      downloadName: 'aimt-practice-toolkit.pdf'
     }
   ]
 };
