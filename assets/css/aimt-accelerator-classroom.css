@@ -83,3 +83,18 @@
  .lj-classroom .lj-step-button span{font-size:11px}
  .lj-classroom .lj-step-button b{flex-basis:18px;font-size:11px}
 }
+
+/* Show the future practitioner experience with genuine AIMT treatment imagery.
+   Owner's photographed bundle can replace this single source later. */
+.lj-classroom .lj-next-move-proof{position:relative;min-height:435px;overflow:hidden;padding:0}
+.lj-classroom .lj-next-move-lifestyle-image{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 46%}
+.lj-classroom .lj-next-move-media::before{opacity:.08;z-index:1}
+.lj-classroom .lj-next-move-media figcaption{background:#251d1b;color:rgba(250,248,245,.78);font-size:12px;line-height:1.55}
+@media(max-width:990px){
+ .lj-classroom .lj-next-move-proof{min-height:350px}
+ .lj-classroom .lj-next-move-lifestyle-image{object-position:center 43%}
+}
+@media(max-width:560px){
+ .lj-classroom .lj-next-move-proof{min-height:300px}
+ .lj-classroom .lj-next-move-lifestyle-image{object-position:center 45%}
+}
