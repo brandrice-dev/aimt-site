@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>AIMT License &amp; Scope Finder — Unlisted Preview</title>
+<meta name="description" content="AIMT official-source finder pilot: identify the licensing rules you need to verify before offering a head spa service.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/aimt-design-system.css">
+<link rel="stylesheet" href="/assets/css/aimt-free-tools.css">
+<style>
+body{margin:0;background:#1a1814;color:#faf8f5;font-family:'Outfit',system-ui,sans-serif}
+*,*:before,*:after{box-sizing:border-box}
+button,input,select{font:inherit}
+a{color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #d2afa8;outline-offset:3px}
+.sf-nav{padding:19px clamp(16px,4vw,52px);border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;gap:16px}
+.sf-mark{font:700 13px 'Montserrat',sans-serif;letter-spacing:.2em;text-decoration:none}
+.sf-nav small{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#bea7a1}
+.sf-container{width:min(980px,calc(100% - 36px));margin:0 auto}
+.sf-hero{padding:clamp(42px,7vw,72px) 0 30px}
+.sf-eyebrow{font:600 10px 'Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b9a29c;margin:0 0 15px}
+.sf-hero h1{font:700 clamp(33px,5.3vw,60px)/1.05 'Montserrat',sans-serif;letter-spacing:-.035em;text-transform:uppercase;max-width:780px;margin:0 0 20px}
+.sf-lead{font-size:clamp(16px,1.9vw,19px);font-weight:300;line-height:1.65;color:rgba(255,255,255,.72);max-width:75ch}
+.sf-note{border-left:3px solid #b39c94;background:rgba(255,255,255,.04);border-radius:0 10px 10px 0;padding:15px 20px;color:rgba(255,255,255,.72);line-height:1.6;font-size:14px;margin:26px 0}
+.sf-steps{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-bottom:38px}
+.sf-form,.sf-result{background:#f7f4ef;color:#292522;border-radius:17px;padding:clamp(22px,3.5vw,36px)}
+.sf-form h2,.sf-result h2{font:600 19px 'Montserrat',sans-serif;letter-spacing:-.02em;margin:0 0 16px}
+.sf-form p,.sf-result p{color:#645c56;font-size:14px;line-height:1.65}
+.sf-field{margin:22px 0}
+.sf-field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.sf-field select{width:100%;background:#fff;border:1px solid #c8c0b8;border-radius:8px;color:#292522;padding:12px;min-height:49px}
+.sf-checks{border:0;padding:0;margin:22px 0}
+.sf-checks legend{font-size:13px;font-weight:600;margin-bottom:12px}
+.sf-checks small{font-size:11px;color:#655e59;display:block;margin-bottom:12px;line-height:1.6}
+.sf-checks label{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #d8d0c8;border-radius:8px;padding:11px;margin:8px 0;color:#292522;line-height:1.45;font-size:13px;cursor:pointer}
+.sf-checks input{margin:3px 0 0;accent-color:#78535b}
+.sf-button{display:inline-flex;align-items:center;justify-content:center;padding:12px 17px;min-height:45px;background:#26221e;color:#fff;border-radius:50px;border:1px solid #26221e;font:600 11px 'Montserrat',sans-serif;letter-spacing:.035em;text-decoration:none}
+.sf-button:hover{background:#4f4840}
+.sf-secondary{background:transparent;color:#26221e;border-color:#b3aba4}
+.sf-secondary:hover{background:#e9e4dd}
+.sf-actions{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 0}
+.sf-source{background:#fff;border:1px solid #d8d0c8;border-radius:10px;padding:17px;margin:18px 0}
+.sf-source h3{font:600 14px 'Montserrat',sans-serif;margin:0 0 9px}
+.sf-source ul{margin:0;padding-left:20px}
+.sf-source li{margin:9px 0;font-size:13px;line-height:1.5}
+.sf-source a{color:#65444b;font-weight:600;text-underline-offset:3px;overflow-wrap:anywhere}
+.sf-source p{margin:0 0 8px}
+.sf-request{white-space:pre-wrap;background:#fff;border:1px solid #ded4cb;border-radius:10px;color:#292522;line-height:1.6;font-size:13px;padding:18px;margin:15px 0;word-break:break-word}
+.sf-status{font-size:12px!important;line-height:1.5!important;min-height:18px;color:#75464e!important}
+.sf-result .sf-incomplete{color:#724f36;font:600 10px 'Montserrat',sans-serif;letter-spacing:.10em;text-transform:uppercase;margin:16px 0}
+.sf-status-line{padding:12px 14px;border-left:3px solid #99684d;background:#f1e8de;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6}
+.sf-footer{border-top:1px solid rgba(255,255,255,.1);padding:24px 0 55px;line-height:1.6;color:rgba(255,255,255,.5);font-size:12px}
+.sf-footer a{color:rgba(255,255,255,.8)}
+@media(max-width:750px){.sf-steps{grid-template-columns:1fr}.sf-nav small{display:none}.sf-hero{padding-top:38px}}
+@media print{body{background:#fff;color:#222}.sf-nav,.sf-hero,.sf-form,.sf-actions,.sf-footer,.sf-note{display:none!important}.sf-steps{display:block}.sf-result{background:#fff;padding:0}.sf-container{width:100%}.sf-source,.sf-request{border:1px solid #bbb}}
+</style>
+</head>
+<body>
+<header class="sf-nav"><a href="/free-tools" class="sf-mark">AIMT</a><small>Free Practitioner Tools · Unlisted Pilot</small><a href="/free-tools" style="font-size:12px;text-decoration:none;color:#d4c7c2">All Free Tools</a></header>
+<main class="sf-container">
+  <section class="sf-hero">
+    <div class="sf-eyebrow">AIMT · License &amp; Scope Finder · Source Directory Pilot</div>
+    <h1>Don't guess what your license covers.</h1>
+    <p class="sf-lead">The phrase “head spa” doesn't tell you whether your license permits each step. Start with the specific services you want to offer, find your state's official guidance, and take unanswered questions to the licensing authority.</p>
+    <div class="sf-note"><strong>What this tool can and cannot do:</strong> It can point you to official sources and organize a precise licensing-board question. It <strong>cannot</strong> clear you to perform a treatment, interpret ambiguous law, confirm business permits or replace qualified regulatory advice. Only five states currently have curated links; all other states are intentionally marked unmapped.</div>
+  </section>
+  <div class="sf-steps">
+    <section class="sf-form" aria-labelledby="inputsHeading">
+      <h2 id="inputsHeading">01 / Your situation</h2>
+      <p>Choose your jurisdiction and your existing credential. No license number, address, name or email is needed for this preview.</p>
+      <div class="sf-field">
+        <label for="state">Where would you provide the service?</label>
+        <select id="state" required><option value="">Select a state</option></select>
+      </div>
+      <div class="sf-field">
+        <label for="license">What credential do you currently hold?</label>
+        <select id="license" required>
+          <option value="">Choose a license type</option>
+          <option value="Cosmetology license">Cosmetology</option>
+          <option value="Esthetician license">Esthetics</option>
+          <option value="Barber license">Barber</option>
+          <option value="Massage therapy license">Massage therapy</option>
+          <option value="No current professional license">No professional license yet</option>
+          <option value="Other credential">Other / not listed</option>
+        </select>
+      </div>
+      <fieldset class="sf-checks">
+        <legend>Which activities are you considering?</legend>
+        <small>Select everything that might be in your first appointment. These are questions to verify—not preapproved techniques.</small>
+        <label><input type="checkbox" name="activity" value="shampooing, conditioning or washing hair"> Shampooing / conditioning / washing hair</label>
+        <label><input type="checkbox" name="activity" value="cosmetic scalp cleansing or exfoliation"> Cosmetic scalp cleansing or exfoliation</label>
+        <label><input type="checkbox" name="activity" value="scalp massage or manipulation"> Scalp massage</label>
+        <label><input type="checkbox" name="activity" value="neck or shoulder massage"> Neck / shoulder massage</label>
+        <label><input type="checkbox" name="activity" value="hair drying, styling or blowouts"> Blow-drying / styling</label>
+        <label><input type="checkbox" name="activity" value="scalp camera observation and client communication"> Scalp camera observation / communication</label>
+        <label><input type="checkbox" name="activity" value="water/steam equipment use and associated sanitation"> Water / steam equipment and sanitation</label>
+      </fieldset>
+      <div class="sf-actions"><button type="button" id="review" class="sf-button">Find official sources →</button><button type="button" id="clear" class="sf-button sf-secondary">Start over</button></div>
+      <p class="sf-status" id="formStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section class="sf-result" aria-labelledby="resultHeading">
+      <h2 id="resultHeading">02 / What to verify</h2>
+      <div id="empty"><p>Choose your state, credential and proposed activities on the left to generate your review list and a message you can send to your state board.</p></div>
+      <div id="output" hidden>
+        <p class="sf-incomplete" id="statusLabel">UNRESOLVED — VERIFICATION REQUIRED</p>
+        <p class="sf-status-line" id="resultNote"></p>
+        <div class="sf-source">
+          <h3>Official sources located</h3>
+          <ul id="sourceList"></ul>
+        </div>
+        <div class="sf-source">
+          <h3>Activities needing confirmation</h3>
+          <ul id="activityList"></ul>
+        </div>
+        <h3 style="font:600 14px 'Montserrat',sans-serif;margin:20px 0 0">Draft question for your licensing board</h3>
+        <p>This is a starting point. Edit details about your facility yourself before sending it; do not submit private license details to AIMT.</p>
+        <div class="sf-request" id="requestText" aria-label="Board inquiry draft"></div>
+        <div class="sf-actions">
+          <button class="sf-button" type="button" id="copy">Copy inquiry</button>
+          <button class="sf-button sf-secondary" type="button" id="print">Print / Save PDF</button>
+        </div>
+        <p class="sf-status" id="copyStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+  <footer class="sf-footer">
+    AIMT · Unlisted educational prototype. Official links were checked on November 11, 2026, but no state-specific professional scope determinations have been approved for this tool. Confirm current regulations with the board before practice. <a href="/head-spa-accelerator-pilot">Explore a sample AIMT lesson</a> · <a href="/privacy">Privacy</a>
+  </footer>
+</main>
+<script>
+(function(){
+'use strict';
+const states=['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming','District of Columbia'];
+const sourceMap={
+ 'California':[['California Board — Head Spas industry bulletin','https://barbercosmo.ca.gov/forms_pubs/headspas.pdf'],['Board industry bulletins index','https://barbercosmo.ca.gov/forms_pubs/publications/bulletins.shtml']],
+ 'Tennessee':[['Tennessee Commerce — Shampoo and Head Spa','https://support.commerce.tn.gov/hc/en-us/articles/29894088035987-Shampoo-and-Head-Spa'],['Licensing information','https://www.tn.gov/commerce/regboards/cosmo/license/individual.html']],
+ 'Texas':[['TDLR — scope of practice by credential','https://www.tdlr.texas.gov/barbering-and-cosmetology/scope-of-practice/'],['TDLR — who regulates what','https://www.tdlr.texas.gov/barbering-and-cosmetology/who-regulates-what.htm']],
+ 'Florida':[['Florida DBPR — Cosmetology FAQs','https://www2.myfloridalicense.com/cosmetology/faqs/'],['Florida DBPR — What requires a license','https://ula.myfloridalicense.com/what-requires-a-license/']],
+ 'New York':[['NY Department of State — appearance enhancement procedures chart','https://dos.ny.gov/system/files/documents/2025/03/ae-licensees-procedural-service-determinations_03.2025.pdf']]
+};
+const $=id=>document.getElementById(id);
+for(const state of states){const o=document.createElement('option');o.textContent=state;o.value=state;$('state').appendChild(o);}
+function setStatus(message){$('formStatus').textContent=message;}
+let inquiry='';
+function addListItem(ul,text,url){
+ const li=document.createElement('li');
+ if(url){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=text+' (official source)';li.appendChild(a);}
+ else{li.textContent=text;}
+ ul.appendChild(li);
+}
+function render(){
+ const state=$('state').value,lic=$('license').value,activities=Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(x=>x.value);
+ if(!state||!lic||activities.length===0){setStatus('Choose your state and license, then select at least one proposed activity.');return;}
+ setStatus('');
+ $('empty').hidden=true;$('output').hidden=false;
+ $('sourceList').replaceChildren();$('activityList').replaceChildren();
+ const sources=sourceMap[state]||[];
+ $('statusLabel').textContent=sources.length?'OFFICIAL SOURCES FOUND — PERMISSIONS NOT DETERMINED':'SOURCE DIRECTORY INCOMPLETE — STATE NOT YET MAPPED';
+ const otherAuthority=lic==='Massage therapy license'||lic==='Other credential'||lic==='No current professional license';
+ $('resultNote').textContent=sources.length
+  ?(otherAuthority
+     ?'The links listed here concern barbering/cosmetology or appearance-enhancement regulation; they may not govern your credential or unlicensed activity. Identify the correct professional board as well. AIMT has not determined permission for these activities.'
+     :'These are government resources, not a license clearance. You still need to check the rules for your exact credential, activity, venue and local requirements.')
+  :'AIMT has not yet verified a government source for this state in this pilot. Do not infer that your proposed service is allowed or prohibited; locate the official board and ask directly.';
+ if(sources.length)for(const entry of sources)addListItem($('sourceList'),entry[0],entry[1]);
+ else addListItem($('sourceList'),'No curated source available for this state yet. Search your official state government site for the professional licensing board.');
+ activities.forEach(a=>addListItem($('activityList'),a+' — not determined; check official guidance'));
+ inquiry='Subject: Request to clarify professional scope for a proposed scalp-care service\n\nHello,\n\nI am considering a scalp-care / head spa service in '+state+'. My current credential is: '+lic+'.\n\nBefore offering this service, could you clarify whether each of these activities is permitted under that credential:\n- '+activities.join('\n- ')+'\n\nCould you also tell me whether there are separate establishment, supervision, sanitation, plumbing or equipment requirements and direct me to the applicable written law, rule or board guidance?\n\nThank you.';
+ $('requestText').textContent=inquiry;$('copyStatus').textContent='';
+ $('resultHeading').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
+}
+$('review').addEventListener('click',render);
+$('clear').addEventListener('click',()=>{
+ $('state').value='';$('license').value='';
+ document.querySelectorAll('input[name="activity"]').forEach(x=>x.checked=false);
+ $('empty').hidden=false;$('output').hidden=true;
+ $('copyStatus').textContent='';setStatus('Selection cleared.');
+});
+$('copy').addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText(inquiry);$('copyStatus').textContent='Inquiry copied. You decide whether and how to send it to your official licensing authority.';}
+ catch(e){$('copyStatus').textContent='Clipboard access is unavailable. Select the inquiry text above and copy it manually.';const range=document.createRange();range.selectNodeContents($('requestText'));getSelection().removeAllRanges();getSelection().addRange(range);}
+});
+$('print').addEventListener('click',()=>window.print());
+})();
+</script>
+</body>
+</html>

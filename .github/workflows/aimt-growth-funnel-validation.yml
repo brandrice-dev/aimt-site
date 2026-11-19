@@ -36,6 +36,16 @@ on:
       - 'tests/readiness-followups.test.mjs'
       - 'tests/aimt-free-tools.test.mjs'
       - 'free-tools.html'
+      - 'head-spa-launch-accelerator.html'
+      - 'head-spa-scope-finder.html'
+      - 'head-spa-equipment-planner.html'
+      - 'scalp-observation-lab.html'
+      - 'assets/js/aimt-launch-journey-*.mjs'
+      - 'assets/js/aimt-launch-accelerator.mjs'
+      - 'assets/js/aimt-standalone-tool.mjs'
+      - 'assets/css/aimt-launch-journey.css'
+      - 'assets/css/aimt-free-tools-hub-expansion.css'
+      - 'tests/aimt-free-journey.test.mjs'
       - 'head-spa-service-cost.html'
       - 'first-service-blueprint.html'
       - 'assets/css/aimt-free-tools.css'
@@ -80,6 +90,7 @@ jobs:
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
             tests/aimt-free-tools.test.mjs \
+            tests/aimt-free-journey.test.mjs \
             tests/free-tool-capture.test.mjs \
             tests/founder-review.test.mjs \
             tests/founder-review-maintenance.test.mjs \

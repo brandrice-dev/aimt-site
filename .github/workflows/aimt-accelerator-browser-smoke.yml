@@ -1,0 +1,37 @@
+name: AIMT Accelerator Phone-Width Browser Smoke
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'head-spa-accelerator-classroom.html'
+      - 'head-spa-launch-accelerator.html'
+      - 'assets/css/aimt-accelerator-classroom.css'
+      - 'assets/css/aimt-accelerator-landing.css'
+      - 'assets/js/aimt-launch-accelerator.mjs'
+      - 'assets/js/aimt-launch-journey-widgets.mjs'
+      - 'assets/js/aimt-scope-evidence.mjs'
+      - 'tests/aimt-accelerator-browser-smoke.*'
+      - '.github/workflows/aimt-accelerator-browser-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Check bundled Chromium/Chrome
+        run: |
+          command -v google-chrome || command -v chromium
+      - name: Check classroom widths, lesson navigation, licensing results, practice and live-course CTA
+        run: |
+          if command -v google-chrome >/dev/null; then
+            CHROME_BIN="$(command -v google-chrome)" node tests/aimt-accelerator-browser-smoke.mjs
+          else
+            CHROME_BIN="$(command -v chromium)" node tests/aimt-accelerator-browser-smoke.mjs
+          fi

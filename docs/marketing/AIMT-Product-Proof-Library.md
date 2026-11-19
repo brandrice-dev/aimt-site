@@ -86,6 +86,28 @@ stay as masters. Also current: `images/marketing/approved-module08-screenshot1.p
 (laptop scene, catalog) and `images/marketing/head-spa-certification-course-ui.webp`
 (Module 4 lesson with a Cadence pull quote, 16:10).
 
+### Development preview references in the Free Head Spa Launch Accelerator (not yet released)
+
+The November 12 development branch reuses these **existing AIMT-approved** assets to avoid stock/generated practitioner photography:
+
+| Preview location | Existing source | Treatment and limitation |
+|---|---|---|
+| Lesson 1 · Scope | `images/marketing/head-spa-service-rinse.webp` | Real AIMT treatment photo, contextual illustration of a multi-activity service; **does not imply any individual license permits it** |
+| Lesson 2 · Service design | `images/marketing/approved-aesthetic-service-shot2.png` | Approved real scalp massage photo; teaches the service experience, not a performance or wellness outcome |
+| Lesson 3 · Equipment | `images/marketing/head-spa-service-basin.webp` | Real treatment setup with timer, not a specification or installation recommendation |
+| Lesson 5 · Launch pathway | `images/marketing/public/consultation-warm-1440.webp` | Existing AIMT warm-toned photo of a practitioner using a handheld scalp microscope with a client viewing magnified scalp detail; highlights closer observation and informed client conversation |
+| Shared Scalp Observation Lab · Free Lesson 4 | `images/course/module-04/microscopy/microscopy-surface-residue.webp` | **Illustrative magnified teaching example from paid Module 4**, used in the free observation-only question. Never described as a patient diagnosis or real clinical evidence. |
+
+The course-derived magnified image is **not authenticated clinical photography** and must not be marketed as a real patient's condition, medical diagnostic evidence, treatment result, or a substitute for consented scalp-image cases. The accompanying separate card uses `images/marketing/product-proof/lesson-module-04-microscopy-assessment-1x1.webp` (an approved actual course-interface capture), links to `/head-spa-certification`, and is not a promise of diagnostic competency. It is used as a **clearly labeled course teaching sample** while the free exercise retains an explicitly schematic illustration for its observation question. The preview links to Head Spa Certification rather than implying completion of the paid material. Owner-directed development placement is not equivalent to final editorial/clinical release signoff.
+
+The equipment lesson now uses the actual `images/course/module-07/module-07-treatment-bed-setup.webp` instructional bed visual rather than an image focused on the Smart Service Sidekick. Career-stage guidance welcomes both newly licensed and established practitioners. Correct reasoning uses the approved green success treatment (`--aimt-success: #3a5a3a`, `--aimt-success-light: #e8ede8`).
+
+The final Accelerator **“Your Next Move”** panel now displays the **owner-approved square “GET BETTER. FASTER.” bundle promotional image** (`images/marketing/aimt-get-better-faster-bundle.webp`), supplied on November 18, 2026, and optimized as a 480×480 WebP for the development preview. It depicts sample AIMT course and learning-tool screens in an owner-created device composition and is clearly described as a promotional mockup. The page displays the entire square without cropping on mobile or desktop (`data-bundle-photo-slot="owner-approved"`). Real treatment photography remains inside the preceding learning experience. The **Smart Service Sidekick** and Resource Library are included with the certification; the **1:1 founder review is a limited, conditional bonus** and preview-domain availability is not claimed. No extra or fictional products should be inferred from the devices in the mockup.
+
+The existing `images/marketing/my-aimt-course-texture.webp` is reused as a very subtle background layer. No new photographic assets or third-party image licenses were introduced in this pass.
+
+---
+
 ## 5. My AIMT (new captures, QA student "Jordan Sample")
 
 | Asset | Proves | S | O | A | E | P | Ratios |

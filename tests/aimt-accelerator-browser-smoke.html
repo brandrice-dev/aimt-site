@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIMT Accelerator phone-width browser smoke (development only)</title>
+<style>html,body{margin:0;background:#eee;color:#111;font-family:Arial,sans-serif}iframe{border:0;height:820px;display:block;background:#fff}pre{white-space:pre-wrap;word-break:break-word;padding:10px}</style></head>
+<body>
+<iframe title="Classroom under test" id="classroom"></iframe><pre id="report">Waiting for classroom...</pre>
+<script>
+(async function(){
+ const width=Number(new URLSearchParams(location.search).get('width'))||390;
+ const iframe=document.getElementById('classroom');
+ iframe.style.width=width+'px';
+ iframe.addEventListener('load', async ()=>{
+  const w=iframe.contentWindow,d=w.document;
+  const failures=[],checks=[];
+  function check(name,ok,details=''){
+   checks.push({name,ok,details});
+   if(!ok)failures.push(name+(details?' '+details:''));
+  }
+  function inspect(name){
+   const vw=w.innerWidth,sw=d.documentElement.scrollWidth;
+   const visible=Array.from(d.querySelectorAll('a,button,input,textarea,select'))
+    .filter(el=>{const s=w.getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&el.getClientRects().length>0})
+    .map(el=>({el,rect:el.getBoundingClientRect()}));
+   const outside=visible.filter(x=>x.rect.right>vw+3||x.rect.left< -3)
+    .map(x=>(x.el.tagName.toLowerCase()+'#'+x.el.id+' '+Math.round(x.rect.left)+'-'+Math.round(x.rect.right))).slice(0,7);
+   check(name+' overflow',sw<=vw+3&&outside.length===0,'viewport='+vw+' scrollWidth='+sw+' outside='+outside.join(','));
+  }
+  try {
+   await new Promise(resolve=>setTimeout(resolve,450));
+   check('responsive viewport',w.innerWidth===width,String(w.innerWidth));
+   check('course widgets loaded',!!d.querySelector('#sc-state')&&!!d.querySelector('#practiceCheck'));
+   const brand=d.querySelector('.lj-brand-group');
+   const mark=brand?.querySelector('.aimt-public-nav-mark svg use');
+   const wordmark=brand?.querySelector('.aimt-public-nav-name');
+   const markSvg=brand?.querySelector('.aimt-public-nav-mark svg');
+   check('AIMT canonical orbital logo',!!brand&&mark?.getAttribute('href')==='#aimtOrbitalMark'&&!!d.getElementById('aimtOrbitalMark')&&wordmark?.textContent==='AIMT');
+   check('AIMT orbital mobile dimensions',!!markSvg&&markSvg.getBoundingClientRect().width>=26&&markSvg.getBoundingClientRect().height>=26);
+   inspect('Lesson 1 initial');
+   const nav=[...d.querySelectorAll('[data-open-lesson]')];
+   check('six progress destinations',nav.length===6,String(nav.length));
+   const tabs=[...d.querySelectorAll('[data-open-lesson]')].map(x=>x.getBoundingClientRect());
+   check('navigation buttons full-size',tabs.every(r=>r.height>=44),tabs.map(r=>Math.round(r.height)).join('/'));
+   const state=d.querySelector('#sc-state');
+   if(state){
+    state.value='Texas';state.dispatchEvent(new Event('change',{bubbles:true}));
+    const cred=d.querySelector('#sc-license');cred.value='Esthetician';cred.dispatchEvent(new Event('change',{bubbles:true}));
+    const st=d.querySelector('#sc-status');st.value='active_here';st.dispatchEvent(new Event('change',{bubbles:true}));
+    const ctx=d.querySelector('#sc-context');ctx.value='salon';ctx.dispatchEvent(new Event('change',{bubbles:true}));
+    for(const key of ['scalp','scalp-massage','styling']){
+     const box=d.querySelector('input[name="sc-activity"][value="'+key+'"]');
+     if(box){box.checked=true;box.dispatchEvent(new Event('change',{bubbles:true}));}
+    }
+    const submit=d.querySelector('[data-action="scope-save"]');if(submit)submit.click();
+    const outcome=d.querySelector('[data-scope-takeaway-items]');
+    check('mixed licensing results contain supported activity and specific limit',!!outcome&&/Covered by this license type/.test(outcome.textContent)&&/license restriction/.test(outcome.textContent),outcome?.textContent?.slice(0,200));
+    inspect('Lesson 1 results');
+   }
+   for(const id of ['service','equipment','observation','launch','summary']){
+    d.querySelector('[data-open-lesson="'+id+'"]').click();
+    await new Promise(resolve=>setTimeout(resolve,60));
+    const section=d.querySelector('[data-lesson="'+id+'"]');
+    check('navigation '+id,section&&!section.hidden);
+    inspect('Lesson '+id);
+    if(id==='launch'){
+     const radio=d.querySelector('input[name="aimt-case-response"][value="assess"]');
+     if(radio){radio.checked=true;radio.dispatchEvent(new Event('change',{bubbles:true}));}
+     d.querySelector('#practiceCheck').click();
+     const fb=d.querySelector('#practiceFeedback');
+     check('case feedback',fb&&!fb.hidden&&/Strong first decision/.test(fb.textContent));
+    }
+    if(id==='summary'){
+     check('plan actions available',['downloadLaunchPlan','copyLaunchPlan','printLaunchPlan'].every(name=>!!d.getElementById(name)));
+     const bundle=d.querySelector('.lj-next-move-bundle-image');
+     check('approved bundle image present',!!bundle&&bundle.getAttribute('src')==='/assets/images/marketing/aimt-get-better-faster-bundle.webp');
+     if(bundle){
+      check('approved bundle has square dimensions',bundle.getAttribute('width')==='480'&&bundle.getAttribute('height')==='480');
+      check('approved bundle fits without cropping',w.getComputedStyle(bundle).objectFit==='contain');
+     }
+     const link=d.querySelector('[data-next-step-action]');
+     check('paid course opens canonical live site',link?.href==='https://aimtrichology.com/head-spa-certification',link?.href||'missing');
+    }
+   }
+  } catch(e){failures.push('unhandled '+String(e&&e.stack||e));}
+  const passed=failures.length===0;
+  const data={width,passed,checks,failures};
+  document.documentElement.setAttribute('data-smoke',passed?'PASS':'FAIL');
+  document.getElementById('report').textContent='AIMT_PHONE_'+(passed?'PASS':'FAIL')+'\n'+JSON.stringify(data,null,2);
+ });
+ iframe.src='/head-spa-accelerator-classroom.html';
+})();
+</script>
+</body></html>
