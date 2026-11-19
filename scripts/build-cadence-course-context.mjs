@@ -2,8 +2,9 @@
 // generated assessment bank. This snapshot contains guides, never exam rubrics.
 import {execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync} from 'node:fs';
+import {readPrivateCourseSnapshot} from './_lib/private-course-snapshot.mjs';
 import {loadModuleGuideSystems,loadSharedToneConstants,extractConstObject} from './cadence-model-regression/load-checkpoint-rubrics.mjs';
-const html=readFileSync('headspa-mastery.html','utf8'),guides=loadModuleGuideSystems(),tone=loadSharedToneConstants();
+const html=readPrivateCourseSnapshot(),guides=loadModuleGuideSystems(),tone=loadSharedToneConstants();
 const titles=extractConstObject(html,'MODULE_TITLES'),checkpoints=extractConstObject(html.slice(html.indexOf('const MODULE_CHECKPOINTS = {'),html.indexOf('window.MODULE_CHECKPOINTS')).replace(/\/\*[\s\S]*?\*\//g,''),'MODULE_CHECKPOINTS');
 const passages=JSON.parse(execFileSync('python3',['scripts/_lib/cadence-course-excerpts.py'],{input:html,encoding:'utf8'}));
 const modules=Object.fromEntries(Array.from({length:12},(_,id)=>[String(id),{title:titles[id],guide:guides[id]+'\n'+tone.CADENCE_RESPONSE_CONSISTENCY_ANCHOR+'\n'+tone.CADENCE_SELECTIVE_MEMORY_INSTRUCTION,checkpointIds:checkpoints[id],passages:passages[id]}]));

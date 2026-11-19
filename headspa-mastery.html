@@ -4495,7 +4495,9 @@ textarea#gpInput::placeholder { color: var(--muted2); }
      Enrolled students load the complete original course from authenticated private storage.
      Never re-embed module HTML, Cadence prompts or assessments here. -->
 <script>
-function startCheckout() { window.location.href = '/enroll'; }
+function startCheckout() {
+  window.location.href = '/enroll';
+}
 function showSignInPanel() { window.location.href = '/student-access'; }
 </script>
 <script src="/assets/js/aimt-growth.js" defer></script>
