@@ -66,3 +66,8 @@
  .la-availability{margin-top:14px}
 }
 @media(prefers-reduced-motion:reduce){.lj-landing{scroll-behavior:auto}}
+
+/* Match the canonical public AIMT mark + wordmark spacing within the Accelerator header. */
+.lj-top .lj-brand-group{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.lj-top .lj-brand-group .aimt-public-nav-mark{width:28px;height:28px;flex-shrink:0}
+.lj-top .lj-brand-group .aimt-public-nav-wordmark{display:flex;align-items:center}
