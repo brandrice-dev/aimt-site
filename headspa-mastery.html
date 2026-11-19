@@ -4006,7 +4006,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
         <div class="lp-proof-head">
           <div class="lp-proof-eyebrow">The Business Of Head Spa</div>
           <div class="lp-proof-title">The Economics Of The Room.</div>
-          <p class="lp-proof-body">Enter your own service price and schedule to explore hypothetical gross service revenue. This is an illustration, not a prediction of demand or earnings.</p>
+          <p class="lp-proof-body">Enter your own service price ($75–$300), clients per day (1–8), and operating days (1–7). Results are illustrative gross service revenue, not a prediction of demand or earnings.</p>
         </div>
         <div class="lp-econ-card" id="lpEconCard">
           <div class="lp-econ-controls">
@@ -4015,7 +4015,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                 <label for="lpEconPrice">Average service price</label>
                 <output class="lp-econ-control-value" for="lpEconPrice" id="lpEconPriceVal">—</output>
               </div>
-              <input type="number" id="lpEconPrice" min="0.01" step="0.01" inputmode="decimal" placeholder="Enter price" autocomplete="off" aria-describedby="lpEconDisclosure">
+              <input type="number" id="lpEconPrice" min="75" max="300" step="1" inputmode="decimal" placeholder="Enter price" autocomplete="off" aria-describedby="lpEconDisclosure">
               <div class="lp-econ-range-ends" aria-hidden="true"><span>USD per service</span></div>
             </div>
             <div class="lp-econ-control">
@@ -4023,7 +4023,7 @@ textarea#gpInput::placeholder { color: var(--muted2); }
                 <label for="lpEconClients">Clients per day</label>
                 <output class="lp-econ-control-value" for="lpEconClients" id="lpEconClientsVal">—</output>
               </div>
-              <input type="number" id="lpEconClients" min="1" max="50" step="1" inputmode="numeric" placeholder="Enter clients" autocomplete="off" aria-describedby="lpEconDisclosure">
+              <input type="number" id="lpEconClients" min="1" max="8" step="1" inputmode="numeric" placeholder="Enter clients" autocomplete="off" aria-describedby="lpEconDisclosure">
               <div class="lp-econ-range-ends" aria-hidden="true"><span>Clients per operating day</span></div>
             </div>
             <div class="lp-econ-control">
@@ -4460,8 +4460,8 @@ textarea#gpInput::placeholder { color: var(--muted2); }
     const days = Number(daysInput.value);
 
     const entered = [priceInput, clientsInput, daysInput].every(input => input.value.trim() !== '');
-    const valid = entered && Number.isFinite(price) && price > 0 &&
-      Number.isInteger(clients) && clients > 0 && clients <= 50 &&
+    const valid = entered && Number.isFinite(price) && price >= 75 && price <= 300 &&
+      Number.isInteger(clients) && clients > 0 && clients <= 8 &&
       Number.isInteger(days) && days > 0 && days <= 7;
     if (priceOut) priceOut.textContent = priceInput.value.trim() ? money.format(price) : '—';
     if (clientsOut) clientsOut.textContent = clientsInput.value.trim() ? String(clients) : '—';
