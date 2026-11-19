@@ -105,7 +105,7 @@ test('embedded request creates an embedded_page session for the configured $697 
   assert.equal(headers['Stripe-Version'], '2026-03-25.dahlia', 'API version pinned so embedded_page is valid regardless of account default');
   assert.equal(headers.Authorization, `Bearer ${SECRET_KEY}`);
 
-  assert.deepEqual(data, { clientSecret: 'cs_test_embedded_1_secret_abc', publishableKey: PUBLISHABLE_KEY });
+  assert.deepEqual(data, { clientSecret: 'cs_test_embedded_1_secret_abc', publishableKey: PUBLISHABLE_KEY, checkoutSessionId: 'cs_test_embedded_1' });
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
 });
 
@@ -173,7 +173,7 @@ for (const [label, overrides, reason] of [
     });
     const { response, data } = await postCreate(makeEnv(overrides), { ui: 'embedded' });
     assert.equal(response.status, 200);
-    assert.deepEqual(data, { url: 'https://checkout.stripe.com/c/pay/cs_test_hosted', fallback: 'hosted' });
+    assert.deepEqual(data, { url: 'https://checkout.stripe.com/c/pay/cs_test_hosted', fallback: 'hosted', checkoutSessionId: 'cs_test_hosted' });
     assert.ok(state.logs.some((row) => row.event_type === 'api_create_checkout_session_embedded_fallback' && row.message === reason));
   });
 }
@@ -186,7 +186,7 @@ test('legacy (non-embedded) request still creates the exact same hosted session 
   assert.equal(params.get('success_url'), `${ORIGIN}/success.html?session_id={CHECKOUT_SESSION_ID}`);
   assert.equal(params.get('cancel_url'), `${ORIGIN}/courses.html?checkout=canceled`);
   assert.equal(headers['Stripe-Version'], undefined, 'hosted path keeps the account default API version');
-  assert.deepEqual(data, { url: 'https://checkout.stripe.com/c/pay/cs_test_hosted' });
+  assert.deepEqual(data, { url: 'https://checkout.stripe.com/c/pay/cs_test_hosted', checkoutSessionId: 'cs_test_hosted' });
 });
 
 // ── Webhook + entitlement with an embedded-shaped session ────────────────
