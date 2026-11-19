@@ -65,6 +65,13 @@
     }
     if(id==='summary'){
      check('plan actions available',['downloadLaunchPlan','copyLaunchPlan','printLaunchPlan'].every(name=>!!d.getElementById(name)));
+     const bundle=d.querySelector('.lj-next-move-bundle-image');
+     check('approved bundle image present',!!bundle&&bundle.getAttribute('src')==='/assets/images/marketing/aimt-get-better-faster-bundle.webp');
+     if(bundle){
+      let decoded=false;try{await bundle.decode();decoded=true;}catch{}
+      check('approved bundle image decodes',decoded&&bundle.naturalWidth===480&&bundle.naturalHeight===480);
+      check('approved bundle fits without cropping',w.getComputedStyle(bundle).objectFit==='contain');
+     }
      const link=d.querySelector('[data-next-step-action]');
      check('paid course opens canonical live site',link?.href==='https://aimtrichology.com/head-spa-certification',link?.href||'missing');
     }
