@@ -1,6 +1,17 @@
 # AIMT paid-content protection — controlled cutover
 
-**Status: IMPLEMENTED IN DRAFT, NOT DEPLOYED, NOT VERIFIED.** PR #170 is a branch preview only; Brandon must review and approve the completed release. Main and the public production site remain unchanged. Do not merge until private storage is populated, Cloudflare routing is verified, and representative enrollment tests pass.
+**Status: DRAFT REVIEW, NOT APPROVED FOR PRODUCTION.** PR #170 remains unmerged. Its Cloudflare branch Preview is active; `main` and production remain unchanged. Private Storage staging and anonymous-access smoke tests passed, but Stripe Sandbox checkout and its enrollment/attribution chain remain unverified. Owner approval is required for any release.
+
+## November 20, 2026 — Sandbox checkout price mismatch (open release blocker)
+
+- The enrollment page advertises **$697**, while the owner's actual Stripe Embedded Checkout screen displays **$597 in TEST MODE**. The owner correctly stopped the payment test. **Do not complete a test purchase or approve the release while these amounts disagree.**
+- Stripe's distinct account **AIMT sandbox** (`livemode=false`) has a newly created active **$697** Price, `price_1UdyGPKjk8tjNSVUJm9DnnDm`, set as its product default; its active webhook `we_1UdyOWKjk8tjNSVU1SjnVBx7` targets the PR's Cloudflare branch Preview.
+- Read-only Cloudflare **Preview** settings display that exact `STRIPE_PRICE_ID`, while the `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` are encrypted and cannot be independently inspected. The Stripe Sandbox connector has **no recent $697 Checkout Session**. Therefore, the on-screen $597 session is **not verified as coming from the newly configured Sandbox**.
+- The last observed Cloudflare PR Preview deployment was generated **before the Preview Stripe variable changes**. Cloudflare secret bindings take effect on a *new deployment*. A new commit to this review branch triggers a new Preview deployment, never a Production deployment. Verify the deployment completes before retesting.
+- Open the new branch-preview `/enroll` in a **fresh private/incognito window** to avoid reusing any old Stripe Link Checkout or tab-scoped `aimt-checkout-request-key`. Check that the Stripe iframe itself shows **$697** and TEST MODE; if it still shows $597, stop and compare the Checkout Session's exact account, line-item Price ID, discounts, and Cloudflare Preview key mode in a secure environment. Do not reveal secret values in logs or GitHub.
+- Only after price agreement: complete one Sandbox test payment, confirm the webhook destination signing secret matches the deployed Preview function, validate entitlement and Admin → Growth test classification, and record QA. This preview shares an existing Supabase project, so keep test activity segmented from real revenue/student access.
+
+**Evidence:** owner screenshot (Nov 20); Stripe Sandbox account price/webhook and absence of a recent $697 session (read-only); current Preview variable names/visible price; GitHub PR deployment history. The precise cause of the $597 session remains unverified.
 
 ## What the draft branch now contains
 
@@ -13,15 +24,15 @@
 
 ## What is known about the actual environment
 
-- As checked on November 19, Supabase project `epcnkncyxqgscrejinwr` has only the existing **private `founder-review-materials`** bucket. It has **no `aimt-paid-content` bucket or uploaded course assets**.
+- **Updated verification (Nov 19–20):** Supabase project `epcnkncyxqgscrejinwr` now has private `aimt-paid-content` (`public=false`) populated with exactly **251 verified objects / 294,176,692 bytes**, including one original course app, 244 media, and six resources. GitHub Actions upload run `44665172045` passed upload SHA verification and independent read-only recheck. Do not repeat the upload.
 - Existing entitlement and progress records are not zero: eight course entitlements (one $1 paid live checkout, one sandbox checkout entry, six manually granted), three saved progress rows and one completion/certificate. These must not be changed or deleted as part of the migration. The $1 live Stripe entitlement is unlinked and carries no progress.
 - The GitHub repo is currently public; its prior commits and possible forks already exposed the old paid course. Switching to private (if approved and Cloudflare deployment integration verified) limits future public repository access but cannot guarantee recall of historic copies.
-- Stripe's connected account provides Live Mode **read-only** access; the Sandbox connection is not available here. A complete sandbox checkout and enrollment test cannot be claimed yet.
+- **Updated verification (Nov 20):** AIMT Live and separate AIMT Sandbox are both connected; the Sandbox contains the new $697 course Price and a test webhook. A complete $697 checkout/enrollment test remains blocked by the observed **$597 Stripe Embedded Checkout mismatch**, which must be resolved before payment.
 - Meta Pixel ID, Cloudflare CAPI secret and the final Meta Test Events verification are pending. None of that is required to upload private content, and missing Meta secrets must not prevent checkout.
 
-## One-time staging transfer through GitHub Actions (prepared; not executed)
+## One-time staging transfer through GitHub Actions (completed; retained for audit)
 
-The existing **AIMT Growth Funnel Validation** workflow now contains a separate, **manual-dispatch-only** job named `Manually stage paid assets in private Supabase Storage`. It is guarded to run only when the workflow is explicitly dispatched on `review/aimt-security-meta-2026-11-19`; ordinary PR CI skips it. The job uses a `300000000` byte ceiling (verified read-only manifest: 251 objects, 294176692 bytes), a pinned course source commit/blob, and SHA-256 verification for all uploaded/downloaded bytes. The workflow never deploys the website and does not update student database rows.
+The **AIMT Growth Funnel Validation** workflow contains a **manual-dispatch-only** job named `Manually stage paid assets in private Supabase Storage`, guarded to run only on the exact review branch. It completed successfully on November 19 (run `44665172045`): **251 objects, 294,176,692 bytes**, SHA-verified on upload and an independent verify-only pass. No student database rows were modified. The following instructions describe the completed setup for audit, not a request to repeat migration.
 
 Required owner-controlled setup, **before** intentionally dispatching the job:
 
