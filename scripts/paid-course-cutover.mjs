@@ -5,6 +5,7 @@
    Explicit --upload and byte ceiling required. Never embeds source in PR. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { adminHeaders } from './_lib/supabase-admin-headers.mjs';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -74,13 +75,13 @@ const base = process.env.SUPABASE_URL;
 const role = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const bucket = process.env.PAID_ASSETS_BUCKET;
 if (!base || !/^https:\/\/[a-z0-9.-]+$/.test(base) || !role || !/^[a-z0-9][a-z0-9_-]{2,62}$/.test(bucket || '')) {
-  throw new Error('SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, PAID_ASSETS_BUCKET are required; never paste the service key into source files.');
+  throw new Error('SUPABASE_URL, elevated Supabase secret via SUPABASE_SERVICE_ROLE_KEY, and PAID_ASSETS_BUCKET are required; never paste keys into source files.');
 }
 if (args.has('--upload')) {
   const cap = Number(process.env.AIMT_PAID_MIGRATION_MAX_BYTES);
   if (!Number.isSafeInteger(cap) || cap < totalBytes) throw new Error('Explicit AIMT_PAID_MIGRATION_MAX_BYTES authorization must cover the complete migration.');
 }
-const headers = { Authorization: 'Bearer ' + role, apikey: role };
+const headers = adminHeaders(role);
 const apiBase = base.replace(/\/$/, '') + '/storage/v1';
 async function request(path, options={}) {
   return fetch(apiBase + path, { ...options, headers: { ...headers, ...options.headers } });
