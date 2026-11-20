@@ -120,6 +120,12 @@ jobs:
             tests/transactional-email-redesign.test.mjs \
             tests/readiness-sales-prompt.test.mjs
 
+      - name: Verify Preview-only Cadence failure diagnostics and retry rules
+        run: |
+          node --test tests/cadence-preview-diagnostics.test.mjs
+          node --check assets/js/cadence-shell.js
+          node --check functions/api/cadence/ask.js
+
       - name: Verify modern and legacy Supabase migration key header selection
         run: env -i PATH="$PATH" node --test tests/paid-course-key-auth.test.mjs
 
