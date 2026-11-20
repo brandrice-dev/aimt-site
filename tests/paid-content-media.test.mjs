@@ -125,3 +125,15 @@ test('sales HTML contains no paid course lesson DOM or checkpoint rubric objects
   assert.match(privateLoader, /\/api\/course-material\?resource=course-app/);
   assert.match(privateLoader, /document\.write\(html\)/);
 });
+
+test('only the previously published education illustration redirects to its public copy', async () => {
+  const { onRequestGet } = await import('../functions/assets/images/course/[[path]].js');
+  const approved = await onRequestGet({
+    request: new Request('https://aimtrichology.com/assets/images/course/module-06/module-06-dry-scalp-vs-dandruff-illustration.webp'),
+    env
+  });
+  assert.equal(approved.status, 302);
+  assert.equal(approved.headers.get('Location'), '/assets/images/education/dry-scalp-vs-dandruff-illustration.webp');
+  const privateLesson = await onRequestGet({ request: new Request(mediaURL), env });
+  assert.equal(privateLesson.status, 401, 'unrelated paid image is never publicly redirected');
+});
