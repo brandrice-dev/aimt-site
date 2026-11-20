@@ -153,7 +153,7 @@ export async function onRequestPost(context) {
     // the model call cleanly).
     // Only branch Preview receives a fixed non-sensitive diagnostic enum.
     // Never serialize Anthropic's response body, headers, key or prompt.
-    const preview = new URL(request.url).hostname.endsWith('.aimt-site.pages.dev');
+    const preview = typeof request.url === 'string' && /^https:\/\/[a-z0-9-]+\.aimt-site\.pages\.dev(?:[/?#]|$)/i.test(request.url);
     return json({
       error: 'Cadence is temporarily unavailable — your message was saved. Please retry.',
       preserved: true,
