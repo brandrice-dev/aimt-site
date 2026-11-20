@@ -120,6 +120,9 @@ jobs:
             tests/transactional-email-redesign.test.mjs \
             tests/readiness-sales-prompt.test.mjs
 
+      - name: Verify modern and legacy Supabase migration key header selection
+        run: env -i PATH="$PATH" node --test tests/paid-course-key-auth.test.mjs
+
       - name: Inventory the pinned paid course for private migration (no credentials or writes)
         run: |
           env -i PATH="$PATH" node scripts/paid-course-cutover.mjs --inventory
