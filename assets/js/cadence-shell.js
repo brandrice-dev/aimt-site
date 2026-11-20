@@ -783,14 +783,14 @@
     scrollToBottomIfNearEnd(true);
   }
 
-  async function sendAskCadenceMessage(text) {
+  async function sendAskCadenceMessage(text, requestId = uuid()) {
     if (!session) return;
     session.busy = true;
     renderComposerLocked(true);
     setErrorVisible(false);
     renderTyping(true, 'Cadence is thinking…');
-    const requestId = uuid();
     let data;
+    let diagnostic = '';
     try {
       const token = await getBearerToken();
       const res = await fetch('/api/cadence/ask', {
@@ -804,13 +804,20 @@
           activeCheckpointId: session.activeCheckpointId,
         }),
       });
-      if (!res.ok) throw new Error('ask_cadence_failed');
+      if (!res.ok) {
+        const failure = await res.json().catch(() => ({}));
+        diagnostic = typeof failure.diagnostic === 'string' && /^[A-Z_]{3,36}$/.test(failure.diagnostic)
+          ? failure.diagnostic : '';
+        throw new Error('ask_cadence_failed');
+      }
       data = await res.json();
     } catch (e) {
       renderTyping(false);
       session.busy = false;
       renderComposerLocked(false);
-      renderRetryAffordance(text, () => sendAskCadenceMessage(text));
+      // Keep the original idempotency key: retry must not create duplicate
+      // user messages in the persisted Cadence conversation.
+      renderRetryAffordance(text, () => sendAskCadenceMessage(text, requestId), diagnostic);
       return;
     }
     renderTyping(false);
@@ -985,14 +992,17 @@
     dom.continueRow.style.display = hideEntirely ? 'flex' : 'none';
   }
 
-  function renderRetryAffordance(textToRetry, onRetry) {
+  function renderRetryAffordance(textToRetry, onRetry, diagnostic) {
     // A required checkpoint with its own approved network-error copy (see
     // openCheckpoint()/session.errorMessage) uses that exact text instead of
     // the shell's generic message. Ask Cadence and any checkpoint without
     // one keep the generic message unchanged.
     const genericMessage = 'Cadence is having trouble responding right now. Your answer is saved.';
     const message = (session && session.mode === 'required_checkpoint' && session.errorMessage) || genericMessage;
-    setErrorVisible(true, message);
+    // Fixed enum returned only by the server on non-production branch previews.
+    const previewCode = session && session.mode === 'ask_cadence' && diagnostic
+      ? ' Preview diagnostic: ' + diagnostic + '.' : '';
+    setErrorVisible(true, message + previewCode);
     dom.retryBtn.onclick = function () {
       setErrorVisible(false);
       if (onRetry) { onRetry(); return; }
