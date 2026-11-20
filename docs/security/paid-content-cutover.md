@@ -1,40 +1,42 @@
-# AIMT paid-content protection — controlled cutover plan
+# AIMT paid-content protection — controlled cutover
 
-**Status: BLOCKED / NOT SECURED.** This review branch contains a fail-closed API boundary, but the existing public course HTML and static premium assets have **not** been moved or removed. **Do not merge or deploy for the purpose of claiming the course is protected.** Owner: Brandon. No release is authorized by this document.
+**Status: IMPLEMENTED IN DRAFT, NOT DEPLOYED, NOT VERIFIED.** PR #170 is a branch preview only; Brandon must review and approve the completed release. Main and the public production site remain unchanged. Do not merge until private storage is populated, Cloudflare routing is verified, and representative enrollment tests pass.
 
-## Security fact pattern (verified from `main` on November 19, 2026)
+## What the draft branch now contains
 
-- `headspa-mastery.html` (served as `/head-spa-certification`) contains the public landing page **and** paid course HTML, JavaScript, lessons, assessment content and lesson media references in one ~1.08 MB public file. CSS-hiding modules after an auth check does not protect source text.
-- `_routes.json` excludes `/head-spa-certification`, `/headspa-mastery.html` and **all** `/assets/*` from Functions. Those files are served statically without server-side enrollment checks.
-- `assets/js/aimt-course-resources.js` points to public module PDFs and PNGs under `assets/images/course/`, including Module 9's enhancement guide. Dashboard filtering is display logic, not file authorization.
-- The repository is public. Historical copies remain accessible through raw GitHub URLs, Git history and possible forks even if a later deployment removes the links. GitHub visibility changes alone do not retroactively erase disclosures.
-- Supabase authentication, RLS-backed `course_entitlements`, Stripe signature and price verification are already present. Preserve them as the only authority for student access and payment.
+- The public `headspa-mastery.html` is a sales-page shell. Full module content, final assessment, Cadence curriculum and its scripts are kept out of the newly published public HTML. `tests/paid-content-media.test.mjs` checks for former paid markup markers.
+- `assets/js/aimt-paid-course-loader.js` requests `/api/course-session`, then `/api/course-material?resource=course-app` **only after** Supabase user authentication and server-side course-entitlement verification. It restores the legacy `?enter=1` bootstrap for the private app, preserving the existing same-origin course lifecycle. `my-aimt.html` continues to link to `/head-spa-certification?enter=1`.
+- `functions/api/course-material.js` allowlists the private course app and six approved downloads. The My AIMT dashboard downloads private files with an authenticated bearer-token fetch, not an unauthenticated `<a download>`.
+- Native premium `/assets/images/course/*` and `/assets/audio/listen/headspa-mastery/*` are routed to private media Functions. Media requests require a short-lived `Secure; HttpOnly; SameSite=Strict` cookie plus **fresh** server-side enrollment verification; no arbitrary bucket key or Supabase service role is exposed. Public marketing images and general site scripts remain static.
+- `scripts/paid-course-cutover.mjs` reads a pinned, SHA-verified **pre-split Git revision** and prepares the private app plus paid-media manifest without recommitting full paid source to this branch. `--inventory` is read-only; `--verify` is read-only against configured Storage; `--upload` requires an explicit maximum byte authorization and refuses public buckets.
+- `supabase/migrations/20261119_aimt_private_paid_content_bucket.sql` is a **manual-only** additive migration to create a private `aimt-paid-content` Storage bucket. Committing the SQL does not execute it.
 
-## Implemented in this draft PR (prerequisite only)
+## What is known about the actual environment
 
-- `/api/course-material?resource=<allowlisted-key>` verifies a Supabase bearer identity, then an active `headspa-mastery` entitlement, before proxying an allowlisted file from a **private** Supabase Storage bucket.
-- No user-supplied storage paths or course slugs are accepted; missing bucket configuration, sign-in, enrollment or storage returns a non-cacheable denial. No access token or service role is sent to the browser.
-- Tests cover anonymous, unenrolled, unsupported-path, missing-config and enrolled access scenarios against mocked backends.
-- **This endpoint is not yet used by the student app or download links.** No production Supabase configuration has been changed.
+- As checked on November 19, Supabase project `epcnkncyxqgscrejinwr` has only the existing **private `founder-review-materials`** bucket. It has **no `aimt-paid-content` bucket or uploaded course assets**.
+- Existing entitlement and progress records are not zero: eight course entitlements (one $1 paid live checkout, one sandbox checkout entry, six manually granted), three saved progress rows and one completion/certificate. These must not be changed or deleted as part of the migration. The $1 live Stripe entitlement is unlinked and carries no progress.
+- The GitHub repo is currently public; its prior commits and possible forks already exposed the old paid course. Switching to private (if approved and Cloudflare deployment integration verified) limits future public repository access but cannot guarantee recall of historic copies.
+- Stripe's connected account provides Live Mode **read-only** access; the Sandbox connection is not available here. A complete sandbox checkout and enrollment test cannot be claimed yet.
+- Meta Pixel ID, Cloudflare CAPI secret and the final Meta Test Events verification are pending. None of that is required to upload private content, and missing Meta secrets must not prevent checkout.
 
-## Remaining hardening work (must be done before release)
+## Manual release path — in order
 
-1. **Private storage, authorized migration.** Owner approves the new non-public Supabase bucket (`PAID_ASSETS_BUCKET`) and any associated cost. Upload current paid course bundle and the six listed downloadable resources to the exact allowlisted private paths. Verify checksums and RLS/storage permissions before switching links. Do **not** upload paid course source to a publicly readable bucket or a new file in this public repository.
-2. **Split the sales page from the course.** Keep public curriculum descriptions, public imagery and checkout on `/head-spa-certification`. Remove **every** complete paid module body, assessment, tutor prompt and course-only script from the public HTML and JS. After authenticating and proving enrollment, load the private course app through the secure course endpoint. Preserve the current Supabase student session, APP_STATE, cloud sync, checkpoints, exam and certificate routes. Treat this as a high-risk migration, not a trivial markup move.
-3. **Protect resource URLs.** Rewire the My AIMT resource registry, in-course links, Service Timer and other paid tool routes to authenticate before fetching. The browser must attach a valid bearer token or obtain a short-lived signed URL **only after server entitlement verification**. Public marketing/sample images remain public; genuine premium lesson files move to the private bucket.
-4. **Remove the public originals.** Delete premium PDFs/PNGs and complete paid HTML from the deployable repository root, review the rest of `assets/images/course/`, and verify that no public build, branch preview, `/assets/*` exception or `_redirects` rewrite still serves them. Audit GitHub public history, raw URLs and any forks/caches; establish realistic mitigation since prior public content cannot be recalled from every copy.
-5. **Fail-closed deployment.** Verify Cloudflare Pages Functions routing and the **actual** Pages “fail closed” setting; a static fallback must not bypass private-content checks. Purge obsolete CDN copies once an approved release is made.
-6. **Regression and release gates.** Test as anonymous, unenrolled authenticated, valid enrolled, expired-token, owner/staff account and returning paid student; direct file link, cache headers and mobile/desktop. Verify purchase, account claim, progress, Review Mode, lesson checkpoints, Cadence, service resources, completion and certificate behavior. Independently audit the built public source for premium text and asset strings. Owner approves the exact preview and merge.
+1. Have an independent technical reviewer assess this high-risk architecture, especially the sale/course separation, iframe-free `document.write` bootstrap, course progress and certificate behavior, short-lived cookie routing and original media paths. Confirm no protected curriculum leaks in linked public scripts or deployment artifacts.
+2. After explicit owner release approval, **manually** apply the private-bucket SQL migration. Verify `public=false` and service-role access; configure Cloudflare Pages `PAID_ASSETS_BUCKET=aimt-paid-content` and confirm existing `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` are present without exposing values.
+3. From an authorized checkout of the exact repository commit, run `node scripts/paid-course-cutover.mjs --inventory` first. Review object count and total bytes, authorize a bounded migration size, then run `--upload` and `--verify` with credentials supplied **only through trusted environment variables**. Inspect SHA-256 verification receipts and verify non-public bucket access.
+4. Verify the Cloudflare preview's Functions fail-closed setting and routes. A direct anonymous/unenrolled request to every prior paid media URL must deny; an enrolled student must retrieve the exact content. Check the document source and public JS for absent paid lessons and leaked credentials.
+5. Exercise the branch preview as an anonymous visitor, authenticated nonstudent, owner/staff grant, expired user, and returning enrolled student. Verify course opening, reload/resume, saved progress, checkpoints, Review Mode, Cadence, private images and MP3, all six downloads, final assessment and certificate behavior on desktop and phone.
+6. Connect Stripe Sandbox, complete a full $697-equivalent test checkout and entitlement claim, and verify Admin → Growth and Meta Test Events (only after privacy and Meta configuration review). Preserve historic unattributed $1 test as historic, not proof of full revenue attribution.
+7. Present evidence, cost/usage receipts, rollback plan and exact preview to Brandon for explicit approval before merge or production deployment. Purge obsolete CDN cache and inspect residual old URLs only as part of a controlled release.
 
-## Acceptance checks — all required, currently NOT MET
+## Acceptance criteria (NOT YET VERIFIED)
 
-- Anonymous requests to public sales page source and source-linked scripts contain no protected lessons/assessments.
-- Every old premium public URL responds 403/404 (not a static cached copy); no raw public GitHub copies remain in newly published trees.
-- Private API returns 401 without a valid session; 403 without entitlement; returns exact file only for an enrolled student; and never leaks a storage credential.
-- Supabase RLS, Stripe payment/access, My AIMT, review mode, assessment and certificate tests are independently verified in a branch preview.
-- Cloudflare fail-closed behavior and private bucket settings are observed in their respective dashboards, not inferred from code.
-- Explicit Brandon approval before any merge/deployment.
+- No full paid lesson or assessment exists in public HTML/JS or new raw Git trees.
+- Old premium static media paths are intercepted by Functions and deny anonymous/unenrolled access, even with direct URLs.
+- Private app/downloads respond 401 without auth, 403 without entitlement, and stream the exact expected bytes for enrolled users; responses are non-cacheable.
+- The deployed private bucket exists, is `public=false` and matches the pinned SHA-256 manifest.
+- No existing progress, staff grant, entitlement or certificate is removed or silently replaced.
+- Complete paid checkout, progress/assessment, and Meta attribution behavior is tested in the appropriate sandbox/production preview.
+- Owner review is recorded; no merge without approval.
 
-## Change authority and risk
-
-**Tier 2 / consequential:** paid content, credentials, student access and payment relationships. This PR is a proposal plus non-shipping prerequisites. No Supabase migration, GitHub visibility change, production secret write, public CDN purge, paid Meta test event or production deployment is authorized by these commits. No new external spend has been approved. Independent architecture review and a representative enrolled-student pilot are required before an actual migration.
+**Rollback:** Keep the previous `main` branch untouched until approval; preserve the original protected-content source commit in Git history, and never delete Supabase student records. If preview fails, revert the candidate changes rather than make public static links accessible again.
