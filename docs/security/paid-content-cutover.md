@@ -19,6 +19,20 @@
 - Stripe's connected account provides Live Mode **read-only** access; the Sandbox connection is not available here. A complete sandbox checkout and enrollment test cannot be claimed yet.
 - Meta Pixel ID, Cloudflare CAPI secret and the final Meta Test Events verification are pending. None of that is required to upload private content, and missing Meta secrets must not prevent checkout.
 
+## One-time staging transfer through GitHub Actions (prepared; not executed)
+
+The existing **AIMT Growth Funnel Validation** workflow now contains a separate, **manual-dispatch-only** job named `Manually stage paid assets in private Supabase Storage`. It is guarded to run only when the workflow is explicitly dispatched on `review/aimt-security-meta-2026-11-19`; ordinary PR CI skips it. The job uses a `300000000` byte ceiling (verified read-only manifest: 251 objects, 294176692 bytes), a pinned course source commit/blob, and SHA-256 verification for all uploaded/downloaded bytes. The workflow never deploys the website and does not update student database rows.
+
+Required owner-controlled setup, **before** intentionally dispatching the job:
+
+1. In GitHub repo `brandrice-dev/aimt-site`, open **Settings → Environments** and create `aimt-private-course-staging` (exact name).
+2. Under that environment's **Environment secrets**, add **`SUPABASE_SERVICE_ROLE_KEY`** using the existing Supabase project service-role key. Do not put the key in a GitHub repository file, PR comment, issue, command line or chat. Prefer environment-scoped secret rather than a repository-wide secret. Do not modify Cloudflare's existing key.
+3. Verify that the Cloudflare **Preview** environment (not Production) has Text variable `PAID_ASSETS_BUCKET=aimt-paid-content` and still has its existing `SUPABASE_URL` and encrypted `SUPABASE_SERVICE_ROLE_KEY`. The owner reported Preview configuration; it has not been independently inspected through a Cloudflare management connection.
+4. When ready to stage, open **Actions → AIMT Growth Funnel Validation → Run workflow**, select branch `review/aimt-security-meta-2026-11-19` and run. The private migration job first verifies source and exact byte cap, uploads **only** missing objects into bucket `aimt-paid-content` and verifies every object's SHA-256. If one object differs it refuses to overwrite it.
+5. Check the named job's exit status and no-secret logs; use Supabase's `storage.objects` count and bucket `public=false` as an independent follow-up check. Do not merge this PR or mark release complete based on that run alone.
+
+If GitHub Actions cannot provide this environment secret without unacceptable credential exposure, **stop** and use the existing trusted CLI migration in a secure execution environment instead. Neither method should copy the source bundle to a new public URL.
+
 ## Manual release path — in order
 
 1. Have an independent technical reviewer assess this high-risk architecture, especially the sale/course separation, iframe-free `document.write` bootstrap, course progress and certificate behavior, short-lived cookie routing and original media paths. Confirm no protected curriculum leaks in linked public scripts or deployment artifacts.
