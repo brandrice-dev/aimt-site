@@ -17,6 +17,16 @@
   document.head.appendChild(s);
 })();
 
+/* Optional Meta measurement is separate from first-party Growth. Consent is
+   handled inside this script; without it, no Meta tag is fetched. */
+(function () {
+  if (window.AIMTMeta || document.querySelector('script[src$="/aimt-meta.js"]')) return;
+  const script = document.createElement('script');
+  script.src = '/assets/js/aimt-meta.js';
+  script.defer = true;
+  document.head.appendChild(script);
+})();
+
 (function () {
   const btn = document.getElementById('navHamburger');
   const menu = document.getElementById('navMobileMenu');

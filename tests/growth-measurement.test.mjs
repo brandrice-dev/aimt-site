@@ -556,11 +556,22 @@ function listHtml(dir = ROOT, out = []) {
   return out;
 }
 
-test('static: no third-party ad pixels, tag managers, or session replay on any page', () => {
-  const forbidden = /fbq\(|connect\.facebook\.net|analytics\.tiktok\.com|ttq\.|googletagmanager\.com|gtag\(|google-analytics\.com|doubleclick\.net|hotjar|fullstory|clarity\.ms|mouseflow|logrocket|smartlook/i;
-  for (const f of [...listHtml(), 'assets/js/aimt-growth.js', 'assets/js/aimt-public-nav.js']) {
-    assert.doesNotMatch(read(f), forbidden, f);
+test('static: only the approved opt-in Meta client may load an ad pixel', () => {
+  const forbiddenOther = /analytics\.tiktok\.com|ttq\.|googletagmanager\.com|gtag\(|google-analytics\.com|doubleclick\.net|hotjar|fullstory|clarity\.ms|mouseflow|logrocket|smartlook/i;
+  const metaCode = /fbq\(|connect\.facebook\.net/i;
+  const files = [...listHtml(), 'assets/js/aimt-growth.js', 'assets/js/aimt-public-nav.js', 'assets/js/aimt-meta.js'];
+  for (const f of files) {
+    assert.doesNotMatch(read(f), forbiddenOther, f);
+    if (f !== 'assets/js/aimt-meta.js') assert.doesNotMatch(read(f), metaCode, f);
   }
+  const meta = read('assets/js/aimt-meta.js');
+  assert.match(meta, /aimt_meta_consent_v1/);
+  assert.match(meta, /globalPrivacyControl/);
+  assert.match(meta, /track', 'PageView'/);
+  assert.match(meta, /track', 'ViewContent'/);
+  assert.match(meta, /track', 'InitiateCheckout'/);
+  assert.match(meta, /track', 'Purchase'/);
+  assert.match(read('privacy.html'), /Meta Conversions API/);
 });
 
 test('static: growth client is wired where the funnel happens', () => {

@@ -37,7 +37,7 @@
   var SESSION_IDLE_MS = 30 * 60 * 1000;
   var QUALIFY_VISIBLE_MS = 5000;
   var CAMPAIGN_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-  var CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid'];
+  var CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid', 'fbclid'];
   var USER_BOUND = { service_timer_used: true, resource_used: true };
   // Sales-page Readiness prompt (assets/js/aimt-readiness-prompt.js): no props.
   var READINESS_PROMPT_EVENTS = { readiness_prompt_shown: true, readiness_prompt_dismissed: true, readiness_prompt_clicked: true };
@@ -119,11 +119,11 @@
   }
   function touchSignature(t) {
     if (!t) return '';
-    return ['source', 'medium', 'campaign', 'content', 'term', 'gclid', 'gbraid', 'wbraid', 'referrer_domain']
+    return ['source', 'medium', 'campaign', 'content', 'term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'referrer_domain']
       .map(function (k) { return t[k] || ''; }).join('|');
   }
   function isMeaningful(t) {
-    return !!(t && (t.source || t.medium || t.campaign || t.content || t.term || t.gclid || t.gbraid || t.wbraid || t.referrer_domain));
+    return !!(t && (t.source || t.medium || t.campaign || t.content || t.term || t.gclid || t.gbraid || t.wbraid || t.fbclid || t.referrer_domain));
   }
 
   // ── Identity + attribution, once per page load ──

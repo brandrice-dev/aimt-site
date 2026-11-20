@@ -128,23 +128,21 @@ snapshots:
 - **first_touch**: the visitor's first-ever landing (UTMs, click ids,
   referring domain, landing path, time). Never overwritten.
 - **last_touch**: the **most recent meaningful** touch, meaning one with a
-  UTM tag, `gclid`/`gbraid`/`wbraid`, or an external referring domain.
+  UTM tag, `gclid`/`gbraid`/`wbraid`/`fbclid`, or an external referring domain.
   Direct visits, internal navigation, Stripe's return redirect and AIMT's own
   domains never overwrite it.
 
 Captured fields: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`,
 `utm_term`, landing **path**, referring **domain**, `gclid`, `gbraid`,
-`wbraid`. Values are lowercased and restricted to `[a-z0-9_.-+~:]`. Any value
-containing `@` or that looks like a phone number is dropped.
+`wbraid`, and `fbclid`. Campaign fields are lowercased and restricted to `[a-z0-9_.-+~:]`; click IDs retain their validated case. Any campaign value containing `@` or resembling a phone number is dropped.
 
 **Persistence through the funnel:** landing (any page) → sales page →
 Readiness → `/enroll` → `create-checkout-session` stores the snapshot against
 the **Stripe Checkout Session id** → webhook records `paid_enrollment` for
-that same id → the report joins them. Stripe's request is unchanged. No
-attribution is sent to Stripe.
+that same id → the report joins them. First-party UTM and click-source snapshots are still not sent to Stripe. Separately, after optional advertising consent, Meta `_fbc`/`_fbp` identifiers and the browser user-agent are stored in Stripe Checkout Session metadata solely to enable deduplicated Meta purchase measurement.
 
 **Channel resolution** (`channelFor`): explicit UTMs win; else a Google click
-id = `google / cpc`; else the referring domain → `organic` (search engines),
+id = `google / cpc`; else `fbclid` = `facebook / cpc`; else the referring domain → `organic` (search engines),
 `social` (Instagram, TikTok, YouTube, Facebook, Pinterest, LinkedIn, X,
 Threads, Reddit, Snapchat) or `referral`; else `(direct) / (none)`.
 
@@ -279,18 +277,13 @@ numbers, IP addresses, user agents, full URLs or query strings.
   `state->student->introComplete`, and `cadence_messages` only as
   `user_id, mode, created_at`. It never reads `content`. The report payload
   contains no emails.
-- Browser: honors Global Privacy Control and Do Not Track (nothing stored or
-  sent). No cookies, no third-party scripts, no fingerprinting, no session
-  replay. No Meta/TikTok pixel, no Google Ads tag, no new GA. A static test
-  fails the build if any of these appear.
+- AIMT Growth first-party browser client: honors Global Privacy Control and Do Not Track (nothing stored or sent). No cookies or third-party requests from this client; no fingerprinting or session replay.
+- Optional Meta Pixel is separate from the Growth ledger, strictly consent-gated, and may create `_fbp`/`_fbc` cookies. The server sends only consented, Stripe-verified Purchase events through Meta Conversions API. Both use the Stripe session ID for `event_id`/`eventID`. No student answers, progress, Cadence messages or names are shared. No TikTok, Google Ads, GA, tag manager or session-replay providers are authorized. The static privacy test allows only the dedicated Meta client.
 - Staff/test exclusion: Admin sign-in marks that browser internal.
   `?aimt_internal=1` marks any browser (`?aimt_internal=0` clears). Admin
   accounts are internal server-side. Owner purchases, Stripe test mode, $0 checkouts and
   staff/complimentary/scholarship/manual grants are never paid.
-- Payment security unchanged: the Stripe request, price validation,
-  signature verification, entitlement write and webhook response are
-  untouched. Growth writes run after them, in the background, and can't
-  throw.
+- Payment authority unchanged: Stripe price validation, signature verification, entitlement writes and paid-revenue recording remain authoritative. Optional Meta identifiers are stored as validated Checkout metadata and CAPI runs after entitlement, without modifying the payment decision or causing a webhook retry on advertising delivery failure.
 - Privacy policy (`privacy.html` §1, §2, §4) updated to describe this before
   it's enabled, as that policy promised.
 - Cloudflare Web Analytics (cookie-free RUM beacon injected at the edge by

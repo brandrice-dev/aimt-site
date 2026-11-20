@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/aimt-design-system.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/aimt-meta.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -699,6 +700,9 @@ body {
         });
 
         const data = await response.json().catch(() => ({}));
+        if (response.ok && data.ok === true && window.AIMTMeta) {
+          window.AIMTMeta.paidPurchase(checkoutSessionId, { amount_total: data.amount_total, currency: data.currency });
+        }
         if (response.ok) {
           clearPendingCheckoutSession();
           void logAimtEvent('success_claim_course_access_success', {

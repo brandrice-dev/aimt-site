@@ -62,7 +62,7 @@ async function createStripeSession(stripeSecretKey, params, stripeVersion, idemp
   return { response, session };
 }
 
-async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin, hold, activeOffer=false) {
+async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin, hold, activeOffer=false, metaParams={}) {
   const params = {
     mode: 'payment',
     ui_mode: 'embedded_page',
@@ -71,6 +71,7 @@ async function createEmbeddedSession(stripeSecretKey, stripePriceId, origin, hol
     return_url: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
   };
   applyHold(params,hold,activeOffer);
+  Object.assign(params, metaParams);
   let result = await createStripeSession(
     stripeSecretKey, { ...params, ...EMBEDDED_BRANDING }, EMBEDDED_STRIPE_API_VERSION, hold?`founder-review/${hold.id}/embedded-branded`:undefined
   );
@@ -129,6 +130,22 @@ async function logAimtEvent(type, payload) {
   }
 }
 
+/* Optional Meta match identifiers are separate from AIMT's own Growth ledger.
+   Only short validated cookie IDs and browser agent, never course content,
+   payment details, or identifiable fields supplied in a query string. */
+function checkoutMetaParams(body, request) {
+  const m = body && typeof body.meta === 'object' && body.meta || {};
+  if (m.consent !== true) return {};
+  const fbc = String(m.fbc || '').trim();
+  const fbp = String(m.fbp || '').trim();
+  const ua = String(request.headers.get('user-agent') || '').replace(/[\r\n]/g, ' ').slice(0, 500);
+  const result = { 'metadata[aimt_meta_consent]': '1' };
+  if (/^fb\.1\.\d{10,13}\.[A-Za-z0-9_.-]{1,255}$/.test(fbc)) result['metadata[aimt_meta_fbc]'] = fbc;
+  if (/^fb\.1\.\d{10,13}\.[A-Za-z0-9_.-]{1,255}$/.test(fbp)) result['metadata[aimt_meta_fbp]'] = fbp;
+  if (ua) result['metadata[aimt_meta_user_agent]'] = ua;
+  return result;
+}
+
 /* AIMT Growth: record `checkout_start` once a Stripe Checkout Session
    really exists (keyed by its id, so a reload that creates a new session is
    a new start, and a retry of the same session is not). The browser's
@@ -184,6 +201,7 @@ export async function onRequestPost(context) {
 
   const requestBody = await request.clone().json().catch(() => ({}));
   const wantsEmbedded = !!requestBody && requestBody.ui === 'embedded';
+  const metaParams = checkoutMetaParams(requestBody, request);
   let founderHold=null;
   try{founderHold=await holdReview(env,requestBody?.checkoutRequestKey);}catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
 
@@ -197,11 +215,11 @@ export async function onRequestPost(context) {
       if(session.status==='expired'){
         await releaseExpiredReview(env,session);founderHold=await holdReview(env,requestBody?.checkoutRequestKey);
       }else if(session.status==='complete'){
-        return Response.json({url:`${origin}/success.html?session_id=${encodeURIComponent(session.id)}`,fallback:'hosted'},{headers:{'Cache-Control':'no-store'}});
+        return Response.json({url:`${origin}/success.html?session_id=${encodeURIComponent(session.id)}`,fallback:'hosted',checkoutSessionId:session.id},{headers:{'Cache-Control':'no-store'}});
       }else if(session.status==='open'){
         const key=embeddedPublishableKey(env).key;
-        if(wantsEmbedded&&session.client_secret&&key)return Response.json({clientSecret:session.client_secret,publishableKey:key,founderReview:true},{headers:{'Cache-Control':'no-store'}});
-        if(session.url)return Response.json({url:session.url,fallback:'hosted'},{headers:{'Cache-Control':'no-store'}});
+        if(wantsEmbedded&&session.client_secret&&key)return Response.json({clientSecret:session.client_secret,publishableKey:key,founderReview:true,checkoutSessionId:session.id},{headers:{'Cache-Control':'no-store'}});
+        if(session.url)return Response.json({url:session.url,fallback:'hosted',checkoutSessionId:session.id},{headers:{'Cache-Control':'no-store'}});
         throw Error();
       }else throw Error();
     }catch{return Response.json({error:'Checkout is temporarily unavailable. Please retry.'},{status:503});}
@@ -211,7 +229,7 @@ export async function onRequestPost(context) {
     const { key: publishableKey, reason } = embeddedPublishableKey(env);
     if (publishableKey) {
       try {
-        const { response, session } = await createEmbeddedSession(stripeSecretKey, stripePriceId, origin, founderHold, env.FOUNDER_REVIEW_SALES_ENABLED==='true');
+        const { response, session } = await createEmbeddedSession(stripeSecretKey, stripePriceId, origin, founderHold, env.FOUNDER_REVIEW_SALES_ENABLED==='true', metaParams);
         if (!response.ok || !session.client_secret) {
           await releaseRejectedHold(env,founderHold,response);
           await logAimtEvent('api_create_checkout_session_failure', {
@@ -228,7 +246,7 @@ export async function onRequestPost(context) {
         await recordCheckoutStart(context, requestBody, session.id, 'embedded', stripeSecretKey);
         /* Only what Stripe.js needs to mount — never the secret key or
            any other server-side value. */
-        return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey, ...(env.FOUNDER_REVIEW_SALES_ENABLED==='true'?{founderReview:!!founderHold}:{}) }), {
+        return new Response(JSON.stringify({ clientSecret: session.client_secret, publishableKey, checkoutSessionId: session.id, ...(env.FOUNDER_REVIEW_SALES_ENABLED==='true'?{founderReview:!!founderHold}:{}) }), {
           headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
         });
       } catch (error) {
@@ -260,6 +278,7 @@ export async function onRequestPost(context) {
   });
 
   const holdParams={};applyHold(holdParams,founderHold,env.FOUNDER_REVIEW_SALES_ENABLED==='true');for(const [key,value] of Object.entries(holdParams))body.set(key,value);
+  for (const [key, value] of Object.entries(metaParams)) body.set(key, value);
   try {
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -291,7 +310,7 @@ export async function onRequestPost(context) {
 
     await bindHold(env,founderHold,session);
     await recordCheckoutStart(context, requestBody, session.id, 'hosted', stripeSecretKey);
-    return new Response(JSON.stringify(wantsEmbedded ? { url: session.url, fallback: 'hosted' } : { url: session.url }), {
+    return new Response(JSON.stringify(wantsEmbedded ? { url: session.url, fallback: 'hosted', checkoutSessionId: session.id } : { url: session.url, checkoutSessionId: session.id }), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {

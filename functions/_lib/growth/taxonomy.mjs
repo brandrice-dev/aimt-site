@@ -126,7 +126,7 @@ function sanitizeIso(value) {
 }
 
 const TOUCH_TOKEN_FIELDS = ['source', 'medium', 'campaign', 'content', 'term'];
-const TOUCH_CLICK_FIELDS = ['gclid', 'gbraid', 'wbraid'];
+const TOUCH_CLICK_FIELDS = ['gclid', 'gbraid', 'wbraid', 'fbclid'];
 
 /** Whitelisted attribution snapshot. Returns {} when nothing usable. */
 export function sanitizeTouch(raw) {
@@ -154,7 +154,7 @@ export function sanitizeTouch(raw) {
 export function isMeaningfulTouch(touch) {
   if (!touch || typeof touch !== 'object') return false;
   return !!(touch.source || touch.medium || touch.campaign || touch.content || touch.term
-    || touch.gclid || touch.gbraid || touch.wbraid || touch.referrer_domain);
+    || touch.gclid || touch.gbraid || touch.wbraid || touch.fbclid || touch.referrer_domain);
 }
 
 const SEARCH_DOMAINS = ['google.', 'bing.com', 'duckduckgo.com', 'yahoo.', 'ecosia.org', 'baidu.com', 'yandex.', 'search.brave.com', 'startpage.com'];
@@ -177,6 +177,9 @@ export function channelFor(touch) {
     out.medium = t.medium || '(not set)';
   } else if (t.gclid || t.gbraid || t.wbraid) {
     out.source = 'google';
+    out.medium = 'cpc';
+  } else if (t.fbclid) {
+    out.source = 'facebook';
     out.medium = 'cpc';
   } else if (t.referrer_domain) {
     out.source = t.referrer_domain;

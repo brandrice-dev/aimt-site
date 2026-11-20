@@ -23,6 +23,7 @@ import { isHeadspaCoursePrice } from '../_lib/enrollment/course-prices.mjs';
 import {fulfillReview,releaseExpiredReview,releaseFailedReview} from '../_lib/founder-review/purchase.mjs';
 import { sendPaidEnrollmentEmail } from '../_lib/enrollment/paid-enrollment-email.mjs';
 import { recordGrowthEventInBackground } from '../_lib/growth/record.mjs';
+import { sendMetaPurchase } from '../_lib/meta/conversions.mjs';
 
 const ENTITLEMENTS_TABLE = 'course_entitlements';
 const AIMT_LOGS_TABLE = 'aimt_logs';
@@ -269,6 +270,17 @@ export async function onRequestPost(context) {
       courseSlug,
       purchaserEmail
     });
+
+    /* Meta Purchase is downstream of the signed, paid Stripe event AND
+       successful entitlement write. It is optional and never delays access
+       or changes Stripe's retry semantics when the ad provider is offline. */
+    const metaTask = sendMetaPurchase(env, session).catch((error) =>
+      logEvent(env, 'webhook_meta_purchase_failure', {
+        message: error && error.message ? error.message : 'meta_request_failed'
+      })
+    );
+    if (typeof context.waitUntil === 'function') context.waitUntil(metaTask);
+    else await metaTask;
 
     const founderReview=await fulfillReview(env,session);
 

@@ -1012,12 +1012,49 @@ async function loadResources(entitledSlugs) {
           group.items.map(r =>
             '<div class="resource-item"><div><div class="r-name">' + r.title + '</div>' +
             '<div class="r-desc">' + r.description + '</div></div>' +
-            '<a class="dl" href="' + r.href + '" download>Download</a></div>'
+            '<a class="dl" href="' + r.href + '" data-private-resource="' + (r.resourceKey || '') + '" data-download-name="' + (r.downloadName || '') + '" download>Download</a></div>'
           ).join('') +
           '</div>';
       }).join('')
     : '<div class="empty-row">No resources are available for this course yet.</div>';
 }
+
+// Native <a download> cannot attach a Supabase bearer token. Fetch each
+// allowlisted private resource as a Blob after verifying this student session.
+document.getElementById('resourcesCard').addEventListener('click', async function (event) {
+  const link = event.target.closest('a[data-private-resource]');
+  if (!link || !link.dataset.privateResource) return;
+  event.preventDefault();
+  if (link.dataset.downloading === '1') return;
+  link.dataset.downloading = '1';
+  const previousLabel = link.textContent;
+  link.textContent = 'Preparing…';
+  let objectUrl;
+  try {
+    const result = await supabaseClient.auth.getSession();
+    const token = result.data && result.data.session && result.data.session.access_token;
+    if (!token) { window.location.href = 'student-access.html'; return; }
+    const response = await fetch(link.href, {
+      headers: { Authorization: 'Bearer ' + token },
+      cache: 'no-store'
+    });
+    if (!response.ok) throw new Error(response.status === 403 ? 'Enrollment required.' : 'This resource is temporarily unavailable.');
+    const fileBlob = await response.blob();
+    objectUrl = URL.createObjectURL(fileBlob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = link.dataset.downloadName || 'aimt-course-resource';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } catch (e) {
+    alert(e.message || 'This resource could not be downloaded. Please try again.');
+  } finally {
+    if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 15000);
+    link.dataset.downloading = '0';
+    link.textContent = previousLabel;
+  }
+});
 
 async function signOut() {
   try { await supabaseClient.auth.signOut(); } catch (_) {}

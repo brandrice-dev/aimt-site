@@ -81,7 +81,8 @@ test('first visit: captures UTM attribution and sends one qualified site_visit a
   assert.equal(b.first_touch.referrer_domain, 'l.instagram.com');
   assert.equal(b.first_touch.term, undefined, 'email-like utm_term dropped');
   const raw = JSON.stringify(b);
-  assert.ok(!raw.includes('jane@example.com') && !raw.includes('fbclid') && !raw.includes('?'), 'no query string or PII leaves the browser');
+  assert.equal(b.first_touch.fbclid, 'zzz', 'Meta click ID is retained without the full query');
+  assert.ok(!raw.includes('jane@example.com') && !raw.includes('?'), 'no full query string or PII leaves the browser');
 });
 
 test('reload: same session, no second site_visit request', () => {

@@ -28,6 +28,7 @@ import { json as baseJson, hasSupabaseEnv, resolveUser, isEntitled } from '../..
 import { getOrCreateThread, appendMessage, findMessageByIdempotencyKey, getThreadMessages, buildBoundedContext } from '../../_lib/cadence/threads.mjs';
 import { askCadenceServerSide, getVerifiedCheckpointStatus, isModule12AssessmentActive, buildActiveCheckpointGuardrail } from '../../_lib/cadence/ask-cadence.mjs';
 import { checkRateLimit } from '../../_lib/cadence/rate-limit.mjs';
+import { cadenceFailureCode } from '../../_lib/cadence/error-code.mjs';
 
 import {groundedCourseContext,assessmentContext,retrieveLearningResearch,safeLearningLinks,classifyLearningGap,recordLearningGap,projectLearningResearch,learningConcept} from '../../_lib/cadence/learning-research.mjs';
 
@@ -150,7 +151,14 @@ export async function onRequestPost(context) {
     // above; no assistant message is written. A retry with the same
     // requestId is safe (student message already deduped, re-attempts
     // the model call cleanly).
-    return json({ error: 'Cadence is temporarily unavailable — your message was saved. Please retry.', preserved: true }, 502);
+    // Only branch Preview receives a fixed non-sensitive diagnostic enum.
+    // Never serialize Anthropic's response body, headers, key or prompt.
+    const preview = typeof request.url === 'string' && /^https:\/\/[a-z0-9-]+\.aimt-site\.pages\.dev(?:[/?#]|$)/i.test(request.url);
+    return json({
+      error: 'Cadence is temporarily unavailable — your message was saved. Please retry.',
+      preserved: true,
+      ...(preview ? { diagnostic: cadenceFailureCode(e) } : {}),
+    }, 502);
   }
 
   const assistantMsg = await appendMessage(env, {

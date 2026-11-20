@@ -27,6 +27,7 @@
 // Run: node tests/cadence-phase3-ask-cadence.test.mjs
 
 import { readFileSync } from 'node:fs';
+import { readPrivateCourseSnapshot } from '../scripts/_lib/private-course-snapshot.mjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -370,7 +371,7 @@ await runEndpointChecks();
 })();
 
 (function staticPageChecks() {
-  const html = readFileSync(path.join(ROOT, 'headspa-mastery.html'), 'utf8');
+  const html = readPrivateCourseSnapshot();
   const toggleGuideMatch = html.match(/function toggleGuide\(\) \{[\s\S]*?\n\}/);
   check('PILL STATIC', 'toggleGuide() function found', !!toggleGuideMatch);
   if (toggleGuideMatch) {

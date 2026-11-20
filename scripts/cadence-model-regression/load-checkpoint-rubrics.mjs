@@ -7,13 +7,14 @@
 // they can be safely isolated and evaluated in a throwaway vm context --
 // the same "parse the real locked source, never hand-retype it" principle
 // scripts/build-module12-assessment-bank.mjs already established for the
-// Module 12 content banks. This keeps headspa-mastery.html the single
+// Module 12 content banks. This keeps the approved private course bundle the single
 // source of truth for rubric text; the regression harness can never drift
 // from what production actually evaluates against.
 //
 // Not loaded by the student browser bundle -- Node-only, scripts/ tooling.
 
 import { readFileSync } from 'node:fs';
+import { readPrivateCourseSnapshot } from '../_lib/private-course-snapshot.mjs';
 import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -77,7 +78,7 @@ export function extractConstObject(html, varName) {
  * { questions: {...}, systems: {...} } for M1..M11.
  */
 export function loadCheckpointRubrics(htmlPath = HTML_PATH) {
-  const html = readFileSync(htmlPath, 'utf8');
+  const html = htmlPath === HTML_PATH ? readPrivateCourseSnapshot() : readFileSync(htmlPath, 'utf8');
   const result = {};
   for (const varName of RUBRIC_VARS) {
     result[varName] = extractConstObject(html, varName);
@@ -87,7 +88,7 @@ export function loadCheckpointRubrics(htmlPath = HTML_PATH) {
 
 /** Returns MODULE_GUIDE_SYSTEMS keyed by numeric-string module id, exactly as authored (used for the chat-quality regression suite). */
 export function loadModuleGuideSystems(htmlPath = HTML_PATH) {
-  const html = readFileSync(htmlPath, 'utf8');
+  const html = htmlPath === HTML_PATH ? readPrivateCourseSnapshot() : readFileSync(htmlPath, 'utf8');
   return extractConstObject(html, 'MODULE_GUIDE_SYSTEMS');
 }
 
@@ -107,7 +108,7 @@ export function extractConstString(html, varName) {
 
 /** The two shared Cadence tone constants every guide/chat system prompt appends (see headspa-mastery.html's getGuideSystem()). */
 export function loadSharedToneConstants(htmlPath = HTML_PATH) {
-  const html = readFileSync(htmlPath, 'utf8');
+  const html = htmlPath === HTML_PATH ? readPrivateCourseSnapshot() : readFileSync(htmlPath, 'utf8');
   return {
     CADENCE_RESPONSE_CONSISTENCY_ANCHOR: extractConstString(html, 'CADENCE_RESPONSE_CONSISTENCY_ANCHOR'),
     CADENCE_SELECTIVE_MEMORY_INSTRUCTION: extractConstString(html, 'CADENCE_SELECTIVE_MEMORY_INSTRUCTION'),

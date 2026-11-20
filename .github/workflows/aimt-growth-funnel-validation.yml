@@ -28,6 +28,27 @@ on:
       - 'functions/_lib/enrollment/paid-enrollment-email.mjs'
       - 'functions/api/create-checkout-session.js'
       - 'functions/api/stripe-webhook.js'
+      - 'functions/api/meta-config.js'
+      - 'functions/api/course-material.js'
+      - 'functions/_lib/meta/**'
+      - 'assets/js/aimt-meta.js'
+      - 'assets/js/aimt-growth.js'
+      - 'assets/js/aimt-public-nav.js'
+      - 'tests/meta-measurement.test.mjs'
+      - 'tests/paid-content-boundary.test.mjs'
+      - 'tests/paid-content-media.test.mjs'
+      - 'functions/api/course-session.js'
+      - 'functions/_lib/paid-content/**'
+      - 'functions/assets/**'
+      - 'assets/js/aimt-paid-course-loader.js'
+      - 'assets/js/aimt-paid-media-session.js'
+      - 'scripts/paid-course-cutover.mjs'
+      - 'scripts/_lib/private-course-snapshot.mjs'
+      - 'tests/growth-measurement.test.mjs'
+      - 'tests/growth-client.test.mjs'
+      - 'headspa-mastery.html'
+      - 'enroll.html'
+      - 'success.html'
       - 'functions/api/claim-course-access.js'
       - 'assets/js/aimt-founder-review-admin.js'
       - 'tests/blueprint-autosave.test.mjs'
@@ -70,6 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -89,13 +111,83 @@ jobs:
             tests/readiness-final-decision.test.mjs \
             tests/growth-funnel-repair.test.mjs \
             tests/growth-measurement.test.mjs \
+            tests/meta-measurement.test.mjs \
+            tests/paid-content-boundary.test.mjs \
+            tests/paid-content-media.test.mjs \
             tests/growth-client.test.mjs \
             tests/embedded-enrollment-checkout.test.mjs \
             tests/stripe-webhook-paid-enrollment-email.test.mjs \
             tests/transactional-email-redesign.test.mjs \
             tests/readiness-sales-prompt.test.mjs
 
+      - name: Verify Preview-only Cadence failure diagnostics and retry rules
+        run: |
+          node --test tests/cadence-preview-diagnostics.test.mjs
+          node --check assets/js/cadence-shell.js
+          node --check functions/api/cadence/ask.js
+
+      - name: Verify modern and legacy Supabase migration key header selection
+        run: env -i PATH="$PATH" node --test tests/paid-course-key-auth.test.mjs
+
+      - name: Inventory the pinned paid course for private migration (no credentials or writes)
+        run: |
+          env -i PATH="$PATH" node scripts/paid-course-cutover.mjs --inventory
+
       - name: Validate founder review ledger in isolated PostgreSQL (no hosted database)
         run: |
           npm install --prefix /tmp/aimt-review-sql-test --no-audit --no-fund @electric-sql/pglite@0.5.15
           PGLITE_MODULE=file:///tmp/aimt-review-sql-test/node_modules/@electric-sql/pglite/dist/index.js node --test tests/founder-review-sql.test.mjs tests/founder-review-flow.test.mjs
+
+  private-course-staging-upload:
+    name: Manually stage paid assets in private Supabase Storage
+    # NEVER run automatically for a PR, push, deployment, or schedule.
+    # Run workflow manually on the exact review branch only. The GitHub
+    # environment must exist and contain its own secret, with owner approval.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/review/aimt-security-meta-2026-11-19' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: aimt-private-course-staging
+    permissions:
+      contents: read
+    env:
+      SUPABASE_URL: https://epcnkncyxqgscrejinwr.supabase.co
+      PAID_ASSETS_BUCKET: aimt-paid-content
+      AIMT_PAID_MIGRATION_MAX_BYTES: "300000000"
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Require protected credential and exact review branch
+        run: |
+          test "$GITHUB_REF" = "refs/heads/review/aimt-security-meta-2026-11-19"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          test "$(git status --porcelain)" = ""
+      - name: Confirm the complete, pinned payload fits the byte ceiling
+        run: node scripts/paid-course-cutover.mjs --inventory
+      - name: Upload missing private course assets and compare hashes
+        run: node scripts/paid-course-cutover.mjs --upload
+      - name: Recheck every private object without modifying it
+        run: node scripts/paid-course-cutover.mjs --verify
+
+  private-course-preview-smoke:
+    name: Preview paid-course anonymous access
+    # This exact review PR only; never hit production or mutate data.
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'review/aimt-security-meta-2026-11-19' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Read-only smoke against Cloudflare branch Preview (no login or secrets)
+        run: node scripts/paid-course-preview-smoke.mjs
