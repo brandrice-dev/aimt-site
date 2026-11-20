@@ -167,3 +167,21 @@ jobs:
         run: node scripts/paid-course-cutover.mjs --upload
       - name: Recheck every private object without modifying it
         run: node scripts/paid-course-cutover.mjs --verify
+
+  private-course-preview-smoke:
+    name: Preview paid-course anonymous access
+    # This exact review PR only; never hit production or mutate data.
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'review/aimt-security-meta-2026-11-19' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Read-only smoke against Cloudflare branch Preview (no login or secrets)
+        run: node scripts/paid-course-preview-smoke.mjs
