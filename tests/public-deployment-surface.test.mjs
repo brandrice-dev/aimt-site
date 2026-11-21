@@ -93,6 +93,10 @@ test('every public root page is served statically (clean, .html, and trailing-sl
   const pages = tracked.filter((f) => !f.includes('/') && f.endsWith('.html')).map((f) => f.slice(0, -5));
   for (const page of pages) {
     if (page === 'index') { assert.ok(isExcluded('/') && isExcluded('/index.html')); continue; }
+    if (page === 'headspa-mastery') {
+      for (const p of ['/headspa-mastery', '/headspa-mastery.html', '/headspa-mastery/', '/head-spa-certification', '/head-spa-certification/']) assert.ok(reachesFunctions(p), p);
+      continue;
+    }
     if (page === '404') continue; // served by the catch-all itself
     if (INTERNAL_ROOT_PAGES.includes(page)) continue; // covered by the internal-page test below
     for (const p of [`/${page}`, `/${page}.html`]) assert.ok(isExcluded(p), `${p} must be in _routes.json exclude`);
@@ -100,14 +104,16 @@ test('every public root page is served statically (clean, .html, and trailing-sl
   }
   for (const f of PUBLIC_ROOT_FILES) assert.ok(isExcluded(`/${f}`), f);
   for (const d of PUBLIC_DIRS) assert.ok(routes.exclude.includes(`/${d}/*`), `/${d}/*`);
-  for (const p of PUBLIC_SAMPLES) assert.ok(isExcluded(p), p);
+  for (const p of PUBLIC_SAMPLES) assert.ok(p === '/head-spa-certification' ? reachesFunctions(p) : isExcluded(p), p);
 });
 
 test('every sitemap URL and every _redirects source is served statically', () => {
   const locs = [...read('sitemap.xml').matchAll(/<loc>https:\/\/aimtrichology\.com([^<]*)<\/loc>/g)].map((m) => m[1] || '/');
   assert.ok(locs.length > 5);
   for (const p of locs) {
-    if (p === '/research') {
+    if (p === '/head-spa-certification') {
+      assert.ok(reachesFunctions(p), 'public course page passes through content boundary');
+    } else if (p === '/research') {
       assert.ok(reachesFunctions(p), 'public research is rendered dynamically');
       assert.ok(existsSync(path.join(ROOT, 'functions/research/[[path]].js')));
     } else assert.ok(isExcluded(p), `sitemap ${p}`);

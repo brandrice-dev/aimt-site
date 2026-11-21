@@ -55,6 +55,9 @@ on:
       - 'my-aimt.html'
       - 'readiness-enroll.html'
       - '_routes.json'
+      - 'functions/_lib/courses/page-delivery.mjs'
+      - 'assets/js/aimt-course-entry.js'
+      - 'tests/course-page-delivery.test.mjs'
       - 'tests/readiness-final-decision.test.mjs'
       - 'admin.html'
       - 'assets/js/aimt-readiness-config.js'
@@ -76,7 +79,7 @@ jobs:
           node-version: 20
       - name: Run offline growth, readiness, checkout regression tests
         run: |
-          env -i PATH="$PATH" node --test \
+          env -i PATH="$PATH" node --test tests/course-page-delivery.test.mjs \
             tests/readiness-profile-email.test.mjs \
             tests/readiness-followups.test.mjs \
             tests/aimt-free-tools.test.mjs \
